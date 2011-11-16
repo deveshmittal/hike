@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:background="@drawable/conversations_background_tile">
+	<TextView android:id="@+id/CDAliasDialogLabel"
+		android:layout_height="wrap_content" android:layout_width="wrap_content"
+		android:text="@string/userinfo_label_alias"
+		android:gravity="left" android:textColor="#ff000000" android:textSize="14sp" android:layout_margin="10dip"/>
+	<EditText android:id="@+id/CDAliasDialogName"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:scrollHorizontally="true" android:autoText="false"
+		android:capitalize="none" android:gravity="fill_horizontal"
+		android:contentDescription="@string/userinfo_label_alias" android:layout_marginLeft="10dip" android:layout_marginRight="10dip"/>
+</LinearLayout>
