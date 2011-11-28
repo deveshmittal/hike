@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_vertical"
+    android:orientation="vertical" >
+
+	<TextView
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/enter_name_message"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:textSize="30dp" />
+
+	<TextView
+	    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/enter_name_label"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="@string/enter_name_label"
+	    android:textSize="20dp" />
+
+	<EditText
+	    android:id="@+id/name_field"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:inputType="textPersonName"
+	    android:focusable="true"
+	    android:focusableInTouchMode="true">
+	</EditText>
+
+	<CheckBox
+	    android:id="@+id/checkbox_tc"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="@string/accept_tc"
+	    android:textSize="10dp"/>
+
+	<Button
+	    android:id="@+id/next"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:clickable="false"
+	    android:text="@string/create_account" />
+	
+</LinearLayout>

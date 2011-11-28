@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">hike messenger</string>
+    <string name="we_got_you_on_carrier">We got you on %1$s.  Give us a second while we determine your phone #</string>
+    <string name="accept_tc">Accept T&amp;C and Privacy Policy.</string>
+    <string name="enter_name_label">Enter it below to complete signup:</string>
+    <string name="enter_name_message">Great! So we have you as %1$s on %2$s .  But we still don\'t know your name yet!</string>
+    <string name="create_account">Create</string>
+</resources>
