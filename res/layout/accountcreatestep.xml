@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_gravity="center_vertical"
+    android:layout_gravity="center"
+    android:gravity="center"
     android:orientation="vertical" >
 
 	<TextView
@@ -28,19 +29,25 @@
 	    android:focusable="true"
 	    android:focusableInTouchMode="true">
 	</EditText>
+	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	android:layout_gravity="center"
+    	android:gravity="top"
+    	android:orientation="horizontal">
 
-	<CheckBox
-	    android:id="@+id/checkbox_tc"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:text="@string/accept_tc"
-	    android:textSize="10dp"/>
+		<CheckBox
+		    android:id="@+id/checkbox_tc"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:text="@string/accept_tc"
+		    android:textSize="10dp"/>
 
-	<Button
-	    android:id="@+id/next"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:clickable="false"
-	    android:text="@string/create_account" />
-	
+		<Button
+		    android:id="@+id/next"
+		    android:layout_width="wrap_content"
+	    	android:layout_height="wrap_content"
+	    	android:enabled="false"
+	    	android:text="@string/create_account" />
+		</LinearLayout>	
 </LinearLayout>
