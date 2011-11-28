@@ -9,8 +9,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -18,7 +18,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class AccountCreateStep extends Activity implements OnClickListener, OnCheckedChangeListener {
+public class AccountCreateStep extends Activity implements OnCheckedChangeListener {
 
 	private EditText mNameField;
 	private CheckBox mCheckBox;
@@ -45,21 +45,23 @@ public class AccountCreateStep extends Activity implements OnClickListener, OnCh
         TextView label = (TextView) findViewById(R.id.enter_name_message);
         label.setText(text);
 
-        //attach event listeners
-        mNameField = (EditText) findViewById(R.id.name_field);
-        mCheckBox = (CheckBox) findViewById(R.id.checkbox_tc);
-        mNameField.setOnClickListener(this);
+        mNameField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        	@Override
+        	public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        		if (actionId == EditorInfo.IME_ACTION_DONE) {
+        			Log.d("create", "called");
+        			updateNextButtonState();
+        			return false;
+        		}
+        		return false;
+        	}
+        });
+
         mCheckBox.setOnCheckedChangeListener(this);
 	}
 
 	private void updateNextButtonState() {
 		mNextButton.setEnabled((mNameField.getText().length() > 0) && mCheckBox.isChecked());
-//		mNextButton.setClickable((mNameField.getText().length() > 0) && mCheckBox.isChecked());
-	}
-
-	public void onClick(View v) {
-		Log.d("AccountCreateStep", "onClick: " +v);
-		updateNextButtonState();
 	}
 
 	@Override
