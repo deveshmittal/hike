@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">hike messenger</string>
-    <string name="we_got_you_on_carrier">We got you on %1$s.  Give us a second while we determine your phone #</string>
+    <string name="we_got_you_on_carrier">Great! So we have you as %1$s on %2$s.  You\'re all set</string>
+    <string name="click_next">Click next to start texting.</string>
     <string name="accept_tc">Accept T&amp;C and Privacy Policy.</string>
-    <string name="enter_name_label">Enter it below to complete signup:</string>
-    <string name="enter_name_message">Great! So we have you as %1$s on %2$s .  But we still don\'t know your name yet!</string>
-    <string name="create_account">Create</string>
-    <string name="creating_account">Creating Account</string>
+    <string name="welcome_message">Welcome to hike!
+hike is just like SMS but absolutely free.
+No hidden costs and no data plan required</string>
     <string name="scanning_ab">Scanning Address Book</string>
     <string name="looking_for_friends">Just checking to see if any friends are on hike.</string>
     <string name="wont_be_long">Won\'t be long, we promise.</string>
+    <string name="determining_phone_number">Determining phone number</string>
 </resources>

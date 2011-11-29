@@ -12,7 +12,7 @@ public class ServerAPITestCase extends TestCase {
 	}
 
 	public void testCreateAccount() throws UnsupportedEncodingException {
-		String token = AccountUtils.registerAccount("testuser");
-		assertNotNull(token);
+		AccountUtils.AccountInfo accountInfo = AccountUtils.registerAccount();
+		assertNotNull(accountInfo.token);
 	}
 }
