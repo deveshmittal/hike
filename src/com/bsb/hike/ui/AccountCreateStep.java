@@ -1,15 +1,21 @@
 package com.bsb.hike.ui;
 
+import java.io.UnsupportedEncodingException;
+
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.AccountUtils;
 
 import android.app.Activity;
-import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -18,11 +24,48 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class AccountCreateStep extends Activity implements OnCheckedChangeListener {
+public class AccountCreateStep extends Activity implements OnCheckedChangeListener, OnClickListener {
 
+	private String mName;
 	private EditText mNameField;
 	private CheckBox mCheckBox;
 	private Button mNextButton;
+	private ProgressDialog mDialog;
+
+	private class AccountTask extends AsyncTask<Void, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(Void... arg0) {
+			String token = null;
+			Log.d("AccountCreate", "creating account for: "+mName);
+			try {
+				token = AccountUtils.registerAccount(mName);
+			} catch (UnsupportedEncodingException e) {
+				//their name was all weird ... shouldn't happen
+				e.printStackTrace();
+			}
+
+			Log.d("AccountCreate", "account created token: "+token);
+			if (token == null) {
+				return Boolean.FALSE;
+			}
+
+			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString(HikeMessengerApp.TOKEN_SETTING, token);
+			editor.commit();
+
+			return Boolean.TRUE;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			mDialog.dismiss();
+			finish();
+			//start new intent
+		}
+	}
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +101,7 @@ public class AccountCreateStep extends Activity implements OnCheckedChangeListen
         });
 
         mCheckBox.setOnCheckedChangeListener(this);
+        mNextButton.setOnClickListener(this);
 	}
 
 	private void updateNextButtonState() {
@@ -68,6 +112,22 @@ public class AccountCreateStep extends Activity implements OnCheckedChangeListen
 	public void onCheckedChanged(CompoundButton btn, boolean val) {
 		Log.d("AccountCreateStep", "onCheck: " +btn);
 		updateNextButtonState();
+	}
+
+	@Override
+	public void onClick(View view) {
+		Log.d("AccountCreateStep", "onClick called: "+view);
+		if (view == mNextButton) {
+			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		    SharedPreferences.Editor editor = settings.edit();
+		    mName = mNameField.getText().toString().trim();
+		    editor.putString(HikeMessengerApp.NAME_SETTING, mName);
+		    editor.commit();
+
+		    mDialog = ProgressDialog.show(this, "almost done", "creating account");
+		    AccountTask task = new AccountTask();
+		    task.execute();
+		}
 	}
 
 }

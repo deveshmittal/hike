@@ -15,7 +15,7 @@ public class MessagesList extends Activity {
 
 	    //TODO check to see if we've configured an account
 	    if (true) {
-	    	startActivity(new Intent(this, AccountCreationActivity.class));
+	    	startActivity(new Intent(this, PhoneNumberFindActivity.class));
 	    	finish();
 	    }
 	}
