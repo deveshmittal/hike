@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/grey"
     android:gravity="center"
     android:layout_gravity="center" >
 
@@ -23,12 +24,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/looking_for_friends"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/wont_be_long"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/wont_be_long"
+        android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 </LinearLayout>
