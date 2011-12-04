@@ -3,12 +3,15 @@
     <string name="app_name">hike messenger</string>
     <string name="we_got_you_on_carrier">Great! So we have you as %1$s on %2$s.  You\'re all set</string>
     <string name="click_next">Click next to start texting.</string>
-    <string name="accept_tc">Accept T&amp;C and Privacy Policy.</string>
-    <string name="welcome_message">Welcome to hike!
-hike is just like SMS but absolutely free.
+    <string name="accept_tc">Accept and Continue</string>
+    <string name="welcome">Welcome to hike!</string>
+    <string name="welcome_message">hike is just like SMS but absolutely free.
 No hidden costs and no data plan required</string>
     <string name="scanning_ab">Scanning Address Book</string>
     <string name="looking_for_friends">Just checking to see if any friends are on hike.</string>
     <string name="wont_be_long">Won\'t be long, we promise.</string>
     <string name="determining_phone_number">Determining phone number</string>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="green">#76EE00</color>
 </resources>
