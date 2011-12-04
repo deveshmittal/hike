@@ -24,7 +24,7 @@ public class MessagesList extends Activity implements OnClickListener {
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-	    if (token != null) {
+	    if (token == null) {
 	    	startActivity(new Intent(this, WelcomeActivity.class));
 	    	finish();
 	    }
