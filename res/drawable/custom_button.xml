@@ -3,10 +3,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:state_pressed="true" >
-        <color android:color="@color/green" />
         <shape>
             <solid
-            android:color="@color/green" />
+            android:color="@color/white" />
             <corners
                 android:radius="3dp" />
             <padding
@@ -20,7 +19,7 @@
     <item android:state_focused="true" >
         <shape>
             <solid
-                android:color="@color/green" />
+                android:color="@color/black" />
             <corners
                 android:radius="3dp" />
             <padding
