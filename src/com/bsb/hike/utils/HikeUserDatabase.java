@@ -41,7 +41,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		onCreate(db);
 
 		for(ContactInfo contact : contacts) {
-			Log.d("db", "inserted");
 			ih.prepareForInsert();
 			ih.bind(msisdnColumn, contact.number);
 			ih.bind(idColumn, contact.id);
