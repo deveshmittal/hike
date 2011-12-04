@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.http.HttpEntity;
@@ -37,6 +38,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.ContentValues;
 import android.util.Log;
 
 public class AccountUtils {
@@ -77,12 +79,15 @@ public class AccountUtils {
 			HttpEntity entity = response.getEntity();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
 			StringBuilder builder = new StringBuilder();
-			CharBuffer target = CharBuffer.allocate(1024);
+			CharBuffer target = CharBuffer.allocate(10000);
 			int read = reader.read(target);
 			while (read >= 0) {
-				builder.append(target.array());
+				Log.d("HTTP", "read characters: "+new String(target.array()));
+				builder.append(target.array(), 0, read);
+				target.clear();
 				read = reader.read(target);
 			}
+			Log.d("HTTP", "request finished");
 			try {
 				return new JSONObject(builder.toString());
 			} catch (JSONException e) {
@@ -116,12 +121,13 @@ public class AccountUtils {
 		}
 	}
 
-	public static Set<String> postAddressBook(String token, Set<String> contacts) throws UnsupportedEncodingException {
+	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws UnsupportedEncodingException {
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(contacts.size());
-		for (Iterator<String> iterator = contacts.iterator(); iterator.hasNext();) {
-			String phone_no = (String) iterator.next();
-			pairs.add(new BasicNameValuePair("phone_no", phone_no));
+		for (ContactInfo contact : contacts) {
+			pairs.add(new BasicNameValuePair("phone_no", contact.number));
+			pairs.add(new BasicNameValuePair("name", contact.name));
+			pairs.add(new BasicNameValuePair("id", contact.id));
 		}
 
 		HttpEntity entity = new UrlEncodedFormEntity(pairs);
@@ -135,12 +141,24 @@ public class AccountUtils {
 			return null;				
 		}
 
-		JSONArray hike_users = obj.optJSONArray("hike_users");
-		Set<String> hike_users_set = new HashSet<String>(hike_users.length());
-		for(int i = 0; i < hike_users.length(); ++i) {
-			hike_users_set.add(hike_users.optString(i));
+		contacts = new ArrayList<ContactInfo>();
+		Log.d("FOO", obj.toString());
+		JSONObject addressbook = obj.optJSONObject("addressbook");
+		for(Iterator<String> it = addressbook.keys(); it.hasNext();) {
+			String id =  it.next();
+			JSONArray entries = addressbook.optJSONArray(id);
+			entries.length();
+			for(int i = 0; i < entries.length(); ++i) {
+				JSONObject entry = entries.optJSONObject(i);
+				String msisdn = entry.optString("msisdn");
+				Boolean onhike = entry.optBoolean("onhike");
+				contacts.add(new ContactInfo(id, msisdn, onhike.booleanValue()));
+			}
 		}
-		return hike_users_set;
+		
+		return contacts;
+
+
 	}
 
 	public static class AccountInfo {
