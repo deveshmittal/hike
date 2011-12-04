@@ -49,6 +49,11 @@ public class AccountUtils {
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
 	private static HttpClient mClient = null;
+	private static String mToken = null;
+
+	public static void setToken(String token) {
+		mToken = token;
+	}
 
 	private static synchronized HttpClient getClient() {
 		if (mClient != null) {
@@ -76,6 +81,11 @@ public class AccountUtils {
 			Log.d("HTTP", "Performing HTTP Request " + request.getRequestLine());
 			Log.d("HTTP", "to host" + request);
 			response = client.execute(request);
+			if (response.getStatusLine().getStatusCode() != 200) {
+				Log.w("HTTP", "Request Failed: " + response.getStatusLine());
+				return null;
+			}
+
 			HttpEntity entity = response.getEntity();
 			BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
 			StringBuilder builder = new StringBuilder();
@@ -121,6 +131,29 @@ public class AccountUtils {
 		}
 	}
 
+	public static boolean invite(String phone_no) {
+		HttpPost httppost = new HttpPost(BASE + "/user/invite");
+		addToken(httppost);
+		try {
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>(1);
+			pairs.add(new BasicNameValuePair("to", phone_no));
+			HttpEntity entity = new UrlEncodedFormEntity(pairs);
+			httppost.setEntity(entity);
+		} catch (UnsupportedEncodingException e) {
+			Log.wtf("AccountUtils", "encoding exception", e);
+			return false;
+		}
+
+		JSONObject obj = executeRequest(httppost);
+		if (((obj == null) ||
+			("fail".equals(obj.optString("stat"))))) {
+			Log.i("Invite", "Couldn't invite friend: " + obj);
+			return false;
+		}
+
+		return true;
+	}
+
 	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws UnsupportedEncodingException {
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(contacts.size());
@@ -155,10 +188,8 @@ public class AccountUtils {
 				contacts.add(new ContactInfo(id, msisdn, onhike.booleanValue()));
 			}
 		}
-		
+
 		return contacts;
-
-
 	}
 
 	public static class AccountInfo {
@@ -195,6 +226,10 @@ public class AccountUtils {
 		String msisdn = obj.optString("msisdn");
 		Log.d("HTTP", "Successfully created account");
 		return new AccountUtils.AccountInfo(token, msisdn);
+	}
+
+	private static void addToken(HttpRequestBase req) {
+		req.addHeader("Cookie", "user="+mToken);
 	}
 
 	private static void addMSISDNHeader(HttpRequestBase req) {

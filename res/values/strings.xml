@@ -17,4 +17,6 @@ No hidden costs and no data plan required</string>
     <string name="search">Search</string>
     <string name="notifications">Notifications</string>
     <string name="settings">Settings</string>
+    <string name="invite_sent">Invite sent</string>
+    <string name="invite_failed">Invite failed</string>
 </resources>
