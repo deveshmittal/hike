@@ -13,6 +13,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactInfo;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeUserDatabase;
 
 import android.app.Activity;
@@ -22,6 +23,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Contacts.People;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
@@ -47,15 +49,8 @@ public class ScanningAddressBook extends Activity {
 			while (contacts.moveToNext()) {
 				String id = contacts.getString(idFieldColumnIndex);
 				String name = contacts.getString(nameFieldColumnIndex);
-				//TODO batch this up
-				Cursor phoneCursor = managedQuery(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "= ?", new String[]{id}, null);
-				int numberIdx = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-				int idIdx = phoneCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID);
-				while(phoneCursor.moveToNext()) {
-					String number = phoneCursor.getString(numberIdx);
-					String rowId = phoneCursor.getString(idIdx);
-					contactinfos.add(new ContactInfo(rowId, name, number));
-				}
+				String number = ContactUtils.getMobileNumber(getContentResolver(), Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, id));
+				contactinfos.add(new ContactInfo(id, name, number));
 			}
 
 			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);

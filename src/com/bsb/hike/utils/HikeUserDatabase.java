@@ -1,22 +1,25 @@
 package com.bsb.hike.utils;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.util.Log;
 
 public class HikeUserDatabase extends SQLiteOpenHelper {
-	private static final int DATABASE_VERSION = 1;
+	private static final int DATABASE_VERSION = 2;
 	private static final String DATABASE_NAME = "hikeusers";
 	private static final String DATABASE_TABLE = "users";
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		String create = "CREATE TABLE IF NOT EXISTS users ( id STRING, name STRING, msisdn STRING, onhike INTEGER )";
+		String create = "CREATE TABLE IF NOT EXISTS users ( id STRING PRIMARY KEY ON CONFLICT REPLACE NOT NULL, name STRING, msisdn STRING, onhike INTEGER )";
 		db.execSQL(create);
 	}
 
@@ -33,19 +36,38 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public void updateAddressBook(List<ContactInfo> contacts) {
 		SQLiteDatabase db = getWritableDatabase();
+		db.beginTransaction();
+		Cursor c = db.rawQuery("SELECT id FROM users", null);
+		int idx = c.getColumnIndex("id");
+
+		Set<String> ids = new HashSet<String>(c.getCount());
+		while (c.moveToNext()) {
+			String id = c.getString(idx);
+			ids.add(id);
+		}
+		Log.d("DB", "Allocated: "+ids.size());
 		InsertHelper ih = new InsertHelper(db, DATABASE_TABLE);
 		final int msisdnColumn = ih.getColumnIndex("msisdn");
 		final int idColumn = ih.getColumnIndex("id");
 		final int onHikeColumn = ih.getColumnIndex("onhike");
-		db.delete(DATABASE_TABLE, "", new String[]{});
-		onCreate(db);
-
+		Log.d("DBUtils", "starting insert");
 		for(ContactInfo contact : contacts) {
-			ih.prepareForInsert();
+			ids.remove(contact.id);
+			ih.prepareForReplace();
 			ih.bind(msisdnColumn, contact.number);
 			ih.bind(idColumn, contact.id);
 			ih.bind(onHikeColumn, contact.onhike);
 			ih.execute();
 		}
+
+		if (!ids.isEmpty()) {
+			String clause = Utils.join(ids, ",");
+			Log.d("db", "deleting entry: " + clause);
+			db.delete(DATABASE_TABLE, "id in ("+clause+")", null);
+		}
+
+		db.setTransactionSuccessful();
+		db.endTransaction();
+		db.close();
 	}
 }

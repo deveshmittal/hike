@@ -29,7 +29,6 @@ public class ContactUtils {
 				break;
 			}
 		}
-		Log.d("ContactUtils", "phone number: " + number + " for contactURI: " + contact);
 		return number;
 	}
 }
