@@ -156,6 +156,7 @@ public class AccountUtils {
 
 	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws UnsupportedEncodingException {
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
+		addToken(httppost);
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(contacts.size());
 		for (ContactInfo contact : contacts) {
 			pairs.add(new BasicNameValuePair("phone_no", contact.number));
@@ -206,7 +207,10 @@ public class AccountUtils {
 		HttpPost httppost = new HttpPost(BASE + "/account");
 		HttpEntity entity = null;
 		try {
-			entity = new StringEntity("");
+			List<NameValuePair> pairs = new ArrayList<NameValuePair>(1);
+			pairs.add(new BasicNameValuePair("set_cookie", "0"));
+			entity = new UrlEncodedFormEntity(pairs);
+			httppost.setEntity(entity);
 		} catch (UnsupportedEncodingException e) {
 			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!");
 		}

@@ -23,6 +23,8 @@ public class WelcomeActivity extends Activity {
 			if (accountInfo != null) {
 				String token = accountInfo.token;
 				String msisdn = accountInfo.msisdn;
+				Log.d("setting token", "setting token");
+				AccountUtils.setToken(token);
 				SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 				SharedPreferences.Editor editor = settings.edit();
 				editor.putString(HikeMessengerApp.TOKEN_SETTING, token);
