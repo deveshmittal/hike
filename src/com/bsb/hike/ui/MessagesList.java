@@ -118,10 +118,6 @@ public class MessagesList extends Activity implements OnClickListener {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent;
 		switch (item.getItemId()) {
-		case R.id.contacts:
-			intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
-			startActivityForResult(intent, CONTACT_PICKER_RESULT);
-			return true;
 		case R.id.invite:
 			intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
 			startActivityForResult(intent, INVITE_PICKER_RESULT);
