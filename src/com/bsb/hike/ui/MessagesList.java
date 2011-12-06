@@ -59,11 +59,12 @@ public class MessagesList extends Activity implements OnClickListener {
 	private boolean mConversationsViewHidden;
 	private View mNewMessageView;
 	private View mConversationsView;
+	private View mSearchIconView;
+	private View mEditMessageIconView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-	    setContentView(R.layout.main);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
@@ -73,13 +74,15 @@ public class MessagesList extends Activity implements OnClickListener {
 	    }
 
 	    AccountUtils.setToken(token);
+
+	    setContentView(R.layout.main);
     	mNewMessageView = findViewById(R.id.new_user_message);
     	mConversationsView = findViewById(R.id.conversations);
 
-    	View searchIconView = findViewById(R.id.search);
-    	searchIconView.setOnClickListener(this);
-    	View editMessageIconView = findViewById(R.id.edit_message);
-    	editMessageIconView.setOnClickListener(this);
+    	mSearchIconView = findViewById(R.id.search);
+    	mSearchIconView.setOnClickListener(this);
+    	mEditMessageIconView = findViewById(R.id.edit_message);
+    	mEditMessageIconView.setOnClickListener(this);
 	    Intent intent = getIntent();
 	    if (intent.getBooleanExtra("first", false)) {
 	    	mNewMessageView.setVisibility(View.VISIBLE);
@@ -128,7 +131,12 @@ public class MessagesList extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		Log.d("MessagesList", "OnClick called: "+v);		
+		Log.d("MessagesList", "OnClick called: "+v);
+		if (v == mEditMessageIconView) {
+			Intent intent = new Intent(this, ChatThread.class);
+			intent.putExtra("edit", true);
+			startActivity(intent);
+		}
 	}
 }
 
