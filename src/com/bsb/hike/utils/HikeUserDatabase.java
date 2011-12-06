@@ -45,15 +45,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			String id = c.getString(idx);
 			ids.add(id);
 		}
-		Log.d("DB", "Allocated: "+ids.size());
+		c.close();
+		Log.d("DB", "DB Size is: "+ids.size());
 		InsertHelper ih = new InsertHelper(db, DATABASE_TABLE);
 		final int msisdnColumn = ih.getColumnIndex("msisdn");
 		final int idColumn = ih.getColumnIndex("id");
+		final int nameColumn = ih.getColumnIndex("name");
 		final int onHikeColumn = ih.getColumnIndex("onhike");
-		Log.d("DBUtils", "starting insert");
+		Log.d("DBUtils", "starting insert " + contacts.size());
 		for(ContactInfo contact : contacts) {
 			ids.remove(contact.id);
 			ih.prepareForReplace();
+			ih.bind(nameColumn, contact.name);
 			ih.bind(msisdnColumn, contact.number);
 			ih.bind(idColumn, contact.id);
 			ih.bind(onHikeColumn, contact.onhike);
