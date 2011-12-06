@@ -8,7 +8,7 @@
         android:layout_alignParentBottom="true"
         android:id="@+id/bottom_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="65dp"
         android:color="@color/black">
         <Button
 	        android:layout_width="fill_parent"
