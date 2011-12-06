@@ -43,7 +43,7 @@
              android:layout_alignParentLeft="true"
              android:layout_margin="10dp"
              android:layout_toLeftOf="@+id/send_message"
-             android:hint="Type to compose"
+             android:hint="@string/type_to_compose"
              android:inputType="textShortMessage" >
 
             <requestFocus />
@@ -54,6 +54,6 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:id="@+id/send_message"
-            android:text="Send"/>
+            android:text="@string/send"/>
  	</RelativeLayout>
 </RelativeLayout>
