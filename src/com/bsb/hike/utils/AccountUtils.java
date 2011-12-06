@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -81,6 +82,7 @@ public class AccountUtils {
 			Log.d("HTTP", "Performing HTTP Request " + request.getRequestLine());
 			Log.d("HTTP", "to host" + request);
 			response = client.execute(request);
+			Log.d("HTTP", "finished request");
 			if (response.getStatusLine().getStatusCode() != 200) {
 				Log.w("HTTP", "Request Failed: " + response.getStatusLine());
 				return null;
@@ -157,14 +159,17 @@ public class AccountUtils {
 	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws UnsupportedEncodingException {
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
 		addToken(httppost);
+		Map<String, String> idToName = new HashMap<String, String>(contacts.size());
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(contacts.size());
 		for (ContactInfo contact : contacts) {
+			idToName.put(contact.id, contact.name);
 			pairs.add(new BasicNameValuePair("phone_no", contact.number));
 			pairs.add(new BasicNameValuePair("name", contact.name));
 			pairs.add(new BasicNameValuePair("id", contact.id));
 		}
 
 		HttpEntity entity = new UrlEncodedFormEntity(pairs);
+		Log.d("HTTP", "AddressBook size is " + entity.getContentLength());
 		httppost.setEntity(entity);
 
 		JSONObject obj = executeRequest(httppost);
@@ -186,7 +191,9 @@ public class AccountUtils {
 				JSONObject entry = entries.optJSONObject(i);
 				String msisdn = entry.optString("msisdn");
 				Boolean onhike = entry.optBoolean("onhike");
-				contacts.add(new ContactInfo(id, msisdn, onhike.booleanValue()));
+				ContactInfo info = new ContactInfo(id, msisdn, onhike.booleanValue());
+				info.name = idToName.get(id);
+				contacts.add(info);
 			}
 		}
 
