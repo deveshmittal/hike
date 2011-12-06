@@ -23,7 +23,6 @@ public class WelcomeActivity extends Activity {
 			if (accountInfo != null) {
 				String token = accountInfo.token;
 				String msisdn = accountInfo.msisdn;
-				Log.d("setting token", "setting token");
 				AccountUtils.setToken(token);
 				SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 				SharedPreferences.Editor editor = settings.edit();
@@ -48,12 +47,10 @@ public class WelcomeActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
-		Log.d("Hello", "testing");
 		setContentView(R.layout.welcomescreen);
 	}
 
 	public void onClick(View v) {
-		Log.d("WelcomeActivity", "View Clicked");
 		mDialog = ProgressDialog.show(this, null, getText(R.string.determining_phone_number));
 		AccountCreateActivity aca = new AccountCreateActivity();
 		aca.execute();
