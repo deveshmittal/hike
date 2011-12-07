@@ -32,6 +32,22 @@ public class ScanningAddressBook extends Activity {
 
 	private class ScanAddressBookTask extends AsyncTask<Void, Void, Void> {
 
+		private ScanningAddressBook mActivity;
+		private Cursor mContacts;
+
+		public ScanAddressBookTask(ScanningAddressBook activity) {
+			mActivity = activity;
+		}
+
+		public void setActivity(ScanningAddressBook activity) {
+			if (activity == null) {
+				stopManagingCursor(mContacts);
+			} else {
+				activity.startManagingCursor(mContacts);
+			}
+			mActivity = activity;
+		}
+
 		@Override
 		protected Void doInBackground(Void... params) {
 			String[] projection = new String[] {
@@ -41,14 +57,14 @@ public class ScanningAddressBook extends Activity {
 			};
 
 			String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
-			Cursor contacts = managedQuery(ContactsContract.Contacts.CONTENT_URI, projection, selection, null, null);
+			mContacts = mActivity.managedQuery(ContactsContract.Contacts.CONTENT_URI, projection, selection, null, null);
 
-			int idFieldColumnIndex = contacts.getColumnIndex(ContactsContract.Contacts._ID);
-			int nameFieldColumnIndex = contacts.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+			int idFieldColumnIndex = mContacts.getColumnIndex(ContactsContract.Contacts._ID);
+			int nameFieldColumnIndex = mContacts.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
 			List<ContactInfo> contactinfos = new ArrayList<ContactInfo>();
-			while (contacts.moveToNext()) {
-				String id = contacts.getString(idFieldColumnIndex);
-				String name = contacts.getString(nameFieldColumnIndex);
+			while (mContacts.moveToNext()) {
+				String id = mContacts.getString(idFieldColumnIndex);
+				String name = mContacts.getString(nameFieldColumnIndex);
 				String number = ContactUtils.getMobileNumber(getContentResolver(), Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, id));
 				contactinfos.add(new ContactInfo(id, name, number));
 			}
@@ -64,6 +80,7 @@ public class ScanningAddressBook extends Activity {
 				//TODO raise a dialog here, ask the user to retry later?  Or continue?
 				Log.e("ScanningAddressBook", "Unable to post address book", e);
 			}
+
 			Log.d("ScanningAddressBook", "Finished scanning addressbook");
 			Intent intent = new Intent(ScanningAddressBook.this, MessagesList.class);
 			intent.putExtra("first", true);
@@ -73,14 +90,29 @@ public class ScanningAddressBook extends Activity {
 		}
 	}
 
+	ScanAddressBookTask mTask;
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		mTask.setActivity(null);
+		return mTask;
+	}
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//TODO this is called when you rotate the screen.  We shouldn't
 		Log.d(ScanningAddressBook.class.getSimpleName(), "onCreate");
 	 	setContentView(R.layout.scanningcontactlist);
-	 	ScanAddressBookTask sab = new ScanAddressBookTask();
-	 	sab.execute();
+	 	Object retained = getLastNonConfigurationInstance();
+	 	if (retained instanceof ScanAddressBookTask) {
+	 		mTask = (ScanAddressBookTask) retained;
+	 		mTask.setActivity(this);
+	 	} else {
+	 		mTask = new ScanAddressBookTask(this);
+	 		mTask.execute();
+	 	}
 	}
 
 }
