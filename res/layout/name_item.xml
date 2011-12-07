@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@color/white">
 
     <TextView 
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:text="Vijay Raghunathan" 
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:text="Vijay Raghunathan"
+        android:textColor="@color/black"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
     <TextView 
         android:id="@+id/number"
         android:layout_below="@id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:textColor="@color/black"
         android:text="1231231231231" />
 
 </RelativeLayout>
