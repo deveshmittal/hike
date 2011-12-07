@@ -14,8 +14,7 @@
             android:layout_margin="7dp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/input_number"
-            android:completionHint="Enter number">
+            android:id="@+id/input_number">
             <requestFocus/>
         </AutoCompleteTextView>
         <TextView
