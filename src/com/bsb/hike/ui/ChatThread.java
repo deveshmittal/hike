@@ -1,8 +1,11 @@
 package com.bsb.hike.ui;
+import java.util.ArrayList;
+
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeUserDatabase;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,10 +13,13 @@ import android.os.Bundle;
 import android.provider.Contacts.People;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.FilterQueryProvider;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
@@ -24,6 +30,10 @@ public class ChatThread extends Activity {
 	Cursor mCursor;
 	private long mContactId;
 	private String mContactName;
+	private String mContactNumber;
+	private ConversationsAdapter mAdapter;
+	private EditText mComposeView;
+	private ListView mConversationsView;
 
 	private void createAutoCompleteView() {
     	Log.d("ChatThread", "edit view");
@@ -40,8 +50,9 @@ public class ChatThread extends Activity {
     	adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
 			@Override
 			public CharSequence convertToString(Cursor cursor) {
-				String name = cursor.getString(cursor.getColumnIndex("name"));
-				return name;
+				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
+				mContactName = cursor.getString(cursor.getColumnIndex("name"));
+				return mContactName;
 			}
 		});
 
@@ -64,9 +75,8 @@ public class ChatThread extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> list, View _empty, int position,
 					long id) {
-				String contactName = inputNumberView.getText().toString();
-				Log.d("TAG", "Name is " + contactName);
-				createConversation(id, contactName);
+				mContactId = id;
+				createConversation();
 			}
 		});
   
@@ -81,16 +91,28 @@ public class ChatThread extends Activity {
 	    setContentView(R.layout.chatthread);
 
 	    Intent intent = getIntent();
-	    long contactId = intent.getLongExtra("id", -1);
-	    if (contactId < 0) {
+	    mContactId = intent.getLongExtra("id", -1);
+	    if (mContactId < 0) {
 	    	createAutoCompleteView();
 	    } else {
-	    	String contactName = intent.getStringExtra("contactName");
-	    	createConversation(contactId, contactName);
+	    	mContactName = intent.getStringExtra("contactName");
+	    	createConversation();
 	    }
 	}
 
-	private void createConversation(long contactId, String contactName) {
+	public void onSendClick(View v) {
+		Log.d("ChatThread", "Send Button Called");
+		String message = mComposeView.getText().toString();
+		mComposeView.setText("");
+		int time = (int) System.currentTimeMillis()/10000;
+		Conversation conversation = new Conversation(message, time, true, false /*TODO this should come from the activity */);
+		mAdapter.add(conversation);
+	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
+//		mConversationsView.requestFocus();
+	}
+
+	private void createConversation() {
     	View bottomPanel = findViewById(R.id.bottom_panel);
     	bottomPanel.setVisibility(View.VISIBLE);
     	TextView nameView = (TextView) findViewById(R.id.name_field);
@@ -98,9 +120,12 @@ public class ChatThread extends Activity {
     	final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
     	inputNumberView.setVisibility(View.GONE);
  
-	    nameView.setText(contactName);
-		mContactId = contactId;
-		mContactName = contactName;
+	    nameView.setText(mContactName);
+	    ArrayList<Conversation> conversations = new ArrayList<Conversation>();
+	    mConversationsView = (ListView) findViewById(R.id.conversations_list);
+	    mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
+	    mConversationsView.setAdapter(mAdapter);
+	    mComposeView = (EditText) findViewById(R.id.msg_compose);
 	}
 
 	protected void onStop() {
