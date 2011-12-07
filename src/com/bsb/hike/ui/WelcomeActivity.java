@@ -1,17 +1,16 @@
 package com.bsb.hike.ui;
 
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.R;
-import com.bsb.hike.utils.AccountUtils;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
+import com.bsb.hike.utils.AccountUtils;
 
 public class WelcomeActivity extends Activity {
 	public class AccountCreateActivity extends AsyncTask<Void, Void, Boolean> {

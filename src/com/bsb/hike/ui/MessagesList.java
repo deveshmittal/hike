@@ -4,12 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.util.Log;
 import android.view.Menu;
@@ -54,7 +51,6 @@ public class MessagesList extends Activity implements OnClickListener {
 	}
 
 	private static final int INVITE_PICKER_RESULT = 1001;
-	private static final int CONTACT_PICKER_RESULT = 1002;
 
 	private boolean mConversationsViewHidden;
 	private View mNewMessageView;

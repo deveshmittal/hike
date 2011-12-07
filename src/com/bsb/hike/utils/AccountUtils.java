@@ -6,11 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -22,13 +20,10 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
@@ -39,7 +34,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.ContentValues;
 import android.util.Log;
 
 public class AccountUtils {
@@ -112,6 +106,30 @@ public class AccountUtils {
 			Log.e("HTTP", "Unable to perform request", e);
 		}
 		return null;		
+	}
+
+	public static int sendMessage(String phone_no, String message) {
+		HttpPost httppost = new HttpPost(BASE + "/user/msg");
+		List<NameValuePair> pairs = new ArrayList<NameValuePair>(2);
+		pairs.add(new BasicNameValuePair("to", phone_no));
+		pairs.add(new BasicNameValuePair("body", message));
+		HttpEntity entity;
+		try {
+			entity = new UrlEncodedFormEntity(pairs);
+			httppost.setEntity(entity);
+		} catch (UnsupportedEncodingException e) {
+			Log.wtf("URL", "Unable to send message " + message);
+			return -1;
+		}
+
+		JSONObject obj = executeRequest(httppost);
+		if ((obj == null)  || ("fail".equals(obj.optString("stat")))) {
+			Log.w("HTTP", "Unable to send message");
+			return -1;
+		}
+
+		int count = obj.optInt("sms_count");
+		return count;
 	}
 
 	public static String getMSISDN() {

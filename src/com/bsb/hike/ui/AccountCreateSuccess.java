@@ -1,10 +1,6 @@
 package com.bsb.hike.ui;
 
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.R;
-
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +10,9 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
 
 public class AccountCreateSuccess extends Activity {
 	public void onCreate(Bundle state) {

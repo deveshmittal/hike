@@ -1,20 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.json.JSONObject;
-
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.R;
-import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactInfo;
-import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.HikeUserDatabase;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -23,10 +10,15 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.Contacts.People;
 import android.provider.ContactsContract;
-import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
+
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.R;
+import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ContactInfo;
+import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.HikeUserDatabase;
 
 public class ScanningAddressBook extends Activity {
 

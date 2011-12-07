@@ -1,15 +1,14 @@
 package com.bsb.hike.utils;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class HikeUserDatabase extends SQLiteOpenHelper {
