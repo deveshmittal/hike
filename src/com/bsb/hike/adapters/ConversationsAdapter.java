@@ -1,4 +1,4 @@
-package com.bsb.hike.ui;
+package com.bsb.hike.adapters;
 
 import java.util.List;
 
@@ -12,6 +12,7 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.models.Conversation;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
