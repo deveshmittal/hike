@@ -26,7 +26,6 @@ import com.bsb.hike.utils.HikeUserDatabase;
 
 public class ChatThread extends Activity {
 	HikeUserDatabase mDbhelper;
-	SQLiteDatabase mDb;
 	Cursor mCursor;
 	private long mContactId;
 	private String mContactName;
@@ -43,7 +42,6 @@ public class ChatThread extends Activity {
     	nameView.setVisibility(View.GONE);
     	final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		mDbhelper = new HikeUserDatabase(this);
-		mDb = mDbhelper.getReadableDatabase();
     	String[] columns = new String[] { "name", "msisdn"};
     	int[] to = new int[] { R.id.name, R.id.number };
     	SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
@@ -64,7 +62,7 @@ public class ChatThread extends Activity {
 					stopManagingCursor(mCursor);
 					mCursor.close();
 				}
-				mCursor = mDb.rawQuery("SELECT name, id AS _id, msisdn, onhike FROM users WHERE name LIKE ?", new String[] { str });
+				mCursor = mDbhelper.findUsers(str);
 				startManagingCursor(mCursor);
 				return mCursor;
 			}
@@ -130,10 +128,8 @@ public class ChatThread extends Activity {
 	protected void onStop() {
 		super.onStop();
 		Log.d(getLocalClassName(), "OnStop called");
-		if (mDb != null) {
+		if (mDbhelper != null) {
 			mDbhelper.close();
-			mDb.close();
-			mDb = null;
 			mDbhelper = null;
 		}
 	}
