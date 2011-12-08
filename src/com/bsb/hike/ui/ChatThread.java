@@ -20,7 +20,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
-import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.HikeUserDatabase;
 
 
@@ -105,8 +105,8 @@ public class ChatThread extends Activity {
 		String message = mComposeView.getText().toString();
 		mComposeView.setText("");
 		int time = (int) System.currentTimeMillis()/10000;
-		Conversation conversation = new Conversation(message, mContactId, time, true);
-		mAdapter.add(conversation);
+		ConvMessage convMessage = new ConvMessage(message, mContactNumber, Long.toString(mContactId), time, true);
+		mAdapter.add(convMessage);
 	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
 	}
@@ -120,9 +120,9 @@ public class ChatThread extends Activity {
     	inputNumberView.setVisibility(View.GONE);
  
 	    nameView.setText(mContactName);
-	    ArrayList<Conversation> conversations = new ArrayList<Conversation>();
+	    ArrayList<ConvMessage> convMessages = new ArrayList<ConvMessage>();
 	    mConversationsView = (ListView) findViewById(R.id.conversations_list);
-	    mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
+	    mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, convMessages);
 	    mConversationsView.setAdapter(mAdapter);
 	    mComposeView = (EditText) findViewById(R.id.msg_compose);
 	}

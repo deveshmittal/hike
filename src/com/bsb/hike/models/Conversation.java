@@ -1,51 +1,79 @@
 package com.bsb.hike.models;
 
-public class Conversation {
-	public Conversation(String message, long id, int timeestamp, boolean isSent) {
-		this.mId = id;
-		this.mMessage = message;
-		this.mTimestamp = timeestamp;
-		this.mIsSent = isSent;
+import java.util.List;
+
+public class Conversation implements Comparable {
+
+	public String getMsisdn() {
+		return msisdn;
 	}
 
-	public String getMessage() {
-		return mMessage;
+	public long getConvId() {
+		return convId;
 	}
 
-	public boolean isSent() {
-		return mIsSent;
+	public String getContactId() {
+		return contactId;
 	}
 
-	public int getTimestamp() {
-		return this.mTimestamp;
+	private String msisdn;
+	private long convId;
+	private String contactId;
+	private List<ConvMessage> messages;
+
+	public Conversation(String msisdn, long convId,
+			String contactId) {
+		this.msisdn = msisdn;
+		this.convId = convId;
+		this.contactId = contactId;
 	}
 
-	public State getState() {
-		return mState;
+	public void setMessages(List<ConvMessage> messages) {
+		this.messages = messages;
 	}
 
-	public long getId() {
-		return mId;
+	public void addMessage(ConvMessage message) {
+		this.messages.add(message);
 	}
-
 
 	@Override
-	public String toString() {
-		return "Conversation [mMessage=" + mMessage + ", mId=" + mId
-				+ ", mTimestamp=" + mTimestamp + ", mIsSent=" + mIsSent
-				+ ", mState=" + mState + "]";
+	public int compareTo(Object obj) {
+		Conversation rhs = (Conversation) obj;
+		if (this.equals(rhs)) {
+			return 0;
+		}
+
+		int ts = messages.isEmpty() ? 0 : messages.get(0).getTimestamp();
+		int rhsTs = rhs.messages.get(0).getTimestamp();
+		if (rhsTs != ts) {
+			return (ts < rhsTs) ? -1 : 1;
+		}
+
+		int ret = msisdn.compareTo(rhs.msisdn);
+		if (ret != 0) { return ret; }
+			
+		if (convId != rhs.convId) {
+			return (convId < rhs.convId) ? -1 : 1;
+		}
+
+		String cId = (contactId != null) ? contactId : "";
+		return cId.compareTo(rhs.contactId);
+	}
+
+	public List<ConvMessage> getMessages() {
+		return messages;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (mId ^ (mId >>> 32));
-		result = prime * result + (mIsSent ? 1231 : 1237);
 		result = prime * result
-				+ ((mMessage == null) ? 0 : mMessage.hashCode());
-		result = prime * result + ((mState == null) ? 0 : mState.hashCode());
-		result = prime * result + mTimestamp;
+				+ ((contactId == null) ? 0 : contactId.hashCode());
+		result = prime * result + (int) (convId ^ (convId >>> 32));
+		result = prime * result
+				+ ((messages == null) ? 0 : messages.hashCode());
+		result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
 		return result;
 	}
 
@@ -58,27 +86,23 @@ public class Conversation {
 		if (getClass() != obj.getClass())
 			return false;
 		Conversation other = (Conversation) obj;
-		if (mId != other.mId)
-			return false;
-		if (mIsSent != other.mIsSent)
-			return false;
-		if (mMessage == null) {
-			if (other.mMessage != null)
+		if (contactId == null) {
+			if (other.contactId != null)
 				return false;
-		} else if (!mMessage.equals(other.mMessage))
+		} else if (!contactId.equals(other.contactId))
 			return false;
-		if (mState != other.mState)
+		if (convId != other.convId)
 			return false;
-		if (mTimestamp != other.mTimestamp)
+		if (messages == null) {
+			if (other.messages != null)
+				return false;
+		} else if (!messages.equals(other.messages))
+			return false;
+		if (msisdn == null) {
+			if (other.msisdn != null)
+				return false;
+		} else if (!msisdn.equals(other.msisdn))
 			return false;
 		return true;
 	}
-
-
-	private String mMessage;
-	private long mId;
-	private int mTimestamp;
-	private boolean mIsSent;
-	public enum State {SENT, DELIVERED, RECEIVED };
-	private State mState;
 }

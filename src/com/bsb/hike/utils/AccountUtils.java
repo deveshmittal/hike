@@ -34,6 +34,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.bsb.hike.models.ContactInfo;
+
 import android.util.Log;
 
 public class AccountUtils {
@@ -209,7 +211,7 @@ public class AccountUtils {
 				JSONObject entry = entries.optJSONObject(i);
 				String msisdn = entry.optString("msisdn");
 				Boolean onhike = entry.optBoolean("onhike");
-				ContactInfo info = new ContactInfo(id, msisdn, onhike.booleanValue());
+				ContactInfo info = new ContactInfo(id, msisdn, idToName.get(id), onhike.booleanValue());
 				info.name = idToName.get(id);
 				contacts.add(info);
 			}

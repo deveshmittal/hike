@@ -1,17 +1,22 @@
 package com.bsb.hike.utils;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.bsb.hike.models.ContactInfo;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class HikeUserDatabase extends SQLiteOpenHelper {
+	private SQLiteDatabase mDb;
+	private SQLiteDatabase mReadDb;
+
 	private static final int DATABASE_VERSION = 2;
 	private static final String DATABASE_NAME = "hikeusers";
 	private static final String DATABASE_TABLE = "users";
@@ -24,6 +29,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public HikeUserDatabase(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		mDb = getWritableDatabase();
+		mReadDb = getReadableDatabase();
+	}
+
+	@Override
+	public synchronized void close() {
+		mDb.close();
+		mReadDb.close();
+		super.close();
 	}
 
 	@Override
@@ -34,7 +48,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public void updateAddressBook(List<ContactInfo> contacts) {
-		SQLiteDatabase db = getWritableDatabase();
+		SQLiteDatabase db = mDb;
 		db.beginTransaction();
 		Cursor c = db.rawQuery("SELECT id FROM users", null);
 		int idx = c.getColumnIndex("id");
@@ -45,13 +59,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			ids.add(id);
 		}
 		c.close();
-		Log.d("DB", "DB Size is: "+ids.size());
 		InsertHelper ih = new InsertHelper(db, DATABASE_TABLE);
 		final int msisdnColumn = ih.getColumnIndex("msisdn");
 		final int idColumn = ih.getColumnIndex("id");
 		final int nameColumn = ih.getColumnIndex("name");
 		final int onHikeColumn = ih.getColumnIndex("onhike");
-		Log.d("DBUtils", "starting insert " + contacts.size());
 		for(ContactInfo contact : contacts) {
 			ids.remove(contact.id);
 			ih.prepareForReplace();
@@ -64,12 +76,32 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		if (!ids.isEmpty()) {
 			String clause = Utils.join(ids, ",");
-			Log.d("db", "deleting entry: " + clause);
 			db.delete(DATABASE_TABLE, "id in ("+clause+")", null);
 		}
 
 		db.setTransactionSuccessful();
 		db.endTransaction();
-		db.close();
+	}
+
+	public ContactInfo getContactInfoFromMSISDN(String msisdn) {
+		Cursor c = mReadDb.query(DATABASE_TABLE, new String[]{"msisdn", "id", "name", "onhike"}, "msisdn=?", new String[]{msisdn}, null, null, null);
+		if (!c.moveToFirst()) {
+			return null;
+		}
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		return contactInfos.get(0);
+	}
+
+	private List<ContactInfo> extractContactInfo(Cursor c) {
+		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>(c.getCount());
+		int idx = c.getColumnIndex("id");
+		int msisdnIdx = c.getColumnIndex("msisdn");
+		int nameIdx = c.getColumnIndex("name");
+		int onhikeIdx = c.getColumnIndex("onhike");
+		while (c.moveToNext()) {
+			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getInt(onhikeIdx) != 0);
+			contactInfos.add(contactInfo);
+		}
+		return contactInfos;
 	}
 }

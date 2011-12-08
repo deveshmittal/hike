@@ -12,13 +12,13 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
-import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConvMessage;
 
-public class ConversationsAdapter extends ArrayAdapter<Conversation> {
+public class ConversationsAdapter extends ArrayAdapter<ConvMessage> {
 
 	private int mResourceId;
 	public ConversationsAdapter(Context context, int textViewResourceId,
-			List<Conversation> objects) {
+			List<ConvMessage> objects) {
 		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
 	}
@@ -31,12 +31,12 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		if (v == null) {
 			v = inflater.inflate(mResourceId, parent, false);
 		}
-		Conversation conversation = getItem(position);
+		ConvMessage convMessage = getItem(position);
 		TextView messageView = (TextView) v.findViewById(R.id.conversation_id);
-		messageView.setText(conversation.getMessage());
+		messageView.setText(convMessage.getMessage());
 //		timestampView.setText(conversation.getTimestampFormatted());
 		RelativeLayout.LayoutParams params = (LayoutParams) messageView.getLayoutParams();		
-		if (conversation.isSent()) {
+		if (convMessage.isSent()) {
 			params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
 		} else {
 			params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);

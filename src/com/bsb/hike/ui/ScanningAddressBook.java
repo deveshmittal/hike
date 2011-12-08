@@ -15,8 +15,8 @@ import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactInfo;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeUserDatabase;
 
@@ -58,19 +58,24 @@ public class ScanningAddressBook extends Activity {
 				String id = mContacts.getString(idFieldColumnIndex);
 				String name = mContacts.getString(nameFieldColumnIndex);
 				String number = ContactUtils.getMobileNumber(getContentResolver(), Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, id));
-				contactinfos.add(new ContactInfo(id, name, number));
+				contactinfos.add(new ContactInfo(id, number, name));
 			}
 
 			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+			HikeUserDatabase db = null;
 			try {
 				List<ContactInfo> addressbook = AccountUtils.postAddressBook(token, contactinfos);
 				Log.d("SAB", "about to insert");
-				HikeUserDatabase db = new HikeUserDatabase(ScanningAddressBook.this);
+				db = new HikeUserDatabase(ScanningAddressBook.this);
 				db.updateAddressBook(addressbook);
 			} catch(Exception e) {
 				//TODO raise a dialog here, ask the user to retry later?  Or continue?
 				Log.e("ScanningAddressBook", "Unable to post address book", e);
+			} finally {
+				if (db != null) {
+					db.close();
+				}
 			}
 
 			Log.d("ScanningAddressBook", "Finished scanning addressbook");
