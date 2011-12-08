@@ -103,7 +103,7 @@ public class ChatThread extends Activity {
 		String message = mComposeView.getText().toString();
 		mComposeView.setText("");
 		int time = (int) System.currentTimeMillis()/10000;
-		Conversation conversation = new Conversation(message, time, true, false /*TODO this should come from the activity */);
+		Conversation conversation = new Conversation(message,mContactNumber, time, true, false /*TODO this should come from the activity */);
 		mAdapter.add(conversation);
 	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);

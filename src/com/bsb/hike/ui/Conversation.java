@@ -1,7 +1,8 @@
 package com.bsb.hike.ui;
 
 public class Conversation {
-	public Conversation(String message, int timeestamp, boolean isSent, boolean isIP) {
+	public Conversation(String message, String to, int timeestamp, boolean isSent, boolean isIP) {
+		this.mTo = to;
 		this.mMessage = message;
 		this.mTimestamp = timeestamp;
 		this.mIsSent = isSent;
@@ -28,7 +29,12 @@ public class Conversation {
 		return mState;
 	}
 
+	public String getTo() {
+		return mTo;
+	}
+
 	private String mMessage;
+	private String mTo;
 	private int mTimestamp;
 	private boolean mIsSent;
 	public enum State {SENT, DELIVERED, RECEIVED };
