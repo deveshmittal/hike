@@ -90,10 +90,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public ContactInfo getContactInfoFromMSISDN(String msisdn) {
 		Cursor c = mReadDb.query(DATABASE_TABLE, new String[]{"msisdn", "id", "name", "onhike"}, "msisdn=?", new String[]{msisdn}, null, null, null);
-		if (!c.moveToFirst()) {
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		if (contactInfos.isEmpty()) {
 			return null;
 		}
-		List<ContactInfo> contactInfos = extractContactInfo(c);
 		return contactInfos.get(0);
 	}
 
