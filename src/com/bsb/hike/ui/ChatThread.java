@@ -51,6 +51,7 @@ public class ChatThread extends Activity {
     	adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
 			@Override
 			public CharSequence convertToString(Cursor cursor) {
+				Log.d("Cursor", "Cursor is " + cursor);
 				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
 				mContactName = cursor.getString(cursor.getColumnIndex("name"));
 				return mContactName;
@@ -84,19 +85,38 @@ public class ChatThread extends Activity {
     	inputNumberView.setAdapter(adapter);
     	inputNumberView.setVisibility(View.VISIBLE);
     	inputNumberView.requestFocus();
-    }		
+    }
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		Intent intent = new Intent();
+		if (mContactName != null) {
+			intent.putExtra("name", mContactName);
+		}
+		if (mContactId >= 0) {
+			intent.putExtra("id", mContactId);
+		}
+
+		if (mContactNumber != null) {
+			intent.putExtra("msisdn", mContactNumber);
+		}
+
+		return intent;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 	    setContentView(R.layout.chatthread);
-
-	    Intent intent = getIntent();
-	    mContactId = intent.getLongExtra("id", -1);
-	    if (mContactId < 0) {
+	    mPubSub = HikeMessengerApp.getPubSub();
+	    Object o = getLastNonConfigurationInstance();
+	    Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
+	    mContactNumber = intent.getStringExtra("msisdn");
+	    if (mContactNumber == null) {
 	    	createAutoCompleteView();
 	    } else {
-	    	mContactName = intent.getStringExtra("contactName");
+		    mContactId = intent.getLongExtra("id", -1);
+		    mContactName = intent.getStringExtra("name");
 	    	createConversation();
 	    }
 	}
