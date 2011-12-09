@@ -17,6 +17,8 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.models.ConvMessage;
@@ -24,8 +26,10 @@ import com.bsb.hike.utils.HikeUserDatabase;
 
 
 public class ChatThread extends Activity {
-	HikeUserDatabase mDbhelper;
-	Cursor mCursor;
+
+	private HikePubSub mPubSub;
+	private HikeUserDatabase mDbhelper;
+	private Cursor mCursor;
 	private long mContactId;
 	private String mContactName;
 	private String mContactNumber;
@@ -104,6 +108,7 @@ public class ChatThread extends Activity {
 		int time = (int) System.currentTimeMillis()/10000;
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, Long.toString(mContactId), time, true);
 		mAdapter.add(convMessage);
+		mPubSub.publish(HikePubSub.MESSAGE, convMessage);
 	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
 	}
