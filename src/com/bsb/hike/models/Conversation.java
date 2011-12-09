@@ -2,7 +2,7 @@ package com.bsb.hike.models;
 
 import java.util.List;
 
-public class Conversation implements Comparable {
+public class Conversation implements Comparable<Conversation> {
 
 	public String getMsisdn() {
 		return msisdn;
@@ -37,8 +37,7 @@ public class Conversation implements Comparable {
 	}
 
 	@Override
-	public int compareTo(Object obj) {
-		Conversation rhs = (Conversation) obj;
+	public int compareTo(Conversation rhs) {
 		if (this.equals(rhs)) {
 			return 0;
 		}
