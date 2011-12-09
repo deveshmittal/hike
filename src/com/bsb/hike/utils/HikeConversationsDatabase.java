@@ -76,6 +76,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
+	public void addConversation(ConvMessage message) {
+		List<ConvMessage> l = new ArrayList<ConvMessage>(1);
+		l.add(message);
+		addConversations(l);
+	}
+
 	public void addConversations(List<ConvMessage> convMessages) {
 		SQLiteStatement insertStatement = mDb.compileStatement(
 				"INSERT INTO " + MESSAGESTABLE + 
