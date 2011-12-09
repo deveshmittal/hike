@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,6 +23,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeUserDatabase;
 
 
@@ -140,11 +142,13 @@ public class ChatThread extends Activity {
     	nameView.setVisibility(View.VISIBLE);
     	final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
     	inputNumberView.setVisibility(View.GONE);
- 
-	    nameView.setText(mContactName);
-	    ArrayList<ConvMessage> convMessages = new ArrayList<ConvMessage>();
+  	    nameView.setText(mContactName);
+
+ 	    HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+    	List<ConvMessage> messages = db.getConversationThread(mContactNumber, 10);
+
 	    mConversationsView = (ListView) findViewById(R.id.conversations_list);
-	    mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, convMessages);
+	    mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, messages);
 	    mConversationsView.setAdapter(mAdapter);
 	    mComposeView = (EditText) findViewById(R.id.msg_compose);
 	}
