@@ -203,8 +203,8 @@ public class AccountUtils {
 		contacts = new ArrayList<ContactInfo>();
 		Log.d("FOO", obj.toString());
 		JSONObject addressbook = obj.optJSONObject("addressbook");
-		for(Iterator<String> it = addressbook.keys(); it.hasNext();) {
-			String id =  it.next();
+		for(Iterator<?> it = addressbook.keys(); it.hasNext();) {
+			String id =  (String) it.next();
 			JSONArray entries = addressbook.optJSONArray(id);
 			entries.length();
 			for(int i = 0; i < entries.length(); ++i) {
