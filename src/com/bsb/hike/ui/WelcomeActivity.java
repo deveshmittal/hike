@@ -6,7 +6,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -17,6 +21,11 @@ public class WelcomeActivity extends Activity {
 
 		@Override
 		protected Boolean doInBackground(Void... arg0) {
+			if (mMSISDNText.getVisibility() == View.VISIBLE) {
+				String msisdn = mMSISDNText.getText().toString();
+				AccountUtils.MSISDN = msisdn;
+			}
+
 			AccountUtils.AccountInfo accountInfo = AccountUtils.registerAccount();
 
 			if (accountInfo != null) {
@@ -42,16 +51,27 @@ public class WelcomeActivity extends Activity {
 	}
 
 	private ProgressDialog mDialog;
+	private Button mAcceptButton;
+	private ImageView mIconView;
+	private EditText mMSISDNText;
 
 	@Override
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
+		mAcceptButton = (Button) findViewById(R.id.accept_tc);
+		mIconView = (ImageView) findViewById(R.id.ic_edit_message);
+		mMSISDNText = (EditText) findViewById(R.id.debug_msisdn_input);
 	}
 
 	public void onClick(View v) {
-		mDialog = ProgressDialog.show(this, null, getText(R.string.determining_phone_number));
-		AccountCreateActivity aca = new AccountCreateActivity();
-		aca.execute();
+		if (v == mAcceptButton) {
+			mDialog = ProgressDialog.show(this, null, getText(R.string.determining_phone_number));
+			AccountCreateActivity aca = new AccountCreateActivity();
+			aca.execute();
+		} else if (v == mIconView) {
+			Log.w("DEBGUG", "Adding Debug Input MSISDN");
+			mMSISDNText.setVisibility(View.VISIBLE);
+		}
 	}
 }

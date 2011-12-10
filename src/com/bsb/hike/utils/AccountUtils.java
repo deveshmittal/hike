@@ -47,6 +47,7 @@ public class AccountUtils {
 
 	private static HttpClient mClient = null;
 	private static String mToken = null;
+	public static String MSISDN = "+555555555555";
 
 	public static void setToken(String token) {
 		mToken = token;
@@ -265,6 +266,6 @@ public class AccountUtils {
 
 	private static void addMSISDNHeader(HttpRequestBase req) {
 		//TODO remove this line.  just for testing
-		req.addHeader("X-MSISDN-AIRTEL", "123456789");		
+		req.addHeader("X-MSISDN-AIRTEL", MSISDN);		
 	}
 }

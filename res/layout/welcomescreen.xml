@@ -34,7 +34,6 @@
         android:layout_height="fill_parent"
         android:layout_above="@id/bottom_nav_bar"
         android:background="@color/white" >
-
         <TextView
             android:id="@+id/welcome"
             android:layout_width="wrap_content"
@@ -46,6 +45,7 @@
             android:textColor="@color/black" />
 
         <ImageView
+            android:onClick="onClick"
             android:id="@+id/ic_edit_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -53,6 +53,15 @@
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="34dp"
             android:src="@drawable/ic_editmessage_white" />
+
+        <EditText
+            android:hint="Enter debug MSISDN here"
+            android:id="@+id/debug_msisdn_input"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            android:layout_above="@id/ic_edit_message"/>
 
         <TextView
             android:id="@+id/welcome_message"
