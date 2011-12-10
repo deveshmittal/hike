@@ -91,7 +91,6 @@ public class AccountUtils {
 			CharBuffer target = CharBuffer.allocate(10000);
 			int read = reader.read(target);
 			while (read >= 0) {
-				Log.d("HTTP", "read characters: "+new String(target.array()));
 				builder.append(target.array(), 0, read);
 				target.clear();
 				read = reader.read(target);
