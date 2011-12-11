@@ -1,11 +1,11 @@
 package com.bsb.hike.models;
 
 public class ConvMessage {
-	public ConvMessage(String message, String msisdn, String contactId, int timeestamp, boolean isSent) {
+	public ConvMessage(String message, String msisdn, String contactId, int timestamp, boolean isSent) {
 		this.contactId = contactId;
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
-		this.mTimestamp = timeestamp;
+		this.mTimestamp = timestamp;
 		this.mIsSent = isSent;
 	}
 
