@@ -70,7 +70,8 @@ public class MessagesList extends Activity implements OnClickListener {
 	    }
 
 	    AccountUtils.setToken(token);
-
+	    HikeMessengerApp app = (HikeMessengerApp) getApplication();
+	    app.startWebSocket();
 	    setContentView(R.layout.main);
     	mNewMessageView = findViewById(R.id.new_user_message);
     	mConversationsView = findViewById(R.id.conversations);
