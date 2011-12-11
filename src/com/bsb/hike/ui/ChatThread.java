@@ -26,7 +26,7 @@ import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeUserDatabase;
 
 
-public class ChatThread extends Activity {
+public class ChatThread extends Activity implements HikePubSub.Listener {
 
 	private HikePubSub mPubSub;
 	private HikeUserDatabase mDbhelper;
@@ -87,6 +87,12 @@ public class ChatThread extends Activity {
     	inputNumberView.setVisibility(View.VISIBLE);
     	inputNumberView.requestFocus();
     }
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
+	}
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
@@ -150,6 +156,7 @@ public class ChatThread extends Activity {
 	    mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, messages);
 	    mConversationsView.setAdapter(mAdapter);
 	    mComposeView = (EditText) findViewById(R.id.msg_compose);
+	    HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 	}
 
 	protected void onStop() {
@@ -158,6 +165,21 @@ public class ChatThread extends Activity {
 		if (mDbhelper != null) {
 			mDbhelper.close();
 			mDbhelper = null;
+		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) {
+		if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
+			final ConvMessage conv = (ConvMessage) object;
+			if (conv.getMsisdn().indexOf(mContactNumber) != -1) {//TODO the number we have is not in E164 format (missing the +) so just hack around it
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						mAdapter.add(conv);
+					}});
+
+			}
 		}
 	}
 }
