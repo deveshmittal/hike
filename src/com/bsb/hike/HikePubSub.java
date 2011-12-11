@@ -10,7 +10,12 @@ public class HikePubSub {
 		public void onEventReceived(String type, Object object);
 	}
 
-	public static final String MESSAGE = "message";
+	public static final String MESSAGE_SENT = "messagesent";
+	public static final String WS_CLOSE = "ws_close";
+	public static final String WS_MESSAGE = "ws_message";
+	public static final String WS_OPEN = "ws_open";
+	public static String MESSAGE_RECEIVED = "messagereceived";
+
 	private Map<String, List<Listener> > listeners;
 
 	public HikePubSub() {

@@ -1,5 +1,4 @@
 package com.bsb.hike.ui;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -130,7 +129,7 @@ public class ChatThread extends Activity {
 		int time = (int) System.currentTimeMillis()/10000;
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, Long.toString(mContactId), time, true);
 		mAdapter.add(convMessage);
-		mPubSub.publish(HikePubSub.MESSAGE, convMessage);
+		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
 	}
