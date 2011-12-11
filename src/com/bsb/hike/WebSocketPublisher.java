@@ -36,12 +36,12 @@ public class WebSocketPublisher implements HikePubSub.Listener {
 			return;
 		}
 
-		if ("messages".equals(type)) {
+		if ("message".equals(type)) {
 			String id = data.optString("id");
 			String msisdn = data.optString("from");
 			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
 			String contactId = (contactInfo != null) ? contactInfo.id : null;
-			String message = data.optString("message");
+			String message = data.optString("data");
 			int ts = data.optInt("ts");
 			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, false);
 			this.pubsub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
