@@ -42,4 +42,11 @@ public class HikePubSub {
 		}
 		return true;
 	}
+
+	public void removeListener(String type, Listener listener) {
+		List<Listener> l = listeners.get(type);
+		if (l != null) {
+			l.remove(listener);
+		}
+	}
 }
