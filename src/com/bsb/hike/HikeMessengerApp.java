@@ -28,10 +28,20 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public void onCreate() {
 		super.onCreate();
 		HikePubSub pubSub = HikeMessengerApp.getPubSub();
+
+		/* add the db write listener */
 		Listener listener = new DbConversationListener(getApplicationContext());
 		pubSub.addListener(HikePubSub.MESSAGE_SENT, listener);
+		pubSub.addListener(HikePubSub.MESSAGE_RECEIVED, listener);
+
+		/* add the generic websocket listener.  This will turn strings into objects and re-broadcast them */
 		mPublisher = new WebSocketPublisher(getApplicationContext());
 		pubSub.addListener(HikePubSub.WS_MESSAGE, mPublisher);
+
+		/* lastly add ourselves to restart the connection if it terminates
+		 * TODO add exponential backoff
+		 * TODO keep track of the connected state
+		 */
 		pubSub.addListener(HikePubSub.WS_CLOSE, this);
 		mHandler = new Handler();
 	}
@@ -56,8 +66,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		Runnable restart = new Runnable() {
 			@Override
 			public void run() {
-				System.out
-						.println("HikeMessengerApp.restartWebSocket().new Runnable() {...}.run()");
 				mWebSocket = null;
 				startWebSocket();
 			}
