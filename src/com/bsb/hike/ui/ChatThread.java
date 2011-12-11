@@ -52,7 +52,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
     	adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
 			@Override
 			public CharSequence convertToString(Cursor cursor) {
-				Log.d("Cursor", "Cursor is " + cursor);
 				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
 				mContactName = cursor.getString(cursor.getColumnIndex("name"));
 				return mContactName;
