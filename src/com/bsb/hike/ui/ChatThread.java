@@ -78,6 +78,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 			public void onItemClick(AdapterView<?> list, View _empty, int position,
 					long id) {
 				mContactId = id;
+				mDbhelper.close();
+				mDbhelper = null;
 				createConversation();
 			}
 		});
@@ -150,7 +152,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 
  	    HikeConversationsDatabase db = new HikeConversationsDatabase(this);
     	List<ConvMessage> messages = db.getConversationThread(mContactNumber, 10);
-
+    	db.close();
+   
 	    mConversationsView = (ListView) findViewById(R.id.conversations_list);
 	    mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, messages);
 	    mConversationsView.setAdapter(mAdapter);
