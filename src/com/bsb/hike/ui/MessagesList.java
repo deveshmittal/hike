@@ -9,11 +9,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract.Contacts;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -54,7 +59,7 @@ public class MessagesList extends Activity implements OnClickListener {
 
 	private boolean mConversationsViewHidden;
 	private View mNewMessageView;
-	private View mConversationsView;
+	private ListView mConversationsView;
 	private View mSearchIconView;
 	private View mEditMessageIconView;
 
@@ -73,19 +78,23 @@ public class MessagesList extends Activity implements OnClickListener {
 	    HikeMessengerApp app = (HikeMessengerApp) getApplication();
 	    app.startWebSocket();
 	    setContentView(R.layout.main);
-    	mNewMessageView = findViewById(R.id.new_user_message);
-    	mConversationsView = findViewById(R.id.conversations);
+    	mConversationsView = (ListView) findViewById(R.id.conversations);
 
     	mSearchIconView = findViewById(R.id.search);
     	mSearchIconView.setOnClickListener(this);
     	mEditMessageIconView = findViewById(R.id.edit_message);
     	mEditMessageIconView.setOnClickListener(this);
-	    Intent intent = getIntent();
-	    if (intent.getBooleanExtra("first", false)) {
-	    	mNewMessageView.setVisibility(View.VISIBLE);
-	    	mConversationsView.setVisibility(View.GONE);
-	    	mConversationsViewHidden = true;
-	    }
+    	LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    	RelativeLayout emptyView = (RelativeLayout) vi.inflate(R.layout.empty_conversations, null);
+    	emptyView.setVisibility(View.GONE);
+    	emptyView.setOnClickListener(this);
+    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+    			RelativeLayout.LayoutParams.FILL_PARENT,
+    			RelativeLayout.LayoutParams.FILL_PARENT);
+    	params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+    	emptyView.setLayoutParams(params);
+    	((ViewGroup) mConversationsView.getParent()).addView(emptyView);
+    	mConversationsView.setEmptyView(emptyView);
 	}
 	
 	@Override

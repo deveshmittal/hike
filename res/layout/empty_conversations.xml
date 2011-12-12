@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   android:id="@+id/new_message"
+   android:background="@color/white"
+   android:layout_alignParentLeft="true"
+   android:layout_alignParentRight="true"
+   android:layout_alignParentTop="true"
+   android:layout_alignParentBottom="true"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   android:onClick="onClick">
+<ImageView
+    android:id="@+id/edit_message_icon"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:src="@drawable/ic_editmessage_white" />
+<TextView
+    android:id="@+id/tap_to_send_message"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/edit_message_icon"
+    android:layout_centerHorizontal="true"
+    android:text="Tap to send message"
+    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:textColor="@color/black" />
+</RelativeLayout>
