@@ -1,5 +1,7 @@
 package com.bsb.hike.ui;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -23,8 +25,12 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.ConversationsAdapter;
+import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.HikeConversationsDatabase;
 
 public class MessagesList extends Activity implements OnClickListener {
 
@@ -63,6 +69,8 @@ public class MessagesList extends Activity implements OnClickListener {
 	private View mSearchIconView;
 	private View mEditMessageIconView;
 
+	private ConversationsAdapter mAdapter;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -95,6 +103,12 @@ public class MessagesList extends Activity implements OnClickListener {
     	emptyView.setLayoutParams(params);
     	((ViewGroup) mConversationsView.getParent()).addView(emptyView);
     	mConversationsView.setEmptyView(emptyView);
+  
+    	HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+    	List<Conversation> conversations = db.getConversations();
+    	mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
+    	mConversationsView.setAdapter(mAdapter);
+    	db.close();
 	}
 	
 	@Override

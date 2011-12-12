@@ -7,21 +7,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.RelativeLayout;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 
-public class ConversationsAdapter extends ArrayAdapter<ConvMessage> {
+public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 	private int mResourceId;
+
 	public ConversationsAdapter(Context context, int textViewResourceId,
-			List<ConvMessage> objects) {
+			List<Conversation> objects) {
 		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
 	}
+
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
@@ -31,18 +32,20 @@ public class ConversationsAdapter extends ArrayAdapter<ConvMessage> {
 		if (v == null) {
 			v = inflater.inflate(mResourceId, parent, false);
 		}
-		ConvMessage convMessage = getItem(position);
-		TextView messageView = (TextView) v.findViewById(R.id.conversation_id);
-		messageView.setText(convMessage.getMessage());
-//		timestampView.setText(conversation.getTimestampFormatted());
-		RelativeLayout.LayoutParams params = (LayoutParams) messageView.getLayoutParams();		
-		if (convMessage.isSent()) {
-			params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-		} else {
-			params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+		Conversation conversation = getItem(position);
+		System.out.println("ConversationsAdapter.getView() -- " + conversation);
+		TextView contactView = (TextView) v.findViewById(R.id.contact);
+		String name = conversation.getContactName();
+		if (name == null) {
+			name = conversation.getMsisdn();
 		}
-		messageView.setLayoutParams(params);
-
+		contactView.setText(name);
+		List<ConvMessage> messages = conversation.getMessages();
+		if (!messages.isEmpty()) {
+			ConvMessage message = messages.get(0);
+			TextView messageView = (TextView) v.findViewById(R.id.last_message);
+			messageView.setText(message.getMessage());
+		}
 		return v;
 	}
 }

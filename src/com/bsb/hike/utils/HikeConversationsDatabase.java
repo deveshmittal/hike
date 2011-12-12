@@ -163,12 +163,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		final int msisdnIdx = c.getColumnIndex("msisdn");
 		final int convIdx = c.getColumnIndex("convid");
 		final int contactIdx = c.getColumnIndex("contactid");
+		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		while (c.moveToNext()) {
-			Conversation conv = new Conversation(c.getString(msisdnIdx), c.getLong(convIdx), c.getString(contactIdx));
+			String msisdn = c.getString(msisdnIdx);
+			ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
+			Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx), (contactInfo != null) ? contactInfo.name : null);
 			conv.setMessages(getConversationThread(conv.getMsisdn(), conv.getContactId(), conv.getConvId(), 1));
 			conversations.add(conv);
 		}
-
+		huDb.close();
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
 	}

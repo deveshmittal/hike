@@ -20,7 +20,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.ConversationsAdapter;
+import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeUserDatabase;
@@ -34,7 +34,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 	private long mContactId;
 	private String mContactName;
 	private String mContactNumber;
-	private ConversationsAdapter mAdapter;
+	private MessagesAdapter mAdapter;
 	private EditText mComposeView;
 	private ListView mConversationsView;
 
@@ -155,7 +155,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
     	db.close();
    
 	    mConversationsView = (ListView) findViewById(R.id.conversations_list);
-	    mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, messages);
+	    mAdapter = new MessagesAdapter(this, R.layout.message_item, messages);
 	    mConversationsView.setAdapter(mAdapter);
 	    mComposeView = (EditText) findViewById(R.id.msg_compose);
 	    HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);

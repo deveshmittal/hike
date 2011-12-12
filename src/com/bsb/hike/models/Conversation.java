@@ -12,6 +12,13 @@ public class Conversation implements Comparable<Conversation> {
 		return convId;
 	}
 
+	@Override
+	public String toString() {
+		return "Conversation [msisdn=" + msisdn + ", convId=" + convId
+				+ ", contactId=" + contactId + ", messages=" + messages
+				+ ", contactName=" + contactName + "]";
+	}
+
 	public String getContactId() {
 		return contactId;
 	}
@@ -20,12 +27,20 @@ public class Conversation implements Comparable<Conversation> {
 	private long convId;
 	private String contactId;
 	private List<ConvMessage> messages;
+	private String contactName;
 
-	public Conversation(String msisdn, long convId,
-			String contactId) {
+	public String getContactName() {
+		return contactName;
+	}
+
+	public Conversation(String msisdn, 
+						long convId,
+						String contactId,
+						String contactName) {
 		this.msisdn = msisdn;
 		this.convId = convId;
 		this.contactId = contactId;
+		this.contactName = contactName;
 	}
 
 	public void setMessages(List<ConvMessage> messages) {
@@ -69,6 +84,8 @@ public class Conversation implements Comparable<Conversation> {
 		int result = 1;
 		result = prime * result
 				+ ((contactId == null) ? 0 : contactId.hashCode());
+		result = prime * result
+				+ ((contactName == null) ? 0 : contactName.hashCode());
 		result = prime * result + (int) (convId ^ (convId >>> 32));
 		result = prime * result
 				+ ((messages == null) ? 0 : messages.hashCode());
@@ -89,6 +106,11 @@ public class Conversation implements Comparable<Conversation> {
 			if (other.contactId != null)
 				return false;
 		} else if (!contactId.equals(other.contactId))
+			return false;
+		if (contactName == null) {
+			if (other.contactName != null)
+				return false;
+		} else if (!contactName.equals(other.contactName))
 			return false;
 		if (convId != other.convId)
 			return false;

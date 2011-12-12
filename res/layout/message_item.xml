@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white" >
+    android:layout_height="match_parent" >
 	<TextView
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
-	    android:id="@+id/contact"
+	    android:id="@+id/conversation_id"
 	    android:textColor="@color/black"
-	    android:text="Kavin Mittal"
 	    android:textAppearance="?android:attr/textAppearanceMedium"/>
 	<TextView
-	    android:text="what's up dude?"
-	    android:layout_below="@id/contact"
-	    android:id="@+id/last_message"
+	    android:layout_below="@id/conversation_id"
+	    android:id="@+id/timestamp"
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:textSize="8dp"
