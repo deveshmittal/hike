@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
@@ -28,7 +27,6 @@ import android.widget.Toast;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
-import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
@@ -42,7 +40,6 @@ public class MessagesList extends Activity implements OnClickListener {
 		protected Boolean doInBackground(Uri... params) {
 			Uri uri = params[0];
 			String number = ContactUtils.getMobileNumber(MessagesList.this.getContentResolver(), uri);
-			Log.d("MessagesList", "found number: " + number);
 			return AccountUtils.invite(number);
 		}
 
@@ -65,8 +62,6 @@ public class MessagesList extends Activity implements OnClickListener {
 
 	private static final int INVITE_PICKER_RESULT = 1001;
 
-	private boolean mConversationsViewHidden;
-	private View mNewMessageView;
 	private ListView mConversationsView;
 	private View mSearchIconView;
 	private View mEditMessageIconView;
