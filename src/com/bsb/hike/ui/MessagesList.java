@@ -19,6 +19,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -109,6 +111,24 @@ public class MessagesList extends Activity implements OnClickListener {
     	mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
     	mConversationsView.setAdapter(mAdapter);
     	db.close();
+
+    	mConversationsView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> adapter, View view, int pos,
+					long id) {
+				Conversation conversation = (Conversation) adapter.getItemAtPosition(pos);
+				Intent intent = new Intent(MessagesList.this, ChatThread.class);
+				if (conversation.getContactName() != null) {
+					intent.putExtra("name", conversation.getContactName());
+				}
+				if (conversation.getContactId() != null) {
+					intent.putExtra("id", Long.parseLong(conversation.getContactId()));
+				}
+				intent.putExtra("msisdn", conversation.getMsisdn());
+				startActivity(intent);
+			}
+		});
 	}
 	
 	@Override
@@ -116,14 +136,6 @@ public class MessagesList extends Activity implements OnClickListener {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
 		return true;
-	}
-
-	private void checkForWelcomeMessage() {
-		if (mConversationsViewHidden) {
-			mConversationsViewHidden = false;
-	    	mNewMessageView.setVisibility(View.GONE);
-	    	mConversationsView.setVisibility(View.VISIBLE);
-		}
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
