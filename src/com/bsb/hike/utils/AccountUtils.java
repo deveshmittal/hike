@@ -43,6 +43,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils {
@@ -266,7 +267,7 @@ public class AccountUtils {
 		return new AccountUtils.AccountInfo(token, msisdn);
 	}
 
-	public static WebSocketClient startWebSocketConnection() {
+	public static HikeWebSocketClient startWebSocketConnection() {
 		Header header = new BasicHeader("Cookie", "user="+mToken);
 		Header[] headers = new Header[]{header};
 		URI uri;
@@ -278,7 +279,7 @@ public class AccountUtils {
 			return null;
 		}
 		Log.d("AccountUtils", "about to create websocket");
-		WebSocketClient socket = new HikeWebSocketClient(uri, new Draft_10WithExtra(headers));
+		HikeWebSocketClient socket = new HikeWebSocketClient(uri, new Draft_10WithExtra(headers));
 		socket.connect();
 		return socket;
 	}

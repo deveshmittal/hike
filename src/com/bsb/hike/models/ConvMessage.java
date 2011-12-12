@@ -1,5 +1,10 @@
 package com.bsb.hike.models;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.util.Log;
+
 public class ConvMessage {
 	public ConvMessage(String message, String msisdn, String contactId, int timestamp, boolean isSent) {
 		this.contactId = contactId;
@@ -95,5 +100,16 @@ public class ConvMessage {
 	private boolean mIsSent;
 	public enum State {SENT, DELIVERED, RECEIVED };
 	private State mState;
+	public JSONObject serialize(String type) {
+		JSONObject object = new JSONObject();
+		try {
+			object.put("type", type);
+			object.put("to", mMsisdn);
+			object.put("body", mMessage);
+		} catch (JSONException e) {
+			Log.e("ConvMessage", "invalid json message", e);
+		}
+		return object;
+	}
 
 }

@@ -24,6 +24,7 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeUserDatabase;
+import com.bsb.hike.utils.HikeWebSocketClient;
 
 
 public class ChatThread extends Activity implements HikePubSub.Listener {
@@ -137,6 +138,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, Long.toString(mContactId), time, true);
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+		HikeWebSocketClient webSocket = ((HikeMessengerApp) getApplicationContext()).getWebSocket();
+		webSocket.nb_send(convMessage.serialize("send"));
 	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
 	}

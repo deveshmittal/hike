@@ -8,6 +8,7 @@ import android.util.Log;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.DbConversationListener;
+import com.bsb.hike.utils.HikeWebSocketClient;
 
 public class HikeMessengerApp extends Application implements HikePubSub.Listener {
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
@@ -18,7 +19,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String MESSAGES_SETTING = "messageid";
 	private static HikePubSub mPubSubInstance;
 	private WebSocketPublisher mPublisher;
-	private WebSocketClient mWebSocket;
+	private HikeWebSocketClient mWebSocket;
 	private Handler mHandler;
 
 	static {
@@ -50,7 +51,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		return mPubSubInstance;
 	}
 
-	public WebSocketClient getWebSocket() {
+	public HikeWebSocketClient getWebSocket() {
 		return mWebSocket;
 	}
 
