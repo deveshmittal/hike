@@ -171,7 +171,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	@Override
 	protected void onStop() {
-		super.onDestroy();
+		super.onStop();
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
 	}
@@ -207,6 +207,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			});
 		} else if (HikePubSub.NEW_CONVERSATION.equals(type)) {
 			final Conversation conversation = (Conversation) object;
+			mConversationsByMSISDN.put(conversation.getMsisdn(), conversation);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
