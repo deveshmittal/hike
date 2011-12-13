@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
@@ -25,14 +26,18 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 
-public class MessagesList extends Activity implements OnClickListener {
+public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener {
+
+	private HashMap<String, Conversation> mConversationsByMSISDN;
 
 	public class InviteFriendAsyncTask extends AsyncTask<Uri, Void, Boolean> {
 
@@ -107,6 +112,14 @@ public class MessagesList extends Activity implements OnClickListener {
     	mConversationsView.setAdapter(mAdapter);
     	db.close();
 
+    	mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
+    	for (Conversation conv : conversations) {
+    		mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+    	}
+   
+    	HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
+    	HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
+
     	mConversationsView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -157,12 +170,49 @@ public class MessagesList extends Activity implements OnClickListener {
 	}
 
 	@Override
+	protected void onStop() {
+		super.onDestroy();
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
+	}
+
+	@Override
 	public void onClick(View v) {
 		Log.d("MessagesList", "OnClick called: "+v);
 		if (v == mEditMessageIconView) {
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra("edit", true);
 			startActivity(intent);
+		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) {
+		if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
+			ConvMessage message = (ConvMessage) object;
+			/* find the conversation corresponding to this message */
+			String msisdn = message.getMsisdn();
+			Conversation conv = mConversationsByMSISDN.get(msisdn);
+			if (conv == null) {
+				Log.w("MessagesList", "New Conversation is null");
+				return;
+			}
+			conv.addMessage(message);
+			/* this could be a singleton object within this class */
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					mAdapter.notifyDataSetChanged();
+				}		
+			});
+		} else if (HikePubSub.NEW_CONVERSATION.equals(type)) {
+			final Conversation conversation = (Conversation) object;
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					mAdapter.add(conversation);
+				}
+			});
 		}
 	}
 }

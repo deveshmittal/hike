@@ -33,6 +33,7 @@ public class HikePubSub implements Runnable {
 	public static final String WS_MESSAGE = "ws_message";
 	public static final String WS_OPEN = "ws_open";
 	private static final Operation DONE_OPERATION = null; /* TODO this can't be null */
+	public static final String NEW_CONVERSATION = "newconv";
 	public static String MESSAGE_RECEIVED = "messagereceived";
 	private final Thread mThread;
 	private final BlockingQueue<Operation> mQueue;
