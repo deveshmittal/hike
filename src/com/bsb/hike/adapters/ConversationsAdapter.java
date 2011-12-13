@@ -42,7 +42,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		contactView.setText(name);
 		List<ConvMessage> messages = conversation.getMessages();
 		if (!messages.isEmpty()) {
-			ConvMessage message = messages.get(0);
+			ConvMessage message = messages.get(messages.size() - 1);
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			messageView.setText(message.getMessage());
 		}
