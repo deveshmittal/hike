@@ -41,6 +41,18 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private HashMap<String, Conversation> mConversationsByMSISDN;
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
+	}
+
 	private class DeleteConversationsAsyncTask extends AsyncTask<Long, Void, Boolean> {
 
 		@Override

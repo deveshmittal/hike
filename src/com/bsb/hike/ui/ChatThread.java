@@ -39,6 +39,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 	private EditText mComposeView;
 	private ListView mConversationsView;
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
+	}
+
 	private void createAutoCompleteView() {
     	Log.d("ChatThread", "edit view");
     	View bottomPanel = findViewById(R.id.bottom_panel);
@@ -186,5 +198,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 
 			}
 		}
+	}
+
+	public String getContactNumber() {
+		return mContactNumber;
 	}
 }

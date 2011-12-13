@@ -1,6 +1,5 @@
 package com.bsb.hike;
 
-import net.tootallnate.websocket.WebSocketClient;
 import android.app.Application;
 import android.os.Handler;
 import android.util.Log;
@@ -39,9 +38,13 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		mPublisher = new WebSocketPublisher(getApplicationContext());
 		pubSub.addListener(HikePubSub.WS_MESSAGE, mPublisher);
 
+		/* add a handler to handle toasts */
+		ToastListener toastListener = new ToastListener(getApplicationContext());
+
 		/* lastly add ourselves to restart the connection if it terminates
 		 * TODO add exponential backoff
 		 * TODO keep track of the connected state
+		 * TODO this totally doesn't need to be here
 		 */
 		pubSub.addListener(HikePubSub.WS_CLOSE, this);
 		mHandler = new Handler();
