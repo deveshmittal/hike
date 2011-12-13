@@ -10,7 +10,10 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Log;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
@@ -102,7 +105,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			insertStatement.bindString(msisdnColumn, conv.getMsisdn());
 			long msgId = insertStatement.executeInsert();
 			if (msgId < 0) {
-				addConversation(conv.getMsisdn());
+				Conversation conversation = addConversation(conv.getMsisdn());
+				if (conversation != null) {
+					conversation.addMessage(conv);
+					HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conversation);
+				}
 				msgId = insertStatement.executeInsert();
 				assert (msgId >= 0);
 			}			
@@ -112,7 +119,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.endTransaction();
 	}
 
-	private void addConversation(String msisdn) {
+	private Conversation addConversation(String msisdn) {
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 		huDb.close();
@@ -123,7 +130,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			ih.bind(ih.getColumnIndex("contactid"), contactInfo.id);
 			ih.bind(ih.getColumnIndex("onhike"), contactInfo.onhike);
 		}
-		ih.execute();
+		long id = ih.execute();
+		if (id >= 0) {
+			Conversation conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.id : null, (contactInfo != null) ? contactInfo.name : null);
+			return conv;
+		}
+		/* TODO does this happen?  If so, what should we do? */
+		Log.wtf("COnversationadding", "Couldn't add conversation --- race condition?");
+		return null;
 	}
 
 	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit) {

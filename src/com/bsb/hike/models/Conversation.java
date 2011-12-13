@@ -1,5 +1,6 @@
 package com.bsb.hike.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Conversation implements Comparable<Conversation> {
@@ -41,8 +42,10 @@ public class Conversation implements Comparable<Conversation> {
 		this.convId = convId;
 		this.contactId = contactId;
 		this.contactName = contactName;
+		this.messages = new ArrayList<ConvMessage>();
 	}
 
+	/* TODO this should be addAll to conform w/ normal java semantics */
 	public void setMessages(List<ConvMessage> messages) {
 		this.messages = messages;
 	}
