@@ -119,7 +119,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.endTransaction();
 	}
 
-	private Conversation addConversation(String msisdn) {
+	public void deleteConversation(Long[] ids) {
+		mDb.beginTransaction();
+		for (int i = 0; i < ids.length; i++)  {
+			Long[] bindArgs = new Long[]{ids[i]};
+			mDb.execSQL("DELETE FROM " + CONVERSATIONSTABLE + " WHERE convid = ?", bindArgs);
+			mDb.execSQL("DELETE FROM " + MESSAGESTABLE + " WHERE convid = ?", bindArgs);
+		}
+		mDb.setTransactionSuccessful();
+		mDb.endTransaction();
+	}
+
+	public Conversation addConversation(String msisdn) {
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 		huDb.close();

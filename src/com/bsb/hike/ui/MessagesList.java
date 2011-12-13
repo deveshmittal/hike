@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -35,9 +37,28 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 
-public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener {
+public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener {
 
 	private HashMap<String, Conversation> mConversationsByMSISDN;
+
+	private class DeleteConversationsAsyncTask extends AsyncTask<Long, Void, Boolean> {
+
+		@Override
+		protected Boolean doInBackground(Long... params) {
+			HikeConversationsDatabase db = new HikeConversationsDatabase(MessagesList.this);
+			db.deleteConversation(params);
+			db.close();
+			return Boolean.TRUE;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (result == Boolean.TRUE) {
+				mAdapter.clear();
+				mConversationsByMSISDN.clear();
+			}
+		}		
+	}
 
 	public class InviteFriendAsyncTask extends AsyncTask<Uri, Void, Boolean> {
 
@@ -164,6 +185,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		case R.id.invite:
 			intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
 			startActivityForResult(intent, INVITE_PICKER_RESULT);
+			return true;
+		case R.id.deleteconversations:
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.delete_all_question).setPositiveButton("Delete", this).setNegativeButton(R.string.cancel, this).show();
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -214,6 +239,21 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 					mAdapter.add(conversation);
 				}
 			});
+		}
+	}
+
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		switch (which) {
+		case DialogInterface.BUTTON_POSITIVE:
+			Long[] ids = new Long[mAdapter.getCount()];
+			for(int i = 0;i < ids.length; i++) {
+				ids[i] = mAdapter.getItem(i).getConvId();
+			}
+			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+			task.execute(ids);
+			break;
+		default:
 		}
 	}
 }
