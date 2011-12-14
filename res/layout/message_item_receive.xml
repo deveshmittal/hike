@@ -22,6 +22,6 @@
         android:layout_alignRight="@+id/conversation_id"
         android:layout_below="@+id/conversation_id"
         android:text="This is the timestamp"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>
