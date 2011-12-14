@@ -12,9 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.tootallnate.websocket.WebSocket;
-import net.tootallnate.websocket.WebSocketClient;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -43,7 +40,6 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils {
