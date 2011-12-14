@@ -16,13 +16,14 @@ public class WebSocketPublisher implements HikePubSub.Listener {
 	private SharedPreferences settings;
 	private Context context;
 	private HikeUserDatabase mDb;
-	private HikePubSub pubsub;
+	private HikePubSub pubSub;
 
 	public WebSocketPublisher(Context context) {
 		this.mDb = new HikeUserDatabase(context);
 		this.context = context;
 		this.settings = context.getSharedPreferences(HikeMessengerApp.MESSAGES_SETTING, 0);
-		this.pubsub = HikeMessengerApp.getPubSub();
+		this.pubSub = HikeMessengerApp.getPubSub();
+		this.pubSub.addListener(HikePubSub.WS_MESSAGE, this);
 	}
 
 	public void onMessage(String msg) {
@@ -44,7 +45,7 @@ public class WebSocketPublisher implements HikePubSub.Listener {
 			String message = data.optString("data");
 			int ts = data.optInt("ts");
 			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, false);
-			this.pubsub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		}
 	}
 

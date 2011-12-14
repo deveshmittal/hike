@@ -17,7 +17,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	public static final String TOKEN_SETTING = "token";
 	public static final String MESSAGES_SETTING = "messageid";
 	private static HikePubSub mPubSubInstance;
-	private WebSocketPublisher mPublisher;
 	private HikeWebSocketClient mWebSocket;
 	private Handler mHandler;
 
@@ -31,14 +30,11 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 
 		/* add the db write listener */
 		Listener listener = new DbConversationListener(getApplicationContext());
-		pubSub.addListener(HikePubSub.MESSAGE_SENT, listener);
-		pubSub.addListener(HikePubSub.MESSAGE_RECEIVED, listener);
 
 		/* add the generic websocket listener.  This will turn strings into objects and re-broadcast them */
-		mPublisher = new WebSocketPublisher(getApplicationContext());
-		pubSub.addListener(HikePubSub.WS_MESSAGE, mPublisher);
+		listener = new WebSocketPublisher(getApplicationContext());
 
-		/* add a handler to handle toasts */
+		/* add a handler to handle toasts.  The object initializes itself it it's constructor */
 		ToastListener toastListener = new ToastListener(getApplicationContext());
 
 		/* lastly add ourselves to restart the connection if it terminates

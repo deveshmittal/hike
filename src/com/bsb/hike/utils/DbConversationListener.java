@@ -2,6 +2,7 @@ package com.bsb.hike.utils;
 
 import android.content.Context;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.ConvMessage;
@@ -14,6 +15,8 @@ public class DbConversationListener implements Listener {
 	public DbConversationListener(Context context) {
 		mConversationDb = new HikeConversationsDatabase(context);
 		mUserDb = new HikeUserDatabase(context);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 	}
 
 	@Override
