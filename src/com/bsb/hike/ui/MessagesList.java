@@ -115,6 +115,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	    if (token == null) {
 	    	startActivity(new Intent(this, WelcomeActivity.class));
 	    	finish();
+	        return;
 	    }
 
 	    AccountUtils.setToken(token);
