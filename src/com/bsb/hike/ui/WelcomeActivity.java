@@ -45,6 +45,7 @@ public class WelcomeActivity extends Activity {
 		@Override
 		protected void onPostExecute(Boolean result) {
 			mDialog.dismiss();
+			mDialog = null;
 			startActivity(new Intent(WelcomeActivity.this, AccountCreateSuccess.class));
 			finish();
 		}
@@ -64,6 +65,13 @@ public class WelcomeActivity extends Activity {
 		mMSISDNText = (EditText) findViewById(R.id.debug_msisdn_input);
 	}
 
+	@Override
+	public void onDestroy() {
+		if (mDialog != null) {
+           mDialog.dismiss();
+           mDialog = null;
+		}
+	}
 	public void onClick(View v) {
 		if (v == mAcceptButton) {
 			mDialog = ProgressDialog.show(this, null, getText(R.string.determining_phone_number));
