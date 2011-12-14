@@ -19,6 +19,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	private static HikePubSub mPubSubInstance;
 	private HikeWebSocketClient mWebSocket;
 	private Handler mHandler;
+	private long mDelay;
 
 	static {
 		mPubSubInstance = new HikePubSub();
@@ -43,6 +44,7 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		 * TODO this totally doesn't need to be here
 		 */
 		pubSub.addListener(HikePubSub.WS_CLOSE, this);
+		mDelay = 1000;
 		mHandler = new Handler();
 	}
 
@@ -63,15 +65,19 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	}
 
 	public void restartWebSocket() {
+		if (mDelay <= 3000*60) { /*3 minutes*/
+			mDelay = mDelay * 2;
+		}
+
 		Runnable restart = new Runnable() {
 			@Override
 			public void run() {
-				mWebSocket = null;
-				startWebSocket();
+				mWebSocket.releaseAndInitialize();
+				mWebSocket.connect();
 			}
 		};
 		System.out.println("restarting...");
-		mHandler.postDelayed(restart, 1000);
+		mHandler.postDelayed(restart, mDelay);
 	}
 
 	@Override
@@ -80,6 +86,8 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 		if (HikePubSub.WS_CLOSE.equals(type)) {
 			Log.i("HikeMessengerApp", "Websocket closed");
 			restartWebSocket();
+		} else if (HikePubSub.WS_OPEN.equals(type)) {
+			mDelay = 1000;
 		}
 	}
 }
