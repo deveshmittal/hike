@@ -34,6 +34,8 @@ public class ContactUtils {
 				break;
 			}
 		}
+		phones.close();
+		cursor.close();
 		return number;
 	}
 }
