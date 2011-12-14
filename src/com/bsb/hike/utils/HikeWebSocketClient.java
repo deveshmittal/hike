@@ -21,6 +21,15 @@ public class HikeWebSocketClient extends WebSocketClient {
 	private Thread mThread;
 	private LinkedBlockingQueue<String> mQueue;
 
+	private void sleepAndRequeue(String message) {
+		try {
+			Thread.sleep(1000);
+		} catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		mQueue.add(message);
+	}
+
 	public HikeWebSocketClient(URI uri, Draft draft) {
 		super(uri, draft);
 		pubSub = HikeMessengerApp.getPubSub();
@@ -44,7 +53,10 @@ public class HikeWebSocketClient extends WebSocketClient {
 						send(message);
 					} catch (IOException e) {
 						Log.e("WebSocket", "Unable to send message", e);
-						//TODO maybe requeue?
+						sleepAndRequeue(message);
+					} catch (java.nio.channels.NotYetConnectedException e) {
+						Log.e("WebSocket", "Not yet connected");
+						sleepAndRequeue(message);
 					}
 				}
 			}});
