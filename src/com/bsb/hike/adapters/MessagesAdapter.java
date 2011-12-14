@@ -4,20 +4,15 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import android.content.ContentUris;
 import android.content.Context;
-import android.net.Uri;
-import android.provider.ContactsContract.Contacts;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
 
 public class MessagesAdapter extends ArrayAdapter<ConvMessage> {
 

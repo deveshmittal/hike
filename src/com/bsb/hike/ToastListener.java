@@ -8,7 +8,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.text.Html;
 import android.text.Spanned;
 
@@ -17,7 +16,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.MessagesList;
-import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeUserDatabase;
 
 public class ToastListener implements Listener {

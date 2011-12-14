@@ -5,14 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.util.Log;
-
-import com.bsb.hike.HikePubSub.Listener;
-import com.bsb.hike.HikePubSub.Operation;
 
 public class HikePubSub implements Runnable {
 	public class Operation {
