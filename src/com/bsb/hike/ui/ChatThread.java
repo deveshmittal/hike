@@ -1,5 +1,4 @@
 package com.bsb.hike.ui;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -9,6 +8,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -103,6 +103,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
     	inputNumberView.setAdapter(adapter);
     	inputNumberView.setVisibility(View.VISIBLE);
     	inputNumberView.requestFocus();
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
 	@Override
