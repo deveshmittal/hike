@@ -24,6 +24,7 @@ public class WebSocketPublisher implements HikePubSub.Listener {
 		this.settings = context.getSharedPreferences(HikeMessengerApp.MESSAGES_SETTING, 0);
 		this.pubSub = HikeMessengerApp.getPubSub();
 		this.pubSub.addListener(HikePubSub.WS_MESSAGE, this);
+		this.pubSub.addListener(HikePubSub.NEW_CONVERSATION, this);
 	}
 
 	public void onMessage(String msg) {

@@ -40,9 +40,10 @@ public class ConvMessage {
 
 	@Override
 	public String toString() {
-		return "Conversation [mMessage=" + mMessage + ", mMsisdn=" + mMsisdn
-				+ ", contactId=" + contactId + ", mTimestamp=" + mTimestamp
-				+ ", mIsSent=" + mIsSent + ", mState=" + mState + "]";
+		return "ConvMessage [mConversation=" + mConversation.getConvId() + ", mMessage="
+				+ mMessage + ", mMsisdn=" + mMsisdn + ", contactId="
+				+ contactId + ", mTimestamp=" + mTimestamp + ", mIsSent="
+				+ mIsSent + ", mState=" + mState + "]";
 	}
 
 	@Override
@@ -51,6 +52,8 @@ public class ConvMessage {
 		int result = 1;
 		result = prime * result
 				+ ((contactId == null) ? 0 : contactId.hashCode());
+		result = prime * result
+				+ ((mConversation == null) ? 0 : mConversation.hashCode());
 		result = prime * result + (mIsSent ? 1231 : 1237);
 		result = prime * result
 				+ ((mMessage == null) ? 0 : mMessage.hashCode());
@@ -74,6 +77,11 @@ public class ConvMessage {
 				return false;
 		} else if (!contactId.equals(other.contactId))
 			return false;
+		if (mConversation == null) {
+			if (other.mConversation != null)
+				return false;
+		} else if (!mConversation.equals(other.mConversation))
+			return false;
 		if (mIsSent != other.mIsSent)
 			return false;
 		if (mMessage == null) {
@@ -93,6 +101,7 @@ public class ConvMessage {
 		return true;
 	}
 
+	private Conversation mConversation;
 	private String mMessage;
 	private String mMsisdn;
 	private String contactId;
@@ -100,6 +109,7 @@ public class ConvMessage {
 	private boolean mIsSent;
 	public enum State {SENT, DELIVERED, RECEIVED };
 	private State mState;
+
 	public JSONObject serialize(String type) {
 		JSONObject object = new JSONObject();
 		try {
@@ -110,6 +120,14 @@ public class ConvMessage {
 			Log.e("ConvMessage", "invalid json message", e);
 		}
 		return object;
+	}
+
+	public void setConversation(Conversation conversation) {
+		this.mConversation = conversation;
+	}
+
+	public Conversation getConversation() {
+		return mConversation;
 	}
 
 }

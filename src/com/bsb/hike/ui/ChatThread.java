@@ -1,4 +1,5 @@
 package com.bsb.hike.ui;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -22,6 +23,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeUserDatabase;
 import com.bsb.hike.utils.HikeWebSocketClient;
@@ -38,6 +40,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 	private MessagesAdapter mAdapter;
 	private EditText mComposeView;
 	private ListView mConversationsView;
+	private Conversation mConversation;
 
 	@Override
 	protected void onPause() {
@@ -148,6 +151,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 		mComposeView.setText("");
 		int time = (int) System.currentTimeMillis()/10000;
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, Long.toString(mContactId), time, true);
+		convMessage.setConversation(mConversation);
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		HikeWebSocketClient webSocket = ((HikeMessengerApp) getApplicationContext()).getWebSocket();
@@ -166,11 +170,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
   	    nameView.setText(mContactName);
 
  	    HikeConversationsDatabase db = new HikeConversationsDatabase(this);
-    	List<ConvMessage> messages = db.getConversationThread(mContactNumber, 10);
-    	db.close();
-   
-	    mConversationsView = (ListView) findViewById(R.id.conversations_list);
-	    mAdapter = new MessagesAdapter(this, R.layout.message_item, messages);
+ 	    mConversation = db.getConversation(mContactNumber, 10);
+ 	    if (mConversation == null) {
+ 	    	mConversation = db.addConversation(mContactNumber);
+ 	    }
+ 	    db.close();
+ 	    List<ConvMessage> messages = mConversation.getMessages();
+
+ 	    mConversationsView = (ListView) findViewById(R.id.conversations_list);
+	    mAdapter = new MessagesAdapter(this, messages);
 	    mConversationsView.setAdapter(mAdapter);
 	    mComposeView = (EditText) findViewById(R.id.msg_compose);
 	    HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
@@ -189,13 +197,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener {
 	public void onEventReceived(String type, Object object) {
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
 			final ConvMessage conv = (ConvMessage) object;
-			if (conv.getMsisdn().indexOf(mContactNumber) != -1) {//TODO the number we have is not in E164 format (missing the +) so just hack around it
+			if (conv.getMsisdn().indexOf(mContactNumber) != -1) {
+				/* we publish the message before the conversation is created, 
+				 * so it's safer to just tack it on here */
+				conv.setConversation(mConversation);
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						mAdapter.add(conv);
 					}});
-
 			}
 		}
 	}

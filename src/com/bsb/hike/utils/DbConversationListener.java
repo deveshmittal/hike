@@ -23,10 +23,10 @@ public class DbConversationListener implements Listener {
 	public void onEventReceived(String type, Object object) {
 		if (HikePubSub.MESSAGE_SENT.equals(type)) {
 			ConvMessage message = (ConvMessage) object;
-			mConversationDb.addConversation(message);
+			mConversationDb.addConversationMessages(message);
 		} else if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
 			ConvMessage message = (ConvMessage) object;
-			mConversationDb.addConversation(message);
+			mConversationDb.addConversationMessages(message);
 			//TODO update the unread flags here
 		}
 	}

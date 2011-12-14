@@ -16,7 +16,7 @@ public class Conversation implements Comparable<Conversation> {
 	@Override
 	public String toString() {
 		return "Conversation [msisdn=" + msisdn + ", convId=" + convId
-				+ ", contactId=" + contactId + ", messages=" + messages
+				+ ", contactId=" + contactId + ", messages=" + messages.size()
 				+ ", contactName=" + contactName + "]";
 	}
 
@@ -61,7 +61,7 @@ public class Conversation implements Comparable<Conversation> {
 		}
 
 		int ts = messages.isEmpty() ? 0 : messages.get(0).getTimestamp();
-		int rhsTs = rhs.messages.get(0).getTimestamp();
+		int rhsTs = rhs.messages.isEmpty() ? 0 : rhs.messages.get(0).getTimestamp();
 		if (rhsTs != ts) {
 			return (ts < rhsTs) ? -1 : 1;
 		}
