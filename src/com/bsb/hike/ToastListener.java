@@ -53,19 +53,32 @@ public class ToastListener implements Listener {
 				return;
 			}
 			/* the foreground activity isn't going to show this message so Toast it */
-
 			HikeUserDatabase db = new HikeUserDatabase(context);
 			ContactInfo contactInfo = db.getContactInfoFromMSISDN(message.getMsisdn());
 			db.close();
 
 			String name = (contactInfo != null) ? contactInfo.name : message.getMsisdn();
 			int icon = R.drawable.ic_launcher;
+
+			//TODO this doesn't turn the text bold :(
 			Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>:%2$s", name, message.getMessage()));
 			Notification notification = new Notification(icon, text, message.getTimestamp());
 			notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 
 			Intent notificationIntent = new Intent(context, ChatThread.class);
+			notificationIntent.putExtra("msisdn", message.getMsisdn());
+
+			if (contactInfo != null) {
+				if (contactInfo.id != null) {
+					notificationIntent.putExtra("id", Long.parseLong(contactInfo.id));
+				}
+				if (contactInfo.name != null) {
+					notificationIntent.putExtra("name", contactInfo.name);
+				}
+			}
+
 			PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+
 			notification.setLatestEventInfo(context, name, message.getMessage(), contentIntent);
 			notificationManager.notify(NEW_MESSAGE_ID, notification);
 		}
