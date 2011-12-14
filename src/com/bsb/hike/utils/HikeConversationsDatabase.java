@@ -153,7 +153,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation) {
 		String limitStr = new Integer(limit).toString();
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] {"message, sent, timestamp"}, "convid=?", new String[] {Long.toString(convid)}, null, null, "timestamp DESC", limitStr);
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] {"message, sent, timestamp"}, "convid=?", new String[] {Long.toString(convid)}, null, null, "msgid DESC", limitStr);
 		final int msgColumn = c.getColumnIndex("message");
 		final int sentColumn = c.getColumnIndex("sent");
 		final int tsColumn = c.getColumnIndex("timestamp");
@@ -165,10 +165,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 									contactid,
 									c.getInt(tsColumn), 
 									c.getInt(sentColumn) != 0);
-			elements.add(message);
+			elements.add(elements.size(), message);
 			message.setConversation(conversation);
 		}
-
+		Collections.reverse(elements);
 		return elements;	
 	}
 
