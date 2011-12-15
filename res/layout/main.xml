@@ -2,14 +2,26 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/title_field"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/grey"
+        android:text="Conversations"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:visibility="visible" />
+
     <RelativeLayout
-        android:layout_alignParentBottom="true"
-        android:background="@color/black"
         android:id="@+id/bottom_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="55dp">
+        android:layout_height="55dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/black" >
 
         <ImageView
             android:id="@+id/edit_message"
@@ -18,31 +30,24 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:src="@drawable/ic_editmessage" />
-		<ImageView
-		    android:id="@+id/search"
+
+        <ImageView
+            android:id="@+id/search"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:src="@drawable/ic_searchicon" />
     </RelativeLayout>
-    
-	<RelativeLayout
-	    android:background="@color/white"
-	    android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/bottom_nav_bar">
 
-	    <ListView
-	        android:id="@+id/conversations"
-	        android:layout_width="match_parent"
-	        android:layout_height="match_parent"
-	        android:layout_alignParentLeft="true"
-	        android:layout_alignParentTop="true"
-	        android:background="@color/white">
-
-	    </ListView>
-
-	</RelativeLayout>
+    <ListView
+        android:id="@+id/conversations"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_nav_bar"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/title_field"
+        android:background="@color/white" >
+    </ListView>
 
 </RelativeLayout>
