@@ -67,6 +67,7 @@ public class WelcomeActivity extends Activity {
 
 	@Override
 	public void onDestroy() {
+		super.onDestroy();
 		if (mDialog != null) {
            mDialog.dismiss();
            mDialog = null;
