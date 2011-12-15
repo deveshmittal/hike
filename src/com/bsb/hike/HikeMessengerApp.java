@@ -66,11 +66,6 @@ public class HikeMessengerApp extends Application implements HikePubSub.Listener
 	}
 
 	public void restartWebSocket() {
-		if (mDelay <= 1000*30) { /*30 seconds is our max delay*/
-			mDelay = mDelay * 2;
-			Log.d("HikeMessengerApp", "Increasing delay to " + mDelay);
-		}
-
 		Runnable restart = new Runnable() {
 			@Override
 			public void run() {
