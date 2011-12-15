@@ -12,6 +12,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 
 import net.tootallnate.websocket.Draft;
+import net.tootallnate.websocket.WebSocket;
 import net.tootallnate.websocket.WebSocketClient;
 
 public class HikeWebSocketClient extends WebSocketClient {
@@ -23,7 +24,7 @@ public class HikeWebSocketClient extends WebSocketClient {
 
 	private void sleepAndRequeue(String message) {
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(7000);
 		} catch(InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -83,7 +84,7 @@ public class HikeWebSocketClient extends WebSocketClient {
 
 	@Override
 	public void onMessage(String message) {
-		System.out.println("onMessage -- " + message);
+		Log.d("HikeWebSocketClient", message);
 		pubSub.publish(HikePubSub.WS_MESSAGE, message);
 	}
 
