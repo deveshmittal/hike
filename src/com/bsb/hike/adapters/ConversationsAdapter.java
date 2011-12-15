@@ -23,7 +23,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		this.mResourceId = textViewResourceId;
 	}
 
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		Context context = getContext();
@@ -32,6 +31,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		if (v == null) {
 			v = inflater.inflate(mResourceId, parent, false);
 		}
+
 		Conversation conversation = getItem(position);
 		System.out.println("ConversationsAdapter.getView() -- " + conversation);
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
@@ -39,12 +39,15 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		if (name == null) {
 			name = conversation.getMsisdn();
 		}
+
 		contactView.setText(name);
 		List<ConvMessage> messages = conversation.getMessages();
 		if (!messages.isEmpty()) {
 			ConvMessage message = messages.get(messages.size() - 1);
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			messageView.setText(message.getMessage());
+			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
+			tsView.setText(message.getTimestampFormatted());
 		}
 		return v;
 	}

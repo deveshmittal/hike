@@ -40,10 +40,7 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage> {
 		messageView.setText(convMessage.getMessage());
 
 		TextView timestampView = (TextView) v.findViewById(R.id.timestamp);
-		int timestamp = convMessage.getTimestamp();
-		SimpleDateFormat dfm = new SimpleDateFormat("HH:mm aa");
-		Date date = new Date(timestamp * 1000);
-		String dateFormatted = dfm.format(date);
+		String dateFormatted = convMessage.getTimestampFormatted();
 		timestampView.setText(dateFormatted);
 
 		return v;
