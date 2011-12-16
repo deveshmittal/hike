@@ -32,6 +32,8 @@ public class HikePubSub implements Runnable {
 	public static final String NEW_CONVERSATION = "newconv";
 	public static final String MESSAGE_RECEIVED = "messagereceived";
 	public static final String NEW_ACTIVITY = "new_activity";
+	public static final String END_TYPING_CONVERSATION = "endtypingconv";
+	public static final String TYPING_CONVERSATION = "typingconv";
 	private final Thread mThread;
 	private final BlockingQueue<Operation> mQueue;
 

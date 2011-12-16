@@ -47,6 +47,14 @@ public class WebSocketPublisher implements HikePubSub.Listener {
 			int ts = data.optInt("ts");
 			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, false);
 			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+		} else if ("typing".equals(type)) {
+			String msisdn = data.optString("from");
+			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
+		} else if ("stop_typing".equals(type)) {
+			String msisdn = data.optString("from");
+			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
+		} else {
+			Log.d("WebSocketPublisher", "Unknown Type:" + type);
 		}
 	}
 
