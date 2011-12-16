@@ -2,72 +2,22 @@ package com.bsb.hike.utils;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.LinkedBlockingQueue;
 
-import org.json.JSONObject;
-
+import net.tootallnate.websocket.Draft;
+import net.tootallnate.websocket.WebSocketClient;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 
-import net.tootallnate.websocket.Draft;
-import net.tootallnate.websocket.WebSocket;
-import net.tootallnate.websocket.WebSocketClient;
-
 public class HikeWebSocketClient extends WebSocketClient {
 
 	protected static final String FINISH = "finish";
 	private HikePubSub pubSub;
-	private Thread mThread;
-	private LinkedBlockingQueue<String> mQueue;
-
-	private void sleepAndRequeue(String message) {
-		try {
-			Thread.sleep(7000);
-		} catch(InterruptedException e) {
-			e.printStackTrace();
-		}
-		mQueue.add(message);
-	}
 
 	public HikeWebSocketClient(URI uri, Draft draft) {
 		super(uri, draft);
 		pubSub = HikeMessengerApp.getPubSub();
-		mQueue = new LinkedBlockingQueue<String>();
-		mThread = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				while (true) {
-					String message;
-					try {
-						message = mQueue.take();
-					} catch (InterruptedException e) {
-						Log.e("WebSocket", "sending thread", e);
-						continue;
-					}
-					if (message == FINISH) {
-						break;
-					}
-					try {
-						send(message);
-					} catch (IOException e) {
-						Log.e("WebSocket", "Unable to send message", e);
-						sleepAndRequeue(message);
-					} catch (java.nio.channels.NotYetConnectedException e) {
-						Log.e("WebSocket", "Not yet connected");
-						sleepAndRequeue(message);
-					}
-				}
-			}});
-		mThread.start();
-		
-	}
-
-	public void nb_send(JSONObject obj) {
-		String message = obj.toString();
-		mQueue.add(message);
 	}
 
 	@Override

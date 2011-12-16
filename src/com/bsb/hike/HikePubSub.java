@@ -24,17 +24,24 @@ public class HikePubSub implements Runnable {
 		public void onEventReceived(String type, Object object);
 	}
 
+	private static final Operation DONE_OPERATION = null; /* TODO this can't be null */
+
+	   
 	public static final String MESSAGE_SENT = "messagesent";
 	public static final String WS_CLOSE = "ws_close";
 	public static final String WS_MESSAGE = "ws_message";
 	public static final String WS_OPEN = "ws_open";
-	private static final Operation DONE_OPERATION = null; /* TODO this can't be null */
+    public static final String WS_SEND = "ws_send";
 	public static final String NEW_CONVERSATION = "newconv";
 	public static final String MESSAGE_RECEIVED = "messagereceived";
 	public static final String NEW_ACTIVITY = "new_activity";
 	public static final String END_TYPING_CONVERSATION = "endtypingconv";
 	public static final String TYPING_CONVERSATION = "typingconv";
-	private final Thread mThread;
+    public static final String TOKEN_CREATED = "tokencreated";
+
+
+
+    private final Thread mThread;
 	private final BlockingQueue<Operation> mQueue;
 
 	private Map<String, List<Listener> > listeners;

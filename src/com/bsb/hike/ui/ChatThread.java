@@ -167,8 +167,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		convMessage.setConversation(mConversation);
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-		HikeWebSocketClient webSocket = ((HikeMessengerApp) getApplicationContext()).getWebSocket();
-		webSocket.nb_send(convMessage.serialize("send"));
+		mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send"));
 	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
 	}
@@ -276,8 +275,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		public void run() {
 			long current = System.currentTimeMillis();
 			if (current - mTextLastChanged >= 5*1000) { //text hasn't changed in 10 seconds, send an event
-				HikeWebSocketClient webSocket = ((HikeMessengerApp) getApplicationContext()).getWebSocket();
-				webSocket.nb_send(mConversation.serialize("stop_typing"));
+			    mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("stop_typing"));
 				mTextLastChanged = 0;
 			} else { //text has changed, fire a new event
 				long delta = 10*1000 - (current - mTextLastChanged);
@@ -300,9 +298,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			//we're currently not in 'typing' mode
 			mTextLastChanged = System.currentTimeMillis();
 			//fire an event
-			HikeWebSocketClient webSocket = ((HikeMessengerApp) getApplicationContext()).getWebSocket();
-			webSocket.nb_send(mConversation.serialize("typing"));
-			mPubSub.publish(HikePubSub.TYPING_CONVERSATION, mConversation);
+            mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("stop_typing"));
 
 			//create a timer to clear the event
 			mUiThreadHandler.removeCallbacks(mResetTypingNotification); //clear any existing ones

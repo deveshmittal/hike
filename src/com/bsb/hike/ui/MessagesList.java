@@ -125,8 +125,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	    }
 
 	    AccountUtils.setToken(token);
-	    HikeMessengerApp app = (HikeMessengerApp) getApplication();
-	    app.startWebSocket();
+	    HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, token);
+
 	    setContentView(R.layout.main);
     	mConversationsView = (ListView) findViewById(R.id.conversations);
 
