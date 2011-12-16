@@ -20,6 +20,8 @@ public class ContactUtils {
 		}
 
 		String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+	    cursor.close();
+
 		Cursor phones = cr.query(Phone.CONTENT_URI, null, Phone.CONTACT_ID + " = " + contactId, null, null);
 		String number = null;
 		if (phones == null) {
@@ -34,8 +36,8 @@ public class ContactUtils {
 				break;
 			}
 		}
+
 		phones.close();
-		cursor.close();
 		return number;
 	}
 }
