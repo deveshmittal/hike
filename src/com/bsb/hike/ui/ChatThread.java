@@ -115,10 +115,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.END_TYPING_CONVERSATION, this);
+        super.onDestroy();
+        HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
+        HikeMessengerApp.getPubSub().removeListener(HikePubSub.TYPING_CONVERSATION, this);
+        HikeMessengerApp.getPubSub().removeListener(HikePubSub.END_TYPING_CONVERSATION, this);
+        if (mDbhelper != null) {
+            mDbhelper.close();
+            mDbhelper = null;
+        }
 	}
 
 	@Override
@@ -200,15 +204,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
         HikeMessengerApp.getPubSub().addListener(
                 HikePubSub.END_TYPING_CONVERSATION, this);
         mComposeView.addTextChangedListener(this);
-	}
-
-	protected void onStop() {
-		super.onStop();
-		Log.d(getLocalClassName(), "OnStop called");
-		if (mDbhelper != null) {
-			mDbhelper.close();
-			mDbhelper = null;
-		}
 	}
 
 	private class SetTypingText implements Runnable {
