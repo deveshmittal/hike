@@ -57,10 +57,16 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		@Override
 		protected Boolean doInBackground(Long... params) {
-			HikeConversationsDatabase db = new HikeConversationsDatabase(MessagesList.this);
-			db.deleteConversation(params);
-			db.close();
-			return Boolean.TRUE;
+		    HikeConversationsDatabase db = null;
+		    try {
+		        db = new HikeConversationsDatabase(MessagesList.this);
+		        db.deleteConversation(params);
+		    } finally {
+	            if (db != null) {
+	                db.close();
+	            }
+		    }
+		    return Boolean.TRUE;
 		}
 
 		@Override
