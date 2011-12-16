@@ -27,10 +27,8 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.ui.ChatThread.ResetTypingNotification;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeUserDatabase;
-import com.bsb.hike.utils.HikeWebSocketClient;
 
 
 public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher {
