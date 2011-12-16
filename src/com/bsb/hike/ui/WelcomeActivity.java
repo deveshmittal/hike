@@ -44,8 +44,6 @@ public class WelcomeActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			mDialog.dismiss();
-			mDialog = null;
 			startActivity(new Intent(WelcomeActivity.this, AccountCreateSuccess.class));
 			finish();
 		}
