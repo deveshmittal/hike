@@ -214,11 +214,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
-	}
-
-	@Override
     protected void onDestroy() {
         super.onDestroy();
         HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
@@ -227,7 +222,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
     @Override
 	public void onClick(View v) {
-		Log.d("MessagesList", "OnClick called: "+v);
 		if (v == mEditMessageIconView) {
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra("edit", true);
