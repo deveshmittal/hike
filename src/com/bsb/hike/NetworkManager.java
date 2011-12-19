@@ -61,7 +61,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable {
 			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
 			String contactId = (contactInfo != null) ? contactInfo.id : null;
 			String message = data.optString("data");
-			int ts = data.optInt("ts");
+			int ts = (int) System.currentTimeMillis()/1000;
 			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, false);
 			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		} else if ("typing".equals(type)) {
