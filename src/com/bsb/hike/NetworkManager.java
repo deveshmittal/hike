@@ -91,6 +91,8 @@ public class NetworkManager implements HikePubSub.Listener, Runnable {
 		    JSONObject o = (JSONObject) object;
 		    String str = o.toString();
 		    mQueue.add(str);
+		} else if (HikePubSub.WS_OPEN.equals(type)) {
+		    Log.d("NetworkManager", "Websocket opened");
 		}
 	}
 
