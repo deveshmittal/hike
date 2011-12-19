@@ -3,6 +3,11 @@ package com.bsb.hike.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.util.Log;
+
 public class Conversation implements Comparable<Conversation> {
 
 	public String getMsisdn() {
@@ -16,7 +21,7 @@ public class Conversation implements Comparable<Conversation> {
 	@Override
 	public String toString() {
 		return "Conversation [msisdn=" + msisdn + ", convId=" + convId
-				+ ", contactId=" + contactId + ", messages=" + messages
+				+ ", contactId=" + contactId + ", messages=" + messages.size()
 				+ ", contactName=" + contactName + "]";
 	}
 
@@ -61,7 +66,7 @@ public class Conversation implements Comparable<Conversation> {
 		}
 
 		int ts = messages.isEmpty() ? 0 : messages.get(0).getTimestamp();
-		int rhsTs = rhs.messages.get(0).getTimestamp();
+		int rhsTs = rhs.messages.isEmpty() ? 0 : rhs.messages.get(0).getTimestamp();
 		if (rhsTs != ts) {
 			return (ts < rhsTs) ? -1 : 1;
 		}
@@ -128,5 +133,16 @@ public class Conversation implements Comparable<Conversation> {
 		} else if (!msisdn.equals(other.msisdn))
 			return false;
 		return true;
+	}
+
+	public JSONObject serialize(String type) {
+		JSONObject object =  new JSONObject();
+		try {
+			object.put("type", type);
+			object.put("to", msisdn);
+		} catch (JSONException e) {
+			Log.e("ConvMessage", "invalid json message", e);
+		}
+		return object;
 	}
 }

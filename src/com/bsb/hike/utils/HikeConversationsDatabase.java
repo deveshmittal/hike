@@ -79,7 +79,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
-	public void addConversation(ConvMessage message) {
+	public void addConversationMessages(ConvMessage message) {
 		List<ConvMessage> l = new ArrayList<ConvMessage>(1);
 		l.add(message);
 		addConversations(l);
@@ -108,7 +108,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				Conversation conversation = addConversation(conv.getMsisdn());
 				if (conversation != null) {
 					conversation.addMessage(conv);
-					HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conversation);
 				}
 				msgId = insertStatement.executeInsert();
 				assert (msgId >= 0);
@@ -119,7 +118,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.endTransaction();
 	}
 
-	private Conversation addConversation(String msisdn) {
+	public void deleteConversation(Long[] ids) {
+		mDb.beginTransaction();
+		for (int i = 0; i < ids.length; i++)  {
+			Long[] bindArgs = new Long[]{ids[i]};
+			mDb.execSQL("DELETE FROM " + CONVERSATIONSTABLE + " WHERE convid = ?", bindArgs);
+			mDb.execSQL("DELETE FROM " + MESSAGESTABLE + " WHERE convid = ?", bindArgs);
+		}
+		mDb.setTransactionSuccessful();
+		mDb.endTransaction();
+	}
+
+	public Conversation addConversation(String msisdn) {
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 		huDb.close();
@@ -133,6 +143,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		long id = ih.execute();
 		if (id >= 0) {
 			Conversation conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.id : null, (contactInfo != null) ? contactInfo.name : null);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
 			return conv;
 		}
 		/* TODO does this happen?  If so, what should we do? */
@@ -140,35 +151,42 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		return null;
 	}
 
-	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit) {
+	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation) {
 		String limitStr = new Integer(limit).toString();
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] {"message, sent, timestamp"}, "convid=?", new String[] {Long.toString(convid)}, null, null, "timestamp DESC", limitStr);
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] {"message, sent, timestamp"}, "convid=?", new String[] {Long.toString(convid)}, null, null, "msgid DESC", limitStr);
 		final int msgColumn = c.getColumnIndex("message");
 		final int sentColumn = c.getColumnIndex("sent");
 		final int tsColumn = c.getColumnIndex("timestamp");
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());		
 		while (c.moveToNext()) {
-			ConvMessage conv = new ConvMessage(
+			ConvMessage message = new ConvMessage(
 									c.getString(msgColumn),
 									msisdn, 
 									contactid,
 									c.getInt(tsColumn), 
 									c.getInt(sentColumn) != 0);
-			elements.add(conv);
+			elements.add(elements.size(), message);
+			message.setConversation(conversation);
 		}
-
+		Collections.reverse(elements);
 		return elements;	
 	}
 
-	public List<ConvMessage> getConversationThread(String msisdn, int limit) {
+	public Conversation getConversation(String msisdn, int limit) {
 		Cursor c = mDb.query(CONVERSATIONSTABLE, new String[]{"convid", "contactid"}, "msisdn=?", new String[]{msisdn}, null, null, null);
 		if (!c.moveToFirst()) {
-			return new ArrayList<ConvMessage>();
+			return null;
 		}
 
 		long convid = c.getInt(c.getColumnIndex("convid"));
 		String contactid = c.getString(c.getColumnIndex("contactid"));
-		return getConversationThread(msisdn, contactid, convid, limit);
+		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
+		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
+		huDb.close();
+		Conversation conv = new Conversation(msisdn, convid, contactid, (contactInfo != null) ? contactInfo.name : null);
+		List<ConvMessage> messages = getConversationThread(msisdn, contactid, convid, limit, conv);
+		conv.setMessages(messages);
+		return conv;
 	}	
 
 	public List<Conversation> getConversations() {
@@ -182,7 +200,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			String msisdn = c.getString(msisdnIdx);
 			ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 			Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx), (contactInfo != null) ? contactInfo.name : null);
-			conv.setMessages(getConversationThread(conv.getMsisdn(), conv.getContactId(), conv.getConvId(), 1));
+			conv.setMessages(getConversationThread(conv.getMsisdn(), conv.getContactId(), conv.getConvId(), 1, conv));
 			conversations.add(conv);
 		}
 		huDb.close();
