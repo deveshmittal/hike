@@ -10,12 +10,12 @@
         android:layout_alignParentTop="true"
         android:background="@color/grey">
         <AutoCompleteTextView
+            android:hint="Start typing a name"
             android:visibility="gone"
             android:layout_margin="7dp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/input_number">
-            <requestFocus/>
         </AutoCompleteTextView>
         <TextView
             android:visibility="visible"
@@ -42,11 +42,10 @@
              android:layout_height="fill_parent"
              android:layout_alignParentLeft="true"
              android:layout_margin="10dp"
+             android:imeOptions="actionSend"
              android:layout_toLeftOf="@+id/send_message"
              android:hint="@string/type_to_compose"
              android:inputType="textShortMessage" >
-
-            <requestFocus />
         </EditText>
         <Button 
             android:layout_alignParentRight="true"
@@ -59,6 +58,8 @@
  	</RelativeLayout>
 
 	<ListView
+	    android:divider="@color/black"
+	    android:dividerHeight="1dp"
 	    android:transcriptMode="alwaysScroll"
 	    android:cacheColorHint="#00000000"
 	    android:id="@+id/conversations_list"

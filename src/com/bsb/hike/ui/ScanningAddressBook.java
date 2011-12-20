@@ -58,7 +58,9 @@ public class ScanningAddressBook extends Activity {
 				String id = mContacts.getString(idFieldColumnIndex);
 				String name = mContacts.getString(nameFieldColumnIndex);
 				String number = ContactUtils.getMobileNumber(getContentResolver(), Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_URI, id));
-				contactinfos.add(new ContactInfo(id, number, name));
+				if (number != null) {
+					contactinfos.add(new ContactInfo(id, number, name));
+				}
 			}
 
 			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);

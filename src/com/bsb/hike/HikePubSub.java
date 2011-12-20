@@ -5,14 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.util.Log;
-
-import com.bsb.hike.HikePubSub.Listener;
-import com.bsb.hike.HikePubSub.Operation;
 
 public class HikePubSub implements Runnable {
 	public class Operation {
@@ -28,14 +24,24 @@ public class HikePubSub implements Runnable {
 		public void onEventReceived(String type, Object object);
 	}
 
+	private static final Operation DONE_OPERATION = null; /* TODO this can't be null */
+
+	   
 	public static final String MESSAGE_SENT = "messagesent";
 	public static final String WS_CLOSE = "ws_close";
 	public static final String WS_MESSAGE = "ws_message";
 	public static final String WS_OPEN = "ws_open";
-	private static final Operation DONE_OPERATION = null; /* TODO this can't be null */
+    public static final String WS_SEND = "ws_send";
 	public static final String NEW_CONVERSATION = "newconv";
-	public static String MESSAGE_RECEIVED = "messagereceived";
-	private final Thread mThread;
+	public static final String MESSAGE_RECEIVED = "messagereceived";
+	public static final String NEW_ACTIVITY = "new_activity";
+	public static final String END_TYPING_CONVERSATION = "endtypingconv";
+	public static final String TYPING_CONVERSATION = "typingconv";
+    public static final String TOKEN_CREATED = "tokencreated";
+
+
+
+    private final Thread mThread;
 	private final BlockingQueue<Operation> mQueue;
 
 	private Map<String, List<Listener> > listeners;
