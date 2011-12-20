@@ -56,7 +56,6 @@ public class NetworkManager implements HikePubSub.Listener, Runnable {
 		}
 
 		if ("message".equals(type)) {
-			String id = data.optString("id");
 			String msisdn = data.optString("from");
 			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
 			String contactId = (contactInfo != null) ? contactInfo.id : null;
@@ -86,7 +85,21 @@ public class NetworkManager implements HikePubSub.Listener, Runnable {
 		} else if (HikePubSub.WS_CLOSE.equals(type)) {
             Log.i("NetworkManager", "Websocket closed");
             mWebSocket = null;
-            startWebSocket();
+            Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    startWebSocket();
+                }
+            };
+            Thread t = new Thread(r);
+            t.start();
 		} else if (HikePubSub.WS_SEND.equals(type)) {
 		    JSONObject o = (JSONObject) object;
 		    String str = o.toString();
