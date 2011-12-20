@@ -3,6 +3,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.CharBuffer;
@@ -287,5 +290,19 @@ public class AccountUtils {
 	private static void addMSISDNHeader(HttpRequestBase req) {
 		//TODO remove this line.  just for testing
 		req.addHeader("X-MSISDN-AIRTEL", MSISDN);		
+	}
+
+	public static void sendUDPPacket() throws IOException {
+	    String sentence = "Hello from client";
+	    byte[] sendData = sentence.getBytes();
+	    DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, new InetSocketAddress("175.41.153.127", 4000));
+	    DatagramSocket clientSocket = new DatagramSocket();
+	    clientSocket.send(sendPacket);
+	    byte[] receiveData = new byte[1024];
+	    DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+	    clientSocket.receive(receivePacket);
+	    String modifiedSentence = new String(receivePacket.getData(), 0, receivePacket.getLength());
+	    System.out.println("FROM SERVER:" + modifiedSentence);
+	    clientSocket.close();
 	}
 }

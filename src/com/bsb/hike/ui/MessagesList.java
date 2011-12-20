@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -222,10 +223,24 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
     @Override
 	public void onClick(View v) {
+        Log.d("MessagesList", "onclick called");
 		if (v == mEditMessageIconView) {
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra("edit", true);
 			startActivity(intent);
+		} else if (v == mSearchIconView) {
+		    Log.d("MessagesList", "sending UDP packet");
+		    (new Thread() {
+		        @Override
+		        public void run() {
+		            try {
+                        AccountUtils.sendUDPPacket();
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+		        }
+		    }).start();
 		}
 	}
 
