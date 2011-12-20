@@ -43,9 +43,10 @@
              android:layout_alignParentLeft="true"
              android:layout_margin="10dp"
              android:imeOptions="actionSend"
+             android:autoText="true"
              android:layout_toLeftOf="@+id/send_message"
              android:hint="@string/type_to_compose"
-             android:inputType="textShortMessage" >
+             android:inputType="text|textAutoCorrect|textShortMessage" >
         </EditText>
         <Button 
             android:layout_alignParentRight="true"
