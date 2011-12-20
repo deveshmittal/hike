@@ -1,109 +1,52 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	android:versionName="0.0.1" package="com.bsb.im" android:versionCode="7">
-	<application android:label="@string/app_name"
-		android:icon="@drawable/beem_launcher_icon_silver" android:theme="@style/Theme.BEEM.Default" android:name="com.bsb.im.BeemApplication">
-		<activity android:name=".ui.Login" android:label="@string/app_name"
-			android:launchMode="standard" android:windowSoftInputMode="stateVisible|adjustResize">    
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>	
-		</activity>
-		<activity android:name=".ui.wizard.Account" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
-		<activity android:name=".ui.wizard.AccountConfigure" android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
-		<activity android:name=".ui.LoginAnim" android:label="@string/login_login_progress"
-			android:launchMode="singleTop" android:screenOrientation="portrait" />
-		<activity android:name=".ui.Settings" android:label="@string/edit_settings_name" />
-		<activity android:name=".ui.Chat" android:label="@string/chat_name"
-		    android:launchMode="singleTop" />
-		<activity android:name=".ui.ChangeStatus" android:label="@string/ChangeStatusActTitle"
-		    android:launchMode="singleTop"
-		    android:windowSoftInputMode="stateHidden" />
-		<activity android:name=".ui.AddContact" android:label="@string/AddCActTitle" />
-		<activity android:name=".ui.Subscription" android:label="@string/app_name" />
-		<activity android:name=".ui.CreateAccount" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:windowSoftInputMode="stateVisible|adjustResize"/>
+    package="com.bsb.hike"
+    android:versionCode="1"
+    android:versionName="1.0" >
 
-		<activity android:name=".ui.ContactList" android:label="@string/contact_list_name"
-		    android:launchMode="singleTask" />
+    <uses-sdk android:minSdkVersion="7" />
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
-		<activity android:name=".ui.GroupList" android:label="GroupList" />
-		<activity android:name=".ui.PrivacyList" android:label="@string/privacy_list_name" />
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" 
+        android:name="com.bsb.hike.HikeMessengerApp"
+        android:debuggable="true">
 
-		<!-- MemorizingTrustManagerActivity -->
-		<activity android:name="de.duenndns.ssl.MemorizingActivity" />
-		<!--
-			Could be interesting if we would launch beem at startup <receiver
-			android:name=".tool.BeemBroadcastReceiver" android:enabled="true">
-			<intent-filter> <action
-			android:name="android.intent.action.BOOT_COMPLETED" />
-			</intent-filter> </receiver>
-		-->
-		<provider android:name="com.bsb.im.providers.AvatarProvider"
-		    android:authorities="com.bsb.im.providers.avatarprovider"
-		    android:exported="false" />
-		    
-			
-			
-			<receiver android:name="com.urbanairship.CoreReceiver">
-            <!-- REQUIRED IntentFilter - For Helium and Hybrid -->
-            <intent-filter>
-              <action android:name="android.intent.action.BOOT_COMPLETED" />
-              <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+        <service
+            android:name="HikeService"
+            android:enabled="true">            
+        </service>
+
+        <activity
+            android:name=".ui.MessagesList"
+            android:label="@string/app_name"
+
+            >
+            <intent-filter >
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        	</receiver>
-        
-                <receiver android:name="com.urbanairship.push.c2dm.C2DMPushReceiver"
-                android:permission="com.google.android.c2dm.permission.SEND">
-          <!-- Receive the actual message -->
-          <intent-filter>
-              <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-              <category android:name="com.bsb.im" />
-          </intent-filter>
-          <!-- Receive the registration id -->
-          <intent-filter>
-              <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-              <category android:name="com.bsb.im" />
-          </intent-filter>
-        </receiver>
-                <service android:name="com.urbanairship.push.PushService"
-                android:process=":com.urbanairship.push.process"/>
-    
-    	        <service android:name="com.urbanairship.iap.marketinterface.BillingService" />
-    
-        <!--  REQUIRED -->
-        <receiver android:name="com.urbanairship.iap.marketinterface.BillingReceiver">
-            <intent-filter>
-                <action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
-                <action android:name="com.android.vending.billing.RESPONSE_CODE" />
-                <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
-            </intent-filter>
-        </receiver>
-        
-
-		<service android:name="com.bsb.im.BeemService" android:enabled="true"
-			android:label="Beem Service" android:permission="com.bsb.im.BEEM_SERVICE">
-			<intent-filter>
-				<action android:name="com.bsb.im.BeemService"></action>
-			</intent-filter>
-		</service>
-	</application>
-	<permission android:permissionGroup="android.permission-group.NETWORK"
-		android:label="BeemService" android:description="@string/BeemServiceDescription"
-		android:name="com.bsb.im.BEEM_SERVICE"/>
-	<uses-permission android:name="android.permission.INTERNET"/>
-	<uses-permission android:name="android.permission.VIBRATE"/>
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-	<uses-permission android:name="com.bsb.im.BEEM_SERVICE"/>
-	<uses-feature name="android.hardware.touchscreen" required="false" />
-	<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="7" />
-	<supports-screens android:largeScreens="true"
-		android:normalScreens="true" android:smallScreens="true" android:anyDensity="true" />
-
-
-<uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
-<uses-permission android:name="android.permission.READ_CONTACTS"></uses-permission>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+        </activity>
+        <activity
+            android:label="@string/app_name"
+            android:name=".ui.WelcomeActivity" >
+        </activity>
+        <activity
+            android:label="@string/app_name"
+            android:name=".ui.AccountCreateSuccess">
+        </activity>
+        <activity
+            android:label="@string/app_name"
+            android:name=".ui.ScanningAddressBook">
+        </activity>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:label="@string/app_name"
+            android:name=".ui.ChatThread">
+        </activity>
+    </application>
 
 </manifest>
