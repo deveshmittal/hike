@@ -33,7 +33,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		}
 
 		Conversation conversation = getItem(position);
-		System.out.println("ConversationsAdapter.getView() -- " + conversation);
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
 		String name = conversation.getContactName();
 		if (name == null) {
