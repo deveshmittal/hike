@@ -15,9 +15,11 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
+import android.widget.ResourceCursorAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
@@ -69,9 +71,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
     	nameView.setVisibility(View.GONE);
     	final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		mDbhelper = new HikeUserDatabase(this);
-    	String[] columns = new String[] { "name", "msisdn"};
-    	int[] to = new int[] { R.id.name, R.id.number };
+        String[] columns = new String[] { "name", "msisdn", "onhike"};
+        int[] to = new int[] { R.id.name, R.id.number, R.id.onhike};
     	SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
+        adapter.setViewBinder(new DropDownViewBinder());
     	adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
 			@Override
 			public CharSequence convertToString(Cursor cursor) {

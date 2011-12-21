@@ -21,4 +21,16 @@
         android:textColor="@color/black"
         android:text="1231231231231" />
 
+    <CheckBox
+        android:checked="true"
+        android:clickable="false"
+        android:textColor="@color/green"
+        android:id="@+id/onhike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="19dp"
+        android:text="on hike" />
+
 </RelativeLayout>
