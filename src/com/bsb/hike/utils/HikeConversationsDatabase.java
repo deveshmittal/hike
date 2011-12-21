@@ -142,7 +142,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 		long id = ih.execute();
 		if (id >= 0) {
-			Conversation conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.id : null, (contactInfo != null) ? contactInfo.name : null);
+			Conversation conv = new Conversation(msisdn, id, 
+			                            (contactInfo != null) ? contactInfo.id : null,
+			                            (contactInfo != null) ? contactInfo.name : null,
+			                            (contactInfo != null) ? contactInfo.onhike : false);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
 			return conv;
 		}
@@ -183,11 +186,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 		huDb.close();
-		Conversation conv = new Conversation(msisdn, convid, contactid, (contactInfo != null) ? contactInfo.name : null);
+		Conversation conv = new Conversation(msisdn, convid, contactid, 
+		                                    (contactInfo != null) ? contactInfo.name : null,
+		                                    (contactInfo != null) ? contactInfo.onhike : false);
 		List<ConvMessage> messages = getConversationThread(msisdn, contactid, convid, limit, conv);
 		conv.setMessages(messages);
 		return conv;
-	}	
+	}
 
 	public List<Conversation> getConversations() {
 		Cursor c = mDb.query(CONVERSATIONSTABLE, new String[] {"convid, contactid", "msisdn"}, null, null, null, null, null);
@@ -199,7 +204,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		while (c.moveToNext()) {
 			String msisdn = c.getString(msisdnIdx);
 			ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
-			Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx), (contactInfo != null) ? contactInfo.name : null);
+			Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx),
+			                                    (contactInfo != null) ? contactInfo.name : null,
+			                                    (contactInfo != null) ? contactInfo.onhike : false);
 			conv.setMessages(getConversationThread(conv.getMsisdn(), conv.getContactId(), conv.getConvId(), 1, conv));
 			conversations.add(conv);
 		}

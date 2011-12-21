@@ -19,11 +19,11 @@ public class Conversation implements Comparable<Conversation> {
 	}
 
 	@Override
-	public String toString() {
-		return "Conversation [msisdn=" + msisdn + ", convId=" + convId
-				+ ", contactId=" + contactId + ", messages=" + messages.size()
-				+ ", contactName=" + contactName + "]";
-	}
+    public String toString() {
+        return "Conversation [msisdn=" + msisdn + ", convId=" + convId
+                + ", contactId=" + contactId + ", messages=" + messages
+                + ", contactName=" + contactName + ", onhike=" + onhike + "]";
+    }
 
 	public String getContactId() {
 		return contactId;
@@ -34,6 +34,7 @@ public class Conversation implements Comparable<Conversation> {
 	private String contactId;
 	private List<ConvMessage> messages;
 	private String contactName;
+    private boolean onhike;
 
 	public String getContactName() {
 		return contactName;
@@ -42,15 +43,21 @@ public class Conversation implements Comparable<Conversation> {
 	public Conversation(String msisdn, 
 						long convId,
 						String contactId,
-						String contactName) {
+						String contactName,
+						boolean onhike) {
 		this.msisdn = msisdn;
 		this.convId = convId;
 		this.contactId = contactId;
 		this.contactName = contactName;
+		this.onhike = onhike;
 		this.messages = new ArrayList<ConvMessage>();
 	}
 
-	/* TODO this should be addAll to conform w/ normal java semantics */
+	public boolean isOnhike() {
+        return onhike;
+    }
+
+    /* TODO this should be addAll to conform w/ normal java semantics */
 	public void setMessages(List<ConvMessage> messages) {
 		this.messages = messages;
 	}
@@ -87,53 +94,56 @@ public class Conversation implements Comparable<Conversation> {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((contactId == null) ? 0 : contactId.hashCode());
-		result = prime * result
-				+ ((contactName == null) ? 0 : contactName.hashCode());
-		result = prime * result + (int) (convId ^ (convId >>> 32));
-		result = prime * result
-				+ ((messages == null) ? 0 : messages.hashCode());
-		result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
-		return result;
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((contactId == null) ? 0 : contactId.hashCode());
+        result = prime * result
+                + ((contactName == null) ? 0 : contactName.hashCode());
+        result = prime * result + (int) (convId ^ (convId >>> 32));
+        result = prime * result
+                + ((messages == null) ? 0 : messages.hashCode());
+        result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
+        result = prime * result + (onhike ? 1231 : 1237);
+        return result;
+    }
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Conversation other = (Conversation) obj;
-		if (contactId == null) {
-			if (other.contactId != null)
-				return false;
-		} else if (!contactId.equals(other.contactId))
-			return false;
-		if (contactName == null) {
-			if (other.contactName != null)
-				return false;
-		} else if (!contactName.equals(other.contactName))
-			return false;
-		if (convId != other.convId)
-			return false;
-		if (messages == null) {
-			if (other.messages != null)
-				return false;
-		} else if (!messages.equals(other.messages))
-			return false;
-		if (msisdn == null) {
-			if (other.msisdn != null)
-				return false;
-		} else if (!msisdn.equals(other.msisdn))
-			return false;
-		return true;
-	}
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Conversation other = (Conversation) obj;
+        if (contactId == null) {
+            if (other.contactId != null)
+                return false;
+        } else if (!contactId.equals(other.contactId))
+            return false;
+        if (contactName == null) {
+            if (other.contactName != null)
+                return false;
+        } else if (!contactName.equals(other.contactName))
+            return false;
+        if (convId != other.convId)
+            return false;
+        if (messages == null) {
+            if (other.messages != null)
+                return false;
+        } else if (!messages.equals(other.messages))
+            return false;
+        if (msisdn == null) {
+            if (other.msisdn != null)
+                return false;
+        } else if (!msisdn.equals(other.msisdn))
+            return false;
+        if (onhike != other.onhike)
+            return false;
+        return true;
+    }
 
 	public JSONObject serialize(String type) {
 		JSONObject object =  new JSONObject();
