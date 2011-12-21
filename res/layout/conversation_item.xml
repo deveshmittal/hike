@@ -3,21 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/list_item" >
+
 	<TextView
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
 	    android:id="@+id/contact"
-	    android:textColor="@color/black"
-	    android:text="Kavin Mittal"
-	    android:textAppearance="?android:attr/textAppearanceLarge"/>
-	<TextView
-	    android:text="what's up dude?"
-        android:textColor="@color/black"
-	    android:layout_below="@id/contact"
-	    android:id="@+id/last_message"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:textAppearance="?android:attr/textAppearanceMedium"/>
+	    android:layout_alignParentLeft="true"
+	    android:text="Kavin Mittal"
+	    android:layout_marginLeft="10dp"
+	    android:textAppearance="?android:attr/textAppearanceMedium"
+	    android:textColor="@color/black" />
+
 	<TextView
 	    android:text="9:35AM"
         android:textColor="@color/black"
@@ -26,5 +22,20 @@
 	    android:id="@+id/last_message_timestamp"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:textAppearance="?android:attr/textAppearanceMedium"/>
+	    android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+	<TextView
+	    android:id="@+id/last_message"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentLeft="true"
+	    android:layout_alignTop="@+id/last_message_timestamp"
+	    android:layout_marginLeft="10dp"
+	    android:layout_toLeftOf="@+id/last_message_timestamp"
+	    android:ellipsize="end"
+	    android:singleLine="true"
+	    android:text="what&apos;s up dude?  I really like cherries.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
+	    android:textAppearance="?android:attr/textAppearanceSmall"
+	    android:textColor="@color/black" />
+
 </RelativeLayout>
