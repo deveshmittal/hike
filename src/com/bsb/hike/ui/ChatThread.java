@@ -102,6 +102,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mDbhelper.close();
 				mDbhelper = null;
 				createConversation();
+				mComposeView.requestFocus();
 			}
 		});
   
