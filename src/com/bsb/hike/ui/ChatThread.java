@@ -193,7 +193,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
         mConversationsView = (ListView) findViewById(R.id.conversations_list);
         mConversationsView.setStackFromBottom(true);
-        mAdapter = new MessagesAdapter(this, messages);
+        mAdapter = new MessagesAdapter(this, messages, mConversation);
         mConversationsView.setAdapter(mAdapter);
         mComposeView = (EditText) findViewById(R.id.msg_compose);
         HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED,
