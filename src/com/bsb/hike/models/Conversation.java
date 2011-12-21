@@ -21,7 +21,7 @@ public class Conversation implements Comparable<Conversation> {
 	@Override
     public String toString() {
         return "Conversation [msisdn=" + msisdn + ", convId=" + convId
-                + ", contactId=" + contactId + ", messages=" + messages
+                + ", contactId=" + contactId + ", messages=" + messages.size()
                 + ", contactName=" + contactName + ", onhike=" + onhike + "]";
     }
 
