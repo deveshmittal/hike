@@ -50,6 +50,7 @@ public class ToastListener implements Listener {
 			} else if (activity instanceof MessagesList) {
 				return;
 			}
+
 			/* the foreground activity isn't going to show this message so Toast it */
 			HikeUserDatabase db = new HikeUserDatabase(context);
 			ContactInfo contactInfo = db.getContactInfoFromMSISDN(message.getMsisdn());
