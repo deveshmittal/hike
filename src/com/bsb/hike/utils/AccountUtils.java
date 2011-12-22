@@ -43,8 +43,8 @@ import android.util.Log;
 import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils {
-	private static final int PORT = 3001;
-	private static final String HOST = "ec2-175-41-153-127.ap-southeast-1.compute.amazonaws.com";
+    public static final String HOST = "ec2-175-41-153-127.ap-southeast-1.compute.amazonaws.com";
+    private static final int PORT = 3001;
 	private static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
