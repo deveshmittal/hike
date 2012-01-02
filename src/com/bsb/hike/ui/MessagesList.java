@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikeService;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.models.ConvMessage;
@@ -126,6 +127,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	    AccountUtils.setToken(token);
 	    HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, token);
+	    startService(new Intent(this, HikeService.class));
 
 	    setContentView(R.layout.main);
     	mConversationsView = (ListView) findViewById(R.id.conversations);
