@@ -33,7 +33,7 @@ public class ScanningAddressBook extends Activity {
 
 		public void setActivity(ScanningAddressBook activity) {
 			if (activity == null) {
-				stopManagingCursor(mContacts);
+				mActivity.stopManagingCursor(mContacts);
 			} else {
 				activity.startManagingCursor(mContacts);
 			}
