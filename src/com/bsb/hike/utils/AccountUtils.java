@@ -1,6 +1,8 @@
 package com.bsb.hike.utils;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -11,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -23,10 +26,13 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHeader;
@@ -34,6 +40,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -180,7 +187,7 @@ public class AccountUtils {
 		return true;
 	}
 
-	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws UnsupportedEncodingException {
+	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws IllegalStateException, IOException {
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
 		addToken(httppost);
 		Map<String, String> idToName = new HashMap<String, String>(contacts.size());
@@ -192,9 +199,23 @@ public class AccountUtils {
 			pairs.add(new BasicNameValuePair("id", contact.id));
 		}
 
-		HttpEntity entity = new UrlEncodedFormEntity(pairs);
-		Log.d("HTTP", "AddressBook size is " + entity.getContentLength());
+		AbstractHttpEntity entity = new UrlEncodedFormEntity(pairs);
+	    Log.d("HTTP", "AddressBook size is " + entity.getContentLength());
+
+		InputStream is = entity.getContent();
+		byte[] buf = new byte[(int) entity.getContentLength()];
+		int n = is.read(buf);
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		GZIPOutputStream zos = new GZIPOutputStream(bos);
+		zos.write(buf);
+		zos.close();
+
+		byte[] data = bos.toByteArray();
+		entity = new ByteArrayEntity(data);
+		entity.setContentType(URLEncodedUtils.CONTENT_TYPE + HTTP.CHARSET_PARAM + HTTP.DEFAULT_CONTENT_CHARSET);
 		httppost.setEntity(entity);
+		httppost.addHeader("Content-Encoding", "gzip");
 
 		JSONObject obj = executeRequest(httppost);
 		if ((obj == null) ||
@@ -227,10 +248,12 @@ public class AccountUtils {
 	public static class AccountInfo {
 		public String token;
 		public String msisdn;
+		public String uid;
 
-		public AccountInfo(String token, String msisdn) {
+		public AccountInfo(String token, String msisdn, String uid) {
 			this.token = token;
 			this.msisdn = msisdn;
+			this.uid = uid;
 		}
 	}
 
@@ -259,8 +282,9 @@ public class AccountUtils {
 
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
+		String uid = obj.optString("uid");
 		Log.d("HTTP", "Successfully created account");
-		return new AccountUtils.AccountInfo(token, msisdn);
+		return new AccountUtils.AccountInfo(token, msisdn, uid);
 	}
 
 	public static HikeWebSocketClient startWebSocketConnection() {
