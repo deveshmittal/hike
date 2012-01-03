@@ -5,6 +5,7 @@ import android.os.Handler;
 
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.utils.DbConversationListener;
+import com.bsb.hike.utils.SmileyParser;
 
 public class HikeMessengerApp extends Application {
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
@@ -23,7 +24,7 @@ public class HikeMessengerApp extends Application {
 
 	public void onCreate() {
 		super.onCreate();
-
+		SmileyParser.init(this);
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
 

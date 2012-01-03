@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.utils.SmileyParser;
 
 public class MessagesAdapter extends ArrayAdapter<ConvMessage> {
 
@@ -43,8 +44,11 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage> {
 		        v.setBackgroundResource(R.color.green);
 		    }
 		}
+
 		TextView messageView = (TextView) v.findViewById(R.id.conversation_id);
-		messageView.setText(convMessage.getMessage());
+		SmileyParser smileyParser = SmileyParser.getInstance();
+		CharSequence markedUp = smileyParser.addSmileySpans(convMessage.getMessage());
+		messageView.setText(markedUp);
 
 		TextView timestampView = (TextView) v.findViewById(R.id.timestamp);
 		String dateFormatted = convMessage.getTimestampFormatted();
