@@ -134,7 +134,7 @@ public class ConvMessage {
 	}
 
 	public String getTimestampFormatted() {
-		SimpleDateFormat dfm = new SimpleDateFormat("HH:mm aa");
+		SimpleDateFormat dfm = new SimpleDateFormat("HH:mm");
 		Date date = new Date(mTimestamp * 1000);
 		String dateFormatted = dfm.format(date);
 		return dateFormatted;
