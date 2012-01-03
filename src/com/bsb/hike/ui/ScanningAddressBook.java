@@ -12,7 +12,6 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.provider.Contacts.People.Phones;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
