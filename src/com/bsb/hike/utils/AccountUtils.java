@@ -199,23 +199,8 @@ public class AccountUtils {
 			pairs.add(new BasicNameValuePair("id", contact.id));
 		}
 
-		AbstractHttpEntity entity = new UrlEncodedFormEntity(pairs);
-	    Log.d("HTTP", "AddressBook size is " + entity.getContentLength());
-
-		InputStream is = entity.getContent();
-		byte[] buf = new byte[(int) entity.getContentLength()];
-		int n = is.read(buf);
-
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		GZIPOutputStream zos = new GZIPOutputStream(bos);
-		zos.write(buf);
-		zos.close();
-
-		byte[] data = bos.toByteArray();
-		entity = new ByteArrayEntity(data);
-		entity.setContentType(URLEncodedUtils.CONTENT_TYPE + HTTP.CHARSET_PARAM + HTTP.DEFAULT_CONTENT_CHARSET);
+		AbstractHttpEntity entity = new GzipUrlEncodedFormEntity(pairs, HTTP.DEFAULT_CONTENT_CHARSET);
 		httppost.setEntity(entity);
-		httppost.addHeader("Content-Encoding", "gzip");
 
 		JSONObject obj = executeRequest(httppost);
 		if ((obj == null) ||
