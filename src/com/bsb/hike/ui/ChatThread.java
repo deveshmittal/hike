@@ -161,7 +161,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		Log.d("ChatThread", "Send Button Called");
 		String message = mComposeView.getText().toString();
 		mComposeView.setText("");
-		int time = (int) System.currentTimeMillis()/10000;
+		int time = (int) System.currentTimeMillis()/1000;
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, Long.toString(mContactId), time, true);
 		convMessage.setConversation(mConversation);
 		mAdapter.add(convMessage);
