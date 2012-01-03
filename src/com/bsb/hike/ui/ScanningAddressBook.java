@@ -12,6 +12,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Contacts.People.Phones;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
@@ -67,13 +68,17 @@ public class ScanningAddressBook extends Activity {
 	            contactNames.put(id, name);
 			}
 
-			mPhones = mActivity.managedQuery(Phone.CONTENT_URI, new String[]{Phone.CONTACT_ID, Phone.NUMBER}, 
+			mPhones = mActivity.managedQuery(Phone.CONTENT_URI, new String[]{Phone.CONTACT_ID, Phone.NUMBER, Phone.TYPE}, 
 			                         null, null, null);
 
 			int numberColIdx = mPhones.getColumnIndex(Phone.NUMBER);
 			int idColIdx = mPhones.getColumnIndex(Phone.CONTACT_ID);
+			int typeColIdx = mPhones.getColumnIndex(Phone.TYPE);
 			while (mPhones.moveToNext()) {
 			    //TODO this should be done via SQL
+			    if (mPhones.getInt(typeColIdx) != Phone.TYPE_MOBILE) {
+			        continue;
+			    }
 			    String number = mPhones.getString(numberColIdx);
 			    String id = mPhones.getString(idColIdx);
 			    String name = contactNames.get(id);
