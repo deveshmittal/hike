@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 public class Utils {
-	static String join(Collection<?> s, String delimiter) {
+	public static String join(Collection<?> s, String delimiter) {
 	     StringBuilder builder = new StringBuilder();
 	     Iterator<?> iter = s.iterator();
 	     while (iter.hasNext()) {
