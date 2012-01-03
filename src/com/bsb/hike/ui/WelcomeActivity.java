@@ -31,11 +31,13 @@ public class WelcomeActivity extends Activity {
 			if (accountInfo != null) {
 				String token = accountInfo.token;
 				String msisdn = accountInfo.msisdn;
+				String uid = accountInfo.uid;
 				AccountUtils.setToken(token);
 				SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 				SharedPreferences.Editor editor = settings.edit();
 				editor.putString(HikeMessengerApp.TOKEN_SETTING, token);
 				editor.putString(HikeMessengerApp.MSISDN_SETTING, msisdn);
+				editor.putString(HikeMessengerApp.UID_SETTING, uid);
 				editor.commit();
 			}
 

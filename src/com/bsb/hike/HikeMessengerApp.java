@@ -13,6 +13,7 @@ public class HikeMessengerApp extends Application {
 	public static final String NAME_SETTING = "name";
 	public static final String TOKEN_SETTING = "token";
 	public static final String MESSAGES_SETTING = "messageid";
+    public static final String UID_SETTING = "uid";
 	private static HikePubSub mPubSubInstance;
     private NetworkManager mNetworkManager;
 
