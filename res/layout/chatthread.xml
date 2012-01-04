@@ -36,7 +36,7 @@
 	    android:id="@+id/bottom_panel"
 	    android:background="@color/grey">
 
-         <EditText
+        <EditText
              android:id="@+id/msg_compose"
              android:layout_width="fill_parent"
              android:layout_height="fill_parent"
