@@ -46,6 +46,8 @@
         android:layout_above="@id/bottom_nav_bar"
         android:layout_below="@+id/title_field">
     <ListView
+        android:divider="@color/dividercolor"
+        android:dividerHeight="1dp"
         android:id="@+id/conversations"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

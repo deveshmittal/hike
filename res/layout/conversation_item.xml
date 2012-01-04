@@ -2,7 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/list_item" >
+    android:background="@drawable/list_item"
+    android:paddingBottom="10dp"
+    android:paddingTop="10dp">
 
 	<TextView
 	    android:id="@+id/contact"
@@ -19,6 +21,7 @@
         android:textColor="@color/black"
 	    android:layout_below="@id/contact"
 	    android:layout_alignParentRight="true"
+	    android:layout_marginRight="10dp"
 	    android:id="@+id/last_message_timestamp"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
@@ -31,10 +34,11 @@
 	    android:layout_alignParentLeft="true"
 	    android:layout_alignTop="@+id/last_message_timestamp"
 	    android:layout_marginLeft="10dp"
+	    android:layout_marginRight="15dp"
 	    android:layout_toLeftOf="@+id/last_message_timestamp"
 	    android:ellipsize="end"
 	    android:singleLine="true"
-	    android:text="what&apos;s up dude?  I really like cherries.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
+	    android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
 	    android:textAppearance="?android:attr/textAppearanceSmall"
 	    android:textColor="@color/black" />
 
