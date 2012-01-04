@@ -263,7 +263,7 @@ public class AccountUtils {
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
 		String uid = obj.optString("uid");
-		Log.d("HTTP", "Successfully created account");
+		Log.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
 		return new AccountUtils.AccountInfo(token, msisdn, uid);
 	}
 
