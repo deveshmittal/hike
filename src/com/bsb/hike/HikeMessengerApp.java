@@ -6,6 +6,7 @@ import android.os.Handler;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.utils.DbConversationListener;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.ToastListener;
 
 public class HikeMessengerApp extends Application {
 	public static final String ACCOUNT_SETTINGS = "accountsettings";

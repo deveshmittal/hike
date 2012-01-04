@@ -23,12 +23,7 @@ public class HikeToast {
         this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    public void toast(String msisdn, String message, int timestamp) {
-
-        HikeUserDatabase db = new HikeUserDatabase(context);
-        ContactInfo contactInfo = db.getContactInfoFromMSISDN(msisdn);
-        db.close();
-
+    public void toast(ContactInfo contactInfo, String msisdn, String message, int timestamp) {
         String name = (contactInfo != null) ? contactInfo.name : msisdn;
         int icon = R.drawable.ic_launcher;
 

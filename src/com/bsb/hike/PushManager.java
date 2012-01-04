@@ -13,8 +13,12 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.util.Log;
 
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeToast;
+import com.bsb.hike.utils.HikeUserDatabase;
 
 public class PushManager extends Thread {
 
@@ -23,6 +27,8 @@ public class PushManager extends Thread {
     private String password;
     private String topic;
     private HikeToast toaster;
+    private HikeUserDatabase db;
+    private HikeConversationsDatabase convDb;
 
     public PushManager(Context context, String uid, String password) throws URISyntaxException {
         mqtt = new MQTT();
@@ -33,6 +39,8 @@ public class PushManager extends Thread {
         mqtt.setPassword(password);
         this.password = password;
         this.topic = uid;
+        this.db = new HikeUserDatabase(context);
+        this.convDb = new HikeConversationsDatabase(context);
     }
 
     private BlockingConnection connect() {
@@ -82,7 +90,10 @@ public class PushManager extends Thread {
                 String msg = obj.optString("message");
                 String msisdn = obj.optString("msisdn");
                 int timestamp = obj.optInt("timestamp");
-                this.toaster.toast(msisdn, msg, timestamp);
+                ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(msisdn);
+                this.toaster.toast(contactInfo, msisdn, msg, timestamp);
+                ConvMessage convMessage = new ConvMessage(msg, msisdn, contactInfo.id, timestamp, false);
+                this.convDb.addConversationMessages(convMessage);
             } catch (JSONException e) {
                 Log.e("PushManager", "invalid JSON Message", e);
             }
