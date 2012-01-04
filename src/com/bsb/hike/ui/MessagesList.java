@@ -113,6 +113,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private ConversationsAdapter mAdapter;
 
+    private RelativeLayout mEmptyView;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -137,16 +139,16 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
     	mEditMessageIconView = findViewById(R.id.edit_message);
     	mEditMessageIconView.setOnClickListener(this);
     	LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    	RelativeLayout emptyView = (RelativeLayout) vi.inflate(R.layout.empty_conversations, null);
-    	emptyView.setVisibility(View.GONE);
-    	emptyView.setOnClickListener(this);
+    	mEmptyView = (RelativeLayout) vi.inflate(R.layout.empty_conversations, null);
+    	mEmptyView.setVisibility(View.GONE);
+    	mEmptyView.setOnClickListener(this);
     	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
     			RelativeLayout.LayoutParams.FILL_PARENT,
     			RelativeLayout.LayoutParams.FILL_PARENT);
     	params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-    	emptyView.setLayoutParams(params);
-    	((ViewGroup) mConversationsView.getParent()).addView(emptyView);
-    	mConversationsView.setEmptyView(emptyView);
+    	mEmptyView.setLayoutParams(params);
+    	((ViewGroup) mConversationsView.getParent()).addView(mEmptyView);
+    	mConversationsView.setEmptyView(mEmptyView);
   
     	HikeConversationsDatabase db = new HikeConversationsDatabase(this);
     	List<Conversation> conversations = db.getConversations();
@@ -224,7 +226,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
     @Override
 	public void onClick(View v) {
-		if (v == mEditMessageIconView) {
+		if ( (v == mEditMessageIconView) || (v == mEmptyView)) {
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra("edit", true);
 			startActivity(intent);
