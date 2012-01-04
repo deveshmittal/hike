@@ -288,7 +288,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			//we're currently not in 'typing' mode
 			mTextLastChanged = System.currentTimeMillis();
 			//fire an event
-            mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("start_typing"));
+		    mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("typing"));
 
 			//create a timer to clear the event
 			mUiThreadHandler.removeCallbacks(mResetTypingNotification); //clear any existing ones
