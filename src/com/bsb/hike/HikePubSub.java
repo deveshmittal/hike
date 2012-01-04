@@ -26,7 +26,6 @@ public class HikePubSub implements Runnable {
 
 	private static final Operation DONE_OPERATION = null; /* TODO this can't be null */
 
-	   
 	public static final String MESSAGE_SENT = "messagesent";
 	public static final String WS_CLOSE = "ws_close";
 	public static final String WS_MESSAGE = "ws_message";
