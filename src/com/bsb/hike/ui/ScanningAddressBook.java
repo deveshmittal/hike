@@ -105,6 +105,9 @@ public class ScanningAddressBook extends Activity {
 			}
 
 			Log.d("ScanningAddressBook", "Finished scanning addressbook");
+			SharedPreferences.Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, true);
+			editor.commit();
 			Intent intent = new Intent(ScanningAddressBook.this, MessagesList.class);
 			intent.putExtra("first", true);
 			startActivity(intent);
