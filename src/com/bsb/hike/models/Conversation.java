@@ -1,6 +1,7 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONException;
@@ -9,6 +10,14 @@ import org.json.JSONObject;
 import android.util.Log;
 
 public class Conversation implements Comparable<Conversation> {
+
+    public static class ConversationComparator implements Comparator<Conversation> {
+
+        @Override
+        public int compare(Conversation conv1, Conversation conv2) {
+            return conv1.compareTo(conv2);
+        }
+    }
 
 	public String getMsisdn() {
 		return msisdn;
