@@ -276,7 +276,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	@Override
 	public void afterTextChanged(Editable editable) {
-		if (editable.toString().isEmpty()) {
+		if (editable.toString().trim().length() == 0) {
 			return;
 		}
 
