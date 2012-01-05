@@ -142,6 +142,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
     	mSearchIconView.setOnClickListener(this);
     	mEditMessageIconView = findViewById(R.id.edit_message);
     	mEditMessageIconView.setOnClickListener(this);
+ 
+    	/* set the empty view layout for the list */
     	LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     	mEmptyView = (RelativeLayout) vi.inflate(R.layout.empty_conversations, null);
     	mEmptyView.setVisibility(View.GONE);
@@ -186,7 +188,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			}
 		});
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
