@@ -43,7 +43,8 @@ public class ConvMessage {
 
 	@Override
 	public String toString() {
-		return "ConvMessage [mConversation=" + mConversation.getConvId() + ", mMessage="
+	    String convId = mConversation == null ? "null" : Long.toString(mConversation.getConvId());
+		return "ConvMessage [mConversation=" + convId + ", mMessage="
 				+ mMessage + ", mMsisdn=" + mMsisdn + ", contactId="
 				+ contactId + ", mTimestamp=" + mTimestamp + ", mIsSent="
 				+ mIsSent + ", mState=" + mState + "]";
@@ -55,8 +56,6 @@ public class ConvMessage {
 		int result = 1;
 		result = prime * result
 				+ ((contactId == null) ? 0 : contactId.hashCode());
-		result = prime * result
-				+ ((mConversation == null) ? 0 : mConversation.hashCode());
 		result = prime * result + (mIsSent ? 1231 : 1237);
 		result = prime * result
 				+ ((mMessage == null) ? 0 : mMessage.hashCode());
