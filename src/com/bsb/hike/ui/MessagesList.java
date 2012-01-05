@@ -1,7 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import android.app.Activity;
@@ -42,7 +41,6 @@ import com.bsb.hike.utils.HikeConversationsDatabase;
 public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener {
 
 	private HashMap<String, Conversation> mConversationsByMSISDN;
-	private Conversation.ConversationComparator mConversationComparator;
 
 	@Override
 	protected void onPause() {
@@ -160,24 +158,15 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
   
     	HikeConversationsDatabase db = new HikeConversationsDatabase(this);
     	List<Conversation> conversations = db.getConversations();
+    	mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
+    	mConversationsView.setAdapter(mAdapter);
     	db.close();
 
-    	mConversationComparator = new Conversation.ConversationComparator();
     	mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
-
-    	/* we use an explicit for-loop so we have access to the iterator so we can remove empty conversations
-    	 * before adding the to the adapter */
-    	for(Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();) {
-    	    Conversation conv = iter.next();
+    	for (Conversation conv : conversations) {
     		mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-    		if (conv.getMessages().isEmpty()) {
-    		    iter.remove();
-    		}
     	}
-
-        mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
-        mConversationsView.setAdapter(mAdapter);
-
+   
     	HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
     	HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
 
@@ -258,30 +247,26 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			String msisdn = message.getMsisdn();
 			Conversation conv = mConversationsByMSISDN.get(msisdn);
 			if (conv == null) {
-				Log.w("MessagesList", "No conversation with " + msisdn + " found");
+				Log.w("MessagesList", "New Conversation is null");
 				return;
 			}
-
-			/* we only add the conversation to the adapter when it's 
-			 * non-empty, so go ahead and add it now */
-			if (conv.getMessages().isEmpty()) {
-			    mAdapter.add(conv);
-			}
-
 			conv.addMessage(message);
-			mAdapter.sort(mConversationComparator);
-			mAdapter.notifyDataSetChanged();
-
 			/* this could be a singleton object within this class */
-/*			runOnUiThread(new Runnable() {
+			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					mAdapter.notifyDataSetChanged();
 				}		
-			});*/
+			});
 		} else if (HikePubSub.NEW_CONVERSATION.equals(type)) {
 			final Conversation conversation = (Conversation) object;
 			mConversationsByMSISDN.put(conversation.getMsisdn(), conversation);
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					mAdapter.add(conversation);
+				}
+			});
 		}
 	}
 
@@ -300,3 +285,4 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 	}
 }
+
