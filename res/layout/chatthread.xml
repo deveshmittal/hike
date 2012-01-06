@@ -21,6 +21,7 @@
             android:visibility="visible"
             android:id="@+id/name_field"
             android:layout_width="fill_parent"
+            android:height="40dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_margin="7dp"
