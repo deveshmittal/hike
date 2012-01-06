@@ -1,19 +1,22 @@
 package com.bsb.hike.models;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.ocpsoft.pretty.time.PrettyTime;
+
 import android.util.Log;
 
 public class ConvMessage {
-	public ConvMessage(String message, String msisdn, String contactId, int timestamp, boolean isSent) {
+	public ConvMessage(String message, String msisdn, String contactId, long time, boolean isSent) {
 		this.contactId = contactId;
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
-		this.mTimestamp = timestamp;
+		this.mTimestamp = time;
 		this.mIsSent = isSent;
 	}
 
@@ -25,7 +28,7 @@ public class ConvMessage {
 		return mIsSent;
 	}
 
-	public int getTimestamp() {
+	public long getTimestamp() {
 		return this.mTimestamp;
 	}
 
@@ -51,63 +54,58 @@ public class ConvMessage {
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((contactId == null) ? 0 : contactId.hashCode());
-		result = prime * result + (mIsSent ? 1231 : 1237);
-		result = prime * result
-				+ ((mMessage == null) ? 0 : mMessage.hashCode());
-		result = prime * result + ((mMsisdn == null) ? 0 : mMsisdn.hashCode());
-		result = prime * result + ((mState == null) ? 0 : mState.hashCode());
-		result = prime * result + mTimestamp;
-		return result;
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                + ((contactId == null) ? 0 : contactId.hashCode());
+        result = prime * result + (mIsSent ? 1231 : 1237);
+        result = prime * result
+                + ((mMessage == null) ? 0 : mMessage.hashCode());
+        result = prime * result + ((mMsisdn == null) ? 0 : mMsisdn.hashCode());
+        result = prime * result + ((mState == null) ? 0 : mState.hashCode());
+        result = prime * result + (int) (mTimestamp ^ (mTimestamp >>> 32));
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ConvMessage other = (ConvMessage) obj;
-		if (contactId == null) {
-			if (other.contactId != null)
-				return false;
-		} else if (!contactId.equals(other.contactId))
-			return false;
-		if (mConversation == null) {
-			if (other.mConversation != null)
-				return false;
-		} else if (!mConversation.equals(other.mConversation))
-			return false;
-		if (mIsSent != other.mIsSent)
-			return false;
-		if (mMessage == null) {
-			if (other.mMessage != null)
-				return false;
-		} else if (!mMessage.equals(other.mMessage))
-			return false;
-		if (mMsisdn == null) {
-			if (other.mMsisdn != null)
-				return false;
-		} else if (!mMsisdn.equals(other.mMsisdn))
-			return false;
-		if (mState != other.mState)
-			return false;
-		if (mTimestamp != other.mTimestamp)
-			return false;
-		return true;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ConvMessage other = (ConvMessage) obj;
+        if (contactId == null) {
+            if (other.contactId != null)
+                return false;
+        } else if (!contactId.equals(other.contactId))
+            return false;
+        if (mIsSent != other.mIsSent)
+            return false;
+        if (mMessage == null) {
+            if (other.mMessage != null)
+                return false;
+        } else if (!mMessage.equals(other.mMessage))
+            return false;
+        if (mMsisdn == null) {
+            if (other.mMsisdn != null)
+                return false;
+        } else if (!mMsisdn.equals(other.mMsisdn))
+            return false;
+        if (mState != other.mState)
+            return false;
+        if (mTimestamp != other.mTimestamp)
+            return false;
+        return true;
+    }
 
 	private Conversation mConversation;
 	private String mMessage;
 	private String mMsisdn;
 	private String contactId;
-	private int mTimestamp;
+	private long mTimestamp;
 	private boolean mIsSent;
 	public enum State {SENT, DELIVERED, RECEIVED };
 	private State mState;
@@ -133,9 +131,8 @@ public class ConvMessage {
 	}
 
 	public String getTimestampFormatted() {
-		SimpleDateFormat dfm = new SimpleDateFormat("HH:mm");
 		Date date = new Date(mTimestamp * 1000);
-		String dateFormatted = dfm.format(date);
-		return dateFormatted;
+	    PrettyTime p = new PrettyTime();
+	    return p.format(date);
 	}
 }

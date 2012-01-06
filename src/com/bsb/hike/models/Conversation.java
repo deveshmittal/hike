@@ -72,8 +72,8 @@ public class Conversation implements Comparable<Conversation> {
 			return 0;
 		}
 
-		int ts = messages.isEmpty() ? 0 : messages.get(0).getTimestamp();
-		int rhsTs = rhs.messages.isEmpty() ? 0 : rhs.messages.get(0).getTimestamp();
+		long ts = messages.isEmpty() ? 0 : messages.get(0).getTimestamp();
+		long rhsTs = rhs.messages.isEmpty() ? 0 : rhs.messages.get(0).getTimestamp();
 		if (rhsTs != ts) {
 			return (ts < rhsTs) ? -1 : 1;
 		}
