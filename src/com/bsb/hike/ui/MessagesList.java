@@ -132,7 +132,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	    	finish();
 	        return;
 	    } else if (!settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false)) {
-	        startActivity(new Intent(this, ScanningAddressBook.class));
+	        startActivity(new Intent(this, AccountCreateSuccess.class));
 	        finish();
 	        return;
 	    }
