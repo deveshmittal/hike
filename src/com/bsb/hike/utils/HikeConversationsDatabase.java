@@ -85,6 +85,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		addConversations(l);
 	}
 
+	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv) {
+        final int messageColumn = 1;
+        final int sentColumn = 2;
+        final int timestampColumn = 3;
+        final int msisdnColumn = 4;
+
+        insertStatement.clearBindings();
+	    insertStatement.bindString(messageColumn, conv.getMessage());
+	    insertStatement.bindLong(sentColumn, conv.isSent() ? 1 : 0);
+	    insertStatement.bindLong(timestampColumn, conv.getTimestamp());
+	    insertStatement.bindString(msisdnColumn, conv.getMsisdn());
+	}
+
 	public void addConversations(List<ConvMessage> convMessages) {
 		SQLiteStatement insertStatement = mDb.compileStatement(
 				"INSERT INTO " + MESSAGESTABLE + 
@@ -92,25 +105,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				"SELECT ?, ?, ?, convid FROM " + CONVERSATIONSTABLE + 
 				" WHERE " + CONVERSATIONSTABLE +".msisdn=?");
 		mDb.beginTransaction();
-		final int messageColumn = 1;
-		final int sentColumn = 2;
-		final int timestampColumn = 3;
-		final int msisdnColumn = 4;
 
 		for(ConvMessage conv : convMessages) {
-			insertStatement.clearBindings();
-			insertStatement.bindString(messageColumn, conv.getMessage());
-			insertStatement.bindLong(sentColumn, conv.isSent() ? 1 : 0);
-			insertStatement.bindLong(timestampColumn, conv.getTimestamp());
-			insertStatement.bindString(msisdnColumn, conv.getMsisdn());
+		    bindConversationInsert(insertStatement, conv);
 			long msgId = insertStatement.executeInsert();
 			if (msgId < 0) {
+			    Log.d("HikeConversationDB", "adding conversation for msisdn " + conv.getMsisdn());
 				Conversation conversation = addConversation(conv.getMsisdn());
 				if (conversation != null) {
 					conversation.addMessage(conv);
 				}
+				bindConversationInsert(insertStatement, conv);
 				msgId = insertStatement.executeInsert();
-				assert (msgId >= 0);
+				assert (msgId > 0);
 			}			
 		}
 
