@@ -247,7 +247,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			String msisdn = message.getMsisdn();
 			Conversation conv = mConversationsByMSISDN.get(msisdn);
 			if (conv == null) {
-				Log.w("MessagesList", "New Conversation is null");
+			    //When a message gets sent from a user we don't have a conversation for, the message gets
+			    //broadcasted first then the conversation gets created.  It's okay that we don't add it now, because
+			    //when the conversation is broadcasted it will contain the messages
 				return;
 			}
 			conv.addMessage(message);
