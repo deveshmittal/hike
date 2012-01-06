@@ -1,7 +1,11 @@
 package com.bsb.hike.ui;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -13,7 +17,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract.Contacts;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,9 +41,10 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 
-public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener {
+public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable {
 
-	private HashMap<String, Conversation> mConversationsByMSISDN;
+	private Map<String, Conversation> mConversationsByMSISDN;
+	private Set<String> mConversationsAdded;
 
 	@Override
 	protected void onPause() {
@@ -74,6 +78,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		protected void onPostExecute(Boolean result) {
 			if (result == Boolean.TRUE) {
 				mAdapter.clear();
+				mAdapter.notifyDataSetChanged();
+				mAdapter.setNotifyOnChange(false);
 				mConversationsByMSISDN.clear();
 			}
 		}		
@@ -133,6 +139,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	    AccountUtils.setToken(token);
 	    HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, token);
+	    //TODO this is being called everytime this activity is created.  Way too often
 	    startService(new Intent(this, HikeService.class));
 
 	    setContentView(R.layout.main);
@@ -158,15 +165,32 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
   
     	HikeConversationsDatabase db = new HikeConversationsDatabase(this);
     	List<Conversation> conversations = db.getConversations();
-    	mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
-    	mConversationsView.setAdapter(mAdapter);
     	db.close();
 
     	mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
-    	for (Conversation conv : conversations) {
-    		mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+    	mConversationsAdded = new HashSet<String>();
+
+    	/* Use an iterator so we can remove conversations w/ no messages
+    	 * from our list
+    	 */
+    	for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
+    	{
+    	    Conversation conv = (Conversation) iter.next();
+    	    mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+    	    if (conv.getMessages().isEmpty()) {
+    	        iter.remove();
+    	    } else {
+    	        mConversationsAdded.add(conv.getMsisdn());
+    	    }
     	}
-   
+
+        mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
+        /* because notifyOnChange gets re-enabled whenever we call notifyDataSetChanged
+         * it's simpler to assume it's set to false and always notifyOnChange by hand
+         */
+        mAdapter.setNotifyOnChange(false);
+        mConversationsView.setAdapter(mAdapter);
+
     	HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
     	HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
 
@@ -252,24 +276,38 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			    //when the conversation is broadcasted it will contain the messages
 				return;
 			}
+
+			/* notification must be done on the thread that created the view (the UI thread in our case)
+			 * We don't want to sort the list on the UI thread so instead, disable notification and manually notify on the UI thread
+			 * We have to ensure it's disabled because calling notifyDataSetChanged will re-enable notifyOnChange
+			 */
+			mAdapter.setNotifyOnChange(false);
+			if (!mConversationsAdded.contains(conv.getMsisdn())) {
+			    mConversationsAdded.add(conv.getMsisdn());
+			    mAdapter.add(conv);
+			}
+
 			conv.addMessage(message);
-			/* this could be a singleton object within this class */
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					mAdapter.notifyDataSetChanged();
-				}		
-			});
+
+			runOnUiThread(this);
 		} else if (HikePubSub.NEW_CONVERSATION.equals(type)) {
 			final Conversation conversation = (Conversation) object;
 			mConversationsByMSISDN.put(conversation.getMsisdn(), conversation);
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					mAdapter.add(conversation);
-				}
-			});
+			if (conversation.getMessages().isEmpty()) {
+			    return;
+			}
+
+			mConversationsAdded.add(conversation.getMsisdn());
+            mAdapter.add(conversation);
+
+			runOnUiThread(this);
 		}
+	}
+
+	public void run() {
+	    mAdapter.notifyDataSetChanged();
+	    //notifyDataSetChanged sets notifyonChange to true but we want it to always be false
+	    mAdapter.setNotifyOnChange(false);
 	}
 
 	@Override
