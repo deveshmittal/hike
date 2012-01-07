@@ -96,8 +96,12 @@ public class ScanningAddressBook extends Activity {
 				db = new HikeUserDatabase(ScanningAddressBook.this);
 				db.updateAddressBook(addressbook);
 			} catch(Exception e) {
-				//TODO raise a dialog here, ask the user to retry later?  Or continue?
 				Log.e("ScanningAddressBook", "Unable to post address book", e);
+				Intent intent = new Intent(ScanningAddressBook.this, AccountCreateSuccess.class);
+				intent.putExtra("failed", true);
+	            startActivity(intent);
+	            finish();
+	            return null;
 			} finally {
 				if (db != null) {
 					db.close();

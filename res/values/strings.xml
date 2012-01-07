@@ -24,4 +24,5 @@ No hidden costs and no data plan required</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="delete_all_question">Delete all your conversations?</string>
+    <string name="address_book_failed">Shucks, we couldn\'t scan your address book.  Try again?</string>
 </resources>
