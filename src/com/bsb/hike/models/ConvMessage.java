@@ -113,6 +113,7 @@ public class ConvMessage {
 	public JSONObject serialize(String type) {
 		JSONObject object = new JSONObject();
 		try {
+		    object.put("ts", mTimestamp);
 			object.put("type", type);
 			object.put("to", mMsisdn);
 			object.put("body", mMessage);
