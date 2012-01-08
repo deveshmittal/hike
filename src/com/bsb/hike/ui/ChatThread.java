@@ -15,6 +15,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
@@ -48,6 +49,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private SetTypingText mClearTypingCallback;
 	private ResetTypingNotification mResetTypingNotification;
 	private Handler mUiThreadHandler;
+    private Button mSendBtn;
 
 	@Override
 	protected void onPause() {
@@ -202,6 +204,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
         HikeMessengerApp.getPubSub().addListener(
                 HikePubSub.END_TYPING_CONVERSATION, this);
         mComposeView.addTextChangedListener(this);
+
+        mSendBtn = (Button) findViewById(R.id.send_message);
 	}
 
 	private class SetTypingText implements Runnable {
@@ -278,9 +282,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void afterTextChanged(Editable editable) {
 		if (editable.toString().trim().length() == 0) {
+		    mSendBtn.setEnabled(false);
 			return;
 		}
 
+		mSendBtn.setEnabled(true);
 		if (mResetTypingNotification == null) {
 			mResetTypingNotification = new ResetTypingNotification();
 		}
