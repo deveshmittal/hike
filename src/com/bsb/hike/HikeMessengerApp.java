@@ -17,6 +17,7 @@ public class HikeMessengerApp extends Application {
 	public static final String MESSAGES_SETTING = "messageid";
     public static final String UID_SETTING = "uid";
     public static final String ADDRESS_BOOK_SCANNED = "abscanned";
+    public static final String CONTACT_LIST_EMPTY = "contactlistempty";
 	private static HikePubSub mPubSubInstance;
     private NetworkManager mNetworkManager;
 

@@ -149,12 +149,29 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
     	mSearchIconView.setOnClickListener(this);
     	mEditMessageIconView = findViewById(R.id.edit_message);
     	mEditMessageIconView.setOnClickListener(this);
- 
+
     	/* set the empty view layout for the list */
     	LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     	mEmptyView = (RelativeLayout) vi.inflate(R.layout.empty_conversations, null);
+
+        /*
+         * if we have no contacts yet, let the user alert the user that they
+         * need to add contacts
+         */
+        if (settings.getBoolean(HikeMessengerApp.CONTACT_LIST_EMPTY, false)) {
+            View message = mEmptyView.findViewById(R.id.no_contacts_message);
+            message.setVisibility(View.VISIBLE);
+            View v = mEmptyView.findViewById(R.id.edit_message_icon);
+            v.setVisibility(View.INVISIBLE);
+            v = mEmptyView.findViewById(R.id.tap_to_send_message);
+            v.setVisibility(View.INVISIBLE);
+        } else {
+            //only make the view clickable if the user has contacts
+            mEmptyView.setOnClickListener(this);
+        }
+
     	mEmptyView.setVisibility(View.GONE);
-    	mEmptyView.setOnClickListener(this);
+
     	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
     			RelativeLayout.LayoutParams.FILL_PARENT,
     			RelativeLayout.LayoutParams.FILL_PARENT);

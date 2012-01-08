@@ -5,9 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,6 +18,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class HikeUserDatabase extends SQLiteOpenHelper {
 	private SQLiteDatabase mDb;
 	private SQLiteDatabase mReadDb;
+    private Context context;
 
 	private static final int DATABASE_VERSION = 2;
 	private static final String DATABASE_NAME = "hikeusers";
@@ -31,6 +34,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		mDb = getWritableDatabase();
 		mReadDb = getReadableDatabase();
+		this.context = context;
 	}
 
 	@Override
@@ -79,11 +83,24 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			db.delete(DATABASE_TABLE, "id in ("+clause+")", null);
 		}
 
+		updateHasUsersSetting();
+
 		db.setTransactionSuccessful();
 		db.endTransaction();
 	}
 
-	public Cursor findUsers(String partialName) {
+	/* Updates a setting on whether or not we have any users in our DB.
+	 * Call this whenever you remove users from the db (and on initial scan)"
+	 */
+	private void updateHasUsersSetting() {
+	    Cursor c = mDb.rawQuery("SELECT id FROM users LIMIT 1", null);
+        SharedPreferences.Editor editor = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+        editor.putBoolean(HikeMessengerApp.CONTACT_LIST_EMPTY, c.isLast());
+        c.close();
+        editor.commit();
+    }
+
+    public Cursor findUsers(String partialName) {
 		Cursor cursor = mDb.rawQuery("SELECT name, id AS _id, msisdn, onhike FROM users WHERE name LIKE ?", new String[] { partialName });
 		return cursor;
 	}
