@@ -101,7 +101,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
     }
 
     public Cursor findUsers(String partialName) {
-		Cursor cursor = mDb.rawQuery("SELECT name, id AS _id, msisdn, onhike FROM users WHERE name LIKE ? ORDER BY name", new String[] { partialName });
+		Cursor cursor = mDb.rawQuery("SELECT name, id AS _id, msisdn, onhike, onhike=0 AS NotOnHike FROM users WHERE name LIKE ? ORDER BY name, NotOnHike", new String[] { partialName });
 		return cursor;
 	}
 
