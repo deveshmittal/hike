@@ -67,17 +67,12 @@ public class ScanningAddressBook extends Activity {
 	            contactNames.put(id, name);
 			}
 
-			mPhones = mActivity.managedQuery(Phone.CONTENT_URI, new String[]{Phone.CONTACT_ID, Phone.NUMBER, Phone.TYPE}, 
+			mPhones = mActivity.managedQuery(Phone.CONTENT_URI, new String[]{Phone.CONTACT_ID, Phone.NUMBER}, 
 			                         null, null, null);
 
 			int numberColIdx = mPhones.getColumnIndex(Phone.NUMBER);
 			int idColIdx = mPhones.getColumnIndex(Phone.CONTACT_ID);
-			int typeColIdx = mPhones.getColumnIndex(Phone.TYPE);
 			while (mPhones.moveToNext()) {
-			    //TODO this should be done via SQL
-			    if (mPhones.getInt(typeColIdx) != Phone.TYPE_MOBILE) {
-			        continue;
-			    }
 			    String number = mPhones.getString(numberColIdx);
 			    String id = mPhones.getString(idColIdx);
 			    String name = contactNames.get(id);
