@@ -5,15 +5,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.models.ContactInfo;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.models.ContactInfo;
 
 public class HikeUserDatabase extends SQLiteOpenHelper {
 	private SQLiteDatabase mDb;
@@ -126,4 +126,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 		return contactInfos;
 	}
+
+    public ContactInfo getContactInfoFromId(String id) {
+        Cursor c = mReadDb.query(DATABASE_TABLE, new String[]{"msisdn", "id", "name", "onhike"}, "id=?", new String[] {id}, null, null, null);
+        List<ContactInfo> contactInfos = extractContactInfo(c);
+        if (contactInfos.isEmpty()) {
+            return null;
+        }
+
+        return contactInfos.get(0);
+    }
 }

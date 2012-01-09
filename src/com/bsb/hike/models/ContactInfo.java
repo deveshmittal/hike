@@ -1,7 +1,13 @@
 package com.bsb.hike.models;
 
 public class ContactInfo {
-	public String name;
+	@Override
+    public String toString() {
+        return "ContactInfo [name=" + name + ", number=" + number + ", id="
+                + id + ", onhike=" + onhike + "]";
+    }
+
+    public String name;
 	public String number;
 	public String id;
 	public boolean onhike;

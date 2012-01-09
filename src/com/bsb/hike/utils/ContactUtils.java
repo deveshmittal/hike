@@ -1,11 +1,15 @@
 package com.bsb.hike.utils;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
+
+import com.bsb.hike.models.ContactInfo;
 
 public class ContactUtils {
 	/**
@@ -39,5 +43,37 @@ public class ContactUtils {
 
 		phones.close();
 		return number;
+	}
+
+	public static ContactInfo getContactInfo(String phoneNumber, Context context) {
+	    ContentResolver contentResolver = context.getContentResolver();
+	    Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+
+	    Cursor cursor = null;
+	    HikeUserDatabase db = null;
+	    try {
+
+	        cursor = contentResolver.query(uri, new String[]{PhoneLookup.DISPLAY_NAME, PhoneLookup._ID}, null, null, null);
+	        // if cursor is empty, just return null
+	        if (!cursor.moveToFirst()) {
+	            return null;
+	        }
+
+	        // lookup the user via the retrieved contactID
+	        String id = cursor.getString(cursor.getColumnIndexOrThrow(PhoneLookup._ID));
+	        db = new HikeUserDatabase(context);
+	        ContactInfo contactInfo = db.getContactInfoFromId(id);
+	        return contactInfo;
+	    } catch (Exception e) {
+	        return null;
+	    } finally {
+	        if (cursor != null)
+	        {
+	            cursor.close();
+	        }
+	        if (db != null) {
+	            db.close();
+	        }
+	    }
 	}
 }

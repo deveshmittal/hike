@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -26,8 +27,10 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeUserDatabase;
 
@@ -149,9 +152,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	    Object o = getLastNonConfigurationInstance();
 	    Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
 	    mContactNumber = intent.getStringExtra("msisdn");
-	    if (mContactNumber == null) {
+	    Uri dataURI = intent.getData();
+
+	    if ((dataURI != null) && ("smsto".equals(dataURI.getScheme()))) {
+	        //Intent received externally
+	        String phoneNumber = dataURI.getSchemeSpecificPart();
+	        ContactInfo contactInfo = ContactUtils.getContactInfo(phoneNumber, this);
+	        /* phone lookup fails for a *lot* of people.  If that happens, fall back to
+	         * using their msisdn
+	         */
+	        if (contactInfo != null)
+	        {
+	            mContactId = Long.parseLong(contactInfo.id);
+	            mContactName = contactInfo.name;
+	            mContactNumber = contactInfo.number;
+	        } else {
+	            mContactId = -1;
+	            mContactName = mContactNumber = phoneNumber;
+	        }
+	        createConversation();
+	    } else if (mContactNumber == null) {
+	        //new conversation thread
 	    	createAutoCompleteView();
 	    } else {
+	        //selected chat from conversation list
 		    mContactId = intent.getLongExtra("id", -1);
 		    mContactName = intent.getStringExtra("name");
 	    	createConversation();
@@ -170,7 +194,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send"));
-	    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
 	}
 
