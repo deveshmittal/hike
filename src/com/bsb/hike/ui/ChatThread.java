@@ -194,8 +194,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send"));
-		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-	    imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
 	}
 
 	private void createConversation() {
