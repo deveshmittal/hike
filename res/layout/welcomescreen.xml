@@ -17,11 +17,7 @@
 	        android:layout_width="fill_parent"
 	        android:layout_height="fill_parent"
 	        android:layout_centerHorizontal="true"
-	        android:layout_marginTop="10dp"
-	        android:layout_marginBottom="10dp"
-	        android:layout_marginLeft="20dp"
-	        android:layout_marginRight="20dp"
-	        android:background="@drawable/custom_button"
+	        android:background="@color/diamondblue"
 	        android:onClick="onClick"
 	        android:text="@string/accept_tc"
 	        android:textAppearance="?android:attr/textAppearanceMedium"
@@ -34,25 +30,28 @@
         android:layout_height="fill_parent"
         android:layout_above="@id/bottom_nav_bar"
         android:background="@color/white" >
+
         <TextView
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:id="@+id/welcome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
             android:gravity="center"
-            android:text="@string/welcome"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/welcome_message"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/black" />
 
         <ImageView
-            android:onClick="onClick"
             android:id="@+id/ic_edit_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/welcome"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="34dp"
-            android:src="@drawable/ic_editmessage_white" />
+            android:onClick="onClick"
+            android:src="@drawable/ic_launcher" />
 
         <EditText
             android:hint="Enter debug MSISDN here"
@@ -62,18 +61,6 @@
             android:layout_centerInParent="true"
             android:visibility="gone"
             android:layout_above="@id/ic_edit_message"/>
-
-        <TextView
-            android:id="@+id/welcome_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/welcome"
-            android:layout_margin="10dp"
-            android:layout_marginTop="18dp"
-            android:gravity="center"
-            android:text="@string/welcome_message"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/black" />
 
         <TextView
             android:id="@+id/t_and_c"
