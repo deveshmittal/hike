@@ -1,24 +1,21 @@
 package com.bsb.hike.utils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 
 public class HikeUserDatabase extends SQLiteOpenHelper {
 	private SQLiteDatabase mDb;
 	private SQLiteDatabase mReadDb;
-    private Context context;
 
 	private static final int DATABASE_VERSION = 2;
 	private static final String DATABASE_NAME = "hikeusers";
@@ -34,7 +31,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		mDb = getWritableDatabase();
 		mReadDb = getReadableDatabase();
-		this.context = context;
 	}
 
 	@Override
@@ -51,54 +47,45 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
-	public void updateAddressBook(List<ContactInfo> contacts) {
-		SQLiteDatabase db = mDb;
-		db.beginTransaction();
-		Cursor c = db.rawQuery("SELECT id FROM users", null);
-		int idx = c.getColumnIndex("id");
+    public boolean addContacts(List<ContactInfo> contacts) {
+        SQLiteDatabase db = mDb;
+        db.beginTransaction();
 
-		Set<String> ids = new HashSet<String>(c.getCount());
-		while (c.moveToNext()) {
-			String id = c.getString(idx);
-			ids.add(id);
-		}
-		c.close();
-		InsertHelper ih = new InsertHelper(db, DATABASE_TABLE);
-		final int msisdnColumn = ih.getColumnIndex("msisdn");
-		final int idColumn = ih.getColumnIndex("id");
-		final int nameColumn = ih.getColumnIndex("name");
-		final int onHikeColumn = ih.getColumnIndex("onhike");
-		for(ContactInfo contact : contacts) {
-			ids.remove(contact.id);
-			ih.prepareForReplace();
-			ih.bind(nameColumn, contact.name);
-			ih.bind(msisdnColumn, contact.number);
-			ih.bind(idColumn, contact.id);
-			ih.bind(onHikeColumn, contact.onhike);
-			ih.execute();
-		}
-
-		if (!ids.isEmpty()) {
-			String clause = Utils.join(ids, ",");
-			db.delete(DATABASE_TABLE, "id in ("+clause+")", null);
-		}
-
-		updateHasUsersSetting();
-
-		db.setTransactionSuccessful();
-		db.endTransaction();
-	}
-
-	/* Updates a setting on whether or not we have any users in our DB.
-	 * Call this whenever you remove users from the db (and on initial scan)"
-	 */
-	private void updateHasUsersSetting() {
-	    Cursor c = mDb.rawQuery("SELECT id FROM users LIMIT 1", null);
-        SharedPreferences.Editor editor = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-        editor.putBoolean(HikeMessengerApp.CONTACT_LIST_EMPTY, c.isLast());
-        c.close();
-        editor.commit();
+        try {
+            InsertHelper ih = new InsertHelper(db, DATABASE_TABLE);
+            final int msisdnColumn = ih.getColumnIndex("msisdn");
+            final int idColumn = ih.getColumnIndex("id");
+            final int nameColumn = ih.getColumnIndex("name");
+            final int onHikeColumn = ih.getColumnIndex("onhike");
+            for (ContactInfo contact : contacts) {
+                ih.prepareForReplace();
+                ih.bind(nameColumn, contact.name);
+                ih.bind(msisdnColumn, contact.number);
+                ih.bind(idColumn, contact.id);
+                ih.bind(onHikeColumn, contact.onhike);
+                ih.execute();
+            }
+            db.setTransactionSuccessful();
+            return true;
+        } catch (Exception e) {
+            Log.e("HikeUserDatabase", "Unable to insert contacts", e);
+            return false;
+        } finally {
+            db.endTransaction();
+        }
     }
+
+	/**
+	 * Sets the address book from the list of contacts
+	 * Deletes any existing contacts from the db
+	 * @param contacts list of contacts to set/add
+	 */
+	public void setAddressBook(List<ContactInfo> contacts) {
+		/* delete all existing entries from database */
+		mDb.delete(DATABASE_TABLE, null, null);
+
+		addContacts(contacts);
+	}
 
     public Cursor findUsers(String partialName) {
 		Cursor cursor = mDb.rawQuery("SELECT name, id AS _id, msisdn, onhike, onhike=0 AS NotOnHike FROM users WHERE name LIKE ? ORDER BY name, NotOnHike", new String[] { partialName });
@@ -135,5 +122,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
         }
 
         return contactInfos.get(0);
+    }
+
+    /** Adds a single contact to the hike user db
+     * @param hikeContactInfo contact to add
+     * @return true iff the insert was successful
+     */
+    public boolean addContact(ContactInfo hikeContactInfo) {
+        List<ContactInfo> l = new LinkedList<ContactInfo>();
+        l.add(hikeContactInfo);
+        return addContacts(l);
     }
 }
