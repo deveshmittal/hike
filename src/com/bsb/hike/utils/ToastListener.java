@@ -36,7 +36,7 @@ public class ToastListener implements Listener {
 		} else if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
 			System.out.println("new message received");
 			ConvMessage message = (ConvMessage) object;
-			Activity activity = currentActivity.get();
+			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
 			if ((activity instanceof ChatThread )) {
 				String contactNumber = ((ChatThread) activity).getContactNumber();
 				if (message.getMsisdn().equals(contactNumber)) {
@@ -44,6 +44,8 @@ public class ToastListener implements Listener {
 				}
 			} else if (activity instanceof MessagesList) {
 				return;
+			} else if (activity == null) {
+			    return;
 			}
 
 	         /* the foreground activity isn't going to show this message so Toast it */
