@@ -1,15 +1,13 @@
 package com.bsb.hike.models;
 
-import java.text.DateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.ocpsoft.pretty.time.PrettyTime;
-
 import android.util.Log;
+
+import com.ocpsoft.pretty.time.PrettyTime;
 
 public class ConvMessage {
 	public ConvMessage(String message, String msisdn, String contactId, long time, boolean isSent) {
