@@ -16,8 +16,10 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeUserDatabase;
 
@@ -89,7 +91,17 @@ public class ScanningAddressBook extends Activity {
 				List<ContactInfo> addressbook = AccountUtils.postAddressBook(token, contactinfos);
 				Log.d("SAB", "about to insert");
 				db = new HikeUserDatabase(ScanningAddressBook.this);
-				db.updateAddressBook(addressbook);
+				db.setAddressBook(addressbook);
+
+				/* Add a default message from hike */
+				//TODO get the number for hikebot from the server?
+	            ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", "TD-HIKE", "HikeBot");
+	            hikeContactInfo.onhike = true;
+	            db.addContact(hikeContactInfo);
+	            ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message),
+	                    hikeContactInfo.number, hikeContactInfo.id, System.currentTimeMillis()/1000, false);
+
+	            HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, message);
 			} catch(Exception e) {
 				Log.e("ScanningAddressBook", "Unable to post address book", e);
 				Intent intent = new Intent(ScanningAddressBook.this, AccountCreateSuccess.class);
@@ -107,8 +119,8 @@ public class ScanningAddressBook extends Activity {
 			SharedPreferences.Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 			editor.putBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, true);
 			editor.commit();
+
 			Intent intent = new Intent(ScanningAddressBook.this, MessagesList.class);
-			intent.putExtra("first", true);
 			startActivity(intent);
 			finish();
 			return null;
