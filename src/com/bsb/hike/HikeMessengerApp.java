@@ -8,37 +8,51 @@ import com.bsb.hike.utils.DbConversationListener;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 
-public class HikeMessengerApp extends Application {
+public class HikeMessengerApp extends Application
+{
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
-	public static final String MSISDN_SETTING = "msisdn";
-	public static final String CARRIER_SETTING = "carrier";
-	public static final String NAME_SETTING = "name";
-	public static final String TOKEN_SETTING = "token";
-	public static final String MESSAGES_SETTING = "messageid";
-    public static final String UID_SETTING = "uid";
-    public static final String ADDRESS_BOOK_SCANNED = "abscanned";
-    public static final String CONTACT_LIST_EMPTY = "contactlistempty";
-	private static HikePubSub mPubSubInstance;
-    private NetworkManager mNetworkManager;
 
-	static {
+	public static final String MSISDN_SETTING = "msisdn";
+
+	public static final String CARRIER_SETTING = "carrier";
+
+	public static final String NAME_SETTING = "name";
+
+	public static final String TOKEN_SETTING = "token";
+
+	public static final String MESSAGES_SETTING = "messageid";
+
+	public static final String UID_SETTING = "uid";
+
+	public static final String ADDRESS_BOOK_SCANNED = "abscanned";
+
+	public static final String CONTACT_LIST_EMPTY = "contactlistempty";
+
+	private static HikePubSub mPubSubInstance;
+
+	private NetworkManager mNetworkManager;
+
+	static
+	{
 		mPubSubInstance = new HikePubSub();
 	}
 
-	public void onCreate() {
+	public void onCreate()
+	{
 		super.onCreate();
 		SmileyParser.init(this);
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
 
-		/* add the generic websocket listener.  This will turn strings into objects and re-broadcast them */
+		/* add the generic websocket listener. This will turn strings into objects and re-broadcast them */
 		mNetworkManager = new NetworkManager(getApplicationContext());
 
-		/* add a handler to handle toasts.  The object initializes itself it it's constructor */
+		/* add a handler to handle toasts. The object initializes itself it it's constructor */
 		new ToastListener(getApplicationContext());
 	}
 
-	public static HikePubSub getPubSub() {
+	public static HikePubSub getPubSub()
+	{
 		return mPubSubInstance;
 	}
 }

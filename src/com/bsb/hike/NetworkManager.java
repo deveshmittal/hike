@@ -17,18 +17,27 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeUserDatabase;
 import com.bsb.hike.utils.HikeWebSocketClient;
 
-public class NetworkManager implements HikePubSub.Listener, Runnable {
+public class NetworkManager implements HikePubSub.Listener, Runnable
+{
 
 	private static final String FINISH = null;
-    private SharedPreferences settings;
-	private Context context;
-	private HikeUserDatabase mDb;
-	private HikePubSub pubSub;
-	private HikeWebSocketClient mWebSocket;
-	private Thread mThread;
-    private BlockingQueue<String> mQueue;
 
-	public NetworkManager(Context context) {
+	private SharedPreferences settings;
+
+	private Context context;
+
+	private HikeUserDatabase mDb;
+
+	private HikePubSub pubSub;
+
+	private HikeWebSocketClient mWebSocket;
+
+	private Thread mThread;
+
+	private BlockingQueue<String> mQueue;
+
+	public NetworkManager(Context context)
+	{
 		this.mDb = new HikeUserDatabase(context);
 		this.context = context;
 		this.settings = context.getSharedPreferences(HikeMessengerApp.MESSAGES_SETTING, 0);
@@ -43,18 +52,23 @@ public class NetworkManager implements HikePubSub.Listener, Runnable {
 		mThread.start();
 	}
 
-	public void onMessage(String msg) {
+	public void onMessage(String msg)
+	{
 		JSONObject data;
 		String type;
-		try {
+		try
+		{
 			data = new JSONObject(msg);
 			type = data.getString("type");
-		} catch (JSONException e) {
+		}
+		catch (JSONException e)
+		{
 			Log.e("WebSocketPublisher", "Invalid JSON message: " + msg);
 			return;
 		}
 
-		if ("message".equals(type)) {
+		if ("message".equals(type))
+		{
 			String msisdn = data.optString("from");
 			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
 			String contactId = (contactInfo != null) ? contactInfo.id : null;
@@ -62,91 +76,129 @@ public class NetworkManager implements HikePubSub.Listener, Runnable {
 			long ts = data.optLong("ts");
 			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, false);
 			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-		} else if ("typing".equals(type)) {
+		}
+		else if ("typing".equals(type))
+		{
 			String msisdn = data.optString("from");
 			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
-		} else if ("stop_typing".equals(type)) {
+		}
+		else if ("stop_typing".equals(type))
+		{
 			String msisdn = data.optString("from");
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
-		} else {
+		}
+		else
+		{
 			Log.d("WebSocketPublisher", "Unknown Type:" + type);
 		}
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
-		if (type.equals(HikePubSub.WS_MESSAGE)) {
+	public void onEventReceived(String type, Object object)
+	{
+		if (type.equals(HikePubSub.WS_MESSAGE))
+		{
 			String message = (String) object;
 			onMessage(message);
-		} else if (HikePubSub.TOKEN_CREATED.equals(type)) {
-		    Log.i("NetworkManager", "Creating Websocket");
-		    startWebSocket();
-		} else if (HikePubSub.WS_CLOSE.equals(type)) {
-            Log.i("NetworkManager", "Websocket closed");
-            mWebSocket = null;
-            Runnable r = new Runnable() {
+		}
+		else if (HikePubSub.TOKEN_CREATED.equals(type))
+		{
+			Log.i("NetworkManager", "Creating Websocket");
+			startWebSocket();
+		}
+		else if (HikePubSub.WS_CLOSE.equals(type))
+		{
+			Log.i("NetworkManager", "Websocket closed");
+			mWebSocket = null;
+			Runnable r = new Runnable()
+			{
 
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    startWebSocket();
-                }
-            };
-            Thread t = new Thread(r);
-            t.start();
-		} else if (HikePubSub.WS_SEND.equals(type)) {
-		    JSONObject o = (JSONObject) object;
-		    String str = o.toString();
-		    mQueue.add(str);
-		} else if (HikePubSub.WS_OPEN.equals(type)) {
-		    Log.d("NetworkManager", "Websocket opened");
+				@Override
+				public void run()
+				{
+					try
+					{
+						Thread.sleep(2000);
+					}
+					catch (InterruptedException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					startWebSocket();
+				}
+			};
+			Thread t = new Thread(r);
+			t.start();
+		}
+		else if (HikePubSub.WS_SEND.equals(type))
+		{
+			JSONObject o = (JSONObject) object;
+			String str = o.toString();
+			mQueue.add(str);
+		}
+		else if (HikePubSub.WS_OPEN.equals(type))
+		{
+			Log.d("NetworkManager", "Websocket opened");
 		}
 	}
 
-    private synchronized void startWebSocket() {
-        if (mWebSocket == null) {
-            mWebSocket = AccountUtils.startWebSocketConnection();
-        }
-    }
+	private synchronized void startWebSocket()
+	{
+		if (mWebSocket == null)
+		{
+			mWebSocket = AccountUtils.startWebSocketConnection();
+		}
+	}
 
-    @Override
-    public void run() {
-        while (true) {
-            String message;
-            try {
-                message = mQueue.take();
-                System.out.println("trying to send message");
-            } catch (InterruptedException e) {
-                Log.e("WebSocket", "sending thread", e);
-                continue;
-            }
-            if (message == FINISH) {
-                break;
-            }
+	@Override
+	public void run()
+	{
+		while (true)
+		{
+			String message;
+			try
+			{
+				message = mQueue.take();
+				System.out.println("trying to send message");
+			}
+			catch (InterruptedException e)
+			{
+				Log.e("WebSocket", "sending thread", e);
+				continue;
+			}
+			if (message == FINISH)
+			{
+				break;
+			}
 
-            while (mWebSocket == null) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    continue;
-                }
-            }
+			while (mWebSocket == null)
+			{
+				try
+				{
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e)
+				{
+					continue;
+				}
+			}
 
-            try {
-                mWebSocket.send(message);
-            } catch (IOException e) {
-                Log.e("WebSocket", "Unable to send message", e);
-                mQueue.add(message);
-            } catch (java.nio.channels.NotYetConnectedException e) {
-                Log.e("WebSocket", "Not yet connected");
-                mQueue.add(message);
-            }
-        }
+			try
+			{
+				mWebSocket.send(message);
+			}
+			catch (IOException e)
+			{
+				Log.e("WebSocket", "Unable to send message", e);
+				mQueue.add(message);
+			}
+			catch (java.nio.channels.NotYetConnectedException e)
+			{
+				Log.e("WebSocket", "Not yet connected");
+				mQueue.add(message);
+			}
+		}
 
-    }
+	}
 }

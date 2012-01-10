@@ -1,4 +1,5 @@
 package com.bsb.hike.utils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -44,25 +45,33 @@ import android.util.Log;
 
 import com.bsb.hike.models.ContactInfo;
 
-public class AccountUtils {
-    public static final String HOST = "ec2-175-41-153-127.ap-southeast-1.compute.amazonaws.com";
-    private static final int PORT = 3001;
+public class AccountUtils
+{
+	public static final String HOST = "ec2-175-41-153-127.ap-southeast-1.compute.amazonaws.com";
+
+	private static final int PORT = 3001;
+
 	private static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
 	private static HttpClient mClient = null;
+
 	private static String mToken = null;
+
 	public static String MSISDN = "+555555555555";
 
-	public static void setToken(String token) {
+	public static void setToken(String token)
+	{
 		mToken = token;
 	}
 
-	private static synchronized HttpClient getClient() {
-		if (mClient != null) {
+	private static synchronized HttpClient getClient()
+	{
+		if (mClient != null)
+		{
 			return mClient;
-			
+
 		}
 
 		HttpParams params = new BasicHttpParams();
@@ -78,15 +87,18 @@ public class AccountUtils {
 		return mClient;
 	}
 
-	public static JSONObject executeRequest(HttpRequestBase request) {
+	public static JSONObject executeRequest(HttpRequestBase request)
+	{
 		HttpClient client = getClient();
 		HttpResponse response;
-		try {
+		try
+		{
 			Log.d("HTTP", "Performing HTTP Request " + request.getRequestLine());
 			Log.d("HTTP", "to host" + request);
 			response = client.execute(request);
 			Log.d("HTTP", "finished request");
-			if (response.getStatusLine().getStatusCode() != 200) {
+			if (response.getStatusLine().getStatusCode() != 200)
+			{
 				Log.w("HTTP", "Request Failed: " + response.getStatusLine());
 				return null;
 			}
@@ -96,42 +108,55 @@ public class AccountUtils {
 			StringBuilder builder = new StringBuilder();
 			CharBuffer target = CharBuffer.allocate(10000);
 			int read = reader.read(target);
-			while (read >= 0) {
+			while (read >= 0)
+			{
 				builder.append(target.array(), 0, read);
 				target.clear();
 				read = reader.read(target);
 			}
 			Log.d("HTTP", "request finished");
-			try {
+			try
+			{
 				return new JSONObject(builder.toString());
-			} catch (JSONException e) {
+			}
+			catch (JSONException e)
+			{
 				Log.e("HTTP", "Invalid JSON Response", e);
 			}
-		} catch (ClientProtocolException e) {
+		}
+		catch (ClientProtocolException e)
+		{
 			Log.e("HTTP", "Invalid Response", e);
 			e.printStackTrace();
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			Log.e("HTTP", "Unable to perform request", e);
 		}
-		return null;		
+		return null;
 	}
 
-	public static int sendMessage(String phone_no, String message) {
+	public static int sendMessage(String phone_no, String message)
+	{
 		HttpPost httppost = new HttpPost(BASE + "/user/msg");
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(2);
 		pairs.add(new BasicNameValuePair("to", phone_no));
 		pairs.add(new BasicNameValuePair("body", message));
 		HttpEntity entity;
-		try {
+		try
+		{
 			entity = new UrlEncodedFormEntity(pairs);
 			httppost.setEntity(entity);
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e)
+		{
 			Log.wtf("URL", "Unable to send message " + message);
 			return -1;
 		}
 
 		JSONObject obj = executeRequest(httppost);
-		if ((obj == null)  || ("fail".equals(obj.optString("stat")))) {
+		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
+		{
 			Log.w("HTTP", "Unable to send message");
 			return -1;
 		}
@@ -140,41 +165,50 @@ public class AccountUtils {
 		return count;
 	}
 
-	public static String getMSISDN() {
+	public static String getMSISDN()
+	{
 
 		HttpRequestBase httpget = new HttpGet(BASE + "/account");
 		addMSISDNHeader(httpget);
 		JSONObject obj = executeRequest(httpget);
-		try {
-			if (obj.has("stat") && "fail".equals(obj.getString("stat"))) {
+		try
+		{
+			if (obj.has("stat") && "fail".equals(obj.getString("stat")))
+			{
 				Log.e("HTTP", "Unable to get MSISDN");
 				return null;
 			}
 
 			String msisdn = obj.getString("phone_no");
 			return msisdn;
-		} catch (JSONException e) {
+		}
+		catch (JSONException e)
+		{
 			Log.e("HTTP", "Invalid JSON Object", e);
 			return null;
 		}
 	}
 
-	public static boolean invite(String phone_no) {
+	public static boolean invite(String phone_no)
+	{
 		HttpPost httppost = new HttpPost(BASE + "/user/invite");
 		addToken(httppost);
-		try {
+		try
+		{
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>(1);
 			pairs.add(new BasicNameValuePair("to", phone_no));
 			HttpEntity entity = new UrlEncodedFormEntity(pairs);
 			httppost.setEntity(entity);
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e)
+		{
 			Log.wtf("AccountUtils", "encoding exception", e);
 			return false;
 		}
 
 		JSONObject obj = executeRequest(httppost);
-		if (((obj == null) ||
-			("fail".equals(obj.optString("stat"))))) {
+		if (((obj == null) || ("fail".equals(obj.optString("stat")))))
+		{
 			Log.i("Invite", "Couldn't invite friend: " + obj);
 			return false;
 		}
@@ -182,12 +216,14 @@ public class AccountUtils {
 		return true;
 	}
 
-	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws IllegalStateException, IOException {
+	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws IllegalStateException, IOException
+	{
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
 		addToken(httppost);
 		Map<String, String> idToName = new HashMap<String, String>(contacts.size());
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(contacts.size());
-		for (ContactInfo contact : contacts) {
+		for (ContactInfo contact : contacts)
+		{
 			idToName.put(contact.id, contact.name);
 			pairs.add(new BasicNameValuePair("phone_no", contact.number));
 			pairs.add(new BasicNameValuePair("name", contact.name));
@@ -198,21 +234,23 @@ public class AccountUtils {
 		httppost.setEntity(entity);
 
 		JSONObject obj = executeRequest(httppost);
-		if ((obj == null) ||
-			("fail".equals(obj.optString("stat")))) {
+		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
+		{
 			Log.w("HTTP", "Unable to upload address book");
-			//TODO raise a real exception here
-			return null;				
+			// TODO raise a real exception here
+			return null;
 		}
 
 		contacts = new ArrayList<ContactInfo>();
 		Log.d("FOO", obj.toString());
 		JSONObject addressbook = obj.optJSONObject("addressbook");
-		for(Iterator<?> it = addressbook.keys(); it.hasNext();) {
-			String id =  (String) it.next();
+		for (Iterator<?> it = addressbook.keys(); it.hasNext();)
+		{
+			String id = (String) it.next();
 			JSONArray entries = addressbook.optJSONArray(id);
 			entries.length();
-			for(int i = 0; i < entries.length(); ++i) {
+			for (int i = 0; i < entries.length(); ++i)
+			{
 				JSONObject entry = entries.optJSONObject(i);
 				String msisdn = entry.optString("msisdn");
 				Boolean onhike = entry.optBoolean("onhike");
@@ -225,27 +263,35 @@ public class AccountUtils {
 		return contacts;
 	}
 
-	public static class AccountInfo {
+	public static class AccountInfo
+	{
 		public String token;
+
 		public String msisdn;
+
 		public String uid;
 
-		public AccountInfo(String token, String msisdn, String uid) {
+		public AccountInfo(String token, String msisdn, String uid)
+		{
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
 		}
 	}
 
-	public static AccountInfo registerAccount() {
+	public static AccountInfo registerAccount()
+	{
 		HttpPost httppost = new HttpPost(BASE + "/account");
 		HttpEntity entity = null;
-		try {
+		try
+		{
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>(1);
 			pairs.add(new BasicNameValuePair("set_cookie", "0"));
 			entity = new UrlEncodedFormEntity(pairs);
 			httppost.setEntity(entity);
-		} catch (UnsupportedEncodingException e) {
+		}
+		catch (UnsupportedEncodingException e)
+		{
 			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!");
 		}
 
@@ -253,11 +299,11 @@ public class AccountUtils {
 
 		addMSISDNHeader(httppost);
 		JSONObject obj = executeRequest(httppost);
-		if ((obj == null) ||
-			("fail".equals(obj.optString("stat")))) {
-				Log.w("HTTP", "Unable to create account");
-				//raise an exception?
-				return null;
+		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
+		{
+			Log.w("HTTP", "Unable to create account");
+			// raise an exception?
+			return null;
 		}
 
 		String token = obj.optString("token");
@@ -267,13 +313,17 @@ public class AccountUtils {
 		return new AccountUtils.AccountInfo(token, msisdn, uid);
 	}
 
-	public static HikeWebSocketClient startWebSocketConnection() {
-		Header header = new BasicHeader("Cookie", "user="+mToken);
-		Header[] headers = new Header[]{header};
+	public static HikeWebSocketClient startWebSocketConnection()
+	{
+		Header header = new BasicHeader("Cookie", "user=" + mToken);
+		Header[] headers = new Header[] { header };
 		URI uri;
-		try {
+		try
+		{
 			uri = new URI(BASE + "/user/msgs");
-		} catch (URISyntaxException e) {
+		}
+		catch (URISyntaxException e)
+		{
 			e.printStackTrace();
 			Log.e("AccountUtils", "Error creating websocket", e);
 			return null;
@@ -284,12 +334,14 @@ public class AccountUtils {
 		return socket;
 	}
 
-	private static void addToken(HttpRequestBase req) {
-		req.addHeader("Cookie", "user="+mToken);
+	private static void addToken(HttpRequestBase req)
+	{
+		req.addHeader("Cookie", "user=" + mToken);
 	}
 
-	private static void addMSISDNHeader(HttpRequestBase req) {
-		//TODO remove this line.  just for testing
-		req.addHeader("X-MSISDN-AIRTEL", MSISDN);		
+	private static void addMSISDNHeader(HttpRequestBase req)
+	{
+		// TODO remove this line. just for testing
+		req.addHeader("X-MSISDN-AIRTEL", MSISDN);
 	}
 }

@@ -16,19 +16,24 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.AccountUtils;
 
-public class WelcomeActivity extends Activity {
-	public class AccountCreateActivity extends AsyncTask<Void, Void, Boolean> {
+public class WelcomeActivity extends Activity
+{
+	public class AccountCreateActivity extends AsyncTask<Void, Void, Boolean>
+	{
 
 		@Override
-		protected Boolean doInBackground(Void... arg0) {
-			if (mMSISDNText.getVisibility() == View.VISIBLE) {
+		protected Boolean doInBackground(Void... arg0)
+		{
+			if (mMSISDNText.getVisibility() == View.VISIBLE)
+			{
 				String msisdn = mMSISDNText.getText().toString();
 				AccountUtils.MSISDN = msisdn;
 			}
 
 			AccountUtils.AccountInfo accountInfo = AccountUtils.registerAccount();
 
-			if (accountInfo != null) {
+			if (accountInfo != null)
+			{
 				String token = accountInfo.token;
 				String msisdn = accountInfo.msisdn;
 				String uid = accountInfo.uid;
@@ -45,19 +50,24 @@ public class WelcomeActivity extends Activity {
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result) {
+		protected void onPostExecute(Boolean result)
+		{
 			startActivity(new Intent(WelcomeActivity.this, AccountCreateSuccess.class));
 			finish();
 		}
 	}
 
 	private ProgressDialog mDialog;
+
 	private Button mAcceptButton;
+
 	private ImageView mIconView;
+
 	private EditText mMSISDNText;
 
 	@Override
-	public void onCreate(Bundle savedState) {
+	public void onCreate(Bundle savedState)
+	{
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 		mAcceptButton = (Button) findViewById(R.id.accept_tc);
@@ -66,19 +76,26 @@ public class WelcomeActivity extends Activity {
 	}
 
 	@Override
-	public void onDestroy() {
+	public void onDestroy()
+	{
 		super.onDestroy();
-		if (mDialog != null) {
-           mDialog.dismiss();
-           mDialog = null;
+		if (mDialog != null)
+		{
+			mDialog.dismiss();
+			mDialog = null;
 		}
 	}
-	public void onClick(View v) {
-		if (v == mAcceptButton) {
+
+	public void onClick(View v)
+	{
+		if (v == mAcceptButton)
+		{
 			mDialog = ProgressDialog.show(this, null, getText(R.string.determining_phone_number));
 			AccountCreateActivity aca = new AccountCreateActivity();
 			aca.execute();
-		} else if (v == mIconView) {
+		}
+		else if (v == mIconView)
+		{
 			Log.w("DEBGUG", "Adding Debug Input MSISDN");
 			mMSISDNText.setVisibility(View.VISIBLE);
 		}

@@ -41,68 +41,86 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 
-public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable {
+public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
+{
 
 	private Map<String, Conversation> mConversationsByMSISDN;
+
 	private Set<String> mConversationsAdded;
 
 	@Override
-	protected void onPause() {
+	protected void onPause()
+	{
 		super.onPause();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 	}
 
 	@Override
-	protected void onResume() {
+	protected void onResume()
+	{
 		super.onResume();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 	}
 
-	private class DeleteConversationsAsyncTask extends AsyncTask<Long, Void, Boolean> {
+	private class DeleteConversationsAsyncTask extends AsyncTask<Long, Void, Boolean>
+	{
 
 		@Override
-		protected Boolean doInBackground(Long... params) {
-		    HikeConversationsDatabase db = null;
-		    try {
-		        db = new HikeConversationsDatabase(MessagesList.this);
-		        db.deleteConversation(params);
-		    } finally {
-	            if (db != null) {
-	                db.close();
-	            }
-		    }
-		    return Boolean.TRUE;
+		protected Boolean doInBackground(Long... params)
+		{
+			HikeConversationsDatabase db = null;
+			try
+			{
+				db = new HikeConversationsDatabase(MessagesList.this);
+				db.deleteConversation(params);
+			}
+			finally
+			{
+				if (db != null)
+				{
+					db.close();
+				}
+			}
+			return Boolean.TRUE;
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result) {
-			if (result == Boolean.TRUE) {
+		protected void onPostExecute(Boolean result)
+		{
+			if (result == Boolean.TRUE)
+			{
 				mAdapter.clear();
 				mAdapter.notifyDataSetChanged();
 				mAdapter.setNotifyOnChange(false);
 				mConversationsByMSISDN.clear();
 			}
-		}		
+		}
 	}
 
-	public class InviteFriendAsyncTask extends AsyncTask<Uri, Void, Boolean> {
+	public class InviteFriendAsyncTask extends AsyncTask<Uri, Void, Boolean>
+	{
 
 		@Override
-		protected Boolean doInBackground(Uri... params) {
+		protected Boolean doInBackground(Uri... params)
+		{
 			Uri uri = params[0];
 			String number = ContactUtils.getMobileNumber(MessagesList.this.getContentResolver(), uri);
 			return AccountUtils.invite(number);
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result) {
+		protected void onPostExecute(Boolean result)
+		{
 			Context ctx = MessagesList.this.getApplicationContext();
 			int duration;
 			CharSequence message;
-			if (result.booleanValue()) {
+			if (result.booleanValue())
+			{
 				duration = Toast.LENGTH_SHORT;
 				message = getString(R.string.invite_sent);
-			} else {
+			}
+			else
+			{
 				duration = Toast.LENGTH_LONG;
 				message = getString(R.string.invite_failed);
 			}
@@ -114,114 +132,126 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	private static final int INVITE_PICKER_RESULT = 1001;
 
 	private ListView mConversationsView;
+
 	private View mSearchIconView;
+
 	private View mEditMessageIconView;
 
 	private ConversationsAdapter mAdapter;
 
-    private RelativeLayout mEmptyView;
+	private RelativeLayout mEmptyView;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-	    if (token == null) {
-	    	startActivity(new Intent(this, WelcomeActivity.class));
-	    	finish();
-	        return;
-	    } else if (!settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false)) {
-	        startActivity(new Intent(this, AccountCreateSuccess.class));
-	        finish();
-	        return;
-	    }
+		if (token == null)
+		{
+			startActivity(new Intent(this, WelcomeActivity.class));
+			finish();
+			return;
+		}
+		else if (!settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false))
+		{
+			startActivity(new Intent(this, AccountCreateSuccess.class));
+			finish();
+			return;
+		}
 
-	    AccountUtils.setToken(token);
-	    HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, token);
-	    //TODO this is being called everytime this activity is created.  Way too often
-	    startService(new Intent(this, HikeService.class));
+		AccountUtils.setToken(token);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, token);
+		// TODO this is being called everytime this activity is created. Way too often
+		startService(new Intent(this, HikeService.class));
 
-	    setContentView(R.layout.main);
-    	mConversationsView = (ListView) findViewById(R.id.conversations);
+		setContentView(R.layout.main);
+		mConversationsView = (ListView) findViewById(R.id.conversations);
 
-    	mSearchIconView = findViewById(R.id.search);
-    	mSearchIconView.setOnClickListener(this);
-    	mEditMessageIconView = findViewById(R.id.edit_message);
-    	mEditMessageIconView.setOnClickListener(this);
+		mSearchIconView = findViewById(R.id.search);
+		mSearchIconView.setOnClickListener(this);
+		mEditMessageIconView = findViewById(R.id.edit_message);
+		mEditMessageIconView.setOnClickListener(this);
 
-    	/* set the empty view layout for the list */
-    	LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    	mEmptyView = (RelativeLayout) vi.inflate(R.layout.empty_conversations, null);
+		/* set the empty view layout for the list */
+		LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mEmptyView = (RelativeLayout) vi.inflate(R.layout.empty_conversations, null);
 
-        /*
-         * if we have no contacts yet, let the user alert the user that they
-         * need to add contacts
-         */
-        if (settings.getBoolean(HikeMessengerApp.CONTACT_LIST_EMPTY, false)) {
-            View message = mEmptyView.findViewById(R.id.no_contacts_message);
-            message.setVisibility(View.VISIBLE);
-            View v = mEmptyView.findViewById(R.id.edit_message_icon);
-            v.setVisibility(View.INVISIBLE);
-            v = mEmptyView.findViewById(R.id.tap_to_send_message);
-            v.setVisibility(View.INVISIBLE);
-        } else {
-            //only make the view clickable if the user has contacts
-            mEmptyView.setOnClickListener(this);
-        }
+		/*
+		 * if we have no contacts yet, let the user alert the user that they need to add contacts
+		 */
+		if (settings.getBoolean(HikeMessengerApp.CONTACT_LIST_EMPTY, false))
+		{
+			View message = mEmptyView.findViewById(R.id.no_contacts_message);
+			message.setVisibility(View.VISIBLE);
+			View v = mEmptyView.findViewById(R.id.edit_message_icon);
+			v.setVisibility(View.INVISIBLE);
+			v = mEmptyView.findViewById(R.id.tap_to_send_message);
+			v.setVisibility(View.INVISIBLE);
+		}
+		else
+		{
+			// only make the view clickable if the user has contacts
+			mEmptyView.setOnClickListener(this);
+		}
 
-    	mEmptyView.setVisibility(View.GONE);
+		mEmptyView.setVisibility(View.GONE);
 
-    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-    			RelativeLayout.LayoutParams.FILL_PARENT,
-    			RelativeLayout.LayoutParams.FILL_PARENT);
-    	params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-    	mEmptyView.setLayoutParams(params);
-    	((ViewGroup) mConversationsView.getParent()).addView(mEmptyView);
-    	mConversationsView.setEmptyView(mEmptyView);
-  
-    	HikeConversationsDatabase db = new HikeConversationsDatabase(this);
-    	List<Conversation> conversations = db.getConversations();
-    	db.close();
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
+		params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+		mEmptyView.setLayoutParams(params);
+		((ViewGroup) mConversationsView.getParent()).addView(mEmptyView);
+		mConversationsView.setEmptyView(mEmptyView);
 
-    	mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
-    	mConversationsAdded = new HashSet<String>();
+		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+		List<Conversation> conversations = db.getConversations();
+		db.close();
 
-    	/* Use an iterator so we can remove conversations w/ no messages
-    	 * from our list
-    	 */
-    	for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
-    	{
-    	    Conversation conv = (Conversation) iter.next();
-    	    mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-    	    if (conv.getMessages().isEmpty()) {
-    	        iter.remove();
-    	    } else {
-    	        mConversationsAdded.add(conv.getMsisdn());
-    	    }
-    	}
+		mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
+		mConversationsAdded = new HashSet<String>();
 
-        mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
-        /* because notifyOnChange gets re-enabled whenever we call notifyDataSetChanged
-         * it's simpler to assume it's set to false and always notifyOnChange by hand
-         */
-        mAdapter.setNotifyOnChange(false);
-        mConversationsView.setAdapter(mAdapter);
+		/*
+		 * Use an iterator so we can remove conversations w/ no messages from our list
+		 */
+		for (Iterator<Conversation> iter = conversations.iterator(); iter.hasNext();)
+		{
+			Conversation conv = (Conversation) iter.next();
+			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+			if (conv.getMessages().isEmpty())
+			{
+				iter.remove();
+			}
+			else
+			{
+				mConversationsAdded.add(conv.getMsisdn());
+			}
+		}
 
-    	HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
-    	HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
+		mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
+		/*
+		 * because notifyOnChange gets re-enabled whenever we call notifyDataSetChanged it's simpler to assume it's set to false and always notifyOnChange by hand
+		 */
+		mAdapter.setNotifyOnChange(false);
+		mConversationsView.setAdapter(mAdapter);
 
-    	mConversationsView.setOnItemClickListener(new OnItemClickListener() {
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
+
+		mConversationsView.setOnItemClickListener(new OnItemClickListener()
+		{
 
 			@Override
-			public void onItemClick(AdapterView<?> adapter, View view, int pos,
-					long id) {
+			public void onItemClick(AdapterView<?> adapter, View view, int pos, long id)
+			{
 				Conversation conversation = (Conversation) adapter.getItemAtPosition(pos);
 				Intent intent = new Intent(MessagesList.this, ChatThread.class);
-				if (conversation.getContactName() != null) {
+				if (conversation.getContactName() != null)
+				{
 					intent.putExtra("name", conversation.getContactName());
 				}
-				if (conversation.getContactId() != null) {
+				if (conversation.getContactId() != null)
+				{
 					intent.putExtra("id", conversation.getContactId());
 				}
 				intent.putExtra("msisdn", conversation.getMsisdn());
@@ -231,15 +261,19 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
 		return true;
 	}
 
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode == RESULT_OK) {
-			switch(requestCode) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if (resultCode == RESULT_OK)
+		{
+			switch (requestCode)
+			{
 			case INVITE_PICKER_RESULT:
 				Uri uri = data.getData();
 				InviteFriendAsyncTask task = new InviteFriendAsyncTask();
@@ -249,9 +283,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
 		Intent intent;
-		switch (item.getItemId()) {
+		switch (item.getItemId())
+		{
 		case R.id.invite:
 			intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
 			startActivityForResult(intent, INVITE_PICKER_RESULT);
@@ -265,15 +301,18 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	}
 
 	@Override
-    protected void onDestroy() {
-        super.onDestroy();
-        HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
-        HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
-    }
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
+	}
 
-    @Override
-	public void onClick(View v) {
-		if ( (v == mEditMessageIconView) || (v == mEmptyView)) {
+	@Override
+	public void onClick(View v)
+	{
+		if ((v == mEditMessageIconView) || (v == mEmptyView))
+		{
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra("edit", true);
 			startActivity(intent);
@@ -281,58 +320,69 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
-		if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
+	public void onEventReceived(String type, Object object)
+	{
+		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
+		{
 			ConvMessage message = (ConvMessage) object;
 			/* find the conversation corresponding to this message */
 			String msisdn = message.getMsisdn();
 			Conversation conv = mConversationsByMSISDN.get(msisdn);
-			if (conv == null) {
-			    //When a message gets sent from a user we don't have a conversation for, the message gets
-			    //broadcasted first then the conversation gets created.  It's okay that we don't add it now, because
-			    //when the conversation is broadcasted it will contain the messages
+			if (conv == null)
+			{
+				// When a message gets sent from a user we don't have a conversation for, the message gets
+				// broadcasted first then the conversation gets created. It's okay that we don't add it now, because
+				// when the conversation is broadcasted it will contain the messages
 				return;
 			}
 
-			/* notification must be done on the thread that created the view (the UI thread in our case)
-			 * We don't want to sort the list on the UI thread so instead, disable notification and manually notify on the UI thread
-			 * We have to ensure it's disabled because calling notifyDataSetChanged will re-enable notifyOnChange
+			/*
+			 * notification must be done on the thread that created the view (the UI thread in our case) We don't want to sort the list on the UI thread so instead, disable
+			 * notification and manually notify on the UI thread We have to ensure it's disabled because calling notifyDataSetChanged will re-enable notifyOnChange
 			 */
 			mAdapter.setNotifyOnChange(false);
-			if (!mConversationsAdded.contains(conv.getMsisdn())) {
-			    mConversationsAdded.add(conv.getMsisdn());
-			    mAdapter.add(conv);
+			if (!mConversationsAdded.contains(conv.getMsisdn()))
+			{
+				mConversationsAdded.add(conv.getMsisdn());
+				mAdapter.add(conv);
 			}
 
 			conv.addMessage(message);
 
 			runOnUiThread(this);
-		} else if (HikePubSub.NEW_CONVERSATION.equals(type)) {
+		}
+		else if (HikePubSub.NEW_CONVERSATION.equals(type))
+		{
 			final Conversation conversation = (Conversation) object;
 			mConversationsByMSISDN.put(conversation.getMsisdn(), conversation);
-			if (conversation.getMessages().isEmpty()) {
-			    return;
+			if (conversation.getMessages().isEmpty())
+			{
+				return;
 			}
 
 			mConversationsAdded.add(conversation.getMsisdn());
-            mAdapter.add(conversation);
+			mAdapter.add(conversation);
 
 			runOnUiThread(this);
 		}
 	}
 
-	public void run() {
-	    mAdapter.notifyDataSetChanged();
-	    //notifyDataSetChanged sets notifyonChange to true but we want it to always be false
-	    mAdapter.setNotifyOnChange(false);
+	public void run()
+	{
+		mAdapter.notifyDataSetChanged();
+		// notifyDataSetChanged sets notifyonChange to true but we want it to always be false
+		mAdapter.setNotifyOnChange(false);
 	}
 
 	@Override
-	public void onClick(DialogInterface dialog, int which) {
-		switch (which) {
+	public void onClick(DialogInterface dialog, int which)
+	{
+		switch (which)
+		{
 		case DialogInterface.BUTTON_POSITIVE:
 			Long[] ids = new Long[mAdapter.getCount()];
-			for(int i = 0;i < ids.length; i++) {
+			for (int i = 0; i < ids.length; i++)
+			{
 				ids[i] = mAdapter.getItem(i).getConvId();
 			}
 			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
@@ -342,4 +392,3 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 	}
 }
-

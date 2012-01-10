@@ -10,84 +10,112 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import android.util.Log;
 
-public class HikePubSub implements Runnable {
-	public class Operation {
-		public Operation(String type, Object o) {
+public class HikePubSub implements Runnable
+{
+	public class Operation
+	{
+		public Operation(String type, Object o)
+		{
 			this.type = type;
 			this.payload = o;
 		}
+
 		public final String type;
+
 		public final Object payload;
 	}
 
-	public interface Listener {
+	public interface Listener
+	{
 		public void onEventReceived(String type, Object object);
 	}
 
 	private static final Operation DONE_OPERATION = null; /* TODO this can't be null */
 
 	public static final String MESSAGE_SENT = "messagesent";
+
 	public static final String WS_CLOSE = "ws_close";
+
 	public static final String WS_MESSAGE = "ws_message";
+
 	public static final String WS_OPEN = "ws_open";
-    public static final String WS_SEND = "ws_send";
+
+	public static final String WS_SEND = "ws_send";
+
 	public static final String NEW_CONVERSATION = "newconv";
+
 	public static final String MESSAGE_RECEIVED = "messagereceived";
+
 	public static final String NEW_ACTIVITY = "new_activity";
+
 	public static final String END_TYPING_CONVERSATION = "endtypingconv";
+
 	public static final String TYPING_CONVERSATION = "typingconv";
-    public static final String TOKEN_CREATED = "tokencreated";
 
+	public static final String TOKEN_CREATED = "tokencreated";
 
+	private final Thread mThread;
 
-    private final Thread mThread;
 	private final BlockingQueue<Operation> mQueue;
 
-	private Map<String, List<Listener> > listeners;
+	private Map<String, List<Listener>> listeners;
 
-	public HikePubSub() {
+	public HikePubSub()
+	{
 		listeners = Collections.synchronizedMap(new HashMap<String, List<Listener>>());
 		mQueue = new LinkedBlockingQueue<Operation>();
 		mThread = new Thread(this);
 		mThread.start();
 	}
 
-	synchronized public void addListener(String type, Listener listener) {
+	synchronized public void addListener(String type, Listener listener)
+	{
 		List<Listener> list = listeners.get(type);
-		if (list == null) {
+		if (list == null)
+		{
 			list = Collections.synchronizedList((new ArrayList<Listener>()));
 			listeners.put(type, list);
 		}
 		list.add(listener);
 	}
 
-	synchronized public boolean publish(String type, Object o) {
+	synchronized public boolean publish(String type, Object o)
+	{
 		List<Listener> list = listeners.get(type);
-		if (list == null) {
+		if (list == null)
+		{
 			return false;
 		}
 		mQueue.add(new Operation(type, o));
 		return true;
 	}
 
-	public void removeListener(String type, Listener listener) {
+	public void removeListener(String type, Listener listener)
+	{
 		List<Listener> l = listeners.get(type);
-		if (l != null) {
+		if (l != null)
+		{
 			l.remove(listener);
 		}
 	}
 
 	@Override
-	public void run() {
+	public void run()
+	{
 		Operation op;
-		while (true) {
-			try {
+		while (true)
+		{
+			try
+			{
 				op = mQueue.take();
-			} catch(InterruptedException e) {
+			}
+			catch (InterruptedException e)
+			{
 				Log.e("PubSub", "exception while running", e);
 				continue;
 			}
-			if (op == DONE_OPERATION) {
+			if (op == DONE_OPERATION)
+			{
 				break;
 			}
 
@@ -95,11 +123,13 @@ public class HikePubSub implements Runnable {
 			Object o = op.payload;
 
 			List<Listener> list = listeners.get(type);
-			if (list == null) {
+			if (list == null)
+			{
 				continue;
 			}
 
-			for (Listener l : list) {
+			for (Listener l : list)
+			{
 				l.onEventReceived(type, o);
 			}
 		}

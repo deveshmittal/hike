@@ -23,23 +23,32 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeUserDatabase;
 
-public class ScanningAddressBook extends Activity {
+public class ScanningAddressBook extends Activity
+{
 
-	private class ScanAddressBookTask extends AsyncTask<Void, Void, Void> {
+	private class ScanAddressBookTask extends AsyncTask<Void, Void, Void>
+	{
 
 		private ScanningAddressBook mActivity;
+
 		private Cursor mContacts;
+
 		private Cursor mPhones;
 
-		public ScanAddressBookTask(ScanningAddressBook activity) {
+		public ScanAddressBookTask(ScanningAddressBook activity)
+		{
 			mActivity = activity;
 		}
 
-		public void setActivity(ScanningAddressBook activity) {
-			if (activity == null) {
+		public void setActivity(ScanningAddressBook activity)
+		{
+			if (activity == null)
+			{
 				mActivity.stopManagingCursor(mContacts);
 				mActivity.stopManagingCursor(mPhones);
-			} else {
+			}
+			else
+			{
 				activity.startManagingCursor(mContacts);
 				activity.startManagingCursor(mPhones);
 			}
@@ -47,12 +56,9 @@ public class ScanningAddressBook extends Activity {
 		}
 
 		@Override
-		protected Void doInBackground(Void... params) {
-			String[] projection = new String[] {
-					ContactsContract.Contacts._ID,
-					ContactsContract.Contacts.HAS_PHONE_NUMBER,
-					ContactsContract.Contacts.DISPLAY_NAME
-			};
+		protected Void doInBackground(Void... params)
+		{
+			String[] projection = new String[] { ContactsContract.Contacts._ID, ContactsContract.Contacts.HAS_PHONE_NUMBER, ContactsContract.Contacts.DISPLAY_NAME };
 
 			String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
 			mContacts = mActivity.managedQuery(ContactsContract.Contacts.CONTENT_URI, projection, selection, null, null);
@@ -63,54 +69,62 @@ public class ScanningAddressBook extends Activity {
 			Log.d("SAB", "Starting to scan address book");
 			long tm = System.currentTimeMillis();
 			Map<String, String> contactNames = new HashMap<String, String>();
-			while (mContacts.moveToNext()) {
-			    String id = mContacts.getString(idFieldColumnIndex);
-	            String name = mContacts.getString(nameFieldColumnIndex);
-	            contactNames.put(id, name);
+			while (mContacts.moveToNext())
+			{
+				String id = mContacts.getString(idFieldColumnIndex);
+				String name = mContacts.getString(nameFieldColumnIndex);
+				contactNames.put(id, name);
 			}
 
-			mPhones = mActivity.managedQuery(Phone.CONTENT_URI, new String[]{Phone.CONTACT_ID, Phone.NUMBER}, 
-			                         null, null, null);
+			mPhones = mActivity.managedQuery(Phone.CONTENT_URI, new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null, null, null);
 
 			int numberColIdx = mPhones.getColumnIndex(Phone.NUMBER);
 			int idColIdx = mPhones.getColumnIndex(Phone.CONTACT_ID);
-			while (mPhones.moveToNext()) {
-			    String number = mPhones.getString(numberColIdx);
-			    String id = mPhones.getString(idColIdx);
-			    String name = contactNames.get(id);
-			    if ((name != null) && (number != null)) {
-	                 contactinfos.add(new ContactInfo(id, number, name));
-			    }
+			while (mPhones.moveToNext())
+			{
+				String number = mPhones.getString(numberColIdx);
+				String id = mPhones.getString(idColIdx);
+				String name = contactNames.get(id);
+				if ((name != null) && (number != null))
+				{
+					contactinfos.add(new ContactInfo(id, number, name));
+				}
 			}
 
 			Log.d("SAB", "Finished scan address book " + (System.currentTimeMillis() - tm));
 			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			HikeUserDatabase db = null;
-			try {
+			try
+			{
 				List<ContactInfo> addressbook = AccountUtils.postAddressBook(token, contactinfos);
 				Log.d("SAB", "about to insert");
 				db = new HikeUserDatabase(ScanningAddressBook.this);
 				db.setAddressBook(addressbook);
 
 				/* Add a default message from hike */
-				//TODO get the number for hikebot from the server?
-	            ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", "TD-HIKE", "HikeBot");
-	            hikeContactInfo.onhike = true;
-	            db.addContact(hikeContactInfo);
-	            ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message),
-	                    hikeContactInfo.number, hikeContactInfo.id, System.currentTimeMillis()/1000, false);
+				// TODO get the number for hikebot from the server?
+				ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", "TD-HIKE", "HikeBot");
+				hikeContactInfo.onhike = true;
+				db.addContact(hikeContactInfo);
+				ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message), hikeContactInfo.number, hikeContactInfo.id,
+						System.currentTimeMillis() / 1000, false);
 
-	            HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, message);
-			} catch(Exception e) {
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, message);
+			}
+			catch (Exception e)
+			{
 				Log.e("ScanningAddressBook", "Unable to post address book", e);
 				Intent intent = new Intent(ScanningAddressBook.this, AccountCreateSuccess.class);
 				intent.putExtra("failed", true);
-	            startActivity(intent);
-	            finish();
-	            return null;
-			} finally {
-				if (db != null) {
+				startActivity(intent);
+				finish();
+				return null;
+			}
+			finally
+			{
+				if (db != null)
+				{
 					db.close();
 				}
 			}
@@ -130,26 +144,30 @@ public class ScanningAddressBook extends Activity {
 	ScanAddressBookTask mTask;
 
 	@Override
-	public Object onRetainNonConfigurationInstance() {
+	public Object onRetainNonConfigurationInstance()
+	{
 		mTask.setActivity(null);
 		return mTask;
 	}
 
-
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
-		//TODO this is called when you rotate the screen.  We shouldn't
+		// TODO this is called when you rotate the screen. We shouldn't
 		Log.d(ScanningAddressBook.class.getSimpleName(), "onCreate");
-	 	setContentView(R.layout.scanningcontactlist);
-	 	Object retained = getLastNonConfigurationInstance();
-	 	if (retained instanceof ScanAddressBookTask) {
-	 		mTask = (ScanAddressBookTask) retained;
-	 		mTask.setActivity(this);
-	 	} else {
-	 		mTask = new ScanAddressBookTask(this);
-	 		mTask.execute();
-	 	}
+		setContentView(R.layout.scanningcontactlist);
+		Object retained = getLastNonConfigurationInstance();
+		if (retained instanceof ScanAddressBookTask)
+		{
+			mTask = (ScanAddressBookTask) retained;
+			mTask.setActivity(this);
+		}
+		else
+		{
+			mTask = new ScanAddressBookTask(this);
+			mTask.execute();
+		}
 	}
 
 }

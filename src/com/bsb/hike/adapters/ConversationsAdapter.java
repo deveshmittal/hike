@@ -13,35 +13,40 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 
-public class ConversationsAdapter extends ArrayAdapter<Conversation> {
+public class ConversationsAdapter extends ArrayAdapter<Conversation>
+{
 
 	private int mResourceId;
 
-	public ConversationsAdapter(Context context, int textViewResourceId,
-			List<Conversation> objects) {
+	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
+	{
 		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View convertView, ViewGroup parent)
+	{
 		Context context = getContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
-		if (v == null) {
+		if (v == null)
+		{
 			v = inflater.inflate(mResourceId, parent, false);
 		}
 
 		Conversation conversation = getItem(position);
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
 		String name = conversation.getContactName();
-		if (name == null) {
+		if (name == null)
+		{
 			name = conversation.getMsisdn();
 		}
 
 		contactView.setText(name);
 		List<ConvMessage> messages = conversation.getMessages();
-		if (!messages.isEmpty()) {
+		if (!messages.isEmpty())
+		{
 			ConvMessage message = messages.get(messages.size() - 1);
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			messageView.setText(message.getMessage());

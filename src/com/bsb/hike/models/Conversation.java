@@ -8,43 +8,50 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-public class Conversation implements Comparable<Conversation> {
+public class Conversation implements Comparable<Conversation>
+{
 
-	public String getMsisdn() {
+	public String getMsisdn()
+	{
 		return msisdn;
 	}
 
-	public long getConvId() {
+	public long getConvId()
+	{
 		return convId;
 	}
 
 	@Override
-    public String toString() {
-        return "Conversation [msisdn=" + msisdn + ", convId=" + convId
-                + ", contactId=" + contactId + ", messages=" + messages.size()
-                + ", contactName=" + contactName + ", onhike=" + onhike + "]";
-    }
+	public String toString()
+	{
+		return "Conversation [msisdn=" + msisdn + ", convId=" + convId + ", contactId=" + contactId + ", messages=" + messages.size() + ", contactName=" + contactName
+				+ ", onhike=" + onhike + "]";
+	}
 
-	public String getContactId() {
+	public String getContactId()
+	{
 		return contactId;
 	}
 
 	private String msisdn;
-	private long convId;
-	private String contactId;
-	private List<ConvMessage> messages;
-	private String contactName;
-    private boolean onhike;
 
-	public String getContactName() {
+	private long convId;
+
+	private String contactId;
+
+	private List<ConvMessage> messages;
+
+	private String contactName;
+
+	private boolean onhike;
+
+	public String getContactName()
+	{
 		return contactName;
 	}
 
-	public Conversation(String msisdn, 
-						long convId,
-						String contactId,
-						String contactName,
-						boolean onhike) {
+	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike)
+	{
 		this.msisdn = msisdn;
 		this.convId = convId;
 		this.contactId = contactId;
@@ -53,35 +60,45 @@ public class Conversation implements Comparable<Conversation> {
 		this.messages = new ArrayList<ConvMessage>();
 	}
 
-	public boolean isOnhike() {
-        return onhike;
-    }
+	public boolean isOnhike()
+	{
+		return onhike;
+	}
 
-    /* TODO this should be addAll to conform w/ normal java semantics */
-	public void setMessages(List<ConvMessage> messages) {
+	/* TODO this should be addAll to conform w/ normal java semantics */
+	public void setMessages(List<ConvMessage> messages)
+	{
 		this.messages = messages;
 	}
 
-	public void addMessage(ConvMessage message) {
+	public void addMessage(ConvMessage message)
+	{
 		this.messages.add(message);
 	}
 
 	@Override
-	public int compareTo(Conversation rhs) {
-		if (this.equals(rhs)) {
+	public int compareTo(Conversation rhs)
+	{
+		if (this.equals(rhs))
+		{
 			return 0;
 		}
 
 		long ts = messages.isEmpty() ? 0 : messages.get(0).getTimestamp();
 		long rhsTs = rhs.messages.isEmpty() ? 0 : rhs.messages.get(0).getTimestamp();
-		if (rhsTs != ts) {
+		if (rhsTs != ts)
+		{
 			return (ts < rhsTs) ? -1 : 1;
 		}
 
 		int ret = msisdn.compareTo(rhs.msisdn);
-		if (ret != 0) { return ret; }
-			
-		if (convId != rhs.convId) {
+		if (ret != 0)
+		{
+			return ret;
+		}
+
+		if (convId != rhs.convId)
+		{
 			return (convId < rhs.convId) ? -1 : 1;
 		}
 
@@ -89,68 +106,80 @@ public class Conversation implements Comparable<Conversation> {
 		return cId.compareTo(rhs.contactId);
 	}
 
-	public List<ConvMessage> getMessages() {
+	public List<ConvMessage> getMessages()
+	{
 		return messages;
 	}
 
 	@Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                + ((contactId == null) ? 0 : contactId.hashCode());
-        result = prime * result
-                + ((contactName == null) ? 0 : contactName.hashCode());
-        result = prime * result + (int) (convId ^ (convId >>> 32));
-        result = prime * result
-                + ((messages == null) ? 0 : messages.hashCode());
-        result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
-        result = prime * result + (onhike ? 1231 : 1237);
-        return result;
-    }
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((contactId == null) ? 0 : contactId.hashCode());
+		result = prime * result + ((contactName == null) ? 0 : contactName.hashCode());
+		result = prime * result + (int) (convId ^ (convId >>> 32));
+		result = prime * result + ((messages == null) ? 0 : messages.hashCode());
+		result = prime * result + ((msisdn == null) ? 0 : msisdn.hashCode());
+		result = prime * result + (onhike ? 1231 : 1237);
+		return result;
+	}
 
 	@Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Conversation other = (Conversation) obj;
-        if (contactId == null) {
-            if (other.contactId != null)
-                return false;
-        } else if (!contactId.equals(other.contactId))
-            return false;
-        if (contactName == null) {
-            if (other.contactName != null)
-                return false;
-        } else if (!contactName.equals(other.contactName))
-            return false;
-        if (convId != other.convId)
-            return false;
-        if (messages == null) {
-            if (other.messages != null)
-                return false;
-        } else if (!messages.equals(other.messages))
-            return false;
-        if (msisdn == null) {
-            if (other.msisdn != null)
-                return false;
-        } else if (!msisdn.equals(other.msisdn))
-            return false;
-        if (onhike != other.onhike)
-            return false;
-        return true;
-    }
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Conversation other = (Conversation) obj;
+		if (contactId == null)
+		{
+			if (other.contactId != null)
+				return false;
+		}
+		else if (!contactId.equals(other.contactId))
+			return false;
+		if (contactName == null)
+		{
+			if (other.contactName != null)
+				return false;
+		}
+		else if (!contactName.equals(other.contactName))
+			return false;
+		if (convId != other.convId)
+			return false;
+		if (messages == null)
+		{
+			if (other.messages != null)
+				return false;
+		}
+		else if (!messages.equals(other.messages))
+			return false;
+		if (msisdn == null)
+		{
+			if (other.msisdn != null)
+				return false;
+		}
+		else if (!msisdn.equals(other.msisdn))
+			return false;
+		if (onhike != other.onhike)
+			return false;
+		return true;
+	}
 
-	public JSONObject serialize(String type) {
-		JSONObject object =  new JSONObject();
-		try {
+	public JSONObject serialize(String type)
+	{
+		JSONObject object = new JSONObject();
+		try
+		{
 			object.put("type", type);
 			object.put("to", msisdn);
-		} catch (JSONException e) {
+		}
+		catch (JSONException e)
+		{
 			Log.e("ConvMessage", "invalid json message", e);
 		}
 		return object;

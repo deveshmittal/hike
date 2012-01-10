@@ -13,42 +13,54 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.MessagesList;
 
-public class ToastListener implements Listener {
+public class ToastListener implements Listener
+{
 
 	private WeakReference<Activity> currentActivity;
 
-    private HikeToast toaster;
+	private HikeToast toaster;
 
-    private HikeUserDatabase db;
+	private HikeUserDatabase db;
 
-	public ToastListener(Context context) {
+	public ToastListener(Context context)
+	{
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
 		this.toaster = new HikeToast(context);
-        this.db = new HikeUserDatabase(context);
+		this.db = new HikeUserDatabase(context);
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
-		if (HikePubSub.NEW_ACTIVITY.equals(type)) {
+	public void onEventReceived(String type, Object object)
+	{
+		if (HikePubSub.NEW_ACTIVITY.equals(type))
+		{
 			System.out.println("new activity is front " + object);
 			currentActivity = new WeakReference<Activity>((Activity) object);
-		} else if (HikePubSub.MESSAGE_RECEIVED.equals(type)) {
+		}
+		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
+		{
 			System.out.println("new message received");
 			ConvMessage message = (ConvMessage) object;
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-			if ((activity instanceof ChatThread )) {
+			if ((activity instanceof ChatThread))
+			{
 				String contactNumber = ((ChatThread) activity).getContactNumber();
-				if (message.getMsisdn().equals(contactNumber)) {
+				if (message.getMsisdn().equals(contactNumber))
+				{
 					return;
 				}
-			} else if (activity instanceof MessagesList) {
+			}
+			else if (activity instanceof MessagesList)
+			{
 				return;
-			} else if (activity == null) {
-			    return;
+			}
+			else if (activity == null)
+			{
+				return;
 			}
 
-	         /* the foreground activity isn't going to show this message so Toast it */
+			/* the foreground activity isn't going to show this message so Toast it */
 			ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn());
 			this.toaster.toast(contactInfo, message.getMsisdn(), message.getMessage(), message.getTimestamp());
 		}
