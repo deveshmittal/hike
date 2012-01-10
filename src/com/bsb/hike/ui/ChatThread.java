@@ -136,7 +136,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			@Override
 			public void onItemClick(AdapterView<?> list, View _empty, int position, long id)
 			{
-
 				/* Extract selected values from the cursor */
 				Cursor cursor = (Cursor) list.getItemAtPosition(position);
 				mContactId = cursor.getString(cursor.getColumnIndex("_id"));
@@ -253,11 +252,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mComposeView.setText("");
 		long time = (long) System.currentTimeMillis() / 1000;
 		Log.d("Timestamp", "Current timestamp is " + time);
-		ConvMessage convMessage = new ConvMessage(message, mContactNumber, mContactId, time, true);
+		ConvMessage convMessage = new ConvMessage(message, mContactNumber, mContactId, time,ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mConversation);
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-		mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send"));
 	}
 
 	/**
@@ -389,7 +387,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		} else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{
 			mCredits = ((Integer) object).intValue();
-			runOnUiThread(new Runnable() {
+			runOnUiThread(new Runnable() 
+			{
 				@Override
 				public void run()
 				{
@@ -446,6 +445,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			return;
 		}
+
+		mSendBtn.setEnabled(true);
 
 		if (mResetTypingNotification == null)
 		{

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
@@ -47,8 +48,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			db = mDb;
 		}
-		String sql = "CREATE TABLE IF NOT EXISTS " + MESSAGESTABLE + "(message STRING, " + "sent INTEGER, " + "timestamp INTEGER, " + "msgid INTEGER PRIMARY KEY AUTOINCREMENT,"
-				+ "convid INTEGER)";
+		String sql = "CREATE TABLE IF NOT EXISTS " + MESSAGESTABLE + "(message STRING, " + "msgStatus INTEGER, " + // this is to check if msg sent or recieved of the msg sent.
+				"timestamp INTEGER, " + "msgid INTEGER PRIMARY KEY AUTOINCREMENT," + "convid INTEGER)";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS conversation_idx ON " + MESSAGESTABLE + "( convid, timestamp DESC)";
@@ -82,40 +83,50 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		onCreate(db);
 	}
 
-	public void addConversationMessages(ConvMessage message)
+	public long addConversationMessages(ConvMessage message)
 	{
 		List<ConvMessage> l = new ArrayList<ConvMessage>(1);
 		l.add(message);
-		addConversations(l);
+		return addConversations(l);
+	}
+
+	public int updateMsgStatus(long msgID,int val)
+	{
+		String [] whereArgs = {String.valueOf(msgID)};
+		ContentValues values = new ContentValues();
+        values.put("msgStatus",val);
+        return mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
 	}
 
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
 	{
 		final int messageColumn = 1;
-		final int sentColumn = 2;
+		final int msgStatusColumn = 2;
 		final int timestampColumn = 3;
 		final int msisdnColumn = 4;
 
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
-		insertStatement.bindLong(sentColumn, conv.isSent() ? 1 : 0);
+		// 0 -> SENT_UNCONFIRMED ; 1 -> SENT_CONFIRMED ; 2 -> RECEIVED_UNREAD ; 3 -> RECEIVED_READ
+		insertStatement.bindLong(msgStatusColumn, conv.getState().ordinal()); 
 		insertStatement.bindLong(timestampColumn, conv.getTimestamp());
-		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
+		insertStatement.bindString(msisdnColumn, conv.getMsisdn());		
 	}
 
-	public void addConversations(List<ConvMessage> convMessages)
+	public long addConversations(List<ConvMessage> convMessages)
 	{
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + MESSAGESTABLE + " (message, sent, timestamp, convid) " + "SELECT ?, ?, ?, convid FROM "
 				+ CONVERSATIONSTABLE + " WHERE " + CONVERSATIONSTABLE + ".msisdn=?");
 		mDb.beginTransaction();
 
+		long msgId = -1;
+		
 		for (ConvMessage conv : convMessages)
 		{
 			bindConversationInsert(insertStatement, conv);
-			long msgId = insertStatement.executeInsert();
-			if (msgId < 0)
+			msgId = insertStatement.executeInsert();
+			if (msgId <= 0)
 			{
-				Log.d("HikeConversationDB", "adding conversation for msisdn " + conv.getMsisdn());
 				Conversation conversation = addConversation(conv.getMsisdn());
 				if (conversation != null)
 				{
@@ -123,12 +134,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				bindConversationInsert(insertStatement, conv);
 				msgId = insertStatement.executeInsert();
-				assert (msgId > 0);
+				assert (msgId >= 0);
 			}
 		}
 
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
+		return msgId;
 	}
 
 	public void deleteConversation(Long[] ids)
@@ -175,12 +187,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		String limitStr = new Integer(limit).toString();
 		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, sent, timestamp" }, "convid=?", new String[] { Long.toString(convid) }, null, null, "msgid DESC", limitStr);
 		final int msgColumn = c.getColumnIndex("message");
-		final int sentColumn = c.getColumnIndex("sent");
+		final int msgStatusColumn = c.getColumnIndex("msgStatus");
 		final int tsColumn = c.getColumnIndex("timestamp");
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		while (c.moveToNext())
 		{
-			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, contactid, c.getInt(tsColumn), c.getInt(sentColumn) != 0);
+			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, contactid, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)));
 			elements.add(elements.size(), message);
 			message.setConversation(conversation);
 		}
@@ -244,4 +256,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
 	}
+
+	
 }

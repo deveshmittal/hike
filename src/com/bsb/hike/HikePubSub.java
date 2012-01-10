@@ -36,7 +36,7 @@ public class HikePubSub implements Runnable
 
 	public static final String WS_CLOSE = "ws_close";
 
-	public static final String WS_MESSAGE = "ws_message";
+	public static final String WS_RECEIVED = "ws_received";
 
 	public static final String WS_OPEN = "ws_open";
 
@@ -56,6 +56,8 @@ public class HikePubSub implements Runnable
 
 	/* sms credits have been modified */
 	public static final String SMS_CREDIT_CHANGED = "smscredits";
+
+	public static final String SERVER_RECEIVED_MSG = "serverReceivedMsg";
 
 	private final Thread mThread;
 

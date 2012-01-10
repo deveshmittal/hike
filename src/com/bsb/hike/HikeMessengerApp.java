@@ -47,7 +47,7 @@ public class HikeMessengerApp extends Application
 		new DbConversationListener(getApplicationContext());
 
 		/* add the generic websocket listener. This will turn strings into objects and re-broadcast them */
-		mNetworkManager = new NetworkManager(getApplicationContext());
+		mNetworkManager = NetworkManager.getInstance(getApplicationContext());
 
 		/* add a handler to handle toasts. The object initializes itself it it's constructor */
 		new ToastListener(getApplicationContext());

@@ -41,7 +41,7 @@ public class HikeWebSocketClient extends WebSocketClient
 	public void onMessage(String message)
 	{
 		Log.d("HikeWebSocketClient", message);
-		pubSub.publish(HikePubSub.WS_MESSAGE, message);
+		pubSub.publish(HikePubSub.WS_RECEIVED, message);
 	}
 
 	@Override

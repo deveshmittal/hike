@@ -17,6 +17,13 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeUserDatabase;
 import com.bsb.hike.utils.HikeWebSocketClient;
 
+/**
+ * 
+ * @author Vijay , Gautam (Some changes)
+ * Class should be singleton as only one instance is required to manage the components.
+ *
+ */
+
 public class NetworkManager implements HikePubSub.Listener, Runnable
 {
 
@@ -36,13 +43,15 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 
 	private BlockingQueue<String> mQueue;
 
-	public NetworkManager(Context context)
+	private static volatile NetworkManager instance;
+	
+	private NetworkManager(Context context)
 	{
 		this.mDb = new HikeUserDatabase(context);
 		this.context = context;
 		this.settings = context.getSharedPreferences(HikeMessengerApp.MESSAGES_SETTING, 0);
 		pubSub = HikeMessengerApp.getPubSub();
-		pubSub.addListener(HikePubSub.WS_MESSAGE, this);
+		pubSub.addListener(HikePubSub.WS_RECEIVED, this);
 		pubSub.addListener(HikePubSub.WS_SEND, this);
 		pubSub.addListener(HikePubSub.WS_CLOSE, this);
 		pubSub.addListener(HikePubSub.WS_OPEN, this);
@@ -51,8 +60,24 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		mThread = new Thread(this);
 		mThread.start();
 	}
+	
+	public static NetworkManager getInstance(Context context)
+	{
+		if (instance == null)
+		{
+			synchronized (NetworkManager.class)
+			{
+				if (instance == null)
+				{
+					instance = new NetworkManager(context);
+				}
+			}
+		}
 
-	public void onMessage(String msg)
+		return instance;
+	}
+
+	private void onMessage(String msg)
 	{
 		JSONObject data;
 		String type;
@@ -74,7 +99,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			String contactId = (contactInfo != null) ? contactInfo.id : null;
 			String message = data.optString("data");
 			long ts = data.optLong("ts");
-			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, false);
+			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, ConvMessage.State.RECEIVED_UNREAD);
 			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		}
 		else if ("typing".equals(type))
@@ -92,6 +117,11 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			int sms_credits = data.optInt("data");
 			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
 		}
+		else if("msgRcpt".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
+		{
+			long msgID = data.optLong("msgID");
+			this.pubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgID);	
+		}
 		else
 		{
 			Log.d("WebSocketPublisher", "Unknown Type:" + type);
@@ -101,7 +131,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		if (type.equals(HikePubSub.WS_MESSAGE))
+		if (type.equals(HikePubSub.WS_RECEIVED)) // signifies msg is received through web sockets.
 		{
 			String message = (String) object;
 			onMessage(message);
