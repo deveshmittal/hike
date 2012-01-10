@@ -207,17 +207,25 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		final int msisdnIdx = c.getColumnIndex("msisdn");
 		final int convIdx = c.getColumnIndex("convid");
 		final int contactIdx = c.getColumnIndex("contactid");
-		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
-		while (c.moveToNext()) {
-			String msisdn = c.getString(msisdnIdx);
-			ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
-			Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx),
+		HikeUserDatabase huDb = null;
+		try {
+		    huDb = new HikeUserDatabase(mCtx);
+		    while (c.moveToNext()) 
+		    {
+		        //TODO this can be expressed in a single sql query
+		        String msisdn = c.getString(msisdnIdx);
+		        ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
+		        Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx),
 			                                    (contactInfo != null) ? contactInfo.name : null,
 			                                    (contactInfo != null) ? contactInfo.onhike : false);
 			conv.setMessages(getConversationThread(conv.getMsisdn(), conv.getContactId(), conv.getConvId(), 1, conv));
 			conversations.add(conv);
+		    }
+		} catch (Exception e) {
+		    Log.e("HikeConversationsDatabase", "Unable to retrieve conversations", e);
+		} finally {
+		    huDb.close();
 		}
-		huDb.close();
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
 	}
