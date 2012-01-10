@@ -222,7 +222,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 					intent.putExtra("name", conversation.getContactName());
 				}
 				if (conversation.getContactId() != null) {
-					intent.putExtra("id", Long.parseLong(conversation.getContactId()));
+					intent.putExtra("id", conversation.getContactId());
 				}
 				intent.putExtra("msisdn", conversation.getMsisdn());
 				startActivity(intent);

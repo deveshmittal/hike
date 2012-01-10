@@ -2,7 +2,6 @@ package com.bsb.hike.ui;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,7 +12,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -40,7 +38,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private HikePubSub mPubSub;
 	private HikeUserDatabase mDbhelper;
 	private Cursor mCursor;
-	private long mContactId;
+	private String mContactId;
 	private String mContactName;
 	private String mContactNumber;
 	private MessagesAdapter mAdapter;
@@ -74,15 +72,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
     	nameView.setVisibility(View.GONE);
     	final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		mDbhelper = new HikeUserDatabase(this);
-        String[] columns = new String[] { "name", "msisdn", "onhike"};
+        String[] columns = new String[] {"name", "msisdn", "onhike", "_id"};
         int[] to = new int[] { R.id.name, R.id.number, R.id.onhike};
     	SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
         adapter.setViewBinder(new DropDownViewBinder());
     	adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter() {
 			@Override
 			public CharSequence convertToString(Cursor cursor) {
-				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
-				mContactName = cursor.getString(cursor.getColumnIndex("name"));
+                mContactName = cursor.getString(cursor.getColumnIndex("name"));
 				return mContactName;
 			}
 		});
@@ -101,11 +98,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			@Override
 			public void onItemClick(AdapterView<?> list, View _empty, int position,
 					long id) {
-				mContactId = id;
-				mDbhelper.close();
-				mDbhelper = null;
-				createConversation();
-				mComposeView.requestFocus();
+
+			    /* Extract selected values from the cursor */
+				Cursor cursor = (Cursor) list.getItemAtPosition(position);
+                mContactId = cursor.getString(cursor.getColumnIndex("_id"));
+                mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
+                mContactName = cursor.getString(cursor.getColumnIndex("name"));
+
+                /* close the db */
+                mDbhelper.close();
+                mDbhelper = null;
+
+                /* initialize the conversation */
+                createConversation();
+
+                /* set the focus on the input text box
+                 * TODO can this be done in createConversation? */
+                mComposeView.requestFocus();
 			}
 		});
   
@@ -133,7 +142,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mContactName != null) {
 			intent.putExtra("name", mContactName);
 		}
-		if (mContactId >= 0) {
+		if (mContactId != null) {
 			intent.putExtra("id", mContactId);
 		}
 
@@ -163,11 +172,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	         */
 	        if (contactInfo != null)
 	        {
-	            mContactId = Long.parseLong(contactInfo.id);
+	            mContactId = contactInfo.id;
 	            mContactName = contactInfo.name;
 	            mContactNumber = contactInfo.number;
 	        } else {
-	            mContactId = -1;
+	            mContactId = null;
 	            mContactName = mContactNumber = phoneNumber;
 	        }
 	        createConversation();
@@ -176,7 +185,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	    	createAutoCompleteView();
 	    } else {
 	        //selected chat from conversation list
-		    mContactId = intent.getLongExtra("id", -1);
+		    mContactId = intent.getStringExtra("id");
 		    mContactName = intent.getStringExtra("name");
 	    	createConversation();
 	    }
@@ -189,7 +198,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mComposeView.setText("");
 		long time = (long) System.currentTimeMillis()/1000;
 		Log.d("Timestamp", "Current timestamp is " + time);
-		ConvMessage convMessage = new ConvMessage(message, mContactNumber, Long.toString(mContactId), time, true);
+		ConvMessage convMessage = new ConvMessage(message, mContactNumber, mContactId, time, true);
 		convMessage.setConversation(mConversation);
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
