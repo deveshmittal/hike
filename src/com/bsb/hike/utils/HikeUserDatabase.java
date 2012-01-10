@@ -98,6 +98,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		if (contactInfos.isEmpty()) {
 			return null;
 		}
+		c.close();
 		return contactInfos.get(0);
 	}
 
