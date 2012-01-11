@@ -91,7 +91,7 @@
              android:autoText="true"
              android:layout_toLeftOf="@+id/send_message"
              android:hint="@string/type_to_compose"
-             android:inputType="text|textAutoCorrect|textShortMessage" >
+             android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences" >
              <requestFocus/>
         </EditText>
 
