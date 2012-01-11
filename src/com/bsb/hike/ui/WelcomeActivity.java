@@ -44,16 +44,23 @@ public class WelcomeActivity extends Activity
 				editor.putString(HikeMessengerApp.MSISDN_SETTING, msisdn);
 				editor.putString(HikeMessengerApp.UID_SETTING, uid);
 				editor.commit();
+				return Boolean.TRUE;
 			}
-
-			return Boolean.TRUE;
+			return Boolean.FALSE;
 		}
 
 		@Override
 		protected void onPostExecute(Boolean result)
 		{
-			startActivity(new Intent(WelcomeActivity.this, AccountCreateSuccess.class));
-			finish();
+			if (result.booleanValue())
+			{
+				startActivity(new Intent(WelcomeActivity.this, AccountCreateSuccess.class));
+				finish();
+			} else
+			{
+				//Simply dimiss this dialog for now and let us try again
+				mDialog.dismiss();
+			}
 		}
 	}
 
