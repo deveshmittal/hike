@@ -58,7 +58,7 @@ public class WelcomeActivity extends Activity
 				finish();
 			} else
 			{
-				//Simply dimiss this dialog for now and let us try again
+				//Simply dimiss this dialog for now and make the user try again later
 				mDialog.dismiss();
 			}
 		}
