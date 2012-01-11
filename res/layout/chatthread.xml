@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     android:layout_height="match_parent"
-    android:background="@color/white" >
+    android:background="@color/white">
+
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -30,7 +32,43 @@
 
     </RelativeLayout>
 
-	<RelativeLayout 
+	<ListView
+	    android:id="@+id/conversations_list"
+	    android:layout_width="fill_parent"
+	    android:layout_height="362dp"
+	    android:background="@color/white"
+	    android:cacheColorHint="#00000000"
+	    android:divider="@color/dividercolor"
+	    android:dividerHeight="1dp"
+	    android:transcriptMode="alwaysScroll" >
+
+	</ListView>
+	<LinearLayout
+        android:id="@+id/chat_metadata"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/grey">
+
+        <TextView
+            android:id="@+id/txt_metadata"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/grey"
+            android:text="35/199"
+            android:textColor="@color/black"
+            android:layout_marginLeft="10dp"
+            android:textSize="9dp" >
+        </TextView>
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_centerVertical="true"
+            android:background="#ffffff" />
+    </LinearLayout>
+
+	<RelativeLayout
+	    android:layout_weight="1"
 	    android:layout_width="fill_parent"
 	    android:layout_height="65dp"
 	    android:layout_alignParentBottom="true"
@@ -59,18 +97,4 @@
             android:enabled="false"
             android:onClick="onSendClick"/>
  	</RelativeLayout>
-
-	<ListView
-	    android:divider="@color/dividercolor"
-        android:dividerHeight="1dp"
-	    android:transcriptMode="alwaysScroll"
-	    android:cacheColorHint="#00000000"
-	    android:id="@+id/conversations_list"
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:background="@color/white"
-	    android:layout_above="@id/bottom_panel"
-	    android:layout_below="@+id/top_panel" >
-	</ListView>
-
-</RelativeLayout>
+</LinearLayout>
