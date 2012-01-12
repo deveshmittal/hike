@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -7,20 +7,38 @@
 
     <TextView
         android:id="@+id/title_field"
-        android:height="40dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:background="@color/diamondblue"
-        android:text="Hike"
         android:gravity="center"
+        android:height="40dp"
+        android:text="Hike"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:visibility="visible" />
 
     <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="10"
+        android:layout_below="@+id/title_field" >
+
+        <ListView
+            android:id="@+id/conversations"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/title_field"
+            android:background="@color/white"
+            android:divider="@color/dividercolor"
+            android:dividerHeight="1dp" >
+        </ListView>
+    </RelativeLayout>
+
+    <RelativeLayout
         android:id="@+id/bottom_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="65dp"
         android:layout_alignParentBottom="true"
         android:background="@color/black" >
 
@@ -30,23 +48,6 @@
             android:layout_height="match_parent"
             android:layout_centerInParent="true"
             android:src="@drawable/ic_editmessage" />
-
     </RelativeLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/bottom_nav_bar"
-        android:layout_below="@+id/title_field">
-    <ListView
-        android:divider="@color/dividercolor"
-        android:dividerHeight="1dp"
-        android:id="@+id/conversations"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/title_field"
-        android:background="@color/white" >
-    </ListView>
-  </RelativeLayout>
-</RelativeLayout>
+</LinearLayout>
