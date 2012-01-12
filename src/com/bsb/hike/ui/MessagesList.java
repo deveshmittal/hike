@@ -166,8 +166,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		setContentView(R.layout.main);
 		mConversationsView = (ListView) findViewById(R.id.conversations);
 
-		mSearchIconView = findViewById(R.id.search);
-		mSearchIconView.setOnClickListener(this);
+/*		mSearchIconView = findViewById(R.id.search);
+		mSearchIconView.setOnClickListener(this);*/
+
 		mEditMessageIconView = findViewById(R.id.edit_message);
 		mEditMessageIconView.setOnClickListener(this);
 
