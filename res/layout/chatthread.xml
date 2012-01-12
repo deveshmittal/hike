@@ -46,32 +46,46 @@
 	    android:transcriptMode="alwaysScroll" >
 	</ListView>
 
-	<LinearLayout
+	<RelativeLayout
 	    android:id="@+id/sms_chat_metadata"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:background="@color/grey"
-	    android:orientation="vertical" >
+	    android:background="@color/grey" >
 
         <TextView
+            android:layout_alignParentLeft="true"
             android:layout_marginTop="3dp"
             android:layout_marginBottom="3dp"
-            android:id="@+id/sms_chat_metadata_text"
-            android:layout_width="fill_parent"
+            android:id="@+id/sms_chat_metadata_num_chars"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:paddingLeft="10dp"
             android:background="@color/grey"
-            android:text=""
+            android:text="24/160"
             android:textColor="@color/white"
             android:textSize="12dp" >
         </TextView>
 
+        <TextView
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:id="@+id/sms_chat_metadata_text_credits_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="10dp"
+            android:background="@color/grey"
+            android:text="99 credits left"
+            android:textColor="@color/white"
+            android:textSize="12dp" >
+        </TextView>
         <View
+            android:layout_below="@id/sms_chat_metadata_num_chars"
             android:layout_width="fill_parent"
             android:layout_height="1dp"
             android:layout_centerVertical="true"
             android:background="#ffffff" />
-    </LinearLayout>
+    </RelativeLayout>
 
 	<RelativeLayout
 	    android:id="@+id/bottom_panel"

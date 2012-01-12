@@ -68,6 +68,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private Button mSendBtn;
 
+	private int mCredits;
+
+	private View mMetadataView;
+
+	private TextView mMetadataNumChars;
+
+	private TextView mMetadataCreditsLeft;
+
 	@Override
 	protected void onPause()
 	{
@@ -89,6 +97,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		bottomPanel.setVisibility(View.GONE);
 		View nameView = findViewById(R.id.name_field);
 		nameView.setVisibility(View.GONE);
+		View metadataView = findViewById(R.id.sms_chat_metadata);
+		metadataView.setVisibility(View.GONE);
 		final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		mDbhelper = new HikeUserDatabase(this);
 		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
@@ -156,6 +166,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.END_TYPING_CONVERSATION, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		if (mDbhelper != null)
 		{
 			mDbhelper.close();
@@ -245,6 +256,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send"));
 	}
 
+	/**
+	 * Renders the chats for a given user
+	 */
 	private void createConversation()
 	{
 		final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
@@ -256,6 +270,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mNameView.setVisibility(View.VISIBLE);
 		mNameView.setText(mContactName);
 
+		/*
+		 * strictly speaking we shouldn't be reading from the db in the UI Thread
+		 */
 		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
 		mConversation = db.getConversation(mContactNumber, 10);
 		if (mConversation == null)
@@ -264,7 +281,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		db.close();
 		List<ConvMessage> messages = mConversation.getMessages();
-
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mConversationsView.setStackFromBottom(true);
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
@@ -276,6 +292,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mComposeView.addTextChangedListener(this);
 
 		mSendBtn = (Button) findViewById(R.id.send_message);
+
+		/* get the number of credits and also listen for changes */
+		mCredits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
+		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+
+		mMetadataView = findViewById(R.id.sms_chat_metadata);
+		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
+		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
+		if (mConversation.isOnhike())
+		{
+			mMetadataView.setVisibility(View.GONE);
+		} else {
+			updateChatMetadata();
+		}
 	}
 
 	private class SetTypingText implements Runnable
@@ -352,6 +382,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 				mUiThreadHandler.postDelayed(mClearTypingCallback, 20 * 1000);
 			}
+		} else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		{
+			mCredits = ((Integer) object).intValue();
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run()
+				{
+					updateChatMetadata();
+				}
+			});
 		}
 	}
 
@@ -382,6 +422,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
+
+		/* only update the chat metadata if this is an SMS chat */
+		if (!mConversation.isOnhike()) {
+			updateChatMetadata();
+		}
+
+		/* we can bail early if this is an empty message */
 		if (editable.toString().trim().length() == 0)
 		{
 			mSendBtn.setEnabled(false);
@@ -389,6 +436,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		mSendBtn.setEnabled(true);
+
+		/* don't send typing notifications for non-hike chats */
+		if (!mConversation.isOnhike())
+		{
+			return;
+		}
+
 		if (mResetTypingNotification == null)
 		{
 			mResetTypingNotification = new ResetTypingNotification();
@@ -405,6 +459,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear any existing ones
 			mUiThreadHandler.postDelayed(mResetTypingNotification, 10 * 1000);
 		}
+	}
+
+	/* must be called on the UI Thread */
+	private void updateChatMetadata()
+	{
+		int length = mComposeView.getText().length();
+		mMetadataNumChars.setText(Integer.toString(length) + "/160");
+		String formatted = String.format(getResources().getString(R.string.credits_left), mCredits);
+		mMetadataCreditsLeft.setText(formatted);
 	}
 
 	@Override

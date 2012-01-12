@@ -54,6 +54,9 @@ public class HikePubSub implements Runnable
 
 	public static final String TOKEN_CREATED = "tokencreated";
 
+	/* sms credits have been modified */
+	public static final String SMS_CREDIT_CHANGED = "smscredits";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

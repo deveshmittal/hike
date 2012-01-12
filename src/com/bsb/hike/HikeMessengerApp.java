@@ -28,6 +28,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String CONTACT_LIST_EMPTY = "contactlistempty";
 
+	public static final String SMS_SETTING = "smscredits";
+
 	private static HikePubSub mPubSubInstance;
 
 	private NetworkManager mNetworkManager;

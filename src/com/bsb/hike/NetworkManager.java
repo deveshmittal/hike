@@ -87,6 +87,11 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			String msisdn = data.optString("from");
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
 		}
+		else if ("sms_credits".equals(type))
+		{
+			int sms_credits = data.optInt("data");
+			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
+		}
 		else
 		{
 			Log.d("WebSocketPublisher", "Unknown Type:" + type);
