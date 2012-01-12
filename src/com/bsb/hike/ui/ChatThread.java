@@ -76,6 +76,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private TextView mMetadataCreditsLeft;
 
+	int mMaxSmsLength = 160;
+
 	@Override
 	protected void onPause()
 	{
@@ -465,7 +467,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void updateChatMetadata()
 	{
 		int length = mComposeView.getText().length();
-		mMetadataNumChars.setText(Integer.toString(length) + "/160");
+		//set the max sms length to a length appropriate to the number of characters we have
+		mMaxSmsLength = 160 * (1 + length/160);
+		mMetadataNumChars.setText(Integer.toString(length) + "/" + Integer.toString(mMaxSmsLength));
 		String formatted = String.format(getResources().getString(R.string.credits_left), mCredits);
 		mMetadataCreditsLeft.setText(formatted);
 	}
