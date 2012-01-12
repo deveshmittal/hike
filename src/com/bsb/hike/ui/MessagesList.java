@@ -40,6 +40,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
+import com.bsb.hike.utils.UserError;
 
 public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
@@ -97,33 +98,29 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 	}
 
-	public class InviteFriendAsyncTask extends AsyncTask<Uri, Void, Boolean>
+	public class InviteFriendAsyncTask extends AsyncTask<Uri, Void, String>
 	{
-
 		@Override
-		protected Boolean doInBackground(Uri... params)
+		protected String doInBackground(Uri... params)
 		{
 			Uri uri = params[0];
 			String number = ContactUtils.getMobileNumber(MessagesList.this.getContentResolver(), uri);
-			return AccountUtils.invite(number);
+			try
+			{
+				AccountUtils.invite(number);
+				return getString(R.string.invite_sent);
+			}
+			catch(UserError err)
+			{
+				return err.message;
+			}
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result)
+		protected void onPostExecute(String message)
 		{
 			Context ctx = MessagesList.this.getApplicationContext();
-			int duration;
-			CharSequence message;
-			if (result.booleanValue())
-			{
-				duration = Toast.LENGTH_SHORT;
-				message = getString(R.string.invite_sent);
-			}
-			else
-			{
-				duration = Toast.LENGTH_LONG;
-				message = getString(R.string.invite_failed);
-			}
+			int duration = Toast.LENGTH_LONG;
 			Toast toast = Toast.makeText(ctx, message, duration);
 			toast.show();
 		}

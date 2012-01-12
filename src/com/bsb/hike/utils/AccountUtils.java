@@ -189,7 +189,7 @@ public class AccountUtils
 		}
 	}
 
-	public static boolean invite(String phone_no)
+	public static void invite(String phone_no) throws UserError
 	{
 		HttpPost httppost = new HttpPost(BASE + "/user/invite");
 		addToken(httppost);
@@ -203,17 +203,15 @@ public class AccountUtils
 		catch (UnsupportedEncodingException e)
 		{
 			Log.wtf("AccountUtils", "encoding exception", e);
-			return false;
+			throw new UserError("Invalid PhoneNumber", -2);
 		}
 
 		JSONObject obj = executeRequest(httppost);
 		if (((obj == null) || ("fail".equals(obj.optString("stat")))))
 		{
 			Log.i("Invite", "Couldn't invite friend: " + obj);
-			return false;
+			throw new UserError(obj.optString("errorMsg"), obj.optInt("error"));
 		}
-
-		return true;
 	}
 
 	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws IllegalStateException, IOException
