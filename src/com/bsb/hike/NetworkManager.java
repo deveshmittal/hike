@@ -92,7 +92,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			return;
 		}
 
-		if ("message".equals(type))
+		if ("message".equals(type))  // this represents msg from another client through tornado server.
 		{
 			String msisdn = data.optString("from");
 			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
@@ -100,7 +100,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			String message = data.optString("data");
 			long ts = data.optLong("ts");
 			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, ConvMessage.State.RECEIVED_UNREAD);
-			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, convMessage);
 		}
 		else if ("typing".equals(type))
 		{

@@ -59,6 +59,8 @@ public class HikePubSub implements Runnable
 
 	public static final String SERVER_RECEIVED_MSG = "serverReceivedMsg";
 
+	public static final String MESSAGE_RECEIVED_FROM_OTHER_CLIENT = "messageReceivedFromOtherClient";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

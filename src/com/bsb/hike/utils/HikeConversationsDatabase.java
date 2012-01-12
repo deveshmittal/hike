@@ -90,12 +90,34 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return addConversations(l);
 	}
 
-	public int updateMsgStatus(long msgID,int val)
+	public int updateMsgStatus(long convID, long msgID, int val)
 	{
-		String [] whereArgs = {String.valueOf(msgID)};
 		ContentValues values = new ContentValues();
-        values.put("msgStatus",val);
-        return mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
+		values.put("msgStatus", val);
+		String whereClause;
+		if (convID > 0 && msgID <= 0) // this is to handle the case where we need to update status for a particular convID
+		{
+			String[] whereArgs = { String.valueOf(convID) };
+			whereClause = "convid=?";
+			return mDb.update(MESSAGESTABLE, values, "convid=?", whereArgs);
+		}
+		else if(convID > 0 && msgID > 0) // update status for msgID=X and convID=y
+		{
+			String[] whereArgs = { String.valueOf(msgID), String.valueOf(convID)};
+			whereClause="msgid=? and convid=?";
+			return mDb.update(MESSAGESTABLE, values, "msgid=? and convid=?", whereArgs);
+		}
+		else
+		{
+			String[] whereArgs = { String.valueOf(msgID) };
+			whereClause="msgid=?";
+			return mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
+		}
+	}
+
+	public void updateConversation()
+	{
+
 	}
 
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
@@ -107,20 +129,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
-		// 0 -> SENT_UNCONFIRMED ; 1 -> SENT_CONFIRMED ; 2 -> RECEIVED_UNREAD ; 3 -> RECEIVED_READ
-		insertStatement.bindLong(msgStatusColumn, conv.getState().ordinal()); 
+		// 0 -> SENT_UNCONFIRMED ; 1 -> SENT_CONFIRMED ; 2 -> RECEIVED_UNREAD ;
+		// 3 -> RECEIVED_READ
+		insertStatement.bindLong(msgStatusColumn, conv.getState().ordinal());
 		insertStatement.bindLong(timestampColumn, conv.getTimestamp());
-		insertStatement.bindString(msisdnColumn, conv.getMsisdn());		
+		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
 	}
 
 	public long addConversations(List<ConvMessage> convMessages)
 	{
-		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + MESSAGESTABLE + " (message, sent, timestamp, convid) " + "SELECT ?, ?, ?, convid FROM "
+		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + MESSAGESTABLE + " (message, msgStatus, timestamp, convid) " + "SELECT ?, ?, ?, convid FROM "
 				+ CONVERSATIONSTABLE + " WHERE " + CONVERSATIONSTABLE + ".msisdn=?");
 		mDb.beginTransaction();
 
 		long msgId = -1;
-		
+
 		for (ConvMessage conv : convMessages)
 		{
 			bindConversationInsert(insertStatement, conv);
@@ -185,7 +208,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation)
 	{
 		String limitStr = new Integer(limit).toString();
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, sent, timestamp" }, "convid=?", new String[] { Long.toString(convid) }, null, null, "msgid DESC", limitStr);
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, msgStatus, timestamp" }, "convid=?", new String[] { Long.toString(convid) }, null, null, "msgid DESC",
+				limitStr);
 		final int msgColumn = c.getColumnIndex("message");
 		final int msgStatusColumn = c.getColumnIndex("msgStatus");
 		final int tsColumn = c.getColumnIndex("timestamp");
@@ -257,5 +281,4 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return conversations;
 	}
 
-	
 }

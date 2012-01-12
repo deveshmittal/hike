@@ -37,6 +37,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 {
 
 	private HikePubSub mPubSub;
+	
+	private HikeConversationsDatabase mConversationDb; 
 
 	private HikeUserDatabase mDbhelper;
 
@@ -175,6 +177,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mDbhelper.close();
 			mDbhelper = null;
 		}
+		if(mConversationDb != null)
+		{
+			mConversationDb.close();
+			mConversationDb = null;
+		}
 	}
 
 	@Override
@@ -230,7 +237,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			createConversation();
 		}
-		else if (mContactNumber == null)
+		else if (mContactNumber == null) // wt if i have this number , then
+											// removes it and again store it.
 		{
 			// new conversation thread
 			createAutoCompleteView();
@@ -252,7 +260,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mComposeView.setText("");
 		long time = (long) System.currentTimeMillis() / 1000;
 		Log.d("Timestamp", "Current timestamp is " + time);
-		ConvMessage convMessage = new ConvMessage(message, mContactNumber, mContactId, time,ConvMessage.State.SENT_UNCONFIRMED);
+		ConvMessage convMessage = new ConvMessage(message, mContactNumber, mContactId, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mConversation);
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
@@ -275,13 +283,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
-		mConversation = db.getConversation(mContactNumber, 10);
+		mConversationDb = new HikeConversationsDatabase(this);
+		mConversation = mConversationDb.getConversation(mContactNumber, 10);
 		if (mConversation == null)
 		{
-			mConversation = db.addConversation(mContactNumber);
+			mConversation = mConversationDb.addConversation(mContactNumber);
 		}
-		db.close();
+		long convID = mConversation.getConvId();
+		mConversationDb.updateMsgStatus(convID, 0, ConvMessage.State.RECEIVED_READ.ordinal());
+		
 		List<ConvMessage> messages = mConversation.getMessages();
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mConversationsView.setStackFromBottom(true);
@@ -353,6 +363,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						mAdapter.add(conv);
 					}
 				});
+				
+				mConversationDb.updateMsgStatus(mConversation.getConvId(), conv.getMsgID(), ConvMessage.State.SENT_CONFIRMED.ordinal());
 			}
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
@@ -361,7 +373,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				if (mClearTypingCallback != null)
 				{
-					// we can assume that if we don't have the callback, then the UI should be in the right state already
+					// we can assume that if we don't have the callback, then
+					// the UI should be in the right state already
 					runOnUiThread(mClearTypingCallback);
 					mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 				}
@@ -379,7 +392,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 				else
 				{
-					// we've got another typing notification, so we want to clear it a while from now
+					// we've got another typing notification, so we want to
+					// clear it a while from now
 					mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 				}
 				mUiThreadHandler.postDelayed(mClearTypingCallback, 20 * 1000);
@@ -410,7 +424,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			long current = System.currentTimeMillis();
 			if (current - mTextLastChanged >= 5 * 1000)
-			{ // text hasn't changed in 10 seconds, send an event
+			{ // text hasn't changed
+				// in 10 seconds,
+				// send an event
 				mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("stop_typing"));
 				mTextLastChanged = 0;
 			}
@@ -461,7 +477,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("typing"));
 
 			// create a timer to clear the event
-			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear any existing ones
+			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear
+																		// any
+																		// existing
+																		// ones
 			mUiThreadHandler.postDelayed(mResetTypingNotification, 10 * 1000);
 		}
 	}

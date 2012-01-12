@@ -29,6 +29,7 @@ public class DbConversationListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 	}
 
@@ -42,21 +43,24 @@ public class DbConversationListener implements Listener
 			convMessage.setMsgID(msgID); // set the msgID for this message.
 			mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send")); // this is used to be sent by the web socket.
 		}
-		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))  // represents event when a client receive msg from other client through server.
+		else if (HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT.equals(type))  // represents event when a client receive msg from other client through server.
 		{
 			ConvMessage message = (ConvMessage) object;
 			mConversationDb.addConversationMessages(message);
+			mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, message);
 			// TODO update the unread flags here
-		} if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		}
+		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{
 			Integer credits = (Integer) object;
 			mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
 			mEditor.commit();
-		}
-		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server sent recieved msg
+		} 
+		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{
-			long msgID = Long.parseLong((String)object);
-			int rowsAffected = mConversationDb.updateMsgStatus(msgID,ConvMessage.State.SENT_CONFIRMED.ordinal());
+			Log.d("DbConvList", "Object is " + object);
+			long msgID = (Long)object;
+			int rowsAffected = mConversationDb.updateMsgStatus(0,msgID,ConvMessage.State.SENT_CONFIRMED.ordinal());
 			if(rowsAffected<=0) // signifies no msg.
 			{
 				// TODO : Handle this case
