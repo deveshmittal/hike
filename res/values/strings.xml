@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">hike messenger</string>
+    <string name="app_name">hike</string>
     <string name="we_got_you_on_carrier">Great! So we have you as %1$s on %2$s.  You\'re all set</string>
     <string name="click_next">Next</string>
     <string name="accept_tc">Accept and Continue</string>
@@ -10,7 +10,7 @@ No hidden costs and no data plan required</string>
     <string name="scanning_ab">Scanning Address Book</string>
     <string name="looking_for_friends">Just checking to see if any friends are on hike. Won\'t be long, we promise.</string>
     <string name="determining_phone_number">Determining phone number</string>
-    <string name="next_message">Click on next to scan your contacts and start texting for free!</string>
+    <string name="next_message">Tap next to scan your contacts and start texting for free!</string>
     <string name="invite">Invite</string>
     <string name="contacts">Contacts</string>
     <string name="deleteconversations">Delete Conversations</string>
