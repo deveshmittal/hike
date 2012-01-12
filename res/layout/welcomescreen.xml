@@ -32,8 +32,8 @@
         android:background="@color/white" >
 
         <TextView
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
+            android:layout_marginLeft="17dp"
+            android:layout_marginRight="17dp"
             android:id="@+id/welcome"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -48,10 +48,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/welcome"
-            android:layout_marginBottom="15dp"
             android:layout_centerHorizontal="true"
+            android:layout_marginBottom="15dp"
             android:onClick="onClick"
-            android:src="@drawable/ic_launcher" />
+            android:src="@drawable/ic_hikelogo" />
 
         <EditText
             android:hint="Enter debug MSISDN here"
