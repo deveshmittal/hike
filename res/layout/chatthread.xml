@@ -60,7 +60,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
-            android:background="@color/grey"
             android:text="24/160"
             android:textColor="@color/white"
             android:textSize="12dp" >
@@ -74,7 +73,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingRight="10dp"
-            android:background="@color/grey"
             android:text="99 credits left"
             android:textColor="@color/white"
             android:textSize="12dp" >
