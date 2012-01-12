@@ -44,7 +44,6 @@
 	    android:divider="@color/dividercolor"
 	    android:dividerHeight="1dp"
 	    android:transcriptMode="alwaysScroll" >
-
 	</ListView>
 
 	<LinearLayout
@@ -62,7 +61,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:background="@color/grey"
-            android:text="35/199"
+            android:text=""
             android:textColor="@color/white"
             android:textSize="12dp" >
         </TextView>
