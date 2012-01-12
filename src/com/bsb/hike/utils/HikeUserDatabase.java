@@ -142,6 +142,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	{
 		Cursor c = mReadDb.query(DATABASE_TABLE, new String[] { "msisdn", "id", "name", "onhike" }, "id=?", new String[] { id }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
+		c.close();
 		if (contactInfos.isEmpty())
 		{
 			return null;

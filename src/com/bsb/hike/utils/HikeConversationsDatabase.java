@@ -185,6 +185,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			message.setConversation(conversation);
 		}
 		Collections.reverse(elements);
+		c.close();
+
 		return elements;
 	}
 
@@ -198,6 +200,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		long convid = c.getInt(c.getColumnIndex("convid"));
 		String contactid = c.getString(c.getColumnIndex("contactid"));
+		c.close();
+
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 		huDb.close();
