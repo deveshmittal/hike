@@ -59,7 +59,10 @@ public class WelcomeActivity extends Activity
 			} else
 			{
 				//Simply dimiss this dialog for now and make the user try again later
-				mDialog.dismiss();
+				if (mDialog != null)
+				{
+					mDialog.dismiss();
+				}
 			}
 		}
 	}

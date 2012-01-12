@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,6 +99,11 @@ public class ScanningAddressBook extends Activity
 			try
 			{
 				List<ContactInfo> addressbook = AccountUtils.postAddressBook(token, contactinfos);
+				//TODO this exception should be raised from the postAddressBook code
+				if (addressbook == null)
+				{
+					throw new IOException("Unable to retrieve address book");
+				}
 				Log.d("SAB", "about to insert");
 				db = new HikeUserDatabase(ScanningAddressBook.this);
 				db.setAddressBook(addressbook);

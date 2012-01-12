@@ -55,7 +55,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		onCreate(db);
 	}
 
-	public boolean addContacts(List<ContactInfo> contacts)
+	public void addContacts(List<ContactInfo> contacts) throws DbException
 	{
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
@@ -77,12 +77,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				ih.execute();
 			}
 			db.setTransactionSuccessful();
-			return true;
 		}
 		catch (Exception e)
 		{
 			Log.e("HikeUserDatabase", "Unable to insert contacts", e);
-			return false;
+			throw new DbException(e);
 		}
 		finally
 		{
@@ -96,7 +95,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	 * @param contacts
 	 *            list of contacts to set/add
 	 */
-	public void setAddressBook(List<ContactInfo> contacts)
+	public void setAddressBook(List<ContactInfo> contacts) throws DbException
 	{
 		/* delete all existing entries from database */
 		mDb.delete(DATABASE_TABLE, null, null);
@@ -158,10 +157,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	 *            contact to add
 	 * @return true iff the insert was successful
 	 */
-	public boolean addContact(ContactInfo hikeContactInfo)
+	public void addContact(ContactInfo hikeContactInfo) throws DbException
 	{
 		List<ContactInfo> l = new LinkedList<ContactInfo>();
 		l.add(hikeContactInfo);
-		return addContacts(l);
+		addContacts(l);
 	}
 }
