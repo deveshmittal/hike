@@ -39,14 +39,15 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 			if (convMessage.isSent())
 			{
 				v = inflater.inflate(R.layout.message_item_send, parent, false);
-			}
-			else
-			{
-				v = inflater.inflate(R.layout.message_item_receive, parent, false);
+				/* label outgoing hike conversations in green */
 				if (conversation.isOnhike())
 				{
 					v.setBackgroundResource(R.color.green);
 				}
+			}
+			else
+			{
+				v = inflater.inflate(R.layout.message_item_receive, parent, false);
 			}
 		}
 
