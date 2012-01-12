@@ -73,7 +73,8 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
 			String contactId = (contactInfo != null) ? contactInfo.id : null;
 			String message = data.optString("data");
-			long ts = data.optLong("ts");
+			//If there's no timestamp set, use the current time.  Totally a hack
+			long ts = data.has("ts") ? data.optLong("ts") : System.currentTimeMillis()/1000;
 			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, false);
 			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		}
