@@ -114,6 +114,19 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		else if (HikePubSub.WS_CLOSE.equals(type))
 		{
 			Log.i("NetworkManager", "Websocket closed");
+			/* try to close any existing connections from our end */
+			if (mWebSocket != null)
+			{
+				try
+				{
+					mWebSocket.close();
+				}
+				catch (IOException e)
+				{
+					Log.e("NetworkManager", "Error closing websocket", e);
+				}
+			}
+
 			mWebSocket = null;
 			Runnable r = new Runnable()
 			{
