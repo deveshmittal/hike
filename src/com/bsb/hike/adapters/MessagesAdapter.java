@@ -42,7 +42,7 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 				/* label outgoing hike conversations in green */
 				if (conversation.isOnhike())
 				{
-					v.setBackgroundResource(R.color.green);
+					v.setBackgroundResource(R.color.blue);
 				}
 			}
 			else
