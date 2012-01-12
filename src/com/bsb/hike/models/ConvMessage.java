@@ -11,13 +11,37 @@ import com.ocpsoft.pretty.time.PrettyTime;
 
 public class ConvMessage
 {
-	public ConvMessage(String message, String msisdn, String contactId, long time, boolean isSent)
+
+	private long msgID;
+
+	private Conversation mConversation;
+
+	private String mMessage;
+
+	private String mMsisdn;
+
+	private String contactId;
+
+	private long mTimestamp;
+
+	private boolean mIsSent;
+	
+	private State mState;
+	
+	public static enum State
+	{
+		SENT_UNCONFIRMED, SENT_CONFIRMED , RECEIVED_UNREAD, RECEIVED_READ
+	};
+
+	public ConvMessage(String message, String msisdn, String contactId, long timestamp, State msgState)
 	{
 		this.contactId = contactId;
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
-		this.mTimestamp = time;
-		this.mIsSent = isSent;
+		this.mTimestamp = timestamp;
+		mState = msgState;
+		
+		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED);
 	}
 
 	public String getMessage()
@@ -112,31 +136,13 @@ public class ConvMessage
 		return true;
 	}
 
-	private Conversation mConversation;
-
-	private String mMessage;
-
-	private String mMsisdn;
-
-	private String contactId;
-
-	private long mTimestamp;
-
-	private boolean mIsSent;
-
-	public enum State
-	{
-		SENT, DELIVERED, RECEIVED
-	};
-
-	private State mState;
-
 	public JSONObject serialize(String type)
 	{
 		JSONObject object = new JSONObject();
 		try
 		{
 			object.put("ts", mTimestamp);
+			object.put("msgID", msgID); // added msgID to the JSON Object
 			object.put("type", type);
 			object.put("to", mMsisdn);
 			object.put("body", mMessage);
@@ -163,5 +169,26 @@ public class ConvMessage
 		Date date = new Date(mTimestamp * 1000);
 		PrettyTime p = new PrettyTime();
 		return p.format(date);
+	}
+
+	public void setMsgID(long msgID)
+	{
+		this.msgID = msgID;
+	}
+	public long getMsgID()
+	{
+		return msgID;			
+	}
+	
+	public static State stateValue(int val)
+	{
+		switch(val)
+		{
+			case 0: return State.SENT_UNCONFIRMED;
+			case 1: return State.SENT_CONFIRMED;
+			case 2: return State.RECEIVED_UNREAD;
+			case 3: return State.RECEIVED_READ;
+			default: return State.SENT_UNCONFIRMED;
+		}
 	}
 }

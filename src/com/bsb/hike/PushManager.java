@@ -111,10 +111,10 @@ public class PushManager extends Thread
 				JSONObject obj = new JSONObject(str);
 				String msg = obj.optString("message");
 				String msisdn = obj.optString("msisdn");
-				int timestamp = obj.optInt("timestamp");
+				long timestamp = obj.optLong("timestamp");
 				ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(msisdn);
 				this.toaster.toast(contactInfo, msisdn, msg, timestamp);
-				ConvMessage convMessage = new ConvMessage(msg, msisdn, contactInfo.id, timestamp, false);
+				ConvMessage convMessage = new ConvMessage(msg, msisdn, contactInfo.id, timestamp, ConvMessage.State.RECEIVED_UNREAD);
 				this.convDb.addConversationMessages(convMessage);
 			}
 			catch (JSONException e)
