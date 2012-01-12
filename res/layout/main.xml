@@ -5,23 +5,22 @@
     android:background="@color/white"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/title_field"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@color/diamondblue"
-        android:gravity="center"
-        android:height="40dp"
-        android:text="Hike"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:visibility="visible" />
-
     <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:background="@color/diamondblue" >
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:src="@drawable/ic_header_logo" />
+    </RelativeLayout>
+<RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="10"
-        android:layout_below="@+id/title_field" >
+        android:layout_weight="10">
 
         <ListView
             android:id="@+id/conversations"
