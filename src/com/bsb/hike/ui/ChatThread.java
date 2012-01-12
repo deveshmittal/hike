@@ -78,7 +78,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	int mMaxSmsLength = 160;
 
-	private boolean mCanSend;
+	private boolean mCanSend = true; /*default this to true for all hike<->hike messages */
 
 	@Override
 	protected void onPause()
