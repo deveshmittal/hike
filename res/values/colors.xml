@@ -10,4 +10,5 @@
     <color name="gainsboro">#E8E8E8</color>
     <color name="dividercolor">#CCCCCC</color>
     <color name="diamondblue">#0EBFE9</color>
+    <color name="red">#FF0000</color>
 </resources>
