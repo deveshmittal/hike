@@ -28,17 +28,9 @@
             android:id="@+id/edit_message"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
+            android:layout_centerInParent="true"
             android:src="@drawable/ic_editmessage" />
 
-        <ImageView
-            android:id="@+id/search"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:src="@drawable/ic_searchicon" />
     </RelativeLayout>
 
     <RelativeLayout
