@@ -78,6 +78,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	int mMaxSmsLength = 160;
 
+	private boolean mCanSend;
+
 	@Override
 	protected void onPause()
 	{
@@ -434,10 +436,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (editable.toString().trim().length() == 0)
 		{
 			mSendBtn.setEnabled(false);
-			return;
 		}
 
-		mSendBtn.setEnabled(true);
+		/* set the button enabled iff we're not in an SMS chat and we have credits remaining */ 
+		mSendBtn.setEnabled(mCanSend);
 
 		/* don't send typing notifications for non-hike chats */
 		if (!mConversation.isOnhike())
@@ -466,6 +468,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* must be called on the UI Thread */
 	private void updateChatMetadata()
 	{
+		/* set the bottom bar to red if we're out of sms credits */
+		if (mCredits <= 0)
+		{
+			mMetadataView.setBackgroundResource(R.color.red);
+			mSendBtn.setEnabled(false);
+			mCanSend = false;
+		} else {
+			mMetadataView.setBackgroundResource(R.color.grey);
+			mCanSend = true;
+			mSendBtn.setEnabled(true);
+		}
+
 		int length = mComposeView.getText().length();
 		//set the max sms length to a length appropriate to the number of characters we have
 		mMaxSmsLength = 160 * (1 + length/160);
