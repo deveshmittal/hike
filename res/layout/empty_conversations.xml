@@ -8,30 +8,13 @@
    android:layout_alignParentBottom="true"
    android:layout_width="match_parent"
    android:layout_height="match_parent">
-<ImageView
-    android:id="@+id/edit_message_icon"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerInParent="true"
-    android:src="@drawable/ic_editmessage_white" />
-<TextView
-    android:id="@+id/tap_to_send_message"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/edit_message_icon"
-    android:layout_centerInParent="true"
-    android:text="Tap to send message"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    android:textColor="@color/black" />
-<TextView
-    android:id="@+id/no_contacts_message"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerInParent="true"
-    android:gravity="center"
-    android:textAppearance="?android:attr/textAppearanceLarge"
-    android:textColor="@color/black"
-    android:visibility="gone"
-    android:text="Oh no.  Hike works better when you have contacts.  Add some to start messaging for free">
-</TextView>
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_hometip" />
+
 </RelativeLayout>
