@@ -218,6 +218,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 
 		mConversationsView.setOnItemClickListener(new OnItemClickListener()
 		{
@@ -285,6 +286,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
 	}
@@ -303,7 +305,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
+		if ( (HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)) )
 		{
 			ConvMessage message = (ConvMessage) object;
 			/* find the conversation corresponding to this message */
