@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
@@ -293,9 +294,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		long convID = mConversation.getConvId();
 		mConversationDb.updateMsgStatus(convID, 0, ConvMessage.State.RECEIVED_READ.ordinal());
 		
-		List<ConvMessage> messages = mConversation.getMessages();
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mConversationsView.setStackFromBottom(true);
+
+		/* make a copy of the message list since it's used internally by the adapter */
+		List<ConvMessage> messages = new ArrayList<ConvMessage>(mConversation.getMessages());
+
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
