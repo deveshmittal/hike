@@ -263,7 +263,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		Log.d("Timestamp", "Current timestamp is " + time);
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, mContactId, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mConversation);
+
 		mAdapter.add(convMessage);
+
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		mSendBtn.setEnabled(false);
 	}
@@ -353,19 +355,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			final ConvMessage conv = (ConvMessage) object;
-			if (conv.getMsisdn().indexOf(mContactNumber) != -1)
+			final ConvMessage message = (ConvMessage) object;
+			if (message.getMsisdn().indexOf(mContactNumber) != -1)
 			{
 				/*
 				 * we publish the message before the conversation is created, so it's safer to just tack it on here
 				 */
-				conv.setConversation(mConversation);
+				message.setConversation(mConversation);
 				runOnUiThread(new Runnable()
 				{
 					@Override
 					public void run()
 					{
-						mAdapter.add(conv);
+						mAdapter.add(message);
 					}
 				});
 				
