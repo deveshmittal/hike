@@ -59,6 +59,7 @@ public class WelcomeActivity extends Activity
 			} else
 			{
 				//Simply dimiss this dialog for now and make the user try again later
+				//this guard shouldn't be necessary since the dialog should always be created here
 				if (mDialog != null)
 				{
 					mDialog.dismiss();
@@ -75,6 +76,14 @@ public class WelcomeActivity extends Activity
 
 	private EditText mMSISDNText;
 
+	private AccountCreateActivity mTask;
+
+	@Override
+	public Object onRetainNonConfigurationInstance()
+	{
+		return mTask;
+	}
+
 	@Override
 	public void onCreate(Bundle savedState)
 	{
@@ -83,6 +92,13 @@ public class WelcomeActivity extends Activity
 		mAcceptButton = (Button) findViewById(R.id.accept_tc);
 		mIconView = (ImageView) findViewById(R.id.ic_edit_message);
 		mMSISDNText = (EditText) findViewById(R.id.debug_msisdn_input);
+
+		Object retained = getLastNonConfigurationInstance();
+		if (retained instanceof AccountCreateActivity)
+		{
+			mTask = (AccountCreateActivity) retained;
+			mDialog = ProgressDialog.show(this, null, getText(R.string.determining_phone_number));
+		}
 	}
 
 	@Override
@@ -101,8 +117,8 @@ public class WelcomeActivity extends Activity
 		if (v == mAcceptButton)
 		{
 			mDialog = ProgressDialog.show(this, null, getText(R.string.determining_phone_number));
-			AccountCreateActivity aca = new AccountCreateActivity();
-			aca.execute();
+			mTask = new AccountCreateActivity();
+			mTask.execute();
 		}
 		else if (v == mIconView)
 		{
