@@ -34,21 +34,18 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 		// TODO rather than re-use the cache (which could be for a slightly different type of view, let's just ignore it for now
 		ConvMessage convMessage = getItem(position);
 		View v = null;
-		if (v == null)
+		if (convMessage.isSent())
 		{
-			if (convMessage.isSent())
+			v = inflater.inflate(R.layout.message_item_send, parent, false);
+			/* label outgoing hike conversations in green */
+			if (conversation.isOnhike())
 			{
-				v = inflater.inflate(R.layout.message_item_send, parent, false);
-				/* label outgoing hike conversations in green */
-				if (conversation.isOnhike())
-				{
-					v.setBackgroundResource(R.color.blue);
-				}
+				v.setBackgroundResource(R.color.blue);
 			}
-			else
-			{
-				v = inflater.inflate(R.layout.message_item_receive, parent, false);
-			}
+		}
+		else
+		{
+			v = inflater.inflate(R.layout.message_item_receive, parent, false);
 		}
 
 		TextView messageView = (TextView) v.findViewById(R.id.conversation_id);
