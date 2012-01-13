@@ -191,4 +191,9 @@ public class ConvMessage
 			default: return State.SENT_UNCONFIRMED;
 		}
 	}
+
+	public void setState(State sentConfirmed)
+	{
+		mState = sentConfirmed;
+	}
 }
