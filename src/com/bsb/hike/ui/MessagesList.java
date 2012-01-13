@@ -94,6 +94,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				mAdapter.notifyDataSetChanged();
 				mAdapter.setNotifyOnChange(false);
 				mConversationsByMSISDN.clear();
+				mConversationsAdded.clear();
 			}
 		}
 	}
