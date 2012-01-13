@@ -371,7 +371,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					}
 				});
 				
-				mConversationDb.updateMsgStatus(mConversation.getConvId(), conv.getMsgID(), ConvMessage.State.SENT_CONFIRMED.ordinal());
+				mConversationDb.updateMsgStatus(mConversation.getConvId(), message.getMsgID(), ConvMessage.State.SENT_CONFIRMED.ordinal());
 			}
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
