@@ -264,6 +264,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		convMessage.setConversation(mConversation);
 		mAdapter.add(convMessage);
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+		mSendBtn.setEnabled(false);
 	}
 
 	/**
