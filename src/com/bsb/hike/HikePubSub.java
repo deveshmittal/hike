@@ -32,6 +32,7 @@ public class HikePubSub implements Runnable
 
 	private static final Operation DONE_OPERATION = null; /* TODO this can't be null */
 
+	/* broadcast when the sender sends the message (click the send button in chat thread view) */
 	public static final String MESSAGE_SENT = "messagesent";
 
 	public static final String WS_CLOSE = "ws_close";
@@ -44,6 +45,8 @@ public class HikePubSub implements Runnable
 
 	public static final String NEW_CONVERSATION = "newconv";
 
+	/* Broadcast after we've received a message and written it to our DB.
+	 * Status is RECEIVED_UNREAD */
 	public static final String MESSAGE_RECEIVED = "messagereceived";
 
 	public static final String NEW_ACTIVITY = "new_activity";
@@ -57,8 +60,10 @@ public class HikePubSub implements Runnable
 	/* sms credits have been modified */
 	public static final String SMS_CREDIT_CHANGED = "smscredits";
 
+	/* broadcast when the server receives the message and replies with a confirmation */
 	public static final String SERVER_RECEIVED_MSG = "serverReceivedMsg";
 
+	/* broadcast when a message is received from the sender but before it's been written our DB*/
 	public static final String MESSAGE_RECEIVED_FROM_OTHER_CLIENT = "messageReceivedFromOtherClient";
 
 	private final Thread mThread;
