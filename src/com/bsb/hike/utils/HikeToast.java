@@ -43,7 +43,7 @@ public class HikeToast
 		{
 			if (contactInfo.id != null)
 			{
-				notificationIntent.putExtra("id", Long.parseLong(contactInfo.id));
+				notificationIntent.putExtra("id", contactInfo.id);
 			}
 			if (contactInfo.name != null)
 			{
