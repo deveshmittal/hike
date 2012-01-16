@@ -30,7 +30,7 @@ public class ConvMessage
 	
 	public static enum State
 	{
-		SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ
+		SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ, UNKNOWN
 	};
 
 	public ConvMessage(String message, String msisdn, String contactId, long timestamp, State msgState)
@@ -186,14 +186,33 @@ public class ConvMessage
 		{
 			case 0: return State.SENT_UNCONFIRMED;
 			case 1: return State.SENT_CONFIRMED;
-			case 2: return State.RECEIVED_UNREAD;
-			case 3: return State.RECEIVED_READ;
-			default: return State.SENT_UNCONFIRMED;
+			case 2: return State.SENT_DELIVERED;
+			case 3: return State.SENT_DELIVERED_READ;
+			case 4: return State.RECEIVED_UNREAD;
+			case 5: return State.RECEIVED_READ;
+			default: return State.UNKNOWN;
 		}
 	}
 
 	public void setState(State sentConfirmed)
 	{
 		mState = sentConfirmed;
+	}
+
+	public JSONObject serializeDeliveryReport(String type)
+	{
+				JSONObject object = new JSONObject();
+				try
+				{
+					object.put("ts", mTimestamp);
+					object.put("msgID", msgID); // added msgID to the JSON Object
+					object.put("type", type);
+					object.put("to", mMsisdn);
+				}
+				catch (JSONException e)
+				{
+					Log.e("ConvMessage", "invalid json message", e);
+				}
+				return object;
 	}
 }
