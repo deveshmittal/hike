@@ -351,7 +351,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mConversation.isOnhike())
 		{
 			mMetadataView.setVisibility(View.GONE);
-		} else {
+		}
+		else
+		{
 			mMetadataView.setVisibility(View.VISIBLE);
 			updateChatMetadata();
 		}

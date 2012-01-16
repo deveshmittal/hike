@@ -28,7 +28,7 @@ public class DbConversationListener implements Listener
 		mEditor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 	}
 
@@ -41,7 +41,7 @@ public class DbConversationListener implements Listener
 			mConversationDb.addConversationMessages(convMessage);
 			mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send")); // this is used to be sent by the web socket.
 		}
-		else if (HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT.equals(type))  // represents event when a client receive msg from other client through server.
+		else if (HikePubSub.MESSAGE_RECEIVED_FROM_SENDER.equals(type))  // represents event when a client receive msg from other client through server.
 		{
 			ConvMessage message = (ConvMessage) object;
 			mConversationDb.addConversationMessages(message);

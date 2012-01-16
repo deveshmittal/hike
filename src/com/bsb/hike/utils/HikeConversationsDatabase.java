@@ -140,9 +140,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				bindConversationInsert(insertStatement, conv);
 				msgId = insertStatement.executeInsert();
-				conv.setMsgID(msgId);
 				assert (msgId >= 0);
 			}
+			conv.setMsgID(msgId);
 		}
 
 		mDb.setTransactionSuccessful();
