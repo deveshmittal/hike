@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -102,7 +101,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void createAutoCompleteView()
 	{
-		Log.d("ChatThread", "edit view");
 		View bottomPanel = findViewById(R.id.bottom_panel);
 		bottomPanel.setVisibility(View.GONE);
 		View nameView = findViewById(R.id.name_field);
@@ -259,11 +257,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	public void onSendClick(View v)
 	{
-		Log.d("ChatThread", "Send Button Called");
 		String message = mComposeView.getText().toString();
 		mComposeView.setText("");
 		long time = (long) System.currentTimeMillis() / 1000;
-		Log.d("Timestamp", "Current timestamp is " + time);
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, mContactId, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mConversation);
 
