@@ -114,9 +114,9 @@ public class ScanningAddressBook extends Activity
 				hikeContactInfo.onhike = true;
 				db.addContact(hikeContactInfo);
 				ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message), hikeContactInfo.number, hikeContactInfo.id,
-						System.currentTimeMillis() / 1000, ConvMessage.State.RECEIVED_READ);
+						System.currentTimeMillis() / 1000, ConvMessage.State.RECEIVED_UNREAD);
 
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, message);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, message);
 			}
 			catch (Exception e)
 			{
