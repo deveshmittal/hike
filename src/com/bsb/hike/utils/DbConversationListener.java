@@ -38,8 +38,7 @@ public class DbConversationListener implements Listener
 		if (HikePubSub.MESSAGE_SENT.equals(type))
 		{
 			ConvMessage convMessage = (ConvMessage) object;
-			long msgID = mConversationDb.addConversationMessages(convMessage);
-			convMessage.setMsgID(msgID); // set the msgID for this message.
+			mConversationDb.addConversationMessages(convMessage);
 			mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send")); // this is used to be sent by the web socket.
 		}
 		else if (HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT.equals(type))  // represents event when a client receive msg from other client through server.

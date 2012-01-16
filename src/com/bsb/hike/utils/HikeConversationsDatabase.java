@@ -83,11 +83,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		onCreate(db);
 	}
 
-	public long addConversationMessages(ConvMessage message)
+	public void addConversationMessages(ConvMessage message)
 	{
 		List<ConvMessage> l = new ArrayList<ConvMessage>(1);
 		l.add(message);
-		return addConversations(l);
+		addConversations(l);
 	}
 
 	public int updateMsgStatus(long convID, long msgID, int val)
@@ -119,7 +119,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
 	}
 
-	public long addConversations(List<ConvMessage> convMessages)
+	public void addConversations(List<ConvMessage> convMessages)
 	{
 		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + MESSAGESTABLE + " (message, msgStatus, timestamp, convid) " + "SELECT ?, ?, ?, convid FROM "
 				+ CONVERSATIONSTABLE + " WHERE " + CONVERSATIONSTABLE + ".msisdn=?");
@@ -140,13 +140,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				bindConversationInsert(insertStatement, conv);
 				msgId = insertStatement.executeInsert();
+				conv.setMsgID(msgId);
 				assert (msgId >= 0);
 			}
 		}
 
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
-		return msgId;
 	}
 
 	public void deleteConversation(Long[] ids)
