@@ -123,6 +123,17 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			long msgID = data.optLong("msgID");
 			this.pubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgID);	
 		}
+		else if("msgDelivered".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a received msg
+		{
+			long msgID = data.optLong("msgID");
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
+		}
+		else if("msgDeliveredRead".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
+		{
+			long msgID = data.optLong("msgID");
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, msgID);	
+		}
+
 		else
 		{
 			Log.d("WebSocketPublisher", "Unknown Type:" + type);
