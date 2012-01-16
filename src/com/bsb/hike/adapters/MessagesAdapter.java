@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
@@ -41,6 +42,13 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 			if (conversation.isOnhike())
 			{
 				v.setBackgroundResource(R.color.blue);
+			}
+
+			ConvMessage.State state = convMessage.getState();
+			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
+			if (state == ConvMessage.State.SENT_CONFIRMED)
+			{
+				imgStatus.setImageResource(R.drawable.ic_sent);
 			}
 		}
 		else

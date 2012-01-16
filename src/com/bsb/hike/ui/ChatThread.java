@@ -83,6 +83,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean mCanSend = true; /*default this to true for all hike<->hike messages */
 
+	/* notifies that the adapter has been updated */
+	private Runnable mUpdateAdapter;
+
 	@Override
 	protected void onPause()
 	{
@@ -305,6 +308,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
@@ -325,6 +330,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		} else {
 			updateChatMetadata();
 		}
+
+		/* create an object that we can notify when the contents of the thread are updated */
+		mUpdateAdapter = new UpdateAdapter(mAdapter);
 	}
 
 	private class SetTypingText implements Runnable
@@ -417,6 +425,31 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 			});
 		}
+		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
+		{
+			long msgID = (Long)object;
+			//TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
+			ConvMessage msg = findMessageById(msgID);
+			if (msg != null)
+			{
+				msg.setState(ConvMessage.State.SENT_CONFIRMED);
+				runOnUiThread(mUpdateAdapter);
+			}
+		}
+	}
+
+	private ConvMessage findMessageById(long msgID)
+	{
+		int count = mAdapter.getCount();
+		for(int i = 0; i < count; ++i)
+		{
+			ConvMessage msg = mAdapter.getItem(i);
+			if (msg.getMsgID() == msgID)
+			{
+				return msg;
+			}
+		}
+		return null;
 	}
 
 	public String getContactNumber()
