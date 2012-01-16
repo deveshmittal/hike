@@ -34,6 +34,10 @@ public class HikePubSub implements Runnable
 
 	/* broadcast when the sender sends the message (click the send button in chat thread view) */
 	public static final String MESSAGE_SENT = "messagesent";
+	
+	public static final String MESSAGE_DELIVERED = "messageDelivered"; // represents that msg is delivered to receiver but is not read.
+	
+	public static final String MESSAGE_DELIVERED_READ = "messageDeliveredRead"; // represents that msg is delivered to receiver and is read by the same.
 
 	public static final String WS_CLOSE = "ws_close";
 

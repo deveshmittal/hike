@@ -27,7 +27,6 @@ public class DbConversationListener implements Listener
 		mUserDb = new HikeUserDatabase(context);
 		mEditor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
@@ -48,7 +47,7 @@ public class DbConversationListener implements Listener
 			ConvMessage message = (ConvMessage) object;
 			mConversationDb.addConversationMessages(message);
 			mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, message);
-			// TODO update the unread flags here
+			mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport("msgDelivered")); // handle return to sender
 		}
 		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{
@@ -58,18 +57,27 @@ public class DbConversationListener implements Listener
 		} 
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{
-			Log.d("DbConvList", "Object is " + object);
-			long msgID = (Long)object;
-			int rowsAffected = mConversationDb.updateMsgStatus(0,msgID,ConvMessage.State.SENT_CONFIRMED.ordinal());
-			if(rowsAffected<=0) // signifies no msg.
-			{
-				// TODO : Handle this case
-			}
-			else if(rowsAffected > 1) // error case
-			{
-				
-			}
+			updateDB(object,ConvMessage.State.SENT_CONFIRMED.ordinal());
 		}
+		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))  // server got msg from client 1 and sent back received msg receipt
+		{
+			updateDB(object,ConvMessage.State.SENT_DELIVERED.ordinal());
+		}
+		
+		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))  // server got msg from client 1 and sent back received msg receipt
+		{
+			updateDB(object,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
+		}
+		
 	}
 
+	private void updateDB(Object object, int status)
+	{
+		long msgID = (Long)object;
+		int rowsAffected = mConversationDb.updateMsgStatus(0,msgID,status);
+		if(rowsAffected<=0) // signifies no msg.
+		{
+			// TODO : Handle this case
+		}	
+	}
 }

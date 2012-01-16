@@ -378,8 +378,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						mAdapter.add(message);
 					}
 				});
-				
-				//mConversationDb.updateMsgStatus(mConversation.getConvId(), message.getMsgID(), ConvMessage.State.SENT_CONFIRMED.ordinal());
+				mConversationDb.updateMsgStatus(mConversation.getConvId(), message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
+				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport("msgDeliveredRead")); // handle return to sender
 			}
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
