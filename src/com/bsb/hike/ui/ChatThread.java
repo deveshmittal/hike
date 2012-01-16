@@ -298,7 +298,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		long convID = mConversation.getConvId();
 		//mConversationDb.updateMsgStatus(convID, 0, ConvMessage.State.RECEIVED_READ.ordinal());
-		
+
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mConversationsView.setStackFromBottom(true);
 
