@@ -55,10 +55,6 @@ public class ToastListener implements Listener
 			{
 				return;
 			}
-			else if (activity == null)
-			{
-				return;
-			}
 
 			/* the foreground activity isn't going to show this message so Toast it */
 			ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn());
