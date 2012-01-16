@@ -1,9 +1,7 @@
 package com.bsb.hike;
 
 import android.app.Application;
-import android.os.Handler;
 
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.utils.DbConversationListener;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
