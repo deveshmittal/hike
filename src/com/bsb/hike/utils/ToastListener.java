@@ -35,12 +35,10 @@ public class ToastListener implements Listener
 	{
 		if (HikePubSub.NEW_ACTIVITY.equals(type))
 		{
-			System.out.println("new activity is front " + object);
 			currentActivity = new WeakReference<Activity>((Activity) object);
 		}
 		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			System.out.println("new message received");
 			ConvMessage message = (ConvMessage) object;
 			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
 			if ((activity instanceof ChatThread))
