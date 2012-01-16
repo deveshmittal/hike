@@ -297,7 +297,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mConversation = mConversationDb.addConversation(mContactNumber);
 		}
 		long convID = mConversation.getConvId();
-		mConversationDb.updateMsgStatus(convID, 0, ConvMessage.State.RECEIVED_READ.ordinal());
+		//mConversationDb.updateMsgStatus(convID, 0, ConvMessage.State.RECEIVED_READ.ordinal());
 		
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mConversationsView.setStackFromBottom(true);
@@ -379,7 +379,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					}
 				});
 				
-				mConversationDb.updateMsgStatus(mConversation.getConvId(), message.getMsgID(), ConvMessage.State.SENT_CONFIRMED.ordinal());
+				//mConversationDb.updateMsgStatus(mConversation.getConvId(), message.getMsgID(), ConvMessage.State.SENT_CONFIRMED.ordinal());
 			}
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))

@@ -30,7 +30,7 @@ public class ConvMessage
 	
 	public static enum State
 	{
-		SENT_UNCONFIRMED, SENT_CONFIRMED , RECEIVED_UNREAD, RECEIVED_READ
+		SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ
 	};
 
 	public ConvMessage(String message, String msisdn, String contactId, long timestamp, State msgState)
@@ -40,8 +40,8 @@ public class ConvMessage
 		this.mMessage = message;
 		this.mTimestamp = timestamp;
 		mState = msgState;
-		
-		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED);
+
+		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ);
 	}
 
 	public String getMessage()
