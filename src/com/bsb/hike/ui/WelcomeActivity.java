@@ -46,6 +46,10 @@ public class WelcomeActivity extends Activity
 				editor.commit();
 				return Boolean.TRUE;
 			}
+
+			/* set the async task to null so the UI doesn't think we're still looking for the MSISDN */
+			WelcomeActivity.this.mTask = null;
+
 			return Boolean.FALSE;
 		}
 
