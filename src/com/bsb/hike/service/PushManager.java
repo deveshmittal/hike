@@ -144,7 +144,7 @@ public class PushManager extends Thread
 				continue;
 			}
 
-			byte[] payload = buffer.getData();
+			byte[] payload = message.getPayload();
 
 			String str = new String(payload);
 			if (this.service.sendToApp(str))
