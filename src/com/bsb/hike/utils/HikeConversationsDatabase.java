@@ -94,25 +94,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		ContentValues values = new ContentValues();
 		values.put("msgStatus", val);
-		String whereClause;
-		if (convID > 0 && msgID <= 0) // this is to handle the case where we need to update status for a particular convID
-		{
-			String[] whereArgs = { String.valueOf(convID) };
-			whereClause = "convid=?";
-			return mDb.update(MESSAGESTABLE, values, "convid=?", whereArgs);
-		}
-		else if(convID > 0 && msgID > 0) // update status for msgID=X and convID=y
-		{
-			String[] whereArgs = { String.valueOf(msgID), String.valueOf(convID)};
-			whereClause="msgid=? and convid=?";
-			return mDb.update(MESSAGESTABLE, values, "msgid=? and convid=?", whereArgs);
-		}
-		else
-		{
-			String[] whereArgs = { String.valueOf(msgID) };
-			whereClause="msgid=?";
-			return mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
-		}
+		String[] whereArgs = { String.valueOf(msgID), String.valueOf(convID) };
+		return mDb.update(MESSAGESTABLE, values, "msgid=? and convid=?", whereArgs);
 	}
 
 	public void updateConversation()

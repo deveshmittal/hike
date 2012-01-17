@@ -101,23 +101,6 @@ public class PushManager extends Thread
 	@Override
 	public void run()
 	{
-/*		Log.d("PushManager", "sending test message");
-		JSONObject tst = new JSONObject();
-		try
-		{
-			tst.put("type", "message");
-			tst.put("from", "+917146804208");
-			JSONObject data = new JSONObject();
-			data.put("message", "hello world!");
-			tst.put("data", data);
-		}
-		catch (JSONException e1)
-		{
-			e1.printStackTrace();
-		}
-
-		this.service.sendToApp(tst.toString());*/
-
 		Log.d("PushManager", "Making connection");
 		BlockingConnection connection = connect();
 		Log.d("PushManager", "Connection made");
@@ -129,6 +112,10 @@ public class PushManager extends Thread
 				Log.d("PushManager", "receiving message");
 				message = connection.receive();
 				Log.d("PushManager", "message received " + message);
+				if (message == null)
+				{
+					continue;
+				}
 			}
 			catch (Exception e)
 			{
