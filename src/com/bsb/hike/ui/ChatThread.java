@@ -96,7 +96,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	protected void onResume()
 	{
 		super.onResume();
+		/* TODO evidently a better way to do this is to check for onWindowFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
+
+		/* we set a sentinal value while we're rendering the UI to avoid typing notifications.
+		 * If one is actually set by the onRestoreInstanceState code prefer that
+		 */
+		mTextLastChanged = (mTextLastChanged == Long.MAX_VALUE) ? 0 : mTextLastChanged;
 	}
 
 	private void createAutoCompleteView()
@@ -207,10 +213,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		return intent;
 	}
 
+	static final String TEXT_CHANGED_KEY = "text_last_changed";
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+		outState.putLong(TEXT_CHANGED_KEY, mTextLastChanged);
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState)
+	{
+		super.onRestoreInstanceState(savedInstanceState);
+		mTextLastChanged = savedInstanceState.getLong(TEXT_CHANGED_KEY, 0);
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		/* disable typing notifications until the UI is rendered.
+		 * This is so if any callbacks that are fired due to UI changes will not
+		 * cause messages to be sent. */
+		mTextLastChanged = Long.MAX_VALUE;
+
 		setContentView(R.layout.chatthread);
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
@@ -481,45 +507,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
-
 		/* only update the chat metadata if this is an SMS chat */
 		if (!mConversation.isOnhike()) {
 			updateChatMetadata();
 		}
 
-		/* we can bail early if this is an empty message */
+		/* if the message is empty, don't allow you to send messages */
 		if (editable.toString().trim().length() == 0)
 		{
 			mSendBtn.setEnabled(false);
-		}
-
-		/* set the button enabled iff we're not in an SMS chat and we have credits remaining */ 
-		mSendBtn.setEnabled(mCanSend);
-
-		/* don't send typing notifications for non-hike chats */
-		if (!mConversation.isOnhike())
-		{
-			return;
-		}
-
-		if (mResetTypingNotification == null)
-		{
-			mResetTypingNotification = new ResetTypingNotification();
-		}
-
-		if (mTextLastChanged == 0)
-		{
-			// we're currently not in 'typing' mode
-			mTextLastChanged = System.currentTimeMillis();
-			// fire an event
-			mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("typing"));
-
-			// create a timer to clear the event
-			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear
-																		// any
-																		// existing
-																		// ones
-			mUiThreadHandler.postDelayed(mResetTypingNotification, 10 * 1000);
 		}
 	}
 
@@ -555,6 +551,36 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count)
 	{
-		// blank
+		if ((before == 0) && (count == 0))
+		{
+			//we were called on config changed, just ignore
+			return;
+		}
+
+		/* don't send typing notifications for non-hike chats */
+		if (!mConversation.isOnhike())
+		{
+			return;
+		}
+
+		if (mResetTypingNotification == null)
+		{
+			mResetTypingNotification = new ResetTypingNotification();
+		}
+
+		if (mTextLastChanged == 0)
+		{
+			// we're currently not in 'typing' mode
+			mTextLastChanged = System.currentTimeMillis();
+			// fire an event
+			mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("typing"));
+
+			// create a timer to clear the event
+			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear
+																		// any
+																		// existing
+																		// ones
+			mUiThreadHandler.postDelayed(mResetTypingNotification, 10 * 1000);
+		}
 	}
 }
