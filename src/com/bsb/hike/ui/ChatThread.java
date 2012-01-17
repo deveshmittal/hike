@@ -363,6 +363,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			final ConvMessage message = (ConvMessage) object;
 			if (message.getMsisdn().indexOf(mContactNumber) != -1)
 			{
+				/* unset the typing notification */
+				runOnUiThread(mClearTypingCallback);
+				mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 				/*
 				 * we publish the message before the conversation is created, so it's safer to just tack it on here
 				 */
