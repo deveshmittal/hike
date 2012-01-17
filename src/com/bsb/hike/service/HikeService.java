@@ -50,6 +50,7 @@ public class HikeService extends Service
 				{
 					sendToApp(m);
 				}
+				pendingMessages.clear();
 				break;
 			case MSG_APP_DISCONNECTED:
 				mApp = null;
