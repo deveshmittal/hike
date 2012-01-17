@@ -502,8 +502,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return;
 		}
 
-		mSendBtn.setEnabled(true);
-
 		if (mResetTypingNotification == null)
 		{
 			mResetTypingNotification = new ResetTypingNotification();
