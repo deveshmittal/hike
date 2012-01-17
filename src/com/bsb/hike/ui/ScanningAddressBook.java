@@ -21,6 +21,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeUserDatabase;
 
@@ -113,7 +114,7 @@ public class ScanningAddressBook extends Activity
 				ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", "TD-HIKE", "HikeBot");
 				hikeContactInfo.onhike = true;
 				db.addContact(hikeContactInfo);
-				ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message), hikeContactInfo.number, hikeContactInfo.id,
+				ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message), hikeContactInfo.number,
 						System.currentTimeMillis() / 1000, ConvMessage.State.RECEIVED_UNREAD);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, message);
@@ -143,6 +144,7 @@ public class ScanningAddressBook extends Activity
 			Intent intent = new Intent(ScanningAddressBook.this, MessagesList.class);
 			startActivity(intent);
 			finish();
+			
 			return null;
 		}
 	}

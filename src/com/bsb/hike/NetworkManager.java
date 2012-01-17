@@ -95,12 +95,12 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		if ("message".equals(type))  // this represents msg from another client through tornado server.
 		{
 			String msisdn = data.optString("from");
-			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
-			String contactId = (contactInfo != null) ? contactInfo.id : null;
+//			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
+//			String contactId = (contactInfo != null) ? contactInfo.id : null;
 			String message = data.optString("data");
 			//If there's no timestamp set, use the current time.  Totally a hack
 			long ts = data.has("ts") ? data.optLong("ts") : System.currentTimeMillis()/1000;
-			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, ConvMessage.State.RECEIVED_UNREAD);
+			ConvMessage convMessage = new ConvMessage(message, msisdn, ts, ConvMessage.State.RECEIVED_UNREAD);
 			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, convMessage);
 		}
 		else if ("typing".equals(type))

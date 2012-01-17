@@ -20,8 +20,6 @@ public class ConvMessage
 
 	private String mMsisdn;
 
-	private String contactId;
-
 	private long mTimestamp;
 
 	private boolean mIsSent;
@@ -33,9 +31,8 @@ public class ConvMessage
 		SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ
 	};
 
-	public ConvMessage(String message, String msisdn, String contactId, long timestamp, State msgState)
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState)
 	{
-		this.contactId = contactId;
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
 		this.mTimestamp = timestamp;
@@ -64,10 +61,10 @@ public class ConvMessage
 		return mState;
 	}
 
-	public String getId()
+/*	public String getId()
 	{
 		return contactId;
-	}
+	}*/
 
 	public String getMsisdn()
 	{
@@ -78,7 +75,7 @@ public class ConvMessage
 	public String toString()
 	{
 		String convId = mConversation == null ? "null" : Long.toString(mConversation.getConvId());
-		return "ConvMessage [mConversation=" + convId + ", mMessage=" + mMessage + ", mMsisdn=" + mMsisdn + ", contactId=" + contactId + ", mTimestamp=" + mTimestamp
+		return "ConvMessage [mConversation=" + convId + ", mMessage=" + mMessage + ", mMsisdn=" + mMsisdn + ", mTimestamp=" + mTimestamp
 				+ ", mIsSent=" + mIsSent + ", mState=" + mState + "]";
 	}
 
@@ -87,7 +84,6 @@ public class ConvMessage
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((contactId == null) ? 0 : contactId.hashCode());
 		result = prime * result + (mIsSent ? 1231 : 1237);
 		result = prime * result + ((mMessage == null) ? 0 : mMessage.hashCode());
 		result = prime * result + ((mMsisdn == null) ? 0 : mMsisdn.hashCode());
@@ -106,13 +102,7 @@ public class ConvMessage
 		if (getClass() != obj.getClass())
 			return false;
 		ConvMessage other = (ConvMessage) obj;
-		if (contactId == null)
-		{
-			if (other.contactId != null)
-				return false;
-		}
-		else if (!contactId.equals(other.contactId))
-			return false;
+
 		if (mIsSent != other.mIsSent)
 			return false;
 		if (mMessage == null)
