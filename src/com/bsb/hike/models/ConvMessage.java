@@ -36,9 +36,18 @@ public class ConvMessage
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
 		this.mTimestamp = timestamp;
-		mState = msgState;
+		setState(mState);
+	}
 
-		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ);
+	public ConvMessage(JSONObject obj) throws JSONException
+	{
+		this.mMsisdn = obj.getString("from");
+		JSONObject data = obj.getJSONObject("data");
+		this.mMessage = data.getString("message");
+		//If there's no timestamp set, use the current time.  Totally a hack
+		this.mTimestamp = data.has("ts") ? data.optLong("ts") : System.currentTimeMillis()/1000;
+		/* if we're deserialized an object from json, it's always unread */
+		setState(State.RECEIVED_UNREAD);
 	}
 
 	public String getMessage()
@@ -60,11 +69,6 @@ public class ConvMessage
 	{
 		return mState;
 	}
-
-/*	public String getId()
-	{
-		return contactId;
-	}*/
 
 	public String getMsisdn()
 	{
@@ -185,5 +189,6 @@ public class ConvMessage
 	public void setState(State sentConfirmed)
 	{
 		mState = sentConfirmed;
+		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ);
 	}
 }

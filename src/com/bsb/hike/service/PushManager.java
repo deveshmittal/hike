@@ -171,14 +171,14 @@ public class PushManager extends Thread
 			if ("message".equals(obj.optString("type")))
 			{
 				/* toast and save it */
-				
-				String msg = obj.optString("message");
-				String msisdn = obj.optString("msisdn");
-				long timestamp = obj.optLong("timestamp");
-				ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(msisdn);
-				this.toaster.toast(contactInfo, msisdn, msg, timestamp);
-				ConvMessage convMessage = new ConvMessage(msg, msisdn, timestamp, ConvMessage.State.RECEIVED_UNREAD);
-				this.convDb.addConversationMessages(convMessage);				
+				try
+				{
+					ConvMessage convMessage = new ConvMessage(obj);
+					this.convDb.addConversationMessages(convMessage);
+				} catch (JSONException e)
+				{
+					Log.e("JSON", "Invalid JSON", e);
+				}
 			} else
 			{
 				/* just save it */
