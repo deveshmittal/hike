@@ -19,9 +19,10 @@ import android.util.Log;
 public class HikeService extends Service
 {
 
-	static final int MSG_APP_CONNECTED = 1;
-	static final int MSG_APP_DISCONNECTED = 2;
-	static final int MSG_APP_TOKEN_CREATED = 3;
+	public static final int MSG_APP_CONNECTED = 1;
+	public static final int MSG_APP_DISCONNECTED = 2;
+	public static final int MSG_APP_TOKEN_CREATED = 3;
+	public static final int MSG_APP_PUBLISH = 4;
 
 	protected Messenger mApp;
 	protected ArrayList<String> pendingMessages;
@@ -31,9 +32,18 @@ public class HikeService extends Service
 		@Override
 		public void handleMessage(Message msg)
 		{
+			Log.d("HikeService", "received message " + msg.what);
 			switch (msg.what)
 			{
 			case MSG_APP_CONNECTED:
+
+				/* if we've got an auth token, go ahead and mqtt connect */
+				String token = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.TOKEN_SETTING, null);
+				if (token != null)
+				{
+					mPushManager = PushManager.createInstance(HikeService.this);
+					Log.d("HikeService", "creating push manager " + mPushManager);
+				}
 				mApp = msg.replyTo;
 				/* TODO what if the app crashes while we're sending the message? */
 				for (String m: pendingMessages)
@@ -59,12 +69,14 @@ public class HikeService extends Service
 	{
 		if (mApp == null)
 		{
+			Log.d("HikeService", "no app");
 			return false;
 		}
 
 		try
 		{
 			Message msg = Message.obtain();
+			msg.what = MSG_APP_PUBLISH;
 			Bundle bundle = new Bundle();
 			bundle.putString("msg", message);
 			msg.setData(bundle);

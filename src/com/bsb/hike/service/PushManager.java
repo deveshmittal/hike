@@ -100,6 +100,8 @@ public class PushManager extends Thread
 	@Override
 	public void run()
 	{
+		Log.d("PushManager", "sending test message");
+		this.service.sendToApp("{FUNKY MONKEYS}");
 		Log.d("PushManager", "Making connection");
 		BlockingConnection connection = connect();
 		Log.d("PushManager", "Connection made");
@@ -110,7 +112,7 @@ public class PushManager extends Thread
 			{
 				Log.d("PushManager", "receiving message");
 				message = connection.receive();
-				Log.d("PushManager", "message received");
+				Log.d("PushManager", "message received " + message);
 			}
 			catch (Exception e)
 			{
@@ -146,12 +148,13 @@ public class PushManager extends Thread
 			if ("message".equals(obj.optString("type")))
 			{
 				/* toast and save it */
+				
 				String msg = obj.optString("message");
 				String msisdn = obj.optString("msisdn");
 				long timestamp = obj.optLong("timestamp");
 				ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(msisdn);
 				this.toaster.toast(contactInfo, msisdn, msg, timestamp);
-				ConvMessage convMessage = new ConvMessage(msg, msisdn, contactInfo.id, timestamp, ConvMessage.State.RECEIVED_UNREAD);
+				ConvMessage convMessage = new ConvMessage(msg, msisdn, timestamp, ConvMessage.State.RECEIVED_UNREAD);
 				this.convDb.addConversationMessages(convMessage);				
 			} else
 			{
@@ -170,6 +173,7 @@ public class PushManager extends Thread
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
 			mPushManager = new PushManager(service, uid, token);
+			mPushManager.start();
 		}
 		return mPushManager;
 	}
