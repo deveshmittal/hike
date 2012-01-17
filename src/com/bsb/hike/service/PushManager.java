@@ -15,8 +15,10 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeToast;
 import com.bsb.hike.utils.HikeUserDatabase;
@@ -142,7 +144,7 @@ public class PushManager extends Thread
 				continue;
 			}
 
-			byte[] payload = buffer.getData();
+			byte[] payload = message.getPayload();
 
 			String str = new String(payload);
 			if (this.service.sendToApp(str))
@@ -175,6 +177,8 @@ public class PushManager extends Thread
 				{
 					ConvMessage convMessage = new ConvMessage(obj);
 					this.convDb.addConversationMessages(convMessage);
+					ContactInfo contactInfo = ContactUtils.getContactInfo(convMessage.getMsisdn(), service);
+					toaster.toast(contactInfo, convMessage.getMsisdn(), convMessage.getMessage(), convMessage.getTimestamp());
 				} catch (JSONException e)
 				{
 					Log.e("JSON", "Invalid JSON", e);
