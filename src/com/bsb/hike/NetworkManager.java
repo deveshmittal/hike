@@ -117,9 +117,9 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			int sms_credits = data.optInt("data");
 			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
 		}
-		else if("msgRcpt".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
+		else if("msgrcpt".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
 		{
-			long msgID = data.optLong("msgID");
+			long msgID = data.optLong("data");
 			this.pubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgID);	
 		}
 		else
