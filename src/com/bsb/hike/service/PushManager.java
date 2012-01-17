@@ -2,6 +2,7 @@ package com.bsb.hike.service;
 
 import java.net.URISyntaxException;
 
+import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.mqtt.client.BlockingConnection;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.Message;
@@ -120,7 +121,16 @@ public class PushManager extends Thread
 				continue;
 			}
 
-			byte[] payload = message.getPayload();
+			Buffer buffer = message.getPayloadBuffer();
+			if (buffer == null)
+			{
+				//empty message, ignore it
+				message.ack();
+				continue;
+			}
+
+			byte[] payload = buffer.getData();
+
 			String str = new String(payload);
 			if (this.service.sendToApp(str))
 			{
