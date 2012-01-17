@@ -1,6 +1,7 @@
 package com.bsb.hike.service;
 
 import java.net.URISyntaxException;
+import java.util.concurrent.TimeUnit;
 
 import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.mqtt.client.BlockingConnection;
@@ -110,7 +111,7 @@ public class PushManager extends Thread
 			try
 			{
 				Log.d("PushManager", "receiving message");
-				message = connection.receive();
+				message = connection.receive(60, TimeUnit.SECONDS);
 				Log.d("PushManager", "message received " + message);
 				if (message == null)
 				{
