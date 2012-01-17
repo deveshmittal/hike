@@ -39,12 +39,7 @@ public class HikeServiceConnection implements ServiceConnection
 
 		try
 		{
-			Message msg = Message.obtain(null, HikeService.MSG_APP_CONNECTED);
-			msg.replyTo = this.mMessenger;
-			mService.send(msg);
-
-			// Give it some value as an example.
-			msg = Message.obtain();
+			Message msg = Message.obtain();
 			msg.what = HikeService.MSG_APP_CONNECTED;
 			msg.replyTo = this.mMessenger;
 			mService.send(msg);
