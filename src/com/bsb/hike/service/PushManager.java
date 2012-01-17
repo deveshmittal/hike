@@ -112,6 +112,10 @@ public class PushManager extends Thread
 				Log.d("PushManager", "receiving message");
 				message = connection.receive();
 				Log.d("PushManager", "message received " + message);
+				if (message == null)
+				{
+					continue;
+				}
 			}
 			catch (Exception e)
 			{
