@@ -100,8 +100,11 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			try
 			{
 				ConvMessage convMessage = new ConvMessage(data);
+				long senderMsgId = data.optLong("msgID");
+				convMessage.setMappedMsgID(senderMsgId);
 				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, convMessage);
-			} catch (JSONException e)
+			}
+			catch (JSONException e)
 			{
 				Log.d("JSON", "Invalid JSON", e);
 			}
