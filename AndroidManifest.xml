@@ -15,7 +15,7 @@
         android:debuggable="true">
 
         <service
-            android:name="HikeService"
+            android:name=".service.HikeService"
             android:enabled="true">            
         </service>
 

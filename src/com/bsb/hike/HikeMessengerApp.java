@@ -1,7 +1,17 @@
 package com.bsb.hike;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
+import android.util.Log;
 
+import com.bsb.hike.service.HikeService;
+import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.utils.DbConversationListener;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
@@ -30,16 +40,60 @@ public class HikeMessengerApp extends Application
 
 	private static HikePubSub mPubSubInstance;
 
+	private static Messenger mMessenger;
+
 	private NetworkManager mNetworkManager;
+
+	private Messenger mService;
+
+	private HikeServiceConnection mServiceConnection;
+
+	private boolean mInitialized;
+
+	static class IncomingHandler extends Handler
+	{
+		@Override
+		public void handleMessage(Message msg)
+		{
+			Log.d("HikeMessengerApp", "In handleMessage " + msg.what);
+			switch (msg.what)
+			{
+				case HikeService.MSG_APP_PUBLISH:
+					Log.d("HikeMessengerApp", "received message " );
+					Bundle bundle = msg.getData();
+					String message = bundle.getString("msg");
+					Log.d("HikeMessengerApp", "received message " + message);
+					mPubSubInstance.publish(HikePubSub.WS_RECEIVED, message);
+			}
+		}
+	}
 
 	static
 	{
 		mPubSubInstance = new HikePubSub();
 	}
 
+	public void sendToService(Message message)
+	{
+		try
+		{
+			mService.send(message);
+		}
+		catch (RemoteException e)
+		{
+			Log.e("HikeMessengerApp", "Unable to connect to service", e);
+		}
+	}
+
+	public void connectToService()
+	{
+		mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
+	}
+
 	public void onCreate()
 	{
 		super.onCreate();
+
 		SmileyParser.init(this);
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
@@ -49,10 +103,17 @@ public class HikeMessengerApp extends Application
 
 		/* add a handler to handle toasts. The object initializes itself it it's constructor */
 		new ToastListener(getApplicationContext());
+
+		mMessenger = new Messenger(new IncomingHandler());
 	}
 
 	public static HikePubSub getPubSub()
 	{
 		return mPubSubInstance;
+	}
+
+	public void setService(Messenger service)
+	{
+		this.mService = service;
 	}
 }

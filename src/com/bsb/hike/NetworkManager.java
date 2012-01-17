@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeUserDatabase;
@@ -94,14 +93,14 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 
 		if ("message".equals(type))  // this represents msg from another client through tornado server.
 		{
-			String msisdn = data.optString("from");
-			ContactInfo contactInfo = this.mDb.getContactInfoFromMSISDN(msisdn);
-			String contactId = (contactInfo != null) ? contactInfo.id : null;
-			String message = data.optString("data");
-			//If there's no timestamp set, use the current time.  Totally a hack
-			long ts = data.has("ts") ? data.optLong("ts") : System.currentTimeMillis()/1000;
-			ConvMessage convMessage = new ConvMessage(message, msisdn, contactId, ts, ConvMessage.State.RECEIVED_UNREAD);
-			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, convMessage);
+			try
+			{
+				ConvMessage convMessage = new ConvMessage(data);
+				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, convMessage);
+			} catch (JSONException e)
+			{
+				Log.d("JSON", "Invalid JSON", e);
+			}
 		}
 		else if ("typing".equals(type))
 		{
@@ -118,9 +117,9 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			int sms_credits = data.optInt("data");
 			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
 		}
-		else if("msgRcpt".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
+		else if("msgrcpt".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
 		{
-			long msgID = data.optLong("msgID");
+			long msgID = data.optLong("data");
 			this.pubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgID);	
 		}
 		else if("msgDelivered".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a received msg
