@@ -1,6 +1,7 @@
 package com.bsb.hike;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,6 +11,7 @@ import android.util.Log;
 
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.DbConversationListener;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
@@ -103,6 +105,13 @@ public class HikeMessengerApp extends Application
 		new ToastListener(getApplicationContext());
 
 		mMessenger = new Messenger(new IncomingHandler());
+
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		if (token != null)
+		{
+			AccountUtils.setToken(token);
+		}
 	}
 
 	public static HikePubSub getPubSub()

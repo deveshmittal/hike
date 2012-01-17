@@ -159,7 +159,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			return;
 		}
 
-		AccountUtils.setToken(token);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, token);
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
