@@ -216,7 +216,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		while (c.moveToNext())
 		{
-			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, contactid, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)));
+			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)));
 			elements.add(elements.size(), message);
 			message.setConversation(conversation);
 		}
