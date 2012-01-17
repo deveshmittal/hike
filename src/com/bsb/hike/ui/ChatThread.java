@@ -3,6 +3,8 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -361,6 +363,31 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		setBtnEnabled();
 		/* create an object that we can notify when the contents of the thread are updated */
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
+		long convID = mConversation.getConvId();
+		/* this is to check if last msg was a sent msg category for a particular conversation id */
+		if(!isLastMsgSent())
+		{
+			JSONObject obj = mConversationDb.updateStatusAndSendDeliveryReport(convID,mConversation.getMsisdn());
+			mPubSub.publish(HikePubSub.WS_SEND, obj); 
+		}
+	}
+
+	private boolean isLastMsgSent()
+	{
+		List<ConvMessage>  msgList = mConversation.getMessages();
+
+		if ((msgList == null) || (msgList.isEmpty()))
+		{
+			return false;
+		}
+
+		ConvMessage lastMsg = msgList.get(msgList.size()-1);
+		if(lastMsg.isSent() || lastMsg.getState() == ConvMessage.State.RECEIVED_READ)
+			return true;
+		else 
+		{
+			return false;
+		}
 	}
 
 	private class SetTypingText implements Runnable
