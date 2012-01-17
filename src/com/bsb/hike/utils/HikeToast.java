@@ -33,7 +33,8 @@ public class HikeToast
 
 		// TODO this doesn't turn the text bold :(
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>:%2$s", name, msisdn));
-		Notification notification = new Notification(icon, text, timestamp);
+		Notification notification = new Notification(icon, text, timestamp * 1000);
+
 		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 
 		Intent notificationIntent = new Intent(context, ChatThread.class);
