@@ -43,7 +43,7 @@ public class ConvMessage
 	{
 		this.mMsisdn = obj.getString("from");
 		JSONObject data = obj.getJSONObject("data");
-		this.mMessage = data.getString("message");
+		this.mMessage = data.getString("msg");
 		//If there's no timestamp set, use the current time.  Totally a hack
 		this.mTimestamp = data.has("ts") ? data.optLong("ts") : System.currentTimeMillis()/1000;
 		/* if we're deserialized an object from json, it's always unread */
