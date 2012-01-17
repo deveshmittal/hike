@@ -11,12 +11,10 @@ import org.fusesource.mqtt.client.Topic;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
