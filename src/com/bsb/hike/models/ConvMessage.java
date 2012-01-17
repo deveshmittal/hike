@@ -25,7 +25,7 @@ public class ConvMessage
 	private boolean mIsSent;
 	
 	private State mState;
-	
+
 	public static enum State
 	{
 		SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ
@@ -36,7 +36,7 @@ public class ConvMessage
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
 		this.mTimestamp = timestamp;
-		setState(mState);
+		setState(msgState);
 	}
 
 	public ConvMessage(JSONObject obj) throws JSONException
