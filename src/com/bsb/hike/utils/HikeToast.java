@@ -36,6 +36,7 @@ public class HikeToast
 		Notification notification = new Notification(icon, text, timestamp * 1000);
 
 		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+		notification.defaults |= Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
 
 		Intent notificationIntent = new Intent(context, ChatThread.class);
 		notificationIntent.putExtra("msisdn", msisdn);
