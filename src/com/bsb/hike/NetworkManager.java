@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,7 +27,7 @@ import com.bsb.hike.utils.HikeWebSocketClient;
 public class NetworkManager implements HikePubSub.Listener, Runnable
 {
 
-	private static final String FINISH = null;
+	private static final JSONObject FINISH = new JSONObject();
 
 	private SharedPreferences settings;
 
@@ -40,7 +41,11 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 
 	private Thread mThread;
 
-	private BlockingQueue<String> mQueue;
+	private BlockingQueue<JSONObject> mQueue;
+
+	private JSONObject lastMessageSent;
+
+	private long lastMessageTimestamp;
 
 	private static volatile NetworkManager instance;
 	
@@ -55,7 +60,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		pubSub.addListener(HikePubSub.WS_CLOSE, this);
 		pubSub.addListener(HikePubSub.WS_OPEN, this);
 		pubSub.addListener(HikePubSub.TOKEN_CREATED, this);
-		mQueue = new LinkedBlockingQueue<String>();
+		mQueue = new LinkedBlockingQueue<JSONObject>();
 		mThread = new Thread(this);
 		mThread.start();
 	}
@@ -193,12 +198,19 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		else if (HikePubSub.WS_SEND.equals(type))
 		{
 			JSONObject o = (JSONObject) object;
-			String str = o.toString();
-			mQueue.add(str);
+			mQueue.add(o);
 		}
 		else if (HikePubSub.WS_OPEN.equals(type))
 		{
-			Log.d("NetworkManager", "Websocket opened");
+			long now = System.currentTimeMillis();
+			Log.d("NetworkManager", "Websocket opened " + now + " " + this.lastMessageTimestamp);
+			if ((now - this.lastMessageTimestamp) <= 5) //resend any message sent in the last 5 seconds
+			{
+				Log.e("NetworkManager", "open after recent message.  Resending");
+				//assume the last message didn't get sent through.  Total hack
+				this.lastMessageTimestamp = 0;
+				mQueue.add(this.lastMessageSent);
+			}
 		}
 	}
 
@@ -215,7 +227,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 	{
 		while (true)
 		{
-			String message;
+			JSONObject message;
 			try
 			{
 				message = mQueue.take();
@@ -245,7 +257,13 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 
 			try
 			{
-				mWebSocket.send(message);
+				if ("send".equals(message.optString("type")))
+				{
+					Log.d("NetworkManager", "received a 'send' message.  saving it");
+					this.lastMessageSent = message;
+					this.lastMessageTimestamp = System.currentTimeMillis();
+				}
+				mWebSocket.send(message.toString());
 			}
 			catch (IOException e)
 			{
