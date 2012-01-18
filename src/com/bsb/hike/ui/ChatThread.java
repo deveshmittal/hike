@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
@@ -80,7 +81,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	int mMaxSmsLength = 160;
 
-	private boolean mCanSend = true; /*default this to true for all hike<->hike messages */
+	private String mLabel;
 
 	/* notifies that the adapter has been updated */
 	private Runnable mUpdateAdapter;
@@ -96,7 +97,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	protected void onResume()
 	{
 		super.onResume();
+		/* TODO evidently a better way to do this is to check for onWindowFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
+
+		/* we set a sentinal value while we're rendering the UI to avoid typing notifications.
+		 * If one is actually set by the onRestoreInstanceState code prefer that
+		 */
+		mTextLastChanged = (mTextLastChanged == Long.MAX_VALUE) ? 0 : mTextLastChanged;
 	}
 
 	private void createAutoCompleteView()
@@ -207,10 +214,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		return intent;
 	}
 
+	static final String TEXT_CHANGED_KEY = "text_last_changed";
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+		outState.putLong(TEXT_CHANGED_KEY, mTextLastChanged);
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState)
+	{
+		super.onRestoreInstanceState(savedInstanceState);
+		mTextLastChanged = savedInstanceState.getLong(TEXT_CHANGED_KEY, 0);
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		/* disable typing notifications until the UI is rendered.
+		 * This is so if any callbacks that are fired due to UI changes will not
+		 * cause messages to be sent. */
+		mTextLastChanged = Long.MAX_VALUE;
+
 		setContentView(R.layout.chatthread);
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
@@ -277,11 +304,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		inputNumberView.setVisibility(View.GONE);
 
+		mLabel = TextUtils.isEmpty(mContactName) ? mContactNumber : mContactName;
+
 		View bottomPanel = findViewById(R.id.bottom_panel);
 		bottomPanel.setVisibility(View.VISIBLE);
 		mNameView = (TextView) findViewById(R.id.name_field);
 		mNameView.setVisibility(View.VISIBLE);
-		mNameView.setText(mContactName);
+		mNameView.setText(mLabel);
 
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
@@ -292,8 +321,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mConversation = mConversationDb.addConversation(mContactNumber);
 		}
-		long convID = mConversation.getConvId();
-		//mConversationDb.updateMsgStatus(convID, 0, ConvMessage.State.RECEIVED_READ.ordinal());
 
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mConversationsView.setStackFromBottom(true);
@@ -309,6 +336,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
+		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
 
 		mSendBtn = (Button) findViewById(R.id.send_message);
@@ -328,6 +356,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			updateChatMetadata();
 		}
 
+		setBtnEnabled();
 		/* create an object that we can notify when the contents of the thread are updated */
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
 	}
@@ -346,11 +375,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			if (direction)
 			{
-				mNameView.setText(mContactName + " is typing");
+				mNameView.setText(mLabel + " is typing");
 			}
 			else
 			{
-				mNameView.setText(mContactName);
+				mNameView.setText(mLabel);
 			}
 		}
 	}
@@ -363,6 +392,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			final ConvMessage message = (ConvMessage) object;
 			if (message.getMsisdn().indexOf(mContactNumber) != -1)
 			{
+				/* unset the typing notification */
+				runOnUiThread(mClearTypingCallback);
+				mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 				/*
 				 * we publish the message before the conversation is created, so it's safer to just tack it on here
 				 */
@@ -475,31 +507,64 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	};
 
+	private void setBtnEnabled()
+	{
+		CharSequence seq = mComposeView.getText();
+		/* the button is enabled iff there is text AND (this is an IP conversation or we have credits available) */
+		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation.isOnhike() || mCredits > 0)));
+		mSendBtn.setEnabled(canSend);
+	}
+
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
-
 		/* only update the chat metadata if this is an SMS chat */
 		if (!mConversation.isOnhike()) {
 			updateChatMetadata();
 		}
 
-		/* we can bail early if this is an empty message */
-		if (editable.toString().trim().length() == 0)
+		setBtnEnabled();
+	}
+
+	/* must be called on the UI Thread */
+	private void updateChatMetadata()
+	{
+		/* set the bottom bar to red if we're out of sms credits */
+		if (mCredits <= 0)
 		{
-			mSendBtn.setEnabled(false);
+			mMetadataView.setBackgroundResource(R.color.red);
+		} else {
+			mMetadataView.setBackgroundResource(R.color.grey);
 		}
 
-		/* set the button enabled iff we're not in an SMS chat and we have credits remaining */ 
-		mSendBtn.setEnabled(mCanSend);
+		int length = mComposeView.getText().length();
+		//set the max sms length to a length appropriate to the number of characters we have
+		mMaxSmsLength = 160 * (1 + length/160);
+		mMetadataNumChars.setText(Integer.toString(length) + "/" + Integer.toString(mMaxSmsLength));
+		String formatted = String.format(getResources().getString(R.string.credits_left), mCredits);
+		mMetadataCreditsLeft.setText(formatted);
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int before, int count)
+	{
+		// blank
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count)
+	{
+		if ((before == 0) && (count == 0))
+		{
+			//we were called on config changed, just ignore
+			return;
+		}
 
 		/* don't send typing notifications for non-hike chats */
 		if (!mConversation.isOnhike())
 		{
 			return;
 		}
-
-		mSendBtn.setEnabled(true);
 
 		if (mResetTypingNotification == null)
 		{
@@ -520,40 +585,5 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 																		// ones
 			mUiThreadHandler.postDelayed(mResetTypingNotification, 10 * 1000);
 		}
-	}
-
-	/* must be called on the UI Thread */
-	private void updateChatMetadata()
-	{
-		/* set the bottom bar to red if we're out of sms credits */
-		if (mCredits <= 0)
-		{
-			mMetadataView.setBackgroundResource(R.color.red);
-			mSendBtn.setEnabled(false);
-			mCanSend = false;
-		} else {
-			mMetadataView.setBackgroundResource(R.color.grey);
-			mCanSend = true;
-			mSendBtn.setEnabled(true);
-		}
-
-		int length = mComposeView.getText().length();
-		//set the max sms length to a length appropriate to the number of characters we have
-		mMaxSmsLength = 160 * (1 + length/160);
-		mMetadataNumChars.setText(Integer.toString(length) + "/" + Integer.toString(mMaxSmsLength));
-		String formatted = String.format(getResources().getString(R.string.credits_left), mCredits);
-		mMetadataCreditsLeft.setText(formatted);
-	}
-
-	@Override
-	public void beforeTextChanged(CharSequence s, int start, int before, int count)
-	{
-		// blank
-	}
-
-	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count)
-	{
-		// blank
 	}
 }

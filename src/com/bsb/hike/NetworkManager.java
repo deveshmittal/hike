@@ -149,7 +149,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		}
 		else if (HikePubSub.TOKEN_CREATED.equals(type))
 		{
-			Log.i("NetworkManager", "Creating Websocket");
+			Log.i("NetworkManager", "Token Created -- starting websocket");
 			startWebSocket();
 		}
 		else if (HikePubSub.WS_CLOSE.equals(type))
@@ -202,7 +202,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		}
 	}
 
-	private synchronized void startWebSocket()
+	public synchronized void startWebSocket()
 	{
 		if (mWebSocket == null)
 		{
@@ -219,7 +219,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			try
 			{
 				message = mQueue.take();
-				System.out.println("trying to send message");
+				Log.d("NetworkManager", "trying to send message: " + message);
 			}
 			catch (InterruptedException e)
 			{

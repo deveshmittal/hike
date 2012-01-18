@@ -94,8 +94,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		ContentValues values = new ContentValues();
 		values.put("msgStatus", val);
-		String[] whereArgs = { String.valueOf(msgID), String.valueOf(convID) };
-		return mDb.update(MESSAGESTABLE, values, "msgid=? and convid=?", whereArgs);
+		String[] whereArgs = { String.valueOf(msgID)};
+		return mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
 	}
 
 	public void updateConversation()
