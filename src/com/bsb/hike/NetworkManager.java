@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -129,15 +130,27 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		}
 		else if("msgDelivered".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a received msg
 		{
+			
 			long msgID = jsonObj.optLong("msgID");
+			Log.d("DELIVERY REPORT ","Delivery report received for msgid : "+msgID);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
 		}
 		else if("msgDeliveredRead".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
 		{
 			long msgID = jsonObj.optLong("msgID");
+			Log.d("DELIVERY REPORT READ","Delivery report read received for msgid : "+msgID);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, msgID);	
 		}
-
+		else if("msgDeliveredReadBatch".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
+		{
+			String msgIDArray = jsonObj.optString("msgIdArray");
+			if(msgIDArray.equals(""))
+			{
+				Log.e("UPDATE BATCH ERROR", "Message id Array is empty. Check problem");
+				return;
+			}
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ_BATCH, msgIDArray);	
+		}
 		else
 		{
 			Log.d("WebSocketPublisher", "Unknown Type:" + type);
