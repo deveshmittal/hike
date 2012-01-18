@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -49,7 +53,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db = mDb;
 		}
 		String sql = "CREATE TABLE IF NOT EXISTS " + MESSAGESTABLE + "(message STRING, " + "msgStatus INTEGER, " + // this is to check if msg sent or recieved of the msg sent.
-				"timestamp INTEGER, " + "msgid INTEGER PRIMARY KEY AUTOINCREMENT," + "convid INTEGER)";
+				"timestamp INTEGER, " + "msgid INTEGER PRIMARY KEY AUTOINCREMENT, " + "mappedMsgId INTEGER, " + "convid INTEGER)";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS conversation_idx ON " + MESSAGESTABLE + "( convid, timestamp DESC)";
@@ -83,14 +87,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		onCreate(db);
 	}
 
-	public long addConversationMessages(ConvMessage message)
+	public void addConversationMessages(ConvMessage message)
 	{
 		List<ConvMessage> l = new ArrayList<ConvMessage>(1);
 		l.add(message);
-		return addConversations(l);
+		addConversations(l);
 	}
 
-	public int updateMsgStatus(long convID, long msgID, int val)
+	public int updateMsgStatus(long msgID, int val)
 	{
 		ContentValues values = new ContentValues();
 		values.put("msgStatus", val);
@@ -98,17 +102,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
 	}
 
-	public void updateConversation()
-	{
-
-	}
-
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
 	{
 		final int messageColumn = 1;
 		final int msgStatusColumn = 2;
 		final int timestampColumn = 3;
-		final int msisdnColumn = 4;
+		final int mappedMsgIdColumn = 4;
+		final int msisdnColumn = 5;
 
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
@@ -116,13 +116,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		// 3 -> RECEIVED_READ
 		insertStatement.bindLong(msgStatusColumn, conv.getState().ordinal());
 		insertStatement.bindLong(timestampColumn, conv.getTimestamp());
+		insertStatement.bindLong(mappedMsgIdColumn, conv.getMappedMsgID());
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
 	}
 
-	public long addConversations(List<ConvMessage> convMessages)
+	public void addConversations(List<ConvMessage> convMessages)
 	{
-		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + MESSAGESTABLE + " (message, msgStatus, timestamp, convid) " + "SELECT ?, ?, ?, convid FROM "
-				+ CONVERSATIONSTABLE + " WHERE " + CONVERSATIONSTABLE + ".msisdn=?");
+		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + MESSAGESTABLE + " (message, msgStatus, timestamp,mappedMsgId ,convid) "
+				+ "SELECT ?, ?, ?, ?, convid FROM " + CONVERSATIONSTABLE + " WHERE " + CONVERSATIONSTABLE + ".msisdn=?");
 		mDb.beginTransaction();
 
 		long msgId = -1;
@@ -142,11 +143,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				msgId = insertStatement.executeInsert();
 				assert (msgId >= 0);
 			}
+			conv.setMsgID(msgId);
 		}
 
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
-		return msgId;
 	}
 
 	public void deleteConversation(Long[] ids)
@@ -191,15 +192,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation)
 	{
 		String limitStr = new Integer(limit).toString();
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, msgStatus, timestamp" }, "convid=?", new String[] { Long.toString(convid) }, null, null, "msgid DESC",
-				limitStr);
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, msgStatus, timestamp,msgid,mappedMsgId" }, "convid=?", new String[] { Long.toString(convid) }, null, null,
+				"msgid DESC", limitStr);
 		final int msgColumn = c.getColumnIndex("message");
 		final int msgStatusColumn = c.getColumnIndex("msgStatus");
 		final int tsColumn = c.getColumnIndex("timestamp");
+		final int mappedMsgIdColumn = c.getColumnIndex("mappedMsgId");
+		final int msgIdColumn = c.getColumnIndex("msgid");
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		while (c.moveToNext())
 		{
-			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)));
+			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),c.getLong(msgIdColumn),c.getLong(mappedMsgIdColumn));
 			elements.add(elements.size(), message);
 			message.setConversation(conversation);
 		}
@@ -264,4 +267,63 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return conversations;
 	}
 
+	
+	public JSONObject updateStatusAndSendDeliveryReport(long convID, String msisdn)
+	{
+		Log.d("UPDATE VARIABLE CHECK ", "Conv ID : "+convID+" ; msisdn : "+msisdn);
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "msgid,mappedMsgId" }, "convid=? and msgStatus=?", new String[] { Long.toString(convID), Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) }, null, null, null);
+		Log.d("NUMBER OF ROWS UPDATED ", String.valueOf(c.getCount()));
+		/* If there are no rows in the cursor then simply return null*/
+		if(c.getCount() <= 0)
+			return null;
+		
+		JSONObject object = new JSONObject();
+		StringBuilder msgIdsObj = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
+		msgIdsObj.append("(");
+		sb.append("(");
+		
+		final int msgIdIdx = c.getColumnIndex("msgid");
+		final int mappedMsgIdIdx = c.getColumnIndex("mappedMsgId");
+		
+		while (c.moveToNext())
+		{
+			long msgId = c.getLong(msgIdIdx);
+			long mappedMsgId = c.getLong(mappedMsgIdIdx);
+			
+			msgIdsObj.append(mappedMsgId);
+			sb.append(msgId);
+			if(!c.isLast())
+			{
+				msgIdsObj.append(",");
+				sb.append(",");
+			}
+		}
+		sb.append(")");
+		
+		Log.d("MSG ID VALUES ", sb.toString());
+		try
+		{
+			ContentValues values = new ContentValues();
+			values.put("msgStatus", ConvMessage.State.RECEIVED_READ.ordinal());
+			int rowsAffected = mDb.update(MESSAGESTABLE, values, "msgid in "+sb.toString(), null);
+			Log.d("ROWS UPADTED ", "Rows updated to RECEIVED_READ : "+rowsAffected);
+			object.put("type", "msgDeliveredReadBatch");
+			object.put("to", msisdn);
+			object.put("msgIdArray", msgIdsObj.toString());
+		}
+		catch (JSONException e)
+		{
+			Log.e("ConvMessage", "invalid json message", e);
+		}
+		c.close();
+		return object;
+	}
+
+	public void updateBatch(String sb,int status)
+	{
+		ContentValues values = new ContentValues();
+		values.put("msgStatus", status);
+		mDb.update(MESSAGESTABLE, values, "msgid in "+sb, null);
+	}
 }

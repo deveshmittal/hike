@@ -3,6 +3,8 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -12,6 +14,7 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -351,7 +354,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mConversation.isOnhike())
 		{
 			mMetadataView.setVisibility(View.GONE);
-		} else {
+		}
+		else
+		{
 			mMetadataView.setVisibility(View.VISIBLE);
 			updateChatMetadata();
 		}
@@ -359,6 +364,36 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		setBtnEnabled();
 		/* create an object that we can notify when the contents of the thread are updated */
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
+		long convID = mConversation.getConvId();
+		/* this is to check if last msg was a sent msg category for a particular conversation id */
+		if(!isLastMsgSent())
+		{
+			JSONObject obj = mConversationDb.updateStatusAndSendDeliveryReport(convID,mConversation.getMsisdn());
+			/*If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read.*/
+			if(obj != null)
+				mPubSub.publish(HikePubSub.WS_SEND, obj); 
+		}
+	}
+
+	private boolean isLastMsgSent()
+	{
+		Log.d("CHECKING LAST MSG STATUS", "Checking last msg status in chat thread ....");
+		List<ConvMessage>  msgList = mConversation.getMessages();
+
+		if ((msgList == null) || (msgList.isEmpty()))
+		{
+			return false;
+		}
+
+		ConvMessage lastMsg = msgList.get(msgList.size()-1);
+		Log.d("LAST MSG STATUS", "lastMsg ID : "+lastMsg.getMsgID() +" ; Status : "+lastMsg.getState().name()+"TEXT is : "+lastMsg.getMessage());
+		
+		if(lastMsg.isSent() || lastMsg.getState() == ConvMessage.State.RECEIVED_READ)
+			return true;
+		else 
+		{
+			return false;
+		}
 	}
 
 	private class SetTypingText implements Runnable
@@ -389,6 +424,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
+			Log.d("CHAT THREAD EVENT","Message Received by chat thread .....");
 			final ConvMessage message = (ConvMessage) object;
 			if (message.getMsisdn().indexOf(mContactNumber) != -1)
 			{
@@ -407,7 +443,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						mAdapter.add(message);
 					}
 				});
-				mConversationDb.updateMsgStatus(mConversation.getConvId(), message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
+				Log.d("CHAT THREAD EVENT","Received Msg ID : "+message.getMsgID() + "Receiver Name : "+message.getConversation().getContactName());
+				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
 				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport("msgDeliveredRead")); // handle return to sender
 			}
 		}

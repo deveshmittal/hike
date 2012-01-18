@@ -164,8 +164,10 @@ public class PushManager extends Thread
 				/* toast and save it */
 				try
 				{
+					Log.d("TOAST MSG","Msg Received");
 					ConvMessage convMessage = new ConvMessage(obj);
 					this.convDb.addConversationMessages(convMessage);
+					Log.d("PUSH MANAGER RECEIVED MSG","Receiver msg id -> "+convMessage.getMsgID() + " ; sender msg id -> "+convMessage.getMappedMsgID()+" ; MsgStatus -> "+convMessage.getState().name());
 					ContactInfo contactInfo = ContactUtils.getContactInfo(convMessage.getMsisdn(), service);
 					toaster.toast(contactInfo, convMessage.getMsisdn(), convMessage.getMessage(), convMessage.getTimestamp());
 				} catch (JSONException e)

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,12 +83,12 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 
 	private void onMessage(String msg)
 	{
-		JSONObject data;
+		JSONObject jsonObj;
 		String type;
 		try
 		{
-			data = new JSONObject(msg);
-			type = data.getString("type");
+			jsonObj = new JSONObject(msg);
+			type = jsonObj.getString("type");
 		}
 		catch (JSONException e)
 		{
@@ -99,44 +100,57 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		{
 			try
 			{
-				ConvMessage convMessage = new ConvMessage(data);
-				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_OTHER_CLIENT, convMessage);
-			} catch (JSONException e)
+				ConvMessage convMessage = new ConvMessage(jsonObj);
+				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, convMessage);
+			}
+			catch (JSONException e)
 			{
 				Log.d("JSON", "Invalid JSON", e);
 			}
 		}
 		else if ("typing".equals(type))
 		{
-			String msisdn = data.optString("from");
+			String msisdn = jsonObj.optString("from");
 			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
 		}
 		else if ("stop_typing".equals(type))
 		{
-			String msisdn = data.optString("from");
+			String msisdn = jsonObj.optString("from");
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
 		}
 		else if ("sms_credits".equals(type))
 		{
-			int sms_credits = data.optInt("data");
+			int sms_credits = jsonObj.optInt("data");
 			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
 		}
 		else if("msgrcpt".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
 		{
-			long msgID = data.optLong("data");
+			long msgID = jsonObj.optLong("data");
 			this.pubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgID);	
 		}
 		else if("msgDelivered".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a received msg
 		{
-			long msgID = data.optLong("msgID");
+			
+			long msgID = jsonObj.optLong("msgID");
+			Log.d("DELIVERY REPORT ","Delivery report received for msgid : "+msgID);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
 		}
 		else if("msgDeliveredRead".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
 		{
-			long msgID = data.optLong("msgID");
+			long msgID = jsonObj.optLong("msgID");
+			Log.d("DELIVERY REPORT READ","Delivery report read received for msgid : "+msgID);
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, msgID);	
 		}
-
+		else if("msgDeliveredReadBatch".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
+		{
+			String msgIDArray = jsonObj.optString("msgIdArray");
+			if(msgIDArray.equals(""))
+			{
+				Log.e("UPDATE BATCH ERROR", "Message id Array is empty. Check problem");
+				return;
+			}
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ_BATCH, msgIDArray);	
+		}
 		else
 		{
 			Log.d("WebSocketPublisher", "Unknown Type:" + type);

@@ -12,7 +12,8 @@ import com.ocpsoft.pretty.time.PrettyTime;
 public class ConvMessage
 {
 
-	private long msgID;
+	private long msgID; // this corresponds to msgID stored in sender's DB
+	private long mappedMsgId; // this corresponds to msgID stored in receiver's DB
 
 	private Conversation mConversation;
 
@@ -39,6 +40,16 @@ public class ConvMessage
 		setState(msgState);
 	}
 
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId)
+	{
+		this.mMsisdn = msisdn;
+		this.mMessage = message;
+		this.mTimestamp = timestamp;
+		this.msgID=msgid;
+		this.mappedMsgId=mappedMsgId;
+		setState(msgState);
+	}
+	
 	public ConvMessage(JSONObject obj) throws JSONException
 	{
 		this.mMsisdn = obj.getString("from");
@@ -52,6 +63,8 @@ public class ConvMessage
 		this.mTimestamp = (this.mTimestamp > now) ? now : this.mTimestamp;
 		/* if we're deserialized an object from json, it's always unread */
 		setState(State.RECEIVED_UNREAD);
+		msgID = -1;
+		mappedMsgId=data.getLong("id");
 	}
 
 	public String getMessage()
@@ -173,11 +186,21 @@ public class ConvMessage
 	{
 		this.msgID = msgID;
 	}
+	
 	public long getMsgID()
 	{
 		return msgID;			
 	}
+
+	public void setMappedMsgID(long msgID)
+	{
+		this.mappedMsgId = msgID;
+	}
 	
+	public long getMappedMsgID()
+	{
+		return mappedMsgId;			
+	}
 	public static State stateValue(int val)
 	{
 		switch(val)
@@ -203,8 +226,7 @@ public class ConvMessage
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put("ts", mTimestamp);
-					object.put("msgID", msgID); // added msgID to the JSON Object
+					object.put("msgID", mappedMsgId); // added msgID to the JSON Object
 					object.put("type", type);
 					object.put("to", mMsisdn);
 				}
