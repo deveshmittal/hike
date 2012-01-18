@@ -45,7 +45,7 @@ public class PushManager extends Thread
 
 	private HikeService service;
 
-	public PushManager(HikeService service, String uid, String password)
+	public PushManager(HikeService service, String msisdn,String uid, String password)
 	{
 		mqtt = new MQTT();
 		this.toaster = new HikeToast(service);
@@ -59,6 +59,7 @@ public class PushManager extends Thread
 		}
 		mqtt.setKeepAlive((short) (60 * 5));
 		mqtt.setWillTopic("connection_terminated");
+		mqtt.setClientId(msisdn);
 		mqtt.setPassword(password);
 		this.password = password;
 		this.topic = uid;
@@ -187,7 +188,8 @@ public class PushManager extends Thread
 			SharedPreferences settings = service.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-			mPushManager = new PushManager(service, uid, token);
+			String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+			mPushManager = new PushManager(service, msisdn, uid, token);
 			mPushManager.start();
 		}
 		return mPushManager;
