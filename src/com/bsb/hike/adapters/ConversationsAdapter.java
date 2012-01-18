@@ -3,6 +3,8 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,6 +52,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			ConvMessage message = messages.get(messages.size() - 1);
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			messageView.setText(message.getMessage());
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			{
+				Typeface tf = messageView.getTypeface();
+				messageView.setTypeface(tf, Typeface.BOLD);
+			}
 			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
 			tsView.setText(message.getTimestampFormatted());
 		}
