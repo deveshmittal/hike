@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -218,7 +217,14 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 	{
 		if (mWebSocket == null)
 		{
-			mWebSocket = AccountUtils.startWebSocketConnection();
+			synchronized(NetworkManager.class)
+			{
+				if (mWebSocket == null)
+				{
+					Log.d("NetworkManager", "restarting websocket");
+					mWebSocket = AccountUtils.startWebSocketConnection();
+				}
+			}
 		}
 	}
 
@@ -238,31 +244,37 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 				Log.e("WebSocket", "sending thread", e);
 				continue;
 			}
+
 			if (message == FINISH)
 			{
 				break;
 			}
 
-			while (mWebSocket == null)
-			{
-				try
-				{
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e)
-				{
-					continue;
-				}
-			}
-
 			try
 			{
-				if ("send".equals(message.optString("type")))
+				if ("ASDFsend".equals(message.optString("type")))
 				{
 					Log.d("NetworkManager", "received a 'send' message.  saving it");
 					this.lastMessageSent = message;
 					this.lastMessageTimestamp = System.currentTimeMillis();
 				}
+
+				while (mWebSocket == null)
+				{
+					startWebSocket();
+					Log.i("NetworkManager", "no websocket, sleeping");
+					try
+					{
+						Thread.sleep(1000);
+					}
+					catch (InterruptedException e)
+					{
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+
+				/* total race condition here, but whatever */
 				mWebSocket.send(message.toString());
 			}
 			catch (IOException e)
@@ -273,6 +285,15 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			catch (java.nio.channels.NotYetConnectedException e)
 			{
 				Log.e("WebSocket", "Not yet connected");
+				try
+				{
+					Thread.sleep(1000);
+				}
+				catch(InterruptedException e3)
+				{
+					//pass
+				}
+
 				mQueue.add(message);
 			}
 		}
