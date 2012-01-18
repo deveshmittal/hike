@@ -3,6 +3,8 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -371,16 +373,29 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* this is to check if last msg was a sent msg category for a particular conversation id */
 		if (!isLastMsgSent())
 		{
-			JSONObject obj = mConversationDb.updateStatusAndSendDeliveryReport(convID, mConversation.getMsisdn());
+			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
 			/* If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read. */
-			if (obj != null)
-				mPubSub.publish(HikePubSub.WS_SEND, obj);
+			if (ids != null)
+			{
+				JSONObject object = new JSONObject();
+				try
+				{
+					object.put("type", "msgDeliveredRead");
+					object.put("to", mConversation.getMsisdn());
+					object.put("msgIdArray", ids);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+				mPubSub.publish(HikePubSub.WS_SEND, object);
+			}
 		}
 	}
 
 	private boolean isLastMsgSent()
 	{
-		Log.d("CHECKING LAST MSG STATUS", "Checking last msg status in chat thread ....");
+		Log.d("CHAT THREAD","Checking last msg status ....");
 		List<ConvMessage> msgList = mConversation.getMessages();
 
 		if ((msgList == null) || (msgList.isEmpty()))
@@ -389,7 +404,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		ConvMessage lastMsg = msgList.get(msgList.size() - 1);
-		Log.d("LAST MSG STATUS", "lastMsg ID : " + lastMsg.getMsgID() + " ; Status : " + lastMsg.getState().name() + "TEXT is : " + lastMsg.getMessage());
+		Log.d("CHAT THREAD", "Last msg status .... lastMsg ID : " + lastMsg.getMsgID() + " ; Status : " + lastMsg.getState().name() + " ; TEXT is : " + lastMsg.getMessage());
 
 		if (lastMsg.isSent() || lastMsg.getState() == ConvMessage.State.RECEIVED_READ)
 			return true;
@@ -427,7 +442,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			Log.d("CHAT THREAD EVENT", "Message Received by chat thread .....");
+			Log.d("CHAT THREAD", "EVENT : Message Received by chat thread .....");
 			final ConvMessage message = (ConvMessage) object;
 			if (message.getMsisdn().indexOf(mContactNumber) != -1)
 			{
@@ -446,9 +461,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						mAdapter.add(message);
 					}
 				});
-				Log.d("CHAT THREAD EVENT", "Received Msg ID : " + message.getMsgID() + "Receiver Name : " + message.getConversation().getContactName());
 				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
-				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport("msgDeliveredRead")); // handle return to sender
+				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReportRead()); // handle return to sender
 			}
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
@@ -509,7 +523,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
 		{
 			long[] ids = (long[]) object;
-			Log.d("ChatThread", "received message delivered read " + ids);
+			Log.d("CHAT THREAD", "received message delivered read " + ids);
 			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			for (int i = 0; i < ids.length; i++)
 			{
