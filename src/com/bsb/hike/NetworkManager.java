@@ -132,7 +132,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		{
 			
 			long msgID = jsonObj.optLong("msgID");
-			Log.d("NetworkManager","Delivery report received for msgid : "+msgID);
+			Log.d("NETWORK MANAGER","Delivery report received for msgid : "+msgID +"	;	REPORT : DELIVERED");
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
 		}
 		else if("msgDeliveredRead".equals(type)) // this handles the case when msg with msgId is received by the tornado server and it send back a received msg
@@ -140,7 +140,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			JSONArray msgIds = jsonObj.optJSONArray("msgIdArray");
 			if(msgIds == null)
 			{
-				Log.e("UPDATE BATCH ERROR", "Message id Array is empty. Check problem");
+				Log.e("UPDATE ERROR", "Message id Array is empty or null . Check problem");
 				return;
 			}
 
@@ -149,6 +149,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			{
 					ids[i] = msgIds.optLong(i);
 			}
+			Log.d("NETWORK MANAGER","Delivery report received : " +"	;	REPORT : DELIVERED READ");
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);	
 		}
 		else
