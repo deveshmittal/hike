@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_margin="7dp"
-            android:height="40dp"
+            android:height="50dp"
             android:text=""
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:visibility="visible" />

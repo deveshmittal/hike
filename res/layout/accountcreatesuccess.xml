@@ -31,24 +31,12 @@
             android:layout_width="wrap_content"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
-            android:gravity="center"
+            android:gravity="left"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/we_got_you_on_carrier"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/black" />
-
-        <TextView
-            android:id="@+id/next"
-            android:gravity="center"
-            android:layout_marginRight="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/textWeGotYouOnCarrier"
-            android:text="@string/next_message" />
 
         <ImageView
             android:id="@+id/imageCheckmark"
@@ -58,6 +46,19 @@
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="15dp"
             android:src="@drawable/checkmark" />
+
+        <TextView
+            android:id="@+id/next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textWeGotYouOnCarrier"
+            android:layout_alignParentBottom="true"
+            android:layout_alignRight="@+id/textWeGotYouOnCarrier"
+            android:layout_marginBottom="58dp"
+            android:gravity="left"
+            android:text="@string/next_message"
+            android:textColor="@color/grey"
+            android:textSize="18sp" />
 
     </RelativeLayout>
 
