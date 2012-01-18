@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.WindowManager;
@@ -81,6 +82,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	int mMaxSmsLength = 160;
 
 	private boolean mCanSend = true; /*default this to true for all hike<->hike messages */
+	private String mLabel;
 
 	/* notifies that the adapter has been updated */
 	private Runnable mUpdateAdapter;
@@ -303,11 +305,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		inputNumberView.setVisibility(View.GONE);
 
+		mLabel = TextUtils.isEmpty(mContactName) ? mContactNumber : mContactName;
+
 		View bottomPanel = findViewById(R.id.bottom_panel);
 		bottomPanel.setVisibility(View.VISIBLE);
 		mNameView = (TextView) findViewById(R.id.name_field);
 		mNameView.setVisibility(View.VISIBLE);
-		mNameView.setText(mContactName);
+		mNameView.setText(mLabel);
 
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
@@ -372,11 +376,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			if (direction)
 			{
-				mNameView.setText(mContactName + " is typing");
+				mNameView.setText(mLabel + " is typing");
 			}
 			else
 			{
-				mNameView.setText(mContactName);
+				mNameView.setText(mLabel);
 			}
 		}
 	}
