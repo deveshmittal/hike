@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -376,6 +377,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean isLastMsgSent()
 	{
+		Log.d("CHECKING LAST MSG STATUS", "Checking last msg status in chat thread ....");
 		List<ConvMessage>  msgList = mConversation.getMessages();
 
 		if ((msgList == null) || (msgList.isEmpty()))
@@ -384,6 +386,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		ConvMessage lastMsg = msgList.get(msgList.size()-1);
+		Log.d("LAST MSG STATUS", "lastMsg ID : "+lastMsg.getMsgID() +" ; Status : "+lastMsg.getState().name()+"TEXT is : "+lastMsg.getMessage());
+		
 		if(lastMsg.isSent() || lastMsg.getState() == ConvMessage.State.RECEIVED_READ)
 			return true;
 		else 
@@ -420,6 +424,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
+			Log.d("CHAT THREAD EVENT","Message Received by chat thread .....");
 			final ConvMessage message = (ConvMessage) object;
 			if (message.getMsisdn().indexOf(mContactNumber) != -1)
 			{
@@ -438,6 +443,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						mAdapter.add(message);
 					}
 				});
+				Log.d("CHAT THREAD EVENT","Received Msg ID : "+message.getMsgID() + "Receiver Name : "+message.getConversation().getContactName());
 				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
 				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport("msgDeliveredRead")); // handle return to sender
 			}
