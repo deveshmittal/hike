@@ -40,6 +40,16 @@ public class ConvMessage
 		setState(msgState);
 	}
 
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId)
+	{
+		this.mMsisdn = msisdn;
+		this.mMessage = message;
+		this.mTimestamp = timestamp;
+		this.msgID=msgid;
+		this.mappedMsgId=mappedMsgId;
+		setState(msgState);
+	}
+	
 	public ConvMessage(JSONObject obj) throws JSONException
 	{
 		this.mMsisdn = obj.getString("from");
