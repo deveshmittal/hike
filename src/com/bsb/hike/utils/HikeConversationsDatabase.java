@@ -192,17 +192,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation)
 	{
 		String limitStr = new Integer(limit).toString();
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, msgStatus, timestamp,mappedMsgId" }, "convid=?", new String[] { Long.toString(convid) }, null, null,
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, msgStatus, timestamp,msgid,mappedMsgId" }, "convid=?", new String[] { Long.toString(convid) }, null, null,
 				"msgid DESC", limitStr);
 		final int msgColumn = c.getColumnIndex("message");
 		final int msgStatusColumn = c.getColumnIndex("msgStatus");
 		final int tsColumn = c.getColumnIndex("timestamp");
-		final int mappedMsgIdColumn = c.getColumnIndex("mappedMsgIdColumn");
+		final int mappedMsgIdColumn = c.getColumnIndex("mappedMsgId");
+		final int msgIdColumn = c.getColumnIndex("msgid");
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		while (c.moveToNext())
 		{
-			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)));
-			message.setMappedMsgID(mappedMsgIdColumn);
+			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),c.getLong(msgIdColumn),c.getLong(mappedMsgIdColumn));
 			elements.add(elements.size(), message);
 			message.setConversation(conversation);
 		}
@@ -270,33 +270,47 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	
 	public JSONObject updateStatusAndSendDeliveryReport(long convID, String msisdn)
 	{
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "mappedMsgId" }, "convid=? and msgStatus=?", new String[] { Long.toString(convID), Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) }, null, null, null);
+		Log.d("UPDATE VARIABLE CHECK ", "Conv ID : "+convID+" ; msisdn : "+msisdn);
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "msgid,mappedMsgId" }, "convid=? and msgStatus=?", new String[] { Long.toString(convID), Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) }, null, null, null);
+		Log.d("NUMBER OF ROWS UPDATED ", String.valueOf(c.getCount()));
 		/* If there are no rows in the cursor then simply return null*/
 		if(c.getCount() <= 0)
 			return null;
 		
 		JSONObject object = new JSONObject();
-		JSONArray msgIds = new JSONArray();
+		StringBuilder msgIdsObj = new StringBuilder();
 		StringBuilder sb = new StringBuilder();
+		msgIdsObj.append("(");
 		sb.append("(");
+		
+		final int msgIdIdx = c.getColumnIndex("msgid");
 		final int mappedMsgIdIdx = c.getColumnIndex("mappedMsgId");
+		
 		while (c.moveToNext())
 		{
+			long msgId = c.getLong(msgIdIdx);
 			long mappedMsgId = c.getLong(mappedMsgIdIdx);
-			msgIds.put(mappedMsgId);
-			sb.append(mappedMsgId);
+			
+			msgIdsObj.append(mappedMsgId);
+			sb.append(msgId);
 			if(!c.isLast())
+			{
+				msgIdsObj.append(",");
 				sb.append(",");
+			}
 		}
 		sb.append(")");
+		
+		Log.d("MSG ID VALUES ", sb.toString());
 		try
 		{
 			ContentValues values = new ContentValues();
 			values.put("msgStatus", ConvMessage.State.RECEIVED_READ.ordinal());
-			mDb.update(MESSAGESTABLE, values, "msgid in "+sb, null);
-			object.put("type", "msgDeliveredRead");
+			int rowsAffected = mDb.update(MESSAGESTABLE, values, "msgid in "+sb.toString(), null);
+			Log.d("ROWS UPADTED ", "Rows updated to RECEIVED_READ : "+rowsAffected);
+			object.put("type", "msgDeliveredReadBatch");
 			object.put("to", msisdn);
-			object.put("data", msgIds);
+			object.put("msgIdArray", msgIdsObj.toString());
 		}
 		catch (JSONException e)
 		{
@@ -306,4 +320,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return object;
 	}
 
+	public void updateBatch(String sb,int status)
+	{
+		ContentValues values = new ContentValues();
+		values.put("msgStatus", status);
+		mDb.update(MESSAGESTABLE, values, "msgid in "+sb, null);
+	}
 }

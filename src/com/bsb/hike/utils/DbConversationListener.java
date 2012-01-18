@@ -1,5 +1,7 @@
 package com.bsb.hike.utils;
 
+import org.json.JSONArray;
+
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
@@ -39,7 +41,7 @@ public class DbConversationListener implements Listener
 		{
 			ConvMessage convMessage = (ConvMessage) object;
 			mConversationDb.addConversationMessages(convMessage);
-			Log.i("MESSAGE SENT","sender msg id -> "+convMessage.getMsgID() + " ; receiver msg id -> "+convMessage.getMappedMsgID()+" ; MsgStatus -> "+convMessage.getState().name());
+			Log.d("MESSAGE SENT","sender msg id -> "+convMessage.getMsgID() + " ; receiver msg id -> "+convMessage.getMappedMsgID()+" ; MsgStatus -> "+convMessage.getState().name());
 			mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send")); // this is used to be sent by the web socket.
 		}
 		else if (HikePubSub.MESSAGE_RECEIVED_FROM_SENDER.equals(type))  // represents event when a client receive msg from other client through server.
@@ -72,7 +74,16 @@ public class DbConversationListener implements Listener
 			Log.d("MSG DELIVERY REPORT","Msg Read by receiver for msgID -> "+(Long)object);
 			updateDB(object,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
 		}
-		
+		else if (HikePubSub.MESSAGE_DELIVERED_READ_BATCH.equals(type))  // server got msg from client 1 and sent back received msg receipt
+		{
+			updateDbBatch(object,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
+		}
+	}
+
+	private void updateDbBatch(Object object, int status)
+	{
+		String msgIdArray = (String)object;	
+		mConversationDb.updateBatch(msgIdArray, ConvMessage.State.SENT_DELIVERED_READ.ordinal());
 	}
 
 	private void updateDB(Object object, int status)
