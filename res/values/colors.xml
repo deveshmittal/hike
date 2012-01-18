@@ -11,4 +11,6 @@
     <color name="dividercolor">#CCCCCC</color>
     <color name="diamondblue">#0EBFE9</color>
     <color name="red">#FF0000</color>
+    <color name="bottomgrey">#686868</color>
+    <color name="lightblack">#222222</color>
 </resources>
