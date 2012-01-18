@@ -81,7 +81,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	int mMaxSmsLength = 160;
 
-	private boolean mCanSend = true; /*default this to true for all hike<->hike messages */
 	private String mLabel;
 
 	/* notifies that the adapter has been updated */
@@ -358,6 +357,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			updateChatMetadata();
 		}
 
+		setBtnEnabled();
 		/* create an object that we can notify when the contents of the thread are updated */
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
 	}
@@ -508,6 +508,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	};
 
+	private void setBtnEnabled()
+	{
+		CharSequence seq = mComposeView.getText();
+		/* the button is enabled iff there is text AND (this is an IP conversation or we have credits available) */
+		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation.isOnhike() || mCredits > 0)));
+		mSendBtn.setEnabled(canSend);
+	}
+
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
@@ -516,11 +524,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			updateChatMetadata();
 		}
 
-		/* if the message is empty, don't allow you to send messages */
-		if (editable.toString().trim().length() == 0)
-		{
-			mSendBtn.setEnabled(false);
-		}
+		setBtnEnabled();
 	}
 
 	/* must be called on the UI Thread */
@@ -530,12 +534,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mCredits <= 0)
 		{
 			mMetadataView.setBackgroundResource(R.color.red);
-			mSendBtn.setEnabled(false);
-			mCanSend = false;
 		} else {
 			mMetadataView.setBackgroundResource(R.color.grey);
-			mCanSend = true;
-			mSendBtn.setEnabled(true);
 		}
 
 		int length = mComposeView.getText().length();
