@@ -368,7 +368,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if(!isLastMsgSent())
 		{
 			JSONObject obj = mConversationDb.updateStatusAndSendDeliveryReport(convID,mConversation.getMsisdn());
-			mPubSub.publish(HikePubSub.WS_SEND, obj); 
+			/*If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read.*/
+			if(obj != null)
+				mPubSub.publish(HikePubSub.WS_SEND, obj); 
 		}
 	}
 
@@ -436,7 +438,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						mAdapter.add(message);
 					}
 				});
-				mConversationDb.updateMsgStatus(mConversation.getConvId(), message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
+				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
 				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport("msgDeliveredRead")); // handle return to sender
 			}
 		}
