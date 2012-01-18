@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import java.util.Date;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -226,7 +227,7 @@ public class ConvMessage
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put("msgID", mappedMsgId); // added msgID to the JSON Object
+					object.put("msgID", mappedMsgId);
 					object.put("type", type);
 					object.put("to", mMsisdn);
 				}

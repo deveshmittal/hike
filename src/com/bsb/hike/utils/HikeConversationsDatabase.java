@@ -262,12 +262,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		finally
 		{
 			huDb.close();
+			c.close();
 		}
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
 	}
 
-	
 	public JSONObject updateStatusAndSendDeliveryReport(long convID, String msisdn)
 	{
 		Log.d("UPDATE VARIABLE CHECK ", "Conv ID : "+convID+" ; msisdn : "+msisdn);
@@ -278,29 +278,26 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			return null;
 		
 		JSONObject object = new JSONObject();
-		StringBuilder msgIdsObj = new StringBuilder();
 		StringBuilder sb = new StringBuilder();
-		msgIdsObj.append("(");
 		sb.append("(");
 		
 		final int msgIdIdx = c.getColumnIndex("msgid");
 		final int mappedMsgIdIdx = c.getColumnIndex("mappedMsgId");
-		
+
+		JSONArray ids = new JSONArray();
 		while (c.moveToNext())
 		{
 			long msgId = c.getLong(msgIdIdx);
 			long mappedMsgId = c.getLong(mappedMsgIdIdx);
-			
-			msgIdsObj.append(mappedMsgId);
+			ids.put(mappedMsgId);
 			sb.append(msgId);
 			if(!c.isLast())
 			{
-				msgIdsObj.append(",");
 				sb.append(",");
 			}
 		}
 		sb.append(")");
-		
+
 		Log.d("MSG ID VALUES ", sb.toString());
 		try
 		{
@@ -308,9 +305,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			values.put("msgStatus", ConvMessage.State.RECEIVED_READ.ordinal());
 			int rowsAffected = mDb.update(MESSAGESTABLE, values, "msgid in "+sb.toString(), null);
 			Log.d("ROWS UPADTED ", "Rows updated to RECEIVED_READ : "+rowsAffected);
-			object.put("type", "msgDeliveredReadBatch");
+			object.put("type", "msgDeliveredRead");
 			object.put("to", msisdn);
-			object.put("msgIdArray", msgIdsObj.toString());
+			object.put("msgIdArray", ids);
 		}
 		catch (JSONException e)
 		{
@@ -320,8 +317,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return object;
 	}
 
-	public void updateBatch(String sb,int status)
+	public void updateBatch(long[] ids,int status)
 	{
+		StringBuilder sb = new StringBuilder("(");
+		/* TODO make utils.join work for arrays */
+		for (int i = 0; i < ids.length; i++)
+		{
+			sb.append(ids[i]);
+			if (i != ids.length - 1)
+			{
+				sb.append(",");
+			}
+		}
+		sb.append(")");
+
 		ContentValues values = new ContentValues();
 		values.put("msgStatus", status);
 		mDb.update(MESSAGESTABLE, values, "msgid in "+sb, null);

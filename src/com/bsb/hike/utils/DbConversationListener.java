@@ -32,6 +32,8 @@ public class DbConversationListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
 	}
 
 	@Override
@@ -65,25 +67,20 @@ public class DbConversationListener implements Listener
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{
-			Log.d("MSG DELIVERY REPORT","Msg delivered to receiver for msgID -> "+(Long)object);
+			Log.d("DbConversationListener","Msg delivered to receiver for msgID -> "+(Long)object);
 			updateDB(object,ConvMessage.State.SENT_DELIVERED.ordinal());
 		}
-		
 		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{
-			Log.d("MSG DELIVERY REPORT","Msg Read by receiver for msgID -> "+(Long)object);
-			updateDB(object,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
-		}
-		else if (HikePubSub.MESSAGE_DELIVERED_READ_BATCH.equals(type))  // server got msg from client 1 and sent back received msg receipt
-		{
-			updateDbBatch(object,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
+			long[] ids = (long[]) object;
+			Log.d("DbConversationListener", "received message delivered read " + ids);
+			updateDbBatch(ids,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
 		}
 	}
 
-	private void updateDbBatch(Object object, int status)
+	private void updateDbBatch(long[] ids, int status)
 	{
-		String msgIdArray = (String)object;	
-		mConversationDb.updateBatch(msgIdArray, ConvMessage.State.SENT_DELIVERED_READ.ordinal());
+		mConversationDb.updateBatch(ids, ConvMessage.State.SENT_DELIVERED_READ.ordinal());
 	}
 
 	private void updateDB(Object object, int status)
