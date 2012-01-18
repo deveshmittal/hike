@@ -87,6 +87,7 @@ public class HikeMessengerApp extends Application
 
 	public void connectToService()
 	{
+		mNetworkManager.startWebSocket();
 		mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
 	}
 
