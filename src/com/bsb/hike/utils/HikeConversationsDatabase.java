@@ -94,7 +94,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		addConversations(l);
 	}
 
-	public int updateMsgStatus(long convID, long msgID, int val)
+	public int updateMsgStatus(long msgID, int val)
 	{
 		ContentValues values = new ContentValues();
 		values.put("msgStatus", val);
@@ -270,21 +270,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	
 	public JSONObject updateStatusAndSendDeliveryReport(long convID, String msisdn)
 	{
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "mappedMsgId" }, "convid=? and msgStatus=?", new String[] { Long.toString(convID), Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) }, null, null, null);
+		/* If there are no rows in the cursor then simply return null*/
+		if(c.getCount() <= 0)
+			return null;
+		
 		JSONObject object = new JSONObject();
 		JSONArray msgIds = new JSONArray();
 		StringBuilder sb = new StringBuilder();
 		sb.append("(");
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "mappedMsgId" }, "convid=? and msgStatus=?", new String[] { Long.toString(convID), Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) }, null, null, null);
 		final int mappedMsgIdIdx = c.getColumnIndex("mappedMsgId");
 		while (c.moveToNext())
 		{
 			long mappedMsgId = c.getLong(mappedMsgIdIdx);
 			msgIds.put(mappedMsgId);
 			sb.append(mappedMsgId);
-			sb.append(",");
+			if(!c.isLast())
+				sb.append(",");
 		}
-		int last = sb.lastIndexOf(",");
-		sb.deleteCharAt(last);
 		sb.append(")");
 		try
 		{
@@ -299,6 +302,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			Log.e("ConvMessage", "invalid json message", e);
 		}
+		c.close();
 		return object;
 	}
 
