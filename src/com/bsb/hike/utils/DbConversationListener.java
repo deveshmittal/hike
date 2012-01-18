@@ -74,9 +74,11 @@ public class DbConversationListener implements Listener
 	private void updateDB(Object object, int status)
 	{
 		long msgID = (Long)object;
+		/* TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations */
 		int rowsAffected = mConversationDb.updateMsgStatus(0,msgID,status);
 		if(rowsAffected<=0) // signifies no msg.
 		{
+			Log.e("DbConversationListener", "Could not update msgstatus for message: " + msgID);
 			// TODO : Handle this case
 		}	
 	}
