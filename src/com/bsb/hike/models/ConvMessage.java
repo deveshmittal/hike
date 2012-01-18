@@ -38,6 +38,8 @@ public class ConvMessage
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
 		this.mTimestamp = timestamp;
+		msgID = -1;
+		mappedMsgId = -1;
 		setState(msgState);
 	}
 
@@ -229,6 +231,23 @@ public class ConvMessage
 				{
 					object.put("msgID", mappedMsgId);
 					object.put("type", type);
+					object.put("to", mMsisdn);
+				}
+				catch (JSONException e)
+				{
+					Log.e("ConvMessage", "invalid json message", e);
+				}
+				return object;
+	}
+	public JSONObject serializeDeliveryReportRead()
+	{
+				JSONObject object = new JSONObject();
+				JSONArray ids = new JSONArray();
+				try
+				{
+					ids.put(mappedMsgId);
+					object.put("msgIdArray", ids);
+					object.put("type", "msgDeliveredRead");
 					object.put("to", mMsisdn);
 				}
 				catch (JSONException e)
