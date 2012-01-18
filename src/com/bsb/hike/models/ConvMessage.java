@@ -54,7 +54,7 @@ public class ConvMessage
 		/* if we're deserialized an object from json, it's always unread */
 		setState(State.RECEIVED_UNREAD);
 		msgID = -1;
-		mappedMsgId=-1;
+		mappedMsgId=data.getLong("id");
 	}
 
 	public String getMessage()
@@ -216,7 +216,6 @@ public class ConvMessage
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put("ts", mTimestamp);
 					object.put("msgID", mappedMsgId); // added msgID to the JSON Object
 					object.put("type", type);
 					object.put("to", mMsisdn);
