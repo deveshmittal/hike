@@ -70,8 +70,6 @@ public class HikePubSub implements Runnable
 	/* broadcast when a message is received from the sender but before it's been written our DB*/
 	public static final String MESSAGE_RECEIVED_FROM_SENDER = "messageReceivedFromSender";
 
-	public static final String MESSAGE_DELIVERED_READ_BATCH = "messageDeliveredReadBatch";
-
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

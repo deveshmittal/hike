@@ -3,6 +3,8 @@ package com.bsb.hike.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -41,8 +43,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 {
 
 	private HikePubSub mPubSub;
-	
-	private HikeConversationsDatabase mConversationDb; 
+
+	private HikeConversationsDatabase mConversationDb;
 
 	private HikeUserDatabase mDbhelper;
 
@@ -103,8 +105,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* TODO evidently a better way to do this is to check for onWindowFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
-		/* we set a sentinal value while we're rendering the UI to avoid typing notifications.
-		 * If one is actually set by the onRestoreInstanceState code prefer that
+		/*
+		 * we set a sentinal value while we're rendering the UI to avoid typing notifications. If one is actually set by the onRestoreInstanceState code prefer that
 		 */
 		mTextLastChanged = (mTextLastChanged == Long.MAX_VALUE) ? 0 : mTextLastChanged;
 	}
@@ -184,12 +186,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.END_TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
 		if (mDbhelper != null)
 		{
 			mDbhelper.close();
 			mDbhelper = null;
 		}
-		if(mConversationDb != null)
+		if (mConversationDb != null)
 		{
 			mConversationDb.close();
 			mConversationDb = null;
@@ -218,6 +221,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	}
 
 	static final String TEXT_CHANGED_KEY = "text_last_changed";
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState)
 	{
@@ -236,9 +240,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		/* disable typing notifications until the UI is rendered.
-		 * This is so if any callbacks that are fired due to UI changes will not
-		 * cause messages to be sent. */
+		/*
+		 * disable typing notifications until the UI is rendered. This is so if any callbacks that are fired due to UI changes will not cause messages to be sent.
+		 */
 		mTextLastChanged = Long.MAX_VALUE;
 
 		setContentView(R.layout.chatthread);
@@ -339,6 +343,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
 
@@ -366,31 +371,44 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
 		long convID = mConversation.getConvId();
 		/* this is to check if last msg was a sent msg category for a particular conversation id */
-		if(!isLastMsgSent())
+		if (!isLastMsgSent())
 		{
-			JSONObject obj = mConversationDb.updateStatusAndSendDeliveryReport(convID,mConversation.getMsisdn());
-			/*If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read.*/
-			if(obj != null)
-				mPubSub.publish(HikePubSub.WS_SEND, obj); 
+			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
+			/* If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read. */
+			if (ids != null)
+			{
+				JSONObject object = new JSONObject();
+				try
+				{
+					object.put("type", "msgDeliveredRead");
+					object.put("to", mConversation.getMsisdn());
+					object.put("msgIdArray", ids);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+				mPubSub.publish(HikePubSub.WS_SEND, object);
+			}
 		}
 	}
 
 	private boolean isLastMsgSent()
 	{
-		Log.d("CHECKING LAST MSG STATUS", "Checking last msg status in chat thread ....");
-		List<ConvMessage>  msgList = mConversation.getMessages();
+		Log.d("CHAT THREAD","Checking last msg status ....");
+		List<ConvMessage> msgList = mConversation.getMessages();
 
 		if ((msgList == null) || (msgList.isEmpty()))
 		{
 			return false;
 		}
 
-		ConvMessage lastMsg = msgList.get(msgList.size()-1);
-		Log.d("LAST MSG STATUS", "lastMsg ID : "+lastMsg.getMsgID() +" ; Status : "+lastMsg.getState().name()+"TEXT is : "+lastMsg.getMessage());
-		
-		if(lastMsg.isSent() || lastMsg.getState() == ConvMessage.State.RECEIVED_READ)
+		ConvMessage lastMsg = msgList.get(msgList.size() - 1);
+		Log.d("CHAT THREAD", "Last msg status .... lastMsg ID : " + lastMsg.getMsgID() + " ; Status : " + lastMsg.getState().name() + " ; TEXT is : " + lastMsg.getMessage());
+
+		if (lastMsg.isSent() || lastMsg.getState() == ConvMessage.State.RECEIVED_READ)
 			return true;
-		else 
+		else
 		{
 			return false;
 		}
@@ -424,7 +442,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			Log.d("CHAT THREAD EVENT","Message Received by chat thread .....");
+			Log.d("CHAT THREAD", "EVENT : Message Received by chat thread .....");
 			final ConvMessage message = (ConvMessage) object;
 			if (message.getMsisdn().indexOf(mContactNumber) != -1)
 			{
@@ -443,9 +461,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						mAdapter.add(message);
 					}
 				});
-				Log.d("CHAT THREAD EVENT","Received Msg ID : "+message.getMsgID() + "Receiver Name : "+message.getConversation().getContactName());
 				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
-				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport("msgDeliveredRead")); // handle return to sender
+				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReportRead()); // handle return to sender
 			}
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
@@ -479,10 +496,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 				mUiThreadHandler.postDelayed(mClearTypingCallback, 20 * 1000);
 			}
-		} else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		}
+		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{
 			mCredits = ((Integer) object).intValue();
-			runOnUiThread(new Runnable() 
+			runOnUiThread(new Runnable()
 			{
 				@Override
 				public void run()
@@ -493,8 +511,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
 		{
-			long msgID = (Long)object;
-			//TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
+			long msgID = (Long) object;
+			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			ConvMessage msg = findMessageById(msgID);
 			if (msg != null)
 			{
@@ -502,15 +520,44 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				runOnUiThread(mUpdateAdapter);
 			}
 		}
+		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
+		{
+			long[] ids = (long[]) object;
+			Log.d("CHAT THREAD", "received message delivered read " + ids);
+			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
+			for (int i = 0; i < ids.length; i++)
+			{
+				ConvMessage msg = findMessageByMappedId(ids[i]);
+				if (msg != null)
+				{
+					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+				}
+			}
+			runOnUiThread(mUpdateAdapter);
+		}
 	}
 
 	private ConvMessage findMessageById(long msgID)
 	{
 		int count = mAdapter.getCount();
-		for(int i = 0; i < count; ++i)
+		for (int i = 0; i < count; ++i)
 		{
 			ConvMessage msg = mAdapter.getItem(i);
 			if (msg.getMsgID() == msgID)
+			{
+				return msg;
+			}
+		}
+		return null;
+	}
+
+	private ConvMessage findMessageByMappedId(long msgID)
+	{
+		int count = mAdapter.getCount();
+		for (int i = 0; i < count; ++i)
+		{
+			ConvMessage msg = mAdapter.getItem(i);
+			if (msg.getMappedMsgID() == msgID)
 			{
 				return msg;
 			}
@@ -556,7 +603,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void afterTextChanged(Editable editable)
 	{
 		/* only update the chat metadata if this is an SMS chat */
-		if (!mConversation.isOnhike()) {
+		if (!mConversation.isOnhike())
+		{
 			updateChatMetadata();
 		}
 
@@ -570,13 +618,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mCredits <= 0)
 		{
 			mMetadataView.setBackgroundResource(R.color.red);
-		} else {
+		}
+		else
+		{
 			mMetadataView.setBackgroundResource(R.color.grey);
 		}
 
 		int length = mComposeView.getText().length();
-		//set the max sms length to a length appropriate to the number of characters we have
-		mMaxSmsLength = 160 * (1 + length/160);
+		// set the max sms length to a length appropriate to the number of characters we have
+		mMaxSmsLength = 160 * (1 + length / 160);
 		mMetadataNumChars.setText(Integer.toString(length) + "/" + Integer.toString(mMaxSmsLength));
 		String formatted = String.format(getResources().getString(R.string.credits_left), mCredits);
 		mMetadataCreditsLeft.setText(formatted);
@@ -593,7 +643,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if ((before == 0) && (count == 0))
 		{
-			//we were called on config changed, just ignore
+			// we were called on config changed, just ignore
 			return;
 		}
 

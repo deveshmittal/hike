@@ -94,12 +94,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		addConversations(l);
 	}
 
-	public int updateMsgStatus(long msgID, int val)
+	public void updateMsgStatus(long msgID, int val)
 	{
 		ContentValues values = new ContentValues();
 		values.put("msgStatus", val);
-		String[] whereArgs = { String.valueOf(msgID)};
-		return mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
+		String[] whereArgs = { String.valueOf(msgID) };
+		int rowsAffected = mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
+		Log.d("HIKE CONVERSATION DB", "Update Msg status to : " + ConvMessage.stateValue(val) + "	;	for msgID : " + msgID + "	;	Rows Affected : " + rowsAffected);
 	}
 
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
@@ -202,7 +203,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		while (c.moveToNext())
 		{
-			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)),c.getLong(msgIdColumn),c.getLong(mappedMsgIdColumn));
+			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
+					c.getLong(mappedMsgIdColumn));
 			elements.add(elements.size(), message);
 			message.setConversation(conversation);
 		}
@@ -262,68 +264,63 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		finally
 		{
 			huDb.close();
+			c.close();
 		}
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
 	}
 
-	
-	public JSONObject updateStatusAndSendDeliveryReport(long convID, String msisdn)
+	public JSONArray updateStatusAndSendDeliveryReport(long convID)
 	{
-		Log.d("UPDATE VARIABLE CHECK ", "Conv ID : "+convID+" ; msisdn : "+msisdn);
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "msgid,mappedMsgId" }, "convid=? and msgStatus=?", new String[] { Long.toString(convID), Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) }, null, null, null);
-		Log.d("NUMBER OF ROWS UPDATED ", String.valueOf(c.getCount()));
-		/* If there are no rows in the cursor then simply return null*/
-		if(c.getCount() <= 0)
+		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "msgid,mappedMsgId" }, "convid=? and msgStatus=?",
+				new String[] { Long.toString(convID), Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) }, null, null, null);
+		/* If there are no rows in the cursor then simply return null */
+		if (c.getCount() <= 0)
 			return null;
-		
-		JSONObject object = new JSONObject();
-		StringBuilder msgIdsObj = new StringBuilder();
+
 		StringBuilder sb = new StringBuilder();
-		msgIdsObj.append("(");
 		sb.append("(");
-		
+
 		final int msgIdIdx = c.getColumnIndex("msgid");
 		final int mappedMsgIdIdx = c.getColumnIndex("mappedMsgId");
-		
+
+		JSONArray ids = new JSONArray();
 		while (c.moveToNext())
 		{
 			long msgId = c.getLong(msgIdIdx);
 			long mappedMsgId = c.getLong(mappedMsgIdIdx);
-			
-			msgIdsObj.append(mappedMsgId);
+			ids.put(mappedMsgId);
 			sb.append(msgId);
-			if(!c.isLast())
+			if (!c.isLast())
 			{
-				msgIdsObj.append(",");
 				sb.append(",");
 			}
 		}
 		sb.append(")");
-		
-		Log.d("MSG ID VALUES ", sb.toString());
-		try
-		{
-			ContentValues values = new ContentValues();
-			values.put("msgStatus", ConvMessage.State.RECEIVED_READ.ordinal());
-			int rowsAffected = mDb.update(MESSAGESTABLE, values, "msgid in "+sb.toString(), null);
-			Log.d("ROWS UPADTED ", "Rows updated to RECEIVED_READ : "+rowsAffected);
-			object.put("type", "msgDeliveredReadBatch");
-			object.put("to", msisdn);
-			object.put("msgIdArray", msgIdsObj.toString());
-		}
-		catch (JSONException e)
-		{
-			Log.e("ConvMessage", "invalid json message", e);
-		}
+		ContentValues values = new ContentValues();
+		values.put("msgStatus", ConvMessage.State.RECEIVED_READ.ordinal());
+		int rowsAffected = mDb.update(MESSAGESTABLE, values, "msgid in " + sb.toString(), null);
+		Log.d("HIKE CONVERSATION DB ","Rows Updated : "+rowsAffected);
 		c.close();
-		return object;
+		return ids;
 	}
 
-	public void updateBatch(String sb,int status)
+	public void updateBatch(long[] ids, int status)
 	{
+		StringBuilder sb = new StringBuilder("(");
+		/* TODO make utils.join work for arrays */
+		for (int i = 0; i < ids.length; i++)
+		{
+			sb.append(ids[i]);
+			if (i != ids.length - 1)
+			{
+				sb.append(",");
+			}
+		}
+		sb.append(")");
+
 		ContentValues values = new ContentValues();
 		values.put("msgStatus", status);
-		mDb.update(MESSAGESTABLE, values, "msgid in "+sb, null);
+		mDb.update(MESSAGESTABLE, values, "msgid in " + sb, null);
 	}
 }

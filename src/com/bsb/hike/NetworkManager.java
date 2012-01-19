@@ -132,24 +132,25 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		{
 			
 			long msgID = jsonObj.optLong("msgID");
-			Log.d("DELIVERY REPORT ","Delivery report received for msgid : "+msgID);
+			Log.d("NETWORK MANAGER","Delivery report received for msgid : "+msgID +"	;	REPORT : DELIVERED");
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
 		}
-		else if("msgDeliveredRead".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
+		else if("msgDeliveredRead".equals(type)) // this handles the case when msg with msgId is received by the tornado server and it send back a received msg
 		{
-			long msgID = jsonObj.optLong("msgID");
-			Log.d("DELIVERY REPORT READ","Delivery report read received for msgid : "+msgID);
-			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, msgID);	
-		}
-		else if("msgDeliveredReadBatch".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
-		{
-			String msgIDArray = jsonObj.optString("msgIdArray");
-			if(msgIDArray.equals(""))
+			JSONArray msgIds = jsonObj.optJSONArray("msgIdArray");
+			if(msgIds == null)
 			{
-				Log.e("UPDATE BATCH ERROR", "Message id Array is empty. Check problem");
+				Log.e("UPDATE ERROR", "Message id Array is empty or null . Check problem");
 				return;
 			}
-			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ_BATCH, msgIDArray);	
+
+			long[] ids = new long[msgIds.length()];
+			for (int i = 0; i < ids.length; i++)
+			{
+					ids[i] = msgIds.optLong(i);
+			}
+			Log.d("NETWORK MANAGER","Delivery report received : " +"	;	REPORT : DELIVERED READ");
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);	
 		}
 		else
 		{
