@@ -36,7 +36,7 @@ public class HikeToast
 		String name = (contactInfo != null) ? contactInfo.name : msisdn;
 		
 		Log.d("HIKE TOAST","MSISDN : "+msisdn+" , message : "+message+" , name : "+name);
-		int icon = R.drawable.ic_launcher;
+		int icon = R.drawable.ic_contact_logo;
 
 		// TODO this doesn't turn the text bold :(
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>:%2$s", name, msisdn));
