@@ -1,11 +1,11 @@
 package com.bsb.hike;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.util.Log;
@@ -89,7 +89,7 @@ public class HikePubSub implements Runnable
 		List<Listener> list = listeners.get(type);
 		if (list == null)
 		{
-			list = Collections.synchronizedList((new ArrayList<Listener>()));
+			list = new CopyOnWriteArrayList<Listener>();
 			listeners.put(type, list);
 		}
 		list.add(listener);
@@ -138,7 +138,9 @@ public class HikePubSub implements Runnable
 			String type = op.type;
 			Object o = op.payload;
 
+			
 			List<Listener> list = listeners.get(type);
+			
 			if (list == null)
 			{
 				continue;
