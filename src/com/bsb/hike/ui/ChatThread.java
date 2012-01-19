@@ -527,7 +527,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			for (int i = 0; i < ids.length; i++)
 			{
-				ConvMessage msg = findMessageByMappedId(ids[i]);
+				ConvMessage msg = findMessageById(ids[i]);
 				if (msg != null)
 				{
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
@@ -544,20 +544,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			ConvMessage msg = mAdapter.getItem(i);
 			if (msg.getMsgID() == msgID)
-			{
-				return msg;
-			}
-		}
-		return null;
-	}
-
-	private ConvMessage findMessageByMappedId(long msgID)
-	{
-		int count = mAdapter.getCount();
-		for (int i = 0; i < count; ++i)
-		{
-			ConvMessage msg = mAdapter.getItem(i);
-			if (msg.getMappedMsgID() == msgID)
 			{
 				return msg;
 			}
