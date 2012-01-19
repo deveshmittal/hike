@@ -42,7 +42,7 @@
 	    android:background="@color/white"
 	    android:cacheColorHint="#00000000"
 	    android:divider="@color/dividercolor"
-	    android:dividerHeight="1dp"
+	    android:dividerHeight="0.5dp"
 	    android:transcriptMode="alwaysScroll" >
 	</ListView>
 

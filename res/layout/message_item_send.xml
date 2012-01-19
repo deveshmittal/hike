@@ -38,7 +38,7 @@
         android:layout_marginRight="10dp"
         android:layout_below="@+id/conversation_id"
         android:text="This is the timestamp"
-        android:textColor="@color/lightgrey"
+        android:textColor="@color/timestampcolor"
         android:textAppearance="?android:attr/textAppearanceSmall"/>
 
 </RelativeLayout>

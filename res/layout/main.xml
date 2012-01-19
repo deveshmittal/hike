@@ -30,7 +30,7 @@
             android:layout_below="@+id/title_field"
             android:background="@color/white"
             android:divider="@color/dividercolor"
-            android:dividerHeight="1dp" >
+            android:dividerHeight="0.5dp" >
         </ListView>
     </RelativeLayout>
 

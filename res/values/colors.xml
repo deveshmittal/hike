@@ -2,15 +2,16 @@
 <resources>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
-    <color name="green">#D5F5D2</color>
+    <color name="green">#e4f7d5</color>
     <color name="grey">#808080</color>
-    <color name="blue">#E2F0F8</color>
+    <color name="blue">#def3f8</color>
     <color name="orange">#FFA500</color>
     <color name="lightgrey">#D3D3D3</color>
     <color name="gainsboro">#E8E8E8</color>
-    <color name="dividercolor">#CCCCCC</color>
+    <color name="dividercolor">#d2d2d2</color>
     <color name="diamondblue">#0EBFE9</color>
     <color name="red">#FF0000</color>
     <color name="scangrey">#3e3e3e</color>
     <color name="lightblack">#222222</color>
+    <color name="timestampcolor">#8a8a8a</color>
 </resources>
