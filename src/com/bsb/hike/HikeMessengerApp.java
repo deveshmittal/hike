@@ -50,6 +50,8 @@ public class HikeMessengerApp extends Application
 
 	private boolean mInitialized;
 
+	private boolean service_init;
+
 	static class IncomingHandler extends Handler
 	{
 		@Override
@@ -87,8 +89,18 @@ public class HikeMessengerApp extends Application
 
 	public void connectToService()
 	{
-		mNetworkManager.startWebSocket();
-		mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
+		if (!service_init)
+		{
+			synchronized(HikeMessengerApp.class)
+			{
+				if (!service_init)
+				{
+					service_init = true;
+					mNetworkManager.startWebSocket();
+					mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
+				}
+			}
+		}
 	}
 
 	public void onCreate()
