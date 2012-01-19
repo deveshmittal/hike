@@ -1,6 +1,7 @@
 package com.bsb.hike.models;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.json.JSONException;
@@ -10,6 +11,19 @@ import android.util.Log;
 
 public class Conversation implements Comparable<Conversation>
 {
+
+	public static class ConversationComparator implements Comparator<Conversation>
+	{
+		/*
+		 * This comparator reverses the order of the normal comparable
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		@Override
+		public int compare(Conversation lhs, Conversation rhs)
+		{
+			return rhs.compareTo(lhs);
+		}
+	}
 
 	public String getMsisdn()
 	{

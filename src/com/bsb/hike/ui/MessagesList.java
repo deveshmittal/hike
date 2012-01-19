@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -139,6 +140,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private RelativeLayout mEmptyView;
 
+	private Comparator<? super Conversation> mConversationsComparator;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -210,6 +213,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 
 		mAdapter = new ConversationsAdapter(this, R.layout.conversation_item, conversations);
+		/* we need this object every time a message comes in, seems simplest to just create it once */
+		mConversationsComparator = new Conversation.ConversationComparator();
+
 		/*
 		 * because notifyOnChange gets re-enabled whenever we call notifyDataSetChanged it's simpler to assume it's set to false and always notifyOnChange by hand
 		 */
@@ -324,6 +330,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			 * notification and manually notify on the UI thread We have to ensure it's disabled because calling notifyDataSetChanged will re-enable notifyOnChange
 			 */
 			mAdapter.setNotifyOnChange(false);
+
 			if (!mConversationsAdded.contains(conv.getMsisdn()))
 			{
 				mConversationsAdded.add(conv.getMsisdn());
@@ -331,6 +338,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			}
 
 			conv.addMessage(message);
+			mAdapter.sort(mConversationsComparator);
 
 			runOnUiThread(this);
 		}
