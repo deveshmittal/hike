@@ -52,13 +52,20 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			ConvMessage message = messages.get(messages.size() - 1);
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			messageView.setText(message.getMessage());
-			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
-			{
-				Typeface tf = messageView.getTypeface();
-				messageView.setTypeface(tf, Typeface.BOLD);
-			}
 			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
 			tsView.setText(message.getTimestampFormatted());
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			{
+				/* set unread messages to BOLD */
+				Typeface tf = messageView.getTypeface();
+				messageView.setTypeface(tf, Typeface.BOLD);
+
+				tf = tsView.getTypeface();
+				tsView.setTypeface(tf, Typeface.BOLD);
+
+				tf = contactView.getTypeface();
+				contactView.setTypeface(tf, Typeface.BOLD);
+			}
 		}
 		return v;
 	}
