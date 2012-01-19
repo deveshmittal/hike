@@ -412,7 +412,7 @@ public class HikeMqttManager implements MqttSimpleCallback
 					ConvMessage convMessage = new ConvMessage(obj);
 					this.convDb.addConversationMessages(convMessage);
 					ContactInfo contactInfo = ContactUtils.getContactInfo(convMessage.getMsisdn(), this.mHikeService);
-					toaster.toast(contactInfo, convMessage.getMsisdn(), convMessage.getMessage(), convMessage.getTimestamp());
+					toaster.toast(contactInfo, convMessage);
 				}
 				catch (JSONException e)
 				{
