@@ -28,6 +28,7 @@
             android:layout_alignParentLeft="true"
             android:layout_margin="7dp"
             android:height="50dp"
+            android:gravity="center_vertical"
             android:text=""
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:visibility="visible" />
