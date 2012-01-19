@@ -79,7 +79,6 @@ public class HikeMqttManager implements MqttSimpleCallback
 	 */
 	private short keepAliveSeconds = 20 * 60;
 
-
 	// connection to the message broker
 	private IMqttClient mqttClient = null;
 
@@ -102,7 +101,7 @@ public class HikeMqttManager implements MqttSimpleCallback
 		this.toaster = new HikeToast(hikeService);
 		this.convDb = new HikeConversationsDatabase(hikeService);
 		this.createConnectionSpec();
-        setConnectionStatus(MQTTConnectionStatus.INITIAL);
+		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 	}
 
 	private boolean init()
@@ -114,177 +113,176 @@ public class HikeMqttManager implements MqttSimpleCallback
 
 		return !TextUtils.isEmpty(topic);
 	}
-    /*
-     * Create a client connection object that defines our connection to a
-     *   message broker server
-     */
-    private void createConnectionSpec()
-    {
-        String mqttConnSpec = "tcp://" + brokerHostName + "@" + brokerPortNumber;
 
-        try
-        {
-            // define the connection to the broker
-            mqttClient = MqttClient.createMqttClient(mqttConnSpec, usePersistence);
+	/*
+	 * Create a client connection object that defines our connection to a message broker server
+	 */
+	private void createConnectionSpec()
+	{
+		String mqttConnSpec = "tcp://" + brokerHostName + "@" + brokerPortNumber;
 
-            // register this client app has being able to receive messages
-            mqttClient.registerSimpleHandler(this);
-        }
-        catch (MqttException e)
-        {
-            // something went wrong!
-            mqttClient = null;
-            setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+		try
+		{
+			// define the connection to the broker
+			mqttClient = MqttClient.createMqttClient(mqttConnSpec, usePersistence);
 
-            //
-            // inform the app that we failed to connect so that it can update
-            //  the UI accordingly
-            this.mHikeService.broadcastServiceStatus("Invalid connection parameters");
+			// register this client app has being able to receive messages
+			mqttClient.registerSimpleHandler(this);
+		}
+		catch (MqttException e)
+		{
+			// something went wrong!
+			mqttClient = null;
+			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
-            //
-            // inform the user (for times when the Activity UI isn't running)
-            //   that we failed to connect
-            this.mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect");
-        }
-    }
+			//
+			// inform the app that we failed to connect so that it can update
+			// the UI accordingly
+			this.mHikeService.broadcastServiceStatus("Invalid connection parameters");
 
-    /*
-     * (Re-)connect to the message broker
-     */
-    private boolean connectToBroker()
-    {
-        try
-        {
-        	Log.d("HikeMqttManager", "about to call connect " + this.clientId);
-            // try to connect
-     
-            mqttClient.connect(this.clientId, cleanStart, keepAliveSeconds);
+			//
+			// inform the user (for times when the Activity UI isn't running)
+			// that we failed to connect
+			this.mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect");
+		}
+	}
 
-            //
-            // inform the app that the app has successfully connected
-            this.mHikeService.broadcastServiceStatus("Connected");
+	/*
+	 * (Re-)connect to the message broker
+	 */
+	private boolean connectToBroker()
+	{
+		try
+		{
+			Log.d("HikeMqttManager", "about to call connect " + this.clientId);
+			// try to connect
 
-            // we are connected
-            setConnectionStatus(MQTTConnectionStatus.CONNECTED);
+			mqttClient.connect(this.clientId, cleanStart, keepAliveSeconds);
 
-            // we need to wake up the phone's CPU frequently enough so that the
-            //  keep alive messages can be sent
-            // we schedule the first one of these now
-            this.mHikeService.scheduleNextPing();
+			//
+			// inform the app that the app has successfully connected
+			this.mHikeService.broadcastServiceStatus("Connected");
 
-            return true;
-        }
-        catch (MqttException e)
-        {
-        	Log.e("HikeMqttManager", "Unable to connect", e);
-            // something went wrong!
+			// we are connected
+			setConnectionStatus(MQTTConnectionStatus.CONNECTED);
 
-            setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+			// we need to wake up the phone's CPU frequently enough so that the
+			// keep alive messages can be sent
+			// we schedule the first one of these now
+			this.mHikeService.scheduleNextPing();
 
-            //
-            // inform the app that we failed to connect so that it can update
-            //  the UI accordingly
-            this.mHikeService.broadcastServiceStatus("Unable to connect");
+			return true;
+		}
+		catch (MqttException e)
+		{
+			Log.e("HikeMqttManager", "Unable to connect", e);
+			// something went wrong!
 
-            //
-            // inform the user (for times when the Activity UI isn't running)
-            //   that we failed to connect
-            this.mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect - will retry later");        
+			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
-            // if something has failed, we wait for one keep-alive period before
-            //   trying again
-            // in a real implementation, you would probably want to keep count
-            //  of how many times you attempt this, and stop trying after a
-            //  certain number, or length of time - rather than keep trying
-            //  forever.
-            // a failure is often an intermittent network issue, however, so
-            //  some limited retry is a good idea
-            this.mHikeService.scheduleNextPing();
+			//
+			// inform the app that we failed to connect so that it can update
+			// the UI accordingly
+			this.mHikeService.broadcastServiceStatus("Unable to connect");
 
-            return false;
-        }
-    }
+			//
+			// inform the user (for times when the Activity UI isn't running)
+			// that we failed to connect
+			this.mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect - will retry later");
 
-    /*
-     * Send a request to the message broker to be sent messages published with
-     *  the specified topic name. Wildcards are allowed.
-     */
-    private void subscribeToTopic(String topicName)
-    {
-        boolean subscribed = false;
+			// if something has failed, we wait for one keep-alive period before
+			// trying again
+			// in a real implementation, you would probably want to keep count
+			// of how many times you attempt this, and stop trying after a
+			// certain number, or length of time - rather than keep trying
+			// forever.
+			// a failure is often an intermittent network issue, however, so
+			// some limited retry is a good idea
+			this.mHikeService.scheduleNextPing();
 
-        if (isConnected() == false)
-        {
-            // quick sanity check - don't try and subscribe if we
-            //  don't have a connection
+			return false;
+		}
+	}
 
-            Log.e("mqtt", "Unable to subscribe as we are not connected");
-        }
-        else
-        {
-            try
-            {
-                String[] topics = { topicName };
-                mqttClient.subscribe(topics, qualitiesOfService);
+	/*
+	 * Send a request to the message broker to be sent messages published with the specified topic name. Wildcards are allowed.
+	 */
+	private void subscribeToTopic(String topicName)
+	{
+		boolean subscribed = false;
 
-                subscribed = true;
-            }
-            catch (MqttNotConnectedException e)
-            {
-                Log.e("mqtt", "subscribe failed - MQTT not connected", e);
-            }
-            catch (IllegalArgumentException e)
-            {
-                Log.e("mqtt", "subscribe failed - illegal argument", e);
-            }
-            catch (MqttException e)
-            {
-                Log.e("mqtt", "subscribe failed - MQTT exception", e);
-            }
-        }
+		if (isConnected() == false)
+		{
+			// quick sanity check - don't try and subscribe if we
+			// don't have a connection
 
-        if (subscribed == false)
-        {
-            //
-            // inform the app of the failure to subscribe so that the UI can
-            //  display an error
-            this.mHikeService.broadcastServiceStatus("Unable to subscribe");
+			Log.e("mqtt", "Unable to subscribe as we are not connected");
+		}
+		else
+		{
+			try
+			{
+				String[] topics = { topicName };
+				mqttClient.subscribe(topics, qualitiesOfService);
 
-            //
-            // inform the user (for times when the Activity UI isn't running)
-            this.mHikeService.notifyUser("Unable to subscribe", "MQTT", "Unable to subscribe");
-        }
-    }
+				subscribed = true;
+			}
+			catch (MqttNotConnectedException e)
+			{
+				Log.e("mqtt", "subscribe failed - MQTT not connected", e);
+			}
+			catch (IllegalArgumentException e)
+			{
+				Log.e("mqtt", "subscribe failed - illegal argument", e);
+			}
+			catch (MqttException e)
+			{
+				Log.e("mqtt", "subscribe failed - MQTT exception", e);
+			}
+		}
 
-    /*
-     * Terminates a connection to the message broker.
-     */
-    public void disconnectFromBroker()
-    {
-        try
-        {
-            if (mqttClient != null)
-            {
-                mqttClient.disconnect();
-            }
-        }
-        catch (MqttPersistenceException e)
-        {
-            Log.e("mqtt", "disconnect failed - persistence exception", e);
-        }
-        finally
-        {
-            mqttClient = null;
-        }
-    }
+		if (subscribed == false)
+		{
+			//
+			// inform the app of the failure to subscribe so that the UI can
+			// display an error
+			this.mHikeService.broadcastServiceStatus("Unable to subscribe");
 
-    /*
-     * Checks if the MQTT client thinks it has an active connection
-     */
-    public boolean isConnected()
-    {
-        return ((mqttClient != null) && (mqttClient.isConnected() == true));
-    }
+			//
+			// inform the user (for times when the Activity UI isn't running)
+			this.mHikeService.notifyUser("Unable to subscribe", "MQTT", "Unable to subscribe");
+		}
+	}
+
+	/*
+	 * Terminates a connection to the message broker.
+	 */
+	public void disconnectFromBroker()
+	{
+		try
+		{
+			if (mqttClient != null)
+			{
+				mqttClient.disconnect();
+			}
+		}
+		catch (MqttPersistenceException e)
+		{
+			Log.e("mqtt", "disconnect failed - persistence exception", e);
+		}
+		finally
+		{
+			mqttClient = null;
+		}
+	}
+
+	/*
+	 * Checks if the MQTT client thinks it has an active connection
+	 */
+	public boolean isConnected()
+	{
+		return ((mqttClient != null) && (mqttClient.isConnected() == true));
+	}
 
 	public MQTTConnectionStatus getConnectionStatus()
 	{
@@ -296,19 +294,18 @@ public class HikeMqttManager implements MqttSimpleCallback
 		this.connectionStatus = connectionStatus;
 	}
 
-    /************************************************************************/
-    /*    METHODS - MQTT methods inherited from MQTT classes                */
-    /************************************************************************/
+	/************************************************************************/
+	/* METHODS - MQTT methods inherited from MQTT classes */
+	/************************************************************************/
 
-    /*
-     * callback - method called when we no longer have a connection to the
-     *  message broker server
-     */
+	/*
+	 * callback - method called when we no longer have a connection to the message broker server
+	 */
 	public void connectionLost() throws Exception
 	{
 		// we protect against the phone switching off while we're doing this
-		//  by requesting a wake lock - we request the minimum possible wake
-		//  lock - just enough to keep the CPU running until we've finished
+		// by requesting a wake lock - we request the minimum possible wake
+		// lock - just enough to keep the CPU running until we've finished
 		PowerManager pm = (PowerManager) this.mHikeService.getSystemService(Context.POWER_SERVICE);
 		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
 		try
@@ -327,32 +324,32 @@ public class HikeMqttManager implements MqttSimpleCallback
 
 				//
 				// inform the user (for times when the Activity UI isn't running)
-				//   that we are no longer able to receive messages
-				this.mHikeService.notifyUser("Connection lost - no network connection",
-						"MQTT", "Connection lost - no network connection");
+				// that we are no longer able to receive messages
+				this.mHikeService.notifyUser("Connection lost - no network connection", "MQTT", "Connection lost - no network connection");
 
 				//
 				// wait until the phone has a network connection again, when we
-				//  the network connection receiver will fire, and attempt another
-				//  connection to the broker
+				// the network connection receiver will fire, and attempt another
+				// connection to the broker
 			}
 			else
 			{
 				//
 				// we are still online
-				//   the most likely reason for this connectionLost is that we've
-				//   switched from wifi to cell, or vice versa
-				//   so we try to reconnect immediately
-				// 
+				// the most likely reason for this connectionLost is that we've
+				// switched from wifi to cell, or vice versa
+				// so we try to reconnect immediately
+				//
 
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
 				// inform the app that we are not connected any more, and are
-				//   attempting to reconnect
+				// attempting to reconnect
 				this.mHikeService.broadcastServiceStatus("Connection lost - reconnecting...");
 
 				// try to reconnect
-				if (connectToBroker()) {
+				if (connectToBroker())
+				{
 					subscribeToTopic(this.topic);
 				}
 			}
@@ -360,112 +357,117 @@ public class HikeMqttManager implements MqttSimpleCallback
 		finally
 		{
 			// we're finished - if the phone is switched off, it's okay for the CPU
-			//  to sleep now
+			// to sleep now
 			wl.release();
 
 		}
 	}
 
-    /*
-     *   callback - called when we receive a message from the server
-     */
-    public void publishArrived(String topic, byte[] payloadbytes, int qos, boolean retained)
-    {
-        // we protect against the phone switching off while we're doing this
-        //  by requesting a wake lock - we request the minimum possible wake
-        //  lock - just enough to keep the CPU running until we've finished
-        PowerManager pm = (PowerManager) this.mHikeService.getSystemService(Context.POWER_SERVICE);
-        WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
-        try
-        {
-        wl.acquire();
-
-        //
-        //  I'm assuming that all messages I receive are being sent as strings
-        //   this is not an MQTT thing - just me making as assumption about what
-        //   data I will be receiving - your app doesn't have to send/receive
-        //   strings - anything that can be sent as bytes is valid
-        String messageBody = new String(payloadbytes);
-
-		if (this.mHikeService.sendToApp(messageBody))
-		{
-			return;
-		}
-
-		/* couldn't send a message to the app
-		 if it's a message -- toast and write it now
-		 otherwise, just save it in memory until the app connects
-		 */
-
-		JSONObject obj = null;
+	/*
+	 * callback - called when we receive a message from the server
+	 */
+	public void publishArrived(String topic, byte[] payloadbytes, int qos, boolean retained)
+	{
+		// we protect against the phone switching off while we're doing this
+		// by requesting a wake lock - we request the minimum possible wake
+		// lock - just enough to keep the CPU running until we've finished
+		PowerManager pm = (PowerManager) this.mHikeService.getSystemService(Context.POWER_SERVICE);
+		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
 		try
 		{
-			obj = new JSONObject(messageBody);
-		} catch (JSONException e)
-		{
-			Log.e("HikeMqttManager", "Invalid JSON Object", e);
-			return;
-		}
+			wl.acquire();
 
-		if ("message".equals(obj.optString("type")))
-		{
-			/* toast and save it */
+			//
+			// I'm assuming that all messages I receive are being sent as strings
+			// this is not an MQTT thing - just me making as assumption about what
+			// data I will be receiving - your app doesn't have to send/receive
+			// strings - anything that can be sent as bytes is valid
+			String messageBody = new String(payloadbytes);
+
+			if (this.mHikeService.sendToApp(messageBody))
+			{
+				return;
+			}
+
+			/*
+			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
+			 */
+
+			JSONObject obj = null;
 			try
 			{
-				ConvMessage convMessage = new ConvMessage(obj);
-				this.convDb.addConversationMessages(convMessage);
-				ContactInfo contactInfo = ContactUtils.getContactInfo(convMessage.getMsisdn(), this.mHikeService);
-				toaster.toast(contactInfo, convMessage.getMsisdn(), convMessage.getMessage(), convMessage.getTimestamp());
-			} catch (JSONException e)
-			{
-				Log.e("JSON", "Invalid JSON", e);
+				obj = new JSONObject(messageBody);
 			}
-		} else
-		{
-			/* just save it */
-			this.mHikeService.storeMessage(messageBody);
+			catch (JSONException e)
+			{
+				Log.e("HikeMqttManager", "Invalid JSON Object", e);
+				return;
+			}
+
+			if ("message".equals(obj.optString("type")))
+			{
+				/* toast and save it */
+				try
+				{
+					ConvMessage convMessage = new ConvMessage(obj);
+					this.convDb.addConversationMessages(convMessage);
+					ContactInfo contactInfo = ContactUtils.getContactInfo(convMessage.getMsisdn(), this.mHikeService);
+					toaster.toast(contactInfo, convMessage.getMsisdn(), convMessage.getMessage(), convMessage.getTimestamp());
+				}
+				catch (JSONException e)
+				{
+					Log.e("JSON", "Invalid JSON", e);
+				}
+			}
+			else
+			{
+				/* just save it */
+				this.mHikeService.storeMessage(messageBody);
+			}
+
+			// receiving this message will have kept the connection alive for us, so
+			// we take advantage of this to postpone the next scheduled ping
+			this.mHikeService.scheduleNextPing();
+
+			// we're finished - if the phone is switched off, it's okay for the CPU
+			// to sleep now
 		}
+		finally
+		{
+			wl.release();
+		}
+	}
 
-		// receiving this message will have kept the connection alive for us, so
-        //  we take advantage of this to postpone the next scheduled ping
-        this.mHikeService.scheduleNextPing();
+	public void ping()
+	{
+		try
+		{
+			mqttClient.ping();
 
-        // we're finished - if the phone is switched off, it's okay for the CPU
-        //  to sleep now
-        }
-        finally
-        {
-        	wl.release();
-        }
-    }
+		}
+		catch (MqttException e)
+		{
+			// if something goes wrong, it should result in connectionLost
+			// being called, so we will handle it there
+			Log.e("HikeMqttManager", "ping failed - MQTT exception", e);
 
-    public void ping()
-    {
-    	try
-    	{
-    		mqttClient.ping();
+			// assume the client connection is broken - trash it
+			try
+			{
+				mqttClient.disconnect();
+			}
+			catch (MqttPersistenceException e1)
+			{
+				Log.e("HikeMqttManager", "disconnect failed - persistence exception", e1);
+			}
 
-    	}
-    	catch (MqttException e)
-    	{
-    		// if something goes wrong, it should result in connectionLost
-    		//  being called, so we will handle it there
-    		Log.e("mqtt", "ping failed - MQTT exception", e);
-
-    		// assume the client connection is broken - trash it
-    		try {
-    			mqttClient.disconnect();
-    		}
-    		catch (MqttPersistenceException e1) {
-    			Log.e("mqtt", "disconnect failed - persistence exception", e1);
-    		}
-
-    		// reconnect
-    		if (connectToBroker()) {
-    			subscribeToTopic(this.topic);
-    		}
-    	}
-    }
+			// reconnect
+			if (connectToBroker())
+			{
+				subscribeToTopic(this.topic);
+			}
+		}
+	}
 
 	public void connect()
 	{
@@ -487,21 +489,22 @@ public class HikeMqttManager implements MqttSimpleCallback
 			// set the status to show we're trying to connect
 			setConnectionStatus(MQTTConnectionStatus.CONNECTING);
 			if (connectToBroker())
-            {
-                // we subscribe to a topic - registering to receive push
-                //  notifications with a particular key
-                // in a 'real' app, you might want to subscribe to multiple
-                //  topics - I'm just subscribing to one as an example
-                // note that this topicName could include a wildcard, so
-                //  even just with one subscription, we could receive
-                //  messages for multiple topics
-                subscribeToTopic(this.topic);
-            }
-		} else
+			{
+				// we subscribe to a topic - registering to receive push
+				// notifications with a particular key
+				// in a 'real' app, you might want to subscribe to multiple
+				// topics - I'm just subscribing to one as an example
+				// note that this topicName could include a wildcard, so
+				// even just with one subscription, we could receive
+				// messages for multiple topics
+				subscribeToTopic(this.topic);
+			}
+		}
+		else
 		{
-            // we can't do anything now because we don't have a working
-            //  data connection
-            setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
+			// we can't do anything now because we don't have a working
+			// data connection
+			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
 		}
 	}
 }
