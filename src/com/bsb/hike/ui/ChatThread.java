@@ -245,6 +245,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		 */
 		mTextLastChanged = Long.MAX_VALUE;
 
+		// TODO this is being called everytime this activity is created. Way too often
+		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
+		app.connectToService();
+
 		setContentView(R.layout.chatthread);
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
