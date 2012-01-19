@@ -210,7 +210,14 @@ public class AccountUtils
 		if (((obj == null) || ("fail".equals(obj.optString("stat")))))
 		{
 			Log.i("Invite", "Couldn't invite friend: " + obj);
-			throw new UserError(obj.optString("errorMsg"), obj.optInt("error"));
+			if (obj == null)
+			{
+				throw new UserError("Unable to invite", -1);
+			}
+			else
+			{
+				throw new UserError(obj.optString("errorMsg"), obj.optInt("error"));
+			}
 		}
 	}
 
