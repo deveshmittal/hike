@@ -33,13 +33,12 @@ public class HikeToast
 		String msisdn = convMsg.getMsisdn();
 		String message = convMsg.getMessage();
 		long timestamp = convMsg.getTimestamp();
-		String name = (contactInfo != null) ? contactInfo.name : msisdn;
+		String key = (contactInfo != null) ? contactInfo.name : msisdn;
 		
-		Log.d("HIKE TOAST","MSISDN : "+msisdn+" , message : "+message+" , name : "+name);
 		int icon = R.drawable.ic_contact_logo;
 
 		// TODO this doesn't turn the text bold :(
-		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>:%2$s", name, msisdn));
+		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>", key, msisdn));
 		Notification notification = new Notification(icon, text, timestamp * 1000);
 
 		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
@@ -61,8 +60,8 @@ public class HikeToast
 		}
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-		notification.setLatestEventInfo(context, name, message, contentIntent);
-		
+		notification.setLatestEventInfo(context, key, message, contentIntent);
+
 		Log.d("HIKE TOAST","CONVERSATION ID : "+(int)convMsg.getConversation().getConvId());
 		notificationManager.notify((int)convMsg.getConversation().getConvId(), notification);
 	}
