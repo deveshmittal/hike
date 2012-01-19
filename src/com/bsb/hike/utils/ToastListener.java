@@ -56,7 +56,7 @@ public class ToastListener implements Listener
 
 			/* the foreground activity isn't going to show this message so Toast it */
 			ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn());
-			this.toaster.toast(contactInfo, message);
+			this.toaster.toast(contactInfo, message.getMsisdn(), message.getMessage(), message.getTimestamp());
 		}
 	}
 
