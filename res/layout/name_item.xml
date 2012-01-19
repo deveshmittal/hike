@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:text="Vijay Raghunathan"
+        android:layout_marginLeft="10dp"
         android:textColor="@color/black"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     <TextView 
@@ -19,6 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:textColor="@color/black"
+        android:layout_marginLeft="10dp"
         android:text="1231231231231" />
 
     <ImageView
