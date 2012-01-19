@@ -2,6 +2,7 @@ package com.bsb.hike.utils;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.ui.ChatThread;
 
 import android.app.Notification;
@@ -11,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.Log;
 
 public class HikeToast
 {
@@ -26,9 +28,14 @@ public class HikeToast
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
-	public void toast(ContactInfo contactInfo, String msisdn, String message, long timestamp)
+	public void toast(ContactInfo contactInfo,ConvMessage convMsg)
 	{
+		String msisdn = convMsg.getMsisdn();
+		String message = convMsg.getMessage();
+		long timestamp = convMsg.getTimestamp();
 		String name = (contactInfo != null) ? contactInfo.name : msisdn;
+		
+		Log.d("HIKE TOAST","MSISDN : "+msisdn+" , message : "+message+" , name : "+name);
 		int icon = R.drawable.ic_launcher;
 
 		// TODO this doesn't turn the text bold :(
@@ -54,8 +61,9 @@ public class HikeToast
 		}
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-
 		notification.setLatestEventInfo(context, name, message, contentIntent);
-		notificationManager.notify(NEW_MESSAGE_ID, notification);
+		
+		Log.d("HIKE TOAST","CONVERSATION ID : "+(int)convMsg.getConversation().getConvId());
+		notificationManager.notify((int)convMsg.getConversation().getConvId(), notification);
 	}
 }
