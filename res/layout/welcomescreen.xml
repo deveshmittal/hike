@@ -29,7 +29,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_above="@id/bottom_nav_bar"
-        android:background="@drawable/ic_welcomeback" >
+        android:background="@color/white" >
 
         <TextView
             android:id="@+id/welcome"
@@ -37,12 +37,12 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="17dp"
-            android:layout_marginTop="15dp"
             android:layout_marginRight="17dp"
+            android:layout_marginTop="15dp"
             android:gravity="center"
             android:text="@string/welcome_message"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/white" />
+            android:textColor="@color/lightblack" />
 
         <EditText
             android:id="@+id/debug_msisdn_input"
@@ -52,6 +52,18 @@
             android:hint="Enter debug MSISDN here"
             android:visibility="gone" />
 
+        <TextView
+            android:id="@+id/t_and_c"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="65dp"
+            android:gravity="center"
+            android:text="T&amp;C and Privacy Policy"
+            android:textColor="@color/grey"
+            android:textSize="14sp" />
+
         <ImageView
             android:id="@+id/ic_edit_message"
             android:layout_width="wrap_content"
@@ -60,18 +72,6 @@
             android:layout_centerHorizontal="true"
             android:onClick="onClick"
             android:src="@drawable/ic_hikelogo" />
-
-        <TextView
-            android:id="@+id/t_and_c"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/welcome"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="61dp"
-            android:gravity="center"
-            android:text="T&amp;C and Privacy Policy"
-            android:textColor="@color/grey"
-            android:textSize="18sp" />
 
     </RelativeLayout>
 
