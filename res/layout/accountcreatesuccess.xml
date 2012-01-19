@@ -20,9 +20,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/btnScanAB"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="66dp"
         android:background="@color/white"
         android:color="@color/green" >
 
