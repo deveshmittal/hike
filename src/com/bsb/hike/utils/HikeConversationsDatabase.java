@@ -133,6 +133,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			bindConversationInsert(insertStatement, conv);
 			msgId = insertStatement.executeInsert();
+			/* Represents we dont have any conversation made for this msisdn.*/
 			if (msgId <= 0)
 			{
 				Conversation conversation = addConversation(conv.getMsisdn());
@@ -142,7 +143,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				bindConversationInsert(insertStatement, conv);
 				msgId = insertStatement.executeInsert();
+				conv.setConversation(conversation);
 				assert (msgId >= 0);
+			}
+			else
+			{
+				Cursor c = mDb.query(CONVERSATIONSTABLE, new String[] { "convid","onhike","contactid" }, "msisdn=?",new String[] { conv.getMsisdn()}, null, null, null);
+				final int convIdIdx = c.getColumnIndex("convid");
+				final int onhikeIdIdx = c.getColumnIndex("onhike");
+				final int contactIdIdx = c.getColumnIndex("contactid");
+				while (c.moveToNext())
+				{
+					long convId = c.getLong(convIdIdx);
+					int onHike = c.getInt(onhikeIdIdx);
+					String contactId = c.getString(contactIdIdx);
+					Conversation conversation = new Conversation(conv.getMsisdn(), convId, contactId, null,onHike>0?true:false);
+					conv.setConversation(conversation);
+				}
+				c.close();
 			}
 			conv.setMsgID(msgId);
 		}
@@ -186,10 +204,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			return conv;
 		}
 		/* TODO does this happen? If so, what should we do? */
-		Log.wtf("COnversationadding", "Couldn't add conversation --- race condition?");
+		Log.wtf("Conversationadding", "Couldn't add conversation --- race condition?");
 		return null;
 	}
-
+	
 	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation)
 	{
 		String limitStr = new Integer(limit).toString();
