@@ -10,6 +10,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
@@ -44,9 +45,18 @@ public class HikeToast
 		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 		notification.defaults |= Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
 
+		int notificationId = (int)convMsg.getConversation().getConvId();
 		Intent notificationIntent = new Intent(context, ChatThread.class);
-		notificationIntent.putExtra("msisdn", msisdn);
 
+		/* notifications appear to be cached, and their .equals doesn't check 'Extra's.
+		 * In order to prevent the wrong intent being fired, set a data field that's unique to the
+		 * conversation we want to open.
+		 * http://groups.google.com/group/android-developers/browse_thread/thread/e61ec1e8d88ea94d/1fe953564bd11609?#1fe953564bd11609
+		 */
+
+		notificationIntent.setData((Uri.parse("custom://"+notificationId)));
+
+		notificationIntent.putExtra("msisdn", msisdn);
 		if (contactInfo != null)
 		{
 			if (contactInfo.id != null)
@@ -62,7 +72,7 @@ public class HikeToast
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 		notification.setLatestEventInfo(context, key, message, contentIntent);
 
-		Log.d("HIKE TOAST","CONVERSATION ID : "+(int)convMsg.getConversation().getConvId());
-		notificationManager.notify((int)convMsg.getConversation().getConvId(), notification);
+		Log.d("HIKE TOAST","CONVERSATION ID : " + notificationId);
+		notificationManager.notify(notificationId, notification);
 	}
 }
