@@ -1,10 +1,5 @@
 package com.bsb.hike.utils;
 
-import com.bsb.hike.R;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.ui.ChatThread;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -14,6 +9,11 @@ import android.net.Uri;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+
+import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.ui.ChatThread;
 
 public class HikeToast
 {
