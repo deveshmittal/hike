@@ -211,6 +211,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation)
 	{
 		String limitStr = new Integer(limit).toString();
+		/*TODO this should be ORDER BY timestamp */
 		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, msgStatus, timestamp,msgid,mappedMsgId" }, "convid=?", new String[] { Long.toString(convid) }, null, null,
 				"msgid DESC", limitStr);
 		final int msgColumn = c.getColumnIndex("message");
