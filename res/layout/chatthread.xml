@@ -98,7 +98,9 @@
              android:layout_width="fill_parent"
              android:layout_height="wrap_content"
              android:layout_alignParentLeft="true"
-             android:layout_margin="10dp"
+             android:layout_marginLeft="7dp"
+             android:layout_marginTop="7dp"
+             android:layout_marginBottom="7dp"
              android:imeOptions="actionSend"
              android:autoText="true"
              android:layout_toLeftOf="@+id/send_message"
@@ -109,7 +111,10 @@
 
         <Button
             android:layout_alignParentRight="true"
-            android:layout_margin="10dp"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="7dp"
+            android:layout_marginRight="7dp"
+            android:layout_marginLeft="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/send_message"
