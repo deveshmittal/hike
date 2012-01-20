@@ -14,4 +14,6 @@
     <color name="scangrey">#3e3e3e</color>
     <color name="lightblack">#222222</color>
     <color name="timestampcolor">#8a8a8a</color>
+    <color name="bottombargrey">#5b5b5b</color>
+    <color name="listgrey">#f9f9f9</color>
 </resources>

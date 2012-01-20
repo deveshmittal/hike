@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/listgrey"
     android:orientation="vertical" >
 
     <RelativeLayout
@@ -28,7 +28,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/title_field"
-            android:background="@color/white"
+            android:background="@color/listgrey"
             android:divider="@color/dividercolor"
             android:dividerHeight="0.5dp" >
         </ListView>
@@ -37,9 +37,9 @@
     <RelativeLayout
         android:id="@+id/bottom_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="65dp"
+        android:layout_height="55dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/black" >
+        android:background="@color/bottombargrey" >
 
         <ImageView
             android:id="@+id/edit_message"
