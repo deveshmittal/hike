@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -43,6 +44,9 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.bsb.hike.http.GzipByteArrayEntity;
+import com.bsb.hike.http.GzipUrlEncodedFormEntity;
+import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils
@@ -348,5 +352,90 @@ public class AccountUtils
 	{
 		// TODO remove this line. just for testing
 		req.addHeader("X-MSISDN-AIRTEL", MSISDN);
+	}
+
+	/**
+	 * 
+	 * @param new_contacts
+	 * @param old_contacts
+	 * @return
+	 */
+	public static List<ContactInfo> updateAddressBook(Set<ContactInfo> new_contacts, Set<ContactInfo> old_contacts)
+	{
+		HttpPatch request = new HttpPatch(BASE + "/account/addressbook");
+		JSONArray data = new JSONArray();
+		Map<String, String> idToName = new HashMap<String, String>();
+		for (ContactInfo contactInfo : new_contacts)
+		{
+			try
+			{
+				idToName.put(contactInfo.id, contactInfo.name);
+				data.put(contactInfo.toJSON());
+			} catch (JSONException e)
+			{
+				Log.e("AccountUtils", "error serializing contact json", e);
+			}
+		}
+
+		for (ContactInfo contactInfo : old_contacts)
+		{
+			try
+			{
+				JSONObject contact = contactInfo.toJSON();
+				/* indicate that this contact should be removed */
+				contact.put("remove", true);
+				data.put(contact);
+			} catch (JSONException e)
+			{
+				Log.e("AccountUtils", "error serializing contact json", e);
+			}
+		}
+
+		String encoded = data.toString();
+		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		JSONObject addressbook;
+
+		try
+		{
+			AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			request.setEntity(entity);
+
+			JSONObject obj = executeRequest(request);
+			if ((obj == null) || ("fail".equals(obj.optString("stat"))))
+			{
+				Log.w("HTTP", "Unable to upload address book");
+				// TODO raise a real exception here
+				return null;
+			}
+
+			Log.d("AccountUtils", "Reply from PATCH addressbook:" + obj.toString());
+			addressbook = obj.getJSONObject("addressbook");
+		} catch (JSONException e)
+		{
+			Log.e("AccountUtils", "Invalid json object", e);
+			return null;
+		} catch (UnsupportedEncodingException e)
+		{
+			Log.e("AccountUtils", "Unable to encode request body", e);
+			return null;
+		}
+
+		for (Iterator<?> it = addressbook.keys(); it.hasNext();)
+		{
+			String id = (String) it.next();
+			JSONArray entries = addressbook.optJSONArray(id);
+			entries.length();
+			for (int i = 0; i < entries.length(); ++i)
+			{
+				JSONObject entry = entries.optJSONObject(i);
+				String msisdn = entry.optString("msisdn");
+				Boolean onhike = entry.optBoolean("onhike");
+				ContactInfo info = new ContactInfo(id, msisdn, idToName.get(id), onhike.booleanValue());
+				info.name = idToName.get(id);
+				contacts.add(info);
+			}
+		}
+
+		return contacts;
 	}
 }
