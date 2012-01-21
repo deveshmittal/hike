@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +23,7 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -153,7 +155,12 @@ public class HikeService extends Service
 	private PingSender pingSender;
 
 	private HikeMqttManager mMqttManager;
+<<<<<<< HEAD
 
+=======
+	private String mToken;
+	private ContactListChangeIntentReceiver contactsReceived;
+>>>>>>> a0573d7... Add a ContentObserver that will get called whenever the contacts are updated
 	private Handler mHandler;
 
 	/************************************************************************/
@@ -195,6 +202,10 @@ public class HikeService extends Service
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent);
 		startForeground(HikeToast.HIKE_NOTIFICATION, notification);
+
+		/* register with the Contact list to get an update whenever the phone book changes */
+		contactsReceived = new ContactListChangeIntentReceiver(mHandler);
+		getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
 	}
 
 	@Override
@@ -324,6 +335,21 @@ public class HikeService extends Service
 	/* METHODS - wrappers for some of the MQTT methods that we use */
 	/************************************************************************/
 
+	private class ContactListChangeIntentReceiver extends ContentObserver
+	{
+
+		public ContactListChangeIntentReceiver(Handler handler)
+		{
+			super(handler);
+		}
+
+		@Override
+		public void onChange(boolean selfChange)
+		{
+			Log.i("ContactListChangeIntentReceiver", "onChange called");
+		}
+	}
+
 	private class BackgroundDataChangeIntentReceiver extends BroadcastReceiver
 	{
 		@Override
@@ -422,7 +448,7 @@ public class HikeService extends Service
 		// shortly before the keep alive period expires
 		// it means we're pinging slightly more frequently than necessary
 		Calendar wakeUpTime = Calendar.getInstance();
-		wakeUpTime.add(Calendar.SECOND, 20 * 60);
+		wakeUpTime.add(Calendar.SECOND, 20 * 60); //comes from PushMqttManager.KEEPALIVE
 
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
