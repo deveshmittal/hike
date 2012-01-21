@@ -1,6 +1,11 @@
 package com.bsb.hike.models;
 
-public class ContactInfo
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.bsb.hike.models.utils.JSONSerializable;
+
+public class ContactInfo implements JSONSerializable
 {
 	@Override
 	public String toString()
@@ -72,5 +77,14 @@ public class ContactInfo
 		this.number = number;
 		this.name = name;
 		this.onhike = onhike;
+	}
+
+	public JSONObject toJSON() throws JSONException
+	{
+		JSONObject json = new JSONObject();
+		json.put("phone_no", this.number);
+		json.put("name", this.name);
+		json.put("id", this.id);
+		return json;
 	}
 }
