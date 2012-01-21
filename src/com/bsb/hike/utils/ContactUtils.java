@@ -1,5 +1,12 @@
 package com.bsb.hike.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -88,5 +95,93 @@ public class ContactUtils
 				db.close();
 			}
 		}
+	}
+
+	/*
+	 * Call this when we think the address book has changed.
+	 * Checks for updates, posts to the server, writes them to the local database
+	 * and updates existing conversations
+	 */
+	public static void syncUpdates(Context ctx)
+	{
+		Set<ContactInfo> phone_contacts = new HashSet<ContactInfo>(getContacts(ctx));
+
+		HikeUserDatabase db = new HikeUserDatabase(ctx);
+		Set<ContactInfo> hike_contacts = new HashSet<ContactInfo>(db.getContacts());
+
+		Set<ContactInfo> new_contacts = new HashSet<ContactInfo>(phone_contacts);
+		/* {A,B} - {B,C} = {A}, then {B,C} - {A,B} = {C}{*/
+
+		/* find the contacts that are in the phonebook that aren't in our db */
+		new_contacts.removeAll(hike_contacts);
+
+		/* using the original set, find the contacts in our db that are no longer in the phonebook */
+		hike_contacts.removeAll(phone_contacts);
+
+		/* return early if things are in sync */
+		if ((!new_contacts.isEmpty()) && (!hike_contacts.isEmpty()))
+		{
+			Log.d("ContactUtils", "DB in sync");
+			db.close();
+			return;
+		}
+
+		try
+		{
+			List<ContactInfo> contacts = AccountUtils.updateAddressBook(new_contacts, hike_contacts);
+			for (ContactInfo contactInfo : contacts)
+			{
+				db.addContact(contactInfo);
+			}
+		} catch(Exception e)
+		{
+			Log.e("ContactUtils", "error updating addressbook", e);
+		} finally
+		{
+			db.close();
+			db = null;
+		}
+	}
+
+	public static List<ContactInfo> getContacts(Context ctx)
+	{
+		String[] projection = new String[] { ContactsContract.Contacts._ID, ContactsContract.Contacts.HAS_PHONE_NUMBER, ContactsContract.Contacts.DISPLAY_NAME };
+
+		String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
+		Cursor contacts = ctx.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, projection, selection, null, null);
+
+		int idFieldColumnIndex = contacts.getColumnIndex(ContactsContract.Contacts._ID);
+		int nameFieldColumnIndex = contacts.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+		List<ContactInfo> contactinfos = new ArrayList<ContactInfo>();
+		Log.d("ContactUtils", "Starting to scan address book");
+		long tm = System.currentTimeMillis();
+		Map<String, String> contactNames = new HashMap<String, String>();
+		while (contacts.moveToNext())
+		{
+			String id = contacts.getString(idFieldColumnIndex);
+			String name = contacts.getString(nameFieldColumnIndex);
+			contactNames.put(id, name);
+		}
+
+		contacts.close();
+
+		Cursor phones = ctx.getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null, null, null);
+
+		int numberColIdx = phones.getColumnIndex(Phone.NUMBER);
+		int idColIdx = phones.getColumnIndex(Phone.CONTACT_ID);
+		while (phones.moveToNext())
+		{
+			String number = phones.getString(numberColIdx);
+			String id = phones.getString(idColIdx);
+			String name = contactNames.get(id);
+			if ((name != null) && (number != null))
+			{
+				contactinfos.add(new ContactInfo(id, number, name));
+			}
+		}
+
+		phones.close();
+		Log.d("ContactUtils", "Scanning address book took " + (System.currentTimeMillis() - tm)/1000 + " seconds for " + contactinfos.size() + " entries");
+		return contactinfos;
 	}
 }
