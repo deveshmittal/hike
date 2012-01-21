@@ -1,4 +1,4 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
