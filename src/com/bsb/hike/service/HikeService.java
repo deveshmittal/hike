@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -19,10 +20,13 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
-import android.text.TextUtils;
 import android.util.Log;
 
+import com.bsb.hike.R;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.MessagesList;
+import com.bsb.hike.utils.HikeToast;
 
 public class HikeService extends Service
 {
@@ -147,6 +151,21 @@ public class HikeService extends Service
 		dataEnabledReceiver = new BackgroundDataChangeIntentReceiver();
 		registerReceiver(dataEnabledReceiver,
 				new IntentFilter(ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED));
+
+		/* notify android that our service represents a user visible action, so it should
+		 * not be killable.  In order to do so, we need to show a notification so the user
+		 * understands what's going on
+		 */
+		Notification notification = new Notification(
+											R.drawable.ic_contact_logo,
+											getResources().getString(R.string.service_running_message),
+											System.currentTimeMillis());
+		notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+		Intent notificationIntent = new Intent(this, MessagesList.class);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+		notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent);
+		startForeground(HikeToast.HIKE_NOTIFICATION, notification);
 	}
 
 

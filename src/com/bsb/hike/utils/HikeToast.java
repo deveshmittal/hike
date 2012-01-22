@@ -17,7 +17,7 @@ import com.bsb.hike.ui.ChatThread;
 
 public class HikeToast
 {
-	private static final int NEW_MESSAGE_ID = 1;
+	public static final int HIKE_NOTIFICATION = 0;
 
 	private Context context;
 
