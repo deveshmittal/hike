@@ -356,43 +356,49 @@ public class AccountUtils
 
 	/**
 	 * 
-	 * @param new_contacts
-	 * @param old_contacts
+	 * @param new_contacts_by_id new entries to update with.  These will replace contact IDs on the server
+	 * @param old_ids, these are ids that are no longer present and should be removed
 	 * @return
 	 */
-	public static List<ContactInfo> updateAddressBook(Set<ContactInfo> new_contacts, Set<ContactInfo> old_contacts)
+	public static List<ContactInfo> updateAddressBook(Map<String, Set<ContactInfo>> new_contacts_by_id, Set<String> old_ids)
 	{
 		HttpPatch request = new HttpPatch(BASE + "/account/addressbook");
-		JSONArray data = new JSONArray();
-		Map<String, String> idToName = new HashMap<String, String>();
-		for (ContactInfo contactInfo : new_contacts)
+		JSONObject data = new JSONObject();
+		JSONArray ids_json = new JSONArray();
+		for (String string : old_ids)
 		{
-			try
-			{
-				idToName.put(contactInfo.id, contactInfo.name);
-				data.put(contactInfo.toJSON());
-			} catch (JSONException e)
-			{
-				Log.e("AccountUtils", "error serializing contact json", e);
-			}
+			ids_json.put(string);
 		}
 
-		for (ContactInfo contactInfo : old_contacts)
+		JSONObject contacts = new JSONObject();
+		/* add fields to the json packet */
+		try
 		{
-			try
-			{
-				JSONObject contact = contactInfo.toJSON();
-				/* indicate that this contact should be removed */
-				contact.put("remove", true);
-				data.put(contact);
+			data.put("remove", ids_json);
+			data.put("contacts", contacts);
+		} catch (JSONException e)
+		{
+			Log.e("AccountUtils", "Invalid JSON put", e);
+			return null;
+		}
+
+		/* serialize the updated address book */
+		Map<String, String> idToName = new HashMap<String, String>();
+		for (Set<ContactInfo> contactsForId : new_contacts_by_id.values())
+		{
+			JSONArray arr = Utils.jsonSerialize(contactsForId);
+			ContactInfo contactInfo = contactsForId.iterator().next();
+			idToName.put(contactInfo.id, contactInfo.name);
+			try {
+				contacts.put(contactInfo.id, arr);
 			} catch (JSONException e)
 			{
-				Log.e("AccountUtils", "error serializing contact json", e);
+				Log.e("AccountUtils", "error updating address book", e);
 			}
 		}
 
 		String encoded = data.toString();
-		List<ContactInfo> contacts = new ArrayList<ContactInfo>();
+		List<ContactInfo> server_contacts = new ArrayList<ContactInfo>();
 		JSONObject addressbook;
 
 		try
@@ -432,10 +438,10 @@ public class AccountUtils
 				Boolean onhike = entry.optBoolean("onhike");
 				ContactInfo info = new ContactInfo(id, msisdn, idToName.get(id), onhike.booleanValue());
 				info.name = idToName.get(id);
-				contacts.add(info);
+				server_contacts.add(info);
 			}
 		}
 
-		return contacts;
+		return server_contacts;
 	}
 }

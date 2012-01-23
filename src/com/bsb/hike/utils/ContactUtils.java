@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,22 +105,38 @@ public class ContactUtils
 	 */
 	public static void syncUpdates(Context ctx)
 	{
-		Set<ContactInfo> phone_contacts = new HashSet<ContactInfo>(getContacts(ctx));
 
 		HikeUserDatabase db = new HikeUserDatabase(ctx);
-		Set<ContactInfo> hike_contacts = new HashSet<ContactInfo>(db.getContacts());
 
-		Set<ContactInfo> new_contacts = new HashSet<ContactInfo>(phone_contacts);
-		/* {A,B} - {B,C} = {A}, then {B,C} - {A,B} = {C}{*/
+		Map<String, Set<ContactInfo>> new_contacts_by_id = convertToMap(getContacts(ctx));
+		Map<String, Set<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts());
 
-		/* find the contacts that are in the phonebook that aren't in our db */
-		new_contacts.removeAll(hike_contacts);
+		/* iterate over every item in the phone db,
+		 * items that are equal remove from both maps
+		 * items that are different, leave in 'new' map and remove from 'hike' map
+		 * send the 'new' map as items to add, and send the 'hike' map as IDs to remove 
+		 */
+		Map.Entry<String, Set<ContactInfo>> entry = null;
+		for (Iterator<Map.Entry<String, Set<ContactInfo>>> iterator = new_contacts_by_id.entrySet().iterator(); iterator.hasNext(); entry = iterator.next())
+		{
+			String id = entry.getKey();
+			Set<ContactInfo> contacts_for_id = entry.getValue();
+			Set<ContactInfo> hike_contacts_for_id = hike_contacts_by_id.get(id);
+			if (contacts_for_id.equals(hike_contacts_for_id))
+			{
+				/* hike db is up to date, so don't send update */
+				iterator.remove();
+				hike_contacts_by_id.remove(id);
+			} else {
+				/* item is different than our db, so send an update */
+				hike_contacts_by_id.remove(id);
+			}
+		}
 
-		/* using the original set, find the contacts in our db that are no longer in the phonebook */
-		hike_contacts.removeAll(phone_contacts);
+		/* our address object should an update dictionary, and a list of IDs to remove */
 
 		/* return early if things are in sync */
-		if ((!new_contacts.isEmpty()) && (!hike_contacts.isEmpty()))
+		if ((new_contacts_by_id.isEmpty()) && (hike_contacts_by_id.isEmpty()))
 		{
 			Log.d("ContactUtils", "DB in sync");
 			db.close();
@@ -128,7 +145,7 @@ public class ContactUtils
 
 		try
 		{
-			List<ContactInfo> contacts = AccountUtils.updateAddressBook(new_contacts, hike_contacts);
+			List<ContactInfo> contacts = AccountUtils.updateAddressBook(new_contacts_by_id, hike_contacts_by_id.keySet());
 			for (ContactInfo contactInfo : contacts)
 			{
 				db.addContact(contactInfo);
@@ -141,6 +158,29 @@ public class ContactUtils
 			db.close();
 			db = null;
 		}
+	}
+
+	private static Map<String, Set<ContactInfo>> convertToMap(List<ContactInfo> contacts)
+	{
+		Map<String, Set<ContactInfo>> ret = new HashMap<String, Set<ContactInfo>>(contacts.size());
+		for (ContactInfo contactInfo : contacts)
+		{
+			if ("__TD_HIKE__".equals(contactInfo.id))
+			{
+				continue;
+			}
+
+			Set<ContactInfo> l = ret.get(contactInfo.id);
+			if (l == null)
+			{
+				l = new HashSet<ContactInfo>();
+				ret.put(contactInfo.id, l);
+			}
+
+			l.add(contactInfo);
+		}
+
+		return ret;
 	}
 
 	public static List<ContactInfo> getContacts(Context ctx)

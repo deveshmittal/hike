@@ -1,7 +1,6 @@
 package com.bsb.hike.utils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -172,7 +171,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		addContacts(l);
 	}
 
-	public Collection<? extends ContactInfo> getContacts()
+	public List<ContactInfo> getContacts()
 	{
 		Cursor c = mReadDb.query(DATABASE_TABLE, new String[] { "msisdn", "id", "name", "onhike" }, null, null, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);

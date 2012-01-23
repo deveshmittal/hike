@@ -33,7 +33,7 @@ public class Utils
 	/* serializes the given collection into an object.
 	 * Ignores exceptions
 	 */
-	public static JSONArray ajsonSerialize(Collection<? extends JSONSerializable> elements)
+	public static JSONArray jsonSerialize(Collection<? extends JSONSerializable> elements)
 	{
 		JSONArray arr = new JSONArray();
 		for (JSONSerializable elem : elements)
@@ -49,7 +49,7 @@ public class Utils
 		return arr;
 	}
 
-	public static JSONObject sjsonSerialize(Map<String, ? extends JSONSerializable> elements) throws JSONException
+	public static JSONObject jsonSerialize(Map<String, ? extends JSONSerializable> elements) throws JSONException
 	{
 		JSONObject obj = new JSONObject();
 		for (Map.Entry<String, ? extends JSONSerializable> element : elements.entrySet())
