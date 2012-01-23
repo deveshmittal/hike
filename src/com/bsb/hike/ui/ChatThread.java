@@ -58,10 +58,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private MessagesAdapter mAdapter;
 
-	private EditText mComposeView;
-
-	private ListView mConversationsView;
-
 	private Conversation mConversation;
 
 	private long mTextLastChanged;
@@ -74,6 +70,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private Handler mUiThreadHandler;
 
+	/* View element */
 	private Button mSendBtn;
 
 	private int mCredits;
@@ -83,6 +80,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private TextView mMetadataNumChars;
 
 	private TextView mMetadataCreditsLeft;
+
+	private View mBottomView;
+
+	private EditText mComposeView;
+
+	private ListView mConversationsView;
+
+	private AutoCompleteTextView mInputNumberView;
+
 
 	int mMaxSmsLength = 160;
 
@@ -111,15 +117,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mTextLastChanged = (mTextLastChanged == Long.MAX_VALUE) ? 0 : mTextLastChanged;
 	}
 
+
 	private void createAutoCompleteView()
 	{
-		View bottomPanel = findViewById(R.id.bottom_panel);
-		bottomPanel.setVisibility(View.GONE);
-		View nameView = findViewById(R.id.name_field);
-		nameView.setVisibility(View.GONE);
-		View metadataView = findViewById(R.id.sms_chat_metadata);
-		metadataView.setVisibility(View.GONE);
-		final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
+		mBottomView.setVisibility(View.GONE);
+		mNameView.setVisibility(View.GONE);
+		mMetadataView.setVisibility(View.GONE);
+
 		mDbhelper = new HikeUserDatabase(this);
 		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
 		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike };
@@ -146,7 +150,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 		});
 
-		inputNumberView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		mInputNumberView.setOnItemClickListener(new AdapterView.OnItemClickListener()
 		{
 
 			@Override
@@ -172,9 +176,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 		});
 
-		inputNumberView.setAdapter(adapter);
-		inputNumberView.setVisibility(View.VISIBLE);
-		inputNumberView.requestFocus();
+		mInputNumberView.setAdapter(adapter);
+		mInputNumberView.setVisibility(View.VISIBLE);
+		mInputNumberView.requestFocus();
+
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 	}
 
@@ -250,13 +255,74 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		app.connectToService();
 
 		setContentView(R.layout.chatthread);
+
+		/* bind views to variables */
+		mBottomView = findViewById(R.id.bottom_panel);
+		mNameView = (TextView) findViewById(R.id.name_field);
+		mMetadataView = findViewById(R.id.sms_chat_metadata);
+		mInputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
+		mConversationsView = (ListView) findViewById(R.id.conversations_list);
+		mComposeView = (EditText) findViewById(R.id.msg_compose);
+		mSendBtn = (Button) findViewById(R.id.send_message);
+		mMetadataView = findViewById(R.id.sms_chat_metadata);
+		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
+		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
+
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
-		mContactNumber = intent.getStringExtra("msisdn");
 		Uri dataURI = intent.getData();
 
-		if ((dataURI != null) && ("smsto".equals(dataURI.getScheme())))
+		/* if we have an intent that specifies a user, open that users thread */
+		if (((dataURI != null) && ("smsto".equals(dataURI.getScheme()))) ||
+			(intent.hasExtra("msisdn")))
+		{
+			onNewIntent(intent);
+		} else {
+			createAutoCompleteView();
+		}
+
+		/* add a handler on the UI thread so we can post delayed messages */
+		mUiThreadHandler = new Handler();
+
+		/* register listeners */
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+
+		mConversationDb = new HikeConversationsDatabase(this);
+	}
+
+	public void onSendClick(View v)
+	{
+		String message = mComposeView.getText().toString();
+		mComposeView.setText("");
+		long time = (long) System.currentTimeMillis() / 1000;
+		ConvMessage convMessage = new ConvMessage(message, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+		convMessage.setConversation(mConversation);
+
+		mAdapter.add(convMessage);
+
+		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+		mSendBtn.setEnabled(false);
+	}
+
+
+	/* this function is called externally when our Activity is on top and the user selects an Intent for this same Activity
+	 * @see android.app.Activity#onNewIntent(android.content.Intent)
+	 */
+	@Override
+	protected void onNewIntent(Intent intent)
+	{
+		/* setIntent so getIntent returns the right values */
+		setIntent(intent);
+
+		Uri dataURI = intent.getData();
+
+		if ((dataURI != null) &&
+				"smsto".equals(dataURI.getScheme()))
 		{
 			// Intent received externally
 			String phoneNumber = dataURI.getSchemeSpecificPart();
@@ -275,36 +341,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mContactId = null;
 				mContactName = mContactNumber = phoneNumber;
 			}
-			createConversation();
-		}
-		else if (mContactNumber == null) // wt if i have this number , then
-											// removes it and again store it.
-		{
-			// new conversation thread
-			createAutoCompleteView();
 		}
 		else
 		{
 			// selected chat from conversation list
+			mContactNumber = intent.getStringExtra("msisdn");
 			mContactId = intent.getStringExtra("id");
 			mContactName = intent.getStringExtra("name");
-			createConversation();
 		}
-		mUiThreadHandler = new Handler();
-	}
 
-	public void onSendClick(View v)
-	{
-		String message = mComposeView.getText().toString();
-		mComposeView.setText("");
-		long time = (long) System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(message, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
-		convMessage.setConversation(mConversation);
-
-		mAdapter.add(convMessage);
-
-		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-		mSendBtn.setEnabled(false);
+		createConversation();
 	}
 
 	/**
@@ -312,28 +358,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void createConversation()
 	{
-		final AutoCompleteTextView inputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
-		inputNumberView.setVisibility(View.GONE);
+		mInputNumberView.setVisibility(View.GONE);
 
 		mLabel = TextUtils.isEmpty(mContactName) ? mContactNumber : mContactName;
 
-		View bottomPanel = findViewById(R.id.bottom_panel);
-		bottomPanel.setVisibility(View.VISIBLE);
-		mNameView = (TextView) findViewById(R.id.name_field);
+		mBottomView.setVisibility(View.VISIBLE);
+
 		mNameView.setVisibility(View.VISIBLE);
 		mNameView.setText(mLabel);
 
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		mConversationDb = new HikeConversationsDatabase(this);
 		mConversation = mConversationDb.getConversation(mContactNumber, 25);
 		if (mConversation == null)
 		{
 			mConversation = mConversationDb.addConversation(mContactNumber);
 		}
 
-		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mConversationsView.setStackFromBottom(true);
 
 		/* make a copy of the message list since it's used internally by the adapter */
@@ -341,25 +383,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
-		mComposeView = (EditText) findViewById(R.id.msg_compose);
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
-
-		mSendBtn = (Button) findViewById(R.id.send_message);
 
 		/* get the number of credits and also listen for changes */
 		mCredits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
 		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 
-		mMetadataView = findViewById(R.id.sms_chat_metadata);
-		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
-		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
 		if (mConversation.isOnhike())
 		{
 			mMetadataView.setVisibility(View.GONE);

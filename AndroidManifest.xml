@@ -53,6 +53,7 @@
         <activity
             android:label="@string/app_name"
             android:name=".ui.ChatThread"
+            android:launchMode="singleTop"
             android:theme="@android:style/Theme.NoTitleBar"
             android:windowSoftInputMode="stateHidden" ><intent-filter >
                 <action android:name="android.intent.action.SEND" />
