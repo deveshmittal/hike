@@ -273,6 +273,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
 		Uri dataURI = intent.getData();
 
+		mConversationDb = new HikeConversationsDatabase(this);
+
 		/* if we have an intent that specifies a user, open that users thread */
 		if (((dataURI != null) && ("smsto".equals(dataURI.getScheme()))) ||
 			(intent.hasExtra("msisdn")))
@@ -291,8 +293,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-
-		mConversationDb = new HikeConversationsDatabase(this);
 	}
 
 	public void onSendClick(View v)
