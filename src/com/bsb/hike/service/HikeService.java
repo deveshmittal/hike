@@ -168,7 +168,6 @@ public class HikeService extends Service
 		startForeground(HikeToast.HIKE_NOTIFICATION, notification);
 	}
 
-
 	@Override
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
