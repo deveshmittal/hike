@@ -89,7 +89,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private AutoCompleteTextView mInputNumberView;
 
-
 	int mMaxSmsLength = 160;
 
 	private String mLabel;
@@ -116,7 +115,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		 */
 		mTextLastChanged = (mTextLastChanged == Long.MAX_VALUE) ? 0 : mTextLastChanged;
 	}
-
 
 	private void createAutoCompleteView()
 	{
@@ -276,11 +274,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mConversationDb = new HikeConversationsDatabase(this);
 
 		/* if we have an intent that specifies a user, open that users thread */
-		if (((dataURI != null) && ("smsto".equals(dataURI.getScheme()))) ||
-			(intent.hasExtra("msisdn")))
+		if (((dataURI != null) && ("smsto".equals(dataURI.getScheme()))) || (intent.hasExtra("msisdn")))
 		{
 			onNewIntent(intent);
-		} else {
+		}
+		else
+		{
 			createAutoCompleteView();
 		}
 
@@ -309,8 +308,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mSendBtn.setEnabled(false);
 	}
 
-
-	/* this function is called externally when our Activity is on top and the user selects an Intent for this same Activity
+	/*
+	 * this function is called externally when our Activity is on top and the user selects an Intent for this same Activity
+	 * 
 	 * @see android.app.Activity#onNewIntent(android.content.Intent)
 	 */
 	@Override
@@ -321,8 +321,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		Uri dataURI = intent.getData();
 
-		if ((dataURI != null) &&
-				"smsto".equals(dataURI.getScheme()))
+		if ((dataURI != null) && "smsto".equals(dataURI.getScheme()))
 		{
 			// Intent received externally
 			String phoneNumber = dataURI.getSchemeSpecificPart();
@@ -430,7 +429,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean isLastMsgSent()
 	{
-		Log.d("CHAT THREAD","Checking last msg status ....");
+		Log.d("CHAT THREAD", "Checking last msg status ....");
 		List<ConvMessage> msgList = mConversation.getMessages();
 
 		if ((msgList == null) || (msgList.isEmpty()))
