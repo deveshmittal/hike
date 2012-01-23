@@ -29,6 +29,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
+		Log.d("CONVERSATION ADAPTER","Position : "+position);
 		Context context = getContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
@@ -52,19 +53,29 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			ConvMessage message = messages.get(messages.size() - 1);
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			messageView.setText(message.getMessage());
+			Log.d("CONVERSATION ADAPTER","Msg is : "+message.getMessage()+"	State : "+message.getState().name());
 			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
 			tsView.setText(message.getTimestampFormatted());
+			Typeface tf = messageView.getTypeface();
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
 			{
 				/* set unread messages to BOLD */
-				Typeface tf = messageView.getTypeface();
 				messageView.setTypeface(tf, Typeface.BOLD);
-
 				tf = tsView.getTypeface();
 				tsView.setTypeface(tf, Typeface.BOLD);
 
 				tf = contactView.getTypeface();
 				contactView.setTypeface(tf, Typeface.BOLD);
+			}
+			else
+			{
+				Log.d("CONVERSATION ADAPTER","INSIDE ELSE....Msg is : "+message.getMessage()+"	State : "+message.getState().name()+" , mv: "+tsView+" :: "+tsView.getTypeface());
+				messageView.setTypeface(Typeface.DEFAULT);
+				tf = tsView.getTypeface();
+				tsView.setTypeface(Typeface.DEFAULT);
+
+				tf = contactView.getTypeface();
+				contactView.setTypeface(Typeface.DEFAULT);
 			}
 		}
 		return v;

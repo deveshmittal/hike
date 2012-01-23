@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract.Contacts;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,6 +55,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	protected void onPause()
 	{
 		super.onPause();
+		Log.d("MESSAGE LIST","Currently in pause state. .......");
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
 	}
 
@@ -61,6 +63,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	protected void onResume()
 	{
 		super.onResume();
+		Log.d("MESSAGE LIST","Resumed .....");
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 	}
 
@@ -146,7 +149,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
+		Log.d("MESSAGE LIST","On create is Called .....");
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		if (token == null)
@@ -225,6 +228,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MSG_READ, this);
 
 		mConversationsView.setOnItemClickListener(new OnItemClickListener()
 		{
@@ -292,6 +296,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MSG_READ, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
@@ -313,6 +318,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	{
 		if ( (HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)) )
 		{
+			Log.d("MESSAGE LIST","New msg event sent or received.");
 			ConvMessage message = (ConvMessage) object;
 			/* find the conversation corresponding to this message */
 			String msisdn = message.getMsisdn();
@@ -354,6 +360,18 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			mConversationsAdded.add(conversation.getMsisdn());
 			mAdapter.add(conversation);
 
+			runOnUiThread(this);
+		}
+		else if(HikePubSub.MSG_READ.equals(type))
+		{
+			String msisdn = (String)object;
+			Conversation conv = mConversationsByMSISDN.get(msisdn);
+			ConvMessage msg = conv.getMessages().get(conv.getMessages().size()-1);
+			msg.setState(ConvMessage.State.RECEIVED_READ);
+			Log.d("MESSAGE LIST","Msg is : "+msg.getMessage() + "	State : "+msg.getState().name());
+			conv.getMessages().set(conv.getMessages().size()-1, msg);
+			Log.d("MESSAGE LIST","Msg event received");
+			mAdapter.setNotifyOnChange(false);
 			runOnUiThread(this);
 		}
 	}
