@@ -19,7 +19,7 @@ import com.bsb.hike.utils.HikeWebSocketClient;
 
 /**
  * 
- * @author Vijay , Gautam (Some changes)
+ * @author Vijay , Gautam 
  * Class should be singleton as only one instance is required to manage the components.
  *
  */
@@ -88,7 +88,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 		try
 		{
 			jsonObj = new JSONObject(msg);
-			type = jsonObj.getString("type");
+			type = jsonObj.getString("t");
 		}
 		catch (JSONException e)
 		{
@@ -96,7 +96,7 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			return;
 		}
 
-		if ("message".equals(type))  // this represents msg from another client through tornado server.
+		if ("m".equals(type))  // this represents msg from another client through tornado server.
 		{
 			try
 			{
@@ -105,42 +105,61 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			}
 			catch (JSONException e)
 			{
-				Log.d("JSON", "Invalid JSON", e);
+				Log.d("NETWORK MANAGER", "Invalid JSON", e);
 			}
 		}
-		else if ("typing".equals(type))
+		else if ("st".equals(type)) /* Start Typing event received*/
 		{
-			String msisdn = jsonObj.optString("from");
+			String msisdn = jsonObj.optString("d");
 			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
 		}
-		else if ("stop_typing".equals(type))
+		else if ("et".equals(type)) /* End Typing event received */
 		{
-			String msisdn = jsonObj.optString("from");
+			String msisdn = jsonObj.optString("d");
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
 		}
-		else if ("sms_credits".equals(type))
+		else if ("sc".equals(type)) /* SMS CREDITS */
 		{
-			int sms_credits = jsonObj.optInt("data");
+			int sms_credits = jsonObj.optInt("d");
 			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
 		}
-		else if("msgrcpt".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a recieved msg
+		else if("sr".equals(type)) /* Represents Server has received the msg*/
 		{
-			long msgID = jsonObj.optLong("data");
+			String id = jsonObj.optString("d");
+			long msgID;
+			try
+			{
+				msgID=Long.parseLong(id);
+			}
+			catch(NumberFormatException e)
+			{
+				Log.e("NETWORK MANAGER", "Exception occured while parsing msgId. Exception : "+e);
+				msgID = -1;
+			}
 			this.pubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgID);	
 		}
-		else if("msgDelivered".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a received msg
+		else if("dr".equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a received msg
 		{
-			
-			long msgID = jsonObj.optLong("msgID");
+			String id = jsonObj.optString("d");
+			long msgID;
+			try
+			{
+				msgID=Long.parseLong(id);
+			}
+			catch(NumberFormatException e)
+			{
+				Log.e("NETWORK MANAGER", "Exception occured while parsing msgId. Exception : "+e);
+				msgID = -1;
+			}
 			Log.d("NETWORK MANAGER","Delivery report received for msgid : "+msgID +"	;	REPORT : DELIVERED");
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
 		}
-		else if("msgDeliveredRead".equals(type)) // this handles the case when msg with msgId is received by the tornado server and it send back a received msg
+		else if("mr".equals(type)) // this handles the case when msg with msgId is received by the tornado server and it send back a received msg
 		{
-			JSONArray msgIds = jsonObj.optJSONArray("msgIdArray");
+			JSONArray msgIds = jsonObj.optJSONArray("d");
 			if(msgIds == null)
 			{
-				Log.e("UPDATE ERROR", "Message id Array is empty or null . Check problem");
+				Log.e("NETWORK MANAGER", "Update Error : Message id Array is empty or null . Check problem");
 				return;
 			}
 

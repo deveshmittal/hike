@@ -55,10 +55,9 @@ public class ConvMessage
 	
 	public ConvMessage(JSONObject obj) throws JSONException
 	{
-		this.mMsisdn = obj.getString("from");
-		JSONObject data = obj.getJSONObject("data");
-		this.mMessage = data.getString("msg");
-
+		this.mMsisdn = obj.getString("f"); /*represents msg is coming from another client*/
+		JSONObject data = obj.getJSONObject("d");
+		this.mMessage = data.getString("hm");
 		this.mTimestamp = data.getLong("ts");
 
 		/* prevent us from receiving a message from the future */
@@ -67,7 +66,17 @@ public class ConvMessage
 		/* if we're deserialized an object from json, it's always unread */
 		setState(State.RECEIVED_UNREAD);
 		msgID = -1;
-		mappedMsgId=data.getLong("id");
+		String mappedMsgID = data.getString("i");
+		try
+		{
+			this.mappedMsgId=Long.parseLong(mappedMsgID);
+		}
+		catch(NumberFormatException e)
+		{
+			Log.e("CONVMESSAGE", "Exception occured while parsing msgId. Exception : "+e);
+			this.mappedMsgId = -1;
+			throw new JSONException("Problem in JSON while parsing msgID.");
+		}
 	}
 
 	public String getMessage()
@@ -153,13 +162,16 @@ public class ConvMessage
 	public JSONObject serialize(String type)
 	{
 		JSONObject object = new JSONObject();
+		JSONObject data = new JSONObject();
 		try
 		{
-			object.put("ts", mTimestamp);
-			object.put("msgID", msgID); // added msgID to the JSON Object
-			object.put("type", type);
-			object.put("to", mMsisdn);
-			object.put("body", mMessage);
+			data.put("hm", mMessage);
+			data.put("ts",mTimestamp);
+			data.put("i",msgID);
+		
+			object.put("t", type);
+			object.put("r", mMsisdn);
+			object.put("d",data);
 		}
 		catch (JSONException e)
 		{
@@ -224,14 +236,14 @@ public class ConvMessage
 		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ);
 	}
 
-	public JSONObject serializeDeliveryReport(String type)
+	public JSONObject serializeDeliveryReport()
 	{
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put("msgID", mappedMsgId);
-					object.put("type", type);
-					object.put("to", mMsisdn);
+					object.put("t", "dr");
+					object.put("d", String.valueOf(mappedMsgId)) ;
+					object.put("r", mMsisdn); /* Represents to whom this message has to be sent*/
 				}
 				catch (JSONException e)
 				{
@@ -245,10 +257,10 @@ public class ConvMessage
 				JSONArray ids = new JSONArray();
 				try
 				{
-					ids.put(mappedMsgId);
-					object.put("msgIdArray", ids);
-					object.put("type", "msgDeliveredRead");
-					object.put("to", mMsisdn);
+					ids.put(String.valueOf(mappedMsgId));
+					object.put("d", ids);
+					object.put("t", "mr");
+					object.put("r", mMsisdn);
 				}
 				catch (JSONException e)
 				{

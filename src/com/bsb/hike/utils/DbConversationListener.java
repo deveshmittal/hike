@@ -44,14 +44,14 @@ public class DbConversationListener implements Listener
 			ConvMessage convMessage = (ConvMessage) object;
 			mConversationDb.addConversationMessages(convMessage);
 			Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getConversation().getContactName());
-			mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("send")); // this is used to be sent by the web socket.
+			mPubSub.publish(HikePubSub.WS_SEND, convMessage.serialize("m"));
 		}
 		else if (HikePubSub.MESSAGE_RECEIVED_FROM_SENDER.equals(type))  // represents event when a client receive msg from other client through server.
 		{
 			ConvMessage message = (ConvMessage) object;
 			mConversationDb.addConversationMessages(message);
 			Log.d("DBCONVERSATION LISTENER","Receiver received Message : "+message.getMessage() + "		;	Receiver Msg ID : "+message.getMsgID()+"	; Mapped msgID : "+message.getMappedMsgID());
-			mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport("msgDelivered")); // handle return to sender
+			mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReport()); // handle return to sender
 			mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, message);		
 		}
 		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))

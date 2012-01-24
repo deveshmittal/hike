@@ -414,9 +414,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put("type", "msgDeliveredRead");
-					object.put("to", mConversation.getMsisdn());
-					object.put("msgIdArray", ids);
+					object.put("t", "mr");
+					object.put("r", mConversation.getMsisdn());
+					object.put("d", ids);
 				}
 				catch (JSONException e)
 				{
@@ -602,7 +602,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{ // text hasn't changed
 				// in 10 seconds,
 				// send an event
-				mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("stop_typing"));
+				mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("et"));
 				mTextLastChanged = 0;
 			}
 			else
@@ -685,7 +685,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			// we're currently not in 'typing' mode
 			mTextLastChanged = System.currentTimeMillis();
 			// fire an event
-			mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("typing"));
+			mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("st"));
 
 			// create a timer to clear the event
 			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear
