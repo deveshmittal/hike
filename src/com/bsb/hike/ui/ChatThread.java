@@ -141,6 +141,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mInputNumberView.setText("");
 		}
 
+		/* if we've got some pre-filled text, add it here */
+		if (TextUtils.isEmpty(msg)) {
+			mBottomView.setVisibility(View.GONE);
+		} else {
+			mComposeView.setText(msg);
+		}
 		mDbhelper = new HikeUserDatabase(this);
 		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
 		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike };
