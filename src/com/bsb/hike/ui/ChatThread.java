@@ -155,7 +155,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			@Override
 			public Cursor runQuery(CharSequence constraint)
 			{
-				String str = (constraint != null) ? constraint + "%" : "%";
+				String str = (constraint != null) ? "%" + constraint + "%" : "%";
 				mCursor = mDbhelper.findUsers(str);
 				return mCursor;
 			}
