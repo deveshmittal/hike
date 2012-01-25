@@ -128,13 +128,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		mNameView.setVisibility(View.GONE);
 		mMetadataView.setVisibility(View.GONE);
+		mComposeView.removeTextChangedListener(this);
 
 		/* if we've got some pre-filled text, add it here */
 		if (TextUtils.isEmpty(msg)) {
 			mBottomView.setVisibility(View.GONE);
 		} else {
 			mComposeView.setText(msg);
+			/* make sure that the autoselect text is empty */
+			mInputNumberView.setText("");
 		}
+
 		mDbhelper = new HikeUserDatabase(this);
 		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
 		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike };
@@ -282,22 +286,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 
+		mConversationDb = new HikeConversationsDatabase(this);
+
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
-		Uri dataURI = intent.getData();
-
-		mConversationDb = new HikeConversationsDatabase(this);
-
-		/* if we have an intent that specifies a user, open that users thread */
-		if (((dataURI != null) && ("smsto".equals(dataURI.getScheme()))) || (intent.hasExtra("msisdn")))
-		{
-			onNewIntent(intent);
-		}
-		else
-		{
-			createAutoCompleteView(intent.getStringExtra("msg"));
-		}
+		onNewIntent(intent);
 
 		/* add a handler on the UI thread so we can post delayed messages */
 		mUiThreadHandler = new Handler();
@@ -369,6 +363,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		Uri dataURI = intent.getData();
 
+		if (mAdapter != null)
+		{
+			mAdapter.clear();
+		}
+
+		mConversation = null;
+
 		if ((dataURI != null) && "smsto".equals(dataURI.getScheme()))
 		{
 			// Intent received externally
@@ -388,16 +389,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mContactId = null;
 				mContactName = mContactNumber = phoneNumber;
 			}
+
+			createConversation();
 		}
-		else
+		else if (intent.hasExtra("msisdn"))
 		{
 			// selected chat from conversation list
 			mContactNumber = intent.getStringExtra("msisdn");
 			mContactId = intent.getStringExtra("id");
 			mContactName = intent.getStringExtra("name");
-		}
 
-		createConversation();
+			createConversation();
+		}
+		else
+		{
+			createAutoCompleteView(intent.getStringExtra("msg"));
+		}
 	}
 
 	/**
@@ -627,6 +634,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ConvMessage findMessageById(long msgID)
 	{
+		if (mAdapter == null)
+		{
+			return null;
+		}
+
 		int count = mAdapter.getCount();
 		for (int i = 0; i < count; ++i)
 		{
@@ -722,7 +734,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		/* don't send typing notifications for non-hike chats */
-		if (!mConversation.isOnhike())
+		if ((mConversation == null) || (!mConversation.isOnhike()))
 		{
 			return;
 		}
