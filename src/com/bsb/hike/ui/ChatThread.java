@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -473,6 +474,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mPubSub.publish(HikePubSub.WS_SEND, object);
 			}
 		}
+
+		/* clear any toast notifications */
+		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		mgr.cancel((int) mConversation.getConvId());
 	}
 
 	private boolean isLastMsgSent()
