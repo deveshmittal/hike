@@ -308,7 +308,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			long msgId = c.getLong(msgIdIdx);
 			long mappedMsgId = c.getLong(mappedMsgIdIdx);
-			ids.put(mappedMsgId);
+			ids.put(String.valueOf(mappedMsgId));
 			sb.append(msgId);
 			if (!c.isLast())
 			{

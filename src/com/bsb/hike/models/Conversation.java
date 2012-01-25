@@ -190,8 +190,8 @@ public class Conversation implements Comparable<Conversation>
 		JSONObject object = new JSONObject();
 		try
 		{
-			object.put("type", type);
-			object.put("to", msisdn);
+			object.put("t", type);
+			object.put("d", msisdn);
 		}
 		catch (JSONException e)
 		{
