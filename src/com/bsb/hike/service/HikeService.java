@@ -155,12 +155,8 @@ public class HikeService extends Service
 	private PingSender pingSender;
 
 	private HikeMqttManager mMqttManager;
-<<<<<<< HEAD
-
-=======
 	private String mToken;
 	private ContactListChangeIntentReceiver contactsReceived;
->>>>>>> a0573d7... Add a ContentObserver that will get called whenever the contacts are updated
 	private Handler mHandler;
 
 	/************************************************************************/
