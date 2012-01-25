@@ -1,18 +1,23 @@
 package com.bsb.hike.service;
 
-import com.bsb.hike.HikeMessengerApp;
+import org.json.JSONObject;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
-public class HikeServiceConnection implements ServiceConnection
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+
+public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnection
 {
 	private Messenger mService;
 
@@ -81,5 +86,30 @@ public class HikeServiceConnection implements ServiceConnection
 		}
 
 		return mConnection;
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object)
+	{
+		if (HikePubSub.MQTT_PUBLISH.equals(type))
+		{
+			JSONObject o = (JSONObject) object;
+			String data = o.toString();
+			Message msg = Message.obtain();
+			msg.what = HikeService.MSG_APP_PUBLISH;
+			Bundle bundle = new Bundle();
+			bundle.putString(HikeConstants.MESSAGE, data);
+			msg.setData(bundle);
+			msg.replyTo = this.mMessenger;
+			try
+			{
+				mService.send(msg);
+			}
+			catch (RemoteException e)
+			{
+				/* Service is dead.  What to do? */
+				Log.e("HikeServiceConnection", "Remote Service dead", e);
+			}
+		}
 	}
 };

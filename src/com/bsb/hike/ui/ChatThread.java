@@ -8,18 +8,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -116,11 +123,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mTextLastChanged = (mTextLastChanged == Long.MAX_VALUE) ? 0 : mTextLastChanged;
 	}
 
-	private void createAutoCompleteView()
+	/* msg is any text we want to show initially */
+	private void createAutoCompleteView(String msg)
 	{
-		mBottomView.setVisibility(View.GONE);
 		mNameView.setVisibility(View.GONE);
 		mMetadataView.setVisibility(View.GONE);
+		mComposeView.removeTextChangedListener(this);
+
+		/* if we've got some pre-filled text, add it here */
+		if (TextUtils.isEmpty(msg)) {
+			mBottomView.setVisibility(View.GONE);
+		} else {
+			mComposeView.setText(msg);
+			/* make sure that the autoselect text is empty */
+			mInputNumberView.setText("");
+		}
 
 		mDbhelper = new HikeUserDatabase(this);
 		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
@@ -142,7 +159,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			@Override
 			public Cursor runQuery(CharSequence constraint)
 			{
-				String str = (constraint != null) ? constraint + "%" : "%";
+				String str = (constraint != null) ? "%" + constraint + "%" : "%";
 				mCursor = mDbhelper.findUsers(str);
 				return mCursor;
 			}
@@ -266,22 +283,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
 
-		mPubSub = HikeMessengerApp.getPubSub();
-		Object o = getLastNonConfigurationInstance();
-		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
-		Uri dataURI = intent.getData();
+		/* register for long-press's */
+		registerForContextMenu(mConversationsView);
 
 		mConversationDb = new HikeConversationsDatabase(this);
 
-		/* if we have an intent that specifies a user, open that users thread */
-		if (((dataURI != null) && ("smsto".equals(dataURI.getScheme()))) || (intent.hasExtra("msisdn")))
-		{
-			onNewIntent(intent);
-		}
-		else
-		{
-			createAutoCompleteView();
-		}
+		mPubSub = HikeMessengerApp.getPubSub();
+		Object o = getLastNonConfigurationInstance();
+		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
+		onNewIntent(intent);
 
 		/* add a handler on the UI thread so we can post delayed messages */
 		mUiThreadHandler = new Handler();
@@ -292,6 +302,38 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item)
+	{
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		ConvMessage message = mAdapter.getItem((int) info.id);
+		switch (item.getItemId())
+		{
+		case R.id.copy:
+			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+			clipboard.setText(message.getMessage());
+			return true;
+		case R.id.forward:
+			Intent intent = new Intent(this, ChatThread.class);
+			intent.putExtra("msg", message.getMessage());
+			startActivity(intent);
+			return true;
+		case R.id.delete:
+			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
+			mAdapter.remove(message);
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
+	{
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.message_menu, menu);
 	}
 
 	public void onSendClick(View v)
@@ -321,6 +363,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		Uri dataURI = intent.getData();
 
+		if (mAdapter != null)
+		{
+			mAdapter.clear();
+		}
+
+		mConversation = null;
+
 		if ((dataURI != null) && "smsto".equals(dataURI.getScheme()))
 		{
 			// Intent received externally
@@ -340,16 +389,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mContactId = null;
 				mContactName = mContactNumber = phoneNumber;
 			}
+
+			createConversation();
 		}
-		else
+		else if (intent.hasExtra("msisdn"))
 		{
 			// selected chat from conversation list
 			mContactNumber = intent.getStringExtra("msisdn");
 			mContactId = intent.getStringExtra("id");
 			mContactName = intent.getStringExtra("name");
-		}
 
-		createConversation();
+			createConversation();
+		}
+		else
+		{
+			createAutoCompleteView(intent.getStringExtra("msg"));
+		}
 	}
 
 	/**
@@ -426,6 +481,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mPubSub.publish(HikePubSub.WS_SEND, object);
 			}
 		}
+
+		/* clear any toast notifications */
+		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		mgr.cancel((int) mConversation.getConvId());
 	}
 
 	private boolean isLastMsgSent()
@@ -575,6 +634,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ConvMessage findMessageById(long msgID)
 	{
+		if (mAdapter == null)
+		{
+			return null;
+		}
+
 		int count = mAdapter.getCount();
 		for (int i = 0; i < count; ++i)
 		{
@@ -670,7 +734,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		/* don't send typing notifications for non-hike chats */
-		if (!mConversation.isOnhike())
+		if ((mConversation == null) || (!mConversation.isOnhike()))
 		{
 			return;
 		}

@@ -342,4 +342,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		values.put("msgStatus", status);
 		mDb.update(MESSAGESTABLE, values, "msgid in " + sb, null);
 	}
+
+	/* deletes a single message */
+	public void deleteMessage(long msgId)
+	{
+		Long[] bindArgs = new Long[] { msgId };
+		mDb.execSQL("DELETE FROM " + MESSAGESTABLE + " WHERE msgid = ?", bindArgs);
+	}
 }
