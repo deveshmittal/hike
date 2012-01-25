@@ -72,6 +72,9 @@ public class HikePubSub implements Runnable
 
 	public static final String MSG_READ = "msgRead";
 
+	/* published when a message is deleted */
+	public static final String MESSAGE_DELETED = "messageDeleted";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

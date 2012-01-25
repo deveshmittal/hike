@@ -34,6 +34,7 @@ public class DbConversationListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELETED, this);
 	}
 
 	@Override
@@ -75,6 +76,10 @@ public class DbConversationListener implements Listener
 			long[] ids = (long[]) object;
 			Log.d("DBCONVERSATION LISTENER", "Message delivered read for ids " + ids);
 			updateDbBatch(ids,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
+		}
+		else if (HikePubSub.MESSAGE_DELETED.equals(type))
+		{
+			mConversationDb.deleteMessage((Long) object);
 		}
 	}
 

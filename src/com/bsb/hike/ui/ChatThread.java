@@ -13,13 +13,19 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -116,12 +122,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mTextLastChanged = (mTextLastChanged == Long.MAX_VALUE) ? 0 : mTextLastChanged;
 	}
 
-	private void createAutoCompleteView()
+	/* msg is any text we want to show initially */
+	private void createAutoCompleteView(String msg)
 	{
-		mBottomView.setVisibility(View.GONE);
 		mNameView.setVisibility(View.GONE);
 		mMetadataView.setVisibility(View.GONE);
 
+		/* if we've got some pre-filled text, add it here */
+		if (TextUtils.isEmpty(msg)) {
+			mBottomView.setVisibility(View.GONE);
+		} else {
+			mComposeView.setText(msg);
+		}
 		mDbhelper = new HikeUserDatabase(this);
 		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
 		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike };
@@ -266,6 +278,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
 
+		/* register for long-press's */
+		registerForContextMenu(mConversationsView);
+
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
@@ -280,7 +295,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			createAutoCompleteView();
+			createAutoCompleteView(intent.getStringExtra("msg"));
 		}
 
 		/* add a handler on the UI thread so we can post delayed messages */
@@ -292,6 +307,38 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item)
+	{
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		ConvMessage message = mAdapter.getItem((int) info.id);
+		switch (item.getItemId())
+		{
+		case R.id.copy:
+			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+			clipboard.setText(message.getMessage());
+			return true;
+		case R.id.forward:
+			Intent intent = new Intent(this, ChatThread.class);
+			intent.putExtra("msg", message.getMessage());
+			startActivity(intent);
+			return true;
+		case R.id.delete:
+			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
+			mAdapter.remove(message);
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
+	{
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.message_menu, menu);
 	}
 
 	public void onSendClick(View v)
