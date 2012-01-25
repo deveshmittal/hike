@@ -28,6 +28,6 @@ No hidden costs and no data plan required</string>
     <string name="address_book_failed">Shucks, we couldn\'t scan your address book.  Try again?</string>
     <string name="credits_left">%1$d credits left</string>
     <string name="service_running_message">Connected to Hike</string>
-    <string name="forward">forward</string>
-    <string name="copy">copy</string>
+    <string name="forward">Forward</string>
+    <string name="copy">Copy</string>
 </resources>
