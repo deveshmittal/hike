@@ -507,4 +507,28 @@ public class HikeMqttManager implements MqttSimpleCallback
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
 		}
 	}
+
+	public void send(String message)
+	{
+		try
+		{
+			mqttClient.publish(topic, message.getBytes(), 1, false);
+		}
+		catch (MqttNotConnectedException e)
+		{
+			Log.e("HikeMqttManager", "MQTT Not Connected", e);
+		}
+		catch (MqttPersistenceException e)
+		{
+			Log.e("HikeMqttManager", "MQTT Not Connected", e);
+		}
+		catch (IllegalArgumentException e)
+		{
+			Log.e("HikeMqttManager", "MQTT Not Connected", e);
+		}
+		catch (MqttException e)
+		{
+			Log.e("HikeMqttManager", "MQTT Not Connected", e);
+		}
+	}
 }
