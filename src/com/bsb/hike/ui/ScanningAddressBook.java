@@ -107,6 +107,7 @@ public class ScanningAddressBook extends Activity
 		}
 		else
 		{
+			mTask = new ScanAddressBookTask();
 			mTask.execute();
 		}
 	}
