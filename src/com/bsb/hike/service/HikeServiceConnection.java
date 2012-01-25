@@ -13,6 +13,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 
@@ -97,7 +98,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 			Message msg = Message.obtain();
 			msg.what = HikeService.MSG_APP_PUBLISH;
 			Bundle bundle = new Bundle();
-			bundle.putString("msg", data);
+			bundle.putString(HikeConstants.MESSAGE, data);
 			msg.setData(bundle);
 			msg.replyTo = this.mMessenger;
 			try

@@ -22,6 +22,7 @@ import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.MessagesList;
@@ -65,7 +66,7 @@ public class HikeService extends Service
 				break;
 			case MSG_APP_PUBLISH:
 				Bundle bundle = msg.getData();
-				String message = bundle.getString("msg");
+				String message = bundle.getString(HikeConstants.MESSAGE);
 				mMqttManager.send(message);
 			}
 		}
