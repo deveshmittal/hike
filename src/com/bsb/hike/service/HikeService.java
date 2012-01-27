@@ -14,7 +14,9 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
@@ -41,6 +43,11 @@ public class HikeService extends Service
 
 	class IncomingHandler extends Handler
 	{
+		public IncomingHandler(Looper looper)
+		{
+			super(looper);
+		}
+
 		@Override
 		public void handleMessage(Message msg)
 		{
@@ -151,7 +158,9 @@ public class HikeService extends Service
 		super.onCreate();
 
 		Log.d("HikeService", "onCreate called");
-		mMessenger = new Messenger(new IncomingHandler());
+		HandlerThread handlerThread = new HandlerThread("MQTTThread");
+		handlerThread.start();
+		mMessenger = new Messenger(new IncomingHandler(handlerThread.getLooper()));
 		pendingMessages = new ArrayList<String>();
 
 		// reset status variable to initial state
