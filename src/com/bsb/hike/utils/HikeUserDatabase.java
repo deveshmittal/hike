@@ -19,22 +19,22 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	private SQLiteDatabase mReadDb;
 
-	private static final int DATABASE_VERSION = 2;
-
-	private static final String DATABASE_NAME = "hikeusers";
-
-	private static final String DATABASE_TABLE = "users";
-
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
-		String create = "CREATE TABLE IF NOT EXISTS users ( id STRING PRIMARY KEY ON CONFLICT REPLACE NOT NULL, name STRING, msisdn TEXT, onhike INTEGER )";
+		String create = "CREATE TABLE IF NOT EXISTS "+DBConstants.USERS_TABLE 
+												+" ( " 
+														+ DBConstants.ID + " STRING PRIMARY KEY ON CONFLICT REPLACE NOT NULL, "
+														+ DBConstants.NAME +" STRING, "
+														+ DBConstants.MSISDN+" TEXT, "
+														+ DBConstants.ONHIKE+" INTEGER "
+												+ " )";
 		db.execSQL(create);
 	}
 
 	public HikeUserDatabase(Context context)
 	{
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		super(context, DBConstants.USERS_DATABASE_NAME, null, DBConstants.USERS_DATABASE_VERSION);
 		mDb = getWritableDatabase();
 		mReadDb = getReadableDatabase();
 	}
@@ -50,7 +50,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
-		String drop = "DROP TABLE IF EXISTS " + DATABASE_TABLE;
+		String drop = "DROP TABLE IF EXISTS " + DBConstants.USERS_TABLE;
 		db.execSQL(drop);
 		onCreate(db);
 	}
@@ -62,11 +62,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		try
 		{
-			InsertHelper ih = new InsertHelper(db, DATABASE_TABLE);
-			final int msisdnColumn = ih.getColumnIndex("msisdn");
-			final int idColumn = ih.getColumnIndex("id");
-			final int nameColumn = ih.getColumnIndex("name");
-			final int onHikeColumn = ih.getColumnIndex("onhike");
+			InsertHelper ih = new InsertHelper(db, DBConstants.USERS_TABLE);
+			final int msisdnColumn = ih.getColumnIndex(DBConstants.MSISDN);
+			final int idColumn = ih.getColumnIndex(DBConstants.ID);
+			final int nameColumn = ih.getColumnIndex(DBConstants.NAME);
+			final int onHikeColumn = ih.getColumnIndex(DBConstants.ONHIKE);
 			for (ContactInfo contact : contacts)
 			{
 				ih.prepareForReplace();
@@ -98,21 +98,28 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public void setAddressBook(List<ContactInfo> contacts) throws DbException
 	{
 		/* delete all existing entries from database */
-		mDb.delete(DATABASE_TABLE, null, null);
+		mDb.delete(DBConstants.USERS_TABLE, null, null);
 
 		addContacts(contacts);
 	}
 
 	public Cursor findUsers(String partialName)
 	{
-		Cursor cursor = mDb.rawQuery("SELECT name, id AS _id, msisdn, onhike, onhike=0 AS NotOnHike FROM users WHERE name LIKE ? ORDER BY name, NotOnHike",
-				new String[] { partialName });
+		Cursor cursor = mDb.rawQuery("SELECT "
+															+ DBConstants.NAME+", "
+															+ DBConstants.ID+" AS _id, "
+															+ DBConstants.MSISDN+", "
+															+ DBConstants.ONHIKE+", "
+															+ DBConstants.ONHIKE+"=0 "+ "AS NotOnHike "
+														+" FROM "+DBConstants.USERS_TABLE
+														+" WHERE "+DBConstants.NAME+" LIKE ? ORDER BY "+DBConstants.NAME+", NotOnHike",
+														new String[] { partialName });
 		return cursor;
 	}
 
 	public ContactInfo getContactInfoFromMSISDN(String msisdn)
 	{
-		Cursor c = mReadDb.query(DATABASE_TABLE, new String[] { "msisdn", "id", "name", "onhike" }, "msisdn=?", new String[] { msisdn }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE }, DBConstants.MSISDN+"=?", new String[] { msisdn }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		if (contactInfos.isEmpty())
 		{
@@ -125,10 +132,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	private List<ContactInfo> extractContactInfo(Cursor c)
 	{
 		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>(c.getCount());
-		int idx = c.getColumnIndex("id");
-		int msisdnIdx = c.getColumnIndex("msisdn");
-		int nameIdx = c.getColumnIndex("name");
-		int onhikeIdx = c.getColumnIndex("onhike");
+		int idx = c.getColumnIndex(DBConstants.ID);
+		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		int nameIdx = c.getColumnIndex(DBConstants.NAME);
+		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
 		while (c.moveToNext())
 		{
 			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getInt(onhikeIdx) != 0);
@@ -139,7 +146,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public ContactInfo getContactInfoFromId(String id)
 	{
-		Cursor c = mReadDb.query(DATABASE_TABLE, new String[] { "msisdn", "id", "name", "onhike" }, "id=?", new String[] { id }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE }, DBConstants.ID+"=?", new String[] { id }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -155,7 +162,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	 * 
 	 * @param hikeContactInfo
 	 *            contact to add
-	 * @return true iff the insert was successful
+	 * @return true if the insert was successful
 	 */
 	public void addContact(ContactInfo hikeContactInfo) throws DbException
 	{
