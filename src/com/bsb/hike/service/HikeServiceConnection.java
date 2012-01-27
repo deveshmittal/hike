@@ -29,6 +29,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 	{
 		this.mApp = app;
 		this.mMessenger = messenger;
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH, this);
 	}
 
 	public void onServiceConnected(ComponentName className, IBinder service)

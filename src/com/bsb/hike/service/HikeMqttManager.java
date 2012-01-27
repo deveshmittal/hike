@@ -1,5 +1,7 @@
 package com.bsb.hike.service;
 
+import java.util.ArrayList;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,6 +12,7 @@ import android.os.PowerManager.WakeLock;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -204,13 +207,37 @@ public class HikeMqttManager implements MqttSimpleCallback
 		}
 	}
 
+	private boolean unsubscribeFromTopics(String[] topics)
+	{
+		if (!isConnected())
+		{
+			Log.e("HikeMqttManager", "Unable to unsubscribe since we're not connected");
+			return false;
+		}
+
+		try
+		{
+			mqttClient.unsubscribe(topics);
+		}
+		catch (IllegalArgumentException e)
+		{
+			Log.e("HikeMqttManager", "IllegalArgument trying to unsubscribe", e);
+		}
+		catch (MqttException e)
+		{
+			Log.e("HikeMqttManager", "Exception trying to unsubscribe", e);
+		}
+		return false;
+	}
+
 	/*
 	 * Send a request to the message broker to be sent messages published with the specified topic name. Wildcards are allowed.
 	 */
-	private void subscribeToTopic(String topicName)
+	private void subscribeToTopics(String[] topics)
 	{
 		boolean subscribed = false;
 
+		Log.d("HikeMqttManager", "Subscribe to " + topics.length + " topics");
 		if (isConnected() == false)
 		{
 			// quick sanity check - don't try and subscribe if we
@@ -222,8 +249,13 @@ public class HikeMqttManager implements MqttSimpleCallback
 		{
 			try
 			{
-				String[] topics = { topicName };
-				mqttClient.subscribe(topics, qualitiesOfService);
+				int[] qos = new int[topics.length];
+				for (int i = 0; i < topics.length; ++i)
+				{
+					qos[i] = 1;
+				}
+
+				mqttClient.subscribe(topics, qos);
 
 				subscribed = true;
 			}
@@ -350,7 +382,7 @@ public class HikeMqttManager implements MqttSimpleCallback
 				// try to reconnect
 				if (connectToBroker())
 				{
-					subscribeToTopic(this.topic);
+					subscribeToTopics(getTopics());
 				}
 			}
 		}
@@ -361,6 +393,22 @@ public class HikeMqttManager implements MqttSimpleCallback
 			wl.release();
 
 		}
+	}
+
+	private String[] getTopics()
+	{
+		boolean appConnected = mHikeService.appIsConnected();
+		ArrayList<String> topics = new ArrayList<String>(2 + (appConnected ? 0 : 1));
+		topics.add(this.topic + HikeConstants.APP_TOPIC);
+		topics.add(this.topic + HikeConstants.SERVICE_TOPIC);
+
+		/* only subscribe to UI events if the app is currently connected */
+		if (appConnected)
+		{
+			topics.add(this.topic + HikeConstants.UI_TOPIC);
+		}
+
+		return (String[]) topics.toArray(new String[0]);
 	}
 
 	/*
@@ -464,7 +512,7 @@ public class HikeMqttManager implements MqttSimpleCallback
 			// reconnect
 			if (connectToBroker())
 			{
-				subscribeToTopic(this.topic);
+				subscribeToTopics(getTopics());
 			}
 		}
 	}
@@ -497,7 +545,7 @@ public class HikeMqttManager implements MqttSimpleCallback
 				// note that this topicName could include a wildcard, so
 				// even just with one subscription, we could receive
 				// messages for multiple topics
-				subscribeToTopic(this.topic);
+				subscribeToTopics(getTopics());
 			}
 		}
 		else
@@ -512,7 +560,7 @@ public class HikeMqttManager implements MqttSimpleCallback
 	{
 		try
 		{
-			mqttClient.publish(topic, message.getBytes(), 1, false);
+			mqttClient.publish(this.topic + HikeConstants.PUBLISH_TOPIC, message.getBytes(), 1, false);
 		}
 		catch (MqttNotConnectedException e)
 		{
@@ -530,5 +578,15 @@ public class HikeMqttManager implements MqttSimpleCallback
 		{
 			Log.e("HikeMqttManager", "MQTT Not Connected", e);
 		}
+	}
+
+	public void unsubscribeFromUIEvents()
+	{
+		unsubscribeFromTopics(new String[] { this.topic + HikeConstants.UI_TOPIC });
+	}
+
+	public void subscribeToUIEvents()
+	{
+		subscribeToTopics(new String[]{ this.topic + HikeConstants.UI_TOPIC});
 	}
 }

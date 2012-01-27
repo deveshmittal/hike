@@ -48,6 +48,10 @@ public class HikeService extends Service
 			switch (msg.what)
 			{
 			case MSG_APP_CONNECTED:
+				if (mMqttManager.isConnected())
+				{
+					mMqttManager.subscribeToUIEvents();
+				}
 				asyncStart();
 
 				mApp = msg.replyTo;
@@ -59,6 +63,7 @@ public class HikeService extends Service
 				pendingMessages.clear();
 				break;
 			case MSG_APP_DISCONNECTED:
+				mMqttManager.unsubscribeFromUIEvents();
 				mApp = null;
 				break;
 			case MSG_APP_TOKEN_CREATED:
@@ -67,6 +72,7 @@ public class HikeService extends Service
 			case MSG_APP_PUBLISH:
 				Bundle bundle = msg.getData();
 				String message = bundle.getString(HikeConstants.MESSAGE);
+				Log.d("HikeService", "mqtt-message:" + message);
 				mMqttManager.send(message);
 			}
 		}
@@ -97,6 +103,7 @@ public class HikeService extends Service
 		{
 			//client is dead :(
 			mApp = null;
+			mMqttManager.unsubscribeFromUIEvents();
 			Log.e("HikeService", "Can't send message to the application");
 			return false;
 		}
@@ -447,5 +454,10 @@ public class HikeService extends Service
 		}
 
 		return false;
+	}
+
+	public boolean appIsConnected()
+	{
+		return mApp != null;
 	}
 }
