@@ -191,7 +191,7 @@ public class Conversation implements Comparable<Conversation>
 		try
 		{
 			object.put("t", type);
-			object.put("d", msisdn);
+			object.put("r", msisdn);
 		}
 		catch (JSONException e)
 		{
