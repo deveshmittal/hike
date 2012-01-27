@@ -247,22 +247,28 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			public void onItemClick(AdapterView<?> adapter, View view, int pos, long id)
 			{
 				Conversation conversation = (Conversation) adapter.getItemAtPosition(pos);
-				Intent intent = new Intent(MessagesList.this, ChatThread.class);
-				if (conversation.getContactName() != null)
-				{
-					intent.putExtra("name", conversation.getContactName());
-				}
-				if (conversation.getContactId() != null)
-				{
-					intent.putExtra("id", conversation.getContactId());
-				}
-				intent.putExtra("msisdn", conversation.getMsisdn());
+				Intent intent = createIntentForConversation(conversation);
 				startActivity(intent);
 			}
 		});
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
+	}
+
+	private Intent createIntentForConversation(Conversation conversation)
+	{
+		Intent intent = new Intent(MessagesList.this, ChatThread.class);
+		if (conversation.getContactName() != null)
+		{
+			intent.putExtra("name", conversation.getContactName());
+		}
+		if (conversation.getContactId() != null)
+		{
+			intent.putExtra("id", conversation.getContactId());
+		}
+		intent.putExtra("msisdn", conversation.getMsisdn());
+		return intent;
 	}
 
 	@Override
@@ -272,9 +278,20 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		Conversation conv = mAdapter.getItem((int) info.id);
 		switch (item.getItemId())
 		{
+		case R.id.pin:
+	        Intent shortcutIntent = createIntentForConversation(conv);
+	        Intent intent = new Intent();
+	        Log.i("CreateShortcut", "Creating intent for broadcasting");
+	        intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+	        intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getContactName());
+	        intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(this, R.drawable.ic_hikelogo));
+	        intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+	        sendBroadcast(intent);
+			return true;
 		case R.id.delete:
 			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 			task.execute(conv);
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
