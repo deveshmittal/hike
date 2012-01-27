@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -32,18 +30,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public HikeConversationsDatabase(Context context)
 	{
-		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		super(context, DBConstants.CONVERSATIONS_DATABASE_NAME, null, DBConstants.CONVERSATIONS_DATABASE_VERSION);
 		mDb = getWritableDatabase();
 		mCtx = context;
 	}
-
-	private static final int DATABASE_VERSION = 1;
-
-	private static final String MESSAGESTABLE = "messages";
-
-	private static final String CONVERSATIONSTABLE = "conversations";
-
-	private static final String DATABASE_NAME = "chats";
 
 	@Override
 	public void onCreate(SQLiteDatabase db)
@@ -52,13 +42,30 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			db = mDb;
 		}
-		String sql = "CREATE TABLE IF NOT EXISTS " + MESSAGESTABLE + "(message STRING, " + "msgStatus INTEGER, " + // this is to check if msg sent or recieved of the msg sent.
-				"timestamp INTEGER, " + "msgid INTEGER PRIMARY KEY AUTOINCREMENT, " + "mappedMsgId INTEGER, " + "convid INTEGER)";
+		String sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.MESSAGES_TABLE 
+																												+ " ( "
+																														+ DBConstants.MESSAGE +" STRING, " 
+																														+ DBConstants.MSG_STATUS+" INTEGER, " /* this is to check if msg sent or recieved of the msg sent. */
+																														+ DBConstants.TIMESTAMP+" INTEGER, "
+																														+ DBConstants.MESSAGE_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, " 
+																														+ DBConstants.MAPPED_MSG_ID+" INTEGER, " 
+																														+ DBConstants.CONV_ID+" INTEGER" 
+																												+ " ) ";
 
 		db.execSQL(sql);
-		sql = "CREATE INDEX IF NOT EXISTS conversation_idx ON " + MESSAGESTABLE + "( convid, timestamp DESC)";
+		sql = "CREATE INDEX IF NOT EXISTS "+DBConstants.CONVERSATION_INDEX +" ON " + DBConstants.MESSAGES_TABLE  
+																												+ " ( "
+																														+ DBConstants.CONV_ID+" , "
+																														+ DBConstants.TIMESTAMP +" DESC"
+																												+ " )";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + CONVERSATIONSTABLE + "(convid INTEGER PRIMARY KEY AUTOINCREMENT, " + "onhike INTEGER, " + "contactid STRING, " + "msisdn UNIQUE)";
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.CONVERSATIONS_TABLE 
+																												+ " ( "
+																														+ DBConstants.CONV_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, " 
+																														+ DBConstants.ONHIKE +" INTEGER, " 
+																														+ DBConstants.CONTACT_ID +" STRING, " 
+																														+ DBConstants.MSISDN +" UNIQUE"
+																												+ " )";
 		db.execSQL(sql);
 	}
 
@@ -69,8 +76,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db = mDb;
 		}
 
-		db.execSQL("DROP TABLE IF EXISTS " + CONVERSATIONSTABLE);
-		db.execSQL("DROP TABLE IF EXISTS " + MESSAGESTABLE);
+		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.CONVERSATIONS_TABLE);
+		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.MESSAGES_TABLE);
 	}
 
 	@Override
@@ -97,9 +104,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public void updateMsgStatus(long msgID, int val)
 	{
 		ContentValues values = new ContentValues();
-		values.put("msgStatus", val);
+		values.put(DBConstants.MSG_STATUS, val);
 		String[] whereArgs = { String.valueOf(msgID) };
-		int rowsAffected = mDb.update(MESSAGESTABLE, values, "msgid=?", whereArgs);
+		int rowsAffected = mDb.update(DBConstants.MESSAGES_TABLE, values, DBConstants.MESSAGE_ID+"=?", whereArgs);
 		Log.d("HIKE CONVERSATION DB", "Update Msg status to : " + ConvMessage.stateValue(val) + "	;	for msgID : " + msgID + "	;	Rows Affected : " + rowsAffected);
 	}
 
@@ -123,8 +130,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public void addConversations(List<ConvMessage> convMessages)
 	{
-		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + MESSAGESTABLE + " (message, msgStatus, timestamp,mappedMsgId ,convid) "
-				+ "SELECT ?, ?, ?, ?, convid FROM " + CONVERSATIONSTABLE + " WHERE " + CONVERSATIONSTABLE + ".msisdn=?");
+		SQLiteStatement insertStatement = mDb.compileStatement("INSERT INTO " + DBConstants.MESSAGES_TABLE 
+																												+ " ( "
+																														+ DBConstants.MESSAGE+","
+																														+ DBConstants.MSG_STATUS+","
+																														+ DBConstants.TIMESTAMP+","
+																														+ DBConstants.MAPPED_MSG_ID+" ,"
+																														+ DBConstants.CONV_ID
+																												+ " ) "
+																												+ " SELECT ?, ?, ?, ?, "+ DBConstants.CONV_ID 
+																												+ " FROM " + DBConstants.CONVERSATIONS_TABLE 
+																												+ " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."+DBConstants.MSISDN+"=?");
 		mDb.beginTransaction();
 
 		long msgId = -1;
@@ -148,10 +164,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 			else
 			{
-				Cursor c = mDb.query(CONVERSATIONSTABLE, new String[] { "convid","onhike","contactid" }, "msisdn=?",new String[] { conv.getMsisdn()}, null, null, null);
-				final int convIdIdx = c.getColumnIndex("convid");
-				final int onhikeIdIdx = c.getColumnIndex("onhike");
-				final int contactIdIdx = c.getColumnIndex("contactid");
+				Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID,DBConstants.ONHIKE,DBConstants.CONTACT_ID }, DBConstants.MSISDN+"=?",new String[] { conv.getMsisdn()}, null, null, null);
+				final int convIdIdx = c.getColumnIndex(DBConstants.CONV_ID);
+				final int onhikeIdIdx = c.getColumnIndex(DBConstants.ONHIKE);
+				final int contactIdIdx = c.getColumnIndex(DBConstants.CONTACT_ID);
 				while (c.moveToNext())
 				{
 					long convId = c.getLong(convIdIdx);
@@ -175,8 +191,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		for (int i = 0; i < ids.length; i++)
 		{
 			Long[] bindArgs = new Long[] { ids[i] };
-			mDb.execSQL("DELETE FROM " + CONVERSATIONSTABLE + " WHERE convid = ?", bindArgs);
-			mDb.execSQL("DELETE FROM " + MESSAGESTABLE + " WHERE convid = ?", bindArgs);
+			mDb.execSQL("DELETE FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE "+ DBConstants.CONV_ID +"= ?", bindArgs);
+			mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE "+ DBConstants.CONV_ID +"= ?", bindArgs);
 		}
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
@@ -187,13 +203,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 		huDb.close();
-		InsertHelper ih = new InsertHelper(mDb, CONVERSATIONSTABLE);
+		InsertHelper ih = new InsertHelper(mDb, DBConstants.CONVERSATIONS_TABLE);
 		ih.prepareForInsert();
-		ih.bind(ih.getColumnIndex("msisdn"), msisdn);
+		ih.bind(ih.getColumnIndex(DBConstants.MSISDN), msisdn);
 		if (contactInfo != null)
 		{
-			ih.bind(ih.getColumnIndex("contactid"), contactInfo.id);
-			ih.bind(ih.getColumnIndex("onhike"), contactInfo.onhike);
+			ih.bind(ih.getColumnIndex(DBConstants.CONTACT_ID), contactInfo.id);
+			ih.bind(ih.getColumnIndex(DBConstants.ONHIKE), contactInfo.onhike);
 		}
 		long id = ih.execute();
 		if (id >= 0)
@@ -212,13 +228,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		String limitStr = new Integer(limit).toString();
 		/*TODO this should be ORDER BY timestamp */
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "message, msgStatus, timestamp,msgid,mappedMsgId" }, "convid=?", new String[] { Long.toString(convid) }, null, null,
-				"msgid DESC", limitStr);
-		final int msgColumn = c.getColumnIndex("message");
-		final int msgStatusColumn = c.getColumnIndex("msgStatus");
-		final int tsColumn = c.getColumnIndex("timestamp");
-		final int mappedMsgIdColumn = c.getColumnIndex("mappedMsgId");
-		final int msgIdColumn = c.getColumnIndex("msgid");
+		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, 
+										new String[] {    
+																DBConstants.MESSAGE,
+																DBConstants.MSG_STATUS,
+																DBConstants.TIMESTAMP,
+																DBConstants.MESSAGE_ID,
+																DBConstants.MAPPED_MSG_ID 
+															}, 
+										DBConstants.CONV_ID+"=?", 
+										new String[] { Long.toString(convid) }, null, null,
+										DBConstants.MESSAGE_ID+" DESC", limitStr);
+		
+		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
+		final int msgStatusColumn = c.getColumnIndex(DBConstants.MSG_STATUS);
+		final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
+		final int mappedMsgIdColumn = c.getColumnIndex(DBConstants.MAPPED_MSG_ID);
+		final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGE_ID);
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		while (c.moveToNext())
 		{
@@ -235,14 +261,25 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public Conversation getConversation(String msisdn, int limit)
 	{
-		Cursor c = mDb.query(CONVERSATIONSTABLE, new String[] { "convid", "contactid" }, "msisdn=?", new String[] { msisdn }, null, null, null);
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, 
+										new String[] 
+												{ 
+													DBConstants.CONV_ID, 
+													DBConstants.CONTACT_ID 
+												}, 
+										DBConstants.MSISDN+"=?", 
+										new String[] 
+												{ 
+													msisdn 
+												}, 
+										null, null, null);
 		if (!c.moveToFirst())
 		{
 			return null;
 		}
 
-		long convid = c.getInt(c.getColumnIndex("convid"));
-		String contactid = c.getString(c.getColumnIndex("contactid"));
+		long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
+		String contactid = c.getString(c.getColumnIndex(DBConstants.CONTACT_ID));
 		c.close();
 
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
@@ -256,11 +293,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public List<Conversation> getConversations()
 	{
-		Cursor c = mDb.query(CONVERSATIONSTABLE, new String[] { "convid, contactid", "msisdn" }, null, null, null, null, null);
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, 
+										new String[] 
+												{ 
+													DBConstants.CONV_ID,
+													DBConstants.CONTACT_ID,
+													DBConstants.MSISDN 
+												}, 
+										null, null, null, null, null);
+		
 		List<Conversation> conversations = new ArrayList<Conversation>();
-		final int msisdnIdx = c.getColumnIndex("msisdn");
-		final int convIdx = c.getColumnIndex("convid");
-		final int contactIdx = c.getColumnIndex("contactid");
+		final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		final int convIdx = c.getColumnIndex(DBConstants.CONV_ID);
+		final int contactIdx = c.getColumnIndex(DBConstants.CONTACT_ID);
+		
 		HikeUserDatabase huDb = null;
 		try
 		{
@@ -291,8 +337,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public JSONArray updateStatusAndSendDeliveryReport(long convID)
 	{
-		Cursor c = mDb.query(MESSAGESTABLE, new String[] { "msgid,mappedMsgId" }, "convid=? and msgStatus=?",
-				new String[] { Long.toString(convID), Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) }, null, null, null);
+		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, 
+				new String[] 
+						{ 
+							DBConstants.MESSAGE_ID,
+							DBConstants.MAPPED_MSG_ID 
+						}, 
+				DBConstants.CONV_ID+"=? and "+DBConstants.MSG_STATUS+"=?",
+				new String[] 
+						{ 
+							Long.toString(convID), 
+							Integer.toString(ConvMessage.State.RECEIVED_UNREAD.ordinal()) 
+						}, 
+				null, null, null);
 		/* If there are no rows in the cursor then simply return null */
 		if (c.getCount() <= 0)
 			return null;
@@ -300,8 +357,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		StringBuilder sb = new StringBuilder();
 		sb.append("(");
 
-		final int msgIdIdx = c.getColumnIndex("msgid");
-		final int mappedMsgIdIdx = c.getColumnIndex("mappedMsgId");
+		final int msgIdIdx = c.getColumnIndex(DBConstants.MESSAGE_ID);
+		final int mappedMsgIdIdx = c.getColumnIndex(DBConstants.MAPPED_MSG_ID);
 
 		JSONArray ids = new JSONArray();
 		while (c.moveToNext())
@@ -317,8 +374,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 		sb.append(")");
 		ContentValues values = new ContentValues();
-		values.put("msgStatus", ConvMessage.State.RECEIVED_READ.ordinal());
-		int rowsAffected = mDb.update(MESSAGESTABLE, values, "msgid in " + sb.toString(), null);
+		values.put(DBConstants.MSG_STATUS, ConvMessage.State.RECEIVED_READ.ordinal());
+		int rowsAffected = mDb.update(DBConstants.MESSAGES_TABLE, values, DBConstants.MESSAGE_ID+" in " + sb.toString(), null);
 		Log.d("HIKE CONVERSATION DB ","Rows Updated : "+rowsAffected);
 		c.close();
 		return ids;
@@ -339,14 +396,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		sb.append(")");
 
 		ContentValues values = new ContentValues();
-		values.put("msgStatus", status);
-		mDb.update(MESSAGESTABLE, values, "msgid in " + sb, null);
+		values.put(DBConstants.MSG_STATUS, status);
+		mDb.update(DBConstants.MESSAGES_TABLE, values, DBConstants.MESSAGE_ID+" in " + sb.toString(), null);
 	}
 
 	/* deletes a single message */
 	public void deleteMessage(long msgId)
 	{
 		Long[] bindArgs = new Long[] { msgId };
-		mDb.execSQL("DELETE FROM " + MESSAGESTABLE + " WHERE msgid = ?", bindArgs);
+		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE "+DBConstants.MESSAGE_ID+"= ?", bindArgs);
 	}
 }

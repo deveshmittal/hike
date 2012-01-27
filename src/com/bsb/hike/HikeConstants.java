@@ -7,4 +7,5 @@ public class HikeConstants
 	public static final String APP_TOPIC = "/a";
 	public static final String SERVICE_TOPIC = "/s";
 	public static final String PUBLISH_TOPIC = "/p";
+
 }
