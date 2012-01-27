@@ -18,7 +18,6 @@ import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
@@ -35,8 +34,10 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.models.ContactInfo;
@@ -471,9 +472,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put("t", "mr");
-					object.put("r", mConversation.getMsisdn());
-					object.put("d", ids);
+					object.put(HikeConstants.TYPE, "mr");
+					object.put(HikeConstants.TO, mConversation.getMsisdn());
+					object.put(HikeConstants.DATA, ids);
 				}
 				catch (JSONException e)
 				{
@@ -664,7 +665,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{ // text hasn't changed
 				// in 10 seconds,
 				// send an event
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, mConversation.serialize("et"));
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, mConversation.serialize(NetworkManager.END_TYPING));
 				mTextLastChanged = 0;
 			}
 			else
@@ -747,7 +748,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			// we're currently not in 'typing' mode
 			mTextLastChanged = System.currentTimeMillis();
 			// fire an event
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, mConversation.serialize("st"));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, mConversation.serialize(NetworkManager.START_TYPING));
 
 			// create a timer to clear the event
 			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear

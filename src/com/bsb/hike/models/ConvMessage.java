@@ -243,9 +243,9 @@ public class ConvMessage
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put("t", "dr");
-					object.put("d", String.valueOf(mappedMsgId)) ;
-					object.put("r", mMsisdn); /* Represents to whom this message has to be sent*/
+					object.put(HikeConstants.TYPE, "dr");
+					object.put(HikeConstants.DATA, String.valueOf(mappedMsgId)) ;
+					object.put(HikeConstants.TO, mMsisdn); /* Represents to whom this message has to be sent*/
 				}
 				catch (JSONException e)
 				{
