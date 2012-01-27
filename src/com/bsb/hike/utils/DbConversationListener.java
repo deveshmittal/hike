@@ -1,7 +1,5 @@
 package com.bsb.hike.utils;
 
-import org.json.JSONArray;
-
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
