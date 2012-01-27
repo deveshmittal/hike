@@ -564,7 +564,7 @@ public class HikeMqttManager implements MqttSimpleCallback
 		}
 		catch (MqttNotConnectedException e)
 		{
-			Log.e("HikeMqttManager", "MQTT Not Connected", e);
+			this.connect();
 		}
 		catch (MqttPersistenceException e)
 		{
