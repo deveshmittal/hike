@@ -94,7 +94,6 @@ public class HikeMessengerApp extends Application
 				if (!mInitialized)
 				{
 					mInitialized = true;
-					mNetworkManager.startWebSocket();
 					mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
 				}
 			}

@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +28,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		Log.d("CONVERSATION ADAPTER","Position : "+position);
 		Context context = getContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
@@ -53,7 +51,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			ConvMessage message = messages.get(messages.size() - 1);
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			messageView.setText(message.getMessage());
-			Log.d("CONVERSATION ADAPTER","Msg is : "+message.getMessage()+"	State : "+message.getState().name());
 			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
 			tsView.setText(message.getTimestampFormatted());
 			Typeface tf = messageView.getTypeface();
@@ -69,7 +66,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			}
 			else
 			{
-				Log.d("CONVERSATION ADAPTER","INSIDE ELSE....Msg is : "+message.getMessage()+"	State : "+message.getState().name()+" , mv: "+tsView+" :: "+tsView.getTypeface());
 				messageView.setTypeface(Typeface.DEFAULT);
 				tf = tsView.getTypeface();
 				tsView.setTypeface(Typeface.DEFAULT);

@@ -45,7 +45,7 @@ public class HikePubSub implements Runnable
 
 	public static final String WS_OPEN = "ws_open";
 
-	public static final String WS_SEND = "ws_send";
+//	public static final String WS_SEND = "ws_send";
 
 	public static final String NEW_CONVERSATION = "newconv";
 

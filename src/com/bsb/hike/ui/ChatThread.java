@@ -478,7 +478,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					e.printStackTrace();
 				}
 				mPubSub.publish(HikePubSub.MSG_READ,mConversation.getMsisdn()); 
-				mPubSub.publish(HikePubSub.WS_SEND, object);
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, object);
 			}
 		}
 
@@ -489,7 +489,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean isLastMsgSent()
 	{
-		Log.d("CHAT THREAD", "Checking last msg status ....");
 		List<ConvMessage> msgList = mConversation.getMessages();
 
 		if ((msgList == null) || (msgList.isEmpty()))
@@ -498,7 +497,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		ConvMessage lastMsg = msgList.get(msgList.size() - 1);
-		Log.d("CHAT THREAD", "Last msg status .... lastMsg ID : " + lastMsg.getMsgID() + " ; Status : " + lastMsg.getState().name() + " ; TEXT is : " + lastMsg.getMessage());
 
 		if (lastMsg.isSent() || lastMsg.getState() == ConvMessage.State.RECEIVED_READ)
 			return true;
@@ -536,7 +534,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
-			Log.d("CHAT THREAD", "EVENT : Message Received by chat thread .....");
 			final ConvMessage message = (ConvMessage) object;
 			if (message.getMsisdn().indexOf(mContactNumber) != -1)
 			{
@@ -556,7 +553,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					}
 				});
 				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
-				mPubSub.publish(HikePubSub.WS_SEND, message.serializeDeliveryReportRead()); // handle return to sender
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
 			}
 			mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn()); 
 		}
@@ -618,7 +615,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
 		{
 			long[] ids = (long[]) object;
-			Log.d("CHAT THREAD", "received message delivered read " + ids);
 			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			for (int i = 0; i < ids.length; i++)
 			{
@@ -666,7 +662,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{ // text hasn't changed
 				// in 10 seconds,
 				// send an event
-				mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("et"));
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, mConversation.serialize("et"));
 				mTextLastChanged = 0;
 			}
 			else
@@ -749,7 +745,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			// we're currently not in 'typing' mode
 			mTextLastChanged = System.currentTimeMillis();
 			// fire an event
-			mPubSub.publish(HikePubSub.WS_SEND, mConversation.serialize("st"));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, mConversation.serialize("st"));
 
 			// create a timer to clear the event
 			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear

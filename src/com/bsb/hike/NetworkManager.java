@@ -1,21 +1,13 @@
 package com.bsb.hike;
 
-import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeUserDatabase;
-import com.bsb.hike.utils.HikeWebSocketClient;
 
 /**
  * 
@@ -24,45 +16,17 @@ import com.bsb.hike.utils.HikeWebSocketClient;
  *
  */
 
-public class NetworkManager implements HikePubSub.Listener, Runnable
+public class NetworkManager implements HikePubSub.Listener
 {
 
-	private static final JSONObject FINISH = new JSONObject();
-
-	private SharedPreferences settings;
-
-	private Context context;
-
-	private HikeUserDatabase mDb;
-
 	private HikePubSub pubSub;
-
-	private HikeWebSocketClient mWebSocket;
-
-	private Thread mThread;
-
-	private BlockingQueue<JSONObject> mQueue;
-
-	private JSONObject lastMessageSent;
-
-	private long lastMessageTimestamp;
 
 	private static volatile NetworkManager instance;
 	
 	private NetworkManager(Context context)
 	{
-		this.mDb = new HikeUserDatabase(context);
-		this.context = context;
-		this.settings = context.getSharedPreferences(HikeMessengerApp.MESSAGES_SETTING, 0);
 		pubSub = HikeMessengerApp.getPubSub();
 		pubSub.addListener(HikePubSub.WS_RECEIVED, this);
-		pubSub.addListener(HikePubSub.WS_SEND, this);
-		pubSub.addListener(HikePubSub.WS_CLOSE, this);
-		pubSub.addListener(HikePubSub.WS_OPEN, this);
-		pubSub.addListener(HikePubSub.TOKEN_CREATED, this);
-		mQueue = new LinkedBlockingQueue<JSONObject>();
-		mThread = new Thread(this);
-		mThread.start();
 	}
 	
 	public static NetworkManager getInstance(Context context)
@@ -185,152 +149,5 @@ public class NetworkManager implements HikePubSub.Listener, Runnable
 			String message = (String) object;
 			onMessage(message);
 		}
-		else if (HikePubSub.TOKEN_CREATED.equals(type))
-		{
-			Log.i("NetworkManager", "Token Created -- starting websocket");
-			startWebSocket();
-		}
-		else if (HikePubSub.WS_CLOSE.equals(type))
-		{
-			Log.i("NetworkManager", "Websocket closed");
-			/* try to close any existing connections from our end */
-			if (mWebSocket != null)
-			{
-				try
-				{
-					mWebSocket.close();
-				}
-				catch (IOException e)
-				{
-					Log.e("NetworkManager", "Error closing websocket", e);
-				}
-			}
-
-			mWebSocket = null;
-			Runnable r = new Runnable()
-			{
-
-				@Override
-				public void run()
-				{
-					try
-					{
-						Thread.sleep(2000);
-					}
-					catch (InterruptedException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					startWebSocket();
-				}
-			};
-			Thread t = new Thread(r);
-			t.start();
-		}
-		else if (HikePubSub.WS_SEND.equals(type))
-		{
-			JSONObject o = (JSONObject) object;
-			mQueue.add(o);
-		}
-		else if (HikePubSub.WS_OPEN.equals(type))
-		{
-			long now = System.currentTimeMillis();
-			Log.d("NetworkManager", "Websocket opened " + now + " " + this.lastMessageTimestamp);
-			if ((now - this.lastMessageTimestamp) <= 5) //resend any message sent in the last 5 seconds
-			{
-				Log.e("NetworkManager", "open after recent message.  Resending");
-				//assume the last message didn't get sent through.  Total hack
-				this.lastMessageTimestamp = 0;
-				mQueue.add(this.lastMessageSent);
-			}
-		}
-	}
-
-	public synchronized void startWebSocket()
-	{
-		if (mWebSocket == null)
-		{
-			synchronized(NetworkManager.class)
-			{
-				if (mWebSocket == null)
-				{
-					Log.d("NetworkManager", "restarting websocket");
-					mWebSocket = AccountUtils.startWebSocketConnection();
-				}
-			}
-		}
-	}
-
-	@Override
-	public void run()
-	{
-		while (true)
-		{
-			JSONObject message;
-			try
-			{
-				message = mQueue.take();
-				Log.d("NetworkManager", "trying to send message: " + message);
-			}
-			catch (InterruptedException e)
-			{
-				Log.e("WebSocket", "sending thread", e);
-				continue;
-			}
-
-			if (message == FINISH)
-			{
-				break;
-			}
-
-			try
-			{
-				if ("ASDFsend".equals(message.optString("type")))
-				{
-					Log.d("NetworkManager", "received a 'send' message.  saving it");
-					this.lastMessageSent = message;
-					this.lastMessageTimestamp = System.currentTimeMillis();
-				}
-
-				while (mWebSocket == null)
-				{
-					startWebSocket();
-					Log.i("NetworkManager", "no websocket, sleeping");
-					try
-					{
-						Thread.sleep(1000);
-					}
-					catch (InterruptedException e)
-					{
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-
-				/* total race condition here, but whatever */
-				mWebSocket.send(message.toString());
-			}
-			catch (IOException e)
-			{
-				Log.e("WebSocket", "Unable to send message", e);
-				mQueue.add(message);
-			}
-			catch (java.nio.channels.NotYetConnectedException e)
-			{
-				Log.e("WebSocket", "Not yet connected");
-				try
-				{
-					Thread.sleep(1000);
-				}
-				catch(InterruptedException e3)
-				{
-					//pass
-				}
-
-				mQueue.add(message);
-			}
-		}
-
 	}
 }
