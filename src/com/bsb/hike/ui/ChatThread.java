@@ -207,6 +207,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.END_TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
 		if (mDbhelper != null)
 		{
 			mDbhelper.close();
@@ -297,11 +298,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mUiThreadHandler = new Handler();
 
 		/* register listeners */
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
 	}
 
 	@Override
@@ -601,14 +603,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 			});
 		}
-		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
+		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))
 		{
 			long msgID = (Long) object;
 			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			ConvMessage msg = findMessageById(msgID);
 			if (msg != null)
 			{
-				msg.setState(ConvMessage.State.SENT_CONFIRMED);
+				msg.setState(ConvMessage.State.SENT_DELIVERED);
 				runOnUiThread(mUpdateAdapter);
 			}
 		}
