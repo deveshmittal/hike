@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +47,7 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 
 			ConvMessage.State state = convMessage.getState();
 			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
-			if (state == ConvMessage.State.SENT_CONFIRMED)
+			if (state == ConvMessage.State.SENT_DELIVERED)
 			{
 				imgStatus.setImageResource(R.drawable.ic_sent);
 			}
