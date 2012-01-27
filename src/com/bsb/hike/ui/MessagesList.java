@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,9 +18,10 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,6 +30,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -67,17 +70,23 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 	}
 
-	private class DeleteConversationsAsyncTask extends AsyncTask<Long, Void, Boolean>
+	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
 	{
 
 		@Override
-		protected Boolean doInBackground(Long... params)
+		protected Conversation[] doInBackground(Conversation... convs)
 		{
 			HikeConversationsDatabase db = null;
+			ArrayList<Long> ids = new ArrayList<Long>(convs.length);
+			for (Conversation conv : convs)
+			{
+				ids.add(conv.getConvId());
+			}
+
 			try
 			{
 				db = new HikeConversationsDatabase(MessagesList.this);
-				db.deleteConversation(params);
+				db.deleteConversation(ids.toArray(new Long[]{}));
 			}
 			finally
 			{
@@ -86,20 +95,21 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 					db.close();
 				}
 			}
-			return Boolean.TRUE;
+			return convs;
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result)
+		protected void onPostExecute(Conversation[] deleted)
 		{
-			if (result == Boolean.TRUE)
+			for (Conversation conversation : deleted)
 			{
-				mAdapter.clear();
-				mAdapter.notifyDataSetChanged();
-				mAdapter.setNotifyOnChange(false);
-				mConversationsByMSISDN.clear();
-				mConversationsAdded.clear();
+				mAdapter.remove(conversation);
+				mConversationsByMSISDN.remove(conversation.getMsisdn());
+				mConversationsAdded.remove(conversation.getMsisdn());
 			}
+
+			mAdapter.notifyDataSetChanged();
+			mAdapter.setNotifyOnChange(false);
 		}
 	}
 
@@ -250,6 +260,32 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				startActivity(intent);
 			}
 		});
+
+		/* register for long-press's */
+		registerForContextMenu(mConversationsView);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item)
+	{
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		Conversation conv = mAdapter.getItem((int) info.id);
+		switch (item.getItemId())
+		{
+		case R.id.delete:
+			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+			task.execute(conv);
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
+	{
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.conversation_menu, menu);
 	}
 
 	@Override
@@ -389,13 +425,13 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		switch (which)
 		{
 		case DialogInterface.BUTTON_POSITIVE:
-			Long[] ids = new Long[mAdapter.getCount()];
-			for (int i = 0; i < ids.length; i++)
+			Conversation[] convs = new Conversation[mAdapter.getCount()];
+			for (int i = 0; i < convs.length; i++)
 			{
-				ids[i] = mAdapter.getItem(i).getConvId();
+				convs[i] = mAdapter.getItem(i);
 			}
 			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-			task.execute(ids);
+			task.execute(convs);
 			break;
 		default:
 		}
