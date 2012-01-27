@@ -49,7 +49,7 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
 			if (state == ConvMessage.State.SENT_DELIVERED)
 			{
-				imgStatus.setImageResource(R.drawable.ic_sent);
+				imgStatus.setImageResource(R.drawable.ic_delivered);
 			}
 			else if (state == ConvMessage.State.SENT_DELIVERED_READ)
 			{
