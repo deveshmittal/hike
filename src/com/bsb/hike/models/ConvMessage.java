@@ -8,6 +8,8 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.NetworkManager;
 import com.ocpsoft.pretty.time.PrettyTime;
 
 public class ConvMessage
@@ -55,10 +57,10 @@ public class ConvMessage
 	
 	public ConvMessage(JSONObject obj) throws JSONException
 	{
-		this.mMsisdn = obj.getString("f"); /*represents msg is coming from another client*/
-		JSONObject data = obj.getJSONObject("d");
-		this.mMessage = data.getString("hm");
-		this.mTimestamp = data.getLong("ts");
+		this.mMsisdn = obj.getString(HikeConstants.FROM); /*represents msg is coming from another client*/
+		JSONObject data = obj.getJSONObject(HikeConstants.DATA);
+		this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
+		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
 
 		/* prevent us from receiving a message from the future */
 		long now = System.currentTimeMillis()/1000;
@@ -165,13 +167,13 @@ public class ConvMessage
 		JSONObject data = new JSONObject();
 		try
 		{
-			data.put("hm", mMessage);
-			data.put("ts",mTimestamp);
-			data.put("i",msgID);
+			data.put(HikeConstants.HIKE_MESSAGE, mMessage);
+			data.put(HikeConstants.TIMESTAMP,mTimestamp);
+			data.put(HikeConstants.MESSAGE_ID,msgID);
 		
-			object.put("t", type);
-			object.put("r", mMsisdn);
-			object.put("d",data);
+			object.put(HikeConstants.TYPE, type);
+			object.put(HikeConstants.TO, mMsisdn);
+			object.put(HikeConstants.DATA,data);
 		}
 		catch (JSONException e)
 		{
@@ -258,9 +260,9 @@ public class ConvMessage
 				try
 				{
 					ids.put(String.valueOf(mappedMsgId));
-					object.put("d", ids);
-					object.put("t", "mr");
-					object.put("r", mMsisdn);
+					object.put(HikeConstants.DATA, ids);
+					object.put(HikeConstants.TYPE, NetworkManager.MESSAGE_READ);
+					object.put(HikeConstants.TO, mMsisdn);
 				}
 				catch (JSONException e)
 				{

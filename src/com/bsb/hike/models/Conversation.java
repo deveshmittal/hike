@@ -9,6 +9,8 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
+
 public class Conversation implements Comparable<Conversation>
 {
 
@@ -190,8 +192,8 @@ public class Conversation implements Comparable<Conversation>
 		JSONObject object = new JSONObject();
 		try
 		{
-			object.put("t", type);
-			object.put("r", msisdn);
+			object.put(HikeConstants.TYPE, type);
+			object.put(HikeConstants.TO, msisdn);
 		}
 		catch (JSONException e)
 		{

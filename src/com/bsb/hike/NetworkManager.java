@@ -68,7 +68,7 @@ public class NetworkManager implements HikePubSub.Listener
 		try
 		{
 			jsonObj = new JSONObject(msg);
-			type = jsonObj.getString("t");
+			type = jsonObj.getString(HikeConstants.TYPE);
 		}
 		catch (JSONException e)
 		{
@@ -90,22 +90,22 @@ public class NetworkManager implements HikePubSub.Listener
 		}
 		else if (START_TYPING.equals(type)) /* Start Typing event received*/
 		{
-			String msisdn = jsonObj.optString("f");
+			String msisdn = jsonObj.optString(HikeConstants.FROM);
 			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
 		}
 		else if (END_TYPING.equals(type)) /* End Typing event received */
 		{
-			String msisdn = jsonObj.optString("f");
+			String msisdn = jsonObj.optString(HikeConstants.FROM);
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
 		}
 		else if (SMS_CREDITS.equals(type)) /* SMS CREDITS */
 		{
-			int sms_credits = jsonObj.optInt("d");
+			int sms_credits = jsonObj.optInt(HikeConstants.DATA);
 			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
 		}
 		else if("sr".equals(type)) /* Represents Server has received the msg*/
 		{
-			String id = jsonObj.optString("d");
+			String id = jsonObj.optString(HikeConstants.DATA);
 			long msgID;
 			try
 			{
@@ -120,7 +120,7 @@ public class NetworkManager implements HikePubSub.Listener
 		}
 		else if(DELIVERY_REPORT.equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a received msg
 		{
-			String id = jsonObj.optString("d");
+			String id = jsonObj.optString(HikeConstants.DATA);
 			long msgID;
 			try
 			{
