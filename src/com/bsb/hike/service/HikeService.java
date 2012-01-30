@@ -144,7 +144,6 @@ public class HikeService extends Service
 	// receiver that wakes the Service up when it's time to ping the server
 	private PingSender pingSender;
 	private HikeMqttManager mMqttManager;
-	private String mToken;
 
 	/************************************************************************/
 	/*    METHODS - core Service lifecycle methods                          */
