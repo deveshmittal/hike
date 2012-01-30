@@ -254,7 +254,7 @@ public class ConvMessage
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put(HikeConstants.TYPE, "dr");
+					object.put(HikeConstants.TYPE, NetworkManager.DELIVERY_REPORT);
 					object.put(HikeConstants.DATA, String.valueOf(mappedMsgId)) ;
 					object.put(HikeConstants.TO, mMsisdn); /* Represents to whom this message has to be sent*/
 				}
