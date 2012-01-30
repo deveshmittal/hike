@@ -79,8 +79,9 @@ public class HikeService extends Service
 			case MSG_APP_PUBLISH:
 				Bundle bundle = msg.getData();
 				String message = bundle.getString(HikeConstants.MESSAGE);
+				long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
 				Log.d("HikeService", "mqtt-message:" + message);
-				mMqttManager.send(message);
+				mMqttManager.send(message, msgId);
 			}
 		}
 	}
@@ -159,11 +160,13 @@ public class HikeService extends Service
 		Log.d("HikeService", "onCreate called");
 		HandlerThread handlerThread = new HandlerThread("MQTTThread");
 		handlerThread.start();
-		mMessenger = new Messenger(new IncomingHandler(handlerThread.getLooper()));
+		Looper handlerThreadLooper = handlerThread.getLooper();
+		Handler handler = new Handler(handlerThreadLooper);
+		mMessenger = new Messenger(new IncomingHandler(handlerThreadLooper));
 		pendingMessages = new ArrayList<String>();
 
 		// reset status variable to initial state
-		mMqttManager = new HikeMqttManager(this);
+		mMqttManager = new HikeMqttManager(this, handler);
 
 		// register to be notified whenever the user changes their preferences
 		//  relating to background data use - so that we can respect the current
@@ -467,5 +470,30 @@ public class HikeService extends Service
 	public boolean appIsConnected()
 	{
 		return mApp != null;
+	}
+
+	public boolean sendMessageStatus(long msgId, boolean sent)
+	{
+		if (mApp == null)
+		{
+			Log.d("HikeService", "no app");
+			return false;
+		}
+
+		try
+		{
+			Message msg = Message.obtain();
+			msg.obj = msgId;
+			msg.arg1 = sent ? 0 : 1;
+			mApp.send(msg);
+		} catch(RemoteException e)
+		{
+			//client is dead :(
+			mApp = null;
+			mMqttManager.unsubscribeFromUIEvents();
+			Log.e("HikeService", "Can't send message to the application");
+			return false;
+		}
+		return true;
 	}
 }

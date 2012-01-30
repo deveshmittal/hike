@@ -105,6 +105,16 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 			msg.what = HikeService.MSG_APP_PUBLISH;
 			Bundle bundle = new Bundle();
 			bundle.putString(HikeConstants.MESSAGE, data);
+
+			/* if this is a message, then grab the messageId out of the json object 
+			 * so we can get confirmation of success/failure */
+			if (HikeConstants.MESSAGE.equals(o.optString(HikeConstants.TYPE)))
+			{
+				JSONObject json = o.optJSONObject(HikeConstants.DATA);
+				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
+				bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
+			}
+
 			msg.setData(bundle);
 			msg.replyTo = this.mMessenger;
 			try

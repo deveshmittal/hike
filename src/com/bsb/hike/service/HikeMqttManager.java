@@ -1,12 +1,15 @@
 package com.bsb.hike.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.text.TextUtils;
@@ -34,6 +37,23 @@ import com.ibm.mqtt.MqttPersistenceException;
  */
 public class HikeMqttManager implements MqttAdvancedCallback
 {
+	public class BroadcastFailure implements Runnable
+	{
+		int mqttId;
+
+		public BroadcastFailure(int mqttId)
+		{
+			this.mqttId = mqttId;
+		}
+
+		@Override
+		public void run()
+		{
+			HikeMqttManager.this.broadcastFailureIfUnsent(mqttId);
+		}
+
+	}
+
 	private HikeService mHikeService;
 
 	// constants used to define MQTT connection status
@@ -96,13 +116,33 @@ public class HikeMqttManager implements MqttAdvancedCallback
 
 	private HikeConversationsDatabase convDb;
 
-	public HikeMqttManager(HikeService hikeService)
+	private Handler handler;
+
+	private Map<Integer, Long> mqttIdToMsgId;
+
+	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
 		this.toaster = new HikeToast(hikeService);
 		this.convDb = new HikeConversationsDatabase(hikeService);
 		this.createConnectionSpec();
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
+
+		this.handler = handler;
+		mqttIdToMsgId = new HashMap<Integer, Long>();
+	}
+
+	public void broadcastFailureIfUnsent(int mqttId)
+	{
+		Long msgId = mqttIdToMsgId.remove(mqttId);
+		if (msgId == null)
+		{
+			//nothing to do, message was successfully sent
+		} else 
+		{
+			this.mHikeService.sendMessageStatus(msgId.longValue(), false);
+		}
+
 	}
 
 	private boolean init()
@@ -554,12 +594,16 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		}
 	}
 
-	public void send(String message)
+	public void send(String message, long msgId)
 	{
 		try
 		{
-			int msgId = mqttClient.publish(this.topic + HikeConstants.PUBLISH_TOPIC, message.getBytes(), 1, false);
-			Log.d("HikeMqttManager", "attempting to publish message: " + msgId);
+			int mqttId = mqttClient.publish(this.topic + HikeConstants.PUBLISH_TOPIC, message.getBytes(), 1, false);
+			if (msgId >= 0)
+			{
+				mqttIdToMsgId.put(mqttId, msgId);
+				handler.postDelayed(new BroadcastFailure(mqttId), 2000);
+			}
 		}
 		catch (MqttNotConnectedException e)
 		{
@@ -593,6 +637,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	public void published(int msgId)
 	{
 		Log.d("HikeMqttManager", "received acknowledgement for message: " + msgId);
+		this.mqttIdToMsgId.remove(msgId);
 	}
 
 	@Override
