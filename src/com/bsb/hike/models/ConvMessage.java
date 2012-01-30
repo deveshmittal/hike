@@ -30,6 +30,8 @@ public class ConvMessage
 	
 	private State mState;
 
+	private boolean mIsSMS;
+
 	public static enum State
 	{
 		SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ, UNKNOWN
@@ -59,7 +61,16 @@ public class ConvMessage
 	{
 		this.mMsisdn = obj.getString(HikeConstants.FROM); /*represents msg is coming from another client*/
 		JSONObject data = obj.getJSONObject(HikeConstants.DATA);
-		this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
+		if (data.has(HikeConstants.SMS_MESSAGE))
+		{
+			this.mMessage = data.getString(HikeConstants.SMS_MESSAGE);
+			mIsSMS = false;
+		} else
+		{
+			this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
+			mIsSMS = true;
+		}
+
 		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
 
 		/* prevent us from receiving a message from the future */
@@ -269,5 +280,10 @@ public class ConvMessage
 					Log.e("ConvMessage", "invalid json message", e);
 				}
 				return object;
+	}
+
+	public boolean isSMS()
+	{
+		return mIsSMS;
 	}
 }

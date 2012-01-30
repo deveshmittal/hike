@@ -430,7 +430,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mConversation = mConversationDb.getConversation(mContactNumber, 25);
 		if (mConversation == null)
 		{
-			mConversation = mConversationDb.addConversation(mContactNumber);
+			mConversation = mConversationDb.addConversation(mContactNumber, false);
 		}
 
 		mConversationsView.setStackFromBottom(true);

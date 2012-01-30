@@ -152,7 +152,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			/* Represents we dont have any conversation made for this msisdn.*/
 			if (msgId <= 0)
 			{
-				Conversation conversation = addConversation(conv.getMsisdn());
+				Conversation conversation = addConversation(conv.getMsisdn(), conv.isSMS());
 				if (conversation != null)
 				{
 					conversation.addMessage(conv);
@@ -198,7 +198,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.endTransaction();
 	}
 
-	public Conversation addConversation(String msisdn)
+	/**
+	 * Add a conversation to the db
+	 * @param msisdn the msisdn of the contact
+	 * @param onhike true iff the contact is onhike.  If this is false, we consult the local db as well
+	 * @return Conversation object representing the conversation
+	 */
+	public Conversation addConversation(String msisdn, boolean onhike)
 	{
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
@@ -209,8 +215,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		if (contactInfo != null)
 		{
 			ih.bind(ih.getColumnIndex(DBConstants.CONTACT_ID), contactInfo.id);
-			ih.bind(ih.getColumnIndex(DBConstants.ONHIKE), contactInfo.onhike);
+			onhike |= contactInfo.onhike;
 		}
+
+		ih.bind(ih.getColumnIndex(DBConstants.ONHIKE), onhike);
+
 		long id = ih.execute();
 		if (id >= 0)
 		{
