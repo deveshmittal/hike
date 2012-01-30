@@ -59,7 +59,7 @@ public class HikeService extends Service
 				{
 					mMqttManager.subscribeToUIEvents();
 				}
-				asyncStart();
+				handleStart();
 
 				mApp = msg.replyTo;
 				/* TODO what if the app crashes while we're sending the message? */
@@ -74,7 +74,7 @@ public class HikeService extends Service
 				mApp = null;
 				break;
 			case MSG_APP_TOKEN_CREATED:
-				asyncStart();
+				handleStart();
 				break;
 			case MSG_APP_PUBLISH:
 				Bundle bundle = msg.getData();
