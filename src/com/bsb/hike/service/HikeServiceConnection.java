@@ -95,6 +95,11 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 		if (HikePubSub.MQTT_PUBLISH.equals(type))
 		{
 			JSONObject o = (JSONObject) object;
+			if (mService == null)
+			{
+				Log.e("HikeServiceConnection", "Unable to publish message " + o);
+				return;
+			}
 			String data = o.toString();
 			Message msg = Message.obtain();
 			msg.what = HikeService.MSG_APP_PUBLISH;
