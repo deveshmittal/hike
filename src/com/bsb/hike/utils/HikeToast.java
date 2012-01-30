@@ -5,11 +5,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -31,6 +34,10 @@ public class HikeToast
 
 	public void toast(ContactInfo contactInfo,ConvMessage convMsg)
 	{
+		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
+		int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true) ? Notification.DEFAULT_SOUND : 0;
+		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true) ? Notification.DEFAULT_VIBRATE : 0;
+
 		String msisdn = convMsg.getMsisdn();
 		String message = convMsg.getMessage();
 		long timestamp = convMsg.getTimestamp();
@@ -43,7 +50,8 @@ public class HikeToast
 		Notification notification = new Notification(icon, text, timestamp * 1000);
 
 		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
-		notification.defaults |= Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
+
+		notification.defaults |= playSound | vibrate;
 
 		int notificationId = (int)convMsg.getConversation().getConvId();
 		Intent notificationIntent = new Intent(context, ChatThread.class);

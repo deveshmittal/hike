@@ -340,6 +340,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		case R.id.deleteconversations:
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.delete_all_question).setPositiveButton("Delete", this).setNegativeButton(R.string.cancel, this).show();
+		case R.id.settings:
+			intent = new Intent(this, HikePreferences.class);
+			startActivity(intent);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

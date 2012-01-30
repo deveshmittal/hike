@@ -12,10 +12,5 @@
                         android:defaultValue="true"
                         android:summary="Play sound when we receive new message"
                         android:key="soundPref" />
-                <CheckBoxPreference
-                        android:title="Notifications"
-                        android:defaultValue="false"
-                        android:summary="Don't show notifications"
-                        android:key="notificationPref" />
         </PreferenceCategory>
 </PreferenceScreen>
