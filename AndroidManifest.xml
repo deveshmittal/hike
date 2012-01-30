@@ -71,6 +71,11 @@
             </intent-filter>
 
         </activity>
+        <activity
+            android:name=".ui.HikePreferences"
+            android:label="@string/preferences">
+            
+        </activity>
         <receiver android:name=".service.BootService" >
             <intent-filter >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

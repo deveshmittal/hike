@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <PreferenceCategory
+                android:title="Notifications">
+                <CheckBoxPreference
+                        android:title="Vibrate"
+                        android:defaultValue="true"
+                        android:summary="Vibrate when we receive new message"
+                        android:key="vibratePref" />
+                <CheckBoxPreference
+                        android:title="Sound"
+                        android:defaultValue="true"
+                        android:summary="Play sound when we receive new message"
+                        android:key="soundPref" />
+                <CheckBoxPreference
+                        android:title="Notifications"
+                        android:defaultValue="false"
+                        android:summary="Don't show notifications"
+                        android:key="notificationPref" />
+        </PreferenceCategory>
+</PreferenceScreen>
