@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -50,7 +51,12 @@ public class DbConversationListener implements Listener
 			ConvMessage message = (ConvMessage) object;
 			mConversationDb.addConversationMessages(message);
 			Log.d("DBCONVERSATION LISTENER","Receiver received Message : "+message.getMessage() + "		;	Receiver Msg ID : "+message.getMsgID()+"	; Mapped msgID : "+message.getMappedMsgID());
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReport()); // handle return to sender
+			/* don't send delivery report for the hikebot message */
+			if (!HikeConstants.HIKEBOT.equals(message.getMsisdn()))
+			{
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReport()); // handle return to sender
+			}
+
 			mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, message);		
 		}
 		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))

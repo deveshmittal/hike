@@ -16,6 +16,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -110,7 +111,7 @@ public class ScanningAddressBook extends Activity
 
 				/* Add a default message from hike */
 				// TODO get the number for hikebot from the server?
-				ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", "TD-HIKE", "HikeBot");
+				ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", HikeConstants.HIKEBOT, "HikeBot");
 				hikeContactInfo.onhike = true;
 				db.addContact(hikeContactInfo);
 				ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message), hikeContactInfo.number,
