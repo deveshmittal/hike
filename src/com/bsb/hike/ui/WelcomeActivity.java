@@ -68,6 +68,8 @@ public class WelcomeActivity extends Activity
 				{
 					mDialog.dismiss();
 				}
+
+				mErrorView.setVisibility(View.VISIBLE);
 			}
 		}
 	}
@@ -81,6 +83,8 @@ public class WelcomeActivity extends Activity
 	private EditText mMSISDNText;
 
 	private AccountCreateActivity mTask;
+
+	private View mErrorView;
 
 	@Override
 	public Object onRetainNonConfigurationInstance()
@@ -96,6 +100,8 @@ public class WelcomeActivity extends Activity
 		mAcceptButton = (Button) findViewById(R.id.accept_tc);
 		mIconView = (ImageView) findViewById(R.id.ic_edit_message);
 		mMSISDNText = (EditText) findViewById(R.id.debug_msisdn_input);
+
+		mErrorView = findViewById(R.id.error_text);
 
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof AccountCreateActivity)

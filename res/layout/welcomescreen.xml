@@ -73,6 +73,17 @@
             android:onClick="onClick"
             android:src="@drawable/ic_hikelogo" />
 
+        <TextView
+            android:id="@+id/error_text"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/welcome"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/red"
+            android:visibility="gone"
+            android:text="@string/welcome_screen_error_message" />
+
     </RelativeLayout>
 
 </RelativeLayout>
