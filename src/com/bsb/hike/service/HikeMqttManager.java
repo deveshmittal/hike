@@ -21,18 +21,18 @@ import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeToast;
 import com.ibm.mqtt.IMqttClient;
+import com.ibm.mqtt.MqttAdvancedCallback;
 import com.ibm.mqtt.MqttClient;
 import com.ibm.mqtt.MqttException;
 import com.ibm.mqtt.MqttNotConnectedException;
 import com.ibm.mqtt.MqttPersistence;
 import com.ibm.mqtt.MqttPersistenceException;
-import com.ibm.mqtt.MqttSimpleCallback;
 
 /**
  * @author vr
  * 
  */
-public class HikeMqttManager implements MqttSimpleCallback
+public class HikeMqttManager implements MqttAdvancedCallback
 {
 	private HikeService mHikeService;
 
@@ -69,8 +69,6 @@ public class HikeMqttManager implements MqttSimpleCallback
 	private MqttPersistence usePersistence = null;
 
 	private boolean cleanStart = false;
-
-	private int[] qualitiesOfService = { 0 };
 
 	/*
 	 * how often should the app ping the server to keep the connection alive?
@@ -130,7 +128,7 @@ public class HikeMqttManager implements MqttSimpleCallback
 			mqttClient = MqttClient.createMqttClient(mqttConnSpec, usePersistence);
 
 			// register this client app has being able to receive messages
-			mqttClient.registerSimpleHandler(this);
+			mqttClient.registerAdvancedHandler(this);
 		}
 		catch (MqttException e)
 		{
@@ -560,7 +558,8 @@ public class HikeMqttManager implements MqttSimpleCallback
 	{
 		try
 		{
-			mqttClient.publish(this.topic + HikeConstants.PUBLISH_TOPIC, message.getBytes(), 1, false);
+			int msgId = mqttClient.publish(this.topic + HikeConstants.PUBLISH_TOPIC, message.getBytes(), 1, false);
+			Log.d("HikeMqttManager", "attempting to publish message: " + msgId);
 		}
 		catch (MqttNotConnectedException e)
 		{
@@ -588,5 +587,23 @@ public class HikeMqttManager implements MqttSimpleCallback
 	public void subscribeToUIEvents()
 	{
 		subscribeToTopics(new String[]{ this.topic + HikeConstants.UI_TOPIC});
+	}
+
+	@Override
+	public void published(int msgId)
+	{
+		Log.d("HikeMqttManager", "received acknowledgement for message: " + msgId);
+	}
+
+	@Override
+	public void subscribed(int arg0, byte[] arg1)
+	{
+		//ignore
+	}
+
+	@Override
+	public void unsubscribed(int arg0)
+	{
+		//ignore
 	}
 }
