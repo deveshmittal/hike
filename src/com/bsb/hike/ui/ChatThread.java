@@ -305,6 +305,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 	}
 
 	@Override
@@ -628,6 +630,26 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 			}
 			runOnUiThread(mUpdateAdapter);
+		}
+		else if (HikePubSub.MESSAGE_FAILED.equals(type))
+		{
+			long msgId = ((Long) object).longValue();
+			ConvMessage msg = findMessageById(msgId);
+			if (msg != null)
+			{
+				msg.setState(ConvMessage.State.SENT_FAILED);
+				runOnUiThread(mUpdateAdapter);
+			}
+		}
+		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
+		{
+			long msgId = ((Long) object).longValue();
+			ConvMessage msg = findMessageById(msgId);
+			if (msg != null)
+			{
+				msg.setState(ConvMessage.State.SENT_CONFIRMED);
+				runOnUiThread(mUpdateAdapter);
+			}
 		}
 	}
 
