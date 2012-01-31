@@ -78,6 +78,8 @@ public class HikePubSub implements Runnable
 	/* published when a message is deleted */
 	public static final String MESSAGE_DELETED = "messageDeleted";
 
+	public static final String MESSAGE_FAILED = "messageFailed";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
