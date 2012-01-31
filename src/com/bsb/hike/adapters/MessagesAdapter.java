@@ -53,6 +53,14 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 			else if (state == ConvMessage.State.SENT_DELIVERED_READ)
 			{
 				imgStatus.setImageResource(R.drawable.ic_read);
+			} 
+			else if (state == ConvMessage.State.SENT_FAILED)
+			{
+				imgStatus.setImageResource(R.drawable.ic_failed);
+			}
+			else if (state == ConvMessage.State.SENT_CONFIRMED)
+			{
+				imgStatus.setImageResource(R.drawable.ic_sent);
 			}
 		}
 		else

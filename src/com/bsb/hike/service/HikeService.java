@@ -37,6 +37,7 @@ public class HikeService extends Service
 	public static final int MSG_APP_DISCONNECTED = 2;
 	public static final int MSG_APP_TOKEN_CREATED = 3;
 	public static final int MSG_APP_PUBLISH = 4;
+	public static final int MSG_APP_MESSAGE_STATUS = 5;
 
 	protected Messenger mApp;
 	protected ArrayList<String> pendingMessages;
@@ -79,8 +80,8 @@ public class HikeService extends Service
 			case MSG_APP_PUBLISH:
 				Bundle bundle = msg.getData();
 				String message = bundle.getString(HikeConstants.MESSAGE);
-				Log.d("HikeService", "mqtt-message:" + message);
-				mMqttManager.send(message);
+				long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
+				mMqttManager.send(message, msgId);
 			}
 		}
 	}
@@ -106,7 +107,8 @@ public class HikeService extends Service
 			bundle.putString("msg", message);
 			msg.setData(bundle);
 			mApp.send(msg);
-		} catch(RemoteException e)
+		} 
+		catch(RemoteException e)
 		{
 			//client is dead :(
 			mApp = null;
@@ -159,11 +161,13 @@ public class HikeService extends Service
 		Log.d("HikeService", "onCreate called");
 		HandlerThread handlerThread = new HandlerThread("MQTTThread");
 		handlerThread.start();
-		mMessenger = new Messenger(new IncomingHandler(handlerThread.getLooper()));
+		Looper handlerThreadLooper = handlerThread.getLooper();
+		Handler handler = new Handler(handlerThreadLooper);
+		mMessenger = new Messenger(new IncomingHandler(handlerThreadLooper));
 		pendingMessages = new ArrayList<String>();
 
 		// reset status variable to initial state
-		mMqttManager = new HikeMqttManager(this);
+		mMqttManager = new HikeMqttManager(this, handler);
 
 		// register to be notified whenever the user changes their preferences
 		//  relating to background data use - so that we can respect the current
@@ -467,5 +471,30 @@ public class HikeService extends Service
 	public boolean appIsConnected()
 	{
 		return mApp != null;
+	}
+
+	public boolean sendMessageStatus(Long msgId, boolean sent)
+	{
+		if (mApp == null)
+		{
+			Log.d("HikeService", "no app");
+			return false;
+		}
+
+		try
+		{
+			Message msg = Message.obtain(null, MSG_APP_MESSAGE_STATUS);
+			msg.obj = msgId;
+			msg.arg1 = sent ? 1 : 0;
+			mApp.send(msg);
+		} catch(RemoteException e)
+		{
+			//client is dead :(
+			mApp = null;
+			mMqttManager.unsubscribeFromUIEvents();
+			Log.e("HikeService", "Can't send message to the application");
+			return false;
+		}
+		return true;
 	}
 }

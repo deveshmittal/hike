@@ -64,6 +64,13 @@ public class HikeMessengerApp extends Application
 					String message = bundle.getString("msg");
 					Log.d("HikeMessengerApp", "received message " + message);
 					mPubSubInstance.publish(HikePubSub.WS_RECEIVED, message);
+					break;
+				case HikeService.MSG_APP_MESSAGE_STATUS:
+					boolean success = msg.arg1 != 0;
+					Long msgId = (Long) msg.obj;
+					Log.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
+					String event = success ? HikePubSub.SERVER_RECEIVED_MSG : HikePubSub.MESSAGE_FAILED;
+					mPubSubInstance.publish(event, msgId);
 			}
 		}
 	}

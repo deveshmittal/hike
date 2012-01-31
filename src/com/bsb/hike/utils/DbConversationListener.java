@@ -34,6 +34,7 @@ public class DbConversationListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELETED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
 	}
 
 	@Override
@@ -84,6 +85,10 @@ public class DbConversationListener implements Listener
 		else if (HikePubSub.MESSAGE_DELETED.equals(type))
 		{
 			mConversationDb.deleteMessage((Long) object);
+		}
+		else if (HikePubSub.MESSAGE_FAILED.equals(type))  // server got msg from client 1 and sent back received msg receipt
+		{
+			updateDB(object,ConvMessage.State.SENT_FAILED.ordinal());
 		}
 	}
 

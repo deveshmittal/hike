@@ -16,6 +16,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.NetworkManager;
 
 public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnection
 {
@@ -105,6 +106,16 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 			msg.what = HikeService.MSG_APP_PUBLISH;
 			Bundle bundle = new Bundle();
 			bundle.putString(HikeConstants.MESSAGE, data);
+
+			/* if this is a message, then grab the messageId out of the json object 
+			 * so we can get confirmation of success/failure */
+			if (NetworkManager.MESSAGE.equals(o.optString(HikeConstants.TYPE)))
+			{
+				JSONObject json = o.optJSONObject(HikeConstants.DATA);
+				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
+				bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
+			}
+
 			msg.setData(bundle);
 			msg.replyTo = this.mMessenger;
 			try
