@@ -32,9 +32,10 @@ public class ConvMessage
 
 	private boolean mIsSMS;
 
+	/* Adding entries to the beginning of this list is not backwards compatible */
 	public static enum State
 	{
-		SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ, UNKNOWN
+		SENT_FAILED, SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ, UNKNOWN
 	};
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState)
@@ -229,24 +230,16 @@ public class ConvMessage
 	{
 		return mappedMsgId;			
 	}
+
 	public static State stateValue(int val)
 	{
-		switch(val)
-		{
-			case 0: return State.SENT_UNCONFIRMED;
-			case 1: return State.SENT_CONFIRMED;
-			case 2: return State.SENT_DELIVERED;
-			case 3: return State.SENT_DELIVERED_READ;
-			case 4: return State.RECEIVED_UNREAD;
-			case 5: return State.RECEIVED_READ;
-			default: return State.UNKNOWN;
-		}
+		return State.values()[val];
 	}
 
 	public void setState(State sentConfirmed)
 	{
 		mState = sentConfirmed;
-		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ);
+		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ || mState == State.SENT_FAILED);
 	}
 
 	public JSONObject serializeDeliveryReport()
