@@ -135,10 +135,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	public void broadcastFailureIfUnsent(int mqttId)
 	{
 		Long msgId = mqttIdToMsgId.remove(mqttId);
-		if (msgId == null)
-		{
-			//nothing to do, message was successfully sent
-		} else 
+		if (msgId != null)
 		{
 			Log.e("HikeMqttManager", "Broadcasting message failure " + msgId);
 			this.mHikeService.sendMessageStatus(msgId, false);
