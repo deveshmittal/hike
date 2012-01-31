@@ -1,6 +1,7 @@
 package com.bsb.hike.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +52,6 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		{
 			HikeMqttManager.this.broadcastFailureIfUnsent(mqttId);
 		}
-
 	}
 
 	private HikeService mHikeService;
@@ -129,7 +129,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 
 		this.handler = handler;
-		mqttIdToMsgId = new HashMap<Integer, Long>();
+		mqttIdToMsgId = Collections.synchronizedMap(new HashMap<Integer, Long>());
 	}
 
 	public void broadcastFailureIfUnsent(int mqttId)
@@ -140,7 +140,8 @@ public class HikeMqttManager implements MqttAdvancedCallback
 			//nothing to do, message was successfully sent
 		} else 
 		{
-			this.mHikeService.sendMessageStatus(msgId.longValue(), false);
+			Log.e("HikeMqttManager", "Broadcasting message failure " + msgId);
+			this.mHikeService.sendMessageStatus(msgId, false);
 		}
 
 	}
@@ -195,7 +196,6 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	{
 		try
 		{
-			Log.d("HikeMqttManager", "about to call connect " + this.clientId);
 			// try to connect
 
 			mqttClient.connect(this.clientId, cleanStart, keepAliveSeconds);
@@ -275,7 +275,6 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	{
 		boolean subscribed = false;
 
-		Log.d("HikeMqttManager", "Subscribe to " + topics.length + " topics");
 		if (isConnected() == false)
 		{
 			// quick sanity check - don't try and subscribe if we
@@ -557,7 +556,6 @@ public class HikeMqttManager implements MqttAdvancedCallback
 
 	public void connect()
 	{
-		Log.d("HikeMqttManager", "connect called");
 		if (!init())
 		{
 			Log.d("HikeMqttManager", "No token yet");
@@ -607,6 +605,10 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		}
 		catch (MqttNotConnectedException e)
 		{
+			if (msgId >= 0)
+			{
+				this.mHikeService.sendMessageStatus(msgId, false);
+			}
 			this.connect();
 		}
 		catch (MqttPersistenceException e)
@@ -634,10 +636,13 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	}
 
 	@Override
-	public void published(int msgId)
+	public void published(int mqttId)
 	{
-		Log.d("HikeMqttManager", "received acknowledgement for message: " + msgId);
-		this.mqttIdToMsgId.remove(msgId);
+		Long msgId = this.mqttIdToMsgId.remove(mqttId);
+		if (msgId != null)
+		{
+			mHikeService.sendMessageStatus(msgId, true);
+		}
 	}
 
 	@Override

@@ -37,6 +37,7 @@ public class HikeService extends Service
 	public static final int MSG_APP_DISCONNECTED = 2;
 	public static final int MSG_APP_TOKEN_CREATED = 3;
 	public static final int MSG_APP_PUBLISH = 4;
+	public static final int MSG_APP_MESSAGE_STATUS = 5;
 
 	protected Messenger mApp;
 	protected ArrayList<String> pendingMessages;
@@ -80,7 +81,6 @@ public class HikeService extends Service
 				Bundle bundle = msg.getData();
 				String message = bundle.getString(HikeConstants.MESSAGE);
 				long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-				Log.d("HikeService", "mqtt-message:" + message);
 				mMqttManager.send(message, msgId);
 			}
 		}
@@ -472,7 +472,7 @@ public class HikeService extends Service
 		return mApp != null;
 	}
 
-	public boolean sendMessageStatus(long msgId, boolean sent)
+	public boolean sendMessageStatus(Long msgId, boolean sent)
 	{
 		if (mApp == null)
 		{
@@ -482,9 +482,9 @@ public class HikeService extends Service
 
 		try
 		{
-			Message msg = Message.obtain();
+			Message msg = Message.obtain(null, MSG_APP_MESSAGE_STATUS);
 			msg.obj = msgId;
-			msg.arg1 = sent ? 0 : 1;
+			msg.arg1 = sent ? 1 : 0;
 			mApp.send(msg);
 		} catch(RemoteException e)
 		{
