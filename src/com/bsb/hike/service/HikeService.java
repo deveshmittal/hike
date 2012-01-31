@@ -107,7 +107,8 @@ public class HikeService extends Service
 			bundle.putString("msg", message);
 			msg.setData(bundle);
 			mApp.send(msg);
-		} catch(RemoteException e)
+		} 
+		catch(RemoteException e)
 		{
 			//client is dead :(
 			mApp = null;
