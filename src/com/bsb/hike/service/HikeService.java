@@ -26,6 +26,7 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.HikeToast;
@@ -86,7 +87,7 @@ public class HikeService extends Service
 				Bundle bundle = msg.getData();
 				String message = bundle.getString(HikeConstants.MESSAGE);
 				long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-				mMqttManager.send(message.getBytes(), msgId, msg.arg1);
+				mMqttManager.send(new HikePacket(message.getBytes(), msgId), msg.arg1);
 			}
 		}
 	}

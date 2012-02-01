@@ -39,6 +39,24 @@ import com.ibm.mqtt.MqttPersistenceException;
  */
 public class HikeMqttManager implements MqttAdvancedCallback
 {
+	public class RetryMessage implements Runnable
+	{
+		HikePacket hikePacket;
+
+		public RetryMessage(HikePacket packet)
+		{
+			this.hikePacket = packet;
+		}
+
+		@Override
+		public void run()
+		{
+			Log.d("HikeMqttManager", "after timeout resending message " + new String(hikePacket.getMessage()));
+			send(hikePacket, 1);
+			mHikeService.sendMessageStatus(hikePacket.getMsgId(), true);
+		}
+	}
+
 	public class BroadcastFailure implements Runnable
 	{
 		int mqttId;
@@ -51,12 +69,48 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		@Override
 		public void run()
 		{
-			if (HikeMqttManager.this.broadcastFailureIfUnsent(mqttId))
+			/* 
+			 * We haven't received confirmation that the message has been sent.
+			 * Ping the server (which will result in a reconnect if it fails).
+			 * If this is an actual message (msgId > 0), then try to send the message once more
+			 * in 15 seconds.  If that fails, then return a failure to the user.
+			 * Otherwise, just persist the message -- when we're sure we're connected we'll resend
+			 * the message.
+			 */
+			HikePacket packet = HikeMqttManager.this.getPacketIfUnsent(mqttId);
+			if (packet != null)
 			{
+				/* haven't received confirmation of publish */
 				if (getConnectionStatus() == MQTTConnectionStatus.CONNECTED)
 				{
 					Log.e("HikeMqttManager", "Failure occured when we should be connected:" + mqttClient.isConnected());
 					ping();
+				}
+
+				if (packet.getMsgId() > 0)
+				{
+					if (packet.shouldRetry())
+					{
+						//schedule one more message retry
+						Log.d("HikeMqttManager", "Retrying message" + packet.getMsgId() + " once more");
+						HikeMqttManager.this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);
+					}
+					else
+					{
+						/* We've retried once, just signal the app that a failure occured */
+						mHikeService.sendMessageStatus(packet.getMsgId(), false);
+					}
+				}
+				else
+				{
+					try
+					{
+						persistence.addSentMessage(mqttId, packet);
+					}
+					catch (MqttPersistenceException e)
+					{
+						Log.e("HikeMqttManager", "Unable to persist:" + mqttId, e);
+					}
 				}
 			}
 		}
@@ -141,7 +195,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		persistence = new HikeMqttPersistence(hikeService);
 	}
 
-	public boolean broadcastFailureIfUnsent(int mqttId)
+	public HikePacket getPacketIfUnsent(int mqttId)
 	{
 		HikePacket packet = mqttIdToPacket.remove(mqttId);
 		if (packet != null)
@@ -161,10 +215,9 @@ public class HikeMqttManager implements MqttAdvancedCallback
 			{
 				Log.e("HikeMqttManager", "Unable to persist message");
 			}
-			return true;
 		}
 
-		return false;
+		return packet;
 	}
 
 	private boolean init()
@@ -619,17 +672,11 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		}
 	}
 
-	public void send(byte[] message, long msgId, int qos)
+	public void send(HikePacket packet, int qos)
 	{
-		HikePacket packet = null;
-		if (qos > 0)
-		{
-			packet = new HikePacket(message, msgId);
-		}
-
 		try
 		{
-			int mqttId = mqttClient.publish(this.topic + HikeConstants.PUBLISH_TOPIC, message, qos, false);
+			int mqttId = mqttClient.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false);
 			if (packet != null)
 			{
 				/* store the message ... if we don't get confirmation of sent within a few seconds,
@@ -641,24 +688,28 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		}
 		catch (MqttNotConnectedException e)
 		{
-			Log.d("HikeMqttManager", "trying to 'send' but not connected");
-			if (packet != null)
-			{
-				try
-				{
-					persistence.addSentMessage(mqttClient.getNextMqttId(), packet);
-				}
-				catch (MqttException e1)
-				{
-					//only thrown when we have >65k messages in flight.  should never happen
-					Log.e("HikeMqttManager", "Unable to allocate messageId", e1);
-				}
+			Log.d("HikeMqttManager", "trying to 'send' but not connected.  First, connect");
 
-			}
-
-			if (msgId >= 0)
+			/* make sure we don't retry again */
+			if (qos > 0)
 			{
-				this.mHikeService.sendMessageStatus(msgId, false);
+				/* if it's an actual message, try to send it once more.  Otherwise just persist it */
+				if (packet.getMsgId() > 0)
+				{
+					packet.setRetry(false);
+					this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);					
+				}
+				else
+				{
+					try
+					{
+						persistence.addSentMessage(mqttClient.getNextMqttId(), packet);
+					}
+					catch (MqttException e1)
+					{
+						Log.e("HikeMqttManager", "unable to persist message", e);
+					}					
+				}
 			}
 
 			this.connect();
@@ -730,7 +781,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 				for (HikePacket hikePacket : packets)
 				{
 					Log.d("HikeMqttManager", "resending message " + new String(hikePacket.getMessage()));
-					send(hikePacket.getMessage(), hikePacket.getMsgId(), 1);
+					send(hikePacket, 1);
 				}
 			}
 		});

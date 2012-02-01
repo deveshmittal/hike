@@ -3,7 +3,7 @@ package com.bsb.hike.service;
 import android.os.Handler;
 import android.util.Log;
 
-import com.ibm.mqtt.IMqttClient;
+import com.bsb.hike.HikeConstants;
 import com.ibm.mqtt.MqttClient;
 import com.ibm.mqtt.MqttException;
 import com.ibm.mqtt.MqttPersistence;
@@ -78,13 +78,13 @@ public class HikeMqttClient extends MqttClient
 
 		Log.d("HikeMqttClient", "calling ping");
 		r = new PingError();
-		handler.postDelayed(r, 2*1000);
+		handler.postDelayed(r, HikeConstants.PING_TIMEOUT);
 	}
 
 	@Override
 	public void process(MqttPingresp packet)
 	{
-		Log.d("HikeMqttClient", "ping process called");
+		Log.d("HikeMqttClient", "ping response received");
 		handler.removeCallbacks(r);
 		super.process(packet);
 	}
