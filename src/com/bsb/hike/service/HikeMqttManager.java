@@ -198,25 +198,6 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	public HikePacket getPacketIfUnsent(int mqttId)
 	{
 		HikePacket packet = mqttIdToPacket.remove(mqttId);
-		if (packet != null)
-		{
-			long msgId = packet.getMsgId();
-			if (msgId > 0)
-			{
-				Log.e("HikeMqttManager", "Broadcasting message failure " + msgId);
-				this.mHikeService.sendMessageStatus(msgId, false);
-			}
-
-			try
-			{
-				persistence.addSentMessage(mqttId, packet);
-			}
-			catch (MqttPersistenceException e)
-			{
-				Log.e("HikeMqttManager", "Unable to persist message");
-			}
-		}
-
 		return packet;
 	}
 
@@ -677,7 +658,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		try
 		{
 			int mqttId = mqttClient.publish(this.topic + HikeConstants.PUBLISH_TOPIC, packet.getMessage(), qos, false);
-			if (packet != null)
+			if (qos > 0)
 			{
 				/* store the message ... if we don't get confirmation of sent within a few seconds,
 				 * persist it for later.
