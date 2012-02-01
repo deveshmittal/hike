@@ -81,7 +81,7 @@ public class HikeService extends Service
 				Bundle bundle = msg.getData();
 				String message = bundle.getString(HikeConstants.MESSAGE);
 				long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-				mMqttManager.send(message, msgId);
+				mMqttManager.send(message.getBytes(), msgId, msg.arg1);
 			}
 		}
 	}
@@ -162,12 +162,12 @@ public class HikeService extends Service
 		HandlerThread handlerThread = new HandlerThread("MQTTThread");
 		handlerThread.start();
 		Looper handlerThreadLooper = handlerThread.getLooper();
-		Handler handler = new Handler(handlerThreadLooper);
+		this.mHandler = new Handler(handlerThreadLooper);
 		mMessenger = new Messenger(new IncomingHandler(handlerThreadLooper));
 		pendingMessages = new ArrayList<String>();
 
 		// reset status variable to initial state
-		mMqttManager = new HikeMqttManager(this, handler);
+		mMqttManager = new HikeMqttManager(this, this.mHandler);
 
 		// register to be notified whenever the user changes their preferences
 		//  relating to background data use - so that we can respect the current
