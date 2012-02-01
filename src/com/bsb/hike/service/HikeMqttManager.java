@@ -51,7 +51,14 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		@Override
 		public void run()
 		{
-			HikeMqttManager.this.broadcastFailureIfUnsent(mqttId);
+			if (HikeMqttManager.this.broadcastFailureIfUnsent(mqttId))
+			{
+				if (getConnectionStatus() == MQTTConnectionStatus.CONNECTED)
+				{
+					Log.e("HikeMqttManager", "Failure occured when we should be connected:" + mqttClient.isConnected());
+					ping();
+				}
+			}
 		}
 	}
 
@@ -134,7 +141,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		persistence = new HikeMqttPersistence(hikeService);
 	}
 
-	public void broadcastFailureIfUnsent(int mqttId)
+	public boolean broadcastFailureIfUnsent(int mqttId)
 	{
 		HikePacket packet = mqttIdToPacket.remove(mqttId);
 		if (packet != null)
@@ -154,8 +161,10 @@ public class HikeMqttManager implements MqttAdvancedCallback
 			{
 				Log.e("HikeMqttManager", "Unable to persist message");
 			}
+			return true;
 		}
 
+		return false;
 	}
 
 	private boolean init()
@@ -206,10 +215,14 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	 */
 	private boolean connectToBroker()
 	{
+		if (mqttClient == null)
+		{
+			create();
+		}
+
 		try
 		{
 			// try to connect
-
 			mqttClient.connect(this.clientId, cleanStart, keepAliveSeconds);
 
 			//
@@ -354,6 +367,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		finally
 		{
 			mqttClient = null;
+			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 		}
 	}
 
@@ -539,6 +553,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	{
 		try
 		{
+			Log.d("HikeMqttManager", "calling ping");
 			mqttClient.ping();
 
 		}
