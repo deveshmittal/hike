@@ -22,12 +22,12 @@ public class HikeMqttClient extends MqttClient
 	{
 		public void run()
 		{
-			Log.d("HikeMqttClient", "PingError");
+			Log.d("HikeMqttClient", "PingError.  Reconnecting");
 			try
 			{
 				mgr.disconnectFromBroker();
 				mgr.connect();
-				
+				Log.d("HikeMqttClient", "Reconnected after pingerror");
 			}
 			catch (Exception e)
 			{

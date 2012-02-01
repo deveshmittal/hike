@@ -92,7 +92,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 					if (packet.shouldRetry())
 					{
 						//schedule one more message retry
-						Log.d("HikeMqttManager", "Retrying message" + packet.getMsgId() + " once more");
+						Log.d("HikeMqttManager", "Retrying message " + packet.getMsgId() + " once more");
 						HikeMqttManager.this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);
 					}
 					else
