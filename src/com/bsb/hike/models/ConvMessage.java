@@ -242,21 +242,6 @@ public class ConvMessage
 		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ || mState == State.SENT_FAILED);
 	}
 
-	public JSONObject serializeDeliveryReport()
-	{
-				JSONObject object = new JSONObject();
-				try
-				{
-					object.put(HikeConstants.TYPE, NetworkManager.DELIVERY_REPORT);
-					object.put(HikeConstants.DATA, String.valueOf(mappedMsgId)) ;
-					object.put(HikeConstants.TO, mMsisdn); /* Represents to whom this message has to be sent*/
-				}
-				catch (JSONException e)
-				{
-					Log.e("ConvMessage", "invalid json message", e);
-				}
-				return object;
-	}
 	public JSONObject serializeDeliveryReportRead()
 	{
 				JSONObject object = new JSONObject();
