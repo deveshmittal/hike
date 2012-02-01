@@ -27,7 +27,6 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeConversationsDatabase;
 import com.bsb.hike.utils.HikeToast;
-import com.ibm.mqtt.IMqttClient;
 import com.ibm.mqtt.MqttAdvancedCallback;
 import com.ibm.mqtt.MqttException;
 import com.ibm.mqtt.MqttNotConnectedException;
@@ -53,7 +52,6 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		{
 			Log.d("HikeMqttManager", "after timeout resending message " + new String(hikePacket.getMessage()));
 			send(hikePacket, 1);
-			mHikeService.sendMessageStatus(hikePacket.getMsgId(), true);
 		}
 	}
 
@@ -78,40 +76,47 @@ public class HikeMqttManager implements MqttAdvancedCallback
 			 * the message.
 			 */
 			HikePacket packet = HikeMqttManager.this.getPacketIfUnsent(mqttId);
-			if (packet != null)
+			if (packet == null)
 			{
-				/* haven't received confirmation of publish */
-				if (getConnectionStatus() == MQTTConnectionStatus.CONNECTED)
-				{
-					Log.e("HikeMqttManager", "Failure occured when we should be connected:" + mqttClient.isConnected());
-					ping();
-				}
+				return;
+			}
 
-				if (packet.getMsgId() > 0)
+			if (packet.getMsgId() > 0)
+			{
+				if (packet.shouldRetry())
 				{
-					if (packet.shouldRetry())
-					{
-						//schedule one more message retry
-						Log.d("HikeMqttManager", "Retrying message " + packet.getMsgId() + " once more");
-						HikeMqttManager.this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);
-					}
-					else
-					{
-						/* We've retried once, just signal the app that a failure occured */
-						mHikeService.sendMessageStatus(packet.getMsgId(), false);
-					}
+					packet.setRetry(false);
+					//schedule one more message retry
+					Log.d("HikeMqttManager", "Retrying message " + packet.getMsgId() + " once more");
+					HikeMqttManager.this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);
 				}
 				else
 				{
-					try
-					{
-						persistence.addSentMessage(mqttId, packet);
-					}
-					catch (MqttPersistenceException e)
-					{
-						Log.e("HikeMqttManager", "Unable to persist:" + mqttId, e);
-					}
+					/* We've retried once, just signal the app that a failure occured */
+					mHikeService.sendMessageStatus(packet.getMsgId(), false);
 				}
+			}
+			else
+			{
+				try
+				{
+					persistence.addSentMessage(mqttId, packet);
+				}
+				catch (MqttPersistenceException e)
+				{
+					Log.e("HikeMqttManager", "Unable to persist:" + mqttId, e);
+				}
+			}
+
+			/* haven't received confirmation of publish */
+			if (getConnectionStatus() == MQTTConnectionStatus.CONNECTED)
+			{
+				Log.e("HikeMqttManager", "Failure occured when we should be connected:" + mqttClient.isConnected());
+				ping();
+			}
+			else
+			{
+				Log.i("HikeMqttManager", "Failed sending message, app state is " + getConnectionStatus());
 			}
 		}
 	}
