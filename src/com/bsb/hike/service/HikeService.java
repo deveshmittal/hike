@@ -208,12 +208,15 @@ public class HikeService extends Service
 
 	private void asyncStart()
 	{
-		new Thread(new Runnable() {
+		/* ensure that all mqtt activity is done on the mqtt thread */
+		this.mHandler.postAtFrontOfQueue(new Runnable()
+		{
 			@Override
-			public void run() {
+			public void run()
+			{
 				handleStart();
 			}
-		}, "MQTTservice").start();
+		});
 	}
 
 	synchronized void handleStart()
