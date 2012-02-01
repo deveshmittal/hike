@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -266,6 +267,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		 * disable typing notifications until the UI is rendered. This is so if any callbacks that are fired due to UI changes will not cause messages to be sent.
 		 */
 		mTextLastChanged = Long.MAX_VALUE;
+
+		/* force the user into the reg-flow process if the token isn't set */
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		if (token == null)
+		{
+			startActivity(new Intent(this, WelcomeActivity.class));
+			finish();
+			return;
+		}
+		else if (!settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false))
+		{
+			startActivity(new Intent(this, AccountCreateSuccess.class));
+			finish();
+			return;
+		}
 
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
