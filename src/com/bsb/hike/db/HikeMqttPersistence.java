@@ -39,7 +39,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	public void addSentMessage(int id, HikePacket packet) throws MqttPersistenceException
 	{
-		Log.d("HikeMqttPersistence", "Persisting message " + id + " data: " + packet.getMessage());
+		Log.d("HikeMqttPersistence", "Persisting message " + id + " data: " + new String(packet.getMessage()));
 		InsertHelper ih = new InsertHelper(mDb, MQTT_DATABASE_TABLE);
 		ih.prepareForReplace();
 		ih.bind(ih.getColumnIndex(MQTT_PACKET_ID), id);
