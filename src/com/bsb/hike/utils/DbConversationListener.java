@@ -52,11 +52,6 @@ public class DbConversationListener implements Listener
 			ConvMessage message = (ConvMessage) object;
 			mConversationDb.addConversationMessages(message);
 			Log.d("DBCONVERSATION LISTENER","Receiver received Message : "+message.getMessage() + "		;	Receiver Msg ID : "+message.getMsgID()+"	; Mapped msgID : "+message.getMappedMsgID());
-			/* don't send delivery report for the hikebot message */
-			if (!HikeConstants.HIKEBOT.equals(message.getMsisdn()))
-			{
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReport()); // handle return to sender
-			}
 
 			mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, message);		
 		}
@@ -65,7 +60,7 @@ public class DbConversationListener implements Listener
 			Integer credits = (Integer) object;
 			mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
 			mEditor.commit();
-		} 
+		}
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{
 			Log.d("DBCONVERSATION LISTENER","(Sender) Message sent confirmed for msgID -> "+(Long)object);

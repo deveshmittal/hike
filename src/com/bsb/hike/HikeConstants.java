@@ -21,4 +21,14 @@ public class HikeConstants
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
 	public static final String HIKEBOT = "TD-HIKE";
+
+	/* how long to wait between sending publish and receiving an acknowledgement */
+	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
+
+	/* how long to wait for a ping confirmation */
+	public static final long PING_TIMEOUT = 5*1000;
+
+	/* how long to wait to resend message. This should significantly greathr than PING_TIMEOUT */
+	public static final long MESSAGE_RETRY_INTERVAL = 15*1000;
+
 }
