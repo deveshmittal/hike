@@ -687,7 +687,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{ // text hasn't changed
 				// in 10 seconds,
 				// send an event
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, mConversation.serialize(NetworkManager.END_TYPING));
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(NetworkManager.END_TYPING));
 				mTextLastChanged = 0;
 			}
 			else
@@ -770,7 +770,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			// we're currently not in 'typing' mode
 			mTextLastChanged = System.currentTimeMillis();
 			// fire an event
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, mConversation.serialize(NetworkManager.START_TYPING));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(NetworkManager.START_TYPING));
 
 			// create a timer to clear the event
 			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear

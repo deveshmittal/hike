@@ -31,6 +31,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 		this.mApp = app;
 		this.mMessenger = messenger;
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH_LOW, this);
 	}
 
 	public void onServiceConnected(ComponentName className, IBinder service)
@@ -93,40 +94,41 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		if (HikePubSub.MQTT_PUBLISH.equals(type))
+		JSONObject o = (JSONObject) object;
+		if (mService == null)
 		{
-			JSONObject o = (JSONObject) object;
-			if (mService == null)
-			{
-				Log.e("HikeServiceConnection", "Unable to publish message " + o);
-				return;
-			}
-			String data = o.toString();
-			Message msg = Message.obtain();
-			msg.what = HikeService.MSG_APP_PUBLISH;
-			Bundle bundle = new Bundle();
-			bundle.putString(HikeConstants.MESSAGE, data);
+			Log.e("HikeServiceConnection", "Unable to publish message " + o);
+			return;
+		}
+		String data = o.toString();
+		Message msg = Message.obtain();
+		msg.what = HikeService.MSG_APP_PUBLISH;
+		Bundle bundle = new Bundle();
+		bundle.putString(HikeConstants.MESSAGE, data);
 
-			/* if this is a message, then grab the messageId out of the json object 
-			 * so we can get confirmation of success/failure */
-			if (NetworkManager.MESSAGE.equals(o.optString(HikeConstants.TYPE)))
-			{
-				JSONObject json = o.optJSONObject(HikeConstants.DATA);
-				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
-				bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
-			}
+		/* set the QoS */
+		msg.arg1 = HikePubSub.MQTT_PUBLISH_LOW.equals(type) ? 0 : 1;
 
-			msg.setData(bundle);
-			msg.replyTo = this.mMessenger;
-			try
-			{
-				mService.send(msg);
-			}
-			catch (RemoteException e)
-			{
-				/* Service is dead.  What to do? */
-				Log.e("HikeServiceConnection", "Remote Service dead", e);
-			}
+		/*
+		 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
+		 */
+		if (NetworkManager.MESSAGE.equals(o.optString(HikeConstants.TYPE)))
+		{
+			JSONObject json = o.optJSONObject(HikeConstants.DATA);
+			long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
+			bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
+		}
+
+		msg.setData(bundle);
+		msg.replyTo = this.mMessenger;
+		try
+		{
+			mService.send(msg);
+		}
+		catch (RemoteException e)
+		{
+			/* Service is dead. What to do? */
+			Log.e("HikeServiceConnection", "Remote Service dead", e);
 		}
 	}
 };

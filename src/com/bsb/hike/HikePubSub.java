@@ -75,6 +75,9 @@ public class HikePubSub implements Runnable
 	/* publishes a message via mqtt to the server */
 	public static final String MQTT_PUBLISH = "serviceSend";
 
+	/* publishes a message via mqtt to the server with QoS 0*/
+	public static final String MQTT_PUBLISH_LOW = "serviceSendLow";
+
 	/* published when a message is deleted */
 	public static final String MESSAGE_DELETED = "messageDeleted";
 
