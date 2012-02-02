@@ -19,6 +19,7 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NetworkManager;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -554,7 +555,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 				return;
 			}
 
-			if ("message".equals(obj.optString("type")))
+			if (NetworkManager.MESSAGE.equals(obj.optString(HikeConstants.TYPE)))
 			{
 				/* toast and save it */
 				try
