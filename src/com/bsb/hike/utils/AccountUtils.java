@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.Attributes.Name;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -30,6 +31,7 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.entity.AbstractHttpEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHeader;
@@ -52,7 +54,7 @@ import com.bsb.hike.models.ContactInfo;
 public class AccountUtils
 {
 	public static final String HOST = "ec2-175-41-153-127.ap-southeast-1.compute.amazonaws.com";
-	
+
 	private static final int PORT = 3001;
 
 	private static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
@@ -225,53 +227,6 @@ public class AccountUtils
 		}
 	}
 
-	public static List<ContactInfo> postAddressBook(String token, List<ContactInfo> contacts) throws IllegalStateException, IOException
-	{
-		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
-		addToken(httppost);
-		Map<String, String> idToName = new HashMap<String, String>(contacts.size());
-		List<NameValuePair> pairs = new ArrayList<NameValuePair>(contacts.size());
-		for (ContactInfo contact : contacts)
-		{
-			idToName.put(contact.id, contact.name);
-			pairs.add(new BasicNameValuePair("phone_no", contact.number));
-			pairs.add(new BasicNameValuePair("name", contact.name));
-			pairs.add(new BasicNameValuePair("id", contact.id));
-		}
-
-		AbstractHttpEntity entity = new GzipUrlEncodedFormEntity(pairs, HTTP.DEFAULT_CONTENT_CHARSET);
-		httppost.setEntity(entity);
-
-		JSONObject obj = executeRequest(httppost);
-		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
-		{
-			Log.w("HTTP", "Unable to upload address book");
-			// TODO raise a real exception here
-			return null;
-		}
-
-		contacts = new ArrayList<ContactInfo>();
-		Log.d("FOO", obj.toString());
-		JSONObject addressbook = obj.optJSONObject("addressbook");
-		for (Iterator<?> it = addressbook.keys(); it.hasNext();)
-		{
-			String id = (String) it.next();
-			JSONArray entries = addressbook.optJSONArray(id);
-			entries.length();
-			for (int i = 0; i < entries.length(); ++i)
-			{
-				JSONObject entry = entries.optJSONObject(i);
-				String msisdn = entry.optString("msisdn");
-				Boolean onhike = entry.optBoolean("onhike");
-				ContactInfo info = new ContactInfo(id, msisdn, idToName.get(id), onhike.booleanValue());
-				info.name = idToName.get(id);
-				contacts.add(info);
-			}
-		}
-
-		return contacts;
-	}
-
 	public static class AccountInfo
 	{
 		public String token;
@@ -354,75 +309,117 @@ public class AccountUtils
 		req.addHeader("X-MSISDN-AIRTEL", MSISDN);
 	}
 
+	public static List<ContactInfo> postAddressBook(String token, Map<String, List<ContactInfo>> contactsMap) throws IllegalStateException, IOException
+	{
+		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
+		addToken(httppost);
+		JSONObject data;
+		data = getJsonContactList(contactsMap);
+		if(data == null)
+		{
+			return null;
+		}
+		String encoded = data.toString();
+		Log.d("ACCOUNT UTILS","Json data is : "+encoded);
+		try
+		{
+			AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			httppost.setEntity(entity);
+			JSONObject obj = executeRequest(httppost);
+			return getContactList(obj, contactsMap);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			Log.e("AccountUtils", "Unable to encode request body", e);
+			return null;
+		}
+	}
+
 	/**
 	 * 
-	 * @param new_contacts_by_id new entries to update with.  These will replace contact IDs on the server
-	 * @param old_ids, these are ids that are no longer present and should be removed
+	 * @param new_contacts_by_id
+	 *            new entries to update with. These will replace contact IDs on the server
+	 * @param ids_json
+	 *            , these are ids that are no longer present and should be removed
 	 * @return
 	 */
-	public static List<ContactInfo> updateAddressBook(Map<String, Set<ContactInfo>> new_contacts_by_id, Set<String> old_ids)
+	public static List<ContactInfo> updateAddressBook(Map<String, List<ContactInfo>> new_contacts_by_id, JSONArray ids_json)
 	{
 		HttpPatch request = new HttpPatch(BASE + "/account/addressbook");
+		addToken(request);
 		JSONObject data = new JSONObject();
-		JSONArray ids_json = new JSONArray();
-		for (String string : old_ids)
-		{
-			ids_json.put(string);
-		}
 
-		JSONObject contacts = new JSONObject();
-		/* add fields to the json packet */
 		try
 		{
 			data.put("remove", ids_json);
-			data.put("contacts", contacts);
-		} catch (JSONException e)
+			data.put("update", getJsonContactList(new_contacts_by_id));
+		}
+		catch (JSONException e)
 		{
 			Log.e("AccountUtils", "Invalid JSON put", e);
 			return null;
 		}
 
-		/* serialize the updated address book */
-		Map<String, String> idToName = new HashMap<String, String>();
-		for (Set<ContactInfo> contactsForId : new_contacts_by_id.values())
+		String encoded = data.toString();
+		//try
+		//{
+			AbstractHttpEntity entity = new ByteArrayEntity(encoded.getBytes());
+			request.setEntity(entity);
+			JSONObject obj = executeRequest(request);
+			return getContactList(obj, new_contacts_by_id);
+		//}
+		/*catch (UnsupportedEncodingException e)
 		{
-			JSONArray arr = Utils.jsonSerialize(contactsForId);
-			ContactInfo contactInfo = contactsForId.iterator().next();
-			idToName.put(contactInfo.id, contactInfo.name);
-			try {
-				contacts.put(contactInfo.id, arr);
-			} catch (JSONException e)
+			Log.e("AccountUtils", "Unable to encode request body", e);
+			return null;
+		}*/
+	}
+
+	private static JSONObject getJsonContactList(Map<String, List<ContactInfo>> contactsMap)
+	{
+		JSONObject updateContacts = new JSONObject();
+		for (String id : contactsMap.keySet())
+		{
+			try
 			{
-				Log.e("AccountUtils", "error updating address book", e);
+				List<ContactInfo> list = contactsMap.get(id);
+				JSONArray contactInfoList = new JSONArray();
+				for (ContactInfo cInfo : list)
+				{
+					JSONObject contactInfo = new JSONObject();
+					contactInfo.put("name", cInfo.getName());
+					contactInfo.put("phone_no", cInfo.getPhoneNum());
+					contactInfoList.put(contactInfo);
+				}
+				updateContacts.put(id, contactInfoList);
+			}
+			catch (JSONException e)
+			{
+				Log.d("ACCOUNT UTILS","Json exception while getting contact list.");
+				e.printStackTrace();
 			}
 		}
+		return updateContacts;
+	}
 
-		String encoded = data.toString();
+	private static List<ContactInfo> getContactList(JSONObject obj, Map<String, List<ContactInfo>> new_contacts_by_id)
+	{
 		List<ContactInfo> server_contacts = new ArrayList<ContactInfo>();
 		JSONObject addressbook;
-
 		try
 		{
-			AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
-			request.setEntity(entity);
-
-			JSONObject obj = executeRequest(request);
 			if ((obj == null) || ("fail".equals(obj.optString("stat"))))
 			{
 				Log.w("HTTP", "Unable to upload address book");
 				// TODO raise a real exception here
 				return null;
 			}
-
 			Log.d("AccountUtils", "Reply from PATCH addressbook:" + obj.toString());
 			addressbook = obj.getJSONObject("addressbook");
-		} catch (JSONException e)
+		}
+		catch (JSONException e)
 		{
 			Log.e("AccountUtils", "Invalid json object", e);
-			return null;
-		} catch (UnsupportedEncodingException e)
-		{
-			Log.e("AccountUtils", "Unable to encode request body", e);
 			return null;
 		}
 
@@ -430,18 +427,16 @@ public class AccountUtils
 		{
 			String id = (String) it.next();
 			JSONArray entries = addressbook.optJSONArray(id);
-			entries.length();
+			List<ContactInfo> cList = new_contacts_by_id.get(id);
 			for (int i = 0; i < entries.length(); ++i)
 			{
 				JSONObject entry = entries.optJSONObject(i);
 				String msisdn = entry.optString("msisdn");
 				Boolean onhike = entry.optBoolean("onhike");
-				ContactInfo info = new ContactInfo(id, msisdn, idToName.get(id), onhike.booleanValue());
-				info.name = idToName.get(id);
+				ContactInfo info = new ContactInfo(id, msisdn, cList.get(i).getName(), onhike.booleanValue(), cList.get(i).getPhoneNum());
 				server_contacts.add(info);
 			}
 		}
-
 		return server_contacts;
 	}
 }

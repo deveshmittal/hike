@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import org.json.JSONArray;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -99,35 +101,42 @@ public class ContactUtils
 	}
 
 	/*
-	 * Call this when we think the address book has changed.
-	 * Checks for updates, posts to the server, writes them to the local database
-	 * and updates existing conversations
+	 * Call this when we think the address book has changed. Checks for updates, posts to the server, writes them to the local database and updates existing conversations
 	 */
 	public static void syncUpdates(Context ctx)
 	{
 
 		HikeUserDatabase db = new HikeUserDatabase(ctx);
 
-		Map<String, Set<ContactInfo>> new_contacts_by_id = convertToMap(getContacts(ctx));
-		Map<String, Set<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts());
+		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(getContacts(ctx));
+		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts());
 
-		/* iterate over every item in the phone db,
-		 * items that are equal remove from both maps
-		 * items that are different, leave in 'new' map and remove from 'hike' map
-		 * send the 'new' map as items to add, and send the 'hike' map as IDs to remove 
+		/*
+		 * iterate over every item in the phone db, items that are equal remove from both maps items that are different, leave in 'new' map and remove from 'hike' map send the
+		 * 'new' map as items to add, and send the 'hike' map as IDs to remove
 		 */
-		Map.Entry<String, Set<ContactInfo>> entry = null;
-		for (Iterator<Map.Entry<String, Set<ContactInfo>>> iterator = new_contacts_by_id.entrySet().iterator(); iterator.hasNext(); entry = iterator.next())
+		Map.Entry<String, List<ContactInfo>> entry = null;
+		for (Iterator<Map.Entry<String, List<ContactInfo>>> iterator = new_contacts_by_id.entrySet().iterator(); iterator.hasNext();)
 		{
+			entry = iterator.next();
 			String id = entry.getKey();
-			Set<ContactInfo> contacts_for_id = entry.getValue();
-			Set<ContactInfo> hike_contacts_for_id = hike_contacts_by_id.get(id);
-			if (contacts_for_id.equals(hike_contacts_for_id))
+			List<ContactInfo> contacts_for_id = entry.getValue();
+			List<ContactInfo> hike_contacts_for_id = hike_contacts_by_id.get(id);
+
+			/* If id is not present in hike user DB i.e new contact is added to Phone AddressBook*/
+			if (hike_contacts_for_id == null)
+			{
+				continue;
+			}
+			//else if (contacts_for_id.equals(hike_contacts_for_id))
+			else if(areListsEqual(contacts_for_id,hike_contacts_for_id))
 			{
 				/* hike db is up to date, so don't send update */
 				iterator.remove();
 				hike_contacts_by_id.remove(id);
-			} else {
+			}
+			else
+			{
 				/* item is different than our db, so send an update */
 				hike_contacts_by_id.remove(id);
 			}
@@ -145,38 +154,91 @@ public class ContactUtils
 
 		try
 		{
-			List<ContactInfo> contacts = AccountUtils.updateAddressBook(new_contacts_by_id, hike_contacts_by_id.keySet());
-			for (ContactInfo contactInfo : contacts)
+			JSONArray ids_json = new JSONArray();
+			StringBuilder sb = new StringBuilder("(");
+			int i=0;
+			for (String string : hike_contacts_by_id.keySet())
 			{
-				db.addContact(contactInfo);
+				ids_json.put(string);
+				sb.append(string);
+				if (i != hike_contacts_by_id.size() - 1)
+				{
+					sb.append(",");
+				}
+				i++;
 			}
-		} catch(Exception e)
+			sb.append(")");
+			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
+			
+			/* Delete ids from hike user DB*/
+			db.deleteMultipleRows(sb.toString()); // this will delete all rows in HikeUser DB that are not in Addressbook.
+			db.updateContacts(updatedContacts);
+			
+		}
+		catch (Exception e)
 		{
 			Log.e("ContactUtils", "error updating addressbook", e);
-		} finally
+		}
+		finally
 		{
 			db.close();
 			db = null;
 		}
 	}
 
-	private static Map<String, Set<ContactInfo>> convertToMap(List<ContactInfo> contacts)
+	private static boolean areListsEqual(List<ContactInfo> list1, List<ContactInfo> list2)
 	{
-		Map<String, Set<ContactInfo>> ret = new HashMap<String, Set<ContactInfo>>(contacts.size());
+		if(list1 != null && list2 != null)
+		{
+			if(list1.size() != list2.size())
+				return false;
+			else if(list1.size() == 0 && list2.size() == 0)
+			{
+				return false;
+			}
+			else // represents same number of elements 
+			{
+				/* compare each element*/
+				HashSet<ContactInfo> set1 = new HashSet<ContactInfo>(list1.size());
+				for(ContactInfo c : list1)
+				{
+					set1.add(c);
+				}
+				boolean flag = true;
+				for(ContactInfo c : list2)
+				{
+					if(!set1.contains(c))
+					{
+						flag = false;
+						break;
+					}
+				}
+				return flag;
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public static Map<String, List<ContactInfo>> convertToMap(List<ContactInfo> contacts)
+	{
+		Map<String, List<ContactInfo>> ret = new HashMap<String, List<ContactInfo>>(contacts.size());
 		for (ContactInfo contactInfo : contacts)
 		{
-			if ("__TD_HIKE__".equals(contactInfo.getId()))
+			if ("__HIKE__".equals(contactInfo.getId()))
 			{
 				continue;
 			}
 
-			Set<ContactInfo> l = ret.get(contactInfo.getId());
+			List<ContactInfo> l = ret.get(contactInfo.getId());
 			if (l == null)
 			{
-				l = new HashSet<ContactInfo>();
+				/* Linked list is used because removal using iterator is O(1) in linked list vs O(n) in Arraylist*/
+				l = new LinkedList<ContactInfo>();
 				ret.put(contactInfo.getId(), l);
 			}
-
 			l.add(contactInfo);
 		}
 
@@ -216,12 +278,12 @@ public class ContactUtils
 			String name = contactNames.get(id);
 			if ((name != null) && (number != null))
 			{
-				contactinfos.add(new ContactInfo(id, number, name, ""));
+				contactinfos.add(new ContactInfo(id, null, name, number));
 			}
 		}
 
 		phones.close();
-		Log.d("ContactUtils", "Scanning address book took " + (System.currentTimeMillis() - tm)/1000 + " seconds for " + contactinfos.size() + " entries");
+		Log.d("ContactUtils", "Scanning address book took " + (System.currentTimeMillis() - tm) / 1000 + " seconds for " + contactinfos.size() + " entries");
 		return contactinfos;
 	}
 }
