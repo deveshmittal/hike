@@ -351,6 +351,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		case R.id.delete:
 			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
 			mAdapter.remove(message);
+			return true;
+		case R.id.resend:
+			/* we treat resend as delete the failed message, and paste the text in the compose buffer */
+			String m = message.getMessage();
+			mComposeView.setText(m);
+			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
+			mAdapter.remove(message);
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -362,6 +370,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.message_menu, menu);
+
+		/* enable resend options on failed messages */
+		AdapterView.AdapterContextMenuInfo adapterInfo =
+	            (AdapterView.AdapterContextMenuInfo) menuInfo;
+		ConvMessage message = mAdapter.getItem(adapterInfo.position);
+		if ((message.getState() == ConvMessage.State.SENT_FAILED))
+		{
+			MenuItem item = menu.findItem(R.id.resend);
+			item.setVisible(true);
+		}
 	}
 
 	public void onSendClick(View v)
