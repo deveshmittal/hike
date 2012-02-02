@@ -10,20 +10,72 @@ public class ContactInfo implements JSONSerializable
 	@Override
 	public String toString()
 	{
-		return "ContactInfo [name=" + name + ", number=" + number + ", id=" + id + ", onhike=" + onhike + "]";
+		return "ContactInfo [name=" + name + ", number=" + msisdn + ", id=" + id + ", onhike=" + onhike + ", phone number="+phoneNum+"]";
 	}
 
-	public String name;
+	private String name;
 
-	public String number;
+	private String msisdn;
 
-	public String id;
+	private String id;
 
-	public boolean onhike;
+	private boolean onhike;
+	
+	private String phoneNum;
 
-	public ContactInfo(String id, String number, String name)
+	public String getName()
 	{
-		this(id, number, name, false);
+		return name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	public String getMsisdn()
+	{
+		return msisdn;
+	}
+
+	public void setMsisdn(String msisdn)
+	{
+		this.msisdn = msisdn;
+	}
+
+	public String getId()
+	{
+		return id;
+	}
+
+	public void setId(String id)
+	{
+		this.id = id;
+	}
+
+	public boolean isOnhike()
+	{
+		return onhike;
+	}
+
+	public void setOnhike(boolean onhike)
+	{
+		this.onhike = onhike;
+	}
+
+	public String getPhoneNum()
+	{
+		return phoneNum;
+	}
+
+	public void setPhoneNum(String phoneNum)
+	{
+		this.phoneNum = phoneNum;
+	}
+
+	public ContactInfo(String id, String number, String name,String phoneNum)
+	{
+		this(id, number, name, false,phoneNum);
 	}
 
 	@Override
@@ -33,7 +85,7 @@ public class ContactInfo implements JSONSerializable
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((number == null) ? 0 : number.hashCode());
+		result = prime * result + ((phoneNum == null) ? 0 : phoneNum.hashCode());
 		return result;
 	}
 
@@ -61,28 +113,29 @@ public class ContactInfo implements JSONSerializable
 		}
 		else if (!name.equals(other.name))
 			return false;
-		if (number == null)
+		if (phoneNum == null)
 		{
-			if (other.number != null)
+			if (other.phoneNum != null)
 				return false;
 		}
-		else if (!number.equals(other.number))
+		else if (!phoneNum.equals(other.phoneNum))
 			return false;
 		return true;
 	}
 
-	public ContactInfo(String id, String number, String name, boolean onhike)
+	public ContactInfo(String id, String msisdn, String name, boolean onhike, String phoneNum)
 	{
 		this.id = id;
-		this.number = number;
+		this.msisdn = msisdn;
 		this.name = name;
 		this.onhike = onhike;
+		this.phoneNum = phoneNum;
 	}
 
 	public JSONObject toJSON() throws JSONException
 	{
 		JSONObject json = new JSONObject();
-		json.put("phone_no", this.number);
+		json.put("phone_no", this.phoneNum);
 		json.put("name", this.name);
 		json.put("id", this.id);
 		return json;
