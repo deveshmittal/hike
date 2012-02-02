@@ -7,6 +7,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -64,6 +65,14 @@ public class Conversation implements Comparable<Conversation>
 	public String getContactName()
 	{
 		return contactName;
+	}
+
+	/*
+	 * Returns a friendly name for this conversation (name if non-empty, otherwise msisdn)
+	 */
+	public String getLabel()
+	{
+		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
 	}
 
 	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike)

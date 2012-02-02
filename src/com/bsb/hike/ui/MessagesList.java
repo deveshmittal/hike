@@ -283,7 +283,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	        Intent intent = new Intent();
 	        Log.i("CreateShortcut", "Creating intent for broadcasting");
 	        intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-	        intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getContactName());
+	        intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
 	        intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(this, R.drawable.ic_hikelogo));
 	        intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 	        sendBroadcast(intent);

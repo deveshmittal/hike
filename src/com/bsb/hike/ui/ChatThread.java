@@ -442,13 +442,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		mInputNumberView.setVisibility(View.GONE);
 
-		mLabel = TextUtils.isEmpty(mContactName) ? mContactNumber : mContactName;
-
-		mBottomView.setVisibility(View.VISIBLE);
-
-		mNameView.setVisibility(View.VISIBLE);
-		mNameView.setText(mLabel);
-
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
@@ -457,6 +450,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mConversation = mConversationDb.addConversation(mContactNumber, false);
 		}
+
+		mLabel = mConversation.getLabel();
+
+		mBottomView.setVisibility(View.VISIBLE);
+
+		mNameView.setVisibility(View.VISIBLE);
+		mNameView.setText(mLabel);
 
 		mConversationsView.setStackFromBottom(true);
 
