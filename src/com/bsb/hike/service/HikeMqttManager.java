@@ -675,9 +675,9 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		}
 		catch (MqttNotConnectedException e)
 		{
-			Log.d("HikeMqttManager", "trying to 'send' but not connected.  First, connect");
+			Log.d("HikeMqttManager", "trying to send " + new String(packet.getMessage()) + " but not connected.  First, connect");
 
-			/* make sure we don't retry again */
+			/* only retry messages that we actually care about that we haven't already retried */
 			if (qos > 0)
 			{
 				/* if it's an actual message, try to send it once more.  Otherwise just persist it */
