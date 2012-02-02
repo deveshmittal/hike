@@ -65,11 +65,11 @@ public class ConvMessage
 		if (data.has(HikeConstants.SMS_MESSAGE))
 		{
 			this.mMessage = data.getString(HikeConstants.SMS_MESSAGE);
-			mIsSMS = false;
+			mIsSMS = true;
 		} else
 		{
 			this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
-			mIsSMS = true;
+			mIsSMS = false;
 		}
 
 		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
