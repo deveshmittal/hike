@@ -683,8 +683,17 @@ public class HikeMqttManager implements MqttAdvancedCallback
 				/* if it's an actual message, try to send it once more.  Otherwise just persist it */
 				if (packet.getMsgId() > 0)
 				{
-					packet.setRetry(false);
-					this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);					
+					if (packet.shouldRetry())
+					{
+						/* make sure we don't retry again */
+						packet.setRetry(false);
+						this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);
+					}
+					else
+					{
+						/* we've already had one failure, go ahead and tell the app it failed */
+						mHikeService.sendMessageStatus(packet.getMsgId(), false);
+					}
 				}
 				else
 				{
