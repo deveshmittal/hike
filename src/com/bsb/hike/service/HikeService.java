@@ -31,6 +31,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.MessagesList;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeToast;
 
 public class HikeService extends Service
@@ -198,9 +199,12 @@ public class HikeService extends Service
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent);
 		startForeground(HikeToast.HIKE_NOTIFICATION, notification);
-
+	
+		HandlerThread contactHandlerThread = new HandlerThread("");
+		contactHandlerThread.start();
+		Handler contactHandler = new Handler(contactHandlerThread.getLooper());
 		/* register with the Contact list to get an update whenever the phone book changes */
-		contactsReceived = new ContactListChangeIntentReceiver(mHandler);
+		contactsReceived = new ContactListChangeIntentReceiver(contactHandler);
 		getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
 	}
 
@@ -342,6 +346,7 @@ public class HikeService extends Service
 		@Override
 		public void onChange(boolean selfChange)
 		{
+			ContactUtils.syncUpdates(HikeService.this);
 			Log.i("ContactListChangeIntentReceiver", "onChange called");
 		}
 	}
