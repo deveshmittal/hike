@@ -11,7 +11,7 @@ public class BootService extends BroadcastReceiver
 	@Override
 	public void onReceive(Context ctx, Intent intent)
 	{
-		Log.i("BootService", "Received onBoot intent");
+		Log.i("HikeBootService", "Received onBoot intent");
 		Intent startServiceIntent = new Intent(ctx, HikeService.class);
         ctx.startService(startServiceIntent);
 	}
