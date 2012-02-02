@@ -165,16 +165,16 @@ public class ContactUtils
 		Map<String, Set<ContactInfo>> ret = new HashMap<String, Set<ContactInfo>>(contacts.size());
 		for (ContactInfo contactInfo : contacts)
 		{
-			if ("__TD_HIKE__".equals(contactInfo.id))
+			if ("__TD_HIKE__".equals(contactInfo.getId()))
 			{
 				continue;
 			}
 
-			Set<ContactInfo> l = ret.get(contactInfo.id);
+			Set<ContactInfo> l = ret.get(contactInfo.getId());
 			if (l == null)
 			{
 				l = new HashSet<ContactInfo>();
-				ret.put(contactInfo.id, l);
+				ret.put(contactInfo.getId(), l);
 			}
 
 			l.add(contactInfo);
@@ -216,7 +216,7 @@ public class ContactUtils
 			String name = contactNames.get(id);
 			if ((name != null) && (number != null))
 			{
-				contactinfos.add(new ContactInfo(id, number, name));
+				contactinfos.add(new ContactInfo(id, number, name, ""));
 			}
 		}
 

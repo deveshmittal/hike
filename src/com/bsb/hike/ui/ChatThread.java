@@ -408,9 +408,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			 */
 			if (contactInfo != null)
 			{
-				mContactId = contactInfo.id;
-				mContactName = contactInfo.name;
-				mContactNumber = contactInfo.number;
+				mContactId = contactInfo.getId();
+				mContactName = contactInfo.getName();
+				mContactNumber = contactInfo.getMsisdn();
 			}
 			else
 			{

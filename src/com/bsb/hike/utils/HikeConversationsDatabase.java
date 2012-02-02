@@ -214,8 +214,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		ih.bind(ih.getColumnIndex(DBConstants.MSISDN), msisdn);
 		if (contactInfo != null)
 		{
-			ih.bind(ih.getColumnIndex(DBConstants.CONTACT_ID), contactInfo.id);
-			onhike |= contactInfo.onhike;
+			ih.bind(ih.getColumnIndex(DBConstants.CONTACT_ID), contactInfo.getId());
+			onhike |= contactInfo.isOnhike();
 		}
 
 		ih.bind(ih.getColumnIndex(DBConstants.ONHIKE), onhike);
@@ -223,8 +223,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		long id = ih.execute();
 		if (id >= 0)
 		{
-			Conversation conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.id : null, (contactInfo != null) ? contactInfo.name : null,
-					(contactInfo != null) ? contactInfo.onhike : false);
+			Conversation conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null,
+					(contactInfo != null) ? contactInfo.isOnhike() : false);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
 			return conv;
 		}
@@ -294,7 +294,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 		huDb.close();
-		Conversation conv = new Conversation(msisdn, convid, contactid, (contactInfo != null) ? contactInfo.name : null, (contactInfo != null) ? contactInfo.onhike : false);
+		Conversation conv = new Conversation(msisdn, convid, contactid, (contactInfo != null) ? contactInfo.getName() : null, (contactInfo != null) ? contactInfo.isOnhike() : false);
 		List<ConvMessage> messages = getConversationThread(msisdn, contactid, convid, limit, conv);
 		conv.setMessages(messages);
 		return conv;
@@ -325,8 +325,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				// TODO this can be expressed in a single sql query
 				String msisdn = c.getString(msisdnIdx);
 				ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
-				Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx), (contactInfo != null) ? contactInfo.name : null,
-						(contactInfo != null) ? contactInfo.onhike : false);
+				Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx), (contactInfo != null) ? contactInfo.getName() : null,
+						(contactInfo != null) ? contactInfo.isOnhike() : false);
 				conv.setMessages(getConversationThread(conv.getMsisdn(), conv.getContactId(), conv.getConvId(), 1, conv));
 				conversations.add(conv);
 			}

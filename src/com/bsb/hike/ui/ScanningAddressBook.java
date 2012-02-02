@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -35,7 +36,8 @@ public class ScanningAddressBook extends Activity
 			HikeUserDatabase db = null;
 			try
 			{
-				List<ContactInfo> addressbook = AccountUtils.postAddressBook(token, contactinfos);
+				Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
+				List<ContactInfo> addressbook = AccountUtils.postAddressBook(token, contacts);
 				//TODO this exception should be raised from the postAddressBook code
 				if (addressbook == null)
 				{
@@ -47,10 +49,10 @@ public class ScanningAddressBook extends Activity
 
 				/* Add a default message from hike */
 				// TODO get the number for hikebot from the server?
-				ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", HikeConstants.HIKEBOT, "HikeBot");
-				hikeContactInfo.onhike = true;
+				ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", HikeConstants.HIKEBOT, "HikeBot", HikeConstants.HIKEBOT);
+				hikeContactInfo.setOnhike(true);
 				db.addContact(hikeContactInfo);
-				ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message), hikeContactInfo.number,
+				ConvMessage message = new ConvMessage(getResources().getString(R.string.hikebot_message), hikeContactInfo.getMsisdn(),
 						System.currentTimeMillis() / 1000, ConvMessage.State.RECEIVED_UNREAD);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, message);

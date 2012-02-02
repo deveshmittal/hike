@@ -41,7 +41,7 @@ public class HikeToast
 		String msisdn = convMsg.getMsisdn();
 		String message = convMsg.getMessage();
 		long timestamp = convMsg.getTimestamp();
-		String key = (contactInfo != null) ? contactInfo.name : msisdn;
+		String key = (contactInfo != null) ? contactInfo.getName() : msisdn;
 		
 		int icon = R.drawable.ic_contact_logo;
 
@@ -67,13 +67,13 @@ public class HikeToast
 		notificationIntent.putExtra("msisdn", msisdn);
 		if (contactInfo != null)
 		{
-			if (contactInfo.id != null)
+			if (contactInfo.getId() != null)
 			{
-				notificationIntent.putExtra("id", contactInfo.id);
+				notificationIntent.putExtra("id", contactInfo.getId());
 			}
-			if (contactInfo.name != null)
+			if (contactInfo.getName() != null)
 			{
-				notificationIntent.putExtra("name", contactInfo.name);
+				notificationIntent.putExtra("name", contactInfo.getName());
 			}
 		}
 
