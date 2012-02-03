@@ -322,14 +322,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mUiThreadHandler = new Handler();
 
 		/* register listeners */
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 	}
 
 	@Override
@@ -351,6 +352,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		case R.id.delete:
 			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
 			mAdapter.remove(message);
+			return true;
+		case R.id.resend:
+			/* we treat resend as delete the failed message, and paste the text in the compose buffer */
+			String m = message.getMessage();
+			mComposeView.setText(m);
+			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
+			mAdapter.remove(message);
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -362,6 +371,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.message_menu, menu);
+
+		/* enable resend options on failed messages */
+		AdapterView.AdapterContextMenuInfo adapterInfo =
+	            (AdapterView.AdapterContextMenuInfo) menuInfo;
+		ConvMessage message = mAdapter.getItem(adapterInfo.position);
+		if ((message.getState() == ConvMessage.State.SENT_FAILED))
+		{
+			MenuItem item = menu.findItem(R.id.resend);
+			item.setVisible(true);
+		}
 	}
 
 	public void onSendClick(View v)
@@ -442,13 +461,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		mInputNumberView.setVisibility(View.GONE);
 
-		mLabel = TextUtils.isEmpty(mContactName) ? mContactNumber : mContactName;
-
-		mBottomView.setVisibility(View.VISIBLE);
-
-		mNameView.setVisibility(View.VISIBLE);
-		mNameView.setText(mLabel);
-
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
@@ -457,6 +469,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mConversation = mConversationDb.addConversation(mContactNumber, false);
 		}
+
+		mLabel = mConversation.getLabel();
+
+		mBottomView.setVisibility(View.VISIBLE);
+
+		mNameView.setVisibility(View.VISIBLE);
+		mNameView.setText(mLabel);
 
 		mConversationsView.setStackFromBottom(true);
 

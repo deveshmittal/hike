@@ -159,7 +159,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		Log.d("MESSAGE LIST","On create is Called .....");
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		if (token == null)
@@ -236,6 +235,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		mConversationsView.setAdapter(mAdapter);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
+
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MSG_READ, this);
@@ -283,7 +287,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	        Intent intent = new Intent();
 	        Log.i("CreateShortcut", "Creating intent for broadcasting");
 	        intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-	        intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getContactName());
+	        intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
 	        intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource.fromContext(this, R.drawable.ic_hikelogo));
 	        intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
 	        sendBroadcast(intent);
@@ -432,6 +436,72 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			mAdapter.setNotifyOnChange(false);
 			runOnUiThread(this);
 		}
+		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))
+		{
+			long msgId = ((Long) object).longValue();
+			ConvMessage msg = findMessageById(msgId);
+			if (msg != null)
+			{
+				msg.setState(ConvMessage.State.SENT_CONFIRMED);
+				runOnUiThread(this);
+			}
+		}
+		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
+		{
+			long[] ids = (long[]) object;
+			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
+			for (int i = 0; i < ids.length; i++)
+			{
+				ConvMessage msg = findMessageById(ids[i]);
+				if (msg != null)
+				{
+					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+				}
+			}
+			runOnUiThread(this);
+		}
+		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))
+		{
+			long msgId = ((Long) object).longValue();
+			ConvMessage msg = findMessageById(msgId);
+			if (msg != null)
+			{
+				msg.setState(ConvMessage.State.SENT_DELIVERED);
+				runOnUiThread(this);
+			}
+		}
+		else if (HikePubSub.MESSAGE_FAILED.equals(type))
+		{
+			long msgId = ((Long) object).longValue();
+			ConvMessage msg = findMessageById(msgId);
+			if (msg != null)
+			{
+				msg.setState(ConvMessage.State.SENT_FAILED);
+				runOnUiThread(this);
+			}
+		}
+	}
+
+	ConvMessage findMessageById(long msgId)
+	{
+		int count = mAdapter.getCount();
+		for(int i = 0; i < count; ++i)
+		{
+			Conversation conversation = mAdapter.getItem(i);
+			List<ConvMessage> messages = conversation.getMessages();
+			if (messages.isEmpty())
+			{
+				continue;
+			}
+
+			ConvMessage message = messages.get(0);
+			if (message.getMsgID() == msgId)
+			{
+				return message;
+			}
+		}
+
+		return null;
 	}
 
 	public void run()

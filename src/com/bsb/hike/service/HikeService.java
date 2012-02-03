@@ -104,7 +104,7 @@ public class HikeService extends Service
 	{
 		if (mApp == null)
 		{
-			Log.d("HikeService", "no app");
+			Log.d("HikeService", "no app connected for message " + message);
 			return false;
 		}
 

@@ -44,23 +44,11 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 				v.setBackgroundResource(R.color.blue);
 			}
 
-			ConvMessage.State state = convMessage.getState();
 			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
-			if (state == ConvMessage.State.SENT_DELIVERED)
+			int resId = convMessage.getImageState();
+			if (resId > 0)
 			{
-				imgStatus.setImageResource(R.drawable.ic_delivered);
-			}
-			else if (state == ConvMessage.State.SENT_DELIVERED_READ)
-			{
-				imgStatus.setImageResource(R.drawable.ic_read);
-			} 
-			else if (state == ConvMessage.State.SENT_FAILED)
-			{
-				imgStatus.setImageResource(R.drawable.ic_failed);
-			}
-			else if (state == ConvMessage.State.SENT_CONFIRMED)
-			{
-				imgStatus.setImageResource(R.drawable.ic_sent);
+				imgStatus.setImageResource(resId);
 			}
 		}
 		else

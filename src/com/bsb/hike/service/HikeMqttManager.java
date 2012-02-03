@@ -19,6 +19,7 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NetworkManager;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -554,7 +555,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 				return;
 			}
 
-			if ("message".equals(obj.optString("type")))
+			if (NetworkManager.MESSAGE.equals(obj.optString(HikeConstants.TYPE)))
 			{
 				/* toast and save it */
 				try
@@ -674,16 +675,25 @@ public class HikeMqttManager implements MqttAdvancedCallback
 		}
 		catch (MqttNotConnectedException e)
 		{
-			Log.d("HikeMqttManager", "trying to 'send' but not connected.  First, connect");
+			Log.d("HikeMqttManager", "trying to send " + new String(packet.getMessage()) + " but not connected.  First, connect");
 
-			/* make sure we don't retry again */
+			/* only retry messages that we actually care about that we haven't already retried */
 			if (qos > 0)
 			{
 				/* if it's an actual message, try to send it once more.  Otherwise just persist it */
 				if (packet.getMsgId() > 0)
 				{
-					packet.setRetry(false);
-					this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);					
+					if (packet.shouldRetry())
+					{
+						/* make sure we don't retry again */
+						packet.setRetry(false);
+						this.handler.postDelayed(new RetryMessage(packet), HikeConstants.MESSAGE_RETRY_INTERVAL);
+					}
+					else
+					{
+						/* we've already had one failure, go ahead and tell the app it failed */
+						mHikeService.sendMessageStatus(packet.getMsgId(), false);
+					}
 				}
 				else
 				{

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
@@ -72,6 +73,13 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 				tf = contactView.getTypeface();
 				contactView.setTypeface(Typeface.DEFAULT);
+			}
+
+			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
+			int resId = message.getImageState();
+			if (resId > 0)
+			{
+				imgStatus.setImageResource(resId);
 			}
 		}
 		return v;

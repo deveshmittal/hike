@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.NetworkManager;
+import com.bsb.hike.R;
 import com.ocpsoft.pretty.time.PrettyTime;
 
 public class ConvMessage
@@ -65,11 +66,11 @@ public class ConvMessage
 		if (data.has(HikeConstants.SMS_MESSAGE))
 		{
 			this.mMessage = data.getString(HikeConstants.SMS_MESSAGE);
-			mIsSMS = false;
+			mIsSMS = true;
 		} else
 		{
 			this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
-			mIsSMS = true;
+			mIsSMS = false;
 		}
 
 		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
@@ -263,5 +264,28 @@ public class ConvMessage
 	public boolean isSMS()
 	{
 		return mIsSMS;
+	}
+
+	public int getImageState()
+	{
+		/* received messages have no img */
+		if (!isSent())
+		{
+			return -1;
+		}
+
+		switch(mState)
+		{
+		case SENT_DELIVERED:
+			return R.drawable.ic_delivered;
+		case SENT_DELIVERED_READ:
+			return R.drawable.ic_read;
+		case SENT_FAILED:
+			return R.drawable.ic_failed;
+		case SENT_CONFIRMED:
+			return R.drawable.ic_sent;
+		default:
+			return -1;
+		}
 	}
 }
