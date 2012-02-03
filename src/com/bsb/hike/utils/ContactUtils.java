@@ -123,23 +123,24 @@ public class ContactUtils
 			List<ContactInfo> contacts_for_id = entry.getValue();
 			List<ContactInfo> hike_contacts_for_id = hike_contacts_by_id.get(id);
 
-			/* If id is not present in hike user DB i.e new contact is added to Phone AddressBook*/
+			/* If id is not present in hike user DB i.e new contact is added to Phone AddressBook.
+			 * When the items are the same, we remove the item @ the current iterator.  This will result in the
+			 * item *not* being sent to the server
+			 */
 			if (hike_contacts_for_id == null)
 			{
 				continue;
 			}
-			//else if (contacts_for_id.equals(hike_contacts_for_id))
 			else if(areListsEqual(contacts_for_id,hike_contacts_for_id))
 			{
 				/* hike db is up to date, so don't send update */
 				iterator.remove();
 				hike_contacts_by_id.remove(id);
+				continue;
 			}
-			else
-			{
-				/* item is different than our db, so send an update */
-				hike_contacts_by_id.remove(id);
-			}
+
+			/* item is different than our db, so send an update */
+			hike_contacts_by_id.remove(id);
 		}
 
 		/* our address object should an update dictionary, and a list of IDs to remove */

@@ -428,8 +428,8 @@ public class AccountUtils
 			{
 				JSONObject entry = entries.optJSONObject(i);
 				String msisdn = entry.optString("msisdn");
-				Boolean onhike = entry.optBoolean("onhike");
-				ContactInfo info = new ContactInfo(id, msisdn, cList.get(i).getName(), onhike.booleanValue(), cList.get(i).getPhoneNum());
+				boolean onhike = entry.optBoolean("onhike");
+				ContactInfo info = new ContactInfo(id, msisdn, cList.get(i).getName(), onhike, cList.get(i).getPhoneNum());
 				server_contacts.add(info);
 			}
 		}
