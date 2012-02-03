@@ -152,7 +152,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			/* Represents we dont have any conversation made for this msisdn.*/
 			if (msgId <= 0)
 			{
-				Conversation conversation = addConversation(conv.getMsisdn(), conv.isSMS());
+				Conversation conversation = addConversation(conv.getMsisdn(), !conv.isSMS());
 				if (conversation != null)
 				{
 					conversation.addMessage(conv);
@@ -219,12 +219,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 
 		ih.bind(ih.getColumnIndex(DBConstants.ONHIKE), onhike);
-
 		long id = ih.execute();
 		if (id >= 0)
 		{
-			Conversation conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null,
-					(contactInfo != null) ? contactInfo.isOnhike() : false);
+			Conversation conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null, onhike);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
 			return conv;
 		}
@@ -274,7 +272,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 										new String[] 
 												{ 
 													DBConstants.CONV_ID, 
-													DBConstants.CONTACT_ID 
+													DBConstants.CONTACT_ID,
+													DBConstants.ONHIKE
 												}, 
 										DBConstants.MSISDN+"=?", 
 										new String[] 
@@ -289,12 +288,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 		long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
 		String contactid = c.getString(c.getColumnIndex(DBConstants.CONTACT_ID));
+		boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
 		c.close();
 
 		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
 		huDb.close();
-		Conversation conv = new Conversation(msisdn, convid, contactid, (contactInfo != null) ? contactInfo.getName() : null, (contactInfo != null) ? contactInfo.isOnhike() : false);
+
+		onhike |= (contactInfo != null) ? contactInfo.isOnhike() : false;
+		Conversation conv = new Conversation(msisdn, convid, contactid, (contactInfo != null) ? contactInfo.getName() : null, onhike);
 		List<ConvMessage> messages = getConversationThread(msisdn, contactid, convid, limit, conv);
 		conv.setMessages(messages);
 		return conv;
