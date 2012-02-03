@@ -31,4 +31,7 @@ public class HikeConstants
 	/* how long to wait to resend message. This should significantly greathr than PING_TIMEOUT */
 	public static final long MESSAGE_RETRY_INTERVAL = 15*1000;
 
+	/* quiet period of no changes before actually updating the db */
+	public static final long CONTACT_UPDATE_TIMEOUT = 10*1000;
+
 }

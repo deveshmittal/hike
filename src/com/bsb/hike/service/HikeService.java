@@ -37,6 +37,25 @@ import com.bsb.hike.utils.HikeToast;
 public class HikeService extends Service
 {
 
+	public class ContactsChanged implements Runnable
+	{
+
+		private Context context;
+
+		public ContactsChanged(Context ctx)
+		{
+			this.context = ctx;
+		}
+
+		@Override
+		public void run()
+		{
+			Log.d("ContactsChanged", "calling syncUpdates");
+			ContactUtils.syncUpdates(this.context);
+		}
+
+	}
+
 	public static final int MSG_APP_CONNECTED = 1;
 
 	public static final int MSG_APP_DISCONNECTED = 2;
@@ -160,6 +179,9 @@ public class HikeService extends Service
 	private ContactListChangeIntentReceiver contactsReceived;
 	private Handler mHandler;
 
+	private Handler mContactsChangedHandler;
+	private Runnable mContactsChanged;
+
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -199,12 +221,16 @@ public class HikeService extends Service
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent);
 		startForeground(HikeToast.HIKE_NOTIFICATION, notification);
-	
+
 		HandlerThread contactHandlerThread = new HandlerThread("");
 		contactHandlerThread.start();
-		Handler contactHandler = new Handler(contactHandlerThread.getLooper());
-		/* register with the Contact list to get an update whenever the phone book changes */
-		contactsReceived = new ContactListChangeIntentReceiver(contactHandler);
+		mContactsChangedHandler = new Handler(contactHandlerThread.getLooper());
+		mContactsChanged = new ContactsChanged(this);
+
+		/* register with the Contact list to get an update whenever the phone book changes.
+		 * Use the application thread for the intent receiver, the IntentReceiver will take
+		 * care of running the event on a different thread */
+		contactsReceived = new ContactListChangeIntentReceiver(new Handler());
 		getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
 	}
 
@@ -346,8 +372,9 @@ public class HikeService extends Service
 		@Override
 		public void onChange(boolean selfChange)
 		{
-			ContactUtils.syncUpdates(HikeService.this);
-			Log.i("ContactListChangeIntentReceiver", "onChange called");
+			HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
+			HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
+			Log.d("ContactListChangeIntentReceiver", "onChange called");
 		}
 	}
 
