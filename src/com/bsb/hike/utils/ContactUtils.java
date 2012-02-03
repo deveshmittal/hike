@@ -275,6 +275,19 @@ public class ContactUtils
 		}
 
 		phones.close();
+
+		/* scan the simcard */
+		Uri simUri = Uri.parse("content://icc/adn");
+		Cursor cursorSim = ctx.getContentResolver().query(simUri, null, null,null, null);
+		while (cursorSim.moveToNext())
+		{
+			String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
+			String id = "SIM" + cursorSim.getString(cursorSim.getColumnIndex("_id"));
+			String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
+
+			contactinfos.add(new ContactInfo(id, null, name, number));
+		}
+		cursorSim.close();
 		Log.d("ContactUtils", "Scanning address book took " + (System.currentTimeMillis() - tm) / 1000 + " seconds for " + contactinfos.size() + " entries");
 		return contactinfos;
 	}

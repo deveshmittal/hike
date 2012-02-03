@@ -14,13 +14,21 @@ import com.bsb.hike.models.utils.JSONSerializable;
 
 public class Utils
 {
-	public static String join(Collection<?> s, String delimiter)
+	public static String join(Collection<?> s, String delimiter, boolean quote)
 	{
 		StringBuilder builder = new StringBuilder();
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext())
 		{
+			if (quote)
+			{
+				builder.append("\"");
+			}
 			builder.append(iter.next());
+			if (quote)
+			{
+				builder.append("\"");
+			}
 			if (!iter.hasNext())
 			{
 				break;

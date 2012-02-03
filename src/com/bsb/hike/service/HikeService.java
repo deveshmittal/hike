@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -231,7 +232,10 @@ public class HikeService extends Service
 		 * Use the application thread for the intent receiver, the IntentReceiver will take
 		 * care of running the event on a different thread */
 		contactsReceived = new ContactListChangeIntentReceiver(new Handler());
+		/* listen for changes in the addressbook */
 		getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
+		/* listen for changes on the simcard */
+		getContentResolver().registerContentObserver(Uri.parse("content://icc/adn"), true, contactsReceived);
 	}
 
 	@Override

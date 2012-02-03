@@ -190,18 +190,17 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		return contactInfos;
 	}
-	
+
 	public void deleteMultipleRows(Collection<String> ids)
 	{
-		String ids_joined = "(" + Utils.join(ids, ",") + ")";
+		String ids_joined = "(" + Utils.join(ids, ",", true) + ")";
 		mDb.delete(DBConstants.USERS_TABLE, DBConstants.ID+" in " + ids_joined, null);
 	}
-	
+
 	public void deleteRow(String id)
 	{
 		mDb.delete(DBConstants.USERS_TABLE, DBConstants.ID+"=?", new String []{id});
 	}
-	
 
 	public void updateContacts(List<ContactInfo> updatedContacts)
 	{
