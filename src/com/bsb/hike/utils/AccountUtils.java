@@ -410,7 +410,7 @@ public class AccountUtils
 				// TODO raise a real exception here
 				return null;
 			}
-			Log.d("AccountUtils", "Reply from PATCH addressbook:" + obj.toString());
+			Log.d("AccountUtils", "Reply from addressbook:" + obj.toString());
 			addressbook = obj.getJSONObject("addressbook");
 		}
 		catch (JSONException e)
