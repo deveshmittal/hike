@@ -19,7 +19,6 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 
 public class ContactUtils

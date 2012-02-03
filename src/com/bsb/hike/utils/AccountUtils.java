@@ -8,12 +8,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.jar.Attributes.Name;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -47,7 +44,6 @@ import org.json.JSONObject;
 import android.util.Log;
 
 import com.bsb.hike.http.GzipByteArrayEntity;
-import com.bsb.hike.http.GzipUrlEncodedFormEntity;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
