@@ -19,6 +19,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 
 public class ContactUtils
@@ -155,23 +156,14 @@ public class ContactUtils
 		try
 		{
 			JSONArray ids_json = new JSONArray();
-			StringBuilder sb = new StringBuilder("(");
-			int i=0;
 			for (String string : hike_contacts_by_id.keySet())
 			{
 				ids_json.put(string);
-				sb.append(string);
-				if (i != hike_contacts_by_id.size() - 1)
-				{
-					sb.append(",");
-				}
-				i++;
 			}
-			sb.append(")");
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 			
 			/* Delete ids from hike user DB*/
-			db.deleteMultipleRows(sb.toString()); // this will delete all rows in HikeUser DB that are not in Addressbook.
+			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will delete all rows in HikeUser DB that are not in Addressbook.
 			db.updateContacts(updatedContacts);
 			
 		}
@@ -285,5 +277,12 @@ public class ContactUtils
 		phones.close();
 		Log.d("ContactUtils", "Scanning address book took " + (System.currentTimeMillis() - tm) / 1000 + " seconds for " + contactinfos.size() + " entries");
 		return contactinfos;
+	}
+
+	public static void updateHikeStatus(Context ctx, String msisdn, boolean onhike)
+	{
+		HikeUserDatabase db = new HikeUserDatabase(ctx);
+		db.updateHikeContact(msisdn, onhike);
+		db.close();
 	}
 }
