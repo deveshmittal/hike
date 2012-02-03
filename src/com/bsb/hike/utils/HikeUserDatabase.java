@@ -1,6 +1,7 @@
 package com.bsb.hike.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -189,9 +190,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return contactInfos;
 	}
 	
-	public void deleteMultipleRows(String ids)
+	public void deleteMultipleRows(Collection<String> ids)
 	{
-		mDb.delete(DBConstants.USERS_TABLE, DBConstants.ID+" in "+ids, null);
+		String ids_joined = "(" + Utils.join(ids, ",") + ")";
+		mDb.delete(DBConstants.USERS_TABLE, DBConstants.ID+" in " + ids_joined, null);
 	}
 	
 	public void deleteRow(String id)
@@ -202,19 +204,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public void updateContacts(List<ContactInfo> updatedContacts)
 	{
-		StringBuilder sb = new StringBuilder("(");
-		int i=0;
+		ArrayList<String> ids = new ArrayList<String>(updatedContacts.size());
 		for(ContactInfo c : updatedContacts)
 		{
-			sb.append(c.getId());
-			if(i != updatedContacts.size()-1)
-			{
-				sb.append(",");
-			}
-			i++;
+			ids.add(c.getId());
 		}
-		sb.append(")");
-		deleteMultipleRows(sb.toString());
+		deleteMultipleRows(ids);
 		try
 		{
 			addContacts(updatedContacts);

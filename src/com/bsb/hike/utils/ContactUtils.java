@@ -155,23 +155,14 @@ public class ContactUtils
 		try
 		{
 			JSONArray ids_json = new JSONArray();
-			StringBuilder sb = new StringBuilder("(");
-			int i=0;
 			for (String string : hike_contacts_by_id.keySet())
 			{
 				ids_json.put(string);
-				sb.append(string);
-				if (i != hike_contacts_by_id.size() - 1)
-				{
-					sb.append(",");
-				}
-				i++;
 			}
-			sb.append(")");
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
 			
 			/* Delete ids from hike user DB*/
-			db.deleteMultipleRows(sb.toString()); // this will delete all rows in HikeUser DB that are not in Addressbook.
+			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will delete all rows in HikeUser DB that are not in Addressbook.
 			db.updateContacts(updatedContacts);
 			
 		}
