@@ -118,7 +118,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 															+ DBConstants.ONHIKE+"=0 "+ "AS NotOnHike, "
 															+ DBConstants.PHONE
 														+" FROM "+DBConstants.USERS_TABLE
-														+" WHERE "+DBConstants.NAME+" LIKE ? ORDER BY "+DBConstants.NAME+", NotOnHike",
+														+" WHERE "+DBConstants.NAME+" LIKE ? ORDER BY NotOnHike, " + DBConstants.NAME,
 														new String[] { partialName });
 		return cursor;
 	}
