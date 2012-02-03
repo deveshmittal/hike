@@ -3,11 +3,13 @@ package com.bsb.hike;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.ContactUtils;
 
 /**
  * 
@@ -33,14 +35,16 @@ public class NetworkManager implements HikePubSub.Listener
 	public static final String START_TYPING = "st";
 
 	public static final String END_TYPING = "et";
-
 	
 	private HikePubSub pubSub;
+
+	private Context context;
 
 	private static volatile NetworkManager instance;
 	
 	private NetworkManager(Context context)
 	{
+		this.context = context;
 		pubSub = HikeMessengerApp.getPubSub();
 		pubSub.addListener(HikePubSub.WS_RECEIVED, this);
 	}
@@ -76,6 +80,8 @@ public class NetworkManager implements HikePubSub.Listener
 			return;
 		}
 
+		String msisdn = jsonObj.optString(HikeConstants.FROM);
+
 		if (MESSAGE.equals(type))  // this represents msg from another client through tornado server.
 		{
 			try
@@ -90,12 +96,10 @@ public class NetworkManager implements HikePubSub.Listener
 		}
 		else if (START_TYPING.equals(type)) /* Start Typing event received*/
 		{
-			String msisdn = jsonObj.optString(HikeConstants.FROM);
 			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
 		}
 		else if (END_TYPING.equals(type)) /* End Typing event received */
 		{
-			String msisdn = jsonObj.optString(HikeConstants.FROM);
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
 		}
 		else if (SMS_CREDITS.equals(type)) /* SMS CREDITS */
@@ -150,6 +154,10 @@ public class NetworkManager implements HikePubSub.Listener
 			}
 			Log.d("NETWORK MANAGER","Delivery report received : " +"	;	REPORT : DELIVERED READ");
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);	
+		}
+		else if (USER_JOINED.equals(type))
+		{
+			ContactUtils.updateHikeStatus(this.context, msisdn, true);
 		}
 		else
 		{

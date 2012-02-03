@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
@@ -219,5 +220,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void updateHikeContact(String msisdn, boolean onhike)
+	{
+		ContentValues vals = new ContentValues(1);
+		vals.put(DBConstants.ONHIKE, onhike);
+		mDb.update(DBConstants.USERS_TABLE, vals, "msisdn=?", new String[]{msisdn});
 	}
 }

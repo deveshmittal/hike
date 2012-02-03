@@ -19,6 +19,7 @@ import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.models.ContactInfo;
 
 public class ContactUtils
@@ -276,5 +277,12 @@ public class ContactUtils
 		phones.close();
 		Log.d("ContactUtils", "Scanning address book took " + (System.currentTimeMillis() - tm) / 1000 + " seconds for " + contactinfos.size() + " entries");
 		return contactinfos;
+	}
+
+	public static void updateHikeStatus(Context ctx, String msisdn, boolean onhike)
+	{
+		HikeUserDatabase db = new HikeUserDatabase(ctx);
+		db.updateHikeContact(msisdn, onhike);
+		db.close();
 	}
 }
