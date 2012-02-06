@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.Utils;
 
 public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 {
@@ -61,6 +63,8 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 		CharSequence markedUp = smileyParser.addSmileySpans(convMessage.getMessage());
 		messageView.setText(markedUp);
 
+		Linkify.addLinks(messageView, Linkify.ALL);
+		Linkify.addLinks(messageView, Utils.shortCodeRegex, "tel:");
 		TextView timestampView = (TextView) v.findViewById(R.id.timestamp);
 		String dateFormatted = convMessage.getTimestampFormatted();
 		timestampView.setText(dateFormatted);

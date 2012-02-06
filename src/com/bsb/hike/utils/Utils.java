@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,6 +15,13 @@ import com.bsb.hike.models.utils.JSONSerializable;
 
 public class Utils
 {
+	public static Pattern shortCodeRegex;
+	public static String shortCodeIntent;
+	static
+	{
+		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
+	}
+
 	public static String join(Collection<?> s, String delimiter, boolean quote)
 	{
 		StringBuilder builder = new StringBuilder();
