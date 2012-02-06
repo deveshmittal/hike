@@ -601,8 +601,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				});
 				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
 				mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
+				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 			}
-			mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn()); 
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
 		{
