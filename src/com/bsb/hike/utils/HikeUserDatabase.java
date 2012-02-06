@@ -28,7 +28,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 												+" ( " 
 														+ DBConstants.ID + " STRING , "
 														+ DBConstants.NAME +" STRING, "
-														+ DBConstants.MSISDN+" TEXT COLLATE nocase PRIMARY KEY ON CONFLICT REPLACE NOT NULL, "
+														+ DBConstants.MSISDN+" TEXT COLLATE nocase, "
 														+ DBConstants.ONHIKE+" INTEGER, "
 														+ DBConstants.PHONE+" TEXT "
 												+ " )";
