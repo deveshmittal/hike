@@ -47,7 +47,7 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 			}
 
 			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
-			int resId = convMessage.getImageState();
+			int resId = conversation.isOnhike() ? convMessage.getImageState() : -1;
 			if (resId > 0)
 			{
 				imgStatus.setImageResource(resId);
