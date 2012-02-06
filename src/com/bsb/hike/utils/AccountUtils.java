@@ -36,12 +36,14 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
 
+import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
@@ -314,7 +316,7 @@ public class AccountUtils
 		}
 		String encoded = data.toString();
 		Log.d("ACCOUNT UTILS","Json data is : "+encoded);
-		AbstractHttpEntity entity = new ByteArrayEntity(encoded.getBytes());
+		AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 		entity.setContentType("application/json");
 		httppost.setEntity(entity);
 		JSONObject obj = executeRequest(httppost);
