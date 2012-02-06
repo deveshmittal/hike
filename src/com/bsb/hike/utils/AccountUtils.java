@@ -167,7 +167,6 @@ public class AccountUtils
 
 	public static String getMSISDN()
 	{
-
 		HttpRequestBase httpget = new HttpGet(BASE + "/account");
 		addMSISDNHeader(httpget);
 		JSONObject obj = executeRequest(httpget);
@@ -316,6 +315,7 @@ public class AccountUtils
 		String encoded = data.toString();
 		Log.d("ACCOUNT UTILS","Json data is : "+encoded);
 		AbstractHttpEntity entity = new ByteArrayEntity(encoded.getBytes());
+		entity.setContentType("application/json");
 		httppost.setEntity(entity);
 		JSONObject obj = executeRequest(httppost);
 		return getContactList(obj, contactsMap);
@@ -351,6 +351,7 @@ public class AccountUtils
 		//{
 			AbstractHttpEntity entity = new ByteArrayEntity(encoded.getBytes());
 			request.setEntity(entity);
+			entity.setContentType("application/json");
 			JSONObject obj = executeRequest(request);
 			return getContactList(obj, new_contacts_by_id);
 		//}
