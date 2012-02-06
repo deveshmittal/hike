@@ -80,6 +80,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			if (resId > 0)
 			{
 				imgStatus.setImageResource(resId);
+				imgStatus.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				imgStatus.setImageResource(0);
 			}
 		}
 		return v;
