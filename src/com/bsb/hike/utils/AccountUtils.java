@@ -36,14 +36,12 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
 
-import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
@@ -317,18 +315,10 @@ public class AccountUtils
 		}
 		String encoded = data.toString();
 		Log.d("ACCOUNT UTILS","Json data is : "+encoded);
-		try
-		{
-			AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
-			httppost.setEntity(entity);
-			JSONObject obj = executeRequest(httppost);
-			return getContactList(obj, contactsMap);
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			Log.e("AccountUtils", "Unable to encode request body", e);
-			return null;
-		}
+		AbstractHttpEntity entity = new ByteArrayEntity(encoded.getBytes());
+		httppost.setEntity(entity);
+		JSONObject obj = executeRequest(httppost);
+		return getContactList(obj, contactsMap);
 	}
 
 	/**
