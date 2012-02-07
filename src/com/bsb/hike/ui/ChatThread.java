@@ -19,6 +19,7 @@ import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuInflater;
@@ -113,10 +114,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	}
 
 	@Override
+	public void onWindowFocusChanged(boolean hasFocus)
+	{
+		super.onWindowFocusChanged(hasFocus);
+		if (hasFocus)
+		{
+			/* mark any messages unread as read. */
+			setMessagesRead();
+		}
+	}
+
+	@Override
 	protected void onResume()
 	{
 		super.onResume();
-		/* TODO evidently a better way to do this is to check for onWindowFocusChanged */
+
+		/* TODO evidently a better way to do this is to check for onFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
 		/*
@@ -505,29 +518,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		setBtnEnabled();
 		/* create an object that we can notify when the contents of the thread are updated */
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
-		long convID = mConversation.getConvId();
-		/* this is to check if last msg was a sent msg category for a particular conversation id */
-		if (!isLastMsgSent())
-		{
-			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
-			/* If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read. */
-			if (ids != null)
-			{
-				JSONObject object = new JSONObject();
-				try
-				{
-					object.put(HikeConstants.TYPE, "mr");
-					object.put(HikeConstants.TO, mConversation.getMsisdn());
-					object.put(HikeConstants.DATA, ids);
-				}
-				catch (JSONException e)
-				{
-					e.printStackTrace();
-				}
-				mPubSub.publish(HikePubSub.MSG_READ,mConversation.getMsisdn()); 
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, object);
-			}
-		}
 
 		/* clear any toast notifications */
 		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -536,20 +526,44 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean isLastMsgSent()
 	{
-		List<ConvMessage> msgList = mConversation.getMessages();
+		List<ConvMessage> msgList = (mConversation != null) ? mConversation.getMessages() : null;
 
 		if ((msgList == null) || (msgList.isEmpty()))
 		{
-			return false;
+			return true;
 		}
 
 		ConvMessage lastMsg = msgList.get(msgList.size() - 1);
 
-		if (lastMsg.isSent() || lastMsg.getState() == ConvMessage.State.RECEIVED_READ)
-			return true;
-		else
+		return lastMsg.getState() == ConvMessage.State.RECEIVED_READ;
+	}
+
+	/*
+	 * marks messages read
+	 */
+	private void setMessagesRead()
+	{
+		if (!isLastMsgSent())
 		{
-			return false;
+			long convID = mConversation.getConvId();
+			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
+			/* If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read. */
+			if (ids != null)
+			{
+				JSONObject object = new JSONObject();
+				try
+				{
+					object.put(HikeConstants.TYPE, NetworkManager.MESSAGE_READ);
+					object.put(HikeConstants.TO, mConversation.getMsisdn());
+					object.put(HikeConstants.DATA, ids);
+				}
+				catch (JSONException e)
+				{
+					e.printStackTrace();
+				}
+				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, object);
+			}
 		}
 	}
 
@@ -599,8 +613,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						mAdapter.add(message);
 					}
 				});
-				mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
+
+				if (hasWindowFocus())
+				{
+					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
+					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
+				}
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 			}
 		}
