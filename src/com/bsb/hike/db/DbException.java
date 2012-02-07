@@ -1,4 +1,4 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.db;
 
 public class DbException extends Exception
 {

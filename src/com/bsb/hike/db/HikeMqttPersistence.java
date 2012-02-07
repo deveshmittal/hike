@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.bsb.hike.models.HikePacket;
-import com.bsb.hike.utils.DBConstants;
 import com.ibm.mqtt.MqttPersistenceException;
 
 public class HikeMqttPersistence extends SQLiteOpenHelper

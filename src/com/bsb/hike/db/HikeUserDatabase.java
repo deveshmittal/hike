@@ -1,4 +1,4 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.utils.Utils;
 
 public class HikeUserDatabase extends SQLiteOpenHelper
 {

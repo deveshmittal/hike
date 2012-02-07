@@ -9,10 +9,10 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.DbConversationListener;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 

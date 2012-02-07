@@ -42,12 +42,12 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.HikeConversationsDatabase;
-import com.bsb.hike.utils.HikeUserDatabase;
 
 public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher
 {

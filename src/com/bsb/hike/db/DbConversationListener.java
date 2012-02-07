@@ -1,4 +1,4 @@
-package com.bsb.hike.utils;
+package com.bsb.hike.db;
 
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
