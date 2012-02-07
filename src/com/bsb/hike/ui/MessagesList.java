@@ -430,9 +430,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			Conversation conv = mConversationsByMSISDN.get(msisdn);
 			ConvMessage msg = conv.getMessages().get(conv.getMessages().size()-1);
 			msg.setState(ConvMessage.State.RECEIVED_READ);
-			Log.d("MESSAGE LIST","Msg is : "+msg.getMessage() + "	State : "+msg.getState().name());
 			conv.getMessages().set(conv.getMessages().size()-1, msg);
-			Log.d("MESSAGE LIST","Msg event received");
 			mAdapter.setNotifyOnChange(false);
 			runOnUiThread(this);
 		}
