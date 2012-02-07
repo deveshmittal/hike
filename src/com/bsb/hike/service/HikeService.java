@@ -54,7 +54,15 @@ public class HikeService extends Service
 			Log.d("ContactsChanged", "calling syncUpdates");
 			ContactUtils.syncUpdates(this.context);
 		}
+	}
 
+	private class PingRunnable implements Runnable
+	{
+		@Override
+		public void run()
+		{
+			HikeService.this.mMqttManager.ping();
+		}
 	}
 
 	public static final int MSG_APP_CONNECTED = 1;
@@ -183,6 +191,8 @@ public class HikeService extends Service
 	private Handler mContactsChangedHandler;
 	private Runnable mContactsChanged;
 
+	private PingRunnable pingRunnable;
+
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -307,6 +317,7 @@ public class HikeService extends Service
 		if (pingSender == null)
 		{
 			pingSender = new PingSender();
+			pingRunnable = new PingRunnable();
 			registerReceiver(pingSender, new IntentFilter(MQTT_PING_ACTION));
 		}
 	}
@@ -495,15 +506,7 @@ public class HikeService extends Service
 		@Override
 		public void onReceive(Context context, Intent intent)
 		{
-			// Note that we don't need a wake lock for this method (even though
-			// it's important that the phone doesn't switch off while we're
-			// doing this).Ä
-			// According to the docs, "Alarm Manager holds a CPU wake lock as
-			// long as the alarm receiver's onReceive() method is executing.
-			// This guarantees that the phone will not sleep until you have
-			// finished handling the broadcast."
-			// This is good enough for our needs.
-			HikeService.this.mMqttManager.ping();
+			mHandler.post(pingRunnable);
 
 			// start the next keep alive period
 			scheduleNextPing();
