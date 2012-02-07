@@ -285,11 +285,12 @@ public class ContactUtils
 			String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
 			String id = "SIM" + cursorSim.getString(cursorSim.getColumnIndex("_id"));
 			String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
-
-			contactinfos.add(new ContactInfo(id, null, name, number));
+			if (number != null)
+			{
+				contactinfos.add(new ContactInfo(id, null, name, number));
+			}
 		}
 		cursorSim.close();
-		Log.d("ContactUtils", "Scanning address book took " + (System.currentTimeMillis() - tm) / 1000 + " seconds for " + contactinfos.size() + " entries");
 		return contactinfos;
 	}
 
