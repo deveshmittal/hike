@@ -18,7 +18,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.ui.ChatThread;
 
-public class HikeToast
+public class HikeNotification
 {
 	public static final int HIKE_NOTIFICATION = 0;
 
@@ -26,13 +26,13 @@ public class HikeToast
 
 	private NotificationManager notificationManager;
 
-	public HikeToast(Context context)
+	public HikeNotification(Context context)
 	{
 		this.context = context;
 		this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
-	public void toast(ContactInfo contactInfo,ConvMessage convMsg)
+	public void notify(ContactInfo contactInfo,ConvMessage convMsg)
 	{
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
 		int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true) ? Notification.DEFAULT_SOUND : 0;
@@ -80,7 +80,7 @@ public class HikeToast
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 		notification.setLatestEventInfo(context, key, message, contentIntent);
 
-		Log.d("HIKE TOAST","CONVERSATION ID : " + notificationId);
+		Log.d("HikeNotification","CONVERSATION ID : " + notificationId);
 		notificationManager.notify(notificationId, notification);
 	}
 }

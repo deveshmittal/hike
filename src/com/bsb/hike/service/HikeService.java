@@ -33,7 +33,7 @@ import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.HikeToast;
+import com.bsb.hike.utils.HikeNotification;
 
 public class HikeService extends Service
 {
@@ -231,7 +231,7 @@ public class HikeService extends Service
 		Intent notificationIntent = new Intent(this, MessagesList.class);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent);
-		startForeground(HikeToast.HIKE_NOTIFICATION, notification);
+		startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
 
 		HandlerThread contactHandlerThread = new HandlerThread("");
 		contactHandlerThread.start();

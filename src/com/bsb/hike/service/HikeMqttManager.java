@@ -27,7 +27,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.HikeToast;
+import com.bsb.hike.utils.HikeNotification;
 import com.ibm.mqtt.MqttAdvancedCallback;
 import com.ibm.mqtt.MqttException;
 import com.ibm.mqtt.MqttNotConnectedException;
@@ -180,7 +180,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	 */
 	private String password;
 
-	private HikeToast toaster;
+	private HikeNotification toaster;
 
 	private HikeConversationsDatabase convDb;
 
@@ -191,7 +191,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
-		this.toaster = new HikeToast(hikeService);
+		this.toaster = new HikeNotification(hikeService);
 		this.convDb = new HikeConversationsDatabase(hikeService);
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 		this.handler = handler;
@@ -563,7 +563,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 					ConvMessage convMessage = new ConvMessage(obj);
 					this.convDb.addConversationMessages(convMessage);
 					ContactInfo contactInfo = ContactUtils.getContactInfo(convMessage.getMsisdn(), this.mHikeService);
-					toaster.toast(contactInfo, convMessage);
+					toaster.notify(contactInfo, convMessage);
 				}
 				catch (JSONException e)
 				{
