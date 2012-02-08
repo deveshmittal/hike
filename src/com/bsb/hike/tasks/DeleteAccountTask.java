@@ -1,6 +1,9 @@
 package com.bsb.hike.tasks;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
@@ -19,9 +22,10 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean>
 {
 
 	private Context context;
+	private ProgressDialog dialog;
+
 	public DeleteAccountTask(Context context)
 	{
-		Log.d("DAT", "Context is " + context);
 		this.context = context;
 	}
 
@@ -52,13 +56,29 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean>
 	}
 
 	@Override
+	protected void onPreExecute()
+	{
+		dialog = ProgressDialog.show(context, "Account", "Deleting Account.");
+		dialog.show();
+	}
+
+	@Override
 	protected void onPostExecute(Boolean result)
 	{
+		dialog.dismiss();
 		if (result.booleanValue())
 		{
-			Intent intent = new Intent(context, WelcomeActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			context.startActivity(intent);
+			AlertDialog.Builder builder = new AlertDialog.Builder(context);
+			builder.setMessage("Account was deleted.").
+				setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id)
+					{
+						Intent intent = new Intent(context, WelcomeActivity.class);
+						intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						context.startActivity(intent);
+					}
+				});
+			builder.show();
 		}
 		else
 		{
