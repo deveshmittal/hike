@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-        <PreferenceCategory
-                android:title="Notifications">
-                <CheckBoxPreference
-                        android:title="Vibrate"
-                        android:defaultValue="true"
-                        android:summary="Vibrate when we receive new message"
-                        android:key="vibratePref" />
-                <CheckBoxPreference
-                        android:title="Sound"
-                        android:defaultValue="true"
-                        android:summary="Play sound when we receive new message"
-                        android:key="soundPref" />
-        </PreferenceCategory>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Notifications" >
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="vibratePref"
+            android:summary="Vibrate when we receive new message"
+            android:title="Vibrate" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="soundPref"
+            android:summary="Play sound when we receive new message"
+            android:title="Sound" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Privacy" >
+
+        <com.bsb.hike.ui.DeleteDialogPreference
+            android:dialogMessage="Are you sure you want to delete everything?"
+            android:key="deleteAccount"
+            android:negativeButtonText="No"
+            android:positiveButtonText="Yes - Delete"
+            android:summary="Permanently delete your account!"
+            android:title="Delete Account?" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

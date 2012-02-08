@@ -55,7 +55,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
 		String drop = "DROP TABLE IF EXISTS " + DBConstants.USERS_TABLE;
-		db.execSQL(drop);
+		mDb.execSQL(drop);
 		onCreate(db);
 	}
 
@@ -229,5 +229,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		ContentValues vals = new ContentValues(1);
 		vals.put(DBConstants.ONHIKE, onhike);
 		mDb.update(DBConstants.USERS_TABLE, vals, "msisdn=?", new String[]{msisdn});
+	}
+
+	public void deleteAll()
+	{
+		mDb.delete(DBConstants.USERS_TABLE, null, null);
 	}
 }

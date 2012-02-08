@@ -20,6 +20,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -41,6 +42,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.accounts.NetworkErrorException;
 import android.util.Log;
 
 import com.bsb.hike.http.GzipByteArrayEntity;
@@ -427,5 +429,16 @@ public class AccountUtils
 			}
 		}
 		return server_contacts;
+	}
+
+	public static void deleteAccount() throws NetworkErrorException
+	{
+		HttpDelete delete = new HttpDelete(BASE + "/account");
+		addToken(delete);
+		JSONObject obj = executeRequest(delete);
+		if ((obj == null) || "fail".equals(obj.optString("stat")))
+		{
+			throw new NetworkErrorException("Could not delete account");
+		}
 	}
 }
