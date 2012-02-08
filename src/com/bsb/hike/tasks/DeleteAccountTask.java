@@ -14,7 +14,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
-import com.bsb.hike.ui.AccountCreateSuccess;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 
@@ -35,9 +35,13 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean>
 		HikeUserDatabase db = new HikeUserDatabase(context);
 		HikeConversationsDatabase convDb = new HikeConversationsDatabase(context);
 		Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
+
 		try
 		{
 			AccountUtils.deleteAccount();
+			HikeMessengerApp app = (HikeMessengerApp) context.getApplicationContext();
+			app.unbindService(app.getServiceConnection());
+			context.stopService(new Intent(context, HikeService.class));
 			db.deleteAll();
 			convDb.deleteAll();
 			editor.clear();
