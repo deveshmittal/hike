@@ -339,6 +339,18 @@ public class HikeService extends Service
 			unregisterReceiver(dataEnabledReceiver);
 			dataEnabledReceiver = null;
 		}
+
+		if (pingSender != null)
+		{
+			unregisterReceiver(pingSender);
+			pingSender = null;
+		}
+
+		if (netConnReceiver != null)
+		{
+			unregisterReceiver(netConnReceiver);
+			netConnReceiver = null;
+		}
 	}
 
 	/************************************************************************/
