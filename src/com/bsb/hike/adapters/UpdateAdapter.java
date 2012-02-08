@@ -1,4 +1,4 @@
-package com.bsb.hike.ui;
+package com.bsb.hike.adapters;
 
 import android.widget.BaseAdapter;
 

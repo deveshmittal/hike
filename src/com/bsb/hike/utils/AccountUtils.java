@@ -4,15 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -32,7 +29,6 @@ import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
@@ -272,27 +268,6 @@ public class AccountUtils
 		String uid = obj.optString("uid");
 		Log.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
 		return new AccountUtils.AccountInfo(token, msisdn, uid);
-	}
-
-	public static HikeWebSocketClient startWebSocketConnection()
-	{
-		Header header = new BasicHeader("Cookie", "user=" + mToken);
-		Header[] headers = new Header[] { header };
-		URI uri;
-		try
-		{
-			uri = new URI(BASE + "/user/msgs");
-		}
-		catch (URISyntaxException e)
-		{
-			e.printStackTrace();
-			Log.e("AccountUtils", "Error creating websocket", e);
-			return null;
-		}
-		Log.d("AccountUtils", "about to create websocket");
-		HikeWebSocketClient socket = new HikeWebSocketClient(uri, new Draft_10WithExtra(headers));
-		socket.connect();
-		return socket;
 	}
 
 	private static void addToken(HttpRequestBase req)
