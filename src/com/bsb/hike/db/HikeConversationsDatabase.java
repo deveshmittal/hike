@@ -69,15 +69,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		db.execSQL(sql);
 	}
 
-	public void clearDatabase(SQLiteDatabase db)
+	public void deleteAll()
 	{
-		if (db == null)
-		{
-			db = mDb;
-		}
-
-		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.CONVERSATIONS_TABLE);
-		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.MESSAGES_TABLE);
+		mDb.delete(DBConstants.CONVERSATIONS_TABLE, null, null);
+		mDb.delete(DBConstants.MESSAGES_TABLE, null, null);
 	}
 
 	@Override
@@ -90,7 +85,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
-		clearDatabase(db);
+		if (db == null)
+		{
+			db = mDb;
+		}
+
+		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.CONVERSATIONS_TABLE);
+		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.MESSAGES_TABLE);
 		onCreate(db);
 	}
 

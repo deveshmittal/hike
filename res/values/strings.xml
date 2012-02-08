@@ -34,4 +34,5 @@ No hidden costs and no data plan required</string>
     <string name="preferences">Hike Preferences</string>
     <string name="welcome_screen_error_message">We are having some trouble connecting to the server.  Try again in a bit?</string>
     <string name="resend">Resend</string>
+    <string name="delete_account_failed">Couldn\'t delete account</string>
 </resources>
