@@ -33,9 +33,11 @@ public class ScanningAddressBook extends Activity
 			List<ContactInfo> contactinfos = ContactUtils.getContacts(ScanningAddressBook.this);
 			SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+			String name = settings.getString(HikeMessengerApp.NAME, null);
 			HikeUserDatabase db = null;
 			try
 			{
+				AccountUtils.setName(name);
 				Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
 				List<ContactInfo> addressbook = AccountUtils.postAddressBook(token, contacts);
 				//TODO this exception should be raised from the postAddressBook code

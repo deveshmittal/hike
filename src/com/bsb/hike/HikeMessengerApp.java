@@ -39,6 +39,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String SMS_SETTING = "smscredits";
 
+	public static final String NAME = "name";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;

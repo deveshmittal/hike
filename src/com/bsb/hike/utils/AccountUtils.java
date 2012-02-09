@@ -281,6 +281,34 @@ public class AccountUtils
 		req.addHeader("X-MSISDN-AIRTEL", MSISDN);
 	}
 
+	public static void setName(String name) throws NetworkErrorException
+	{
+		HttpPost httppost = new HttpPost(BASE + "/account/name");
+		addToken(httppost);
+		JSONObject data = new JSONObject();
+
+		try
+		{
+			data.put("name", name);
+			AbstractHttpEntity entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity.setContentType("application/json");
+			httppost.setEntity(entity);
+			JSONObject obj = executeRequest(httppost);
+			if ((obj == null) || (!"ok".equals(obj.optString("stat"))))
+			{
+				throw new NetworkErrorException("Unable to set name");
+			}
+		}
+		catch (JSONException e)
+		{
+			Log.wtf("AccountUtils", "Unable to encode name as JSON");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			Log.wtf("AccountUtils", "Unable to encode name");
+		}
+	}
+
 	public static List<ContactInfo> postAddressBook(String token, Map<String, List<ContactInfo>> contactsMap) throws IllegalStateException, IOException
 	{
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
