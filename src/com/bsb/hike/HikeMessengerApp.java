@@ -93,8 +93,25 @@ public class HikeMessengerApp extends Application
 		}
 	}
 
+	public void disconnectFromService()
+	{
+		if (mInitialized)
+		{
+			synchronized(HikeMessengerApp.class)
+			{
+				if (mInitialized)
+				{
+					mInitialized = false;
+					unbindService(mServiceConnection);
+					mServiceConnection = null;
+				}
+			}
+		}
+	}
+
 	public void connectToService()
 	{
+		Log.d("HikeMessengerApp", "calling connectToService:" + mInitialized);
 		if (!mInitialized)
 		{
 			synchronized(HikeMessengerApp.class)
@@ -102,6 +119,7 @@ public class HikeMessengerApp extends Application
 				if (!mInitialized)
 				{
 					mInitialized = true;
+					Log.d("HikeMessengerApp", "Initializing service");
 					mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
 				}
 			}
@@ -142,8 +160,4 @@ public class HikeMessengerApp extends Application
 		this.mService = service;
 	}
 
-	public ServiceConnection getServiceConnection()
-	{
-		return mServiceConnection;
-	}
 }

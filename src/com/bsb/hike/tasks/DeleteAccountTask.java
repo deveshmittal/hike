@@ -30,7 +30,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean>
 	}
 
 	@Override
-	protected Boolean doInBackground(Void... boom)
+	protected Boolean doInBackground(Void... unused)
 	{
 		HikeUserDatabase db = new HikeUserDatabase(context);
 		HikeConversationsDatabase convDb = new HikeConversationsDatabase(context);
@@ -40,7 +40,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean>
 		{
 			AccountUtils.deleteAccount();
 			HikeMessengerApp app = (HikeMessengerApp) context.getApplicationContext();
-			app.unbindService(app.getServiceConnection());
+			app.disconnectFromService();
 			context.stopService(new Intent(context, HikeService.class));
 			db.deleteAll();
 			convDb.deleteAll();

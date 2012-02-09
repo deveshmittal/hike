@@ -89,7 +89,6 @@ public class HikeService extends Service
 		@Override
 		public void handleMessage(Message msg)
 		{
-			Log.d("HikeService", "received message " + msg.what);
 			switch (msg.what)
 			{
 			case MSG_APP_CONNECTED:
@@ -193,6 +192,10 @@ public class HikeService extends Service
 
 	private PingRunnable pingRunnable;
 
+	private Looper mContactHandlerLooper;
+
+	private Looper mMqttHandlerLooper;
+
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -205,11 +208,11 @@ public class HikeService extends Service
 		super.onCreate();
 
 		Log.d("HikeService", "onCreate called");
-		HandlerThread handlerThread = new HandlerThread("MQTTThread");
-		handlerThread.start();
-		Looper handlerThreadLooper = handlerThread.getLooper();
-		this.mHandler = new Handler(handlerThreadLooper);
-		mMessenger = new Messenger(new IncomingHandler(handlerThreadLooper));
+		HandlerThread mqttHandlerThread = new HandlerThread("MQTTThread");
+		mqttHandlerThread.start();
+		mMqttHandlerLooper = mqttHandlerThread.getLooper();
+		this.mHandler = new Handler(mMqttHandlerLooper);
+		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper));
 		pendingMessages = new ArrayList<String>();
 
 		// reset status variable to initial state
@@ -235,7 +238,8 @@ public class HikeService extends Service
 
 		HandlerThread contactHandlerThread = new HandlerThread("");
 		contactHandlerThread.start();
-		mContactsChangedHandler = new Handler(contactHandlerThread.getLooper());
+		mContactHandlerLooper = contactHandlerThread.getLooper();
+		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
 
 		/* register with the Contact list to get an update whenever the phone book changes.
@@ -331,7 +335,7 @@ public class HikeService extends Service
 		this.mMqttManager.disconnectFromBroker();
 
 		// inform the app that the app has successfully disconnected
-		broadcastServiceStatus("Disconnected");
+		Log.i("HikeService", "onDestroy.  Shutting down service");
 
 		// try not to leak the listener
 		if (dataEnabledReceiver != null)
@@ -350,6 +354,22 @@ public class HikeService extends Service
 		{
 			unregisterReceiver(netConnReceiver);
 			netConnReceiver = null;
+		}
+
+		if (contactsReceived != null)
+		{
+			getContentResolver().unregisterContentObserver(contactsReceived);
+			contactsReceived = null;
+		}
+
+		if (mMqttHandlerLooper != null)
+		{
+			mMqttHandlerLooper.quit();
+		}
+
+		if (mContactHandlerLooper != null)
+		{
+			mContactHandlerLooper.quit();
 		}
 	}
 
