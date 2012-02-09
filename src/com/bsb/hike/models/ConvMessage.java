@@ -48,21 +48,17 @@ public class ConvMessage
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState)
 	{
-		this.mMsisdn = msisdn;
-		this.mMessage = message;
-		this.mTimestamp = timestamp;
-		msgID = -1;
-		mappedMsgId = -1;
-		setState(msgState);
+		this(message, msisdn, timestamp, msgState, -1, -1);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId)
 	{
+		assert(msisdn != null);
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
 		this.mTimestamp = timestamp;
-		this.msgID=msgid;
-		this.mappedMsgId=mappedMsgId;
+		this.msgID = msgid;
+		this.mappedMsgId = mappedMsgId;
 		setState(msgState);
 	}
 	
