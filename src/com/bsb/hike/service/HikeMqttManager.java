@@ -354,7 +354,8 @@ public class HikeMqttManager implements MqttAdvancedCallback
 				int[] qos = new int[topics.length];
 				for (int i = 0; i < topics.length; ++i)
 				{
-					qos[i] = 1;
+					/* use qos 0 for ui topics */
+					qos[i] = topics[i].endsWith("/u") ? 0 : 1;
 				}
 
 				mqttClient.subscribe(topics, qos);
