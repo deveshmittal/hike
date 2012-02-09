@@ -64,9 +64,11 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 
 	public void onServiceDisconnected(ComponentName className)
 	{
+		Log.d("HikeServiceConnection", "Connection disconnected");
 		// This is called when the connection with the service has been
 		// unexpectedly disconnected -- that is, its process crashed.
 		mService = null;
+		mConnection = null;
 		this.mApp.setService(null);
 	}
 
@@ -74,20 +76,18 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 
 	public static HikeServiceConnection createConnection(HikeMessengerApp hikeMessengerApp, Messenger mMessenger)
 	{
-		if (mConnection == null)
+		synchronized(HikeServiceConnection.class)
 		{
-			synchronized (HikeServiceConnection.class)
+			if (mConnection == null)
 			{
-				if (mConnection == null)
-				{
-					Log.d("HikeserviceConnection", "creating connection");
-					hikeMessengerApp.startService(new Intent(hikeMessengerApp, HikeService.class));
-					mConnection = new HikeServiceConnection(hikeMessengerApp, mMessenger);
-					hikeMessengerApp.bindService(new Intent(hikeMessengerApp, HikeService.class), mConnection, Context.BIND_AUTO_CREATE);
-				}
+				Log.i("HikeserviceConnection", "creating connection");
+				mConnection = new HikeServiceConnection(hikeMessengerApp, mMessenger);
 			}
 		}
 
+		Log.d("HikeServiceConnection", "binding to service");
+		hikeMessengerApp.startService(new Intent(hikeMessengerApp, HikeService.class));
+		hikeMessengerApp.bindService(new Intent(hikeMessengerApp, HikeService.class), mConnection, Context.BIND_AUTO_CREATE);
 		return mConnection;
 	}
 

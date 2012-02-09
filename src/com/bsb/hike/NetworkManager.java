@@ -31,6 +31,8 @@ public class NetworkManager implements HikePubSub.Listener
 
 	public static final String USER_JOINED = "uj";
 
+	public static final String USER_LEFT = "ul";
+
 	public static final String START_TYPING = "st";
 
 	public static final String END_TYPING = "et";
@@ -154,9 +156,9 @@ public class NetworkManager implements HikePubSub.Listener
 			Log.d("NETWORK MANAGER","Delivery report received : " +"	;	REPORT : DELIVERED READ");
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);	
 		}
-		else if (USER_JOINED.equals(type))
+		else if ((USER_JOINED.equals(type)) || (USER_LEFT.equals(type)))
 		{
-			ContactUtils.updateHikeStatus(this.context, msisdn, true);
+			ContactUtils.updateHikeStatus(this.context, msisdn, USER_JOINED.equals(type));
 		}
 		else
 		{

@@ -42,6 +42,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -596,7 +597,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			final ConvMessage message = (ConvMessage) object;
-			if (message.getMsisdn().indexOf(mContactNumber) != -1)
+			String msisdn = message.getMsisdn();
+			if (msisdn == null)
+			{
+				Log.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
+			}
+			if (msisdn.indexOf(mContactNumber) != -1)
 			{
 				/* unset the typing notification */
 				runOnUiThread(mClearTypingCallback);

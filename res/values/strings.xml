@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">hike</string>
-    <string name="we_got_you_on_carrier">Great! So we have you as %1$s on %2$s.  You\'re all set</string>
+    <string name="we_got_you_on_carrier">Great! So we have you as %1$s on %2$s.  What\'s your name?</string>
     <string name="click_next">Next</string>
     <string name="accept_tc">Accept and Continue</string>
     <string name="welcome">Welcome to hike!</string>

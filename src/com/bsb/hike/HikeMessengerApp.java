@@ -1,6 +1,7 @@
 package com.bsb.hike;
 
 import android.app.Application;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +38,8 @@ public class HikeMessengerApp extends Application
 	public static final String CONTACT_LIST_EMPTY = "contactlistempty";
 
 	public static final String SMS_SETTING = "smscredits";
+
+	public static final String NAME = "name";
 
 	private static HikePubSub mPubSubInstance;
 
@@ -92,8 +95,25 @@ public class HikeMessengerApp extends Application
 		}
 	}
 
+	public void disconnectFromService()
+	{
+		if (mInitialized)
+		{
+			synchronized(HikeMessengerApp.class)
+			{
+				if (mInitialized)
+				{
+					mInitialized = false;
+					unbindService(mServiceConnection);
+					mServiceConnection = null;
+				}
+			}
+		}
+	}
+
 	public void connectToService()
 	{
+		Log.d("HikeMessengerApp", "calling connectToService:" + mInitialized);
 		if (!mInitialized)
 		{
 			synchronized(HikeMessengerApp.class)
@@ -101,6 +121,7 @@ public class HikeMessengerApp extends Application
 				if (!mInitialized)
 				{
 					mInitialized = true;
+					Log.d("HikeMessengerApp", "Initializing service");
 					mServiceConnection = HikeServiceConnection.createConnection(this, mMessenger);
 				}
 			}
@@ -140,4 +161,5 @@ public class HikeMessengerApp extends Application
 	{
 		this.mService = service;
 	}
+
 }

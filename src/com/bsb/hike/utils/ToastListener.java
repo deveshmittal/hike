@@ -19,7 +19,7 @@ public class ToastListener implements Listener
 
 	private WeakReference<Activity> currentActivity;
 
-	private HikeToast toaster;
+	private HikeNotification toaster;
 
 	private HikeUserDatabase db;
 
@@ -27,7 +27,7 @@ public class ToastListener implements Listener
 	{
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
-		this.toaster = new HikeToast(context);
+		this.toaster = new HikeNotification(context);
 		this.db = new HikeUserDatabase(context);
 	}
 
@@ -53,7 +53,7 @@ public class ToastListener implements Listener
 
 			/* the foreground activity isn't going to show this message so Toast it */
 			ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn());
-			this.toaster.toast(contactInfo, message);
+			this.toaster.notify(contactInfo, message);
 		}
 	}
 

@@ -36,26 +36,29 @@ public class ConvMessage
 	/* Adding entries to the beginning of this list is not backwards compatible */
 	public static enum State
 	{
-		SENT_FAILED, SENT_UNCONFIRMED, SENT_CONFIRMED , SENT_DELIVERED, SENT_DELIVERED_READ , RECEIVED_UNREAD, RECEIVED_READ, UNKNOWN
+		SENT_FAILED, /* message could not be sent, manually retry */
+		SENT_UNCONFIRMED,  /* message sent to server */
+		SENT_CONFIRMED , /* message received by server */
+		SENT_DELIVERED, /* message delivered to client device */
+		SENT_DELIVERED_READ , /* message viewed by recipient */
+		RECEIVED_UNREAD, /* message received, but currently unread */
+		RECEIVED_READ, /* message received an read */
+		UNKNOWN
 	};
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState)
 	{
-		this.mMsisdn = msisdn;
-		this.mMessage = message;
-		this.mTimestamp = timestamp;
-		msgID = -1;
-		mappedMsgId = -1;
-		setState(msgState);
+		this(message, msisdn, timestamp, msgState, -1, -1);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId)
 	{
+		assert(msisdn != null);
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
 		this.mTimestamp = timestamp;
-		this.msgID=msgid;
-		this.mappedMsgId=mappedMsgId;
+		this.msgID = msgid;
+		this.mappedMsgId = mappedMsgId;
 		setState(msgState);
 	}
 	
