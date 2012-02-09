@@ -597,7 +597,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			final ConvMessage message = (ConvMessage) object;
-			if (message.getMsisdn().indexOf(mContactNumber) != -1)
+			String msisdn = message.getMsisdn();
+			if (msisdn == null)
+			{
+				Log.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
+			}
+			if (msisdn.indexOf(mContactNumber) != -1)
 			{
 				/* unset the typing notification */
 				runOnUiThread(mClearTypingCallback);
