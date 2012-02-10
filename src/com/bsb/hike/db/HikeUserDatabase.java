@@ -208,6 +208,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public void updateContacts(List<ContactInfo> updatedContacts)
 	{
+		if (updatedContacts == null)
+		{
+			 return;
+		}
+
 		ArrayList<String> ids = new ArrayList<String>(updatedContacts.size());
 		for(ContactInfo c : updatedContacts)
 		{
