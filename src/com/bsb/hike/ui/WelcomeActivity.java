@@ -56,19 +56,14 @@ public class WelcomeActivity extends Activity
 		@Override
 		protected void onPostExecute(Boolean result)
 		{
+			mDialog.dismiss();
+
 			if (result.booleanValue())
 			{
 				startActivity(new Intent(WelcomeActivity.this, AccountCreateSuccess.class));
 				finish();
 			} else
 			{
-				//Simply dimiss this dialog for now and make the user try again later
-				//this guard shouldn't be necessary since the dialog should always be created here
-				if (mDialog != null)
-				{
-					mDialog.dismiss();
-				}
-
 				mErrorView.setVisibility(View.VISIBLE);
 			}
 		}
