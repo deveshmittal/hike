@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
