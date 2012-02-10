@@ -166,7 +166,7 @@ public class HikeMqttManager implements MqttAdvancedCallback
 	 * network's support for // long running, idle connections. Ideally, to keep a connection open // you want to use a keep alive value that is less than the period of // time
 	 * after which a network operator will kill an idle connection
 	 */
-	private short keepAliveSeconds = 20 * 60;
+	private short keepAliveSeconds = HikeConstants.KEEP_ALIVE;
 
 	// connection to the message broker
 	private HikeMqttClient mqttClient = null;

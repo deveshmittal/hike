@@ -33,5 +33,6 @@ public class HikeConstants
 
 	/* quiet period of no changes before actually updating the db */
 	public static final long CONTACT_UPDATE_TIMEOUT = 10*1000;
+	public static final short KEEP_ALIVE = 20 * 60;
 
 }
