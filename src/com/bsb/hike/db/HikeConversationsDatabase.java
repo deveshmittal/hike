@@ -364,7 +364,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				null, null, null);
 		/* If there are no rows in the cursor then simply return null */
 		if (c.getCount() <= 0)
+		{
+			c.close();
 			return null;
+		}
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("(");
