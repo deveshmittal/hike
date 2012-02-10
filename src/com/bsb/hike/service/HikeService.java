@@ -523,7 +523,7 @@ public class HikeService extends Service
 		// shortly before the keep alive period expires
 		// it means we're pinging slightly more frequently than necessary
 		Calendar wakeUpTime = Calendar.getInstance();
-		wakeUpTime.add(Calendar.SECOND, 20 * 60); //comes from PushMqttManager.KEEPALIVE
+		wakeUpTime.add(Calendar.SECOND, (int) (HikeConstants.KEEP_ALIVE * 0.9)); //comes from PushMqttManager.KEEPALIVE
 
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
