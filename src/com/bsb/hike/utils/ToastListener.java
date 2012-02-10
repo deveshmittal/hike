@@ -12,7 +12,6 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.MessagesList;
 
 public class ToastListener implements Listener
 {
