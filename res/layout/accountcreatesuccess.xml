@@ -49,7 +49,8 @@
         android:layout_centerVertical="true"
         android:hint="Vijay Chauhan"
         android:singleLine="true"
-        android:inputType="textCapWords" >
+        android:maxLength="30"
+        android:inputType="textCapWords|textPersonName" >
 
         <requestFocus />
     </EditText>
