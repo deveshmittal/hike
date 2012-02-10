@@ -109,11 +109,18 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 				MQTT_PACKET_ID + "=?", new String[]{Integer.toString(mqttId)}, null, null, null);
 		int dataIdx = c.getColumnIndex(MQTT_MESSAGE);
 		int idIdx = c.getColumnIndex(MQTT_MESSAGE_ID);
-		if (!c.moveToFirst())
+		try
 		{
-			return null;
+			if (!c.moveToFirst())
+			{
+				return null;
+			}
+			return new HikePacket(c.getBlob(dataIdx), c.getLong(idIdx));
 		}
-		return new HikePacket(c.getBlob(dataIdx), c.getLong(idIdx));
+		finally
+		{
+			c.close();
+		}
 	}
 
 }
