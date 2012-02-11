@@ -15,6 +15,7 @@
         <AutoCompleteTextView
             android:hint="Start typing a name"
             android:visibility="gone"
+            android:imeOptions="actionNone"
             android:layout_margin="7dp"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
