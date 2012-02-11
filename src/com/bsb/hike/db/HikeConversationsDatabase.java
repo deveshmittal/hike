@@ -163,8 +163,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				conv.setConversation(conversation);
 				assert (msgId >= 0);
 			}
-			else
+			else if (conv.getConversation() == null)
 			{
+				//conversation not set, retrieve it from db
 				Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] { DBConstants.CONV_ID,DBConstants.ONHIKE,DBConstants.CONTACT_ID }, DBConstants.MSISDN+"=?",new String[] { conv.getMsisdn()}, null, null, null);
 				final int convIdIdx = c.getColumnIndex(DBConstants.CONV_ID);
 				final int onhikeIdIdx = c.getColumnIndex(DBConstants.ONHIKE);
@@ -174,7 +175,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					long convId = c.getLong(convIdIdx);
 					int onHike = c.getInt(onhikeIdIdx);
 					String contactId = c.getString(contactIdIdx);
-					Conversation conversation = new Conversation(conv.getMsisdn(), convId, contactId, null,onHike>0?true:false);
+					Conversation conversation = new Conversation(conv.getMsisdn(), convId, contactId, null,onHike > 0);
 					conv.setConversation(conversation);
 				}
 				c.close();
