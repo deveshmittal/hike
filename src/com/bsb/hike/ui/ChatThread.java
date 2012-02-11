@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -22,10 +23,13 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AutoCompleteTextView;
@@ -35,6 +39,7 @@ import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -50,7 +55,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.ContactUtils;
 
-public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher
+public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener
 {
 
 	private HikePubSub mPubSub;
@@ -324,6 +329,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
+
+		/* ensure that when the softkeyboard Done button is pressed (different than the sen
+		 * button we have), we send the message.
+		 */
+		mComposeView.setOnEditorActionListener(this);
 
 		mConversationDb = new HikeConversationsDatabase(this);
 
@@ -845,5 +855,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 																		// ones
 			mUiThreadHandler.postDelayed(mResetTypingNotification, 10 * 1000);
 		}
+	}
+
+	@Override
+	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
+	{
+		if ((view == mComposeView) &&
+			(actionId == EditorInfo.IME_ACTION_SEND))
+		{
+			boolean ret = mSendBtn.performClick();
+			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
+			return ret;
+		}
+		return false;
 	}
 }
