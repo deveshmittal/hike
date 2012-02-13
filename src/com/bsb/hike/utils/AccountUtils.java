@@ -38,12 +38,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 import android.accounts.NetworkErrorException;
+
+import android.text.TextUtils;
+
 import android.util.Log;
 
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.utils.AccountUtils.AccountInfo;
 
 public class AccountUtils
 {
@@ -58,8 +63,6 @@ public class AccountUtils
 	private static HttpClient mClient = null;
 
 	private static String mToken = null;
-
-	public static String MSISDN = "+555555555555";
 
 	public static void setToken(String token)
 	{
@@ -165,29 +168,6 @@ public class AccountUtils
 		return count;
 	}
 
-	public static String getMSISDN()
-	{
-		HttpRequestBase httpget = new HttpGet(BASE + "/account");
-		addMSISDNHeader(httpget);
-		JSONObject obj = executeRequest(httpget);
-		try
-		{
-			if (obj.has("stat") && "fail".equals(obj.getString("stat")))
-			{
-				Log.e("HTTP", "Unable to get MSISDN");
-				return null;
-			}
-
-			String msisdn = obj.getString("phone_no");
-			return msisdn;
-		}
-		catch (JSONException e)
-		{
-			Log.e("HTTP", "Invalid JSON Object", e);
-			return null;
-		}
-	}
-
 	public static void invite(String phone_no) throws UserError
 	{
 		HttpPost httppost = new HttpPost(BASE + "/user/invite");
@@ -236,33 +216,47 @@ public class AccountUtils
 		}
 	}
 
-	public static AccountInfo registerAccount()
+	public static AccountInfo registerAccount(String pin, String unAuthMSISDN)
 	{
 		HttpPost httppost = new HttpPost(BASE + "/account");
-		HttpEntity entity = null;
+		AbstractHttpEntity entity = null;
+		JSONObject data = new JSONObject();
 		try
 		{
-			List<NameValuePair> pairs = new ArrayList<NameValuePair>(1);
-			pairs.add(new BasicNameValuePair("set_cookie", "0"));
-			entity = new UrlEncodedFormEntity(pairs);
+			data.put("set_cookie", "0");
+			if (pin != null)
+			{
+				data.put("msisdn", unAuthMSISDN);
+				data.put("pin", pin);
+			}
+			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity.setContentType("application/json");
 			httppost.setEntity(entity);
 		}
 		catch (UnsupportedEncodingException e)
 		{
-			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!");
+			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
 		}
-
+		catch (JSONException e)
+		{
+			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
+		}
 		httppost.setEntity(entity);
 
-		addMSISDNHeader(httppost);
 		JSONObject obj = executeRequest(httppost);
-		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
+		if ((obj == null))
 		{
 			Log.w("HTTP", "Unable to create account");
 			// raise an exception?
 			return null;
 		}
-
+		if("fail".equals(obj.optString("stat")))
+		{
+			if(pin != null)
+				return null;
+			/* represents normal account creation , when user is on wifi and account creation failed */
+			return new AccountUtils.AccountInfo(null, null, null); 
+		}
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
 		String uid = obj.optString("uid");
@@ -270,15 +264,44 @@ public class AccountUtils
 		return new AccountUtils.AccountInfo(token, msisdn, uid);
 	}
 
+	public static String validateNumber(String number)
+	{
+		HttpPost httppost = new HttpPost(BASE + "/account/validate");
+		AbstractHttpEntity entity = null;
+		JSONObject data = new JSONObject();
+		try
+		{
+			data.put("phone_no", number);
+			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity.setContentType("application/json");
+			httppost.setEntity(entity);
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (JSONException e)
+		{
+			Log.e("AccountUtils", "creating a string entity from an entry string threw!", e);
+		}
+
+		JSONObject obj = executeRequest(httppost);
+		if (obj == null)
+		{
+			Log.w("HTTP", "Unable to Validate Phone Number.");
+			// raise an exception?
+			return null;
+		}
+		
+		String msisdn = obj.optString("msisdn");
+		Log.d("HTTP", "Successfully validated phone number.");
+		return msisdn;
+	}
+
 	private static void addToken(HttpRequestBase req)
 	{
 		req.addHeader("Cookie", "user=" + mToken);
-	}
-
-	private static void addMSISDNHeader(HttpRequestBase req)
-	{
-		// TODO remove this line. just for testing
-		req.addHeader("X-MSISDN-AIRTEL", MSISDN);
 	}
 
 	public static void setName(String name) throws NetworkErrorException
@@ -315,11 +338,12 @@ public class AccountUtils
 		addToken(httppost);
 		JSONObject data;
 		data = getJsonContactList(contactsMap);
-		if(data == null)
+		if (data == null)
 		{
 			return null;
 		}
 		String encoded = data.toString();
+
 		Log.d("ACCOUNT UTILS","Json data is : "+encoded);
 		AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 		entity.setContentType("application/json");
@@ -354,19 +378,17 @@ public class AccountUtils
 		}
 
 		String encoded = data.toString();
-		//try
-		//{
-			AbstractHttpEntity entity = new ByteArrayEntity(encoded.getBytes());
-			request.setEntity(entity);
-			entity.setContentType("application/json");
-			JSONObject obj = executeRequest(request);
-			return getContactList(obj, new_contacts_by_id);
-		//}
-		/*catch (UnsupportedEncodingException e)
-		{
-			Log.e("AccountUtils", "Unable to encode request body", e);
-			return null;
-		}*/
+		// try
+		// {
+		AbstractHttpEntity entity = new ByteArrayEntity(encoded.getBytes());
+		request.setEntity(entity);
+		entity.setContentType("application/json");
+		JSONObject obj = executeRequest(request);
+		return getContactList(obj, new_contacts_by_id);
+		// }
+		/*
+		 * catch (UnsupportedEncodingException e) { Log.e("AccountUtils", "Unable to encode request body", e); return null; }
+		 */
 	}
 
 	private static JSONObject getJsonContactList(Map<String, List<ContactInfo>> contactsMap)
@@ -389,7 +411,7 @@ public class AccountUtils
 			}
 			catch (JSONException e)
 			{
-				Log.d("ACCOUNT UTILS","Json exception while getting contact list.");
+				Log.d("ACCOUNT UTILS", "Json exception while getting contact list.");
 				e.printStackTrace();
 			}
 		}
@@ -434,6 +456,7 @@ public class AccountUtils
 		return server_contacts;
 	}
 
+
 	public static void deleteAccount() throws NetworkErrorException
 	{
 		HttpDelete delete = new HttpDelete(BASE + "/account");
@@ -444,4 +467,5 @@ public class AccountUtils
 			throw new NetworkErrorException("Could not delete account");
 		}
 	}
+
 }

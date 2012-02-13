@@ -5,11 +5,11 @@
     <string name="click_next">Next</string>
     <string name="accept_tc">Accept and Continue</string>
     <string name="welcome">Welcome to hike!</string>
-    <string name="welcome_message">hike is just like SMS but absolutely free.
-No hidden costs and no data plan required</string>
-    <string name="scanning_ab">Scanning Address Book</string>
+    <string name="welcome_message">hike is just like SMS but absolutely free.No hidden costs and no data plan required</string>
+	<string name="scanning_ab">Scanning Address Book</string>
     <string name="looking_for_friends">Just checking to see if any friends are on hike. Won\'t be long, we promise.</string>
     <string name="determining_phone_number">Determining phone number</string>
+    <string name="processing_request">Processing Request</string>
     <string name="next_message">Tap next to scan your contacts and start texting for free!</string>
     <string name="invite">Invite</string>
     <string name="contacts">Contacts</string>
@@ -35,4 +35,7 @@ No hidden costs and no data plan required</string>
     <string name="welcome_screen_error_message">We are having some trouble connecting to the server.  Try again in a bit?</string>
     <string name="resend">Resend</string>
     <string name="delete_account_failed">Couldn\'t delete account</string>
+    <string name="enterText">Enter your mobile number in the given textbox.</string>
+    <string name="smsFallbackText">Your MSISDN could not be verified. Please enter your phone number below and click send to receive a pin to validate your credentials.</string>
+    <string name="correctPhoneText">Enter correct number and try again.</string>
 </resources>
