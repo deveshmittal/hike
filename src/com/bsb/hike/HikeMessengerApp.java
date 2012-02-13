@@ -38,6 +38,10 @@ public class HikeMessengerApp extends Application
 
 	public static final String SMS_SETTING = "smscredits";
 
+	public static final String PHONE_NUMBER_VALIDATION = "phonenumbervalidation";
+
+	public static final String PHONE_NUMBER_ENTERED = "phonenumberentered";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;

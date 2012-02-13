@@ -163,6 +163,14 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		if (token == null)
 		{
+			/* This is to check if phone validation screen is reached by the user or not.*/
+			boolean phoneValidation = settings.getBoolean(HikeMessengerApp.PHONE_NUMBER_VALIDATION, false);
+			if(phoneValidation)
+			{
+				startActivity(new Intent(this, SmsFallback.class));
+				finish();
+				return;
+			}
 			startActivity(new Intent(this, WelcomeActivity.class));
 			finish();
 			return;
