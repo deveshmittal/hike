@@ -186,20 +186,20 @@ public class SmsFallback extends Activity
 			mTextMsg.setText("Enter Pin received in the sms.");
 			mErrorText.setText("Invalid pin.");
 			mEditTextbox.setInputType(InputType.TYPE_CLASS_NUMBER);
-			mEditTextbox.setEms(6);
 			mResendPhoneButton.setVisibility(View.VISIBLE);
 			mResendPhoneButton.setClickable(true);
+			mEditTextbox.setHint("XXXXXXXXXX");
 		}
 		else
 		{
 			mTextMsg.setText("Enter Phone number.");
 			mErrorText.setText("Cannot get MSISDN for this number. Kindly check phone number entered.");
 			mEditTextbox.setInputType(InputType.TYPE_CLASS_PHONE);
-			mEditTextbox.setEms(8);
 			mResendPhoneButton.setVisibility(View.INVISIBLE);
 			mResendPhoneButton.setClickable(false);
 			mEditTextbox.requestFocus();
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+			mEditTextbox.setHint("9999999999");
 		}
 	}
 }

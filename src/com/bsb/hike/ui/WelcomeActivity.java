@@ -54,7 +54,6 @@ public class WelcomeActivity extends Activity
 			}
 
 			/* set the async task to null so the UI doesn't think we're still looking for the MSISDN */
-			//mTask = null;
 
 			return ServerStatus.ERROR;
 		}

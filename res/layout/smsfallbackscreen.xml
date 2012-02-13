@@ -38,7 +38,6 @@
             android:layout_marginTop="19dp"
             android:inputType="phone"
             android:maxLength="15"
-            android:ems="8"
             android:singleLine="true" />
          
           <TextView
@@ -79,13 +78,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="14dp"
-            android:layout_below="@id/correctPhoneId"
-            android:onClick="onClick"
-            android:visibility="invisible"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="30dp"
+            android:background="@color/orange"
             android:clickable="false"
-            android:text="Resend Phone" />
+            android:onClick="onClick"
+            android:text="ReEnter PhoneNo"
+            android:visibility="invisible" />
 
     </RelativeLayout>
 
