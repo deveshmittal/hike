@@ -151,7 +151,6 @@ public class HikeMqttManager implements Listener
 		this.toaster = new HikeNotification(hikeService);
 		this.convDb = new HikeConversationsDatabase(hikeService);
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
-		this.create();
 		mqttIdToPacket = Collections.synchronizedMap(new HashMap<Integer, HikePacket>());
 
 		persistence = new HikeMqttPersistence(hikeService);
@@ -169,7 +168,7 @@ public class HikeMqttManager implements Listener
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		topic = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-
+		Log.d("HikeMqttManager", "clientId is " + clientId);
 		return !TextUtils.isEmpty(topic);
 	}
 
@@ -178,6 +177,7 @@ public class HikeMqttManager implements Listener
 	 */
 	private void create()
 	{
+		init();
 		try
 		{
 			mqtt = new MQTT();
@@ -426,11 +426,6 @@ public class HikeMqttManager implements Listener
 
 	public void connect()
 	{
-		if (!init())
-		{
-			Log.d("HikeMqttManager", "No token yet");
-		}
-
 		if (isConnected())
 		{
 			Log.d("HikeMqttManager", "already connected");
