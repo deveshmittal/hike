@@ -13,7 +13,7 @@
         android:background="@color/black" >
 
 	    <Button
-	        android:id="@+id/sendPId"
+	        android:id="@+id/send_text_id"
 	        android:layout_width="fill_parent"
 	        android:layout_height="fill_parent"
 	        android:layout_centerHorizontal="true"
@@ -30,24 +30,10 @@
         android:layout_above="@id/bottom_nav_bar"
         android:background="@color/white" >
 
-        <TextView
-            android:id="@+id/smsFallbackTextId"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="70dp"
-            android:gravity="center"
-            android:text="@string/smsFallbackText"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/lightblack" />
-
          <EditText
-            android:id="@+id/insertPId"
+            android:id="@+id/insert_text_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/smsFallbackTextId"
-            android:layout_centerHorizontal="true"
             android:layout_centerInParent="true"
             android:layout_marginTop="19dp"
             android:inputType="phone"
@@ -55,11 +41,23 @@
             android:ems="8"
             android:singleLine="true" />
          
+          <TextView
+            android:id="@+id/smsFallbackTextId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/insert_text_id"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="@string/smsFallbackText"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/lightblack" />
+         
 		<TextView
             android:id="@+id/enterTextId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/insertPId"
+            android:layout_below="@id/insert_text_id"
             android:layout_centerHorizontal="true"
             android:gravity="center"
             android:textColor="@color/grey"
@@ -83,7 +81,7 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="14dp"
-            android:layout_toLeftOf="@id/correctPhoneId"
+            android:layout_below="@id/correctPhoneId"
             android:onClick="onClick"
             android:visibility="invisible"
             android:clickable="false"

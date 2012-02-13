@@ -81,6 +81,7 @@ public class WelcomeActivity extends Activity
 
 				mErrorView.setVisibility(View.VISIBLE);
 			}
+			mTask = null;
 		}
 	}
 
@@ -121,12 +122,12 @@ public class WelcomeActivity extends Activity
 	public void onDestroy()
 	{
 		super.onDestroy();
-		mTask = null;
 		if (mDialog != null)
 		{
 			mDialog.dismiss();
 			mDialog = null;
 		}
+		mTask=null;
 	}
 
 	public void onClick(View v)

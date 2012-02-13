@@ -63,10 +63,6 @@ public class AccountUtils
 
 	private static String mToken = null;
 
-	public static String MSISDN = "+555555555555";
-
-	public static String PHONE = "";
-
 	public static void setToken(String token)
 	{
 		mToken = token;
@@ -171,29 +167,6 @@ public class AccountUtils
 		return count;
 	}
 
-	public static String getMSISDN()
-	{
-		HttpRequestBase httpget = new HttpGet(BASE + "/account");
-		addMSISDNHeader(httpget);
-		JSONObject obj = executeRequest(httpget);
-		try
-		{
-			if (obj.has("stat") && "fail".equals(obj.getString("stat")))
-			{
-				Log.e("HTTP", "Unable to get MSISDN");
-				return null;
-			}
-
-			String msisdn = obj.getString("phone_no");
-			return msisdn;
-		}
-		catch (JSONException e)
-		{
-			Log.e("HTTP", "Invalid JSON Object", e);
-			return null;
-		}
-	}
-
 	public static void invite(String phone_no) throws UserError
 	{
 		HttpPost httppost = new HttpPost(BASE + "/user/invite");
@@ -290,14 +263,14 @@ public class AccountUtils
 		return new AccountUtils.AccountInfo(token, msisdn, uid);
 	}
 
-	public static String validateNumber()
+	public static String validateNumber(String number)
 	{
 		HttpPost httppost = new HttpPost(BASE + "/account/validate");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try
 		{
-			data.put("phone_no", PHONE);
+			data.put("phone_no", number);
 			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");
 			httppost.setEntity(entity);
@@ -349,12 +322,6 @@ public class AccountUtils
 	private static void addToken(HttpRequestBase req)
 	{
 		req.addHeader("Cookie", "user=" + mToken);
-	}
-
-	private static void addMSISDNHeader(HttpRequestBase req)
-	{
-		// TODO remove this line. just for testing
-		req.addHeader("X-MSISDN-AIRTEL", MSISDN);
 	}
 
 	public static List<ContactInfo> postAddressBook(String token, Map<String, List<ContactInfo>> contactsMap) throws IllegalStateException, IOException

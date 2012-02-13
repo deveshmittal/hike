@@ -69,8 +69,7 @@ public class SmsFallback extends Activity
 			}
 			else
 			{
-				AccountUtils.PHONE = text;
-				String msisdn = AccountUtils.validateNumber();
+				String msisdn = AccountUtils.validateNumber(text);
 				if (TextUtils.isEmpty(msisdn))
 				{
 					return Boolean.FALSE;
@@ -112,6 +111,7 @@ public class SmsFallback extends Activity
 
 				mErrorText.setVisibility(View.VISIBLE);
 			}
+			mTask = null;
 		}
 	}
 
@@ -127,8 +127,8 @@ public class SmsFallback extends Activity
 		super.onCreate(savedState);
 		setContentView(R.layout.smsfallbackscreen);
 		mTextMsg = (TextView) findViewById(R.id.enterTextId);
-		mEditTextbox = (EditText) findViewById(R.id.insertPId);
-		mSendButton = (Button) findViewById(R.id.sendPId);
+		mEditTextbox = (EditText) findViewById(R.id.insert_text_id);
+		mSendButton = (Button) findViewById(R.id.send_text_id);
 		mResendPhoneButton = (Button)findViewById(R.id.resendPhoneId);
 		mErrorText = (TextView) findViewById(R.id.correctPhoneId);
 		
