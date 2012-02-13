@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,52 +19,61 @@ import com.bsb.hike.utils.AccountUtils;
 
 public class WelcomeActivity extends Activity
 {
-	public class AccountCreateActivity extends AsyncTask<Void, Void, Boolean>
+	private enum ServerStatus
+	{
+		MSISDN , MSISDN_NOT_FOUND , ERROR
+	}
+	public class AccountCreateActivity extends AsyncTask<Void, Void, ServerStatus>
 	{
 
 		@Override
-		protected Boolean doInBackground(Void... arg0)
+		protected ServerStatus doInBackground(Void... arg0)
 		{
-			if (mMSISDNText.getVisibility() == View.VISIBLE)
-			{
-				String msisdn = mMSISDNText.getText().toString();
-				AccountUtils.MSISDN = msisdn;
-			}
-
-			AccountUtils.AccountInfo accountInfo = AccountUtils.registerAccount();
-
+			AccountUtils.AccountInfo accountInfo = AccountUtils.registerAccount(null,null);
+				
 			if (accountInfo != null)
 			{
-				String token = accountInfo.token;
-				String msisdn = accountInfo.msisdn;
-				String uid = accountInfo.uid;
-				AccountUtils.setToken(token);
 				SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 				SharedPreferences.Editor editor = settings.edit();
+				String msisdn = accountInfo.msisdn;
+				/* If No MSISDN for given number , go to Sms Fallback Screen*/
+				if(TextUtils.isEmpty(msisdn))
+				{
+					editor.putBoolean(HikeMessengerApp.PHONE_NUMBER_VALIDATION, true);
+					editor.commit();
+					return ServerStatus.MSISDN_NOT_FOUND;
+				}
+				String token = accountInfo.token;
+				String uid = accountInfo.uid;
+				AccountUtils.setToken(token);
 				editor.putString(HikeMessengerApp.TOKEN_SETTING, token);
 				editor.putString(HikeMessengerApp.MSISDN_SETTING, msisdn);
 				editor.putString(HikeMessengerApp.UID_SETTING, uid);
 				editor.commit();
-				return Boolean.TRUE;
+				return ServerStatus.MSISDN;
 			}
 
 			/* set the async task to null so the UI doesn't think we're still looking for the MSISDN */
-			WelcomeActivity.this.mTask = null;
+			//mTask = null;
 
-			return Boolean.FALSE;
+			return ServerStatus.ERROR;
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result)
+		protected void onPostExecute(ServerStatus result)
 		{
-			if (result.booleanValue())
+			if (result == ServerStatus.MSISDN)
 			{
 				startActivity(new Intent(WelcomeActivity.this, AccountCreateSuccess.class));
 				finish();
-			} else
+			}
+			else if(result == ServerStatus.MSISDN_NOT_FOUND)
 			{
-				//Simply dimiss this dialog for now and make the user try again later
-				//this guard shouldn't be necessary since the dialog should always be created here
+				startActivity(new Intent(WelcomeActivity.this, SmsFallback.class));
+				finish();
+			}
+			else
+			{
 				if (mDialog != null)
 				{
 					mDialog.dismiss();
@@ -79,8 +89,6 @@ public class WelcomeActivity extends Activity
 	private Button mAcceptButton;
 
 	private ImageView mIconView;
-
-	private EditText mMSISDNText;
 
 	private AccountCreateActivity mTask;
 
@@ -99,8 +107,6 @@ public class WelcomeActivity extends Activity
 		setContentView(R.layout.welcomescreen);
 		mAcceptButton = (Button) findViewById(R.id.accept_tc);
 		mIconView = (ImageView) findViewById(R.id.ic_edit_message);
-		mMSISDNText = (EditText) findViewById(R.id.debug_msisdn_input);
-
 		mErrorView = findViewById(R.id.error_text);
 
 		Object retained = getLastNonConfigurationInstance();
@@ -115,6 +121,7 @@ public class WelcomeActivity extends Activity
 	public void onDestroy()
 	{
 		super.onDestroy();
+		mTask = null;
 		if (mDialog != null)
 		{
 			mDialog.dismiss();
@@ -129,11 +136,6 @@ public class WelcomeActivity extends Activity
 			mDialog = ProgressDialog.show(this, null, getText(R.string.determining_phone_number));
 			mTask = new AccountCreateActivity();
 			mTask.execute();
-		}
-		else if (v == mIconView)
-		{
-			Log.w("DEBGUG", "Adding Debug Input MSISDN");
-			mMSISDNText.setVisibility(View.VISIBLE);
 		}
 	}
 }
