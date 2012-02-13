@@ -279,35 +279,39 @@ public class HikeMqttManager implements MqttAdvancedCallback
 
 			return true;
 		}
+		catch(com.ibm.mqtt.MqttNotConnectedException e)
+		{
+			Log.e("HikeMqttManager", "Unable to connect", e);
+		}
 		catch (MqttException e)
 		{
 			Log.e("HikeMqttManager", "Unable to connect", e);
-			// something went wrong!
-
-			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-
-			//
-			// inform the app that we failed to connect so that it can update
-			// the UI accordingly
-			this.mHikeService.broadcastServiceStatus("Unable to connect");
-
-			//
-			// inform the user (for times when the Activity UI isn't running)
-			// that we failed to connect
-			this.mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect - will retry later");
-
-			// if something has failed, we wait for one keep-alive period before
-			// trying again
-			// in a real implementation, you would probably want to keep count
-			// of how many times you attempt this, and stop trying after a
-			// certain number, or length of time - rather than keep trying
-			// forever.
-			// a failure is often an intermittent network issue, however, so
-			// some limited retry is a good idea
-			this.mHikeService.scheduleNextPing();
-
-			return false;
 		}
+		// something went wrong!
+
+		setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+
+		//
+		// inform the app that we failed to connect so that it can update
+		// the UI accordingly
+		this.mHikeService.broadcastServiceStatus("Unable to connect");
+
+		//
+		// inform the user (for times when the Activity UI isn't running)
+		// that we failed to connect
+		this.mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect - will retry later");
+
+		// if something has failed, we wait for one keep-alive period before
+		// trying again
+		// in a real implementation, you would probably want to keep count
+		// of how many times you attempt this, and stop trying after a
+		// certain number, or length of time - rather than keep trying
+		// forever.
+		// a failure is often an intermittent network issue, however, so
+		// some limited retry is a good idea
+		this.mHikeService.scheduleNextPing();
+
+		return false;
 	}
 
 	private boolean unsubscribeFromTopics(String[] topics)
