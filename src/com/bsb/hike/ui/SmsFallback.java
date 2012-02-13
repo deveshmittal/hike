@@ -6,19 +6,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.ui.WelcomeActivity.AccountCreateActivity;
 import com.bsb.hike.utils.AccountUtils;
 
 public class SmsFallback extends Activity
@@ -28,6 +25,8 @@ public class SmsFallback extends Activity
 	private ProgressDialog mDialog;
 
 	private TextView mTextMsg;
+
+	private TextView mFallbackMsg;
 
 	private EditText mEditTextbox;
 
@@ -131,7 +130,8 @@ public class SmsFallback extends Activity
 		mSendButton = (Button) findViewById(R.id.send_text_id);
 		mResendPhoneButton = (Button)findViewById(R.id.resendPhoneId);
 		mErrorText = (TextView) findViewById(R.id.correctPhoneId);
-		
+		mFallbackMsg = (TextView) findViewById(R.id.smsFallbackTextId);
+
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		isPinCodeScreen = settings.getBoolean(HikeMessengerApp.PHONE_NUMBER_ENTERED, false);
 		resetParams(isPinCodeScreen);
@@ -185,6 +185,7 @@ public class SmsFallback extends Activity
 		{
 			mTextMsg.setText("Enter Pin received in the sms.");
 			mErrorText.setText("Invalid pin.");
+			mFallbackMsg.setText(getResources().getString(R.string.sms_pin_msg));
 			mEditTextbox.setInputType(InputType.TYPE_CLASS_NUMBER);
 			mResendPhoneButton.setVisibility(View.VISIBLE);
 			mResendPhoneButton.setClickable(true);
@@ -194,6 +195,7 @@ public class SmsFallback extends Activity
 		{
 			mTextMsg.setText("Enter Phone number.");
 			mErrorText.setText("Cannot get MSISDN for this number. Kindly check phone number entered.");
+			mFallbackMsg.setText(getResources().getString(R.string.smsFallbackText));
 			mEditTextbox.setInputType(InputType.TYPE_CLASS_PHONE);
 			mResendPhoneButton.setVisibility(View.INVISIBLE);
 			mResendPhoneButton.setClickable(false);

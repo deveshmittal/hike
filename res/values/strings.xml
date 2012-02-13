@@ -37,5 +37,6 @@
     <string name="delete_account_failed">Couldn\'t delete account</string>
     <string name="enterText">Enter your mobile number in the given textbox.</string>
     <string name="smsFallbackText">Your MSISDN could not be verified. Please enter your phone number below and click send to receive a pin to validate your credentials.</string>
+    <string name="sms_pin_msg">Thanks!  We\'ve just sent you a verification PIN via SMS (don\'t worry, it\'s still free!).  Enter it below.</string>
     <string name="correctPhoneText">Enter correct number and try again.</string>
 </resources>
