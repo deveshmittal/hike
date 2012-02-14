@@ -18,20 +18,26 @@
 
 package org.fusesource.mqtt.client;
 
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.hawtdispatch.DispatchQueue;
-import org.fusesource.hawtdispatch.transport.*;
-import org.fusesource.mqtt.codec.CONNECT;
+import static org.fusesource.hawtbuf.Buffer.utf8;
 
-import javax.net.ssl.SSLContext;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import static org.fusesource.hawtbuf.Buffer.utf8;
-import static org.fusesource.hawtdispatch.Dispatch.createQueue;
+import javax.net.ssl.SSLContext;
+
+import org.fusesource.hawtbuf.UTF8Buffer;
+import org.fusesource.hawtdispatch.DispatchQueue;
+import org.fusesource.hawtdispatch.transport.TcpTransport;
+import org.fusesource.mqtt.codec.CONNECT;
+
+import android.util.Log;
 
 
 /**
