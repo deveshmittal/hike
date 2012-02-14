@@ -31,7 +31,7 @@
     <string name="forward">Forward</string>
     <string name="copy">Copy</string>
     <string name="pin">Add shortcut</string>
-    <string name="preferences">Hike Preferences</string>
+    <string name="preferences">Preferences</string>
     <string name="welcome_screen_error_message">We are having some trouble connecting to the server.  Try again in a bit?</string>
     <string name="resend">Resend</string>
     <string name="delete_account_failed">Couldn\'t delete account</string>
