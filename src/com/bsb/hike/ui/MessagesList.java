@@ -505,7 +505,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				continue;
 			}
 
-			ConvMessage message = messages.get(0);
+			ConvMessage message = messages.get(messages.size() - 1);
 			if (message.getMsgID() == msgId)
 			{
 				return message;
