@@ -85,11 +85,11 @@ public class WelcomeActivity extends Activity
 		}
 	}
 
+	static final String ERROR_VISIBILITY = "errorvisibility";
+	
 	private ProgressDialog mDialog;
 
 	private Button mAcceptButton;
-
-	private ImageView mIconView;
 
 	private AccountCreateActivity mTask;
 
@@ -107,9 +107,8 @@ public class WelcomeActivity extends Activity
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 		mAcceptButton = (Button) findViewById(R.id.accept_tc);
-		mIconView = (ImageView) findViewById(R.id.ic_edit_message);
 		mErrorView = findViewById(R.id.error_text);
-
+		
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof AccountCreateActivity)
 		{
@@ -138,5 +137,19 @@ public class WelcomeActivity extends Activity
 			mTask = new AccountCreateActivity();
 			mTask.execute();
 		}
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+		outState.putInt(ERROR_VISIBILITY, mErrorView.getVisibility());
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState)
+	{
+		super.onRestoreInstanceState(savedInstanceState);
+		mErrorView.setVisibility(savedInstanceState.getInt(ERROR_VISIBILITY, View.INVISIBLE));
 	}
 }
