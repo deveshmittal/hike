@@ -370,6 +370,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
+
 	}
 
 	@Override
