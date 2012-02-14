@@ -70,7 +70,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private String mContactName;
 
-	private String mContactNumber;
+	private String mContactNumber = "";/* initialize this to empty to avoid a bunch of NPEs if we haven't selected a person yet */
 
 	private MessagesAdapter mAdapter;
 
