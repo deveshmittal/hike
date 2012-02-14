@@ -183,25 +183,25 @@ public class SmsFallback extends Activity
 		mErrorText.setVisibility(View.INVISIBLE);
 		if (isPinScreen)
 		{
-			mTextMsg.setText("Enter Pin received in the sms.");
-			mErrorText.setText("Invalid pin.");
+			mTextMsg.setText(getResources().getString(R.string.enter_pin));
+			mErrorText.setText(getResources().getString(R.string.invalid_pin));
 			mFallbackMsg.setText(getResources().getString(R.string.sms_pin_msg));
 			mEditTextbox.setInputType(InputType.TYPE_CLASS_NUMBER);
 			mResendPhoneButton.setVisibility(View.VISIBLE);
 			mResendPhoneButton.setClickable(true);
-			mEditTextbox.setHint("XXXXXXXXXX");
+			mEditTextbox.setHint(getResources().getString(R.string.pin_hint));
 		}
 		else
 		{
-			mTextMsg.setText("Enter Phone number.");
-			mErrorText.setText("Cannot get MSISDN for this number. Kindly check phone number entered.");
+			mTextMsg.setText(getResources().getString(R.string.enter_phone));
+			mErrorText.setText(getResources().getString(R.string.invalid_phone));
 			mFallbackMsg.setText(getResources().getString(R.string.smsFallbackText));
 			mEditTextbox.setInputType(InputType.TYPE_CLASS_PHONE);
 			mResendPhoneButton.setVisibility(View.INVISIBLE);
 			mResendPhoneButton.setClickable(false);
 			mEditTextbox.requestFocus();
 			getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-			mEditTextbox.setHint("9999999999");
+			mEditTextbox.setHint(getResources().getString(R.string.phone_hint));
 		}
 	}
 }

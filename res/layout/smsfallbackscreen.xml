@@ -19,7 +19,7 @@
 	        android:layout_centerHorizontal="true"
 	        android:background="@color/diamondblue"
 	        android:onClick="onClick"
-	        android:text="Send"
+	        android:text="@string/smsFallBack_send_button"
 	        android:textAppearance="?android:attr/textAppearanceMedium"
 	        android:textColor="@color/white" />
 
@@ -83,7 +83,7 @@
             android:background="@color/orange"
             android:clickable="false"
             android:onClick="onClick"
-            android:text="ReEnter PhoneNo"
+            android:text="@string/smsFallBack_reenter_phone"
             android:visibility="invisible" />
 
     </RelativeLayout>
