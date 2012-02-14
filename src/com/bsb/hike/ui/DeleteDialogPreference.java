@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import android.content.Context;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import com.bsb.hike.tasks.DeleteAccountTask;
 
@@ -21,7 +22,9 @@ public class DeleteDialogPreference extends DialogPreference
 	{
 		if (shouldDelete)
 		{
-			DeleteAccountTask task = new DeleteAccountTask(context);
+			HikePreferences preferences = (HikePreferences) context;
+			DeleteAccountTask task = new DeleteAccountTask(preferences);
+			preferences.setBlockingTask(task);
 			task.execute();
 		}
 	}

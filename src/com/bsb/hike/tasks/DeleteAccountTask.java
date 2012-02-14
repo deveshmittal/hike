@@ -1,9 +1,8 @@
 package com.bsb.hike.tasks;
 
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
@@ -18,30 +17,30 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 
-public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean>
+public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
 {
 
-	private Context context;
-	private ProgressDialog dialog;
+	private Activity activity;
+	private boolean finished;
 
-	public DeleteAccountTask(Context context)
+	public DeleteAccountTask(Activity activity)
 	{
-		this.context = context;
+		this.activity = activity;
 	}
 
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
-		HikeUserDatabase db = new HikeUserDatabase(context);
-		HikeConversationsDatabase convDb = new HikeConversationsDatabase(context);
-		Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
+		HikeUserDatabase db = new HikeUserDatabase(activity);
+		HikeConversationsDatabase convDb = new HikeConversationsDatabase(activity);
+		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 
 		try
 		{
 			AccountUtils.deleteAccount();
-			HikeMessengerApp app = (HikeMessengerApp) context.getApplicationContext();
+			HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
 			app.disconnectFromService();
-			context.stopService(new Intent(context, HikeService.class));
+			activity.stopService(new Intent(activity, HikeService.class));
 			db.deleteAll();
 			convDb.deleteAll();
 			editor.clear();
@@ -60,36 +59,38 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean>
 	}
 
 	@Override
-	protected void onPreExecute()
-	{
-		dialog = ProgressDialog.show(context, "Account", "Deleting Account.");
-		dialog.show();
-	}
-
-	@Override
 	protected void onPostExecute(Boolean result)
 	{
-		dialog.dismiss();
+		finished = true;
 		if (result.booleanValue())
 		{
-			AlertDialog.Builder builder = new AlertDialog.Builder(context);
-			builder.setMessage("Account was deleted.").
-				setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id)
-					{
-						Intent intent = new Intent(context, WelcomeActivity.class);
-						intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						context.startActivity(intent);
-					}
-				});
-			builder.show();
+			/* clear any toast notifications */
+			NotificationManager mgr = (NotificationManager) activity.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+			mgr.cancelAll();
+
+			Intent intent = new Intent(activity, WelcomeActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			activity.startActivity(intent);
+			activity.finish();
 		}
 		else
 		{
 			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText(context, context.getResources().getString(R.string.delete_account_failed), duration);
+			Toast toast = Toast.makeText(activity, activity.getResources().getString(R.string.delete_account_failed), duration);
 			toast.show();
 		}
+	}
+
+	@Override
+	public void setActivity(Activity activity)
+	{
+		this.activity = activity;
+	}
+
+	@Override
+	public boolean isFinished()
+	{
+		return finished;
 	}
 
 
