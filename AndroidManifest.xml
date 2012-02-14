@@ -50,6 +50,7 @@
         <activity
             android:theme="@android:style/Theme.NoTitleBar"
             android:label="@string/app_name"
+			android:windowSoftInputMode="stateVisible"
             android:name=".ui.AccountCreateSuccess">
         </activity>
         <activity
