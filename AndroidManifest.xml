@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
-    android:versionCode="17"
+    android:versionCode="18"
     android:installLocation="internalOnly"
-    android:versionName="0.1.4" >
+    android:versionName="0.1.5" >
 
     <uses-sdk android:minSdkVersion="7" />
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
