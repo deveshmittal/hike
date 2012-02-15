@@ -11,7 +11,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.bsb.hike.models.HikePacket;
-import com.ibm.mqtt.MqttPersistenceException;
 
 public class HikeMqttPersistence extends SQLiteOpenHelper
 {
@@ -36,18 +35,17 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 		mDb = getWritableDatabase();
 	}
 
-	public void addSentMessage(int id, HikePacket packet) throws MqttPersistenceException
+	public void addSentMessage(HikePacket packet) throws MqttPersistenceException
 	{
-		Log.d("HikeMqttPersistence", "Persisting message " + id + " data: " + new String(packet.getMessage()));
+		Log.d("HikeMqttPersistence", "Persisting message data: " + new String(packet.getMessage()));
 		InsertHelper ih = new InsertHelper(mDb, MQTT_DATABASE_TABLE);
 		ih.prepareForReplace();
-		ih.bind(ih.getColumnIndex(MQTT_PACKET_ID), id);
 		ih.bind(ih.getColumnIndex(MQTT_MESSAGE), packet.getMessage());
 		ih.bind(ih.getColumnIndex(MQTT_MESSAGE_ID), packet.getMsgId());
 		long rowid = ih.execute();
 		if (rowid < 0)
 		{
-			throw new MqttPersistenceException("Unable to persist message " + id);
+			throw new MqttPersistenceException("Unable to persist message");
 		}
 	}
 
@@ -90,7 +88,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 		String sql = "CREATE TABLE IF NOT EXISTS " + MQTT_DATABASE_TABLE 
 				+ " ( "
-						+ MQTT_PACKET_ID +" INTEGER PRIMARY KEY,"
+						+ MQTT_PACKET_ID +" INTEGER PRIMARY KEY AUTOINCREMENT,"
 						+ MQTT_MESSAGE_ID +" INTEGER,"
 						+ MQTT_MESSAGE +" BLOB"
 				+ " ) ";
