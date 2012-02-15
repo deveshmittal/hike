@@ -288,6 +288,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		/* add a handler on the UI thread so we can post delayed messages */
+		mUiThreadHandler = new Handler();
+
 		/*
 		 * disable typing notifications until the UI is rendered. This is so if any callbacks that are fired due to UI changes will not cause messages to be sent.
 		 */
@@ -349,9 +352,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		Object o = getLastNonConfigurationInstance();
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
 		onNewIntent(intent);
-
-		/* add a handler on the UI thread so we can post delayed messages */
-		mUiThreadHandler = new Handler();
 
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
@@ -437,6 +437,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
+		/* prevent any callbacks from previous instances of this activity from being fired now */
+		if (mClearTypingCallback != null)
+		{
+			mUiThreadHandler.removeCallbacks(mClearTypingCallback);
+		}
+
+		if (mResetTypingNotification != null)
+		{
+			mUiThreadHandler.removeCallbacks(mResetTypingNotification);	
+		}
+
 		/* setIntent so getIntent returns the right values */
 		setIntent(intent);
 
