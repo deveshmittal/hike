@@ -793,6 +793,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
+		if (mConversation == null)
+		{
+			return;
+		}
+
 		/* only update the chat metadata if this is an SMS chat */
 		if (!mConversation.isOnhike())
 		{
