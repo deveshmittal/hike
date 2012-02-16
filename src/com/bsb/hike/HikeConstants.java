@@ -35,4 +35,5 @@ public class HikeConstants
 	public static final long CONTACT_UPDATE_TIMEOUT = 10*1000;
 	public static final short KEEP_ALIVE = 10 * 60;
 
+	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 }

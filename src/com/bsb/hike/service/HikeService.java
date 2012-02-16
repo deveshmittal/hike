@@ -5,6 +5,7 @@ import java.util.Calendar;
 
 import android.app.AlarmManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -286,9 +287,6 @@ public class HikeService extends Service
 			// user has disabled background data
 			mMqttManager.setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_DATADISABLED);
 
-			// update the app to show that the connection has been disabled
-			broadcastServiceStatus("Not connected - background data disabled");
-
 			// we have a listener running that will notify us when this
 			// preference changes, and will call handleStart again when it
 			// is - letting us pick up where we leave off now
@@ -381,9 +379,48 @@ public class HikeService extends Service
 	// so that it can be updated to reflect status and the data received
 	// from the server
 
-	public void broadcastServiceStatus(String statusDescription)
+	public void broadcastServiceStatus(HikeMqttManager.MQTTConnectionStatus status)
 	{
-		Log.w("HikeService", "broadcast: " + statusDescription);
+		Log.d("HikeService", "broadcastServiceStatus " + status);
+		if (status == HikeMqttManager.MQTTConnectionStatus.CONNECTED)
+		{
+			NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			notificationManager.cancel(HikeConstants.HIKE_SYSTEM_NOTIFICATION);
+			return;
+		}
+
+		int icon = R.drawable.ic_contact_logo;
+
+		int id = -1;
+		switch (status)
+		{
+		case CONNECTING:
+			id = R.string.notconnected_reconnected;
+			break;
+		case NOTCONNECTED_DATADISABLED:
+			id = R.string.notconnected_data_disabled;
+			break;
+		case NOTCONNECTED_WAITINGFORINTERNET:
+			id = R.string.notconnected_no_internet;
+			break;
+		case NOTCONNECTED_USERDISCONNECT:
+			id = R.string.notconnected_no_internet;
+		}
+
+		if (id < 0)
+		{
+			return;
+		}
+
+		String text = getResources().getString(id);
+		Notification notification = new Notification(icon, text, System.currentTimeMillis());
+
+		Intent notificationIntent = new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+		notification.setLatestEventInfo(this, getResources().getString(R.string.hike_network_connection), text, contentIntent);
+
+		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.notify(HikeConstants.HIKE_SYSTEM_NOTIFICATION, notification);
 	}
 
 	// methods used to notify the user of what has happened for times when
@@ -450,9 +487,6 @@ public class HikeService extends Service
 				{
 					// user has disabled background data
 					mMqttManager.setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_DATADISABLED);
-
-					// update the app to show that the connection has been disabled
-					broadcastServiceStatus("Not connected - background data disabled");
 
 					// disconnect from the broker
 					mMqttManager.disconnectFromBroker();

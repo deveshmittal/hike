@@ -29,6 +29,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NetworkManager;
+import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.MqttPersistenceException;
@@ -194,11 +195,6 @@ public class HikeMqttManager implements Listener
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
 			//
-			// inform the app that we failed to connect so that it can update
-			// the UI accordingly
-			this.mHikeService.broadcastServiceStatus("Invalid connection parameters");
-
-			//
 			// inform the user (for times when the Activity UI isn't running)
 			// that we failed to connect
 			this.mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect");
@@ -225,9 +221,6 @@ public class HikeMqttManager implements Listener
 					Log.e("HikeMqttManager", "Unable to connect", value);
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
-					/* inform the app that we failed to connect */
-					mHikeService.broadcastServiceStatus("Unable to connect failure");
-
 					mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect - will retry later");
 
 					/* if something has failed, we wait for one keep-alive period before
@@ -246,7 +239,6 @@ public class HikeMqttManager implements Listener
 				{
 					Log.d("HikeMqttManager", "Connected");
 					// inform the app that the app has successfully connected
-					mHikeService.broadcastServiceStatus("Connected");
 					setConnectionStatus(MQTTConnectionStatus.CONNECTED);
 					// we need to wake up the phone's CPU frequently enough so that the
 					// keep alive messages can be sent
@@ -311,12 +303,19 @@ public class HikeMqttManager implements Listener
 	 */
 	public void disconnectFromBroker()
 	{
-		if (mqttConnection != null)
+		try
 		{
-			mqttConnection.disconnect(null);
+			if (mqttConnection != null)
+			{
+				mqttConnection.disconnect(null);
+			}
+			mqttConnection = null;
+			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 		}
-		mqttConnection = null;
-		setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+		catch(Exception e)
+		{
+			Log.e("HikeMqttManager", "Caught exception while disconnecting", e);
+		}
 	}
 
 	/*
@@ -335,6 +334,7 @@ public class HikeMqttManager implements Listener
 
 	public void setConnectionStatus(MQTTConnectionStatus connectionStatus)
 	{
+		mHikeService.broadcastServiceStatus(connectionStatus);
 		this.connectionStatus = connectionStatus;
 	}
 
@@ -364,9 +364,6 @@ public class HikeMqttManager implements Listener
 			{
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
 
-				// inform the app that we are not connected any more
-				this.mHikeService.broadcastServiceStatus("Connection lost - no network connection");
-
 				//
 				// inform the user (for times when the Activity UI isn't running)
 				// that we are no longer able to receive messages
@@ -387,10 +384,6 @@ public class HikeMqttManager implements Listener
 				//
 
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-
-				// inform the app that we are not connected any more, and are
-				// attempting to reconnect
-				this.mHikeService.broadcastServiceStatus("Connection lost - reconnecting...");
 			}
 		}
 		finally
