@@ -70,7 +70,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private String mContactName;
 
-	private String mContactNumber = "";/* initialize this to empty to avoid a bunch of NPEs if we haven't selected a person yet */
+	private String mContactNumber;
 
 	private MessagesAdapter mAdapter;
 
@@ -623,6 +623,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
+		if (mContactNumber == null)
+		{
+			Log.d("ChatThread", "received message when contactNumber is null type=" + type + " object=" + object);
+			return;
+		}
+
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			final ConvMessage message = (ConvMessage) object;
@@ -631,7 +637,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				Log.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
 			}
-			if (msisdn.indexOf(mContactNumber) != -1)
+			if (msisdn.equals(mContactNumber))
 			{
 				/* unset the typing notification */
 				runOnUiThread(mClearTypingCallback);
