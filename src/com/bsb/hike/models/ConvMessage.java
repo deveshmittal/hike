@@ -277,14 +277,23 @@ public class ConvMessage
 			return -1;
 		}
 
+		/* failed is handled separately, since it's applicable to SMS messages */
+		if (mState == State.SENT_FAILED)
+		{
+			return R.drawable.ic_failed;
+		}
+
+		if (isSMS())
+		{
+			return -1;
+		}
+
 		switch(mState)
 		{
 		case SENT_DELIVERED:
 			return R.drawable.ic_delivered;
 		case SENT_DELIVERED_READ:
 			return R.drawable.ic_read;
-		case SENT_FAILED:
-			return R.drawable.ic_failed;
 		case SENT_CONFIRMED:
 			return R.drawable.ic_sent;
 		default:

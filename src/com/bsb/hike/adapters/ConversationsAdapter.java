@@ -76,7 +76,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			}
 
 			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
-			int resId = message.isSMS() ? -1 : message.getImageState();
+			int resId = message.getImageState();
 			if (resId > 0)
 			{
 				imgStatus.setImageResource(resId);
