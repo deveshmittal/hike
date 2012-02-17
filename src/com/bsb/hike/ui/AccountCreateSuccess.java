@@ -93,8 +93,9 @@ public class AccountCreateSuccess extends Activity implements TextWatcher
 		mFriendlyNameView.setText(friendlyName);
 	}
 
-	private String friendlyName(String string)
+	private String friendlyName(String str)
 	{
+		String string = str.trim();
 		String[] parts = string.split(" ");
 		int last = parts.length - 1;
 		if ((last > 0) && (parts[last].length() >= 1))
