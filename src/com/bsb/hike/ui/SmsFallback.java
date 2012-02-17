@@ -96,6 +96,7 @@ public class SmsFallback extends Activity
 					if (mDialog != null)
 					{
 						mDialog.dismiss();
+						mDialog=null;
 					}
 					isPinCodeScreen = true;
 					resetParams(isPinCodeScreen);
@@ -106,6 +107,7 @@ public class SmsFallback extends Activity
 				if (mDialog != null)
 				{
 					mDialog.dismiss();
+					mDialog = null;
 				}
 
 				mErrorText.setVisibility(View.VISIBLE);
