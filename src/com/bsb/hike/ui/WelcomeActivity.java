@@ -85,6 +85,18 @@ public class WelcomeActivity extends Activity
 		}
 	}
 
+	@Override
+	public void onBackPressed()
+	{
+		/* TODO this is a total hack,
+		 * but I can't figure out how to make the Intent that got us here
+		 * clear the task stack.  Instead, just exit the app when the back button
+		 * is pressed.
+		 */
+		Log.d("WelcomeActivity", "Calling exit");
+		System.exit(0);
+	}
+
 	static final String ERROR_VISIBILITY = "errorvisibility";
 	
 	private ProgressDialog mDialog;
