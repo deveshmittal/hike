@@ -24,6 +24,7 @@ import com.bsb.hike.models.ContactInfo;
 
 public class ContactUtils
 {
+	private static final int ICE_CREAM_SANDWICH_API_LEVEL = 14;
 	/**
 	 * Gets the mobile number for a contact. If there's no mobile number, gets the default one
 	 */
@@ -124,15 +125,15 @@ public class ContactUtils
 			List<ContactInfo> contacts_for_id = entry.getValue();
 			List<ContactInfo> hike_contacts_for_id = hike_contacts_by_id.get(id);
 
-			/* If id is not present in hike user DB i.e new contact is added to Phone AddressBook.
-			 * When the items are the same, we remove the item @ the current iterator.  This will result in the
-			 * item *not* being sent to the server
+			/*
+			 * If id is not present in hike user DB i.e new contact is added to Phone AddressBook. When the items are the same, we remove the item @ the current iterator. This will
+			 * result in the item *not* being sent to the server
 			 */
 			if (hike_contacts_for_id == null)
 			{
 				continue;
 			}
-			else if(areListsEqual(contacts_for_id,hike_contacts_for_id))
+			else if (areListsEqual(contacts_for_id, hike_contacts_for_id))
 			{
 				/* hike db is up to date, so don't send update */
 				iterator.remove();
@@ -162,11 +163,11 @@ public class ContactUtils
 				ids_json.put(string);
 			}
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
-			
-			/* Delete ids from hike user DB*/
+
+			/* Delete ids from hike user DB */
 			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will delete all rows in HikeUser DB that are not in Addressbook.
 			db.updateContacts(updatedContacts);
-			
+
 		}
 		catch (Exception e)
 		{
@@ -181,26 +182,27 @@ public class ContactUtils
 
 	private static boolean areListsEqual(List<ContactInfo> list1, List<ContactInfo> list2)
 	{
-		if(list1 != null && list2 != null)
+		if (list1 != null && list2 != null)
 		{
-			if(list1.size() != list2.size())
+			if (list1.size() != list2.size())
 				return false;
-			else if(list1.size() == 0 && list2.size() == 0)
+			else if (list1.size() == 0 && list2.size() == 0)
 			{
 				return false;
 			}
-			else // represents same number of elements 
+			else
+			// represents same number of elements
 			{
-				/* compare each element*/
+				/* compare each element */
 				HashSet<ContactInfo> set1 = new HashSet<ContactInfo>(list1.size());
-				for(ContactInfo c : list1)
+				for (ContactInfo c : list1)
 				{
 					set1.add(c);
 				}
 				boolean flag = true;
-				for(ContactInfo c : list2)
+				for (ContactInfo c : list2)
 				{
-					if(!set1.contains(c))
+					if (!set1.contains(c))
 					{
 						flag = false;
 						break;
@@ -228,7 +230,7 @@ public class ContactUtils
 			List<ContactInfo> l = ret.get(contactInfo.getId());
 			if (l == null)
 			{
-				/* Linked list is used because removal using iterator is O(1) in linked list vs O(n) in Arraylist*/
+				/* Linked list is used because removal using iterator is O(1) in linked list vs O(n) in Arraylist */
 				l = new LinkedList<ContactInfo>();
 				ret.put(contactInfo.getId(), l);
 			}
@@ -276,21 +278,24 @@ public class ContactUtils
 		}
 
 		phones.close();
-
-		/* scan the simcard */
-		Uri simUri = Uri.parse("content://icc/adn");
-		Cursor cursorSim = ctx.getContentResolver().query(simUri, null, null,null, null);
-		while (cursorSim.moveToNext())
+		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+		if (currentapiVersion >= ICE_CREAM_SANDWICH_API_LEVEL) // scanning sim card should only be done in API level 14 or more i.e ICS and above
 		{
-			String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
-			String id = "SIM" + cursorSim.getString(cursorSim.getColumnIndex("_id"));
-			String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
-			if (number != null)
+			/* scan the simcard */
+			Uri simUri = Uri.parse("content://icc/adn");
+			Cursor cursorSim = ctx.getContentResolver().query(simUri, null, null, null, null);
+			while (cursorSim.moveToNext())
 			{
-				contactinfos.add(new ContactInfo(id, null, name, number));
+				String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
+				String id = "SIM" + cursorSim.getString(cursorSim.getColumnIndex("_id"));
+				String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
+				if (number != null)
+				{
+					contactinfos.add(new ContactInfo(id, null, name, number));
+				}
 			}
+			cursorSim.close();
 		}
-		cursorSim.close();
 		return contactinfos;
 	}
 
