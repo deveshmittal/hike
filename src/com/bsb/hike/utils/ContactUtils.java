@@ -24,7 +24,6 @@ import com.bsb.hike.models.ContactInfo;
 
 public class ContactUtils
 {
-	private static final int ICE_CREAM_SANDWICH_API_LEVEL = 14;
 	/**
 	 * Gets the mobile number for a contact. If there's no mobile number, gets the default one
 	 */
@@ -242,6 +241,7 @@ public class ContactUtils
 
 	public static List<ContactInfo> getContacts(Context ctx)
 	{
+		HashSet<String> contactsToStore = new HashSet<String>();
 		String[] projection = new String[] { ContactsContract.Contacts._ID, ContactsContract.Contacts.HAS_PHONE_NUMBER, ContactsContract.Contacts.DISPLAY_NAME };
 
 		String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
@@ -273,29 +273,32 @@ public class ContactUtils
 			String name = contactNames.get(id);
 			if ((name != null) && (number != null))
 			{
-				contactinfos.add(new ContactInfo(id, null, name, number));
-			}
-		}
-
-		phones.close();
-		int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-		if (currentapiVersion >= ICE_CREAM_SANDWICH_API_LEVEL) // scanning sim card should only be done in API level 14 or more i.e ICS and above
-		{
-			/* scan the simcard */
-			Uri simUri = Uri.parse("content://icc/adn");
-			Cursor cursorSim = ctx.getContentResolver().query(simUri, null, null, null, null);
-			while (cursorSim.moveToNext())
-			{
-				String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
-				String id = "SIM" + cursorSim.getString(cursorSim.getColumnIndex("_id"));
-				String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
-				if (number != null)
+				if (contactsToStore.add("_" + name + "_" + number)) // if this element is added successfully , it returns true
 				{
 					contactinfos.add(new ContactInfo(id, null, name, number));
 				}
 			}
-			cursorSim.close();
 		}
+
+		phones.close();
+
+		/* scan the simcard */
+		Uri simUri = Uri.parse("content://icc/adn");
+		Cursor cursorSim = ctx.getContentResolver().query(simUri, null, null, null, null);
+		while (cursorSim.moveToNext())
+		{
+			String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
+			String id = "SIM" + cursorSim.getString(cursorSim.getColumnIndex("_id"));
+			String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
+			if (number != null)
+			{
+				if (contactsToStore.add("_" + name + "_" + number))
+					contactinfos.add(new ContactInfo(id, null, name, number));
+			}
+		}
+		cursorSim.close();
+		contactsToStore.clear();
+		contactsToStore = null; // this avoids memory leak
 		return contactinfos;
 	}
 
