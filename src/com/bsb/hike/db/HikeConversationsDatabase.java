@@ -183,6 +183,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			conv.setMsgID(msgId);
 		}
 
+		insertStatement.close();
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
 	}

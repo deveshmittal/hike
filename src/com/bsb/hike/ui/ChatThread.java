@@ -70,7 +70,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private String mContactName;
 
-	private String mContactNumber = "";/* initialize this to empty to avoid a bunch of NPEs if we haven't selected a person yet */
+	private String mContactNumber;
 
 	private MessagesAdapter mAdapter;
 
@@ -204,6 +204,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
 				mContactName = cursor.getString(cursor.getColumnIndex("name"));
 
+				setIntentFromField();
+
 				/* close the db */
 				mDbhelper.close();
 				mDbhelper = null;
@@ -250,22 +252,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public Object onRetainNonConfigurationInstance()
 	{
-		Intent intent = new Intent();
-		if (mContactName != null)
-		{
-			intent.putExtra("name", mContactName);
-		}
-		if (mContactId != null)
-		{
-			intent.putExtra("id", mContactId);
-		}
-
-		if (mContactNumber != null)
-		{
-			intent.putExtra("msisdn", mContactNumber);
-		}
-
-		return intent;
+		return getIntent();
 	}
 
 	static final String TEXT_CHANGED_KEY = "text_last_changed";
@@ -473,6 +460,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mContactId = contactInfo.getId();
 				mContactName = contactInfo.getName();
 				mContactNumber = contactInfo.getMsisdn();
+				setIntentFromField();
 			}
 			else
 			{
@@ -495,6 +483,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			createAutoCompleteView(intent.getStringExtra("msg"));
 		}
+	}
+
+	/* sets the intent for this screen based on the fields we've assigned.
+	 * useful if the user has entered information or we've determined information
+	 * that indicates the type of data on this screen.
+	 */
+	private void setIntentFromField()
+	{
+		Intent intent = new Intent();
+		if (mContactName != null)
+		{
+			intent.putExtra("name", mContactName);
+		}
+		if (mContactId != null)
+		{
+			intent.putExtra("id", mContactId);
+		}
+
+		if (!TextUtils.isEmpty(mContactNumber))
+		{
+			intent.putExtra("msisdn", mContactNumber);
+		}
+
+		setIntent(intent);
 	}
 
 	/**
@@ -623,6 +635,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
+		if (mContactNumber == null)
+		{
+			Log.d("ChatThread", "received message when contactNumber is null type=" + type + " object=" + object);
+			return;
+		}
+
 		if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			final ConvMessage message = (ConvMessage) object;
@@ -631,7 +649,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				Log.wtf("ChatThread", "Message with missing msisdn:" + message.toString());
 			}
-			if (msisdn.indexOf(mContactNumber) != -1)
+			if (msisdn.equals(mContactNumber))
 			{
 				/* unset the typing notification */
 				runOnUiThread(mClearTypingCallback);
