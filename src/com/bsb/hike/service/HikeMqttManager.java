@@ -51,6 +51,7 @@ public class HikeMqttManager implements Listener
 		@Override
 		public void onSuccess(Void value)
 		{
+			Log.d("HikeMqttManager", "Sucessfully disconnected");
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 		}
 
@@ -58,7 +59,7 @@ public class HikeMqttManager implements Listener
 		public void onFailure(Throwable value)
 		{
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-			Log.d("HikeMqttManager", "Error disconnecting from application");
+			Log.d("HikeMqttManager", "Error disconnecting from server");
 		}
 
 	}
@@ -221,17 +222,27 @@ public class HikeMqttManager implements Listener
 	/*
 	 * (Re-)connect to the message broker
 	 */
-	private void connectToBroker()
+	private synchronized void connectToBroker()
 	{
+		if (connectionStatus == MQTTConnectionStatus.CONNECTING)
+		{
+			return;
+		}
+
 		if (mqtt == null)
 		{
 			create();
 		}
 
-		try {
+		if (mqttConnection == null)
+		{
 			mqttConnection = mqtt.callbackConnection();
-			// try to connect
 			mqttConnection.listener(this);
+		}
+
+		try {
+			// try to connect
+			setConnectionStatus(MQTTConnectionStatus.CONNECTING);
 			mqttConnection.connect(new Callback<Void>() {
 				public void onFailure(Throwable value)
 				{
@@ -302,6 +313,7 @@ public class HikeMqttManager implements Listener
 			return;
 		}
 
+		Log.d("HikeMqttManager", "connection is " + mqttConnection);
 		mqttConnection.subscribe(topics, new Callback<byte[]>() {
 			public void onSuccess(byte[] qoses)
 			{
@@ -310,6 +322,7 @@ public class HikeMqttManager implements Listener
 			public void onFailure(Throwable value)
 			{
 				Log.e("HikeMqttManager", "subscribe failed.", value);
+				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 				mqttConnection.disconnect(new DisconnectCB());
 			}
 		});
@@ -326,7 +339,7 @@ public class HikeMqttManager implements Listener
 			{
 				mqttConnection.disconnect(new DisconnectCB());
 			}
-			mqttConnection = null;
+
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 		}
 		catch(Exception e)
@@ -446,7 +459,6 @@ public class HikeMqttManager implements Listener
 		{
 			Log.d("HikeMqttManager", "netconnection valid, try to connect");
 			// set the status to show we're trying to connect
-			setConnectionStatus(MQTTConnectionStatus.CONNECTING);
 			connectToBroker();
 		}
 		else
