@@ -45,6 +45,24 @@ import com.bsb.hike.utils.HikeNotification;
  */
 public class HikeMqttManager implements Listener
 {
+	public class DisconnectCB implements Callback<Void>
+	{
+
+		@Override
+		public void onSuccess(Void value)
+		{
+			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+		}
+
+		@Override
+		public void onFailure(Throwable value)
+		{
+			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+			Log.d("HikeMqttManager", "Error disconnecting from application");
+		}
+
+	}
+
 	public class PublishCB implements Callback<Void>
 	{
 		private HikePacket packet;
@@ -292,7 +310,7 @@ public class HikeMqttManager implements Listener
 			public void onFailure(Throwable value)
 			{
 				Log.e("HikeMqttManager", "subscribe failed.", value);
-				mqttConnection.disconnect(null);
+				mqttConnection.disconnect(new DisconnectCB());
 			}
 		});
 	}
@@ -306,7 +324,7 @@ public class HikeMqttManager implements Listener
 		{
 			if (mqttConnection != null)
 			{
-				mqttConnection.disconnect(null);
+				mqttConnection.disconnect(new DisconnectCB());
 			}
 			mqttConnection = null;
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
