@@ -519,7 +519,10 @@ public class CallbackConnection {
                         }
                     }
                 };
-                transport.flush();
+                if (transport != null)
+                {
+                	transport.flush();
+                }
             }
             public void onFailure(Throwable value) {
                 stop.run();
