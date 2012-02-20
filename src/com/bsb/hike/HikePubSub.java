@@ -2,10 +2,10 @@ package com.bsb.hike;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.util.Log;
@@ -87,11 +87,11 @@ public class HikePubSub implements Runnable
 
 	private final BlockingQueue<Operation> mQueue;
 
-	private Map<String, List<Listener>> listeners;
+	private Map<String, Set<Listener>> listeners;
 
 	public HikePubSub()
 	{
-		listeners = Collections.synchronizedMap(new HashMap<String, List<Listener>>());
+		listeners = Collections.synchronizedMap(new HashMap<String, Set<Listener>>());
 		mQueue = new LinkedBlockingQueue<Operation>();
 		mThread = new Thread(this);
 		mThread.start();
@@ -99,10 +99,10 @@ public class HikePubSub implements Runnable
 
 	synchronized public void addListener(String type, Listener listener)
 	{
-		List<Listener> list = listeners.get(type);
+		Set<Listener> list = listeners.get(type);
 		if (list == null)
 		{
-			list = new CopyOnWriteArrayList<Listener>();
+			list = new CopyOnWriteArraySet<Listener>();
 			listeners.put(type, list);
 		}
 		list.add(listener);
@@ -110,8 +110,7 @@ public class HikePubSub implements Runnable
 
 	synchronized public boolean publish(String type, Object o)
 	{
-		List<Listener> list = listeners.get(type);
-		if (list == null)
+		if (!listeners.containsKey(type))
 		{
 			return false;
 		}
@@ -121,7 +120,7 @@ public class HikePubSub implements Runnable
 
 	public void removeListener(String type, Listener listener)
 	{
-		List<Listener> l = listeners.get(type);
+		Set<Listener> l = listeners.get(type);
 		if (l != null)
 		{
 			l.remove(listener);
@@ -151,8 +150,8 @@ public class HikePubSub implements Runnable
 			String type = op.type;
 			Object o = op.payload;
 
-			
-			List<Listener> list = listeners.get(type);
+
+			Set<Listener> list = listeners.get(type);
 			
 			if (list == null)
 			{
