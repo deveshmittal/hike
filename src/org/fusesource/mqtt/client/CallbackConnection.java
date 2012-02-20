@@ -303,6 +303,7 @@ public class CallbackConnection {
                                 CONNACK connack = new CONNACK().decode(response);
                                 switch (connack.code()) {
                                     case CONNECTION_ACCEPTED:
+                                    	disconnected = false;
                                         onSessionEstablished(transport);
                                         cb.onSuccess(null);
                                         listener.onConnected();
@@ -363,6 +364,7 @@ public class CallbackConnection {
     boolean onRefillCalled =false;
     public void onSessionEstablished(Transport transport) {
         System.out.println("VIJAY - MQTT onSessionEstablished");
+        disconnected = false;
         this.transport = transport;
         if( suspendCount.get() > 0 ) {
             this.transport.suspendRead();
