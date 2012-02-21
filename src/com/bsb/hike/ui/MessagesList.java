@@ -26,6 +26,7 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,12 +38,15 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
 
@@ -58,7 +62,7 @@ import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.UserError;
 import com.bsb.hike.utils.Utils;
 
-public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable, TextWatcher
+public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable, TextWatcher, OnEditorActionListener
 {
 	private static final int INVITE_PICKER_RESULT = 1001;
 
@@ -385,6 +389,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 			mCurrentConversation = mAdapter.getItem(pos);
 			mCurrentComposeText = (EditText) viewAnimator.findViewById(R.id.mini_compose);
+			mCurrentComposeText.setOnEditorActionListener(this);
 
 			mCurrentComposeView = viewAnimator;
 			viewAnimator.setOutAnimation(Utils.outToRightAnimation(this));
@@ -740,7 +745,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	{
 	}
 
-	public void onSendClick(View view)
+	/* called when the send button in the swipe method is clicked */
+	public void onSendClick(View unused)
 	{
 		String message = mCurrentComposeText.getText().toString();
 		mCurrentComposeText.setText("");
@@ -751,4 +757,16 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
 		swipeBack(mCurrentComposeView, true);
 	}
+
+	@Override
+	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
+	{
+		if ((view == mCurrentComposeText) &&
+				(actionId == EditorInfo.IME_ACTION_SEND))
+			{
+				onSendClick(null);
+				return true;
+			}
+			return false;
+		}
 }
