@@ -35,6 +35,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -341,6 +344,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private void swipeBack(ViewAnimator viewAnimator, boolean animate)
 	{
+		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mCurrentComposeText.getWindowToken(), 0);
+
 		mCurrentConversation = null;
 		mCurrentComposeText.removeTextChangedListener(mComposeTextWatcher);
 		mComposeTextWatcher.uninit();
@@ -378,12 +384,34 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			}
 
 			mCurrentConversation = mAdapter.getItem(pos);
+			mCurrentComposeText = (EditText) viewAnimator.findViewById(R.id.mini_compose);
+
 			mCurrentComposeView = viewAnimator;
 			viewAnimator.setOutAnimation(Utils.outToRightAnimation(this));
-			viewAnimator.setInAnimation(Utils.inFromLeftAnimation(this));
+			Animation outAnimation = Utils.inFromLeftAnimation(this);
+			viewAnimator.setInAnimation(outAnimation);
+			outAnimation.setAnimationListener(new AnimationListener(){
+
+				@Override
+				public void onAnimationEnd(Animation animation)
+				{
+					mCurrentComposeText.requestFocusFromTouch();
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
+				}
+
+				@Override
+				public void onAnimationRepeat(Animation arg0)
+				{
+				}
+				@Override
+				public void onAnimationStart(Animation arg0)
+				{
+				}
+			});
+
 			viewAnimator.setDisplayedChild(1);
 
-			mCurrentComposeText = (EditText) viewAnimator.findViewById(R.id.mini_compose);
 			Button button = (Button) viewAnimator.findViewById(R.id.send_message);
 			mComposeTextWatcher = new ComposeViewWatcher(mCurrentConversation, mCurrentComposeText, button,
 										getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0));
