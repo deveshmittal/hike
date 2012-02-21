@@ -80,7 +80,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private SetTypingText mClearTypingCallback;
 
-	private ResetTypingNotification mResetTypingNotification;
+	private ComposeViewWatcher mComposeViewWatcher;
 
 	private Handler mUiThreadHandler;
 
@@ -110,8 +110,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* notifies that the adapter has been updated */
 	private Runnable mUpdateAdapter;
 
-	private boolean mInitialized;
-
 	@Override
 	protected void onPause()
 	{
@@ -138,7 +136,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* TODO evidently a better way to do this is to check for onFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
-		mInitialized = true;
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.init();
+		}
+	}
+
+	@Override
+	protected void onStop()
+	{
+		super.onStop();
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.uninit();
+			mComposeViewWatcher = null;
+		}
 	}
 
 	/* msg is any text we want to show initially */
@@ -423,10 +435,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 		}
 
-		if (mResetTypingNotification != null)
+		if (mComposeViewWatcher != null)
 		{
-			mResetTypingNotification.clearCallbacks();
-			mResetTypingNotification = null;
+			mComposeViewWatcher.clearCallbacks();
+			mComposeViewWatcher = null;
 		}
 
 		/* setIntent so getIntent returns the right values */
@@ -537,9 +549,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
 
+		if (mComposeViewWatcher != null)
+		{
+			mComposeView.removeTextChangedListener(mComposeViewWatcher);
+		}
+
 		/* get the number of credits and also listen for changes */
 		mCredits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
 		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.uninit();
+			mComposeView.removeTextChangedListener(mComposeViewWatcher);
+		}
+
+		mComposeViewWatcher = new ComposeViewWatcher(mConversation, mComposeView, mSendBtn, mCredits);
+		mComposeView.addTextChangedListener(mComposeViewWatcher);
 
 		if (mConversation.isOnhike())
 		{
@@ -551,7 +577,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			updateChatMetadata();
 		}
 
-		setBtnEnabled();
 		/* create an object that we can notify when the contents of the thread are updated */
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
 
@@ -784,14 +809,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		return mContactNumber;
 	}
 
-	private void setBtnEnabled()
-	{
-		CharSequence seq = mComposeView.getText();
-		/* the button is enabled iff there is text AND (this is an IP conversation or we have credits available) */
-		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation.isOnhike() || mCredits > 0)));
-		mSendBtn.setEnabled(canSend);
-	}
-
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
@@ -805,8 +822,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			updateChatMetadata();
 		}
-
-		setBtnEnabled();
 	}
 
 	/* must be called on the UI Thread */
@@ -839,27 +854,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count)
 	{
-		if ((before == 0) && (count == 0))
-		{
-			// we were called on config changed, just ignore
-			return;
-		}
-
-		/* don't send typing notifications for non-hike chats */
-		if ((mConversation == null) || (!mConversation.isOnhike()))
-		{
-			return;
-		}
-
-		if (mResetTypingNotification == null)
-		{
-			mResetTypingNotification = new ResetTypingNotification(mConversation);
-		}
-
-		if (mInitialized)
-		{
-			mResetTypingNotification.onTextLastChanged();
-		}
 	}
 
 	@Override

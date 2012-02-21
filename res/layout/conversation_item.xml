@@ -68,7 +68,7 @@
             android:layout_height="wrap_content">
 
             <EditText
-                android:id="@+id/msg_compose"
+                android:id="@+id/mini_compose"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
