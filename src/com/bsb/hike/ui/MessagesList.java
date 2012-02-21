@@ -22,19 +22,23 @@ import android.provider.ContactsContract.Contacts;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -49,6 +53,51 @@ import com.bsb.hike.utils.UserError;
 
 public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
+
+	private class SwipeGestureDetector extends SimpleOnGestureListener
+	{
+		final int swipeMinDistance;
+		final int swipeThresholdVelocity;
+
+		public SwipeGestureDetector()
+		{
+			final ViewConfiguration vc = ViewConfiguration.get(MessagesList.this);
+			swipeMinDistance = vc.getScaledTouchSlop();
+			swipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
+		}
+
+		@Override
+		public boolean onSingleTapUp(MotionEvent e)
+		{
+			int pos = mConversationsView.pointToPosition((int)e.getX(), (int) e.getY());
+			selectConversation(pos);
+			return false;
+		}
+
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
+		{
+			if (Math.abs(velocityX) < swipeThresholdVelocity)
+			{
+				Log.d("MessagesList", "Too slow " + velocityX);
+				/* too slow, ignore */
+				return false;
+			}
+
+			if ((Math.abs(e1.getX() - e2.getX()) < swipeMinDistance))
+			{
+				/* too short, ignore */
+				Log.d("MessagesList", "Too short");
+				return false;
+			}
+
+			boolean swipeRight = e1.getX() > e2.getX();
+			int pos = mConversationsView.pointToPosition((int) e1.getX(), (int) e1.getY());
+			Log.d("MessagesList", "swipe detected " + swipeRight);
+			onSwipeDetected(pos, swipeRight);
+			return true;
+		}
+	}
 
 	private Map<String, Conversation> mConversationsByMSISDN;
 
@@ -155,6 +204,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private Comparator<? super Conversation> mConversationsComparator;
 
+	private GestureDetector mSwipeGestureListener;
+
+	private ViewFlipper mCurrentComposeView;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -189,6 +242,19 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		setContentView(R.layout.main);
 		mConversationsView = (ListView) findViewById(R.id.conversations);
+		mSwipeGestureListener = new GestureDetector(new SwipeGestureDetector());
+		View.OnTouchListener gestureListener = new View.OnTouchListener()
+		{
+			@Override
+			public boolean onTouch(View v, MotionEvent event)
+			{
+				Log.d("MessagesList", "View is " + v);
+				mSwipeGestureListener.onTouchEvent(event);
+				return false;
+			}
+		};
+
+		mConversationsView.setOnTouchListener(gestureListener);
 
 /*		mSearchIconView = findViewById(R.id.search);
 		mSearchIconView.setOnClickListener(this);*/
@@ -252,22 +318,59 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MSG_READ, this);
 
-		mConversationsView.setOnItemClickListener(new OnItemClickListener()
-		{
-
-			@Override
-			public void onItemClick(AdapterView<?> adapter, View view, int pos, long id)
-			{
-				Conversation conversation = (Conversation) adapter.getItemAtPosition(pos);
-				Intent intent = createIntentForConversation(conversation);
-				startActivity(intent);
-			}
-		});
-
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 	}
 
+
+	private void onSwipeDetected(int pos, boolean swipeRight)
+	{
+		int firstPosition = mConversationsView.getFirstVisiblePosition() - mConversationsView.getHeaderViewsCount(); // This is the same as child #0
+		int wantedPosition = pos - firstPosition;
+
+		if ((wantedPosition < mConversationsView.getFirstVisiblePosition()) ||
+			(wantedPosition > mConversationsView.getLastVisiblePosition()))
+		{
+			Log.e("MessagesList", "Selected swipe view is outside visible range");
+			return;
+		}
+
+		// Could also check if wantedPosition is between listView.getFirstVisiblePosition() and listView.getLastVisiblePosition() instead.
+		View wantedView = mConversationsView.getChildAt(wantedPosition);
+		ViewFlipper flipper = (ViewFlipper) wantedView.findViewById(R.id.conversation_flip);
+		View current = flipper.getCurrentView();
+
+		if (swipeRight && (current.getId() == R.id.conversation_item))
+		{
+			if (mCurrentComposeView != null)
+			{
+				mCurrentComposeView.setInAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
+				mCurrentComposeView.setOutAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
+				mCurrentComposeView.showNext();
+			}
+
+			mCurrentComposeView = flipper;
+			Log.d("MessagesList", "SwipeRight");
+			flipper.setOutAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
+			flipper.setInAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
+			flipper.showPrevious();
+		}
+		else if (current.getId() == R.id.msg_compose)
+		{
+			mCurrentComposeView = null;
+			Log.d("MessagesList", "SwipeLeft");
+			flipper.setInAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
+			flipper.setOutAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
+			flipper.showNext();
+		}
+	}
+
+	private void selectConversation(int position)
+	{
+		Conversation conversation = (Conversation) mAdapter.getItem(position);
+		Intent intent = createIntentForConversation(conversation);
+		startActivity(intent);
+	}
 	private Intent createIntentForConversation(Conversation conversation)
 	{
 		Intent intent = new Intent(MessagesList.this, ChatThread.class);
