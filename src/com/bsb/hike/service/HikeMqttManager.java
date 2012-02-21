@@ -444,7 +444,15 @@ public class HikeMqttManager implements Listener
 	public void ping()
 	{
 			Log.d("HikeMqttManager", "calling ping");
-			mqttConnection.ping();
+			if (connectionStatus == MQTTConnectionStatus.CONNECTED)
+			{
+				mqttConnection.ping();
+			}
+			else
+			{
+				Log.d("HikeMqttManager", "App isn't connected, reconnecting");
+				connect();
+			}
 	}
 
 	public void connect()
