@@ -247,6 +247,14 @@ public class HikeMqttManager implements Listener
 			mqttConnection.connect(new Callback<Void>() {
 				public void onFailure(Throwable value)
 				{
+					if (value instanceof IllegalStateException)
+					{
+						/* we're already connected.  Set our connection State */
+						setConnectionStatus(MQTTConnectionStatus.CONNECTED);
+						mHikeService.scheduleNextPing();
+						return;
+					}
+
 					Log.e("HikeMqttManager", "Unable to connect", value);
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
@@ -260,7 +268,7 @@ public class HikeMqttManager implements Listener
 					 * forever.
 					 * a failure is often an intermittent network issue, however, so
 					 * some limited retry is a good idea */
-					mHikeService.scheduleNextPing();
+					mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 				}
 
 				@Override
@@ -278,6 +286,8 @@ public class HikeMqttManager implements Listener
 		}
 		catch (Exception e)
 		{
+			/* couldn't connect, schedule a ping even earlier? */
+			mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 			Log.e("HikeMqttManager", "Exception Unable to connect", e);
 		}
 	}
@@ -325,6 +335,7 @@ public class HikeMqttManager implements Listener
 				Log.e("HikeMqttManager", "subscribe failed.", value);
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 				mqttConnection.disconnect(new DisconnectCB());
+				mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 			}
 		});
 	}

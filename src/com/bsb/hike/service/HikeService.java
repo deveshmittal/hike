@@ -528,10 +528,15 @@ public class HikeService extends Service
 		}
 	}
 
+	public void scheduleNextPing()
+	{
+		scheduleNextPing( (int) (HikeConstants.KEEP_ALIVE * 0.9));
+	}
+
 	/*
 	 * Schedule the next time that you want the phone to wake up and ping the message broker server
 	 */
-	public void scheduleNextPing()
+	public void scheduleNextPing(int timeout)
 	{
 		// When the phone is off, the CPU may be stopped. This means that our
 		// code may stop running.
@@ -557,7 +562,7 @@ public class HikeService extends Service
 		// shortly before the keep alive period expires
 		// it means we're pinging slightly more frequently than necessary
 		Calendar wakeUpTime = Calendar.getInstance();
-		wakeUpTime.add(Calendar.SECOND, (int) (HikeConstants.KEEP_ALIVE * 0.9)); //comes from PushMqttManager.KEEPALIVE
+		wakeUpTime.add(Calendar.SECOND, timeout); //comes from PushMqttManager.KEEPALIVE
 
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
