@@ -38,7 +38,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
+import android.widget.ViewAnimator;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -50,6 +50,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.UserError;
+import com.bsb.hike.utils.Utils;
 
 public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
@@ -70,8 +71,15 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		public boolean onSingleTapUp(MotionEvent e)
 		{
 			int pos = mConversationsView.pointToPosition((int)e.getX(), (int) e.getY());
-			selectConversation(pos);
-			return false;
+			if (pos < 0)
+			{
+				return false;
+			}
+			else
+			{
+				selectConversation(pos);
+				return true;
+			}
 		}
 
 		@Override
@@ -79,7 +87,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		{
 			if (Math.abs(velocityX) < swipeThresholdVelocity)
 			{
-				Log.d("MessagesList", "Too slow " + velocityX);
+				Log.d("MessagesList", "Swipe ignored -- Too slow " + velocityX);
 				/* too slow, ignore */
 				return false;
 			}
@@ -87,13 +95,12 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			if ((Math.abs(e1.getX() - e2.getX()) < swipeMinDistance))
 			{
 				/* too short, ignore */
-				Log.d("MessagesList", "Too short");
+				Log.d("MessagesList", "Swipe ignored -- Too short");
 				return false;
 			}
 
-			boolean swipeRight = e1.getX() > e2.getX();
+			boolean swipeRight = e2.getX() > e1.getX();
 			int pos = mConversationsView.pointToPosition((int) e1.getX(), (int) e1.getY());
-			Log.d("MessagesList", "swipe detected " + swipeRight);
 			onSwipeDetected(pos, swipeRight);
 			return true;
 		}
@@ -206,7 +213,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private GestureDetector mSwipeGestureListener;
 
-	private ViewFlipper mCurrentComposeView;
+	private ViewAnimator mCurrentComposeView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -248,7 +255,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			@Override
 			public boolean onTouch(View v, MotionEvent event)
 			{
-				Log.d("MessagesList", "View is " + v);
 				mSwipeGestureListener.onTouchEvent(event);
 				return false;
 			}
@@ -337,31 +343,30 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		// Could also check if wantedPosition is between listView.getFirstVisiblePosition() and listView.getLastVisiblePosition() instead.
 		View wantedView = mConversationsView.getChildAt(wantedPosition);
-		ViewFlipper flipper = (ViewFlipper) wantedView.findViewById(R.id.conversation_flip);
-		View current = flipper.getCurrentView();
-
-		if (swipeRight && (current.getId() == R.id.conversation_item))
+		ViewAnimator viewAnimator = (ViewAnimator) wantedView.findViewById(R.id.conversation_flip);
+		int currentChild = viewAnimator.getDisplayedChild();
+		if (swipeRight && (currentChild == 0))
 		{
 			if (mCurrentComposeView != null)
 			{
-				mCurrentComposeView.setInAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
-				mCurrentComposeView.setOutAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
-				mCurrentComposeView.showNext();
+				mCurrentComposeView.setOutAnimation(Utils.outToLeftAnimation(this));
+				mCurrentComposeView.setInAnimation(Utils.inFromRightAnimation(this));
+				mCurrentComposeView.setDisplayedChild(0);
+				mCurrentComposeView = null;
+				return;
 			}
 
-			mCurrentComposeView = flipper;
-			Log.d("MessagesList", "SwipeRight");
-			flipper.setOutAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
-			flipper.setInAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
-			flipper.showPrevious();
+			mCurrentComposeView = viewAnimator;
+			viewAnimator.setOutAnimation(Utils.outToRightAnimation(this));
+			viewAnimator.setInAnimation(Utils.inFromLeftAnimation(this));
+			viewAnimator.setDisplayedChild(1);
 		}
-		else if (current.getId() == R.id.msg_compose)
+		else if (currentChild == 1)
 		{
 			mCurrentComposeView = null;
-			Log.d("MessagesList", "SwipeLeft");
-			flipper.setInAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
-			flipper.setOutAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
-			flipper.showNext();
+			viewAnimator.setOutAnimation(Utils.outToLeftAnimation(this));
+			viewAnimator.setInAnimation(Utils.inFromRightAnimation(this));
+			viewAnimator.setDisplayedChild(0);
 		}
 	}
 
