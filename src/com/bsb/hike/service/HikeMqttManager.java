@@ -203,6 +203,7 @@ public class HikeMqttManager implements Listener
 			mqtt.setHost(brokerHostName, brokerPortNumber);
 			mqtt.setClientId(clientId);
 			mqtt.setKeepAlive((short) keepAliveSeconds);
+			mqtt.setCleanSession(false);
 			//mqtt.setUserName(clientId);
 			//mqtt.setPassword(password);
 		}
