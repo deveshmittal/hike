@@ -109,6 +109,12 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		@Override
 		public boolean onSingleTapUp(MotionEvent e)
 		{
+			if (mCurrentComposeView != null)
+			{
+				swipeBack(mCurrentComposeView, true);
+				return false;
+			}
+
 			int pos = mConversationsView.pointToPosition((int) e.getX(), (int) e.getY());
 			if (pos < 0)
 			{
@@ -368,7 +374,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	private void onSwipeDetected(int pos, boolean swipeRight)
 	{
 		int firstPosition = mConversationsView.getFirstVisiblePosition() - mConversationsView.getHeaderViewsCount(); // This is the same as child #0
-		int wantedPosition = pos - firstPosition;
+		final int wantedPosition = pos - firstPosition;
 
 		if ((wantedPosition < mConversationsView.getFirstVisiblePosition()) || (wantedPosition > mConversationsView.getLastVisiblePosition()))
 		{
@@ -400,12 +406,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				@Override
 				public void onAnimationEnd(Animation animation)
 				{
-					View bottomBar = findViewById(R.id.bottom_nav_bar);
-					bottomBar.setVisibility(View.GONE);
-
 					mCurrentComposeText.requestFocusFromTouch();
 					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 					imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
+					mConversationsView.smoothScrollToPosition(wantedPosition);
 				}
 
 				@Override
