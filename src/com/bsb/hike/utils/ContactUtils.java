@@ -124,15 +124,15 @@ public class ContactUtils
 			List<ContactInfo> contacts_for_id = entry.getValue();
 			List<ContactInfo> hike_contacts_for_id = hike_contacts_by_id.get(id);
 
-			/* If id is not present in hike user DB i.e new contact is added to Phone AddressBook.
-			 * When the items are the same, we remove the item @ the current iterator.  This will result in the
-			 * item *not* being sent to the server
+			/*
+			 * If id is not present in hike user DB i.e new contact is added to Phone AddressBook. When the items are the same, we remove the item @ the current iterator. This will
+			 * result in the item *not* being sent to the server
 			 */
 			if (hike_contacts_for_id == null)
 			{
 				continue;
 			}
-			else if(areListsEqual(contacts_for_id,hike_contacts_for_id))
+			else if (areListsEqual(contacts_for_id, hike_contacts_for_id))
 			{
 				/* hike db is up to date, so don't send update */
 				iterator.remove();
@@ -162,11 +162,11 @@ public class ContactUtils
 				ids_json.put(string);
 			}
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(new_contacts_by_id, ids_json);
-			
-			/* Delete ids from hike user DB*/
+
+			/* Delete ids from hike user DB */
 			db.deleteMultipleRows(hike_contacts_by_id.keySet()); // this will delete all rows in HikeUser DB that are not in Addressbook.
 			db.updateContacts(updatedContacts);
-			
+
 		}
 		catch (Exception e)
 		{
@@ -181,26 +181,27 @@ public class ContactUtils
 
 	private static boolean areListsEqual(List<ContactInfo> list1, List<ContactInfo> list2)
 	{
-		if(list1 != null && list2 != null)
+		if (list1 != null && list2 != null)
 		{
-			if(list1.size() != list2.size())
+			if (list1.size() != list2.size())
 				return false;
-			else if(list1.size() == 0 && list2.size() == 0)
+			else if (list1.size() == 0 && list2.size() == 0)
 			{
 				return false;
 			}
-			else // represents same number of elements 
+			else
+			// represents same number of elements
 			{
-				/* compare each element*/
+				/* compare each element */
 				HashSet<ContactInfo> set1 = new HashSet<ContactInfo>(list1.size());
-				for(ContactInfo c : list1)
+				for (ContactInfo c : list1)
 				{
 					set1.add(c);
 				}
 				boolean flag = true;
-				for(ContactInfo c : list2)
+				for (ContactInfo c : list2)
 				{
-					if(!set1.contains(c))
+					if (!set1.contains(c))
 					{
 						flag = false;
 						break;
@@ -228,7 +229,7 @@ public class ContactUtils
 			List<ContactInfo> l = ret.get(contactInfo.getId());
 			if (l == null)
 			{
-				/* Linked list is used because removal using iterator is O(1) in linked list vs O(n) in Arraylist*/
+				/* Linked list is used because removal using iterator is O(1) in linked list vs O(n) in Arraylist */
 				l = new LinkedList<ContactInfo>();
 				ret.put(contactInfo.getId(), l);
 			}
@@ -240,6 +241,7 @@ public class ContactUtils
 
 	public static List<ContactInfo> getContacts(Context ctx)
 	{
+		HashSet<String> contactsToStore = new HashSet<String>();
 		String[] projection = new String[] { ContactsContract.Contacts._ID, ContactsContract.Contacts.HAS_PHONE_NUMBER, ContactsContract.Contacts.DISPLAY_NAME };
 
 		String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
@@ -271,7 +273,10 @@ public class ContactUtils
 			String name = contactNames.get(id);
 			if ((name != null) && (number != null))
 			{
-				contactinfos.add(new ContactInfo(id, null, name, number));
+				if (contactsToStore.add("_" + name + "_" + number)) // if this element is added successfully , it returns true
+				{
+					contactinfos.add(new ContactInfo(id, null, name, number));
+				}
 			}
 		}
 
@@ -279,7 +284,7 @@ public class ContactUtils
 
 		/* scan the simcard */
 		Uri simUri = Uri.parse("content://icc/adn");
-		Cursor cursorSim = ctx.getContentResolver().query(simUri, null, null,null, null);
+		Cursor cursorSim = ctx.getContentResolver().query(simUri, null, null, null, null);
 		while (cursorSim.moveToNext())
 		{
 			String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
@@ -287,10 +292,13 @@ public class ContactUtils
 			String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
 			if (number != null)
 			{
-				contactinfos.add(new ContactInfo(id, null, name, number));
+				if (contactsToStore.add("_" + name + "_" + number))
+					contactinfos.add(new ContactInfo(id, null, name, number));
 			}
 		}
 		cursorSim.close();
+		contactsToStore.clear();
+		contactsToStore = null; // this avoids memory leak
 		return contactinfos;
 	}
 
