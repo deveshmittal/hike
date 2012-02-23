@@ -17,10 +17,11 @@
             android:gravity="center"
             android:src="@drawable/ic_header_logo" />
     </RelativeLayout>
-<RelativeLayout
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="10">
+        android:layout_weight="10" >
 
         <ListView
             android:id="@+id/conversations"
