@@ -400,6 +400,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				@Override
 				public void onAnimationEnd(Animation animation)
 				{
+					View bottomBar = findViewById(R.id.bottom_nav_bar);
+					bottomBar.setVisibility(View.GONE);
+
 					mCurrentComposeText.requestFocusFromTouch();
 					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 					imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
@@ -422,9 +425,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 										getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0));
 			mComposeTextWatcher.init();
 			mCurrentComposeText.addTextChangedListener(mComposeTextWatcher);
-
-			View bottomBar = findViewById(R.id.bottom_nav_bar);
-			bottomBar.setVisibility(View.GONE);
 		}
 		else if (currentChild == 1)
 		{
