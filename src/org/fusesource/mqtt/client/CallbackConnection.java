@@ -423,10 +423,18 @@ public class CallbackConnection {
         }
     }
 
-    public void ping()
+    public boolean ping()
     {
-        queue.execute(heartBeatMonitor.getOnKeepAlive());
-    }
+    	if (heartBeatMonitor != null)
+    	{
+    		queue.execute(heartBeatMonitor.getOnKeepAlive());
+    		return true;
+    	}
+    	else
+    	{
+    		return false;
+    	}
+    	}
 
     public Transport transport() {
         return transport;
