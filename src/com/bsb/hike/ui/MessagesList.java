@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
@@ -458,8 +460,24 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 					mConversationsView.postDelayed(new Runnable() {
 						public void run()
 						{
+							View v = findViewById(R.id.messages_list_overlay);
+							v.setVisibility(View.VISIBLE);
+							RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
+							Log.d("MessagesList", "LayoutParams are " + lp);
+							View parent = (View) mCurrentComposeView.getParent();
+							parent.setId(10);
+							Log.d("MessagesList", "ComposeView id is " + ((View) mCurrentComposeView.getParent()).getId());
+							lp.addRule(RelativeLayout.BELOW, R.id.message_list_top);
+							int[] location = new int[2];
+							parent.getLocationOnScreen(location);
+							Display display = getWindowManager().getDefaultDisplay();
+							lp.height = display.getHeight() - location[1] - parent.getHeight();
+							Log.d("MessagesList", "height is " + lp.height);
+							v.setLayoutParams(lp);
+							v.setVisibility(View.VISIBLE);
+
 						}
-					}, 0);
+					}, 210);
 				}
 
 				@Override
