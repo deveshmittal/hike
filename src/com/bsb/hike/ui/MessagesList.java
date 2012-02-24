@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract.Contacts;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -66,6 +67,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 {
 	private static final int INVITE_PICKER_RESULT = 1001;
 
+	public static final Object COMPOSE = "compose";
+
 	private ListView mConversationsView;
 
 	private View mSearchIconView;
@@ -112,7 +115,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			if (mCurrentComposeView != null)
 			{
 				swipeBack(mCurrentComposeView, true);
-				return false;
+				return true;
 			}
 
 			int pos = mConversationsView.pointToPosition((int) e.getX(), (int) e.getY());
@@ -137,6 +140,13 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				return false;
 			}
 
+			if (Math.abs(e1.getY() - e2.getY()) > 200)
+			{
+				/* too much horizontal movement, ignore */
+				Log.d("MessagesList", "Swipe ignore -- Too much Y movement " + (Math.abs(e1.getY() - e2.getY())) + " " + 200);
+				return false;
+			}
+
 			if ((Math.abs(e1.getX() - e2.getX()) < swipeMinDistance))
 			{
 				/* too short, ignore */
@@ -144,6 +154,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				return false;
 			}
 
+			Log.d("MessagesList", "Valid swipe detected");
 			boolean swipeRight = e2.getX() > e1.getX();
 			int pos = mConversationsView.pointToPosition((int) e1.getX(), (int) e1.getY());
 			onSwipeDetected(pos, swipeRight);
@@ -278,8 +289,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			@Override
 			public boolean onTouch(View v, MotionEvent event)
 			{
-				mSwipeGestureListener.onTouchEvent(event);
-				return false;
+				return mSwipeGestureListener.onTouchEvent(event);
 			}
 		};
 
@@ -366,6 +376,30 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		viewAnimator.setOutAnimation(animate ? Utils.outToLeftAnimation(this) : null);
 		viewAnimator.setInAnimation(animate ? Utils.inFromRightAnimation(this) : null);
+		if (animate)
+		{
+			viewAnimator.getInAnimation().setAnimationListener(new AnimationListener()
+			{
+				@Override
+				public void onAnimationStart(Animation animation) {}
+				@Override
+				public void onAnimationRepeat(Animation animation) {}
+
+				@Override
+				public void onAnimationEnd(Animation animation)
+				{
+					mAdapter.remove(null);
+					mAdapter.notifyDataSetChanged();
+					mAdapter.setNotifyOnChange(false);
+				}
+			});
+		}
+		else
+		{
+			mAdapter.remove(null);
+			runOnUiThread(this);
+		}
+
 		viewAnimator.setDisplayedChild(0);
 		View bottomBar = findViewById(R.id.bottom_nav_bar);
 		bottomBar.setVisibility(View.VISIBLE);
@@ -385,31 +419,47 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		View wantedView = mConversationsView.getChildAt(wantedPosition);
 		ViewAnimator viewAnimator = (ViewAnimator) wantedView.findViewById(R.id.conversation_flip);
 		int currentChild = viewAnimator.getDisplayedChild();
-		if (swipeRight && (currentChild == 0))
+
+		if (currentChild == 0)
 		{
+			Log.d("MessagesList", "swipe forward");
 			if (mCurrentComposeView != null)
 			{
+				Log.d("MessagesList", "swiping backing weird view");
 				swipeBack(mCurrentComposeView, true);
 				return;
 			}
 
 			mCurrentConversation = mAdapter.getItem(pos);
 			mCurrentComposeText = (EditText) viewAnimator.findViewById(R.id.mini_compose);
-			mCurrentComposeText.setOnEditorActionListener(this);
-
 			mCurrentComposeView = viewAnimator;
+
 			viewAnimator.setOutAnimation(Utils.outToRightAnimation(this));
-			Animation outAnimation = Utils.inFromLeftAnimation(this);
-			viewAnimator.setInAnimation(outAnimation);
-			outAnimation.setAnimationListener(new AnimationListener(){
+			Animation inAnimation = Utils.inFromLeftAnimation(this);
+			viewAnimator.setInAnimation(inAnimation);
+			inAnimation.setAnimationListener(new AnimationListener(){
 
 				@Override
 				public void onAnimationEnd(Animation animation)
 				{
-					mCurrentComposeText.requestFocusFromTouch();
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					mCurrentComposeText.requestFocus();
+					mAdapter.add(null);
+					mAdapter.notifyDataSetChanged();
+					mAdapter.setNotifyOnChange(false);
+
+					int[] loc = new int[2];
+					mCurrentComposeView.getLocationOnScreen(loc);
+					Log.d("MessagesList", "SmoothScrolling " + (loc[1] - mCurrentComposeView.getHeight()*1.2));
+					mConversationsView.smoothScrollBy((int) (loc[1] - mCurrentComposeView.getHeight()*1.2), 200);
+					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 					imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
-					mConversationsView.smoothScrollToPosition(wantedPosition);
+					imm.showSoftInputFromInputMethod(mCurrentComposeText.getWindowToken(), InputMethodManager.SHOW_IMPLICIT);
+
+					mConversationsView.postDelayed(new Runnable() {
+						public void run()
+						{
+						}
+					}, 0);
 				}
 
 				@Override
@@ -423,17 +473,33 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			});
 
 			viewAnimator.setDisplayedChild(1);
-
-			Button button = (Button) viewAnimator.findViewById(R.id.send_message);
-			mComposeTextWatcher = new ComposeViewWatcher(mCurrentConversation, mCurrentComposeText, button,
-										getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0));
-			mComposeTextWatcher.init();
-			mCurrentComposeText.addTextChangedListener(mComposeTextWatcher);
 		}
 		else if (currentChild == 1)
 		{
+			Log.d("MessagesList", "swipe back");
 			swipeBack(viewAnimator, true);
 		}
+	}
+
+	public void setComposeView(ViewAnimator viewAnimator)
+	{
+		viewAnimator.setTag(MessagesList.COMPOSE);
+		mCurrentComposeText = (EditText) viewAnimator.findViewById(R.id.mini_compose);
+		mCurrentComposeText.requestFocus();
+
+		mCurrentComposeText.setOnEditorActionListener(this);
+		mCurrentComposeView = viewAnimator;
+
+		Button button = (Button) viewAnimator.findViewById(R.id.send_message);
+		if (mComposeTextWatcher != null)
+		{
+			mComposeTextWatcher.uninit();
+		}
+
+		mComposeTextWatcher = new ComposeViewWatcher(mCurrentConversation, mCurrentComposeText, button,
+									getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0));
+		mComposeTextWatcher.init();
+		mCurrentComposeText.addTextChangedListener(mComposeTextWatcher);
 	}
 
 	private void selectConversation(int position)
@@ -611,6 +677,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			}
 
 			conv.addMessage(message);
+			Log.d("MessagesList", "new message is " + message);
 			mAdapter.sort(mConversationsComparator);
 
 			runOnUiThread(this);
@@ -755,10 +822,15 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		String message = mCurrentComposeText.getText().toString();
 		mCurrentComposeText.setText("");
 		long time = (long) System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(message, mCurrentConversation.getMsisdn(), time, ConvMessage.State.SENT_UNCONFIRMED);
+		final ConvMessage convMessage = new ConvMessage(message, mCurrentConversation.getMsisdn(), time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mCurrentConversation);
-
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+		Log.d("MessagesList", "Current Conversation is " + mCurrentConversation);
+		(new Handler()).postDelayed(new Runnable() {
+			public void run()
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+			}
+		}, 1000);
 		swipeBack(mCurrentComposeView, true);
 	}
 
@@ -773,4 +845,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			}
 			return false;
 		}
+
+	public Conversation getSelectedConversation()
+	{
+		return mCurrentConversation;
+	}
 }
