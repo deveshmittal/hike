@@ -18,25 +18,51 @@
 
 package org.fusesource.mqtt.client;
 
-import org.fusesource.hawtbuf.Buffer;
-import org.fusesource.hawtbuf.HexSupport;
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.hawtdispatch.DispatchQueue;
-import org.fusesource.hawtdispatch.transport.*;
-import org.fusesource.mqtt.codec.MessageSupport.Acked;
-import org.fusesource.mqtt.codec.*;
+import static org.fusesource.hawtbuf.Buffer.utf8;
+import static org.fusesource.hawtdispatch.Dispatch.createQueue;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ProtocolException;
 import java.net.SocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.fusesource.hawtbuf.Buffer.utf8;
-import static org.fusesource.hawtdispatch.Dispatch.createQueue;
+import javax.net.ssl.SSLContext;
+
+import org.fusesource.hawtbuf.Buffer;
+import org.fusesource.hawtbuf.HexSupport;
+import org.fusesource.hawtbuf.UTF8Buffer;
+import org.fusesource.hawtdispatch.DispatchQueue;
+import org.fusesource.hawtdispatch.transport.DefaultTransportListener;
+import org.fusesource.hawtdispatch.transport.HeartBeatMonitor;
+import org.fusesource.hawtdispatch.transport.SslTransport;
+import org.fusesource.hawtdispatch.transport.TcpTransport;
+import org.fusesource.hawtdispatch.transport.Transport;
+import org.fusesource.hawtdispatch.transport.TransportListener;
+import org.fusesource.mqtt.codec.CONNACK;
+import org.fusesource.mqtt.codec.DISCONNECT;
+import org.fusesource.mqtt.codec.MQTTFrame;
+import org.fusesource.mqtt.codec.MQTTProtocolCodec;
+import org.fusesource.mqtt.codec.MessageSupport.Acked;
+import org.fusesource.mqtt.codec.PINGREQ;
+import org.fusesource.mqtt.codec.PINGRESP;
+import org.fusesource.mqtt.codec.PUBACK;
+import org.fusesource.mqtt.codec.PUBCOMP;
+import org.fusesource.mqtt.codec.PUBLISH;
+import org.fusesource.mqtt.codec.PUBREC;
+import org.fusesource.mqtt.codec.PUBREL;
+import org.fusesource.mqtt.codec.SUBACK;
+import org.fusesource.mqtt.codec.SUBSCRIBE;
+import org.fusesource.mqtt.codec.UNSUBACK;
+import org.fusesource.mqtt.codec.UNSUBSCRIBE;
+
+import android.util.Log;
 
 
 /**
@@ -754,6 +780,7 @@ public class CallbackConnection {
                     case AT_LEAST_ONCE:
                         cb = new Runnable() {
                             public void run() {
+                            	Log.d("CallbackConnection", "Acknowleding message " + publish.messageId());
                                 PUBACK response = new PUBACK();
                                 response.messageId(publish.messageId());
                                 send(new Request(0, response.encode(), null));
