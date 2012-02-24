@@ -418,6 +418,19 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		overlay.setVisibility(View.GONE);
 	}
 
+	@Override
+	public void onBackPressed()
+	{
+		if (mCurrentConversation != null)
+		{
+			swipeBack(mCurrentComposeView, true);
+		}
+		else
+		{
+			super.onBackPressed();
+		}
+	}
+
 	private void onSwipeDetected(int pos, boolean swipeRight)
 	{
 		int firstPosition = mConversationsView.getFirstVisiblePosition() - mConversationsView.getHeaderViewsCount(); // This is the same as child #0
