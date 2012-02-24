@@ -413,6 +413,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		viewAnimator.setDisplayedChild(0);
 		View bottomBar = findViewById(R.id.bottom_nav_bar);
 		bottomBar.setVisibility(View.VISIBLE);
+
+		View overlay = findViewById(R.id.messages_list_overlay);
+		overlay.setVisibility(View.GONE);
 	}
 
 	private void onSwipeDetected(int pos, boolean swipeRight)
