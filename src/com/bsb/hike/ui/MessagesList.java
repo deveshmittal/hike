@@ -787,6 +787,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		for (int i = 0; i < count; ++i)
 		{
 			Conversation conversation = mAdapter.getItem(i);
+			if (conversation == null)
+			{
+				continue;
+			}
 			List<ConvMessage> messages = conversation.getMessages();
 			if (messages.isEmpty())
 			{
