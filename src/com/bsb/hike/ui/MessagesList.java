@@ -472,22 +472,29 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 					int[] loc = new int[2];
 					mCurrentComposeView.getLocationOnScreen(loc);
-					Log.d("MessagesList", "SmoothScrolling " + (loc[1] - mCurrentComposeView.getHeight()*1.2));
-					mConversationsView.smoothScrollBy((int) (loc[1] - mCurrentComposeView.getHeight()*1.2), 600);
-
+					int scrollDistance = (int) (loc[1] - mCurrentComposeView.getHeight()*1.2);
+					Log.d("MessagesList", "SmoothScrolling " + scrollDistance);
+					mConversationsView.smoothScrollBy(scrollDistance, 400);
 					mConversationsView.postDelayed(new Runnable() {
 						public void run()
 						{
+							Display display = getWindowManager().getDefaultDisplay();
 							View v = findViewById(R.id.messages_list_overlay);
-							v.setVisibility(View.VISIBLE);
 							RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
 							View parent = (View) mCurrentComposeView.getParent();
-							parent.setId(10);
-							lp.addRule(RelativeLayout.BELOW, R.id.message_list_top);
 							int[] location = new int[2];
 							parent.getLocationOnScreen(location);
-							Display display = getWindowManager().getDefaultDisplay();
-							lp.height = display.getHeight() - location[1] - parent.getHeight();
+							if (location[1] > 120)
+							{
+								Log.d("MessagesList", "Scroll failed.  Just make it work");
+								int scrollDistance = (int) (location[1] - mCurrentComposeView.getHeight()*1.2);
+								mConversationsView.scrollTo(0, scrollDistance);
+								lp.height = display.getHeight() - parent.getHeight() - 116;
+							}
+							else
+							{
+								lp.height = display.getHeight() - location[1] - parent.getHeight();
+							}
 							v.setLayoutParams(lp);
 							v.setVisibility(View.VISIBLE);
 
@@ -495,7 +502,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 							imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
 							imm.showSoftInputFromInputMethod(mCurrentComposeText.getWindowToken(), InputMethodManager.SHOW_IMPLICIT);
 						}
-					}, 605);
+					}, 405);
 				}
 
 				@Override
