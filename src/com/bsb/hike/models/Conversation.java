@@ -23,7 +23,12 @@ public class Conversation implements Comparable<Conversation>
 		 */
 		@Override
 		public int compare(Conversation lhs, Conversation rhs)
-		{	
+		{
+			if (rhs == null)
+			{
+				return 1;
+			}
+
 			return rhs.compareTo(lhs);
 		}
 	}
@@ -110,6 +115,11 @@ public class Conversation implements Comparable<Conversation>
 		}
 
 		long ts = messages.isEmpty() ? 0 : messages.get(messages.size()-1).getTimestamp();
+		if (rhs == null)
+		{
+			return 1;
+		}
+
 		long rhsTs = rhs.messages.isEmpty() ? 0 : rhs.messages.get(rhs.messages.size()-1).getTimestamp();
 		
 		if (rhsTs != ts)
