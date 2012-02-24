@@ -16,4 +16,5 @@
     <color name="timestampcolor">#8a8a8a</color>
     <color name="bottombargrey">#5b5b5b</color>
     <color name="listgrey">#f9f9f9</color>
+    <color name="transparent_white">#8000</color>
 </resources>

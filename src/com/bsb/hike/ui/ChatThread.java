@@ -76,13 +76,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private Conversation mConversation;
 
-	private long mTextLastChanged;
-
 	private TextView mNameView;
 
 	private SetTypingText mClearTypingCallback;
 
-	private ResetTypingNotification mResetTypingNotification;
+	private ComposeViewWatcher mComposeViewWatcher;
 
 	private Handler mUiThreadHandler;
 
@@ -138,10 +136,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* TODO evidently a better way to do this is to check for onFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
-		/*
-		 * we set a sentinal value while we're rendering the UI to avoid typing notifications. If one is actually set by the onRestoreInstanceState code prefer that
-		 */
-		mTextLastChanged = (mTextLastChanged == Long.MAX_VALUE) ? 0 : mTextLastChanged;
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.init();
+		}
+	}
+
+	@Override
+	protected void onStop()
+	{
+		super.onStop();
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.uninit();
+			mComposeViewWatcher = null;
+		}
 	}
 
 	/* msg is any text we want to show initially */
@@ -264,14 +273,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		super.onSaveInstanceState(outState);
-		outState.putLong(TEXT_CHANGED_KEY, mTextLastChanged);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState)
 	{
 		super.onRestoreInstanceState(savedInstanceState);
-		mTextLastChanged = savedInstanceState.getLong(TEXT_CHANGED_KEY, 0);
 	}
 
 	@Override
@@ -280,11 +287,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		super.onCreate(savedInstanceState);
 		/* add a handler on the UI thread so we can post delayed messages */
 		mUiThreadHandler = new Handler();
-
-		/*
-		 * disable typing notifications until the UI is rendered. This is so if any callbacks that are fired due to UI changes will not cause messages to be sent.
-		 */
-		mTextLastChanged = Long.MAX_VALUE;
 
 		/* force the user into the reg-flow process if the token isn't set */
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -433,9 +435,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 		}
 
-		if (mResetTypingNotification != null)
+		if (mComposeViewWatcher != null)
 		{
-			mUiThreadHandler.removeCallbacks(mResetTypingNotification);	
+			mComposeViewWatcher.clearCallbacks();
+			mComposeViewWatcher = null;
 		}
 
 		/* setIntent so getIntent returns the right values */
@@ -546,9 +549,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
 
+		if (mComposeViewWatcher != null)
+		{
+			mComposeView.removeTextChangedListener(mComposeViewWatcher);
+		}
+
 		/* get the number of credits and also listen for changes */
 		mCredits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
 		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.uninit();
+			mComposeView.removeTextChangedListener(mComposeViewWatcher);
+		}
+
+		mComposeViewWatcher = new ComposeViewWatcher(mConversation, mComposeView, mSendBtn, mCredits);
+		mComposeView.addTextChangedListener(mComposeViewWatcher);
 
 		if (mConversation.isOnhike())
 		{
@@ -560,7 +577,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			updateChatMetadata();
 		}
 
-		setBtnEnabled();
 		/* create an object that we can notify when the contents of the thread are updated */
 		mUpdateAdapter = new UpdateAdapter(mAdapter);
 
@@ -793,35 +809,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		return mContactNumber;
 	}
 
-	class ResetTypingNotification implements Runnable
-	{
-		@Override
-		public void run()
-		{
-			long current = System.currentTimeMillis();
-			if (current - mTextLastChanged >= 5 * 1000)
-			{ // text hasn't changed
-				// in 10 seconds,
-				// send an event
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(NetworkManager.END_TYPING));
-				mTextLastChanged = 0;
-			}
-			else
-			{ // text has changed, fire a new event
-				long delta = 10 * 1000 - (current - mTextLastChanged);
-				mUiThreadHandler.postDelayed(mResetTypingNotification, delta);
-			}
-		}
-	};
-
-	private void setBtnEnabled()
-	{
-		CharSequence seq = mComposeView.getText();
-		/* the button is enabled iff there is text AND (this is an IP conversation or we have credits available) */
-		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation.isOnhike() || mCredits > 0)));
-		mSendBtn.setEnabled(canSend);
-	}
-
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
@@ -835,8 +822,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			updateChatMetadata();
 		}
-
-		setBtnEnabled();
 	}
 
 	/* must be called on the UI Thread */
@@ -869,37 +854,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count)
 	{
-		if ((before == 0) && (count == 0))
-		{
-			// we were called on config changed, just ignore
-			return;
-		}
-
-		/* don't send typing notifications for non-hike chats */
-		if ((mConversation == null) || (!mConversation.isOnhike()))
-		{
-			return;
-		}
-
-		if (mResetTypingNotification == null)
-		{
-			mResetTypingNotification = new ResetTypingNotification();
-		}
-
-		if (mTextLastChanged == 0)
-		{
-			// we're currently not in 'typing' mode
-			mTextLastChanged = System.currentTimeMillis();
-			// fire an event
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(NetworkManager.START_TYPING));
-
-			// create a timer to clear the event
-			mUiThreadHandler.removeCallbacks(mResetTypingNotification); // clear
-																		// any
-																		// existing
-																		// ones
-			mUiThreadHandler.postDelayed(mResetTypingNotification, 10 * 1000);
-		}
 	}
 
 	@Override

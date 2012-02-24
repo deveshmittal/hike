@@ -4,40 +4,58 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ViewAnimator;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.ui.MessagesList;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation>
 {
 
 	private int mResourceId;
+	private MessagesList mMessagesList;
 
-	public ConversationsAdapter(Context context, int textViewResourceId, List<Conversation> objects)
+	public ConversationsAdapter(MessagesList messagesList, int textViewResourceId, List<Conversation> objects)
 	{
-		super(context, textViewResourceId, objects);
+		super(messagesList, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
+		mMessagesList = messagesList;
 	}
+
+	static final String SENTINEL = "dummy";
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
 		Context context = getContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		Conversation conversation = getItem(position);
+
+		if (conversation == null)
+		{
+			/* sentinel view */
+			View v = inflater.inflate(R.layout.message_list_bottom_space, parent, false);
+			v.getLayoutParams().height = 1000;
+			Log.d("ConversationsAdapter", "sentinal value reached");
+			v.setTag(SENTINEL);
+			return v;
+		}
+
 		View v = convertView;
-		if (v == null)
+		if ((v == null) || (v.getTag() == SENTINEL))
 		{
 			v = inflater.inflate(mResourceId, parent, false);
 		}
 
-		Conversation conversation = getItem(position);
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
 		String name = conversation.getContactName();
 		if (name == null)
@@ -87,6 +105,16 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				imgStatus.setImageResource(0);
 			}
 		}
+
+		if (mMessagesList.getSelectedConversation() == conversation)
+		{
+			ViewAnimator animator = (ViewAnimator) v.findViewById(R.id.conversation_flip);
+			animator.setInAnimation(null);
+			animator.setOutAnimation(null);
+			animator.setDisplayedChild(1);
+			mMessagesList.setComposeView(animator);
+		}
+
 		return v;
 	}
 }
