@@ -457,8 +457,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			}
 
 			mCurrentConversation = mAdapter.getItem(pos);
-			mCurrentComposeText = (EditText) viewAnimator.findViewById(R.id.mini_compose);
-			mCurrentComposeView = viewAnimator;
+			setComposeView(viewAnimator);
 
 			viewAnimator.setOutAnimation(Utils.outToRightAnimation(this));
 			Animation inAnimation = Utils.inFromLeftAnimation(this);
