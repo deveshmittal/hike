@@ -291,7 +291,15 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			@Override
 			public boolean onTouch(View v, MotionEvent event)
 			{
-				return mSwipeGestureListener.onTouchEvent(event);
+				if (mSwipeGestureListener.onTouchEvent(event))
+				{
+					/* handled by swipe */
+					return true;
+				}
+
+				int pos = mConversationsView.pointToPosition((int) event.getX(), (int) event.getY());
+				Log.d("MessagesList", "pos is " + pos);
+				return mCurrentConversation != null;
 			}
 		};
 
