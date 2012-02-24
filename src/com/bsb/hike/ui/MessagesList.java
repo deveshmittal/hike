@@ -873,6 +873,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		(new Handler()).postDelayed(new Runnable() {
 			public void run()
 			{
+				mConversationsView.smoothScrollToPosition(0);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
 			}
 		}, 1000);
