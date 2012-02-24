@@ -475,10 +475,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 					int[] loc = new int[2];
 					mCurrentComposeView.getLocationOnScreen(loc);
 					Log.d("MessagesList", "SmoothScrolling " + (loc[1] - mCurrentComposeView.getHeight()*1.2));
-					mConversationsView.smoothScrollBy((int) (loc[1] - mCurrentComposeView.getHeight()*1.2), 200);
-					InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-					imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
-					imm.showSoftInputFromInputMethod(mCurrentComposeText.getWindowToken(), InputMethodManager.SHOW_IMPLICIT);
+					mConversationsView.smoothScrollBy((int) (loc[1] - mCurrentComposeView.getHeight()*1.2), 600);
 
 					mConversationsView.postDelayed(new Runnable() {
 						public void run()
@@ -499,8 +496,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 							v.setLayoutParams(lp);
 							v.setVisibility(View.VISIBLE);
 
+							InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
+							imm.showSoftInputFromInputMethod(mCurrentComposeText.getWindowToken(), InputMethodManager.SHOW_IMPLICIT);
 						}
-					}, 210);
+					}, 605);
 				}
 
 				@Override
