@@ -481,16 +481,13 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 							View v = findViewById(R.id.messages_list_overlay);
 							v.setVisibility(View.VISIBLE);
 							RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
-							Log.d("MessagesList", "LayoutParams are " + lp);
 							View parent = (View) mCurrentComposeView.getParent();
 							parent.setId(10);
-							Log.d("MessagesList", "ComposeView id is " + ((View) mCurrentComposeView.getParent()).getId());
 							lp.addRule(RelativeLayout.BELOW, R.id.message_list_top);
 							int[] location = new int[2];
 							parent.getLocationOnScreen(location);
 							Display display = getWindowManager().getDefaultDisplay();
 							lp.height = display.getHeight() - location[1] - parent.getHeight();
-							Log.d("MessagesList", "height is " + lp.height);
 							v.setLayoutParams(lp);
 							v.setVisibility(View.VISIBLE);
 
