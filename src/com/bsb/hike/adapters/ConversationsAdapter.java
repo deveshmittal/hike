@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +30,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		mMessagesList = messagesList;
 	}
 
-	static final String SENTINEL = "dummy";
-
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
@@ -40,18 +37,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		Conversation conversation = getItem(position);
 
-		if (conversation == null)
-		{
-			/* sentinel view */
-			View v = inflater.inflate(R.layout.message_list_bottom_space, parent, false);
-			v.getLayoutParams().height = 1000;
-			Log.d("ConversationsAdapter", "sentinal value reached");
-			v.setTag(SENTINEL);
-			return v;
-		}
-
 		View v = convertView;
-		if ((v == null) || (v.getTag() == SENTINEL))
+		if (v == null)
 		{
 			v = inflater.inflate(mResourceId, parent, false);
 		}

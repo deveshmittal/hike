@@ -41,6 +41,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -384,29 +385,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		viewAnimator.setOutAnimation(animate ? Utils.outToLeftAnimation(this) : null);
 		viewAnimator.setInAnimation(animate ? Utils.inFromRightAnimation(this) : null);
-		if (animate)
-		{
-			viewAnimator.getInAnimation().setAnimationListener(new AnimationListener()
-			{
-				@Override
-				public void onAnimationStart(Animation animation) {}
-				@Override
-				public void onAnimationRepeat(Animation animation) {}
-
-				@Override
-				public void onAnimationEnd(Animation animation)
-				{
-					mAdapter.remove(null);
-					mAdapter.notifyDataSetChanged();
-					mAdapter.setNotifyOnChange(false);
-				}
-			});
-		}
-		else
-		{
-			mAdapter.remove(null);
-			runOnUiThread(this);
-		}
 
 		viewAnimator.setDisplayedChild(0);
 		View bottomBar = findViewById(R.id.bottom_nav_bar);
@@ -466,35 +444,23 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				public void onAnimationEnd(Animation animation)
 				{
 					mCurrentComposeText.requestFocus();
-					mAdapter.add(null);
-					mAdapter.notifyDataSetChanged();
-					mAdapter.setNotifyOnChange(false);
 
-					int[] loc = new int[2];
-					mCurrentComposeView.getLocationOnScreen(loc);
-					int scrollDistance = (int) (loc[1] - mCurrentComposeView.getHeight()*1.2);
-					Log.d("MessagesList", "SmoothScrolling " + scrollDistance);
-					mConversationsView.smoothScrollBy(scrollDistance, 400);
 					mConversationsView.postDelayed(new Runnable() {
 						public void run()
 						{
+							int[] loc = new int[2];
+							mCurrentComposeView.getLocationOnScreen(loc);
+							int scrollDistance = (int) (loc[1] - mCurrentComposeView.getHeight()*1.2);
+							mConversationsView.scrollTo(0, scrollDistance);
+
 							Display display = getWindowManager().getDefaultDisplay();
 							View v = findViewById(R.id.messages_list_overlay);
 							RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
 							View parent = (View) mCurrentComposeView.getParent();
 							int[] location = new int[2];
 							parent.getLocationOnScreen(location);
-							if (location[1] > 120)
-							{
-								Log.d("MessagesList", "Scroll failed.  Just make it work");
-								int scrollDistance = (int) (location[1] - mCurrentComposeView.getHeight()*1.2);
-								mConversationsView.scrollTo(0, scrollDistance);
-								lp.height = display.getHeight() - parent.getHeight() - 116;
-							}
-							else
-							{
-								lp.height = display.getHeight() - location[1] - parent.getHeight();
-							}
+
+							lp.height = display.getHeight() - location[1] - parent.getHeight();
 							v.setLayoutParams(lp);
 							v.setVisibility(View.VISIBLE);
 
@@ -502,7 +468,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 							imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
 							imm.showSoftInputFromInputMethod(mCurrentComposeText.getWindowToken(), InputMethodManager.SHOW_IMPLICIT);
 						}
-					}, 405);
+					}, (int) 150);
 				}
 
 				@Override
