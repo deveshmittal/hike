@@ -90,6 +90,7 @@ public class Utils
 		return obj;
 	}
 
+	static final private int ANIMATION_DURATION = 400;
 	public static Animation inFromRightAnimation(Context ctx)
 	{
 		if (mInFromRight == null)
@@ -98,7 +99,7 @@ public class Utils
 			{
 				mInFromRight = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, +1.0f, Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, 0.0f,
 						Animation.RELATIVE_TO_PARENT, 0.0f);
-				mInFromRight.setDuration(500);
+				mInFromRight.setDuration(ANIMATION_DURATION);
 				mInFromRight.setInterpolator(new AccelerateInterpolator());				
 			}
 		}
@@ -113,7 +114,7 @@ public class Utils
 			{
 				mOutToLeft = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, -1.0f, Animation.RELATIVE_TO_PARENT, 0.0f,
 						Animation.RELATIVE_TO_PARENT, 0.0f);
-				mOutToLeft.setDuration(500);
+				mOutToLeft.setDuration(ANIMATION_DURATION);
 				mOutToLeft.setInterpolator(new AccelerateInterpolator());				
 			}
 		}
@@ -129,7 +130,10 @@ public class Utils
 			{
 				if (mOutToRight == null)
 				{
-					mOutToRight = AnimationUtils.loadAnimation(ctx, android.R.anim.slide_out_right);
+					mOutToRight = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, 1.0f, Animation.RELATIVE_TO_PARENT, 0.0f,
+							Animation.RELATIVE_TO_PARENT, 0.0f);
+					mOutToRight.setDuration(ANIMATION_DURATION);
+					mOutToRight.setInterpolator(new AccelerateInterpolator());
 				}
 			}
 		}
@@ -144,7 +148,10 @@ public class Utils
 			{
 				if (mInFromLeft == null)
 				{
-					mInFromLeft = AnimationUtils.loadAnimation(ctx, android.R.anim.slide_in_left);
+					mInFromLeft = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, -1.0f, Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, 0.0f,
+							Animation.RELATIVE_TO_PARENT, 0.0f);
+					mInFromLeft.setDuration(ANIMATION_DURATION);
+					mInFromLeft.setInterpolator(new AccelerateInterpolator());
 				}
 			}
 		}
