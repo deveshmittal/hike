@@ -15,7 +15,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,7 +40,6 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
-import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -85,6 +83,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	private Comparator<? super Conversation> mConversationsComparator;
 
 	private GestureDetector mSwipeGestureListener;
+
+	private int mAmountToScrollAfterSwipeBack; /* the amount to scroll back to restore your position */
 
 	private ViewAnimator mCurrentComposeView;
 
@@ -390,6 +390,41 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		View bottomBar = findViewById(R.id.bottom_nav_bar);
 		bottomBar.setVisibility(View.VISIBLE);
 
+		if (animate)
+		{
+			viewAnimator.getInAnimation().setAnimationListener(new AnimationListener()
+			{
+				@Override
+				public void onAnimationStart(Animation animation)
+				{}
+				@Override
+				public void onAnimationRepeat(Animation animation)
+				{}
+
+				@Override
+				public void onAnimationEnd(Animation animation)
+				{
+					mConversationsView.postDelayed(new Runnable() {
+						public void run()
+						{
+							int delta = mAmountToScrollAfterSwipeBack;
+							if (delta > 0 )
+							{
+								int scrollDistance = mConversationsView.getChildAt(0).getHeight() * delta;
+								Log.d("MessagesList", "Should be scrolling to position " + delta + " " + scrollDistance);
+								mConversationsView.scrollBy(0, -scrollDistance);
+							}
+							else if (delta > 0)
+							{
+								/* message was sent, jump to the top */
+								mConversationsView.scrollTo(0, 0);
+							}
+							mAmountToScrollAfterSwipeBack = 0;
+						}
+					}, 150);
+				}
+			});
+		}
 		View overlay = findViewById(R.id.messages_list_overlay);
 		overlay.setVisibility(View.GONE);
 	}
@@ -422,7 +457,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		ViewAnimator viewAnimator = (ViewAnimator) wantedView.findViewById(R.id.conversation_flip);
 		int currentChild = viewAnimator.getDisplayedChild();
 
-		if (currentChild == 0)
+		if (swipeRight && (currentChild == 0))
 		{
 			Log.d("MessagesList", "swipe forward");
 			if (mCurrentComposeView != null)
@@ -435,6 +470,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			mCurrentConversation = mAdapter.getItem(pos);
 			setComposeView(viewAnimator);
 
+			mAmountToScrollAfterSwipeBack = pos - mConversationsView.getFirstVisiblePosition();
+			Log.d("MessagesList", "position is " + mAmountToScrollAfterSwipeBack);
+
 			viewAnimator.setOutAnimation(Utils.outToRightAnimation(this));
 			Animation inAnimation = Utils.inFromLeftAnimation(this);
 			viewAnimator.setInAnimation(inAnimation);
@@ -443,7 +481,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				@Override
 				public void onAnimationEnd(Animation animation)
 				{
-					mCurrentComposeText.requestFocus();
+//					mCurrentComposeText.requestFocus();
 
 					mConversationsView.postDelayed(new Runnable() {
 						public void run()
@@ -838,13 +876,13 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		final ConvMessage convMessage = new ConvMessage(message, mCurrentConversation.getMsisdn(), time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mCurrentConversation);
 		Log.d("MessagesList", "Current Conversation is " + mCurrentConversation);
+		mAmountToScrollAfterSwipeBack = - 1; /* signifies that we should jump to the top, not the last position */
 		(new Handler()).postDelayed(new Runnable() {
 			public void run()
 			{
-				mConversationsView.smoothScrollToPosition(0);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
 			}
-		}, 1000);
+		}, 750);
 		swipeBack(mCurrentComposeView, true);
 	}
 
