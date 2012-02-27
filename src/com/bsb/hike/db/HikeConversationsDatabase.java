@@ -271,7 +271,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 	public Conversation getConversation(String msisdn, int limit)
 	{
-		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, 
+		Cursor c = null;
+		HikeUserDatabase huDb = null;
+		try
+		{
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, 
 										new String[] 
 												{ 
 													DBConstants.CONV_ID, 
@@ -284,25 +288,36 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 													msisdn 
 												}, 
 										null, null, null);
-		if (!c.moveToFirst())
-		{
-			return null;
+			if (!c.moveToFirst())
+			{
+				return null;
+			}
+
+			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
+			String contactid = c.getString(c.getColumnIndex(DBConstants.CONTACT_ID));
+			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
+
+			huDb = new HikeUserDatabase(mCtx);
+			ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
+
+			onhike |= (contactInfo != null) ? contactInfo.isOnhike() : false;
+			Conversation conv = new Conversation(msisdn, convid, contactid, (contactInfo != null) ? contactInfo.getName() : null, onhike);
+			List<ConvMessage> messages = getConversationThread(msisdn, contactid, convid, limit, conv);
+			conv.setMessages(messages);
+			return conv;
 		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();				
+			}
 
-		long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
-		String contactid = c.getString(c.getColumnIndex(DBConstants.CONTACT_ID));
-		boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
-		c.close();
-
-		HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
-		ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
-		huDb.close();
-
-		onhike |= (contactInfo != null) ? contactInfo.isOnhike() : false;
-		Conversation conv = new Conversation(msisdn, convid, contactid, (contactInfo != null) ? contactInfo.getName() : null, onhike);
-		List<ConvMessage> messages = getConversationThread(msisdn, contactid, convid, limit, conv);
-		conv.setMessages(messages);
-		return conv;
+			if (huDb != null)
+			{
+				huDb.close();				
+			}
+		}
 	}
 
 	public List<Conversation> getConversations()
