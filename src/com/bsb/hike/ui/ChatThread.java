@@ -409,6 +409,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	public void onSendClick(View v)
 	{
+		if (!mConversation.isOnhike() &&
+			mCredits <= 0)
+		{
+			return;
+		}
+
 		String message = mComposeView.getText().toString();
 		mComposeView.setText("");
 		long time = (long) System.currentTimeMillis() / 1000;
