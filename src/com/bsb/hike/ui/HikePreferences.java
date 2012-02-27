@@ -56,4 +56,13 @@ public class HikePreferences extends PreferenceActivity
 			mDialog = ProgressDialog.show(this, "Account", "Deleting Account");	
 		}
 	}
+
+	public void dismissProgressDialog()
+	{
+		if (mDialog != null)
+		{
+			mDialog.dismiss();
+			mDialog = null;
+		}
+	}
 }

@@ -14,16 +14,17 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 
 public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
 {
 
-	private Activity activity;
+	private HikePreferences activity;
 	private boolean finished;
 
-	public DeleteAccountTask(Activity activity)
+	public DeleteAccountTask(HikePreferences activity)
 	{
 		this.activity = activity;
 	}
@@ -75,6 +76,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		}
 		else
 		{
+			activity.dismissProgressDialog();
 			int duration = Toast.LENGTH_LONG;
 			Toast toast = Toast.makeText(activity, activity.getResources().getString(R.string.delete_account_failed), duration);
 			toast.show();
@@ -84,7 +86,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	@Override
 	public void setActivity(Activity activity)
 	{
-		this.activity = activity;
+		this.activity = (HikePreferences) activity;
 	}
 
 	@Override
