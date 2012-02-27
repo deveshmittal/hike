@@ -525,7 +525,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
-		mConversation = mConversationDb.getConversation(mContactNumber, 25);
+		mConversation = mConversationDb.getConversation(mContactNumber, 1000);
 		if (mConversation == null)
 		{
 			mConversation = mConversationDb.addConversation(mContactNumber, false);
