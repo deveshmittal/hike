@@ -82,7 +82,7 @@ public class HikeMessengerApp extends Application
 					mPubSubInstance.publish(event, msgId);
 					break;
 				case HikeService.MSG_APP_CONN_STATUS:
-					Log.d("HikeMessengerApp", "received connection status");
+					Log.d("HikeMessengerApp", "received connection status " + msg.arg1);
 					int s = msg.arg1;
 					MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
 					mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
