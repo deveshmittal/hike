@@ -83,6 +83,7 @@ public class WelcomeActivity extends Activity
 				if (mDialog != null)
 				{
 					mDialog.dismiss();
+					mDialog = null;
 				}
 				mErrorView.setVisibility(View.VISIBLE);
 			}
@@ -96,7 +97,7 @@ public class WelcomeActivity extends Activity
 		if (mDialog != null)
 		{
 			mDialog.dismiss();
-			mTask.cancel(true);
+			mTask.cancel(true);				
 			mDialog = null;
 			return;
 		}
