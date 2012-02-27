@@ -38,7 +38,7 @@ public class HikeConstants
 	public static final short KEEP_ALIVE = 10 * 60; /* 10 minutes */
 
 	/* how often to ping after a failure */
-	public static final int RECONNECT_TIME = 30; /* 30 seconds */
+	public static final int RECONNECT_TIME = 10; /* 10 seconds */
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 }
