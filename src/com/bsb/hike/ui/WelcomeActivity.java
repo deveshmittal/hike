@@ -30,7 +30,12 @@ public class WelcomeActivity extends Activity
 		protected ServerStatus doInBackground(Void... arg0)
 		{
 			AccountUtils.AccountInfo accountInfo = AccountUtils.registerAccount(null,null);
-				
+
+			if (isCancelled())
+			{
+				return ServerStatus.ERROR;
+			}
+
 			if (accountInfo != null)
 			{
 				SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -88,6 +93,13 @@ public class WelcomeActivity extends Activity
 	@Override
 	public void onBackPressed()
 	{
+		if (mDialog != null)
+		{
+			mDialog.dismiss();
+			mTask.cancel(true);
+			mDialog = null;
+			return;
+		}
 		/* TODO this is a total hack,
 		 * but I can't figure out how to make the Intent that got us here
 		 * clear the task stack.  Instead, just exit the app when the back button
