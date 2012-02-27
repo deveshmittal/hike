@@ -3,14 +3,23 @@ package com.bsb.hike.utils;
 import java.lang.ref.WeakReference;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.service.HikeMqttManager;
+import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
 
 public class ToastListener implements Listener
@@ -22,12 +31,19 @@ public class ToastListener implements Listener
 
 	private HikeUserDatabase db;
 
+	private Context context;
+
+	private MQTTConnectionStatus mCurrentUnnotifiedStatus;
+
 	public ToastListener(Context context)
 	{
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTION_STATUS, this);
 		this.toaster = new HikeNotification(context);
 		this.db = new HikeUserDatabase(context);
+		this.context = context;
+		mCurrentUnnotifiedStatus = MQTTConnectionStatus.INITIAL;
 	}
 
 	@Override
@@ -35,7 +51,14 @@ public class ToastListener implements Listener
 	{
 		if (HikePubSub.NEW_ACTIVITY.equals(type))
 		{
-			currentActivity = new WeakReference<Activity>((Activity) object);
+			Activity activity = (Activity) object;
+			if ((activity != null) && (mCurrentUnnotifiedStatus != MQTTConnectionStatus.INITIAL))
+			{
+				notifyConnStatus(mCurrentUnnotifiedStatus);
+				mCurrentUnnotifiedStatus = MQTTConnectionStatus.INITIAL;
+			}
+
+			currentActivity = new WeakReference<Activity>(activity);
 		}
 		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
@@ -54,6 +77,61 @@ public class ToastListener implements Listener
 			ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn());
 			this.toaster.notify(contactInfo, message);
 		}
+		else if (HikePubSub.CONNECTION_STATUS.equals(type))
+		{
+			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
+			if (status == HikeMqttManager.MQTTConnectionStatus.CONNECTED)
+			{
+				NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+				notificationManager.cancel(HikeConstants.HIKE_SYSTEM_NOTIFICATION);
+				return;
+			}
+
+			mCurrentUnnotifiedStatus  = status;
+			if ((currentActivity == null) || (currentActivity.get() == null))
+			{
+				//no activity on the screen, so don't toast it
+				return;
+			}
+			notifyConnStatus(status);
+		}
+	}
+
+	private void notifyConnStatus(MQTTConnectionStatus status)
+	{
+		int icon = R.drawable.ic_contact_logo;
+
+		int id = -1;
+		Log.d("ToastListener", "status is " + status);
+		switch (status)
+		{
+		case CONNECTING:
+			id = R.string.notconnected_reconnected;
+			break;
+		case NOTCONNECTED_DATADISABLED:
+			id = R.string.notconnected_data_disabled;
+			break;
+		case NOTCONNECTED_WAITINGFORINTERNET:
+			id = R.string.notconnected_no_internet;
+			break;
+		case NOTCONNECTED_USERDISCONNECT:
+			id = R.string.notconnected_no_internet;
+		}
+
+		if (id < 0)
+		{
+			return;
+		}
+
+		String text = context.getResources().getString(id);
+		Notification notification = new Notification(icon, text, System.currentTimeMillis());
+
+		Intent notificationIntent = new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+		notification.setLatestEventInfo(context, context.getResources().getString(R.string.hike_network_connection), text, contentIntent);
+
+		NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+		notificationManager.notify(HikeConstants.HIKE_SYSTEM_NOTIFICATION, notification);
 	}
 
 }

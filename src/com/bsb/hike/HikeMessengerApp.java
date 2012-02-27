@@ -11,6 +11,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.bsb.hike.db.DbConversationListener;
+import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.utils.AccountUtils;
@@ -79,6 +80,12 @@ public class HikeMessengerApp extends Application
 					Log.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
 					String event = success ? HikePubSub.SERVER_RECEIVED_MSG : HikePubSub.MESSAGE_FAILED;
 					mPubSubInstance.publish(event, msgId);
+					break;
+				case HikeService.MSG_APP_CONN_STATUS:
+					Log.d("HikeMessengerApp", "received connection status");
+					int s = msg.arg1;
+					MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
+					mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
 			}
 		}
 	}

@@ -76,6 +76,8 @@ public class HikeService extends Service
 
 	public static final int MSG_APP_MESSAGE_STATUS = 5;
 
+	public static final int MSG_APP_CONN_STATUS = 6;
+
 	protected Messenger mApp;
 
 	protected ArrayList<String> pendingMessages;
@@ -106,6 +108,7 @@ public class HikeService extends Service
 					sendToApp(m);
 				}
 				pendingMessages.clear();
+				broadcastServiceStatus(mMqttManager.getConnectionStatus());
 				break;
 			case MSG_APP_DISCONNECTED:
 				mMqttManager.unsubscribeFromUIEvents();
@@ -382,45 +385,33 @@ public class HikeService extends Service
 	public void broadcastServiceStatus(HikeMqttManager.MQTTConnectionStatus status)
 	{
 		Log.d("HikeService", "broadcastServiceStatus " + status);
+
 		if (status == HikeMqttManager.MQTTConnectionStatus.CONNECTED)
 		{
 			NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			notificationManager.cancel(HikeConstants.HIKE_SYSTEM_NOTIFICATION);
-			return;
 		}
 
-		int icon = R.drawable.ic_contact_logo;
-
-		int id = -1;
-		switch (status)
-		{
-		case CONNECTING:
-			id = R.string.notconnected_reconnected;
-			break;
-		case NOTCONNECTED_DATADISABLED:
-			id = R.string.notconnected_data_disabled;
-			break;
-		case NOTCONNECTED_WAITINGFORINTERNET:
-			id = R.string.notconnected_no_internet;
-			break;
-		case NOTCONNECTED_USERDISCONNECT:
-			id = R.string.notconnected_no_internet;
-		}
-
-		if (id < 0)
+		if (mApp == null)
 		{
 			return;
 		}
 
-		String text = getResources().getString(id);
-		Notification notification = new Notification(icon, text, System.currentTimeMillis());
+		try
+		{
+			Message msg = Message.obtain();
+			msg.what = MSG_APP_CONN_STATUS;
+			msg.arg1 = status.ordinal();
+			mApp.send(msg);
+		}
+		catch (RemoteException e)
+		{
+			// client is dead :(
+			mApp = null;
+			mMqttManager.unsubscribeFromUIEvents();
+			Log.e("HikeService", "Can't send connection status to the application");
+		}
 
-		Intent notificationIntent = new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS);
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-		notification.setLatestEventInfo(this, getResources().getString(R.string.hike_network_connection), text, contentIntent);
-
-		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(HikeConstants.HIKE_SYSTEM_NOTIFICATION, notification);
 	}
 
 	// methods used to notify the user of what has happened for times when

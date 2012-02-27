@@ -83,6 +83,8 @@ public class HikePubSub implements Runnable
 
 	public static final String MESSAGE_FAILED = "messageFailed";
 
+	public static final String CONNECTION_STATUS = "connStatus";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
