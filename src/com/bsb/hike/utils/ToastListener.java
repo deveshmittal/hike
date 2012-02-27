@@ -80,6 +80,8 @@ public class ToastListener implements Listener
 		else if (HikePubSub.CONNECTION_STATUS.equals(type))
 		{
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
+			mCurrentUnnotifiedStatus  = status;
+
 			if (status == HikeMqttManager.MQTTConnectionStatus.CONNECTED)
 			{
 				NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -87,7 +89,6 @@ public class ToastListener implements Listener
 				return;
 			}
 
-			mCurrentUnnotifiedStatus  = status;
 			if ((currentActivity == null) || (currentActivity.get() == null))
 			{
 				//no activity on the screen, so don't toast it
