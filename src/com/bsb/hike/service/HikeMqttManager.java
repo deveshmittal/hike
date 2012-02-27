@@ -627,5 +627,6 @@ public class HikeMqttManager implements Listener
 	{
 		Log.e("HikeMqttManager", "onFailure called.", value);
 		disconnectFromBroker();
+		this.mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 	}
 }
