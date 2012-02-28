@@ -450,6 +450,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private void onSwipeDetected(int pos, boolean swipeRight)
 	{
+		final int positionSelected = pos;
+
 		int firstPosition = mConversationsView.getFirstVisiblePosition() - mConversationsView.getHeaderViewsCount(); // This is the same as child #0
 		final int wantedPosition = pos - firstPosition;
 
@@ -476,7 +478,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			mCurrentConversation = mAdapter.getItem(pos);
 			setComposeView(viewAnimator);
 
-			mAmountToScrollAfterSwipeBack = pos - mConversationsView.getFirstVisiblePosition();
 			Log.d("MessagesList", "position is " + mAmountToScrollAfterSwipeBack);
 
 			viewAnimator.setOutAnimation(Utils.outToRightAnimation(this));
@@ -497,6 +498,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 							{
 								return;
 							}
+
+							mAmountToScrollAfterSwipeBack = positionSelected - mConversationsView.getFirstVisiblePosition();
 
 							int[] loc = new int[2];
 							mCurrentComposeView.getLocationOnScreen(loc);
