@@ -136,6 +136,12 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
 		{
+			if (Math.abs(velocityY) > 500)
+			{
+				Log.d("MessagesList", "Swipe ignored -- Y motion too fast " + velocityY);
+				return false;
+			}
+
 			if (Math.abs(velocityX) < swipeThresholdVelocity)
 			{
 				Log.d("MessagesList", "Swipe ignored -- Too slow " + velocityX);
