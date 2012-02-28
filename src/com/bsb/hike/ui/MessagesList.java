@@ -486,6 +486,12 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 					mConversationsView.postDelayed(new Runnable() {
 						public void run()
 						{
+							/* since this is a callback, the user may have unswiped already */
+							if (mCurrentComposeView == null)
+							{
+								return;
+							}
+
 							int[] loc = new int[2];
 							mCurrentComposeView.getLocationOnScreen(loc);
 							int scrollDistance = (int) (loc[1] - mCurrentComposeView.getHeight()*1.2);
