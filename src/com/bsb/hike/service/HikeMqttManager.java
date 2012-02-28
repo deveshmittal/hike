@@ -229,6 +229,7 @@ public class HikeMqttManager implements Listener
 	{
 		if (connectionStatus == MQTTConnectionStatus.CONNECTING)
 		{
+			Log.d("HikeMqttManager", "called connectToBroker but already in CONNECTING state");
 			return;
 		}
 
