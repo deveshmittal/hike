@@ -84,6 +84,8 @@ public class HikeMqttManager implements Listener
 		@Override
 		public void onFailure(Throwable value)
 		{
+			Log.d("HikeMqttManager", "unable to send packet:" + value.toString());
+			ping();
 			if (packet.getMsgId() > 0)
 			{
 				/* Signal the app that a failure occured */
