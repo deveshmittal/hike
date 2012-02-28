@@ -318,7 +318,8 @@ public class CallbackConnection {
             transport.setTransportListener(new DefaultTransportListener() {
                 @Override
                 public void onTransportFailure(IOException error) {
-                    System.out.println("VIJAY - MQTT onTransportFailure in onSuccess listener");
+                    System.out.println("VIJAY - MQTT onTransportFailure in onSuccess listener:" + error);
+                    cb.onFailure(error);
                 }
 
                 public void onTransportCommand(Object command) {
