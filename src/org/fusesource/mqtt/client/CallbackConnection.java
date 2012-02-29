@@ -130,7 +130,7 @@ public class CallbackConnection {
         assert cb !=null : "Callback should not be null.";
 
         if( transport!=null ) {
-            cb.onFailure(new IllegalStateException("Already connected"));
+        	cb.onSuccess(null);
             return;
         }
         try {
