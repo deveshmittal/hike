@@ -390,6 +390,12 @@ public class HikeMqttManager implements Listener
 
 	public void setConnectionStatus(MQTTConnectionStatus connectionStatus)
 	{
+		if ((connectionStatus != MQTTConnectionStatus.CONNECTED) &&
+			(connectionStatus != MQTTConnectionStatus.CONNECTING))
+		{
+			mqttConnection = null;
+		}
+
 		mHikeService.broadcastServiceStatus(connectionStatus);
 		this.connectionStatus = connectionStatus;
 	}
