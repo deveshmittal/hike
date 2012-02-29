@@ -64,17 +64,26 @@ public class HikeMqttManager implements Listener
 
 	}
 
-	public class PublishCB implements Callback<Void>
+	public class PublishCB implements Callback<Void>, Runnable
 	{
 		private HikePacket packet;
+		boolean called;
 		public PublishCB(HikePacket packet)
 		{
 			this.packet = packet;
+			this.called = false;
 		}
 
 		@Override
 		public void onSuccess(Void value)
 		{
+			if (called)
+			{
+				Log.w("HikeMqttManager", "Received 'success' for message that's already been triggered");
+			}
+
+			called = true;
+			handler.removeCallbacks(this);
 			if (packet.getMsgId() > 0)
 			{
 				mHikeService.sendMessageStatus(packet.getMsgId(), true);
@@ -84,6 +93,8 @@ public class HikeMqttManager implements Listener
 		@Override
 		public void onFailure(Throwable value)
 		{
+			called = true;
+			handler.removeCallbacks(this);
 			Log.d("HikeMqttManager", "unable to send packet:" + value.toString());
 			ping();
 			if (packet.getMsgId() > 0)
@@ -102,6 +113,13 @@ public class HikeMqttManager implements Listener
 					Log.e("HikeMqttManager", "Unable to persist message" + packet.toString(), e);
 				}
 			}
+		}
+
+		@Override
+		public void run()
+		{
+			/* only called when a failure occurs */
+			onFailure(new Throwable("Timeout when trying to send a message"));
 		}
 	}
 
@@ -166,6 +184,8 @@ public class HikeMqttManager implements Listener
 
 	private HikeService mHikeService;
 
+	private Handler handler;
+
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
@@ -173,7 +193,7 @@ public class HikeMqttManager implements Listener
 		this.convDb = new HikeConversationsDatabase(hikeService);
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 		mqttIdToPacket = Collections.synchronizedMap(new HashMap<Integer, HikePacket>());
-
+		this.handler = handler;
 		persistence = new HikeMqttPersistence(hikeService);
 	}
 
@@ -521,9 +541,12 @@ public class HikeMqttManager implements Listener
 		}
 
 		Log.d("HikeMqttManager", "About to send message " + new String(packet.getMessage()));
+		PublishCB pbCB = new PublishCB(packet);
+		this.handler.postDelayed(pbCB, HikeConstants.MESSAGE_DELIVERY_TIMEOUT);
+
 		mqttConnection.publish(new UTF8Buffer(this.topic + HikeConstants.PUBLISH_TOPIC),
 								new Buffer(packet.getMessage()), QoS.AT_LEAST_ONCE,
-								false, new PublishCB(packet));
+								false, pbCB);
 	}
 
 	public void unsubscribeFromUIEvents()
