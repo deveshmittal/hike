@@ -108,6 +108,7 @@ public class MQTT {
     double reconnectBackOffMultiplier = 2.0f;
     long reconnectAttemptsMax = -1;
     long connectAttemptsMax = -1;
+    long pingTimeout = 3;
 
     public MQTT() {
     }
@@ -369,4 +370,13 @@ public class MQTT {
         this.reconnectDelayMax = reconnectDelayMax;
     }
 
+	public long getPingTimeout()
+	{
+		return pingTimeout;
+	}
+
+	public void setPingTimeout(long pingTimeout)
+	{
+		this.pingTimeout = pingTimeout;
+	}
 }

@@ -325,6 +325,7 @@ public class CallbackConnection {
                 public void onTransportCommand(Object command) {
                     MQTTFrame response = (MQTTFrame) command;
                     try {
+                    	System.out.println("VIJAY -- received onTransportCommand " + response.messageType());
                         switch (response.messageType()) {
                             case CONNACK.TYPE:
                                 CONNACK connack = new CONNACK().decode(response);
@@ -429,7 +430,7 @@ public class CallbackConnection {
                         final long now = System.currentTimeMillis();
                         final long suspends = suspendChanges.get();
                         pingedAt = now;
-                        queue.executeAfter(CallbackConnection.this.mqtt.getKeepAlive(), TimeUnit.SECONDS, new Runnable() {
+                        queue.executeAfter(CallbackConnection.this.mqtt.getPingTimeout(), TimeUnit.SECONDS, new Runnable() {
                             public void run() {
                                 if (now == pingedAt) {
                                     // if the connection remained suspend we will never get the ping response..
