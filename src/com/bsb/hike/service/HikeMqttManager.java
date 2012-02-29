@@ -270,14 +270,6 @@ public class HikeMqttManager implements Listener
 			mqttConnection.connect(new Callback<Void>() {
 				public void onFailure(Throwable value)
 				{
-					if (value instanceof IllegalStateException)
-					{
-						/* we're already connected.  Set our connection State */
-						setConnectionStatus(MQTTConnectionStatus.CONNECTED);
-						mHikeService.scheduleNextPing();
-						return;
-					}
-
 					Log.e("HikeMqttManager", "Unable to connect", value);
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
