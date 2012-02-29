@@ -348,8 +348,7 @@ public class HikeMqttManager implements Listener
 			public void onFailure(Throwable value)
 			{
 				Log.e("HikeMqttManager", "subscribe failed.", value);
-				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-				mqttConnection.disconnect(new DisconnectCB());
+				disconnectFromBroker();
 				mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 			}
 		});
