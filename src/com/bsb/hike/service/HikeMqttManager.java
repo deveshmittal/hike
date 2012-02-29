@@ -480,6 +480,10 @@ public class HikeMqttManager implements Listener
 			!mqttConnection.ping())
 		{
 			Log.d("HikeMqttManager", "App isn't connected, reconnecting");
+			if (connectionStatus == MQTTConnectionStatus.CONNECTED)
+			{
+				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+			}
 			connect();
 		}
 	}
