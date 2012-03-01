@@ -420,7 +420,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 								Log.d("MessagesList", "Should be scrolling to position " + delta + " " + scrollDistance);
 								mConversationsView.scrollBy(0, -scrollDistance);
 							}
-							else if (delta > 0)
+							else if (delta < 0)
 							{
 								/* message was sent, jump to the top */
 								mConversationsView.scrollTo(0, 0);
