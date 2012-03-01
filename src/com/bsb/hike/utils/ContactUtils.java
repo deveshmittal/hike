@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.PhoneLookup;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.bsb.hike.db.HikeUserDatabase;
@@ -101,12 +102,22 @@ public class ContactUtils
 		}
 	}
 
+	private static boolean isAirplaneModeOn(Context context)
+	{
+		   return Settings.System.getInt(context.getContentResolver(),Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+	}
+
 	/*
 	 * Call this when we think the address book has changed. Checks for updates, posts to the server, writes them to the local database and updates existing conversations
 	 */
 	public static void syncUpdates(Context ctx)
 	{
 
+		if(isAirplaneModeOn(ctx))
+		{
+			Log.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
+			return;
+		}
 		HikeUserDatabase db = new HikeUserDatabase(ctx);
 
 		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(getContacts(ctx));
