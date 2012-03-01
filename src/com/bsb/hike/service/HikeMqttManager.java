@@ -363,7 +363,9 @@ public class HikeMqttManager implements Listener
 		{
 			if (mqttConnection != null)
 			{
+				mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 				mqttConnection.disconnect(new DisconnectCB());
+				mqttConnection = null;
 			}
 
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
@@ -390,12 +392,6 @@ public class HikeMqttManager implements Listener
 
 	public void setConnectionStatus(MQTTConnectionStatus connectionStatus)
 	{
-		if ((connectionStatus != MQTTConnectionStatus.CONNECTED) &&
-			(connectionStatus != MQTTConnectionStatus.CONNECTING))
-		{
-			mqttConnection = null;
-		}
-
 		mHikeService.broadcastServiceStatus(connectionStatus);
 		this.connectionStatus = connectionStatus;
 	}
@@ -643,6 +639,7 @@ public class HikeMqttManager implements Listener
 		}
 		finally
 		{
+			Log.d("HikeMqttManager", "About to call ack");
 			ack.run();
 			wl.release();
 		}
