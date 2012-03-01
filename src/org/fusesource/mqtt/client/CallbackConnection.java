@@ -86,7 +86,7 @@ public class CallbackConnection {
         }
     }
 
-    private static final Listener DEFAULT_LISTENER = new Listener(){
+    public static final Listener DEFAULT_LISTENER = new Listener(){
         public void onConnected() {
         }
         public void onDisconnected() {
@@ -782,7 +782,7 @@ public class CallbackConnection {
                     case AT_LEAST_ONCE:
                         cb = new Runnable() {
                             public void run() {
-                            	Log.d("CallbackConnection", "Acknowleding message " + publish.messageId());
+                                System.out.println("VIJAY -- acking message (at least once)" + publish.messageId());
                                 PUBACK response = new PUBACK();
                                 response.messageId(publish.messageId());
                                 send(new Request(0, response.encode(), null));
@@ -792,6 +792,7 @@ public class CallbackConnection {
                     case EXACTLY_ONCE:
                         cb = new Runnable() {
                             public void run() {
+                                System.out.println("VIJAY -- acking message (exactly once)" + publish.messageId());
                                 PUBREC response = new PUBREC();
                                 response.messageId(publish.messageId());
                                 processed.add(publish.messageId());
