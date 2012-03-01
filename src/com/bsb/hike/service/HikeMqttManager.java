@@ -93,9 +93,15 @@ public class HikeMqttManager implements Listener
 		@Override
 		public void onFailure(Throwable value)
 		{
+			handler.post(this);
+		}
+
+		@Override
+		public void run()
+		{
 			called = true;
 			handler.removeCallbacks(this);
-			Log.d("HikeMqttManager", "unable to send packet:" + value.toString());
+			Log.d("HikeMqttManager", "unable to send packet");
 			ping();
 			if (packet.getMsgId() > 0)
 			{
@@ -113,13 +119,6 @@ public class HikeMqttManager implements Listener
 					Log.e("HikeMqttManager", "Unable to persist message" + packet.toString(), e);
 				}
 			}
-		}
-
-		@Override
-		public void run()
-		{
-			/* only called when a failure occurs */
-			onFailure(new Throwable("Timeout when trying to send a message"));
 		}
 	}
 
@@ -563,13 +562,18 @@ public class HikeMqttManager implements Listener
 		setConnectionStatus(MQTTConnectionStatus.CONNECTED);
 
 		subscribeToTopics(getTopics());
-		final List<HikePacket> packets = persistence.getAllSentMessages();
 
-		for (HikePacket hikePacket : packets)
-		{
-			Log.d("HikeMqttManager", "resending message " + new String(hikePacket.getMessage()));
-			send(hikePacket, 1);
-		}
+		/* Accesses the persistence object from the main handler thread */
+		handler.post(new Runnable() {
+			public void run(){
+				final List<HikePacket> packets = persistence.getAllSentMessages();
+				for (HikePacket hikePacket : packets)
+				{
+					Log.d("HikeMqttManager", "resending message " + new String(hikePacket.getMessage()));
+					send(hikePacket, 1);
+				}
+			}
+		});
 	}
 
 	@Override
