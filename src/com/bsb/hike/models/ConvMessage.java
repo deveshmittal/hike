@@ -242,7 +242,12 @@ public class ConvMessage
 
 	public void setState(State sentConfirmed)
 	{
-		mState = sentConfirmed;
+		/* only allow the state to increase */
+		if (((mState != null) ? mState.ordinal() : 0) <= sentConfirmed.ordinal())
+		{
+			mState = sentConfirmed;
+		}
+
 		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ || mState == State.SENT_FAILED);
 	}
 
