@@ -222,6 +222,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				/* initialize the conversation */
 				createConversation();
 
+				/* initialize the text watcher */
+				mComposeViewWatcher.init();
+
 				/*
 				 * set the focus on the input text box TODO can this be done in createConversation?
 				 */
