@@ -10,7 +10,7 @@ public class ContactInfo implements JSONSerializable
 	@Override
 	public String toString()
 	{
-		return "ContactInfo [name=" + name + ", number=" + msisdn + ", id=" + id + ", onhike=" + onhike + ", phone number="+phoneNum+"]";
+		return name;
 	}
 
 	private String name;
