@@ -18,7 +18,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ClientConnectionManager;
@@ -31,6 +30,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
@@ -38,17 +38,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import android.accounts.NetworkErrorException;
-
-import android.text.TextUtils;
-
 import android.util.Log;
 
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.utils.AccountUtils.AccountInfo;
 
 public class AccountUtils
 {
@@ -80,9 +75,12 @@ public class AccountUtils
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 
+		/* set the connection timeout to 6 seconds, and the waiting for data timeout to 20 seconds */
+		HttpConnectionParams.setConnectionTimeout(params, 6000);
+		HttpConnectionParams.setSoTimeout(params, 20000);
+
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PORT));
-		schemeRegistry.register(new Scheme("ws", PlainSocketFactory.getSocketFactory(), PORT));
 
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
 		mClient = new DefaultHttpClient(cm, params);
