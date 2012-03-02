@@ -666,8 +666,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		switch (item.getItemId())
 		{
 		case R.id.invite:
-			intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
-			startActivityForResult(intent, INVITE_PICKER_RESULT);
+			intent = new Intent(this, HikeListActivity.class);
+			startActivity(intent);
 			return true;
 		case R.id.deleteconversations:
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
