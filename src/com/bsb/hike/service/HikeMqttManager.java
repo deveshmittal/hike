@@ -225,8 +225,8 @@ public class HikeMqttManager implements Listener
 			mqtt.setClientId(clientId);
 			mqtt.setKeepAlive((short) keepAliveSeconds);
 			mqtt.setCleanSession(false);
-			//mqtt.setUserName(clientId);
-			//mqtt.setPassword(password);
+			mqtt.setUserName(clientId);
+			mqtt.setPassword(password);
 		}
 		catch (URISyntaxException e)
 		{
