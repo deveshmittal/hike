@@ -384,6 +384,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		mCurrentConversation = null;
 		mCurrentComposeText.removeTextChangedListener(mComposeTextWatcher);
+		mCurrentComposeText.setText("");
 		mComposeTextWatcher.uninit();
 		mComposeTextWatcher = null;
 		mCurrentComposeText = null;
