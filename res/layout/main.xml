@@ -31,6 +31,7 @@
             android:layout_weight="10" >
 
             <com.bsb.hike.view.HikeListView
+                android:choiceMode="none"
                 android:id="@+id/conversations"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
