@@ -63,6 +63,7 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.UserError;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.HikeListView;
 
 public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable, TextWatcher, OnEditorActionListener
 {
@@ -70,7 +71,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	public static final Object COMPOSE = "compose";
 
-	private ListView mConversationsView;
+	private HikeListView mConversationsView;
 
 	private View mSearchIconView;
 
@@ -136,7 +137,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
 		{
-			if (Math.abs(velocityY) > 500)
+			if (Math.abs(velocityY) > 1000)
 			{
 				Log.d("MessagesList", "Swipe ignored -- Y motion too fast " + velocityY);
 				return false;
@@ -291,7 +292,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		app.connectToService();
 
 		setContentView(R.layout.main);
-		mConversationsView = (ListView) findViewById(R.id.conversations);
+		mConversationsView = (HikeListView) findViewById(R.id.conversations);
 		mSwipeGestureListener = new GestureDetector(new SwipeGestureDetector());
 		View.OnTouchListener gestureListener = new View.OnTouchListener()
 		{
@@ -427,6 +428,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 								mConversationsView.scrollTo(0, 0);
 							}
 							mAmountToScrollAfterSwipeBack = 0;
+							mConversationsView.setScrollable(true);
 						}
 					}, 150);
 				}
@@ -499,6 +501,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 							{
 								return;
 							}
+
+							mConversationsView.setScrollable(false);
 
 							mAmountToScrollAfterSwipeBack = positionSelected - mConversationsView.getFirstVisiblePosition();
 
