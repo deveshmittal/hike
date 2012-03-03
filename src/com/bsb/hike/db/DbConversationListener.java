@@ -44,7 +44,7 @@ public class DbConversationListener implements Listener
 			ConvMessage convMessage = (ConvMessage) object;
 			mConversationDb.addConversationMessages(convMessage);
 			Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getConversation().getContactName());
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize("m"));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
 		}
 		else if (HikePubSub.MESSAGE_RECEIVED_FROM_SENDER.equals(type))  // represents event when a client receive msg from other client through server.
 		{

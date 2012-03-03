@@ -33,6 +33,18 @@ public class ConvMessage
 
 	private boolean mIsSMS;
 
+	boolean mInvite;
+
+	public boolean isInvite()
+	{
+		return mInvite;
+	}
+
+	public void setInvite(boolean mIsInvite)
+	{
+		this.mInvite = mIsInvite;
+	}
+
 	/* Adding entries to the beginning of this list is not backwards compatible */
 	public static enum State
 	{
@@ -177,7 +189,7 @@ public class ConvMessage
 		return true;
 	}
 
-	public JSONObject serialize(String type)
+	public JSONObject serialize()
 	{
 		JSONObject object = new JSONObject();
 		JSONObject data = new JSONObject();
@@ -186,10 +198,11 @@ public class ConvMessage
 			data.put(HikeConstants.HIKE_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP,mTimestamp);
 			data.put(HikeConstants.MESSAGE_ID,msgID);
-		
-			object.put(HikeConstants.TYPE, type);
+
 			object.put(HikeConstants.TO, mMsisdn);
 			object.put(HikeConstants.DATA,data);
+
+			object.put(HikeConstants.TYPE, mInvite ? NetworkManager.INVITE : NetworkManager.MESSAGE);
 		}
 		catch (JSONException e)
 		{

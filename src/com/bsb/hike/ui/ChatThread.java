@@ -417,6 +417,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	}
 
+	private void sendMessage(ConvMessage convMessage)
+	{
+		mAdapter.add(convMessage);
+
+		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+		mSendBtn.setEnabled(false);
+	}
+
 	public void onSendClick(View v)
 	{
 		if (!mConversation.isOnhike() &&
@@ -427,14 +435,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		String message = mComposeView.getText().toString();
 		mComposeView.setText("");
+
 		long time = (long) System.currentTimeMillis() / 1000;
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mConversation);
-
-		mAdapter.add(convMessage);
-
-		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-		mSendBtn.setEnabled(false);
+		sendMessage(convMessage);
 	}
 
 	/*
@@ -500,6 +505,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mContactName = intent.getStringExtra("name");
 
 			createConversation();
+			if (intent.getBooleanExtra("invite", false))
+			{
+				intent.removeExtra("invite");
+				if (!mConversation.isOnhike())
+				{
+					long time = (long) System.currentTimeMillis() / 1000;
+					ConvMessage convMessage = new ConvMessage("You should check out Hike!", mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+					convMessage.setInvite(true);
+					convMessage.setConversation(mConversation);
+					sendMessage(convMessage);
+				}
+			}
 		}
 		else
 		{
