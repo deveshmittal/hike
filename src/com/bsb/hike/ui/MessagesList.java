@@ -110,8 +110,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			swipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
 		}
 
+
 		@Override
-		public boolean onSingleTapUp(MotionEvent e)
+		public boolean onSingleTapConfirmed(MotionEvent e)
 		{
 			if (mCurrentComposeView != null)
 			{
