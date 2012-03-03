@@ -34,6 +34,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
@@ -261,6 +262,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mConversationDb.close();
 			mConversationDb = null;
+		}
+
+		if (mInputNumberView.getAdapter() != null)
+		{
+			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
+			adapter.changeCursor(null);
 		}
 	}
 
