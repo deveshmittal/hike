@@ -45,11 +45,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -57,11 +55,10 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.UserError;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HikeListView;
 
@@ -228,34 +225,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 			mAdapter.notifyDataSetChanged();
 			mAdapter.setNotifyOnChange(false);
-		}
-	}
-
-	public class InviteFriendAsyncTask extends AsyncTask<Uri, Void, String>
-	{
-		@Override
-		protected String doInBackground(Uri... params)
-		{
-			Uri uri = params[0];
-			String number = ContactUtils.getMobileNumber(MessagesList.this.getContentResolver(), uri);
-			try
-			{
-				AccountUtils.invite(number);
-				return getString(R.string.invite_sent);
-			}
-			catch (UserError err)
-			{
-				return err.message;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(String message)
-		{
-			Context ctx = MessagesList.this.getApplicationContext();
-			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText(ctx, message, duration);
-			toast.show();
 		}
 	}
 
@@ -655,8 +624,19 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			{
 			case INVITE_PICKER_RESULT:
 				Uri uri = data.getData();
-				InviteFriendAsyncTask task = new InviteFriendAsyncTask();
-				task.execute(uri);
+				ContactInfo contactInfo = ContactUtils.getContactId(this, uri);
+				Intent intent = new Intent(MessagesList.this, ChatThread.class);
+				if (contactInfo.getName() != null)
+				{
+					intent.putExtra("name", contactInfo.getName());
+				}
+				if (contactInfo.getId() != null)
+				{
+					intent.putExtra("id", contactInfo.getId());
+				}
+				intent.putExtra("msisdn", contactInfo.getMsisdn());
+				intent.putExtra("invite", true);
+				startActivity(intent);
 			}
 		}
 	}
