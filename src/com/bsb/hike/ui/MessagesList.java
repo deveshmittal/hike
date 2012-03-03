@@ -578,6 +578,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	@Override
 	public boolean onContextItemSelected(MenuItem item)
 	{
+		if (mCurrentComposeView != null)
+		{
+			return true;
+		}
+
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		Conversation conv = mAdapter.getItem((int) info.id);
 		switch (item.getItemId())
