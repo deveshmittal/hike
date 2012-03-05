@@ -34,12 +34,14 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -262,6 +264,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mConversationDb.close();
 			mConversationDb = null;
 		}
+
+		if (mInputNumberView.getAdapter() != null)
+		{
+			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
+			adapter.changeCursor(null);
+		}
 	}
 
 	@Override
@@ -410,6 +418,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	}
 
+	private void sendMessage(ConvMessage convMessage)
+	{
+		mAdapter.add(convMessage);
+
+		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+		mSendBtn.setEnabled(false);
+	}
+
 	public void onSendClick(View v)
 	{
 		if (!mConversation.isOnhike() &&
@@ -420,14 +436,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		String message = mComposeView.getText().toString();
 		mComposeView.setText("");
+
 		long time = (long) System.currentTimeMillis() / 1000;
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mConversation);
-
-		mAdapter.add(convMessage);
-
-		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-		mSendBtn.setEnabled(false);
+		sendMessage(convMessage);
 	}
 
 	/*
@@ -493,6 +506,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mContactName = intent.getStringExtra("name");
 
 			createConversation();
+			if (intent.getBooleanExtra("invite", false))
+			{
+				intent.removeExtra("invite");
+				if (!mConversation.isOnhike())
+				{
+					long time = (long) System.currentTimeMillis() / 1000;
+					ConvMessage convMessage = new ConvMessage("You should check out Hike!", mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+					convMessage.setInvite(true);
+					convMessage.setConversation(mConversation);
+					sendMessage(convMessage);
+				}
+				else
+				{
+					Toast toast = Toast.makeText(this, R.string.already_hike_user, Toast.LENGTH_LONG);
+					toast.show();
+				}
+			}
 		}
 		else
 		{

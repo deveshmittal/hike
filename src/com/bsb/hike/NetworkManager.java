@@ -36,6 +36,8 @@ public class NetworkManager implements HikePubSub.Listener
 	public static final String START_TYPING = "st";
 
 	public static final String END_TYPING = "et";
+
+	public static final String INVITE = "i";
 	
 	private HikePubSub pubSub;
 

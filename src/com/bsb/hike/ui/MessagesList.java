@@ -45,7 +45,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -57,12 +56,12 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.UserError;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.HikeListView;
 
 public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable, TextWatcher, OnEditorActionListener
 {
@@ -70,7 +69,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	public static final Object COMPOSE = "compose";
 
-	private ListView mConversationsView;
+	private HikeListView mConversationsView;
 
 	private View mSearchIconView;
 
@@ -112,8 +111,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			swipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
 		}
 
+
 		@Override
-		public boolean onSingleTapUp(MotionEvent e)
+		public boolean onSingleTapConfirmed(MotionEvent e)
 		{
 			if (mCurrentComposeView != null)
 			{
@@ -136,7 +136,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
 		{
-			if (Math.abs(velocityY) > 500)
+			if (Math.abs(velocityY) > 1000)
 			{
 				Log.d("MessagesList", "Swipe ignored -- Y motion too fast " + velocityY);
 				return false;
@@ -230,34 +230,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 	}
 
-	public class InviteFriendAsyncTask extends AsyncTask<Uri, Void, String>
-	{
-		@Override
-		protected String doInBackground(Uri... params)
-		{
-			Uri uri = params[0];
-			String number = ContactUtils.getMobileNumber(MessagesList.this.getContentResolver(), uri);
-			try
-			{
-				AccountUtils.invite(number);
-				return getString(R.string.invite_sent);
-			}
-			catch (UserError err)
-			{
-				return err.message;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(String message)
-		{
-			Context ctx = MessagesList.this.getApplicationContext();
-			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText(ctx, message, duration);
-			toast.show();
-		}
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -291,7 +263,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		app.connectToService();
 
 		setContentView(R.layout.main);
-		mConversationsView = (ListView) findViewById(R.id.conversations);
+		mConversationsView = (HikeListView) findViewById(R.id.conversations);
 		mSwipeGestureListener = new GestureDetector(new SwipeGestureDetector());
 		View.OnTouchListener gestureListener = new View.OnTouchListener()
 		{
@@ -427,6 +399,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 								mConversationsView.scrollTo(0, 0);
 							}
 							mAmountToScrollAfterSwipeBack = 0;
+							mConversationsView.setScrollable(true);
 						}
 					}, 150);
 				}
@@ -499,6 +472,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 							{
 								return;
 							}
+
+							mConversationsView.setScrollable(false);
 
 							mAmountToScrollAfterSwipeBack = positionSelected - mConversationsView.getFirstVisiblePosition();
 
@@ -604,6 +579,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	@Override
 	public boolean onContextItemSelected(MenuItem item)
 	{
+		if (mCurrentComposeView != null)
+		{
+			return true;
+		}
+
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		Conversation conv = mAdapter.getItem((int) info.id);
 		switch (item.getItemId())
@@ -651,8 +631,25 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			{
 			case INVITE_PICKER_RESULT:
 				Uri uri = data.getData();
-				InviteFriendAsyncTask task = new InviteFriendAsyncTask();
-				task.execute(uri);
+				ContactInfo contactInfo = ContactUtils.getContactInfoFromURI(this, uri);
+				if (contactInfo == null)
+				{
+					Toast toast = Toast.makeText(this, getResources().getString(R.string.invite_failed), Toast.LENGTH_LONG);
+					toast.show();
+					return;
+				}
+				Intent intent = new Intent(MessagesList.this, ChatThread.class);
+				if (contactInfo.getName() != null)
+				{
+					intent.putExtra("name", contactInfo.getName());
+				}
+				if (contactInfo.getId() != null)
+				{
+					intent.putExtra("id", contactInfo.getId());
+				}
+				intent.putExtra("msisdn", contactInfo.getMsisdn());
+				intent.putExtra("invite", true);
+				startActivity(intent);
 			}
 		}
 	}

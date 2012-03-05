@@ -28,38 +28,53 @@ public class ContactUtils
 	/**
 	 * Gets the mobile number for a contact. If there's no mobile number, gets the default one
 	 */
-	public static String getMobileNumber(ContentResolver cr, Uri contact)
+	public static ContactInfo getContactInfoFromURI(Context context, Uri contact)
 	{
-		Cursor cursor = cr.query(contact, new String[] { "_id" }, null, null, null);
+		Cursor cursor = context.getContentResolver().query(contact, new String[] { "_id" }, null, null, null);
 		if ((cursor == null) || (!cursor.moveToFirst()))
 		{
 			Log.w("ContactUtils", "No contact found: " + contact);
+			if (cursor != null)
+			{
+				cursor.close();
+			}
 			return null;
 		}
 
 		String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
 		cursor.close();
 
-		Cursor phones = cr.query(Phone.CONTENT_URI, null, Phone.CONTACT_ID + " = " + contactId, null, null);
-		String number = null;
-		if (phones == null)
+		HikeUserDatabase db = new HikeUserDatabase(context);
+		ContactInfo contactInfo = db.getContactInfoFromId(contactId);
+		if (contactInfo == null)
 		{
-			return null;
-		}
-
-		while (phones.moveToNext())
-		{
-			number = phones.getString(phones.getColumnIndex(Phone.NUMBER));
-			int type = phones.getInt(phones.getColumnIndex(Phone.TYPE));
-			switch (type)
+			Cursor phones = context.getContentResolver().query(Phone.CONTENT_URI, null, Phone.CONTACT_ID + " = " + contactId, null, null);
+			String number = null;
+			while ((phones != null) && (phones.moveToNext()))
 			{
-			case Phone.TYPE_MOBILE:
-				break;
+				number = phones.getString(phones.getColumnIndex(Phone.NUMBER));
+				int type = phones.getInt(phones.getColumnIndex(Phone.TYPE));
+				Log.d("ContactUtils", "Number is " + number);
+				switch (type)
+				{
+				case Phone.TYPE_MOBILE:
+					break;
+				}
+			}
+
+			if (phones != null)
+			{
+				phones.close();
+			}
+
+			if (number != null)
+			{
+				contactInfo = db.getContactInfoFromPhoneNo(number);
 			}
 		}
 
-		phones.close();
-		return number;
+		db.close();
+		return contactInfo;
 	}
 
 	public static ContactInfo getContactInfo(String phoneNumber, Context context)
