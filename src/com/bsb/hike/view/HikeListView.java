@@ -36,8 +36,11 @@ public class HikeListView extends ListView
 	{
 		if (!mScrollable)
 		{
-			ev.setAction(MotionEvent.ACTION_CANCEL);
-			return true;
+			if (ev.getAction() == MotionEvent.ACTION_MOVE)
+			{
+				ev.setAction(MotionEvent.ACTION_CANCEL);
+				return true;
+			}
 		}
 
 		return super.onInterceptTouchEvent(ev);
