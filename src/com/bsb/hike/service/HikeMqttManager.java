@@ -1,5 +1,6 @@
 package com.bsb.hike.service;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -185,6 +186,8 @@ public class HikeMqttManager implements Listener
 
 	private Handler handler;
 
+	private String uid;
+
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
@@ -206,7 +209,7 @@ public class HikeMqttManager implements Listener
 	{
 		SharedPreferences settings = this.mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-		topic = settings.getString(HikeMessengerApp.UID_SETTING, null);
+		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		Log.d("HikeMqttManager", "clientId is " + clientId);
 		return !TextUtils.isEmpty(topic);
@@ -225,7 +228,7 @@ public class HikeMqttManager implements Listener
 			mqtt.setClientId(clientId);
 			mqtt.setKeepAlive((short) keepAliveSeconds);
 			mqtt.setCleanSession(false);
-			mqtt.setUserName(clientId);
+			mqtt.setUserName(uid);
 			mqtt.setPassword(password);
 		}
 		catch (URISyntaxException e)
