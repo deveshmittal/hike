@@ -90,6 +90,8 @@ public class HikeMessengerApp extends Application
 					break;
 				case HikeService.MSG_APP_INVALID_TOKEN:
 					Log.d("HikeMessengerApp", "received invalid token message from service");
+					HikeMessengerApp.this.disconnectFromService();
+					HikeMessengerApp.this.stopService(new Intent(HikeMessengerApp.this, HikeService.class));
 					HikeMessengerApp.this.startActivity(new Intent(HikeMessengerApp.this, WelcomeActivity.class));
 			}
 		}
