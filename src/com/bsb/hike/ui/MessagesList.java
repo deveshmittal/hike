@@ -48,6 +48,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -630,7 +631,13 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			{
 			case INVITE_PICKER_RESULT:
 				Uri uri = data.getData();
-				ContactInfo contactInfo = ContactUtils.getContactId(this, uri);
+				ContactInfo contactInfo = ContactUtils.getContactInfoFromURI(this, uri);
+				if (contactInfo == null)
+				{
+					Toast toast = Toast.makeText(this, getResources().getString(R.string.invite_failed), Toast.LENGTH_LONG);
+					toast.show();
+					return;
+				}
 				Intent intent = new Intent(MessagesList.this, ChatThread.class);
 				if (contactInfo.getName() != null)
 				{

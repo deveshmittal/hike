@@ -242,4 +242,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	{
 		mDb.delete(DBConstants.USERS_TABLE, null, null);
 	}
+
+	public ContactInfo getContactInfoFromPhoneNo(String number)
+	{
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE }, 
+												DBConstants.PHONE + "=?", new String[] { number }, null, null, null);
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		c.close();
+		if (contactInfos.isEmpty())
+		{
+			return null;
+		}
+
+		return contactInfos.get(0);
+	}
 }

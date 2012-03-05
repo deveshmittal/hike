@@ -41,6 +41,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -515,6 +516,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					convMessage.setInvite(true);
 					convMessage.setConversation(mConversation);
 					sendMessage(convMessage);
+				}
+				else
+				{
+					Toast toast = Toast.makeText(this, R.string.already_hike_user, Toast.LENGTH_LONG);
+					toast.show();
 				}
 			}
 		}

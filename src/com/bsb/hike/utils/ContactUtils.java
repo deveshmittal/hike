@@ -28,7 +28,7 @@ public class ContactUtils
 	/**
 	 * Gets the mobile number for a contact. If there's no mobile number, gets the default one
 	 */
-	public static ContactInfo getContactId(Context context, Uri contact)
+	public static ContactInfo getContactInfoFromURI(Context context, Uri contact)
 	{
 		Cursor cursor = context.getContentResolver().query(contact, new String[] { "_id" }, null, null, null);
 		if ((cursor == null) || (!cursor.moveToFirst()))
@@ -46,6 +46,33 @@ public class ContactUtils
 
 		HikeUserDatabase db = new HikeUserDatabase(context);
 		ContactInfo contactInfo = db.getContactInfoFromId(contactId);
+		if (contactInfo == null)
+		{
+			Cursor phones = context.getContentResolver().query(Phone.CONTENT_URI, null, Phone.CONTACT_ID + " = " + contactId, null, null);
+			String number = null;
+			while ((phones != null) && (phones.moveToNext()))
+			{
+				number = phones.getString(phones.getColumnIndex(Phone.NUMBER));
+				int type = phones.getInt(phones.getColumnIndex(Phone.TYPE));
+				Log.d("ContactUtils", "Number is " + number);
+				switch (type)
+				{
+				case Phone.TYPE_MOBILE:
+					break;
+				}
+			}
+
+			if (phones != null)
+			{
+				phones.close();
+			}
+
+			if (number != null)
+			{
+				contactInfo = db.getContactInfoFromPhoneNo(number);
+			}
+		}
+
 		db.close();
 		return contactInfo;
 	}
