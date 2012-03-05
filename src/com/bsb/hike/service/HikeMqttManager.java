@@ -12,10 +12,12 @@ import org.fusesource.hawtbuf.Buffer;
 import org.fusesource.hawtbuf.UTF8Buffer;
 import org.fusesource.mqtt.client.Callback;
 import org.fusesource.mqtt.client.CallbackConnection;
+import org.fusesource.mqtt.client.ConnectionException;
 import org.fusesource.mqtt.client.Listener;
 import org.fusesource.mqtt.client.MQTT;
 import org.fusesource.mqtt.client.QoS;
 import org.fusesource.mqtt.client.Topic;
+import org.fusesource.mqtt.codec.CONNACK.Code;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -273,6 +275,15 @@ public class HikeMqttManager implements Listener
 				public void onFailure(Throwable value)
 				{
 					Log.e("HikeMqttManager", "Unable to connect", value);
+					if (value instanceof ConnectionException && ((ConnectionException) value).getCode().equals(Code.CONNECTION_REFUSED_BAD_USERNAME_OR_PASSWORD))
+					{
+						Log.e("HikeMqttManager", "Invalid account credentials");
+						/* delete the token and send a message to the app to send the user back to the main screen */
+						SharedPreferences.Editor editor = mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+						editor.clear();
+						editor.commit();
+					}
+
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
 					mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect - will retry later");
