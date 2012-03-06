@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SectionIndexer;
@@ -18,24 +18,58 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 
-public class HikeArrayAdapter extends ArrayAdapter<ContactInfo> implements SectionIndexer
+public class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionIndexer
 {
+	private static final int SECTION_TYPE = 0;
+	private static final int ITEM_TYPE = 1;
+
+	public class Section
+	{
+		public String title;
+		public Section(String c)
+		{
+			this.title = c;
+		}
+
+		public String toString()
+		{
+			return title;
+		}
+
+	}
+
 	private Context context;
 	private HashMap<String, Integer> alphaIndexer;
 	private String[] sections;
+	
+	@Override
+	public boolean areAllItemsEnabled()
+	{
+		return false;
+	}
 
 	public HikeArrayAdapter(Context context, int inviteItem, List<ContactInfo> contacts)
 	{
-		super(context, inviteItem, contacts);
+        super(context, inviteItem);
 		this.context = context;
 
-        int size = getCount();
-		alphaIndexer = new HashMap<String, Integer>(size);
+		alphaIndexer = new HashMap<String, Integer>(contacts.size());
+		String lastChar = "";
 
-		for(int i = 0; i < size; ++i)
+		int i = 0;
+		for(ContactInfo contact : contacts)
 		{
-			String c = idForPosition(i);
-            alphaIndexer.put(c, i);
+			String c = contact.toString().substring(0,1).toUpperCase();
+			if (!c.equals(lastChar))
+			{
+				/* add a new entry */
+				alphaIndexer.put(c, i);
+				add(new Section(c));
+				lastChar = c;
+			}
+
+			add(contact);
+			i++;
 		}
 
         Set<String> sectionLetters = alphaIndexer.keySet();
@@ -51,7 +85,12 @@ public class HikeArrayAdapter extends ArrayAdapter<ContactInfo> implements Secti
 
 	public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent)
 	{
-		ContactInfo contactInfo = getItem(position);
+		if (getItemViewType(position) == SECTION_TYPE)
+		{
+			return getHeaderView(position, convertView, parent);
+		}
+
+		ContactInfo contactInfo = (ContactInfo) getItem(position);
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
 		if (v == null)
@@ -65,13 +104,38 @@ public class HikeArrayAdapter extends ArrayAdapter<ContactInfo> implements Secti
 		Button button = (Button) v.findViewById(R.id.invite_button);
 		button.setEnabled(!contactInfo.isOnhike());
 
+		boolean no_dividers = ((position == getCount() - 1) ||
+								(getItem(position+1) instanceof Section));
+		View divider = v.findViewById(R.id.item_divider);
+		divider.setVisibility(no_dividers ? View.INVISIBLE : View.VISIBLE);
 		return v;
 	};
 
+	@Override
+	public boolean isEnabled(int position)
+	{
+		return !(getItem(position) instanceof Section);
+	}
+
+	private View getHeaderView(int position, View convertView, ViewGroup parent)
+	{
+		Section section = (Section) getItem(position);
+		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View v = convertView;
+		if (v == null)
+		{
+			v = inflater.inflate(R.layout.section_item, parent, false);
+		}
+
+		TextView tv = (TextView) v.findViewById(R.id.section_title);
+		tv.setText(section.title);
+		return v;
+	}
+
 	public String idForPosition(int position)
 	{
-		ContactInfo contactInfo = getItem(position);
-		return contactInfo.getName().substring(0,1).toUpperCase();
+		Object o = getItem(position);
+		return o.toString().substring(0,1).toUpperCase();
 	}
 
     public int getPositionForSection(int section) {
@@ -85,4 +149,28 @@ public class HikeArrayAdapter extends ArrayAdapter<ContactInfo> implements Secti
     public String[] getSections() {
          return sections;
     }
+
+	@Override
+	public long getItemId(int position)
+	{
+		return position;
+	}
+
+	@Override
+	public int getViewTypeCount()
+	{
+		return 2;/* section headers plus items */
+	}
+
+	@Override
+	public int getItemViewType(int position)
+	{
+		Object o = getItem(position);
+		if (o instanceof Section)
+		{
+			return SECTION_TYPE;
+		}
+
+		return ITEM_TYPE;
+	}
 }
