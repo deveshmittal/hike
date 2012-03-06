@@ -15,10 +15,12 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeArrayAdapter;
+import com.bsb.hike.adapters.HikeArrayAdapter.Section;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 
@@ -26,6 +28,7 @@ public class HikeListActivity extends ListActivity implements OnScrollListener
 {
 	private HikeArrayAdapter adapter;
 	private TextView sectionText;
+	private RelativeLayout sectionContainer;
 
 	HikeArrayAdapter createListAdapter()
 	{
@@ -51,6 +54,7 @@ public class HikeListActivity extends ListActivity implements OnScrollListener
 		adapter = createListAdapter();
 
 		sectionText = (TextView) findViewById(R.id.section_label);
+		sectionContainer = (RelativeLayout) findViewById(R.id.section_container);
 
 		EditText editText = (EditText) findViewById(R.id.filter);
 		editText.addTextChangedListener(new TextWatcher(){
@@ -81,10 +85,13 @@ public class HikeListActivity extends ListActivity implements OnScrollListener
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
 	{
-		Log.d("HikeListActivity", "Top Item is " + firstVisibleItem);
-		Log.d("HikeListActivity", "Section is " + adapter.getSectionForPosition(firstVisibleItem));
-		String title = (String) adapter.idForPosition(firstVisibleItem);
-		sectionText.setText(title);
+		Object o = adapter.getItem(firstVisibleItem);
+		if (!(o instanceof Section))
+		{
+			String title = (String) adapter.idForPosition(firstVisibleItem);
+			sectionText.setText(title);
+		}
+
 	}
 
 	@Override

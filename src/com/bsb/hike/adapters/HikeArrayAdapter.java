@@ -54,7 +54,7 @@ public class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionInd
 		this.context = context;
 
 		alphaIndexer = new HashMap<String, Integer>(contacts.size());
-		String lastChar = "";
+		String lastChar = contacts.isEmpty() ? "" : contacts.get(0).toString().substring(0,1).toUpperCase();
 
 		int i = 0;
 		for(ContactInfo contact : contacts)
