@@ -1,6 +1,7 @@
 package com.bsb.hike.view;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -36,7 +37,7 @@ public class HikeListView extends ListView
 	{
 		if (!mScrollable)
 		{
-			if (ev.getAction() == MotionEvent.ACTION_MOVE)
+			if ((ev.getAction() == MotionEvent.ACTION_MOVE) && (Build.VERSION.SDK_INT > 11))
 			{
 				ev.setAction(MotionEvent.ACTION_CANCEL);
 				return true;
