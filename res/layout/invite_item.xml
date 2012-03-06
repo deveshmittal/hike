@@ -14,7 +14,6 @@
         android:textSize="18dp"
         android:textColor="@color/black"
         android:text="Vijay Raghunathan"
-        android:layout_marginLeft="15dp"
         android:layout_alignParentLeft="true"/>
 
     <Button
@@ -25,7 +24,6 @@
         android:layout_alignParentRight="true"
         android:textColor="@color/white"
         style="@style/ButtonText"
-        android:layout_marginRight="15dp"
         android:id="@+id/invite_button"
         android:text="Invite"/>
 
