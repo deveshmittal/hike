@@ -29,13 +29,12 @@ public class HikeArrayAdapter extends ArrayAdapter<ContactInfo> implements Secti
 		super(context, inviteItem, contacts);
 		this.context = context;
 
-        int size = contacts.size();
+        int size = getCount();
 		alphaIndexer = new HashMap<String, Integer>(size);
 
 		for(int i = 0; i < size; ++i)
 		{
-			ContactInfo contactInfo = contacts.get(i);
-			String c = contactInfo.getName().substring(0,1).toUpperCase();
+			String c = idForPosition(i);
             alphaIndexer.put(c, i);
 		}
 
@@ -69,9 +68,13 @@ public class HikeArrayAdapter extends ArrayAdapter<ContactInfo> implements Secti
 		return v;
 	};
 
+	public String idForPosition(int position)
+	{
+		ContactInfo contactInfo = getItem(position);
+		return contactInfo.getName().substring(0,1).toUpperCase();
+	}
+
     public int getPositionForSection(int section) {
-    	Log.d("MessagesList", "alphaIndexer " + alphaIndexer);
-    	Log.d("MessagesList", "sections " + sections);
         return alphaIndexer.get(sections[section]);
     }
 
@@ -79,7 +82,7 @@ public class HikeArrayAdapter extends ArrayAdapter<ContactInfo> implements Secti
         return 1;
     }
 
-    public Object[] getSections() {
+    public String[] getSections() {
          return sections;
     }
 }
