@@ -18,11 +18,11 @@
 
         <TextView
             android:id="@+id/section_label"
+            android:textColor="@color/diamondblue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="7dp"
-            android:text=""
-            android:textColor="@color/black" />
+            android:text=""/>
     </RelativeLayout>
 
     <ListView
@@ -36,6 +36,7 @@
         android:fastScrollEnabled="true"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"
+        android:divider="@color/diamondblue"
         android:textFilterEnabled="true" />
 
 </LinearLayout>

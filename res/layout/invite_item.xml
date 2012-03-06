@@ -27,4 +27,10 @@
         android:id="@+id/invite_button"
         android:text="Invite"/>
 
+        <View
+        	android:id="@+id/item_divider"
+        	android:layout_width="match_parent"
+        	android:layout_height="1dp"
+        	android:background="@color/dividercolor"
+  			android:layout_alignParentBottom="true"/>
 </RelativeLayout>
