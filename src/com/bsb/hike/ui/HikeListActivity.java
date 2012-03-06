@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.Collections;
 import java.util.List;
 
 import android.app.ListActivity;
@@ -28,6 +29,7 @@ public class HikeListActivity extends ListActivity
 	{
 		HikeUserDatabase db = new HikeUserDatabase(this);
 		List<ContactInfo> contacts = db.getContacts();
+		Collections.sort(contacts);
 		db.close();
 		contacts.toArray(new ContactInfo[]{});
 		ListAdapter adapter = new ArrayAdapter<ContactInfo>(this,
