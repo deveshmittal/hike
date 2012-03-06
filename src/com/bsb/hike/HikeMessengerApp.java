@@ -1,7 +1,7 @@
 package com.bsb.hike;
 
 import android.app.Application;
-import android.content.ServiceConnection;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +14,7 @@ import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
+import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
@@ -59,7 +60,7 @@ public class HikeMessengerApp extends Application
 
 	private boolean mInitialized;
 
-	static class IncomingHandler extends Handler
+	class IncomingHandler extends Handler
 	{
 		@Override
 		public void handleMessage(Message msg)
@@ -86,6 +87,12 @@ public class HikeMessengerApp extends Application
 					int s = msg.arg1;
 					MQTTConnectionStatus status = MQTTConnectionStatus.values()[s];
 					mPubSubInstance.publish(HikePubSub.CONNECTION_STATUS, status);
+					break;
+				case HikeService.MSG_APP_INVALID_TOKEN:
+					Log.d("HikeMessengerApp", "received invalid token message from service");
+					HikeMessengerApp.this.disconnectFromService();
+					HikeMessengerApp.this.stopService(new Intent(HikeMessengerApp.this, HikeService.class));
+					HikeMessengerApp.this.startActivity(new Intent(HikeMessengerApp.this, WelcomeActivity.class));
 			}
 		}
 	}

@@ -46,6 +46,7 @@ import org.fusesource.hawtdispatch.transport.TcpTransport;
 import org.fusesource.hawtdispatch.transport.Transport;
 import org.fusesource.hawtdispatch.transport.TransportListener;
 import org.fusesource.mqtt.codec.CONNACK;
+import org.fusesource.mqtt.codec.CONNACK.Code;
 import org.fusesource.mqtt.codec.DISCONNECT;
 import org.fusesource.mqtt.codec.MQTTFrame;
 import org.fusesource.mqtt.codec.MQTTProtocolCodec;
@@ -74,7 +75,7 @@ import android.util.Log;
  */
 public class CallbackConnection {
 
-    private static class Request {
+	private static class Request {
         final MQTTFrame frame;
         private final short id;
         final Callback cb;
@@ -343,7 +344,7 @@ public class CallbackConnection {
                                         break;
                                     default:
                                         // Bad creds or something. No point in reconnecting.
-                                        cb.onFailure(new IOException("Could not connect: " + connack.code()));
+                                        cb.onFailure(new ConnectionException("Could not connect: " + connack.code(), connack.code()));
                                 }
                                 break;
                             default:

@@ -78,6 +78,8 @@ public class HikeService extends Service
 
 	public static final int MSG_APP_CONN_STATUS = 6;
 
+	public static final int MSG_APP_INVALID_TOKEN = 7;
+
 	protected Messenger mApp;
 
 	protected ArrayList<String> pendingMessages;
@@ -590,6 +592,30 @@ public class HikeService extends Service
 	public boolean appIsConnected()
 	{
 		return mApp != null;
+	}
+
+	public boolean sendInvalidToken()
+	{
+		if (mApp == null)
+		{
+			Log.d("HikeService", "no app");
+			return false;
+		}
+
+		try
+		{
+			Message msg = Message.obtain(null, MSG_APP_INVALID_TOKEN);
+			mApp.send(msg);
+		}
+		catch (RemoteException e)
+		{
+			// client is dead :(
+			mApp = null;
+			mMqttManager.unsubscribeFromUIEvents();
+			Log.e("HikeService", "Can't send message to the application");
+			return false;
+		}
+		return true;
 	}
 
 	public boolean sendMessageStatus(Long msgId, boolean sent)
