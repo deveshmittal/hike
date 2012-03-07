@@ -6,19 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
-import com.bsb.hike.models.ContactInfo;
 
-public class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionIndexer
+public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionIndexer
 {
 	private static final int SECTION_TYPE = 0;
 	private static final int ITEM_TYPE = 1;
@@ -38,7 +37,7 @@ public class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionInd
 
 	}
 
-	private Context context;
+	protected Activity activity;
 	private HashMap<String, Integer> alphaIndexer;
 	private String[] sections;
 	
@@ -48,18 +47,18 @@ public class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionInd
 		return false;
 	}
 
-	public HikeArrayAdapter(Context context, int inviteItem, List<ContactInfo> contacts)
+	public <T> HikeArrayAdapter(Activity context, int viewItemId, List<T> items)
 	{
-        super(context, inviteItem);
-		this.context = context;
+        super(context, viewItemId);
+		this.activity = context;
 
-		alphaIndexer = new HashMap<String, Integer>(contacts.size());
-		String lastChar = contacts.isEmpty() ? "" : contacts.get(0).toString().substring(0,1).toUpperCase();
+		alphaIndexer = new HashMap<String, Integer>(items.size());
+		String lastChar = items.isEmpty() ? "" : items.get(0).toString().substring(0,1).toUpperCase();
 
 		int i = 0;
-		for(ContactInfo contact : contacts)
+		for(Object item : items)
 		{
-			String c = contact.toString().substring(0,1).toUpperCase();
+			String c = item.toString().substring(0,1).toUpperCase();
 			if (!c.equals(lastChar))
 			{
 				/* add a new entry */
@@ -68,7 +67,7 @@ public class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionInd
 				lastChar = c;
 			}
 
-			add(contact);
+			add(item);
 			i++;
 		}
 
@@ -83,32 +82,18 @@ public class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionInd
         sectionList.toArray(sections);
 	}
 
+	protected abstract android.view.View getItemView(int position, android.view.View convertView, android.view.ViewGroup parent);
+
 	public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent)
 	{
 		if (getItemViewType(position) == SECTION_TYPE)
 		{
 			return getHeaderView(position, convertView, parent);
 		}
-
-		ContactInfo contactInfo = (ContactInfo) getItem(position);
-		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View v = convertView;
-		if (v == null)
+		else
 		{
-			v = inflater.inflate(R.layout.invite_item, parent, false);
+			return getItemView(position, convertView, parent);
 		}
-
-		TextView textView = (TextView) v.findViewById(R.id.name);
-		textView.setText(contactInfo.getName());
-
-		Button button = (Button) v.findViewById(R.id.invite_button);
-		button.setEnabled(!contactInfo.isOnhike());
-
-		boolean no_dividers = ((position == getCount() - 1) ||
-								(getItem(position+1) instanceof Section));
-		View divider = v.findViewById(R.id.item_divider);
-		divider.setVisibility(no_dividers ? View.INVISIBLE : View.VISIBLE);
-		return v;
 	};
 
 	@Override
@@ -120,7 +105,7 @@ public class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionInd
 	private View getHeaderView(int position, View convertView, ViewGroup parent)
 	{
 		Section section = (Section) getItem(position);
-		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
 		if (v == null)
 		{
