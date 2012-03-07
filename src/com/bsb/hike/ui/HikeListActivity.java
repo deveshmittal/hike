@@ -43,8 +43,8 @@ public class HikeListActivity extends ListActivity implements OnScrollListener
 		String adapterClassName = intent.getStringExtra(HikeConstants.ADAPTER_NAME);
 		Class<HikeArrayAdapter> cls = (Class<HikeArrayAdapter>) Class.forName(adapterClassName);
 		/* assume that there is only one constructor, and it's the one we want */
-		Constructor<HikeArrayAdapter> c = cls.getConstructors()[0];
-		return c.newInstance(this, -1, contacts);
+		Constructor c = cls.getConstructors()[0];
+		return (HikeArrayAdapter) c.newInstance(this, -1, contacts);
 	}
 
 	@Override
