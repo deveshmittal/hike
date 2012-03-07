@@ -10,12 +10,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.JSONSerializable;
 
 public class Utils
@@ -156,5 +157,13 @@ public class Utils
 			}
 		}
 		return mInFromLeft;
+	}
+
+	public static Intent createIntentFromContactInfo(final ContactInfo contactInfo)
+	{
+		Intent intent = new Intent();
+		intent.putExtra("id", contactInfo.getId());
+		intent.putExtra("msisdn", contactInfo.getMsisdn());
+		return intent;
 	}
 }
