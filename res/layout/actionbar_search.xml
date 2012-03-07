@@ -8,6 +8,5 @@
 	    android:layout_height="match_parent"
 	    android:singleLine="true"
 	    android:hint="Search">
-	    <requestFocus/>
 	</EditText>
 </FrameLayout>

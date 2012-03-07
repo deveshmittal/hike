@@ -130,7 +130,7 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 		}
 
 		EditText editText = (EditText) view;
-		editText.requestFocus();
+//		editText.requestFocus();
 		editText.addTextChangedListener(this);
 		
 		return true;
