@@ -41,4 +41,5 @@ public class HikeConstants
 	public static final int RECONNECT_TIME = 10; /* 10 seconds */
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
+	public static final String ADAPTER_NAME = "hikeadapter";
 }

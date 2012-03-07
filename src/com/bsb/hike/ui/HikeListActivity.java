@@ -1,15 +1,16 @@
 package com.bsb.hike.ui;
 
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.List;
 
 import android.app.ListActivity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.EditText;
@@ -18,6 +19,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeArrayAdapter;
 import com.bsb.hike.adapters.HikeArrayAdapter.Section;
@@ -30,18 +32,19 @@ public class HikeListActivity extends ListActivity implements OnScrollListener
 	private TextView sectionText;
 	private RelativeLayout sectionContainer;
 
-	HikeArrayAdapter createListAdapter()
+	HikeArrayAdapter createListAdapter() throws Exception
 	{
 		HikeUserDatabase db = new HikeUserDatabase(this);
 		List<ContactInfo> contacts = db.getContacts();
 		Collections.sort(contacts);
 		db.close();
 		contacts.toArray(new ContactInfo[]{});
-		HikeArrayAdapter adapter = new HikeArrayAdapter(this,
-												R.layout.invite_item,
-												contacts);
-
-		return adapter;
+		Intent intent = getIntent();
+		String adapterClassName = intent.getStringExtra(HikeConstants.ADAPTER_NAME);
+		Class<HikeArrayAdapter> cls = (Class<HikeArrayAdapter>) Class.forName(adapterClassName);
+		/* assume that there is only one constructor, and it's the one we want */
+		Constructor<HikeArrayAdapter> c = cls.getConstructors()[0];
+		return c.newInstance(this, -1, contacts);
 	}
 
 	@Override
@@ -51,7 +54,15 @@ public class HikeListActivity extends ListActivity implements OnScrollListener
 		ListView listView = getListView();
 		setContentView(R.layout.hikelistactivity);
 		listView.setTextFilterEnabled(true);
-		adapter = createListAdapter();
+		try
+		{
+			adapter = createListAdapter();
+		}
+		catch(Exception e)
+		{
+			Log.e("HikeListActivity", "Unable to instantiate adapter", e);
+			throw new RuntimeException(e.getCause());
+		}
 
 		sectionText = (TextView) findViewById(R.id.section_label);
 		sectionContainer = (RelativeLayout) findViewById(R.id.section_container);
