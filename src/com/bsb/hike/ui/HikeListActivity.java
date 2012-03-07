@@ -36,6 +36,7 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 	private TextView sectionText;
 	private RelativeLayout sectionContainer;
 	private ListView listView;
+	private MenuItem searchMenu;
 
 	HikeArrayAdapter createListAdapter() throws Exception
 	{
@@ -99,12 +100,13 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		menu.add("Search").
+		searchMenu = menu.add("Search").
 			setIcon(R.drawable.ic_searchicon).
 			setActionView(com.bsb.hike.R.layout.actionbar_search).
-			setOnActionExpandListener(this).
-			setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-			
+			setOnActionExpandListener(this);
+
+		searchMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+
 		return true;
 	}
 
@@ -134,6 +136,12 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 		editText.addTextChangedListener(this);
 		
 		return true;
+	}
+
+	@Override
+	public boolean onSearchRequested()
+	{
+		return searchMenu.expandActionView();
 	}
 
 	@Override
