@@ -34,7 +34,6 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 		{
 			return title;
 		}
-
 	}
 
 	protected Activity activity;
