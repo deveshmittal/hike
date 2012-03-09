@@ -264,7 +264,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mConversationDb = null;
 		}
 
-		if (mInputNumberView.getAdapter() != null)
+		if ((mInputNumberView != null) && (mInputNumberView.getAdapter() != null))
 		{
 			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
 			adapter.changeCursor(null);
