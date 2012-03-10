@@ -41,17 +41,18 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 
 	HikeArrayAdapter createListAdapter() throws Exception
 	{
-		HikeUserDatabase db = new HikeUserDatabase(this);
-		List<ContactInfo> contacts = db.getContacts();
-		Collections.sort(contacts);
-		db.close();
-		contacts.toArray(new ContactInfo[]{});
 		Intent intent = getIntent();
 		String adapterClassName = intent.getStringExtra(HikeConstants.ADAPTER_NAME);
 		Class<HikeArrayAdapter> cls = (Class<HikeArrayAdapter>) Class.forName(adapterClassName);
 		/* assume that there is only one constructor, and it's the one we want */
 		Constructor c = cls.getConstructors()[0];
-		return (HikeArrayAdapter) c.newInstance(this, -1, contacts);
+		return (HikeArrayAdapter) c.newInstance(this, -1);
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance()
+	{
+		return listView.getAdapter();
 	}
 
 	@Override
@@ -63,7 +64,8 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 		listView.setTextFilterEnabled(true);
 		try
 		{
-			adapter = createListAdapter();
+			Object o = getLastNonConfigurationInstance();
+			adapter = (o instanceof HikeArrayAdapter) ? (HikeArrayAdapter) o : createListAdapter();
 		}
 		catch(Exception e)
 		{

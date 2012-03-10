@@ -24,7 +24,7 @@
         android:layout_alignParentRight="true"
         android:textColor="@color/white"
         style="@style/ButtonText"
-        android:id="@+id/invite_button"
+        android:id="@+id/contact_button"
         android:text="Invite"/>
 
         <View
