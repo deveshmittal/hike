@@ -34,6 +34,8 @@ public class DbConversationListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELETED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.BLOCK_USER, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.UNBLOCK_USER, this);
 	}
 
 	@Override
@@ -83,6 +85,16 @@ public class DbConversationListener implements Listener
 		else if (HikePubSub.MESSAGE_FAILED.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{
 			updateDB(object,ConvMessage.State.SENT_FAILED.ordinal());
+		}
+		else if (HikePubSub.BLOCK_USER.equals(type))
+		{
+			String msisdn = (String) object;
+			mUserDb.block(msisdn);
+		}
+		else if (HikePubSub.UNBLOCK_USER.equals(type))
+		{
+			String msisdn = (String) object;
+			mUserDb.unblock(msisdn);
 		}
 	}
 

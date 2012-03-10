@@ -45,4 +45,6 @@ public class DBConstants
 
 	public static final String PHONE = "phoneNumber";
 
+	public static final String BLOCK_TABLE = "blocked";
+
 }

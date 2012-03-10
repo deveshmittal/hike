@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.MenuItem.OnActionExpandListener;
 import com.bsb.hike.HikeConstants;
@@ -102,7 +103,6 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 		getSupportMenuInflater().inflate(R.menu.list_menu, menu);
 		searchMenu = menu.getItem(0);
 		searchMenu.setOnActionExpandListener(this);
-
 		return true;
 	}
 

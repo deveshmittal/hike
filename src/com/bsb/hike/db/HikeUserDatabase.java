@@ -2,8 +2,10 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -33,6 +35,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 														+ DBConstants.ONHIKE+" INTEGER, "
 														+ DBConstants.PHONE+" TEXT "
 												+ " )";
+
+		db.execSQL(create);
+		create = "CREATE TABLE IF NOT EXISTS " + DBConstants.BLOCK_TABLE +
+													" ( " + 
+														DBConstants.MSISDN + " TEXT " +
+													" ) ";
 		db.execSQL(create);
 	}
 
@@ -255,5 +263,44 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 
 		return contactInfos.get(0);
+	}
+
+	public void unblock(String msisdn)
+	{
+		mDb.delete(DBConstants.BLOCK_TABLE, DBConstants.MSISDN + "=?", new String[] {msisdn});
+	}
+
+	public void block(String msisdn)
+	{
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.MSISDN, msisdn);
+		mDb.insert(DBConstants.BLOCK_TABLE, null, values);
+	}
+
+	public Set<String> getBlockedUsers()
+	{
+		Set<String> blocked = new HashSet<String>();
+		Cursor c = mReadDb.query(DBConstants.BLOCK_TABLE, new String[] { DBConstants.MSISDN}, null, null, null, null, null);
+		int idx = c.getColumnIndex(DBConstants.MSISDN);
+		while(c.moveToNext())
+		{
+			blocked.add(c.getString(idx));
+		}
+
+		return blocked;
+	}
+
+	public boolean isBlocked(String msisdn)
+	{
+
+		Cursor c = mReadDb.query(DBConstants.BLOCK_TABLE, null, DBConstants.MSISDN + "=?", new String[] {msisdn}, null, null, null);
+		try
+		{
+			return !c.moveToFirst();
+		}
+		finally
+		{
+			c.close();			
+		}
 	}
 }

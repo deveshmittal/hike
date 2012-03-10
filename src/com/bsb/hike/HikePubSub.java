@@ -85,6 +85,10 @@ public class HikePubSub implements Runnable
 
 	public static final String CONNECTION_STATUS = "connStatus";
 
+	public static final String BLOCK_USER = "blockUser";
+
+	public static final String UNBLOCK_USER = "unblockUser";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
