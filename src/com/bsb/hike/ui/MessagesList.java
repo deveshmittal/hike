@@ -51,10 +51,12 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.widget.ViewAnimator;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
+import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -628,31 +630,14 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		return true;
 	}
 
-	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent)
 	{
 		if (resultCode == RESULT_OK)
 		{
 			switch (requestCode)
 			{
 			case INVITE_PICKER_RESULT:
-				Uri uri = data.getData();
-				ContactInfo contactInfo = ContactUtils.getContactInfoFromURI(this, uri);
-				if (contactInfo == null)
-				{
-					Toast toast = Toast.makeText(this, getResources().getString(R.string.invite_failed), Toast.LENGTH_LONG);
-					toast.show();
-					return;
-				}
-				Intent intent = new Intent(MessagesList.this, ChatThread.class);
-				if (contactInfo.getName() != null)
-				{
-					intent.putExtra("name", contactInfo.getName());
-				}
-				if (contactInfo.getId() != null)
-				{
-					intent.putExtra("id", contactInfo.getId());
-				}
-				intent.putExtra("msisdn", contactInfo.getMsisdn());
+				intent.setClass(this, ChatThread.class);
 				intent.putExtra("invite", true);
 				startActivity(intent);
 			}
@@ -666,7 +651,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		switch (item.getItemId())
 		{
 		case R.id.invite:
-			intent = new Intent(Intent.ACTION_PICK, Contacts.CONTENT_URI);
+			intent = new Intent(this, HikeListActivity.class);
+			intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
 			startActivityForResult(intent, INVITE_PICKER_RESULT);
 			return true;
 		case R.id.deleteconversations:

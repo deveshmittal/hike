@@ -5,12 +5,12 @@ import org.json.JSONObject;
 
 import com.bsb.hike.models.utils.JSONSerializable;
 
-public class ContactInfo implements JSONSerializable
+public class ContactInfo implements JSONSerializable, Comparable
 {
 	@Override
 	public String toString()
 	{
-		return "ContactInfo [name=" + name + ", number=" + msisdn + ", id=" + id + ", onhike=" + onhike + ", phone number="+phoneNum+"]";
+		return name;
 	}
 
 	private String name;
@@ -139,5 +139,11 @@ public class ContactInfo implements JSONSerializable
 		json.put("name", this.name);
 		json.put("id", this.id);
 		return json;
+	}
+
+	@Override
+	public int compareTo(Object rhs)
+	{
+		return (this.name.toLowerCase().compareTo( ((ContactInfo) rhs).name.toLowerCase()));
 	}
 }
