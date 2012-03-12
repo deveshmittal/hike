@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/menu_search"
           android:title="@string/search"
-          android:icon="@drawable/ic_searchicon"
-          android:showAsAction="collapseActionView"
+          android:icon="@drawable/ic_search"
+           android:showAsAction="always|collapseActionView"
           android:actionViewClass="com.bsb.hike.view.SearchView" />
 </menu>
