@@ -100,12 +100,8 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		getSupportMenuInflater().inflate(R.menu.list_menu, menu);
-		for(int i = 0; i < menu.size(); ++i)
-		{
-			MenuItem searchMenu = menu.getItem(i);
-			searchMenu.setOnActionExpandListener(this);
-		}
-
+		searchMenu = menu.getItem(0);
+		searchMenu.setOnActionExpandListener(this);
 
 		return true;
 	}
@@ -145,6 +141,9 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 		final EditText editText = (EditText) view;
 		editText.addTextChangedListener(this);
 
+		/* add this in a runnable, because if we try to
+		 * expand this now the editText isn't actually visible.
+		 */
 		editText.post(new Runnable()
 		{
 			public void run()
