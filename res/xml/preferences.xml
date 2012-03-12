@@ -18,6 +18,11 @@
 
     <PreferenceCategory android:title="Privacy" >
 
+        <Preference android:defaultValue="false"
+            		android:key="block"
+            		android:summary="Block Users"
+            		android:title="Block"/>
+
         <com.bsb.hike.ui.DeleteDialogPreference
             android:dialogMessage="Are you sure you want to delete everything?"
             android:key="deleteAccount"

@@ -1,14 +1,19 @@
 package com.bsb.hike.ui;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.HikeBlockedUserAdapter;
 import com.bsb.hike.tasks.ActivityCallableTask;
 
-public class HikePreferences extends PreferenceActivity
+public class HikePreferences extends PreferenceActivity implements OnPreferenceClickListener
 {
 
 	private ActivityCallableTask mTask;
@@ -32,6 +37,9 @@ public class HikePreferences extends PreferenceActivity
 			setBlockingTask((ActivityCallableTask) retained);
 			mTask.setActivity(this);
 		}
+
+		Preference preference = getPreferenceScreen().findPreference("block");
+		preference.setOnPreferenceClickListener(this);
 	}
 
 	@Override
@@ -64,5 +72,14 @@ public class HikePreferences extends PreferenceActivity
 			mDialog.dismiss();
 			mDialog = null;
 		}
+	}
+
+	@Override
+	public boolean onPreferenceClick(Preference preference)
+	{
+		Intent intent = new Intent(this, HikeListActivity.class);
+		intent.putExtra(HikeConstants.ADAPTER_NAME, HikeBlockedUserAdapter.class.getName());
+		startActivity(intent);
+		return true;
 	}
 }
