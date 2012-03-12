@@ -22,7 +22,7 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 	private static final int SECTION_TYPE = 0;
 	private static final int ITEM_TYPE = 1;
 
-	public class Section
+	static public class Section
 	{
 		public String title;
 		public Section(String c)
@@ -37,9 +37,9 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 	}
 
 	protected Activity activity;
-	private HashMap<String, Integer> alphaIndexer;
+	private HashMap<String, Integer> alphaIndexer; /* keeps track of Section to location */
 	private String[] sections;
-	
+
 	@Override
 	public boolean areAllItemsEnabled()
 	{
@@ -81,6 +81,13 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
         sectionList.toArray(sections);
 	}
 
+	/**
+	 * Inflate the actual item view
+	 * @param position which positino in the array
+	 * @param convertView existing convertView
+	 * @param parent
+	 * @return inflated View
+	 */
 	protected abstract android.view.View getItemView(int position, android.view.View convertView, android.view.ViewGroup parent);
 
 	public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent)
