@@ -1,8 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.lang.reflect.Constructor;
-import java.util.Collections;
-import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,8 +26,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeArrayAdapter;
 import com.bsb.hike.adapters.HikeArrayAdapter.Section;
-import com.bsb.hike.db.HikeUserDatabase;
-import com.bsb.hike.models.ContactInfo;
 
 public class HikeListActivity extends SherlockActivity implements OnScrollListener, OnActionExpandListener, TextWatcher
 {
@@ -103,12 +99,13 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		searchMenu = menu.add("Search").
-			setIcon(R.drawable.ic_searchicon).
-			setActionView(com.bsb.hike.R.layout.actionbar_search).
-			setOnActionExpandListener(this);
+		getSupportMenuInflater().inflate(R.menu.list_menu, menu);
+		for(int i = 0; i < menu.size(); ++i)
+		{
+			MenuItem searchMenu = menu.getItem(i);
+			searchMenu.setOnActionExpandListener(this);
+		}
 
-		searchMenu.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 
 		return true;
 	}
@@ -134,6 +131,11 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 	@Override
 	public boolean onMenuItemActionExpand(MenuItem item)
 	{
+		if (item.getItemId() != R.id.menu_search)
+		{
+			return true;
+		}
+
 		View view = item.getActionView().findViewById(R.id.searchview);
 		if (view == null)
 		{
@@ -158,6 +160,11 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 	@Override
 	public boolean onMenuItemActionCollapse(MenuItem item)
 	{
+		if (item.getItemId() != R.id.menu_search)
+		{
+			return true;
+		}
+
 		View view = item.getActionView().findViewById(R.id.searchview);
 		final EditText editText = (EditText) view;
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
