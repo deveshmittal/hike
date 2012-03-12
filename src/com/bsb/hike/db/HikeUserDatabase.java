@@ -289,18 +289,4 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		return blocked;
 	}
-
-	public boolean isBlocked(String msisdn)
-	{
-
-		Cursor c = mReadDb.query(DBConstants.BLOCK_TABLE, null, DBConstants.MSISDN + "=?", new String[] {msisdn}, null, null, null);
-		try
-		{
-			return !c.moveToFirst();
-		}
-		finally
-		{
-			c.close();			
-		}
-	}
 }
