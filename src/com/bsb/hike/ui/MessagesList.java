@@ -9,17 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.ContactsContract.Contacts;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -30,8 +28,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,9 +44,12 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 import android.widget.ViewAnimator;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -58,14 +57,12 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HikeListView;
 
-public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable, TextWatcher, OnEditorActionListener
+public class MessagesList extends SherlockActivity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable, TextWatcher, OnEditorActionListener
 {
 	private static final int INVITE_PICKER_RESULT = 1001;
 
@@ -618,14 +615,14 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 
 		super.onCreateContextMenu(menu, v, menuInfo);
-		MenuInflater inflater = getMenuInflater();
+		android.view.MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.conversation_menu, menu);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		MenuInflater inflater = getMenuInflater();
+		MenuInflater inflater = getSupportMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
 		return true;
 	}
@@ -644,8 +641,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
+	public boolean onOptionsItemSelected(com.actionbarsherlock.view.MenuItem item)
 	{
 		Intent intent;
 		switch (item.getItemId())

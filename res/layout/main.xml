@@ -4,44 +4,25 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/message_list_main"
         xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/message_list_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/listgrey"
         android:orientation="vertical" >
 
-        <RelativeLayout
-            android:id="@+id/message_list_top"
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
-            android:background="@color/diamondblue" >
-
-            <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:src="@drawable/ic_header_logo" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="10" >
-
-            <com.bsb.hike.view.HikeListView
-                android:choiceMode="none"
-                android:id="@+id/conversations"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
-                android:layout_below="@+id/title_field"
-                android:background="@color/listgrey"
-                android:divider="@color/dividercolor"
-                android:dividerHeight="0.5dp" >
-            </com.bsb.hike.view.HikeListView>
-        </RelativeLayout>
+        <com.bsb.hike.view.HikeListView
+           android:layout_weight="10"
+           android:choiceMode="none"
+           android:id="@+id/conversations"
+           android:layout_width="match_parent"
+           android:layout_height="0dp"
+           android:layout_alignParentLeft="true"
+           android:layout_below="@+id/title_field"
+           android:background="@color/listgrey"
+           android:divider="@color/dividercolor"
+           android:dividerHeight="0.5dp" >
+        </com.bsb.hike.view.HikeListView>
 
         <RelativeLayout
             android:id="@+id/bottom_nav_bar"
@@ -62,7 +43,6 @@
 	    android:id="@+id/messages_list_overlay"
 	    android:layout_width="match_parent"
 	    android:layout_height="0dp"
-	    android:layout_below="@id/message_list_top"
 	    android:layout_alignParentBottom="true"
 	    android:background="@color/transparent_white"
 	    android:visibility="visible" >
