@@ -1,43 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent" >
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/message_list_main"
+    <com.bsb.hike.view.HikeListView
+        android:fadingEdge="none"
+        android:id="@+id/conversations"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/bottom_nav_bar"
+        android:layout_alignParentLeft="true"
+        android:layout_weight="10"
         android:background="@color/listgrey"
-        android:orientation="vertical" >
+        android:choiceMode="none"
+        android:divider="@color/dividercolor"
+        android:dividerHeight="0.5dp" >
+    </com.bsb.hike.view.HikeListView>
 
-        <com.bsb.hike.view.HikeListView
-           android:layout_weight="10"
-           android:choiceMode="none"
-           android:id="@+id/conversations"
-           android:layout_width="match_parent"
-           android:layout_height="0dp"
-           android:layout_alignParentLeft="true"
-           android:layout_below="@+id/title_field"
-           android:background="@color/listgrey"
-           android:divider="@color/dividercolor"
-           android:dividerHeight="0.5dp" >
-        </com.bsb.hike.view.HikeListView>
+    <View
+        android:id="@+id/bottom_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/black" >
+    </View>
 
-        <RelativeLayout
-            android:id="@+id/bottom_nav_bar"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:background="@color/bottombargrey" >
+    <View
+        android:id="@+id/messages_list_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/transparent_white"
+        android:visibility="visible" >
+    </View>
 
-            <ImageView
-                android:id="@+id/edit_message"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_centerInParent="true"
-                android:src="@drawable/ic_editmessage" />
-        </RelativeLayout>
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/edit_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="13dp"
+        android:src="@drawable/ic_editmessage" />
 
 	<View
 	    android:id="@+id/messages_list_overlay"
