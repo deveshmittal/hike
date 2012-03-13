@@ -11,15 +11,19 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 
-public class AccountCreateSuccess extends Activity implements TextWatcher
+public class AccountCreateSuccess extends Activity implements TextWatcher, OnEditorActionListener
 {
 	private EditText mEditText;
 	private TextView mFriendlyNameView;
@@ -34,6 +38,7 @@ public class AccountCreateSuccess extends Activity implements TextWatcher
 		mNextButton = (Button) findViewById(R.id.btnScanAB);
 
 		mEditText.addTextChangedListener(this);
+		mEditText.setOnEditorActionListener(this);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String name = settings.getString(HikeMessengerApp.NAME, null);
@@ -116,6 +121,18 @@ public class AccountCreateSuccess extends Activity implements TextWatcher
 	@Override
 	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
 	{
+	}
+
+	@Override
+	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
+	{
+		if ((view == mEditText) &&
+				(actionId == EditorInfo.IME_ACTION_NEXT))
+			{
+				boolean ret = mNextButton.performClick();
+				return ret;
+			}
+		return false;
 	}
 }
 
