@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent">
 
     <com.bsb.hike.view.HikeListView
         android:fadingEdge="none"
@@ -11,7 +11,7 @@
         android:layout_above="@+id/bottom_nav_bar"
         android:layout_alignParentLeft="true"
         android:layout_weight="10"
-        android:background="@color/listgrey"
+        android:background="@drawable/thatch_repeat"
         android:choiceMode="none"
         android:divider="@color/dividercolor"
         android:dividerHeight="0.5dp" >
@@ -20,9 +20,9 @@
     <View
         android:id="@+id/bottom_nav_bar"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/black" >
+        android:background="@drawable/bottombar" >
     </View>
 
     <View
@@ -34,14 +34,19 @@
         android:visibility="visible" >
     </View>
 
+	<View
+        android:layout_below="@id/conversations"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/dropshadow" />
+
     <ImageView
         android:id="@+id/edit_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:paddingBottom="13dp"
-        android:src="@drawable/ic_editmessage" />
+        android:src="@drawable/ic_newmessage" />
 
     <RelativeLayout
         android:layout_above="@+id/bottom_nav_bar"
