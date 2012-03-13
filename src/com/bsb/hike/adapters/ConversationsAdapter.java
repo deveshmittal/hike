@@ -102,6 +102,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			mMessagesList.setComposeView(animator);
 		}
 
+		/* remove divider from last item */
+		View divider = v.findViewById(R.id.item_divider);
+		divider.setVisibility(position == (getCount() - 1) ? View.GONE : View.VISIBLE);
 		return v;
 	}
 }
