@@ -14,7 +14,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -27,13 +26,11 @@ import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.inputmethod.EditorInfo;
@@ -46,7 +43,6 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewAnimator;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -97,6 +93,8 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 
 	private ComposeViewWatcher mComposeTextWatcher;
 
+	private Button mCurrentButton;
+
 	private class SwipeGestureDetector extends SimpleOnGestureListener
 	{
 		final int swipeMinDistance;
@@ -110,10 +108,31 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 			swipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
 		}
 
-
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e)
 		{
+			/* 
+			 * on certain phones, it doesn't deliver a button press first.  Detect if we're over a button
+			 */
+			if ((mCurrentButton != null) && (mCurrentButton.isEnabled()))
+			{
+				int[] location = new int[2];
+				mCurrentButton.getLocationOnScreen(location);
+				float touchX = e.getX();
+				float touchY = e.getY();
+				float buttonX = location[0];
+				float buttonY = location[1];
+				if ((touchX >= buttonX) &&
+					(touchY <= buttonY) &&
+					(touchX <= (buttonX + mCurrentButton.getWidth())) &&
+					(touchY >= (buttonY - mCurrentButton.getHeight())))
+				{
+					e.setAction(MotionEvent.ACTION_CANCEL);
+					mCurrentButton.performClick();
+					return true;
+				}
+			}
+
 			if (mCurrentComposeView != null)
 			{
 				swipeBack(mCurrentComposeView, true);
@@ -352,6 +371,7 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 		mComposeTextWatcher = null;
 		mCurrentComposeText = null;
 		mCurrentComposeView = null;
+		mCurrentButton = null;
 
 		viewAnimator.setOutAnimation(animate ? Utils.outToLeftAnimation(this) : null);
 		viewAnimator.setInAnimation(animate ? Utils.inFromRightAnimation(this) : null);
@@ -519,13 +539,13 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 		mCurrentComposeText.setOnEditorActionListener(this);
 		mCurrentComposeView = viewAnimator;
 
-		Button button = (Button) viewAnimator.findViewById(R.id.send_message);
+		mCurrentButton = (Button) viewAnimator.findViewById(R.id.send_message);
 		if (mComposeTextWatcher != null)
 		{
 			mComposeTextWatcher.uninit();
 		}
 
-		mComposeTextWatcher = new ComposeViewWatcher(mCurrentConversation, mCurrentComposeText, button,
+		mComposeTextWatcher = new ComposeViewWatcher(mCurrentConversation, mCurrentComposeText, mCurrentButton,
 									getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0));
 		mComposeTextWatcher.init();
 		mCurrentComposeText.addTextChangedListener(mComposeTextWatcher);
