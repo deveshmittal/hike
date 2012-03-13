@@ -43,13 +43,20 @@
         android:paddingBottom="13dp"
         android:src="@drawable/ic_editmessage" />
 
-	<View
-	    android:id="@+id/messages_list_overlay"
-	    android:layout_width="match_parent"
-	    android:layout_height="0dp"
-	    android:layout_alignParentBottom="true"
-	    android:background="@color/transparent_white"
-	    android:visibility="visible" >
+    <RelativeLayout
+        android:layout_above="@+id/bottom_nav_bar"
+        android:visibility="gone"
+        android:id="@+id/empty_view"
+   		android:background="@color/white"
+   		android:layout_width="match_parent"
+   		android:layout_height="match_parent">
 
-	</View>
+        <ImageView
+        	android:id="@+id/imageView1"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_alignParentBottom="true"
+        	android:layout_centerHorizontal="true"
+        	android:src="@drawable/ic_hometip" />
+    </RelativeLayout>
 </RelativeLayout>

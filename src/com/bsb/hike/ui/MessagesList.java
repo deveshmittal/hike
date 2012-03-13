@@ -76,7 +76,7 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 
 	private ConversationsAdapter mAdapter;
 
-	private RelativeLayout mEmptyView;
+	private View mEmptyView;
 
 	private Comparator<? super Conversation> mConversationsComparator;
 
@@ -289,15 +289,7 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 		mEditMessageIconView.setOnClickListener(this);
 
 		/* set the empty view layout for the list */
-		LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mEmptyView = (RelativeLayout) vi.inflate(R.layout.empty_conversations, null);
-
-		mEmptyView.setVisibility(View.GONE);
-
-		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.FILL_PARENT, RelativeLayout.LayoutParams.FILL_PARENT);
-		params.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
-		mEmptyView.setLayoutParams(params);
-		((ViewGroup) mConversationsView.getParent()).addView(mEmptyView);
+		mEmptyView = findViewById(R.id.empty_view);
 		mConversationsView.setEmptyView(mEmptyView);
 
 		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
