@@ -1,9 +1,13 @@
 package com.bsb.hike.db;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -90,12 +94,32 @@ public class DbConversationListener implements Listener
 		{
 			String msisdn = (String) object;
 			mUserDb.block(msisdn);
+			JSONObject blockObj = blockUnblockSerialize("b",msisdn);
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, blockObj);
 		}
 		else if (HikePubSub.UNBLOCK_USER.equals(type))
 		{
 			String msisdn = (String) object;
 			mUserDb.unblock(msisdn);
+			JSONObject unblockObj = blockUnblockSerialize("ub",msisdn);
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, unblockObj);
 		}
+	}
+
+	private JSONObject blockUnblockSerialize(String type, String msisdn) 
+	{
+		JSONObject obj = new JSONObject();
+		try 
+		{
+			obj.put(HikeConstants.TYPE, type);
+			obj.put(HikeConstants.DATA, msisdn);
+		} 
+		catch (JSONException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return obj;
 	}
 
 	private void updateDbBatch(long[] ids, int status)
