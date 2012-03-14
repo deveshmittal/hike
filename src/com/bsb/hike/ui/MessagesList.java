@@ -255,6 +255,11 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		ActionBar actionBar = getSupportActionBar();
+
+		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setIcon(R.drawable.ic_logoheader);
+
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		if (token == null)
@@ -360,13 +365,6 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
-
-		ActionBar actionBar = getSupportActionBar();
-		BitmapDrawable background = new BitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.ic_headermain));
-		background.setTileModeX(android.graphics.Shader.TileMode.REPEAT);
-		actionBar.setBackgroundDrawable(background);
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setIcon(R.drawable.ic_logoheader);
 	}
 
 	private void swipeBack(ViewAnimator viewAnimator, boolean animate)
