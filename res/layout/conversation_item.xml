@@ -68,7 +68,7 @@
             android:layout_height="wrap_content" >
 
             <Button
-                android:background="@drawable/ic_sendbutton"
+                android:background="@drawable/sendbutton"
                 android:id="@+id/send_message"
 	            android:layout_width="57px"
     	        android:layout_height="37px"

@@ -100,7 +100,7 @@
         </EditText>
 
         <Button
-            android:background="@drawable/ic_sendbutton"
+            android:background="@drawable/sendbutton"
             android:layout_alignParentRight="true"
 			android:layout_centerVertical="true"
             android:layout_marginBottom="7dp"
