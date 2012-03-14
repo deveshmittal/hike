@@ -62,24 +62,22 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/black" />
         </RelativeLayout>
-
         <RelativeLayout
             android:id="@+id/bottom_panel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" >
 
             <Button
+                android:background="@drawable/ic_sendbutton"
                 android:id="@+id/send_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+	            android:layout_width="57px"
+    	        android:layout_height="37px"
                 android:layout_alignParentRight="true"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="7dp"
-                android:layout_marginTop="12dp"
-                android:layout_centerVertical="true"
+                android:layout_marginTop="21dp"
                 android:enabled="false"
-                android:onClick="onSendClick"
-                android:text="@string/send" />
+                android:onClick="onSendClick" />
 
             <EditText
                 android:id="@+id/mini_compose"
@@ -95,6 +93,7 @@
                 android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences" />
 
         </RelativeLayout>
+
     </ViewAnimator>
     <View
         android:layout_marginLeft="10dp"
@@ -103,6 +102,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_alignParentBottom="true"
-        android:background="@color/dividercolor" />
+        android:background="@color/black" />
 
 </RelativeLayout>

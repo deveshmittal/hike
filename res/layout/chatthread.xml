@@ -41,7 +41,7 @@
 	    android:id="@+id/sms_chat_metadata"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
-	    android:background="@color/grey" >
+	    android:background="@color/compose_background" >
 
         <TextView
             android:layout_alignParentLeft="true"
@@ -79,8 +79,8 @@
 	<RelativeLayout
 	    android:id="@+id/bottom_panel"
 	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-	    android:background="@color/grey" >
+	    android:layout_height="58dp"
+	    android:background="@color/compose_background" >
 
         <EditText
             android:background="@drawable/edittext"
@@ -88,9 +88,9 @@
              android:layout_width="fill_parent"
              android:layout_height="wrap_content"
              android:layout_alignParentLeft="true"
-             android:layout_marginLeft="7dp"
-             android:layout_marginTop="7dp"
-             android:layout_marginBottom="7dp"
+             android:layout_marginLeft="12dp"
+             android:layout_marginTop="9dp"
+             android:layout_marginBottom="9dp"
              android:imeOptions="actionSend"
              android:autoText="true"
              android:layout_toLeftOf="@+id/send_message"
@@ -100,15 +100,15 @@
         </EditText>
 
         <Button
+            android:background="@drawable/ic_sendbutton"
             android:layout_alignParentRight="true"
-            android:layout_marginTop="7dp"
+			android:layout_centerVertical="true"
             android:layout_marginBottom="7dp"
-            android:layout_marginRight="7dp"
-            android:layout_marginLeft="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_marginRight="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_width="57px"
+            android:layout_height="37px"
             android:id="@+id/send_message"
-            android:text="@string/send"
             android:enabled="false"
             android:onClick="onSendClick"/>
  	</RelativeLayout>
