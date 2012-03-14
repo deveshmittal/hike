@@ -83,6 +83,7 @@
 	    android:background="@color/grey" >
 
         <EditText
+            android:background="@drawable/edittext"
              android:id="@+id/msg_compose"
              android:layout_width="fill_parent"
              android:layout_height="wrap_content"
