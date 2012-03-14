@@ -385,9 +385,6 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 		viewAnimator.setInAnimation(animate ? Utils.inFromRightAnimation(this) : null);
 
 		viewAnimator.setDisplayedChild(0);
-		View bottomBar = findViewById(R.id.bottom_nav_bar);
-		bottomBar.setVisibility(View.VISIBLE);
-
 		if (animate)
 		{
 			viewAnimator.getInAnimation().setAnimationListener(new AnimationListener()
@@ -481,8 +478,6 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 				@Override
 				public void onAnimationEnd(Animation animation)
 				{
-//					mCurrentComposeText.requestFocus();
-
 					mConversationsView.postDelayed(new Runnable() {
 						public void run()
 						{
@@ -496,19 +491,21 @@ public class MessagesList extends SherlockActivity implements OnClickListener, H
 
 							mAmountToScrollAfterSwipeBack = positionSelected - mConversationsView.getFirstVisiblePosition();
 
+							View parent = (View) mCurrentComposeView.getParent();
+
 							int[] loc = new int[2];
-							mCurrentComposeView.getLocationOnScreen(loc);
-							int scrollDistance = (int) (loc[1] - mCurrentComposeView.getHeight()*1.2);
+							parent.getLocationOnScreen(loc);
+							/* i have no idea why this has to be such a weird number */
+							int scrollDistance = (int) (loc[1] - parent.getHeight()*1.1);
 							mConversationsView.scrollTo(0, scrollDistance);
 
 							Display display = getWindowManager().getDefaultDisplay();
 							View v = findViewById(R.id.messages_list_overlay);
 							RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
-							View parent = (View) mCurrentComposeView.getParent();
 							int[] location = new int[2];
 							parent.getLocationOnScreen(location);
 
-							lp.height = display.getHeight() - location[1] - parent.getHeight();
+							lp.height = display.getHeight() - location[1] - parent.getHeight() + 2;//2px for the divider
 							v.setLayoutParams(lp);
 							v.setVisibility(View.VISIBLE);
 
