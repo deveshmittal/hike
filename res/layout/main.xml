@@ -13,7 +13,9 @@
         android:layout_weight="10"
         android:background="@drawable/thatch_repeat"
         android:choiceMode="none"
-  	    android:divider="@color/diamondblue">
+        android:footerDividersEnabled="false"
+        android:dividerHeight="2dp"
+  	    android:divider="@drawable/ic_thread_divider">
     </com.bsb.hike.view.HikeListView>
 
     <View
