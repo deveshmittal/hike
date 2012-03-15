@@ -3,11 +3,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.bsb.hike.view.HikeListView
+ 	<LinearLayout
+        android:id="@+id/top_panel"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/headerbar" >
+
+        <ImageView
+            android:layout_marginLeft="17dp"
+            android:layout_gravity="center"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+            android:src="@drawable/ic_header_logo"/>
+	</LinearLayout>
+    
+     <com.bsb.hike.view.HikeListView
         android:fadingEdge="none"
         android:id="@+id/conversations"
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
+        android:layout_below="@id/top_panel"
         android:layout_above="@+id/bottom_nav_bar"
         android:layout_alignParentLeft="true"
         android:layout_weight="10"

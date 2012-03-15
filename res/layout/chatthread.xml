@@ -3,39 +3,40 @@
     android:layout_width="fill_parent"
     android:orientation="vertical"
     android:layout_height="fill_parent"
-    android:background="@color/white">
+    android:background="@color/black">
 
     <LinearLayout
         android:id="@+id/top_panel"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="47dp"
         android:layout_alignParentTop="true"
         android:background="@drawable/headerbar" >
 
-        <ImageView
-            android:layout_marginLeft="7dp"
-            android:layout_gravity="center"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-            android:src="@drawable/ic_header_logo"/>
+        <TextView
+            android:textSize="18dp"
+            android:gravity="center_vertical"
+            android:textAppearance="@style/ChatLabelStyle"
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:id="@+id/chat_label"
+            android:layout_marginLeft="18dp"
+            android:text="New Message"/>
+    </LinearLayout>
 
-        <AutoCompleteTextView
+    <AutoCompleteTextView
             android:background="@drawable/edittext"
             android:hint="Start typing a name"
             android:visibility="visible"
             android:imeOptions="actionNone"
-            android:layout_marginLeft="7dp"
-            android:layout_marginRight="7dp"
+            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
             android:layout_marginTop="7dp"
             android:layout_marginBottom="7dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/input_number">
-        </AutoCompleteTextView>
-
-    </LinearLayout>
-
+    </AutoCompleteTextView>
 	<ListView
 	    android:fadingEdge="none"
 	    android:id="@+id/conversations_list"
@@ -80,12 +81,6 @@
             android:textColor="@color/white"
             android:textSize="12dp" >
         </TextView>
-        <View
-            android:layout_below="@id/sms_chat_metadata_num_chars"
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_centerVertical="true"
-            android:background="#ffffff" />
     </RelativeLayout>
 
 	<RelativeLayout

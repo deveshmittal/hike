@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
@@ -42,8 +43,6 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockActivity;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -58,7 +57,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.ContactUtils;
 
-public class ChatThread extends SherlockActivity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener
+public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener
 {
 
 	private HikePubSub mPubSub;
@@ -104,8 +103,6 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 
 	private AutoCompleteTextView mInputNumberView;
 
-	private ActionBar mActionBar;
-
 	int mMaxSmsLength = 160;
 
 	private String mLabel;
@@ -113,7 +110,7 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 	/* notifies that the adapter has been updated */
 	private Runnable mUpdateAdapter;
 
-	private View mTopPanel;
+	private TextView mLabelView;
 
 	@Override
 	protected void onPause()
@@ -161,8 +158,6 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 	/* msg is any text we want to show initially */
 	private void createAutoCompleteView(String msg)
 	{
-		mActionBar.hide();
-		mTopPanel.setVisibility(View.VISIBLE);
 		mMetadataView.setVisibility(View.GONE);
 		mComposeView.removeTextChangedListener(this);
 
@@ -334,8 +329,6 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 		setContentView(R.layout.chatthread);
 
 		/* bind views to variables */
-		mActionBar = getSupportActionBar();
-		mTopPanel = findViewById(R.id.top_panel);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mMetadataView = findViewById(R.id.sms_chat_metadata);
 		mInputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
@@ -345,6 +338,7 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 		mMetadataView = findViewById(R.id.sms_chat_metadata);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
+		mLabelView = (TextView) findViewById(R.id.chat_label);
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
@@ -564,6 +558,9 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 	 */
 	private void createConversation()
 	{
+		/* hide the number picker */
+		mInputNumberView.setVisibility(View.GONE);
+
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
 		 */
@@ -577,11 +574,7 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 
 		mBottomView.setVisibility(View.VISIBLE);
 
-		mTopPanel.setVisibility(View.GONE);
-
-		mActionBar.show();
-
-		mActionBar.setTitle(mLabel);
+		mLabelView.setText(mLabel);
 
 		mConversationsView.setStackFromBottom(true);
 
@@ -687,11 +680,11 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 		{
 			if (direction)
 			{
-				mActionBar.setTitle(mLabel + " is typing");
+				mLabelView.setText(mLabel + " is typing");
 			}
 			else
 			{
-				mActionBar.setTitle(mLabel);
+				mLabelView.setText(mLabel);
 			}
 		}
 	}
