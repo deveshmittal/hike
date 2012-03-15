@@ -579,6 +579,8 @@ public class ChatThread extends SherlockActivity implements HikePubSub.Listener,
 
 		mTopPanel.setVisibility(View.GONE);
 
+		mActionBar.show();
+
 		mActionBar.setTitle(mLabel);
 
 		mConversationsView.setStackFromBottom(true);
