@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -67,6 +68,12 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 		ContactInfo info = (ContactInfo) view.getTag();
 		activity.setResult(Activity.RESULT_OK, Utils.createIntentFromContactInfo(info));
 		activity.finish();
+	}
+
+	@Override
+	public String getTitle()
+	{
+		return activity.getResources().getString(R.string.invite);
 	}
 
 }

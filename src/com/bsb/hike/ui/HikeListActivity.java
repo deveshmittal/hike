@@ -32,6 +32,7 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	private RelativeLayout sectionContainer;
 	private ListView listView;
 	private EditText filterText;
+	private TextView labelView;
 
 	HikeArrayAdapter createListAdapter() throws Exception
 	{
@@ -54,6 +55,7 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hikelistactivity);
+		labelView = (TextView) findViewById(R.id.title);
 		listView = (ListView) findViewById(R.id.contact_list);
 		listView.setTextFilterEnabled(true);
 		try
@@ -66,6 +68,8 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 			Log.e("HikeListActivity", "Unable to instantiate adapter", e);
 			throw new RuntimeException(e.getCause());
 		}
+
+		labelView.setText(adapter.getTitle());
 
 		sectionText = (TextView) findViewById(R.id.section_label);
 		sectionContainer = (RelativeLayout) findViewById(R.id.section_container);

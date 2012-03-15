@@ -90,6 +90,12 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 	 */
 	protected abstract android.view.View getItemView(int position, android.view.View convertView, android.view.ViewGroup parent);
 
+	/**
+	 * Get the title for the activity
+	 * @return String title of this activity
+	 */
+	public abstract String getTitle();
+
 	public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent)
 	{
 		if (getItemViewType(position) == SECTION_TYPE)

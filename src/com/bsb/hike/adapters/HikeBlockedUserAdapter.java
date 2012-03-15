@@ -80,4 +80,10 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 		this.notifyDataSetChanged();
 		HikeMessengerApp.getPubSub().publish(block ? HikePubSub.BLOCK_USER : HikePubSub.UNBLOCK_USER, msisdn);
 	}
+
+	@Override
+	public String getTitle()
+	{
+		return context.getResources().getString(R.string.block_users);
+	}
 }

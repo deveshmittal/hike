@@ -19,9 +19,8 @@
             android:textAppearance="@style/ChatLabelStyle"
             android:layout_height="match_parent"
             android:layout_width="wrap_content"
-            android:id="@+id/chat_label"
-            android:layout_marginLeft="18dp"
-            android:text="Invite"/>
+            android:id="@+id/title"
+            android:layout_marginLeft="18dp"/>
     </LinearLayout>
 
     <RelativeLayout
