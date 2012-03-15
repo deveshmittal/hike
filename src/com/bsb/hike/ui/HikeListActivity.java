@@ -2,12 +2,14 @@ package com.bsb.hike.ui;
 
 import java.lang.reflect.Constructor;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
@@ -18,23 +20,18 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.MenuItem.OnActionExpandListener;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeArrayAdapter;
 import com.bsb.hike.adapters.HikeArrayAdapter.Section;
 
-public class HikeListActivity extends SherlockActivity implements OnScrollListener, OnActionExpandListener, TextWatcher
+public class HikeListActivity extends Activity implements OnScrollListener, TextWatcher
 {
 	private HikeArrayAdapter adapter;
 	private TextView sectionText;
 	private RelativeLayout sectionContainer;
 	private ListView listView;
-	private MenuItem searchMenu;
+	private EditText filterText;
 
 	HikeArrayAdapter createListAdapter() throws Exception
 	{
@@ -75,6 +72,9 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 
 		listView.setAdapter(adapter);
 		listView.setOnScrollListener(this);
+
+		filterText = (EditText) findViewById(R.id.filter);
+		filterText.addTextChangedListener(this);
 	}
 
 	@Override
@@ -98,83 +98,10 @@ public class HikeListActivity extends SherlockActivity implements OnScrollListen
 	{		
 	}
 
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		getSupportMenuInflater().inflate(R.menu.list_menu, menu);
-		searchMenu = menu.getItem(0);
-		searchMenu.setOnActionExpandListener(this);
-		return true;
-	}
-
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		switch(item.getItemId())
-		{
-		case android.R.id.home:
-			finish();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);			
-		}
-	}
-
 	@Override
 	public boolean onSearchRequested()
 	{
-		return searchMenu.expandActionView();
-	}
-
-	@Override
-	public boolean onMenuItemActionExpand(MenuItem item)
-	{
-		if (item.getItemId() != R.id.menu_search)
-		{
-			return true;
-		}
-
-		View view = item.getActionView().findViewById(R.id.searchview);
-		if (view == null)
-		{
-			return true;
-		}
-
-		final EditText editText = (EditText) view;
-		editText.addTextChangedListener(this);
-
-		/* add this in a runnable, because if we try to
-		 * expand this now the editText isn't actually visible.
-		 */
-		editText.post(new Runnable()
-		{
-			public void run()
-			{
-				editText.requestFocusFromTouch();
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.showSoftInput(editText, 0);
-			}
-		});
-		return true;
-	}
-
-	@Override
-	public boolean onMenuItemActionCollapse(MenuItem item)
-	{
-		if (item.getItemId() != R.id.menu_search)
-		{
-			return true;
-		}
-
-		View view = item.getActionView().findViewById(R.id.searchview);
-		final EditText editText = (EditText) view;
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-		editText.post(new Runnable()
-		{
-			public void run()
-			{
-				editText.clearFocus();
-			}
-		});
+		filterText.requestFocus();
 		return true;
 	}
 

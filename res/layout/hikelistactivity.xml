@@ -2,28 +2,44 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="@color/black"
     android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/filter"
+   <LinearLayout
+        android:id="@+id/top_panel"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
+        android:layout_height="47dp"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/headerbar" >
+
+        <TextView
+            android:textSize="18dp"
+            android:gravity="center_vertical"
+            android:textAppearance="@style/ChatLabelStyle"
+            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:id="@+id/chat_label"
+            android:layout_marginLeft="18dp"
+            android:text="Invite"/>
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/section_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@color/offwhite">
 
         <TextView
             android:id="@+id/section_label"
             android:textColor="@color/diamondblue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="7dp"
+            android:layout_marginLeft="18dp"
             android:text=""/>
    	    <View
+            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
 	        android:layout_width="match_parent"
       	    android:layout_height="1dp"
        	    android:background="@color/diamondblue"
@@ -31,17 +47,29 @@
     </RelativeLayout>
 
     <ListView
+        android:background="@color/offwhite"
         android:id="@+id/contact_list"
-        android:fadingEdge="none"        
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="7dp"
-        android:layout_marginRight="7dp"
+        android:layout_height="0dp"
+        android:layout_weight="5"
         android:cacheColorHint="#000000"
+        android:divider="@null"
+        android:fadingEdge="none"
         android:fastScrollEnabled="true"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"
-        android:divider="@color/diamondblue"
         android:textFilterEnabled="true" />
+
+    <EditText
+		android:hint="Search"
+		android:layout_marginTop="7dp"
+		android:layout_marginBottom="7dp"
+		android:layout_marginLeft="18dp"
+		android:layout_marginRight="18dp"
+        android:id="@+id/filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/edittext" >
+    </EditText>
 
 </LinearLayout>
