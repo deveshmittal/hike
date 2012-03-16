@@ -11,11 +11,14 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 
+import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.JSONSerializable;
 
@@ -165,5 +168,26 @@ public class Utils
 		intent.putExtra("id", contactInfo.getId());
 		intent.putExtra("msisdn", contactInfo.getMsisdn());
 		return intent;
+	}
+
+	public static Drawable getDefaultIconForUser(Context context, String msisdn)
+	{
+		int count = 3;
+		int id;
+		switch(msisdn.hashCode() % count)
+		{
+		case 0:
+			id = R.drawable.ic_avatar0;
+			break;
+		case 1:
+			id = R.drawable.ic_avatar1;
+			break;
+		case 2:
+		default:
+			id = R.drawable.ic_avatar2;
+			break;
+		}
+
+		return context.getResources().getDrawable(id);
 	}
 }

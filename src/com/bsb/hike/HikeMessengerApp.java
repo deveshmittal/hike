@@ -11,6 +11,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.bsb.hike.db.DbConversationListener;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
@@ -152,6 +153,8 @@ public class HikeMessengerApp extends Application
 		super.onCreate();
 
 		SmileyParser.init(this);
+
+		IconCacheManager.init(this);
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
 

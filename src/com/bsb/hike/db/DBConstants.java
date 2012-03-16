@@ -47,4 +47,8 @@ public class DBConstants
 
 	public static final String BLOCK_TABLE = "blocked";
 
+	public static final String THUMBNAILS_TABLE = "thumbnails";
+
+	public static final String IMAGE = "image";
+
 }

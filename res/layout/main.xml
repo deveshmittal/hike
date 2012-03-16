@@ -18,7 +18,7 @@
         	android:layout_height="wrap_content"
             android:src="@drawable/ic_header_logo"/>
 	</LinearLayout>
-    
+
      <com.bsb.hike.view.HikeListView
         android:fadingEdge="none"
         android:id="@+id/conversations"

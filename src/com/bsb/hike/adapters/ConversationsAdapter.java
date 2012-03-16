@@ -15,6 +15,7 @@ import android.widget.ViewAnimator;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.MessagesList;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation>
@@ -92,6 +93,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				imgStatus.setImageResource(0);
 			}
 		}
+
+		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
+		avatarView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(conversation.getMsisdn()));
 
 		if (mMessagesList.getSelectedConversation() == conversation)
 		{

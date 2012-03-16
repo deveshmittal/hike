@@ -1,5 +1,6 @@
 package com.bsb.hike.db;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -13,6 +14,9 @@ import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.bsb.hike.models.ContactInfo;
@@ -23,6 +27,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	private SQLiteDatabase mDb;
 
 	private SQLiteDatabase mReadDb;
+
+	private Context mContext;
 
 	@Override
 	public void onCreate(SQLiteDatabase db)
@@ -37,9 +43,17 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 												+ " )";
 
 		db.execSQL(create);
+
 		create = "CREATE TABLE IF NOT EXISTS " + DBConstants.BLOCK_TABLE +
 													" ( " + 
 														DBConstants.MSISDN + " TEXT " +
+													" ) ";
+		db.execSQL(create);
+
+		create = "CREATE TABLE IF NOT EXISTS " + DBConstants.THUMBNAILS_TABLE + 
+													" ( " +
+														DBConstants.MSISDN + " TEXT PRIMARY KEY, " + 
+														DBConstants.IMAGE + " BLOB" +
 													" ) ";
 		db.execSQL(create);
 	}
@@ -49,6 +63,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		super(context, DBConstants.USERS_DATABASE_NAME, null, DBConstants.USERS_DATABASE_VERSION);
 		mDb = getWritableDatabase();
 		mReadDb = getReadableDatabase();
+		this.mContext = context;
 	}
 
 	@Override
@@ -288,5 +303,33 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 
 		return blocked;
+	}
+
+	public void setIcon(String msisdn, byte[] data)
+	{
+		ContentValues vals = new ContentValues(2);
+		vals.put(DBConstants.MSISDN, msisdn);
+		vals.put(DBConstants.IMAGE, data);
+		mDb.replace(DBConstants.THUMBNAILS_TABLE, null, vals);
+	}
+
+	public Drawable getIcon(String msisdn)
+	{
+		Cursor c = mDb.query(DBConstants.THUMBNAILS_TABLE, new String[]{DBConstants.IMAGE}, "msisdn=?", new String[] {msisdn}, null, null, null);
+		try
+		{
+			if (!c.moveToFirst())
+			{
+				/* lookup based on this msisdn */
+				return Utils.getDefaultIconForUser(mContext, msisdn);
+			}
+
+			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
+			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata, 0, icondata.length));
+		}
+		finally
+		{
+			c.close();
+		}
 	}
 }
