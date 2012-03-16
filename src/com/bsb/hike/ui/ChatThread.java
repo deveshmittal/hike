@@ -872,7 +872,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			mMetadataView.setBackgroundResource(R.color.grey);
+			mMetadataView.setBackgroundResource(R.color.compose_background);
 		}
 
 		int length = mComposeView.getText().length();
