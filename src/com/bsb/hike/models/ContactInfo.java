@@ -5,7 +5,7 @@ import org.json.JSONObject;
 
 import com.bsb.hike.models.utils.JSONSerializable;
 
-public class ContactInfo implements JSONSerializable, Comparable
+public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 {
 	@Override
 	public String toString()
@@ -142,7 +142,7 @@ public class ContactInfo implements JSONSerializable, Comparable
 	}
 
 	@Override
-	public int compareTo(Object rhs)
+	public int compareTo(ContactInfo rhs)
 	{
 		return (this.name.toLowerCase().compareTo( ((ContactInfo) rhs).name.toLowerCase()));
 	}
