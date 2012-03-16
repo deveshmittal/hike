@@ -3,7 +3,6 @@ package com.bsb.hike.ui;
 import android.content.Context;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import com.bsb.hike.tasks.DeleteAccountTask;
 

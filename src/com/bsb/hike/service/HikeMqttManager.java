@@ -1,6 +1,5 @@
 package com.bsb.hike.service;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
