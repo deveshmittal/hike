@@ -4,21 +4,6 @@
     android:layout_height="match_parent"
     android:background="@drawable/thatch_repeat" >
 
-    <TextView
-        android:id="@+id/textWeGotYouOnCarrier"
-        android:layout_above="@id/nameView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:gravity="center"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="25dp"
-        android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
-        android:text="@string/we_got_you_on_carrier"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/black" />
-
     <Button
         android:id="@+id/btnScanAB"
         android:layout_width="fill_parent"
@@ -47,7 +32,20 @@
 
         <requestFocus />
     </EditText>
-
+    <TextView
+        android:id="@+id/textWeGotYouOnCarrier"
+        android:layout_above="@id/nameView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="25dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:text="@string/we_got_you_on_carrier"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="@color/black" />
     <TextView
         android:text="VijayC"
         android:id="@+id/namePreview"
