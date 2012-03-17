@@ -63,7 +63,7 @@
         android:layout_toRightOf="@id/avatar"
         android:background="@drawable/ic_bubble_white"
         android:layout_marginLeft="2dp"
-        android:gravity="center"
+        android:gravity="left"
         android:paddingLeft="17dp"
         android:paddingRight="10dp"
         android:paddingBottom="10dp"
