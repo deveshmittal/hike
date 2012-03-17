@@ -95,6 +95,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private Button mCurrentButton;
 
+	private View mInviteFriend;
+
 	private class SwipeGestureDetector extends SimpleOnGestureListener
 	{
 		final int swipeMinDistance;
@@ -311,6 +313,9 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		/* set the empty view layout for the list */
 		mEmptyView = findViewById(R.id.empty_view);
 		mConversationsView.setEmptyView(mEmptyView);
+
+		mInviteFriend = mEmptyView.findViewById(R.id.invite_friend);
+		mInviteFriend.setOnClickListener(this);
 
 		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
 		List<Conversation> conversations = db.getConversations();
@@ -651,15 +656,20 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 	}
 
+	private void invite()
+	{
+		Intent intent = new Intent(this, HikeListActivity.class);
+		intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
+		startActivityForResult(intent, INVITE_PICKER_RESULT);		
+	}
+
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		Intent intent;
 		switch (item.getItemId())
 		{
 		case R.id.invite:
-			intent = new Intent(this, HikeListActivity.class);
-			intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
-			startActivityForResult(intent, INVITE_PICKER_RESULT);
+			invite();
 			return true;
 		case R.id.deleteconversations:
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -700,6 +710,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra("edit", true);
 			startActivity(intent);
+		}
+		else if (v == mInviteFriend)
+		{
+			invite();
 		}
 	}
 
