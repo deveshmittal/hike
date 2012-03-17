@@ -651,15 +651,20 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		}
 	}
 
+	public void onInviteClick(View v)
+	{
+		Intent intent = new Intent(this, HikeListActivity.class);
+		intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
+		startActivityForResult(intent, INVITE_PICKER_RESULT);		
+	}
+
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		Intent intent;
 		switch (item.getItemId())
 		{
 		case R.id.invite:
-			intent = new Intent(this, HikeListActivity.class);
-			intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
-			startActivityForResult(intent, INVITE_PICKER_RESULT);
+			onInviteClick(null);
 			return true;
 		case R.id.deleteconversations:
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
