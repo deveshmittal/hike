@@ -1,6 +1,7 @@
 package com.bsb.hike.models;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -232,10 +233,9 @@ public class ConvMessage
 		}
 		else
 		{
-			
-			String hourFormatted = DateFormat.getTimeInstance().format(date);
-			String dayFormatted = DateFormat.getDateInstance().format(date);
-			return hourFormatted + " AT " + dayFormatted;
+			String format = "d MMM ''yy 'AT' h:mm aaa";
+			DateFormat df = new SimpleDateFormat(format);
+			return df.format(date);
 		}
 	}
 
