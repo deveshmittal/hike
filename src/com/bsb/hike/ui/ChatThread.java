@@ -342,7 +342,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataView = findViewById(R.id.sms_chat_metadata);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
-		mLabelView = (TextView) findViewById(R.id.chat_label);
+		mLabelView = (TextView) findViewById(R.id.title);
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);

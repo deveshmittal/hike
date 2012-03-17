@@ -1,74 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:orientation="vertical"
     android:layout_height="fill_parent"
-	android:background="@drawable/thatch_repeat">
+    android:background="@drawable/thatch_repeat"
+    android:orientation="vertical" >
 
-    <RelativeLayout
-        android:id="@+id/top_panel"
+    <include
+        android:id="@+id/top_panel_ref"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@drawable/headerbar" >
-
-        <TextView
-            android:layout_centerVertical="true"
-            android:textSize="22dp"
-            android:gravity="center_vertical"
-            android:textAppearance="@style/ChatLabelStyle"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:id="@+id/chat_label"
-            android:layout_marginLeft="18dp"
-            android:text="New Message"/>
-    </RelativeLayout>
+        layout="@layout/top_panel" />
 
     <LinearLayout
-        android:orientation="vertical"
         android:id="@+id/input_number_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/black">
-    	<AutoCompleteTextView
-            android:background="@drawable/edittext"
-            android:hint="Start typing a name"
-            android:visibility="visible"
-            android:imeOptions="actionNone"
+        android:background="@color/black"
+        android:orientation="vertical" >
+
+        <AutoCompleteTextView
+            android:id="@+id/input_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
             android:layout_marginLeft="18dp"
             android:layout_marginRight="18dp"
             android:layout_marginTop="7dp"
-            android:layout_marginBottom="7dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/input_number">
-    	</AutoCompleteTextView>
+            android:background="@drawable/edittext"
+            android:hint="Start typing a name"
+            android:imeOptions="actionNone"
+            android:visibility="visible" >
+        </AutoCompleteTextView>
     </LinearLayout>
 
     <ListView
-	    android:fadingEdge="none"
-	    android:id="@+id/conversations_list"
-	    android:layout_width="fill_parent"
-	    android:layout_height="0dp"
-	    android:layout_weight="30"
-	    android:cacheColorHint="#00000000"
-	    android:divider="@null"
-	    android:transcriptMode="alwaysScroll" >
-	</ListView>
+        android:id="@+id/conversations_list"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="30"
+        android:cacheColorHint="#00000000"
+        android:divider="@null"
+        android:fadingEdge="none"
+        android:transcriptMode="alwaysScroll" >
+    </ListView>
 
-	<RelativeLayout
-	    android:id="@+id/sms_chat_metadata"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:background="@color/compose_background" >
+    <RelativeLayout
+        android:id="@+id/sms_chat_metadata"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/compose_background" >
 
         <TextView
-            android:layout_alignParentLeft="true"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp"
             android:id="@+id/sms_chat_metadata_num_chars"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="3dp"
+            android:layout_marginTop="3dp"
             android:paddingLeft="10dp"
             android:text="24/160"
             android:textColor="@color/white"
@@ -76,12 +65,12 @@
         </TextView>
 
         <TextView
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp"
             android:id="@+id/sms_chat_metadata_text_credits_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="3dp"
+            android:layout_marginTop="3dp"
             android:paddingRight="10dp"
             android:text="99 credits left"
             android:textColor="@color/white"
@@ -89,40 +78,42 @@
         </TextView>
     </RelativeLayout>
 
-	<RelativeLayout
-	    android:id="@+id/bottom_panel"
-	    android:layout_width="fill_parent"
-	    android:layout_height="58dp"
-	    android:background="@color/compose_background" >
+    <RelativeLayout
+        android:id="@+id/bottom_panel"
+        android:layout_width="fill_parent"
+        android:layout_height="58dp"
+        android:background="@color/compose_background" >
 
         <EditText
+            android:id="@+id/msg_compose"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="9dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="9dp"
+            android:layout_toLeftOf="@+id/send_message"
+            android:autoText="true"
             android:background="@drawable/edittext"
-             android:id="@+id/msg_compose"
-             android:layout_width="fill_parent"
-             android:layout_height="wrap_content"
-             android:layout_alignParentLeft="true"
-             android:layout_marginLeft="12dp"
-             android:layout_marginTop="9dp"
-             android:layout_marginBottom="9dp"
-             android:imeOptions="actionSend"
-             android:autoText="true"
-             android:layout_toLeftOf="@+id/send_message"
-             android:hint="@string/type_to_compose"
-             android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences" >
-             <requestFocus/>
+            android:hint="@string/type_to_compose"
+            android:imeOptions="actionSend"
+            android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences" >
+
+            <requestFocus />
         </EditText>
 
         <Button
-            android:background="@drawable/sendbutton"
-            android:layout_alignParentRight="true"
-			android:layout_centerVertical="true"
-            android:layout_marginBottom="7dp"
-            android:layout_marginRight="12dp"
-            android:layout_marginLeft="12dp"
+            android:id="@+id/send_message"
             android:layout_width="57px"
             android:layout_height="37px"
-            android:id="@+id/send_message"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="7dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:background="@drawable/sendbutton"
             android:enabled="false"
-            android:onClick="onSendClick"/>
- 	</RelativeLayout>
+            android:onClick="onSendClick" />
+    </RelativeLayout>
+
 </LinearLayout>

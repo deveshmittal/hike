@@ -5,23 +5,12 @@
     android:background="@color/black"
     android:orientation="vertical" >
 
-   <RelativeLayout
-        android:id="@+id/top_panel"
+   <include
+        android:id="@+id/top_panel_ref"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:background="@drawable/headerbar" >
-
-        <TextView
-            android:layout_centerVertical="true"
-            android:textSize="22dp"
-            android:gravity="center_vertical"
-            android:textAppearance="@style/ChatLabelStyle"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:id="@+id/title"
-            android:layout_marginLeft="18dp"/>
-    </RelativeLayout>
+        layout="@layout/top_panel" />
 
     <RelativeLayout
         android:id="@+id/section_container"
