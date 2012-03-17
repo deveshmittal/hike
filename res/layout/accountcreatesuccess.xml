@@ -2,28 +2,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white" >
-
-    <ImageView
-        android:id="@+id/imageCheckmark"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="15dp"
-        android:layout_marginTop="8dp"
-        android:src="@drawable/checkmark" />
+    android:background="@drawable/thatch_repeat" >
 
     <TextView
         android:id="@+id/textWeGotYouOnCarrier"
+        android:layout_above="@id/nameView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/imageCheckmark"
+        android:layout_centerVertical="true"
+        android:gravity="center"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:gravity="left"
+        android:layout_marginBottom="25dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
         android:text="@string/we_got_you_on_carrier"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/black" />
@@ -66,18 +57,18 @@
         android:layout_centerHorizontal="true"
         android:textColor="@color/black" />
 
-    <TextView
-        android:id="@+id/next"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/btnScanAB"
-        android:layout_alignParentLeft="true"
-        android:layout_marginBottom="15dp"
-        android:gravity="center"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:text="@string/next_message"
-        android:textColor="@color/grey"
-        android:textSize="18sp" />
-
+		android:layout_below="@id/nameView"
+		android:layout_centerHorizontal="true"
+		android:layout_marginTop="10dp"
+		android:background="@drawable/avatar_border">
+    <ImageView
+        android:id="@+id/avatar"
+        android:src="@drawable/ic_avatar0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"/>
+    </LinearLayout>
 </RelativeLayout>
