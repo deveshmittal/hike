@@ -2,44 +2,84 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/green"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    >
+    android:background="@drawable/thatch_repeat"
+	android:paddingLeft="18dp"
+	android:paddingRight="18dp"
+    android:paddingBottom="8dp">
 
-    <ImageView
+	<LinearLayout
+	    android:orientation="horizontal"
+	    android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="5dp"
+		android:id="@+id/timestamp_container">
+
+		<View 
+		    android:layout_height="1dp"
+		    android:layout_width="0dp"
+		    android:layout_weight="10"
+		    android:layout_gravity="center"
+		    android:background="@drawable/ic_chatthread_divider"/>
+		    
+	    <TextView
+	        android:id="@+id/timestamp"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_marginLeft="7dp"
+        	android:layout_marginRight="7dp"
+        	android:layout_alignParentTop="true"
+        	android:layout_centerHorizontal="true"
+        	android:text="This is the timestamp"
+        	android:textAppearance="?android:attr/textAppearanceSmall"
+        	android:textColor="@color/timestampcolor" />
+
+	    <View 
+		    android:layout_height="1dp"
+		    android:layout_width="0dp"
+		    android:layout_weight="10"
+		    android:layout_gravity="center"
+		    android:background="@drawable/ic_chatthread_divider"/>
+	</LinearLayout>
+
+	<RelativeLayout
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentRight="true"
+	    android:layout_below="@id/timestamp_container" >
+
+	<ImageView
+	    android:layout_centerVertical="true"
+	    android:layout_marginRight="7dp"
+        android:src="@drawable/ic_sent"
         android:id="@+id/msg_status_indicator"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="8dp" >
+        android:layout_height="wrap_content" />
 
-    </ImageView>
-
-    <TextView
-        android:id="@+id/conversation_id"
-        android:layout_width="fill_parent"
+	<TextView
+        android:id="@+id/message_sms"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="10dp"
-        android:layout_toRightOf="@+id/msg_status_indicator"
+        android:background="@drawable/ic_bubble_green"
         android:gravity="right"
-        android:text="This is the message"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_toRightOf="@id/msg_status_indicator"
+        android:text="This is the message a much"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/black" />
 
-    <TextView
-        android:id="@+id/timestamp"
+	<TextView
+        android:id="@+id/message_hike"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="10dp"
-        android:layout_below="@+id/conversation_id"
-        android:text="This is the timestamp"
-        android:textColor="@color/timestampcolor"
-        android:textAppearance="?android:attr/textAppearanceSmall"/>
+        android:background="@drawable/ic_bubble_blue"
+        android:gravity="right"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:layout_toRightOf="@id/msg_status_indicator"
+        android:text="This is the message a much"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/black" />
 
+	</RelativeLayout>
 </RelativeLayout>

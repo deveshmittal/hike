@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:orientation="vertical"
     android:layout_height="fill_parent"
-    android:background="@color/black">
+	android:background="@drawable/thatch_repeat">
 
     <LinearLayout
         android:id="@+id/top_panel"
@@ -24,7 +24,13 @@
             android:text="New Message"/>
     </LinearLayout>
 
-    <AutoCompleteTextView
+    <LinearLayout
+        android:orientation="vertical"
+        android:id="@+id/input_number_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/black">
+    	<AutoCompleteTextView
             android:background="@drawable/edittext"
             android:hint="Start typing a name"
             android:visibility="visible"
@@ -36,17 +42,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/input_number">
-    </AutoCompleteTextView>
-	<ListView
+    	</AutoCompleteTextView>
+    </LinearLayout>
+
+    <ListView
 	    android:fadingEdge="none"
 	    android:id="@+id/conversations_list"
 	    android:layout_width="fill_parent"
 	    android:layout_height="0dp"
 	    android:layout_weight="30"
-	    android:background="@color/white"
 	    android:cacheColorHint="#00000000"
-	    android:divider="@color/dividercolor"
-	    android:dividerHeight="0.5dp"
+	    android:divider="@null"
 	    android:transcriptMode="alwaysScroll" >
 	</ListView>
 

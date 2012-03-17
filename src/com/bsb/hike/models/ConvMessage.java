@@ -1,5 +1,6 @@
 package com.bsb.hike.models;
 
+import java.text.DateFormat;
 import java.util.Date;
 
 import org.json.JSONArray;
@@ -221,11 +222,21 @@ public class ConvMessage
 		return mConversation;
 	}
 
-	public String getTimestampFormatted()
+	public String getTimestampFormatted(boolean pretty)
 	{
 		Date date = new Date(mTimestamp * 1000);
-		PrettyTime p = new PrettyTime();
-		return p.format(date);
+		if (pretty)
+		{
+			PrettyTime p = new PrettyTime();
+			return p.format(date);			
+		}
+		else
+		{
+			
+			String hourFormatted = DateFormat.getTimeInstance().format(date);
+			String dayFormatted = DateFormat.getDateInstance().format(date);
+			return hourFormatted + " AT " + dayFormatted;
+		}
 	}
 
 	public void setMsgID(long msgID)

@@ -59,7 +59,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			messageView.setText(message.getMessage());
 			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
-			tsView.setText(message.getTimestampFormatted());
+			tsView.setText(message.getTimestampFormatted(true));
 			Typeface tf = messageView.getTypeface();
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
 			{

@@ -37,6 +37,7 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -111,6 +112,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private Runnable mUpdateAdapter;
 
 	private TextView mLabelView;
+
+	private LinearLayout mInputNumberContainer;
 
 	@Override
 	protected void onPause()
@@ -332,6 +335,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mBottomView = findViewById(R.id.bottom_panel);
 		mMetadataView = findViewById(R.id.sms_chat_metadata);
 		mInputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
+		mInputNumberContainer = (LinearLayout) findViewById(R.id.input_number_container);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (Button) findViewById(R.id.send_message);
@@ -560,6 +564,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		/* hide the number picker */
 		mInputNumberView.setVisibility(View.GONE);
+		mInputNumberContainer.setVisibility(View.GONE);
 
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI Thread
