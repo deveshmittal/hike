@@ -13,7 +13,9 @@ import com.bsb.hike.db.HikeUserDatabase;
 public class IconCacheManager
 {
 	private class LRUCache<A, B> extends LinkedHashMap<A, B> {
-	    private final int maxEntries;
+
+		private static final long serialVersionUID = 1L;
+		private final int maxEntries;
 
 	    public LRUCache(final int maxEntries) {
 	        super(maxEntries + 1, 1.0f, true);
@@ -52,7 +54,7 @@ public class IconCacheManager
 	public IconCacheManager(Context context)
 	{
 		mContext = context.getApplicationContext();
-		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(20)); /* only keep 10 entries @ a time */
+		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(20)); /* only keep 20 entries @ a time */
 		mDb = new HikeUserDatabase(mContext);
 	}
 
