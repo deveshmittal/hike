@@ -85,7 +85,7 @@
             android:text="@string/made_with_love"
             android:textColor="@color/white"
             android:textSize="16dp"
-            android:background="@drawable/ic_ovalled_text"
-            android:src="@drawable/made_with_live_in_delhi" />
+            android:background="@drawable/ic_ovalled_text"/>
+
     </RelativeLayout>
 </LinearLayout>

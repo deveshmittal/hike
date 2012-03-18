@@ -1,14 +1,13 @@
 package com.bsb.hike.ui;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,59 +15,12 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.ProfileArrayAdapter;
+import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 
-public class ProfileActivity extends Activity
+public class ProfileActivity extends Activity implements OnItemClickListener
 {
-
-	private class ProfileItem
-	{
-		public ProfileItem(String title, int icon)
-		{
-			this.title = title;
-			this.icon = icon;
-		}
-		String title;
-		int icon;
-	}
-
-	private class ProfileArrayAdapter extends ArrayAdapter<ProfileItem>
-	{
-
-		private LayoutInflater inflater;
-
-		public ProfileArrayAdapter(Context context, int textViewResourceId, ProfileItem[] objects)
-		{
-			super(context, textViewResourceId, objects);
-			this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent)
-		{
-			ProfileItem profileItem = getItem(position);
-			View v = convertView;
-			if (v == null)
-			{
-				v = inflater.inflate(R.layout.profile_item, parent, false);
-			}
-
-			ImageView imageView = (ImageView) v.findViewById(R.id.profile_item_icon);
-			TextView textView = (TextView) v.findViewById(R.id.profile_item_name);
-			View extraView = v.findViewById(R.id.profile_item_extra);
-
-			imageView.setImageDrawable(getResources().getDrawable(profileItem.icon));
-			textView.setText(profileItem.title);
-			if (profileItem.icon == R.drawable.ic_credits)
-			{
-				SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-				String credits = Integer.toString(settings.getInt(HikeMessengerApp.SMS_SETTING, 0));
-				((TextView) extraView).setText(credits);
-				extraView.setVisibility(View.VISIBLE);
-			}
-			return v;
-		}
-	}
 
 	private ImageView mIconView;
 	private TextView mNameView;
@@ -102,13 +54,23 @@ public class ProfileActivity extends Activity
 
 		ProfileItem[] items = new ProfileItem[] 
 			{
-				new ProfileItem("Credits", R.drawable.ic_credits),
-				new ProfileItem("Notifications", R.drawable.ic_notifications),
-				new ProfileItem("Privacy", R.drawable.ic_privacy),
-				new ProfileItem("Help", R.drawable.ic_help)
+				new ProfileItem.ProfileSettingsItem("Credits", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
+				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, "notifications"),
+				new ProfileItem. ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, "privacy"),
+				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, "http://www.bsb.im/about")
 			};
 		ProfileArrayAdapter adapter = new ProfileArrayAdapter(this, R.layout.profile_item, items);
 		mListView.setAdapter(adapter);
+
+		mListView.setOnItemClickListener(this);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+	{
+		ProfileItem item = (ProfileItem) adapterView.getItemAtPosition(position);
+		Intent intent = item.getIntent(this);
+		startActivity(intent);
 	}
 
 }
