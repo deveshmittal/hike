@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/thatch_repeat">
+
+    <include
+        android:id="@+id/top_panel_ref"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/top_panel" />
+
+    <RelativeLayout
+        android:id="@+id/profile_container"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/offwhite" >
+
+        <LinearLayout
+            android:id="@+id/avatar_border"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="18dp"
+            android:background="@drawable/avatar_border" >
+
+            <ImageView
+                android:id="@+id/profile"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_margin="3dp"
+                android:src="@drawable/default_profile" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/avatar_border"
+            android:layout_marginLeft="0dp"
+            android:layout_centerVertical="true"
+            android:text="Kavin Bharti Mittal"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/dropshadow_top" />
+
+    <ListView
+        android:id="@+id/profile_preferences"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:cacheColorHint="#000000"
+        android:choiceMode="none"
+        android:background="@color/offwhite"
+        android:divider="@drawable/ic_thread_divider"
+        android:dividerHeight="2dp"
+        android:fadingEdge="none"
+        android:footerDividersEnabled="false" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/dropshadow_top" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="10">
+
+        <TextView
+            android:id="@+id/made_with_love"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/made_with_love"
+            android:textColor="@color/white"
+            android:textSize="16dp"
+            android:background="@drawable/ic_ovalled_text"/>
+
+    </RelativeLayout>
+</LinearLayout>

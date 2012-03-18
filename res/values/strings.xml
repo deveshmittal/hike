@@ -55,4 +55,6 @@
     <string name="already_hike_user">Good News! Your friend is already on hike!</string>
     <string name="no_phone_number">Sorry! Your friend doesn\'t have a phone number</string>
     <string name="block_users">Block Users</string>
+    <string name="profile_title">Me</string>
+    <string name="made_with_love">Made with %1$s in New Delhi</string>
 </resources>

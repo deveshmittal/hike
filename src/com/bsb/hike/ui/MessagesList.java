@@ -679,6 +679,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			intent = new Intent(this, HikePreferences.class);
 			startActivity(intent);
 			return true;
+		case R.id.profile:
+			intent = new Intent(this, ProfileActivity.class);
+			startActivity(intent);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
