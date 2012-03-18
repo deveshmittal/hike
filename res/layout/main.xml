@@ -90,6 +90,7 @@
             android:src="@drawable/empty_messages_hike_logo" />
 
 		<TextView
+		    android:id="@+id/invite_friend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -98,7 +99,6 @@
             android:textColor="@color/white"
             android:gravity="center_horizontal"
             android:text="Bring a friend.  Take some credit >>"
-            android:background="@drawable/lightbulb_textbox"
-            android:onClick="inviteOnClick"/>
+            android:background="@drawable/lightbulb_textbox"/>
 	</RelativeLayout>
 </RelativeLayout>
