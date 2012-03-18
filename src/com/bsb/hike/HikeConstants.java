@@ -22,6 +22,9 @@ public class HikeConstants
 	public static final String VIBRATE_PREF = "vibratePref";
 	public static final String HIKEBOT = "TD-HIKE";
 
+	/* fake MSISDN we use to represent ourselves */
+	public static final String ME = "ME";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 

@@ -8,6 +8,10 @@
         android:title="@string/deleteconversations"
         android:icon="@drawable/ic_delete"/>
     <item
+        android:id="@+id/profile"
+        android:title="@string/profile_title"
+        android:icon="@drawable/ic_profile"/>
+    <item
         android:id="@+id/settings"
         android:title="@string/preferences"
         android:icon="@drawable/ic_settings"/>

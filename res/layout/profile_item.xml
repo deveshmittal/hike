@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/offwhite"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <ImageView 
+        android:id="@+id/profile_item_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="18dp"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_credits"/>
+
+    <TextView
+        android:text="Credits"
+        android:id="@+id/profile_item_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_centerVertical="true"
+		android:textSize="18dp"
+		android:textColor="@color/black"
+        android:layout_toRightOf="@id/profile_item_icon"/>
+
+	<TextView
+        android:text="25"
+        android:id="@+id/profile_item_extra"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_ovalled_text"
+        android:textColor="@color/white"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        android:layout_marginRight="18dp" />
+
+</RelativeLayout>
