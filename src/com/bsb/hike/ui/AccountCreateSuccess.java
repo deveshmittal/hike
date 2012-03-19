@@ -13,6 +13,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,7 +23,7 @@ import android.widget.TextView.OnEditorActionListener;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 
-public class AccountCreateSuccess extends Activity implements TextWatcher, OnEditorActionListener
+public class AccountCreateSuccess extends Activity implements TextWatcher, OnEditorActionListener, OnClickListener
 {
 	private EditText mEditText;
 	private TextView mFriendlyNameView;
@@ -38,6 +39,8 @@ public class AccountCreateSuccess extends Activity implements TextWatcher, OnEdi
 
 		mEditText.addTextChangedListener(this);
 		mEditText.setOnEditorActionListener(this);
+
+		mNextButton.setOnClickListener(this);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String name = settings.getString(HikeMessengerApp.NAME, null);
@@ -133,5 +136,6 @@ public class AccountCreateSuccess extends Activity implements TextWatcher, OnEdi
 			}
 		return false;
 	}
+
 }
 
