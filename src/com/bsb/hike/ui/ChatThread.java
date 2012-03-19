@@ -164,6 +164,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataView.setVisibility(View.GONE);
 		mComposeView.removeTextChangedListener(this);
 
+		mLabelView.setText("New Message");
+
 		/* if we've got some pre-filled text, add it here */
 		if (TextUtils.isEmpty(msg)) {
 			mBottomView.setVisibility(View.GONE);
@@ -171,6 +173,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mComposeView.setText(msg);
 			/* make sure that the autoselect text is empty */
 			mInputNumberView.setText("");
+			/* disable the send button */
+			mSendBtn.setEnabled(false);
 		}
 
 		/* if we've got some pre-filled text, add it here */
@@ -238,6 +242,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mInputNumberView.setAdapter(adapter);
 		mInputNumberView.setVisibility(View.VISIBLE);
+		mInputNumberContainer.setVisibility(View.VISIBLE);
 		mInputNumberView.requestFocus();
 
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
@@ -462,7 +467,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		if (mComposeViewWatcher != null)
 		{
-			mComposeViewWatcher.clearCallbacks();
+			mComposeViewWatcher.uninit();
 			mComposeViewWatcher = null;
 		}
 
@@ -592,11 +597,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
 
-		if (mComposeViewWatcher != null)
-		{
-			mComposeView.removeTextChangedListener(mComposeViewWatcher);
-		}
-
 		/* get the number of credits and also listen for changes */
 		mCredits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
 		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
@@ -604,11 +604,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.uninit();
-			mComposeView.removeTextChangedListener(mComposeViewWatcher);
 		}
 
 		mComposeViewWatcher = new ComposeViewWatcher(mConversation, mComposeView, mSendBtn, mCredits);
-		mComposeView.addTextChangedListener(mComposeViewWatcher);
 
 		if (mConversation.isOnhike())
 		{

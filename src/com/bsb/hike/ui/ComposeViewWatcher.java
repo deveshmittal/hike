@@ -45,14 +45,22 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 
 	public void init()
 	{
+		if (mInitialized)
+		{
+			return;
+		}
+
 		mInitialized = true;
 		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		mComposeView.addTextChangedListener(this);
 	}
 
 	public void uninit()
 	{
 		mPubSub.removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		mUIThreadHandler.removeCallbacks(this);
+		mComposeView.removeTextChangedListener(this);
+		mInitialized = false;
 	}
 
 	private void setBtnEnabled()
@@ -105,10 +113,6 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 			long delta = 10 * 1000 - (current - mTextLastChanged);
 			mUIThreadHandler.postDelayed(this, delta);
 		}
-	}
-
-	public void clearCallbacks()
-	{
 	}
 
 	@Override
