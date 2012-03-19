@@ -67,8 +67,9 @@
         android:src="@drawable/ic_newmessage" />
 
     <RelativeLayout
+		android:layout_below="@id/top_panel"
         android:layout_above="@+id/bottom_nav_bar"
-        android:visibility="gone"
+        android:visibility="visible"
         android:id="@+id/empty_view"
    		android:background="@drawable/thatch_repeat"
    		android:layout_width="match_parent"
