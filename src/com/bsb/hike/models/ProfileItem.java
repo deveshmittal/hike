@@ -80,8 +80,10 @@ public abstract class ProfileItem
 		@Override
 		public Intent getIntent(Context context)
 		{
-			Uri uri = Uri.parse("http://www.bsb.com/hike-help/" + settingsName);
+			return null;
+/*			Uri uri = Uri.parse("http://www.bsb.com/hike-help/" + settingsName);
 			return new Intent(Intent.ACTION_VIEW, uri);
+*/
 		}
 
 		@Override
