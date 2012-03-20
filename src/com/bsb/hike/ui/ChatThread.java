@@ -104,7 +104,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private AutoCompleteTextView mInputNumberView;
 
-	int mMaxSmsLength = 160;
+	int mMaxSmsLength = 140;
 
 	private String mLabel;
 
