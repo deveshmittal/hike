@@ -99,6 +99,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private class SwipeGestureDetector extends SimpleOnGestureListener
 	{
+		private static final boolean DISABLE_SWIPE = true;
+
 		final int swipeMinDistance;
 
 		final int swipeThresholdVelocity;
@@ -156,6 +158,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
 		{
+			if (DISABLE_SWIPE)
+			{
+				return false;
+			}
+
 			if (Math.abs(velocityY) > 1000)
 			{
 				Log.d("MessagesList", "Swipe ignored -- Y motion too fast " + velocityY);
