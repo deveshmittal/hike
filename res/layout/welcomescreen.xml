@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/empty_messages_hike_logo" />
+        android:src="@drawable/ic_welcome_logo" />
 
     <TextView
         android:id="@+id/welcome"
