@@ -50,7 +50,6 @@
 	<ImageView
 	    android:layout_centerVertical="true"
 	    android:layout_marginRight="7dp"
-        android:src="@drawable/ic_sent"
         android:id="@+id/msg_status_indicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
