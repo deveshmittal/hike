@@ -40,10 +40,10 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 	{
 		ContactInfo contactInfo = (ContactInfo) getItem(position);
 		LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View v = convertView;
+		View v = null;
 		if (v == null)
 		{
-			v = inflater.inflate(R.layout.contact_item, parent, false);
+			v = inflater.inflate(R.layout.invite_item, parent, false);
 		}
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
@@ -51,8 +51,13 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 
 		Button button = (Button) v.findViewById(R.id.contact_button);
 		button.setTag(contactInfo);
-		button.setEnabled(!contactInfo.isOnhike());
-		button.setOnClickListener(this);
+		if (contactInfo.isOnhike())
+		{
+			button.setEnabled(false);
+			button.setBackgroundResource(R.drawable.ic_contact_logo);
+		}
+
+		v.setOnClickListener(this);
 
 		boolean no_dividers = ((position == getCount() - 1) || (getItem(position + 1) instanceof Section));
 		View divider = v.findViewById(R.id.item_divider);
