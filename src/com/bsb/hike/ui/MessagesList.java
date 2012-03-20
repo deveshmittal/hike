@@ -319,6 +319,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		/* set the empty view layout for the list */
 		mEmptyView = findViewById(R.id.empty_view);
+		mEmptyView.setOnClickListener(this);
+
 		mConversationsView.setEmptyView(mEmptyView);
 
 		mInviteFriend = mEmptyView.findViewById(R.id.invite_friend);
