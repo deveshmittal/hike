@@ -611,11 +611,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mConversation.isOnhike())
 		{
 			mMetadataView.setVisibility(View.GONE);
+			mSendBtn.setBackgroundResource(R.drawable.sendbutton);
+			mComposeView.setHint("Free Message...");
 		}
 		else
 		{
 			mMetadataView.setVisibility(View.VISIBLE);
 			updateChatMetadata();
+			mSendBtn.setBackgroundResource(R.drawable.sendbutton_sms);
+			mComposeView.setHint("SMS Message...");
 		}
 
 		/* create an object that we can notify when the contents of the thread are updated */
@@ -624,6 +628,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* clear any toast notifications */
 		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mgr.cancel((int) mConversation.getConvId());
+
 	}
 
 	private boolean isLastMsgSent()
