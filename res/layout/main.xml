@@ -58,39 +58,16 @@
         android:layout_height="1dp"
         android:background="@drawable/dropshadow" />
 
-    <ImageView
-        android:id="@+id/edit_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/ic_newmessage" />
-
     <RelativeLayout
 		android:layout_below="@id/top_panel"
         android:layout_above="@+id/bottom_nav_bar"
-        android:visibility="visible"
+        android:visibility="gone"
         android:id="@+id/empty_view"
    		android:background="@drawable/thatch_repeat"
    		android:layout_width="match_parent"
    		android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/empty_message_textview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textSize="20dp"
-            android:text="Why so serious?  Tap to hike" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/empty_message_textview"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/empty_messages_hike_logo" />
-
-		<TextView
 		    android:id="@+id/invite_friend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -101,5 +78,27 @@
             android:gravity="center_horizontal"
             android:text="Bring a friend.  Take some credit >>"
             android:background="@drawable/lightbulb_textbox"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_above="@id/invite_friend">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+			android:layout_centerInParent="true"
+            android:src="@drawable/empty_messages_hike_logo" />
+		</RelativeLayout>
 	</RelativeLayout>
+
+    <ImageView
+        android:id="@+id/edit_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_newmessage" />
+
 </RelativeLayout>
