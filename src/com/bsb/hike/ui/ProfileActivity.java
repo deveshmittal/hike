@@ -55,8 +55,8 @@ public class ProfileActivity extends Activity implements OnItemClickListener
 		ProfileItem[] items = new ProfileItem[] 
 			{
 				new ProfileItem.ProfileSettingsItem("Credits", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
-				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, "notifications"),
-				new ProfileItem. ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, "privacy"),
+				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, R.xml.notification_preferences),
+				new ProfileItem. ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
 				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, "http://www.bsb.im/about")
 			};
 		ProfileArrayAdapter adapter = new ProfileArrayAdapter(this, R.layout.profile_item, items);

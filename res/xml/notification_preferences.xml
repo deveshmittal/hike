@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Notifications">
+
+    <com.bsb.hike.view.IconCheckBoxPreference
+		android:layout="@layout/icon_checkbox_preference"
+		icon="@drawable/ic_credits"
+        android:defaultValue="true"
+        android:key="vibratePref"
+        android:summary="Vibrate when we receive new message"
+        android:title="Vibrate" />
+
+    <com.bsb.hike.view.IconCheckBoxPreference
+		android:layout="@layout/icon_checkbox_preference"
+        android:defaultValue="true"
+        android:key="soundPref"
+        android:summary="Play sound when we receive new message"
+        android:title="Sound" />
+
+</PreferenceScreen>

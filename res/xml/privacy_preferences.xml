@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Privacy">
+
+    <Preference
+		android:layout="@layout/icon_preference"
+        android:defaultValue="false"
+        android:key="block"
+        android:summary="Block Users"
+        android:title="Block" />
+
+    <com.bsb.hike.ui.DeleteDialogPreference
+		android:layout="@layout/icon_preference"
+        android:dialogMessage="Are you sure you want to delete everything?"
+        android:key="deleteAccount"
+        android:negativeButtonText="No"
+        android:positiveButtonText="Yes - Delete"
+        android:summary="Permanently delete your account!"
+        android:title="Delete Account?" />
+
+</PreferenceScreen>

@@ -7,6 +7,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -29,7 +30,15 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.preferences);
+		setContentView(R.layout.hikepreferences);
+
+		Intent intent = getIntent();
+		int preferences = intent.getIntExtra("pref", -1);
+
+		addPreferencesFromResource(preferences);
+
+		TextView titleView = (TextView) findViewById(R.id.title);
+		titleView.setText(getTitle());
 
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof ActivityCallableTask)
@@ -39,7 +48,10 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		}
 
 		Preference preference = getPreferenceScreen().findPreference("block");
-		preference.setOnPreferenceClickListener(this);
+		if (preference != null)
+		{
+			preference.setOnPreferenceClickListener(this);
+		}
 	}
 
 	@Override
