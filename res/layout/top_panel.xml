@@ -14,7 +14,7 @@
         android:layout_gravity="center"
 		android:layout_centerVertical="true"
         android:layout_marginLeft="17dp"
-        android:src="@drawable/ic_header_logo" />
+        android:src="@drawable/ic_logoheader" />
 
     <TextView
         android:id="@+id/title"
