@@ -50,14 +50,16 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 		textView.setText(contactInfo.getName());
 
 		Button button = (Button) v.findViewById(R.id.contact_button);
-		button.setTag(contactInfo);
+		v.setTag(contactInfo);
 		if (contactInfo.isOnhike())
 		{
 			button.setEnabled(false);
 			button.setBackgroundResource(R.drawable.ic_contact_logo);
 		}
-
-		v.setOnClickListener(this);
+		else
+		{
+			v.setOnClickListener(this);
+		}
 
 		boolean no_dividers = ((position == getCount() - 1) || (getItem(position + 1) instanceof Section));
 		View divider = v.findViewById(R.id.item_divider);
