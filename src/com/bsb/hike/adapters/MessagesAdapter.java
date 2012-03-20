@@ -156,7 +156,10 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 		{
 			holder.image.setImageResource(resId);
 		}
-
+		else
+		{
+			holder.image.setImageResource(0);
+		}
 		return v;
 	}
 
