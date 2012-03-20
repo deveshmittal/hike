@@ -40,6 +40,7 @@
                 android:id="@+id/operator_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingTop="2dp"
                 android:layout_marginLeft="18dp"
                 android:layout_marginTop="50dp"
                 android:src="@drawable/airtel_logo" />
@@ -62,6 +63,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/operator_icon"
+                android:paddingTop="3dp"
                 android:layout_marginLeft="18dp"
                 android:layout_marginTop="30dp"
                 android:src="@drawable/signup_dude" />
