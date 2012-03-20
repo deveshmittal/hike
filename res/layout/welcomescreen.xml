@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/ic_headermain"
+        android:background="@drawable/signup_button"
         android:onClick="onClick"
         android:text="@string/accept_tc"
         android:textAppearance="?android:attr/textAppearanceMedium"
