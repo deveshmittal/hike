@@ -3,73 +3,75 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center_vertical"
-    android:background="@color/offwhite"
+    android:background="@drawable/thatch_repeat"
     android:orientation="vertical" >
 
-    <include
-        android:id="@+id/top_panel_ref"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        layout="@layout/top_panel" />
-
     <Button
-        android:id="@+id/accept_tc"
+        android:id="@+id/btn_continue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="18dp"
-        android:layout_marginRight="18dp"
-        android:layout_marginLeft="18dp"
-        android:background="@drawable/rounded_button"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/ic_headermain"
         android:onClick="onClick"
         android:text="@string/accept_tc"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/white" />
 
-    <TextView
-        android:id="@+id/welcome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="17dp"
-        android:layout_marginRight="17dp"
-        android:layout_marginTop="20dp"
-        android:gravity="center"
-        android:text="@string/welcome_message"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/lightblack" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+       	android:layout_above="@id/btn_continue">
 
-    <ImageView
-        android:id="@+id/ic_hike_logo"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/welcome"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/ic_hikelogo" />
+        android:layout_centerInParent="true">
 
     <TextView
         android:id="@+id/error_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/welcome"
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:text="@string/welcome_screen_error_message"
         android:textColor="@color/red"
         android:visibility="gone" />
 
+    <ImageView
+        android:id="@+id/ic_hike_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/empty_messages_hike_logo" />
+
     <TextView
-        android:id="@+id/t_and_c"
+        android:id="@+id/welcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/ic_hike_logo"
+        android:layout_marginTop="16dp"
+		android:layout_marginRight="35dp"
+		android:layout_marginLeft="35dp"
+        android:gravity="center"
+        android:text="@string/welcome_message"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/lightblack" />
+
+    <TextView
+        android:id="@+id/terms_and_conditions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/welcome"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="16dp"
         android:gravity="center"
         android:text="T&amp;C and Privacy Policy"
         android:textColor="@color/grey"
         android:textSize="14sp" />
 
+    </RelativeLayout>
+    </RelativeLayout>
 </RelativeLayout>

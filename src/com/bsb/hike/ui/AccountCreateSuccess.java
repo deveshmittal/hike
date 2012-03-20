@@ -26,23 +26,17 @@ import com.bsb.hike.R;
 public class AccountCreateSuccess extends Activity implements TextWatcher, OnEditorActionListener, OnClickListener
 {
 	private EditText mEditText;
-	private TextView mFriendlyNameView;
 	private Button mNextButton;
-	private TextView mTitleView;
 
 	public void onCreate(Bundle state)
 	{
 		super.onCreate(state);
 		setContentView(R.layout.accountcreatesuccess);
 		mEditText = (EditText) findViewById(R.id.name_view);
-		mFriendlyNameView = (TextView) findViewById(R.id.name_preview);
 		mNextButton = (Button) findViewById(R.id.btn_scan_ab);
 
 		mEditText.addTextChangedListener(this);
 		mEditText.setOnEditorActionListener(this);
-
-		mTitleView = (TextView) findViewById(R.id.title);
-		mTitleView.setText(getResources().getString(R.string.profile_title));
 
 		mNextButton.setOnClickListener(this);
 
@@ -101,7 +95,6 @@ public class AccountCreateSuccess extends Activity implements TextWatcher, OnEdi
 		{
 			friendlyName = friendlyName(mEditText.getHint().toString());
 		}
-		mFriendlyNameView.setText(friendlyName);
 	}
 
 	private String friendlyName(String str)

@@ -2,75 +2,99 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/offwhite" >
+    android:background="@drawable/thatch_repeat" >
 
-    <include
-        android:id="@+id/top_panel_ref"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        layout="@layout/top_panel" />
- 
-	<Button
+    <Button
         android:id="@+id/btn_scan_ab"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="18dp"
-        android:layout_marginRight="18dp"
-        android:layout_marginLeft="18dp"
-		android:enabled="false"
+        android:layout_centerHorizontal="true"
         android:background="@drawable/rounded_button"
+        android:enabled="true"
         android:text="@string/click_next"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/white" />
 
-   <TextView
-        android:id="@+id/text_carrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-		android:layout_centerInParent="true"
-        android:gravity="center"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="25dp"
-        android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
-        android:text="@string/we_got_you_on_carrier"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/black" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/btn_scan_ab" >
 
-	<EditText
-        android:id="@+id/name_view"
-        android:imeOptions="actionNext"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-		android:layout_below="@id/text_carrier"
-        android:hint="Vijay Chauhan"
-        android:gravity="center"
-        android:singleLine="true"
-        android:maxLength="30"
-        android:inputType="textCapWords" >
+        <ImageView
+            android:id="@+id/ic_hike_logo"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="60dp"
+            android:src="@drawable/empty_messages_hike_logo" />
 
-        <requestFocus />
-    </EditText>
+        <RelativeLayout
+            android:id="@+id/relativeLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" >
 
-	<ImageView
-        android:id="@+id/ic_hike_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/text_carrier"
-		android:layout_marginBottom="20dp"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/ic_hikelogo" />
+            <ImageView
+                android:id="@+id/operator_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="18dp"
+                android:layout_marginTop="50dp"
+                android:src="@drawable/airtel_logo" />
 
-    <TextView
-        android:text="VijayC"
-        android:id="@+id/name_preview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/name_view"
-        android:layout_centerHorizontal="true"
-        android:textColor="@color/black" />
+            <TextView
+                android:id="@+id/text_carrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="18dp"
+                android:layout_toRightOf="@id/operator_icon"
+				android:layout_alignTop="@id/operator_icon"
+                android:gravity="left"
+                android:text="@string/we_got_you_on_carrier"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/black" />
+
+            <ImageView
+                android:id="@+id/people_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/operator_icon"
+                android:layout_marginLeft="18dp"
+                android:layout_marginTop="30dp"
+                android:src="@drawable/signup_dude" />
+
+            <TextView
+                android:id="@+id/text_give_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/people_icon"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="18dp"
+                android:layout_toRightOf="@id/people_icon"
+                android:gravity="left"
+                android:text="@string/tell_your_name"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/name_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_give_name"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="24dp"
+                android:layout_marginLeft="28dp"
+                android:layout_marginRight="28dp"
+                android:gravity="center"
+                android:hint="John Appleseed"
+                android:imeOptions="actionNext"
+                android:inputType="textCapWords"
+                android:maxLength="30"
+                android:singleLine="true" />
+        </RelativeLayout>
+    </RelativeLayout>
+
 </RelativeLayout>

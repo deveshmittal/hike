@@ -118,6 +118,8 @@ public class WelcomeActivity extends Activity
 
 	private View mErrorView;
 
+	private View mTitleView;
+
 	@Override
 	public Object onRetainNonConfigurationInstance()
 	{
@@ -129,9 +131,9 @@ public class WelcomeActivity extends Activity
 	{
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
-		mAcceptButton = (Button) findViewById(R.id.accept_tc);
+		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		mErrorView = findViewById(R.id.error_text);
-		
+
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof AccountCreateActivity)
 		{

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">hike</string>
-    <string name="we_got_you_on_carrier">Super! You are %1$s (%2$s).  Let\'s make a profile</string>
-    <string name="click_next">Next</string>
+	<string name="tell_your_name">Tell us your name and you\'ll be all set:</string>
+    <string name="we_got_you_on_carrier">Super!  We logged you in as %1$s</string>
+    <string name="click_next">Done.  Scan my Address book</string>
     <string name="accept_tc">Accept and Continue</string>
     <string name="welcome">Welcome to hike!</string>
-    <string name="welcome_message">hike is just like SMS but absolutely free.No hidden costs and no data plan required</string>
+    <string name="welcome_message">Think of hike as SMS but free.  No hidden costs and no data plan required.</string>
 	<string name="scanning_ab">Scanning Address Book</string>
     <string name="looking_for_friends">Just checking to see if any friends are on hike. Won\'t be long, we promise.</string>
     <string name="determining_phone_number">Determining phone number</string>
