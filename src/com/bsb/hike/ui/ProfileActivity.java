@@ -50,7 +50,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener
 		mTitleView.setText(getResources().getString(R.string.profile_title));
 
 		/* add the heart in code because unicode isn't supported via xml*/
-		mMadeWithLoveView.setText(String.format(getString(R.string.made_with_love), "\u2665"));
+		//mMadeWithLoveView.setText(String.format(getString(R.string.made_with_love), "\u2665"));
 
 		ProfileItem[] items = new ProfileItem[] 
 			{
@@ -68,15 +68,12 @@ public class ProfileActivity extends Activity implements OnItemClickListener
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		return;
-/*
 		ProfileItem item = (ProfileItem) adapterView.getItemAtPosition(position);
 		Intent intent = item.getIntent(this);
 		if (intent != null)
 		{
 			startActivity(intent);			
 		}
-*/
 	}
 
 }
