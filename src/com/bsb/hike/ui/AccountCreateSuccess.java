@@ -28,17 +28,21 @@ public class AccountCreateSuccess extends Activity implements TextWatcher, OnEdi
 	private EditText mEditText;
 	private TextView mFriendlyNameView;
 	private Button mNextButton;
+	private TextView mTitleView;
 
 	public void onCreate(Bundle state)
 	{
 		super.onCreate(state);
 		setContentView(R.layout.accountcreatesuccess);
-		mEditText = (EditText) findViewById(R.id.nameView);
-		mFriendlyNameView = (TextView) findViewById(R.id.namePreview);
-		mNextButton = (Button) findViewById(R.id.btnScanAB);
+		mEditText = (EditText) findViewById(R.id.name_view);
+		mFriendlyNameView = (TextView) findViewById(R.id.name_preview);
+		mNextButton = (Button) findViewById(R.id.btn_scan_ab);
 
 		mEditText.addTextChangedListener(this);
 		mEditText.setOnEditorActionListener(this);
+
+		mTitleView = (TextView) findViewById(R.id.title);
+		mTitleView.setText(getResources().getString(R.string.profile_title));
 
 		mNextButton.setOnClickListener(this);
 
@@ -69,7 +73,7 @@ public class AccountCreateSuccess extends Activity implements TextWatcher, OnEdi
 			rendered = String.format(res.getString(R.string.we_got_you_on_carrier), msisdn, carrierName);
 		}
 
-		TextView view = (TextView) findViewById(R.id.textWeGotYouOnCarrier);
+		TextView view = (TextView) findViewById(R.id.text_carrier);
 		view.setText(rendered);
 	}
 

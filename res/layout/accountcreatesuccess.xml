@@ -2,41 +2,35 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/thatch_repeat" >
+    android:background="@color/offwhite" >
 
-    <Button
-        android:id="@+id/btnScanAB"
-        android:layout_width="fill_parent"
-        android:layout_height="55dp"
+    <include
+        android:id="@+id/top_panel_ref"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/top_panel" />
+ 
+	<Button
+        android:id="@+id/btn_scan_ab"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom"
-        android:background="@color/diamondblue"
-        android:enabled="false"
+        android:layout_marginBottom="18dp"
+        android:layout_marginRight="18dp"
+        android:layout_marginLeft="18dp"
+		android:enabled="false"
+        android:background="@drawable/rounded_button"
         android:text="@string/click_next"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/white" />
 
-    <EditText
-        android:id="@+id/nameView"
-        android:imeOptions="actionNext"
+   <TextView
+        android:id="@+id/text_carrier"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_centerVertical="true"
-        android:hint="Vijay Chauhan"
-        android:gravity="center"
-        android:singleLine="true"
-        android:maxLength="30"
-        android:inputType="textCapWords" >
-
-        <requestFocus />
-    </EditText>
-    <TextView
-        android:id="@+id/textWeGotYouOnCarrier"
-        android:layout_above="@id/nameView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+		android:layout_centerInParent="true"
         android:gravity="center"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="25dp"
@@ -45,12 +39,38 @@
         android:text="@string/we_got_you_on_carrier"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@color/black" />
-    <TextView
-        android:text="VijayC"
-        android:id="@+id/namePreview"
+
+	<EditText
+        android:id="@+id/name_view"
+        android:imeOptions="actionNext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/nameView"
+        android:layout_centerHorizontal="true"
+		android:layout_below="@id/text_carrier"
+        android:hint="Vijay Chauhan"
+        android:gravity="center"
+        android:singleLine="true"
+        android:maxLength="30"
+        android:inputType="textCapWords" >
+
+        <requestFocus />
+    </EditText>
+
+	<ImageView
+        android:id="@+id/ic_hike_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/text_carrier"
+		android:layout_marginBottom="20dp"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_hikelogo" />
+
+    <TextView
+        android:text="VijayC"
+        android:id="@+id/name_preview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/name_view"
         android:layout_centerHorizontal="true"
         android:textColor="@color/black" />
 </RelativeLayout>
