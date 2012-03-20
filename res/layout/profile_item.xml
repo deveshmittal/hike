@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/offwhite"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
 
     <ImageView 
         android:id="@+id/profile_item_icon"
@@ -33,6 +33,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/ic_ovalled_text"
         android:textColor="@color/white"
+		android:gravity="center"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:visibility="gone"
