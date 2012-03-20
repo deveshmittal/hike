@@ -51,6 +51,7 @@ public class ScanningAddressBook extends Activity
 
 				/* Add a default message from hike */
 				// TODO get the number for hikebot from the server?
+				/**
 				ContactInfo hikeContactInfo = new ContactInfo("__HIKE__", HikeConstants.HIKEBOT, "HikeBot", HikeConstants.HIKEBOT);
 				hikeContactInfo.setOnhike(true);
 				db.addContact(hikeContactInfo);
@@ -58,6 +59,7 @@ public class ScanningAddressBook extends Activity
 						System.currentTimeMillis() / 1000, ConvMessage.State.RECEIVED_UNREAD);
 
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, message);
+				**/
 			}
 			catch (Exception e)
 			{
