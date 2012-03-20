@@ -34,7 +34,8 @@ public abstract class ProfileItem
 		@Override
 		public Intent getIntent(Context context)
 		{
-			return new Intent(Intent.ACTION_VIEW, this.url);
+			return null;
+//			return new Intent(Intent.ACTION_VIEW, this.url);
 		}
 	}
 

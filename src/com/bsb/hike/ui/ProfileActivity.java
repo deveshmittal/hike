@@ -70,7 +70,10 @@ public class ProfileActivity extends Activity implements OnItemClickListener
 	{
 		ProfileItem item = (ProfileItem) adapterView.getItemAtPosition(position);
 		Intent intent = item.getIntent(this);
-		startActivity(intent);
+		if (intent != null)
+		{
+			startActivity(intent);			
+		}
 	}
 
 }
