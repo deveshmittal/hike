@@ -5,6 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,10 +57,8 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 			button.setEnabled(false);
 			button.setBackgroundResource(R.drawable.ic_contact_logo);
 		}
-		else
-		{
-			v.setOnClickListener(this);
-		}
+
+		v.setOnClickListener(this);
 
 		boolean no_dividers = ((position == getCount() - 1) || (getItem(position + 1) instanceof Section));
 		View divider = v.findViewById(R.id.item_divider);
@@ -72,7 +71,14 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 	public void onClick(View view)
 	{
 		ContactInfo info = (ContactInfo) view.getTag();
-		activity.setResult(Activity.RESULT_OK, Utils.createIntentFromContactInfo(info));
+		Intent intent = Utils.createIntentFromContactInfo(info);
+
+		if (!info.isOnhike())
+		{
+			intent.putExtra("invite", true);
+		}
+
+		activity.setResult(Activity.RESULT_OK, intent);
 		activity.finish();
 	}
 
