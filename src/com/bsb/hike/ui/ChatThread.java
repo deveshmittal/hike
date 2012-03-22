@@ -130,6 +130,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			/* mark any messages unread as read. */
 			setMessagesRead();
+			/* clear any pending notifications */
+			/* clear any toast notifications */
+			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			mgr.cancel((int) mConversation.getConvId());
 		}
 	}
 
