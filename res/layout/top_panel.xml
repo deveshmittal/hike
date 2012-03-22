@@ -17,6 +17,8 @@
         android:src="@drawable/ic_logoheader" />
 
     <TextView
+		android:singleLine="true"
+		android:ellipsize="end"
         android:id="@+id/title"
 		android:layout_alignWithParentIfMissing="true"
 		android:layout_toRightOf="@id/title_hikeicon"
@@ -24,6 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="18dp"
+        android:layout_marginRight="18dp"
         android:gravity="center_vertical"
         android:textAppearance="@style/ChatLabelStyle"
         android:textSize="22dp" />
