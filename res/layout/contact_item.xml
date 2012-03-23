@@ -30,6 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/item_divider"
+        android:layout_toRightOf="@id/contact_button"
         android:layout_centerVertical="true"
         android:text="Vijay Raghunathan"
         android:textColor="@color/black"
