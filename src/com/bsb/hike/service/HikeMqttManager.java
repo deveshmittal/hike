@@ -54,14 +54,16 @@ public class HikeMqttManager implements Listener
 		public void onSuccess(Void value)
 		{
 			Log.d("HikeMqttManager", "Sucessfully disconnected");
+			mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 		}
 
 		@Override
 		public void onFailure(Throwable value)
 		{
-			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 			Log.d("HikeMqttManager", "Error disconnecting from server");
+			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+			mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 		}
 
 	}
@@ -375,7 +377,6 @@ public class HikeMqttManager implements Listener
 		{
 			if (mqttConnection != null)
 			{
-				mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 				mqttConnection.disconnect(new DisconnectCB());
 				mqttConnection = null;
 			}
