@@ -63,7 +63,7 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 		mInitialized = false;
 	}
 
-	private void setBtnEnabled()
+	public void setBtnEnabled()
 	{
 		CharSequence seq = mComposeView.getText();
 		/* the button is enabled iff there is text AND (this is an IP conversation or we have credits available) */

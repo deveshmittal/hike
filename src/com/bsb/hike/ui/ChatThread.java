@@ -132,8 +132,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			setMessagesRead();
 			/* clear any pending notifications */
 			/* clear any toast notifications */
-			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-			mgr.cancel((int) mConversation.getConvId());
+			if (mConversation != null)
+			{
+				NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+				mgr.cancel((int) mConversation.getConvId());				
+			}
 		}
 	}
 
@@ -148,6 +151,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.init();
+
+			/* check if the send button should be enabled */
+			mComposeViewWatcher.setBtnEnabled();
 		}
 	}
 
