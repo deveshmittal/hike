@@ -97,7 +97,8 @@
             android:background="@drawable/edittext"
             android:hint="@string/type_to_compose"
             android:imeOptions="actionSend"
-            android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences" >
+            android:maxLines="4"
+            android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences|textMultiLine" >
 
             <requestFocus />
         </EditText>
