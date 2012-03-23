@@ -81,17 +81,17 @@
     <RelativeLayout
         android:id="@+id/bottom_panel"
         android:layout_width="fill_parent"
-        android:layout_height="58dp"
+        android:layout_height="wrap_content"
         android:background="@color/compose_background" >
 
         <EditText
             android:id="@+id/msg_compose"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_marginBottom="9dp"
+			android:layout_centerVertical="true"
             android:layout_marginLeft="12dp"
-            android:layout_marginTop="9dp"
+            android:layout_marginTop="8dp"
             android:layout_toLeftOf="@+id/send_message"
             android:autoText="true"
             android:background="@drawable/edittext"
@@ -102,10 +102,17 @@
             <requestFocus />
         </EditText>
 
+        <View
+	        android:id="@+id/dummy"
+	        android:layout_width="match_parent"
+	        android:layout_height="0dp"
+	        android:layout_below="@id/msg_compose"
+	        android:layout_marginTop="8dp" />
+
         <Button
             android:id="@+id/send_message"
-            android:layout_width="57px"
-            android:layout_height="37px"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginBottom="7dp"
