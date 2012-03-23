@@ -15,7 +15,6 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 
 public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
