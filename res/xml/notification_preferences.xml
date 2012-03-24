@@ -4,14 +4,15 @@
     android:title="Notifications">
 
     <com.bsb.hike.view.IconCheckBoxPreference
-		android:layout="@layout/icon_checkbox_preference"
-		icon="@drawable/ic_credits"
+        icon="ic_credits"
         android:defaultValue="true"
         android:key="vibratePref"
+		android:layout="@layout/icon_checkbox_preference"
         android:summary="Vibrate when we receive new message"
         android:title="Vibrate" />
 
     <com.bsb.hike.view.IconCheckBoxPreference
+        icon="ic_help"
 		android:layout="@layout/icon_checkbox_preference"
         android:defaultValue="true"
         android:key="soundPref"
