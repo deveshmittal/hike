@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:background="@color/offwhite" >
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/avatar_border"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,7 +34,35 @@
                 android:layout_height="80dp"
                 android:layout_margin="3dp"
                 android:src="@drawable/default_profile" />
-        </LinearLayout>
+            <RelativeLayout
+                android:id="@+id/profile_change_overlay"
+                android:visibility="gone"
+                android:background="@color/transparent_white"
+                android:layout_alignLeft="@id/profile"
+                android:layout_alignRight="@id/profile"
+                android:layout_alignTop="@id/profile"
+                android:layout_width="wrap_content"
+                android:layout_height="20dp">
+                <TextView
+                    android:layout_centerInParent="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Change" />
+            </RelativeLayout>
+        </RelativeLayout>
+
+        <EditText
+            android:id="@+id/name_editable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/avatar_border"
+            android:layout_marginLeft="0dp"
+            android:layout_centerVertical="true"
+            android:text="Kavin Bharti Mittal"
+            android:textSize="18dp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/name"
