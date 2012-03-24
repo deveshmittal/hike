@@ -48,6 +48,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String PHONE_NUMBER_ENTERED = "phonenumberentered";
 
+	public static final String CONNECTED_ONCE = "connectedonce";
+
 
 	private static HikePubSub mPubSubInstance;
 
