@@ -67,7 +67,7 @@
         android:paddingLeft="17dp"
         android:paddingRight="10dp"
         android:paddingBottom="10dp"
-        android:text="Thanks for joining hike.  If you ahve questions or concerns you can send them to us here!"
+        android:text="Thanks for joining hike.  If you have questions or concerns you can send them to us here!"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/black" />
 	</RelativeLayout>
