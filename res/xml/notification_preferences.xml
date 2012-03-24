@@ -7,13 +7,13 @@
         icon="ic_credits"
         android:defaultValue="true"
         android:key="vibratePref"
-		android:layout="@layout/icon_checkbox_preference"
+		android:layout="@layout/icon_preference"
         android:summary="Vibrate when we receive new message"
         android:title="Vibrate" />
 
     <com.bsb.hike.view.IconCheckBoxPreference
         icon="ic_help"
-		android:layout="@layout/icon_checkbox_preference"
+		android:layout="@layout/icon_preference"
         android:defaultValue="true"
         android:key="soundPref"
         android:summary="Play sound when we receive new message"

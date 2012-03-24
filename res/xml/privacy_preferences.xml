@@ -5,7 +5,7 @@
 
     <com.bsb.hike.view.IconPreference
 		icon="ic_credits"
-		android:layout="@layout/icon_checkbox_preference"
+		android:layout="@layout/icon_preference"
         android:defaultValue="false"
         android:key="block"
         android:summary="Block Users"
@@ -13,7 +13,7 @@
 
     <com.bsb.hike.view.DeleteDialogPreference
 		icon="ic_help"
-		android:layout="@layout/icon_checkbox_preference"
+		android:layout="@layout/icon_preference"
         android:dialogMessage="Are you sure you want to delete everything?"
         android:key="deleteAccount"
         android:negativeButtonText="No"
