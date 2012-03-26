@@ -1,17 +1,24 @@
 package com.bsb.hike.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,8 +40,16 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 
-public class ProfileActivity extends Activity implements OnItemClickListener, OnClickListener, FinishableEvent
+public class ProfileActivity extends Activity implements OnItemClickListener, OnClickListener, FinishableEvent, android.content.DialogInterface.OnClickListener
 {
+	/* dialog IDs */
+	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
+	private static final int PROFILE_PICTURE_FROM_GALLERY = 1;
+
+	/* activityForResult IDs */
+	private static final int CAMERA_RESULT = 0;
+	private static final int GALLERY_RESULT = 1;
+	private static final int CROP_RESULT = 2;
 
 	private ImageView mIconView;
 	private TextView mNameView;
@@ -88,7 +103,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		String name = settings.getString(HikeMessengerApp.NAME, "Set a name!");
 		mNameView.setText(name);
 
-		mNameView.setOnClickListener(this);
+		mIconView.setOnClickListener(this);
 
 		mTitleView.setText(getResources().getString(R.string.profile_title));
 		mTitleIcon.setImageResource(R.drawable.ic_editmessage);
@@ -186,12 +201,17 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	@Override
 	public void onClick(View view)
 	{
-		if (view == mNameView)
+		Log.d("ProfileActivity", "View is " + view);
+		if (mEditable && (view == mIconView))
 		{
-			mNameView.setVisibility(View.GONE);
-			EditText editableTextView = (EditText) findViewById(R.id.name_editable);
-			editableTextView.setVisibility(View.VISIBLE);
-			editableTextView.requestFocus();
+			/* The wants to change their profile picture.
+			 * Open a dialog to allow them pick Camera or Gallery 
+			 */
+			final CharSequence[] items = {"Camera", "Gallery"};/*TODO externalize these */
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Choose a picture");
+			builder.setItems(items, this);
+			builder.show().setOwnerActivity(this);
 		}
 	}
 
@@ -212,4 +232,44 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		}
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		Uri uri = null;
+		if (resultCode != RESULT_OK)
+		{
+			return;
+		}
+
+		switch(requestCode)
+		{
+		case CAMERA_RESULT:
+			/* fall-through on purpose */
+		case GALLERY_RESULT:
+				uri = data.getData();
+			/* Crop the image */
+			break;
+		case CROP_RESULT:
+			break;
+		}
+	}
+
+	@Override
+	public void onClick(DialogInterface dialog, int item)
+	{
+		Intent intent = null;
+		switch(item)
+		{
+		case PROFILE_PICTURE_FROM_CAMERA:
+			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+			intent.putExtra("return-data", false);
+			startActivityForResult(intent, CAMERA_RESULT);
+			break;
+		case PROFILE_PICTURE_FROM_GALLERY:
+			intent = new Intent(Intent.ACTION_PICK);
+			intent.setType("image/*");
+			startActivityForResult(intent, GALLERY_RESULT);
+			break;
+		}
+	}
 }
