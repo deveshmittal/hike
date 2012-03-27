@@ -45,6 +45,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -116,7 +117,7 @@ public class CropImage extends MonitoredActivity {
 			}
 
 			mImagePath = extras.getString("image-path");
-			mSaveUri = getImageUri(mImagePath);
+			mSaveUri = extras.containsKey(MediaStore.EXTRA_OUTPUT) ? getImageUri(extras.getString(MediaStore.EXTRA_OUTPUT)) : null;
 			mBitmap = getBitmap(mImagePath);
 
 			mAspectX = extras.getInt("aspectX");
@@ -350,10 +351,12 @@ public class CropImage extends MonitoredActivity {
 			Bundle extras = new Bundle();
 			setResult(RESULT_OK, new Intent(mSaveUri.toString())
 			.putExtras(extras));
+			croppedImage.recycle();
 		} else {
-			Log.e(TAG, "not defined image url");
+			Bundle extras = new Bundle();
+			extras.putParcelable("bitmap", croppedImage);
+			setResult(RESULT_OK, new Intent().putExtras(extras));
 		}
-		croppedImage.recycle();
 		finish();
 	}
 

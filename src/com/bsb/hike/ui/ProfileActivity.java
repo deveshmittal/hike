@@ -1,7 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 
 import org.json.JSONException;
@@ -14,6 +13,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -64,6 +64,8 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	private ProgressDialog mDialog;
 	private HikeHTTPTask mTask;
 	private File mSelectedIconFile;
+
+	private Bitmap mNewBitmap = null;
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -260,6 +262,10 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			startActivityForResult(intent, CROP_RESULT);
 			break;
 		case CROP_RESULT:
+			Bitmap bitmap = data.getParcelableExtra("bitmap");
+			mNewBitmap = Utils.getRoundedCornerBitmap(bitmap);
+			bitmap.recycle();
+			mIconView.setImageBitmap(mNewBitmap);
 			break;
 		}
 	}
