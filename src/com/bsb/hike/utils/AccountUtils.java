@@ -473,14 +473,13 @@ public class AccountUtils
 		addToken(post);
 		try
 		{
-			
-			AbstractHttpEntity entity = new GzipByteArrayEntity(hikeHttpRequest.getJSONData().toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
-			entity.setContentType("application/json");
+			AbstractHttpEntity entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity.setContentType(hikeHttpRequest.getContentType());
 			post.setEntity(entity);
 			JSONObject obj = executeRequest(post);
 			if ((obj == null) || (!"ok".equals(obj.optString("stat"))))
 			{
-				throw new NetworkErrorException("Unable to set name");
+				throw new NetworkErrorException("Unable to perform request");
 			}
 		}
 		catch (UnsupportedEncodingException e)

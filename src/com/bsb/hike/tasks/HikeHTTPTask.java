@@ -34,8 +34,14 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Void, Boolean> impl
 		}
 		else
 		{
+
+			for (HikeHttpRequest request : requests)
+			{
+				request.onFailure();
+			}
+
 			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText((Activity) finishableEvent, ((Activity) finishableEvent).getResources().getString(R.string.delete_account_failed), duration);
+			Toast toast = Toast.makeText((Activity) finishableEvent, ((Activity) finishableEvent).getResources().getString(R.string.update_profile_failed), duration);
 			toast.show();
 		}
 	}

@@ -5,6 +5,12 @@ import org.json.JSONObject;
 public class HikeHttpRequest
 {
 
+	public static abstract class HikeHttpCallback
+	{
+		public void onSuccess() {}
+		public void onFailure() {}
+	}
+
 	public enum Method
 	{
 		GET,
@@ -14,12 +20,13 @@ public class HikeHttpRequest
 
 	private String mPath;
 	private JSONObject mJSONData;
-	private Runnable mSuccessRunnable;
+	private HikeHttpCallback mCompletionRunnable;
+	private byte[] mPostData;
 
-	public HikeHttpRequest(String path, Runnable successRunnable)
+	public HikeHttpRequest(String path, HikeHttpCallback completionRunnable)
 	{
 		this.mPath = path;
-		this.mSuccessRunnable = successRunnable;
+		this.mCompletionRunnable = completionRunnable;
 	}
 
 	public JSONObject getJSONData()
@@ -39,9 +46,44 @@ public class HikeHttpRequest
 
 	public void onSuccess()
 	{
-		if (mSuccessRunnable != null)
+		if (mCompletionRunnable != null)
 		{
-			mSuccessRunnable.run();
+			mCompletionRunnable.onSuccess();
+		}
+	}
+
+	public void setPostData(byte[] bytes)
+	{
+		this.mPostData = bytes;
+	}
+
+	public byte[] getPostData()
+	{
+		if (mPostData != null)
+		{
+			return mPostData;
+		}
+
+		return mJSONData.toString().getBytes();
+	}
+
+	public void onFailure()
+	{
+		if (mCompletionRunnable != null)
+		{
+			mCompletionRunnable.onFailure();
+		}
+	}
+
+	public String getContentType()
+	{
+		if (mJSONData != null)
+		{
+			return "application/json";
+		}
+		else
+		{
+			return "";
 		}
 	}
 }

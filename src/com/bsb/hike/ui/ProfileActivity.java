@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -34,6 +35,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileArrayAdapter;
 import com.bsb.hike.cropimage.CropImage;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -161,8 +163,13 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			if (!mNameView.getText().equals(mNameViewEdittable.getText().toString()))
 			{
 				/* user edited the text, so update the profile */
-				HikeHttpRequest request = new HikeHttpRequest("/account/name", new Runnable() {
-					public void run()
+				HikeHttpRequest request = new HikeHttpRequest("/account/name", new HikeHttpRequest.HikeHttpCallback()
+				{
+					public void onFailure()
+					{
+					}
+
+					public void onSuccess()
 					{
 						/* if the requet was successful, update the shared preferences and the UI */
 						String name = mNameViewEdittable.getText().toString();
@@ -186,6 +193,32 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 				requests.add(request);
 			}
 
+			if (mNewBitmap != null)
+			{
+				ByteArrayOutputStream bao = new ByteArrayOutputStream();
+				mNewBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
+				final byte[] bytes = bao.toByteArray();
+				HikeHttpRequest request = new HikeHttpRequest("/account/icon", new HikeHttpRequest.HikeHttpCallback()
+				{
+					public void onFailure()
+					{
+						Log.d("ProfileActivity", "resetting image");
+						mNewBitmap = null;
+						/* reset the image */
+						mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(HikeConstants.ME));
+					}
+
+					public void onSuccess()
+					{
+						IconCacheManager.getInstance().clearIconForMSISDN(HikeConstants.ME);
+						HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
+						db.setIcon(HikeConstants.ME, bytes);
+					}
+				});
+
+				request.setPostData(bytes);
+				requests.add(request);
+			}
 			if (!requests.isEmpty())
 			{
 				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
