@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 
 import org.json.JSONException;
@@ -9,7 +10,6 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,7 +17,6 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -34,11 +33,13 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileArrayAdapter;
+import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.Utils;
 
 public class ProfileActivity extends Activity implements OnItemClickListener, OnClickListener, FinishableEvent, android.content.DialogInterface.OnClickListener
 {
@@ -62,6 +63,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	private EditText mNameViewEdittable;
 	private ProgressDialog mDialog;
 	private HikeHTTPTask mTask;
+	private File mSelectedIconFile;
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -235,7 +237,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		Uri uri = null;
+		String path = null;
 		if (resultCode != RESULT_OK)
 		{
 			return;
@@ -246,8 +248,16 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		case CAMERA_RESULT:
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
-				uri = data.getData();
+			path = (requestCode == CAMERA_RESULT) ? mSelectedIconFile.getAbsolutePath() : null;
 			/* Crop the image */
+			Intent intent = new Intent(this, CropImage.class);
+			intent.putExtra("image-path", path);
+			intent.putExtra("scale", true);
+			intent.putExtra("outputX", 40);
+			intent.putExtra("outputY", 40);
+			intent.putExtra("aspectX", 1);
+			intent.putExtra("aspectY", 1);
+			startActivityForResult(intent, CROP_RESULT);
 			break;
 		case CROP_RESULT:
 			break;
@@ -262,7 +272,8 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		{
 		case PROFILE_PICTURE_FROM_CAMERA:
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			intent.putExtra("return-data", false);
+			mSelectedIconFile = Utils.getOutputMediaFile(Utils.MEDIA_TYPE_IMAGE); // create a file to save the image
+			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mSelectedIconFile));
 			startActivityForResult(intent, CAMERA_RESULT);
 			break;
 		case PROFILE_PICTURE_FROM_GALLERY:
