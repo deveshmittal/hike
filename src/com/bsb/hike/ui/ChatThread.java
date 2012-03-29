@@ -130,6 +130,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			/* mark any messages unread as read. */
 			setMessagesRead();
+			/* clear any pending notifications */
+			/* clear any toast notifications */
+			if (mConversation != null)
+			{
+				NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+				mgr.cancel((int) mConversation.getConvId());				
+			}
 		}
 	}
 
@@ -144,17 +151,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.init();
-		}
-	}
 
-	@Override
-	protected void onStop()
-	{
-		super.onStop();
-		if (mComposeViewWatcher != null)
-		{
-			mComposeViewWatcher.uninit();
-			mComposeViewWatcher = null;
+			/* check if the send button should be enabled */
+			mComposeViewWatcher.setBtnEnabled();
 		}
 	}
 
@@ -260,6 +259,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
+
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.uninit();
+			mComposeViewWatcher = null;
+		}
 
 		if (mDbhelper != null)
 		{

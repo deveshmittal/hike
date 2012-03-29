@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -33,6 +34,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -54,14 +56,16 @@ public class HikeMqttManager implements Listener
 		public void onSuccess(Void value)
 		{
 			Log.d("HikeMqttManager", "Sucessfully disconnected");
+			mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 		}
 
 		@Override
 		public void onFailure(Throwable value)
 		{
-			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 			Log.d("HikeMqttManager", "Error disconnecting from server");
+			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+			mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 		}
 
 	}
@@ -189,11 +193,14 @@ public class HikeMqttManager implements Listener
 
 	private String uid;
 
+	private HikeUserDatabase userDb;
+
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
 		this.toaster = new HikeNotification(hikeService);
 		this.convDb = new HikeConversationsDatabase(hikeService);
+		this.userDb = new HikeUserDatabase(hikeService);
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 		mqttIdToPacket = Collections.synchronizedMap(new HashMap<Integer, HikePacket>());
 		this.handler = handler;
@@ -375,7 +382,6 @@ public class HikeMqttManager implements Listener
 		{
 			if (mqttConnection != null)
 			{
-				mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 				mqttConnection.disconnect(new DisconnectCB());
 				mqttConnection = null;
 			}
@@ -590,7 +596,7 @@ public class HikeMqttManager implements Listener
 	}
 
 	@Override
-	public void onPublish(UTF8Buffer topic, org.fusesource.hawtbuf.Buffer body, Runnable ack)
+	public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack)
 	{
 		// we protect against the phone switching off while we're doing this
 		// by requesting a wake lock - we request the minimum possible wake
@@ -605,6 +611,18 @@ public class HikeMqttManager implements Listener
 			String messageBody = new String(body.toByteArray());
 
 			Log.d("HikeMqttManager", "onPublish called " + messageBody);
+			JSONObject jsonObj = new JSONObject(messageBody);
+			String type = jsonObj.getString(HikeConstants.TYPE);
+
+			/* handle icons/etc here so we don't risk losing them.
+			 * TODO handle more things in the service
+			 */
+			if (NetworkManager.ICON.equals(type))
+			{
+				String msisdn = jsonObj.getString(HikeConstants.FROM);
+				String iconBase64 = jsonObj.getString(HikeConstants.DATA);
+				this.userDb.setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT));
+			}
 
 			if (this.mHikeService.sendToApp(messageBody))
 			{
@@ -653,6 +671,10 @@ public class HikeMqttManager implements Listener
 
 			// we're finished - if the phone is switched off, it's okay for the CPU
 			// to sleep now
+		}
+		catch (JSONException e)
+		{
+			Log.e("HikeMqttManager", "invalid JSON message", e);
 		}
 		finally
 		{

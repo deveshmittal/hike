@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 import com.bsb.hike.db.HikeUserDatabase;
@@ -87,5 +86,10 @@ public class IconCacheManager
 		}
 
 		return b;
+	}
+
+	public synchronized void clearIconForMSISDN(String msisdn)
+	{
+		mIcons.remove(msisdn);
 	}
 }

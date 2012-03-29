@@ -15,7 +15,6 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 
 public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
@@ -69,10 +68,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			NotificationManager mgr = (NotificationManager) activity.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
 			mgr.cancelAll();
 
-			Intent intent = new Intent(activity, WelcomeActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			activity.startActivity(intent);
-			activity.finish();
+			/* just shutdwn the app */
+			android.os.Process.killProcess(android.os.Process.myPid());
 		}
 		else
 		{

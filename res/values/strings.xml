@@ -58,4 +58,6 @@
     <string name="block_users">Block Users</string>
     <string name="profile_title">Me</string>
     <string name="made_with_love">Made with %1$s in New Delhi</string>
+    <string name="updating_profile">Updating Profile</string>
+    <string name="update_profile_failed">Could not update profile</string>
 </resources>

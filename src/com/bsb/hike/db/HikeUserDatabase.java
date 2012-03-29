@@ -1,6 +1,5 @@
 package com.bsb.hike.db;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

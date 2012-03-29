@@ -20,28 +20,52 @@
             android:src="@drawable/ic_logoheader"/>
 	</LinearLayout>
 
-     <com.bsb.hike.view.HikeListView
-        android:fadingEdge="none"
-        android:id="@+id/conversations"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/top_panel"
-        android:layout_alignParentLeft="true"
-        android:layout_weight="10"
-        android:background="@drawable/thatch_repeat"
-        android:choiceMode="none"
-        android:footerDividersEnabled="false"
-        android:dividerHeight="2dp"
-  	    android:divider="@drawable/ic_thread_divider">
-    </com.bsb.hike.view.HikeListView>
-
-    <View
+ 	<View
         android:id="@+id/bottom_nav_bar"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/bottombar" >
     </View>
+
+	<View
+		android:id="@+id/bottom_nav_bar_dropshadow"
+		android:layout_above="@id/bottom_nav_bar"
+		android:layout_width="fill_parent"
+		android:layout_height="1dp"
+		android:background="@drawable/dropshadow" />
+
+ 	<LinearLayout
+        android:id="@+id/background_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+		android:layout_below="@id/top_panel"
+        android:layout_above="@id/bottom_nav_bar_dropshadow"
+        android:layout_weight="10"
+        android:orientation="vertical"
+        android:background="@drawable/thatch_repeat" >
+
+        <com.bsb.hike.view.HikeListView
+            android:id="@+id/conversations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/background_view"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/top_panel"
+            android:background="@drawable/thatch_repeat"
+            android:choiceMode="none"
+            android:divider="@drawable/ic_thread_divider"
+            android:dividerHeight="2dp"
+            android:fadingEdge="none"
+            android:footerDividersEnabled="false" >
+        </com.bsb.hike.view.HikeListView>
+
+		<View
+		    android:id="@+id/conversation_list_dropshadow"
+	        android:layout_width="fill_parent"
+	        android:layout_height="1dp"
+ 	       	android:background="@drawable/dropshadow" />
+    </LinearLayout>
 
     <View
         android:id="@+id/messages_list_overlay"
@@ -52,22 +76,10 @@
         android:visibility="visible" >
     </View>
 
-	<View
-        android:layout_below="@id/conversations"
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/dropshadow" />
-
-	<View
-        android:layout_above="@id/bottom_nav_bar"
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/dropshadow" />
-
 	<RelativeLayout
 		android:layout_below="@id/top_panel"
         android:layout_above="@+id/bottom_nav_bar"
-        android:visibility="visible"
+        android:visibility="gone"
         android:id="@+id/empty_view"
    		android:background="@drawable/thatch_repeat"
    		android:layout_width="match_parent"

@@ -42,6 +42,7 @@ import android.accounts.NetworkErrorException;
 import android.util.Log;
 
 import com.bsb.hike.http.GzipByteArrayEntity;
+import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
@@ -466,4 +467,24 @@ public class AccountUtils
 		}
 	}
 
+	public static void performRequest(HikeHttpRequest hikeHttpRequest) throws NetworkErrorException
+	{
+		HttpPost post = new HttpPost(BASE + hikeHttpRequest.getPath());
+		addToken(post);
+		try
+		{
+			AbstractHttpEntity entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity.setContentType(hikeHttpRequest.getContentType());
+			post.setEntity(entity);
+			JSONObject obj = executeRequest(post);
+			if ((obj == null) || (!"ok".equals(obj.optString("stat"))))
+			{
+				throw new NetworkErrorException("Unable to perform request");
+			}
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			Log.wtf("AccountUtils", "Unable to encode name");
+		}
+	}
 }

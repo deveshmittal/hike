@@ -659,7 +659,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			{
 			case INVITE_PICKER_RESULT:
 				intent.setClass(this, ChatThread.class);
-				intent.putExtra("invite", true);
 				startActivity(intent);
 			}
 		}

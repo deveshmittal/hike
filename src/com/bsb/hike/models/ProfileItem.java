@@ -46,8 +46,8 @@ public abstract class ProfileItem
 	 */
 	static public class ProfilePreferenceItem extends ProfileItem
 	{
-		private String preference;
-		public ProfilePreferenceItem(String title, int icon, String preference)
+		private int preference;
+		public ProfilePreferenceItem(String title, int icon, int preference)
 		{
 			super(title, icon);
 			this.preference = preference;
@@ -57,7 +57,7 @@ public abstract class ProfileItem
 		public Intent getIntent(Context ctx)
 		{
 			Intent intent = new Intent(ctx, HikePreferences.class);
-			intent.putExtra("preference", preference);
+			intent.putExtra("pref", preference);
 			return intent;
 		}
 
