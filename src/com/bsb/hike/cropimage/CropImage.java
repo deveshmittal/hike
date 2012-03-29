@@ -180,7 +180,26 @@ public class CropImage extends MonitoredActivity {
 
 	private Bitmap getBitmap(String path) {
 		File f = new File(path);
-		return BitmapFactory.decodeFile(path);
+		/* resize the image while opening it.
+		 * http://stackoverflow.com/questions/477572/android-strange-out-of-memory-issue-while-loading-an-image-to-a-bitmap-object/823966#823966
+		 */
+		BitmapFactory.Options options = new BitmapFactory.Options();
+
+		/* query the filesize of the bitmap */
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(path, options);
+
+		final int maxSize = Math.max(mOutputX, mOutputY);
+		int scale = 1;
+		/* determine the correct scale (must be a power of 2) */
+		if (options.outHeight > mOutputY || options.outWidth > mOutputX)
+		{
+			scale = (int) Math.pow(2, (int) Math.round(Math.log(maxSize/Math.max(options.outHeight, options.outWidth)/ Math.log(0.5))));
+		}
+
+		options = new BitmapFactory.Options();
+		options.inSampleSize = scale;
+		return BitmapFactory.decodeFile(path, options);
 	}
 
 
