@@ -157,17 +157,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	}
 
-	@Override
-	protected void onStop()
-	{
-		super.onStop();
-		if (mComposeViewWatcher != null)
-		{
-			mComposeViewWatcher.uninit();
-			mComposeViewWatcher = null;
-		}
-	}
-
 	/* msg is any text we want to show initially */
 	private void createAutoCompleteView(String msg)
 	{
@@ -270,6 +259,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
+
+		if (mComposeViewWatcher != null)
+		{
+			mComposeViewWatcher.uninit();
+			mComposeViewWatcher = null;
+		}
 
 		if (mDbhelper != null)
 		{
