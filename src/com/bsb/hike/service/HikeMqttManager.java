@@ -596,7 +596,7 @@ public class HikeMqttManager implements Listener
 	}
 
 	@Override
-	public void onPublish(UTF8Buffer topic, org.fusesource.hawtbuf.Buffer body, Runnable ack)
+	public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack)
 	{
 		// we protect against the phone switching off while we're doing this
 		// by requesting a wake lock - we request the minimum possible wake
