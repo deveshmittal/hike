@@ -198,7 +198,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 				ByteArrayOutputStream bao = new ByteArrayOutputStream();
 				mNewBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
 				final byte[] bytes = bao.toByteArray();
-				HikeHttpRequest request = new HikeHttpRequest("/account/icon", new HikeHttpRequest.HikeHttpCallback()
+				HikeHttpRequest request = new HikeHttpRequest("/account/avatar", new HikeHttpRequest.HikeHttpCallback()
 				{
 					public void onFailure()
 					{
@@ -213,6 +213,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 						IconCacheManager.getInstance().clearIconForMSISDN(HikeConstants.ME);
 						HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
 						db.setIcon(HikeConstants.ME, bytes);
+						db.close();
 					}
 				});
 
