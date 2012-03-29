@@ -189,12 +189,12 @@ public class CropImage extends MonitoredActivity {
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(path, options);
 
-		final int maxSize = Math.max(mOutputX, mOutputY);
+		final int maxSize = 1024;
 		int scale = 1;
 		/* determine the correct scale (must be a power of 2) */
-		if (options.outHeight > mOutputY || options.outWidth > mOutputX)
+		if (options.outHeight > maxSize || options.outWidth > maxSize)
 		{
-			scale = (int) Math.pow(2, (int) Math.round(Math.log(maxSize/Math.max(options.outHeight, options.outWidth)/ Math.log(0.5))));
+			scale = Math.max(options.outHeight, options.outWidth) / maxSize;
 		}
 
 		options = new BitmapFactory.Options();
