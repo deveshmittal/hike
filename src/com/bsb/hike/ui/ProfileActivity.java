@@ -68,6 +68,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	private File mSelectedIconFile;
 
 	private Bitmap mNewBitmap = null;
+	private String mLocalMSISDN = null;
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -102,11 +103,13 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mMadeWithLoveView = (TextView) findViewById(R.id.made_with_love);
 		mProfilePictureChangeOverlay = findViewById(R.id.profile_change_overlay);
 
-		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(HikeConstants.ME);
-		mIconView.setImageDrawable(drawable);
-
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String name = settings.getString(HikeMessengerApp.NAME, "Set a name!");
+		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+
+		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(mLocalMSISDN);
+		mIconView.setImageDrawable(drawable);
+
 		mNameView.setText(name);
 
 		mIconView.setOnClickListener(this);
@@ -205,14 +208,14 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 						Log.d("ProfileActivity", "resetting image");
 						mNewBitmap = null;
 						/* reset the image */
-						mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(HikeConstants.ME));
+						mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(mLocalMSISDN));
 					}
 
 					public void onSuccess()
 					{
-						IconCacheManager.getInstance().clearIconForMSISDN(HikeConstants.ME);
+						IconCacheManager.getInstance().clearIconForMSISDN(mLocalMSISDN);
 						HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
-						db.setIcon(HikeConstants.ME, bytes);
+						db.setIcon(mLocalMSISDN, bytes);
 						db.close();
 					}
 				});
