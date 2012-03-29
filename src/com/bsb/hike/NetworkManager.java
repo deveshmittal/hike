@@ -8,6 +8,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 
 /**
@@ -38,6 +39,8 @@ public class NetworkManager implements HikePubSub.Listener
 	public static final String END_TYPING = "et";
 
 	public static final String INVITE = "i";
+
+	public static final String ICON = "ic";
 	
 	private HikePubSub pubSub;
 
@@ -161,6 +164,10 @@ public class NetworkManager implements HikePubSub.Listener
 		else if ((USER_JOINED.equals(type)) || (USER_LEFT.equals(type)))
 		{
 			ContactUtils.updateHikeStatus(this.context, msisdn, USER_JOINED.equals(type));
+		}
+		else if ((ICON.equals(type)))
+		{
+			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 		}
 		else
 		{
