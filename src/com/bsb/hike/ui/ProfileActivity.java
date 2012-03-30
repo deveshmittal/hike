@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -30,7 +31,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileArrayAdapter;
@@ -287,7 +287,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		case CAMERA_RESULT:
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
-			path = (requestCode == CAMERA_RESULT) ? mSelectedIconFile.getAbsolutePath() : null;
+			path = (requestCode == CAMERA_RESULT) ? mSelectedIconFile.getAbsolutePath() : getGalleryPath(data.getData());
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);
 			intent.putExtra("image-path", path);
@@ -305,6 +305,19 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			mIconView.setImageBitmap(mNewBitmap);
 			break;
 		}
+	}
+
+	private String getGalleryPath(Uri selectedImage)
+	{
+        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+        Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+        cursor.moveToFirst();
+
+        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+        String filePath = cursor.getString(columnIndex);
+        cursor.close();
+        return filePath;
 	}
 
 	@Override

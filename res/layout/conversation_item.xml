@@ -20,11 +20,11 @@
 
             <ImageView
                 android:id="@+id/avatar"
-                android:src="@drawable/ic_avatar0"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_alignParentLeft="true"
-                android:layout_marginLeft="17dp" />
+                android:layout_marginLeft="17dp"
+                android:src="@drawable/ic_avatar0" />
 
             <TextView
                 android:id="@+id/contact"
@@ -32,61 +32,70 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="17dp"
                 android:layout_marginRight="10dp"
-                android:layout_toRightOf="@id/avatar"
                 android:layout_toLeftOf="@+id/last_message_timestamp"
+                android:layout_toRightOf="@id/avatar"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="Kavin Mittal"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/black" />
 
-            <ImageView
-                android:id="@+id/msg_status_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/avatar"
-                android:layout_below="@id/contact"
-                android:layout_marginLeft="13dp" />
-
             <TextView
                 android:id="@+id/last_message_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:paddingTop="2dp"
                 android:layout_marginRight="17dp"
+                android:paddingTop="2dp"
                 android:text="9:35AM"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/black" />
 
-            <TextView
-                android:id="@+id/last_message"
-                android:layout_width="fill_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/msg_status_indicator"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="10dp"
-                android:layout_toRightOf="@+id/msg_status_indicator"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/black" />
+                android:layout_alignLeft="@+id/contact"
+                android:layout_below="@+id/last_message_timestamp"
+                android:orientation="horizontal" >
+
+                <ImageView
+                    android:id="@+id/msg_status_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/contact"
+                    android:layout_marginRight="5dp"
+                    android:layout_toRightOf="@id/avatar"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/last_message"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="10dp"
+                    android:layout_toRightOf="@+id/msg_status_indicator"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/grey" />
+            </LinearLayout>
         </RelativeLayout>
+
         <RelativeLayout
             android:id="@+id/bottom_panel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" >
 
             <Button
-                android:background="@drawable/sendbutton"
                 android:id="@+id/send_message"
-	            android:layout_width="57px"
-    	        android:layout_height="37px"
+                android:layout_width="57px"
+                android:layout_height="37px"
                 android:layout_alignParentRight="true"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="7dp"
                 android:layout_marginTop="21dp"
+                android:background="@drawable/sendbutton"
                 android:enabled="false"
                 android:onClick="onSendClick" />
 
@@ -94,15 +103,15 @@
                 android:id="@+id/mini_compose"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@+id/send_message"
-                android:autoText="true"
                 android:layout_marginLeft="7dp"
                 android:layout_marginTop="12dp"
+                android:layout_toLeftOf="@+id/send_message"
+                android:autoText="true"
                 android:background="@drawable/edittext"
                 android:hint="@string/type_to_compose"
                 android:imeOptions="actionSend"
                 android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences" />
-
         </RelativeLayout>
     </ViewAnimator>
+
 </RelativeLayout>
