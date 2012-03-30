@@ -61,6 +61,8 @@
             android:text="Kavin Bharti Mittal"
             android:textSize="18dp"
             android:textStyle="bold"
+            android:maxLength="20"
+			android:ellipsize="end"
             android:textColor="@color/black"
             android:visibility="gone"/>
 
@@ -71,7 +73,9 @@
             android:layout_toRightOf="@+id/avatar_border"
             android:layout_marginLeft="0dp"
             android:layout_centerVertical="true"
+            android:maxLength="20"
             android:text="Kavin Bharti Mittal"
+			android:ellipsize="end"
             android:textSize="18dp"
             android:textStyle="bold"
             android:textColor="@color/black" />
