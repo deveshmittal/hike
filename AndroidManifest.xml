@@ -85,6 +85,7 @@
 
         </activity>
         <activity
+			android:theme="@android:style/Theme.NoTitleBar"
             android:name=".ui.HikePreferences"
             android:label="@string/preferences">
             
