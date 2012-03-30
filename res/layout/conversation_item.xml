@@ -65,7 +65,8 @@
                     android:layout_below="@id/contact"
                     android:layout_marginRight="5dp"
                     android:layout_toRightOf="@id/avatar"
-                    android:visibility="gone" />
+                    android:visibility="visible"
+                    android:src="@drawable/ic_unread" />
 
                 <TextView
                     android:id="@+id/last_message"

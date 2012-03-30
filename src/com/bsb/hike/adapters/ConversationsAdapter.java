@@ -56,30 +56,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		if (!messages.isEmpty())
 		{
 			ConvMessage message = messages.get(messages.size() - 1);
-			TextView messageView = (TextView) v.findViewById(R.id.last_message);
-			messageView.setText(message.getMessage());
-			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
-			tsView.setText(message.getTimestampFormatted(true));
-			Typeface tf = messageView.getTypeface();
-			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
-			{
-				/* set unread messages to BOLD */
-				messageView.setTypeface(tf, Typeface.BOLD);
-				tf = tsView.getTypeface();
-				tsView.setTypeface(tf, Typeface.BOLD);
-
-				tf = contactView.getTypeface();
-				contactView.setTypeface(tf, Typeface.BOLD);
-			}
-			else
-			{
-				messageView.setTypeface(Typeface.DEFAULT);
-				tf = tsView.getTypeface();
-				tsView.setTypeface(Typeface.DEFAULT);
-
-				tf = contactView.getTypeface();
-				contactView.setTypeface(Typeface.DEFAULT);
-			}
 
 			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
 			int resId = message.getImageState();
@@ -88,9 +64,29 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				imgStatus.setImageResource(resId);
 				imgStatus.setVisibility(View.VISIBLE);
 			}
+			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			{
+				imgStatus.setImageResource(R.drawable.ic_unread);
+				imgStatus.setVisibility(View.VISIBLE);
+			}
 			else
 			{
 				imgStatus.setImageResource(0);
+				imgStatus.setVisibility(View.GONE);
+			}
+
+			TextView messageView = (TextView) v.findViewById(R.id.last_message);
+			messageView.setText(message.getMessage());
+			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
+			tsView.setText(message.getTimestampFormatted(true));
+			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			{
+				/* set unread messages to BLUE */
+				messageView.setTextColor(mMessagesList.getResources().getColor(R.color.unread_message_blue));
+			}
+			else
+			{
+				messageView.setTextColor(mMessagesList.getResources().getColor(R.color.grey));
 			}
 		}
 

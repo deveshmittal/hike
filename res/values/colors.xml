@@ -5,6 +5,7 @@
     <color name="green">#e4f7d5</color>
     <color name="grey">#808080</color>
     <color name="blue">#def3f8</color>
+    <color name="unread_message_blue">#3e8ec3</color>
     <color name="orange">#FFA500</color>
     <color name="lightgrey">#D3D3D3</color>
     <color name="gainsboro">#E8E8E8</color>
