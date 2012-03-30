@@ -20,6 +20,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -163,7 +164,8 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
 
 			/* save the new fields */
-			if (!mNameView.getText().equals(mNameViewEdittable.getText().toString()))
+			String updatedName = mNameViewEdittable.getText().toString();
+			if (!TextUtils.isEmpty(updatedName) && !mNameView.getText().equals(updatedName))
 			{
 				/* user edited the text, so update the profile */
 				HikeHttpRequest request = new HikeHttpRequest("/account/name", new HikeHttpRequest.HikeHttpCallback()
@@ -174,7 +176,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 
 					public void onSuccess()
 					{
-						/* if the requet was successful, update the shared preferences and the UI */
+						/* if the request was successful, update the shared preferences and the UI */
 						String name = mNameViewEdittable.getText().toString();
 						mNameView.setText(name);
 						Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
