@@ -67,6 +67,11 @@ public class Conversation implements Comparable<Conversation>
 
 	private boolean onhike;
 
+	public void setOnhike(boolean onhike)
+	{
+		this.onhike = onhike;
+	}
+
 	public String getContactName()
 	{
 		return contactName;

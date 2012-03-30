@@ -706,6 +706,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
+
 		if (mComposeTextWatcher != null)
 		{
 			mComposeTextWatcher.uninit();

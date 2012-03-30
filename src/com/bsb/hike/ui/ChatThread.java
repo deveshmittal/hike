@@ -208,7 +208,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
-
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_JOINED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_LEFT, this);
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.uninit();
@@ -321,8 +323,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
-
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_JOINED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_LEFT, this);
 	}
 
 	@Override
@@ -554,8 +559,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mComposeViewWatcher.uninit();
 		}
 
+		updateUIForHikeStatus();
+
 		mComposeViewWatcher = new ComposeViewWatcher(mConversation, mComposeView, mSendBtn, mCredits);
 
+		/* create an object that we can notify when the contents of the thread are updated */
+		mUpdateAdapter = new UpdateAdapter(mAdapter);
+
+		/* clear any toast notifications */
+		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		mgr.cancel((int) mConversation.getConvId());
+	}
+
+	/*
+	 * Update the UI to show SMS Credits/etc if the conversation is on hike
+	 */
+	private void updateUIForHikeStatus()
+	{
 		if (mConversation.isOnhike())
 		{
 			mMetadataView.setVisibility(View.GONE);
@@ -569,14 +589,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mSendBtn.setBackgroundResource(R.drawable.sendbutton_sms);
 			mComposeView.setHint("SMS Message...");
 		}
-
-		/* create an object that we can notify when the contents of the thread are updated */
-		mUpdateAdapter = new UpdateAdapter(mAdapter);
-
-		/* clear any toast notifications */
-		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-		mgr.cancel((int) mConversation.getConvId());
-
 	}
 
 	private boolean isLastMsgSent()
@@ -776,6 +788,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 				runOnUiThread(mUpdateAdapter);
 			}
+		}
+		else if (HikePubSub.ICON_CHANGED.equals(type))
+		{
+			runOnUiThread(mUpdateAdapter);
+		}
+		else if ((HikePubSub.USER_LEFT.equals(type)) || (HikePubSub.USER_JOINED.equals(type)))
+		{
+			mConversation.setOnhike(HikePubSub.USER_JOINED.equals(type));
+			runOnUiThread(new Runnable()
+			{
+				public void run()
+				{
+					updateUIForHikeStatus();
+					mUpdateAdapter.run();
+				}
+			});
 		}
 	}
 

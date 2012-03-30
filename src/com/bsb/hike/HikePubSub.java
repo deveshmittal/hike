@@ -91,6 +91,10 @@ public class HikePubSub implements Runnable
 
 	public static final String ICON_CHANGED = "iconChanged";
 
+	public static final String USER_JOINED = "userJoined";
+
+	public static final String USER_LEFT = "userLeft";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
