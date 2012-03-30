@@ -7,6 +7,8 @@ import java.util.Map;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 
 public class IconCacheManager
@@ -91,5 +93,6 @@ public class IconCacheManager
 	public synchronized void clearIconForMSISDN(String msisdn)
 	{
 		mIcons.remove(msisdn);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
 	}
 }

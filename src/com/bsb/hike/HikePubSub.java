@@ -89,6 +89,8 @@ public class HikePubSub implements Runnable
 
 	public static final String UNBLOCK_USER = "unblockUser";
 
+	public static final String ICON_CHANGED = "iconChanged";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

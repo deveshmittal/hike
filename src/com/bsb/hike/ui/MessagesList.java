@@ -370,6 +370,8 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MSG_READ, this);
 
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
+
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 	}
@@ -828,6 +830,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				msg.setState(ConvMessage.State.SENT_FAILED);
 				runOnUiThread(this);
 			}
+		}
+		else if (HikePubSub.ICON_CHANGED.equals(type))
+		{
+			/* an icon changed, so update the view */
+			runOnUiThread(this);
 		}
 	}
 
