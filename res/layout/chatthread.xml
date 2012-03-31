@@ -19,7 +19,7 @@
         android:background="@color/black"
         android:orientation="vertical" >
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/input_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -31,19 +31,7 @@
             android:hint="Start typing a name"
             android:imeOptions="actionNone"
             android:visibility="visible" >
-        </EditText>
-        <ListView
-            android:id="@+id/contact_search_result"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/offwhite"
-            android:fadingEdge="none"
-            android:divider="@drawable/ic_thread_divider" />
-        <View
-		android:id="@+id/bottom_nav_bar_dropshadow"
-		android:layout_width="match_parent"
-		android:layout_height="1dp"
-		android:background="@drawable/dropshadow" />
+        </AutoCompleteTextView>
     </LinearLayout>
 
     <ListView
