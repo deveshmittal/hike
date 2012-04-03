@@ -12,8 +12,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -30,9 +32,13 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.JSONSerializable;
+import com.bsb.hike.ui.SignupActivity;
+import com.bsb.hike.ui.WelcomeActivity;
+import com.bsb.hike.utils.AccountUtils.AccountInfo;
 
 public class Utils
 {
@@ -266,5 +272,43 @@ public class Utils
 		    canvas.drawBitmap(bitmap, rect, rect, paint);
 
 		    return output;
+	}
+
+	public static void savedAccountCredentials(AccountInfo accountInfo, SharedPreferences.Editor editor)
+	{
+		editor.putString(HikeMessengerApp.MSISDN_SETTING, accountInfo.msisdn);
+		editor.putString(HikeMessengerApp.TOKEN_SETTING, accountInfo.token);
+		editor.putString(HikeMessengerApp.UID_SETTING, accountInfo.uid);
+		editor.commit();
+	}
+
+	/* Extract a pin code from a specially formatted message
+	 * to the application.
+	 * @return null iff the message isn't an SMS pincode,
+	 * otherwise return the pincode
+	 */
+	public static String getSMSPinCode(String body)
+	{
+		return body;
+	}
+
+	public static boolean requireAuth(Activity activity)
+	{
+		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
+		{
+			activity.startActivity(new Intent(activity, WelcomeActivity.class));
+			activity.finish();
+			return true;
+		}
+
+		if (settings.getString(HikeMessengerApp.NAME_SETTING, null) == null)
+		{
+			activity.startActivity(new Intent(activity, SignupActivity.class));
+			activity.finish();
+			return true;
+		}
+
+		return false;
 	}
 }

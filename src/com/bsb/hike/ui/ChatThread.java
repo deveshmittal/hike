@@ -57,6 +57,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Utils;
 
 public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener
 {
@@ -314,26 +315,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mUiThreadHandler = new Handler();
 
 		/* force the user into the reg-flow process if the token isn't set */
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-		if (token == null)
+		if (Utils.requireAuth(this))
 		{
-			/* This is to check if phone validation screen is reached by the user or not.*/
-			boolean phoneValidation = settings.getBoolean(HikeMessengerApp.PHONE_NUMBER_VALIDATION, false);
-			if(phoneValidation)
-			{
-				startActivity(new Intent(this, SmsFallback.class));
-				finish();
-				return;
-			}
-			startActivity(new Intent(this, WelcomeActivity.class));
-			finish();
-			return;
-		}
-		else if (!settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false))
-		{
-			startActivity(new Intent(this, AccountCreateSuccess.class));
-			finish();
 			return;
 		}
 

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/signup_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentLeft="true" />
+
+    <View
+        android:id="@+id/signup_gradient"
+        android:background="@drawable/signup_gradient"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true"
+		android:layout_alignParentLeft="true" />
+
+    <ImageView
+        android:id="@+id/title_hikeicon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_logoheader"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/title_hikeicon"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_thread_divider" />
+
+    <ImageView
+        android:id="@+id/signup_hi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/divider"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_signup_hi" />
+
+    <ProgressBar
+        android:id="@+id/signup_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/signup_hi"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="17dp" />
+
+    <LinearLayout
+        android:visibility="visible"
+        android:orientation="horizontal"
+        android:id="@+id/signup_digits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+   		android:layout_centerHorizontal="true"
+        android:layout_below="@+id/signup_progress"
+        android:layout_marginTop="20dp">
+
+		<ImageView
+		    android:src="@drawable/ic_contacts"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" />
+
+		<TextView
+		    android:id="@+id/signup_text"
+		    android:layout_marginLeft="8dp"
+		    android:text="Pulling your digits..."
+		    android:layout_gravity="center_vertical"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" />
+
+		<ImageView
+		    android:id="@+id/signup_status"
+			android:layout_marginLeft="8dp"
+		    android:src="@drawable/checkmark"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"/>
+	</LinearLayout>
+	<LinearLayout
+        android:visibility="invisible"
+        android:orientation="horizontal"
+        android:id="@+id/signup_addressbook"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+   		android:layout_centerHorizontal="true"
+        android:layout_below="@+id/signup_digits"
+        android:layout_marginTop="20dp">
+
+		<ImageView
+		    android:src="@drawable/ic_contacts"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" />
+
+		<TextView
+			android:id="@+id/signup_text"
+		    android:layout_marginLeft="8dp"
+		    android:text="Scanning contacts..."
+		    android:layout_gravity="center_vertical"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" />
+
+		<ImageView
+		    android:id="@+id/signup_status"
+			android:layout_marginLeft="8dp"
+		    android:src="@drawable/checkmark"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"/>
+	</LinearLayout>
+    <LinearLayout
+        android:visibility="invisible"
+        android:orientation="horizontal"
+        android:id="@+id/signup_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+   		android:layout_centerHorizontal="true"
+        android:layout_below="@+id/signup_addressbook"
+        android:layout_marginTop="20dp">
+
+		<ImageView
+		    android:src="@drawable/ic_contacts"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" />
+
+		<TextView
+		    android:id="@+id/signup_text"
+		    android:layout_marginLeft="8dp"
+		    android:text="What's your name?"
+		    android:layout_gravity="center_vertical"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" />
+
+		<ImageView
+		    android:id="@+id/signup_status"
+		    android:layout_marginLeft="8dp"
+		    android:src="@drawable/checkmark"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"/>
+	</LinearLayout>
+</RelativeLayout>

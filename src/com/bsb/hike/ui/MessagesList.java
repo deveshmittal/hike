@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -262,29 +263,13 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	{
 		super.onCreate(savedInstanceState);
 
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-		if (token == null)
+		if (Utils.requireAuth(this))
 		{
-			/* This is to check if phone validation screen is reached by the user or not. */
-			boolean phoneValidation = settings.getBoolean(HikeMessengerApp.PHONE_NUMBER_VALIDATION, false);
-			if (phoneValidation)
-			{
-				startActivity(new Intent(this, SmsFallback.class));
-				finish();
-				return;
-			}
-			startActivity(new Intent(this, WelcomeActivity.class));
-			finish();
-			return;
-		}
-		else if (!settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false))
-		{
-			startActivity(new Intent(this, AccountCreateSuccess.class));
-			finish();
 			return;
 		}
 
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, token);
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();

@@ -95,6 +95,11 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.profile);
 
+		if (Utils.requireAuth(this))
+		{
+			return;
+		}
+
 		mIconView = (ImageView) findViewById(R.id.profile);
 		mNameView = (TextView) findViewById(R.id.name);
 		mNameViewEdittable = (EditText) findViewById(R.id.name_editable);
@@ -289,6 +294,11 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		case CAMERA_RESULT:
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
+			for(String key : data.getExtras().keySet())
+			{
+				Log.d("ProfileActivity", "Intent key=" + key + " value=" + data.getExtras().getString(key));
+			}
+
 			path = (requestCode == CAMERA_RESULT) ? mSelectedIconFile.getAbsolutePath() : getGalleryPath(data.getData());
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);

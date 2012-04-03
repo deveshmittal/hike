@@ -44,9 +44,7 @@ public class HikeMessengerApp extends Application
 
 	public static final String NAME = "name";
 
-	public static final String PHONE_NUMBER_VALIDATION = "phonenumbervalidation";
-
-	public static final String PHONE_NUMBER_ENTERED = "phonenumberentered";
+	public static final String ACCEPT_TERMS = "acceptterms";
 
 	public static final String CONNECTED_ONCE = "connectedonce";
 
