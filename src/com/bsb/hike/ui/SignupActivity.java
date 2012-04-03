@@ -58,7 +58,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 	private ViewGroup mPullingDigitsView;
 	private ViewGroup mScanningContactsView;
 	private ViewGroup mGettingNameView;
-	private AlertDialog mDialog;
+	private View mDialogOverlay;
 	private StateValue mCurrentState;
 
 	@Override
@@ -70,6 +70,23 @@ public class SignupActivity extends Activity implements FinishableEvent
 		mPullingDigitsView = (ViewGroup) findViewById(R.id.signup_digits);
 		mScanningContactsView = (ViewGroup) findViewById(R.id.signup_addressbook);
 		mGettingNameView = (ViewGroup) findViewById(R.id.signup_name);
+		mDialogOverlay = findViewById(R.id.dialog_overlay);
+
+		final EditText editText = (EditText) findViewById(R.id.dialog_edittext);
+		Button button = (Button) mDialogOverlay.findViewById(R.id.dialog_proceed);
+		button.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				String text = editText.getText().toString();
+				editText.setText("");
+				mDialogOverlay.setVisibility(View.INVISIBLE);
+					mTask.addUserInput(text);
+			}
+		});
+
+		editText.addTextChangedListener(new DialogTextWatcher(button));
 
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof SignupTask)
@@ -99,46 +116,23 @@ public class SignupActivity extends Activity implements FinishableEvent
 
 	private void createProgressDialog(String title, String labelString)
 	{
-		assert(mDialog == null);
+		/* ensure we're not currently showing a dialog */
+		assert(mDialogOverlay.getVisibility() == View.GONE);
 
 		/* couldn't auto-detect MSISDN, prompt the user via a popup */
-		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		View layout = inflater.inflate(R.layout.customdialog, null);
+		mDialogOverlay.setVisibility(View.VISIBLE);
 
-		TextView label = (TextView) layout.findViewById(R.id.dialog_label);
+		TextView label = (TextView) mDialogOverlay.findViewById(R.id.dialog_label);
 		label.setText(labelString);
 
-		final EditText editText = (EditText) layout.findViewById(R.id.dialog_edittext);
+		final EditText editText = (EditText) mDialogOverlay.findViewById(R.id.dialog_edittext);
 		editText.setHint(title);
-
-		Button button = (Button) layout.findViewById(R.id.dialog_proceed);
-		button.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				String text = editText.getText().toString();
-				mDialog.dismiss();
-				mDialog = null;
-				if (mTask != null)
-				{
-					mTask.addUserInput(text);
-				}
-			}
-		});
-		editText.addTextChangedListener(new DialogTextWatcher(button));
-
-		mDialog = new AlertDialog.Builder(this).setView(layout).show();
 	}
 
 	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		if (mDialog != null)
-		{
-			mDialog.dismiss();
-		}
 	}
 
 	public void onProgressUpdate(StateValue stateValue)
@@ -150,7 +144,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 			Log.w("SignupActivity", "Error in state " + mCurrentState.state.name());
 			mTask.cancel(true);
 			mTask = null;
-			/*TODO add a dialog prompting the user to try again */
+			/*TODO add a dialog prompting the user to try again 
 			mDialog = new AlertDialog.Builder(this)
 			.setTitle("Error")
 			.setMessage("Something bad happened, try again?")
@@ -168,6 +162,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 
 			})
 			.show();
+			*/
 		}
 
 		TextView text;

@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent" >
 
     <View
         android:id="@+id/signup_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-		android:layout_alignParentTop="true"
-		android:layout_alignParentBottom="true"
-		android:layout_alignParentRight="true"
-		android:layout_alignParentLeft="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true" />
 
     <View
         android:id="@+id/signup_gradient"
-        android:background="@drawable/signup_gradient"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-		android:layout_alignParentTop="true"
-		android:layout_alignParentBottom="true"
-		android:layout_alignParentRight="true"
-		android:layout_alignParentLeft="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/signup_gradient" />
 
     <ImageView
         android:id="@+id/title_hikeicon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_logoheader"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_logoheader" />
 
     <View
         android:id="@+id/divider"
@@ -43,8 +43,8 @@
         android:id="@+id/signup_hi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_below="@id/divider"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:src="@drawable/ic_signup_hi" />
 
@@ -57,93 +57,158 @@
         android:layout_marginTop="17dp" />
 
     <LinearLayout
-        android:visibility="visible"
-        android:orientation="horizontal"
         android:id="@+id/signup_digits"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-   		android:layout_centerHorizontal="true"
         android:layout_below="@+id/signup_progress"
-        android:layout_marginTop="20dp">
-
-		<ImageView
-		    android:src="@drawable/ic_contacts"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content" />
-
-		<TextView
-		    android:id="@+id/signup_text"
-		    android:layout_marginLeft="8dp"
-		    android:text="Pulling your digits..."
-		    android:layout_gravity="center_vertical"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content" />
-
-		<ImageView
-		    android:id="@+id/signup_status"
-			android:layout_marginLeft="8dp"
-		    android:src="@drawable/checkmark"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"/>
-	</LinearLayout>
-	<LinearLayout
-        android:visibility="invisible"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal"
+        android:visibility="visible" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_contacts" />
+
+        <TextView
+            android:id="@+id/signup_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="8dp"
+            android:text="Pulling your digits..." />
+
+        <ImageView
+            android:id="@+id/signup_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:src="@drawable/checkmark" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/signup_addressbook"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-   		android:layout_centerHorizontal="true"
         android:layout_below="@+id/signup_digits"
-        android:layout_marginTop="20dp">
-
-		<ImageView
-		    android:src="@drawable/ic_contacts"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content" />
-
-		<TextView
-			android:id="@+id/signup_text"
-		    android:layout_marginLeft="8dp"
-		    android:text="Scanning contacts..."
-		    android:layout_gravity="center_vertical"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content" />
-
-		<ImageView
-		    android:id="@+id/signup_status"
-			android:layout_marginLeft="8dp"
-		    android:src="@drawable/checkmark"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"/>
-	</LinearLayout>
-    <LinearLayout
-        android:visibility="invisible"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal"
+        android:visibility="invisible" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_contacts" />
+
+        <TextView
+            android:id="@+id/signup_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="8dp"
+            android:text="Scanning contacts..." />
+
+        <ImageView
+            android:id="@+id/signup_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:src="@drawable/checkmark" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/signup_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-   		android:layout_centerHorizontal="true"
         android:layout_below="@+id/signup_addressbook"
-        android:layout_marginTop="20dp">
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:visibility="invisible" >
 
-		<ImageView
-		    android:src="@drawable/ic_contacts"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_contacts" />
 
-		<TextView
-		    android:id="@+id/signup_text"
-		    android:layout_marginLeft="8dp"
-		    android:text="What's your name?"
-		    android:layout_gravity="center_vertical"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/signup_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="8dp"
+            android:text="What&apos;s your name?" />
 
-		<ImageView
-		    android:id="@+id/signup_status"
-		    android:layout_marginLeft="8dp"
-		    android:src="@drawable/checkmark"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"/>
-	</LinearLayout>
+        <ImageView
+            android:id="@+id/signup_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:src="@drawable/checkmark" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/dialog_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent_white" >
+
+        <LinearLayout
+            android:id="@+id/signup_dialog"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
+			android:orientation="vertical"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:paddingLeft="0dp"
+            android:paddingRight="0dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/edittext" >
+
+            <TextView
+                android:id="@+id/dialog_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:singleLine="true"
+                android:text="What&apos;s your name?"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/dialog_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Name"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:singleLine="true" />
+
+            <View
+                android:id="@+id/dialog_dropshadow"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/dropshadow" />
+
+            <Button
+                android:id="@+id/dialog_proceed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/dialog_button"
+                android:gravity="center"
+                android:layout_marginLeft="0dp"
+                android:onClick="onDialogClick"
+                android:text="Proceed"
+                android:textColor="@color/black"
+                android:textSize="18dp" />
+        </LinearLayout>
+    </RelativeLayout>
+
 </RelativeLayout>
