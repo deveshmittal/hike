@@ -720,10 +720,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)))
 		{
 			Log.d("MESSAGE LIST", "New msg event sent or received.");
-			ConvMessage message = (ConvMessage) object;
+			final ConvMessage message = (ConvMessage) object;
 			/* find the conversation corresponding to this message */
 			String msisdn = message.getMsisdn();
-			Conversation conv = mConversationsByMSISDN.get(msisdn);
+			final Conversation conv = mConversationsByMSISDN.get(msisdn);
 			if (conv == null)
 			{
 				// When a message gets sent from a user we don't have a conversation for, the message gets
@@ -732,23 +732,23 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 				return;
 			}
 
-			/*
-			 * notification must be done on the thread that created the view (the UI thread in our case) We don't want to sort the list on the UI thread so instead, disable
-			 * notification and manually notify on the UI thread We have to ensure it's disabled because calling notifyDataSetChanged will re-enable notifyOnChange
-			 */
-			mAdapter.setNotifyOnChange(false);
+			runOnUiThread(new Runnable(){
+				@Override
+				public void run()
+				{
+					if (!mConversationsAdded.contains(conv.getMsisdn()))
+					{
+						mConversationsAdded.add(conv.getMsisdn());
+						mAdapter.add(conv);
+					}
 
-			if (!mConversationsAdded.contains(conv.getMsisdn()))
-			{
-				mConversationsAdded.add(conv.getMsisdn());
-				mAdapter.add(conv);
-			}
-
-			conv.addMessage(message);
-			Log.d("MessagesList", "new message is " + message);
-			mAdapter.sort(mConversationsComparator);
-
-			runOnUiThread(this);
+					conv.addMessage(message);
+					Log.d("MessagesList", "new message is " + message);
+					mAdapter.sort(mConversationsComparator);
+					// notifyDataSetChanged sets notifyonChange to true but we want it to always be false
+					mAdapter.setNotifyOnChange(false);
+				}
+			});
 		}
 		else if (HikePubSub.NEW_CONVERSATION.equals(type))
 		{
