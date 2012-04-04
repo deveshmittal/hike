@@ -9,7 +9,6 @@ import android.util.Log;
 
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.utils.ContactUtils;
 
 /**
  * 
@@ -41,20 +40,18 @@ public class NetworkManager implements HikePubSub.Listener
 	public static final String INVITE = "i";
 
 	public static final String ICON = "ic";
-	
+
 	private HikePubSub pubSub;
 
-	private Context context;
 
 	private static volatile NetworkManager instance;
-	
+
 	private NetworkManager(Context context)
 	{
-		this.context = context;
 		pubSub = HikeMessengerApp.getPubSub();
 		pubSub.addListener(HikePubSub.WS_RECEIVED, this);
 	}
-	
+
 	public static NetworkManager getInstance(Context context)
 	{
 		if (instance == null)
@@ -156,7 +153,7 @@ public class NetworkManager implements HikePubSub.Listener
 			long[] ids = new long[msgIds.length()];
 			for (int i = 0; i < ids.length; i++)
 			{
-					ids[i] = msgIds.optLong(i);
+				ids[i] = msgIds.optLong(i);
 			}
 			Log.d("NETWORK MANAGER","Delivery report received : " +"	;	REPORT : DELIVERED READ");
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);	
@@ -164,7 +161,6 @@ public class NetworkManager implements HikePubSub.Listener
 		else if ((USER_JOINED.equals(type)) || (USER_LEFT.equals(type)))
 		{
 			boolean joined = USER_JOINED.equals(type);
-			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			this.pubSub.publish(joined ? HikePubSub.USER_JOINED : HikePubSub.USER_LEFT, msisdn);
 		}
 		else if ((ICON.equals(type)))

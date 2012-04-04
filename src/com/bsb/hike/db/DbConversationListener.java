@@ -4,7 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -22,14 +21,12 @@ public class DbConversationListener implements Listener
 	
 	private HikePubSub mPubSub;
 
-	private Editor mEditor;
 
 	public DbConversationListener(Context context)
 	{
 		mPubSub = HikeMessengerApp.getPubSub();
 		mConversationDb = new HikeConversationsDatabase(context);
 		mUserDb = new HikeUserDatabase(context);
-		mEditor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, this);
@@ -59,12 +56,6 @@ public class DbConversationListener implements Listener
 			Log.d("DBCONVERSATION LISTENER","Receiver received Message : "+message.getMessage() + "		;	Receiver Msg ID : "+message.getMsgID()+"	; Mapped msgID : "+message.getMappedMsgID());
 
 			mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, message);		
-		}
-		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
-		{
-			Integer credits = (Integer) object;
-			mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
-			mEditor.commit();
 		}
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{
