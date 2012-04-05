@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -67,6 +65,21 @@ public class SignupActivity extends Activity implements FinishableEvent
 		mDialogDropShadow = (View) mDialogOverlay.findViewById(R.id.dialog_dropshadow);
 		mDialogButton = (Button) mDialogOverlay.findViewById(R.id.dialog_proceed);
 		
+		mDialogButton.setOnClickListener(new OnClickListener()
+		{
+			@Override
+			public void onClick(View v)
+			{
+				mDialogOverlay.setVisibility(View.INVISIBLE);
+				if(mTask != null) {
+					mTask.cancelTask();
+					mTask = null;
+				}
+				mTask = new SignupTask(SignupActivity.this);
+				mTask.execute();
+			}
+		});
+		
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof SignupTask)
 		{
@@ -124,11 +137,14 @@ public class SignupActivity extends Activity implements FinishableEvent
 			editText = (EditText) mDialogOverlay.findViewById(R.id.dialog_edittext);
 		}
 		
+		
+
 		switch (this.mCurrentState.state)
 		{
 		case MSISDN:
 			mDialogButton.setVisibility(View.GONE);
 			mDialogDropShadow.setVisibility(View.GONE);
+			editText.setVisibility(View.VISIBLE);
 			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_phone));
 			editText.setInputType(InputType.TYPE_CLASS_PHONE);
 			editText.setHint("Phone Number");
@@ -138,6 +154,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 		case NAME:
 			mDialogButton.setVisibility(View.GONE);
 			mDialogDropShadow.setVisibility(View.GONE);
+			editText.setVisibility(View.VISIBLE);
 			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_name));
 			editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
 			editText.setHint("Name");
@@ -148,27 +165,23 @@ public class SignupActivity extends Activity implements FinishableEvent
 			mDialogButton.setVisibility(View.VISIBLE);
 			mDialogDropShadow.setVisibility(View.VISIBLE);
 			mDialogButton.setText("Change Number");
-			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_phone));
+			editText.setVisibility(View.VISIBLE);
+			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_pin));
 			editText.setInputType(InputType.TYPE_CLASS_NUMBER);
 			editText.setHint("Pin");
 			label.setText("Enter the Pin");
-			
-			mDialogButton.setOnClickListener(new OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					mDialogOverlay.setVisibility(View.INVISIBLE);
-					if(mTask != null) {
-						mTask.cancelTask();
-						mTask = null;
-					}
-					mTask = new SignupTask(SignupActivity.this);
-					mTask.execute();
-				}
-			});
+			break;
+		case ERROR:
+			mDialogButton.setVisibility(View.VISIBLE);
+			mDialogDropShadow.setVisibility(View.VISIBLE);
+			mDialogButton.setText("Ok");
+			editText.setVisibility(View.GONE);
+			label.setText("Something bad happened, try again.");
 			break;
 		}
+		
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.showSoftInput(editText, InputMethodManager.SHOW_FORCED);
 		
 		editText.setOnKeyListener(new OnKeyListener()
 		{
@@ -206,7 +219,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 		/*
 		 * To hide the soft keyboard when the "DONE" key is pressed.
 		 */
-		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 	}
 	
@@ -219,6 +232,9 @@ public class SignupActivity extends Activity implements FinishableEvent
 			Log.w("SignupActivity", "Error in state " + mCurrentState.state.name());
 			mTask.cancelTask();
 			mTask = null;
+			
+			createProgressDialog();
+			
 			/*TODO add a dialog prompting the user to try again 
 			mDialog = new AlertDialog.Builder(this)
 			.setTitle("Error")
@@ -238,6 +254,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 			})
 			.show();
 			*/
+			return;
 		}
 
 		TextView text;

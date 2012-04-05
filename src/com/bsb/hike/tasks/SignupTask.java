@@ -58,7 +58,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		MSISDN,
 		ADDRESSBOOK,
 		NAME,
-		PIN
+		PIN,
+		ERROR
 	};
 
 	public class StateValue
@@ -99,7 +100,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		boolean ab_scanned = settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false);
 		String name = settings.getString(HikeMessengerApp.NAME_SETTING, null);
-
+		
+		if (isCancelled())
+		{
+			/* just gtfo */
+			Log.d("SignupTask", "Task was cancelled");
+			return Boolean.FALSE;
+		}
+		
 		if (msisdn == null)
 		{
 			/* need to get the MSISDN */
@@ -138,7 +146,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				intentFilter.setPriority(99);
 				receiver = new SMSReceiver();
 				
-//				this.context.registerReceiver(receiver, new IntentFilter(intentFilter));
+				this.context.registerReceiver(receiver, new IntentFilter(intentFilter));
 				String unauthedMSISDN = AccountUtils.validateNumber(number);
 
 				if (unauthedMSISDN != null)
@@ -150,7 +158,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						{
 							/* TODO add a timeout so if we don't get the SMS,
 							 * we throw an error an ask the user enter manually */
-							this.wait(5*1000);
+							this.wait(15*1000);
 						}
 						catch (InterruptedException e)
 						{
@@ -159,7 +167,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 
-//				this.context.unregisterReceiver(receiver);
+				this.context.unregisterReceiver(receiver);
 				receiver = null;
 				
 				if(this.data == null){
@@ -188,17 +196,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 				accountInfo = null;
 				String pin = this.data;
-				if (pin != null)
-				{
-					accountInfo = AccountUtils.registerAccount(pin, unauthedMSISDN);
-					Utils.savedAccountCredentials(accountInfo, settings.edit());
-				}
-
+				accountInfo = AccountUtils.registerAccount(pin, unauthedMSISDN);
 				if (accountInfo == null)
 				{
-					publishProgress(new StateValue(State.MSISDN, null));
+					publishProgress(new StateValue(State.ERROR, null));
 					return Boolean.FALSE;
 				}
+				Utils.savedAccountCredentials(accountInfo, settings.edit());
 
 				msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 			}
@@ -212,7 +216,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		/* msisdn set, yay */
 		publishProgress(new StateValue(State.MSISDN, msisdn));
-
+		
+		if (isCancelled())
+		{
+			/* just gtfo */
+			Log.d("SignupTask", "Task was cancelled");
+			return Boolean.FALSE;
+		}
+		
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
@@ -254,7 +265,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/* addressbook scanned, sick
 		 */
 		publishProgress(new StateValue(State.ADDRESSBOOK, ""));
-
+		
+		if (isCancelled())
+		{
+			/* just gtfo */
+			Log.d("SignupTask", "Task was cancelled");
+			return Boolean.FALSE;
+		}
+		
 		if (name == null)
 		{
 			/* publishing this will cause the the Activity to ask the user for a name and signal us */
