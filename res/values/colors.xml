@@ -20,4 +20,5 @@
     <color name="transparent_white">#8000</color>
     <color name="offwhite">#F7F7F4</color>
     <color name="compose_background">#282828</color>
+    <color name="signup_blue">#50a1d9</color>
 </resources>

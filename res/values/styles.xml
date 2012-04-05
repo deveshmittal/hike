@@ -26,6 +26,20 @@
         <item name="android:shadowDy">1</item>
         <item name="android:shadowRadius">2</item>
    </style>
+   
+	<style name="SignUpText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/signup_blue</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:shadowDx">1</item>
+        <item name="android:shadowDy">1</item>
+        <item name="android:shadowRadius">1</item>
+   </style>
 
    <style name="ButtonTextNoShadow">
         <item name="android:layout_width">fill_parent</item>

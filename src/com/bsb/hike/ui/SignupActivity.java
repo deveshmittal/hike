@@ -1,21 +1,24 @@
 package com.bsb.hike.ui;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -58,8 +61,14 @@ public class SignupActivity extends Activity implements FinishableEvent
 	private ViewGroup mPullingDigitsView;
 	private ViewGroup mScanningContactsView;
 	private ViewGroup mGettingNameView;
+	private ViewGroup mOperatorView;
 	private View mDialogOverlay;
 	private StateValue mCurrentState;
+	private EditText editText;
+	
+	private ImageView numberStatus;
+	private ImageView addressBookStatus;
+	private ImageView nameStatus;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -70,19 +79,21 @@ public class SignupActivity extends Activity implements FinishableEvent
 		mPullingDigitsView = (ViewGroup) findViewById(R.id.signup_digits);
 		mScanningContactsView = (ViewGroup) findViewById(R.id.signup_addressbook);
 		mGettingNameView = (ViewGroup) findViewById(R.id.signup_name);
+		mOperatorView = (ViewGroup) findViewById(R.id.operator_layout);
 		mDialogOverlay = findViewById(R.id.dialog_overlay);
 
-		final EditText editText = (EditText) findViewById(R.id.dialog_edittext);
+		editText = (EditText) findViewById(R.id.dialog_edittext);
+		numberStatus = (ImageView) findViewById(R.id.signup_digits_status);
+		addressBookStatus = (ImageView) findViewById(R.id.signup_address_status);
+		nameStatus = (ImageView) findViewById(R.id.signup_name_status);
+		
 		Button button = (Button) mDialogOverlay.findViewById(R.id.dialog_proceed);
 		button.setOnClickListener(new OnClickListener()
 		{
 			@Override
 			public void onClick(View v)
 			{
-				String text = editText.getText().toString();
-				editText.setText("");
-				mDialogOverlay.setVisibility(View.INVISIBLE);
-					mTask.addUserInput(text);
+				buttonClickEvent();
 			}
 		});
 
@@ -104,37 +115,103 @@ public class SignupActivity extends Activity implements FinishableEvent
 	public void onFinish(boolean success)
 	{
 		if (success)
-		{
-			/*
-			 * operation successsful,  signal the next screen
+		{	
+			/**
+			 * delaying the next activity from being displayed by a few secs
 			 */
-			Intent intent = new Intent(this, MessagesList.class);
-			startActivity(intent);
-			finish();
+			Handler handler = new Handler();
+			handler.postDelayed(new Runnable()
+			{
+				
+				@Override
+				public void run()
+				{
+					/*
+					 * operation successsful,  signal the next screen
+					 */
+					Intent intent = new Intent(SignupActivity.this, MessagesList.class);
+					startActivity(intent);
+					finish();
+				}
+			}, 2000);
+			
 		}
 	}
+	
+	
 
-	private void createProgressDialog(String title, String labelString)
+	private void createProgressDialog(boolean isName)
 	{
 		/* ensure we're not currently showing a dialog */
 		assert(mDialogOverlay.getVisibility() == View.GONE);
 
 		/* couldn't auto-detect MSISDN, prompt the user via a popup */
-		mDialogOverlay.setVisibility(View.VISIBLE);
+		
 
 		TextView label = (TextView) mDialogOverlay.findViewById(R.id.dialog_label);
-		label.setText(labelString);
+		
 
-		final EditText editText = (EditText) mDialogOverlay.findViewById(R.id.dialog_edittext);
-		editText.setHint(title);
+		if (editText == null)
+		{
+			editText = (EditText) mDialogOverlay.findViewById(R.id.dialog_edittext);
+		}
+		
+		if(isName)
+		{
+			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_name));
+			editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			editText.setHint("Name");
+			label.setText("What's your name?");
+		} 
+		else 
+		{
+			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_phone));
+			editText.setInputType(InputType.TYPE_CLASS_PHONE);
+			editText.setHint("Phone Number");
+			label.setText("old fashion way sucks");
+		}
+		
+		editText.setOnKeyListener(new OnKeyListener()
+		{
+			
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event)
+			{
+				if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+				{
+					buttonClickEvent();
+				}
+				return false;
+			}
+		});
+		
+		mDialogOverlay.setVisibility(View.VISIBLE);
 	}
 
 	@Override
 	protected void onDestroy()
 	{
+		Log.d("SignupActivity", "onDestroy being called");
 		super.onDestroy();
+		if(mTask!=null){
+			mTask.cancel(true);
+			mTask.cancelTask();
+		}
 	}
-
+	
+	private void buttonClickEvent() {
+		String text = editText.getText().toString();
+		editText.setText("");
+		mDialogOverlay.setVisibility(View.INVISIBLE);
+		mTask.addUserInput(text);
+		
+		/**
+		 * To hide the soft keyboard when the "DONE" key is pressed.
+		 */
+		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+	}
+	
 	public void onProgressUpdate(StateValue stateValue)
 	{
 		String value = stateValue.value;
@@ -174,7 +251,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 			if (TextUtils.isEmpty(value))
 			{
 				/* couldn't auto-detect MSISDN, prompt the user via a popup */
-				createProgressDialog("Phone Number", "old fashion way sucks");
+				createProgressDialog(false);
 			}
 			else
 			{
@@ -183,23 +260,30 @@ public class SignupActivity extends Activity implements FinishableEvent
 				mScanningContactsView.setVisibility(View.VISIBLE);
 				text = (TextView) mPullingDigitsView.findViewById(R.id.signup_text);
 				String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
-				text.setText("Great we got you on " + msisdn);
+				text.setText(msisdn);
+				text.setTextColor(getResources().getColor(R.color.white));
+				mOperatorView.setVisibility(View.VISIBLE);
+				numberStatus.setVisibility(View.VISIBLE);
 			}
 			break;
 		case ADDRESSBOOK:
 			mGettingNameView.setVisibility(View.VISIBLE);
 			text = (TextView) mScanningContactsView.findViewById(R.id.signup_text);
 			text.setText("Addressbook Scanned");
+			text.setTextColor(getResources().getColor(R.color.white));
+			addressBookStatus.setVisibility(View.VISIBLE);
 			break;
 		case NAME:
 			if (TextUtils.isEmpty(value))
 			{
-				createProgressDialog("Name", "What's your name?");
+				createProgressDialog(true);
 			}
 			else
 			{
 				text = (TextView) mGettingNameView.findViewById(R.id.signup_text);
 				text.setText("Hi " + value);
+				text.setTextColor(getResources().getColor(R.color.white));
+				nameStatus.setVisibility(View.VISIBLE);
 			}
 			break;
 		}

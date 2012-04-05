@@ -74,6 +74,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	private SignupActivity signupActivity;
 	private Context context;
 	private String data;
+	private SMSReceiver receiver;
 
 	public SignupTask(SignupActivity activity)
 	{
@@ -134,7 +135,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				/* register broadcast receiver to get the actual PIN code, and pass it to us */
 				IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
 				intentFilter.setPriority(99);
-				BroadcastReceiver receiver = new SMSReceiver();
+				receiver = new SMSReceiver();
 				
 				this.context.registerReceiver(receiver, new IntentFilter(intentFilter));
 				String unauthedMSISDN = AccountUtils.validateNumber(number);
@@ -152,12 +153,20 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						}
 						catch (InterruptedException e)
 						{
-							e.printStackTrace();
+							Log.e("SignupTask", "Task was interrupted", e);
 						}
 					}
 				}
 
 				this.context.unregisterReceiver(receiver);
+				receiver = null;
+
+				if (isCancelled())
+				{
+					/* just gtfo */
+					Log.d("SignupTask", "Task was cancelled");
+					return Boolean.FALSE;
+				}
 
 				accountInfo = null;
 				String pin = this.data;
@@ -266,7 +275,20 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 		return Boolean.TRUE;
 	}
-
+	
+	@Override
+	protected void onCancelled() 
+	{
+		Log.d("SignupTask", "onCancelled called");
+		/*
+		 * For removing intent when finishing the activity
+		 */
+		if (receiver != null)
+		{
+			this.context.unregisterReceiver(receiver);
+			receiver = null;
+		}
+	}
 	
 	@Override
 	protected void onPostExecute(Boolean result)
@@ -291,6 +313,19 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public boolean isFinished()
 	{
 		return false;
+	}
+	
+	public void cancelTask()
+	{
+		Log.d("SignupTask", "cancelling it manually");
+		/*
+		 * For removing intent when finishing the activity
+		 */
+		if (receiver != null)
+		{
+			this.context.unregisterReceiver(receiver);
+			receiver = null;
+		}
 	}
 
 }
