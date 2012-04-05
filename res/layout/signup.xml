@@ -2,22 +2,50 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/signup_background" >
+    android:background="@drawable/main_bg" >
+
+    <ImageView
+        android:id="@+id/hike_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
+        android:src="@drawable/hike_logo" />
+
+    <View
+        android:id="@+id/header_dropshadow"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@+id/hike_logo"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/signup_header_dropshadow" />
+
+    <ImageView
+        android:id="@+id/hi_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header_dropshadow"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/hi_logo" />
 
     <ProgressBar
         android:id="@+id/signup_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:indeterminateDrawable="@drawable/custom_progress_bar_drawable"
+        android:layout_below="@id/hi_logo"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="200dp" />
+        android:layout_marginTop="30dp"
+        android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
     <ImageView
         android:id="@+id/large_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/hi_logo"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="210dp"
+        android:layout_marginTop="40dp"
         android:src="@drawable/large_check"
         android:visibility="invisible" />
 
@@ -59,7 +87,7 @@
         android:layout_centerHorizontal="true"
         android:orientation="horizontal"
         android:visibility="gone" >
-		
+
         <ImageView
             android:id="@+id/operator_logo"
             android:layout_width="wrap_content"
@@ -196,7 +224,6 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/dialog_button"
                 android:gravity="center"
-                android:onClick="onDialogClick"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
                 android:text="Proceed"

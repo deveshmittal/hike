@@ -30,45 +30,22 @@ import com.bsb.hike.tasks.SignupTask.StateValue;
 public class SignupActivity extends Activity implements FinishableEvent
 {
 
-	private class DialogTextWatcher implements TextWatcher
-	{
-
-		private Button button;
-		public DialogTextWatcher(Button b)
-		{
-			this.button = b;
-		}
-
-		@Override
-		public void afterTextChanged(Editable editable)
-		{
-			this.button.setEnabled(!TextUtils.isEmpty(editable.toString()));
-		}
-
-		@Override
-		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-		{
-		}
-
-		@Override
-		public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-		{
-		}
-		
-	}
-
 	private SignupTask mTask;
 	private ViewGroup mPullingDigitsView;
 	private ViewGroup mScanningContactsView;
 	private ViewGroup mGettingNameView;
 	private ViewGroup mOperatorView;
 	private View mDialogOverlay;
+	private View mDialogDropShadow;
+	
 	private StateValue mCurrentState;
 	private EditText editText;
 	
 	private ImageView numberStatus;
 	private ImageView addressBookStatus;
 	private ImageView nameStatus;
+	private Button mDialogButton;
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -87,18 +64,9 @@ public class SignupActivity extends Activity implements FinishableEvent
 		addressBookStatus = (ImageView) findViewById(R.id.signup_address_status);
 		nameStatus = (ImageView) findViewById(R.id.signup_name_status);
 		
-		Button button = (Button) mDialogOverlay.findViewById(R.id.dialog_proceed);
-		button.setOnClickListener(new OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				buttonClickEvent();
-			}
-		});
-
-		editText.addTextChangedListener(new DialogTextWatcher(button));
-
+		mDialogDropShadow = (View) mDialogOverlay.findViewById(R.id.dialog_dropshadow);
+		mDialogButton = (Button) mDialogOverlay.findViewById(R.id.dialog_proceed);
+		
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof SignupTask)
 		{
@@ -133,14 +101,14 @@ public class SignupActivity extends Activity implements FinishableEvent
 					startActivity(intent);
 					finish();
 				}
-			}, 2000);
+			}, 1000);
 			
 		}
 	}
 	
 	
 
-	private void createProgressDialog(boolean isName)
+	private void createProgressDialog()
 	{
 		/* ensure we're not currently showing a dialog */
 		assert(mDialogOverlay.getVisibility() == View.GONE);
@@ -156,19 +124,50 @@ public class SignupActivity extends Activity implements FinishableEvent
 			editText = (EditText) mDialogOverlay.findViewById(R.id.dialog_edittext);
 		}
 		
-		if(isName)
+		switch (this.mCurrentState.state)
 		{
-			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_name));
-			editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-			editText.setHint("Name");
-			label.setText("What's your name?");
-		} 
-		else 
-		{
+		case MSISDN:
+			mDialogButton.setVisibility(View.GONE);
+			mDialogDropShadow.setVisibility(View.GONE);
 			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_phone));
 			editText.setInputType(InputType.TYPE_CLASS_PHONE);
 			editText.setHint("Phone Number");
 			label.setText("old fashion way sucks");
+			break;
+			
+		case NAME:
+			mDialogButton.setVisibility(View.GONE);
+			mDialogDropShadow.setVisibility(View.GONE);
+			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_name));
+			editText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+			editText.setHint("Name");
+			label.setText("What's your name?");
+			break;
+			
+		case PIN:
+			mDialogButton.setVisibility(View.VISIBLE);
+			mDialogDropShadow.setVisibility(View.VISIBLE);
+			mDialogButton.setText("Change Number");
+			editText.setBackgroundDrawable(getResources().getDrawable(R.drawable.tb_phone));
+			editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+			editText.setHint("Pin");
+			label.setText("Enter the Pin");
+			
+			mDialogButton.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					mDialogOverlay.setVisibility(View.INVISIBLE);
+					if(mTask != null) {
+						mTask.cancelTask();
+						mTask = null;
+					}
+					mTask = new SignupTask(SignupActivity.this);
+					mTask.execute();
+				}
+			});
+			break;
 		}
 		
 		editText.setOnKeyListener(new OnKeyListener()
@@ -194,7 +193,6 @@ public class SignupActivity extends Activity implements FinishableEvent
 		Log.d("SignupActivity", "onDestroy being called");
 		super.onDestroy();
 		if(mTask!=null){
-			mTask.cancel(true);
 			mTask.cancelTask();
 		}
 	}
@@ -205,7 +203,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 		mDialogOverlay.setVisibility(View.INVISIBLE);
 		mTask.addUserInput(text);
 		
-		/**
+		/*
 		 * To hide the soft keyboard when the "DONE" key is pressed.
 		 */
 		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -219,7 +217,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 		if (value == null)
 		{
 			Log.w("SignupActivity", "Error in state " + mCurrentState.state.name());
-			mTask.cancel(true);
+			mTask.cancelTask();
 			mTask = null;
 			/*TODO add a dialog prompting the user to try again 
 			mDialog = new AlertDialog.Builder(this)
@@ -251,7 +249,8 @@ public class SignupActivity extends Activity implements FinishableEvent
 			if (TextUtils.isEmpty(value))
 			{
 				/* couldn't auto-detect MSISDN, prompt the user via a popup */
-				createProgressDialog(false);
+				createProgressDialog();
+				
 			}
 			else
 			{
@@ -276,7 +275,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 		case NAME:
 			if (TextUtils.isEmpty(value))
 			{
-				createProgressDialog(true);
+				createProgressDialog();
 			}
 			else
 			{
@@ -285,6 +284,9 @@ public class SignupActivity extends Activity implements FinishableEvent
 				text.setTextColor(getResources().getColor(R.color.white));
 				nameStatus.setVisibility(View.VISIBLE);
 			}
+			break;
+		case PIN:
+			createProgressDialog();
 			break;
 		}
 	}

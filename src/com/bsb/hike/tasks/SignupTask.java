@@ -27,7 +27,7 @@ import com.bsb.hike.utils.Utils;
 
 public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> implements ActivityCallableTask
 {
-
+	
 	private class SMSReceiver extends BroadcastReceiver
 	{
 		@Override
@@ -57,7 +57,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	{
 		MSISDN,
 		ADDRESSBOOK,
-		NAME
+		NAME,
+		PIN
 	};
 
 	public class StateValue
@@ -137,7 +138,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				intentFilter.setPriority(99);
 				receiver = new SMSReceiver();
 				
-				this.context.registerReceiver(receiver, new IntentFilter(intentFilter));
+//				this.context.registerReceiver(receiver, new IntentFilter(intentFilter));
 				String unauthedMSISDN = AccountUtils.validateNumber(number);
 
 				if (unauthedMSISDN != null)
@@ -149,7 +150,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						{
 							/* TODO add a timeout so if we don't get the SMS,
 							 * we throw an error an ask the user enter manually */
-							this.wait();
+							this.wait(5*1000);
 						}
 						catch (InterruptedException e)
 						{
@@ -158,9 +159,26 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 
-				this.context.unregisterReceiver(receiver);
+//				this.context.unregisterReceiver(receiver);
 				receiver = null;
-
+				
+				if(this.data == null){
+					data="";
+					publishProgress(new StateValue(State.PIN, data));
+					
+					synchronized (this)
+					{
+						try
+						{
+							this.wait();
+						}
+						catch (InterruptedException e)
+						{
+							Log.e("SignupTask", "Task was interrupted while taking the pin", e);
+						}
+					}
+				}
+				
 				if (isCancelled())
 				{
 					/* just gtfo */
@@ -317,6 +335,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	
 	public void cancelTask()
 	{
+		this.cancel(true);
 		Log.d("SignupTask", "cancelling it manually");
 		/*
 		 * For removing intent when finishing the activity
