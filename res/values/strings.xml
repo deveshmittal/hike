@@ -60,4 +60,7 @@
     <string name="made_with_love">Made with %1$s in New Delhi</string>
     <string name="updating_profile">Updating Profile</string>
     <string name="update_profile_failed">Could not update profile</string>
+    <string name="get_started">Get Started</string>
+    <string name="welcome_message_1">Messaging simplified.</string>
+    <string name="welcome_message_2">Fun, free, forever.</string>
 </resources>
