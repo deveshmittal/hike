@@ -326,7 +326,7 @@ public class ConvMessage
 		case SENT_CONFIRMED:
 			return R.drawable.ic_sent;
 		default:
-			return -1;
+			return R.drawable.ic_blank;
 		}
 	}
 }
