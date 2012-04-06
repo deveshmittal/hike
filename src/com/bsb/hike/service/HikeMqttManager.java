@@ -7,16 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.fusesource.hawtbuf.Buffer;
-import org.fusesource.hawtbuf.UTF8Buffer;
-import org.fusesource.mqtt.client.Callback;
-import org.fusesource.mqtt.client.CallbackConnection;
-import org.fusesource.mqtt.client.ConnectionException;
-import org.fusesource.mqtt.client.Listener;
-import org.fusesource.mqtt.client.MQTT;
-import org.fusesource.mqtt.client.QoS;
-import org.fusesource.mqtt.client.Topic;
-import org.fusesource.mqtt.codec.CONNACK.Code;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,6 +30,16 @@ import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikePacket;
+import com.bsb.hike.mqtt.client.Buffer;
+import com.bsb.hike.mqtt.client.Callback;
+import com.bsb.hike.mqtt.client.CallbackConnection;
+import com.bsb.hike.mqtt.client.ConnectionException;
+import com.bsb.hike.mqtt.client.Listener;
+import com.bsb.hike.mqtt.client.MQTT;
+import com.bsb.hike.mqtt.client.UTF8Buffer;
+import com.bsb.hike.mqtt.msg.ConnAckMessage.ConnectionStatus;
+import com.bsb.hike.mqtt.msg.QoS;
+import com.bsb.hike.pubsub.Topic;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeNotification;
@@ -281,7 +282,7 @@ public class HikeMqttManager implements Listener
 				public void onFailure(Throwable value)
 				{
 					Log.e("HikeMqttManager", "Unable to connect", value);
-					if (value instanceof ConnectionException && ((ConnectionException) value).getCode().equals(Code.CONNECTION_REFUSED_BAD_USERNAME_OR_PASSWORD))
+					if (value instanceof ConnectionException && ((ConnectionException) value).getCode().equals(ConnectionStatus.BAD_USERNAME_OR_PASSWORD))
 					{
 						Log.e("HikeMqttManager", "Invalid account credentials");
 						/* delete the token and send a message to the app to send the user back to the main screen */
