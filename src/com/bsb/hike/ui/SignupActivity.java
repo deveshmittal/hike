@@ -23,6 +23,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.SignupTask;
+import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 
 public class SignupActivity extends Activity implements FinishableEvent
@@ -234,7 +235,14 @@ public class SignupActivity extends Activity implements FinishableEvent
 			mTask = null;
 			
 			createProgressDialog();
-			
+			/*
+			 * In case the state is ERROR we are restart the SignupTask when the user clicks on the OK button, but for other states we need to start the task here itself
+			 */
+			if (mCurrentState.state != State.ERROR)
+			{
+				mTask = new SignupTask(this);
+				mTask.execute();
+			}
 			/*TODO add a dialog prompting the user to try again 
 			mDialog = new AlertDialog.Builder(this)
 			.setTitle("Error")
