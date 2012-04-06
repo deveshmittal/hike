@@ -17,6 +17,7 @@ import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -24,6 +25,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -62,20 +64,25 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	private TextView mMadeWithLoveView;
 	private ImageView mTitleIcon;
 	private View mProfilePictureChangeOverlay;
-	private boolean mEditable = false; /* is this page currently editable */
 	private EditText mNameViewEdittable;
 	private ProgressDialog mDialog;
-	private HikeHTTPTask mTask;
-	private File mSelectedIconFile;
+	public String mLocalMSISDN = null;
 
-	private Bitmap mNewBitmap = null;
-	private String mLocalMSISDN = null;
+	private ActivityState mActivityState; /* config state of this activity */
+	private class ActivityState
+	{
+		public boolean editable = false; /* is this page currently editable */
+		public HikeHTTPTask task; /* the task to update the global profile */
+		public File selectedFileIcon; /* the selected file that we'll store the profile camera picture */
+
+		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
+	}
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
 	public Object onRetainNonConfigurationInstance()
 	{
-		return mTask;
+		return mActivityState;
 	}
 
 	@Override
@@ -85,8 +92,12 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		if (mDialog != null)
 		{
 			mDialog.dismiss();
-			mDialog = null;
 		}
+		if ( (mActivityState != null) && (mActivityState.task != null))
+		{
+			mActivityState.task.setActivity(null);
+		}
+		mActivityState = null;
 	}
 
 	@Override
@@ -98,6 +109,22 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		if (Utils.requireAuth(this))
 		{
 			return;
+		}
+
+		Object o = getLastNonConfigurationInstance();
+		if (o instanceof ActivityState)
+		{
+			mActivityState = (ActivityState) o;
+			if (mActivityState.task != null)
+			{
+				/* we're currently executing a task, so show the progress dialog */
+				mActivityState.task.setActivity(this);
+				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));	
+			}
+		}
+		else
+		{
+			mActivityState = new ActivityState();
 		}
 
 		mIconView = (ImageView) findViewById(R.id.profile);
@@ -138,12 +165,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mListView.setAdapter(adapter);
 		mListView.setOnItemClickListener(this);
 
-		Object o = getLastNonConfigurationInstance();
-		if (o instanceof HikeHTTPTask)
-		{
-			mTask = (HikeHTTPTask) o;
-			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
-		}
+		updateEditableUI();
 	}
 
 	@Override
@@ -159,13 +181,13 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 
 	public void onTitleIconClick(View view)
 	{
-		mEditable = !mEditable;
-		if (mEditable)
+		mActivityState.editable = !mActivityState.editable;
+		if (!mActivityState.editable)
 		{
-			mNameViewEdittable.setText(mNameView.getText());
-		}
-		else
-		{
+			/* hide the softkeyboard */
+			InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(mNameViewEdittable.getWindowToken(), 0);
+	
 			ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
 
 			/* save the new fields */
@@ -203,17 +225,17 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 				requests.add(request);
 			}
 
-			if (mNewBitmap != null)
+			if (mActivityState.newBitmap != null)
 			{
 				ByteArrayOutputStream bao = new ByteArrayOutputStream();
-				mNewBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
+				mActivityState.newBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
 				final byte[] bytes = bao.toByteArray();
 				HikeHttpRequest request = new HikeHttpRequest("/account/avatar", new HikeHttpRequest.HikeHttpCallback()
 				{
 					public void onFailure()
 					{
 						Log.d("ProfileActivity", "resetting image");
-						mNewBitmap = null;
+						mActivityState.newBitmap = null;
 						/* reset the image */
 						mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(mLocalMSISDN));
 					}
@@ -233,24 +255,38 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			if (!requests.isEmpty())
 			{
 				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
-				mTask = new HikeHTTPTask(this);
+				mActivityState.task = new HikeHTTPTask(this);
 				HikeHttpRequest[] r = new HikeHttpRequest[requests.size()];
 				requests.toArray(r);
-				mTask.execute(r);
+				mActivityState.task.execute(r);
 			}
 		}
+		else
+		{
+			/* make the edittext the same as the currently set name */
+			mNameViewEdittable.setText(mNameView.getText());
+		}
 
+		updateEditableUI();
+	}
+
+	private void updateEditableUI()
+	{
 		/* update the UI to let the user know that what's changeable */
-		mProfilePictureChangeOverlay.setVisibility(mEditable ? View.VISIBLE : View.GONE);
-		mNameViewEdittable.setVisibility(mEditable ? View.VISIBLE : View.GONE);
-		mNameView.setVisibility(!mEditable ? View.VISIBLE : View.GONE);
+		mProfilePictureChangeOverlay.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
+		mNameViewEdittable.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
+		mNameView.setVisibility(!mActivityState.editable ? View.VISIBLE : View.GONE);
+		if (mActivityState.newBitmap != null)
+		{
+			mIconView.setImageBitmap(mActivityState.newBitmap);
+		}
 	}
 
 	@Override
 	public void onClick(View view)
 	{
 		Log.d("ProfileActivity", "View is " + view);
-		if (mEditable && (view == mIconView))
+		if (mActivityState.editable && (view == mIconView))
 		{
 			/* The wants to change their profile picture.
 			 * Open a dialog to allow them pick Camera or Gallery 
@@ -272,7 +308,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			mDialog = null;
 		}
 
-		mTask = null;
+		mActivityState = new ActivityState();
 
 		if (!success)
 		{
@@ -294,12 +330,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		case CAMERA_RESULT:
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
-			for(String key : data.getExtras().keySet())
-			{
-				Log.d("ProfileActivity", "Intent key=" + key + " value=" + data.getExtras().getString(key));
-			}
-
-			path = (requestCode == CAMERA_RESULT) ? mSelectedIconFile.getAbsolutePath() : getGalleryPath(data.getData());
+			path = (requestCode == CAMERA_RESULT) ? mActivityState.selectedFileIcon.getAbsolutePath() : getGalleryPath(data.getData());
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);
 			intent.putExtra("image-path", path);
@@ -312,9 +343,9 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			break;
 		case CROP_RESULT:
 			Bitmap bitmap = data.getParcelableExtra("bitmap");
-			mNewBitmap = Utils.getRoundedCornerBitmap(bitmap);
+			mActivityState.newBitmap = Utils.getRoundedCornerBitmap(bitmap);
 			bitmap.recycle();
-			mIconView.setImageBitmap(mNewBitmap);
+			mIconView.setImageBitmap(mActivityState.newBitmap);
 			break;
 		}
 	}
@@ -324,6 +355,11 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
         String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
         Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+        if (cursor == null)
+        {
+        	return selectedImage.getPath();
+        }
+
         cursor.moveToFirst();
 
         int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
@@ -340,8 +376,8 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		{
 		case PROFILE_PICTURE_FROM_CAMERA:
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			mSelectedIconFile = Utils.getOutputMediaFile(Utils.MEDIA_TYPE_IMAGE); // create a file to save the image
-			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mSelectedIconFile));
+			mActivityState.selectedFileIcon = Utils.getOutputMediaFile(Utils.MEDIA_TYPE_IMAGE); // create a file to save the image
+			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mActivityState.selectedFileIcon));
 			startActivityForResult(intent, CAMERA_RESULT);
 			break;
 		case PROFILE_PICTURE_FROM_GALLERY:
