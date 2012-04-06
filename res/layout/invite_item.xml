@@ -24,17 +24,31 @@
 		android:background="@drawable/invite_button"
         android:layout_centerVertical="true"
         android:textColor="@color/white" />
-
+	
+    <LinearLayout android:id="@+id/name_num_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="8dp"
+        android:layout_alignLeft="@+id/item_divider"
+		android:layout_toLeftOf="@id/contact_button"
+		android:orientation="vertical" >
+    
     <TextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/item_divider"
-		android:layout_toLeftOf="@id/contact_button"
-		android:layout_marginRight="8dp"
-        android:layout_centerVertical="true"
         android:text="Vijay Raghunathan"
         android:textColor="@color/black"
         android:textSize="18dp" />
+    <TextView 
+        android:id="@+id/number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Number"
+        android:textColor="@color/black"
+        android:textSize="16sp"/>
+    
+    </LinearLayout>
 
 </RelativeLayout>

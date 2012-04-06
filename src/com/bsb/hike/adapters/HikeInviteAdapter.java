@@ -49,7 +49,10 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
-
+		
+		TextView numView = (TextView) v.findViewById(R.id.number);
+		numView.setText(contactInfo.getPhoneNum());
+		
 		Button button = (Button) v.findViewById(R.id.contact_button);
 		v.setTag(contactInfo);
 		if (contactInfo.isOnhike())

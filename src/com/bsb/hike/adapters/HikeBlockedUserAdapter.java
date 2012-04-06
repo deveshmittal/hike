@@ -56,7 +56,10 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
-
+		
+		TextView numView = (TextView) v.findViewById(R.id.number);
+		numView.setText(contactInfo.getPhoneNum());
+		
 		Button button = (Button) v.findViewById(R.id.contact_button);
 		button.setBackgroundDrawable(activity.getResources().getDrawable(
 						blockedUsers.contains(contactInfo.getMsisdn()) ? R.drawable.ic_unblock : R.drawable.block_button));

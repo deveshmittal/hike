@@ -28,6 +28,7 @@
             android:layout_marginRight="18dp"
             android:layout_marginTop="7dp"
             android:background="@drawable/edittext"
+            android:singleLine="true"
             android:hint="Start typing a name"
             android:imeOptions="actionNone"
             android:visibility="visible" >

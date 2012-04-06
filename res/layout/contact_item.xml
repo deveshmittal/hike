@@ -2,10 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-	android:minHeight="?android:attr/listPreferredItemHeight"
     android:layout_marginBottom="7dp"
     android:layout_marginTop="7dp"
-    android:background="@color/offwhite" >
+    android:background="@color/offwhite"
+    android:minHeight="?android:attr/listPreferredItemHeight" >
 
     <View
         android:id="@+id/item_divider"
@@ -21,19 +21,34 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/item_divider"
-		android:background="@drawable/block_button"
         android:layout_centerVertical="true"
+        android:background="@drawable/block_button"
         android:textColor="@color/white" />
 
-    <TextView
-        android:id="@+id/name"
+    <LinearLayout
+        android:id="@+id/name_num_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/item_divider"
-        android:layout_toRightOf="@id/contact_button"
         android:layout_centerVertical="true"
-        android:text="Vijay Raghunathan"
-        android:textColor="@color/black"
-        android:textSize="18dp" />
+        android:layout_toRightOf="@id/contact_button"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vijay Raghunathan"
+            android:textColor="@color/black"
+            android:textSize="18dp" />
+        
+        <TextView android:id="@+id/number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Number"
+            android:textColor="@color/black"
+            android:textSize="16sp"/>
+        
+    </LinearLayout>
 
 </RelativeLayout>
