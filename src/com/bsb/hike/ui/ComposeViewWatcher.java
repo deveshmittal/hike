@@ -97,6 +97,16 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 		mTextLastChanged = lastChanged;
 	}
 
+	public void onMessageSent()
+	{
+		/* a message was sent, so
+		 * reset the typing notifications so
+		 * they're sent for any subsequent typing
+		 */
+		mTextLastChanged = 0;
+		mUIThreadHandler.removeCallbacks(this);
+	}
+
 	@Override
 	public void run()
 	{
