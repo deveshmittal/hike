@@ -44,6 +44,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			db.deleteAll();
 			convDb.deleteAll();
 			editor.clear();
+			Log.d("DeleteAccountTask", "account deleted");
 			return true;
 		}
 		catch (Exception e) {
@@ -67,9 +68,9 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			/* clear any toast notifications */
 			NotificationManager mgr = (NotificationManager) activity.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
 			mgr.cancelAll();
-
-			/* just shutdwn the app */
-			android.os.Process.killProcess(android.os.Process.myPid());
+			
+			// redirect user to the welcome screen
+			activity.accountDeleted();
 		}
 		else
 		{

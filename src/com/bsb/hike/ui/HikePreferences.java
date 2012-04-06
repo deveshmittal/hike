@@ -94,4 +94,18 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		startActivity(intent);
 		return true;
 	}
+	
+	/**
+	 * For redirecting back to the Welcome Screen.
+	 */
+	public void accountDeleted()
+	{
+		dismissProgressDialog();
+		/*
+		 * First we send the user to the Main Activity(MessagesList) from there we redirect him to the welcome screen.
+		 */
+		Intent dltIntent = new Intent(this, MessagesList.class);
+		dltIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(dltIntent);
+	}
 }
