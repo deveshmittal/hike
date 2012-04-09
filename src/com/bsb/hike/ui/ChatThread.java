@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -61,7 +60,6 @@ import com.bsb.hike.utils.Utils;
 
 public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener
 {
-
 	private HikePubSub mPubSub;
 
 	private HikeConversationsDatabase mConversationDb;
