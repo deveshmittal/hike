@@ -148,7 +148,6 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mIconView.setOnClickListener(this);
 
 		mTitleView.setText(getResources().getString(R.string.profile_title));
-		mTitleIcon.setImageResource(R.drawable.ic_editmessage);
 		mTitleIcon.setVisibility(View.VISIBLE);
 
 		/* add the heart in code because unicode isn't supported via xml*/
@@ -276,6 +275,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mProfilePictureChangeOverlay.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
 		mNameViewEdittable.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
 		mNameView.setVisibility(!mActivityState.editable ? View.VISIBLE : View.GONE);
+		mTitleIcon.setImageResource(!mActivityState.editable ? R.drawable.ic_edit : R.drawable.ic_save);
 		if (mActivityState.newBitmap != null)
 		{
 			mIconView.setImageBitmap(mActivityState.newBitmap);
