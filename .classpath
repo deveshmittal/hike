@@ -2,12 +2,10 @@
 <classpath>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
-	<classpathentry excluding="org/" kind="src" path="src"/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+<<<<<<< HEAD
 	<classpathentry kind="lib" path="lib/ocpsoft-pretty-time-1.0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/hawtbuf-1.8.jar"/>
-	<classpathentry kind="lib" path="lib/hawtdispatch-1.7.jar"/>
-	<classpathentry kind="lib" path="lib/hawtdispatch-transport-1.7.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/hike-mq"/>
+	<classpathentry kind="lib" path="lib/mqttclient.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
