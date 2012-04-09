@@ -7,7 +7,8 @@
         android:id="@+id/conversation_flip"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/compose_background"
+        android:background="@drawable/list_item"
+        android:padding="0dp"
         android:saveEnabled="true" >
 
         <RelativeLayout
@@ -86,7 +87,7 @@
         <RelativeLayout
             android:id="@+id/bottom_panel"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="match_parent" >
 
             <Button
                 android:id="@+id/send_message"
