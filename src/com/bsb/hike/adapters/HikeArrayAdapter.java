@@ -21,7 +21,8 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 {
 	private static final int SECTION_TYPE = 0;
 	private static final int ITEM_TYPE = 1;
-
+	public boolean isFiltering = false;
+	
 	static public class Section
 	{
 		public String title;
@@ -126,6 +127,16 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 
 		TextView tv = (TextView) v.findViewById(R.id.section_title);
 		tv.setText(section.title);
+		
+		if(isFiltering)
+		{
+			v.setVisibility(View.GONE);
+		}
+		else
+		{
+			v.setVisibility(View.VISIBLE);
+		}
+		
 		return v;
 	}
 

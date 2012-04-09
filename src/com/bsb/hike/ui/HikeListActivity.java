@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.EditText;
@@ -110,6 +111,25 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	{
 		Filterable filterable = (Filterable) listView.getAdapter();
 		filterable.getFilter().filter(text);
+		
+		if(text.length()>0) 
+		{
+			sectionContainer.setVisibility(View.GONE);
+			findViewById(android.R.id.content).requestLayout();
+			if(adapter != null)
+			{
+				adapter.isFiltering = true;
+			}
+		} 
+		else 
+		{
+			sectionContainer.setVisibility(View.VISIBLE);
+			findViewById(android.R.id.content).requestLayout();
+			if(adapter != null)
+			{
+				adapter.isFiltering = false;
+			}
+		}
 	}
 
 	@Override
