@@ -375,6 +375,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 					conv.addMessage(message);
 					Log.d("MessagesList", "new message is " + message);
 					mAdapter.sort(mConversationsComparator);
+					mAdapter.notifyDataSetChanged();
 					// notifyDataSetChanged sets notifyonChange to true but we want it to always be false
 					mAdapter.setNotifyOnChange(false);
 				}
