@@ -38,12 +38,10 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 	}
 
 	private Conversation conversation;
-	private Context context;
 
 	public MessagesAdapter(Context context, List<ConvMessage> objects, Conversation conversation)
 	{
 		super(context, -1, objects);
-		this.context = context;
 		this.conversation = conversation;
 	}
 
@@ -122,16 +120,13 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 				holder.timestampContainer = (LinearLayout) v.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v.findViewById(R.id.timestamp);
 				v.setTag(holder);
-
-				/* this doesn't change, so just set it here once */
-				holder.image.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(conversation.getMsisdn()));
 			}
 		}
 		else
 		{
 			holder = (ViewHolder) v.getTag();
 		}
-		
+
 		SmileyParser smileyParser = SmileyParser.getInstance();
 		CharSequence markedUp = smileyParser.addSmileySpans(convMessage.getMessage());
 		holder.messageTextView.setText(markedUp);
@@ -156,10 +151,15 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 		{
 			holder.image.setImageResource(resId);
 		}
-		else
+		else if (convMessage.isSent())
 		{
 			holder.image.setImageResource(0);
 		}
+		else
+		{
+			holder.image.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(convMessage.getMsisdn()));
+		}
+
 		return v;
 	}
 
