@@ -25,7 +25,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ViewAnimator;
 
@@ -41,7 +43,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HikeListView;
 
-public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
+public class MessagesList extends Activity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
 	private static final int INVITE_PICKER_RESULT = 1001;
 
@@ -156,6 +158,7 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		mEmptyView.setOnClickListener(this);
 
 		mConversationsView.setEmptyView(mEmptyView);
+		mConversationsView.setOnItemClickListener(this);
 
 		mInviteFriend = mEmptyView.findViewById(R.id.invite_friend);
 		mInviteFriend.setOnClickListener(this);
@@ -504,5 +507,13 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			break;
 		default:
 		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+	{
+		Conversation conv = (Conversation) adapterView.getItemAtPosition(position);
+		Intent intent = createIntentForConversation(conv);
+		startActivity(intent);
 	}
 }
