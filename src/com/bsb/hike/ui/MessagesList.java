@@ -11,39 +11,22 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Display;
 import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewConfiguration;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewAnimator;
 
 import com.bsb.hike.HikeConstants;
@@ -58,7 +41,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.HikeListView;
 
-public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable, TextWatcher, OnEditorActionListener
+public class MessagesList extends Activity implements OnClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
 	private static final int INVITE_PICKER_RESULT = 1001;
 
@@ -76,127 +59,11 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 	private Comparator<? super Conversation> mConversationsComparator;
 
-	private GestureDetector mSwipeGestureListener;
-
-	private int mAmountToScrollAfterSwipeBack; /* the amount to scroll back to restore your position */
-
-	private ViewAnimator mCurrentComposeView;
-
-	private EditText mCurrentComposeText;
-
 	private Map<String, Conversation> mConversationsByMSISDN;
 
 	private Set<String> mConversationsAdded;
 
-	/* the conversation that's currently being composed */
-	private Conversation mCurrentConversation;
-
-	private ComposeViewWatcher mComposeTextWatcher;
-
-	private Button mCurrentButton;
-
 	private View mInviteFriend;
-
-	private class SwipeGestureDetector extends SimpleOnGestureListener
-	{
-		private static final boolean DISABLE_SWIPE = true;
-
-		final int swipeMinDistance;
-
-		final int swipeThresholdVelocity;
-
-		public SwipeGestureDetector()
-		{
-			final ViewConfiguration vc = ViewConfiguration.get(MessagesList.this);
-			swipeMinDistance = vc.getScaledTouchSlop();
-			swipeThresholdVelocity = vc.getScaledMinimumFlingVelocity();
-		}
-
-		@Override
-		public boolean onSingleTapConfirmed(MotionEvent e)
-		{
-			/* 
-			 * on certain phones, it doesn't deliver a button press first.  Detect if we're over a button
-			 */
-			if ((mCurrentButton != null) && (mCurrentButton.isEnabled()))
-			{
-				int[] location = new int[2];
-				mCurrentButton.getLocationOnScreen(location);
-				float touchX = e.getX();
-				float touchY = e.getY();
-				float buttonX = location[0];
-				float buttonY = location[1];
-				if ((touchX >= buttonX) &&
-					(touchY <= buttonY) &&
-					(touchX <= (buttonX + mCurrentButton.getWidth())) &&
-					(touchY >= (buttonY - mCurrentButton.getHeight())))
-				{
-					e.setAction(MotionEvent.ACTION_CANCEL);
-					mCurrentButton.performClick();
-					return true;
-				}
-			}
-
-			if (mCurrentComposeView != null)
-			{
-				swipeBack(mCurrentComposeView, true);
-				return true;
-			}
-
-			int pos = mConversationsView.pointToPosition((int) e.getX(), (int) e.getY());
-			if (pos < 0)
-			{
-				return false;
-			}
-			else
-			{
-				selectConversation(pos);
-				return true;
-			}
-		}
-
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
-		{
-			if (DISABLE_SWIPE)
-			{
-				return false;
-			}
-
-			if (Math.abs(velocityY) > 1000)
-			{
-				Log.d("MessagesList", "Swipe ignored -- Y motion too fast " + velocityY);
-				return false;
-			}
-
-			if (Math.abs(velocityX) < swipeThresholdVelocity)
-			{
-				Log.d("MessagesList", "Swipe ignored -- Too slow " + velocityX);
-				/* too slow, ignore */
-				return false;
-			}
-
-			if (Math.abs(e1.getY() - e2.getY()) > 200)
-			{
-				/* too much horizontal movement, ignore */
-				Log.d("MessagesList", "Swipe ignore -- Too much Y movement " + (Math.abs(e1.getY() - e2.getY())) + " " + 200);
-				return false;
-			}
-
-			if ((Math.abs(e1.getX() - e2.getX()) < swipeMinDistance))
-			{
-				/* too short, ignore */
-				Log.d("MessagesList", "Swipe ignored -- Too short");
-				return false;
-			}
-
-			Log.d("MessagesList", "Valid swipe detected");
-			boolean swipeRight = e2.getX() > e1.getX();
-			int pos = mConversationsView.pointToPosition((int) e1.getX(), (int) e1.getY());
-			onSwipeDetected(pos, swipeRight);
-			return true;
-		}
-	}
 
 	@Override
 	protected void onPause()
@@ -276,23 +143,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 
 		setContentView(R.layout.main);
 		mConversationsView = (HikeListView) findViewById(R.id.conversations);
-		mSwipeGestureListener = new GestureDetector(new SwipeGestureDetector());
-		View.OnTouchListener gestureListener = new View.OnTouchListener()
-		{
-			@Override
-			public boolean onTouch(View v, MotionEvent event)
-			{
-				if (mSwipeGestureListener.onTouchEvent(event))
-				{
-					/* handled by swipe */
-					return true;
-				}
-
-				return mCurrentConversation != null;
-			}
-		};
-
-		mConversationsView.setOnTouchListener(gestureListener);
 
 		/*
 		 * mSearchIconView = findViewById(R.id.search); mSearchIconView.setOnClickListener(this);
@@ -360,214 +210,10 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		registerForContextMenu(mConversationsView);
 	}
 
-	private void swipeBack(ViewAnimator viewAnimator, boolean animate)
-	{
-		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mCurrentComposeText.getWindowToken(), 0);
-
-		mCurrentConversation = null;
-		mCurrentComposeText.removeTextChangedListener(mComposeTextWatcher);
-		mCurrentComposeText.setText("");
-		mComposeTextWatcher.uninit();
-		mComposeTextWatcher = null;
-		mCurrentComposeText = null;
-		mCurrentComposeView = null;
-		mCurrentButton = null;
-
-		viewAnimator.setOutAnimation(animate ? Utils.outToLeftAnimation(this) : null);
-		viewAnimator.setInAnimation(animate ? Utils.inFromRightAnimation(this) : null);
-
-		viewAnimator.setDisplayedChild(0);
-		if (animate)
-		{
-			viewAnimator.getInAnimation().setAnimationListener(new AnimationListener()
-			{
-				@Override
-				public void onAnimationStart(Animation animation)
-				{}
-				@Override
-				public void onAnimationRepeat(Animation animation)
-				{}
-
-				@Override
-				public void onAnimationEnd(Animation animation)
-				{
-					mConversationsView.postDelayed(new Runnable() {
-						public void run()
-						{
-							int delta = mAmountToScrollAfterSwipeBack;
-							if (delta > 0 )
-							{
-								int scrollDistance = mConversationsView.getChildAt(0).getHeight() * delta;
-								Log.d("MessagesList", "Should be scrolling to position " + delta + " " + scrollDistance);
-								mConversationsView.scrollBy(0, -scrollDistance);
-							}
-							else if (delta < 0)
-							{
-								/* message was sent, jump to the top */
-								mConversationsView.scrollTo(0, 0);
-							}
-							mAmountToScrollAfterSwipeBack = 0;
-							mConversationsView.setScrollable(true);
-						}
-					}, 150);
-				}
-			});
-		}
-		View overlay = findViewById(R.id.messages_list_overlay);
-		overlay.setVisibility(View.GONE);
-	}
-
 	@Override
 	public void onBackPressed()
 	{
-		if (mCurrentConversation != null)
-		{
-			swipeBack(mCurrentComposeView, true);
-		}
-		else
-		{
-			super.onBackPressed();
-		}
-	}
-
-	private void onSwipeDetected(int pos, boolean swipeRight)
-	{
-		final int positionSelected = pos;
-
-		int firstPosition = mConversationsView.getFirstVisiblePosition() - mConversationsView.getHeaderViewsCount(); // This is the same as child #0
-		final int wantedPosition = pos - firstPosition;
-
-		if ((wantedPosition < mConversationsView.getFirstVisiblePosition()) || (wantedPosition > mConversationsView.getLastVisiblePosition()))
-		{
-			Log.e("MessagesList", "Selected swipe view is outside visible range " + wantedPosition);
-			return;
-		}
-
-		View wantedView = mConversationsView.getChildAt(wantedPosition);
-		ViewAnimator viewAnimator = (ViewAnimator) wantedView.findViewById(R.id.conversation_flip);
-		int currentChild = viewAnimator.getDisplayedChild();
-
-		if (swipeRight && (currentChild == 0))
-		{
-			Log.d("MessagesList", "swipe forward");
-			if (mCurrentComposeView != null)
-			{
-				Log.d("MessagesList", "swiping backing weird view");
-				swipeBack(mCurrentComposeView, true);
-				return;
-			}
-
-			mCurrentConversation = mAdapter.getItem(pos);
-			setComposeView(viewAnimator);
-
-			Log.d("MessagesList", "position is " + mAmountToScrollAfterSwipeBack);
-
-			viewAnimator.setOutAnimation(Utils.outToRightAnimation(this));
-			Animation inAnimation = Utils.inFromLeftAnimation(this);
-			viewAnimator.setInAnimation(inAnimation);
-			inAnimation.setAnimationListener(new AnimationListener(){
-
-				@Override
-				public void onAnimationEnd(Animation animation)
-				{
-					mConversationsView.postDelayed(new Runnable() {
-						public void run()
-						{
-							/* since this is a callback, the user may have unswiped already */
-							if (mCurrentComposeView == null)
-							{
-								return;
-							}
-
-							mConversationsView.setScrollable(false);
-
-							mAmountToScrollAfterSwipeBack = positionSelected - mConversationsView.getFirstVisiblePosition();
-
-							View parent = (View) mCurrentComposeView.getParent();
-
-							int[] loc = new int[2];
-							parent.getLocationOnScreen(loc);
-							/* i have no idea why this has to be such a weird number */
-							int scrollDistance = (int) (loc[1] - parent.getHeight()*1.1);
-							mConversationsView.scrollTo(0, scrollDistance);
-
-							Display display = getWindowManager().getDefaultDisplay();
-							View v = findViewById(R.id.messages_list_overlay);
-							RelativeLayout.LayoutParams lp = (RelativeLayout.LayoutParams) v.getLayoutParams();
-							int[] location = new int[2];
-							parent.getLocationOnScreen(location);
-
-							lp.height = display.getHeight() - location[1] - parent.getHeight() + 2;//2px for the divider
-							v.setLayoutParams(lp);
-							v.setVisibility(View.VISIBLE);
-
-							InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-							imm.showSoftInput(mCurrentComposeText, InputMethodManager.SHOW_IMPLICIT);
-							imm.showSoftInputFromInputMethod(mCurrentComposeText.getWindowToken(), InputMethodManager.SHOW_IMPLICIT);
-						}
-					}, (int) 150);
-				}
-
-				@Override
-				public void onAnimationRepeat(Animation arg0)
-				{
-				}
-				@Override
-				public void onAnimationStart(Animation arg0)
-				{
-				}
-			});
-
-			viewAnimator.setDisplayedChild(1);
-		}
-		else if (currentChild == 1)
-		{
-			Log.d("MessagesList", "swipe back");
-			swipeBack(viewAnimator, true);
-		}
-	}
-
-	public void setComposeView(ViewAnimator viewAnimator)
-	{
-		viewAnimator.setTag(MessagesList.COMPOSE);
-		mCurrentComposeText = (EditText) viewAnimator.findViewById(R.id.mini_compose);
-		mCurrentComposeText.requestFocus();
-
-		mCurrentComposeText.setOnEditorActionListener(this);
-		mCurrentComposeView = viewAnimator;
-
-		mCurrentButton = (Button) viewAnimator.findViewById(R.id.send_message);
-		if (mComposeTextWatcher != null)
-		{
-			mComposeTextWatcher.uninit();
-		}
-
-		mComposeTextWatcher = new ComposeViewWatcher(mCurrentConversation, mCurrentComposeText, mCurrentButton,
-									getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0));
-		mComposeTextWatcher.init();
-		mCurrentComposeText.addTextChangedListener(mComposeTextWatcher);
-	}
-
-	private void selectConversation(int position)
-	{
-		int firstPosition = mConversationsView.getFirstVisiblePosition() - mConversationsView.getHeaderViewsCount(); // This is the same as child #0
-		int wantedPosition = position - firstPosition;
-
-		if (mCurrentComposeView != null)
-		{
-			if (mConversationsView.getChildAt(wantedPosition) == mCurrentComposeView.getParent())
-			{
-				/* ignore the select since this conversation is currently swiped */
-				return;
-			}
-
-			swipeBack(mCurrentComposeView, false);
-		}
-
-		Conversation conversation = (Conversation) mAdapter.getItem(position);
-		Intent intent = createIntentForConversation(conversation);
-		startActivity(intent);
+		super.onBackPressed();
 	}
 
 	private Intent createIntentForConversation(Conversation conversation)
@@ -588,11 +234,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	@Override
 	public boolean onContextItemSelected(MenuItem item)
 	{
-		if (mCurrentComposeView != null)
-		{
-			return true;
-		}
-
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		Conversation conv = mAdapter.getItem((int) info.id);
 		switch (item.getItemId())
@@ -619,11 +260,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
 	{
-		if (mCurrentComposeView != null)
-		{
-			return;
-		}
-
 		super.onCreateContextMenu(menu, v, menuInfo);
 		android.view.MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.conversation_menu, menu);
@@ -691,11 +327,6 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
-
-		if (mComposeTextWatcher != null)
-		{
-			mComposeTextWatcher.uninit();
-		}
 	}
 
 	@Override
@@ -873,58 +504,5 @@ public class MessagesList extends Activity implements OnClickListener, HikePubSu
 			break;
 		default:
 		}
-	}
-
-	@Override
-	public void afterTextChanged(Editable editable)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-	{
-	}
-
-	@Override
-	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-	{
-	}
-
-	/* called when the send button in the swipe method is clicked */
-	public void onSendClick(View unused)
-	{
-		String message = mCurrentComposeText.getText().toString();
-		mCurrentComposeText.setText("");
-		long time = (long) System.currentTimeMillis() / 1000;
-		final ConvMessage convMessage = new ConvMessage(message, mCurrentConversation.getMsisdn(), time, ConvMessage.State.SENT_UNCONFIRMED);
-		convMessage.setConversation(mCurrentConversation);
-		Log.d("MessagesList", "Current Conversation is " + mCurrentConversation);
-		mAmountToScrollAfterSwipeBack = - 1; /* signifies that we should jump to the top, not the last position */
-		(new Handler()).postDelayed(new Runnable() {
-			public void run()
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
-			}
-		}, 750);
-		swipeBack(mCurrentComposeView, true);
-	}
-
-	@Override
-	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
-	{
-		if ((view == mCurrentComposeText) &&
-				(actionId == EditorInfo.IME_ACTION_SEND))
-			{
-				onSendClick(null);
-				return true;
-			}
-			return false;
-		}
-
-	public Conversation getSelectedConversation()
-	{
-		return mCurrentConversation;
 	}
 }

@@ -3,14 +3,12 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.ViewAnimator;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
@@ -92,15 +90,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
 		avatarView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(conversation.getMsisdn()));
-
-		if (mMessagesList.getSelectedConversation() == conversation)
-		{
-			ViewAnimator animator = (ViewAnimator) v.findViewById(R.id.conversation_flip);
-			animator.setInAnimation(null);
-			animator.setOutAnimation(null);
-			animator.setDisplayedChild(1);
-			mMessagesList.setComposeView(animator);
-		}
 
 		return v;
 	}
