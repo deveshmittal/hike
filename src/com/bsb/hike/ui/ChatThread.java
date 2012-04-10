@@ -527,6 +527,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					toast.show();
 				}
 			}
+
+			mComposeView.setText("");
 		}
 		else
 		{
