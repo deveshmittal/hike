@@ -129,8 +129,6 @@ public class SignupActivity extends Activity implements FinishableEvent
 			
 		}
 	}
-	
-	
 
 	private void createProgressDialog()
 	{
