@@ -73,7 +73,6 @@
                 android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:textColor="@color/grey" />
-<<<<<<< HEAD
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -89,8 +88,8 @@
                     android:layout_below="@id/contact"
                     android:layout_marginRight="5dp"
                     android:layout_toRightOf="@id/avatar"
-                    android:visibility="visible"
-                    android:src="@drawable/ic_unread" />
+                    android:src="@drawable/ic_unread"
+                    android:visibility="visible" />
 
                 <TextView
                     android:id="@+id/last_message"
@@ -105,42 +104,7 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@color/grey" />
             </LinearLayout>
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/bottom_panel"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent" >
-
-            <Button
-                android:id="@+id/send_message"
-                android:layout_width="57px"
-                android:layout_height="37px"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="7dp"
-                android:layout_marginTop="21dp"
-                android:background="@drawable/sendbutton"
-                android:enabled="false"
-                android:onClick="onSendClick" />
-
-            <EditText
-                android:id="@+id/mini_compose"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="7dp"
-                android:layout_marginTop="12dp"
-                android:layout_toLeftOf="@+id/send_message"
-                android:autoText="true"
-                android:background="@drawable/edittext"
-                android:hint="@string/type_to_compose"
-                android:imeOptions="actionSend"
-                android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences" />
-        </RelativeLayout>
-    </ViewAnimator>
-=======
         </LinearLayout>
     </RelativeLayout>
->>>>>>> db1d75f... Remove swipe feature for now
 
 </RelativeLayout>
