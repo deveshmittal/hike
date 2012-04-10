@@ -127,6 +127,8 @@ public class CropImage extends MonitoredActivity {
 		}
 
 		if (mBitmap == null) {
+			Toast toast = Toast.makeText(this, getResources().getString(R.string.image_failed), Toast.LENGTH_LONG);
+			toast.show();
 			Log.d(TAG, "Unable to open bitmap");
 			finish();
 			return;
@@ -179,7 +181,6 @@ public class CropImage extends MonitoredActivity {
 	}
 
 	private Bitmap getBitmap(String path) {
-		File f = new File(path);
 		/* resize the image while opening it.
 		 * http://stackoverflow.com/questions/477572/android-strange-out-of-memory-issue-while-loading-an-image-to-a-bitmap-object/823966#823966
 		 */

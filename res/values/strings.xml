@@ -63,4 +63,5 @@
     <string name="get_started">Get Started</string>
     <string name="welcome_message_1">Messaging simplified.</string>
     <string name="welcome_message_2">Fun, free, forever.</string>
+    <string name="image_failed">Unable to open image</string>
 </resources>
