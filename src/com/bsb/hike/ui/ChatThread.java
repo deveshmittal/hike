@@ -836,7 +836,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (HikePubSub.ICON_CHANGED.equals(type))
 		{
-			runOnUiThread(mUpdateAdapter);
+			String msisdn = (String) object;
+			if (msisdn.equals(mContactNumber))
+			{
+				/* update the image drawable */
+				runOnUiThread(mUpdateAdapter);
+			}
 		}
 		else if ((HikePubSub.USER_LEFT.equals(type)) || (HikePubSub.USER_JOINED.equals(type)))
 		{
