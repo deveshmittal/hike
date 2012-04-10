@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,7 +18,6 @@ import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -65,7 +65,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	private ImageView mTitleIcon;
 	private View mProfilePictureChangeOverlay;
 	private EditText mNameViewEdittable;
-	private ProgressDialog mDialog;
+	private Dialog mDialog;
 	public String mLocalMSISDN = null;
 
 	private ActivityState mActivityState; /* config state of this activity */
@@ -82,6 +82,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	@Override
 	public Object onRetainNonConfigurationInstance()
 	{
+		Log.d("ProfileActivity", "onRetainNonConfigurationinstance");
 		return mActivityState;
 	}
 
@@ -295,7 +296,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Choose a picture");
 			builder.setItems(items, this);
-			builder.show().setOwnerActivity(this);
+			mDialog = builder.show();
 		}
 	}
 
