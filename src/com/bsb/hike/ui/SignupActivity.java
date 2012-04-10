@@ -3,6 +3,8 @@ package com.bsb.hike.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -44,6 +46,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 	private ImageView addressBookStatus;
 	private ImageView nameStatus;
 	private Button mDialogButton;
+	private ImageView mHikeLogoView;
 	
 
 	@Override
@@ -57,6 +60,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 		mGettingNameView = (ViewGroup) findViewById(R.id.signup_name);
 		mOperatorView = (ViewGroup) findViewById(R.id.operator_layout);
 		mDialogOverlay = findViewById(R.id.dialog_overlay);
+		mHikeLogoView = (ImageView) findViewById(R.id.hi_logo);
 
 		editText = (EditText) findViewById(R.id.dialog_edittext);
 		numberStatus = (ImageView) findViewById(R.id.signup_digits_status);
@@ -80,7 +84,13 @@ public class SignupActivity extends Activity implements FinishableEvent
 				mTask.execute();
 			}
 		});
-		
+
+		/* the Hi logo is too big in landscape ... just get rid of it */
+		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+		{
+			mHikeLogoView.setVisibility(View.GONE);
+		}
+
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof SignupTask)
 		{
@@ -201,16 +211,6 @@ public class SignupActivity extends Activity implements FinishableEvent
 		mDialogOverlay.setVisibility(View.VISIBLE);
 	}
 
-	@Override
-	protected void onDestroy()
-	{
-		Log.d("SignupActivity", "onDestroy being called");
-		super.onDestroy();
-		if(mTask!=null){
-			mTask.cancelTask();
-		}
-	}
-	
 	private void buttonClickEvent() {
 		String text = editText.getText().toString();
 		editText.setText("");
