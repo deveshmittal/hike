@@ -30,12 +30,12 @@ public class ConvMessage
 	private long mTimestamp;
 
 	private boolean mIsSent;
-	
-	private State mState;
 
 	private boolean mIsSMS;
 
-	boolean mInvite;
+	private State mState;
+
+	private boolean mInvite;
 
 	public boolean isInvite()
 	{
@@ -73,6 +73,11 @@ public class ConvMessage
 		this.mTimestamp = timestamp;
 		this.msgID = msgid;
 		this.mappedMsgId = mappedMsgId;
+		mIsSent = (msgState == State.SENT_UNCONFIRMED ||
+					msgState == State.SENT_CONFIRMED ||
+					msgState == State.SENT_DELIVERED ||
+					msgState == State.SENT_DELIVERED_READ ||
+					msgState == State.SENT_FAILED);
 		setState(msgState);
 	}
 	
@@ -264,15 +269,13 @@ public class ConvMessage
 		return State.values()[val];
 	}
 
-	public void setState(State sentConfirmed)
+	public void setState(State state)
 	{
 		/* only allow the state to increase */
-		if (((mState != null) ? mState.ordinal() : 0) <= sentConfirmed.ordinal())
+		if (((mState != null) ? mState.ordinal() : 0) <= state.ordinal())
 		{
-			mState = sentConfirmed;
+			mState = state;
 		}
-
-		mIsSent = (mState == State.SENT_UNCONFIRMED || mState == State.SENT_CONFIRMED || mState == State.SENT_DELIVERED || mState == State.SENT_DELIVERED_READ || mState == State.SENT_FAILED);
 	}
 
 	public JSONObject serializeDeliveryReportRead()
