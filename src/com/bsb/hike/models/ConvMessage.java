@@ -276,6 +276,15 @@ public class ConvMessage
 		{
 			mState = state;
 		}
+
+		/* We have a bug where a message is flipping from sent to received
+		 * add this assert to track down when/where it's happening
+		 */
+		assert(mIsSent == (mState == State.SENT_UNCONFIRMED ||
+				mState == State.SENT_CONFIRMED ||
+				mState == State.SENT_DELIVERED ||
+				mState == State.SENT_DELIVERED_READ ||
+				mState == State.SENT_FAILED));
 	}
 
 	public JSONObject serializeDeliveryReportRead()
