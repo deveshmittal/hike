@@ -188,11 +188,27 @@ public class Utils
 		return intent;
 	}
 
+	static private int iconHash(String s)
+	{
+		/* ignore everything after ::
+		 * so that your large icon by default
+		 * matches your msisdn
+		 */
+		s = s.split("::")[0];
+		int count = 0;
+		for(int i = 0; i < s.length(); ++i)
+		{
+			count += s.charAt(i);
+		}
+
+		return count;
+	}
+
 	public static Drawable getDefaultIconForUser(Context context, String msisdn)
 	{
 		int count = 3;
 		int id;
-		switch(msisdn.hashCode() % count)
+		switch(iconHash(msisdn) % count)
 		{
 		case 0:
 			id = R.drawable.ic_avatar0;
