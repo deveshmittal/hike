@@ -146,7 +146,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				intentFilter.setPriority(99);
 				receiver = new SMSReceiver();
 				
-				this.context.registerReceiver(receiver, new IntentFilter(intentFilter));
+				this.context.getApplicationContext().registerReceiver(receiver, new IntentFilter(intentFilter));
 				String unauthedMSISDN = AccountUtils.validateNumber(number);
 
 				if (unauthedMSISDN != null)
@@ -167,7 +167,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					}
 				}
 
-				this.context.unregisterReceiver(receiver);
+				this.context.getApplicationContext().unregisterReceiver(receiver);
 				receiver = null;
 				
 				if(this.data == null){
@@ -321,7 +321,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 */
 		if (receiver != null)
 		{
-			this.context.unregisterReceiver(receiver);
+			this.context.getApplicationContext().unregisterReceiver(receiver);
 			receiver = null;
 		}
 	}
