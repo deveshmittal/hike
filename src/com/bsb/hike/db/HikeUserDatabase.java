@@ -19,6 +19,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
 
 public class HikeUserDatabase extends SQLiteOpenHelper
@@ -312,6 +313,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public void setIcon(String msisdn, byte[] data)
 	{
+		IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 		ContentValues vals = new ContentValues(2);
 		vals.put(DBConstants.MSISDN, msisdn);
 		vals.put(DBConstants.IMAGE, data);

@@ -17,6 +17,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,6 +39,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileArrayAdapter;
 import com.bsb.hike.cropimage.CropImage;
+import com.bsb.hike.cropimage.Util;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ProfileItem;
@@ -141,7 +143,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		String name = settings.getString(HikeMessengerApp.NAME, "Set a name!");
 		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 
-		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(mLocalMSISDN);
+		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId());
 		mIconView.setImageDrawable(drawable);
 
 		mNameView.setText(name);
@@ -227,9 +229,17 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 
 			if (mActivityState.newBitmap != null)
 			{
+				/* the server only needs a 40x40 version */
+				final Bitmap smallerBitmap = Util.transform(new Matrix(),
+						mActivityState.newBitmap, 40, 40, false);
 				ByteArrayOutputStream bao = new ByteArrayOutputStream();
-				mActivityState.newBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
+				smallerBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
 				final byte[] bytes = bao.toByteArray();
+
+				bao = new ByteArrayOutputStream();
+				mActivityState.newBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
+				final byte[] larger_bytes = bao.toByteArray();
+
 				HikeHttpRequest request = new HikeHttpRequest("/account/avatar", new HikeHttpRequest.HikeHttpCallback()
 				{
 					public void onFailure()
@@ -237,14 +247,14 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 						Log.d("ProfileActivity", "resetting image");
 						mActivityState.newBitmap = null;
 						/* reset the image */
-						mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(mLocalMSISDN));
+						mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId()));
 					}
 
 					public void onSuccess()
 					{
-						IconCacheManager.getInstance().clearIconForMSISDN(mLocalMSISDN);
 						HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
 						db.setIcon(mLocalMSISDN, bytes);
+						db.setIcon(getLargerIconId(), larger_bytes);
 						db.close();
 					}
 				});
@@ -268,6 +278,11 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		}
 
 		updateEditableUI();
+	}
+
+	protected String getLargerIconId()
+	{
+		return mLocalMSISDN + "::large";
 	}
 
 	private void updateEditableUI()
@@ -336,8 +351,8 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			Intent intent = new Intent(this, CropImage.class);
 			intent.putExtra("image-path", path);
 			intent.putExtra("scale", true);
-			intent.putExtra("outputX", 40);
-			intent.putExtra("outputY", 40);
+			intent.putExtra("outputX", 80);
+			intent.putExtra("outputY", 80);
 			intent.putExtra("aspectX", 1);
 			intent.putExtra("aspectY", 1);
 			startActivityForResult(intent, CROP_RESULT);
