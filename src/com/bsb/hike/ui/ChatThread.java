@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -113,6 +114,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private TextView mLabelView;
 
 	private LinearLayout mInputNumberContainer;
+
+	private boolean mUserIsBlocked;
 
 	@Override
 	protected void onPause()
@@ -400,6 +403,53 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		/* only enable the options menu
+		 * after we've selected a conversation */
+		if (mConversation == null)
+		{
+			return false;
+		}
+
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.chatthread_menu, menu);
+		/* disable invite if this is a hike user */
+		if (mConversation.isOnhike())
+		{
+			MenuItem item = menu.findItem(R.id.invite_menu);
+			item.setVisible(false);
+		}
+
+		MenuItem item = menu.findItem(R.id.block_menu);
+		int titleId = mUserIsBlocked ? R.string.unblock_title : R.string.block_title;
+		item.setTitle(getResources().getString(titleId));
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		if (mConversation == null)
+		{
+			Log.w("ChatThread", "OptionItem menu selected when conversation was null");
+			return false;
+		}
+
+		if (item.getItemId() == R.id.invite_menu)
+		{
+			inviteUser();
+		}
+		else if (item.getItemId() == R.id.block_menu)
+		{
+			mPubSub.publish(mUserIsBlocked ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER, mContactNumber);
+			mUserIsBlocked = !mUserIsBlocked;
+		}
+
+		return true;
+	}
+
+	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
 	{
 		super.onCreateContextMenu(menu, v, menuInfo);
@@ -513,19 +563,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			if (intent.getBooleanExtra("invite", false))
 			{
 				intent.removeExtra("invite");
-				if (!mConversation.isOnhike())
-				{
-					long time = (long) System.currentTimeMillis() / 1000;
-					ConvMessage convMessage = new ConvMessage("You should check out Hike!", mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
-					convMessage.setInvite(true);
-					convMessage.setConversation(mConversation);
-					sendMessage(convMessage);
-				}
-				else
-				{
-					Toast toast = Toast.makeText(this, R.string.already_hike_user, Toast.LENGTH_LONG);
-					toast.show();
-				}
+				inviteUser();
 			}
 
 			mComposeView.setText("");
@@ -533,6 +571,28 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else
 		{
 			createAutoCompleteView(intent.getStringExtra("msg"));
+		}
+	}
+
+	private void inviteUser()
+	{
+		if (mConversation == null)
+		{
+			return;
+		}
+
+		if (!mConversation.isOnhike())
+		{
+			long time = (long) System.currentTimeMillis() / 1000;
+			ConvMessage convMessage = new ConvMessage("You should check out Hike!", mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+			convMessage.setInvite(true);
+			convMessage.setConversation(mConversation);
+			sendMessage(convMessage);
+		}
+		else
+		{
+			Toast toast = Toast.makeText(this, R.string.already_hike_user, Toast.LENGTH_LONG);
+			toast.show();
 		}
 	}
 
@@ -585,6 +645,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mLabelView.setText(mLabel);
 
 		mConversationsView.setStackFromBottom(true);
+
+		HikeUserDatabase db = new HikeUserDatabase(this);
+		mUserIsBlocked = db.isBlocked(mContactNumber);
+		db.close();
 
 		/* make a copy of the message list since it's used internally by the adapter */
 		List<ConvMessage> messages = new ArrayList<ConvMessage>(mConversation.getMessages());

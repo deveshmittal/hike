@@ -291,6 +291,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		mDb.insert(DBConstants.BLOCK_TABLE, null, values);
 	}
 
+	public boolean isBlocked(String msisdn)
+	{
+		/* TODO could make this only select one entry */
+		return getBlockedUsers().contains(msisdn);
+	}
+
 	public Set<String> getBlockedUsers()
 	{
 		Set<String> blocked = new HashSet<String>();

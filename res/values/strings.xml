@@ -64,4 +64,6 @@
     <string name="welcome_message_1">Messaging simplified.</string>
     <string name="welcome_message_2">Fun, free, forever.</string>
     <string name="image_failed">Unable to open image</string>
+    <string name="block_title">Block</string>
+    <string name="unblock_title">Unblock</string>
 </resources>
