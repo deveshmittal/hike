@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import android.accounts.NetworkErrorException;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -284,6 +285,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					this.wait();					
 				}
 
+				name = this.data;
+				AccountUtils.setName(name);
 			}
 			catch (InterruptedException e)
 			{
@@ -291,8 +294,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				publishProgress(new StateValue(State.NAME, null));
 				return Boolean.FALSE;
 			}
+			catch (NetworkErrorException e)
+			{
+				Log.e("SignupTask", "Unable to set name", e);
+				publishProgress(new StateValue(State.NAME, null));
+				return Boolean.FALSE;
+			}
 
-			name = this.data;
 			this.data = null;
 			Editor editor = settings.edit();
 			editor.putString(HikeMessengerApp.NAME_SETTING, name);
