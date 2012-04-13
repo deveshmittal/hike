@@ -1,10 +1,8 @@
 package com.bsb.hike.ui;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.InputType;
@@ -47,8 +45,8 @@ public class SignupActivity extends Activity implements FinishableEvent
 	private ImageView nameStatus;
 	private Button mDialogButton;
 	private ImageView mHikeLogoView;
+	private boolean isErrorMsg = false;
 	
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -146,11 +144,10 @@ public class SignupActivity extends Activity implements FinishableEvent
 			editText = (EditText) mDialogOverlay.findViewById(R.id.dialog_edittext);
 		}
 		
-		
-
 		switch (this.mCurrentState.state)
 		{
 		case MSISDN:
+			isErrorMsg = false;
 			mDialogButton.setVisibility(View.GONE);
 			mDialogDropShadow.setVisibility(View.GONE);
 			editText.setVisibility(View.VISIBLE);
@@ -161,6 +158,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 			break;
 			
 		case NAME:
+			isErrorMsg = false;
 			mDialogButton.setVisibility(View.GONE);
 			mDialogDropShadow.setVisibility(View.GONE);
 			editText.setVisibility(View.VISIBLE);
@@ -171,6 +169,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 			break;
 			
 		case PIN:
+			isErrorMsg = false;
 			mDialogButton.setVisibility(View.VISIBLE);
 			mDialogDropShadow.setVisibility(View.VISIBLE);
 			mDialogButton.setText("Change Number");
@@ -181,6 +180,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 			label.setText("Enter the Pin");
 			break;
 		case ERROR:
+			isErrorMsg = true;
 			mDialogButton.setVisibility(View.VISIBLE);
 			mDialogDropShadow.setVisibility(View.VISIBLE);
 			mDialogButton.setText("Ok");
@@ -189,9 +189,12 @@ public class SignupActivity extends Activity implements FinishableEvent
 			break;
 		}
 		
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.showSoftInput(editText, InputMethodManager.SHOW_FORCED);
-		
+		if (!isErrorMsg) {
+			editText.requestFocus();
+			InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+			imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
+			isErrorMsg = false;
+		}
 		editText.setOnKeyListener(new OnKeyListener()
 		{
 			
@@ -200,7 +203,17 @@ public class SignupActivity extends Activity implements FinishableEvent
 			{
 				if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 				{
-					buttonClickEvent();
+					/*
+					 * For removing the focus from the EditText box. 
+					 */
+					editText.requestFocus(1);
+					InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+					imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY);
+					
+					if (editText.getText().length()>0) {
+						buttonClickEvent();
+					}
+					
 				}
 				return false;
 			}
@@ -208,18 +221,12 @@ public class SignupActivity extends Activity implements FinishableEvent
 		
 		mDialogOverlay.setVisibility(View.VISIBLE);
 	}
-
+	
 	private void buttonClickEvent() {
-		String text = editText.getText().toString();
-		editText.setText("");
-		mDialogOverlay.setVisibility(View.INVISIBLE);
-		mTask.addUserInput(text);
-		
-		/*
-		 * To hide the soft keyboard when the "DONE" key is pressed.
-		 */
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+			String text = editText.getText().toString();
+			editText.setText("");
+			mDialogOverlay.setVisibility(View.INVISIBLE);
+			mTask.addUserInput(text);
 	}
 	
 	public void onProgressUpdate(StateValue stateValue)
