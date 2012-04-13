@@ -234,6 +234,9 @@ public class HikeService extends Service
 		 * notify android that our service represents a user visible action, so it should not be killable. In order to do so, we need to show a notification so the user understands
 		 * what's going on
 		 */
+
+		/*
+		 * Remove this for now because a) it's irritating and b) it may be causing increased battery usage.
 		Notification notification = new Notification(R.drawable.ic_contact_logo, getResources().getString(R.string.service_running_message), System.currentTimeMillis());
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
@@ -241,6 +244,7 @@ public class HikeService extends Service
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 		notification.setLatestEventInfo(this, "Hike", "Hike", contentIntent);
 		startForeground(HikeNotification.HIKE_NOTIFICATION, notification);
+		*/
 
 		HandlerThread contactHandlerThread = new HandlerThread("");
 		contactHandlerThread.start();
