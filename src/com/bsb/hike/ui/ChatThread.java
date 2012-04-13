@@ -594,7 +594,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (!mConversation.isOnhike())
 		{
 			long time = (long) System.currentTimeMillis() / 1000;
-			ConvMessage convMessage = new ConvMessage("You should check out Hike!", mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+			ConvMessage convMessage = new ConvMessage(getResources().getString(R.string.invite_message),
+												mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
 			convMessage.setInvite(true);
 			convMessage.setConversation(mConversation);
 			sendMessage(convMessage);

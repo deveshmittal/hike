@@ -189,7 +189,11 @@ public class CropImage extends MonitoredActivity {
 
 		/* query the filesize of the bitmap */
 		options.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(path, options);
+		if (BitmapFactory.decodeFile(path, options) == null)
+		{
+			Log.w("CropImage", "Unable to decode bitmap " + path);
+			return null;
+		}
 
 		final int maxSize = 1024;
 		int scale = 1;

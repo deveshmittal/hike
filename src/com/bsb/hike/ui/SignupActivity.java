@@ -248,25 +248,7 @@ public class SignupActivity extends Activity implements FinishableEvent
 				mTask = new SignupTask(this);
 				mTask.execute();
 			}
-			/*TODO add a dialog prompting the user to try again 
-			mDialog = new AlertDialog.Builder(this)
-			.setTitle("Error")
-			.setMessage("Something bad happened, try again?")
-			.setCancelable(false)
-			.setPositiveButton("OK!", new Dialog.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which)
-				{
-					if (mTask != null)
-					{
-						mTask = new SignupTask(SignupActivity.this);
-						mTask.execute();	
-					}
-				}
 
-			})
-			.show();
-			*/
 			return;
 		}
 
