@@ -33,7 +33,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		setContentView(R.layout.hikepreferences);
 
 		Intent intent = getIntent();
-		int preferences = intent.getIntExtra("pref", -1);
+		int preferences = intent.getIntExtra(HikeConstants.Extras.PREF, -1);
 
 		addPreferencesFromResource(preferences);
 

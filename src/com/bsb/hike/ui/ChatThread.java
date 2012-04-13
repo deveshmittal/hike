@@ -326,7 +326,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		app.connectToService();
 
 		setContentView(R.layout.chatthread);
-
 		/* bind views to variables */
 		mBottomView = findViewById(R.id.bottom_panel);
 		mMetadataView = findViewById(R.id.sms_chat_metadata);
@@ -383,7 +382,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return true;
 		case R.id.forward:
 			Intent intent = new Intent(this, ChatThread.class);
-			intent.putExtra("msg", message.getMessage());
+			intent.putExtra(HikeConstants.Extras.MSG, message.getMessage());
 			startActivity(intent);
 			return true;
 		case R.id.delete:
@@ -505,6 +504,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
+		String prevContactNumber = null;
 		/* prevent any callbacks from previous instances of this activity from being fired now */
 		if (mClearTypingCallback != null)
 		{
@@ -541,28 +541,32 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				mContactId = contactInfo.getId();
 				mContactName = contactInfo.getName();
+				prevContactNumber = mContactNumber;
 				mContactNumber = contactInfo.getMsisdn();
 				setIntentFromField();
 			}
 			else
 			{
 				mContactId = null;
+				prevContactNumber = mContactNumber;
 				mContactName = mContactNumber = phoneNumber;
 			}
 
 			createConversation();
 		}
-		else if (intent.hasExtra("msisdn"))
+		else if (intent.hasExtra(HikeConstants.Extras.MSISDN))
 		{
+			
+			prevContactNumber = mContactNumber;
 			// selected chat from conversation list
-			mContactNumber = intent.getStringExtra("msisdn");
-			mContactId = intent.getStringExtra("id");
-			mContactName = intent.getStringExtra("name");
+			mContactNumber = intent.getStringExtra(HikeConstants.Extras.MSISDN);
+			mContactId = intent.getStringExtra(HikeConstants.Extras.ID);
+			mContactName = intent.getStringExtra(HikeConstants.Extras.NAME);
 
 			createConversation();
-			if (intent.getBooleanExtra("invite", false))
+			if (intent.getBooleanExtra(HikeConstants.Extras.INVITE, false))
 			{
-				intent.removeExtra("invite");
+				intent.removeExtra(HikeConstants.Extras.INVITE);
 				inviteUser();
 			}
 
@@ -570,7 +574,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			createAutoCompleteView(intent.getStringExtra("msg"));
+			createAutoCompleteView(intent.getStringExtra(HikeConstants.Extras.MSG));
+		}
+		/* close context menu(if open) if the previous MSISDN is different from the current one)*/
+		if (prevContactNumber != null && !prevContactNumber.equalsIgnoreCase(mContactNumber)) {
+				Log.w("ChatThread",
+						"DIFFERENT MSISDN CLOSING CONTEXT MENU!!");
+				closeContextMenu();
 		}
 	}
 
@@ -605,16 +615,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		Intent intent = new Intent();
 		if (mContactName != null)
 		{
-			intent.putExtra("name", mContactName);
+			intent.putExtra(HikeConstants.Extras.NAME, mContactName);
 		}
 		if (mContactId != null)
 		{
-			intent.putExtra("id", mContactId);
+			intent.putExtra(HikeConstants.Extras.ID, mContactId);
 		}
 
 		if (!TextUtils.isEmpty(mContactNumber))
 		{
-			intent.putExtra("msisdn", mContactNumber);
+			intent.putExtra(HikeConstants.Extras.MSISDN, mContactNumber);
 		}
 
 		setIntent(intent);

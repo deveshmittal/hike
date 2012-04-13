@@ -32,6 +32,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
@@ -183,8 +184,8 @@ public class Utils
 	public static Intent createIntentFromContactInfo(final ContactInfo contactInfo)
 	{
 		Intent intent = new Intent();
-		intent.putExtra("id", contactInfo.getId());
-		intent.putExtra("msisdn", contactInfo.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.ID, contactInfo.getId());
+		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		return intent;
 	}
 

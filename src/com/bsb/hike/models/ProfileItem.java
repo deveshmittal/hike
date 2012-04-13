@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileArrayAdapter.ProfileViewHolder;
@@ -57,7 +58,7 @@ public abstract class ProfileItem
 		public Intent getIntent(Context ctx)
 		{
 			Intent intent = new Intent(ctx, HikePreferences.class);
-			intent.putExtra("pref", preference);
+			intent.putExtra(HikeConstants.Extras.PREF, preference);
 			return intent;
 		}
 

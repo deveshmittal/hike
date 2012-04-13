@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -78,7 +79,7 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 
 		if (!info.isOnhike())
 		{
-			intent.putExtra("invite", true);
+			intent.putExtra(HikeConstants.Extras.INVITE, true);
 		}
 
 		activity.setResult(Activity.RESULT_OK, intent);

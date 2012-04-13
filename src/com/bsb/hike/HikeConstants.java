@@ -21,7 +21,7 @@ public class HikeConstants
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
 	public static final String HIKEBOT = "TD-HIKE";
-
+	
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 
@@ -42,4 +42,26 @@ public class HikeConstants
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 	public static final String ADAPTER_NAME = "hikeadapter";
+	
+	public static final class Extras
+	{
+		public static final String MSISDN = "msisdn";
+		public static final String ID = "id";
+		public static final String NAME = "name";
+		public static final String INVITE = "invite";
+		public static final String MSG = "msg";
+		public static final String PREF = "pref";
+		public static final String EDIT = "edit";
+		public static final String IMAGE_PATH ="image-path";
+		public static final String SCALE = "scale";
+		public static final String OUTPUT_X = "outputX";
+		public static final String OUTPUT_Y = "outputY";
+		public static final String ASPECT_X = "aspectX";
+		public static final String ASPECT_Y = "aspectY";
+		public static final String DATA = "data";
+		public static final String RETURN_DATA = "return-data";
+		public static final String BITMAP = "bitmap";
+		public static final String CIRCLE_CROP = "circleCrop";
+		public static final String SCALE_UP = "scaleUpIfNeeded";
+	}
 }

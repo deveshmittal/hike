@@ -52,6 +52,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 
@@ -108,22 +109,22 @@ public class CropImage extends MonitoredActivity {
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
-			if (extras.getString("circleCrop") != null) {
+			if (extras.getString(HikeConstants.Extras.CIRCLE_CROP) != null) {
 				mCircleCrop = true;
 				mAspectX = 1;
 				mAspectY = 1;
 			}
 
-			mImagePath = extras.getString("image-path");
+			mImagePath = extras.getString(HikeConstants.Extras.IMAGE_PATH);
 			mSaveUri = extras.containsKey(MediaStore.EXTRA_OUTPUT) ? getImageUri(extras.getString(MediaStore.EXTRA_OUTPUT)) : null;
 			mBitmap = getBitmap(mImagePath);
 
-			mAspectX = extras.getInt("aspectX");
-			mAspectY = extras.getInt("aspectY");
-			mOutputX = extras.getInt("outputX");
-			mOutputY = extras.getInt("outputY");
-			mScale = extras.getBoolean("scale", true);
-			mScaleUp = extras.getBoolean("scaleUpIfNeeded", true);
+			mAspectX = extras.getInt(HikeConstants.Extras.ASPECT_X);
+			mAspectY = extras.getInt(HikeConstants.Extras.ASPECT_Y);
+			mOutputX = extras.getInt(HikeConstants.Extras.OUTPUT_X);
+			mOutputY = extras.getInt(HikeConstants.Extras.OUTPUT_Y);
+			mScale = extras.getBoolean(HikeConstants.Extras.SCALE, true);
+			mScaleUp = extras.getBoolean(HikeConstants.Extras.SCALE_UP, true);
 		}
 
 		if (mBitmap == null) {
@@ -334,10 +335,10 @@ public class CropImage extends MonitoredActivity {
 
 		// Return the cropped image directly or save it to the specified URI.
 		Bundle myExtras = getIntent().getExtras();
-		if (myExtras != null && (myExtras.getParcelable("data") != null
-				|| myExtras.getBoolean("return-data"))) {
+		if (myExtras != null && (myExtras.getParcelable(HikeConstants.Extras.DATA) != null
+				|| myExtras.getBoolean(HikeConstants.Extras.RETURN_DATA))) {
 			Bundle extras = new Bundle();
-			extras.putParcelable("data", croppedImage);
+			extras.putParcelable(HikeConstants.Extras.DATA, croppedImage);
 			setResult(RESULT_OK,
 					(new Intent()).setAction("inline-data").putExtras(extras));
 			finish();
@@ -372,7 +373,7 @@ public class CropImage extends MonitoredActivity {
 			croppedImage.recycle();
 		} else {
 			Bundle extras = new Bundle();
-			extras.putParcelable("bitmap", croppedImage);
+			extras.putParcelable(HikeConstants.Extras.BITMAP, croppedImage);
 			setResult(RESULT_OK, new Intent().putExtras(extras));
 		}
 		finish();

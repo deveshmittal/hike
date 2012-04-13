@@ -64,16 +64,16 @@ public class HikeNotification
 
 		notificationIntent.setData((Uri.parse("custom://"+notificationId)));
 
-		notificationIntent.putExtra("msisdn", msisdn);
+		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 		if (contactInfo != null)
 		{
 			if (contactInfo.getId() != null)
 			{
-				notificationIntent.putExtra("id", contactInfo.getId());
+				notificationIntent.putExtra(HikeConstants.Extras.ID, contactInfo.getId());
 			}
 			if (contactInfo.getName() != null)
 			{
-				notificationIntent.putExtra("name", contactInfo.getName());
+				notificationIntent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());
 			}
 		}
 

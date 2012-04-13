@@ -35,6 +35,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ProfileArrayAdapter;
@@ -349,16 +350,16 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			path = (requestCode == CAMERA_RESULT) ? mActivityState.selectedFileIcon.getAbsolutePath() : getGalleryPath(data.getData());
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);
-			intent.putExtra("image-path", path);
-			intent.putExtra("scale", true);
-			intent.putExtra("outputX", 80);
-			intent.putExtra("outputY", 80);
-			intent.putExtra("aspectX", 1);
-			intent.putExtra("aspectY", 1);
+			intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
+			intent.putExtra(HikeConstants.Extras.SCALE, true);
+			intent.putExtra(HikeConstants.Extras.OUTPUT_X, 80);
+			intent.putExtra(HikeConstants.Extras.OUTPUT_Y, 80);
+			intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
+			intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
 			startActivityForResult(intent, CROP_RESULT);
 			break;
 		case CROP_RESULT:
-			Bitmap bitmap = data.getParcelableExtra("bitmap");
+			Bitmap bitmap = data.getParcelableExtra(HikeConstants.Extras.BITMAP);
 			mActivityState.newBitmap = Utils.getRoundedCornerBitmap(bitmap);
 			bitmap.recycle();
 			mIconView.setImageBitmap(mActivityState.newBitmap);

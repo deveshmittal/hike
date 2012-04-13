@@ -221,13 +221,13 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		Intent intent = new Intent(MessagesList.this, ChatThread.class);
 		if (conversation.getContactName() != null)
 		{
-			intent.putExtra("name", conversation.getContactName());
+			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
 		}
 		if (conversation.getContactId() != null)
 		{
-			intent.putExtra("id", conversation.getContactId());
+			intent.putExtra(HikeConstants.Extras.ID, conversation.getContactId());
 		}
-		intent.putExtra("msisdn", conversation.getMsisdn());
+		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
 		return intent;
 	}
 
@@ -335,7 +335,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		if ((v == mEditMessageIconView) || (v == mEmptyView))
 		{
 			Intent intent = new Intent(this, ChatThread.class);
-			intent.putExtra("edit", true);
+			intent.putExtra(HikeConstants.Extras.EDIT, true);
 			startActivity(intent);
 		}
 		else if (v == mInviteFriend)
