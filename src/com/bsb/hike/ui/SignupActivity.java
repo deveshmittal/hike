@@ -206,10 +206,10 @@ public class SignupActivity extends Activity implements FinishableEvent
 					/*
 					 * For removing the focus from the EditText box. 
 					 */
-					editText.requestFocus(1);
+					editText.requestFocus(View.FOCUS_BACKWARD);
 					InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-					imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_IMPLICIT_ONLY);
-					
+					imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_NOT_ALWAYS);
+
 					if (editText.getText().length()>0) {
 						buttonClickEvent();
 					}
