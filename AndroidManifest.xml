@@ -93,6 +93,11 @@
             android:theme="@android:style/Theme.NoTitleBar">
         </activity>
         <activity
+            android:name=".ui.FeedbackActivity"
+            android:windowSoftInputMode="adjustResize|stateVisible"
+            android:theme="@android:style/Theme.NoTitleBar">
+        </activity>
+        <activity
             android:name=".cropimage.CropImage"
             android:theme="@android:style/Theme.NoTitleBar"/>
         <receiver android:name=".service.BootService" >

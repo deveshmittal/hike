@@ -309,6 +309,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			intent = new Intent(this, ProfileActivity.class);
 			startActivity(intent);
 			return true;
+		case R.id.feedback:
+			intent = new Intent(this, FeedbackActivity.class);
+			startActivity(intent);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

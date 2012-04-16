@@ -270,7 +270,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			if (!requests.isEmpty())
 			{
 				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
-				mActivityState.task = new HikeHTTPTask(this);
+				mActivityState.task = new HikeHTTPTask(this, R.string.update_profile_failed);
 				HikeHttpRequest[] r = new HikeHttpRequest[requests.size()];
 				requests.toArray(r);
 				mActivityState.task.execute(r);
