@@ -76,10 +76,14 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	{
 		public boolean editable = false; /* is this page currently editable */
 		public HikeHTTPTask task; /* the task to update the global profile */
-		public File selectedFileIcon; /* the selected file that we'll store the profile camera picture */
 
 		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
 	}
+
+	/* super hacky, but the Activity can get destroyed between startActivityForResult and the onResult
+	 * so store it in a static field.
+	 */
+	public static File selectedFileIcon; /* the selected file that we'll store the profile camera picture */
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -347,7 +351,8 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		case CAMERA_RESULT:
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
-			path = (requestCode == CAMERA_RESULT) ? mActivityState.selectedFileIcon.getAbsolutePath() : getGalleryPath(data.getData());
+			Log.d("ProfileActivity", "The activity is " + this);
+			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon.getAbsolutePath() : getGalleryPath(data.getData());
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);
 			intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
@@ -393,8 +398,8 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		{
 		case PROFILE_PICTURE_FROM_CAMERA:
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			mActivityState.selectedFileIcon = Utils.getOutputMediaFile(Utils.MEDIA_TYPE_IMAGE); // create a file to save the image
-			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(mActivityState.selectedFileIcon));
+			selectedFileIcon = Utils.getOutputMediaFile(Utils.MEDIA_TYPE_IMAGE); // create a file to save the image
+			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));
 			startActivityForResult(intent, CAMERA_RESULT);
 			break;
 		case PROFILE_PICTURE_FROM_GALLERY:
