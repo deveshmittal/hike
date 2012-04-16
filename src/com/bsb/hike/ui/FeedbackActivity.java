@@ -7,10 +7,13 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.bsb.hike.R;
@@ -18,7 +21,7 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 
-public class FeedbackActivity extends Activity implements OnClickListener, FinishableEvent
+public class FeedbackActivity extends Activity implements OnClickListener, FinishableEvent, OnEditorActionListener
 {
 
 	private TextView mFeedbackText;
@@ -45,6 +48,8 @@ public class FeedbackActivity extends Activity implements OnClickListener, Finis
 		mTitleView = (TextView) findViewById(R.id.title);
 
 		mFeedbackButton.setOnClickListener(this);
+		mFeedbackText.setOnEditorActionListener(this);
+
 		mTitleView.setText(getResources().getString(R.string.contact_us));
 
 		Object o = getLastNonConfigurationInstance();
@@ -112,6 +117,17 @@ public class FeedbackActivity extends Activity implements OnClickListener, Finis
 		}
 
 		mTask = null;
+	}
+
+	@Override
+	public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+	{
+		if ((v == mFeedbackText) &&
+			(actionId == EditorInfo.IME_ACTION_SEND))
+		{
+			onClick(mFeedbackButton);
+		}
+		return false;
 	}
 	
 }
