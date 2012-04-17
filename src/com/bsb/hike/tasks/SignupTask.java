@@ -116,7 +116,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			if (accountInfo == null)
 			{
 				/* network error, signal a failure */
-				publishProgress(new StateValue(State.MSISDN, null));
+				publishProgress(new StateValue(State.ERROR, null));
 				return Boolean.FALSE;
 			}
 
@@ -150,21 +150,24 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				this.context.getApplicationContext().registerReceiver(receiver, new IntentFilter(intentFilter));
 				String unauthedMSISDN = AccountUtils.validateNumber(number);
 
-				if (unauthedMSISDN != null)
+				if (unauthedMSISDN == null)
 				{
-					synchronized(this)
+					Log.d("SignupTask", "Unable to send PIN to user");
+					publishProgress(new StateValue(State.ERROR, null));
+					return Boolean.FALSE;
+				}
+				synchronized(this)
+				{
+					/* wait until we get an SMS from the server */
+					try
 					{
-						/* wait until we get an SMS from the server */
-						try
-						{
-							/* TODO add a timeout so if we don't get the SMS,
-							 * we throw an error an ask the user enter manually */
-							this.wait(15*1000);
-						}
-						catch (InterruptedException e)
-						{
-							Log.e("SignupTask", "Task was interrupted", e);
-						}
+						/* TODO add a timeout so if we don't get the SMS,
+						 * we throw an error an ask the user enter manually */
+						this.wait(15*1000);
+					}
+					catch (InterruptedException e)
+					{
+						Log.e("SignupTask", "Task was interrupted", e);
 					}
 				}
 
@@ -297,7 +300,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			catch (NetworkErrorException e)
 			{
 				Log.e("SignupTask", "Unable to set name", e);
-				publishProgress(new StateValue(State.NAME, null));
+				publishProgress(new StateValue(State.ERROR, null));
 				return Boolean.FALSE;
 			}
 
