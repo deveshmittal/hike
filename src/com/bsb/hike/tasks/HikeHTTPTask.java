@@ -14,10 +14,12 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Void, Boolean> impl
 	boolean finished;
 	private FinishableEvent finishableEvent;
 	private HikeHttpRequest[] requests;
+	private int errorStringId;
 
-	public HikeHTTPTask(FinishableEvent activity)
+	public HikeHTTPTask(FinishableEvent activity, int errorStringId)
 	{
 		this.finishableEvent = activity;
+		this.errorStringId = errorStringId;
 	}
 
 	@Override
@@ -41,7 +43,7 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Void, Boolean> impl
 			}
 
 			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText((Activity) finishableEvent, ((Activity) finishableEvent).getResources().getString(R.string.update_profile_failed), duration);
+			Toast toast = Toast.makeText((Activity) finishableEvent, ((Activity) finishableEvent).getResources().getString(errorStringId), duration);
 			toast.show();
 		}
 	}
