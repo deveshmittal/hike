@@ -206,16 +206,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					publishProgress(new StateValue(State.ERROR, null));
 					return Boolean.FALSE;
 				}
-				Utils.savedAccountCredentials(accountInfo, settings.edit());
+			}
 
-				msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-			}
-			else
-			{
-				msisdn = accountInfo.msisdn;
-				/* save the new msisdn */
-				Utils.savedAccountCredentials(accountInfo, settings.edit());
-			}
+			Log.d("SignupTask", "saving MSISDN/Token");
+			msisdn = accountInfo.msisdn;
+			/* save the new msisdn */
+			Utils.savedAccountCredentials(accountInfo, settings.edit());
 		}
 
 		/* msisdn set, yay */
