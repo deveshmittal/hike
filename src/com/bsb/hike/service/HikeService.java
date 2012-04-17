@@ -32,6 +32,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.HikeNotification;
@@ -65,7 +66,7 @@ public class HikeService extends Service
 			HikeService.this.mMqttManager.ping();
 		}
 	}
-
+	
 	public static final int MSG_APP_CONNECTED = 1;
 
 	public static final int MSG_APP_DISCONNECTED = 2;
@@ -169,7 +170,10 @@ public class HikeService extends Service
 
 	// constant used internally to schedule the next ping event
 	public static final String MQTT_PING_ACTION = "com.bsb.hike.PING";
-
+	
+	// constant used internally to schedule the next check for update
+	public static final String APP_UPDATE_ACTION = "com.bsb.hike.UPDATE";
+	
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
 
@@ -201,7 +205,8 @@ public class HikeService extends Service
 	private Looper mContactHandlerLooper;
 
 	private Looper mMqttHandlerLooper;
-
+	
+	private UpdateChecker updateChecker;
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -256,6 +261,15 @@ public class HikeService extends Service
 		getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
 		/* listen for changes on the simcard */
 		getContentResolver().registerContentObserver(Uri.parse("content://icc/adn"), true, contactsReceived);
+		
+		// Check for updates
+		if (updateChecker == null)
+		{
+			Log.d("HikeService", "Registering UPDATE CHECK receiver");
+			updateChecker = new UpdateChecker();
+			registerReceiver(updateChecker, new IntentFilter(APP_UPDATE_ACTION));
+			scheduleNextUpdateCheck();
+		}
 	}
 
 	@Override
@@ -373,6 +387,12 @@ public class HikeService extends Service
 		if (mContactHandlerLooper != null)
 		{
 			mContactHandlerLooper.quit();
+		}
+		
+		if(updateChecker != null)
+		{
+			unregisterReceiver(updateChecker);
+			updateChecker = null;
 		}
 	}
 
@@ -577,7 +597,40 @@ public class HikeService extends Service
 
 		}
 	}
-
+	
+	/**
+	 * Used for checking for an update to the application once a day.
+	 * @author rs
+	 *
+	 */
+	public class UpdateChecker extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			checkForUpdate();
+		}
+	}
+	
+	/**
+	 * Schedule an update check once a day. 
+	 */
+	private void scheduleNextUpdateCheck()
+	{
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(APP_UPDATE_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+		Calendar wakeUpTime = Calendar.getInstance();
+		wakeUpTime.add(Calendar.HOUR, 24);
+		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
+	}
+	
+	private void checkForUpdate()
+	{
+		CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(getApplicationContext());
+		checkForUpdateTask.execute();
+		// Schedule next check
+		scheduleNextUpdateCheck();
+	}
+	
 	public boolean isUserOnline()
 	{
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);

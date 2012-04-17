@@ -43,6 +43,11 @@ public class HikeConstants
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 	public static final String ADAPTER_NAME = "hikeadapter";
 	
+	/* constants for defining what to do after checking for updates*/
+	public static final int UPDATE_AVAILABLE = 2;
+	public static final int CRITICAL_UPDATE = 1;
+	public static final int NO_UPDATE = 0;
+	
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -63,5 +68,6 @@ public class HikeConstants
 		public static final String BITMAP = "bitmap";
 		public static final String CIRCLE_CROP = "circleCrop";
 		public static final String SCALE_UP = "scaleUpIfNeeded";
+		public static final String UPDATE_AVAILABLE = "updateAvailable";
 	}
 }

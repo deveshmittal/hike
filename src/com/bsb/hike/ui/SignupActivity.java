@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -25,8 +24,9 @@ import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
+import com.bsb.hike.utils.UpdateAppBaseActivity;
 
-public class SignupActivity extends Activity implements FinishableEvent
+public class SignupActivity extends UpdateAppBaseActivity implements FinishableEvent
 {
 
 	private SignupTask mTask;

@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -9,8 +8,9 @@ import android.widget.Button;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.UpdateAppBaseActivity;
 
-public class WelcomeActivity extends Activity
+public class WelcomeActivity extends UpdateAppBaseActivity
 {
 	private Button mAcceptButton;
 
@@ -20,6 +20,10 @@ public class WelcomeActivity extends Activity
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
+		
+		// For starting the service and binding it to the app.
+		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
+		app.connectToService();
 	}
 
 	public void onClick(View v)

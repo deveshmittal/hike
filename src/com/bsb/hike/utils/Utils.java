@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.json.JSONArray;
@@ -327,5 +328,18 @@ public class Utils
 		}
 
 		return false;
+	}
+	
+	public static int convertVersionToInt(String version)
+	{
+		int v = 0;
+		int multiplier = 100;
+		StringTokenizer st = new StringTokenizer(version,".");
+		while(st.hasMoreTokens())
+		{
+			v += (Integer.parseInt(st.nextToken())*multiplier);
+			multiplier /=10;
+		}
+		return v;
 	}
 }
