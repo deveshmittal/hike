@@ -12,6 +12,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -26,9 +27,11 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
@@ -318,7 +321,7 @@ public class HikeService extends Service
 
 		// if the Service was already running and we're already connected - we
 		// don't need to do anything
-		if (!this.mMqttManager.isConnected())
+		if (this.haveCredentials() && !this.mMqttManager.isConnected())
 		{
 			this.mMqttManager.connect();
 
@@ -345,6 +348,12 @@ public class HikeService extends Service
 			pingRunnable = new PingRunnable();
 			registerReceiver(pingSender, new IntentFilter(MQTT_PING_ACTION));
 		}
+	}
+
+	private boolean haveCredentials()
+	{
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		return !TextUtils.isEmpty(settings.getString(HikeMessengerApp.TOKEN_SETTING, null));
 	}
 
 	@Override

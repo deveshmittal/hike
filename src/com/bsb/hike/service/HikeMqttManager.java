@@ -64,7 +64,11 @@ public class HikeMqttManager implements Listener
 		public void onSuccess(Void value)
 		{
 			Log.d("HikeMqttManager", "Sucessfully disconnected");
-			mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
+			if (mqttConnection != null)
+			{
+				mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
+			}
+
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 			if (reconnect)
 			{
@@ -77,7 +81,11 @@ public class HikeMqttManager implements Listener
 		{
 			Log.d("HikeMqttManager", "Error disconnecting from server");
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-			mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
+			if (mqttConnection != null)
+			{
+				mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
+			}
+
 			if (reconnect)
 			{
 				connectToBroker();
@@ -247,7 +255,7 @@ public class HikeMqttManager implements Listener
 		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		Log.d("HikeMqttManager", "clientId is " + clientId);
-		return !TextUtils.isEmpty(topic);
+		return !TextUtils.isEmpty(topic) && !TextUtils.isEmpty(clientId) && !TextUtils.isEmpty(password);
 	}
 
 	/*
