@@ -353,7 +353,7 @@ public class HikeService extends Service
 		super.onDestroy();
 
 		// disconnect immediately
-		this.mMqttManager.disconnectFromBroker();
+		this.mMqttManager.disconnectFromBroker(false);
 
 		// inform the app that the app has successfully disconnected
 		Log.i("HikeService", "onDestroy.  Shutting down service");
@@ -506,7 +506,7 @@ public class HikeService extends Service
 					mMqttManager.setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_DATADISABLED);
 
 					// disconnect from the broker
-					mMqttManager.disconnectFromBroker();
+					mMqttManager.disconnectFromBroker(false);
 				}
 
 				// we're finished - if the phone is switched off, it's okay for the CPU

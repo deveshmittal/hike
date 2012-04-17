@@ -53,12 +53,23 @@ public class HikeMqttManager implements Listener
 	public class DisconnectCB implements Callback<Void>
 	{
 
+		private boolean reconnect;
+
+		public DisconnectCB(boolean reconnect)
+		{
+			this.reconnect = reconnect;
+		}
+
 		@Override
 		public void onSuccess(Void value)
 		{
 			Log.d("HikeMqttManager", "Sucessfully disconnected");
 			mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+			if (reconnect)
+			{
+				connectToBroker();
+			}
 		}
 
 		@Override
@@ -67,8 +78,20 @@ public class HikeMqttManager implements Listener
 			Log.d("HikeMqttManager", "Error disconnecting from server");
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 			mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
+			if (reconnect)
+			{
+				connectToBroker();
+			}
 		}
 
+	}
+
+	public class ConnectTimeoutHandler implements Runnable
+	{
+		public void run()
+		{
+			disconnectFromBroker(true);
+		}
 	}
 
 	public class PublishCB implements Callback<Void>, Runnable
@@ -196,16 +219,19 @@ public class HikeMqttManager implements Listener
 
 	private HikeUserDatabase userDb;
 
+	private Runnable mConnectTimeoutHandler;
+
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
 		this.toaster = new HikeNotification(hikeService);
 		this.convDb = new HikeConversationsDatabase(hikeService);
 		this.userDb = new HikeUserDatabase(hikeService);
-		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 		mqttIdToPacket = Collections.synchronizedMap(new HashMap<Integer, HikePacket>());
 		this.handler = handler;
 		persistence = new HikeMqttPersistence(hikeService);
+		mConnectTimeoutHandler = new ConnectTimeoutHandler();
+		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 	}
 
 	public HikePacket getPacketIfUnsent(int mqttId)
@@ -278,6 +304,7 @@ public class HikeMqttManager implements Listener
 		try {
 			// try to connect
 			setConnectionStatus(MQTTConnectionStatus.CONNECTING);
+			handler.postDelayed(mConnectTimeoutHandler, 15*1000);
 			mqttConnection.connect(new Callback<Void>() {
 				public void onFailure(Throwable value)
 				{
@@ -368,7 +395,7 @@ public class HikeMqttManager implements Listener
 			public void onFailure(Throwable value)
 			{
 				Log.e("HikeMqttManager", "subscribe failed.", value);
-				disconnectFromBroker();
+				disconnectFromBroker(false);
 				mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 			}
 		});
@@ -377,13 +404,13 @@ public class HikeMqttManager implements Listener
 	/*
 	 * Terminates a connection to the message broker.
 	 */
-	public void disconnectFromBroker()
+	public void disconnectFromBroker(boolean reconnect)
 	{
 		try
 		{
 			if (mqttConnection != null)
 			{
-				mqttConnection.disconnect(new DisconnectCB());
+				mqttConnection.disconnect(new DisconnectCB(reconnect));
 				mqttConnection = null;
 			}
 
@@ -412,6 +439,7 @@ public class HikeMqttManager implements Listener
 	public void setConnectionStatus(MQTTConnectionStatus connectionStatus)
 	{
 		mHikeService.broadcastServiceStatus(connectionStatus);
+		handler.removeCallbacks(mConnectTimeoutHandler);
 		this.connectionStatus = connectionStatus;
 	}
 
@@ -690,7 +718,7 @@ public class HikeMqttManager implements Listener
 	public void onFailure(Throwable value)
 	{
 		Log.e("HikeMqttManager", "onFailure called.", value);
-		disconnectFromBroker();
+		disconnectFromBroker(false);
 		this.mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 	}
 }
