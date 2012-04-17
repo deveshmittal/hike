@@ -32,6 +32,7 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 		this.mMessenger = messenger;
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MQTT_PUBLISH_LOW, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.TOKEN_CREATED, this);
 	}
 
 	public void onServiceConnected(ComponentName className, IBinder service)
@@ -94,34 +95,46 @@ public class HikeServiceConnection implements HikePubSub.Listener, ServiceConnec
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
-		JSONObject o = (JSONObject) object;
 		if (mService == null)
 		{
-			Log.e("HikeServiceConnection", "Unable to publish message " + o);
+			Log.e("HikeServiceConnection", "Unable to publish message ");
 			return;
 		}
-		String data = o.toString();
-		Message msg = Message.obtain();
-		msg.what = HikeService.MSG_APP_PUBLISH;
-		Bundle bundle = new Bundle();
-		bundle.putString(HikeConstants.MESSAGE, data);
 
-		/* set the QoS */
-		msg.arg1 = HikePubSub.MQTT_PUBLISH_LOW.equals(type) ? 0 : 1;
-
-		/*
-		 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
-		 */
-		if (NetworkManager.MESSAGE.equals(o.optString(HikeConstants.TYPE)) ||
-			(NetworkManager.INVITE.equals(o.optString(HikeConstants.TYPE))))
+		Message msg;
+		if (HikePubSub.TOKEN_CREATED.equals(type))
 		{
-			JSONObject json = o.optJSONObject(HikeConstants.DATA);
-			long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
-			bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
+			msg = Message.obtain();
+			msg.what = HikeService.MSG_APP_TOKEN_CREATED;
+			msg.replyTo = this.mMessenger;
+		}
+		else
+		{
+			JSONObject o = (JSONObject) object;
+			String data = o.toString();
+			msg = Message.obtain();
+			msg.what = HikeService.MSG_APP_PUBLISH;
+			Bundle bundle = new Bundle();
+			bundle.putString(HikeConstants.MESSAGE, data);
+
+			/* set the QoS */
+			msg.arg1 = HikePubSub.MQTT_PUBLISH_LOW.equals(type) ? 0 : 1;
+
+			/*
+			 * if this is a message, then grab the messageId out of the json object so we can get confirmation of success/failure
+			 */
+			if (NetworkManager.MESSAGE.equals(o.optString(HikeConstants.TYPE)) ||
+					(NetworkManager.INVITE.equals(o.optString(HikeConstants.TYPE))))
+			{
+				JSONObject json = o.optJSONObject(HikeConstants.DATA);
+				long msgId = Long.parseLong(json.optString(HikeConstants.MESSAGE_ID));
+				bundle.putLong(HikeConstants.MESSAGE_ID, msgId);
+			}
+
+			msg.setData(bundle);
+			msg.replyTo = this.mMessenger;
 		}
 
-		msg.setData(bundle);
-		msg.replyTo = this.mMessenger;
 		try
 		{
 			mService.send(msg);

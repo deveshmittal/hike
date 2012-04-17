@@ -121,6 +121,7 @@ public class HikeService extends Service
 				mApp = null;
 				break;
 			case MSG_APP_TOKEN_CREATED:
+				Log.d("HikeService", "received MSG_APP_TOKEN_CREATED");
 				handleStart();
 				break;
 			case MSG_APP_PUBLISH:

@@ -19,6 +19,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.ui.SignupActivity;
@@ -308,6 +309,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		/* set the name */
 		publishProgress(new StateValue(State.NAME, name));
+
+		Log.d("SignupTask", "Publishing Token_Created");
+
+		/* tell the service to start listening for new messages */
+		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
+
 		/* operation successful, chill for a second */
 		try
 		{

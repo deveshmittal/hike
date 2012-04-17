@@ -135,7 +135,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, token);
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
