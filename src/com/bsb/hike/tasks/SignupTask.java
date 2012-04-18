@@ -225,6 +225,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			return Boolean.FALSE;
 		}
 		
+		synchronized (this) {
+			try {
+				this.wait(1500);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
@@ -274,6 +282,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			return Boolean.FALSE;
 		}
 		
+		synchronized (this) {
+			try {
+				this.wait(1500);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
 		if (name == null)
 		{
 			/* publishing this will cause the the Activity to ask the user for a name and signal us */
@@ -309,14 +326,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		/* set the name */
 		publishProgress(new StateValue(State.NAME, name));
-		/* operation successful, chill for a second */
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-		}
+//		/* operation successful, chill for a second */
+//		try
+//		{
+//			Thread.sleep(1000);
+//		}
+//		catch (InterruptedException e)
+//		{
+//		}
 		return Boolean.TRUE;
 	}
 	

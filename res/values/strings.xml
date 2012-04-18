@@ -69,4 +69,12 @@
 	<string name="sending_feedback">Sending Feedback</string>
 	<string name="contact_us">We\'re listening</string>
 	<string name="sending_feedback_failed">Unable to send feedback</string>
+	<string name="phone_number">Phone Number:</string>
+	<string name="pulling_digits">Pulling your digits...</string>
+	<string name="scanning_contacts">Scanning contacts...</string>
+	<string name="got_it">Got it!</string>
+	<string name="one_more_step">One more step to go</string>
+	<string name="what_name">What\'s your name?</string>
+	<string name="enter_number">Enter your number:</string>
+	<string name="all_set">You\'re all set!</string>
 </resources>
