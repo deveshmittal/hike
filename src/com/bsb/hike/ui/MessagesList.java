@@ -394,9 +394,14 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			}
 
 			mConversationsAdded.add(conversation.getMsisdn());
-			mAdapter.add(conversation);
-
-			runOnUiThread(this);
+			runOnUiThread(new Runnable()
+			{
+				public void run()
+				{
+					mAdapter.add(conversation);
+					mAdapter.setNotifyOnChange(false);
+				}
+			});
 		}
 		else if (HikePubSub.MSG_READ.equals(type))
 		{
