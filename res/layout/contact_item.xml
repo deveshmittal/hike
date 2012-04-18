@@ -31,14 +31,16 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/item_divider"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@id/contact_button"
+        android:layout_toLeftOf="@id/contact_button"
         android:orientation="vertical" >
 
         <TextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Vijay Raghunathan"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="Vijay Raghunathan dfasdfasdf adsfasfasdf asdfasdfasdf"
             android:textColor="@color/black"
             android:textSize="18dp" />
         

@@ -38,7 +38,9 @@
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Vijay Raghunathan"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:text="Vijay Raghunathan asdfasdfasd asdfasdfasdf ads adsasd"
         android:textColor="@color/black"
         android:textSize="18dp" />
     <TextView 
