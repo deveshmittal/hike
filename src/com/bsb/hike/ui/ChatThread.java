@@ -402,6 +402,27 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	}
 
 	@Override
+	/* this function is called right before the options menu
+	 * is shown.  Disable fields here as appropriate
+	 * @see android.app.Activity#onPrepareOptionsMenu(android.view.Menu)
+	 */
+	public boolean onPrepareOptionsMenu(Menu menu)
+	{
+		super.onPrepareOptionsMenu(menu);
+		/* disable invite if this is a hike user */
+		if (mConversation.isOnhike())
+		{
+			MenuItem item = menu.findItem(R.id.invite_menu);
+			item.setVisible(false);
+		}
+
+		MenuItem item = menu.findItem(R.id.block_menu);
+		int titleId = mUserIsBlocked ? R.string.unblock_title : R.string.block_title;
+		item.setTitle(getResources().getString(titleId));
+		return true;
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		/* only enable the options menu
@@ -413,16 +434,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.chatthread_menu, menu);
-		/* disable invite if this is a hike user */
-		if (mConversation.isOnhike())
-		{
-			MenuItem item = menu.findItem(R.id.invite_menu);
-			item.setVisible(false);
-		}
-
-		MenuItem item = menu.findItem(R.id.block_menu);
-		int titleId = mUserIsBlocked ? R.string.unblock_title : R.string.block_title;
-		item.setTitle(getResources().getString(titleId));
 		return true;
 	}
 
