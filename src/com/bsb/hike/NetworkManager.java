@@ -164,7 +164,6 @@ public class NetworkManager implements HikePubSub.Listener
 		else if ((USER_JOINED.equals(type)) || (USER_LEFT.equals(type)))
 		{
 			boolean joined = USER_JOINED.equals(type);
-			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			this.pubSub.publish(joined ? HikePubSub.USER_JOINED : HikePubSub.USER_LEFT, msisdn);
 		}
 		else if ((ICON.equals(type)))

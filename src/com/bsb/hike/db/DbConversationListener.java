@@ -60,12 +60,6 @@ public class DbConversationListener implements Listener
 
 			mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, message);		
 		}
-		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
-		{
-			Integer credits = (Integer) object;
-			mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
-			mEditor.commit();
-		}
 		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{
 			Log.d("DBCONVERSATION LISTENER","(Sender) Message sent confirmed for msgID -> "+(Long)object);

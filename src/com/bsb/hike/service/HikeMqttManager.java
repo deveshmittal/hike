@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
@@ -229,6 +230,8 @@ public class HikeMqttManager implements Listener
 
 	private Runnable mConnectTimeoutHandler;
 
+	private SharedPreferences settings;
+
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
@@ -250,7 +253,7 @@ public class HikeMqttManager implements Listener
 
 	private boolean init()
 	{
-		SharedPreferences settings = this.mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		settings = this.mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
@@ -659,6 +662,21 @@ public class HikeMqttManager implements Listener
 				String msisdn = jsonObj.getString(HikeConstants.FROM);
 				String iconBase64 = jsonObj.getString(HikeConstants.DATA);
 				this.userDb.setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT));
+			}
+			else if (NetworkManager.SMS_CREDITS.equals(type))
+			{
+				Editor mEditor = settings.edit();
+				Integer credits =  jsonObj.optInt(HikeConstants.DATA);
+				Log.d("HikeMqttManager", "UPDATING CREDITS THROUGH SERVICE: "+ credits);
+				mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
+				mEditor.commit();
+			}
+			else if ((NetworkManager.USER_JOINED.equals(type)) || (NetworkManager.USER_LEFT.equals(type)))
+			{
+				String msisdn = jsonObj.optString(HikeConstants.FROM);
+				Log.d("HikeMqttManager", "UPDATING USER LIST: "+ msisdn);
+				boolean joined = NetworkManager.USER_JOINED.equals(type);
+				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
 			}
 
 			if (this.mHikeService.sendToApp(messageBody))
