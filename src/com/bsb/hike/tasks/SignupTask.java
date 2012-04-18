@@ -162,6 +162,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					/* wait until we get an SMS from the server */
 					try
 					{
+						/* TODO add a timeout so if we don't get the SMS,
+						 * we throw an error an ask the user enter manually */
 						this.wait(10*1000);
 					}
 					catch (InterruptedException e)
@@ -342,7 +344,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 */
 		if (receiver != null)
 		{
-			this.context.getApplicationContext().unregisterReceiver(receiver);
+			try {
+				this.context.getApplicationContext().unregisterReceiver(receiver);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			receiver = null;
 		}
 	}
@@ -381,7 +388,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 */
 		if (receiver != null)
 		{
-			this.context.unregisterReceiver(receiver);
+			try {
+				this.context.unregisterReceiver(receiver);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			receiver = null;
 		}
 	}

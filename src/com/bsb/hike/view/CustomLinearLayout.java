@@ -2,7 +2,6 @@ package com.bsb.hike.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.LinearLayout;
 
 public class CustomLinearLayout extends LinearLayout {
@@ -22,8 +21,7 @@ public class CustomLinearLayout extends LinearLayout {
 		if (onSoftKeyboardListener != null) {
 			final int newSpec = MeasureSpec.getSize(heightMeasureSpec);
 			final int oldSpec = getMeasuredHeight();
-			Log.d("CustomLinearLayout", "OLD SPEC: "+oldSpec+" NEW SPEC: "+newSpec);
-			if ((int)(0.5*oldSpec) > newSpec){
+			if ((int)(0.6*oldSpec) > newSpec){
 				onSoftKeyboardListener.onShown();
 			} else {
 				onSoftKeyboardListener.onHidden();

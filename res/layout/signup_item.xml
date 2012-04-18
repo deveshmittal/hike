@@ -18,7 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:visibility="visible" >
+        android:visibility="gone" >
 
         <TextView
             android:id="@+id/txt_loading"
@@ -34,15 +34,15 @@
             android:id="@+id/loading_progress"
             android:layout_width="25dp"
             android:layout_height="25dp"
-			android:layout_toLeftOf="@id/txt_loading"
-			android:layout_centerVertical="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/txt_loading"
             android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
     </RelativeLayout>
 
     <TextView
         android:id="@+id/txt_success_1"
         style="@style/ButtonText"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_gravity="center_horizontal"
         android:paddingBottom="5dp"
         android:paddingTop="5dp"
@@ -62,8 +62,8 @@
     <TextView
         android:id="@+id/txt_enter"
         style="@style/ButtonText"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:layout_width="match_parent"
+        android:gravity="center_horizontal"
         android:paddingTop="20dp"
         android:textColor="@color/signup_blue"
         android:textSize="22sp"
@@ -78,8 +78,39 @@
         android:layout_marginRight="50dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/tb_phone"
-        android:visibility="gone"
+        android:imeOptions="actionDone"
         android:singleLine="true"
-        android:imeOptions="actionDone" />
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/txt_wrong_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="55dp"
+        android:layout_marginTop="5dp"
+        android:gravity="left"
+        android:shadowColor="@color/black"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="0.5"
+        android:text="@string/wrong_number"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/txt_tap_here"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="55dp"
+        android:gravity="left"
+        android:shadowColor="@color/black"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="0.5"
+        android:text="@string/tap_here"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
 </LinearLayout>

@@ -78,4 +78,6 @@
 	<string name="enter_number">Enter your number:</string>
 	<string name="all_set">You\'re all set!</string>
 	<string name="feedback_hint">Tell me how you feel...</string>
+	<string name="wrong_number">Entered the wrong phone number?</string>
+	<string name="tap_here"><u>Tap here</u></string>
 </resources>
