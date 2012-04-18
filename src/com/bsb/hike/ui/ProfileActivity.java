@@ -330,11 +330,6 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		}
 
 		mActivityState = new ActivityState();
-
-		if (!success)
-		{
-			Toast.makeText(this, R.string.delete_account_failed, Toast.LENGTH_LONG).show();
-		}
 	}
 
 	@Override

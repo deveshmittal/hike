@@ -77,4 +77,5 @@
 	<string name="what_name">What\'s your name?</string>
 	<string name="enter_number">Enter your number:</string>
 	<string name="all_set">You\'re all set!</string>
+	<string name="feedback_hint">Tell me how you feel...</string>
 </resources>
