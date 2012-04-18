@@ -104,7 +104,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 					startActivity(intent);
 					finish();
 				}
-			}, 1500);
+			}, 100);
 		}
 	}
 
@@ -160,7 +160,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 
 	private void prepareLayoutForGettingName()
 	{
-		setStepNo(num3Text);
+//		setStepNo(num3Text);
 		mainIcon.setVisibility(View.VISIBLE);
 		mainIcon.setImageResource(R.drawable.ic_name_big);
 		loadingLayout.setVisibility(View.GONE);

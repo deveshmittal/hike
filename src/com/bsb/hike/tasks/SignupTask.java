@@ -225,7 +225,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		synchronized (this) {
 			try {
-				this.wait(1500);
+				this.wait(1000);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -282,7 +282,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		synchronized (this) {
 			try {
-				this.wait(1500);
+				this.wait(1000);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -330,14 +330,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/* tell the service to start listening for new messages */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 
-		/* operation successful, chill for a second */
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-		}
 		return Boolean.TRUE;
 	}
 	
