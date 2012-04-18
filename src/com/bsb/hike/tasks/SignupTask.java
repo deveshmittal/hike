@@ -162,9 +162,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					/* wait until we get an SMS from the server */
 					try
 					{
-						/* TODO add a timeout so if we don't get the SMS,
-						 * we throw an error an ask the user enter manually */
-						this.wait(15*1000);
+						this.wait(10*1000);
 					}
 					catch (InterruptedException e)
 					{
