@@ -5,6 +5,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="lib" path="lib/ocpsoft-pretty-time-1.0.8-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="lib/mqttclient.jar"/>
+	<classpathentry kind="lib" path="lib/mqttclient.jar" sourcepath="/hike-mq"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
