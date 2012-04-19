@@ -25,7 +25,7 @@
     <string name="delete_all_question">Delete all your conversations?</string>
     <string name="hikebot_message">Thanks for joining hike!  If you have questions or comments you can send us a message here!</string>
     <string name="address_book_failed">Shucks, we couldn\'t scan your address book.  Try again?</string>
-    <string name="credits_left">%1$d credits left</string>
+    <string name="credits_left">%1$d SMS left</string>
     <string name="service_running_message">Connected to Hike</string>
     <string name="forward">Forward</string>
     <string name="copy">Copy</string>
