@@ -223,6 +223,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			return Boolean.FALSE;
 		}
 		
+		synchronized (this) {
+			try {
+				this.wait(1500);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
@@ -270,6 +278,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			/* just gtfo */
 			Log.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
+		}
+		
+		synchronized (this) {
+			try {
+				this.wait(1500);
+			} catch (InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		
 		if (name == null)
