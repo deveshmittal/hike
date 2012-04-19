@@ -118,19 +118,52 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public void addBlockList(List<String> msisdns) throws DbException
+	{
+		SQLiteDatabase db = mDb;
+		db.beginTransaction();
+
+		try
+		{
+			InsertHelper ih = new InsertHelper(db, DBConstants.BLOCK_TABLE);
+			final int msisdnColumn = ih.getColumnIndex(DBConstants.MSISDN);
+			for (String msisdn : msisdns)
+			{
+				ih.prepareForReplace();
+				ih.bind(msisdnColumn, msisdn);
+				ih.execute();
+			}
+			db.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Log.e("HikeUserDatabase", "Unable to insert contacts", e);
+			throw new DbException(e);
+		}
+		finally
+		{
+			db.endTransaction();
+		}
+	}
+
 	/**
 	 * Sets the address book from the list of contacts Deletes any existing contacts from the db
 	 * 
 	 * @param contacts
 	 *            list of contacts to set/add
 	 */
-	public void setAddressBook(List<ContactInfo> contacts) throws DbException
+	public void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
 	{
 		/* delete all existing entries from database */
 		mDb.delete(DBConstants.USERS_TABLE, null, null);
 
+		mDb.delete(DBConstants.BLOCK_TABLE, null, null);
+		
 		addContacts(contacts);
+		addBlockList(blockedMsisdns);
 	}
+	
+	
 
 	public Cursor findUsers(String partialName)
 	{

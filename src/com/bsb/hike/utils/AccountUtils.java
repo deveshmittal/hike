@@ -49,7 +49,7 @@ import com.bsb.hike.models.ContactInfo;
 public class AccountUtils
 {
 	public static final String HOST = "ec2-175-41-153-127.ap-southeast-1.compute.amazonaws.com";
-
+	
 	private static final int PORT = 3001;
 
 	private static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
@@ -86,6 +86,7 @@ public class AccountUtils
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
 		mClient = new DefaultHttpClient(cm, params);
 
+		//mClient.
 		return mClient;
 	}
 
@@ -231,6 +232,7 @@ public class AccountUtils
 			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");
 			httppost.setEntity(entity);
+//			httppost.addHeader("X-MSISDN-AIRTEL", "+919818079814");
 		}
 		catch (UnsupportedEncodingException e)
 		{
@@ -331,7 +333,7 @@ public class AccountUtils
 		}
 	}
 
-	public static List<ContactInfo> postAddressBook(String token, Map<String, List<ContactInfo>> contactsMap) throws IllegalStateException, IOException
+	public static JSONObject postAddressBook(String token, Map<String, List<ContactInfo>> contactsMap) throws IllegalStateException, IOException
 	{
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
 		addToken(httppost);
@@ -348,7 +350,7 @@ public class AccountUtils
 		entity.setContentType("application/json");
 		httppost.setEntity(entity);
 		JSONObject obj = executeRequest(httppost);
-		return getContactList(obj, contactsMap);
+		return obj;
 	}
 
 	/**
@@ -384,10 +386,6 @@ public class AccountUtils
 		entity.setContentType("application/json");
 		JSONObject obj = executeRequest(request);
 		return getContactList(obj, new_contacts_by_id);
-		// }
-		/*
-		 * catch (UnsupportedEncodingException e) { Log.e("AccountUtils", "Unable to encode request body", e); return null; }
-		 */
 	}
 
 	private static JSONObject getJsonContactList(Map<String, List<ContactInfo>> contactsMap)
@@ -417,7 +415,7 @@ public class AccountUtils
 		return updateContacts;
 	}
 
-	private static List<ContactInfo> getContactList(JSONObject obj, Map<String, List<ContactInfo>> new_contacts_by_id)
+	public static List<ContactInfo> getContactList(JSONObject obj, Map<String, List<ContactInfo>> new_contacts_by_id)
 	{
 		List<ContactInfo> server_contacts = new ArrayList<ContactInfo>();
 		JSONObject addressbook;
@@ -454,7 +452,43 @@ public class AccountUtils
 		}
 		return server_contacts;
 	}
+	
+	
+	public static List<String> getBlockList(JSONObject obj)
+	{
+		JSONArray blocklist;
+		List<String> blockListMsisdns = new ArrayList<String>();
+		try
+		{
+			if ((obj == null) || ("fail".equals(obj.optString("stat"))))
+			{
+				Log.w("HTTP", "Unable to upload address book");
+				// TODO raise a real exception here
+				return null;
+			}
+			Log.d("AccountUtils", "Reply from addressbook:" + obj.toString());
+			blocklist = obj.getJSONArray("blocklist");
+		}
+		catch (JSONException e)
+		{
+			Log.e("AccountUtils", "Invalid json object", e);
+			return null;
+		}
 
+		for(int i=0; i<blocklist.length(); i++)
+		{
+			try
+			{
+				blockListMsisdns.add(blocklist.getString(i));
+			}
+			catch (JSONException e)
+			{
+				Log.e("AccountUtils", "Invalid json object", e);
+				return null;
+			}
+		}
+		return blockListMsisdns;
+	}
 
 	public static void deleteAccount() throws NetworkErrorException
 	{

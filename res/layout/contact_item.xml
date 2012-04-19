@@ -25,11 +25,19 @@
         android:background="@drawable/block_button"
         android:textColor="@color/white" />
 
+    <ImageView
+        android:id="@+id/contact_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@+id/item_divider"
+        android:scaleType="fitCenter" />
+
     <LinearLayout
         android:id="@+id/name_num_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/item_divider"
+        android:layout_toRightOf="@+id/contact_image"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/contact_button"
         android:orientation="vertical" >
@@ -38,19 +46,17 @@
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:text="Vijay Raghunathan dfasdfasdf adsfasfasdf asdfasdfasdf"
+            android:text="Vijay Raghunathan"
             android:textColor="@color/black"
             android:textSize="18dp" />
-        
-        <TextView android:id="@+id/number"
+
+        <TextView
+            android:id="@+id/number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Number"
             android:textColor="@color/black"
-            android:textSize="16sp"/>
-        
+            android:textSize="16sp" />
     </LinearLayout>
 
 </RelativeLayout>
