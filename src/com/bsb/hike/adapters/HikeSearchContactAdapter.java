@@ -63,8 +63,6 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		View onhike = v.findViewById(R.id.onhike);
 		onhike.setVisibility(contactInfo.isOnhike() ? View.VISIBLE : View.INVISIBLE);
 
-		v.setOnClickListener(this);
-
 		return v;
 	}
 
