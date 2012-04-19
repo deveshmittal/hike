@@ -1,5 +1,8 @@
 package com.bsb.hike.ui;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -7,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -30,16 +34,14 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 {
 
 	private SignupTask mTask;
-	
+
 	private StateValue mCurrentState;
-	
-	private boolean isErrorMsg = false;
 
 	private ViewFlipper viewFlipper;
 	private CustomLinearLayout pullingNoLayout;
 	private CustomLinearLayout scanContactsLayout;
 	private CustomLinearLayout getNameLayout;
-	
+
 	private ImageView mainIcon;
 	private TextView loadingText;
 	private RelativeLayout loadingLayout;
@@ -47,6 +49,8 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 	private TextView successText2;
 	private TextView enterText;
 	private EditText enterEditText;
+	private TextView wrongNumText;
+	private TextView tapHereText;
 
 	private TextView num1Text;
 	private TextView num2Text;
@@ -104,7 +108,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 					startActivity(intent);
 					finish();
 				}
-			}, 1500);
+			}, 100);
 		}
 	}
 
@@ -130,42 +134,35 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 		successText2 = (TextView) layout.findViewById(R.id.txt_success_2);
 		enterText = (TextView) layout.findViewById(R.id.txt_enter);
 		enterEditText = (EditText) layout.findViewById(R.id.et_enter);
+		wrongNumText = (TextView) layout.findViewById(R.id.txt_wrong_number);
+		tapHereText = (TextView) layout.findViewById(R.id.txt_tap_here);
 	}
 
 	private void prepareLayoutForFetchingNumber()
 	{
 		setStepNo(num1Text);
 
+		hideAllViews();
 		mainIcon.setVisibility(View.VISIBLE);
 		mainIcon.setImageResource(R.drawable.ic_phone_big);
 		loadingLayout.setVisibility(View.VISIBLE);
 		loadingText.setText(R.string.pulling_digits);
-		successText1.setVisibility(View.GONE);
-		successText2.setVisibility(View.GONE);
-		enterText.setVisibility(View.GONE);
-		enterEditText.setVisibility(View.GONE);
 	}
 
 	private void prepareLayoutForScanningContacts()
 	{
+		hideAllViews();
 		mainIcon.setVisibility(View.VISIBLE);
 		mainIcon.setImageResource(R.drawable.ic_scanning_big);
 		loadingLayout.setVisibility(View.VISIBLE);
 		loadingText.setText(R.string.scanning_contacts);
-		successText1.setVisibility(View.GONE);
-		successText2.setVisibility(View.GONE);
-		enterText.setVisibility(View.GONE);
-		enterEditText.setVisibility(View.GONE);
 	}
 
 	private void prepareLayoutForGettingName()
 	{
-		setStepNo(num3Text);
+		hideAllViews();
 		mainIcon.setVisibility(View.VISIBLE);
 		mainIcon.setImageResource(R.drawable.ic_name_big);
-		loadingLayout.setVisibility(View.GONE);
-		successText1.setVisibility(View.GONE);
-		successText2.setVisibility(View.GONE);
 		enterText.setVisibility(View.VISIBLE);
 		enterEditText.setVisibility(View.VISIBLE);
 		enterEditText.setBackgroundResource(R.drawable.tb_name);
@@ -177,18 +174,25 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 	{
 		setStepNo(num1Text);
 
+		hideAllViews();
 		mainIcon.setVisibility(View.VISIBLE);
 		mainIcon.setImageResource(R.drawable.ic_phone_big);
-		loadingLayout.setVisibility(View.GONE);
-		successText1.setVisibility(View.GONE);
-		successText2.setVisibility(View.GONE);
 		enterText.setVisibility(View.VISIBLE);
 		enterEditText.setVisibility(View.VISIBLE);
 		enterText.setText(R.string.enter_pin);
 		enterEditText.setBackgroundResource(R.drawable.tb_pin);
 		enterEditText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+		wrongNumText.setVisibility(View.VISIBLE);
+		tapHereText.setVisibility(View.VISIBLE);
+		tapHereText.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				mTask.addUserInput(null);
+			}
+		});
 	}
-	
+
 	private void setStepNo(TextView tv)
 	{
 		num1Text.setBackgroundDrawable(null);
@@ -204,14 +208,23 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 	
 	private void finishSignupProcess()
 	{
+		hideAllViews();
 		mainIcon.setVisibility(View.VISIBLE);
 		mainIcon.setImageResource(R.drawable.ic_tick_big);
-		loadingLayout.setVisibility(View.GONE);
 		successText1.setVisibility(View.VISIBLE);
-		successText2.setVisibility(View.GONE);
 		successText1.setText(R.string.all_set);
+	}
+	
+	private void hideAllViews()
+	{
+		mainIcon.setVisibility(View.GONE);
+		loadingLayout.setVisibility(View.GONE);
+		successText1.setVisibility(View.GONE);
+		successText2.setVisibility(View.GONE);
 		enterText.setVisibility(View.GONE);
 		enterEditText.setVisibility(View.GONE);
+		wrongNumText.setVisibility(View.GONE);
+		tapHereText.setVisibility(View.GONE);
 	}
 
 	public void onProgressUpdate(StateValue stateValue)
@@ -223,22 +236,26 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 			Log.w("SignupActivity", "Error in state " + mCurrentState.state.name());
 			mTask.cancelTask();
 			mTask = null;
-			
+
 			prepareLayoutForFetchingNumber();
 			/*
 			 * In case the state is ERROR we are restart the SignupTask when the user clicks on the OK button, but for other states we need to start the task here itself
 			 */
-			if (mCurrentState.state != State.ERROR)
-			{
-				mTask = new SignupTask(this);
-				mTask.execute();
-			}
-
+			Builder builder = new Builder(SignupActivity.this);
+			builder.setMessage("Unable to proceed. Check your network and try again.");
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+						mTask = new SignupTask(SignupActivity.this);
+						mTask.execute();
+				}
+			});
+			AlertDialog alertDialog = builder.create();
+			alertDialog.show();
 			return;
 		}
 
-		TextView text;
-		
 		if(mHandler == null)
 		{
 			mHandler = new Handler();
@@ -252,11 +269,9 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 			{
 				/* couldn't auto-detect MSISDN, prompt the user via a popup */
 				initializeViews(pullingNoLayout);
+				hideAllViews();
 				mainIcon.setVisibility(View.VISIBLE);
 				mainIcon.setImageResource(R.drawable.ic_phone_big);
-				loadingLayout.setVisibility(View.GONE);
-				successText1.setVisibility(View.GONE);
-				successText2.setVisibility(View.GONE);
 				enterText.setVisibility(View.VISIBLE);
 				enterEditText.setVisibility(View.VISIBLE);
 				enterText.setText(R.string.enter_number);
@@ -267,15 +282,13 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 			{
 				/* yay, got the actual MSISDN */
 				initializeViews(pullingNoLayout);
+				hideAllViews();
 				mainIcon.setVisibility(View.VISIBLE);
 				mainIcon.setImageResource(R.drawable.ic_tick_big);
-				loadingLayout.setVisibility(View.GONE);
 				successText1.setVisibility(View.VISIBLE);
 				successText2.setVisibility(View.VISIBLE);
 				successText1.setText(R.string.phone_number);
 				successText2.setText(value);
-				enterText.setVisibility(View.GONE);
-				enterEditText.setVisibility(View.GONE);
 
 				mHandler.postDelayed(flipView, 1500);
 			}
@@ -283,16 +296,14 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 		case ADDRESSBOOK:
 			// Finished scanning for contacts
 			initializeViews(scanContactsLayout);
+			hideAllViews();
 			setStepNo(num2Text);
 			mainIcon.setVisibility(View.VISIBLE);
 			mainIcon.setImageResource(R.drawable.ic_tick_big);
-			loadingLayout.setVisibility(View.GONE);
 			successText1.setVisibility(View.VISIBLE);
 			successText2.setVisibility(View.VISIBLE);
 			successText1.setText(R.string.got_it);
 			successText2.setText(R.string.one_more_step);
-			enterText.setVisibility(View.GONE);
-			enterEditText.setVisibility(View.GONE);
 
 			mHandler.postDelayed(flipView, 1500);
 			break;
@@ -325,7 +336,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 					{
 						finishSignupProcess();
 					}
-					if(mCurrentState.state == State.MSISDN)
+					if(mCurrentState.state == State.MSISDN || mCurrentState.state == State.PIN)
 					{
 						prepareLayoutForFetchingNumber();
 					}

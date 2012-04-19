@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,14 +31,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AutoCompleteTextView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
-import android.widget.FilterQueryProvider;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -60,15 +56,13 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 
-public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener
+public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnItemClickListener
 {
 	private HikePubSub mPubSub;
 
 	private HikeConversationsDatabase mConversationDb;
 
 	private HikeUserDatabase mDbhelper;
-
-	private Cursor mCursor;
 
 	private String mContactId;
 
@@ -298,6 +292,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
 		onNewIntent(intent);
 
+		mContactSearchView.setOnItemClickListener(this);
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
@@ -591,6 +586,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void createConversation()
 	{
+		mComposeView.setFocusable(true);
+		mComposeView.requestFocus();
 		/* hide the number picker */
 		mInputNumberContainer.setVisibility(View.GONE);
 
@@ -969,5 +966,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return ret;
 		}
 		return false;
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) 
+	{
+		ContactInfo contactInfo = (ContactInfo) view.getTag();
+		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
+		intent.setClass(this, ChatThread.class);
+		startActivity(intent);
 	}
 }

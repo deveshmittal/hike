@@ -162,6 +162,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					/* wait until we get an SMS from the server */
 					try
 					{
+						/* TODO add a timeout so if we don't get the SMS,
+						 * we throw an error an ask the user enter manually */
 						this.wait(10*1000);
 					}
 					catch (InterruptedException e)
@@ -225,7 +227,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		synchronized (this) {
 			try {
-				this.wait(1500);
+				this.wait(1000);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -282,7 +284,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		synchronized (this) {
 			try {
-				this.wait(1500);
+				this.wait(1000);
 			} catch (InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -330,14 +332,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/* tell the service to start listening for new messages */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 
-		/* operation successful, chill for a second */
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (InterruptedException e)
-		{
-		}
 		return Boolean.TRUE;
 	}
 	
@@ -350,7 +344,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 */
 		if (receiver != null)
 		{
-			this.context.getApplicationContext().unregisterReceiver(receiver);
+			try {
+				this.context.getApplicationContext().unregisterReceiver(receiver);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			receiver = null;
 		}
 	}
@@ -389,7 +388,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		 */
 		if (receiver != null)
 		{
-			this.context.unregisterReceiver(receiver);
+			try {
+				this.context.unregisterReceiver(receiver);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			receiver = null;
 		}
 	}
