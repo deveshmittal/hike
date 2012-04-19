@@ -21,6 +21,17 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	private boolean onhike;
 	
+	private boolean usesCustomPhoto;
+	
+
+	public boolean isUsesCustomPhoto() {
+		return usesCustomPhoto;
+	}
+
+	public void setUsesCustomPhoto(boolean usesCustomPhoto) {
+		this.usesCustomPhoto = usesCustomPhoto;
+	}
+
 	private String phoneNum;
 
 	public String getName()

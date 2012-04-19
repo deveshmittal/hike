@@ -20,6 +20,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.Utils;
 
 public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickListener
 {
@@ -64,8 +65,14 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 		
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		imageView.setPadding(8, 8, 18, 8);
-		imageView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
-
+		if(contactInfo.isUsesCustomPhoto())
+		{
+			imageView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
+		}
+		else
+		{
+			imageView.setImageDrawable(Utils.getDefaultIconForUser(context, contactInfo.getMsisdn()));
+		}
 		
 		Button button = (Button) v.findViewById(R.id.contact_button);
 		button.setSelected(blockedUsers.contains(contactInfo.getMsisdn()));
