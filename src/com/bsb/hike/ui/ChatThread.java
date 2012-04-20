@@ -125,25 +125,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onWindowFocusChanged(boolean hasFocus)
 	{
 		super.onWindowFocusChanged(hasFocus);
-		if (hasFocus)
-		{
-			/* mark any messages unread as read. */
-			setMessagesRead();
-			/* clear any pending notifications */
-			/* clear any toast notifications */
-			if (mConversation != null)
-			{
-				NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-				mgr.cancel((int) mConversation.getConvId());				
-			}
-		}
+		Log.d("ChatThread", "onWindowFocusChanged " + hasFocus);
 	}
 
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
-
+		/* mark any messages unread as read. */
+		setMessagesRead();
+		/* clear any pending notifications */
+		/* clear any toast notifications */
+		if (mConversation != null)
+		{
+			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			mgr.cancel((int) mConversation.getConvId());				
+		}
 		/* TODO evidently a better way to do this is to check for onFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
