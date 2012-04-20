@@ -80,4 +80,6 @@
 	<string name="feedback_hint">Tell me how you feel...</string>
 	<string name="wrong_number">Entered the wrong phone number?</string>
 	<string name="tap_here"><u>Tap here</u></string>
+	<string name="block_key">block</string>
+	<string name="delete_key">deleteAccount</string>
 </resources>

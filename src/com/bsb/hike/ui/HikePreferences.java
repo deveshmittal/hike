@@ -1,6 +1,10 @@
 package com.bsb.hike.ui;
 
+import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -13,6 +17,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeBlockedUserAdapter;
 import com.bsb.hike.tasks.ActivityCallableTask;
+import com.bsb.hike.tasks.DeleteAccountTask;
 
 public class HikePreferences extends PreferenceActivity implements OnPreferenceClickListener
 {
@@ -46,11 +51,17 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 			setBlockingTask((ActivityCallableTask) retained);
 			mTask.setActivity(this);
 		}
+		
 
-		Preference preference = getPreferenceScreen().findPreference("block");
-		if (preference != null)
+		Preference blockPreference = getPreferenceScreen().findPreference(getString(R.string.block_key));
+		if (blockPreference != null)
 		{
-			preference.setOnPreferenceClickListener(this);
+			blockPreference.setOnPreferenceClickListener(this);
+		}
+		Preference deletePreference = getPreferenceScreen().findPreference(getString(R.string.delete_key));
+		if(deletePreference != null)
+		{
+			deletePreference.setOnPreferenceClickListener(this);
 		}
 	}
 
@@ -89,9 +100,38 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 	@Override
 	public boolean onPreferenceClick(Preference preference)
 	{
-		Intent intent = new Intent(this, HikeListActivity.class);
-		intent.putExtra(HikeConstants.ADAPTER_NAME, HikeBlockedUserAdapter.class.getName());
-		startActivity(intent);
+		Log.d("HikePreferences", "Preference clicked: "+preference.getKey());
+		if (preference.getKey().equals(getString(R.string.block_key))) 
+		{
+			Intent intent = new Intent(this, HikeListActivity.class);
+			intent.putExtra(HikeConstants.ADAPTER_NAME,
+					HikeBlockedUserAdapter.class.getName());
+			startActivity(intent);
+		}
+		else if(preference.getKey().equals(getString(R.string.delete_key)))
+		{
+			Builder builder = new Builder(HikePreferences.this);
+			builder.setMessage("Are you sure you want to delete your account?");
+			builder.setPositiveButton("Yes", new OnClickListener() 
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which) 
+				{
+					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this);
+					setBlockingTask(task);
+					task.execute();
+				}
+			});
+			builder.setNegativeButton("No", new OnClickListener() 
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which) 
+				{
+				}
+			});
+			AlertDialog alertDialog = builder.create();
+			alertDialog.show();
+		}
 		return true;
 	}
 	

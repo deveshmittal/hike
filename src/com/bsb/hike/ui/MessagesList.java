@@ -63,6 +63,8 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	private Set<String> mConversationsAdded;
 
 	private View mInviteFriend;
+
+	private List<Conversation> conversations;
 	
 	@Override
 	protected void onPause()
@@ -160,7 +162,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mInviteFriend.setOnClickListener(this);
 
 		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
-		List<Conversation> conversations = db.getConversations();
+		conversations = db.getConversations();
 		db.close();
 
 		mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
@@ -265,10 +267,19 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
+	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) 
+	{
+		if(conversations == null || conversations.size()==0)
+		{
+			menu.findItem(R.id.deleteconversations).setVisible(false);
+		}
 		return true;
 	}
 
