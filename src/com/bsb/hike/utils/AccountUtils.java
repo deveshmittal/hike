@@ -48,7 +48,7 @@ import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils
 {
-	public static final String HOST = "210.152.157.111";//ec2-175-41-153-127.ap-southeast-1.compute.amazonaws.com";
+	public static final String HOST = "ec2-175-41-153-127.ap-southeast-1.compute.amazonaws.com";
 
 	private static final int PORT = 3001;
 
