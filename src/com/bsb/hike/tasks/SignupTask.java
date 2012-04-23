@@ -162,9 +162,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					/* wait until we get an SMS from the server */
 					try
 					{
-						/* TODO add a timeout so if we don't get the SMS,
-						 * we throw an error an ask the user enter manually */
-						this.wait(10*1000);
+						this.wait(1*1000);
 					}
 					catch (InterruptedException e)
 					{
@@ -213,10 +211,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			msisdn = accountInfo.msisdn;
 			/* save the new msisdn */
 			Utils.savedAccountCredentials(accountInfo, settings.edit());
+			/* msisdn set, yay */
+			publishProgress(new StateValue(State.MSISDN, msisdn));
 		}
-
-		/* msisdn set, yay */
-		publishProgress(new StateValue(State.MSISDN, msisdn));
+		else
+		{
+			publishProgress(new StateValue(State.MSISDN, "Done"));
+		}
 		
 		if (isCancelled())
 		{
@@ -224,18 +225,20 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			Log.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
 		}
-		
-		synchronized (this) {
-			try {
-				this.wait(1000);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
+			synchronized (this) {
+				try 
+				{
+					this.wait(1000);
+				} 
+				catch (InterruptedException e)
+				{
+					Log.e("SignupTask", "Task was interrupted while waiting", e);
+				}
+			}
+
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
 			HikeUserDatabase db = null;
@@ -255,7 +258,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			catch (Exception e)
 			{
 				Log.e("SignupTask", "Unable to post address book", e);
-				publishProgress(new StateValue(State.ADDRESSBOOK, null));
+				publishProgress(new StateValue(State.ERROR, null));
 				return Boolean.FALSE;
 			}
 			finally
@@ -269,11 +272,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			Editor editor = settings.edit();
 			editor.putBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, true);
 			editor.commit();
+			/* addressbook scanned, sick
+			 */
+			publishProgress(new StateValue(State.ADDRESSBOOK, ""));
 		}
-
-		/* addressbook scanned, sick
-		 */
-		publishProgress(new StateValue(State.ADDRESSBOOK, ""));
+		else
+		{
+			publishProgress(new StateValue(State.ADDRESSBOOK, "Done"));
+		}
 		
 		if (isCancelled())
 		{
@@ -283,11 +289,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 		
 		synchronized (this) {
-			try {
+			try 
+			{
 				this.wait(1000);
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			} 
+			catch (InterruptedException e)
+			{
+				Log.e("SignupTask", "Task was interrupted while waiting", e);
 			}
 		}
 		
@@ -346,9 +354,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		{
 			try {
 				this.context.getApplicationContext().unregisterReceiver(receiver);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				Log.d("SignupTask", "IllegalArgumentException while unregistering receiver", e);
 			}
 			receiver = null;
 		}
@@ -390,9 +397,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		{
 			try {
 				this.context.unregisterReceiver(receiver);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				Log.d("SignupTask", "IllegalArgumentException while unregistering receiver", e);
 			}
 			receiver = null;
 		}
