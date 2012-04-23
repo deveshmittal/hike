@@ -64,8 +64,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private View mInviteFriend;
 
-	private List<Conversation> conversations;
-	
 	@Override
 	protected void onPause()
 	{
@@ -162,7 +160,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mInviteFriend.setOnClickListener(this);
 
 		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
-		conversations = db.getConversations();
+		List<Conversation> conversations = db.getConversations();
 		db.close();
 
 		mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
@@ -276,9 +274,13 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) 
 	{
-		if(conversations == null || conversations.size()==0)
+		if(mAdapter.getCount() == 0)
 		{
 			menu.findItem(R.id.deleteconversations).setVisible(false);
+		}
+		else
+		{
+			menu.findItem(R.id.deleteconversations).setVisible(true);
 		}
 		return true;
 	}

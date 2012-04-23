@@ -162,7 +162,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					/* wait until we get an SMS from the server */
 					try
 					{
-						this.wait(1*1000);
+						this.wait(10*1000);
 					}
 					catch (InterruptedException e)
 					{
