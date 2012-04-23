@@ -31,7 +31,9 @@
             android:singleLine="true"
             android:hint="Start typing a name"
             android:imeOptions="actionNone"
-            android:visibility="visible" >
+            android:visibility="visible"
+            android:completionThreshold="1"
+            android:dropDownVerticalOffset="8dp" >
         </AutoCompleteTextView>
     </LinearLayout>
 

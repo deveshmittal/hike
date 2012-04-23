@@ -170,7 +170,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		/* if we've got some pre-filled text, add it here */
 		if (TextUtils.isEmpty(msg)) {
-			mBottomView.setVisibility(View.GONE);
+			mBottomView.setVisibility(View.VISIBLE);
 		} else {
 			mComposeView.setText(msg);
 			/* make sure that the autoselect text is empty */
@@ -181,7 +181,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		/* if we've got some pre-filled text, add it here */
 		if (TextUtils.isEmpty(msg)) {
-			mBottomView.setVisibility(View.GONE);
+			mBottomView.setVisibility(View.VISIBLE);
 		} else {
 			mComposeView.setText(msg);
 		}
@@ -340,6 +340,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
 		mLabelView = (TextView) findViewById(R.id.title);
 
+		/*For removing the white bar in the top of the drop-down*/
+		mInputNumberView.setDropDownBackgroundDrawable(null);
+		mInputNumberView.setFadingEdgeLength(0);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 
