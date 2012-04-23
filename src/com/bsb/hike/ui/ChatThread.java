@@ -114,24 +114,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean mUserIsBlocked;
 
+	private boolean mPaused = false; /* is the activity currently paused */
+
 	@Override
 	protected void onPause()
 	{
 		super.onPause();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus)
-	{
-		super.onWindowFocusChanged(hasFocus);
-		Log.d("ChatThread", "onWindowFocusChanged " + hasFocus);
+		mPaused = true;
 	}
 
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
+		mPaused = false;
 		/* mark any messages unread as read. */
 		setMessagesRead();
 		/* clear any pending notifications */
@@ -141,7 +138,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			mgr.cancel((int) mConversation.getConvId());				
 		}
-		/* TODO evidently a better way to do this is to check for onFocusChanged */
+
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
 		if (mComposeViewWatcher != null)
@@ -760,7 +757,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					}
 				});
 
-				if (hasWindowFocus())
+				if (!mPaused)
 				{
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
