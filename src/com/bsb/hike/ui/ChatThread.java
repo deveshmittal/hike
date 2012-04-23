@@ -642,18 +642,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	}
 
-	private boolean isLastMsgSent()
+	/* returns TRUE iff the last message was received and unread */
+	private boolean isLastMsgReceivedAndUnread()
 	{
 		List<ConvMessage> msgList = (mConversation != null) ? mConversation.getMessages() : null;
 
 		if ((msgList == null) || (msgList.isEmpty()))
 		{
-			return true;
+			return false;
 		}
 
 		ConvMessage lastMsg = msgList.get(msgList.size() - 1);
 
-		return lastMsg.getState() == ConvMessage.State.RECEIVED_READ;
+		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD;
 	}
 
 	/*
@@ -661,7 +662,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void setMessagesRead()
 	{
-		if (!isLastMsgSent())
+		if (isLastMsgReceivedAndUnread())
 		{
 			long convID = mConversation.getConvId();
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
