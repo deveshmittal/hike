@@ -50,10 +50,8 @@ public class HighlightView {
 
     private void init() {
         android.content.res.Resources resources = mContext.getResources();
-        mResizeDrawableWidth =
-                resources.getDrawable(R.drawable.camera_crop_width);
-        mResizeDrawableHeight =
-                resources.getDrawable(R.drawable.camera_crop_height);
+        mResizeDrawable =
+                resources.getDrawable(R.drawable.camera_crop_indicator);
         mResizeDrawableDiagonal =
                 resources.getDrawable(R.drawable.indicator_autocrop);
     }
@@ -92,10 +90,10 @@ public class HighlightView {
                                mDrawRect.top + (height / 2),
                                width / 2,
                                Path.Direction.CW);
-                mOutlinePaint.setColor(0xFFEF04D6);
+                mOutlinePaint.setColor(0xFFFFFFFF);
             } else {
                 path.addRect(new RectF(mDrawRect), Path.Direction.CW);
-                mOutlinePaint.setColor(0xFFFF8A00);
+                mOutlinePaint.setColor(0xFFFFFFFF);
             }
             canvas.clipPath(path, Region.Op.DIFFERENCE);
             canvas.drawRect(viewDrawingRect,
@@ -120,48 +118,39 @@ public class HighlightView {
                             y + mResizeDrawableDiagonal.getIntrinsicHeight());
                     mResizeDrawableDiagonal.draw(canvas);
                 } else {
-                    int left    = mDrawRect.left   + 1;
-                    int right   = mDrawRect.right  + 1;
-                    int top     = mDrawRect.top    + 4;
-                    int bottom  = mDrawRect.bottom + 3;
+                    int left    = mDrawRect.left;
+                    int right   = mDrawRect.right;
+                    int top     = mDrawRect.top;
+                    int bottom  = mDrawRect.bottom;
 
-                    int widthWidth   =
-                            mResizeDrawableWidth.getIntrinsicWidth() / 2;
-                    int widthHeight  =
-                            mResizeDrawableWidth.getIntrinsicHeight() / 2;
-                    int heightHeight =
-                            mResizeDrawableHeight.getIntrinsicHeight() / 2;
-                    int heightWidth  =
-                            mResizeDrawableHeight.getIntrinsicWidth() / 2;
+                    int width   =
+                            mResizeDrawable.getIntrinsicWidth() / 2;
+                    int height  =
+                            mResizeDrawable.getIntrinsicHeight() / 2;
 
-                    int xMiddle = mDrawRect.left
-                            + ((mDrawRect.right  - mDrawRect.left) / 2);
-                    int yMiddle = mDrawRect.top
-                            + ((mDrawRect.bottom - mDrawRect.top) / 2);
+                    mResizeDrawable.setBounds(left - width,
+                                                   top - height,
+                                                   left + width,
+                                                   top + height);
+                    mResizeDrawable.draw(canvas);
 
-                    mResizeDrawableWidth.setBounds(left - widthWidth,
-                                                   yMiddle - widthHeight,
-                                                   left + widthWidth,
-                                                   yMiddle + widthHeight);
-                    mResizeDrawableWidth.draw(canvas);
+                    mResizeDrawable.setBounds(right - width,
+                                                   top - height,
+                                                   right + width,
+                                                   top + height);
+                    mResizeDrawable.draw(canvas);
 
-                    mResizeDrawableWidth.setBounds(right - widthWidth,
-                                                   yMiddle - widthHeight,
-                                                   right + widthWidth,
-                                                   yMiddle + widthHeight);
-                    mResizeDrawableWidth.draw(canvas);
+                    mResizeDrawable.setBounds(left - width,
+                                                    bottom - height,
+                                                    left + width,
+                                                    bottom + height);
+                    mResizeDrawable.draw(canvas);
 
-                    mResizeDrawableHeight.setBounds(xMiddle - heightWidth,
-                                                    top - heightHeight,
-                                                    xMiddle + heightWidth,
-                                                    top + heightHeight);
-                    mResizeDrawableHeight.draw(canvas);
-
-                    mResizeDrawableHeight.setBounds(xMiddle - heightWidth,
-                                                    bottom - heightHeight,
-                                                    xMiddle + heightWidth,
-                                                    bottom + heightHeight);
-                    mResizeDrawableHeight.draw(canvas);
+                    mResizeDrawable.setBounds(right - width,
+                                                    bottom - height,
+                                                    right + width,
+                                                    bottom + height);
+                    mResizeDrawable.draw(canvas);
                 }
             }
         }
@@ -405,8 +394,7 @@ public class HighlightView {
     private float mInitialAspectRatio;
     private boolean mCircle = false;
 
-    private Drawable mResizeDrawableWidth;
-    private Drawable mResizeDrawableHeight;
+    private Drawable mResizeDrawable;
     private Drawable mResizeDrawableDiagonal;
 
     private final Paint mFocusPaint = new Paint();

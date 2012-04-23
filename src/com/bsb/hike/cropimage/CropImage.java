@@ -138,14 +138,6 @@ public class CropImage extends MonitoredActivity {
 		// Make UI fullscreen.
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-		findViewById(R.id.discard).setOnClickListener(
-				new View.OnClickListener() {
-					public void onClick(View v) {
-						setResult(RESULT_CANCELED);
-						finish();
-					}
-				});
-
 		findViewById(R.id.save).setOnClickListener(
 				new View.OnClickListener() {
 					public void onClick(View v) {
@@ -164,17 +156,13 @@ public class CropImage extends MonitoredActivity {
 				}
 				});
 		
-		findViewById(R.id.rotateRight).setOnClickListener(
-				new View.OnClickListener() {
-				public void onClick(View v)
-				{
-				mBitmap = Util.rotateImage(mBitmap, 90);
-				RotateBitmap rotateBitmap = new RotateBitmap(mBitmap);
-				mImageView.setImageRotateBitmapResetBase(rotateBitmap, true);
-				mRunFaceDetection.run();
-				}
-				});
 		startFaceDetection();
+	}
+
+	@Override
+	public void onBackPressed() {
+		setResult(RESULT_CANCELED);
+		finish();
 	}
 
 	private Uri getImageUri(String path) {
