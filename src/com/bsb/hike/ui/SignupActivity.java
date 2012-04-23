@@ -278,10 +278,13 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 				}
 			});
 			AlertDialog alertDialog = builder.create();
-			try {
+			try 
+			{
 				alertDialog.show();
-			} catch (BadTokenException e) {
-				Log.d("SignupActivity", "Random crash for the alert dialog", e);
+			} catch (BadTokenException e) 
+			{
+				restartService();
+				Log.e("SignupActivity", "Random crash for the alert dialog", e);
 			}
 			return;
 		}
