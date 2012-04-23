@@ -684,6 +684,13 @@ public class HikeMqttManager implements Listener
 				return;
 			}
 
+			/* don't bother saving messages for the UI topic */
+			if ((topic != null) &&
+				(topic.getString().endsWith(("/u"))))
+			{
+				return;
+			}
+
 			/*
 			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
 			 */

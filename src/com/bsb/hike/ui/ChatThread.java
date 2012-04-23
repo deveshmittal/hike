@@ -114,37 +114,31 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean mUserIsBlocked;
 
+	private boolean mPaused = false; /* is the activity currently paused */
+
 	@Override
 	protected void onPause()
 	{
 		super.onPause();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus)
-	{
-		super.onWindowFocusChanged(hasFocus);
-		if (hasFocus)
-		{
-			/* mark any messages unread as read. */
-			setMessagesRead();
-			/* clear any pending notifications */
-			/* clear any toast notifications */
-			if (mConversation != null)
-			{
-				NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-				mgr.cancel((int) mConversation.getConvId());				
-			}
-		}
+		mPaused = true;
 	}
 
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
+		mPaused = false;
+		/* mark any messages unread as read. */
+		setMessagesRead();
+		/* clear any pending notifications */
+		/* clear any toast notifications */
+		if (mConversation != null)
+		{
+			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			mgr.cancel((int) mConversation.getConvId());				
+		}
 
-		/* TODO evidently a better way to do this is to check for onFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
 		if (mComposeViewWatcher != null)
@@ -229,20 +223,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public Object onRetainNonConfigurationInstance()
 	{
 		return getIntent();
-	}
-
-	static final String TEXT_CHANGED_KEY = "text_last_changed";
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState)
-	{
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState)
-	{
-		super.onRestoreInstanceState(savedInstanceState);
 	}
 
 	@Override
@@ -662,18 +642,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	}
 
-	private boolean isLastMsgSent()
+	/* returns TRUE iff the last message was received and unread */
+	private boolean isLastMsgReceivedAndUnread()
 	{
 		List<ConvMessage> msgList = (mConversation != null) ? mConversation.getMessages() : null;
 
 		if ((msgList == null) || (msgList.isEmpty()))
 		{
-			return true;
+			return false;
 		}
 
 		ConvMessage lastMsg = msgList.get(msgList.size() - 1);
 
-		return lastMsg.getState() == ConvMessage.State.RECEIVED_READ;
+		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD;
 	}
 
 	/*
@@ -681,7 +662,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void setMessagesRead()
 	{
-		if (!isLastMsgSent())
+		if (isLastMsgReceivedAndUnread())
 		{
 			long convID = mConversation.getConvId();
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
@@ -763,7 +744,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					}
 				});
 
-				if (hasWindowFocus())
+				if (!mPaused)
 				{
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
