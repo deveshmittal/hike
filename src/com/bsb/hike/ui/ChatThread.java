@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,10 +33,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
+import android.widget.FilterQueryProvider;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -45,7 +50,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.HikeSearchContactAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -97,9 +101,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ListView mConversationsView;
 
-	private EditText mInputNumberView;
-	
-	private ListView mContactSearchView;
+	private AutoCompleteTextView mInputNumberView;
 
 	int mMaxSmsLength = 140;
 
@@ -113,6 +115,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private LinearLayout mInputNumberContainer;
 
 	private boolean mUserIsBlocked;
+	
+	private Cursor mCursor;
 
 	@Override
 	protected void onPause()
@@ -181,11 +185,65 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		} else {
 			mComposeView.setText(msg);
 		}
+		mDbhelper = new HikeUserDatabase(this);
+		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
+		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike };
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
+		adapter.setViewBinder(new DropDownViewBinder());
+		adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter()
+		{
+			@Override
+			public CharSequence convertToString(Cursor cursor)
+			{
+				mContactName = cursor.getString(cursor.getColumnIndex("name"));
+				return mContactName;
+			}
+		});
 
-		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this);
-		mContactSearchView.setAdapter(adapter);
-		mInputNumberView.addTextChangedListener(adapter);
+		adapter.setFilterQueryProvider(new FilterQueryProvider()
+		{
+			@Override
+			public Cursor runQuery(CharSequence constraint)
+			{
+				String str = (constraint != null) ? "%" + constraint + "%" : "%";
+				mCursor = mDbhelper.findUsers(str);
+				return mCursor;
+			}
+		});
 
+		mInputNumberView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		{
+
+			@Override
+			public void onItemClick(AdapterView<?> list, View _empty, int position, long id)
+			{
+				/* Extract selected values from the cursor */
+				Cursor cursor = (Cursor) list.getItemAtPosition(position);
+				mContactId = cursor.getString(cursor.getColumnIndex("_id"));
+				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
+				mContactName = cursor.getString(cursor.getColumnIndex("name"));
+
+				setIntentFromField();
+
+				/* close the db */
+				mDbhelper.close();
+				mDbhelper = null;
+
+				/* initialize the conversation */
+				createConversation();
+
+				/* initialize the text watcher */
+				mComposeViewWatcher.init();
+
+				/*
+				 * set the focus on the input text box TODO can this be done in createConversation?
+				 */
+				mComposeView.requestFocus();
+			}
+		});
+
+		mInputNumberView.setAdapter(adapter);
+		mInputNumberView.setVisibility(View.VISIBLE);
 		mInputNumberContainer.setVisibility(View.VISIBLE);
 		mInputNumberView.requestFocus();
 
@@ -222,6 +280,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mConversationDb.close();
 			mConversationDb = null;
+		}
+
+		if ((mInputNumberView != null) && (mInputNumberView.getAdapter() != null))
+		{
+			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
+			adapter.changeCursor(null);
 		}
 	}
 
@@ -266,8 +330,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* bind views to variables */
 		mBottomView = findViewById(R.id.bottom_panel);
 		mMetadataView = findViewById(R.id.sms_chat_metadata);
-		mInputNumberView = (EditText) findViewById(R.id.input_number);
-		mContactSearchView = (ListView) findViewById(R.id.contact_search_result);
+		mInputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		mInputNumberContainer = (LinearLayout) findViewById(R.id.input_number_container);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
@@ -292,7 +355,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
 		onNewIntent(intent);
 
-		mContactSearchView.setOnItemClickListener(this);
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
@@ -589,6 +651,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mComposeView.setFocusable(true);
 		mComposeView.requestFocus();
 		/* hide the number picker */
+		mInputNumberView.setVisibility(View.GONE);
 		mInputNumberContainer.setVisibility(View.GONE);
 
 		/*
