@@ -82,4 +82,5 @@
 	<string name="tap_here"><u>Tap here</u></string>
 	<string name="block_key">block</string>
 	<string name="delete_key">deleteAccount</string>
+	<string name="how_hike_feel">How does Hike make you feel?</string>
 </resources>
