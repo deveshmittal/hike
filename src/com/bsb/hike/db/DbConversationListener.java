@@ -4,7 +4,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -22,14 +21,12 @@ public class DbConversationListener implements Listener
 	
 	private HikePubSub mPubSub;
 
-	private Editor mEditor;
 
 	public DbConversationListener(Context context)
 	{
 		mPubSub = HikeMessengerApp.getPubSub();
 		mConversationDb = new HikeConversationsDatabase(context);
 		mUserDb = new HikeUserDatabase(context);
-		mEditor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, this);
