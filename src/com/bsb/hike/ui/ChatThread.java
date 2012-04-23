@@ -225,20 +225,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		return getIntent();
 	}
 
-	static final String TEXT_CHANGED_KEY = "text_last_changed";
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState)
-	{
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState)
-	{
-		super.onRestoreInstanceState(savedInstanceState);
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
