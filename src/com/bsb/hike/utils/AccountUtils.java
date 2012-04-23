@@ -76,9 +76,9 @@ public class AccountUtils
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 
-		/* set the connection timeout to 6 seconds, and the waiting for data timeout to 20 seconds */
+		/* set the connection timeout to 6 seconds, and the waiting for data timeout to 30 seconds */
 		HttpConnectionParams.setConnectionTimeout(params, 6000);
-		HttpConnectionParams.setSoTimeout(params, 20000);
+		HttpConnectionParams.setSoTimeout(params, 30 * 1000);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PORT));
