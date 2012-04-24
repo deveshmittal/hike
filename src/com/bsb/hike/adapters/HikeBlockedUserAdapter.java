@@ -65,7 +65,8 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 		
 		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
 		imageView.setPadding(8, 8, 18, 8);
-		if(contactInfo.isUsesCustomPhoto())
+		
+		if(contactInfo.hasCustomPhoto())
 		{
 			imageView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
 		}
@@ -76,7 +77,6 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 		
 		Button button = (Button) v.findViewById(R.id.contact_button);
 		button.setSelected(blockedUsers.contains(contactInfo.getMsisdn()));
-		
 		
 		v.setTag(contactInfo);
 		v.setOnClickListener(this);

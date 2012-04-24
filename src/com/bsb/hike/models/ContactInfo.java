@@ -21,16 +21,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	private boolean onhike;
 	
-	private boolean usesCustomPhoto;
+	private boolean hasCustomPhoto;
 	
-
-	public boolean isUsesCustomPhoto() {
-		return usesCustomPhoto;
-	}
-
-	public void setUsesCustomPhoto(boolean usesCustomPhoto) {
-		this.usesCustomPhoto = usesCustomPhoto;
-	}
 
 	private String phoneNum;
 
@@ -84,11 +76,34 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		this.phoneNum = phoneNum;
 	}
 
-	public ContactInfo(String id, String number, String name,String phoneNum)
-	{
-		this(id, number, name, false,phoneNum);
+	public boolean hasCustomPhoto() {
+		return hasCustomPhoto;
 	}
 
+	public void setHasCustomPhoto(boolean hasCustomPhoto) {
+		this.hasCustomPhoto = hasCustomPhoto;
+	}
+
+	public ContactInfo(String id, String number, String name,String phoneNum)
+	{
+		this(id, number, name, false,phoneNum, false);
+	}
+
+	public ContactInfo(String id, String number, String name, boolean onHike, String phoneNum)
+	{
+		this(id, number, name, onHike,phoneNum, false);
+	}
+
+	public ContactInfo(String id, String msisdn, String name, boolean onhike, String phoneNum, boolean hasCustomPhoto)
+	{
+		this.id = id;
+		this.msisdn = msisdn;
+		this.name = name;
+		this.onhike = onhike;
+		this.phoneNum = phoneNum;
+		this.hasCustomPhoto = hasCustomPhoto;
+	}
+	
 	@Override
 	public int hashCode()
 	{
@@ -134,14 +149,6 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		return true;
 	}
 
-	public ContactInfo(String id, String msisdn, String name, boolean onhike, String phoneNum)
-	{
-		this.id = id;
-		this.msisdn = msisdn;
-		this.name = name;
-		this.onhike = onhike;
-		this.phoneNum = phoneNum;
-	}
 
 	public JSONObject toJSON() throws JSONException
 	{
