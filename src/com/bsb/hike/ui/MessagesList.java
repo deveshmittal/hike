@@ -67,7 +67,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	private Set<String> mConversationsAdded;
 
 	private View mInviteFriend;
-	
+
 	@Override
 	protected void onPause()
 	{
@@ -273,10 +273,23 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
+	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) 
+	{
+		if(mAdapter.getCount() == 0)
+		{
+			menu.findItem(R.id.deleteconversations).setVisible(false);
+		}
+		else
+		{
+			menu.findItem(R.id.deleteconversations).setVisible(true);
+		}
 		return true;
 	}
 

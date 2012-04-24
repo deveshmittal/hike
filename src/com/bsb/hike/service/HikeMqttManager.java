@@ -169,11 +169,11 @@ public class HikeMqttManager implements Listener
 		CONNECTING, // attempting to connect
 		CONNECTED, // connected
 		NOTCONNECTED_WAITINGFORINTERNET, // can't connect because the phone
-											// does not have Internet access
+		// does not have Internet access
 		NOTCONNECTED_USERDISCONNECT, // user has explicitly requested
-										// disconnection
+		// disconnection
 		NOTCONNECTED_DATADISABLED, // can't connect because the user
-									// has disabled data access
+		// has disabled data access
 		NOTCONNECTED_UNKNOWNREASON // failed to connect for some reason
 	}
 
@@ -231,6 +231,7 @@ public class HikeMqttManager implements Listener
 	private Runnable mConnectTimeoutHandler;
 
 	private SharedPreferences settings;
+	private SharedPreferences prefs;
 
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
@@ -243,6 +244,7 @@ public class HikeMqttManager implements Listener
 		persistence = new HikeMqttPersistence(hikeService);
 		mConnectTimeoutHandler = new ConnectTimeoutHandler();
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
+		prefs = hikeService.getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 	}
 
 	public HikePacket getPacketIfUnsent(int mqttId)
@@ -531,7 +533,7 @@ public class HikeMqttManager implements Listener
 	{
 		Log.d("HikeMqttManager", "calling ping");
 		if (connectionStatus != MQTTConnectionStatus.CONNECTED || 
-			!mqttConnection.ping())
+				!mqttConnection.ping())
 		{
 			Log.d("HikeMqttManager", "App isn't connected, reconnecting");
 			if (connectionStatus == MQTTConnectionStatus.CONNECTED)
@@ -600,8 +602,8 @@ public class HikeMqttManager implements Listener
 		this.handler.postDelayed(pbCB, HikeConstants.MESSAGE_DELIVERY_TIMEOUT);
 
 		mqttConnection.publish(new UTF8Buffer(this.topic + HikeConstants.PUBLISH_TOPIC),
-								new Buffer(packet.getMessage()), QoS.AT_LEAST_ONCE,
-								false, pbCB);
+				new Buffer(packet.getMessage()), QoS.AT_LEAST_ONCE,
+				false, pbCB);
 	}
 
 	public void unsubscribeFromUIEvents()
@@ -654,8 +656,7 @@ public class HikeMqttManager implements Listener
 			JSONObject jsonObj = new JSONObject(messageBody);
 			String type = jsonObj.getString(HikeConstants.TYPE);
 
-			/* handle icons/etc here so we don't risk losing them.
-			 * TODO handle more things in the service
+			/* handle icons/credit/user join/leave here so we don't risk losing them when the app is not open.
 			 */
 			if (NetworkManager.ICON.equals(type))
 			{
@@ -679,6 +680,9 @@ public class HikeMqttManager implements Listener
 				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
 			}
 
+			/*
+			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
+			 */			
 			if (this.mHikeService.sendToApp(messageBody))
 			{
 				return;
@@ -689,29 +693,17 @@ public class HikeMqttManager implements Listener
 				(topic.getString().endsWith(("/u"))))
 			{
 				return;
-			}
+			}			
 
 			/*
 			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
 			 */
-
-			JSONObject obj = null;
-			try
-			{
-				obj = new JSONObject(messageBody);
-			}
-			catch (JSONException e)
-			{
-				Log.e("HikeMqttManager", "Invalid JSON Object", e);
-				return;
-			}
-
-			if (NetworkManager.MESSAGE.equals(obj.optString(HikeConstants.TYPE)))
+			if (NetworkManager.MESSAGE.equals(type))
 			{
 				/* toast and save it */
 				try
 				{
-					ConvMessage convMessage = new ConvMessage(obj);
+					ConvMessage convMessage = new ConvMessage(jsonObj);
 					this.convDb.addConversationMessages(convMessage);
 					ContactInfo contactInfo = ContactUtils.getContactInfo(convMessage.getMsisdn(), this.mHikeService);
 					toaster.notify(contactInfo, convMessage);
@@ -726,6 +718,7 @@ public class HikeMqttManager implements Listener
 				/* just save it */
 				this.mHikeService.storeMessage(messageBody);
 			}
+			
 
 			// receiving this message will have kept the connection alive for us, so
 			// we take advantage of this to postpone the next scheduled ping
@@ -744,7 +737,7 @@ public class HikeMqttManager implements Listener
 			ack.run();
 			wl.release();
 		}
-		
+
 	}
 
 	@Override

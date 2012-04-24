@@ -5,31 +5,32 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 
-public class FeedbackActivity extends Activity implements OnClickListener, FinishableEvent, OnEditorActionListener
+public class FeedbackActivity extends Activity implements FinishableEvent, OnEditorActionListener
 {
 
 	private TextView mFeedbackText;
-	private Button mFeedbackButton;
+	private ImageView mFeedbackButton;
 	private HikeHTTPTask mTask;
 	private ProgressDialog mDialog;
 	private TextView mTitleView;
-
+	private View selectedEmoticon;
+	private TextView mNameText;
 
 	@Override
 	public Object onRetainNonConfigurationInstance()
@@ -44,13 +45,18 @@ public class FeedbackActivity extends Activity implements OnClickListener, Finis
 		setContentView(R.layout.feedback);
 
 		mFeedbackText = (TextView) findViewById(R.id.feedback);
-		mFeedbackButton = (Button) findViewById(R.id.feedback_submit);
+		mFeedbackButton = (ImageView) findViewById(R.id.title_icon);
 		mTitleView = (TextView) findViewById(R.id.title);
+		mNameText = (TextView) findViewById(R.id.user_name);
 
-		mFeedbackButton.setOnClickListener(this);
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String name = settings.getString(HikeMessengerApp.NAME, "Set a name!");
+
+		mNameText.setText(name);
+		mFeedbackButton.setVisibility(View.VISIBLE);
 		mFeedbackText.setOnEditorActionListener(this);
-
-		mTitleView.setText(getResources().getString(R.string.contact_us));
+		mFeedbackButton.setImageResource(R.drawable.sendbutton);
+		mTitleView.setText(getResources().getString(R.string.feedback));
 
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof HikeHTTPTask)
@@ -62,8 +68,7 @@ public class FeedbackActivity extends Activity implements OnClickListener, Finis
 		}
 	}
 
-	@Override
-	public void onClick(View view)
+	public void onTitleIconClick(View view)
 	{
 		if (view == mFeedbackButton)
 		{
@@ -73,7 +78,7 @@ public class FeedbackActivity extends Activity implements OnClickListener, Finis
 			{
 				public void onFailure()
 				{
-					
+
 				}
 
 				public void onSuccess()
@@ -96,6 +101,16 @@ public class FeedbackActivity extends Activity implements OnClickListener, Finis
 			mTask.execute(request);
 			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.sending_feedback));
 		}
+	}
+
+	public void onEmoticonClicked(View view)
+	{
+		if(selectedEmoticon != null)
+		{
+			selectedEmoticon.setSelected(false);
+		}
+		view.setSelected(true);
+		selectedEmoticon = view;
 	}
 
 	public void onDestroy()
@@ -123,11 +138,11 @@ public class FeedbackActivity extends Activity implements OnClickListener, Finis
 	public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
 	{
 		if ((v == mFeedbackText) &&
-			(actionId == EditorInfo.IME_ACTION_SEND))
+				(actionId == EditorInfo.IME_ACTION_SEND))
 		{
-			onClick(mFeedbackButton);
+			onTitleIconClick(mFeedbackButton);
 		}
 		return false;
 	}
-	
+
 }
