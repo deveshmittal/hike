@@ -16,8 +16,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.ClipboardManager;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -37,6 +40,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.TextView.BufferType;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
@@ -115,6 +119,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private boolean mUserIsBlocked;
 
 	private boolean mPaused = false; /* is the activity currently paused */
+
+	private View mBlockedUserOverlay;
 
 	@Override
 	protected void onPause()
@@ -256,6 +262,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
 		mLabelView = (TextView) findViewById(R.id.title);
+		mBlockedUserOverlay = findViewById(R.id.block_overlay);
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
@@ -335,9 +342,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			item.setVisible(false);
 		}
 
+		/* don't show a menu item for unblock (since the overlay will be present */
 		MenuItem item = menu.findItem(R.id.block_menu);
-		int titleId = mUserIsBlocked ? R.string.unblock_title : R.string.block_title;
-		item.setTitle(getResources().getString(titleId));
+		item.setVisible(!mUserIsBlocked);
 		return true;
 	}
 
@@ -371,11 +378,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (item.getItemId() == R.id.block_menu)
 		{
-			mPubSub.publish(mUserIsBlocked ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER, mContactNumber);
-			mUserIsBlocked = !mUserIsBlocked;
+			mPubSub.publish(HikePubSub.BLOCK_USER, mContactNumber);
+			mUserIsBlocked = true;
+			initializeBlockOverlay();
 		}
 
 		return true;
+	}
+
+	public void onUnblockClick(View v)
+	{
+		/* user clicked the unblock button in the chat-screen */
+		mBlockedUserOverlay.setVisibility(View.GONE);
+		mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
+		mUserIsBlocked = false;
 	}
 
 	@Override
@@ -590,6 +606,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		HikeUserDatabase db = new HikeUserDatabase(this);
 		mUserIsBlocked = db.isBlocked(mContactNumber);
+		if (mUserIsBlocked)
+		{
+			initializeBlockOverlay();
+		}
+
 		db.close();
 
 		/* make a copy of the message list since it's used internally by the adapter */
@@ -620,6 +641,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* clear any toast notifications */
 		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mgr.cancel((int) mConversation.getConvId());
+	}
+
+	private void initializeBlockOverlay()
+	{
+		mBlockedUserOverlay.setVisibility(View.VISIBLE);
+		TextView message = (TextView) mBlockedUserOverlay.findViewById(R.id.block_overlay_message);
+
+		/* bold the blocked users name */
+		String label = mConversation.getLabel();
+		String formatString = getResources().getString(R.string.block_overlay_message);
+		String formatted = String.format(formatString, mConversation.getLabel());
+		SpannableString str = new SpannableString(formatted);
+		int start = formatString.indexOf("%1$s");
+		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD),
+						start, start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		message.setText(str);
 	}
 
 	/*

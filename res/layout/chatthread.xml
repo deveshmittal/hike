@@ -1,139 +1,196 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/thatch_repeat"
-    android:orientation="vertical" >
-
-    <include
-        android:id="@+id/top_panel_ref"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        layout="@layout/top_panel" />
+    android:background="@drawable/thatch_repeat" >
 
     <LinearLayout
-        android:id="@+id/input_number_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/black"
+        android:layout_height="match_parent"
+        android:background="@drawable/thatch_repeat"
         android:orientation="vertical" >
 
-        <EditText
-            android:id="@+id/input_number"
+        <include
+            android:id="@+id/top_panel_ref"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:layout_marginLeft="18dp"
-            android:layout_marginRight="18dp"
-            android:layout_marginTop="7dp"
-            android:background="@drawable/edittext"
-            android:singleLine="true"
-            android:hint="Start typing a name"
-            android:imeOptions="actionNone"
-            android:visibility="visible" >
-        </EditText>
+            android:layout_alignParentTop="true"
+            layout="@layout/top_panel" />
+
+        <LinearLayout
+            android:id="@+id/input_number_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/black"
+            android:orientation="vertical" >
+
+            <EditText
+                android:id="@+id/input_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:layout_marginLeft="18dp"
+                android:layout_marginRight="18dp"
+                android:layout_marginTop="7dp"
+                android:background="@drawable/edittext"
+                android:hint="Start typing a name"
+                android:imeOptions="actionNone"
+                android:singleLine="true"
+                android:visibility="visible" >
+            </EditText>
+
+            <ListView
+                android:id="@+id/contact_search_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/offwhite"
+                android:divider="@drawable/ic_thread_divider"
+                android:fadingEdge="none" />
+
+            <View
+                android:id="@+id/bottom_nav_bar_dropshadow"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@drawable/dropshadow" />
+        </LinearLayout>
+
         <ListView
-            android:id="@+id/contact_search_result"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/offwhite"
+            android:id="@+id/conversations_list"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="30"
+            android:cacheColorHint="#00000000"
+            android:divider="@null"
             android:fadingEdge="none"
-            android:divider="@drawable/ic_thread_divider" />
-        <View
-		android:id="@+id/bottom_nav_bar_dropshadow"
-		android:layout_width="match_parent"
-		android:layout_height="1dp"
-		android:background="@drawable/dropshadow" />
+            android:transcriptMode="alwaysScroll" >
+        </ListView>
+
+        <RelativeLayout
+            android:id="@+id/sms_chat_metadata"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/compose_background" >
+
+            <TextView
+                android:id="@+id/sms_chat_metadata_num_chars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginBottom="3dp"
+                android:layout_marginTop="3dp"
+                android:paddingLeft="10dp"
+                android:text="24/140"
+                android:textColor="@color/white"
+                android:textSize="12dp" >
+            </TextView>
+
+            <TextView
+                android:id="@+id/sms_chat_metadata_text_credits_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="3dp"
+                android:layout_marginTop="3dp"
+                android:paddingRight="10dp"
+                android:text="99 credits left"
+                android:textColor="@color/white"
+                android:textSize="12dp" >
+            </TextView>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/bottom_panel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/compose_background" >
+
+            <EditText
+                android:id="@+id/msg_compose"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_toLeftOf="@+id/send_message"
+                android:autoText="true"
+                android:background="@drawable/edittext"
+                android:hint="@string/type_to_compose"
+                android:imeOptions="actionSend"
+                android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences|textMultiLine"
+                android:maxLines="4" >
+
+                <requestFocus />
+            </EditText>
+
+            <View
+                android:id="@+id/dummy"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_below="@id/msg_compose"
+                android:layout_marginTop="8dp" />
+
+            <Button
+                android:id="@+id/send_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:background="@drawable/sendbutton"
+                android:enabled="false"
+                android:onClick="onSendClick" />
+        </RelativeLayout>
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/conversations_list"
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="30"
-        android:cacheColorHint="#00000000"
-        android:divider="@null"
-        android:fadingEdge="none"
-        android:transcriptMode="alwaysScroll" >
-    </ListView>
-
     <RelativeLayout
-        android:id="@+id/sms_chat_metadata"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/compose_background" >
-
+        android:visibility="gone"
+        android:id="@+id/block_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent_black" >
         <TextView
-            android:id="@+id/sms_chat_metadata_num_chars"
+            android:bufferType="spannable"
+            android:id="@+id/block_overlay_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginBottom="3dp"
-            android:layout_marginTop="3dp"
-            android:paddingLeft="10dp"
-            android:text="24/140"
+            android:layout_centerInParent="true"
             android:textColor="@color/white"
-            android:textSize="12dp" >
-        </TextView>
+            android:textSize="18dp"
+            android:text="@string/block_overlay_message"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp"/>
 
-        <TextView
-            android:id="@+id/sms_chat_metadata_text_credits_left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="3dp"
-            android:layout_marginTop="3dp"
-            android:paddingRight="10dp"
-            android:text="99 credits left"
-            android:textColor="@color/white"
-            android:textSize="12dp" >
-        </TextView>
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/bottom_panel"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/compose_background" >
-
-        <EditText
-            android:id="@+id/msg_compose"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-			android:layout_centerVertical="true"
-            android:layout_marginLeft="12dp"
-            android:layout_marginTop="8dp"
-            android:layout_toLeftOf="@+id/send_message"
-            android:autoText="true"
-            android:background="@drawable/edittext"
-            android:hint="@string/type_to_compose"
-            android:imeOptions="actionSend"
-            android:maxLines="4"
-            android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences|textMultiLine" >
-
-            <requestFocus />
-        </EditText>
-
-        <View
-	        android:id="@+id/dummy"
-	        android:layout_width="match_parent"
-	        android:layout_height="0dp"
-	        android:layout_below="@id/msg_compose"
-	        android:layout_marginTop="8dp" />
+        <ImageView
+            android:id="@+id/block_overlay_image"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="16dp"
+            android:layout_above="@+id/block_overlay_message"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_no" />
 
         <Button
-            android:id="@+id/send_message"
+            android:shadowColor="#000000"
+            android:shadowDx="-0.5"
+            android:shadowDy="-0.5"
+            android:shadowRadius="1"
+            android:textStyle="bold"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:textSize="18dp"
+            android:textColor="@color/white"
+            android:id="@+id/block_overlay_unblock_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="12dp"
-            android:layout_marginRight="12dp"
-            android:background="@drawable/sendbutton"
-            android:enabled="false"
-            android:onClick="onSendClick" />
+            android:layout_below="@+id/block_overlay_message"
+            android:layout_marginTop="16dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/rounded_button"
+            android:onClick="onUnblockClick"
+            android:text="@string/unblock_title" />
+
     </RelativeLayout>
 
-</LinearLayout>
+</RelativeLayout>
