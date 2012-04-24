@@ -1050,6 +1050,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public boolean onEditorAction(TextView view, int actionId, KeyEvent keyEvent)
 	{
+		if (mConversation == null)
+		{
+			return false;
+		}
+
 		if ((view == mComposeView) &&
 			(actionId == EditorInfo.IME_ACTION_SEND))
 		{
