@@ -957,6 +957,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if ((HikePubSub.USER_LEFT.equals(type)) || (HikePubSub.USER_JOINED.equals(type)))
 		{
+			/* only update the UI if the message is for this conversation */
+			String msisdn = (String) object;
+			if (!msisdn.equals(mContactNumber))
+			{
+				return;
+			}
+
 			mConversation.setOnhike(HikePubSub.USER_JOINED.equals(type));
 			runOnUiThread(new Runnable()
 			{
