@@ -40,7 +40,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.TextView.BufferType;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
@@ -516,7 +515,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				inviteUser();
 			}
 
-			mComposeView.setText("");
+			if (!intent.getBooleanExtra(HikeConstants.Extras.KEEP_MESSAGE, false))
+			{
+				mComposeView.setText("");
+			}
 		}
 		else
 		{
@@ -992,6 +994,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		ContactInfo contactInfo = (ContactInfo) view.getTag();
 		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 		intent.setClass(this, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.KEEP_MESSAGE, !TextUtils.isEmpty(mComposeView.getText()));
 		startActivity(intent);
 	}
 }

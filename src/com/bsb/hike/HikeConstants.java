@@ -69,5 +69,6 @@ public class HikeConstants
 		public static final String CIRCLE_CROP = "circleCrop";
 		public static final String SCALE_UP = "scaleUpIfNeeded";
 		public static final String UPDATE_AVAILABLE = "updateAvailable";
+		public static final String KEEP_MESSAGE = "keepMessage";
 	}
 }
