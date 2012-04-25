@@ -29,11 +29,11 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -65,7 +65,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	private ListView mListView;
 	private TextView mTitleView;
 	private TextView mMadeWithLoveView;
-	private ImageView mTitleIcon;
+	private Button mTitleIcon;
 	private View mProfilePictureChangeOverlay;
 	private EditText mNameViewEdittable;
 	private Dialog mDialog;
@@ -140,7 +140,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mNameViewEdittable = (EditText) findViewById(R.id.name_editable);
 		mListView = (ListView) findViewById(R.id.profile_preferences);
 		mTitleView = (TextView) findViewById(R.id.title);
-		mTitleIcon = (ImageView) findViewById(R.id.title_icon);
+		mTitleIcon = (Button) findViewById(R.id.title_icon);
 		mMadeWithLoveView = (TextView) findViewById(R.id.made_with_love);
 		mProfilePictureChangeOverlay = findViewById(R.id.profile_change_overlay);
 
@@ -296,7 +296,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mProfilePictureChangeOverlay.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
 		mNameViewEdittable.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
 		mNameView.setVisibility(!mActivityState.editable ? View.VISIBLE : View.GONE);
-		mTitleIcon.setImageResource(!mActivityState.editable ? R.drawable.ic_edit : R.drawable.ic_save);
+		mTitleIcon.setText(!mActivityState.editable ? R.string.edit : R.string.save);
 		if (mActivityState.newBitmap != null)
 		{
 			mIconView.setImageBitmap(mActivityState.newBitmap);

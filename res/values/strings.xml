@@ -83,4 +83,6 @@
 	<string name="block_key">block</string>
 	<string name="delete_key">deleteAccount</string>
 	<string name="how_hike_feel">How does Hike make you feel?</string>
+	<string name="edit">Edit</string>
+	<string name="save">Save</string>
 </resources>
