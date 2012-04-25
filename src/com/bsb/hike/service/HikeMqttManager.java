@@ -680,29 +680,20 @@ public class HikeMqttManager implements Listener
 				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
 			}
 
-			else if(NetworkManager.SMS_CREDITS.equals(type))
-			{
-				Integer credits = jsonObj.optInt(HikeConstants.DATA);
-				Log.d("HikeMqttManager", "Credit: "+credits);
-				Editor mEditor = prefs.edit();
-				mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
-				mEditor.commit();
-			}
-			else if((NetworkManager.USER_JOINED.equals(type))||((NetworkManager.USER_LEFT.equals(type))))
-			{
-				
-				String msisdn = jsonObj.optString(HikeConstants.FROM);
-				Log.d("HikeMqttManager", "USER JOING: "+msisdn);
-				boolean joined = NetworkManager.USER_JOINED.equals(type);
-				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
-			}
-			
-			
+			/*
+			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
+			 */			
 			if (this.mHikeService.sendToApp(messageBody))
 			{
 				return;
 			}
-			
+
+			/* don't bother saving messages for the UI topic */
+			if ((topic != null) &&
+				(topic.getString().endsWith(("/u"))))
+			{
+				return;
+			}			
 
 			/*
 			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects

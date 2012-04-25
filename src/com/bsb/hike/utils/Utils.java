@@ -208,19 +208,15 @@ public class Utils
 
 	public static Drawable getDefaultIconForUser(Context context, String msisdn)
 	{
-		int count = 3;
+		int count = 1;
 		int id;
 		switch(iconHash(msisdn) % count)
 		{
 		case 0:
 			id = R.drawable.ic_avatar0;
 			break;
-		case 1:
-			id = R.drawable.ic_avatar1;
-			break;
-		case 2:
 		default:
-			id = R.drawable.ic_avatar2;
+			id = R.drawable.ic_avatar0;
 			break;
 		}
 

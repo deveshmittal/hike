@@ -49,7 +49,7 @@
 
 	<ImageView
         android:id="@+id/avatar"
-        android:src="@drawable/ic_avatar2"
+        android:src="@drawable/ic_avatar0"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_alignParentTop="true"/>

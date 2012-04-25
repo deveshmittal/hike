@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/contact"
                 android:layout_marginRight="5dp"
-                android:layout_toRightOf="@id/avatar"
+                android:layout_gravity="center_vertical"
                 android:src="@drawable/ic_unread"
                 android:visibility="visible" />
 

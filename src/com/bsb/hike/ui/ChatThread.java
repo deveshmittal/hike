@@ -17,8 +17,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.ClipboardManager;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -118,37 +121,33 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	private Cursor mCursor;
 
+	private boolean mPaused = false; /* is the activity currently paused */
+
+	private View mBlockedUserOverlay;
+
 	@Override
 	protected void onPause()
 	{
 		super.onPause();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
-	}
-
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus)
-	{
-		super.onWindowFocusChanged(hasFocus);
-		if (hasFocus)
-		{
-			/* mark any messages unread as read. */
-			setMessagesRead();
-			/* clear any pending notifications */
-			/* clear any toast notifications */
-			if (mConversation != null)
-			{
-				NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-				mgr.cancel((int) mConversation.getConvId());				
-			}
-		}
+		mPaused = true;
 	}
 
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
+		mPaused = false;
+		/* mark any messages unread as read. */
+		setMessagesRead();
+		/* clear any pending notifications */
+		/* clear any toast notifications */
+		if (mConversation != null)
+		{
+			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+			mgr.cancel((int) mConversation.getConvId());				
+		}
 
-		/* TODO evidently a better way to do this is to check for onFocusChanged */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
 		if (mComposeViewWatcher != null)
@@ -295,20 +294,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		return getIntent();
 	}
 
-	static final String TEXT_CHANGED_KEY = "text_last_changed";
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState)
-	{
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState)
-	{
-		super.onRestoreInstanceState(savedInstanceState);
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -339,6 +324,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
 		mLabelView = (TextView) findViewById(R.id.title);
+		mBlockedUserOverlay = findViewById(R.id.block_overlay);
 
 		/*For removing the white bar in the top of the drop-down*/
 		mInputNumberView.setDropDownBackgroundDrawable(null);
@@ -420,9 +406,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			item.setVisible(false);
 		}
 
+		/* don't show a menu item for unblock (since the overlay will be present */
 		MenuItem item = menu.findItem(R.id.block_menu);
-		int titleId = mUserIsBlocked ? R.string.unblock_title : R.string.block_title;
-		item.setTitle(getResources().getString(titleId));
+		item.setVisible(!mUserIsBlocked);
 		return true;
 	}
 
@@ -456,11 +442,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (item.getItemId() == R.id.block_menu)
 		{
-			mPubSub.publish(mUserIsBlocked ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER, mContactNumber);
-			mUserIsBlocked = !mUserIsBlocked;
+			mPubSub.publish(HikePubSub.BLOCK_USER, mContactNumber);
+			mUserIsBlocked = true;
+			initializeBlockOverlay();
 		}
 
 		return true;
+	}
+
+	public void onUnblockClick(View v)
+	{
+		/* user clicked the unblock button in the chat-screen */
+		mBlockedUserOverlay.setVisibility(View.GONE);
+		mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
+		mUserIsBlocked = false;
 	}
 
 	@Override
@@ -585,7 +580,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				inviteUser();
 			}
 
-			mComposeView.setText("");
+			if (!intent.getBooleanExtra(HikeConstants.Extras.KEEP_MESSAGE, false))
+			{
+				mComposeView.setText("");
+			}
 		}
 		else
 		{
@@ -676,6 +674,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		HikeUserDatabase db = new HikeUserDatabase(this);
 		mUserIsBlocked = db.isBlocked(mContactNumber);
+		if (mUserIsBlocked)
+		{
+			initializeBlockOverlay();
+		}
+
 		db.close();
 
 		/* make a copy of the message list since it's used internally by the adapter */
@@ -708,6 +711,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mgr.cancel((int) mConversation.getConvId());
 	}
 
+	private void initializeBlockOverlay()
+	{
+		mBlockedUserOverlay.setVisibility(View.VISIBLE);
+		TextView message = (TextView) mBlockedUserOverlay.findViewById(R.id.block_overlay_message);
+
+		/* bold the blocked users name */
+		String label = mConversation.getLabel();
+		String formatString = getResources().getString(R.string.block_overlay_message);
+		String formatted = String.format(formatString, mConversation.getLabel());
+		SpannableString str = new SpannableString(formatted);
+		int start = formatString.indexOf("%1$s");
+		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD),
+						start, start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		message.setText(str);
+	}
+
 	/*
 	 * Update the UI to show SMS Credits/etc if the conversation is on hike
 	 */
@@ -728,18 +747,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	}
 
-	private boolean isLastMsgSent()
+	/* returns TRUE iff the last message was received and unread */
+	private boolean isLastMsgReceivedAndUnread()
 	{
 		List<ConvMessage> msgList = (mConversation != null) ? mConversation.getMessages() : null;
 
 		if ((msgList == null) || (msgList.isEmpty()))
 		{
-			return true;
+			return false;
 		}
 
 		ConvMessage lastMsg = msgList.get(msgList.size() - 1);
 
-		return lastMsg.getState() == ConvMessage.State.RECEIVED_READ;
+		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD;
 	}
 
 	/*
@@ -747,7 +767,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void setMessagesRead()
 	{
-		if (!isLastMsgSent())
+		if (isLastMsgReceivedAndUnread())
 		{
 			long convID = mConversation.getConvId();
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
@@ -829,7 +849,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					}
 				});
 
-				if (hasWindowFocus())
+				if (!mPaused)
 				{
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
@@ -1040,6 +1060,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		ContactInfo contactInfo = (ContactInfo) view.getTag();
 		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 		intent.setClass(this, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.KEEP_MESSAGE, !TextUtils.isEmpty(mComposeView.getText()));
 		startActivity(intent);
 	}
 }
