@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONObject;
+
 import android.accounts.NetworkErrorException;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -245,7 +247,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			try
 			{
 				Map<String, List<ContactInfo>> contacts = ContactUtils.convertToMap(contactinfos);
-				List<ContactInfo> addressbook = AccountUtils.postAddressBook(token, contacts);
+				JSONObject jsonForAddressBookAndBlockList = AccountUtils.postAddressBook(token, contacts);
+				
+				List<ContactInfo> addressbook = AccountUtils.getContactList(jsonForAddressBookAndBlockList, contacts);
+				List<String> blockList = AccountUtils.getBlockList(jsonForAddressBookAndBlockList);
+				
+				//List<>
 				//TODO this exception should be raised from the postAddressBook code
 				if (addressbook == null)
 				{
@@ -253,7 +260,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				}
 				Log.d("SignupTask", "about to insert addressbook");
 				db = new HikeUserDatabase(this.context);
-				db.setAddressBook(addressbook);
+				db.setAddressBookAndBlockList(addressbook, blockList);
+				
 			}
 			catch (Exception e)
 			{

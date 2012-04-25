@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -18,6 +19,8 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.Utils;
 
 public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickListener
 {
@@ -60,9 +63,20 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 		TextView numView = (TextView) v.findViewById(R.id.number);
 		numView.setText(contactInfo.getPhoneNum());
 		
+		ImageView imageView = (ImageView) v.findViewById(R.id.contact_image);
+		imageView.setPadding(8, 8, 18, 8);
+		
+		if(contactInfo.hasCustomPhoto())
+		{
+			imageView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
+		}
+		else
+		{
+			imageView.setImageDrawable(Utils.getDefaultIconForUser(context, contactInfo.getMsisdn()));
+		}
+		
 		Button button = (Button) v.findViewById(R.id.contact_button);
 		button.setSelected(blockedUsers.contains(contactInfo.getMsisdn()));
-		
 		
 		v.setTag(contactInfo);
 		v.setOnClickListener(this);
