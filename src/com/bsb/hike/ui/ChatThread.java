@@ -121,8 +121,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	private Cursor mCursor;
 
-	private boolean mPaused = false; /* is the activity currently paused */
-
 	private View mBlockedUserOverlay;
 
 	@Override
@@ -130,16 +128,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		super.onPause();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, null);
-		mPaused = true;
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus)
+	{
+		super.onWindowFocusChanged(hasFocus);
+		setMessagesRead();
 	}
 
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
-		mPaused = false;
-		/* mark any messages unread as read. */
+		/* mark any messages unread as read */
 		setMessagesRead();
+
 		/* clear any pending notifications */
 		/* clear any toast notifications */
 		if (mConversation != null)
@@ -750,14 +754,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* returns TRUE iff the last message was received and unread */
 	private boolean isLastMsgReceivedAndUnread()
 	{
-		List<ConvMessage> msgList = (mConversation != null) ? mConversation.getMessages() : null;
-
-		if ((msgList == null) || (msgList.isEmpty()))
+		int count = (mAdapter != null) ? mAdapter.getCount() : 0;
+		if (count == 0)
 		{
 			return false;
 		}
 
-		ConvMessage lastMsg = msgList.get(msgList.size() - 1);
+		ConvMessage lastMsg = mAdapter.getItem(count - 1);
 
 		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD;
 	}
@@ -767,6 +770,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void setMessagesRead()
 	{
+		if (!hasWindowFocus())
+		{
+			return;
+		}
+
 		if (isLastMsgReceivedAndUnread())
 		{
 			long convID = mConversation.getConvId();
@@ -819,7 +827,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (mContactNumber == null)
 		{
-			Log.d("ChatThread", "received message when contactNumber is null type=" + type + " object=" + object);
+			Log.w("ChatThread", "received message when contactNumber is null type=" + type + " object=" + object);
 			return;
 		}
 
@@ -840,6 +848,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				 * we publish the message before the conversation is created, so it's safer to just tack it on here
 				 */
 				message.setConversation(mConversation);
+
+				if (hasWindowFocus())
+				{
+					message.setState(ConvMessage.State.RECEIVED_READ);
+					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
+					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
+					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+				}
+
 				runOnUiThread(new Runnable()
 				{
 					@Override
@@ -849,12 +866,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					}
 				});
 
-				if (!mPaused)
-				{
-					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
-					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
-				}
-				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 			}
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
