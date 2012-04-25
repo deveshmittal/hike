@@ -85,4 +85,5 @@
 	<string name="delete_key">deleteAccount</string>
 	<string name="unlink_key">unlinkAccount</string>
 	<string name="how_hike_feel">How does Hike make you feel?</string>
+	<string name="feedback_success">Thanks for your feedback!</string>
 </resources>
