@@ -336,11 +336,22 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public Set<String> getBlockedUsers()
 	{
 		Set<String> blocked = new HashSet<String>();
-		Cursor c = mReadDb.query(DBConstants.BLOCK_TABLE, new String[] { DBConstants.MSISDN}, null, null, null, null, null);
-		int idx = c.getColumnIndex(DBConstants.MSISDN);
-		while(c.moveToNext())
+		Cursor c = null;
+		try
 		{
-			blocked.add(c.getString(idx));
+			c = mReadDb.query(DBConstants.BLOCK_TABLE, new String[] { DBConstants.MSISDN}, null, null, null, null, null);
+			int idx = c.getColumnIndex(DBConstants.MSISDN);
+			while(c.moveToNext())
+			{
+				blocked.add(c.getString(idx));
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
 		}
 
 		return blocked;
