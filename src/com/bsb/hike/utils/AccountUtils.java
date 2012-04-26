@@ -41,6 +41,7 @@ import org.json.JSONObject;
 import android.accounts.NetworkErrorException;
 import android.util.Log;
 
+import com.bsb.hike.NetworkManager;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
@@ -208,11 +209,14 @@ public class AccountUtils
 
 		public String uid;
 
-		public AccountInfo(String token, String msisdn, String uid)
+		public int smsCredits;
+
+		public AccountInfo(String token, String msisdn, String uid, int smsCredits)
 		{
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
+			this.smsCredits = smsCredits;
 		}
 	}
 
@@ -232,7 +236,6 @@ public class AccountUtils
 			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");
 			httppost.setEntity(entity);
-//			httppost.addHeader("X-MSISDN-AIRTEL", "+919818079814");
 		}
 		catch (UnsupportedEncodingException e)
 		{
@@ -256,13 +259,15 @@ public class AccountUtils
 			if(pin != null)
 				return null;
 			/* represents normal account creation , when user is on wifi and account creation failed */
-			return new AccountUtils.AccountInfo(null, null, null); 
+			return new AccountUtils.AccountInfo(null, null, null, -1); 
 		}
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
 		String uid = obj.optString("uid");
+		int smsCredits = obj.optInt(NetworkManager.SMS_CREDITS);
+
 		Log.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
-		return new AccountUtils.AccountInfo(token, msisdn, uid);
+		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits);
 	}
 
 	public static String validateNumber(String number)
