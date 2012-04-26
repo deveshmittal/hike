@@ -103,7 +103,7 @@ public class ConvMessage
 		/* if we're deserialized an object from json, it's always unread */
 		setState(State.RECEIVED_UNREAD);
 		msgID = -1;
-		String mappedMsgID = data.getString("i");
+		String mappedMsgID = data.getString(HikeConstants.MESSAGE_ID);
 		try
 		{
 			this.mappedMsgId=Long.parseLong(mappedMsgID);
