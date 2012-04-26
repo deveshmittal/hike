@@ -64,7 +64,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																														+ DBConstants.CONV_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, " 
 																														+ DBConstants.ONHIKE +" INTEGER, " 
 																														+ DBConstants.CONTACT_ID +" STRING, " 
-																														+ DBConstants.MSISDN +" UNIQUE"
+																														+ DBConstants.MSISDN +" UNIQUE, "
+																														+ DBConstants.CONVERSATIONS_METADATA +" TEXT"
 																												+ " )";
 		db.execSQL(sql);
 	}
