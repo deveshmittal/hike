@@ -29,24 +29,26 @@
         android:id="@+id/contact_image"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_centerVertical="true"
         android:layout_alignLeft="@+id/item_divider"
+        android:layout_centerVertical="true"
         android:scaleType="fitCenter" />
 
     <LinearLayout
         android:id="@+id/name_num_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/contact_image"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/contact_button"
+        android:layout_toRightOf="@+id/contact_image"
         android:orientation="vertical" >
 
         <TextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Vijay Raghunathan"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="Vijay Raghunathan dfasdfasdf adsfasfasdf asdfasdfasdf"
             android:textColor="@color/black"
             android:textSize="18dp" />
 

@@ -121,6 +121,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public void addBlockList(List<String> msisdns) throws DbException
 	{
+		if(msisdns == null)
+		{
+			return;
+		}
+		
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
 

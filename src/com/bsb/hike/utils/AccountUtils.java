@@ -463,22 +463,19 @@ public class AccountUtils
 	{
 		JSONArray blocklist;
 		List<String> blockListMsisdns = new ArrayList<String>();
-		try
+		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
 		{
-			if ((obj == null) || ("fail".equals(obj.optString("stat"))))
-			{
-				Log.w("HTTP", "Unable to upload address book");
-				// TODO raise a real exception here
-				return null;
-			}
-			Log.d("AccountUtils", "Reply from addressbook:" + obj.toString());
-			blocklist = obj.getJSONArray("blocklist");
-		}
-		catch (JSONException e)
-		{
-			Log.e("AccountUtils", "Invalid json object", e);
+			Log.w("HTTP", "Unable to upload address book");
+			// TODO raise a real exception here
 			return null;
 		}
+		Log.d("AccountUtils", "Reply from addressbook:" + obj.toString());
+		blocklist = obj.optJSONArray("blocklist");
+		if(blocklist==null)
+		{
+			Log.e("AccountUtils", "Received blocklist as null");
+			return null;
+		}	
 
 		for(int i=0; i<blocklist.length(); i++)
 		{
