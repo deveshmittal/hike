@@ -16,8 +16,17 @@
         android:layout_marginRight="18dp"
         android:background="@color/dividercolor" />
 
+    <TextView
+        android:id="@+id/invited_text"
+        android:text="...Invited"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/item_divider"
+        android:layout_centerVertical="true" />
+
     <Button
         android:id="@+id/contact_button"
+        android:text="Invite"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/item_divider"

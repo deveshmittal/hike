@@ -242,6 +242,19 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		addContacts(l);
 	}
 
+	public List<ContactInfo> getNonHikeContacts()
+	{
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE }, DBConstants.ONHIKE + "=0", null, null, null, null);
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		c.close();
+		if (contactInfos.isEmpty())
+		{
+			return contactInfos;
+		}
+
+		return contactInfos;
+	}
+
 	public List<ContactInfo> getContacts()
 	{
 		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, null, null, null, null, null);
@@ -336,11 +349,22 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public Set<String> getBlockedUsers()
 	{
 		Set<String> blocked = new HashSet<String>();
-		Cursor c = mReadDb.query(DBConstants.BLOCK_TABLE, new String[] { DBConstants.MSISDN}, null, null, null, null, null);
-		int idx = c.getColumnIndex(DBConstants.MSISDN);
-		while(c.moveToNext())
+		Cursor c = null;
+		try
 		{
-			blocked.add(c.getString(idx));
+			c = mReadDb.query(DBConstants.BLOCK_TABLE, new String[] { DBConstants.MSISDN}, null, null, null, null, null);
+			int idx = c.getColumnIndex(DBConstants.MSISDN);
+			while(c.moveToNext())
+			{
+				blocked.add(c.getString(idx));
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
 		}
 
 		return blocked;

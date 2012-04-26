@@ -63,6 +63,11 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		{
 			deletePreference.setOnPreferenceClickListener(this);
 		}
+		Preference unlinkPreference = getPreferenceScreen().findPreference(getString(R.string.unlink_key));
+		if (unlinkPreference != null)
+		{
+			unlinkPreference.setOnPreferenceClickListener(this);
+		}
 	}
 
 	@Override
@@ -117,7 +122,31 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 				@Override
 				public void onClick(DialogInterface dialog, int which) 
 				{
-					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this);
+					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, true);
+					setBlockingTask(task);
+					task.execute();
+				}
+			});
+			builder.setNegativeButton("No", new OnClickListener() 
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which) 
+				{
+				}
+			});
+			AlertDialog alertDialog = builder.create();
+			alertDialog.show();
+		}
+		else if (preference.getKey().equals(getString(R.string.unlink_key)))
+		{
+			Builder builder = new Builder(HikePreferences.this);
+			builder.setMessage("Are you sure you want to unlink your account from this phone?");
+			builder.setPositiveButton("Yes", new OnClickListener() 
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which) 
+				{
+					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, false);
 					setBlockingTask(task);
 					task.execute();
 				}

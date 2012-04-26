@@ -1,11 +1,12 @@
 package com.bsb.hike.adapters;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,25 +14,28 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.utils.Utils;
+import com.bsb.hike.models.ConvMessage;
 
 public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListener
 {
+	private Set<String> mInvitedUsers;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId)
 	{
 		super(activity, viewItemId, getItems(activity));
 		this.activity = activity;
+		mInvitedUsers = new HashSet<String>();
 	}
 
 	private static List<ContactInfo> getItems(Activity activity)
 	{
 		HikeUserDatabase db = new HikeUserDatabase(activity);
-		List<ContactInfo> contacts = db.getContacts();
+		List<ContactInfo> contacts = db.getNonHikeContacts();
 		db.close();
 		Collections.sort(contacts);
 		return contacts;
@@ -56,11 +60,12 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 		
 		Button button = (Button) v.findViewById(R.id.contact_button);
 		v.setTag(contactInfo);
-		if (contactInfo.isOnhike())
-		{
-			button.setEnabled(false);
-			button.setBackgroundResource(R.drawable.ic_contact_logo);
-		}
+
+		TextView invitedText = (TextView) v.findViewById(R.id.invited_text);
+
+		/* hide the button if the person has been invited */
+		button.setVisibility(mInvitedUsers.contains(contactInfo.getMsisdn()) ? View.INVISIBLE : View.VISIBLE);
+		invitedText.setVisibility(mInvitedUsers.contains(contactInfo.getMsisdn()) ? View.VISIBLE : View.INVISIBLE);
 
 		v.setOnClickListener(this);
 
@@ -75,15 +80,20 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 	public void onClick(View view)
 	{
 		ContactInfo info = (ContactInfo) view.getTag();
-		Intent intent = Utils.createIntentFromContactInfo(info);
-
-		if (!info.isOnhike())
+		String msisdn = info.getMsisdn();
+		if (info.isOnhike() || mInvitedUsers.contains(msisdn))
 		{
-			intent.putExtra(HikeConstants.Extras.INVITE, true);
+			return;
 		}
 
-		activity.setResult(Activity.RESULT_OK, intent);
-		activity.finish();
+		mInvitedUsers.add(info.getMsisdn());
+		long time = (long) System.currentTimeMillis() / 1000;
+		ConvMessage convMessage = new ConvMessage(
+				this.activity.getResources().getString(R.string.invite_message),
+				msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
+		convMessage.setInvite(true);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+		this.notifyDataSetChanged();
 	}
 
 	@Override
