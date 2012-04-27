@@ -183,6 +183,15 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 		enterEditText.setVisibility(View.VISIBLE);
 	}
 
+	private void prepareLayoutForSavingName()
+	{
+		hideAllViews();
+		mainIcon.setVisibility(View.VISIBLE);
+		mainIcon.setImageResource(R.drawable.ic_name_big);
+		loadingLayout.setVisibility(View.VISIBLE);
+		loadingText.setText(R.string.saving_name);
+	}
+	
 	private void setStepNo(TextView tv)
 	{
 		num1Text.setBackgroundDrawable(null);
@@ -261,14 +270,17 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 		Log.w("SignupActivity", "Current State " + mCurrentState.state.name() +" VALUE: "+value);
 		if (mCurrentState.state == State.ERROR)
 		{
-			mTask.cancelTask();
-			mTask = null;
-
+			if(mTask != null)
+			{
+				mTask.cancelTask();
+				mTask = null;
+			}
 			hideAllViews();
 			/*
 			 * In case the state is ERROR we are restart the SignupTask when the user clicks on the OK button, but for other states we need to start the task here itself
 			 */
 			Builder builder = new Builder(SignupActivity.this);
+			builder.setCancelable(false);
 			builder.setMessage("Unable to proceed. Check your network and try again.");
 			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 				
@@ -369,6 +381,10 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 				initializeViews(getNameLayout);
 				prepareLayoutForGettingName();
 			}
+			else
+			{
+				finishSignupProcess();
+			}
 			break;
 		case PIN:
 			//Manual entry for pin
@@ -389,7 +405,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 					}
 					else
 					{
-						finishSignupProcess();
+						prepareLayoutForSavingName();
 					}
 					if(mCurrentState.state == State.MSISDN || mCurrentState.state == State.PIN)
 					{
@@ -419,6 +435,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 					setStepNo(num3Text);
 					break;
 				}
+				
 			}
 		}
 	};
