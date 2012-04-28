@@ -22,10 +22,12 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 	private HikePreferences activity;
 	private boolean finished;
+	private boolean delete;
 
-	public DeleteAccountTask(HikePreferences activity)
+	public DeleteAccountTask(HikePreferences activity, boolean delete)
 	{
 		this.activity = activity;
+		this.delete = delete;
 	}
 
 	@Override
@@ -37,7 +39,10 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 		try
 		{
-			AccountUtils.deleteAccount();
+			if (this.delete)
+			{
+				AccountUtils.deleteAccount();
+			}
 			HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
 			app.disconnectFromService();
 			activity.stopService(new Intent(activity, HikeService.class));

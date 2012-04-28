@@ -7,6 +7,10 @@ public class DBConstants
 	
 	public static final int USERS_DATABASE_VERSION = 2;
 	
+	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
+	
+	public static final String CONVERSATIONS_METADATA = "metadata";
+	
 	public static final String CONVERSATIONS_DATABASE_NAME = "chats";
 	
 	public static final String CONVERSATIONS_TABLE = "conversations";

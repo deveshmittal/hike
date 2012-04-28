@@ -39,7 +39,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 														+ DBConstants.NAME +" STRING, "
 														+ DBConstants.MSISDN+" TEXT COLLATE nocase, "
 														+ DBConstants.ONHIKE+" INTEGER, "
-														+ DBConstants.PHONE+" TEXT "
+														+ DBConstants.PHONE+" TEXT, "
+														+ DBConstants.HAS_CUSTOM_PHOTO+" INTEGER "
 												+ " )";
 
 		db.execSQL(create);
@@ -118,19 +119,57 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
+	public void addBlockList(List<String> msisdns) throws DbException
+	{
+		if(msisdns == null)
+		{
+			return;
+		}
+		
+		SQLiteDatabase db = mDb;
+		db.beginTransaction();
+
+		try
+		{
+			InsertHelper ih = new InsertHelper(db, DBConstants.BLOCK_TABLE);
+			final int msisdnColumn = ih.getColumnIndex(DBConstants.MSISDN);
+			for (String msisdn : msisdns)
+			{
+				ih.prepareForReplace();
+				ih.bind(msisdnColumn, msisdn);
+				ih.execute();
+			}
+			db.setTransactionSuccessful();
+		}
+		catch (Exception e)
+		{
+			Log.e("HikeUserDatabase", "Unable to insert contacts", e);
+			throw new DbException(e);
+		}
+		finally
+		{
+			db.endTransaction();
+		}
+	}
+
 	/**
 	 * Sets the address book from the list of contacts Deletes any existing contacts from the db
 	 * 
 	 * @param contacts
 	 *            list of contacts to set/add
 	 */
-	public void setAddressBook(List<ContactInfo> contacts) throws DbException
+	public void setAddressBookAndBlockList(List<ContactInfo> contacts, List<String> blockedMsisdns) throws DbException
 	{
 		/* delete all existing entries from database */
 		mDb.delete(DBConstants.USERS_TABLE, null, null);
 
+		mDb.delete(DBConstants.BLOCK_TABLE, null, null);
+		
 		addContacts(contacts);
+		addBlockList(blockedMsisdns);
 	}
+	
+	
 
 	public Cursor findUsers(String partialName)
 	{
@@ -140,7 +179,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 															+ DBConstants.MSISDN+", "
 															+ DBConstants.ONHIKE+", "
 															+ DBConstants.ONHIKE+"=0 "+ "AS NotOnHike, "
-															+ DBConstants.PHONE
+															+ DBConstants.PHONE+", "
+															+ DBConstants.HAS_CUSTOM_PHOTO
 														+ " FROM " + DBConstants.USERS_TABLE
 														+ " WHERE (" + DBConstants.NAME+" LIKE ? OR "
 														+ DBConstants.MSISDN + " LIKE ? )"
@@ -152,7 +192,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public ContactInfo getContactInfoFromMSISDN(String msisdn)
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE }, DBConstants.MSISDN+"=?", new String[] { msisdn }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.MSISDN+"=?", new String[] { msisdn }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -171,17 +211,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		int nameIdx = c.getColumnIndex(DBConstants.NAME);
 		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
 		int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 		while (c.moveToNext())
 		{
-			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getInt(onhikeIdx) != 0,c.getString(phoneNumIdx));
+			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getInt(onhikeIdx) != 0,c.getString(phoneNumIdx), c.getInt(hasCustomPhotoIdx)==1);
 			contactInfos.add(contactInfo);
 		}
 		return contactInfos;
 	}
-
+	
 	public ContactInfo getContactInfoFromId(String id)
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE }, DBConstants.ID+"=?", new String[] { id }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.ID+"=?", new String[] { id }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -206,9 +247,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		addContacts(l);
 	}
 
-	public List<ContactInfo> getContacts()
+	public List<ContactInfo> getNonHikeContacts()
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE }, null, null, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE }, DBConstants.ONHIKE + "=0", null, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -216,6 +257,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			return contactInfos;
 		}
 
+		return contactInfos;
+	}
+
+	public List<ContactInfo> getContacts()
+	{
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, null, null, null, null, null);
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		c.close();
+		if (contactInfos.isEmpty())
+		{
+			return contactInfos;
+		}
 		return contactInfos;
 	}
 
@@ -268,7 +321,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public ContactInfo getContactInfoFromPhoneNo(String number)
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE }, 
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, 
 												DBConstants.PHONE + "=?", new String[] { number }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
@@ -301,11 +354,22 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public Set<String> getBlockedUsers()
 	{
 		Set<String> blocked = new HashSet<String>();
-		Cursor c = mReadDb.query(DBConstants.BLOCK_TABLE, new String[] { DBConstants.MSISDN}, null, null, null, null, null);
-		int idx = c.getColumnIndex(DBConstants.MSISDN);
-		while(c.moveToNext())
+		Cursor c = null;
+		try
 		{
-			blocked.add(c.getString(idx));
+			c = mReadDb.query(DBConstants.BLOCK_TABLE, new String[] { DBConstants.MSISDN}, null, null, null, null, null);
+			int idx = c.getColumnIndex(DBConstants.MSISDN);
+			while(c.moveToNext())
+			{
+				blocked.add(c.getString(idx));
+			}
+		}
+		finally
+		{
+			if (c != null)
+			{
+				c.close();
+			}
 		}
 
 		return blocked;
@@ -318,8 +382,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		vals.put(DBConstants.MSISDN, msisdn);
 		vals.put(DBConstants.IMAGE, data);
 		mDb.replace(DBConstants.THUMBNAILS_TABLE, null, vals);
+		
+		String whereClause = DBConstants.MSISDN + "=?"; //msisdn;
+		ContentValues customPhotoFlag = new ContentValues(1);
+		customPhotoFlag.put(DBConstants.HAS_CUSTOM_PHOTO, 1);
+		mDb.update(DBConstants.USERS_TABLE, customPhotoFlag, whereClause, new String[] {msisdn});
 	}
-
+	
 	public Drawable getIcon(String msisdn)
 	{
 		Cursor c = mDb.query(DBConstants.THUMBNAILS_TABLE, new String[]{DBConstants.IMAGE}, "msisdn=?", new String[] {msisdn}, null, null, null);

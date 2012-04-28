@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -80,8 +81,12 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 
 				public void onSuccess()
 				{
+					/* show a toast */
+					Toast toast = Toast.makeText(FeedbackActivity.this,
+									R.string.feedback_success,
+									Toast.LENGTH_SHORT);
+					toast.show();
 					finish();
-					//pass
 				}
 			});
 			JSONObject obj = new JSONObject();

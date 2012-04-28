@@ -546,7 +546,8 @@ public class HikeService extends Service
 
 			if (isUserOnline())
 			{
-				asyncStart();
+				HikeService.this.mMqttManager.disconnectFromBroker(false);
+				scheduleNextPing(HikeConstants.RECONNECT_TIME);
 			}
 
 			// we're finished - if the phone is switched off, it's okay for the CPU
