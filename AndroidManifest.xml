@@ -96,7 +96,7 @@
         </activity>
         <activity
             android:name=".ui.FeedbackActivity"
-            android:windowSoftInputMode="adjustResize|stateVisible"
+            android:windowSoftInputMode="adjustPan|stateHidden"
             android:theme="@android:style/Theme.NoTitleBar">
         </activity>
         <activity

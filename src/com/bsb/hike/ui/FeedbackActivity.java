@@ -8,12 +8,10 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ImageView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -22,11 +20,11 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 
-public class FeedbackActivity extends Activity implements FinishableEvent, OnEditorActionListener
+public class FeedbackActivity extends Activity implements FinishableEvent
 {
 
-	private TextView mFeedbackText;
-	private ImageView mFeedbackButton;
+	private EditText mFeedbackText;
+	private Button mFeedbackButton;
 	private HikeHTTPTask mTask;
 	private ProgressDialog mDialog;
 	private TextView mTitleView;
@@ -45,8 +43,8 @@ public class FeedbackActivity extends Activity implements FinishableEvent, OnEdi
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.feedback);
 
-		mFeedbackText = (TextView) findViewById(R.id.feedback);
-		mFeedbackButton = (ImageView) findViewById(R.id.title_icon);
+		mFeedbackText = (EditText) findViewById(R.id.feedback);
+		mFeedbackButton = (Button) findViewById(R.id.title_icon);
 		mTitleView = (TextView) findViewById(R.id.title);
 		mNameText = (TextView) findViewById(R.id.user_name);
 
@@ -55,8 +53,7 @@ public class FeedbackActivity extends Activity implements FinishableEvent, OnEdi
 
 		mNameText.setText(name);
 		mFeedbackButton.setVisibility(View.VISIBLE);
-		mFeedbackText.setOnEditorActionListener(this);
-		mFeedbackButton.setImageResource(R.drawable.sendbutton);
+		mFeedbackButton.setText(R.string.send);
 		mTitleView.setText(getResources().getString(R.string.feedback));
 
 		Object o = getLastNonConfigurationInstance();
@@ -137,17 +134,6 @@ public class FeedbackActivity extends Activity implements FinishableEvent, OnEdi
 		}
 
 		mTask = null;
-	}
-
-	@Override
-	public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
-	{
-		if ((v == mFeedbackText) &&
-				(actionId == EditorInfo.IME_ACTION_SEND))
-		{
-			onTitleIconClick(mFeedbackButton);
-		}
-		return false;
 	}
 
 }

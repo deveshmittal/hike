@@ -119,7 +119,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		final int timestampColumn = 3;
 		final int mappedMsgIdColumn = 4;
 		final int msisdnColumn = 5;
-
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
 		// 0 -> SENT_UNCONFIRMED ; 1 -> SENT_CONFIRMED ; 2 -> RECEIVED_UNREAD ;
@@ -128,6 +127,35 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		insertStatement.bindLong(timestampColumn, conv.getTimestamp());
 		insertStatement.bindLong(mappedMsgIdColumn, conv.getMappedMsgID());
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
+	}
+	
+	public boolean wasMessageReceived(ConvMessage conv)
+	{
+		Log.e("HikeConversationsDatabase", "CHECKING MESSAGE ID: "+conv.getMappedMsgID()+" MESSAGE TIMESTAMP: "+conv.getTimestamp());
+		Cursor c = mDb.query(
+				DBConstants.MESSAGES_TABLE+","+DBConstants.CONVERSATIONS_TABLE,
+				new String[] { DBConstants.MESSAGE },
+				DBConstants.MAPPED_MSG_ID + "=? AND "
+						+ DBConstants.TIMESTAMP + "=? AND "
+						+ DBConstants.CONVERSATIONS_TABLE 
+						+ "."
+						+ DBConstants.MSISDN +"=?",
+						new String[] { Long.toString(conv.getMappedMsgID()),
+						Long.toString(conv.getTimestamp()), conv.getMsisdn() }, null,
+						null, null);
+		int count = c.getCount();
+		c.close();
+		if (count == 0) 
+		{
+			Log.e("HikeConversationsDatabase", "THIS MESSSAGE IS NEWww");
+			return false;
+		} 
+		else 
+		{
+			Log.e("HikeConversationsDatabase",
+					"THIS MESSSAGE HAS ALREADY BEEN RECEIVED");
+			return true;
+		}
 	}
 
 	public void addConversations(List<ConvMessage> convMessages)

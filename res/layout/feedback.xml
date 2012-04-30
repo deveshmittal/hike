@@ -11,8 +11,8 @@
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:paddingBottom="10dp"
-        android:paddingTop="20dp" >
+        android:paddingBottom="50dp"
+        android:paddingTop="50dp" >
 
         <TextView
             android:layout_width="wrap_content"

@@ -20,6 +20,7 @@ import android.telephony.SmsMessage;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -218,7 +219,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 		else
 		{
-			publishProgress(new StateValue(State.MSISDN, "Done"));
+			publishProgress(new StateValue(State.MSISDN, HikeConstants.DONE));
 		}
 		
 		if (isCancelled())
@@ -286,7 +287,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 		else
 		{
-			publishProgress(new StateValue(State.ADDRESSBOOK, "Done"));
+			publishProgress(new StateValue(State.ADDRESSBOOK, HikeConstants.DONE));
 		}
 		
 		if (isCancelled())

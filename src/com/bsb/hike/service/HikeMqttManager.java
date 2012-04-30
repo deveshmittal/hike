@@ -679,7 +679,19 @@ public class HikeMqttManager implements Listener
 				boolean joined = NetworkManager.USER_JOINED.equals(type);
 				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
 			}
-
+			/*
+			 * Check if message was already received by the receiver
+			 */
+			if (NetworkManager.MESSAGE.equals(type))
+			{
+				Log.e("HikeMqttManager", "Checking if message exists");
+				ConvMessage convMessage = new ConvMessage(jsonObj);
+				if (convMessage!=null) {
+					if (this.convDb.wasMessageReceived(convMessage)) {
+						return;
+					}
+				}
+			}
 			/*
 			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
 			 */			

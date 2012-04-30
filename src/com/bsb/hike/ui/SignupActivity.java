@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.SignupTask;
@@ -183,6 +184,15 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 		enterEditText.setVisibility(View.VISIBLE);
 	}
 
+	private void prepareLayoutForSavingName()
+	{
+		hideAllViews();
+		mainIcon.setVisibility(View.VISIBLE);
+		mainIcon.setImageResource(R.drawable.ic_name_big);
+		loadingLayout.setVisibility(View.VISIBLE);
+		loadingText.setText(R.string.saving_name);
+	}
+	
 	private void setStepNo(TextView tv)
 	{
 		num1Text.setBackgroundDrawable(null);
@@ -261,16 +271,19 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 		Log.w("SignupActivity", "Current State " + mCurrentState.state.name() +" VALUE: "+value);
 		if (mCurrentState.state == State.ERROR)
 		{
-			mTask.cancelTask();
-			mTask = null;
-
+			if(mTask != null)
+			{
+				mTask.cancelTask();
+				mTask = null;
+			}
 			hideAllViews();
 			/*
 			 * In case the state is ERROR we are restart the SignupTask when the user clicks on the OK button, but for other states we need to start the task here itself
 			 */
 			Builder builder = new Builder(SignupActivity.this);
-			builder.setMessage("Unable to proceed. Check your network and try again.");
-			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			builder.setCancelable(false);
+			builder.setMessage(R.string.check_network);
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -310,7 +323,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 				enterEditText.setBackgroundResource(R.drawable.tb_phone);
 				enterEditText.setInputType(EditorInfo.TYPE_CLASS_PHONE);
 			}
-			else if (value.equals("Done"))
+			else if (value.equals(HikeConstants.DONE))
 			{
 				removeAnimation();
 				viewFlipper.setDisplayedChild(1);
@@ -337,7 +350,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 			}
 			break;
 		case ADDRESSBOOK:
-			if (value.equals("Done"))
+			if (value.equals(HikeConstants.DONE))
 			{
 				removeAnimation();
 				viewFlipper.setDisplayedChild(2);
@@ -369,6 +382,10 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 				initializeViews(getNameLayout);
 				prepareLayoutForGettingName();
 			}
+			else
+			{
+				finishSignupProcess();
+			}
 			break;
 		case PIN:
 			//Manual entry for pin
@@ -389,7 +406,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 					}
 					else
 					{
-						finishSignupProcess();
+						prepareLayoutForSavingName();
 					}
 					if(mCurrentState.state == State.MSISDN || mCurrentState.state == State.PIN)
 					{
@@ -419,6 +436,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 					setStepNo(num3Text);
 					break;
 				}
+				
 			}
 		}
 	};
