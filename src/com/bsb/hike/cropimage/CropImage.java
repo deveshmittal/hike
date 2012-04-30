@@ -77,7 +77,7 @@ public class CropImage extends MonitoredActivity {
 	private boolean mScale;
 	private boolean mScaleUp = true;
 
-	private boolean mDoFaceDetection = true;
+	private boolean mDoFaceDetection = false;
 
 	boolean mWaitingToPick; // Whether we are wait the user to pick a face.
 	boolean mSaving;  // Whether the "save" button is already clicked.
