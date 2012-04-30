@@ -686,10 +686,9 @@ public class HikeMqttManager implements Listener
 			{
 				Log.e("HikeMqttManager", "Checking if message exists");
 				ConvMessage convMessage = new ConvMessage(jsonObj);
-				if (convMessage!=null) {
-					if (this.convDb.wasMessageReceived(convMessage)) {
+				if (this.convDb.wasMessageReceived(convMessage)) 
+				{
 						return;
-					}
 				}
 			}
 			/*

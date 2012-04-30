@@ -145,17 +145,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 						null, null);
 		int count = c.getCount();
 		c.close();
-		if (count == 0) 
-		{
-			Log.e("HikeConversationsDatabase", "THIS MESSSAGE IS NEWww");
-			return false;
-		} 
-		else 
-		{
-			Log.e("HikeConversationsDatabase",
-					"THIS MESSSAGE HAS ALREADY BEEN RECEIVED");
-			return true;
-		}
+		return (count!=0);
 	}
 
 	public void addConversations(List<ConvMessage> convMessages)
