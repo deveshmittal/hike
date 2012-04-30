@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.SignupTask;
@@ -281,8 +282,8 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 			 */
 			Builder builder = new Builder(SignupActivity.this);
 			builder.setCancelable(false);
-			builder.setMessage("Unable to proceed. Check your network and try again.");
-			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			builder.setMessage(R.string.check_network);
+			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -322,7 +323,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 				enterEditText.setBackgroundResource(R.drawable.tb_phone);
 				enterEditText.setInputType(EditorInfo.TYPE_CLASS_PHONE);
 			}
-			else if (value.equals("Done"))
+			else if (value.equals(HikeConstants.DONE))
 			{
 				removeAnimation();
 				viewFlipper.setDisplayedChild(1);
@@ -349,7 +350,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 			}
 			break;
 		case ADDRESSBOOK:
-			if (value.equals("Done"))
+			if (value.equals(HikeConstants.DONE))
 			{
 				removeAnimation();
 				viewFlipper.setDisplayedChild(2);

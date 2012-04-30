@@ -89,4 +89,6 @@
 	<string name="save">Save</string>
 	<string name="saving_name">Saving name...</string>
 	<string name="feedback_success">Thanks for your feedback!</string>
+	<string name="check_network">Unable to proceed. Check your network and try again.</string>
+	<string name="ok">Ok</string>
 </resources>
