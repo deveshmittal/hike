@@ -131,7 +131,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	
 	public boolean wasMessageReceived(ConvMessage conv)
 	{
-		Log.e("HikeConversationsDatabase", "CHECKING MESSAGE ID: "+conv.getMappedMsgID()+" MESSAGE TIMESTAMP: "+conv.getTimestamp());
+		Log.d("HikeConversationsDatabase", "CHECKING MESSAGE ID: "+conv.getMappedMsgID()+" MESSAGE TIMESTAMP: "+conv.getTimestamp());
 		Cursor c = mDb.query(
 				DBConstants.MESSAGES_TABLE+","+DBConstants.CONVERSATIONS_TABLE,
 				new String[] { DBConstants.MESSAGE },
