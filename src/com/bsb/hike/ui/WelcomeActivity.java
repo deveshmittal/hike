@@ -20,10 +20,6 @@ public class WelcomeActivity extends UpdateAppBaseActivity
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
-		
-		// For starting the service and binding it to the app.
-		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
-		app.connectToService();
 	}
 
 	public void onClick(View v)
