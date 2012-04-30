@@ -397,7 +397,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 			
 			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if(actionId == EditorInfo.IME_ACTION_DONE && enterEditText.getText().length()>0)
+				if((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && enterEditText.getText().length()>0)
 				{
 					mTask.addUserInput(enterEditText.getText().toString());
 					if (mCurrentState.state != State.NAME) 
