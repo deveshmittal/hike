@@ -7,6 +7,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -56,6 +58,8 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 		mFeedbackButton.setText(R.string.send);
 		mTitleView.setText(getResources().getString(R.string.feedback));
 
+		mFeedbackButton.setEnabled(false);
+
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof HikeHTTPTask)
 		{
@@ -64,6 +68,31 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 			mTask.setActivity(this);
 			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));	
 		}
+		
+		mFeedbackText.addTextChangedListener(new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+				if(s.length() != 0 || selectedEmoticon != null)
+				{
+					mFeedbackButton.setEnabled(true);
+				}
+				else
+				{
+					mFeedbackButton.setEnabled(false);
+				}
+			}
+		});
 	}
 
 	public void onTitleIconClick(View view)
@@ -106,7 +135,8 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 	}
 
 	public void onEmoticonClicked(View view)
-	{
+	{	
+		mFeedbackButton.setEnabled(true);
 		if(selectedEmoticon != null)
 		{
 			selectedEmoticon.setSelected(false);
