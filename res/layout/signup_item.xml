@@ -2,126 +2,99 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:orientation="vertical" >
 
-    <ImageView
-        android:id="@+id/ic_big"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/enter_txt1"
+        style="@style/Text.Shadow.White"
+        android:gravity="center_horizontal" />
+
+    <TextView
+        android:id="@+id/enter_txt2"
+        style="@style/Text.Shadow.White"
+        android:gravity="center_horizontal" />
+
+    <EditText
+        android:id="@+id/et_enter"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="72dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="7dp"
+        android:background="@drawable/tb_phone"
+        android:imeOptions="actionDone"
+        android:singleLine="true"
+        android:textSize="15sp"
         android:visibility="visible" />
 
-    <ScrollView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="wrap_content" >
 
-        <LinearLayout
+        <Button
+            android:id="@+id/btn_continue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical" >
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="7dp"
+            android:background="@drawable/signup_button"
+            android:onClick="onClick"
+            android:textColor="@drawable/top_bar_btn_txt_selector"
+            style="@style/Text.Shadow.White.Bold" />
 
-            <RelativeLayout
-                android:id="@+id/loading_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone" >
+        <RelativeLayout
+            android:id="@+id/loading_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="7dp"
+            android:background="@drawable/signup_loading_bckg"
+            android:orientation="horizontal"
+            android:visibility="visible" >
 
-                <TextView
-                    android:id="@+id/txt_loading"
-                    style="@style/ButtonText"
-                    android:layout_width="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:paddingBottom="5dp"
-                    android:paddingTop="5dp"
-                    android:textColor="@color/signup_blue"
-                    android:textSize="22sp" />
-
-                <ProgressBar
-                    android:id="@+id/loading_progress"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@id/txt_loading"
-                    android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
-            </RelativeLayout>
+            <ProgressBar
+                android:id="@+id/loading_progress"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
             <TextView
-                android:id="@+id/txt_success_1"
-                style="@style/ButtonText"
-                android:layout_width="match_parent"
-                android:layout_gravity="center_horizontal"
-                android:paddingBottom="5dp"
-                android:paddingTop="5dp"
-                android:textSize="22sp"
-                android:visibility="gone" />
+                android:id="@+id/txt_loading"
+                style="@style/Text.Shadow.White"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp" />
+        </RelativeLayout>
+    </RelativeLayout>
 
-            <TextView
-                android:id="@+id/txt_success_2"
-                style="@style/ButtonText"
-                android:layout_width="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:paddingBottom="5dp"
-                android:paddingTop="5dp"
-                android:textSize="22sp"
-                android:visibility="gone" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp" >
 
-            <TextView
-                android:id="@+id/txt_enter"
-                style="@style/ButtonText"
-                android:layout_width="wrap_content"
-                android:textColor="@color/signup_blue"
-                android:textSize="22sp"
-                android:visibility="gone" />
+        <TextView
+            android:id="@+id/txt_wrong_number"
+            style="@style/Text.Shadow.White"
+            android:text="@string/wrong_number"
+            android:textSize="12sp"
+            android:visibility="visible" />
 
-            <EditText
-                android:id="@+id/et_enter"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="50dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/tb_phone"
-                android:imeOptions="actionDone"
-                android:singleLine="true"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/txt_wrong_number"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="40dp"
-                android:layout_marginTop="5dp"
-                android:gravity="left"
-                android:shadowColor="@color/black"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="0.5"
-                android:text="@string/wrong_number"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:visibility="gone" />
-
-            <TextView
-                android:id="@+id/txt_tap_here"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="40dp"
-                android:gravity="left"
-                android:shadowColor="@color/black"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="0.5"
-                android:text="@string/tap_here"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:visibility="gone" />
-        </LinearLayout>
-    </ScrollView>
+        <TextView
+            android:id="@+id/txt_tap_here"
+            style="@style/Text.Shadow.White"
+            android:layout_marginLeft="2dp"
+            android:text="@string/tap_here"
+            android:textColor="#66ccff"
+            android:textSize="12sp"
+            android:visibility="visible" />
+    </LinearLayout>
 
 </LinearLayout>

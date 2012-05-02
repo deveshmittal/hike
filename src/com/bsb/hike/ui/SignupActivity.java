@@ -1,38 +1,33 @@
 package com.bsb.hike.ui;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.WindowManager.BadTokenException;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.SignupTask;
-import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
-import com.bsb.hike.view.CustomLinearLayout;
-import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.bsb.hike.utils.Utils;
 
-public class SignupActivity extends UpdateAppBaseActivity implements FinishableEvent
+public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher
 {
 
 	private SignupTask mTask;
@@ -40,48 +35,58 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 	private StateValue mCurrentState;
 
 	private ViewFlipper viewFlipper;
-	private CustomLinearLayout pullingNoLayout;
-	private CustomLinearLayout scanContactsLayout;
-	private CustomLinearLayout getNameLayout;
-
-	private ImageView mainIcon;
+	private ViewGroup numLayout;
+	private ViewGroup pinLayout;
+	private ViewGroup nameLayout;
+	private ViewGroup booBooLayout;
+	
 	private TextView loadingText;
-	private RelativeLayout loadingLayout;
-	private TextView successText1;
-	private TextView successText2;
-	private TextView enterText;
+	private ViewGroup loadingLayout;
+	private TextView enterText1;
+	private TextView enterText2;
 	private EditText enterEditText;
 	private TextView wrongNumText;
 	private TextView tapHereText;
+	private Button submitBtn;
 
-	private TextView num1Text;
-	private TextView num2Text;
-	private TextView num3Text;
-
+	private Button tryAgainBtn;
 	private Handler mHandler;
 
+	private boolean addressBookError = false;
+
+	private static int NAME = 2;
+	private static int PIN = 1;
+	private static int NUMBER = 0;
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.signup);
-
+		
+		Utils.setCorrectOrientation(this);
 		viewFlipper = (ViewFlipper) findViewById(R.id.signup_viewflipper);
-		pullingNoLayout = (CustomLinearLayout) findViewById(R.id.pulling_no_layout);
-		scanContactsLayout = (CustomLinearLayout) findViewById(R.id.scanning_contact_layout);
-		getNameLayout = (CustomLinearLayout) findViewById(R.id.getting_name_layout);
-		
-		pullingNoLayout.setOnSoftKeyboardListener(onSoftKeyboardListener);
-		scanContactsLayout.setOnSoftKeyboardListener(onSoftKeyboardListener);
-		getNameLayout.setOnSoftKeyboardListener(onSoftKeyboardListener);
-		
-		num1Text = (TextView) findViewById(R.id.num1);
-		num2Text = (TextView) findViewById(R.id.num2);
-		num3Text = (TextView) findViewById(R.id.num3);
+		numLayout = (ViewGroup) findViewById(R.id.num_layout);
+		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
+		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
+		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
+		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
 
+		restartTask();
+
+		if(getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false))
+		{
+			viewFlipper.setDisplayedChild(NAME);
+			initializeViews(nameLayout);
+			prepareLayoutForGettingName();
+		}
+		else
+		{
+			initializeViews(numLayout);
+			prepareLayoutForFetchingNumber();
+		}
 		setAnimation();
-
-		restartService();
+		setListeners();
 	}
 
 	@Override
@@ -89,156 +94,180 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 	{
 		if (success)
 		{	
-			mHandler.postDelayed(new Runnable() {
-				
+			mHandler.postDelayed(new Runnable() 
+			{
 				@Override
-				public void run() {
+				public void run() 
+				{
 					Intent intent = new Intent(SignupActivity.this, MessagesList.class);
 					startActivity(intent);
 					finish();
 				}
-			}, 100);
+			}, 2500);
+		}
+		else if(mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
+		{
+			restartTask();
 		}
 	}
 
-	CustomLinearLayout.OnSoftKeyboardListener onSoftKeyboardListener = new OnSoftKeyboardListener() {
-
-		@Override
-		public void onShown() {
-			mainIcon.setVisibility(View.GONE);
-		}
-
-		@Override
-		public void onHidden() {
-			mainIcon.setVisibility(View.VISIBLE);
-		}
-	};
-
-	private void initializeViews(LinearLayout layout)
+	public void onClick(View v)
 	{
-		mainIcon = (ImageView) layout.findViewById(R.id.ic_big);
+		if (v.getId() == submitBtn.getId()) 
+		{
+			submitClicked();
+		}
+		else if(v.getId() == tryAgainBtn.getId())
+		{
+			restartTask();
+		}
+	}
+	
+	private void submitClicked()
+	{
+		loadingLayout.setVisibility(View.VISIBLE);
+		submitBtn.setVisibility(View.GONE);
+		wrongNumText.setVisibility(View.GONE);
+		tapHereText.setVisibility(View.GONE);
+		if (!addressBookError) 
+		{
+			mTask.addUserInput(enterEditText.getText().toString());
+		} 
+		else 
+		{
+			showErrorMsg();
+			addressBookError = false;
+		}
+	}
+
+	private void initializeViews(ViewGroup layout)
+	{
+		enterText1 = (TextView) layout.findViewById(R.id.enter_txt1);
+		enterText2 = (TextView) layout.findViewById(R.id.enter_txt2);
 		loadingText = (TextView) layout.findViewById(R.id.txt_loading);
-		loadingLayout = (RelativeLayout) layout.findViewById(R.id.loading_layout);
-		successText1 = (TextView) layout.findViewById(R.id.txt_success_1);
-		successText2 = (TextView) layout.findViewById(R.id.txt_success_2);
-		enterText = (TextView) layout.findViewById(R.id.txt_enter);
+		loadingLayout = (ViewGroup) layout.findViewById(R.id.loading_layout);
 		enterEditText = (EditText) layout.findViewById(R.id.et_enter);
 		wrongNumText = (TextView) layout.findViewById(R.id.txt_wrong_number);
 		tapHereText = (TextView) layout.findViewById(R.id.txt_tap_here);
+		submitBtn = (Button) layout.findViewById(R.id.btn_continue);
 	}
 
 	private void prepareLayoutForFetchingNumber()
 	{
-		setStepNo(num1Text);
-
+		initializeViews(numLayout);
 		hideAllViews();
-		mainIcon.setVisibility(View.VISIBLE);
-		mainIcon.setImageResource(R.drawable.ic_phone_big);
-		loadingLayout.setVisibility(View.VISIBLE);
-		loadingText.setText(R.string.pulling_digits);
-	}
-
-	private void prepareLayoutForScanningContacts()
-	{
-		hideAllViews();
-		mainIcon.setVisibility(View.VISIBLE);
-		mainIcon.setImageResource(R.drawable.ic_scanning_big);
-		loadingLayout.setVisibility(View.VISIBLE);
-		loadingText.setText(R.string.scanning_contacts);
-	}
-
-	private void prepareLayoutForGettingName()
-	{
-		hideAllViews();
-		prepareLayoutForAcceptingInput();
-		mainIcon.setImageResource(R.drawable.ic_name_big);
-		enterEditText.setBackgroundResource(R.drawable.tb_name);
-		enterText.setText(R.string.what_name);
-		enterEditText.setInputType(EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS);
+		
+		enterText1.setVisibility(View.VISIBLE);
+		enterText2.setVisibility(View.VISIBLE);
+		enterEditText.setVisibility(View.VISIBLE);
+		submitBtn.setVisibility(View.VISIBLE);
+		
+		enterText1.setText(R.string.old_fashioned);
+		enterText2.setText(R.string.enter_num);
+		enterEditText.setText("");
+		enterEditText.requestFocus();
+		enterEditText.setHint(R.string.phone_num);
+		enterEditText.setInputType(EditorInfo.TYPE_CLASS_PHONE);
+		loadingText.setText(R.string.waiting_pin);
+		submitBtn.setText(R.string.next);
 	}
 
 	private void prepareLayoutForGettingPin()
 	{
-		setStepNo(num1Text);
-
+		initializeViews(pinLayout);
 		hideAllViews();
-		prepareLayoutForAcceptingInput();
-		mainIcon.setImageResource(R.drawable.ic_phone_big);
-		enterText.setText(R.string.enter_pin);
-		enterEditText.setBackgroundResource(R.drawable.tb_pin);
-		enterEditText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+
+		enterText1.setVisibility(View.VISIBLE);
+		enterText2.setVisibility(View.VISIBLE);
+		enterEditText.setVisibility(View.VISIBLE);
+		submitBtn.setVisibility(View.VISIBLE);
 		wrongNumText.setVisibility(View.VISIBLE);
 		tapHereText.setVisibility(View.VISIBLE);
-		tapHereText.setOnClickListener(new OnClickListener() {
+
+		enterText1.setText(R.string.enter_pin1);
+		enterText2.setText(R.string.enter_pin2);
+		loadingText.setText(R.string.verifying_pin);
+		submitBtn.setText(R.string.next);
+		enterEditText.setText("");
+		enterEditText.requestFocus();
+		enterEditText.setHint(R.string.pin);
+		enterEditText.setBackgroundResource(R.drawable.tb_pin);
+		enterEditText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+
+		tapHereText.setOnClickListener(new OnClickListener() 
+		{
 			@Override
-			public void onClick(View v) {
-				restartService();
+			public void onClick(View v) 
+			{
+				Log.d("SignupActivity", "CHANGE MY NUMBER!!!");
+				mTask.addUserInput("");
 			}
 		});
 	}
-	
-	private void prepareLayoutForAcceptingInput()
+
+	private void prepareLayoutForGettingName()
 	{
-		mainIcon.setVisibility(View.VISIBLE);
-		enterText.setVisibility(View.VISIBLE);
+		initializeViews(nameLayout);
+		hideAllViews();
+
+		enterText1.setVisibility(View.VISIBLE);
+		enterText2.setVisibility(View.VISIBLE);
 		enterEditText.setVisibility(View.VISIBLE);
+		submitBtn.setVisibility(View.VISIBLE);
+		
+		if (mTask != null) 
+		{
+			enterText1.setText(getString(R.string.current_num) + " "
+					+ mTask.msisdn);
+		}
+		enterText2.setText(R.string.enter_name);
+		enterEditText.setText("");
+		enterEditText.requestFocus();
+		enterEditText.setHint(R.string.name);
+		enterEditText.setInputType(EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS);
+		loadingText.setText(R.string.scanning_contacts);
+		submitBtn.setText(R.string.done);
 	}
 
-	private void prepareLayoutForSavingName()
-	{
-		hideAllViews();
-		mainIcon.setVisibility(View.VISIBLE);
-		mainIcon.setImageResource(R.drawable.ic_name_big);
-		loadingLayout.setVisibility(View.VISIBLE);
-		loadingText.setText(R.string.saving_name);
-	}
-	
-	private void setStepNo(TextView tv)
-	{
-		num1Text.setBackgroundDrawable(null);
-		num1Text.setTextColor(getResources().getColor(R.color.white));
-		num2Text.setBackgroundDrawable(null);
-		num2Text.setTextColor(getResources().getColor(R.color.white));
-		num3Text.setBackgroundDrawable(null);
-		num3Text.setTextColor(getResources().getColor(R.color.white));
-
-		tv.setBackgroundResource(R.drawable.bg_number);
-		tv.setTextColor(getResources().getColor(R.color.signup_blue));
-	}
-	
-	private void finishSignupProcess()
-	{
-		hideAllViews();
-		mainIcon.setVisibility(View.VISIBLE);
-		mainIcon.setImageResource(R.drawable.ic_tick_big);
-		successText1.setVisibility(View.VISIBLE);
-		successText1.setText(R.string.all_set);
-	}
-	
-	private void hideAllViews()
-	{
-		mainIcon.setImageDrawable(null);
-		mainIcon.setVisibility(View.GONE);
+	private void hideAllViews() {
+		enterText1.setVisibility(View.GONE);
+		enterText2.setVisibility(View.GONE);
 		loadingLayout.setVisibility(View.GONE);
-		successText1.setVisibility(View.GONE);
-		successText2.setVisibility(View.GONE);
-		enterText.setVisibility(View.GONE);
 		enterEditText.setVisibility(View.GONE);
 		wrongNumText.setVisibility(View.GONE);
 		tapHereText.setVisibility(View.GONE);
+		submitBtn.setVisibility(View.GONE);
 	}
-	
-	private void restartService()
+
+	private void restartTask()
 	{
-		initializeViews(pullingNoLayout);
+		booBooLayout.setVisibility(View.GONE);
+		viewFlipper.setVisibility(View.VISIBLE);
+		removeAnimation();
+		viewFlipper.setDisplayedChild(NUMBER);
 		prepareLayoutForFetchingNumber();
-		if(mTask != null)
-		{
-			mTask.cancelTask();
-			mTask = null;
-		}
-		mTask = new SignupTask(this);
-		mTask.execute();
+		setAnimation();
+		mTask = SignupTask.startTask(this);
+		Log.d("SignupActivity", "SIGNUP TASK: " + mTask);
+	}
+
+	private void showErrorMsg()
+	{
+		loadingLayout.setVisibility(View.GONE);
+		submitBtn.setVisibility(View.VISIBLE);
+		
+		booBooLayout.setVisibility(View.VISIBLE);
+		viewFlipper.setVisibility(View.GONE);
+		
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(enterEditText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+	}
+
+	private void setListeners()
+	{
+		submitBtn.setEnabled(false);
+		enterEditText.setOnEditorActionListener(this);
+		enterEditText.addTextChangedListener(this);
 	}
 
 	@Override
@@ -264,43 +293,12 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 		viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_out_left));
 	}
 	
+	@Override
 	public void onProgressUpdate(StateValue stateValue)
 	{
 		String value = stateValue.value;
 		mCurrentState = stateValue;
-		Log.w("SignupActivity", "Current State " + mCurrentState.state.name() +" VALUE: "+value);
-		if (mCurrentState.state == State.ERROR)
-		{
-			if(mTask != null)
-			{
-				mTask.cancelTask();
-				mTask = null;
-			}
-			hideAllViews();
-			/*
-			 * In case the state is ERROR we are restart the SignupTask when the user clicks on the OK button, but for other states we need to start the task here itself
-			 */
-			Builder builder = new Builder(SignupActivity.this);
-			builder.setCancelable(false);
-			builder.setMessage(R.string.check_network);
-			builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					restartService();
-				}
-			});
-			AlertDialog alertDialog = builder.create();
-			try 
-			{
-				alertDialog.show();
-			} catch (BadTokenException e) 
-			{
-				restartService();
-				Log.e("SignupActivity", "Random crash for the alert dialog", e);
-			}
-			return;
-		}
+		Log.d("SignupActivity", "Current State " + mCurrentState.state.name() +" VALUE: "+value);
 
 		if(mHandler == null)
 		{
@@ -314,130 +312,91 @@ public class SignupActivity extends UpdateAppBaseActivity implements FinishableE
 			if (TextUtils.isEmpty(value))
 			{
 				Log.d("SignupActivity", "NO MSISDN");
-				/* couldn't auto-detect MSISDN, prompt the user via a popup */
-				initializeViews(pullingNoLayout);
-				hideAllViews();
-				prepareLayoutForAcceptingInput();
-				mainIcon.setImageResource(R.drawable.ic_phone_big);
-				enterText.setText(R.string.enter_number);
-				enterEditText.setBackgroundResource(R.drawable.tb_phone);
-				enterEditText.setInputType(EditorInfo.TYPE_CLASS_PHONE);
+				prepareLayoutForFetchingNumber();
 			}
 			else if (value.equals(HikeConstants.DONE))
 			{
 				removeAnimation();
-				viewFlipper.setDisplayedChild(1);
-				initializeViews(scanContactsLayout);
-				hideAllViews();
-				setStepNo(num2Text);
-				prepareLayoutForScanningContacts();
+				viewFlipper.setDisplayedChild(NAME);
+				prepareLayoutForGettingName();
 				setAnimation();
 			}
 			else
 			{
 				Log.d("SignupActivity", "HAVE MSISDN");
 				/* yay, got the actual MSISDN */
-				initializeViews(pullingNoLayout);
-				hideAllViews();
-				mainIcon.setVisibility(View.VISIBLE);
-				mainIcon.setImageResource(R.drawable.ic_tick_big);
-				successText1.setVisibility(View.VISIBLE);
-				successText2.setVisibility(View.VISIBLE);
-				successText1.setText(R.string.phone_number);
-				successText2.setText(value);
-
-				mHandler.postDelayed(flipView, 1500);
-			}
-			break;
-		case ADDRESSBOOK:
-			if (value.equals(HikeConstants.DONE))
-			{
-				removeAnimation();
-				viewFlipper.setDisplayedChild(2);
-				initializeViews(getNameLayout);
-				hideAllViews();
-				setStepNo(num3Text);
+				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName();
-				setAnimation();
-			}
-			else
-			{
-				// Finished scanning for contacts
-				initializeViews(scanContactsLayout);
-				hideAllViews();
-				setStepNo(num2Text);
-				mainIcon.setVisibility(View.VISIBLE);
-				mainIcon.setImageResource(R.drawable.ic_tick_big);
-				successText1.setVisibility(View.VISIBLE);
-				successText2.setVisibility(View.VISIBLE);
-				successText1.setText(R.string.got_it);
-				successText2.setText(R.string.one_more_step);
-				mHandler.postDelayed(flipView, 1500);
-			}
-			break;
-		case NAME:
-			if (TextUtils.isEmpty(value))
-			{
-				//Manual entry for name
-				initializeViews(getNameLayout);
-				prepareLayoutForGettingName();
-			}
-			else
-			{
-				finishSignupProcess();
 			}
 			break;
 		case PIN:
 			//Manual entry for pin
-			initializeViews(pullingNoLayout);
+			viewFlipper.setDisplayedChild(PIN);
+			initializeViews(pinLayout);
 			prepareLayoutForGettingPin();
+			setAnimation();
+			break;
+		case NAME:
+			if (TextUtils.isEmpty(value))
+			{
+				prepareLayoutForGettingName();
+			}
+			else
+			{
+				mHandler.postDelayed(new Runnable() 
+				{
+					
+					@Override
+					public void run() 
+					{
+						loadingText.setText(R.string.saving_name);
+					}
+				}, 1000);
+			}
+			break;
+		case ERROR:
+			if (value != null && value.equals(HikeConstants.ADDRESS_BOOK_ERROR)) 
+			{
+				addressBookError = true;
+				if(loadingLayout.getVisibility() == View.VISIBLE)
+				{
+					showErrorMsg();
+				}
+			}
+			else if (value == null || !value.equals(HikeConstants.CHANGE_NUMBER))
+			{
+				showErrorMsg();
+			}
 			break;
 		}
-		enterEditText.setOnEditorActionListener(new OnEditorActionListener() {
-			
-			@Override
-			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-				if((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && enterEditText.getText().length()>0)
-				{
-					mTask.addUserInput(enterEditText.getText().toString());
-					if (mCurrentState.state != State.NAME) 
-					{
-						enterEditText.setText("");
-					}
-					else
-					{
-						prepareLayoutForSavingName();
-					}
-					if(mCurrentState.state == State.MSISDN || mCurrentState.state == State.PIN)
-					{
-						prepareLayoutForFetchingNumber();
-					}
-				}
-				return false;
-			}
-		});
+		setListeners();
 	}
-	
-	private Runnable flipView = new Runnable() {
-		
-		@Override
-		public void run() {
-			if(viewFlipper != null)
-			{
-				Log.w("SignupActivity", "Current State in RUNNABLE " + mCurrentState.state.name());	
-				viewFlipper.showNext();
-				switch (mCurrentState.state) {
-				case MSISDN:
-					initializeViews(scanContactsLayout);
-					prepareLayoutForScanningContacts();
-					setStepNo(num2Text);
-					break;
-				case NAME:
-					setStepNo(num3Text);
-					break;
-				}
-				
-			}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		if(enterEditText.getText().length()==0)
+		{
+			submitBtn.setEnabled(false);
 		}
-	};
+		else
+		{
+			submitBtn.setEnabled(true);
+		}
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+	@Override
+	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event) {
+		if((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && enterEditText.getText().length()>0)
+		{
+			submitClicked();
+		}
+		return true;
+	}
 }

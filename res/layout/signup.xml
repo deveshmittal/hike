@@ -21,84 +21,43 @@
         android:layout_marginRight="20dp"
         android:background="@drawable/signup_header_dropshadow" />
 
-    <View
-        android:id="@+id/blank_view"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_alignParentBottom="true" />
-
-    <RelativeLayout
-        android:id="@+id/number_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/blank_view"
-        android:layout_marginBottom="50dp" >
-
-        <TextView
-            android:id="@+id/num2"
-            style="@style/ButtonText"
-            android:layout_width="wrap_content"
-            android:layout_centerInParent="true"
-            android:paddingLeft="9dp"
-            android:paddingRight="9dp"
-            android:text="2" />
-
-        <TextView
-            android:id="@+id/num1"
-            style="@style/ButtonText"
-            android:layout_width="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/num2"
-            android:background="@drawable/bg_number"
-            android:paddingLeft="9dp"
-            android:paddingRight="9dp"
-            android:text="1"
-            android:textColor="@color/signup_blue" />
-
-        <TextView
-            android:id="@+id/num3"
-            style="@style/ButtonText"
-            android:layout_width="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/num2"
-            android:paddingLeft="9dp"
-            android:paddingRight="9dp"
-            android:text="3" />
-    </RelativeLayout>
-
-    <ViewFlipper
+    <com.bsb.hike.view.MyViewFlipper
         android:id="@+id/signup_viewflipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/number_layout"
-        android:layout_below="@id/header_dropshadow" >
+        android:layout_below="@id/header_dropshadow"
+        android:layout_marginTop="10dp" >
 
-        <com.bsb.hike.view.CustomLinearLayout
-            android:id="@+id/pulling_no_layout"
+        <LinearLayout
+            android:id="@+id/num_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical" >
 
             <include layout="@layout/signup_item" />
-        </com.bsb.hike.view.CustomLinearLayout>
+        </LinearLayout>
 
-        <com.bsb.hike.view.CustomLinearLayout
-            android:id="@+id/scanning_contact_layout"
+        <LinearLayout
+            android:id="@+id/pin_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical" >
 
             <include layout="@layout/signup_item" />
-        </com.bsb.hike.view.CustomLinearLayout>
+        </LinearLayout>
 
-        <com.bsb.hike.view.CustomLinearLayout
-            android:id="@+id/getting_name_layout"
+        <LinearLayout
+            android:id="@+id/name_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical" >
 
             <include layout="@layout/signup_item" />
-        </com.bsb.hike.view.CustomLinearLayout>
-    </ViewFlipper>
+        </LinearLayout>
+    </com.bsb.hike.view.MyViewFlipper>
+
+    <include
+        android:layout_below="@id/header_dropshadow"
+        layout="@layout/boo_boo" />
 
 </RelativeLayout>
