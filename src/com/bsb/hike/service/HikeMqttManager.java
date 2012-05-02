@@ -64,7 +64,7 @@ public class HikeMqttManager implements Listener
 		@Override
 		public void onSuccess(Void value)
 		{
-			Log.d("HikeMqttManager", "Sucessfully disconnected");
+			Log.d("HikeMqttManager", "Sucessfully disconnected : "+reconnect);
 			if (mqttConnection != null)
 			{
 				mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
@@ -80,7 +80,7 @@ public class HikeMqttManager implements Listener
 		@Override
 		public void onFailure(Throwable value)
 		{
-			Log.d("HikeMqttManager", "Error disconnecting from server");
+			Log.d("HikeMqttManager", "Error disconnecting from server : "+reconnect);
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 			if (mqttConnection != null)
 			{
@@ -297,6 +297,8 @@ public class HikeMqttManager implements Listener
 	 */
 	private synchronized void connectToBroker()
 	{
+		Thread.dumpStack();
+		Log.d("HikeMqttManager", "calling connectToBroker "+connectionStatus);
 		if (connectionStatus == MQTTConnectionStatus.CONNECTING)
 		{
 			Log.d("HikeMqttManager", "called connectToBroker but already in CONNECTING state");
@@ -316,12 +318,13 @@ public class HikeMqttManager implements Listener
 
 		try {
 			// try to connect
+			Log.e("HikeMqttManager", "Trying to connect");
 			setConnectionStatus(MQTTConnectionStatus.CONNECTING);
-			handler.postDelayed(mConnectTimeoutHandler, 15*1000);
+			handler.postDelayed(mConnectTimeoutHandler, 60*1000);
 			mqttConnection.connect(new Callback<Void>() {
 				public void onFailure(Throwable value)
 				{
-					Log.e("HikeMqttManager", "Unable to connect", value);
+					Log.e("HikeMqttManager", "Hike Unable to connect", value);
 					if (value instanceof ConnectionException && ((ConnectionException) value).getCode().equals(ConnectionStatus.BAD_USERNAME_OR_PASSWORD))
 					{
 						Log.e("HikeMqttManager", "Invalid account credentials");
@@ -349,7 +352,7 @@ public class HikeMqttManager implements Listener
 				@Override
 				public void onSuccess(Void value)
 				{
-					Log.d("HikeMqttManager", "Connected");
+					Log.d("HikeMqttManager", "Hike Connected");
 					// inform the app that the app has successfully connected
 					setConnectionStatus(MQTTConnectionStatus.CONNECTED);
 					// we need to wake up the phone's CPU frequently enough so that the
@@ -417,8 +420,9 @@ public class HikeMqttManager implements Listener
 	/*
 	 * Terminates a connection to the message broker.
 	 */
-	public void disconnectFromBroker(boolean reconnect)
+	public synchronized void disconnectFromBroker(boolean reconnect)
 	{
+		Thread.dumpStack();
 		try
 		{
 			if (mqttConnection != null)
@@ -542,6 +546,19 @@ public class HikeMqttManager implements Listener
 			}
 			connect();
 		}
+	}
+	
+	public void reconnect(){
+		if(this.connectionStatus == MQTTConnectionStatus.CONNECTING)
+			return;
+		
+		if (mqttConnection != null)
+		{
+			mqttConnection.disconnect(new DisconnectCB(true));
+			mqttConnection = null;
+		}
+		setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+		connect();
 	}
 
 	public void connect()

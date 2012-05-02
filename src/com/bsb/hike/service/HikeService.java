@@ -542,12 +542,10 @@ public class HikeService extends Service
 
 			if (isUserOnline())
 			{
-				mHandler.post(new Runnable() 
-				{
+				mHandler.post(new Runnable() {
 					@Override
-					public void run() 
-					{
-						HikeService.this.mMqttManager.disconnectFromBroker(true);
+					public void run() {
+						HikeService.this.mMqttManager.reconnect();
 					}
 				});
 			}

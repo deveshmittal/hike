@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
@@ -47,9 +46,6 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		tcContinueLayout.setVisibility(View.VISIBLE);
 		commLayout.setVisibility(View.VISIBLE);
 		booBooLayout.setVisibility(View.GONE);
-		// For starting the service and binding it to the app.
-		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
-		app.connectToService();
 
 		tcText.setOnClickListener(new OnClickListener() 
 		{
