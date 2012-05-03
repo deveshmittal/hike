@@ -279,20 +279,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		return true;
 	}
 
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) 
-	{
-		if(mAdapter.getCount() == 0)
-		{
-			menu.findItem(R.id.deleteconversations).setVisible(false);
-		}
-		else
-		{
-			menu.findItem(R.id.deleteconversations).setVisible(true);
-		}
-		return true;
-	}
-
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent)
 	{
 		if (resultCode == RESULT_OK)
