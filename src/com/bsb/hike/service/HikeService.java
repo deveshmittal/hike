@@ -545,7 +545,7 @@ public class HikeService extends Service
 				mHandler.post(new Runnable() {
 					@Override
 					public void run() {
-						HikeService.this.mMqttManager.reconnect();
+						HikeService.this.mMqttManager.ping();
 					}
 				});
 			}
