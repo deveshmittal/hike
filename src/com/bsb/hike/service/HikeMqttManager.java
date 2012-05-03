@@ -451,7 +451,7 @@ public class HikeMqttManager implements Listener
 	public boolean isConnected()
 	{
 		Log.d("HikeMqttManager", "in isConnected status " + connectionStatus);
-		return MQTTConnectionStatus.CONNECTED == connectionStatus;
+		return (mqttConnection != null) && (MQTTConnectionStatus.CONNECTED == connectionStatus);
 	}
 
 	public MQTTConnectionStatus getConnectionStatus()
