@@ -24,7 +24,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/tb_phone"
         android:imeOptions="actionDone"
         android:singleLine="true"
@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="50dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/signup_button"
             android:onClick="onClick"
             android:textColor="@drawable/top_bar_btn_txt_selector"
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="50dp"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="20dp"
             android:background="@drawable/signup_loading_bckg"
             android:orientation="horizontal"
             android:visibility="visible" >
@@ -80,23 +80,24 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp" >
+        android:layout_marginTop="25dp" >
 
         <TextView
             android:id="@+id/txt_wrong_number"
             style="@style/Text.Shadow.White"
             android:text="@string/wrong_number"
-            android:textSize="12sp"
+            android:textSize="15sp"
             android:visibility="visible" />
 
-        <TextView
+        <Button
             android:id="@+id/txt_tap_here"
             style="@style/Text.Shadow.White"
             android:layout_marginLeft="2dp"
             android:text="@string/tap_here"
-            android:textColor="#66ccff"
-            android:textSize="12sp"
-            android:visibility="visible" />
+            android:textColor="@drawable/tap_here_txt_selector"
+            android:textSize="15sp"
+            android:visibility="visible"
+            android:background="@null" />
     </LinearLayout>
 
 </LinearLayout>

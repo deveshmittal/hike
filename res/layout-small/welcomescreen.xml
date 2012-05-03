@@ -27,13 +27,14 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_tc" />
 
-            <TextView
+            <Button
                 android:id="@+id/terms_and_conditions"
+                style="@style/Text.Shadow.SignUp"
                 android:layout_marginLeft="5dp"
                 android:gravity="center"
                 android:text="@string/terms_privacy"
                 android:textColor="@drawable/t_c_txt_selector"
-                style="@style/Text.Shadow.SignUp" />
+                android:background = "@null" />
         </LinearLayout>
 
         <Button
