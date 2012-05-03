@@ -241,7 +241,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		Conversation conv = mAdapter.getItem((int) info.id);
 		switch (item.getItemId())
 		{
-		case R.id.pin:
+		case R.id.shortcut:
 			Intent shortcutIntent = createIntentForConversation(conv);
 			Intent intent = new Intent();
 			Log.i("CreateShortcut", "Creating intent for broadcasting");
