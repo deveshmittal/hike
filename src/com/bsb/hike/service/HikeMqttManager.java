@@ -297,7 +297,6 @@ public class HikeMqttManager implements Listener
 	 */
 	private synchronized void connectToBroker()
 	{
-		Thread.dumpStack();
 		Log.d("HikeMqttManager", "calling connectToBroker "+connectionStatus);
 		if (connectionStatus == MQTTConnectionStatus.CONNECTING)
 		{
