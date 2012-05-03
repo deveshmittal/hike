@@ -178,11 +178,18 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
 	{
-		ProfileItem item = (ProfileItem) adapterView.getItemAtPosition(position);
-		Intent intent = item.getIntent(this);
-		if (intent != null)
+		if (position != 0) {
+			ProfileItem item = (ProfileItem) adapterView
+					.getItemAtPosition(position);
+			Intent intent = item.getIntent(this);
+			if (intent != null) {
+				startActivity(intent);
+			}
+		}
+		else 
 		{
-			startActivity(intent);			
+			Intent intent = new Intent(getApplicationContext(), CreditsActivity.class);
+			startActivity(intent);
 		}
 	}
 

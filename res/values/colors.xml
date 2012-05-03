@@ -24,4 +24,5 @@
     <color name="compose_background">#282828</color>
     <color name="signup_blue">#57b2ee</color>
     <color name="disabled">#80afd6</color>
+    <color name="subtext">#666666</color>
 </resources>

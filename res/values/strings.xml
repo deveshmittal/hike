@@ -106,4 +106,15 @@
 	<string name="boo_boo">Oh no! Systems boo boo!</string>
 	<string name="try_again">Try again</string>
 	<string name="if_you_see">If you see this more often send us a note <font color="@color/signup_blue"><u>here.</u></font></string>
+	<string name="friends">Friends</string>
+	<string name="sms_month">SMS\/Month</string>
+	<string name="your_free_sms">Your free SMS</string>
+	<string name="availble_month">Available this month</string>
+	<string name="free_sms">Want free SMS?</string>
+	<string name="every_month">Every month, you get 100 SMS. You can double this limit by inviting friends on Hike.</string>
+	<string name="invite_now">Invite Now</string>
+	<string name="friends_on_hike">Oh no! You have 0 friends on hike :(</string>
+	<string name="free_always_world">Free, always, worldwide!</string>
+	<string name="disclaimer_india">*Free SMS works within India only.</string>
+	<string name="hike_to_hike">Hike to Hike</string>
 </resources>
