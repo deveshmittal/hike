@@ -256,6 +256,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			this.msisdn = msisdn;
 			publishProgress(new StateValue(State.MSISDN, HikeConstants.DONE));
 		}
+		this.data = null;
 		// We're doing this to prevent the WelcomeScreen from being shown the next time we start the app.
 		Editor ed = signupTask.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		ed.putBoolean(HikeMessengerApp.ACCEPT_TERMS, true);
@@ -327,15 +328,17 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		
 		if (name == null)
 		{
-			/* publishing this will cause the the Activity to ask the user for a name and signal us */
-			publishProgress(new StateValue(State.NAME, ""));
 			try
 			{
-				synchronized(this)
+				if (this.data == null) 
 				{
-					this.wait();					
+					/* publishing this will cause the the Activity to ask the user for a name and signal us */
+					publishProgress(new StateValue(State.NAME, ""));
+					synchronized (this) 
+					{
+						this.wait();
+					}
 				}
-
 				name = this.data;
 				AccountUtils.setName(name);
 			}
@@ -450,6 +453,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		{
 			signupTask.execute();
 		}
+		return signupTask;
+	}
+	public static SignupTask restartTask(Activity activity)
+	{
+		if (signupTask!= null && signupTask.isRunning())
+		{
+			signupTask.cancelTask();
+		}
+		startTask(activity);
 		return signupTask;
 	}
 }

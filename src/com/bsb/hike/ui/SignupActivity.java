@@ -72,7 +72,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
 		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
 
-		restartTask();
+		startTask();
 
 		if(getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false))
 		{
@@ -221,7 +221,6 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 					+ mTask.msisdn);
 		}
 		enterText2.setText(R.string.enter_name);
-		enterEditText.setText("");
 		enterEditText.requestFocus();
 		enterEditText.setHint(R.string.name);
 		enterEditText.setInputType(EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS);
@@ -239,7 +238,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		submitBtn.setVisibility(View.GONE);
 	}
 
-	private void restartTask()
+	private void resetViewFlipper()
 	{
 		booBooLayout.setVisibility(View.GONE);
 		viewFlipper.setVisibility(View.VISIBLE);
@@ -247,25 +246,36 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		viewFlipper.setDisplayedChild(NUMBER);
 		prepareLayoutForFetchingNumber();
 		setAnimation();
+	}
+	private void restartTask()
+	{
+		resetViewFlipper();
+		mTask = SignupTask.restartTask(this);
+	}
+	
+	private void startTask()
+	{
+		resetViewFlipper();
 		mTask = SignupTask.startTask(this);
-		Log.d("SignupActivity", "SIGNUP TASK: " + mTask);
 	}
 
 	private void showErrorMsg()
 	{
 		loadingLayout.setVisibility(View.GONE);
 		submitBtn.setVisibility(View.VISIBLE);
-		
 		booBooLayout.setVisibility(View.VISIBLE);
 		viewFlipper.setVisibility(View.GONE);
-		
 		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(enterEditText.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+		imm.hideSoftInputFromWindow(enterEditText.getWindowToken(),
+				InputMethodManager.HIDE_NOT_ALWAYS);
 	}
 
 	private void setListeners()
 	{
-		submitBtn.setEnabled(false);
+		if (this.enterEditText.getText().length() == 0) 
+		{
+			submitBtn.setEnabled(false);
+		}
 		enterEditText.setOnEditorActionListener(this);
 		enterEditText.addTextChangedListener(this);
 	}
