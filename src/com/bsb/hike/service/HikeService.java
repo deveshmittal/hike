@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import android.app.AlarmManager;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -32,13 +31,10 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.R;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.tasks.CheckForUpdateTask;
-import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.HikeNotification;
 
 public class HikeService extends Service
 {
@@ -552,7 +548,6 @@ public class HikeService extends Service
 						HikeService.this.mMqttManager.reconnect();
 					}
 				});
-				
 			}
 
 			// we're finished - if the phone is switched off, it's okay for the CPU

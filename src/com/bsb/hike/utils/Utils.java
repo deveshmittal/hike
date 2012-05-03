@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -29,6 +30,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+import android.view.Display;
+import android.view.Surface;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
@@ -338,5 +341,33 @@ public class Utils
 			multiplier /=10;
 		}
 		return v;
+	}
+	
+	public static void setCorrectOrientation(Activity activity)
+	{
+		Display display= activity.getWindowManager().getDefaultDisplay();
+		
+		if(display.getRotation() == Surface.ROTATION_0)
+		{
+			if(display.getHeight()>display.getWidth())
+			{
+				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			}
+			else
+			{
+				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);	
+			}
+		}
+		else
+		{
+			if(display.getHeight()<display.getWidth())
+			{
+				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+			}
+			else
+			{
+				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);	
+			}
+		}
 	}
 }

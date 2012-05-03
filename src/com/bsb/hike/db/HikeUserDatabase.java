@@ -249,7 +249,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public List<ContactInfo> getNonHikeContacts()
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE }, DBConstants.ONHIKE + "=0", null, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE,DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.ONHIKE + "=0", null, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())

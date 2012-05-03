@@ -29,7 +29,6 @@
     <string name="service_running_message">Connected to Hike</string>
     <string name="forward">Forward</string>
     <string name="copy">Copy</string>
-    <string name="pin">Add shortcut</string>
     <string name="preferences">Preferences</string>
     <string name="welcome_screen_error_message">We are having some trouble connecting to the server.  Try again in a bit?</string>
     <string name="resend">Resend</string>
@@ -38,8 +37,6 @@
     <string name="smsFallbackText">Your Mobile Number could not be verified. Please enter your Mobile number below and click send to receive a pin to validate your credentials.</string>
     <string name="sms_pin_msg">Thanks!  We\'ve just sent you a verification PIN via SMS (don\'t worry, it\'s still free!).  Enter it below.</string>
     <string name="correctPhoneText">Enter correct number and try again.</string>
-    <string name="enter_pin">Enter pin received in the sms</string>
-    <string name="invalid_pin">Invalid Pin</string>
     <string name="enter_phone">Enter Phone number</string>
     <string name="invalid_phone">Cannot authenticate this Mobile Number. Kindly check Phone Number entered.</string>
     <string name="pin_hint">0000000000</string>
@@ -59,7 +56,7 @@
     <string name="updating_profile">Updating Profile</string>
     <string name="update_profile_failed">Could not update profile</string>
     <string name="get_started">Get Started</string>
-    <string name="welcome_message_1">Messaging simplified.</string>
+    <string name="welcome_message_1">Unlimited messaging.</string>
     <string name="welcome_message_2">Fun, free, forever.</string>
     <string name="image_failed">Unable to open image</string>
     <string name="block_title">Block</string>
@@ -78,7 +75,7 @@
 	<string name="enter_number">Enter your number:</string>
 	<string name="all_set">You\'re all set!</string>
 	<string name="feedback_hint">Tell me how you feel...</string>
-	<string name="wrong_number">Entered the wrong phone number?</string>
+	<string name="wrong_number">Entered a wrong number?</string>
 	<string name="tap_here"><u>Tap here</u></string>
 	<string name="block_overlay_message">You\'ve blocked %1$s.  Unblock and continue hiking.</string>
 	<string name="block_key">block</string>
@@ -87,8 +84,37 @@
 	<string name="how_hike_feel">How does Hike make you feel?</string>
 	<string name="edit">Edit</string>
 	<string name="save">Save</string>
-	<string name="saving_name">Saving name...</string>
+	<string name="saving_name">Getting you in...</string>
 	<string name="feedback_success">Thanks for your feedback!</string>
 	<string name="check_network">Unable to proceed. Check your network and try again.</string>
-	<string name="ok">Ok</string>
+	<string name="ok">OK</string>
+	<string name="phone_num">Phone Number</string>
+	<string name="pin">Pin</string>
+	<string name="name">Name</string>
+	<string name="old_fashioned">Let\'s do this old school.</string>
+	<string name="enter_num">What\'s your number?</string>
+	<string name="enter_pin1">Great! Did you get an SMS Pin?</string>
+	<string name="current_num">You\'re all set on</string>
+	<string name="enter_name">Setup your profile name.</string>
+	<string name="waiting_pin">Verifying number...</string>
+	<string name="next">Next</string>
+	<string name="done">Done</string>
+	<string name="invalid_pin">The pin you entered is invalid. Check and try again.</string>
+	<string name="verifying_pin">Verifying number...</string>
+	<string name="enter_pin2">Enter that here.</string>
+	<string name="terms_privacy">Terms and Privacy</string>
+	<string name="boo_boo">Oh no! Systems boo boo!</string>
+	<string name="try_again">Try again</string>
+	<string name="if_you_see">If you see this more often send us a note <font color="@color/signup_blue"><u>here.</u></font></string>
+	<string name="friends">Friends</string>
+	<string name="sms_month">SMS\/Month</string>
+	<string name="your_free_sms">Your free SMS</string>
+	<string name="availble_month">Available this month</string>
+	<string name="free_sms">Want free SMS?</string>
+	<string name="every_month">Every month, you get 100 SMS. You can double this limit by inviting friends on Hike.</string>
+	<string name="invite_now">Invite Now</string>
+	<string name="friends_on_hike">Oh no! You have 0 friends on hike :(</string>
+	<string name="free_always_world">Free, always, worldwide!</string>
+	<string name="disclaimer_india">*Free SMS works within India only.</string>
+	<string name="hike_to_hike">Hike to Hike</string>
 </resources>

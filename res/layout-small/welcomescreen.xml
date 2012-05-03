@@ -12,7 +12,7 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingBottom="60dp" >
+        android:paddingBottom="30dp" >
 
         <LinearLayout
             android:id="@+id/t_c_layout"

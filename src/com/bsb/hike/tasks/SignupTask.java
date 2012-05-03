@@ -25,14 +25,12 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 
 public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> implements ActivityCallableTask
 {
-	
 	private class SMSReceiver extends BroadcastReceiver
 	{
 		@Override
@@ -58,6 +56,11 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 	}
 
+	public interface OnSignupTaskProgressUpdate extends FinishableEvent
+	{
+		public void onProgressUpdate(StateValue value);
+	}
+	
 	public enum State
 	{
 		MSISDN,
@@ -78,17 +81,37 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 	};
 
-	private SignupActivity signupActivity;
 	private Context context;
 	private String data;
 	private SMSReceiver receiver;
+	private static SignupTask signupTask;
+	private OnSignupTaskProgressUpdate onSignupTaskProgressUpdate;
+	private boolean isRunning = false;
+	public String msisdn;
+	
+	public boolean isRunning() {
+		return isRunning;
+	}
 
-	public SignupTask(SignupActivity activity)
+	private SignupTask(Activity activity)
 	{
-		this.signupActivity = activity;
+		this.onSignupTaskProgressUpdate = (OnSignupTaskProgressUpdate) activity;
 		this.context = activity;
 	}
 
+	public static SignupTask getSignupTask(Activity activity)
+	{
+		if (signupTask == null) 
+		{
+			signupTask = new SignupTask(activity);
+		}
+		else
+		{
+			signupTask.setActivity(activity);
+		}
+		return signupTask;
+	}
+	
 	public void addUserInput(String string)
 	{
 		this.data = string;
@@ -101,6 +124,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
+		isRunning = true;
 		SharedPreferences settings = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		boolean ab_scanned = settings.getBoolean(HikeMessengerApp.ADDRESS_BOOK_SCANNED, false);
@@ -139,13 +163,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				catch (InterruptedException e)
 				{
 					Log.d("SignupTask", "Interrupted exception while waiting for msisdn", e);
-					publishProgress(new StateValue(State.MSISDN, null));
+					publishProgress(new StateValue(State.ERROR, null));
 					return Boolean.FALSE;
 				}
-
+				
 				String number = this.data;
 				this.data = null;
-
+				Log.d("SignupTask", "NUMBER RECEIVED: "+number);
 				/* register broadcast receiver to get the actual PIN code, and pass it to us */
 				IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
 				intentFilter.setPriority(99);
@@ -175,36 +199,45 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 				this.context.getApplicationContext().unregisterReceiver(receiver);
 				receiver = null;
-				
-				if(this.data == null){
-					data="";
+
+				accountInfo = null;
+				if (this.data == null) 
+				{
+					data = "";
 					publishProgress(new StateValue(State.PIN, data));
-					
-					synchronized (this)
+
+					synchronized (this) 
 					{
-						try
+						try 
 						{
 							this.wait();
-						}
-						catch (InterruptedException e)
+						} 
+						catch (InterruptedException e) 
 						{
-							Log.e("SignupTask", "Task was interrupted while taking the pin", e);
+							Log.e("SignupTask",
+									"Task was interrupted while taking the pin",
+									e);
 						}
 					}
 				}
-				
-				if (isCancelled())
+				if (isCancelled()) 
 				{
 					/* just gtfo */
 					Log.d("SignupTask", "Task was cancelled");
 					return Boolean.FALSE;
 				}
-
-				accountInfo = null;
 				String pin = this.data;
-				accountInfo = AccountUtils.registerAccount(pin, unauthedMSISDN);
-				if (accountInfo == null)
+				if (TextUtils.isEmpty(pin)) 
 				{
+					publishProgress(new StateValue(State.ERROR, HikeConstants.CHANGE_NUMBER));
+					signupTask = null;
+					return Boolean.FALSE;
+				}
+				accountInfo = AccountUtils.registerAccount(pin,
+						unauthedMSISDN);
+				if (accountInfo == null) 
+				{
+					this.data = null;
 					publishProgress(new StateValue(State.ERROR, null));
 					return Boolean.FALSE;
 				}
@@ -212,6 +245,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 			Log.d("SignupTask", "saving MSISDN/Token");
 			msisdn = accountInfo.msisdn;
+			this.msisdn = msisdn;
 			/* save the new msisdn */
 			Utils.savedAccountCredentials(accountInfo, settings.edit());
 			/* msisdn set, yay */
@@ -219,9 +253,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 		else
 		{
+			this.msisdn = msisdn;
 			publishProgress(new StateValue(State.MSISDN, HikeConstants.DONE));
 		}
-		
+		// We're doing this to prevent the WelcomeScreen from being shown the next time we start the app.
+		Editor ed = signupTask.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		ed.putBoolean(HikeMessengerApp.ACCEPT_TERMS, true);
+		ed.commit();
+
 		if (isCancelled())
 		{
 			/* just gtfo */
@@ -231,17 +270,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		/* scan the addressbook */
 		if (!ab_scanned)
 		{
-			synchronized (this) {
-				try 
-				{
-					this.wait(1000);
-				} 
-				catch (InterruptedException e)
-				{
-					Log.e("SignupTask", "Task was interrupted while waiting", e);
-				}
-			}
-
 			String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 			List<ContactInfo> contactinfos = ContactUtils.getContacts(this.context);
 			HikeUserDatabase db = null;
@@ -267,7 +295,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			catch (Exception e)
 			{
 				Log.e("SignupTask", "Unable to post address book", e);
-				publishProgress(new StateValue(State.ERROR, null));
+				publishProgress(new StateValue(State.ERROR, HikeConstants.ADDRESS_BOOK_ERROR));
 				return Boolean.FALSE;
 			}
 			finally
@@ -297,17 +325,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			return Boolean.FALSE;
 		}
 		
-		synchronized (this) {
-			try 
-			{
-				this.wait(1000);
-			} 
-			catch (InterruptedException e)
-			{
-				Log.e("SignupTask", "Task was interrupted while waiting", e);
-			}
-		}
-		
 		if (name == null)
 		{
 			/* publishing this will cause the the Activity to ask the user for a name and signal us */
@@ -325,7 +342,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			catch (InterruptedException e)
 			{
 				Log.e("SignupTask", "Interrupted exception while waiting for name", e);
-				publishProgress(new StateValue(State.NAME, null));
+				publishProgress(new StateValue(State.ERROR, null));
 				return Boolean.FALSE;
 			}
 			catch (NetworkErrorException e)
@@ -354,39 +371,39 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	
 	@Override
 	protected void onCancelled() 
-	{
-		Log.d("SignupTask", "onCancelled called");
-		/*
-		 * For removing intent when finishing the activity
-		 */
-		if (receiver != null)
+	{	
+		if (signupTask != null) 
 		{
-			try {
-				this.context.getApplicationContext().unregisterReceiver(receiver);
-			} catch (IllegalArgumentException e) {
-				Log.d("SignupTask", "IllegalArgumentException while unregistering receiver", e);
-			}
-			receiver = null;
+			signupTask.isRunning = false;
 		}
+		signupTask = null;
+		Log.d("SignupTask", "onCancelled called");
+		unregisterReceiver();
 	}
 	
 	@Override
 	protected void onPostExecute(Boolean result)
 	{
-		signupActivity.onFinish(result.booleanValue());
+		
+		if (signupTask != null) 
+		{
+			signupTask.isRunning = false;
+		}
+		signupTask = null;
+		onSignupTaskProgressUpdate.onFinish(result.booleanValue());
 	}
 
 	@Override
 	protected void onProgressUpdate(StateValue... values)
 	{
-		signupActivity.onProgressUpdate(values[0]);
+		onSignupTaskProgressUpdate.onProgressUpdate(values[0]);
 	}
 
 	@Override
 	public void setActivity(Activity activity)
 	{
 		this.context = activity;
-		this.signupActivity = (SignupActivity) activity;
+		this.onSignupTaskProgressUpdate = (OnSignupTaskProgressUpdate) activity;
 	}
 
 	@Override
@@ -398,19 +415,41 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	public void cancelTask()
 	{
 		this.cancel(true);
+		if (signupTask != null) 
+		{
+			signupTask.isRunning = false;
+		}
+		signupTask = null;
 		Log.d("SignupTask", "cancelling it manually");
-		/*
-		 * For removing intent when finishing the activity
-		 */
+		unregisterReceiver();
+	}
+	
+	/*
+	 * For removing intent when finishing the activity
+	 */
+	private void unregisterReceiver()
+	{
 		if (receiver != null)
 		{
-			try {
+			try
+			{
 				this.context.unregisterReceiver(receiver);
-			} catch (IllegalArgumentException e) {
+			} 
+			catch (IllegalArgumentException e) 
+			{
 				Log.d("SignupTask", "IllegalArgumentException while unregistering receiver", e);
 			}
 			receiver = null;
 		}
 	}
-
+	
+	public static SignupTask startTask(Activity activity)
+	{
+		getSignupTask(activity);
+		if (!signupTask.isRunning())
+		{
+			signupTask.execute();
+		}
+		return signupTask;
+	}
 }
