@@ -223,6 +223,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		enterText2.setText(R.string.enter_name);
 		enterEditText.requestFocus();
 		enterEditText.setHint(R.string.name);
+		enterEditText.setBackgroundResource(R.drawable.tb_name);
 		enterEditText.setInputType(EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS);
 		loadingText.setText(R.string.scanning_contacts);
 		submitBtn.setText(R.string.done);
