@@ -62,14 +62,15 @@
                 android:layout_height="25dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="10dp"
                 android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
             <TextView
                 android:id="@+id/txt_loading"
-                style="@style/Text.Shadow.White"
-                android:layout_centerHorizontal="true"
+                style="@style/Text.Shadow.Loading"
+                android:layout_toRightOf="@id/loading_progress"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
                 android:paddingBottom="8dp"
                 android:paddingTop="8dp" />
         </RelativeLayout>
