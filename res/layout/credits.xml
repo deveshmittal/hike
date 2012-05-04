@@ -121,7 +121,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:background="@drawable/rounded_button"
+                    android:background="@drawable/invite_btn_bckg_selector"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
                     android:text="@string/invite_now"
                     android:textColor="@color/white"
                     android:textStyle="bold" />
