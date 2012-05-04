@@ -694,6 +694,7 @@ public class HikeMqttManager implements Listener
 				Log.d("HikeMqttManager", "UPDATING USER LIST: "+ msisdn);
 				boolean joined = NetworkManager.USER_JOINED.equals(type);
 				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
+				this.convDb.updateOnHikeStatus(msisdn, joined);
 			}
 			/*
 			 * Check if message was already received by the receiver
