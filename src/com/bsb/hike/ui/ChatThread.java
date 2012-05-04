@@ -30,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -717,7 +718,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void initializeBlockOverlay()
 	{
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		mBlockedUserOverlay.setVisibility(View.VISIBLE);
+		// To prevent the views in the background from being clickable
+		mBlockedUserOverlay.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) {}
+		});
 		TextView message = (TextView) mBlockedUserOverlay.findViewById(R.id.block_overlay_message);
 
 		/* bold the blocked users name */
