@@ -297,7 +297,6 @@ public class HikeMqttManager implements Listener
 	 */
 	private synchronized void connectToBroker()
 	{
-		Thread.dumpStack();
 		Log.d("HikeMqttManager", "calling connectToBroker "+connectionStatus);
 		if (connectionStatus == MQTTConnectionStatus.CONNECTING)
 		{
@@ -338,6 +337,7 @@ public class HikeMqttManager implements Listener
 
 					mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect - will retry later");
 
+					mqttConnection = null; /* set the connection to null since it's no longer valid */
 					/* if something has failed, we wait for one keep-alive period before
 					 * trying again
 					 * in a real implementation, you would probably want to keep count
@@ -422,7 +422,6 @@ public class HikeMqttManager implements Listener
 	 */
 	public synchronized void disconnectFromBroker(boolean reconnect)
 	{
-		Thread.dumpStack();
 		try
 		{
 			if (mqttConnection != null)

@@ -241,7 +241,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		Conversation conv = mAdapter.getItem((int) info.id);
 		switch (item.getItemId())
 		{
-		case R.id.pin:
+		case R.id.shortcut:
 			Intent shortcutIntent = createIntentForConversation(conv);
 			Intent intent = new Intent();
 			Log.i("CreateShortcut", "Creating intent for broadcasting");
@@ -276,20 +276,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) 
-	{
-		if(mAdapter.getCount() == 0)
-		{
-			menu.findItem(R.id.deleteconversations).setVisible(false);
-		}
-		else
-		{
-			menu.findItem(R.id.deleteconversations).setVisible(true);
-		}
 		return true;
 	}
 
