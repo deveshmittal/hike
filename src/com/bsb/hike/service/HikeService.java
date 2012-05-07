@@ -360,6 +360,7 @@ public class HikeService extends Service
 
 		// disconnect immediately
 		this.mMqttManager.disconnectFromBroker(false);
+		this.mMqttManager.finish();
 
 		// inform the app that the app has successfully disconnected
 		Log.i("HikeService", "onDestroy.  Shutting down service");
