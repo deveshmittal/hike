@@ -542,7 +542,7 @@ public class HikeMqttManager implements Listener
 	public void ping()
 	{
 		Log.d("HikeMqttManager", "calling ping");
-		if (connectionStatus != MQTTConnectionStatus.CONNECTED || 
+		if (!isConnected() || 
 				!mqttConnection.ping())
 		{
 			Log.d("HikeMqttManager", "App isn't connected, reconnecting");
