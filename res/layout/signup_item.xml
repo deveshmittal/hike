@@ -62,14 +62,15 @@
                 android:layout_height="25dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="10dp"
                 android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
             <TextView
                 android:id="@+id/txt_loading"
-                style="@style/Text.Shadow.White"
-                android:layout_centerHorizontal="true"
+                style="@style/Text.Shadow.Loading"
+                android:layout_toRightOf="@id/loading_progress"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
                 android:paddingBottom="8dp"
                 android:paddingTop="8dp" />
         </RelativeLayout>
@@ -87,14 +88,15 @@
             android:textSize="12sp"
             android:visibility="visible" />
 
-        <TextView
+        <Button
             android:id="@+id/txt_tap_here"
             style="@style/Text.Shadow.White"
             android:layout_marginLeft="2dp"
             android:text="@string/tap_here"
-            android:textColor="#66ccff"
+            android:textColor="@drawable/tap_here_txt_selector"
             android:textSize="12sp"
-            android:visibility="visible" />
+            android:visibility="visible"
+            android:background="@null" />
     </LinearLayout>
 
 </LinearLayout>

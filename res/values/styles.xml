@@ -13,6 +13,12 @@
         <item name="android:shadowRadius">2</item>
     </style>
 	
+    <style name="Text.Shadow.Loading">
+        <item name="android:textColor">@color/loading</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
     <style name="Text.Shadow.White.Bold">
         <item name="android:textStyle">bold</item>
     </style>

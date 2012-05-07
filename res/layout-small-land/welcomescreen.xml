@@ -27,14 +27,15 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_tc" />
 
-            <TextView
+            <Button
                 android:id="@+id/terms_and_conditions"
                 style="@style/Text.Shadow.SignUp"
                 android:layout_marginLeft="5dp"
                 android:gravity="center"
                 android:text="@string/terms_privacy"
                 android:textColor="@drawable/t_c_txt_selector"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:background = "@null" />
         </LinearLayout>
 
         <Button
@@ -67,19 +68,19 @@
                 android:layout_height="25dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="10dp"
                 android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
             <TextView
                 android:id="@+id/txt_loading"
-                style="@style/Text.Shadow.White"
+                style="@style/Text.Shadow.Loading"
                 android:layout_width="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
+                android:layout_centerInParent="true"
                 android:paddingBottom="4dp"
                 android:paddingTop="4dp"
                 android:text="@string/pulling_digits"
                 android:textSize="13sp" />
+
         </RelativeLayout>
     </RelativeLayout>
 

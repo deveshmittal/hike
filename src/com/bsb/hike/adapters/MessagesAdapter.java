@@ -1,13 +1,13 @@
 package com.bsb.hike.adapters;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import android.content.Context;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,7 +19,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
-public class MessagesAdapter extends ArrayAdapter<ConvMessage>
+public class MessagesAdapter extends BaseAdapter
 {
 
 	private enum ViewType
@@ -38,10 +38,13 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 	}
 
 	private Conversation conversation;
+	private ArrayList<ConvMessage> convMessages;
+	private Context context;
 
-	public MessagesAdapter(Context context, List<ConvMessage> objects, Conversation conversation)
+	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation)
 	{
-		super(context, -1, objects);
+		this.context = context;
+		this.convMessages = objects; 
 		this.conversation = conversation;
 	}
 
@@ -79,7 +82,6 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		Context context = getContext();
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		ConvMessage convMessage = getItem(position);
@@ -179,5 +181,20 @@ public class MessagesAdapter extends ArrayAdapter<ConvMessage>
 		ConvMessage current = getItem(position);
 		ConvMessage previous = getItem(position - 1);
 		return (current.getTimestamp() - previous.getTimestamp() > 60*10);
+	}
+
+	@Override
+	public int getCount() {
+		return convMessages.size();
+	}
+
+	@Override
+	public ConvMessage getItem(int position) {
+		return convMessages.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
 	}
 }

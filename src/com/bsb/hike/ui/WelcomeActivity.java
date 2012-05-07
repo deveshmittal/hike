@@ -22,7 +22,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	private Button mAcceptButton;
 	private SignupTask mTask;
 	private ViewGroup loadingLayout;
-	private TextView tcText;
+	private Button tcText;
 	
 	private ViewGroup tcContinueLayout;
 	private ViewGroup commLayout;
@@ -36,7 +36,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		Utils.setCorrectOrientation(this);
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
-		tcText = (TextView) findViewById(R.id.terms_and_conditions);
+		tcText = (Button) findViewById(R.id.terms_and_conditions);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		commLayout = (ViewGroup) findViewById(R.id.comm_layout);

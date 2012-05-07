@@ -46,7 +46,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	private TextView enterText2;
 	private EditText enterEditText;
 	private TextView wrongNumText;
-	private TextView tapHereText;
+	private Button tapHereText;
 	private Button submitBtn;
 
 	private Button tryAgainBtn;
@@ -148,7 +148,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		loadingLayout = (ViewGroup) layout.findViewById(R.id.loading_layout);
 		enterEditText = (EditText) layout.findViewById(R.id.et_enter);
 		wrongNumText = (TextView) layout.findViewById(R.id.txt_wrong_number);
-		tapHereText = (TextView) layout.findViewById(R.id.txt_tap_here);
+		tapHereText = (Button) layout.findViewById(R.id.txt_tap_here);
 		submitBtn = (Button) layout.findViewById(R.id.btn_continue);
 	}
 
@@ -404,7 +404,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 
 	@Override
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event) {
-		if((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && enterEditText.getText().length()>0)
+		if((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && enterEditText.getText().length()>0 && loadingLayout.getVisibility() != View.VISIBLE)
 		{
 			submitClicked();
 		}

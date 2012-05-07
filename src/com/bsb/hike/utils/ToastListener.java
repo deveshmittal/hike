@@ -92,7 +92,6 @@ public class ToastListener implements Listener
 		/* only show the trying to connect message after we've connected once */
 		SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		boolean connectedOnce = settings.getBoolean(HikeMessengerApp.CONNECTED_ONCE, false);
-
 		if (status == HikeMqttManager.MQTTConnectionStatus.CONNECTED)
 		{
 			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -101,6 +100,7 @@ public class ToastListener implements Listener
 			{
 				Editor editor = settings.edit();
 				editor.putBoolean(HikeMessengerApp.CONNECTED_ONCE, true);
+				editor.commit();
 			}
 			return;
 		}
@@ -134,10 +134,11 @@ public class ToastListener implements Listener
 			break;
 		case NOTCONNECTED_USERDISCONNECT:
 			id = R.string.notconnected_no_internet;
-		}
-
-		if (id < 0)
-		{
+			break;
+		case NOTCONNECTED_UNKNOWNREASON:
+			id = R.string.notconnected_no_internet;
+			break;
+		default:
 			return;
 		}
 

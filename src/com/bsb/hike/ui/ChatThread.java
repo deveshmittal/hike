@@ -1,7 +1,6 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -62,8 +62,10 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomLinearLayout;
+import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
-public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnItemClickListener
+public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnItemClickListener, OnSoftKeyboardListener
 {
 	private HikePubSub mPubSub;
 
@@ -123,6 +125,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private View mBlockedUserOverlay;
 
+	private ArrayList<ConvMessage> messages;
+
+	private boolean shouldScrollToBottom = true;
+
+	private CustomLinearLayout chatLayout;
+
+	private Handler mHandler;
 	@Override
 	protected void onPause()
 	{
@@ -316,7 +325,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		app.connectToService();
 
 		setContentView(R.layout.chatthread);
+		
 		/* bind views to variables */
+		chatLayout = (CustomLinearLayout) findViewById(R.id.chat_layout);
 		mBottomView = findViewById(R.id.bottom_panel);
 		mMetadataView = findViewById(R.id.sms_chat_metadata);
 		mInputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
@@ -342,6 +353,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mComposeView.setOnEditorActionListener(this);
 
 		mConversationDb = new HikeConversationsDatabase(this);
+
+		chatLayout.setOnSoftKeyboardListener(this);
 
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
@@ -381,14 +394,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return true;
 		case R.id.delete:
 			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
-			mAdapter.remove(message);
+			removeMessage(message);
 			return true;
 		case R.id.resend:
 			/* we treat resend as delete the failed message, and paste the text in the compose buffer */
 			String m = message.getMessage();
 			mComposeView.setText(m);
 			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
-			mAdapter.remove(message);
+			removeMessage(message);
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -482,7 +495,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void sendMessage(ConvMessage convMessage)
 	{
-		mAdapter.add(convMessage);
+		addMessage(convMessage);
 
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 		mSendBtn.setEnabled(false);
@@ -518,6 +531,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
+		shouldScrollToBottom = true;
 		String prevContactNumber = null;
 		/* prevent any callbacks from previous instances of this activity from being fired now */
 		if (mClearTypingCallback != null)
@@ -538,7 +552,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		if (mAdapter != null)
 		{
-			mAdapter.clear();
+			messages.clear();
+			mAdapter.notifyDataSetChanged();
 		}
 
 		mConversation = null;
@@ -674,8 +689,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mLabelView.setText(mLabel);
 
-		mConversationsView.setStackFromBottom(true);
-
 		HikeUserDatabase db = new HikeUserDatabase(this);
 		mUserIsBlocked = db.isBlocked(mContactNumber);
 		if (mUserIsBlocked)
@@ -686,11 +699,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		db.close();
 
 		/* make a copy of the message list since it's used internally by the adapter */
-		List<ConvMessage> messages = new ArrayList<ConvMessage>(mConversation.getMessages());
-
+		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
+		
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
-
+		if(shouldScrollToBottom)
+		{
+			shouldScrollToBottom = false;
+			mConversationsView.setSelection(messages.size()-1);
+		}
+		
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
 
@@ -717,7 +735,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void initializeBlockOverlay()
 	{
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 		mBlockedUserOverlay.setVisibility(View.VISIBLE);
+		// To prevent the views in the background from being clickable
+		mBlockedUserOverlay.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) {}
+		});
 		TextView message = (TextView) mBlockedUserOverlay.findViewById(R.id.block_overlay_message);
 
 		/* bold the blocked users name */
@@ -862,7 +888,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					@Override
 					public void run()
 					{
-						mAdapter.add(message);
+						addMessage(message);
 					}
 				});
 
@@ -1050,7 +1076,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int before, int count)
 	{
-		// blank
+		if (messages != null) 
+		{
+			mConversationsView.setSelection(messages.size()-1);
+		}
 	}
 
 	@Override
@@ -1086,4 +1115,41 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		intent.putExtra(HikeConstants.Extras.KEEP_MESSAGE, !TextUtils.isEmpty(mComposeView.getText()));
 		startActivity(intent);
 	}
+	
+	private void addMessage(ConvMessage convMessage)
+	{
+		messages.add(convMessage);
+		mConversationsView.smoothScrollToPosition(messages.size() - 1);
+		mAdapter.notifyDataSetChanged();
+	}
+	
+	private void removeMessage(ConvMessage convMessage)
+	{
+		messages.remove(convMessage);
+		mAdapter.notifyDataSetChanged();
+	}
+
+	@Override
+	public void onShown() 
+	{
+		if (messages != null) 
+		{
+			if (mHandler == null) 
+			{
+				mHandler = new Handler();
+			}
+			mHandler.post(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					mConversationsView.setSelection(messages.size() - 1);
+				}
+			});
+		}
+	}
+
+	@Override
+	public void onHidden() 
+	{}
 }
