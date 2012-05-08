@@ -74,5 +74,7 @@ public class HikeConstants
 		public static final String SCALE_UP = "scaleUpIfNeeded";
 		public static final String UPDATE_AVAILABLE = "updateAvailable";
 		public static final String KEEP_MESSAGE = "keepMessage";
+		public static final String SHOW_CREDITS_HELP = "showCreditsHelp";
+		public static final String CREDITS_HELP_COUNTER = "CreditsHelpCounter";
 	}
 }
