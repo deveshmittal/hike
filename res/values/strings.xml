@@ -107,7 +107,7 @@
 	<string name="try_again">Try again</string>
 	<string name="if_you_see">If you see this more often send us a note <font color="@color/signup_blue"><u>here.</u></font></string>
 	<string name="friends">Friends</string>
-	<string name="sms_month">SMS\/Month</string>
+	<string name="sms_month">SMS/Month</string>
 	<string name="your_free_sms">Your free SMS</string>
 	<string name="availble_month">Available this month</string>
 	<string name="free_sms">Want free SMS?</string>
