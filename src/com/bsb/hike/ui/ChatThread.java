@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -132,6 +133,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private CustomLinearLayout chatLayout;
 
 	private Handler mHandler;
+
+	private View mInviteView;
 	@Override
 	protected void onPause()
 	{
@@ -355,7 +358,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mConversationDb = new HikeConversationsDatabase(this);
 
 		chatLayout.setOnSoftKeyboardListener(this);
-
+		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		mInviteView = inflater.inflate(R.layout.invite_view, null);
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
@@ -767,6 +771,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mMetadataView.setVisibility(View.GONE);
 			mSendBtn.setBackgroundResource(R.drawable.sendbutton);
 			mComposeView.setHint("Free Message...");
+			mInviteView.setVisibility(View.GONE);
 		}
 		else
 		{
@@ -774,6 +779,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			updateChatMetadata();
 			mSendBtn.setBackgroundResource(R.drawable.sendbutton_sms);
 			mComposeView.setHint("SMS Message...");
+			mInviteView.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -1152,4 +1158,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onHidden() 
 	{}
+
+	public void onInviteButtonClick(View v)
+	{
+		inviteUser();
+	}
 }
