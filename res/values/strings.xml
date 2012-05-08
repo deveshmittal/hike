@@ -119,4 +119,7 @@
 	<string name="hike_to_hike">Hike to Hike</string>
 	<string name="shortcut">Add Shortcut</string>
 	<string name="invited">...Invited</string>
+	<string name="earn_200_sms">Earn up to 200 free SMS.</string>
+	<string name="learn_more">Learn More ></string>
+	<string name="dismiss"><u>Dismiss</u></string>
 </resources>

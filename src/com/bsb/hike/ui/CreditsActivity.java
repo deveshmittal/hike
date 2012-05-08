@@ -18,8 +18,6 @@ import com.bsb.hike.adapters.HikeInviteAdapter;
 
 public class CreditsActivity extends Activity 
 {
-	private static final int INVITE_PICKER_RESULT = 1001;
-
 	private LinearLayout creditItemContainer;
 	private TextView mTitleView;
 	private TextView creditsNum;
@@ -61,27 +59,11 @@ public class CreditsActivity extends Activity
 			@Override
 			public void onClick(View v) 
 			{
-				invite();
+				Intent i = new Intent(CreditsActivity.this, HikeListActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				i.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
+				startActivity(i);
 			}
 		});
-	}
-	protected void onActivityResult(int requestCode, int resultCode, Intent intent)
-	{
-		if (resultCode == RESULT_OK)
-		{
-			switch (requestCode)
-			{
-			case INVITE_PICKER_RESULT:
-				intent.setClass(this, ChatThread.class);
-				startActivity(intent);
-			}
-		}
-	}
-
-	private void invite()
-	{
-		Intent intent = new Intent(this, HikeListActivity.class);
-		intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
-		startActivityForResult(intent, INVITE_PICKER_RESULT);		
 	}
 }

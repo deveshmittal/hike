@@ -5,32 +5,32 @@
     android:layout_height="wrap_content"
     android:background="@drawable/headerbar" >
 
-	<ImageView
-		android:visibility="gone"
-		android:id="@+id/title_hikeicon"
-		android:layout_alignParentLeft="true"
+    <ImageView
+        android:id="@+id/title_hikeicon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
         android:layout_gravity="center"
-		android:layout_centerVertical="true"
         android:layout_marginLeft="17dp"
-        android:src="@drawable/ic_logoheader" />
+        android:src="@drawable/ic_logoheader"
+        android:visibility="gone" />
 
     <TextView
-		android:singleLine="true"
-		android:ellipsize="end"
         android:id="@+id/title"
-		android:layout_alignWithParentIfMissing="true"
-		android:layout_toRightOf="@id/title_hikeicon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignWithParentIfMissing="true"
         android:layout_centerVertical="true"
         android:layout_marginLeft="18dp"
         android:layout_marginRight="18dp"
+        android:layout_toRightOf="@id/title_hikeicon"
+        android:ellipsize="end"
         android:gravity="center_vertical"
+        android:singleLine="true"
         android:textAppearance="@style/ChatLabelStyle"
         android:textSize="22dp" />
-    
+
     <Button
         android:id="@+id/title_icon"
         android:layout_width="wrap_content"
@@ -39,13 +39,25 @@
         android:layout_centerVertical="true"
         android:layout_marginRight="18dp"
         android:background="@drawable/top_bar_btn_selector"
+        android:gravity="center"
         android:onClick="onTitleIconClick"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
         android:textColor="@drawable/top_bar_btn_txt_selector"
         android:textSize="16dp"
         android:textStyle="bold"
-        android:visibility="gone"
-        android:gravity="center" />
+        android:visibility="gone" />
+
+    <ImageButton
+        android:id="@+id/title_image_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="15dp"
+        android:background="@null"
+        android:onClick="onTitleIconClick"
+        android:src="@drawable/credits_btn"
+        android:visibility="gone" />
 
 </RelativeLayout>
