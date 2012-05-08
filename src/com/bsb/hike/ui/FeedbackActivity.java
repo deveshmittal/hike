@@ -66,7 +66,7 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 			mTask = (HikeHTTPTask) o;
 			/* we're currently executing a task, so show the progress dialog */
 			mTask.setActivity(this);
-			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));	
+			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.sending_feedback));	
 		}
 		
 		mFeedbackText.addTextChangedListener(new TextWatcher() {
