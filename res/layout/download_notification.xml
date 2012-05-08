@@ -19,7 +19,7 @@
         android:layout_toRightOf="@id/icon"
         android:orientation="vertical" >
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"

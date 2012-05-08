@@ -28,7 +28,7 @@
                     android:layout_centerVertical="true"
                     android:orientation="vertical" >
 
-                    <TextView
+                    <com.bsb.hike.view.RobotoTextView
                         android:id="@+id/free_sms_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
                         android:textColor="@color/black"
                         android:textSize="18sp" />
 
-                    <TextView
+                    <com.bsb.hike.view.RobotoTextView
                         android:id="@+id/available_txt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
                     android:layout_marginLeft="3dp"
                     android:src="@drawable/ic_credits2" />
 
-                <TextView
+                <com.bsb.hike.view.RobotoTextView
                     android:id="@+id/credit_no"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -86,7 +86,7 @@
                     android:layout_alignParentRight="true"
                     android:src="@drawable/ic_sms" />
 
-                <TextView
+                <com.bsb.hike.view.RobotoTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/sms_icon"
@@ -95,7 +95,7 @@
                     android:textSize="18sp" />
             </RelativeLayout>
 
-            <TextView
+            <com.bsb.hike.view.RobotoTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
@@ -116,7 +116,7 @@
                 android:layout_margin="15dp"
                 android:gravity="center_vertical" >
 
-                <Button
+                <com.bsb.hike.view.RobotoButton
                     android:id="@+id/invite_now"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -128,7 +128,7 @@
                     android:textColor="@color/white"
                     android:textStyle="bold" />
 
-                <TextView
+                <com.bsb.hike.view.RobotoTextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_alignParentLeft="true"
@@ -151,7 +151,7 @@
                 android:layout_margin="15dp"
                 android:gravity="center_vertical" >
 
-                <TextView
+                <com.bsb.hike.view.RobotoTextView
                     android:id="@+id/free_sms_txt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -159,7 +159,7 @@
                     android:textColor="@color/black"
                     android:textSize="18sp" />
 
-                <TextView
+                <com.bsb.hike.view.RobotoTextView
                     android:id="@+id/available_txt"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -181,7 +181,7 @@
                 android:layout_height="1dp"
                 android:background="@drawable/dropshadow" />
 
-            <TextView
+            <com.bsb.hike.view.RobotoTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/thatch_repeat"

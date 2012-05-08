@@ -41,7 +41,7 @@
                 android:background="@drawable/rounded_button"
                 android:src="@drawable/ic_rotate"
                 android:gravity="center" />
-            <Button
+            <com.bsb.hike.view.RobotoButton
                 android:id="@+id/save"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

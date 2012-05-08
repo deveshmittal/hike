@@ -43,7 +43,7 @@
                 android:layout_alignTop="@id/profile"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp">
-                <TextView
+                <com.bsb.hike.view.RobotoTextView
                     android:layout_centerInParent="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
             </RelativeLayout>
         </RelativeLayout>
 
-        <EditText
+        <com.bsb.hike.view.RobotoEditText
             android:id="@+id/name_editable"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
             android:textColor="@color/black"
             android:visibility="gone"/>
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -111,7 +111,7 @@
         android:layout_height="0dp"
         android:layout_weight="10">
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:id="@+id/made_with_love"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"

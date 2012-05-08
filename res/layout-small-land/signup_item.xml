@@ -5,19 +5,19 @@
     android:gravity="center"
     android:orientation="vertical" >
 
-    <TextView
+    <com.bsb.hike.view.RobotoTextView
         android:id="@+id/enter_txt1"
         style="@style/Text.Shadow.White"
         android:gravity="center_horizontal"
         android:textSize="18sp" />
 
-    <TextView
+    <com.bsb.hike.view.RobotoTextView
         android:id="@+id/enter_txt2"
         style="@style/Text.Shadow.White"
         android:gravity="center_horizontal"
         android:textSize="18sp" />
 
-    <EditText
+    <com.bsb.hike.view.RobotoEditText
         android:id="@+id/et_enter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <Button
+        <com.bsb.hike.view.RobotoButton
             android:id="@+id/btn_continue"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -67,7 +67,7 @@
                 android:layout_marginLeft="10dp"
                 android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
-            <TextView
+            <com.bsb.hike.view.RobotoTextView
                 android:id="@+id/txt_loading"
                 style="@style/Text.Shadow.Loading"
                 android:layout_toRightOf="@id/loading_progress"
@@ -83,14 +83,14 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp" >
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:id="@+id/txt_wrong_number"
             style="@style/Text.Shadow.White"
             android:text="@string/wrong_number"
             android:textSize="15sp"
             android:visibility="visible" />
 
-        <Button
+        <com.bsb.hike.view.RobotoButton
             android:id="@+id/txt_tap_here"
             style="@style/Text.Shadow.White"
             android:layout_marginLeft="2dp"

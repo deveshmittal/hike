@@ -21,7 +21,7 @@
 		    android:layout_gravity="center"
 		    android:background="@drawable/ic_chatthread_divider"/>
 		    
-	    <TextView
+	    <com.bsb.hike.view.RobotoTextView
 	        android:id="@+id/timestamp"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
         android:layout_height="40dp"
         android:layout_alignParentTop="true"/>
 
-    <TextView
+    <com.bsb.hike.view.RobotoTextView
      	android:layout_alignParentTop="true"
         android:id="@+id/message_receive"
         android:layout_width="wrap_content"

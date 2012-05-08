@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/thatch_repeat">
 
-	<Button
+	<com.bsb.hike.view.RobotoButton
 	    android:onClick="onInviteButtonClick"
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
