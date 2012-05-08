@@ -11,19 +11,60 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         layout="@layout/top_panel" />
+	
+   <RelativeLayout
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:background="@color/white" >
 
-   	<EditText
-		android:hint="Search"
-		android:layout_marginTop="7dp"
-		android:layout_marginBottom="7dp"
-		android:layout_marginLeft="18dp"
-		android:layout_marginRight="18dp"
-        android:id="@+id/filter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/edittext"
-        android:singleLine="true" >
-    </EditText>
+       <EditText
+           android:id="@+id/filter"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_marginLeft="18dp"
+           android:layout_marginRight="18dp"
+           android:layout_marginTop="7dp"
+           android:background="@drawable/edittext"
+           android:hint="Search"
+           android:singleLine="true" >
+       </EditText>
+
+       <LinearLayout
+           android:id="@+id/credits_help_layout"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_marginLeft="7dp"
+           android:layout_marginRight="7dp"
+           android:background="@drawable/credits_help_bckg"
+           android:gravity="center_vertical"
+           android:orientation="horizontal"
+           android:visibility="gone"
+           android:layout_alignParentTop="true" >
+
+           <ImageButton
+               android:id="@+id/close"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:background="@null"
+               android:paddingLeft="3dp"
+               android:paddingRight="7dp"
+               android:src="@drawable/close_btn_selector" />
+
+           <TextView
+               style="@style/Text.Shadow.White.Bold"
+               android:text="@string/earn_200_sms"
+               android:textSize="13sp" />
+
+           <Button
+               android:id="@+id/learn_more_btn"
+               style="@style/Text.Shadow.White.Bold"
+               android:layout_marginLeft="5dp"
+               android:background="@null"
+               android:text="@string/learn_more"
+               android:textColor="@drawable/t_c_txt_selector"
+               android:textSize="13sp" />
+       </LinearLayout>
+   </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/section_container"

@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -58,15 +57,23 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 		TextView numView = (TextView) v.findViewById(R.id.number);
 		numView.setText(contactInfo.getPhoneNum());
 		
-		Button button = (Button) v.findViewById(R.id.contact_button);
 		v.setTag(contactInfo);
 
 		TextView invitedText = (TextView) v.findViewById(R.id.invited_text);
 
-		/* hide the button if the person has been invited */
-		button.setVisibility(mInvitedUsers.contains(contactInfo.getMsisdn()) ? View.INVISIBLE : View.VISIBLE);
-		invitedText.setVisibility(mInvitedUsers.contains(contactInfo.getMsisdn()) ? View.VISIBLE : View.INVISIBLE);
-
+		if(mInvitedUsers.contains(contactInfo.getMsisdn()))
+		{
+			invitedText.setBackgroundDrawable(null);
+			invitedText.setText(R.string.invited);
+			invitedText.setTextColor(activity.getResources().getColor(R.color.grey));
+		}
+		else
+		{
+			invitedText.setBackgroundResource(R.drawable.invite_btn_bckg);
+			invitedText.setText(R.string.invite);
+			invitedText.setTextColor(activity.getResources().getColor(R.color.white));
+		}
+		
 		v.setOnClickListener(this);
 
 		boolean no_dividers = ((position == getCount() - 1) || (getItem(position + 1) instanceof Section));

@@ -292,6 +292,13 @@ public class HikeMqttManager implements Listener
 		}
 	}
 
+	public void finish()
+	{
+		this.persistence.close();
+		this.convDb.close();
+		this.userDb.close();
+	}
+
 	/*
 	 * (Re-)connect to the message broker
 	 */

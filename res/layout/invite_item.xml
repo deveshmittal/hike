@@ -21,28 +21,19 @@
         android:text="...Invited"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+		android:paddingRight="5dp"
         android:layout_alignRight="@+id/item_divider"
+        android:background="@drawable/invite_btn_bckg"
         android:layout_centerVertical="true" />
 
-    <Button
-        android:id="@+id/contact_button"
-        android:text="Invite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/item_divider"
-		android:background="@drawable/invite_btn_bckg_selector"
-		android:paddingLeft="5dp"
-		android:paddingRight="5dp"
-        android:layout_centerVertical="true"
-        android:textColor="@color/white" />
-	
     <LinearLayout android:id="@+id/name_num_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginRight="8dp"
         android:layout_alignLeft="@+id/item_divider"
-		android:layout_toLeftOf="@id/contact_button"
+		android:layout_toLeftOf="@id/invited_text"
 		android:orientation="vertical" >
     
     <TextView
