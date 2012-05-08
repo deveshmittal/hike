@@ -96,6 +96,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		onCreate(db);
 	}
 
+	public void updateOnHikeStatus(String msisdn, boolean onHike)
+	{
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.ONHIKE, onHike);
+		String[] whereArgs = { msisdn };
+		int rowsAffected = mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", whereArgs);
+	}
+
 	public void addConversationMessages(ConvMessage message)
 	{
 		List<ConvMessage> l = new ArrayList<ConvMessage>(1);

@@ -451,7 +451,7 @@ public class HikeMqttManager implements Listener
 	public boolean isConnected()
 	{
 		Log.d("HikeMqttManager", "in isConnected status " + connectionStatus);
-		return MQTTConnectionStatus.CONNECTED == connectionStatus;
+		return (mqttConnection != null) && (MQTTConnectionStatus.CONNECTED == connectionStatus);
 	}
 
 	public MQTTConnectionStatus getConnectionStatus()
@@ -542,7 +542,7 @@ public class HikeMqttManager implements Listener
 	public void ping()
 	{
 		Log.d("HikeMqttManager", "calling ping");
-		if (connectionStatus != MQTTConnectionStatus.CONNECTED || 
+		if (!isConnected() || 
 				!mqttConnection.ping())
 		{
 			Log.d("HikeMqttManager", "App isn't connected, reconnecting");
@@ -701,6 +701,7 @@ public class HikeMqttManager implements Listener
 				Log.d("HikeMqttManager", "UPDATING USER LIST: "+ msisdn);
 				boolean joined = NetworkManager.USER_JOINED.equals(type);
 				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
+				this.convDb.updateOnHikeStatus(msisdn, joined);
 			}
 			/*
 			 * Check if message was already received by the receiver

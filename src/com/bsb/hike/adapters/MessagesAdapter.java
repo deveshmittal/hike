@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -190,6 +191,7 @@ public class MessagesAdapter extends BaseAdapter
 
 	@Override
 	public ConvMessage getItem(int position) {
+		Log.d("MessagesAdapter", "Item position is " + position);
 		return convMessages.get(position);
 	}
 
