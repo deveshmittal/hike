@@ -16,7 +16,7 @@
         android:src="@drawable/ic_logoheader"
         android:visibility="gone" />
 
-    <TextView
+    <com.bsb.hike.view.RobotoTextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
         android:textAppearance="@style/ChatLabelStyle"
         android:textSize="22dp" />
 
-    <Button
+    <com.bsb.hike.view.RobotoButton
         android:id="@+id/title_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

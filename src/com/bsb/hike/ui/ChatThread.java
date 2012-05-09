@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -132,6 +133,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private CustomLinearLayout chatLayout;
 
 	private Handler mHandler;
+
+	private View mInviteView;
+
+	//To prevent the header view from getting inflated twice;
+	private boolean isHeaderShowing = false;
 	@Override
 	protected void onPause()
 	{
@@ -355,7 +361,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mConversationDb = new HikeConversationsDatabase(this);
 
 		chatLayout.setOnSoftKeyboardListener(this);
-
+		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		mInviteView = inflater.inflate(R.layout.invite_view, null);
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
@@ -485,7 +492,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* enable resend options on failed messages */
 		AdapterView.AdapterContextMenuInfo adapterInfo =
 	            (AdapterView.AdapterContextMenuInfo) menuInfo;
-		ConvMessage message = mAdapter.getItem(adapterInfo.position);
+		ConvMessage message = mAdapter.getItem(isHeaderShowing ? adapterInfo.position - 1 : adapterInfo.position);
 		if ((message.getState() == ConvMessage.State.SENT_FAILED))
 		{
 			MenuItem item = menu.findItem(R.id.resend);
@@ -702,6 +709,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 		
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
+		
+		if(!mConversation.isOnhike())
+		{
+			mConversationsView.addHeaderView(mInviteView);
+			isHeaderShowing = true;
+		}
 		mConversationsView.setAdapter(mAdapter);
 		if(shouldScrollToBottom)
 		{
@@ -767,6 +780,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mMetadataView.setVisibility(View.GONE);
 			mSendBtn.setBackgroundResource(R.drawable.sendbutton);
 			mComposeView.setHint("Free Message...");
+			mInviteView.setVisibility(View.GONE);
+			mConversationsView.removeHeaderView(mInviteView);
+			mAdapter.notifyDataSetChanged();
+			isHeaderShowing = false;
 		}
 		else
 		{
@@ -774,6 +791,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			updateChatMetadata();
 			mSendBtn.setBackgroundResource(R.drawable.sendbutton_sms);
 			mComposeView.setHint("SMS Message...");
+			mInviteView.setVisibility(View.VISIBLE);
+			if (!isHeaderShowing) 
+			{
+				mConversationsView.addHeaderView(mInviteView);
+				mAdapter.notifyDataSetChanged();
+				isHeaderShowing = true;
+			}
 		}
 	}
 
@@ -1078,7 +1102,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (messages != null) 
 		{
-			mConversationsView.setSelection(messages.size()-1);
+			mConversationsView.setSelection(isHeaderShowing ? messages.size() : (messages.size()-1));
 		}
 	}
 
@@ -1119,7 +1143,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void addMessage(ConvMessage convMessage)
 	{
 		messages.add(convMessage);
-		mConversationsView.smoothScrollToPosition(messages.size() - 1);
+		mConversationsView.smoothScrollToPosition(isHeaderShowing ? messages.size() :( messages.size() - 1));
 		mAdapter.notifyDataSetChanged();
 	}
 	
@@ -1152,4 +1176,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onHidden() 
 	{}
+
+	public void onInviteButtonClick(View v)
+	{
+		inviteUser();
+	}
 }

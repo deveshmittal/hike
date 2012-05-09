@@ -17,7 +17,7 @@
        android:layout_height="wrap_content"
        android:background="@color/white" >
 
-       <EditText
+       <com.bsb.hike.view.RobotoEditText
            android:id="@+id/filter"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
@@ -27,7 +27,7 @@
            android:background="@drawable/edittext"
            android:hint="Search"
            android:singleLine="true" >
-       </EditText>
+       </com.bsb.hike.view.RobotoEditText>
 
        <LinearLayout
            android:id="@+id/credits_help_layout"
@@ -50,12 +50,12 @@
                android:paddingRight="7dp"
                android:src="@drawable/close_btn_selector" />
 
-           <TextView
+           <com.bsb.hike.view.RobotoTextView
                style="@style/Text.Shadow.White.Bold"
                android:text="@string/earn_200_sms"
                android:textSize="13sp" />
 
-           <Button
+           <com.bsb.hike.view.RobotoButton
                android:id="@+id/learn_more_btn"
                style="@style/Text.Shadow.White.Bold"
                android:layout_marginLeft="5dp"
@@ -72,7 +72,7 @@
         android:layout_height="wrap_content"
         android:background="@color/offwhite">
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:id="@+id/section_label"
             android:textColor="@color/diamondblue"
             android:layout_width="match_parent"

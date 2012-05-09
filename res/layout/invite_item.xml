@@ -16,7 +16,7 @@
         android:layout_marginRight="18dp"
         android:background="@color/dividercolor" />
 
-    <TextView
+    <com.bsb.hike.view.RobotoTextView
         android:id="@+id/invited_text"
         android:text="...Invited"
         android:layout_width="wrap_content"
@@ -36,7 +36,7 @@
 		android:layout_toLeftOf="@id/invited_text"
 		android:orientation="vertical" >
     
-    <TextView
+    <com.bsb.hike.view.RobotoTextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
         android:text="Vijay Raghunathan asdfasdfasd asdfasdfasdf ads adsasd"
         android:textColor="@color/black"
         android:textSize="18dp" />
-    <TextView 
+    <com.bsb.hike.view.RobotoTextView 
         android:id="@+id/number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:background="@color/compose_background" >
 
-            <TextView
+            <com.bsb.hike.view.RobotoTextView
                 android:id="@+id/sms_chat_metadata_num_chars"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -69,10 +69,9 @@
                 android:paddingLeft="10dp"
                 android:text="24/140"
                 android:textColor="@color/white"
-                android:textSize="12dp" >
-            </TextView>
+                android:textSize="12dp" />
 
-            <TextView
+            <com.bsb.hike.view.RobotoTextView
                 android:id="@+id/sms_chat_metadata_text_credits_left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -82,8 +81,7 @@
                 android:paddingRight="10dp"
                 android:text="99 credits left"
                 android:textColor="@color/white"
-                android:textSize="12dp" >
-            </TextView>
+                android:textSize="12dp" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -92,7 +90,7 @@
             android:layout_height="wrap_content"
             android:background="@color/compose_background" >
 
-            <EditText
+            <com.bsb.hike.view.RobotoEditText
                 android:id="@+id/msg_compose"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -109,7 +107,7 @@
                 android:maxLines="4" >
 
                 <requestFocus />
-            </EditText>
+            </com.bsb.hike.view.RobotoEditText>
 
             <View
                 android:id="@+id/dummy"
@@ -118,7 +116,7 @@
                 android:layout_below="@id/msg_compose"
                 android:layout_marginTop="8dp" />
 
-            <Button
+            <com.bsb.hike.view.RobotoButton
                 android:id="@+id/send_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -138,7 +136,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/transparent_black" >
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:bufferType="spannable"
             android:id="@+id/block_overlay_message"
             android:layout_width="wrap_content"
@@ -151,15 +149,15 @@
             android:layout_marginRight="32dp"/>
 
         <ImageView
-            android:id="@+id/block_overlay_image"
+            android:id="@+id/overlay_image"
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_marginBottom="16dp"
-            android:layout_above="@+id/block_overlay_message"
+            android:layout_above="@+id/overlay_message"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_no" />
 
-        <Button
+        <com.bsb.hike.view.RobotoButton
             android:shadowColor="#000000"
             android:shadowDx="-0.5"
             android:shadowDy="-0.5"
@@ -178,6 +176,15 @@
             android:background="@drawable/rounded_button"
             android:onClick="onUnblockClick"
             android:text="@string/unblock_title" />
+		
+        <com.bsb.hike.view.RobotoTextView
+            android:id="@+id/dismiss_overlay"
+            style="@style/Text.Shadow.White"
+            android:layout_below="@id/overlay_button"
+            android:layout_centerHorizontal="true"
+            android:text="@string/dismiss"
+            android:onClick="onOverlayButtonClick"
+            android:layout_marginTop="5dp" />
 
     </RelativeLayout>
 

@@ -32,7 +32,7 @@
                 android:layout_marginRight="10dp"
                 android:src="@drawable/ic_name_2" />
 
-            <TextView
+            <com.bsb.hike.view.RobotoTextView
                 android:id="@+id/user_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -61,19 +61,19 @@
                 android:layout_marginTop="3dp"
                 android:src="@drawable/ic_msg" />
 
-            <EditText
+            <com.bsb.hike.view.RobotoEditText
                 android:id="@+id/feedback"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@null"
                 android:gravity="top"
                 android:hint="@string/feedback_hint"
-                android:imeOptions="actionSend"
+                android:imeOptions="actionDone"
                 android:maxLength="10000"
                 android:textSize="18sp" >
 
                 <requestFocus />
-            </EditText>
+            </com.bsb.hike.view.RobotoEditText>
         </LinearLayout>
     </LinearLayout>
     
@@ -93,7 +93,7 @@
         android:orientation="vertical"
         android:layout_weight="1" >
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/how_hike_feel"

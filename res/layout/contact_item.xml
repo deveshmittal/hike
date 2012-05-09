@@ -16,7 +16,7 @@
         android:layout_marginRight="18dp"
         android:background="@color/dividercolor" />
 
-    <Button
+    <com.bsb.hike.view.RobotoButton
         android:id="@+id/contact_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
         android:layout_toRightOf="@+id/contact_image"
         android:orientation="vertical" >
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
             android:textColor="@color/black"
             android:textSize="18dp" />
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:id="@+id/number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

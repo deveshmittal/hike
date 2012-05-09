@@ -24,7 +24,7 @@ layout. -->
         android:layout_marginRight="8dp"
         android:src="@drawable/ic_credits" />
 
-    <TextView android:id="@+android:id/title"
+    <com.bsb.hike.view.RobotoTextView android:id="@+android:id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Title"
@@ -32,7 +32,7 @@ layout. -->
         android:textColor="@color/black"
         android:layout_toRightOf="@id/icon"/>
 
-    <TextView android:id="@+android:id/summary"
+    <com.bsb.hike.view.RobotoTextView android:id="@+android:id/summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@android:id/title"

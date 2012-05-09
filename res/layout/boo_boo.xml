@@ -18,7 +18,7 @@
             android:layout_centerHorizontal="true"
             android:src="@drawable/boo_boo" />
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             android:id="@+id/welcome_1"
             style="@style/Text.Shadow.White.Bold"
             android:layout_below="@+id/ic_hike_logo"
@@ -27,7 +27,7 @@
             android:text="@string/boo_boo"
             android:textSize="18dp" />
 
-        <Button
+        <com.bsb.hike.view.RobotoButton
             android:id="@+id/btn_try_again"
             style="@style/Text.Shadow.White.Bold"
             android:layout_width="match_parent"
@@ -42,7 +42,7 @@
             android:paddingTop="9dp"
             android:text="@string/try_again" />
 
-        <TextView
+        <com.bsb.hike.view.RobotoTextView
             style="@style/Text.Shadow.White"
             android:layout_below="@id/btn_try_again"
             android:layout_centerHorizontal="true"
