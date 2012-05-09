@@ -1143,7 +1143,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void addMessage(ConvMessage convMessage)
 	{
 		messages.add(convMessage);
-		mConversationsView.smoothScrollToPosition(isHeaderShowing ? messages.size() :( messages.size() - 1));
+		if (messages.size() - mConversationsView.getLastVisiblePosition()>2) 
+		{
+			mConversationsView
+					.smoothScrollToPosition(isHeaderShowing ? messages.size()
+							: (messages.size() - 1));
+		}
+		else
+		{
+			mConversationsView.smoothScrollBy((int)(convMessage.getMessage().length()/30+1)*100, 500);
+		}
 		mAdapter.notifyDataSetChanged();
 	}
 	
