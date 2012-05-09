@@ -74,7 +74,7 @@
 	<string name="what_name">What\'s your name?</string>
 	<string name="enter_number">Enter your number:</string>
 	<string name="all_set">You\'re all set!</string>
-	<string name="feedback_hint">Tell me how you feel...</string>
+	<string name="feedback_hint">Your feedback</string>
 	<string name="wrong_number">Entered a wrong number?</string>
 	<string name="tap_here"><u>Tap here</u></string>
 	<string name="block_overlay_message">You\'ve blocked %1$s.  Unblock and continue hiking.</string>
