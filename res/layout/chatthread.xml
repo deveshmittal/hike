@@ -129,19 +129,21 @@
                 android:onClick="onSendClick" />
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
-
+	
     <RelativeLayout
         android:visibility="gone"
-        android:id="@+id/block_overlay"
+        android:id="@+id/overlay_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/transparent_black" >
+        
         <com.bsb.hike.view.RobotoTextView
             android:bufferType="spannable"
-            android:id="@+id/block_overlay_message"
+            android:id="@+id/overlay_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:gravity="center"
             android:textColor="@color/white"
             android:textSize="18dp"
             android:text="@string/block_overlay_message"
@@ -150,9 +152,9 @@
 
         <ImageView
             android:id="@+id/overlay_image"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
             android:layout_above="@+id/overlay_message"
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_no" />
@@ -167,24 +169,50 @@
             android:paddingRight="16dp"
             android:textSize="18dp"
             android:textColor="@color/white"
-            android:id="@+id/block_overlay_unblock_button"
+            android:id="@+id/overlay_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/block_overlay_message"
-            android:layout_marginTop="16dp"
+            android:layout_below="@+id/overlay_message"
+            android:layout_marginTop="25dp"
             android:layout_centerHorizontal="true"
             android:background="@drawable/rounded_button"
-            android:onClick="onUnblockClick"
+            android:onClick="onOverlayButtonClick"
             android:text="@string/unblock_title" />
-		
-        <com.bsb.hike.view.RobotoTextView
-            android:id="@+id/dismiss_overlay"
-            style="@style/Text.Shadow.White"
+
+        <LinearLayout
+            android:id="@+id/dismiss_overlay_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_below="@id/overlay_button"
             android:layout_centerHorizontal="true"
-            android:text="@string/dismiss"
+            android:layout_marginTop="15dp"
+            android:gravity="center"
             android:onClick="onOverlayButtonClick"
-            android:layout_marginTop="5dp" />
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/dismiss_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_dismiss" />
+
+            <com.bsb.hike.view.RobotoTextView
+                android:id="@+id/dismiss_overlay"
+                style="@style/Text.Shadow.White"
+                android:layout_marginLeft="3dp"
+                android:text="@string/dismiss" />
+        </LinearLayout>
+        
+        <ImageButton
+            android:id="@+id/btn_i"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@null"
+            android:src="@drawable/ic_i"
+            android:visibility="gone" />
 
     </RelativeLayout>
 

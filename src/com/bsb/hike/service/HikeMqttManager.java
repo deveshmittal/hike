@@ -689,8 +689,16 @@ public class HikeMqttManager implements Listener
 			}
 			else if (NetworkManager.SMS_CREDITS.equals(type))
 			{
-				Editor mEditor = settings.edit();
 				Integer credits =  jsonObj.optInt(HikeConstants.DATA);
+				if(settings.getInt(HikeMessengerApp.SMS_SETTING, 0) == 0)
+				{
+					if(credits > 0)
+					{
+						Log.d("HikeMqttManager", "RESETING THE OVERLAYS");
+						userDb.setOverlay(false, null);
+					}
+				}
+				Editor mEditor = settings.edit();
 				Log.d("HikeMqttManager", "UPDATING CREDITS THROUGH SERVICE: "+ credits);
 				mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
 				mEditor.commit();

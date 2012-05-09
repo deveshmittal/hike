@@ -30,8 +30,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -42,6 +45,8 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -124,7 +129,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	private Cursor mCursor;
 
-	private View mBlockedUserOverlay;
+	private View mOverlayLayout;
 
 	private ArrayList<ConvMessage> messages;
 
@@ -138,6 +143,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	//To prevent the header view from getting inflated twice;
 	private boolean isHeaderShowing = false;
+
+	private boolean blockOverlay;
+
+	private HikeUserDatabase hikeUserDatabase;
+
 	@Override
 	protected void onPause()
 	{
@@ -345,7 +355,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
 		mLabelView = (TextView) findViewById(R.id.title);
-		mBlockedUserOverlay = findViewById(R.id.block_overlay);
+		mOverlayLayout = findViewById(R.id.overlay_layout);
 
 		/*For removing the white bar in the top of the drop-down*/
 		mInputNumberView.setDropDownBackgroundDrawable(null);
@@ -468,18 +478,34 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mPubSub.publish(HikePubSub.BLOCK_USER, mContactNumber);
 			mUserIsBlocked = true;
-			initializeBlockOverlay();
+			showOverlay(true);
 		}
 
 		return true;
 	}
 
-	public void onUnblockClick(View v)
+	public void onOverlayButtonClick(View v)
 	{
 		/* user clicked the unblock button in the chat-screen */
-		mBlockedUserOverlay.setVisibility(View.GONE);
-		mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
-		mUserIsBlocked = false;
+		Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
+		fadeOut.setDuration(250);
+		mOverlayLayout.startAnimation(fadeOut);
+		mOverlayLayout.setVisibility(View.GONE);
+		if (v.getId() != R.id.dismiss_overlay_layout && blockOverlay) 
+		{
+			mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
+			mUserIsBlocked = false;
+		}
+		else if(v.getId() != R.id.dismiss_overlay_layout)
+		{
+			inviteUser();
+		}
+		if(!blockOverlay)
+		{
+			hikeUserDatabase = new HikeUserDatabase(ChatThread.this);
+			hikeUserDatabase.setOverlay(true, mConversation.getMsisdn());
+			hikeUserDatabase.close();
+		}
 	}
 
 	@Override
@@ -700,7 +726,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mUserIsBlocked = db.isBlocked(mContactNumber);
 		if (mUserIsBlocked)
 		{
-			initializeBlockOverlay();
+			showOverlay(true);
 		}
 
 		db.close();
@@ -744,30 +770,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* clear any toast notifications */
 		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mgr.cancel((int) mConversation.getConvId());
-	}
-
-	private void initializeBlockOverlay()
-	{
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-		mBlockedUserOverlay.setVisibility(View.VISIBLE);
-		// To prevent the views in the background from being clickable
-		mBlockedUserOverlay.setOnClickListener(new OnClickListener() 
-		{
-			@Override
-			public void onClick(View v) {}
-		});
-		TextView message = (TextView) mBlockedUserOverlay.findViewById(R.id.block_overlay_message);
-
-		/* bold the blocked users name */
-		String label = mConversation.getLabel();
-		String formatString = getResources().getString(R.string.block_overlay_message);
-		String formatted = String.format(formatString, mConversation.getLabel());
-		SpannableString str = new SpannableString(formatted);
-		int start = formatString.indexOf("%1$s");
-		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD),
-						start, start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		message.setText(str);
 	}
 
 	/*
@@ -951,7 +953,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 		}
 		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
-		{
+		{	
 			mCredits = ((Integer) object).intValue();
 			runOnUiThread(new Runnable()
 			{
@@ -1079,13 +1081,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* must be called on the UI Thread */
 	private void updateChatMetadata()
 	{
+		ImageButton topBarBtn = (ImageButton) findViewById(R.id.title_image_btn);
 		/* set the bottom bar to red if we're out of sms credits */
 		if (mCredits <= 0)
 		{
 			mMetadataView.setBackgroundResource(R.color.red);
+			mSendBtn.setEnabled(false);
+			hikeUserDatabase = new HikeUserDatabase(ChatThread.this);
+			boolean show = hikeUserDatabase.wasOverlayDismissed(mConversation.getMsisdn());
+			hikeUserDatabase.close();
+			if (!show) {
+				showOverlay(false);
+			}
+			topBarBtn.setVisibility(View.VISIBLE);
+			topBarBtn.setImageResource(R.drawable.ic_i);
 		}
 		else
 		{
+			topBarBtn.setVisibility(View.GONE);
+			if (!blockOverlay) {
+				Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
+				fadeOut.setDuration(250);
+				mOverlayLayout.startAnimation(fadeOut);
+				mOverlayLayout.setVisibility(View.GONE);
+			}
 			mMetadataView.setBackgroundResource(R.color.compose_background);
 		}
 
@@ -1189,5 +1208,67 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onInviteButtonClick(View v)
 	{
 		inviteUser();
+	}
+	
+	private void showOverlay(boolean blockOverlay)
+	{
+		this.blockOverlay = blockOverlay;
+
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(),
+				InputMethodManager.HIDE_NOT_ALWAYS);
+
+		Animation fadeIn = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
+		fadeIn.setDuration(250);
+		mOverlayLayout.startAnimation(fadeIn);
+		mOverlayLayout.setVisibility(View.VISIBLE);
+		// To prevent the views in the background from being clickable
+		mOverlayLayout.setOnClickListener(new OnClickListener() 
+		{	
+			@Override
+			public void onClick(View v) 
+			{}
+		});
+
+		TextView message = (TextView) mOverlayLayout.findViewById(R.id.overlay_message);
+		Button overlayBtn = (Button) mOverlayLayout.findViewById(R.id.overlay_button);
+		ViewGroup dismissLayout = (ViewGroup) mOverlayLayout.findViewById(R.id.dismiss_overlay_layout);
+		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
+		ImageButton btnI = (ImageButton) mOverlayLayout.findViewById(R.id.btn_i);
+		
+		String label = mConversation.getLabel();
+		String formatString;
+		if (blockOverlay) 
+		{
+			overlayImg.setImageResource(R.drawable.ic_no);
+			formatString = getResources().getString(R.string.block_overlay_message);
+			dismissLayout.setVisibility(View.GONE);
+			overlayBtn.setText(R.string.unblock_title);
+			btnI.setVisibility(View.GONE);
+		}
+		else
+		{
+			hikeUserDatabase = new HikeUserDatabase(ChatThread.this);
+			hikeUserDatabase.setOverlay(false, mConversation.getMsisdn());
+			hikeUserDatabase.close();
+			formatString = getResources().getString(R.string.no_credits);
+			overlayImg.setImageResource(R.drawable.ic_no_credits);
+			dismissLayout.setVisibility(View.VISIBLE);
+			overlayBtn.setText(R.string.invite_now);
+			btnI.setVisibility(View.VISIBLE);
+		}
+		/* bold the blocked users name */
+		String formatted = String.format(formatString,
+				mConversation.getLabel());
+		SpannableString str = new SpannableString(formatted);
+		int start = formatString.indexOf("%1$s");
+		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
+				start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		message.setText(str);
+	}
+
+	public void onTitleIconClick(View v)
+	{
+		showOverlay(false);
 	}
 }

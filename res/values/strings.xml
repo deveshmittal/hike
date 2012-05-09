@@ -121,5 +121,6 @@
 	<string name="invited">...Invited</string>
 	<string name="earn_200_sms">Earn up to 200 free SMS.</string>
 	<string name="learn_more">Learn More ></string>
-	<string name="dismiss"><u>Dismiss</u></string>
+	<string name="dismiss">Tap to close</string>
+	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 20 more!</string>
 </resources>

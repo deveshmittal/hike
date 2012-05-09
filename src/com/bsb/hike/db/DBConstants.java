@@ -55,4 +55,5 @@ public class DBConstants
 
 	public static final String IMAGE = "image";
 
+	public static final String OVERLAY_DISMISSED = "overlayDismissed";
 }

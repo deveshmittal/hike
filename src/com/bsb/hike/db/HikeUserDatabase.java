@@ -40,7 +40,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 														+ DBConstants.MSISDN+" TEXT COLLATE nocase, "
 														+ DBConstants.ONHIKE+" INTEGER, "
 														+ DBConstants.PHONE+" TEXT, "
-														+ DBConstants.HAS_CUSTOM_PHOTO+" INTEGER "
+														+ DBConstants.HAS_CUSTOM_PHOTO+" INTEGER, "
+														+ DBConstants.OVERLAY_DISMISSED+" INTEGER"
 												+ " )";
 
 		db.execSQL(create);
@@ -406,6 +407,39 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		finally
 		{
 			c.close();
+		}
+	}
+	
+	public boolean wasOverlayDismissed(String msisdn)
+	{
+		Cursor c = mDb.query(DBConstants.USERS_TABLE, new String[] {DBConstants.OVERLAY_DISMISSED}, DBConstants.MSISDN + "=?", new String[]{msisdn}, null, null, null);
+		int s = 0;
+		if(c.moveToFirst())
+		{
+			s = c.getInt(0);
+		}
+		c.close();
+		return (s==0) ? false : true;
+	}
+
+	public void setOverlay(boolean dismiss, String msisdn)
+	{
+		ContentValues contentValues = new ContentValues(1);
+		contentValues.put(DBConstants.OVERLAY_DISMISSED, dismiss);
+		if (msisdn != null) {
+			mDb.update(DBConstants.USERS_TABLE, contentValues,
+					DBConstants.MSISDN + "=?", new String[] { msisdn });
+		} else {
+			mDb.update(DBConstants.USERS_TABLE, contentValues,
+					null, null);
+		}
+	}
+	
+	public void resetOverlays(ArrayList<String> msisdns)
+	{
+		for(String msisdn : msisdns)
+		{
+			setOverlay(false, msisdn);
 		}
 	}
 }
