@@ -21,10 +21,11 @@ public class RobotoEditText extends EditText {
 
 	@Override
 	public void setTypeface(Typeface tf, int style) {
-		if (RobotoTypeFace.robotoTypeFace == null) {
-			RobotoTypeFace.robotoTypeFace = new RobotoTypeFace(getContext());
-		}
 		if (!isInEditMode()) {
+			if (RobotoTypeFace.robotoTypeFace == null) {
+				RobotoTypeFace.robotoTypeFace = new RobotoTypeFace(getContext());
+			}
+
 			if (style == Typeface.BOLD) {
 				super.setTypeface(RobotoTypeFace.robotoTypeFace.bold);
 			} else if (style == Typeface.ITALIC) {
