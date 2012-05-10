@@ -487,10 +487,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onOverlayButtonClick(View v)
 	{
 		/* user clicked the unblock button in the chat-screen */
-		Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
-		fadeOut.setDuration(250);
-		mOverlayLayout.startAnimation(fadeOut);
-		mOverlayLayout.setVisibility(View.GONE);
+		hideOverlay();
 		if (v.getId() != R.id.dismiss_overlay_layout && blockOverlay) 
 		{
 			mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
@@ -506,6 +503,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			hikeUserDatabase.setOverlay(true, mConversation.getMsisdn());
 			hikeUserDatabase.close();
 		}
+	}
+
+	private void hideOverlay()
+	{
+		Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
+		fadeOut.setDuration(250);
+		mOverlayLayout.startAnimation(fadeOut);
+		mOverlayLayout.setVisibility(View.GONE);
+		mComposeView.setEnabled(true);
 	}
 
 	@Override
@@ -1103,10 +1109,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			topBarBtn.setVisibility(View.GONE);
 			buttonBar.setVisibility(View.GONE);
 			if (!blockOverlay) {
-				Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
-				fadeOut.setDuration(250);
-				mOverlayLayout.startAnimation(fadeOut);
-				mOverlayLayout.setVisibility(View.GONE);
+				hideOverlay();
 			}
 			mMetadataView.setBackgroundResource(R.color.compose_background);
 		}
@@ -1238,7 +1241,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		ViewGroup dismissLayout = (ViewGroup) mOverlayLayout.findViewById(R.id.dismiss_overlay_layout);
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
 		ImageButton btnI = (ImageButton) mOverlayLayout.findViewById(R.id.btn_i);
-		
+
+		mComposeView.setEnabled(false);
 		String label = mConversation.getLabel();
 		String formatString;
 		if (blockOverlay) 
