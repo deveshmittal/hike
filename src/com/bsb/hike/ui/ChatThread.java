@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,12 +31,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -147,6 +147,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private boolean blockOverlay;
 
 	private HikeUserDatabase hikeUserDatabase;
+
+	private Configuration config;
 
 	@Override
 	protected void onPause()
@@ -341,6 +343,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		app.connectToService();
 
 		setContentView(R.layout.chatthread);
+
+		config = getResources().getConfiguration();
 		
 		/* bind views to variables */
 		chatLayout = (CustomLinearLayout) findViewById(R.id.chat_layout);
@@ -542,8 +546,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	public void onSendClick(View v)
 	{
-		if (!mConversation.isOnhike() &&
-			mCredits <= 0)
+		if ((!mConversation.isOnhike() &&
+			mCredits <= 0) ||
+			(TextUtils.isEmpty(mComposeView.getText())))
 		{
 			return;
 		}
@@ -1145,7 +1150,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		if ((view == mComposeView) &&
-			(actionId == EditorInfo.IME_ACTION_SEND))
+				(keyEvent != null) &&
+				(keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) && 
+				(keyEvent.getAction() != KeyEvent.ACTION_UP) && 
+				(config.keyboard != Configuration.KEYBOARD_NOKEYS))
 		{
 			boolean ret = mSendBtn.performClick();
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
