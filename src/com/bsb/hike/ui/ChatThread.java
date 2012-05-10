@@ -780,7 +780,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mConversation.isOnhike())
 		{
 			mMetadataView.setVisibility(View.GONE);
-			mSendBtn.setBackgroundResource(R.drawable.sendbutton);
+			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn_selector);
 			mComposeView.setHint("Free Message...");
 			mInviteView.setVisibility(View.GONE);
 			mConversationsView.removeHeaderView(mInviteView);
@@ -791,7 +791,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mMetadataView.setVisibility(View.VISIBLE);
 			updateChatMetadata();
-			mSendBtn.setBackgroundResource(R.drawable.sendbutton_sms);
+			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn_selector);
 			mComposeView.setHint("SMS Message...");
 			mInviteView.setVisibility(View.VISIBLE);
 			if (!isHeaderShowing) 
@@ -1082,6 +1082,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void updateChatMetadata()
 	{
 		ImageButton topBarBtn = (ImageButton) findViewById(R.id.title_image_btn);
+		View buttonBar = (View) findViewById(R.id.button_bar);
 		/* set the bottom bar to red if we're out of sms credits */
 		if (mCredits <= 0)
 		{
@@ -1094,11 +1095,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				showOverlay(false);
 			}
 			topBarBtn.setVisibility(View.VISIBLE);
+			buttonBar.setVisibility(View.VISIBLE);
 			topBarBtn.setImageResource(R.drawable.ic_i);
 		}
 		else
 		{
 			topBarBtn.setVisibility(View.GONE);
+			buttonBar.setVisibility(View.GONE);
 			if (!blockOverlay) {
 				Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
 				fadeOut.setDuration(250);

@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/top_panel"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="48dp"
     android:background="@drawable/headerbar" >
 
     <ImageView
@@ -54,10 +54,19 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="15dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
         android:background="@null"
         android:onClick="onTitleIconClick"
         android:src="@drawable/credits_btn"
         android:visibility="gone" />
 
+    <View 
+        android:id="@+id/button_bar"
+        android:layout_toLeftOf="@id/title_image_btn"
+        android:layout_width="1dp"
+        android:layout_height="48dp"
+        android:background="@drawable/button_bar"
+        android:visibility="gone"/>
+    
 </RelativeLayout>

@@ -101,6 +101,8 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	{
 		sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		creditsHelpBtn = (ImageButton) findViewById(R.id.title_image_btn);
+		View buttonBar = (View) findViewById(R.id.button_bar);
+		buttonBar.setVisibility(View.VISIBLE);
 		creditsHelpBtn.setVisibility(View.VISIBLE);
 		creditsHelpBtn.setImageResource(R.drawable.credits_btn_selector);
 		creditsHelpBtn.setOnClickListener(this);
