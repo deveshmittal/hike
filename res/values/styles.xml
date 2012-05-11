@@ -44,4 +44,20 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
+
+    <!-- just defines top layer "Animation" -->
+	<style name="Animation" />
+
+	<!-- the animations must have been defined in your "anim" folder, of course -->
+	<style name="Animation.ActivityTransitions">
+	    <item name="android:activityOpenEnterAnimation">@anim/slide_in_right_noalpha</item>
+	    <item name="android:activityOpenExitAnimation">@anim/slide_out_left_noalpha</item>
+	    <item name="android:activityCloseEnterAnimation">@anim/slide_in_left_noalpha</item>
+	    <item name="android:activityCloseExitAnimation">@anim/slide_out_right_noalpha</item>
+	</style>
+
+	<style name="NoTitleBar">
+		<item name="android:windowAnimationStyle">@style/Animation.ActivityTransitions</item>
+	    <item name="android:windowNoTitle">true</item>
+    </style>
 </resources>
