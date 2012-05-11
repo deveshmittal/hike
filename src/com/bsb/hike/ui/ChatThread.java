@@ -405,6 +405,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	}
 
 	@Override
+	public void onBackPressed()
+	{
+		super.onBackPressed();
+		Intent intent = new Intent(this, MessagesList.class);
+		startActivity(intent);
+		overridePendingTransition(R.anim.slide_in_left_noalpha, R.anim.slide_out_right_noalpha);
+		finish();
+	}
+
+	@Override
 	public boolean onContextItemSelected(MenuItem item)
 	{
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();

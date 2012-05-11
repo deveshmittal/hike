@@ -30,6 +30,7 @@
         <activity
             android:theme="@style/NoTitleBar"
             android:name=".ui.MessagesList"
+            android:launchMode="singleTop"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustPan">
 
