@@ -319,8 +319,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			invite();
 			return true;
 		case R.id.deleteconversations:
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setMessage(R.string.delete_all_question).setPositiveButton("Delete", this).setNegativeButton(R.string.cancel, this).show();
+			if (!mAdapter.isEmpty()) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setMessage(R.string.delete_all_question)
+						.setPositiveButton("Delete", this)
+						.setNegativeButton(R.string.cancel, this).show();
+			}
 			return true;
 		case R.id.profile:
 			intent = new Intent(this, ProfileActivity.class);
