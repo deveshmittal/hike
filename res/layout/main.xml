@@ -56,7 +56,7 @@
             android:background="@drawable/thatch_repeat"
             android:choiceMode="none"
             android:divider="@drawable/ic_thread_divider"
-            android:dividerHeight="2dp"
+            android:dividerHeight="1dp"
             android:fadingEdge="none"
             android:footerDividersEnabled="false" >
         </com.bsb.hike.view.HikeListView>
