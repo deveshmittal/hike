@@ -16,7 +16,7 @@ public class RobotoTypeFace {
 	{
 		Log.e("INITIALISING", "CONTEXT: " + context +" "+context.getAssets());
 		bold = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Bold.ttf");
-		thin = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Thin.ttf");
+		thin = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Light.ttf");
 		normal = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Regular.ttf");
 	}
 }
