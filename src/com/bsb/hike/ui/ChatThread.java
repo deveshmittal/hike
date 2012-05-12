@@ -410,7 +410,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		super.onBackPressed();
 		Intent intent = new Intent(this, MessagesList.class);
 		startActivity(intent);
-		overridePendingTransition(R.anim.slide_in_left_noalpha, R.anim.slide_out_right_noalpha);
+		/* slide down if we're still selecting a user, otherwise slide back */
+		if (mConversation == null)
+		{
+			overridePendingTransition(R.anim.no_animation, R.anim.slide_down_noalpha);
+		}
+		else
+		{
+			overridePendingTransition(R.anim.slide_in_left_noalpha, R.anim.slide_out_right_noalpha);
+		}
 		finish();
 	}
 

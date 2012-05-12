@@ -362,6 +362,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 			startActivity(intent);
+			overridePendingTransition(R.anim.slide_up_noalpha, R.anim.no_animation);
 		}
 		else if (v == mInviteFriend)
 		{
