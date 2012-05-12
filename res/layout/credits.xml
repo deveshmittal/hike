@@ -102,14 +102,7 @@
                 android:layout_marginRight="15dp"
                 android:text="@string/every_month"
                 android:textColor="@color/black" />
-
-            <LinearLayout
-                android:id="@+id/credit_item_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="15dp"
-                android:orientation="vertical" />
-
+            
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -129,15 +122,45 @@
                     android:textStyle="bold" />
 
                 <com.bsb.hike.view.RobotoTextView
+                    android:id="@+id/friends_num"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
                     android:layout_toLeftOf="@id/invite_now"
                     android:gravity="left"
-                    android:text="@string/friends_on_hike"
+                    android:text="@string/friends_on_hike_0"
                     android:textColor="@color/black" />
             </RelativeLayout>
 
+              <com.bsb.hike.view.RobotoTextView
+                  android:id="@+id/friends_joined_num"
+                  android:layout_width="wrap_content"
+                  android:layout_height="match_parent"
+                  android:layout_marginLeft="15dp"
+                  android:gravity="left"
+                  android:text="Friends joined:"
+                  android:textColor="@color/black" />
+            
+            <LinearLayout
+                android:id="@+id/credit_item_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp"
+                android:orientation="vertical" />
+			
+            <com.bsb.hike.view.RobotoTextView
+                android:id="@+id/imp_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="15dp"
+                android:textColor="@color/black" />
+            
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
