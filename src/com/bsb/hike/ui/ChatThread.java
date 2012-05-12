@@ -196,8 +196,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataView.setVisibility(View.GONE);
 		mComposeView.removeTextChangedListener(this);
 
+		// Added because the header remains visible when you forward from an sms chat thread.
+		if (isHeaderShowing) {
+			mConversationsView.removeHeaderView(mInviteView);
+			mAdapter.notifyDataSetChanged();
+			isHeaderShowing = false;
+		}
 		mLabelView.setText("New Message");
-
+		
 		/* if we've got some pre-filled text, add it here */
 		if (TextUtils.isEmpty(msg)) {
 			mBottomView.setVisibility(View.GONE);
