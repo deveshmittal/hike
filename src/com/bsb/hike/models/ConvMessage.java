@@ -7,7 +7,9 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -36,6 +38,8 @@ public class ConvMessage
 	private State mState;
 
 	private boolean mInvite;
+
+	private MessageMetadata metadata;
 
 	public boolean isInvite()
 	{
@@ -114,6 +118,33 @@ public class ConvMessage
 			this.mappedMsgId = -1;
 			throw new JSONException("Problem in JSON while parsing msgID.");
 		}
+
+		if (data.has(HikeConstants.METADATA))
+		{
+			setMetadata(data.getJSONObject(HikeConstants.METADATA));
+		}
+	}
+
+	public void setMetadata(JSONObject metadata)
+	{
+		if (metadata != null)
+		{
+			this.metadata = new MessageMetadata(metadata);
+		}
+	}
+
+	public void setMetadata(String metadataString) throws JSONException
+	{
+		if (!TextUtils.isEmpty(metadataString))
+		{
+			JSONObject metadata = new JSONObject(metadataString);
+			setMetadata(metadata);
+		}
+	}
+
+	public MessageMetadata getMetadata()
+	{
+		return this.metadata;
 	}
 
 	public String getMessage()

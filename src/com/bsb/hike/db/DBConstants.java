@@ -9,7 +9,6 @@ public class DBConstants
 	
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 	
-	public static final String CONVERSATIONS_METADATA = "metadata";
 	
 	public static final String CONVERSATIONS_DATABASE_NAME = "chats";
 	
@@ -40,6 +39,8 @@ public class DBConstants
 	public static final String CONTACT_ID = "contactid";
 	
 	public static final String MSISDN = "msisdn";
+
+	public static final String MESSAGE_METADATA = "metadata";
 	
 	public static final String CONVERSATION_INDEX = "conversation_idx";
 	

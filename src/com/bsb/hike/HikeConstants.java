@@ -17,6 +17,8 @@ public class HikeConstants
 	public static final String SMS_MESSAGE = "sm";
 	public static final String TIMESTAMP = "ts";
 	public static final String MESSAGE_ID = "i";
+	public static final String METADATA = "md";
+	public static final String METADATA_DND = "dnd";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

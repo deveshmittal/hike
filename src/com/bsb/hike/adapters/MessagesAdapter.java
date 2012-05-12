@@ -3,6 +3,13 @@ package com.bsb.hike.adapters;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.sax.StartElementListener;
+import android.text.Spannable;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +23,7 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -85,7 +93,7 @@ public class MessagesAdapter extends BaseAdapter
 	{
 		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		ConvMessage convMessage = getItem(position);
+		final ConvMessage convMessage = getItem(position);
 		ViewHolder holder = null;
 		View v = convertView;
 		if (v == null)
@@ -130,12 +138,37 @@ public class MessagesAdapter extends BaseAdapter
 			holder = (ViewHolder) v.getTag();
 		}
 
-		SmileyParser smileyParser = SmileyParser.getInstance();
-		CharSequence markedUp = smileyParser.addSmileySpans(convMessage.getMessage());
-		holder.messageTextView.setText(markedUp);
+		MessageMetadata metadata = convMessage.getMetadata();
+		final String dndMissedCalledNumber = metadata != null ? metadata.getDNDMissedCallNumber() : null;
 
-		Linkify.addLinks(holder.messageTextView, Linkify.ALL);
-		Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
+		if (dndMissedCalledNumber != null)
+		{
+			String content = "tap here";
+			String message = context.getString(R.string.dnd_message, convMessage.getConversation().getLabel(), dndMissedCalledNumber);
+			Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
+			int index = message.indexOf(content);
+			spannable.setSpan(new ClickableSpan()
+			{
+				@Override
+				public void onClick(View blah)
+				{
+					Intent smsIntent = new Intent(Intent.ACTION_VIEW);
+					smsIntent.setData(Uri.parse("sms:" + convMessage.getMsisdn()));
+					smsIntent.putExtra("sms_body", context.getString(R.string.dnd_invite_message, dndMissedCalledNumber));
+					context.startActivity(smsIntent);
+				}
+			}, index, index + content.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+			holder.messageTextView.setText(spannable);
+			holder.messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
+		}
+		else
+		{
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			CharSequence markedUp = smileyParser.addSmileySpans(convMessage.getMessage());
+			holder.messageTextView.setText(markedUp);
+			Linkify.addLinks(holder.messageTextView, Linkify.ALL);
+			Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
+		}
 
 		if (shouldDisplayTimestamp(position))
 		{

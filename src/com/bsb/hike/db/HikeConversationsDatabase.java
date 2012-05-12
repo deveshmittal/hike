@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -13,6 +14,7 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -49,7 +51,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																														+ DBConstants.TIMESTAMP+" INTEGER, "
 																														+ DBConstants.MESSAGE_ID+" INTEGER PRIMARY KEY AUTOINCREMENT, " 
 																														+ DBConstants.MAPPED_MSG_ID+" INTEGER, " 
-																														+ DBConstants.CONV_ID+" INTEGER" 
+																														+ DBConstants.CONV_ID+" INTEGER,"
+																														+ DBConstants.MESSAGE_METADATA + " TEXT"
 																												+ " ) ";
 
 		db.execSQL(sql);
@@ -64,8 +67,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																														+ DBConstants.CONV_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, " 
 																														+ DBConstants.ONHIKE +" INTEGER, " 
 																														+ DBConstants.CONTACT_ID +" STRING, " 
-																														+ DBConstants.MSISDN +" UNIQUE, "
-																														+ DBConstants.CONVERSATIONS_METADATA +" TEXT"
+																														+ DBConstants.MSISDN +" UNIQUE"
 																												+ " )";
 		db.execSQL(sql);
 	}
@@ -126,7 +128,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		final int msgStatusColumn = 2;
 		final int timestampColumn = 3;
 		final int mappedMsgIdColumn = 4;
-		final int msisdnColumn = 5;
+		final int messageMetadataColumn = 5;
+		final int msisdnColumn = 6;
+
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
 		// 0 -> SENT_UNCONFIRMED ; 1 -> SENT_CONFIRMED ; 2 -> RECEIVED_UNREAD ;
@@ -135,6 +139,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		insertStatement.bindLong(timestampColumn, conv.getTimestamp());
 		insertStatement.bindLong(mappedMsgIdColumn, conv.getMappedMsgID());
 		insertStatement.bindString(msisdnColumn, conv.getMsisdn());
+		insertStatement.bindString(messageMetadataColumn, conv.getMetadata() != null ? conv.getMetadata().serialize() : "");
 	}
 	
 	public boolean wasMessageReceived(ConvMessage conv)
@@ -164,9 +169,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																														+ DBConstants.MSG_STATUS+","
 																														+ DBConstants.TIMESTAMP+","
 																														+ DBConstants.MAPPED_MSG_ID+" ,"
+																														+ DBConstants.MESSAGE_METADATA +","
 																														+ DBConstants.CONV_ID
 																												+ " ) "
-																												+ " SELECT ?, ?, ?, ?, "+ DBConstants.CONV_ID 
+																												+ " SELECT ?, ?, ?, ?, ?,"+ DBConstants.CONV_ID 
 																												+ " FROM " + DBConstants.CONVERSATIONS_TABLE 
 																												+ " WHERE " + DBConstants.CONVERSATIONS_TABLE + "."+DBConstants.MSISDN+"=?");
 		mDb.beginTransaction();
@@ -271,7 +277,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																DBConstants.MSG_STATUS,
 																DBConstants.TIMESTAMP,
 																DBConstants.MESSAGE_ID,
-																DBConstants.MAPPED_MSG_ID 
+																DBConstants.MAPPED_MSG_ID,
+																DBConstants.MESSAGE_METADATA
 															}, 
 										DBConstants.CONV_ID+"=?", 
 										new String[] { Long.toString(convid) }, null, null,
@@ -282,11 +289,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
 		final int mappedMsgIdColumn = c.getColumnIndex(DBConstants.MAPPED_MSG_ID);
 		final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGE_ID);
+		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGE_METADATA);
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
 		while (c.moveToNext())
 		{
 			ConvMessage message = new ConvMessage(c.getString(msgColumn), msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
 					c.getLong(mappedMsgIdColumn));
+			String metadata = c.getString(metadataColumn);
+			if (!TextUtils.isEmpty(metadata))
+			{
+				try
+				{
+					message.setMetadata(metadata);
+				}
+				catch (JSONException e)
+				{
+					Log.e(HikeConversationsDatabase.class.getName(), "Invalid JSON metadata", e);
+				}
+			}
 			elements.add(elements.size(), message);
 			message.setConversation(conversation);
 		}
