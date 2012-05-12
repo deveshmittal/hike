@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/profile_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:background="@color/offwhite" >
+
+    <RelativeLayout
+        android:id="@+id/avatar_border"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="18dp"
+        android:background="@drawable/avatar_border" >
+
+        <ImageView
+            android:id="@+id/profile"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_margin="3dp"
+            android:src="@drawable/default_profile" />
+
+        <RelativeLayout
+            android:id="@+id/profile_change_overlay"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_alignLeft="@id/profile"
+            android:layout_alignRight="@id/profile"
+            android:layout_alignTop="@id/profile"
+            android:background="@color/transparent_white"
+            android:visibility="gone" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Change" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <EditText
+        android:id="@+id/name_editable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="0dp"
+        android:layout_toRightOf="@+id/avatar_border"
+        android:ellipsize="end"
+        android:maxLength="20"
+        android:singleLine="true"
+        android:text="Kavin Bharti Mittal"
+        android:textColor="@color/black"
+        android:textSize="18dp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="0dp"
+        android:layout_toRightOf="@+id/avatar_border"
+        android:ellipsize="end"
+        android:maxLength="20"
+        android:singleLine="true"
+        android:text="Kavin Bharti Mittal"
+        android:textColor="@color/black"
+        android:textSize="18dp"
+        android:textStyle="bold" />
+    <View
+	    android:layout_width="fill_parent"
+	    android:layout_height="1dp"
+	    android:layout_alignParentBottom="true"
+	    android:background="@drawable/dropshadow_top" />
+</RelativeLayout>

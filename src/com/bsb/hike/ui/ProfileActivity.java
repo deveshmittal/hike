@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
@@ -136,15 +137,18 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			mActivityState = new ActivityState();
 		}
 
-		mIconView = (ImageView) findViewById(R.id.profile);
-		mNameView = (TextView) findViewById(R.id.name);
-		mNameViewEdittable = (EditText) findViewById(R.id.name_editable);
+		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		View headerView = inflater.inflate(R.layout.profile_header_view, null);
+
+		mIconView = (ImageView) headerView.findViewById(R.id.profile);
+		mNameView = (TextView) headerView.findViewById(R.id.name);
+		mNameViewEdittable = (EditText) headerView.findViewById(R.id.name_editable);
 		mListView = (ListView) findViewById(R.id.profile_preferences);
 		mTitleView = (TextView) findViewById(R.id.title);
 		mTitleIcon = (Button) findViewById(R.id.title_icon);
 		mButtonBar = (View) findViewById(R.id.button_bar_2);
 		mMadeWithLoveView = (TextView) findViewById(R.id.made_with_love);
-		mProfilePictureChangeOverlay = findViewById(R.id.profile_change_overlay);
+		mProfilePictureChangeOverlay = headerView.findViewById(R.id.profile_change_overlay);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String name = settings.getString(HikeMessengerApp.NAME, "Set a name!");
@@ -162,6 +166,9 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mButtonBar.setVisibility(View.VISIBLE);
 		/* add the heart in code because unicode isn't supported via xml*/
 		//mMadeWithLoveView.setText(String.format(getString(R.string.made_with_love), "\u2665"));
+
+		mListView.addHeaderView(headerView);
+		mListView.setHeaderDividersEnabled(false);
 
 		ProfileItem[] items = new ProfileItem[] 
 			{
