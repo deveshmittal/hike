@@ -30,14 +30,14 @@
 
     <style name="Text.Shadow.SignUp">
         <item name="android:textColor">@color/signup_blue</item>
-        <item name="android:textSize">14sp</item>
+        <item name="android:textSize">15sp</item>
     </style>
 
     <style name="Text.Shadow">
         <item name="android:shadowColor">#000000</item>
-        <item name="android:shadowDx">0.3</item>
-        <item name="android:shadowDy">0.3</item>
-        <item name="android:shadowRadius">0.2</item>
+        <item name="android:shadowDx">0.5</item>
+        <item name="android:shadowDy">0.5</item>
+        <item name="android:shadowRadius">0.27</item>
     </style>
 	
     <style name="Text">
