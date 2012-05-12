@@ -81,10 +81,6 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 		v.setTag(contactInfo);
 		v.setOnClickListener(this);
 
-		boolean no_dividers = ((position == getCount() - 1) || (getItem(position + 1) instanceof Section));
-		View divider = v.findViewById(R.id.item_divider);
-		divider.setVisibility(no_dividers ? View.INVISIBLE : View.VISIBLE);
-
 		return v;
 	}
 

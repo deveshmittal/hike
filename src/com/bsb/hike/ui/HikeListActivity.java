@@ -20,21 +20,17 @@ import android.widget.EditText;
 import android.widget.Filterable;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeArrayAdapter;
-import com.bsb.hike.adapters.HikeArrayAdapter.Section;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 
 public class HikeListActivity extends Activity implements OnScrollListener, TextWatcher, OnClickListener
 {
 	private HikeArrayAdapter adapter;
-	private TextView sectionText;
-	private RelativeLayout sectionContainer;
 	private ListView listView;
 	private EditText filterText;
 	private TextView labelView;
@@ -81,9 +77,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		}
 
 		labelView.setText(adapter.getTitle());
-
-		sectionText = (TextView) findViewById(R.id.section_label);
-		sectionContainer = (RelativeLayout) findViewById(R.id.section_container);
 
 		listView.setAdapter(adapter);
 		listView.setOnScrollListener(this);
@@ -166,13 +159,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		{
 			return;
 		}
-
-		Object o = adapter.getItem(firstVisibleItem);
-		if (!(o instanceof Section))
-		{
-			String title = (String) adapter.idForPosition(firstVisibleItem);
-			sectionText.setText(title);
-		}
 	}
 
 	@Override
@@ -195,7 +181,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		
 		if(text.length()>0) 
 		{
-			sectionContainer.setVisibility(View.GONE);
 			findViewById(android.R.id.content).requestLayout();
 			if(adapter != null)
 			{
@@ -204,7 +189,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		} 
 		else 
 		{
-			sectionContainer.setVisibility(View.VISIBLE);
 			findViewById(android.R.id.content).requestLayout();
 			if(adapter != null)
 			{

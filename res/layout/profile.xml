@@ -86,7 +86,7 @@
     <View
         android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:background="@drawable/dropshadow_top" />
+        android:background="@null" />
 
     <ListView
         android:id="@+id/profile_preferences"
@@ -95,7 +95,7 @@
         android:layout_weight="0"
         android:cacheColorHint="#000000"
         android:choiceMode="none"
-        android:background="@color/offwhite"
+        android:background="@color/profile_item_bckg"
         android:divider="@drawable/ic_thread_divider"
         android:dividerHeight="2dp"
         android:fadingEdge="none"

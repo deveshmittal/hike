@@ -135,9 +135,8 @@
                 android:text="@string/send"
                 style="@style/Text.Shadow.White.Bold"
                 android:textSize="14sp"
-                android:onClick="onSendClick"
-                android:layout_alignTop="@id/msg_compose"
-                android:layout_alignBottom="@id/msg_compose" />
+                android:layout_height="40dp"
+                android:onClick="onSendClick" />
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
 	

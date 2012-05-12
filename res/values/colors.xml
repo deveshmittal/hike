@@ -26,4 +26,5 @@
     <color name="disabled">#80afd6</color>
     <color name="subtext">#666666</color>
     <color name="loading">#4797ce</color>
+    <color name="profile_item_bckg">#eeeeeb</color>
 </resources>
