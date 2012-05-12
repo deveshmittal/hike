@@ -14,7 +14,7 @@ public class DropDownViewBinder implements ViewBinder
 	{
 		if (view.getId() == R.id.onhike)
 		{
-			view.setVisibility(cursor.getInt(columnIndex) == 0 ? View.INVISIBLE : View.VISIBLE);
+			view.setBackgroundResource(cursor.getInt(columnIndex) == 0 ? R.drawable.ic_sms_user : R.drawable.ic_hike_user);
 			return true;
 		}
 		return false;

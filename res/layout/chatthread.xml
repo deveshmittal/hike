@@ -22,26 +22,35 @@
             android:id="@+id/input_number_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/black"
-            android:orientation="vertical" >
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:gravity="center_vertical" >
 
-        <AutoCompleteTextView
-            android:id="@+id/input_number"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="7dp"
-            android:layout_marginLeft="18dp"
-            android:layout_marginRight="18dp"
-            android:layout_marginTop="7dp"
-            android:background="@drawable/edittext"
-            android:singleLine="true"
-            android:hint="Start typing a name"
-            android:imeOptions="actionNone"
-            android:visibility="visible"
-            android:completionThreshold="1"
-            android:dropDownVerticalOffset="8dp" >
-        </AutoCompleteTextView>
-    </LinearLayout>
+            
+            <AutoCompleteTextView
+                android:id="@+id/input_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:completionThreshold="1"
+                android:dropDownVerticalOffset="11dp"
+                android:dropDownWidth="match_parent"
+                android:fadingEdge="none"
+                android:hint="Start typing a name"
+                android:imeOptions="actionNone"
+                android:paddingBottom="7dp"
+                android:paddingRight="18dp"
+                android:paddingTop="7dp"
+                android:paddingLeft="10dp"
+                android:singleLine="true"
+                android:visibility="visible"
+                android:drawableLeft="@drawable/ic_name_2"
+                android:drawablePadding="10dp"
+                 >
+            </AutoCompleteTextView>
+        </LinearLayout>
 
         <ListView
             android:id="@+id/conversations_list"
@@ -102,8 +111,7 @@
                 android:autoText="true"
                 android:background="@drawable/edittext"
                 android:hint="@string/type_to_compose"
-                android:imeOptions="actionSend"
-                android:inputType="text|textAutoCorrect|textShortMessage|textCapSentences|textMultiLine"
+                android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine"
                 android:maxLines="4" >
 
                 <requestFocus />
