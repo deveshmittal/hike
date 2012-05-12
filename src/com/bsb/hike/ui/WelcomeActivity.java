@@ -3,24 +3,20 @@ package com.bsb.hike.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
-import com.bsb.hike.utils.Utils;
 
 public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask.OnSignupTaskProgressUpdate
 {
 	private Button mAcceptButton;
-	private SignupTask mTask;
 	private ViewGroup loadingLayout;
 	private Button tcText;
 	
@@ -33,7 +29,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	{
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
-		Utils.setCorrectOrientation(this);
+
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
@@ -47,6 +43,16 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		commLayout.setVisibility(View.VISIBLE);
 		booBooLayout.setVisibility(View.GONE);
 
+		if(savedState!= null)
+		{
+			if (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)) {
+				showError();
+			}
+			else if (savedState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING)) {
+				onClick(mAcceptButton);
+			}
+		}
+		
 		tcText.setOnClickListener(new OnClickListener() 
 		{
 			@Override
@@ -57,21 +63,27 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		});
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, booBooLayout.getVisibility() == View.VISIBLE);
+		super.onSaveInstanceState(outState);
+	}
+
 	public void onClick(View v)
 	{
 		if (v.getId() == mAcceptButton.getId())
 		{
 			loadingLayout.setVisibility(View.VISIBLE);
 			mAcceptButton.setVisibility(View.GONE);
-			mTask = SignupTask.startTask(this);
-			Log.d("WelcomeActivity", "SIGNUP TASK: " + mTask);
+			SignupTask.startTask(this);
 		}
 		else if(v.getId() == tryAgainBtn.getId())
 		{
 			tcContinueLayout.setVisibility(View.VISIBLE);
 			commLayout.setVisibility(View.VISIBLE);
 			booBooLayout.setVisibility(View.GONE);
-			mTask = SignupTask.startTask(WelcomeActivity.this);
+			onClick(mAcceptButton);
 		}
 	}
 
@@ -80,14 +92,18 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	{
 	}
 
+	private void showError() {
+		tcContinueLayout.setVisibility(View.GONE);
+		commLayout.setVisibility(View.GONE);
+		booBooLayout.setVisibility(View.VISIBLE);
+	}
+	
 	@Override
 	public void onProgressUpdate(StateValue value) 
 	{
 		if(value.state == SignupTask.State.ERROR)
 		{
-			tcContinueLayout.setVisibility(View.GONE);
-			commLayout.setVisibility(View.GONE);
-			booBooLayout.setVisibility(View.VISIBLE);
+			showError();
 		}
 		else if(value.state == SignupTask.State.MSISDN)
 		{

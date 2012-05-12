@@ -76,5 +76,9 @@ public class HikeConstants
 		public static final String KEEP_MESSAGE = "keepMessage";
 		public static final String SHOW_CREDITS_HELP = "showCreditsHelp";
 		public static final String CREDITS_HELP_COUNTER = "CreditsHelpCounter";
+		public static final String SIGNUP_TASK_RUNNING = "signupTaskRunning";
+		public static final String SIGNUP_PART = "signupPart";
+		public static final String SIGNUP_TEXT = "signupText";
+		public static final String SIGNUP_ERROR = "signupError";
 	}
 }
