@@ -51,11 +51,13 @@ public class CreditsActivity extends Activity
 		String dnd = getString(R.string.dnd);
 		SpannableString s = new SpannableString(imp + " " + dnd);
 
+		s.setSpan(new StyleSpan(Typeface.BOLD), 0, imp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		s.setSpan(new ForegroundColorSpan(0xffff3333), 0, imp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 		int ind = dnd.indexOf("10 SMS");
 		int l = new String("10 SMS").length();
 		s.setSpan(new StyleSpan(Typeface.BOLD), imp.length() + ind, imp.length() + ind + l + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		s.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), imp.length() + ind, imp.length() + ind + l + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 		impTxt.setText(s);
 
@@ -67,6 +69,7 @@ public class CreditsActivity extends Activity
 		int start = formatString.indexOf("%1$s");
 		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
 				start + num.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		str.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), start, start + num.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		friendsNumTxt.setText(str);
 		
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
