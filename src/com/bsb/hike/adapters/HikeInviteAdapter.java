@@ -7,10 +7,12 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -59,19 +61,22 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 		
 		v.setTag(contactInfo);
 
-		TextView invitedText = (TextView) v.findViewById(R.id.invited_text);
+		ImageView invitedTick = (ImageView) v.findViewById(R.id.invited_tick);
+		TextView inviteText = (TextView) v.findViewById(R.id.invited_text);
 
 		if(mInvitedUsers.contains(contactInfo.getMsisdn()))
 		{
-			invitedText.setBackgroundDrawable(null);
-			invitedText.setText(R.string.invited);
-			invitedText.setTextColor(activity.getResources().getColor(R.color.grey));
+			invitedTick.setVisibility(View.VISIBLE);
+			inviteText.setVisibility(View.GONE);
 		}
 		else
 		{
-			invitedText.setBackgroundResource(R.drawable.invite_btn_bckg);
-			invitedText.setText(R.string.invite);
-			invitedText.setTextColor(activity.getResources().getColor(R.color.white));
+			invitedTick.setVisibility(View.GONE);
+			inviteText.setVisibility(View.VISIBLE);
+			inviteText.setBackgroundResource(R.drawable.blue_btn_small);
+			inviteText.setText(R.string.invite);
+			inviteText.setTextColor(activity.getResources().getColor(R.color.white));
+			inviteText.setTypeface(null, Typeface.BOLD);
 		}
 		
 		v.setOnClickListener(this);

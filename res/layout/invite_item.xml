@@ -5,21 +5,35 @@
 	android:minHeight="?android:attr/listPreferredItemHeight"
     android:layout_marginBottom="7dp"
     android:layout_marginTop="7dp"
-    android:background="@drawable/list_item" >
+    android:background="@color/profile_item_bckg" >
 
     <com.bsb.hike.view.RobotoTextView
         android:id="@+id/invited_text"
-        android:text="...Invited"
+        android:layout_width="65dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="18dp"
+        android:background="@drawable/blue_btn_small"
+        android:gravity="center"
+        android:shadowColor="#990f3a56"
+        android:shadowDx="0.4"
+        android:shadowDy="0.4"
+        android:shadowRadius="0.25"
+        android:text="Invite"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+    
+    <ImageView 
+        android:id="@+id/invited_tick"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="5dp"
-		android:paddingRight="5dp"
-		android:layout_marginRight="18dp"
         android:layout_alignParentRight="true"
-        android:background="@drawable/invite_btn_bckg"
         android:layout_centerVertical="true"
-        android:textStyle="bold" />
-
+        android:layout_marginRight="42dp"
+        android:src="@drawable/ic_invited"
+        android:visibility="visible"/>
+    
     <LinearLayout android:id="@+id/name_num_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,15 +51,16 @@
         android:singleLine="true"
         android:ellipsize="end"
         android:text="Vijay Raghunathan asdfasdfasd asdfasdfasdf ads adsasd"
-        android:textColor="@color/black"
+        android:textColor="@color/lightblack"
         android:textSize="18sp" />
     <com.bsb.hike.view.RobotoTextView 
         android:id="@+id/number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Number"
-        android:textColor="@color/black"
-        android:textSize="13sp"/>
+        android:textColor="@color/subtext"
+        android:textSize="13sp"
+        android:textStyle="italic"/>
     
     </LinearLayout>
 
