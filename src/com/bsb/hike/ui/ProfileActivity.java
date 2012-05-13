@@ -72,6 +72,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 	public String mLocalMSISDN = null;
 
 	private ActivityState mActivityState; /* config state of this activity */
+	private View mButtonBar;
 	private class ActivityState
 	{
 		public boolean editable = false; /* is this page currently editable */
@@ -141,6 +142,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mListView = (ListView) findViewById(R.id.profile_preferences);
 		mTitleView = (TextView) findViewById(R.id.title);
 		mTitleIcon = (Button) findViewById(R.id.title_icon);
+		mButtonBar = (View) findViewById(R.id.button_bar_2);
 		mMadeWithLoveView = (TextView) findViewById(R.id.made_with_love);
 		mProfilePictureChangeOverlay = findViewById(R.id.profile_change_overlay);
 
@@ -157,7 +159,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 
 		mTitleView.setText(getResources().getString(R.string.profile_title));
 		mTitleIcon.setVisibility(View.VISIBLE);
-
+		mButtonBar.setVisibility(View.VISIBLE);
 		/* add the heart in code because unicode isn't supported via xml*/
 		//mMadeWithLoveView.setText(String.format(getString(R.string.made_with_love), "\u2665"));
 

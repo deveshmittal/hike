@@ -32,6 +32,7 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 	private TextView mTitleView;
 	private View selectedEmoticon;
 	private TextView mNameText;
+	private View mButtonBar;
 
 	@Override
 	public Object onRetainNonConfigurationInstance()
@@ -47,6 +48,7 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 
 		mFeedbackText = (EditText) findViewById(R.id.feedback);
 		mFeedbackButton = (Button) findViewById(R.id.title_icon);
+		mButtonBar = (View) findViewById(R.id.button_bar_2);
 		mTitleView = (TextView) findViewById(R.id.title);
 		mNameText = (TextView) findViewById(R.id.user_name);
 
@@ -57,6 +59,7 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 		mFeedbackButton.setVisibility(View.VISIBLE);
 		mFeedbackButton.setText(R.string.send);
 		mTitleView.setText(getResources().getString(R.string.feedback));
+		mButtonBar.setVisibility(View.VISIBLE);
 
 		mFeedbackButton.setEnabled(false);
 

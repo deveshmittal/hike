@@ -60,13 +60,22 @@
         android:onClick="onTitleIconClick"
         android:src="@drawable/credits_btn"
         android:visibility="gone" />
-
-    <View 
-        android:id="@+id/button_bar"
-        android:layout_toLeftOf="@id/title_image_btn"
-        android:layout_width="1dp"
-        android:layout_height="48dp"
-        android:background="@drawable/button_bar"
-        android:visibility="gone"/>
     
+    <View android:id="@+id/button_bar"
+        android:layout_width="4px"
+        android:layout_height="47dp"
+        android:background="@drawable/button_separator"
+        android:layout_toLeftOf="@id/title_image_btn"
+        android:layout_marginRight="-2dp"
+        android:layout_marginTop="-1dp"
+        android:visibility="gone" />
+	
+    <View android:id="@+id/button_bar_2"
+        android:layout_width="4px"
+        android:layout_height="47dp"
+        android:background="@drawable/button_separator"
+        android:layout_toLeftOf="@id/title_icon"
+        android:layout_marginRight="-2dp"
+        android:layout_marginTop="-1dp"
+        android:visibility="gone" />
 </RelativeLayout>
