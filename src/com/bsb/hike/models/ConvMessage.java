@@ -332,11 +332,11 @@ public class ConvMessage
 		switch(mState)
 		{
 		case SENT_DELIVERED:
-			return R.drawable.ic_delivered;
+			return R.drawable.ic_delivered_small;
 		case SENT_DELIVERED_READ:
-			return R.drawable.ic_read;
+			return R.drawable.ic_read_small;
 		case SENT_CONFIRMED:
-			return R.drawable.ic_sent;
+			return R.drawable.ic_sent_small;
 		default:
 			return R.drawable.ic_blank;
 		}
