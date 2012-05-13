@@ -140,7 +140,7 @@ public class MessagesAdapter extends BaseAdapter
 		if (shouldDisplayTimestamp(position))
 		{
 			String dateFormatted = convMessage.getTimestampFormatted(false);
-			holder.timestampTextView.setText(dateFormatted);
+			holder.timestampTextView.setText(dateFormatted.toUpperCase());
 			holder.timestampContainer.setVisibility(View.VISIBLE);
 		}
 		else
