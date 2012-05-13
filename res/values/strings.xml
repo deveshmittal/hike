@@ -74,7 +74,7 @@
 	<string name="what_name">What\'s your name?</string>
 	<string name="enter_number">Enter your number:</string>
 	<string name="all_set">You\'re all set!</string>
-	<string name="feedback_hint">Your feedback</string>
+	<string name="feedback_hint">We\'d love to hear from you...</string>
 	<string name="wrong_number">Entered a wrong number?</string>
 	<string name="tap_here"><u>Tap here</u></string>
 	<string name="block_overlay_message">You\'ve blocked %1$s.  Unblock and continue hiking.</string>
@@ -106,14 +106,14 @@
 	<string name="boo_boo">Oh no! Systems boo boo!</string>
 	<string name="try_again">Try again</string>
 	<string name="if_you_see">If you see this more often send us a note <font color="@color/signup_blue"><u>here.</u></font></string>
-	<string name="friends">Friends</string>
-	<string name="sms_month">SMS/Month</string>
+	<string name="friends">friends</string>
+	<string name="sms_month">SMS/month</string>
 	<string name="your_free_sms">Your free SMS</string>
 	<string name="availble_month">Available this month</string>
 	<string name="free_sms">Want free SMS?</string>
 	<string name="every_month">Every month, you get 100 SMS. To get more free SMS, invite your friends to hike!</string>
 	<string name="invite_now">Invite Now</string>
-	<string name="friends_on_hike_0">You\'ve invited %1$s friends</string>
+	<string name="friends_on_hike_0">You\'ve invited %1$s friends.</string>
 	<string name="free_always_world">Free, always, worldwide!</string>
 	<string name="disclaimer_india">*Free SMS works within India only.</string>
 	<string name="hike_to_hike">hike to hike</string>
@@ -123,7 +123,7 @@
 	<string name="learn_more">Learn More ></string>
 	<string name="dismiss">Tap to close</string>
 	<string name="important">Important:</string>
-	<string name="dnd"> Friends on the Do Not Disturb (DND) list need to opt in to hike to receive your free messages. Get an additional 10 SMS for every friend you opt-in.</string>
+	<string name="dnd"> Due to SMS regulations, friends on the Do Not Disturb (DND) list need to opt in to hike to receive your free SMS. \n\nGet an additional 10 SMS for every friend you opt-in.</string>
 	<string name="friends_on_hike_more">You\'ve invited only %1$s friend to hike. Invite more.</string>
 	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 20 more!</string>
 </resources>

@@ -12,10 +12,12 @@
 	    android:orientation="horizontal"
 	    android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:id="@+id/timestamp_container">
+		android:id="@+id/timestamp_container"
+		android:gravity="center_vertical"
+		android:layout_marginTop="10dp">
 
 		<View 
-		    android:layout_height="1dp"
+		    android:layout_height="1px"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
 		    android:layout_gravity="center"
@@ -30,11 +32,14 @@
         	android:layout_alignParentTop="true"
         	android:layout_centerHorizontal="true"
         	android:text="This is the timestamp"
-        	android:textAppearance="?android:attr/textAppearanceSmall"
-        	android:textColor="@color/timestampcolor" />
+        	android:textSize="13sp"
+        	android:textColor="@color/timestampcolor"
+        	android:shadowColor="#80FFFFFF"
+        	android:shadowDy="0.4"
+        	android:shadowRadius="0.3" />
 
 	    <View 
-		    android:layout_height="1dp"
+		    android:layout_height="1px"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
 		    android:layout_gravity="center"
@@ -64,11 +69,12 @@
         android:background="@drawable/ic_bubble_white"
         android:layout_marginLeft="2dp"
         android:gravity="left"
-        android:paddingLeft="17dp"
-        android:paddingRight="10dp"
+        android:paddingTop="7dp"
         android:paddingBottom="10dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="10dp"
         android:text="Thanks for joining hike.  If you have questions or concerns you can send them to us here!"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/black" />
+        android:textSize="15sp"
+        android:textColor="@color/chat_color" />
 	</RelativeLayout>
 </RelativeLayout>

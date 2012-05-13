@@ -5,14 +5,15 @@
     android:background="@drawable/thatch_repeat"
 	android:paddingLeft="18dp"
 	android:paddingRight="18dp"
-    android:paddingBottom="8dp">
+    android:paddingBottom="5dp">
 
 	<LinearLayout
 	    android:orientation="horizontal"
 	    android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginBottom="5dp"
-		android:id="@+id/timestamp_container">
+		android:id="@+id/timestamp_container"
+		android:layout_marginTop="10dp">
 
 		<View 
 		    android:layout_height="1dp"
@@ -30,8 +31,11 @@
         	android:layout_alignParentTop="true"
         	android:layout_centerHorizontal="true"
         	android:text="This is the timestamp"
-        	android:textAppearance="?android:attr/textAppearanceSmall"
-        	android:textColor="@color/timestampcolor" />
+        	android:textSize="13sp"
+        	android:textColor="@color/timestampcolor"
+        	android:shadowColor="#80FFFFFF"
+        	android:shadowDy="0.4"
+        	android:shadowRadius="0.3" />
 
 	    <View 
 		    android:layout_height="1dp"
@@ -61,12 +65,14 @@
         android:layout_height="wrap_content"
         android:background="@drawable/ic_bubble_green"
         android:gravity="right"
+        android:paddingTop="7dp"
+        android:paddingBottom="17dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:layout_toRightOf="@id/msg_status_indicator"
         android:text="This is the message a much"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/black" />
+        android:textSize="15sp"
+        android:textColor="@color/chat_color" />
 
 	<com.bsb.hike.view.RobotoTextView
         android:id="@+id/message_hike"
@@ -74,12 +80,14 @@
         android:layout_height="wrap_content"
         android:background="@drawable/ic_bubble_blue"
         android:gravity="right"
+       	 android:paddingTop="7dp"
+        android:paddingBottom="17dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:layout_toRightOf="@id/msg_status_indicator"
         android:text="This is the message a much"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@color/black" />
+        android:textSize="15sp"
+        android:textColor="@color/chat_color" />
 
 	</RelativeLayout>
 </RelativeLayout>

@@ -15,7 +15,7 @@
     <color name="red">#FF0000</color>
     <color name="scangrey">#3e3e3e</color>
     <color name="lightblack">#222222</color>
-    <color name="timestampcolor">#8a8a8a</color>
+    <color name="timestampcolor">#999999</color>
     <color name="bottombargrey">#5b5b5b</color>
     <color name="listgrey">#f9f9f9</color>
     <color name="transparent_white">#8000</color>
@@ -27,4 +27,7 @@
     <color name="subtext">#666666</color>
     <color name="loading">#4797ce</color>
     <color name="profile_item_bckg">#eeeeeb</color>
+    <color name="chat_color">#686767</color>
+    <color name="notif_subtext">#717069</color>
+    <color name="credits_blue">#3e8ec3</color>
 </resources>

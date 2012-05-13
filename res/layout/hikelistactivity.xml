@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="#eeeeeb"
     android:orientation="vertical" >
 
    <include
@@ -20,15 +20,19 @@
        <com.bsb.hike.view.RobotoEditText
            android:id="@+id/filter"
            android:layout_width="match_parent"
-           android:layout_height="wrap_content"
+           android:layout_height="48dp"
            android:paddingLeft="10dp"
            android:background="@color/white"
            android:hint="Search"
-           android:paddingBottom="15dp"
-           android:paddingTop="15dp"
+           android:paddingBottom="10dp"
+           android:paddingTop="10dp"
            android:singleLine="true"
            android:drawableLeft="@drawable/ic_search_et"
-           android:drawablePadding="10dp" >
+           android:drawablePadding="10dp"
+           android:textSize="16sp"
+           android:gravity="center_vertical"
+           android:textColorHint="#cdcdc8"
+           android:textColor="@color/lightblack" >
        </com.bsb.hike.view.RobotoEditText>
 
        <LinearLayout
@@ -76,14 +80,14 @@
            android:background="@drawable/thatch_repeat"/>
    
     <ListView
-        android:background="@color/offwhite"
+        android:background="#eeeeeb"
         android:id="@+id/contact_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
         android:cacheColorHint="#000000"
-        android:divider="#dddddd"
-        android:dividerHeight="1px"
+        android:divider="@drawable/ic_thread_divider_other"
+        android:dividerHeight="1dp"
         android:fadingEdge="none"
         android:fadingEdgeLength="2dp"
         android:fastScrollEnabled="true"

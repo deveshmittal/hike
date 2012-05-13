@@ -21,11 +21,9 @@
         <LinearLayout
             android:id="@+id/input_number_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:background="@color/white"
             android:orientation="horizontal"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
             android:gravity="center_vertical" >
 
             
@@ -35,10 +33,10 @@
                 android:layout_height="wrap_content"
                 android:background="@color/white"
                 android:completionThreshold="1"
-                android:dropDownVerticalOffset="11dp"
+                android:dropDownVerticalOffset="7dp"
                 android:dropDownWidth="match_parent"
                 android:fadingEdge="none"
-                android:hint="Start typing a name"
+                android:hint="Start typing a name..."
                 android:imeOptions="actionNone"
                 android:paddingBottom="7dp"
                 android:paddingRight="18dp"
@@ -48,7 +46,9 @@
                 android:visibility="visible"
                 android:drawableLeft="@drawable/ic_name_2"
                 android:drawablePadding="10dp"
-                 >
+                android:textSize="16sp"
+                android:textColorHint="#cdcdc8"
+                android:textColor="@color/lightblack" >
             </AutoCompleteTextView>
         </LinearLayout>
 
@@ -112,7 +112,9 @@
                 android:background="@drawable/edittext"
                 android:hint="@string/type_to_compose"
                 android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine"
-                android:maxLines="4" >
+                android:maxLines="4"
+                android:textSize="15sp"
+                android:textColor="@color/chat_color" >
 
                 <requestFocus />
             </com.bsb.hike.view.RobotoEditText>

@@ -37,7 +37,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Your Name"
-                android:textColor="@color/black"
+                android:textColor="@color/lightblack"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -46,19 +46,19 @@
             android:layout_height="1dp"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:background="@drawable/feedback_dropshadow_top" />
+            android:background="@drawable/ic_thread_divider_other" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:padding="13dp" >
+            android:layout_margin="13dp" >
 
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="10dp"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="7dp"
                 android:src="@drawable/ic_msg" />
 
             <com.bsb.hike.view.RobotoEditText
@@ -70,7 +70,9 @@
                 android:hint="@string/feedback_hint"
                 android:imeOptions="actionDone"
                 android:maxLength="10000"
-                android:textSize="18sp" >
+                android:textSize="18sp"
+                android:textColorHint="#cdcdc8"
+           		android:textColor="@color/lightblack" >
 
                 <requestFocus />
             </com.bsb.hike.view.RobotoEditText>
@@ -97,7 +99,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/how_hike_feel"
-            android:textColor="@color/black" />
+            android:textColor="#6b6965" />
 
         <LinearLayout
             android:layout_width="wrap_content"

@@ -16,13 +16,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/top_panel_ref"
-        android:background="@color/offwhite"
+        android:background="@color/profile_item_bckg"
         android:cacheColorHint="#000000"
         android:choiceMode="none"
-        android:divider="@drawable/ic_thread_divider"
-        android:dividerHeight="2dp"
-        android:fadingEdge="none"
-        android:footerDividersEnabled="false" />
+        android:divider="@drawable/ic_thread_divider_other"
+        android:dividerHeight="1dp"
+        android:fadingEdge="none" />
 
     <View
         android:layout_width="fill_parent"

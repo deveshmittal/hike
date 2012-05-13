@@ -55,7 +55,7 @@
             android:cacheColorHint="#00000000"
             android:background="@drawable/thatch_repeat"
             android:choiceMode="none"
-            android:divider="@drawable/ic_thread_divider"
+            android:divider="@drawable/ic_thread_divider_other"
             android:dividerHeight="1dp"
             android:fadingEdge="none"
             android:footerDividersEnabled="false" >

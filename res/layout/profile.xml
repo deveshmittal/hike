@@ -96,8 +96,8 @@
         android:cacheColorHint="#000000"
         android:choiceMode="none"
         android:background="@color/profile_item_bckg"
-        android:divider="@drawable/ic_thread_divider"
-        android:dividerHeight="2dp"
+        android:divider="@drawable/ic_thread_divider_other"
+        android:dividerHeight="1dp"
         android:fadingEdge="none"
         android:footerDividersEnabled="false" />
 

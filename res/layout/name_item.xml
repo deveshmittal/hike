@@ -32,7 +32,7 @@
             android:singleLine="true"
             android:text="Vijay Raghunathan"
             android:textSize="18sp"
-            android:textColor="@color/black" />
+            android:textColor="@color/lightblack" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -57,8 +57,9 @@
                 android:layout_below="@id/name"
                 android:layout_toRightOf="@+id/onhike"
                 android:text="1231231231231"
-                android:textColor="@color/black"
-                android:textSize="13sp" />
+                android:textColor="@color/subtext"
+                android:textSize="13sp"
+                android:textStyle="italic" />
         </LinearLayout>
     </LinearLayout>
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:drawable="@drawable/invite_chatthread_selected"/>
-    <item android:drawable="@drawable/invite_chatthread"/>
+    <item android:drawable="@drawable/invite_to_hike_pressed" android:state_pressed="true" android:state_enabled="true"/>
+	<item android:drawable="@drawable/invite_to_hike_selected" android:state_focused="true"/>
+    <item android:drawable="@drawable/invite_to_hike" />
 </selector>

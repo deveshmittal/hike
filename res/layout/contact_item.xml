@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:layout_marginBottom="7dp"
     android:layout_marginTop="7dp"
-    android:background="@drawable/list_item"
+    android:background="@color/profile_item_bckg"
     android:minHeight="?android:attr/listPreferredItemHeight" >
 
     <com.bsb.hike.view.RobotoButton
@@ -42,7 +42,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:text="Vijay Raghunathan dfasdfasdf adsfasfasdf asdfasdfasdf"
-            android:textColor="@color/black"
+            android:textColor="@color/lightblack"
             android:textSize="18sp" />
 
         <com.bsb.hike.view.RobotoTextView
@@ -50,8 +50,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Number"
-            android:textColor="@color/black"
-            android:textSize="13sp" />
+            android:textColor="@color/subtext"
+            android:textSize="13sp"
+            android:textStyle="italic" />
     </LinearLayout>
 
 </RelativeLayout>

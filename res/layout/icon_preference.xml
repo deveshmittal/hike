@@ -8,7 +8,7 @@ layout. -->
 	android:gravity="center_vertical"
 	android:paddingRight="18dp"
 	android:paddingLeft="18dp"
-	android:background="@drawable/list_item">
+	android:background="@color/profile_item_bckg">
 
 <RelativeLayout android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -31,7 +31,7 @@ layout. -->
         android:layout_height="wrap_content"
         android:text="Title"
         android:textSize="18dp"
-        android:textColor="@color/black"
+        android:textColor="@color/lightblack"
         android:layout_toRightOf="@id/icon"/>
 
     <com.bsb.hike.view.RobotoTextView android:id="@+android:id/summary"
@@ -39,10 +39,11 @@ layout. -->
         android:layout_height="wrap_content"
         android:layout_below="@android:id/title"
         android:layout_alignLeft="@android:id/title"
-        android:textSize="12dp"
+        android:textSize="13dp"
         android:text="Summary"
-        android:textColor="@color/black"
-        android:maxLines="4" />
+        android:textColor="@color/notif_subtext"
+        android:maxLines="4"
+        android:textStyle="italic" />
 
 </RelativeLayout>
 

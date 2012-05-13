@@ -27,38 +27,41 @@
         android:layout_toRightOf="@id/title_hikeicon"
         android:ellipsize="end"
         android:gravity="center_vertical"
+        android:shadowColor="#002147"
+        android:shadowDy="-0.7"
+        android:shadowRadius="0.4"
         android:singleLine="true"
         android:textAppearance="@style/ChatLabelStyle"
-        android:textSize="22dp" />
+        android:textSize="20dp" />
 
     <com.bsb.hike.view.RobotoButton
         android:id="@+id/title_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="60dp"
+        android:layout_height="47dp"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="18dp"
         android:background="@drawable/top_bar_btn_selector"
         android:gravity="center"
         android:onClick="onTitleIconClick"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
         android:textColor="@drawable/top_bar_btn_txt_selector"
+        android:layout_marginTop="-1dp"
         android:textSize="16dp"
         android:textStyle="bold"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:layout_alignParentTop="true"
+        android:text="Save" />
 
     <ImageButton
         android:id="@+id/title_image_btn"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="47dp"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
         android:paddingLeft="15dp"
         android:paddingRight="15dp"
-        android:background="@null"
+        android:layout_marginTop="-2dp"
+        android:layout_alignParentTop="true"
         android:onClick="onTitleIconClick"
         android:src="@drawable/credits_btn"
+        android:background="@drawable/top_bar_btn_selector"
         android:visibility="gone" />
     
     <View android:id="@+id/button_bar"
