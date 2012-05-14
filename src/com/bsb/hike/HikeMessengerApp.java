@@ -52,6 +52,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String MESSAGES_LIST_TOOLTIP_DISMISSED = "messageslist_tooltip";
 
+	public static final String SPLASH_SEEN = "splashseen";
+
 
 	private static HikePubSub mPubSubInstance;
 

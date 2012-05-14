@@ -1,14 +1,21 @@
 package com.bsb.hike.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
@@ -21,9 +28,11 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	private Button tcText;
 	
 	private ViewGroup tcContinueLayout;
-	private ViewGroup commLayout;
 	private ViewGroup booBooLayout;
 	private Button tryAgainBtn;
+	private View hiLogoView;
+	private ImageView hikeWelcomeView;
+
 	@Override
 	public void onCreate(Bundle savedState)
 	{
@@ -33,26 +42,38 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
+		hiLogoView = findViewById(R.id.ic_hi_logo);
+		hikeWelcomeView = (ImageView) findViewById(R.id.ic_hike_welcome_image);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
-		commLayout = (ViewGroup) findViewById(R.id.comm_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
 		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
 
-		tcContinueLayout.setVisibility(View.VISIBLE);
-		commLayout.setVisibility(View.VISIBLE);
-		booBooLayout.setVisibility(View.GONE);
-
-		if(savedState!= null)
+		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
 		{
-			if (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)) {
-				showError();
-			}
-			else if (savedState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING)) {
-				onClick(mAcceptButton);
-			}
+			showError();
 		}
-		
+		else if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING)))
+		{
+			onClick(mAcceptButton);
+		}
+		else if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SPLASH_SEEN, false))
+		{
+			hikeWelcomeView.setVisibility(View.VISIBLE);
+			tcContinueLayout.setVisibility(View.VISIBLE);
+			hiLogoView.setVisibility(View.GONE);
+		}
+		else
+		{
+			(new Handler()).postDelayed(new Runnable() {
+				public void run()
+				{
+					startAnimations();
+				}
+
+			}, (long) 1.5 * 1000);
+		}
+
 		tcText.setOnClickListener(new OnClickListener() 
 		{
 			@Override
@@ -61,6 +82,60 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 				startActivity(new Intent(WelcomeActivity.this, TermsAndConditionsActivity.class));
 			}
 		});
+
+	}
+
+	private void startAnimations()
+	{
+
+
+		Animation slideUpAlphaout = AnimationUtils.loadAnimation(this, R.anim.welcome_alpha_out);
+		Animation slideUpAlphaIn = AnimationUtils.loadAnimation(this, R.anim.welcome_alpha_in);
+		slideUpAlphaout.setAnimationListener(new Animation.AnimationListener()
+		{
+			
+			@Override
+			public void onAnimationStart(Animation animation)
+			{
+			}
+			
+			@Override
+			public void onAnimationRepeat(Animation animation)
+			{
+			}
+			
+			@Override
+			public void onAnimationEnd(Animation animation)
+			{
+				hiLogoView.setVisibility(View.INVISIBLE);
+				Animation fadeInAnimation = AnimationUtils.loadAnimation(WelcomeActivity.this, R.anim.fade_in_animation);
+				fadeInAnimation.setAnimationListener(new Animation.AnimationListener()
+				{
+					@Override
+					public void onAnimationStart(Animation animation)
+					{
+						tcContinueLayout.setVisibility(View.VISIBLE);
+					}
+					
+					@Override
+					public void onAnimationRepeat(Animation animation)
+					{
+					}
+					
+					@Override
+					public void onAnimationEnd(Animation animation)
+					{
+						hikeWelcomeView.setVisibility(View.VISIBLE);
+					}
+				});
+				tcContinueLayout.startAnimation(fadeInAnimation);
+				SharedPreferences.Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+				editor.putBoolean(HikeMessengerApp.SPLASH_SEEN, true);
+				editor.commit();
+			}
+		});
+		hikeWelcomeView.startAnimation(slideUpAlphaIn);
+		hiLogoView.startAnimation(slideUpAlphaout);
 	}
 
 	@Override
@@ -81,7 +156,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		else if(v.getId() == tryAgainBtn.getId())
 		{
 			tcContinueLayout.setVisibility(View.VISIBLE);
-			commLayout.setVisibility(View.VISIBLE);
+			hikeWelcomeView.setVisibility(View.VISIBLE);
 			booBooLayout.setVisibility(View.GONE);
 			onClick(mAcceptButton);
 		}
@@ -93,8 +168,9 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	}
 
 	private void showError() {
+		Log.d("WelcomeActivity", "showError");
 		tcContinueLayout.setVisibility(View.GONE);
-		commLayout.setVisibility(View.GONE);
+		hikeWelcomeView.setImageDrawable(null);
 		booBooLayout.setVisibility(View.VISIBLE);
 	}
 	
