@@ -13,6 +13,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -29,6 +30,7 @@ import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -67,7 +69,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private Set<String> mConversationsAdded;
 
-	private View mInviteFriend;
+	private View mInviteToolTip;
 
 	@Override
 	protected void onPause()
@@ -157,6 +159,13 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		setContentView(R.layout.main);
 		mConversationsView = (HikeListView) findViewById(R.id.conversations);
 
+		View view = findViewById(R.id.title_hikeicon);
+		view.setVisibility(View.VISIBLE);
+
+		ImageView titleIconView = (ImageView) findViewById(R.id.title_image_btn);
+		titleIconView.setImageResource(R.drawable.credits_btn);
+		titleIconView.setVisibility(View.VISIBLE);
+
 		/*
 		 * mSearchIconView = findViewById(R.id.search); mSearchIconView.setOnClickListener(this);
 		 */
@@ -171,8 +180,11 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		mInviteFriend = mEmptyView.findViewById(R.id.invite_friend);
-		mInviteFriend.setOnClickListener(this);
+		mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
+		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false))
+		{
+			mInviteToolTip.setVisibility(View.VISIBLE);
+		}
 
 		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
 		List<Conversation> conversations = db.getConversations();
@@ -364,10 +376,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			startActivity(intent);
 			overridePendingTransition(R.anim.slide_up_noalpha, R.anim.no_animation);
 		}
-		else if (v == mInviteFriend)
-		{
-			invite();
-		}
 	}
 
 	@Override
@@ -544,5 +552,23 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		Conversation conv = (Conversation) adapterView.getItemAtPosition(position);
 		Intent intent = createIntentForConversation(conv);
 		startActivity(intent);
+	}
+
+	private void setToolTipDismissed()
+	{
+		mInviteToolTip.setVisibility(View.GONE);
+		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, true);
+		editor.commit();
+	}
+
+	public void onToolTipClose(View v)
+	{
+		setToolTipDismissed();
+	}
+
+	public void onInviteClick(View v)
+	{
+		invite();
 	}
 }

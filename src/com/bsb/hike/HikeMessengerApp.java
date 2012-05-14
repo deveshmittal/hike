@@ -50,6 +50,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String CONNECTED_ONCE = "connectedonce";
 
+	public static final String MESSAGES_LIST_TOOLTIP_DISMISSED = "messageslist_tooltip";
+
 
 	private static HikePubSub mPubSubInstance;
 

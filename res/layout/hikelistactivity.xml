@@ -44,7 +44,7 @@
            android:background="@drawable/credits_help_bckg"
            android:gravity="center_vertical"
            android:orientation="horizontal"
-           android:visibility="gone"
+           android:visibility="visible"
            android:layout_alignParentTop="true" >
 
            <ImageButton
