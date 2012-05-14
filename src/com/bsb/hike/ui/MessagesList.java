@@ -165,6 +165,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		ImageView titleIconView = (ImageView) findViewById(R.id.title_image_btn);
 		titleIconView.setImageResource(R.drawable.credits_btn);
 		titleIconView.setVisibility(View.VISIBLE);
+		findViewById(R.id.button_bar).setVisibility(View.VISIBLE);
 
 		/*
 		 * mSearchIconView = findViewById(R.id.search); mSearchIconView.setOnClickListener(this);
@@ -302,24 +303,11 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		return true;
 	}
 
-	protected void onActivityResult(int requestCode, int resultCode, Intent intent)
-	{
-		if (resultCode == RESULT_OK)
-		{
-			switch (requestCode)
-			{
-			case INVITE_PICKER_RESULT:
-				intent.setClass(this, ChatThread.class);
-				startActivity(intent);
-			}
-		}
-	}
-
 	private void invite()
 	{
 		Intent intent = new Intent(this, HikeListActivity.class);
 		intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
-		startActivityForResult(intent, INVITE_PICKER_RESULT);		
+		startActivity(intent);		
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -568,6 +556,11 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	}
 
 	public void onInviteClick(View v)
+	{
+		invite();
+	}
+
+	public void onTitleIconClick(View v)
 	{
 		invite();
 	}
