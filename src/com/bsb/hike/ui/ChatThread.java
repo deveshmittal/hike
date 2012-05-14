@@ -146,8 +146,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean blockOverlay;
 
-	private HikeUserDatabase hikeUserDatabase;
-
 	private Configuration config;
 
 	@Override
@@ -528,9 +526,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		if(!blockOverlay)
 		{
-			hikeUserDatabase = new HikeUserDatabase(ChatThread.this);
-			hikeUserDatabase.setOverlay(true, mConversation.getMsisdn());
-			hikeUserDatabase.close();
+			mConversationDb = new HikeConversationsDatabase(ChatThread.this);
+			mConversationDb.setOverlay(true, mConversation.getMsisdn());
+			mConversationDb.close();
 		}
 	}
 
@@ -1124,9 +1122,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mMetadataView.setBackgroundResource(R.color.red);
 			mSendBtn.setEnabled(false);
-			hikeUserDatabase = new HikeUserDatabase(ChatThread.this);
-			boolean show = hikeUserDatabase.wasOverlayDismissed(mConversation.getMsisdn());
-			hikeUserDatabase.close();
+			mConversationDb = new HikeConversationsDatabase(ChatThread.this);
+			boolean show = mConversationDb.wasOverlayDismissed(mConversation.getMsisdn());
+			mConversationDb.close();
 			if (!show) {
 				showOverlay(false);
 			}
@@ -1288,9 +1286,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			hikeUserDatabase = new HikeUserDatabase(ChatThread.this);
-			hikeUserDatabase.setOverlay(false, mConversation.getMsisdn());
-			hikeUserDatabase.close();
+			mConversationDb = new HikeConversationsDatabase(ChatThread.this);
+			mConversationDb.setOverlay(false, mConversation.getMsisdn());
+			mConversationDb.close();
 			formatString = getResources().getString(R.string.no_credits);
 			overlayImg.setImageResource(R.drawable.ic_no_credits);
 			dismissLayout.setVisibility(View.VISIBLE);

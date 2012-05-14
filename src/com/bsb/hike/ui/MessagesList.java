@@ -39,7 +39,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -94,7 +93,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		protected Conversation[] doInBackground(Conversation... convs)
 		{
 			HikeConversationsDatabase db = null;
-			HikeUserDatabase uDb = null;
 			ArrayList<Long> ids = new ArrayList<Long>(convs.length);
 			ArrayList<String> msisdns =new ArrayList<String>(convs.length);
 			for (Conversation conv : convs)
@@ -107,19 +105,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			{
 				db = new HikeConversationsDatabase(MessagesList.this);
 				db.deleteConversation(ids.toArray(new Long[] {}));
-
-				uDb = new HikeUserDatabase(MessagesList.this);
-				uDb.resetOverlays(msisdns);
 			}
 			finally
 			{
 				if (db != null)
 				{
 					db.close();
-				}
-				if(uDb != null)
-				{
-					uDb.close();
 				}
 			}
 			return convs;
