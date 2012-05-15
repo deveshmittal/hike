@@ -88,7 +88,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	protected void onResume()
 	{
 		super.onResume();
-		Log.d("MESSAGE LIST", "Resumed .....");
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 		if(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.CREDITS_SCREEN_SHOWN, false))
 		{
@@ -144,14 +143,19 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
-
+	protected void onNewIntent(Intent intent) {
 		if (Utils.requireAuth(this))
 		{
 			return;
 		}
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		
+		onNewIntent(null);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
