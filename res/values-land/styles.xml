@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="WelcomeHikeMessage">
+	<item name="android:layout_marginTop">40dp</item>
+    </style>
+
+    <style name="T_C_Message">
+		<item name="android:paddingBottom">40dp</item>        
+    </style>
+</resources>

@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/main_bg" >
+    android:background="@drawable/welcome_bckg" >
 
     <RelativeLayout
+        android:visibility="invisible"
         android:id="@+id/tc_continue_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -12,42 +13,22 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingBottom="50dp" >
+        style="@style/T_C_Message">
 
-        <LinearLayout
-            android:id="@+id/t_c_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:gravity="center"
-            android:orientation="horizontal" >
+        <Button
+            android:id="@+id/terms_and_conditions"
+            android:background="@drawable/t_c_btn"
+            android:layout_centerHorizontal="true"
+         	android:layout_width="wrap_content"
+         	android:layout_height="wrap_content"
+         	android:layout_marginBottom="15dp"/>
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_tc" />
-
-            <com.bsb.hike.view.RobotoButton
-                android:id="@+id/terms_and_conditions"
-                style="@style/Text.Shadow.SignUp"
-                android:layout_marginLeft="5dp"
-                android:background="@null"
-                android:gravity="center"
-                android:shadowDx="0.4"
-                android:shadowDy="0.4"
-                android:shadowRadius="0.25"
-                android:text="@string/terms_privacy"
-                android:textColor="@drawable/t_c_txt_selector"
-                android:textSize="13sp" />
-        </LinearLayout>
-
-        <com.bsb.hike.view.OmnesButton
+        <Button
             android:id="@+id/btn_continue"
             style="@style/Text.Shadow.White.Bold"
-            android:layout_width="match_parent"
-            android:layout_below="@id/t_c_layout"
-            android:layout_marginLeft="40dp"
-            android:layout_marginRight="40dp"
+            android:layout_width="wrap_content"
+            android:layout_below="@id/terms_and_conditions"
+            android:layout_centerHorizontal="true"
             android:background="@drawable/signup_button"
             android:onClick="onClick"
             android:text="@string/get_started" />
@@ -56,7 +37,7 @@
             android:id="@+id/loading_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/t_c_layout"
+            android:layout_below="@id/terms_and_conditions"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
             android:background="@drawable/signup_loading_bckg"
@@ -86,74 +67,26 @@
         </RelativeLayout>
     </RelativeLayout>
 
-    <ImageView
-        android:id="@+id/hike_logo"
+	<ImageView
+		android:id="@+id/ic_hi_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
+		android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
-        android:layout_margin="10dp"
-        android:src="@drawable/hike_logo" />
+        android:src="@drawable/hi_logo_big" />
 
-    <View
-        android:id="@+id/header_dropshadow"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_below="@+id/hike_logo"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:background="@drawable/signup_header_dropshadow" />
+	<ImageView
+	    android:id="@+id/ic_hike_welcome_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+		style="@style/WelcomeHikeMessage"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/hike_welcome_image"/>
 
-    <RelativeLayout
-        android:id="@+id/comm_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/tc_continue_layout"
-        android:layout_below="@id/header_dropshadow" >
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true" >
-
-            <com.bsb.hike.view.OmnesTextView
-                android:id="@+id/error_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:gravity="center"
-                android:text="@string/welcome_screen_error_message"
-                android:textColor="@color/red"
-                android:visibility="gone" />
-
-            <ImageView
-                android:id="@+id/ic_hike_logo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:src="@drawable/hi_logo_big" />
-
-            <com.bsb.hike.view.OmnesTextView
-                android:id="@+id/welcome_1"
-                style="@style/Text.Shadow.White.Bold"
-                android:layout_below="@+id/ic_hike_logo"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="5dp"
-                android:text="@string/welcome_message_1"
-                android:textSize="22dp" />
-
-            <com.bsb.hike.view.OmnesTextView
-                android:id="@+id/welcome_2"
-                style="@style/Text.Shadow.White.Bold"
-                android:layout_below="@+id/welcome_1"
-                android:layout_centerHorizontal="true"
-                android:text="@string/welcome_message_2"
-                android:textSize="22dp" />
-        </RelativeLayout>
-    </RelativeLayout>
-
-    <include
-        android:layout_below="@id/header_dropshadow"
+	<include
+	    android:layout_below="@id/header_dropshadow"
         layout="@layout/boo_boo" />
-
 </RelativeLayout>

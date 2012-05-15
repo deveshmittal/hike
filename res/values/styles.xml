@@ -56,8 +56,16 @@
 	    <item name="android:activityCloseExitAnimation">@anim/slide_out_right_noalpha</item>
 	</style>
 
-	<style name="NoTitleBar">
+	<style name="NoTitleBar" parent="@android:style/Theme.NoTitleBar">
 		<item name="android:windowAnimationStyle">@style/Animation.ActivityTransitions</item>
 	    <item name="android:windowNoTitle">true</item>
+    </style>
+
+	<style name="WelcomeHikeMessage">
+		<item name="android:layout_marginTop">90dp</item>
+    </style>
+
+	<style name="T_C_Message">
+		<item name="android:paddingBottom">75dp</item>        
     </style>
 </resources>
