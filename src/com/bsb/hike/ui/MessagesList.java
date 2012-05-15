@@ -27,6 +27,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -39,7 +41,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -71,6 +72,10 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private View mInviteToolTip;
 
+	private ImageView titleIconView;
+
+	private View btnBar;
+
 	@Override
 	protected void onPause()
 	{
@@ -85,6 +90,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		super.onResume();
 		Log.d("MESSAGE LIST", "Resumed .....");
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
+		if(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.CREDITS_SCREEN_SHOWN, false))
+		{
+			mInviteToolTip.setVisibility(View.GONE);
+			titleIconView.setVisibility(View.GONE);
+			btnBar.setVisibility(View.GONE);
+		}
 	}
 	
 	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
@@ -94,7 +105,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		protected Conversation[] doInBackground(Conversation... convs)
 		{
 			HikeConversationsDatabase db = null;
-			HikeUserDatabase uDb = null;
 			ArrayList<Long> ids = new ArrayList<Long>(convs.length);
 			ArrayList<String> msisdns =new ArrayList<String>(convs.length);
 			for (Conversation conv : convs)
@@ -107,19 +117,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			{
 				db = new HikeConversationsDatabase(MessagesList.this);
 				db.deleteConversation(ids.toArray(new Long[] {}));
-
-				uDb = new HikeUserDatabase(MessagesList.this);
-				uDb.resetOverlays(msisdns);
 			}
 			finally
 			{
 				if (db != null)
 				{
 					db.close();
-				}
-				if(uDb != null)
-				{
-					uDb.close();
 				}
 			}
 			return convs;
@@ -162,11 +165,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		View view = findViewById(R.id.title_hikeicon);
 		view.setVisibility(View.VISIBLE);
 
-		ImageView titleIconView = (ImageView) findViewById(R.id.title_image_btn);
-		titleIconView.setImageResource(R.drawable.credits_btn);
-		titleIconView.setVisibility(View.VISIBLE);
-		findViewById(R.id.button_bar).setVisibility(View.VISIBLE);
-
 		/*
 		 * mSearchIconView = findViewById(R.id.search); mSearchIconView.setOnClickListener(this);
 		 */
@@ -179,11 +177,23 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mEmptyView.setOnClickListener(this);
 
 		mConversationsView.setEmptyView(mEmptyView);
-		mConversationsView.setOnItemClickListener(this);
 
 		mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
-		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false))
+		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
+		btnBar = findViewById(R.id.button_bar);
+		
+		titleIconView.setVisibility(View.VISIBLE);
+		titleIconView.setImageResource(R.drawable.credits_btn);
+		btnBar.setVisibility(View.VISIBLE);
+		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false))
 		{
+			if (savedInstanceState == null || !savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING)) 
+			{
+				Animation alphaIn = AnimationUtils.loadAnimation(
+						MessagesList.this, android.R.anim.fade_in);
+				alphaIn.setStartOffset(1000);
+				mInviteToolTip.setAnimation(alphaIn);
+			}
 			mInviteToolTip.setVisibility(View.VISIBLE);
 		}
 
@@ -235,6 +245,15 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		if(mInviteToolTip.getVisibility() == View.VISIBLE)
+		{
+			outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, true);
+		}
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -357,7 +376,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	@Override
 	public void onClick(View v)
 	{
-		if ((v == mEditMessageIconView) || (v == mEmptyView))
+		if ((v == mEditMessageIconView))
 		{
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
@@ -544,13 +563,15 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private void setToolTipDismissed()
 	{
-		mInviteToolTip.setVisibility(View.GONE);
+		Animation alphaOut = AnimationUtils.loadAnimation(MessagesList.this, android.R.anim.fade_out);
+		mInviteToolTip.setAnimation(alphaOut);
+		mInviteToolTip.setVisibility(View.INVISIBLE);
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, true);
 		editor.commit();
 	}
 
-	public void onToolTipClose(View v)
+	public void onToolTipClosed(View v)
 	{
 		setToolTipDismissed();
 	}
@@ -562,6 +583,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	public void onTitleIconClick(View v)
 	{
-		invite();
+		onToolTipClicked(null);
+	}
+
+	public void onToolTipClicked(View v)
+	{
+		setToolTipDismissed();
+		startActivity(new Intent(MessagesList.this, CreditsActivity.class));
 	}
 }

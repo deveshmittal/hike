@@ -67,7 +67,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 																														+ DBConstants.CONV_ID +" INTEGER PRIMARY KEY AUTOINCREMENT, " 
 																														+ DBConstants.ONHIKE +" INTEGER, " 
 																														+ DBConstants.CONTACT_ID +" STRING, " 
-																														+ DBConstants.MSISDN +" UNIQUE"
+																														+ DBConstants.MSISDN +" UNIQUE, "
+																														+ DBConstants.OVERLAY_DISMISSED+" INTEGER"
 																												+ " )";
 		db.execSQL(sql);
 	}
@@ -484,5 +485,30 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		Long[] bindArgs = new Long[] { msgId };
 		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE "+DBConstants.MESSAGE_ID+"= ?", bindArgs);
+	}
+	
+	public boolean wasOverlayDismissed(String msisdn)
+	{
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {DBConstants.OVERLAY_DISMISSED}, DBConstants.MSISDN + "=?", new String[]{msisdn}, null, null, null);
+		int s = 0;
+		if(c.moveToFirst())
+		{
+			s = c.getInt(0);
+		}
+		c.close();
+		return (s==0) ? false : true;
+	}
+
+	public void setOverlay(boolean dismiss, String msisdn)
+	{
+		ContentValues contentValues = new ContentValues(1);
+		contentValues.put(DBConstants.OVERLAY_DISMISSED, dismiss);
+		if (msisdn != null) {
+			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
+					DBConstants.MSISDN + "=?", new String[] { msisdn });
+		} else {
+			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
+					null, null);
+		}
 	}
 }

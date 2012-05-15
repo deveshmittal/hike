@@ -695,7 +695,7 @@ public class HikeMqttManager implements Listener
 					if(credits > 0)
 					{
 						Log.d("HikeMqttManager", "RESETING THE OVERLAYS");
-						userDb.setOverlay(false, null);
+						convDb.setOverlay(false, null);
 					}
 				}
 				Editor mEditor = settings.edit();

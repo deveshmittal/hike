@@ -82,5 +82,6 @@ public class HikeConstants
 		public static final String SIGNUP_PART = "signupPart";
 		public static final String SIGNUP_TEXT = "signupText";
 		public static final String SIGNUP_ERROR = "signupError";
+		public static final String TOOLTIP_SHOWING = "tooltipShowing";
 	}
 }

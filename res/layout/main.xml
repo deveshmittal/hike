@@ -59,47 +59,9 @@
    		android:background="@drawable/thatch_repeat"
    		android:layout_width="match_parent"
    		android:layout_height="match_parent">
-
-      <RelativeLayout
-           android:id="@+id/credits_help_layout"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:layout_marginLeft="7dp"
-           android:layout_marginRight="7dp"
-           android:background="@drawable/credits_help_bckg"
-           android:visibility="visible"
-           android:layout_alignParentTop="true" >
-
-           <ImageButton
-               android:id="@+id/close"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:background="@null"
-               android:paddingLeft="3dp"
-               android:paddingRight="7dp"
-               android:onClick="onToolTipClose"
-			   android:layout_centerVertical="true"
-               android:layout_alignParentLeft="true"
-               android:src="@drawable/close_btn_selector" />
-
-           <com.bsb.hike.view.RobotoButton
-               android:id="@+id/learn_more_btn"
-			   android:layout_alignParentRight="true"
-			   android:layout_centerVertical="true"
-               style="@style/Text.Shadow.White.Bold"
-               android:layout_marginLeft="5dp"
-               android:background="@null"
-               android:text="@string/learn_more"
-               android:onClick="onInviteClick"
-               android:textColor="@drawable/t_c_txt_selector"
-               android:textSize="13sp" />
-           
-           <com.bsb.hike.view.RobotoTextView
-               style="@style/Text.Shadow.White.Bold"
-               android:text="@string/invite_tooltip"
-               android:layout_toLeftOf="@id/learn_more_btn"
-               android:textSize="13sp" />
-           </RelativeLayout>
+		
+	    <include layout="@layout/tool_tip"/>
+	    
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
