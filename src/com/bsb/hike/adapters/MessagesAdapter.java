@@ -224,7 +224,6 @@ public class MessagesAdapter extends BaseAdapter
 
 	@Override
 	public ConvMessage getItem(int position) {
-		Log.d("MessagesAdapter", "Item position is " + position);
 		return convMessages.get(position);
 	}
 
