@@ -52,6 +52,9 @@ public class HikeMessengerApp extends Application
 
 	public static final String MESSAGES_LIST_TOOLTIP_DISMISSED = "messageslist_tooltip";
 
+	public static final String CREDITS_SCREEN_SHOWN = "creditScreenShown";
+	
+	public static final String INVITE_TOOLTIP_DISMISSED = "inviteToolTip";
 
 	private static HikePubSub mPubSubInstance;
 
