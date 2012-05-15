@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.ProfileArrayAdapter.ProfileViewHolder;
+import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikePreferences;
 
 public abstract class ProfileItem
@@ -38,6 +38,15 @@ public abstract class ProfileItem
 			return null;
 //			return new Intent(Intent.ACTION_VIEW, this.url);
 		}
+
+		@Override
+		public void bindView(Context context, View v)
+		{
+			super.bindView(context, v);
+			ProfileViewHolder holder = (ProfileViewHolder) v.getTag(R.id.profile_item_extra);
+			holder.extraView.setBackgroundResource(R.drawable.ic_arrow);
+			holder.extraView.setVisibility(View.VISIBLE);
+		}	
 	}
 
 	/**
@@ -62,6 +71,14 @@ public abstract class ProfileItem
 			return intent;
 		}
 
+		@Override
+		public void bindView(Context context, View v)
+		{
+			super.bindView(context, v);
+			ProfileViewHolder holder = (ProfileViewHolder) v.getTag(R.id.profile_item_extra);
+			holder.extraView.setBackgroundResource(R.drawable.ic_arrow);
+			holder.extraView.setVisibility(View.VISIBLE);
+		}	
 	}
 	/**
 	 * A profile item that displays the contents of a setting
@@ -81,7 +98,7 @@ public abstract class ProfileItem
 		@Override
 		public Intent getIntent(Context context)
 		{
-			return null;
+			return new Intent(context, CreditsActivity.class);
 /*			Uri uri = Uri.parse("http://www.bsb.com/hike-help/" + settingsName);
 			return new Intent(Intent.ACTION_VIEW, uri);
 */
@@ -91,7 +108,7 @@ public abstract class ProfileItem
 		public void bindView(Context context, View v)
 		{
 			super.bindView(context, v);
-			ProfileViewHolder holder = (ProfileViewHolder) v.getTag();
+			ProfileViewHolder holder = (ProfileViewHolder) v.getTag(R.id.profile_item_extra);
 			SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 			String credits = Integer.toString(settings.getInt(this.settingsName, 0));
 			((TextView) holder.extraView).setText(credits);
@@ -117,7 +134,7 @@ public abstract class ProfileItem
 
 	public void bindView(Context context, View v)
 	{
-		ProfileViewHolder holder = (ProfileViewHolder) v.getTag();
+		ProfileViewHolder holder = (ProfileViewHolder) v.getTag(R.id.profile_item_extra);
 		holder.iconView.setImageDrawable(context.getResources().getDrawable(getIcon()));
 		holder.titleView.setText(getTitle());		
 	}
@@ -132,13 +149,31 @@ public abstract class ProfileItem
 		return icon;
 	}
 
-	public ProfileViewHolder createViewHolder(View v)
+	public ProfileViewHolder createViewHolder(View v, ProfileItem p)
 	{
 		ProfileViewHolder holder = new ProfileViewHolder();
-		v.setTag(holder);
+		v.setTag(R.id.profile_item_extra, holder);
+		v.setTag(R.id.profile, p);
 		holder.iconView = (ImageView) v.findViewById(R.id.profile_item_icon);
 		holder.titleView = (TextView) v.findViewById(R.id.profile_item_name);
-		holder.extraView = (TextView) v.findViewById(R.id.profile_item_extra);
+		if (p instanceof ProfileSettingsItem) 
+		{
+			holder.extraView = (TextView) v
+					.findViewById(R.id.profile_item_extra);
+		}
+		else
+		{
+			holder.extraView = (ImageView) v.findViewById(R.id.arrow);
+		}
+	
 		return holder;
+	}
+	
+	static public class ProfileViewHolder
+	{
+		public ImageView iconView; /* Icon */
+		public TextView titleView; /* Title */
+		public View extraView; /* Any view on the right side */
+		public TextView descriptionView; /* Secondary heading */
 	}
 }

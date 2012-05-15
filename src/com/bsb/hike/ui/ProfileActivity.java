@@ -2,10 +2,6 @@ package com.bsb.hike.ui;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.ArrayList;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,7 +10,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -22,24 +17,16 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
-import android.widget.EditText;
+import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.ProfileArrayAdapter;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.cropimage.Util;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -50,7 +37,7 @@ import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
 
-public class ProfileActivity extends Activity implements OnItemClickListener, OnClickListener, FinishableEvent, android.content.DialogInterface.OnClickListener
+public class ProfileActivity extends Activity implements OnClickListener, FinishableEvent, android.content.DialogInterface.OnClickListener
 {
 	/* dialog IDs */
 	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
@@ -63,20 +50,21 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 
 	private ImageView mIconView;
 	private TextView mNameView;
-	private ListView mListView;
 	private TextView mTitleView;
 	private TextView mMadeWithLoveView;
-	private Button mTitleIcon;
-	private View mProfilePictureChangeOverlay;
-	private EditText mNameViewEdittable;
+
+	private ViewGroup credits;
+	private ViewGroup notifications;
+	private ViewGroup privacy;
+	private ViewGroup help;
+	private ViewGroup myInfo;
+
 	private Dialog mDialog;
 	public String mLocalMSISDN = null;
 
 	private ActivityState mActivityState; /* config state of this activity */
-	private View mButtonBar;
 	private class ActivityState
 	{
-		public boolean editable = false; /* is this page currently editable */
 		public HikeHTTPTask task; /* the task to update the global profile */
 
 		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
@@ -137,18 +125,22 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			mActivityState = new ActivityState();
 		}
 
-		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		View headerView = inflater.inflate(R.layout.profile_header_view, null);
+		myInfo = (ViewGroup) findViewById(R.id.my_info); 
+		credits = (ViewGroup) findViewById(R.id.free_sms);
+		notifications = (ViewGroup) findViewById(R.id.notifications);
+		privacy = (ViewGroup) findViewById(R.id.privacy);
+		help = (ViewGroup) findViewById(R.id.help);
 
-		mIconView = (ImageView) headerView.findViewById(R.id.profile);
-		mNameView = (TextView) headerView.findViewById(R.id.name);
-		mNameViewEdittable = (EditText) headerView.findViewById(R.id.name_editable);
-		mListView = (ListView) findViewById(R.id.profile_preferences);
+		myInfo.setBackgroundResource(R.drawable.profile_top_item_selector);
+		credits.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		notifications.setBackgroundResource(R.drawable.profile_top_item_selector);
+		privacy.setBackgroundResource(R.drawable.profile_center_item_selector);
+		help.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		
+		mIconView = (ImageView) findViewById(R.id.profile);
+		mNameView = (TextView) findViewById(R.id.name);
 		mTitleView = (TextView) findViewById(R.id.title);
-		mTitleIcon = (Button) findViewById(R.id.title_icon);
-		mButtonBar = (View) findViewById(R.id.button_bar_2);
 		mMadeWithLoveView = (TextView) findViewById(R.id.made_with_love);
-		mProfilePictureChangeOverlay = headerView.findViewById(R.id.profile_change_overlay);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String name = settings.getString(HikeMessengerApp.NAME, "Set a name!");
@@ -160,145 +152,83 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		mNameView.setText(name);
 
 		mIconView.setOnClickListener(this);
+		myInfo.setOnClickListener(this);
 
 		mTitleView.setText(getResources().getString(R.string.profile_title));
-		mTitleIcon.setVisibility(View.VISIBLE);
-		mButtonBar.setVisibility(View.VISIBLE);
 		/* add the heart in code because unicode isn't supported via xml*/
 		//mMadeWithLoveView.setText(String.format(getString(R.string.made_with_love), "\u2665"));
-
-		mListView.addHeaderView(headerView);
-		mListView.setHeaderDividersEnabled(false);
-
+		ViewGroup[] itemLayouts = new ViewGroup[]
+				{
+					credits, notifications, privacy, help
+				};
+		
 		ProfileItem[] items = new ProfileItem[] 
 			{
 				new ProfileItem.ProfileSettingsItem("Free SMS left", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
 				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, R.xml.notification_preferences),
-				new ProfileItem. ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
+				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
 				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, "http://www.bsb.im/about")
 			};
-		ProfileArrayAdapter adapter = new ProfileArrayAdapter(this, R.layout.profile_item, items);
-		mListView.setAdapter(adapter);
-		mListView.setOnItemClickListener(this);
-
-		updateEditableUI();
+		
+		for(int i = 0; i < items.length; i++)
+		{
+			items[i].createViewHolder(itemLayouts[i], items[i]);
+			items[i].bindView(ProfileActivity.this, itemLayouts[i]);
+		}
+		
+		notifications.findViewById(R.id.divider).setVisibility(View.GONE);
+//		updateEditableUI();
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id)
+	public void onProfileItemClick(View v)
 	{
-		if (position != 0) {
-			ProfileItem item = (ProfileItem) adapterView
-					.getItemAtPosition(position);
-			Intent intent = item.getIntent(this);
-			if (intent != null) {
-				startActivity(intent);
-			}
-		}
-		else 
+		ProfileItem item = (ProfileItem) v.getTag(R.id.profile);
+		Intent intent = item.getIntent(ProfileActivity.this);
+		if (intent != null)
 		{
-			Intent intent = new Intent(getApplicationContext(), CreditsActivity.class);
 			startActivity(intent);
 		}
 	}
-
-	public void onTitleIconClick(View view)
-	{
-		mActivityState.editable = !mActivityState.editable;
-		if (!mActivityState.editable)
-		{
-			/* hide the softkeyboard */
-			InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(mNameViewEdittable.getWindowToken(), 0);
 	
-			ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
-
-			/* save the new fields */
-			String updatedName = mNameViewEdittable.getText().toString();
-			if (!TextUtils.isEmpty(updatedName) && !mNameView.getText().equals(updatedName))
-			{
-				/* user edited the text, so update the profile */
-				HikeHttpRequest request = new HikeHttpRequest("/account/name", new HikeHttpRequest.HikeHttpCallback()
-				{
-					public void onFailure()
-					{
-					}
-
-					public void onSuccess()
-					{
-						/* if the request was successful, update the shared preferences and the UI */
-						String name = mNameViewEdittable.getText().toString();
-						mNameView.setText(name);
-						Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-						editor.putString(HikeMessengerApp.NAME_SETTING, name);
-						editor.commit();
-					}
-				});
-
-				JSONObject json = new JSONObject();
-				try
-				{
-					json.put("name", mNameViewEdittable.getText().toString());
-					request.setJSONData(json);
-				}
-				catch (JSONException e)
-				{
-					Log.e("ProfileActivity", "Could not set name", e);
-				}
-				requests.add(request);
-			}
-
-			if (mActivityState.newBitmap != null)
-			{
-				/* the server only needs a 40x40 version */
-				final Bitmap smallerBitmap = Util.transform(new Matrix(),
-						mActivityState.newBitmap, 40, 40, false);
-				ByteArrayOutputStream bao = new ByteArrayOutputStream();
-				smallerBitmap.compress(Bitmap.CompressFormat.JPEG, 95, bao);
-				final byte[] bytes = bao.toByteArray();
-
-				bao = new ByteArrayOutputStream();
-				mActivityState.newBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
-				final byte[] larger_bytes = bao.toByteArray();
-
-				HikeHttpRequest request = new HikeHttpRequest("/account/avatar", new HikeHttpRequest.HikeHttpCallback()
-				{
-					public void onFailure()
-					{
-						Log.d("ProfileActivity", "resetting image");
-						mActivityState.newBitmap = null;
-						/* reset the image */
-						mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId()));
-					}
-
-					public void onSuccess()
-					{
-						HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
-						db.setIcon(mLocalMSISDN, bytes);
-						db.setIcon(getLargerIconId(), larger_bytes);
-						db.close();
-					}
-				});
-
-				request.setPostData(bytes);
-				requests.add(request);
-			}
-			if (!requests.isEmpty())
-			{
-				mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
-				mActivityState.task = new HikeHTTPTask(this, R.string.update_profile_failed);
-				HikeHttpRequest[] r = new HikeHttpRequest[requests.size()];
-				requests.toArray(r);
-				mActivityState.task.execute(r);
-			}
-		}
-		else
+	public void changeProfilePic()
+	{
+		if (mActivityState.newBitmap != null)
 		{
-			/* make the edittext the same as the currently set name */
-			mNameViewEdittable.setText(mNameView.getText());
-		}
+			/* the server only needs a 40x40 version */
+			final Bitmap smallerBitmap = Util.transform(new Matrix(),
+					mActivityState.newBitmap, 40, 40, false);
+			ByteArrayOutputStream bao = new ByteArrayOutputStream();
+			smallerBitmap.compress(Bitmap.CompressFormat.JPEG, 95, bao);
+			final byte[] bytes = bao.toByteArray();
 
-		updateEditableUI();
+			bao = new ByteArrayOutputStream();
+			mActivityState.newBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
+			final byte[] larger_bytes = bao.toByteArray();
+
+			HikeHttpRequest request = new HikeHttpRequest("/account/avatar", new HikeHttpRequest.HikeHttpCallback()
+			{
+				public void onFailure()
+				{
+					Log.d("ProfileActivity", "resetting image");
+					mActivityState.newBitmap = null;
+					/* reset the image */
+					mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId()));
+				}
+
+				public void onSuccess()
+				{
+					HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
+					db.setIcon(mLocalMSISDN, bytes);
+					db.setIcon(getLargerIconId(), larger_bytes);
+					db.close();
+				}
+			});
+
+			request.setPostData(bytes);
+			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
+			mActivityState.task = new HikeHTTPTask(this, R.string.update_profile_failed);
+			mActivityState.task.execute(request);
+		}
 	}
 
 	protected String getLargerIconId()
@@ -306,24 +236,24 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 		return mLocalMSISDN + "::large";
 	}
 
-	private void updateEditableUI()
-	{
-		/* update the UI to let the user know that what's changeable */
-		mProfilePictureChangeOverlay.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
-		mNameViewEdittable.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
-		mNameView.setVisibility(!mActivityState.editable ? View.VISIBLE : View.GONE);
-		mTitleIcon.setText(!mActivityState.editable ? R.string.edit : R.string.save);
-		if (mActivityState.newBitmap != null)
-		{
-			mIconView.setImageBitmap(mActivityState.newBitmap);
-		}
-	}
+//	private void updateEditableUI()
+//	{
+//		/* update the UI to let the user know that what's changeable */
+//		mProfilePictureChangeOverlay.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
+//		mNameViewEdittable.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
+//		mNameView.setVisibility(!mActivityState.editable ? View.VISIBLE : View.GONE);
+//		mTitleIcon.setText(!mActivityState.editable ? R.string.edit : R.string.save);
+//		if (mActivityState.newBitmap != null)
+//		{
+//			mIconView.setImageBitmap(mActivityState.newBitmap);
+//		}
+//	}
 
 	@Override
 	public void onClick(View view)
 	{
 		Log.d("ProfileActivity", "View is " + view);
-		if (mActivityState.editable && (view == mIconView))
+		if ((view == mIconView))
 		{
 			/* The wants to change their profile picture.
 			 * Open a dialog to allow them pick Camera or Gallery 
@@ -379,6 +309,7 @@ public class ProfileActivity extends Activity implements OnItemClickListener, On
 			mActivityState.newBitmap = Utils.getRoundedCornerBitmap(bitmap);
 			bitmap.recycle();
 			mIconView.setImageBitmap(mActivityState.newBitmap);
+			changeProfilePic();
 			break;
 		}
 	}

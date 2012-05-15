@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/thatch_repeat">
+    android:background="@drawable/thatch_repeat"
+    android:orientation="vertical" >
 
     <include
         android:id="@+id/top_panel_ref"
@@ -12,113 +12,167 @@
         android:layout_alignParentTop="true"
         layout="@layout/top_panel" />
 
-    <RelativeLayout
-        android:id="@+id/profile_container"
-        android:layout_alignParentTop="true"
+    <ScrollView
+        android:id="@+id/profile_sv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/offwhite" >
+        android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:fadingEdge="none" >
 
-        <RelativeLayout
-            android:id="@+id/avatar_border"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="18dp"
-            android:background="@drawable/avatar_border" >
+            android:orientation="vertical" >
 
-            <ImageView
-                android:id="@+id/profile"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_margin="3dp"
-                android:src="@drawable/default_profile" />
-            <RelativeLayout
-                android:id="@+id/profile_change_overlay"
-                android:visibility="gone"
-                android:background="@color/transparent_white"
-                android:layout_alignLeft="@id/profile"
-                android:layout_alignRight="@id/profile"
-                android:layout_alignTop="@id/profile"
+            <com.bsb.hike.view.RobotoTextView
                 android:layout_width="wrap_content"
-                android:layout_height="20dp">
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:text="Me"
+                android:textColor="@color/timestampcolor"
+                android:textSize="15sp"
+                android:layout_marginLeft="8dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/profile_bckg"
+                android:orientation="vertical" >
+
+                <RelativeLayout
+                    android:id="@+id/my_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <RelativeLayout
+                        android:id="@+id/avatar_border"
+                        android:layout_width="98dp"
+                        android:layout_height="98dp"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="14dp"
+                        android:layout_marginRight="14dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="24dp"
+                        android:background="@drawable/avatar_border"
+                        android:padding="5dp" >
+
+                        <ImageView
+                            android:id="@+id/profile"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/default_profile" />
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentRight="true"
+                            android:src="@drawable/ic_edit_profile"
+                            android:layout_marginRight="2dp"
+                            android:layout_marginBottom="2dp" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:id="@+id/info_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toRightOf="@id/avatar_border"
+                        android:orientation="vertical" >
+
+                        <com.bsb.hike.view.RobotoTextView
+                            android:id="@+id/name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:ellipsize="end"
+                            android:maxLength="20"
+                            android:singleLine="true"
+                            android:text="Kavin Bharti Mittal"
+                            android:textColor="@color/lightblack"
+                            android:textSize="18dp"
+                            android:textStyle="bold" />
+
+                        <com.bsb.hike.view.RobotoTextView
+                            android:id="@+id/email"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLength="20"
+                            android:singleLine="true"
+                            android:text="kbm@bsb.in"
+                            android:textColor="@color/signup_blue"
+                            android:textSize="13dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="8dp"
+                        android:src="@drawable/ic_arrow" />
+                </RelativeLayout>
+
+                <include
+                    android:id="@+id/free_sms"
+                    layout="@layout/profile_item"
+                    android:layout_marginBottom="10dp" />
+            </LinearLayout>
+
+            <com.bsb.hike.view.RobotoTextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp"
+                android:text="Settings"
+                android:textColor="@color/timestampcolor"
+                android:textSize="15sp"
+                android:layout_marginLeft="8dp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/profile_bckg"
+                android:orientation="vertical" >
+
+                <include
+                    android:id="@+id/notifications"
+                    layout="@layout/profile_item" 
+                    android:layout_marginBottom="50dp" />
+
+                <include
+                    android:id="@+id/privacy"
+                    layout="@layout/profile_item"
+                    android:layout_marginBottom="10dp" />
+
+                <include
+                    android:id="@+id/help"
+                    layout="@layout/profile_item"
+                    android:layout_marginBottom="10dp" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp" >
+
                 <com.bsb.hike.view.RobotoTextView
-                    android:layout_centerInParent="true"
+                    android:id="@+id/made_with_love"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Change" />
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/with_love"
+                    android:textColor="@color/white"
+                    android:textSize="16dp" />
             </RelativeLayout>
-        </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
 
-        <com.bsb.hike.view.RobotoEditText
-            android:id="@+id/name_editable"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/avatar_border"
-            android:layout_marginLeft="0dp"
-            android:layout_centerVertical="true"
-            android:text="Kavin Bharti Mittal"
-            android:singleLine="true"
-            android:textSize="18dp"
-            android:textStyle="bold"
-            android:maxLength="20"
-			android:ellipsize="end"
-            android:textColor="@color/black"
-            android:visibility="gone"/>
-
-        <com.bsb.hike.view.RobotoTextView
-            android:id="@+id/name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/avatar_border"
-            android:layout_marginLeft="0dp"
-            android:layout_centerVertical="true"
-            android:maxLength="20"
-            android:text="Kavin Bharti Mittal"
-			android:ellipsize="end"
-			android:singleLine="true"
-            android:textSize="18dp"
-            android:textStyle="bold"
-            android:textColor="@color/black" />
-    </RelativeLayout>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@null" />
-
-    <ListView
-        android:id="@+id/profile_preferences"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:cacheColorHint="#000000"
-        android:choiceMode="none"
-        android:background="@color/profile_item_bckg"
-        android:divider="@drawable/ic_thread_divider_other"
-        android:dividerHeight="1dp"
-        android:fadingEdge="none"
-        android:footerDividersEnabled="false" />
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/dropshadow_top" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="10">
-
-        <com.bsb.hike.view.RobotoTextView
-            android:id="@+id/made_with_love"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:textColor="@color/white"
-            android:textSize="16dp"
-            android:background="@drawable/with_love"/>
-
-    </RelativeLayout>
 </LinearLayout>
