@@ -1207,7 +1207,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			mConversationsView.smoothScrollBy((int)(convMessage.getMessage().length()/30+1)*100, 500);
+			mConversationsView.smoothScrollBy((int)(convMessage.getMessage().length()/30+1)*130, 500);
 		}
 		mAdapter.notifyDataSetChanged();
 	}
