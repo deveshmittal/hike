@@ -177,6 +177,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mEmptyView.setOnClickListener(this);
 
 		mConversationsView.setEmptyView(mEmptyView);
+		mConversationsView.setOnItemClickListener(this);
 
 		mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
 		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
