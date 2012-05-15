@@ -57,7 +57,6 @@
 	</style>
 
 	<style name="NoTitleBar" parent="@android:style/Theme.NoTitleBar">
-		<item name="android:windowAnimationStyle">@style/Animation.ActivityTransitions</item>
 	    <item name="android:windowNoTitle">true</item>
     </style>
 
