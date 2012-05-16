@@ -27,7 +27,7 @@
     <color name="subtext">#666666</color>
     <color name="loading">#4797ce</color>
     <color name="profile_item_bckg">#eeeeeb</color>
-    <color name="chat_color">#686767</color>
+    <color name="chat_color">#4b4a4a</color>
     <color name="notif_subtext">#717069</color>
     <color name="credits_blue">#3e8ec3</color>
 </resources>
