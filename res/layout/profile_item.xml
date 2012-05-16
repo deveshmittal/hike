@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:onClick="onProfileItemClick"
-    android:paddingBottom="10dp" >
+    android:paddingBottom="11dp" >
 
     <View
         android:id="@+id/divider"
@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="11dp"
         android:gravity="center_vertical" >
 
         <ImageView
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="8dp"
+            android:layout_marginRight="15dp"
             android:background="@drawable/ic_arrow"
             android:visibility="gone" />
     </RelativeLayout>
