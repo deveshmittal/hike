@@ -22,7 +22,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.RobotoTextView
@@ -32,7 +32,7 @@
                 android:layout_marginTop="5dp"
                 android:text="Me"
                 android:textColor="@color/timestampcolor"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 android:layout_marginLeft="8dp"
                 android:textStyle="bold" />
 
@@ -49,30 +49,37 @@
 
                     <RelativeLayout
                         android:id="@+id/avatar_border"
-                        android:layout_width="98dp"
-                        android:layout_height="98dp"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="14dp"
                         android:layout_marginRight="14dp"
                         android:layout_marginTop="24dp"
-                        android:layout_marginBottom="24dp"
-                        android:background="@drawable/avatar_border"
-                        android:padding="5dp" >
+                        android:layout_marginBottom="24dp">
+                        <!-- android:background="@drawable/avatar_border"
+                        android:padding="5dp" --> 
 
                         <ImageView
                             android:id="@+id/profile"
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:layout_centerInParent="true"
+                            android:src="@drawable/ic_avatar0" />
+                        
+                        <ImageView
+                            android:id="@+id/profile_border"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@drawable/default_profile" />
-
+                            android:src="@drawable/square" />
+						
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentBottom="true"
                             android:layout_alignParentRight="true"
                             android:src="@drawable/ic_edit_profile"
-                            android:layout_marginRight="2dp"
-                            android:layout_marginBottom="2dp" />
+                            android:layout_marginRight="5dp"
+                            android:layout_marginBottom="5dp" />
                     </RelativeLayout>
 
                     <LinearLayout
@@ -96,16 +103,6 @@
                             android:textSize="18dp"
                             android:textStyle="bold" />
 
-                        <com.bsb.hike.view.RobotoTextView
-                            android:id="@+id/email"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:maxLength="20"
-                            android:singleLine="true"
-                            android:text="kbm@bsb.in"
-                            android:textColor="@color/signup_blue"
-                            android:textSize="13dp" />
                     </LinearLayout>
 
                     <ImageView
@@ -113,7 +110,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginRight="8dp"
+                        android:layout_marginRight="15dp"
                         android:src="@drawable/ic_arrow" />
                 </RelativeLayout>
 
@@ -130,7 +127,7 @@
                 android:layout_marginTop="5dp"
                 android:text="Settings"
                 android:textColor="@color/timestampcolor"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 android:layout_marginLeft="8dp"
                 android:textStyle="bold" />
 
@@ -159,9 +156,8 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp" >
+                android:layout_marginTop="37dp"
+                android:layout_marginBottom="37dp" >
 
                 <com.bsb.hike.view.RobotoTextView
                     android:id="@+id/made_with_love"
