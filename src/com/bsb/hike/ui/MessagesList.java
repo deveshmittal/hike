@@ -573,6 +573,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		if (!hasAnimated) {
 			Animation alphaOut = AnimationUtils.loadAnimation(
 					MessagesList.this, android.R.anim.fade_out);
+			alphaOut.setDuration(200);
 			mInviteToolTip.setAnimation(alphaOut);
 			mInviteToolTip.setVisibility(View.INVISIBLE);
 			hasAnimated  = true;

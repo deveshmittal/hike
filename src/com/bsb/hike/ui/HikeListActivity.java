@@ -140,6 +140,7 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		{
 			Animation alphaOut = AnimationUtils.loadAnimation(
 					HikeListActivity.this, android.R.anim.fade_out);
+			alphaOut.setDuration(200);
 			mInviteToolTip.setAnimation(alphaOut);
 			mInviteToolTip.setVisibility(View.INVISIBLE);
 			hasAnimated = true;
