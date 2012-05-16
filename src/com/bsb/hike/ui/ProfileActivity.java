@@ -63,6 +63,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	public String mLocalMSISDN = null;
 
 	private ActivityState mActivityState; /* config state of this activity */
+	private TextView mEmailView;
 	private class ActivityState
 	{
 		public HikeHTTPTask task; /* the task to update the global profile */
@@ -139,17 +140,20 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		
 		mIconView = (ImageView) findViewById(R.id.profile);
 		mNameView = (TextView) findViewById(R.id.name);
+		mEmailView = (TextView) findViewById(R.id.email);
 		mTitleView = (TextView) findViewById(R.id.title);
 		mMadeWithLoveView = (TextView) findViewById(R.id.made_with_love);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String name = settings.getString(HikeMessengerApp.NAME, "Set a name!");
 		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		String email = settings.getString(HikeMessengerApp.EMAIL, "");
 
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId());
 		mIconView.setImageDrawable(drawable);
 
 		mNameView.setText(name);
+		mEmailView.setText(email);
 
 		mIconView.setOnClickListener(this);
 		myInfo.setOnClickListener(this);

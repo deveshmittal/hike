@@ -58,6 +58,8 @@ public class HikeMessengerApp extends Application
 	
 	public static final String INVITE_TOOLTIP_DISMISSED = "inviteToolTip";
 
+	public static final String EMAIL = "email";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;
