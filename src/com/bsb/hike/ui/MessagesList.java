@@ -32,7 +32,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -94,8 +96,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		if(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.CREDITS_SCREEN_SHOWN, false))
 		{
 			mInviteToolTip.setVisibility(View.GONE);
-			titleIconView.setVisibility(View.GONE);
-			btnBar.setVisibility(View.GONE);
 		}
 	}
 	
@@ -186,9 +186,16 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mConversationsView.setOnItemClickListener(this);
 
 		mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
+		TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
+		text.setText(getString(R.string.invite_tooltip));
+
+		/* set this to invisible, not gone, to add some padding */
+		Button b = (Button) mEmptyView.findViewById(R.id.learn_more_btn);
+		b.setText("");
+		b.setVisibility(View.INVISIBLE);
 		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
 		btnBar = findViewById(R.id.button_bar);
-		
+
 		titleIconView.setVisibility(View.VISIBLE);
 		titleIconView.setImageResource(R.drawable.credits_btn);
 		btnBar.setVisibility(View.VISIBLE);
@@ -596,7 +603,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	public void onTitleIconClick(View v)
 	{
-		onToolTipClicked(null);
+		invite();
 	}
 
 	public void onToolTipClicked(View v)
