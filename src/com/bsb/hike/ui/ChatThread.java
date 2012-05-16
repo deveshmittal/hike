@@ -564,7 +564,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		addMessage(convMessage);
 
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-		mSendBtn.setEnabled(false);
+		mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView.getText()));
 	}
 
 	public void onSendClick(View v)
