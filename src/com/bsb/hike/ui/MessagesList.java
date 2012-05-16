@@ -76,6 +76,8 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private View btnBar;
 
+	private boolean hasAnimated = false;
+
 	@Override
 	protected void onPause()
 	{
@@ -144,10 +146,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	@Override
 	protected void onNewIntent(Intent intent) {
-		if (Utils.requireAuth(this))
-		{
-			return;
-		}
+		Utils.requireAuth(this);
 	}
 
 	@Override
@@ -155,7 +154,10 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	{
 		super.onCreate(savedInstanceState);
 		
-		onNewIntent(null);
+		if (Utils.requireAuth(this))
+		{
+			return;
+		}
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
@@ -568,9 +570,15 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private void setToolTipDismissed()
 	{
-		Animation alphaOut = AnimationUtils.loadAnimation(MessagesList.this, android.R.anim.fade_out);
-		mInviteToolTip.setAnimation(alphaOut);
-		mInviteToolTip.setVisibility(View.INVISIBLE);
+		if (!hasAnimated) {
+			Animation alphaOut = AnimationUtils.loadAnimation(
+					MessagesList.this, android.R.anim.fade_out);
+			alphaOut.setDuration(200);
+			mInviteToolTip.setAnimation(alphaOut);
+			mInviteToolTip.setVisibility(View.INVISIBLE);
+			hasAnimated  = true;
+		}
+
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, true);
 		editor.commit();
