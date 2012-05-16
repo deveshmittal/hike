@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.EditText;
@@ -38,6 +37,7 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	private ViewGroup mInviteToolTip;
 	private SharedPreferences sharedPreferences;
 	private ImageButton creditsHelpBtn;
+	private boolean hasAnimated = false;
 
 	HikeArrayAdapter createListAdapter() throws Exception
 	{
@@ -136,12 +136,13 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	private void setToolTipDismissed()
 	{
 		filterText.setEnabled(true);
-		if (mInviteToolTip != null) 
+		if (mInviteToolTip != null && !hasAnimated) 
 		{
 			Animation alphaOut = AnimationUtils.loadAnimation(
 					HikeListActivity.this, android.R.anim.fade_out);
 			mInviteToolTip.setAnimation(alphaOut);
 			mInviteToolTip.setVisibility(View.INVISIBLE);
+			hasAnimated = true;
 		}
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);

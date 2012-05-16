@@ -76,6 +76,8 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private View btnBar;
 
+	private boolean hasAnimated = false;
+
 	@Override
 	protected void onPause()
 	{
@@ -568,9 +570,14 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private void setToolTipDismissed()
 	{
-		Animation alphaOut = AnimationUtils.loadAnimation(MessagesList.this, android.R.anim.fade_out);
-		mInviteToolTip.setAnimation(alphaOut);
-		mInviteToolTip.setVisibility(View.INVISIBLE);
+		if (!hasAnimated) {
+			Animation alphaOut = AnimationUtils.loadAnimation(
+					MessagesList.this, android.R.anim.fade_out);
+			mInviteToolTip.setAnimation(alphaOut);
+			mInviteToolTip.setVisibility(View.INVISIBLE);
+			hasAnimated  = true;
+		}
+
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, true);
 		editor.commit();
