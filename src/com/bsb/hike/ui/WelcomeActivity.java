@@ -32,6 +32,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	private Button tryAgainBtn;
 	private View hiLogoView;
 	private ImageView hikeWelcomeView;
+	private ViewGroup headerLayout;
 
 	@Override
 	public void onCreate(Bundle savedState)
@@ -48,6 +49,9 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
 		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
+
+		headerLayout = (ViewGroup) booBooLayout.findViewById(R.id.header_layout);
+		headerLayout.setVisibility(View.VISIBLE);
 
 		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
 		{

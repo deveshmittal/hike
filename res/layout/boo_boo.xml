@@ -1,57 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/boo_boo_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
     android:visibility="gone" >
 
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/header_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true" >
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ImageView
+            android:id="@+id/hike_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:src="@drawable/hike_logo" />
+
+        <View
+            android:id="@+id/header_dropshadow"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/signup_header_dropshadow" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="7"
+        android:gravity="bottom" >
 
         <ImageView
             android:id="@+id/ic_hike_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
             android:src="@drawable/boo_boo" />
+    </LinearLayout>
 
-        <com.bsb.hike.view.RobotoTextView
+    <LinearLayout
+        android:id="@+id/error_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="10"
+        android:gravity="center_horizontal|top"
+        android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/welcome_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/error_txt" />
+
+        <!--
+             <com.bsb.hike.view.RobotoTextView
             android:id="@+id/welcome_1"
             style="@style/Text.Shadow.White.Bold"
             android:layout_below="@+id/ic_hike_logo"
             android:layout_centerHorizontal="true"
+            android:gravity="center"
             android:layout_marginTop="10dp"
             android:text="@string/boo_boo"
-            android:textSize="18dp" />
+            android:textSize="18dp"
+            back
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp" />
+        -->
 
         <com.bsb.hike.view.RobotoButton
             android:id="@+id/btn_try_again"
             style="@style/Text.Shadow.White.Bold"
             android:layout_width="match_parent"
-            android:layout_below="@id/welcome_1"
-            android:layout_centerHorizontal="true"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:layout_marginTop="30dp"
             android:background="@drawable/signup_button"
             android:onClick="onClick"
             android:paddingBottom="9dp"
             android:paddingTop="9dp"
             android:text="@string/try_again" />
+    </LinearLayout>
 
-        <com.bsb.hike.view.RobotoTextView
-            style="@style/Text.Shadow.White"
-            android:layout_below="@id/btn_try_again"
-            android:layout_centerHorizontal="true"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
-            android:layout_marginTop="20dp"
-            android:gravity="center_horizontal"
-            android:text="@string/if_you_see"
-            android:textSize="14sp" />
-    </RelativeLayout>
-
-</RelativeLayout>
+</LinearLayout>
