@@ -71,7 +71,7 @@
         android:paddingRight="10dp"
         android:layout_toRightOf="@id/msg_status_indicator"
         android:text="This is the message a much"
-        android:textSize="15sp"
+        android:textSize="16sp"
         android:textColor="@color/chat_color" />
 
 	<com.bsb.hike.view.RobotoTextView
@@ -86,7 +86,7 @@
         android:paddingRight="10dp"
         android:layout_toRightOf="@id/msg_status_indicator"
         android:text="This is the message a much"
-        android:textSize="15sp"
+        android:textSize="16sp"
         android:textColor="@color/chat_color" />
 
 	</RelativeLayout>
