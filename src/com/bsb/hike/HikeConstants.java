@@ -19,6 +19,7 @@ public class HikeConstants
 	public static final String MESSAGE_ID = "i";
 	public static final String METADATA = "md";
 	public static final String METADATA_DND = "dnd";
+	public static final String ANALYTICS_EVENT = "ae";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -83,5 +84,8 @@ public class HikeConstants
 		public static final String SIGNUP_TEXT = "signupText";
 		public static final String SIGNUP_ERROR = "signupError";
 		public static final String TOOLTIP_SHOWING = "tooltipShowing";
+		public static final String FADE_OUT = "fadeOut";
+		public static final String FADE_IN = "fadeIn";
+		public static final String ANIMATED_ONCE = "animatedOnce";
 	}
 }

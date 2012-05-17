@@ -51,53 +51,40 @@
                 android:textColor="@color/lightblack" >
             </AutoCompleteTextView>
         </LinearLayout>
+		
+		<RelativeLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="0dp"
+		    android:layout_weight="30" >
 
-        <ListView
-            android:id="@+id/conversations_list"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="30"
-            android:cacheColorHint="#00000000"
-            android:divider="@null"
-            android:fadingEdge="none" >
-        </ListView>
+		    <ListView
+		        android:id="@+id/conversations_list"
+		        android:layout_width="fill_parent"
+		        android:layout_height="fill_parent"
+		        android:cacheColorHint="#00000000"
+		        android:divider="@null"
+		        android:fadingEdge="none" >
+		    </ListView>
 
-        <RelativeLayout
-            android:id="@+id/sms_chat_metadata"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/compose_background" >
-
-            <com.bsb.hike.view.RobotoTextView
-                android:id="@+id/sms_chat_metadata_num_chars"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_marginBottom="3dp"
-                android:layout_marginTop="3dp"
-                android:paddingLeft="10dp"
-                android:text="24/140"
-                android:textColor="@color/white"
-                android:textSize="12dp" />
-
-            <com.bsb.hike.view.RobotoTextView
-                android:id="@+id/sms_chat_metadata_text_credits_left"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginBottom="3dp"
-                android:layout_marginTop="3dp"
-                android:paddingRight="10dp"
-                android:text="99 credits left"
-                android:textColor="@color/white"
-                android:textSize="12dp" />
-        </RelativeLayout>
-
+		    <com.bsb.hike.view.RobotoTextView
+		        android:id="@+id/sms_counter"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:background="@drawable/compose_box"
+		        android:layout_alignParentBottom="true"
+		        android:gravity="center_vertical"
+		        android:paddingLeft="13dp"
+		        android:text="99 SMS left"
+		        android:textColor="@color/green"
+		        android:textSize="14sp"
+		        android:visibility="invisible" />
+		</RelativeLayout>
+        
         <RelativeLayout
             android:id="@+id/bottom_panel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="@color/compose_background" >
+            android:background="@drawable/compose_box" >
 
             <com.bsb.hike.view.RobotoEditText
                 android:id="@+id/msg_compose"
@@ -109,16 +96,42 @@
                 android:layout_marginTop="8dp"
                 android:layout_toLeftOf="@+id/send_message"
                 android:autoText="true"
-                android:background="@drawable/edittext"
+                android:background="@drawable/chat_thread"
                 android:hint="@string/type_to_compose"
-                android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine"
+                android:gravity="top"
+                android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
                 android:maxLines="4"
                 android:textSize="15sp"
-                android:textColor="@color/chat_color" >
+                android:textColor="@color/chat_color"
+                android:textColorHint="#cdcdc8"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:lineSpacingExtra="2dp" >
 
                 <requestFocus />
             </com.bsb.hike.view.RobotoEditText>
+			
+            <LinearLayout
+                android:id="@+id/info_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/msg_compose"
+                android:layout_alignLeft="@id/msg_compose"
+                android:layout_alignRight="@id/msg_compose"
+                android:layout_alignTop="@id/msg_compose"
+                android:gravity="right|center_vertical"
+                android:onClick="onTitleIconClick"
+                android:visibility="gone" >
 
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:src="@drawable/ic_info" />
+            </LinearLayout>
+            
             <View
                 android:id="@+id/dummy"
                 android:layout_width="match_parent"
@@ -129,16 +142,27 @@
             <com.bsb.hike.view.RobotoButton
                 android:id="@+id/send_message"
                 android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
+                android:layout_alignBottom="@id/msg_compose"
                 android:background="@drawable/send_hike_btn_selector"
                 android:state_enabled="false"
                 android:text="@string/send"
                 style="@style/Text.Shadow.White.Bold"
                 android:textSize="14sp"
-                android:layout_height="40dp"
+                android:layout_height="32dp"
                 android:onClick="onSendClick" />
+            
+            <com.bsb.hike.view.RobotoTextView
+                android:id="@+id/sms_chat_metadata_num_chars"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/send_message"
+                android:layout_alignRight="@id/send_message"
+                android:gravity="center_horizontal"
+                android:layout_alignTop="@id/msg_compose"
+                android:visibility="invisible" />
+            
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
 	
@@ -147,6 +171,7 @@
         android:id="@+id/overlay_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:onClick="onOverlayButtonClick"
         android:background="@color/transparent_black" >
         
         <com.bsb.hike.view.RobotoTextView
@@ -190,41 +215,6 @@
             android:background="@drawable/rounded_button"
             android:onClick="onOverlayButtonClick"
             android:text="@string/unblock_title" />
-
-        <LinearLayout
-            android:id="@+id/dismiss_overlay_layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/overlay_button"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="15dp"
-            android:gravity="center"
-            android:onClick="onOverlayButtonClick"
-            android:orientation="horizontal" >
-
-            <ImageView
-                android:id="@+id/dismiss_img"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_dismiss" />
-
-            <com.bsb.hike.view.RobotoTextView
-                android:id="@+id/dismiss_overlay"
-                style="@style/Text.Shadow.White"
-                android:layout_marginLeft="3dp"
-                android:text="@string/dismiss" />
-        </LinearLayout>
-        
-        <ImageButton
-            android:id="@+id/btn_i"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="10dp"
-            android:background="@null"
-            android:src="@drawable/ic_i"
-            android:visibility="gone" />
 
     </RelativeLayout>
 
