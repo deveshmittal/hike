@@ -23,6 +23,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -345,8 +346,15 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		case PROFILE_PICTURE_FROM_CAMERA:
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			selectedFileIcon = Utils.getOutputMediaFile(Utils.MEDIA_TYPE_IMAGE); // create a file to save the image
-			intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));
-			startActivityForResult(intent, CAMERA_RESULT);
+			if (selectedFileIcon != null)
+			{
+				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));
+				startActivityForResult(intent, CAMERA_RESULT);
+			}
+			else
+			{
+				Toast.makeText(this, getString(R.string.no_sd_card), Toast.LENGTH_LONG).show();
+			}
 			break;
 		case PROFILE_PICTURE_FROM_GALLERY:
 			intent = new Intent(Intent.ACTION_PICK);
