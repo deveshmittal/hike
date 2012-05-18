@@ -130,4 +130,5 @@
 	<string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s</string>
 	<string name="invite_tooltip">Bring a friend, take some credit.</string>
 	<string name="more">More »</string>
+	<string name="no_sd_card">Please insert an SD Card</string>
 </resources>
