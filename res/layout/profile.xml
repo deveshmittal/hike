@@ -35,8 +35,246 @@
                 android:textSize="14sp"
                 android:layout_marginLeft="8dp"
                 android:textStyle="bold" />
-
+			
             <LinearLayout
+                android:id="@+id/edit_profile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/profile_bckg"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <RelativeLayout
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" >
+
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/ic_thread_divider_profile" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.RobotoTextView
+                            android:id="@+id/name_edit_field"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="11dp"
+                            android:layout_marginTop="11dp"
+                            android:layout_weight="1"
+                            android:paddingLeft="10dp"
+                            android:text="Name"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+
+                        <com.bsb.hike.view.RobotoEditText
+                            android:id="@+id/name_input"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:background="@null"
+                            android:textColor="@color/subtext"
+                            android:textSize="16sp"
+                            android:textStyle="italic"
+                            android:visibility="visible" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" >
+
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/ic_thread_divider_profile" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.RobotoTextView
+                            android:id="@+id/phone_edit_field"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="11dp"
+                            android:layout_marginTop="11dp"
+                            android:layout_weight="1"
+                            android:paddingLeft="10dp"
+                            android:text="Name"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+
+                        <com.bsb.hike.view.RobotoEditText
+                            android:id="@+id/phone_input"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:background="@null"
+                            android:textColor="@color/lightgrey"
+                            android:textSize="16sp"
+                            android:textStyle="italic"
+                            android:visibility="visible" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/email"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" >
+
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/ic_thread_divider_profile" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.RobotoTextView
+                            android:id="@+id/email_edit_field"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="11dp"
+                            android:layout_marginTop="11dp"
+                            android:layout_weight="1"
+                            android:paddingLeft="10dp"
+                            android:text="Name"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+
+                        <com.bsb.hike.view.RobotoEditText
+                            android:id="@+id/email_input"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:background="@null"
+                            android:textColor="@color/subtext"
+                            android:textSize="16sp"
+                            android:textStyle="italic"
+                            android:visibility="visible" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/gender"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" >
+
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/ic_thread_divider_profile" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.RobotoTextView
+                            android:id="@+id/gender_edit_field"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="11dp"
+                            android:layout_marginTop="11dp"
+                            android:layout_weight="1"
+                            android:paddingLeft="10dp"
+                            android:text="Name"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+
+                        <LinearLayout
+                            android:id="@+id/pick_gender"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal" >
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/ic_emo_selector"
+                                android:onClick="onEmoticonClick"
+                                android:paddingBottom="5dp"
+                                android:paddingLeft="30dp"
+                                android:paddingRight="30dp"
+                                android:paddingTop="5dp"
+                                android:src="@drawable/ic_guy" />
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="5dp"
+                                android:layout_marginRight="5dp"
+                                android:background="@drawable/ic_emo_selector"
+                                android:onClick="onEmoticonClick"
+                                android:paddingBottom="5dp"
+                                android:paddingLeft="30dp"
+                                android:paddingRight="30dp"
+                                android:paddingTop="5dp"
+                                android:src="@drawable/ic_girl" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/photo"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical" >
+
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/ic_thread_divider_profile" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.RobotoTextView
+                            android:id="@+id/photo_edit_field"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="11dp"
+                            android:layout_marginTop="11dp"
+                            android:layout_weight="1"
+                            android:paddingLeft="10dp"
+                            android:text="Name"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/me_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/profile_bckg"
@@ -91,7 +329,7 @@
                         android:orientation="vertical" >
 
                         <com.bsb.hike.view.RobotoTextView
-                            android:id="@+id/name"
+                            android:id="@+id/name_current"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginRight="10dp"
@@ -121,6 +359,7 @@
             </LinearLayout>
 
             <com.bsb.hike.view.RobotoTextView
+                android:id="@+id/settings_txt"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="5dp"
@@ -132,6 +371,7 @@
                 android:textStyle="bold" />
 
             <LinearLayout
+                android:id="@+id/prefs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/profile_bckg"
@@ -154,6 +394,7 @@
             </LinearLayout>
 
             <RelativeLayout
+                android:id="@+id/with_love_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="37dp"

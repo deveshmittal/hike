@@ -92,7 +92,8 @@
         </activity>
         <activity
             android:theme="@style/NoTitleBar"
-            android:name=".ui.ProfileActivity">
+            android:name=".ui.ProfileActivity"
+            android:windowSoftInputMode="stateHidden">
         </activity>
         <activity
             android:theme="@style/NoTitleBar"
