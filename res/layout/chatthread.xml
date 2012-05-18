@@ -85,7 +85,25 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/compose_box" >
-
+			
+            <com.bsb.hike.view.RobotoButton
+                android:id="@+id/send_message"
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_alignBottom="@+id/msg_compose"
+                android:background="@drawable/send_hike_btn_selector"
+                android:state_enabled="false"
+                android:text="@string/send"
+                style="@style/Text.Shadow.White.Bold"
+                android:textSize="14sp"
+                android:onClick="onSendClick"
+                android:layout_width="50dp"
+                android:layout_height="34dp"
+                android:shadowDx="-0.4"
+                android:shadowDy="-0.4"
+                android:shadowRadius="0.3" />
+            
             <com.bsb.hike.view.RobotoEditText
                 android:id="@+id/msg_compose"
                 android:layout_width="match_parent"
@@ -139,20 +157,6 @@
                 android:layout_below="@id/msg_compose"
                 android:layout_marginTop="8dp" />
 
-            <com.bsb.hike.view.RobotoButton
-                android:id="@+id/send_message"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_alignBottom="@id/msg_compose"
-                android:background="@drawable/send_hike_btn_selector"
-                android:state_enabled="false"
-                android:text="@string/send"
-                style="@style/Text.Shadow.White.Bold"
-                android:textSize="14sp"
-                android:layout_height="32dp"
-                android:onClick="onSendClick" />
-            
             <com.bsb.hike.view.RobotoTextView
                 android:id="@+id/sms_chat_metadata_num_chars"
                 android:layout_width="wrap_content"
