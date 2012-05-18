@@ -2,6 +2,10 @@ package com.bsb.hike.ui;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -10,6 +14,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -17,10 +22,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -51,7 +58,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	private ImageView mIconView;
 	private TextView mNameView;
 	private TextView mTitleView;
-	private TextView mMadeWithLoveView;
+	private EditText mNameEdit;
 
 	private ViewGroup credits;
 	private ViewGroup notifications;
@@ -59,11 +66,21 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	private ViewGroup help;
 	private ViewGroup myInfo;
 
+	private ViewGroup name;
+	private ViewGroup phone;
+	private ViewGroup email;
+	private ViewGroup gender;
+	private ViewGroup picture;
+
+	private View currentSelection;
+
 	private Dialog mDialog;
 	public String mLocalMSISDN = null;
 
 	private ActivityState mActivityState; /* config state of this activity */
-	private TextView mEmailView;
+	private String nameTxt;
+	private boolean isEditingProfile = false;
+	private boolean isBackPressed = false;
 	private class ActivityState
 	{
 		public HikeHTTPTask task; /* the task to update the global profile */
@@ -125,7 +142,59 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		{
 			mActivityState = new ActivityState();
 		}
+		fetchPersistentData();
 
+		mTitleView = (TextView) findViewById(R.id.title);
+
+		isEditingProfile = getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false);
+
+		if(isEditingProfile)
+		{
+			setupEditScreen();
+		}
+		else
+		{
+			setupProfileScreen();
+		}
+	}
+	
+	private void setupEditScreen()
+	{
+		findViewById(R.id.me_layout).setVisibility(View.GONE);
+		findViewById(R.id.settings_txt).setVisibility(View.GONE);
+		findViewById(R.id.prefs).setVisibility(View.GONE);
+		findViewById(R.id.with_love_layout).setVisibility(View.GONE);
+		ViewGroup editProfile =(ViewGroup) findViewById(R.id.edit_profile);
+		editProfile.setVisibility(View.VISIBLE);
+
+		name = (ViewGroup) findViewById(R.id.name);
+		phone = (ViewGroup) findViewById(R.id.phone);
+		email = (ViewGroup) findViewById(R.id.email);
+		gender = (ViewGroup) findViewById(R.id.gender);
+		picture = (ViewGroup) findViewById(R.id.photo);
+
+		mNameEdit = (EditText) name.findViewById(R.id.name_input);
+
+		((TextView)name.findViewById(R.id.name_edit_field)).setText("Name");
+		((TextView)phone.findViewById(R.id.phone_edit_field)).setText("Phone");
+		((TextView)email.findViewById(R.id.email_edit_field)).setText("Email");
+		((TextView)gender.findViewById(R.id.gender_edit_field)).setText("Gender");
+		((TextView)picture.findViewById(R.id.photo_edit_field)).setText("Edit Picture");
+
+		picture.setOnClickListener(this);
+		picture.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+
+		mTitleView.setText(getResources().getString(R.string.edit_profile));
+		((EditText)phone.findViewById(R.id.phone_input)).setText(mLocalMSISDN);
+		((EditText)phone.findViewById(R.id.phone_input)).setEnabled(false);
+
+		mNameEdit.setText(nameTxt);
+		Log.e("Profile Name: ", mNameEdit.getText().toString());
+		mNameEdit.setSelection(nameTxt.length());
+	}
+	
+	private void setupProfileScreen()
+	{
 		myInfo = (ViewGroup) findViewById(R.id.my_info); 
 		credits = (ViewGroup) findViewById(R.id.free_sms);
 		notifications = (ViewGroup) findViewById(R.id.notifications);
@@ -137,32 +206,15 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		notifications.setBackgroundResource(R.drawable.profile_top_item_selector);
 		privacy.setBackgroundResource(R.drawable.profile_center_item_selector);
 		help.setBackgroundResource(R.drawable.profile_bottom_item_selector);
-		
+
 		mIconView = (ImageView) findViewById(R.id.profile);
-		mNameView = (TextView) findViewById(R.id.name);
-		mTitleView = (TextView) findViewById(R.id.title);
-		mMadeWithLoveView = (TextView) findViewById(R.id.made_with_love);
+		mNameView = (TextView) findViewById(R.id.name_current);
 
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		String name = settings.getString(HikeMessengerApp.NAME, "Set a name!");
-		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-
-		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId());
-		mIconView.setImageDrawable(drawable);
-
-		mNameView.setText(name);
-
-		mIconView.setOnClickListener(this);
-		myInfo.setOnClickListener(this);
-
-		mTitleView.setText(getResources().getString(R.string.profile_title));
-		/* add the heart in code because unicode isn't supported via xml*/
-		//mMadeWithLoveView.setText(String.format(getString(R.string.made_with_love), "\u2665"));
 		ViewGroup[] itemLayouts = new ViewGroup[]
 				{
 					credits, notifications, privacy, help
 				};
-		
+
 		ProfileItem[] items = new ProfileItem[] 
 			{
 				new ProfileItem.ProfileSettingsItem("Free SMS left", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
@@ -170,17 +222,43 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
 				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, "http://www.bsb.im/about")
 			};
-		
+
 		for(int i = 0; i < items.length; i++)
 		{
 			items[i].createViewHolder(itemLayouts[i], items[i]);
 			items[i].bindView(ProfileActivity.this, itemLayouts[i]);
 		}
-		
+
 		notifications.findViewById(R.id.divider).setVisibility(View.GONE);
-//		updateEditableUI();
+		mIconView.setOnClickListener(this);
+		myInfo.setOnClickListener(this);
+
+		mTitleView.setText(getResources().getString(R.string.profile_title));
+		mNameView.setText(nameTxt);
+		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId());
+		mIconView.setImageDrawable(drawable);
 	}
 
+	private void fetchPersistentData()
+	{
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		nameTxt = settings.getString(HikeMessengerApp.NAME, "Set a name!");
+		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+	}
+
+	public void onBackPressed()
+	{
+		if(isEditingProfile)
+		{
+			isBackPressed = true;
+			saveChanges();
+		}
+		else
+		{
+			super.onBackPressed();
+		}
+	}
+	
 	public void onProfileItemClick(View v)
 	{
 		ProfileItem item = (ProfileItem) v.getTag(R.id.profile);
@@ -191,8 +269,48 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		}
 	}
 	
-	public void changeProfilePic()
+	public void saveChanges()
 	{
+		ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
+
+		if (mNameEdit != null && !TextUtils.isEmpty(mNameEdit.getText()) && !nameTxt.equals(mNameEdit.getText().toString()))
+		{
+			/* user edited the text, so update the profile */
+			HikeHttpRequest request = new HikeHttpRequest("/account/name", new HikeHttpRequest.HikeHttpCallback()
+			{
+				public void onFailure()
+				{
+					if (isBackPressed) {
+						finsishEditing();
+					}
+				}
+
+				public void onSuccess()
+				{
+					/* if the request was successful, update the shared preferences and the UI */
+					String name = mNameEdit.getText().toString();
+					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+					editor.putString(HikeMessengerApp.NAME_SETTING, name);
+					editor.commit();
+					if (isBackPressed) {
+						finsishEditing();
+					}
+				}
+			});
+
+			JSONObject json = new JSONObject();
+			try
+			{
+				json.put("name", mNameEdit.getText().toString());
+				request.setJSONData(json);
+			}
+			catch (JSONException e)
+			{
+				Log.e("ProfileActivity", "Could not set name", e);
+			}
+			requests.add(request);
+		}
+
 		if (mActivityState.newBitmap != null)
 		{
 			/* the server only needs a 40x40 version */
@@ -212,8 +330,15 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 				{
 					Log.d("ProfileActivity", "resetting image");
 					mActivityState.newBitmap = null;
-					/* reset the image */
-					mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId()));
+					if (mIconView != null) {
+						/* reset the image */
+						mIconView.setImageDrawable(IconCacheManager
+								.getInstance().getIconForMSISDN(
+										getLargerIconId()));
+					}
+					if (isBackPressed) {
+						finsishEditing();
+					}
 				}
 
 				public void onSuccess()
@@ -222,14 +347,37 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 					db.setIcon(mLocalMSISDN, bytes);
 					db.setIcon(getLargerIconId(), larger_bytes);
 					db.close();
+					if (isBackPressed) {
+						finsishEditing();
+					}
 				}
 			});
 
 			request.setPostData(bytes);
+			requests.add(request);
+		}
+		if (!requests.isEmpty())
+		{
 			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
 			mActivityState.task = new HikeHTTPTask(this, R.string.update_profile_failed);
-			mActivityState.task.execute(request);
+			HikeHttpRequest[] r = new HikeHttpRequest[requests.size()];
+			requests.toArray(r);
+			mActivityState.task.execute(r);
 		}
+		else if(isBackPressed)
+		{
+			Intent i = new Intent(this, ProfileActivity.class);
+			startActivity(i);
+			finish();
+		}
+	}
+
+	private void finsishEditing()
+	{
+		Intent i = new Intent(this, ProfileActivity.class);
+		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(i);
+		finish();
 	}
 
 	protected String getLargerIconId()
@@ -237,24 +385,11 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		return mLocalMSISDN + "::large";
 	}
 
-//	private void updateEditableUI()
-//	{
-//		/* update the UI to let the user know that what's changeable */
-//		mProfilePictureChangeOverlay.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
-//		mNameViewEdittable.setVisibility(mActivityState.editable ? View.VISIBLE : View.GONE);
-//		mNameView.setVisibility(!mActivityState.editable ? View.VISIBLE : View.GONE);
-//		mTitleIcon.setText(!mActivityState.editable ? R.string.edit : R.string.save);
-//		if (mActivityState.newBitmap != null)
-//		{
-//			mIconView.setImageBitmap(mActivityState.newBitmap);
-//		}
-//	}
-
 	@Override
 	public void onClick(View view)
 	{
 		Log.d("ProfileActivity", "View is " + view);
-		if ((view == mIconView))
+		if (view == mIconView || view == picture)
 		{
 			/* The wants to change their profile picture.
 			 * Open a dialog to allow them pick Camera or Gallery 
@@ -264,6 +399,13 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			builder.setTitle("Choose a picture");
 			builder.setItems(items, this);
 			mDialog = builder.show();
+		}
+		else if(view == myInfo)
+		{
+			Intent i = new Intent(ProfileActivity.this, ProfileActivity.class);
+			i.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
+			startActivity(i);
+			finish();
 		}
 	}
 
@@ -309,8 +451,12 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			Bitmap bitmap = data.getParcelableExtra(HikeConstants.Extras.BITMAP);
 			mActivityState.newBitmap = Utils.getRoundedCornerBitmap(bitmap);
 			bitmap.recycle();
-			mIconView.setImageBitmap(mActivityState.newBitmap);
-			changeProfilePic();
+			if (mIconView != null) {
+				mIconView.setImageBitmap(mActivityState.newBitmap);
+			}
+			if (!isEditingProfile) {
+				saveChanges();
+			}
 			break;
 		}
 	}
@@ -351,5 +497,15 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			startActivityForResult(intent, GALLERY_RESULT);
 			break;
 		}
+	}
+	
+	public void onEmoticonClick(View v)
+	{
+		if(currentSelection != null)
+		{
+			currentSelection.setSelected(false);
+		}
+		v.setSelected(true);
+		currentSelection = v;
 	}
 }
