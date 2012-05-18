@@ -139,11 +139,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private Handler mHandler;
 
-	private View mInviteView;
-
-	//To prevent the header view from getting inflated twice;
-	private boolean isHeaderShowing = false;
-
 	private boolean blockOverlay;
 
 	private Configuration config;
@@ -194,12 +189,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataView.setVisibility(View.GONE);
 		mComposeView.removeTextChangedListener(this);
 
-		// Added because the header remains visible when you forward from an sms chat thread.
-		if (isHeaderShowing) {
-			mConversationsView.removeHeaderView(mInviteView);
-			mAdapter.notifyDataSetChanged();
-			isHeaderShowing = false;
-		}
 		mLabelView.setText("New Message");
 		
 		/* if we've got some pre-filled text, add it here */
@@ -380,8 +369,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mConversationDb = new HikeConversationsDatabase(this);
 
 		chatLayout.setOnSoftKeyboardListener(this);
-		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		mInviteView = inflater.inflate(R.layout.invite_view, null);
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
@@ -425,6 +412,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		ConvMessage message = mAdapter.getItem((int) info.id);
+		if (message == null)
+		{
+			return false;
+		}
+
 		switch (item.getItemId())
 		{
 		case R.id.copy:
@@ -545,13 +537,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo)
 	{
 		super.onCreateContextMenu(menu, v, menuInfo);
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.message_menu, menu);
 
 		/* enable resend options on failed messages */
 		AdapterView.AdapterContextMenuInfo adapterInfo =
 	            (AdapterView.AdapterContextMenuInfo) menuInfo;
-		ConvMessage message = mAdapter.getItem(isHeaderShowing ? adapterInfo.position - 1 : adapterInfo.position);
+		ConvMessage message = mAdapter.getItem(adapterInfo.position);
+		if (message == null)
+		{
+			return;
+		}
+
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.message_menu, menu);
 		if ((message.getState() == ConvMessage.State.SENT_FAILED))
 		{
 			MenuItem item = menu.findItem(R.id.resend);
@@ -767,21 +764,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		/* make a copy of the message list since it's used internally by the adapter */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
-		
+
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
-		
-		if(!mConversation.isOnhike())
-		{
-			mConversationsView.addHeaderView(mInviteView);
-			isHeaderShowing = true;
-		}
 		mConversationsView.setAdapter(mAdapter);
+		mAdapter.setInviteHeader(!mConversation.isOnhike());
+
 		if(shouldScrollToBottom)
 		{
 			shouldScrollToBottom = false;
 			mConversationsView.setSelection(messages.size()-1);
 		}
-		
+
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
 
@@ -816,10 +809,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mMetadataView.setVisibility(View.GONE);
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn_selector);
 			mComposeView.setHint("Free Message...");
-			mInviteView.setVisibility(View.GONE);
-			mConversationsView.removeHeaderView(mInviteView);
-			mAdapter.notifyDataSetChanged();
-			isHeaderShowing = false;
+			mAdapter.setInviteHeader(false);
 		}
 		else
 		{
@@ -827,13 +817,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			updateChatMetadata();
 			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn_selector);
 			mComposeView.setHint("SMS Message...");
-			mInviteView.setVisibility(View.VISIBLE);
-			if (!isHeaderShowing) 
-			{
-				mConversationsView.addHeaderView(mInviteView);
-				mAdapter.notifyDataSetChanged();
-				isHeaderShowing = true;
-			}
+			mAdapter.setInviteHeader(true);
 		}
 	}
 
@@ -841,12 +825,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private boolean isLastMsgReceivedAndUnread()
 	{
 		int count = (mAdapter != null) ? mAdapter.getCount() : 0;
-		if (count == 0)
+		ConvMessage lastMsg = count > 0 ? mAdapter.getItem(count - 1) : null;
+		if (lastMsg == null)
 		{
 			return false;
 		}
-
-		ConvMessage lastMsg = mAdapter.getItem(count - 1);
 
 		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD;
 	}
@@ -1084,6 +1067,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		for (int i = 0; i < count; ++i)
 		{
 			ConvMessage msg = mAdapter.getItem(i);
+			if (msg == null)
+			{
+				continue;
+			}
 			if (msg.getMsgID() == msgID)
 			{
 				return msg;
@@ -1155,7 +1142,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (messages != null) 
 		{
-			mConversationsView.setSelection(isHeaderShowing ? messages.size() : (messages.size()-1));
+			mConversationsView.setSelection(messages.size()-1);
 		}
 	}
 
@@ -1202,8 +1189,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (messages.size() - mConversationsView.getLastVisiblePosition()>2) 
 		{
 			mConversationsView
-					.smoothScrollToPosition(isHeaderShowing ? messages.size()
-							: (messages.size() - 1));
+					.smoothScrollToPosition(messages.size() - 1);
 		}
 		else
 		{
