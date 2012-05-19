@@ -33,6 +33,7 @@ public class MessagesAdapter extends BaseAdapter
 
 	private enum ViewType
 	{
+		INVITE,
 		RECEIVE,
 		SEND_SMS,
 		SEND_HIKE
@@ -53,7 +54,7 @@ public class MessagesAdapter extends BaseAdapter
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects, Conversation conversation)
 	{
 		this.context = context;
-		this.convMessages = objects; 
+		this.convMessages = objects;
 		this.conversation = conversation;
 	}
 
@@ -65,7 +66,11 @@ public class MessagesAdapter extends BaseAdapter
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.isSent())
+		if (convMessage == null)
+		{
+			type = ViewType.INVITE;
+		}
+		else if (convMessage.isSent())
 		{
 			type = conversation.isOnhike() ? ViewType.SEND_HIKE : ViewType.SEND_SMS;
 		}
@@ -99,7 +104,12 @@ public class MessagesAdapter extends BaseAdapter
 		if (v == null)
 		{
 			holder = new ViewHolder();
-			if (convMessage.isSent())
+			if (convMessage == null)
+			{
+				v = inflater.inflate(R.layout.invite_view, parent, false);
+				v.setTag(holder);
+			}
+			else if (convMessage.isSent())
 			{
 				v = inflater.inflate(R.layout.message_item_send, parent, false);
 
@@ -136,6 +146,11 @@ public class MessagesAdapter extends BaseAdapter
 		else
 		{
 			holder = (ViewHolder) v.getTag();
+		}
+
+		if (convMessage == null)
+		{
+			return v;
 		}
 
 		MessageMetadata metadata = convMessage.getMetadata();
@@ -201,19 +216,17 @@ public class MessagesAdapter extends BaseAdapter
 
 	private boolean shouldDisplayTimestamp(int position)
 	{
-		/* always show the timestamp for the first element */
-		if (position == 0)
-		{
-			return true;
-		}
-
 		/* 
-		 * otherwise, only show the timestamp if the delta between
+		 * only show the timestamp if the delta between
 		 * this message and the previous one is greater than 
 		 * 10 minutes
 		 */
 		ConvMessage current = getItem(position);
-		ConvMessage previous = getItem(position - 1);
+		ConvMessage previous = position > 0 ? getItem(position - 1) : null;
+		if (previous == null)
+		{
+			return true;
+		}
 		return (current.getTimestamp() - previous.getTimestamp() > 60*10);
 	}
 
@@ -230,5 +243,20 @@ public class MessagesAdapter extends BaseAdapter
 	@Override
 	public long getItemId(int position) {
 		return position;
+	}
+
+	public void setInviteHeader(boolean show)
+	{
+		ConvMessage msg = getCount() == 0 ? null : getItem(0);
+		if (msg == null)
+		{
+			if (show) return;
+			convMessages.remove(0);
+		}
+		else
+		{
+			if (!show) return;
+			convMessages.add(0, null);
+		}
 	}
 }
