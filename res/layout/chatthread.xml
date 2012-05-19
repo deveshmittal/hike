@@ -95,14 +95,13 @@
                 android:background="@drawable/send_hike_btn_selector"
                 android:state_enabled="false"
                 android:text="@string/send"
-                style="@style/Text.Shadow.White.Bold"
+                style="@style/Text"
+                android:textStyle="bold"
                 android:textSize="14sp"
                 android:onClick="onSendClick"
                 android:layout_width="50dp"
                 android:layout_height="34dp"
-                android:shadowDx="-0.4"
-                android:shadowDy="-0.4"
-                android:shadowRadius="0.3" />
+                android:textColor="@drawable/top_bar_btn_txt_selector" />
             
             <com.bsb.hike.view.RobotoEditText
                 android:id="@+id/msg_compose"
