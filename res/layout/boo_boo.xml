@@ -73,14 +73,12 @@
             android:layout_marginRight="40dp" />
         -->
 
-        <com.bsb.hike.view.RobotoButton
+        <ImageButton
             android:id="@+id/btn_try_again"
-            style="@style/Text.Shadow.White.Bold"
-            android:layout_width="match_parent"
-            android:layout_marginLeft="40dp"
-            android:layout_marginRight="40dp"
+            style="@style/SignupButton"
             android:layout_marginTop="30dp"
             android:background="@drawable/signup_button"
+            android:src="@drawable/try_again"
             android:onClick="onClick"
             android:paddingBottom="9dp"
             android:paddingTop="9dp"

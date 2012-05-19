@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/pin_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <ImageView
+        android:id="@+id/txt_img1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/enter_pin" />
+
+    <com.bsb.hike.view.RobotoEditText
+        android:id="@+id/et_enter_pin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+		android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/tb_pin"
+        android:hint="@string/pin"
+        android:imeOptions="actionDone"
+        android:inputType="number"
+        android:singleLine="true"
+        android:textSize="15sp"
+        android:visibility="visible" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageButton
+            android:id="@+id/btn_continue"
+            style="@style/SignupButton"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/signup_button"
+            android:onClick="onClick"
+            android:src="@drawable/next_btn_selector" />
+
+        <RelativeLayout
+            android:id="@+id/loading_layout"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/signup_loading_bckg"
+            android:orientation="horizontal"
+            android:visibility="invisible" 
+           	style="@style/SignupButton" >
+
+            <ProgressBar
+                android:id="@+id/loading_progress"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
+
+            <ImageView
+                android:id="@+id/txt_loading"
+                style="@style/Text.Shadow.Loading"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@id/loading_progress"
+                android:src="@drawable/verify_pin" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <ImageView android:id="@+id/wrong_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/wrong_num"
+        android:layout_marginTop="10dp"/>
+</LinearLayout>

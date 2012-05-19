@@ -10,32 +10,12 @@
         android:layout_height="match_parent"
         android:layout_marginTop="10dp" >
 
-        <LinearLayout
-            android:id="@+id/num_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
+         <include layout="@layout/number_signup_item" />
 
-            <include layout="@layout/signup_item" />
-        </LinearLayout>
+        <include layout="@layout/pin_signup_item" />
 
-        <LinearLayout
-            android:id="@+id/pin_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
+        <include layout="@layout/name_signup_item" />
 
-            <include layout="@layout/signup_item" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/name_layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
-
-            <include layout="@layout/signup_item" />
-        </LinearLayout>
     </com.bsb.hike.view.MyViewFlipper>
 
     <include

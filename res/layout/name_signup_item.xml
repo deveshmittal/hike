@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/name_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center" >
+
+        <ImageView
+            android:id="@+id/txt_img1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/all_set" />
+
+        <LinearLayout
+            android:id="@+id/msisdn_container"
+            android:layout_width="130dp"
+            android:layout_height="20dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="3dp"
+            android:gravity="center"
+            android:visibility="visible" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/txt_img2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/set_name" />
+
+    <com.bsb.hike.view.RobotoEditText
+        android:id="@+id/et_enter_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="60dp"
+        android:layout_marginRight="60dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/tb_name"
+        android:hint="@string/name"
+        android:imeOptions="actionDone"
+        android:inputType="textCapWords"
+        android:singleLine="true"
+        android:textSize="15sp"
+        android:visibility="visible" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageButton
+            android:id="@+id/btn_continue"
+            style="@style/SignupButton"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/signup_button"
+            android:onClick="onClick"
+            android:src="@drawable/lets_hike_selector" />
+
+        <RelativeLayout
+            android:id="@+id/loading_layout"
+            style="@style/SignupButton"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/signup_loading_bckg"
+            android:orientation="horizontal"
+            android:visibility="invisible" >
+
+            <ProgressBar
+                android:id="@+id/loading_progress"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
+
+            <ImageView
+                android:id="@+id/txt_loading"
+                style="@style/Text.Shadow.Loading"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_toRightOf="@id/loading_progress"
+                android:src="@drawable/scan_contacts" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+</LinearLayout>

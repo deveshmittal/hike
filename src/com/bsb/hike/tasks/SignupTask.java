@@ -88,6 +88,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	private OnSignupTaskProgressUpdate onSignupTaskProgressUpdate;
 	private boolean isRunning = false;
 	public String msisdn;
+	private boolean isPinError = false;
+	public static boolean isAlreadyFetchingNumber = false;
 	
 	public boolean isRunning() {
 		return isRunning;
@@ -124,6 +126,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
+		Log.e("SignupTask", "FETCHING NUMBER? "+isAlreadyFetchingNumber);
+		isPinError = false;
 		isRunning = true;
 		SharedPreferences settings = this.context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
@@ -140,18 +144,25 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		if (msisdn == null)
 		{
 			/* need to get the MSISDN */
-			AccountUtils.AccountInfo accountInfo = AccountUtils.registerAccount(null,null);
-			if (accountInfo == null)
+			AccountUtils.AccountInfo accountInfo = null;
+			if (!SignupTask.isAlreadyFetchingNumber) 
 			{
-				/* network error, signal a failure */
-				publishProgress(new StateValue(State.ERROR, null));
-				return Boolean.FALSE;
+				accountInfo = AccountUtils.registerAccount(null, null);
+				if (accountInfo == null) 
+				{
+					/* network error, signal a failure */
+					publishProgress(new StateValue(State.ERROR, null));
+					return Boolean.FALSE;
+				}
 			}
-
-			if (TextUtils.isEmpty(accountInfo.msisdn))
+			if (accountInfo == null || TextUtils.isEmpty(accountInfo.msisdn))
 			{
-				/* no MSISDN, ask the user for it */
-				publishProgress(new StateValue(State.MSISDN, ""));
+				if (!SignupTask.isAlreadyFetchingNumber) 
+				{
+					/* no MSISDN, ask the user for it */
+					publishProgress(new StateValue(State.MSISDN, ""));
+					SignupTask.isAlreadyFetchingNumber = true;
+				}
 				/* wait until we're notified that we have the msisdn */
 				try
 				{
@@ -201,46 +212,47 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				receiver = null;
 
 				accountInfo = null;
-				if (this.data == null) 
-				{
-					data = "";
-					publishProgress(new StateValue(State.PIN, data));
-
-					synchronized (this) 
-					{
-						try 
-						{
-							this.wait();
-						} 
-						catch (InterruptedException e) 
-						{
-							Log.e("SignupTask",
-									"Task was interrupted while taking the pin",
-									e);
+				do {
+					if (this.data == null) {
+						data = "";
+						if (!isPinError) {
+							publishProgress(new StateValue(State.PIN, data));
+						}
+						synchronized (this) {
+							try {
+								this.wait();
+							} catch (InterruptedException e) {
+								Log.e("SignupTask",
+										"Task was interrupted while taking the pin",
+										e);
+							}
 						}
 					}
-				}
-				if (isCancelled()) 
-				{
-					/* just gtfo */
-					Log.d("SignupTask", "Task was cancelled");
-					return Boolean.FALSE;
-				}
-				String pin = this.data;
-				if (TextUtils.isEmpty(pin)) 
-				{
-					publishProgress(new StateValue(State.ERROR, HikeConstants.CHANGE_NUMBER));
-					signupTask = null;
-					return Boolean.FALSE;
-				}
-				accountInfo = AccountUtils.registerAccount(pin,
-						unauthedMSISDN);
-				if (accountInfo == null) 
-				{
-					this.data = null;
-					publishProgress(new StateValue(State.ERROR, null));
-					return Boolean.FALSE;
-				}
+					if (isCancelled()) {
+						/* just gtfo */
+						Log.d("SignupTask", "Task was cancelled");
+						return Boolean.FALSE;
+					}
+					String pin = this.data;
+					if (TextUtils.isEmpty(pin)) {
+						publishProgress(new StateValue(State.ERROR,
+								HikeConstants.CHANGE_NUMBER));
+						signupTask = null;
+						return Boolean.FALSE;
+					}
+					accountInfo = AccountUtils.registerAccount(pin,
+							unauthedMSISDN);
+					if (accountInfo == null) {
+						this.data = null;
+						publishProgress(new StateValue(State.ERROR, null));
+						return Boolean.FALSE;
+					} else if (accountInfo.smsCredits == -1) {
+						this.data = null;
+						isPinError  = true;
+						publishProgress(new StateValue(State.PIN,
+								HikeConstants.PIN_ERROR));
+					}
+				} while (this.data == null);
 			}
 
 			Log.d("SignupTask", "saving MSISDN/Token");
