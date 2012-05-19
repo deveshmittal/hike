@@ -282,7 +282,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 				public void onFailure()
 				{
 					if (isBackPressed) {
-						finsishEditing();
+						finishEditing();
 					}
 				}
 
@@ -294,7 +294,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 					editor.putString(HikeMessengerApp.NAME_SETTING, name);
 					editor.commit();
 					if (isBackPressed) {
-						finsishEditing();
+						finishEditing();
 					}
 				}
 			});
@@ -338,7 +338,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 										getLargerIconId()));
 					}
 					if (isBackPressed) {
-						finsishEditing();
+						finishEditing();
 					}
 				}
 
@@ -349,7 +349,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 					db.setIcon(getLargerIconId(), larger_bytes);
 					db.close();
 					if (isBackPressed) {
-						finsishEditing();
+						finishEditing();
 					}
 				}
 			});
@@ -373,7 +373,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		}
 	}
 
-	private void finsishEditing()
+	private void finishEditing()
 	{
 		Intent i = new Intent(this, ProfileActivity.class);
 		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

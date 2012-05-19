@@ -54,6 +54,9 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		headerLayout = (ViewGroup) booBooLayout.findViewById(R.id.header_layout);
 		headerLayout.setVisibility(View.VISIBLE);
 
+		headerLayout = (ViewGroup) booBooLayout.findViewById(R.id.header_layout);
+		headerLayout.setVisibility(View.VISIBLE);
+
 		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
 		{
 			showError();
