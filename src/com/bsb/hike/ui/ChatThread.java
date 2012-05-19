@@ -1250,16 +1250,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void addMessage(ConvMessage convMessage)
 	{
 		messages.add(convMessage);
-		if (messages.size() - mConversationsView.getLastVisiblePosition()>2) 
-		{
-			mConversationsView
-					.smoothScrollToPosition(messages.size() - 1);
-		}
-		else
-		{
-			mConversationsView.smoothScrollBy((int)(convMessage.getMessage().length()/30+1)*130, 500);
-		}
 		mAdapter.notifyDataSetChanged();
+		//Smooth scroll by the minimum distance in the opposite direction, to fix the bug where the list does not scroll at all.
+		mConversationsView.smoothScrollBy(-1, 1);
+		mConversationsView.smoothScrollToPosition(messages.size() - 1);
 	}
 	
 	private void removeMessage(ConvMessage convMessage)
