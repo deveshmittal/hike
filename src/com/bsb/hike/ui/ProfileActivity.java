@@ -82,6 +82,9 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	private String nameTxt;
 	private boolean isEditingProfile = false;
 	private boolean isBackPressed = false;
+	private EditText mEmailEdit;
+	private String emailTxt;
+	private int genderType;
 	private class ActivityState
 	{
 		public HikeHTTPTask task; /* the task to update the global profile */
@@ -175,6 +178,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		picture = (ViewGroup) findViewById(R.id.photo);
 
 		mNameEdit = (EditText) name.findViewById(R.id.name_input);
+		mEmailEdit = (EditText) email.findViewById(R.id.email_input);
 
 		((TextView)name.findViewById(R.id.name_edit_field)).setText("Name");
 		((TextView)phone.findViewById(R.id.phone_edit_field)).setText("Phone");
@@ -190,8 +194,12 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		((EditText)phone.findViewById(R.id.phone_input)).setEnabled(false);
 
 		mNameEdit.setText(nameTxt);
-		Log.e("Profile Name: ", mNameEdit.getText().toString());
+		mEmailEdit.setText(emailTxt);
+
 		mNameEdit.setSelection(nameTxt.length());
+		mEmailEdit.setSelection(emailTxt.length());
+
+		onEmoticonClick(genderType == 0 ? null : genderType == 1 ? gender.findViewById(R.id.guy) : gender.findViewById(R.id.girl));
 	}
 	
 	private void setupProfileScreen()
@@ -245,6 +253,8 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		nameTxt = settings.getString(HikeMessengerApp.NAME, "Set a name!");
 		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		emailTxt = settings.getString(HikeConstants.Extras.EMAIL, "");
+		genderType = settings.getInt(HikeConstants.Extras.GENDER, 0);
 	}
 
 	public void onBackPressed()
@@ -357,6 +367,16 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			request.setPostData(bytes);
 			requests.add(request);
 		}
+
+		SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+		Editor editor = prefs.edit();
+		if(!TextUtils.isEmpty(mEmailEdit.getText()))
+		{
+			editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit.getText().toString());
+		}
+		editor.putInt(HikeConstants.Extras.GENDER, currentSelection == null ? 0 : currentSelection.getId() == R.id.guy ? 1 : 2);
+		editor.commit();
+
 		if (!requests.isEmpty())
 		{
 			mDialog = ProgressDialog.show(this, null, getResources().getString(R.string.updating_profile));
@@ -509,11 +529,13 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	
 	public void onEmoticonClick(View v)
 	{
-		if(currentSelection != null)
+		if (v != null) 
 		{
-			currentSelection.setSelected(false);
+			if (currentSelection != null) {
+				currentSelection.setSelected(false);
+			}
+			v.setSelected(currentSelection != v);
+			currentSelection = v == currentSelection ? null : v;
 		}
-		v.setSelected(true);
-		currentSelection = v;
 	}
 }

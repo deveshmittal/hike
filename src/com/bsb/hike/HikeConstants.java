@@ -88,5 +88,7 @@ public class HikeConstants
 		public static final String FADE_IN = "fadeIn";
 		public static final String ANIMATED_ONCE = "animatedOnce";
 		public static final String EDIT_PROFILE = "editProfile";
+		public static final String EMAIL = "email";
+		public static final String GENDER = "gender";
 	}
 }
