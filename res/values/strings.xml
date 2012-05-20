@@ -103,7 +103,7 @@
 	<string name="verifying_pin">Verifying number...</string>
 	<string name="enter_pin2">Enter that here.</string>
 	<string name="terms_privacy">Terms and Privacy</string>
-	<string name="boo_boo">Oh no! Systems boo boo!</string>
+	<string name="boo_boo">Hmm...Seems like there’s an issue with the network</string>
 	<string name="try_again">Try again</string>
 	<string name="if_you_see">If you see this more often send us a note <font color="@color/signup_blue"><u>here.</u></font></string>
 	<string name="friends">friends</string>
@@ -130,5 +130,6 @@
 	<string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s</string>
 	<string name="invite_tooltip">Bring a friend, take some credit.</string>
 	<string name="more">More »</string>
+	<string name="edit_profile">Edit Profile</string>
 	<string name="no_sd_card">Please insert an SD Card</string>
 </resources>

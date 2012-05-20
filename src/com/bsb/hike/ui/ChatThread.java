@@ -10,6 +10,8 @@ import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
@@ -21,20 +23,20 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -45,7 +47,6 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -100,11 +101,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private int mCredits;
 
-	private View mMetadataView;
-
 	private TextView mMetadataNumChars;
-
-	private TextView mMetadataCreditsLeft;
 
 	private View mBottomView;
 
@@ -142,6 +139,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private boolean blockOverlay;
 
 	private Configuration config;
+
+	private SharedPreferences prefs;
+
+	private Animation slideUp;
+
+	private Animation slideDown;
+
+	private TextView smsCount;
+
+	private boolean animatedOnce = false;
 
 	@Override
 	protected void onPause()
@@ -186,7 +193,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* msg is any text we want to show initially */
 	private void createAutoCompleteView(String msg)
 	{
-		mMetadataView.setVisibility(View.GONE);
 		mComposeView.removeTextChangedListener(this);
 
 		mLabelView.setText("New Message");
@@ -343,15 +349,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* bind views to variables */
 		chatLayout = (CustomLinearLayout) findViewById(R.id.chat_layout);
 		mBottomView = findViewById(R.id.bottom_panel);
-		mMetadataView = findViewById(R.id.sms_chat_metadata);
 		mInputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		mInputNumberContainer = (LinearLayout) findViewById(R.id.input_number_container);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (Button) findViewById(R.id.send_message);
-		mMetadataView = findViewById(R.id.sms_chat_metadata);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
-		mMetadataCreditsLeft = (TextView) findViewById(R.id.sms_chat_metadata_text_credits_left);
 		mLabelView = (TextView) findViewById(R.id.title);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
 
@@ -507,30 +510,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		/* user clicked the unblock button in the chat-screen */
 		hideOverlay();
-		if (v.getId() != R.id.dismiss_overlay_layout && blockOverlay) 
+		if (v.getId() != R.id.overlay_layout && blockOverlay) 
 		{
 			mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
 			mUserIsBlocked = false;
 		}
-		else if(v.getId() != R.id.dismiss_overlay_layout)
+		else if(v.getId() != R.id.overlay_layout)
 		{
 			inviteUser();
 		}
 		if(!blockOverlay)
 		{
-			mConversationDb = new HikeConversationsDatabase(ChatThread.this);
 			mConversationDb.setOverlay(true, mConversation.getMsisdn());
-			mConversationDb.close();
 		}
 	}
 
 	private void hideOverlay()
 	{
-		Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
-		fadeOut.setDuration(250);
-		mOverlayLayout.startAnimation(fadeOut);
 		mOverlayLayout.setVisibility(View.GONE);
-		mComposeView.setEnabled(true);
 	}
 
 	@Override
@@ -806,14 +803,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (mConversation.isOnhike())
 		{
-			mMetadataView.setVisibility(View.GONE);
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn_selector);
 			mComposeView.setHint("Free Message...");
 			mAdapter.setInviteHeader(false);
 		}
 		else
 		{
-			mMetadataView.setVisibility(View.VISIBLE);
 			updateChatMetadata();
 			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn_selector);
 			mComposeView.setHint("SMS Message...");
@@ -978,6 +973,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				public void run()
 				{
 					updateChatMetadata();
+					if (!animatedOnce) 
+					{
+						prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+						animatedOnce = prefs.getBoolean(HikeConstants.Extras.ANIMATED_ONCE, false);
+						if (!animatedOnce) {
+							Editor editor = prefs.edit();
+							editor.putBoolean(
+									HikeConstants.Extras.ANIMATED_ONCE, true);
+							editor.commit();
+						}
+					}
+
+					if(mCredits%10 == 0 || !animatedOnce)
+					{
+						animatedOnce = true;
+						showSMSCounter();
+					}
 				}
 			});
 		}
@@ -1102,39 +1114,91 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* must be called on the UI Thread */
 	private void updateChatMetadata()
 	{
-		ImageButton topBarBtn = (ImageButton) findViewById(R.id.title_image_btn);
-		View buttonBar = (View) findViewById(R.id.button_bar);
-		/* set the bottom bar to red if we're out of sms credits */
+		mMetadataNumChars.setVisibility(View.VISIBLE);
 		if (mCredits <= 0)
 		{
-			mMetadataView.setBackgroundResource(R.color.red);
 			mSendBtn.setEnabled(false);
-			mConversationDb = new HikeConversationsDatabase(ChatThread.this);
+
+			if (!TextUtils.isEmpty(mComposeView.getText())) {
+				mComposeView.setText("");
+			}
+			mComposeView.setHint("0 Free SMS left...");
+			mComposeView.setEnabled(false);
+			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+
 			boolean show = mConversationDb.wasOverlayDismissed(mConversation.getMsisdn());
-			mConversationDb.close();
 			if (!show) {
 				showOverlay(false);
 			}
-			topBarBtn.setVisibility(View.VISIBLE);
-			buttonBar.setVisibility(View.VISIBLE);
-			topBarBtn.setImageResource(R.drawable.ic_i);
 		}
 		else
 		{
-			topBarBtn.setVisibility(View.GONE);
-			buttonBar.setVisibility(View.GONE);
+			if (!mComposeView.isEnabled()) {
+				if (!TextUtils.isEmpty(mComposeView.getText())) {
+					mComposeView.setText("");
+				}
+				mComposeView.setHint(R.string.type_to_compose);
+				mComposeView.setEnabled(true);
+			}
+			findViewById(R.id.info_layout).setVisibility(View.GONE);
+
 			if (!blockOverlay) {
 				hideOverlay();
 			}
-			mMetadataView.setBackgroundResource(R.color.compose_background);
-		}
 
-		int length = mComposeView.getText().length();
-		// set the max sms length to a length appropriate to the number of characters we have
-		mMaxSmsLength = 160 * (1 + length / 160);
-		mMetadataNumChars.setText(Integer.toString(length) + "/" + Integer.toString(mMaxSmsLength));
-		String formatted = String.format(getResources().getString(R.string.credits_left), mCredits);
-		mMetadataCreditsLeft.setText(formatted);
+			if(mComposeView.getLineCount()>1)
+			{
+				mMetadataNumChars.setVisibility(View.VISIBLE);
+				int length = mComposeView.getText().length();
+				// set the max sms length to a length appropriate to the number of characters we have
+				int charNum = length % 140;
+				int numSms = ((int)(length/140)) + 1;
+				String charNumString = Integer.toString(charNum);
+				SpannableString ss = new SpannableString(charNumString + "/#" + Integer.toString(numSms));
+				ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.green)), 0, charNumString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				mMetadataNumChars.setText(ss);
+			}
+			else
+			{
+				mMetadataNumChars.setVisibility(View.INVISIBLE);
+			}
+		}
+	}
+
+	private void showSMSCounter()
+	{
+		slideUp = AnimationUtils.loadAnimation(ChatThread.this,
+					R.anim.slide_up_noalpha);
+		slideUp.setDuration(2000);
+
+			slideDown = AnimationUtils.loadAnimation(ChatThread.this,
+					R.anim.slide_down_noalpha);
+		slideDown.setDuration(2000);
+		slideDown.setStartOffset(2000);
+		
+		if (smsCount == null) 
+		{
+			smsCount = (TextView) findViewById(R.id.sms_counter);
+		}
+		smsCount.setAnimation(slideUp);
+		smsCount.setVisibility(View.VISIBLE);
+		smsCount.setText(mCredits + " SMS left");
+
+		slideUp.setAnimationListener(new AnimationListener() 
+		{
+			@Override
+			public void onAnimationStart(Animation animation) {}
+		
+			@Override
+			public void onAnimationRepeat(Animation animation) {}
+
+			@Override
+			public void onAnimationEnd(Animation animation) 
+			{
+				smsCount.setAnimation(slideDown);
+				smsCount.setVisibility(View.INVISIBLE);
+			}
+		});
 	}
 
 	@Override
@@ -1186,16 +1250,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void addMessage(ConvMessage convMessage)
 	{
 		messages.add(convMessage);
-		if (messages.size() - mConversationsView.getLastVisiblePosition()>2) 
-		{
-			mConversationsView
-					.smoothScrollToPosition(messages.size() - 1);
-		}
-		else
-		{
-			mConversationsView.smoothScrollBy((int)(convMessage.getMessage().length()/30+1)*130, 500);
-		}
 		mAdapter.notifyDataSetChanged();
+		//Smooth scroll by the minimum distance in the opposite direction, to fix the bug where the list does not scroll at all.
+		mConversationsView.smoothScrollBy(-1, 1);
+		mConversationsView.smoothScrollToPosition(messages.size() - 1);
 	}
 	
 	private void removeMessage(ConvMessage convMessage)
@@ -1241,9 +1299,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(),
 				InputMethodManager.HIDE_NOT_ALWAYS);
 
-		Animation fadeIn = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
-		fadeIn.setDuration(250);
-		mOverlayLayout.startAnimation(fadeIn);
 		mOverlayLayout.setVisibility(View.VISIBLE);
 		// To prevent the views in the background from being clickable
 		mOverlayLayout.setOnClickListener(new OnClickListener() 
@@ -1255,9 +1310,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		TextView message = (TextView) mOverlayLayout.findViewById(R.id.overlay_message);
 		Button overlayBtn = (Button) mOverlayLayout.findViewById(R.id.overlay_button);
-		ViewGroup dismissLayout = (ViewGroup) mOverlayLayout.findViewById(R.id.dismiss_overlay_layout);
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
-		ImageButton btnI = (ImageButton) mOverlayLayout.findViewById(R.id.btn_i);
 
 		mComposeView.setEnabled(false);
 		String label = mConversation.getLabel();
@@ -1266,20 +1319,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			overlayImg.setImageResource(R.drawable.ic_no);
 			formatString = getResources().getString(R.string.block_overlay_message);
-			dismissLayout.setVisibility(View.GONE);
 			overlayBtn.setText(R.string.unblock_title);
-			btnI.setVisibility(View.GONE);
 		}
 		else
 		{
-			mConversationDb = new HikeConversationsDatabase(ChatThread.this);
 			mConversationDb.setOverlay(false, mConversation.getMsisdn());
-			mConversationDb.close();
 			formatString = getResources().getString(R.string.no_credits);
 			overlayImg.setImageResource(R.drawable.ic_no_credits);
-			dismissLayout.setVisibility(View.VISIBLE);
 			overlayBtn.setText(R.string.invite_now);
-			btnI.setVisibility(View.VISIBLE);
+			mOverlayLayout.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					onOverlayButtonClick(mOverlayLayout);
+				}
+			});
 		}
 		/* bold the blocked users name */
 		String formatted = String.format(formatString,
@@ -1293,6 +1347,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	public void onTitleIconClick(View v)
 	{
-		showOverlay(false);
+		if (v.getId() == R.id.info_layout) {
+			showOverlay(false);
+		}
 	}
 }

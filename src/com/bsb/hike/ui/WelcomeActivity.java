@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.bsb.hike.HikeConstants;
@@ -23,15 +24,16 @@ import com.bsb.hike.utils.UpdateAppBaseActivity;
 
 public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask.OnSignupTaskProgressUpdate
 {
-	private Button mAcceptButton;
+	private ImageButton mAcceptButton;
 	private ViewGroup loadingLayout;
 	private Button tcText;
 	
 	private ViewGroup tcContinueLayout;
 	private ViewGroup booBooLayout;
-	private Button tryAgainBtn;
+	private ImageButton tryAgainBtn;
 	private View hiLogoView;
 	private ImageView hikeWelcomeView;
+	private ViewGroup headerLayout;
 
 	@Override
 	public void onCreate(Bundle savedState)
@@ -39,7 +41,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 
-		mAcceptButton = (Button) findViewById(R.id.btn_continue);
+		mAcceptButton = (ImageButton) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
 		hiLogoView = findViewById(R.id.ic_hi_logo);
@@ -47,7 +49,13 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
-		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
+		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
+
+		headerLayout = (ViewGroup) booBooLayout.findViewById(R.id.header_layout);
+		headerLayout.setVisibility(View.VISIBLE);
+
+		headerLayout = (ViewGroup) booBooLayout.findViewById(R.id.header_layout);
+		headerLayout.setVisibility(View.VISIBLE);
 
 		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
 		{

@@ -257,7 +257,7 @@ public class AccountUtils
 		if("fail".equals(obj.optString("stat")))
 		{
 			if(pin != null)
-				return null;
+				return new AccountUtils.AccountInfo(null, null, null, -1);
 			/* represents normal account creation , when user is on wifi and account creation failed */
 			return new AccountUtils.AccountInfo(null, null, null, -1); 
 		}

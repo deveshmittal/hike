@@ -1,15 +1,11 @@
 package com.bsb.hike.ui;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -18,8 +14,10 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
@@ -29,8 +27,9 @@ import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
+import com.bsb.hike.view.MSISDNView;
 
-public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher
+public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener
 {
 
 	private SignupTask mTask;
@@ -42,24 +41,25 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	private ViewGroup pinLayout;
 	private ViewGroup nameLayout;
 	private ViewGroup booBooLayout;
-	
-	private TextView loadingText;
-	private ViewGroup loadingLayout;
-	private TextView enterText1;
-	private TextView enterText2;
-	private EditText enterEditText;
-	private TextView wrongNumText;
-	private Button tapHereText;
-	private Button submitBtn;
+	private ViewGroup numberContainer;
 
-	private Button tryAgainBtn;
+	private ImageView infoTxt;
+	private ImageView loadingText;
+	private ViewGroup loadingLayout;
+	private EditText enterEditText;
+	private ImageView tapHereText;
+	private ImageButton submitBtn;
+
+	private ImageButton tryAgainBtn;
 	private Handler mHandler;
 
 	private boolean addressBookError = false;
 
-	private static final int NAME = 2;
-	private static final int PIN = 1;
-	private static final int NUMBER = 0;
+	private final int NAME = 2;
+	private final int PIN = 1;
+	private final int NUMBER = 0;
+	
+	private static String msisdn;
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -72,7 +72,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
-		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
+		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
 
 		if(savedInstanceState != null)
 		{
@@ -91,16 +91,15 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 				prepareLayoutForGettingName();
 				break;
 			}
-			setAnimation();
 			if(savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
 			{
 				startLoading();
 			}
-			enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 			if(savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR))
 			{
 				showErrorMsg();
 			}
+			enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
 		}
 		else
 		{
@@ -113,9 +112,10 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 			{
 				prepareLayoutForFetchingNumber();
 			}
-			setAnimation();
-			setListeners();
+			
 		}
+		setAnimation();
+		setListeners();
 		mTask = SignupTask.startTask(this);
 	}
 
@@ -151,14 +151,19 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		{
 			restartTask();
 		}
+		else if(v.getId() == tapHereText.getId())
+		{
+			mTask.addUserInput("");
+		}
 	}
 	
 	private void startLoading()
 	{
 		loadingLayout.setVisibility(View.VISIBLE);
 		submitBtn.setVisibility(View.GONE);
-		wrongNumText.setVisibility(View.GONE);
-		tapHereText.setVisibility(View.GONE);
+		if (tapHereText != null) {
+			tapHereText.setVisibility(View.GONE);
+		}
 	}
 
 	private void submitClicked()
@@ -177,101 +182,53 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 
 	private void initializeViews(ViewGroup layout)
 	{
-		enterText1 = (TextView) layout.findViewById(R.id.enter_txt1);
-		enterText2 = (TextView) layout.findViewById(R.id.enter_txt2);
-		loadingText = (TextView) layout.findViewById(R.id.txt_loading);
+		switch (layout.getId()) 
+		{
+		case R.id.name_layout:
+			enterEditText = (EditText) layout.findViewById(R.id.et_enter_name);
+			break;
+		case R.id.num_layout:
+			enterEditText = (EditText) layout.findViewById(R.id.et_enter_num);
+			break;
+		case R.id.pin_layout:
+			enterEditText = (EditText) layout.findViewById(R.id.et_enter_pin);
+			break;
+		}
+		infoTxt = (ImageView) layout.findViewById(R.id.txt_img1);
+		loadingText = (ImageView) layout.findViewById(R.id.txt_loading);
 		loadingLayout = (ViewGroup) layout.findViewById(R.id.loading_layout);
-		enterEditText = (EditText) layout.findViewById(R.id.et_enter);
-		wrongNumText = (TextView) layout.findViewById(R.id.txt_wrong_number);
-		tapHereText = (Button) layout.findViewById(R.id.txt_tap_here);
-		submitBtn = (Button) layout.findViewById(R.id.btn_continue);
+		tapHereText = (ImageView) layout.findViewById(R.id.wrong_num);
+		submitBtn = (ImageButton) layout.findViewById(R.id.btn_continue);
+		numberContainer = (LinearLayout) layout.findViewById(R.id.msisdn_container);
+
+		loadingLayout.setVisibility(View.GONE);
+		submitBtn.setVisibility(View.VISIBLE);
 	}
 
 	private void prepareLayoutForFetchingNumber()
 	{
 		initializeViews(numLayout);
-		hideAllViews();
-		showCommonViews();
-		
-		enterText1.setText(R.string.old_fashioned);
-		enterText2.setText(R.string.enter_num);
-		enterEditText.setHint(R.string.phone_num);
-		enterEditText.setBackgroundResource(R.drawable.tb_phone);
-		enterEditText.setInputType(EditorInfo.TYPE_CLASS_PHONE);
-		loadingText.setText(R.string.waiting_pin);
-		submitBtn.setText(R.string.next);
 	}
 
 	private void prepareLayoutForGettingPin()
 	{
 		initializeViews(pinLayout);
-		hideAllViews();
-		showCommonViews();
-
-		wrongNumText.setVisibility(View.VISIBLE);
-		tapHereText.setVisibility(View.VISIBLE);
-
-		enterText1.setText(R.string.enter_pin1);
-		enterText2.setText(R.string.enter_pin2);
-		loadingText.setText(R.string.verifying_pin);
-		submitBtn.setText(R.string.next);
-		enterEditText.setHint(R.string.pin);
-		enterEditText.setBackgroundResource(R.drawable.tb_pin);
-		enterEditText.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
-
-		tapHereText.setOnClickListener(new OnClickListener() 
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				mTask.addUserInput("");
-			}
-		});
+		infoTxt.setImageResource(R.drawable.enter_pin);
+		tapHereText.setOnClickListener(this);
 	}
 
 	private void prepareLayoutForGettingName()
 	{
 		initializeViews(nameLayout);
-		hideAllViews();
-		showCommonViews();
 
 		if (mTask != null) 
 		{
-			String currentNum = getString(R.string.current_num);
-			SpannableString spannableString = new SpannableString(currentNum + " " + mTask.msisdn);
-			
-			int start = currentNum.length() + 1;
-			spannableString.setSpan(new StyleSpan(Typeface.BOLD), start, start + mTask.msisdn.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			enterText1.setText(spannableString);
+			SignupActivity.msisdn = mTask.msisdn;
 		}
-		enterText2.setText(R.string.enter_name);
-		enterEditText.setHint(R.string.name);
-		enterEditText.setBackgroundResource(R.drawable.tb_name);
-		enterEditText.setInputType(EditorInfo.TYPE_TEXT_FLAG_CAP_WORDS);
-		loadingText.setText(R.string.scanning_contacts);
-		submitBtn.setText(R.string.done);
-	}
-
-	private void hideAllViews() {
-		enterText1.setVisibility(View.GONE);
-		enterText2.setVisibility(View.GONE);
-		loadingLayout.setVisibility(View.GONE);
-		enterEditText.setVisibility(View.GONE);
-		wrongNumText.setVisibility(View.GONE);
-		tapHereText.setVisibility(View.GONE);
-		submitBtn.setVisibility(View.GONE);
+		MSISDNView v = new MSISDNView(SignupActivity.this, SignupActivity.msisdn);
+		numberContainer.addView(v);
 	}
 	
-	private void showCommonViews()
-	{
-		enterText1.setVisibility(View.VISIBLE);
-		enterText2.setVisibility(View.VISIBLE);
-		enterEditText.setVisibility(View.VISIBLE);
-		submitBtn.setVisibility(View.VISIBLE);
-		enterEditText.requestFocus();
-		setListeners();
-	}
-
 	private void resetViewFlipper()
 	{
 		booBooLayout.setVisibility(View.GONE);
@@ -312,9 +269,9 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
-		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, booBooLayout.getVisibility() == View.VISIBLE);
+		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -325,6 +282,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 				mTask.cancelTask();
 				mTask = null;
 			}
+		SignupTask.isAlreadyFetchingNumber = false;
 		super.onBackPressed();
 	}
 
@@ -374,11 +332,22 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 			}
 			break;
 		case PIN:
+			//Wrong Pin
+			if(value != null && value.equals(HikeConstants.PIN_ERROR))
+			{
+				infoTxt.setImageResource(R.drawable.wrong_pin);
+				loadingLayout.setVisibility(View.GONE);
+				submitBtn.setVisibility(View.VISIBLE);
+				tapHereText.setVisibility(View.VISIBLE);
+				enterEditText.setText("");
+			}
 			//Manual entry for pin
-			viewFlipper.setDisplayedChild(PIN);
-			initializeViews(pinLayout);
-			prepareLayoutForGettingPin();
-			setAnimation();
+			else
+			{
+				viewFlipper.setDisplayedChild(PIN);
+				prepareLayoutForGettingPin();
+				setAnimation();
+			}
 			break;
 		case NAME:
 			if (TextUtils.isEmpty(value))
@@ -393,7 +362,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 					@Override
 					public void run() 
 					{
-						loadingText.setText(R.string.saving_name);
+						loadingText.setImageResource(R.drawable.getting_you_in);
 					}
 				}, 1000);
 			}
@@ -413,6 +382,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 			}
 			break;
 		}
+		setListeners();
 	}
 
 	@Override
@@ -436,7 +406,10 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 
 	@Override
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event) {
-		if((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) && enterEditText.getText().length()>0 && loadingLayout.getVisibility() != View.VISIBLE)
+		if((actionId == EditorInfo.IME_ACTION_DONE 
+				|| event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+				&& enterEditText.getText().length()>0 
+				&& loadingLayout.getVisibility() != View.VISIBLE)
 		{
 			submitClicked();
 		}
