@@ -261,9 +261,9 @@ public class MessagesAdapter extends BaseAdapter
 		else /* remove the empty header */
 		{
 			if ((getCount() != 0) &&
-					(getItem(0) != null))
+					(getItem(0) == null))
 			{
-				/* add the null entry */
+				/* remove the null entry */
 				convMessages.remove(0);				
 			}
 		}
