@@ -14,11 +14,7 @@
 
     <com.bsb.hike.view.RobotoEditText
         android:id="@+id/et_enter_pin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-		android:layout_marginLeft="60dp"
-        android:layout_marginRight="60dp"
+        style="@style/SignupButton"
         android:layout_marginTop="10dp"
         android:background="@drawable/tb_pin"
         android:hint="@string/pin"
@@ -46,15 +42,15 @@
             android:background="@drawable/signup_loading_bckg"
             android:orientation="horizontal"
             android:visibility="invisible" 
-           	style="@style/SignupButton" >
+           	style="@style/SignupButton"
+           	android:layout_centerHorizontal="true"
+           	android:gravity="center_horizontal" >
 
             <ProgressBar
                 android:id="@+id/loading_progress"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
                 android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
             <ImageView

@@ -14,19 +14,19 @@
 
     <com.bsb.hike.view.RobotoEditText
         android:id="@+id/et_enter_num"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="60dp"
-        android:layout_marginRight="60dp"
+        style="@style/SignupButton"
         android:layout_marginTop="10dp"
         android:background="@drawable/tb_phone"
+        android:ems="10"
         android:hint="@string/phone_num"
         android:imeOptions="actionDone"
         android:inputType="phone"
         android:singleLine="true"
         android:textSize="15sp"
-        android:visibility="visible" />
+        android:visibility="visible" >
+
+        <requestFocus />
+    </com.bsb.hike.view.RobotoEditText>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -45,8 +45,9 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/signup_loading_bckg"
             android:orientation="horizontal"
-            android:visibility="invisible"
-			style="@style/SignupButton" >
+            android:visibility="visible"
+			style="@style/SignupButton"
+			android:gravity="center_horizontal" >
 
             <ProgressBar
                 android:id="@+id/loading_progress"
@@ -54,14 +55,13 @@
                 android:layout_height="25dp"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
                 android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
             <ImageView
                 android:id="@+id/txt_loading"
                 style="@style/Text.Shadow.Loading"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="3dp"
                 android:layout_toRightOf="@id/loading_progress"
                 android:src="@drawable/verifying_num" />
         </RelativeLayout>
