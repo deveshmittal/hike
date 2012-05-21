@@ -622,7 +622,6 @@ public class HikeMqttManager implements Listener
 
 		Log.d("HikeMqttManager", "About to send message " + new String(packet.getMessage()));
 		PublishCB pbCB = new PublishCB(packet);
-		this.handler.postDelayed(pbCB, HikeConstants.MESSAGE_DELIVERY_TIMEOUT);
 
 		mqttConnection.publish(new UTF8Buffer(this.topic + HikeConstants.PUBLISH_TOPIC),
 				new Buffer(packet.getMessage()), QoS.AT_LEAST_ONCE,
