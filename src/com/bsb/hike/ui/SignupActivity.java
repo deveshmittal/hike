@@ -23,7 +23,9 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.HikeArrayAdapter;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
@@ -58,8 +60,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	private final int NAME = 2;
 	private final int PIN = 1;
 	private final int NUMBER = 0;
-	
-	private static String msisdn;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -221,11 +222,8 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	{
 		initializeViews(nameLayout);
 
-		if (mTask != null) 
-		{
-			SignupActivity.msisdn = mTask.msisdn;
-		}
-		MSISDNView v = new MSISDNView(SignupActivity.this, SignupActivity.msisdn);
+		String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
+		MSISDNView v = new MSISDNView(SignupActivity.this, msisdn);
 		numberContainer.addView(v);
 	}
 	
