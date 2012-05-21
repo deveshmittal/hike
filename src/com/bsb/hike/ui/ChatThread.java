@@ -38,6 +38,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -1224,10 +1225,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		if ((view == mComposeView) &&
-				(keyEvent != null) &&
-				(keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) && 
-				(keyEvent.getAction() != KeyEvent.ACTION_UP) && 
-				(config.keyboard != Configuration.KEYBOARD_NOKEYS))
+				(
+					(actionId == EditorInfo.IME_ACTION_SEND) ||
+					(
+						(keyEvent != null) &&
+						(keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) && 
+						(keyEvent.getAction() != KeyEvent.ACTION_UP) && 
+						(config.keyboard != Configuration.KEYBOARD_NOKEYS)
+					)
+				)
+			)
 		{
 			boolean ret = mSendBtn.performClick();
 			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);

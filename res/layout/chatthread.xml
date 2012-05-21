@@ -116,6 +116,7 @@
                 android:background="@drawable/chat_thread"
                 android:hint="@string/type_to_compose"
                 android:gravity="top"
+                android:imeOptions="actionSend"
                 android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
                 android:maxLines="4"
                 android:textSize="15sp"
