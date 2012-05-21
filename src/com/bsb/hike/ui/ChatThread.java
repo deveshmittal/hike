@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.inputmethodservice.Keyboard;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -73,7 +74,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
-public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnItemClickListener, OnSoftKeyboardListener
+public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnItemClickListener, OnSoftKeyboardListener, View.OnKeyListener
 {
 	private HikePubSub mPubSub;
 
@@ -369,6 +370,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		 * button we have), we send the message.
 		 */
 		mComposeView.setOnEditorActionListener(this);
+
+		/* ensure that when we hit Alt+Enter, we insert a newline */
+		mComposeView.setOnKeyListener(this);
 
 		mConversationDb = new HikeConversationsDatabase(this);
 
@@ -1357,5 +1361,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (v.getId() == R.id.info_layout) {
 			showOverlay(false);
 		}
+	}
+
+	@Override
+	public boolean onKey(View view, int keyCode, KeyEvent event)
+	{
+		if ((event.getAction() == KeyEvent.ACTION_UP) &&
+				(keyCode == KeyEvent.KEYCODE_ENTER)
+				&& event.isAltPressed())
+		{
+			mComposeView.append("\n");
+			return true;
+		}
+		return false;
 	}
 }
