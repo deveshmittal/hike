@@ -368,14 +368,19 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			requests.add(request);
 		}
 
-		SharedPreferences prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		Editor editor = prefs.edit();
-		if(!TextUtils.isEmpty(mEmailEdit.getText()))
-		{
-			editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit.getText().toString());
+		if (mEmailEdit != null) {
+			SharedPreferences prefs = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+			Editor editor = prefs.edit();
+			if (!TextUtils.isEmpty(mEmailEdit.getText())) {
+				editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
+						.getText().toString());
+			}
+			editor.putInt(HikeConstants.Extras.GENDER,
+					currentSelection == null ? 0
+							: currentSelection.getId() == R.id.guy ? 1 : 2);
+			editor.commit();
 		}
-		editor.putInt(HikeConstants.Extras.GENDER, currentSelection == null ? 0 : currentSelection.getId() == R.id.guy ? 1 : 2);
-		editor.commit();
 
 		if (!requests.isEmpty())
 		{
