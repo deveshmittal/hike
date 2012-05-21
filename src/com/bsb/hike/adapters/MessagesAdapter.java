@@ -250,7 +250,7 @@ public class MessagesAdapter extends BaseAdapter
 		ConvMessage msg = getCount() == 0 ? null : getItem(0);
 		if (msg == null)
 		{
-			if (show) return;
+			if (show || getCount() == 0) return;
 			convMessages.remove(0);
 		}
 		else
