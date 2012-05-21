@@ -573,6 +573,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		Conversation conv = (Conversation) adapterView.getItemAtPosition(position);
 		Intent intent = createIntentForConversation(conv);
 		startActivity(intent);
+		overridePendingTransition(R.anim.slide_in_right_noalpha, R.anim.slide_out_left_noalpha);
 	}
 
 	private void setToolTipDismissed()
