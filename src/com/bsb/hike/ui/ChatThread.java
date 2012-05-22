@@ -1063,6 +1063,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 
 			mConversation.setOnhike(HikePubSub.USER_JOINED.equals(type));
+			mAdapter.setInviteHeader(!HikePubSub.USER_JOINED.equals(type));
 			runOnUiThread(new Runnable()
 			{
 				public void run()
