@@ -380,7 +380,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 		/* tell the service to start listening for new messages */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
-
+		isAlreadyFetchingNumber = false;
 		return Boolean.TRUE;
 	}
 	
