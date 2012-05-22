@@ -25,7 +25,6 @@ import android.widget.ViewFlipper;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.HikeArrayAdapter;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
@@ -49,8 +48,9 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	private ImageView loadingText;
 	private ViewGroup loadingLayout;
 	private EditText enterEditText;
-	private ImageView tapHereText;
+	private ImageButton tapHereText;
 	private ImageButton submitBtn;
+	private ImageView invalidNum;
 
 	private ImageButton tryAgainBtn;
 	private Handler mHandler;
@@ -162,6 +162,10 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	{
 		loadingLayout.setVisibility(View.VISIBLE);
 		submitBtn.setVisibility(View.GONE);
+		if(invalidNum != null)
+		{
+			invalidNum.setVisibility(View.GONE);
+		}
 		if (tapHereText != null) {
 			tapHereText.setVisibility(View.GONE);
 		}
@@ -172,7 +176,16 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		startLoading();
 		if (!addressBookError) 
 		{
-			mTask.addUserInput(enterEditText.getText().toString());
+			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches("[0-9]{10}")) 
+			{
+				loadingLayout.setVisibility(View.GONE);
+				submitBtn.setVisibility(View.VISIBLE);
+				invalidNum.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				mTask.addUserInput(enterEditText.getText().toString());
+			}
 		} 
 		else 
 		{
@@ -198,9 +211,10 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		infoTxt = (ImageView) layout.findViewById(R.id.txt_img1);
 		loadingText = (ImageView) layout.findViewById(R.id.txt_loading);
 		loadingLayout = (ViewGroup) layout.findViewById(R.id.loading_layout);
-		tapHereText = (ImageView) layout.findViewById(R.id.wrong_num);
+		tapHereText = (ImageButton) layout.findViewById(R.id.wrong_num);
 		submitBtn = (ImageButton) layout.findViewById(R.id.btn_continue);
 		numberContainer = (LinearLayout) layout.findViewById(R.id.msisdn_container);
+		invalidNum = (ImageView) layout.findViewById(R.id.invalid_num);
 
 		loadingLayout.setVisibility(View.GONE);
 		submitBtn.setVisibility(View.VISIBLE);
@@ -209,6 +223,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	private void prepareLayoutForFetchingNumber()
 	{
 		initializeViews(numLayout);
+		invalidNum.setVisibility(View.INVISIBLE);
 	}
 
 	private void prepareLayoutForGettingPin()
