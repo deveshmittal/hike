@@ -519,6 +519,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
 			mUserIsBlocked = false;
+			mComposeView.setEnabled(true);
 		}
 		else if(v.getId() != R.id.overlay_layout)
 		{
