@@ -245,12 +245,17 @@ public class MessagesAdapter extends BaseAdapter
 		return position;
 	}
 
+	public boolean isEmpty()
+	{
+		return getCount() == 0;
+	}
+
 	public void setInviteHeader(boolean show)
 	{
 		Log.d("MessagesAdapter", "Show is " + show + "getCount " + getCount());
 		if (show)
 		{
-			if ((getCount() == 0) ||
+			if ((isEmpty()) ||
 				(getItem(0) != null))
 			{
 				/* add the null entry */
@@ -260,7 +265,7 @@ public class MessagesAdapter extends BaseAdapter
 		}
 		else /* remove the empty header */
 		{
-			if ((getCount() != 0) &&
+			if (!isEmpty() &&
 					(getItem(0) == null))
 			{
 				/* remove the null entry */
