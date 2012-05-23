@@ -39,13 +39,15 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 		try
 		{
+			HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
+			app.disconnectFromService();
+			activity.stopService(new Intent(activity, HikeService.class));
+
 			if (this.delete)
 			{
 				AccountUtils.deleteAccount();
 			}
-			HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
-			app.disconnectFromService();
-			activity.stopService(new Intent(activity, HikeService.class));
+
 			db.deleteAll();
 			convDb.deleteAll();
 			editor.clear();
