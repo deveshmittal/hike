@@ -1372,6 +1372,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				&& event.isAltPressed())
 		{
 			mComposeView.append("\n");
+			/* micromax phones appear to fire this event twice.
+			 * Doing this seems to fix the problem.
+			 */
+			KeyEvent.changeAction(event, KeyEvent.ACTION_DOWN);
 			return true;
 		}
 		return false;
