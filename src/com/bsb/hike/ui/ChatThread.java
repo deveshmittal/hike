@@ -1211,10 +1211,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int before, int count)
 	{
-		if (messages != null) 
-		{
-			mConversationsView.setSelection(messages.size()-1);
-		}
 	}
 
 	@Override
@@ -1266,8 +1262,36 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mAdapter.notifyDataSetChanged();
 		//Smooth scroll by the minimum distance in the opposite direction, to fix the bug where the list does not scroll at all.
 		mConversationsView.smoothScrollBy(-1, 1);
-		mConversationsView.smoothScrollToPosition(messages.size() - 1);
+		mConversationsView.post(smoothScroller);
 	}
+
+	private Runnable smoothScroller = new Runnable() 
+	{
+		private final int SCROLL_TIME = 500;
+		@Override
+		public void run() {
+			int itemsToScroll = messages.size() - (mConversationsView.getFirstVisiblePosition() + mConversationsView.getChildCount());
+
+			if(itemsToScroll>10)
+			{
+				mConversationsView.setSelection(messages.size() - 11);
+			}
+			int scrollTime = SCROLL_TIME/(itemsToScroll+1); 
+			int lastViewHeight = mConversationsView.getChildAt(mConversationsView.getChildCount() - 1).getHeight();
+			int extraScroll = 0;
+
+			if(itemsToScroll>2)
+			{
+				extraScroll = mConversationsView.getHeight();
+			}
+			mConversationsView.smoothScrollBy((int)lastViewHeight + extraScroll, scrollTime);
+
+			if(itemsToScroll > 0)
+			{
+				mConversationsView.post(smoothScroller);
+			}
+		}
+	};
 	
 	private void removeMessage(ConvMessage convMessage)
 	{
