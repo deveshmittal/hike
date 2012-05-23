@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -75,8 +74,8 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 			imageView.setImageDrawable(Utils.getDefaultIconForUser(context, contactInfo.getMsisdn()));
 		}
 		
-		Button button = (Button) v.findViewById(R.id.contact_button);
-		button.setSelected(blockedUsers.contains(contactInfo.getMsisdn()));
+		ImageView blockImg = (ImageView) v.findViewById(R.id.contact_button);
+		blockImg.setSelected(blockedUsers.contains(contactInfo.getMsisdn()));
 		
 		v.setTag(contactInfo);
 		v.setOnClickListener(this);

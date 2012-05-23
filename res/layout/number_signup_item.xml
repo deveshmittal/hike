@@ -45,7 +45,7 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/signup_loading_bckg"
             android:orientation="horizontal"
-            android:visibility="visible"
+            android:visibility="invisible"
 			style="@style/SignupButton"
 			android:gravity="center_horizontal" >
 
@@ -67,4 +67,10 @@
         </RelativeLayout>
     </RelativeLayout>
 
+    <ImageView android:id="@+id/invalid_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/invalid_num"
+        android:layout_marginTop="10dp"
+        android:visibility="invisible"/>
 </LinearLayout>

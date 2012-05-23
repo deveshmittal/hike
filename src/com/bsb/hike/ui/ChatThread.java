@@ -14,7 +14,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.inputmethodservice.Keyboard;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -752,8 +751,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mLabel = mConversation.getLabel();
 
-		mBottomView.setVisibility(View.VISIBLE);
-
 		mLabelView.setText(mLabel);
 
 		HikeUserDatabase db = new HikeUserDatabase(this);
@@ -770,6 +767,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
+
+		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE) 
+		{
+			Animation alphaIn = AnimationUtils.loadAnimation(
+					getApplicationContext(), R.anim.slide_up_noalpha);
+			alphaIn.setDuration(400);
+			mBottomView.setAnimation(alphaIn);
+			mBottomView.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			mBottomView.setVisibility(View.VISIBLE);
+		}
+
 		mAdapter.setInviteHeader(!mConversation.isOnhike());
 
 		if(shouldScrollToBottom)
@@ -1063,6 +1074,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 
 			mConversation.setOnhike(HikePubSub.USER_JOINED.equals(type));
+			mAdapter.setInviteHeader(!HikePubSub.USER_JOINED.equals(type));
 			runOnUiThread(new Runnable()
 			{
 				public void run()
@@ -1210,10 +1222,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int before, int count)
 	{
-		if (messages != null) 
-		{
-			mConversationsView.setSelection(messages.size()-1);
-		}
 	}
 
 	@Override
@@ -1265,8 +1273,36 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mAdapter.notifyDataSetChanged();
 		//Smooth scroll by the minimum distance in the opposite direction, to fix the bug where the list does not scroll at all.
 		mConversationsView.smoothScrollBy(-1, 1);
-		mConversationsView.smoothScrollToPosition(messages.size() - 1);
+		mConversationsView.post(smoothScroller);
 	}
+
+	private Runnable smoothScroller = new Runnable() 
+	{
+		private final int SCROLL_TIME = 500;
+		@Override
+		public void run() {
+			int itemsToScroll = messages.size() - (mConversationsView.getFirstVisiblePosition() + mConversationsView.getChildCount());
+
+			if(itemsToScroll>10)
+			{
+				mConversationsView.setSelection(messages.size() - 11);
+			}
+			int scrollTime = SCROLL_TIME/(itemsToScroll+1); 
+			int lastViewHeight = mConversationsView.getChildAt(mConversationsView.getChildCount() - 1).getHeight();
+			int extraScroll = 0;
+
+			if(itemsToScroll>2)
+			{
+				extraScroll = mConversationsView.getHeight();
+			}
+			mConversationsView.smoothScrollBy((int)lastViewHeight + extraScroll, scrollTime);
+
+			if(itemsToScroll > 0)
+			{
+				mConversationsView.post(smoothScroller);
+			}
+		}
+	};
 	
 	private void removeMessage(ConvMessage convMessage)
 	{

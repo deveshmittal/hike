@@ -54,18 +54,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		headerLayout = (ViewGroup) booBooLayout.findViewById(R.id.header_layout);
 		headerLayout.setVisibility(View.VISIBLE);
 
-		headerLayout = (ViewGroup) booBooLayout.findViewById(R.id.header_layout);
-		headerLayout.setVisibility(View.VISIBLE);
-
-		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
-		{
-			showError();
-		}
-		else if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING)))
-		{
-			onClick(mAcceptButton);
-		}
-		else if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SPLASH_SEEN, false))
+		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.SPLASH_SEEN, false))
 		{
 			hikeWelcomeView.setVisibility(View.VISIBLE);
 			tcContinueLayout.setVisibility(View.VISIBLE);
@@ -80,6 +69,14 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 				}
 
 			}, (long) 1.5 * 1000);
+		}
+		if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)))
+		{
+			showError();
+		}
+		else if ((savedState != null) && (savedState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING)))
+		{
+			onClick(mAcceptButton);
 		}
 
 		tcText.setOnClickListener(new OnClickListener() 
@@ -178,7 +175,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	private void showError() {
 		Log.d("WelcomeActivity", "showError");
 		tcContinueLayout.setVisibility(View.GONE);
-		hikeWelcomeView.setImageDrawable(null);
+		hikeWelcomeView.setVisibility(View.GONE);
 		booBooLayout.setVisibility(View.VISIBLE);
 	}
 	

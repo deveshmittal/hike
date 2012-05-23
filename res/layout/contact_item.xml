@@ -7,14 +7,14 @@
     android:background="@color/profile_item_bckg"
     android:minHeight="?android:attr/listPreferredItemHeight" >
 
-    <com.bsb.hike.view.RobotoButton
+    <ImageView
         android:id="@+id/contact_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginRight="18dp"
         android:layout_centerVertical="true"
-        android:background="@drawable/block_button"
+        android:src="@drawable/block_button"
         android:textColor="@color/white" />
 
     <ImageView

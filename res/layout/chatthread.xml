@@ -97,10 +97,12 @@
                 android:text="@string/send"
                 style="@style/Text"
                 android:textStyle="bold"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:onClick="onSendClick"
                 android:layout_width="50dp"
-                android:layout_height="34dp"
+                android:layout_height="35dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
                 android:textColor="@drawable/top_bar_btn_txt_selector" />
             
             <com.bsb.hike.view.RobotoEditText
