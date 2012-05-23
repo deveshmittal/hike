@@ -233,6 +233,7 @@ public class AccountUtils
 				data.put("msisdn", unAuthMSISDN);
 				data.put("pin", pin);
 			}
+			Log.d("AccountUtils", "Creating Account " + data.toString());
 			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");
 			httppost.setEntity(entity);
@@ -254,6 +255,8 @@ public class AccountUtils
 			// raise an exception?
 			return null;
 		}
+
+		Log.d("AccountUtils", "AccountCreation " + obj.toString());
 		if("fail".equals(obj.optString("stat")))
 		{
 			if(pin != null)
