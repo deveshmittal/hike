@@ -372,7 +372,8 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			SharedPreferences prefs = getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 			Editor editor = prefs.edit();
-			if (!TextUtils.isEmpty(mEmailEdit.getText())) {
+			if (Utils.isValidEmail(mEmailEdit.getText()))
+			{
 				editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
 						.getText().toString());
 			}
