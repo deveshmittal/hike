@@ -14,7 +14,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.inputmethodservice.Keyboard;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -752,8 +751,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mLabel = mConversation.getLabel();
 
-		mBottomView.setVisibility(View.VISIBLE);
-
 		mLabelView.setText(mLabel);
 
 		HikeUserDatabase db = new HikeUserDatabase(this);
@@ -770,6 +767,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
+
+		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE) 
+		{
+			Animation alphaIn = AnimationUtils.loadAnimation(
+					getApplicationContext(), R.anim.slide_up_noalpha);
+			alphaIn.setDuration(400);
+			mBottomView.setAnimation(alphaIn);
+			mBottomView.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			mBottomView.setVisibility(View.VISIBLE);
+		}
+
 		mAdapter.setInviteHeader(!mConversation.isOnhike());
 
 		if(shouldScrollToBottom)
