@@ -308,23 +308,6 @@ public class ContactUtils
 
 		phones.close();
 
-		/* scan the simcard */
-		Uri simUri = Uri.parse("content://icc/adn");
-		Cursor cursorSim = ctx.getContentResolver().query(simUri, null, null, null, null);
-		while (cursorSim.moveToNext())
-		{
-			String name = cursorSim.getString(cursorSim.getColumnIndex("name"));
-			String id = "SIM" + cursorSim.getString(cursorSim.getColumnIndex("_id"));
-			String number = cursorSim.getString(cursorSim.getColumnIndex("number"));
-			if (number != null)
-			{
-				if (contactsToStore.add("_" + name + "_" + number))
-					contactinfos.add(new ContactInfo(id, null, name, number));
-			}
-		}
-		cursorSim.close();
-		contactsToStore.clear();
-		contactsToStore = null; // this avoids memory leak
 		return contactinfos;
 	}
 
