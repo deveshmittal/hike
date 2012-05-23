@@ -152,7 +152,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		{
 			restartTask();
 		}
-		else if(v.getId() == tapHereText.getId())
+		else if(tapHereText != null && v.getId() == tapHereText.getId())
 		{
 			mTask.addUserInput("");
 		}
@@ -351,7 +351,10 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 				infoTxt.setImageResource(R.drawable.wrong_pin);
 				loadingLayout.setVisibility(View.GONE);
 				submitBtn.setVisibility(View.VISIBLE);
-				tapHereText.setVisibility(View.VISIBLE);
+				if (tapHereText != null) 
+				{
+					tapHereText.setVisibility(View.VISIBLE);
+				}
 				enterEditText.setText("");
 			}
 			//Manual entry for pin
