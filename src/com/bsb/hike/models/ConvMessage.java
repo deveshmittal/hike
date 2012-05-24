@@ -368,6 +368,8 @@ public class ConvMessage
 			return R.drawable.ic_read_small;
 		case SENT_CONFIRMED:
 			return R.drawable.ic_sent_small;
+		case SENT_UNCONFIRMED:
+			return R.drawable.ic_trying2;
 		default:
 			return R.drawable.ic_blank;
 		}
