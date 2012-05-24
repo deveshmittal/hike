@@ -18,7 +18,8 @@ public class DbConversationListener implements Listener
 	HikeConversationsDatabase mConversationDb;
 
 	HikeUserDatabase mUserDb;
-	
+
+	HikeMqttPersistence persistence;
 	private HikePubSub mPubSub;
 
 
@@ -27,6 +28,7 @@ public class DbConversationListener implements Listener
 		mPubSub = HikeMessengerApp.getPubSub();
 		mConversationDb = new HikeConversationsDatabase(context);
 		mUserDb = new HikeUserDatabase(context);
+		persistence = new HikeMqttPersistence(context);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, this);
@@ -75,7 +77,9 @@ public class DbConversationListener implements Listener
 		}
 		else if (HikePubSub.MESSAGE_DELETED.equals(type))
 		{
-			mConversationDb.deleteMessage((Long) object);
+			Long msgId = (Long) object;
+			mConversationDb.deleteMessage(msgId);
+			persistence.removeMessage(msgId);
 		}
 		else if (HikePubSub.MESSAGE_FAILED.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{

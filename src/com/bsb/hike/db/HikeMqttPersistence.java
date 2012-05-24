@@ -27,6 +27,8 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	public static final String MQTT_MESSAGE = "data";
 
+	public static final String MQTT_INDEX = "mqttIndex";
+
 	private SQLiteDatabase mDb;
 
 	public HikeMqttPersistence(Context context)
@@ -93,6 +95,12 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 						+ MQTT_MESSAGE +" BLOB"
 				+ " ) ";
 		db.execSQL(sql);
+		
+		sql = "CREATE INDEX IF NOT EXISTS " + MQTT_INDEX
+				+ " ON "
+				+ MQTT_DATABASE_TABLE 
+				+ "(" + MQTT_MESSAGE_ID + ")";
+		db.execSQL(sql);
 	}
 
 	@Override
@@ -121,4 +129,10 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 		}
 	}
 
+	public void removeMessage(long msgId)
+	{
+		String[] bindArgs = new String[] { Long.toString(msgId) };
+		int numRows = mDb.delete(MQTT_DATABASE_TABLE, MQTT_MESSAGE_ID + "=?", bindArgs);
+		Log.d("HikeMqttPersistence", "Removed " + numRows + " Rows from " + MQTT_DATABASE_TABLE + " with Msg ID: " + msgId);
+	}
 }
