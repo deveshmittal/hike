@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/enter_phone" />
 
-    <com.bsb.hike.view.RobotoEditText
+    <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/et_enter_num"
         style="@style/SignupButton"
         android:layout_marginTop="10dp"
@@ -26,7 +26,7 @@
         android:visibility="visible" >
 
         <requestFocus />
-    </com.bsb.hike.view.RobotoEditText>
+    </com.bsb.hike.view.CustomFontEditText>
 
     <RelativeLayout
         android:layout_width="match_parent"

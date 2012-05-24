@@ -66,7 +66,7 @@
 		        android:fadingEdge="none" >
 		    </ListView>
 
-		    <com.bsb.hike.view.RobotoTextView
+		    <com.bsb.hike.view.CustomFontTextView
 		        android:id="@+id/sms_counter"
 		        android:layout_width="fill_parent"
 		        android:layout_height="wrap_content"
@@ -86,7 +86,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/compose_box" >
 			
-            <com.bsb.hike.view.RobotoButton
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/send_message"
                 android:layout_alignParentRight="true"
                 android:layout_marginLeft="5dp"
@@ -105,7 +105,7 @@
                 android:paddingRight="5dp"
                 android:textColor="@drawable/top_bar_btn_txt_selector" />
             
-            <com.bsb.hike.view.RobotoEditText
+            <com.bsb.hike.view.CustomFontEditText
                 android:id="@+id/msg_compose"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -131,7 +131,7 @@
                 android:lineSpacingExtra="2dp" >
 
                 <requestFocus />
-            </com.bsb.hike.view.RobotoEditText>
+            </com.bsb.hike.view.CustomFontEditText>
 			
             <LinearLayout
                 android:id="@+id/info_layout"
@@ -159,7 +159,7 @@
                 android:layout_below="@id/msg_compose"
                 android:layout_marginTop="8dp" />
 
-            <com.bsb.hike.view.RobotoTextView
+            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sms_chat_metadata_num_chars"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -180,7 +180,7 @@
         android:onClick="onOverlayButtonClick"
         android:background="@color/transparent_black" >
         
-        <com.bsb.hike.view.RobotoTextView
+        <com.bsb.hike.view.CustomFontTextView
             android:bufferType="spannable"
             android:id="@+id/overlay_message"
             android:layout_width="wrap_content"
@@ -202,7 +202,7 @@
             android:layout_centerHorizontal="true"
             android:src="@drawable/ic_no" />
 
-        <com.bsb.hike.view.RobotoButton
+        <com.bsb.hike.view.CustomFontButton
             android:shadowColor="#000000"
             android:shadowDx="-0.5"
             android:shadowDy="-0.5"

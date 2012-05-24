@@ -27,7 +27,7 @@
             android:paddingTop="15dp"
             android:src="@drawable/close" />
 
-        <com.bsb.hike.view.RobotoTextView
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tool_tip"
             style="@style/Text.Shadow.White"
             android:shadowColor="#4c000000"
@@ -37,7 +37,7 @@
             android:text="@string/earn_200_sms"
             android:textSize="14sp" />
 
-        <com.bsb.hike.view.RobotoButton
+        <com.bsb.hike.view.CustomFontButton
             android:id="@+id/learn_more_btn"
             style="@style/Text.Shadow.White"
             android:layout_marginLeft="2dp"

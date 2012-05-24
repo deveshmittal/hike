@@ -7,7 +7,7 @@
     android:layout_marginTop="7dp"
     android:background="@color/profile_item_bckg" >
 
-    <com.bsb.hike.view.RobotoTextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/invited_text"
         android:layout_width="65dp"
         android:layout_height="wrap_content"
@@ -44,7 +44,7 @@
 		android:layout_toLeftOf="@id/invited_text"
 		android:orientation="vertical" >
     
-    <com.bsb.hike.view.RobotoTextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -53,7 +53,7 @@
         android:text="Vijay Raghunathan asdfasdfasd asdfasdfasdf ads adsasd"
         android:textColor="@color/lightblack"
         android:textSize="18sp" />
-    <com.bsb.hike.view.RobotoTextView 
+    <com.bsb.hike.view.CustomFontTextView 
         android:id="@+id/number"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

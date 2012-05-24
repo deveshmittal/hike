@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <com.bsb.hike.view.RobotoTextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/scanningContactList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
         android:layout_marginTop="10dp"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <com.bsb.hike.view.RobotoTextView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/looking_for_friends"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

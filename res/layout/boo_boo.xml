@@ -59,7 +59,7 @@
             android:src="@drawable/error_txt" />
 
         <!--
-             <com.bsb.hike.view.RobotoTextView
+             <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/welcome_1"
             style="@style/Text.Shadow.White.Bold"
             android:layout_below="@+id/ic_hike_logo"

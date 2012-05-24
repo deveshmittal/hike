@@ -19,7 +19,7 @@
             android:layout_marginLeft="17dp"
             android:src="@drawable/ic_avatar0" />
 
-        <com.bsb.hike.view.RobotoTextView
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/contact"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,7 +34,7 @@
             android:textColor="@color/lightblack"
             android:layout_alignTop="@id/avatar" />
 
-        <com.bsb.hike.view.RobotoTextView
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/last_message_timestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
                 android:layout_gravity="center_vertical"
                 android:visibility="visible" />
 
-            <com.bsb.hike.view.RobotoTextView
+            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/last_message"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
