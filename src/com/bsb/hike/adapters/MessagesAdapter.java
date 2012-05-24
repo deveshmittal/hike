@@ -4,10 +4,12 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.sax.StartElementListener;
 import android.text.Spannable;
 import android.text.Spanned;
+import android.text.format.Time;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
@@ -15,6 +17,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,6 +26,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -201,6 +206,15 @@ public class MessagesAdapter extends BaseAdapter
 		if (resId > 0)
 		{
 			holder.image.setImageResource(resId);
+			if (convMessage.getState() == State.SENT_UNCONFIRMED) 
+			{
+				showTryingAgainIcon(holder.image, convMessage.getTimestamp());
+			}
+			else
+			{
+				holder.image.setAnimation(null);
+				holder.image.setVisibility(View.VISIBLE);
+			}
 		}
 		else if (convMessage.isSent())
 		{
@@ -212,6 +226,35 @@ public class MessagesAdapter extends BaseAdapter
 		}
 
 		return v;
+	}
+
+	private void showTryingAgainIcon(ImageView iv, long ts)
+	{
+		/* 
+		 * We are checking this so that we can delay the try again icon from being shown immediately if the user 
+		 * just sent the msg. If it has been over 5 secs then the user will immediately see the icon though. 
+		 */
+		if ((((long)System.currentTimeMillis()/1000) - ts) < 5) 
+		{
+			iv.setVisibility(View.INVISIBLE);
+
+			Animation anim = AnimationUtils.loadAnimation(context,
+					android.R.anim.fade_in);
+			anim.setStartOffset(3000);
+			anim.setDuration(1);
+
+			iv.setAnimation(anim);
+			iv.setVisibility(View.VISIBLE);
+		}
+		AnimationDrawable ad = new AnimationDrawable();
+		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_trying0), 600);
+		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_trying1), 600);
+		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_trying2), 600);
+		ad.setOneShot(false);
+		ad.setVisible(true, true);
+
+		iv.setImageDrawable(ad);
+		ad.start();
 	}
 
 	private boolean shouldDisplayTimestamp(int position)

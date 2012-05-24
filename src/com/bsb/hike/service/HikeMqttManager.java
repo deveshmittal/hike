@@ -142,21 +142,13 @@ public class HikeMqttManager implements Listener
 			handler.removeCallbacks(this);
 			Log.d("HikeMqttManager", "unable to send packet");
 			ping();
-			if (packet.getMsgId() > 0)
+			try
 			{
-				/* Signal the app that a failure occured */
-				mHikeService.sendMessageStatus(packet.getMsgId(), false);
+				persistence.addSentMessage(packet);
 			}
-			else
+			catch (MqttPersistenceException e)
 			{
-				try
-				{
-					persistence.addSentMessage(packet);
-				}
-				catch (MqttPersistenceException e)
-				{
-					Log.e("HikeMqttManager", "Unable to persist message" + packet.toString(), e);
-				}
+				Log.e("HikeMqttManager", "Unable to persist message" + packet.toString(), e);
 			}
 		}
 	}
@@ -598,21 +590,13 @@ public class HikeMqttManager implements Listener
 			/* only care about failures for messages we care about. */
 			if (qos > 0)
 			{
-				/* if it's an actual message fail it */
-				if (packet.getMsgId() > 0)
+				try
 				{
-					mHikeService.sendMessageStatus(packet.getMsgId(), false);
+					persistence.addSentMessage(packet);
 				}
-				else
+				catch (MqttPersistenceException e)
 				{
-					try
-					{
-						persistence.addSentMessage(packet);
-					}
-					catch (MqttPersistenceException e)
-					{
-						Log.e("HikeMqttManager", "Unable to persist message");
-					}
+					Log.e("HikeMqttManager", "Unable to persist message");
 				}
 			}
 
