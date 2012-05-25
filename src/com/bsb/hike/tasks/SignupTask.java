@@ -87,7 +87,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 	private static SignupTask signupTask;
 	private OnSignupTaskProgressUpdate onSignupTaskProgressUpdate;
 	private boolean isRunning = false;
-	public String msisdn;
 	private boolean isPinError = false;
 	public static boolean isAlreadyFetchingNumber = false;
 	
@@ -257,7 +256,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 
 			Log.d("SignupTask", "saving MSISDN/Token");
 			msisdn = accountInfo.msisdn;
-			this.msisdn = msisdn;
 			/* save the new msisdn */
 			Utils.savedAccountCredentials(accountInfo, settings.edit());
 			/* msisdn set, yay */
@@ -265,7 +263,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 		}
 		else
 		{
-			this.msisdn = msisdn;
 			publishProgress(new StateValue(State.MSISDN, HikeConstants.DONE));
 		}
 		this.data = null;
