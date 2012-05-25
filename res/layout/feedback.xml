@@ -32,7 +32,7 @@
                 android:layout_marginRight="10dp"
                 android:src="@drawable/ic_name_2" />
 
-            <com.bsb.hike.view.RobotoTextView
+            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/user_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
                 android:layout_marginTop="7dp"
                 android:src="@drawable/ic_msg" />
 
-            <com.bsb.hike.view.RobotoEditText
+            <com.bsb.hike.view.CustomFontEditText
                 android:id="@+id/feedback"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -75,7 +75,7 @@
            		android:textColor="@color/lightblack" >
 
                 <requestFocus />
-            </com.bsb.hike.view.RobotoEditText>
+            </com.bsb.hike.view.CustomFontEditText>
         </LinearLayout>
     </LinearLayout>
     
@@ -95,7 +95,7 @@
         android:orientation="vertical"
         android:layout_weight="1" >
 
-        <com.bsb.hike.view.RobotoTextView
+        <com.bsb.hike.view.CustomFontTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/how_hike_feel"

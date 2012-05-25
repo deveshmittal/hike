@@ -28,6 +28,8 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
+import android.text.Editable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -399,5 +401,11 @@ public class Utils
 		Log.d("Fomat MSISD", "Fomatted number is:" + sb.toString());
 		
 		return sb.toString();
+	}
+
+	public static boolean isValidEmail(Editable text)
+	{
+		return (!TextUtils.isEmpty(text) &&
+				android.util.Patterns.EMAIL_ADDRESS.matcher(text).matches());
 	}
 }

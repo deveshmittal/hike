@@ -57,6 +57,7 @@
 	</style>
 
 	<style name="NoTitleBar" parent="@android:style/Theme.NoTitleBar">
+		<item name="android:windowAnimationStyle">@style/Animation.ActivityTransitions</item>
 	    <item name="android:windowNoTitle">true</item>
     </style>
 
@@ -67,7 +68,7 @@
 	<style name="T_C_Message">
 		<item name="android:paddingBottom">75dp</item>        
     </style>
-    
+
 	<style name="SignupButton">
 	    <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>

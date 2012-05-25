@@ -28,7 +28,7 @@
             android:layout_marginLeft="14dp"
             android:src="@drawable/ic_credits" />
 
-        <com.bsb.hike.view.RobotoTextView
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/profile_item_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
             android:textColor="@color/lightblack"
             android:textSize="16sp" />
 
-        <com.bsb.hike.view.RobotoTextView
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/profile_item_extra"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -22,7 +22,7 @@
 		    android:layout_gravity="center"
 		    android:background="@drawable/ic_chatthread_divider"/>
 		    
-	    <com.bsb.hike.view.RobotoTextView
+	    <com.bsb.hike.view.CustomFontTextView
 	        android:id="@+id/timestamp"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_blank" />
 
-	<com.bsb.hike.view.RobotoTextView
+	<com.bsb.hike.view.CustomFontTextView
         android:id="@+id/message_sms"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
         android:textSize="16sp"
         android:textColor="@color/chat_color" />
 
-	<com.bsb.hike.view.RobotoTextView
+	<com.bsb.hike.view.CustomFontTextView
         android:id="@+id/message_hike"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

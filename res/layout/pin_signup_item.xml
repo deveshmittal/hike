@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/enter_pin" />
 
-    <com.bsb.hike.view.RobotoEditText
+    <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/et_enter_pin"
         style="@style/SignupButton"
         android:layout_marginTop="10dp"

@@ -25,7 +25,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical" >
 
-            <com.bsb.hike.view.RobotoTextView
+            <com.bsb.hike.view.CustomFontTextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="5dp"
@@ -56,7 +56,7 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal" >
 
-                        <com.bsb.hike.view.RobotoTextView
+                        <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/name_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
                             android:textColor="@color/lightblack"
                             android:textSize="16sp" />
 
-                        <com.bsb.hike.view.RobotoEditText
+                        <com.bsb.hike.view.CustomFontEditText
                             android:id="@+id/name_input"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -100,7 +100,7 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal" >
 
-                        <com.bsb.hike.view.RobotoTextView
+                        <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/phone_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
                             android:textColor="@color/lightblack"
                             android:textSize="16sp" />
 
-                        <com.bsb.hike.view.RobotoEditText
+                        <com.bsb.hike.view.CustomFontEditText
                             android:id="@+id/phone_input"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -144,7 +144,7 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal" >
 
-                        <com.bsb.hike.view.RobotoTextView
+                        <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/email_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -156,7 +156,7 @@
                             android:textColor="@color/lightblack"
                             android:textSize="16sp" />
 
-                        <com.bsb.hike.view.RobotoEditText
+                        <com.bsb.hike.view.CustomFontEditText
                             android:id="@+id/email_input"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -188,7 +188,7 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal" >
 
-                        <com.bsb.hike.view.RobotoTextView
+                        <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/gender_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -256,7 +256,7 @@
                         android:gravity="center_vertical"
                         android:orientation="horizontal" >
 
-                        <com.bsb.hike.view.RobotoTextView
+                        <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/photo_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -327,7 +327,7 @@
                         android:layout_toRightOf="@id/avatar_border"
                         android:orientation="vertical" >
 
-                        <com.bsb.hike.view.RobotoTextView
+                        <com.bsb.hike.view.CustomFontTextView
                             android:id="@+id/name_current"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -357,7 +357,7 @@
                     android:layout_marginBottom="10dp" />
             </LinearLayout>
 
-            <com.bsb.hike.view.RobotoTextView
+            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/settings_txt"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -399,7 +399,7 @@
                 android:layout_marginTop="37dp"
                 android:layout_marginBottom="37dp" >
 
-                <com.bsb.hike.view.RobotoTextView
+                <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/made_with_love"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
