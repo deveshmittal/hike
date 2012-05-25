@@ -50,12 +50,6 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical" >
 
-                    <View
-                        android:id="@+id/divider"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@drawable/ic_thread_divider_profile" />
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
