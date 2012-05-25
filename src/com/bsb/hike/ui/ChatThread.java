@@ -762,6 +762,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		db.close();
 
+		changeInviteButtonVisibility();
 		/* make a copy of the message list since it's used internally by the adapter */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
@@ -780,8 +781,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mBottomView.setVisibility(View.VISIBLE);
 		}
-
-		mAdapter.setInviteHeader(!mConversation.isOnhike());
 
 		if(shouldScrollToBottom)
 		{
@@ -822,14 +821,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn_selector);
 			mComposeView.setHint("Free Message...");
-			mAdapter.setInviteHeader(false);
 		}
 		else
 		{
 			updateChatMetadata();
 			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn_selector);
 			mComposeView.setHint("SMS Message...");
-			mAdapter.setInviteHeader(true);
 		}
 	}
 
@@ -1074,11 +1071,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 
 			mConversation.setOnhike(HikePubSub.USER_JOINED.equals(type));
-			mAdapter.setInviteHeader(!HikePubSub.USER_JOINED.equals(type));
 			runOnUiThread(new Runnable()
 			{
 				public void run()
 				{
+					changeInviteButtonVisibility();
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
 				}
@@ -1373,9 +1370,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	public void onTitleIconClick(View v)
 	{
-		if (v.getId() == R.id.info_layout) {
-			showOverlay(false);
-		}
+		inviteUser();
 	}
 
 	@Override
@@ -1393,5 +1388,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return true;
 		}
 		return false;
+	}
+
+	private void changeInviteButtonVisibility()
+	{
+		ImageView titleIconView = (ImageView) findViewById(R.id.title_image_btn);
+		View btnBar = findViewById(R.id.button_bar);
+		titleIconView.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
+		titleIconView.setImageResource(R.drawable.ic_invite_top);
+		btnBar.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 	}
 }

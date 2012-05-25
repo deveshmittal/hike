@@ -293,27 +293,4 @@ public class MessagesAdapter extends BaseAdapter
 		return getCount() == 0;
 	}
 
-	public void setInviteHeader(boolean show)
-	{
-		Log.d("MessagesAdapter", "Show is " + show + "getCount " + getCount());
-		if (show)
-		{
-			if ((isEmpty()) ||
-				(getItem(0) != null))
-			{
-				/* add the null entry */
-				convMessages.add(0, null);				
-			}
-			/* the empty header is already present */
-		}
-		else /* remove the empty header */
-		{
-			if (!isEmpty() &&
-					(getItem(0) == null))
-			{
-				/* remove the null entry */
-				convMessages.remove(0);				
-			}
-		}
-	}
 }
