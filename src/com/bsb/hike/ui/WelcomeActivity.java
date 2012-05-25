@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -34,6 +35,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	private View hiLogoView;
 	private ImageView hikeWelcomeView;
 	private ViewGroup headerLayout;
+	private ImageView errorImage;
 
 	@Override
 	public void onCreate(Bundle savedState)
@@ -50,6 +52,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
 		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
+		errorImage = (ImageView) findViewById(R.id.error_img);
 
 		headerLayout = (ViewGroup) booBooLayout.findViewById(R.id.header_layout);
 		headerLayout.setVisibility(View.VISIBLE);
@@ -88,6 +91,15 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 			}
 		});
 
+		AnimationDrawable ad = new AnimationDrawable();
+		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large0), 600);
+		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large1), 600);
+		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large2), 600);
+		ad.setOneShot(false);
+		ad.setVisible(true, true);
+
+		errorImage.setImageDrawable(ad);
+		ad.start();
 	}
 
 	private void startAnimations()
