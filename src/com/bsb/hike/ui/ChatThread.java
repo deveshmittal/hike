@@ -1002,7 +1002,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						}
 					}
 
-					if(mCredits%10 == 0 || !animatedOnce)
+					if((mCredits % 5 == 0 || !animatedOnce)  && !mConversation.isOnhike())
 					{
 						animatedOnce = true;
 						showSMSCounter();
