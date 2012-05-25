@@ -263,6 +263,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		{
 			isBackPressed = true;
 			saveChanges();
+			overridePendingTransition(R.anim.slide_in_left_noalpha, R.anim.slide_out_right_noalpha);
 		}
 		else
 		{
@@ -519,6 +520,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			{
 				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));
 				startActivityForResult(intent, CAMERA_RESULT);
+				overridePendingTransition(R.anim.slide_in_right_noalpha, R.anim.slide_out_left_noalpha);
 			}
 			else
 			{
@@ -529,6 +531,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			intent = new Intent(Intent.ACTION_PICK);
 			intent.setType("image/*");
 			startActivityForResult(intent, GALLERY_RESULT);
+			overridePendingTransition(R.anim.slide_in_right_noalpha, R.anim.slide_out_left_noalpha);
 			break;
 		}
 	}
