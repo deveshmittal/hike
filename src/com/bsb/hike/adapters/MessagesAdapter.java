@@ -247,9 +247,9 @@ public class MessagesAdapter extends BaseAdapter
 			iv.setVisibility(View.VISIBLE);
 		}
 		AnimationDrawable ad = new AnimationDrawable();
-		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_trying0), 600);
-		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_trying1), 600);
-		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_trying2), 600);
+		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_tower0), 600);
+		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_tower1), 600);
+		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_tower2), 600);
 		ad.setOneShot(false);
 		ad.setVisible(true, true);
 
