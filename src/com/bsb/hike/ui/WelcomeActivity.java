@@ -161,7 +161,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 		else if(v.getId() == tryAgainBtn.getId())
 		{
 			tcContinueLayout.setVisibility(View.VISIBLE);
-			hikeWelcomeView.setVisibility(View.VISIBLE);
+			hikeWelcomeView.setImageResource(R.drawable.hike_welcome_image);
 			booBooLayout.setVisibility(View.GONE);
 			onClick(mAcceptButton);
 		}
@@ -175,7 +175,7 @@ public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask
 	private void showError() {
 		Log.d("WelcomeActivity", "showError");
 		tcContinueLayout.setVisibility(View.GONE);
-		hikeWelcomeView.setVisibility(View.GONE);
+		hikeWelcomeView.setImageDrawable(null);
 		booBooLayout.setVisibility(View.VISIBLE);
 	}
 	
