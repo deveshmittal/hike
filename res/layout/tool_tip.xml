@@ -26,7 +26,13 @@
             android:paddingRight="11dp"
             android:paddingTop="15dp"
             android:src="@drawable/close" />
-
+		
+        <View 
+            android:id="@+id/padding_view"
+            android:layout_width="11dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+        	
         <com.bsb.hike.view.RobotoTextView
             android:id="@+id/tool_tip"
             style="@style/Text.Shadow.White"

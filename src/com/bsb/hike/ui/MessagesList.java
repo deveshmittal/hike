@@ -33,6 +33,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -186,7 +187,11 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mConversationsView.setOnItemClickListener(this);
 
 		mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
-		TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
+		ImageButton close = (ImageButton) mInviteToolTip.findViewById(R.id.close);
+		TextView text = (TextView) mInviteToolTip.findViewById(R.id.tool_tip);
+
+		mInviteToolTip.findViewById(R.id.padding_view).setVisibility(View.VISIBLE);
+		close.setVisibility(View.GONE);
 		text.setText(getString(R.string.invite_tooltip));
 
 		/* set this to invisible, not gone, to add some padding */
@@ -197,7 +202,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		btnBar = findViewById(R.id.button_bar);
 
 		titleIconView.setVisibility(View.VISIBLE);
-		titleIconView.setImageResource(R.drawable.credits_btn);
+		titleIconView.setImageResource(R.drawable.ic_invite_top);
 		btnBar.setVisibility(View.VISIBLE);
 		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false))
 		{
@@ -576,26 +581,8 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		overridePendingTransition(R.anim.slide_in_right_noalpha, R.anim.slide_out_left_noalpha);
 	}
 
-	private void setToolTipDismissed()
-	{
-		if (!hasAnimated) {
-			Animation alphaOut = AnimationUtils.loadAnimation(
-					MessagesList.this, android.R.anim.fade_out);
-			alphaOut.setDuration(200);
-			mInviteToolTip.setAnimation(alphaOut);
-			mInviteToolTip.setVisibility(View.INVISIBLE);
-			hasAnimated  = true;
-		}
-
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, true);
-		editor.commit();
-	}
-
 	public void onToolTipClosed(View v)
-	{
-		setToolTipDismissed();
-	}
+	{}
 
 	public void onInviteClick(View v)
 	{
@@ -608,8 +595,5 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	}
 
 	public void onToolTipClicked(View v)
-	{
-		setToolTipDismissed();
-		startActivity(new Intent(MessagesList.this, CreditsActivity.class));
-	}
+	{}
 }
