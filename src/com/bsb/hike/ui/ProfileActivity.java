@@ -84,12 +84,12 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	private boolean isBackPressed = false;
 	private EditText mEmailEdit;
 	private String emailTxt;
-	private int genderType;
 	private class ActivityState
 	{
 		public HikeHTTPTask task; /* the task to update the global profile */
 
 		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
+		public int genderType;
 	}
 
 	/* super hacky, but the Activity can get destroyed between startActivityForResult and the onResult
@@ -199,7 +199,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		mNameEdit.setSelection(nameTxt.length());
 		mEmailEdit.setSelection(emailTxt.length());
 
-		onEmoticonClick(genderType == 0 ? null : genderType == 1 ? gender.findViewById(R.id.guy) : gender.findViewById(R.id.girl));
+		onEmoticonClick(mActivityState.genderType == 0 ? null : mActivityState.genderType == 1 ? gender.findViewById(R.id.guy) : gender.findViewById(R.id.girl));
 	}
 	
 	private void setupProfileScreen()
@@ -254,7 +254,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		nameTxt = settings.getString(HikeMessengerApp.NAME, "Set a name!");
 		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		emailTxt = settings.getString(HikeConstants.Extras.EMAIL, "");
-		genderType = settings.getInt(HikeConstants.Extras.GENDER, 0);
+		mActivityState.genderType = mActivityState.genderType == 0 ? settings.getInt(HikeConstants.Extras.GENDER, 0) : mActivityState.genderType;
 	}
 
 	public void onBackPressed()
@@ -545,6 +545,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			}
 			v.setSelected(currentSelection != v);
 			currentSelection = v == currentSelection ? null : v;
+			mActivityState.genderType = currentSelection.getId() == R.id.guy ? 1 : 2;
 		}
 	}
 }
