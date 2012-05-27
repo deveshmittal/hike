@@ -156,6 +156,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean isToolTipShowing = false;
 
+	private boolean isOverlayShowing = false;
+
 	@Override
 	protected void onPause()
 	{
@@ -351,6 +353,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		setContentView(R.layout.chatthread);
 
 		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
+		isOverlayShowing  = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
 
 		config = getResources().getConfiguration();
 		
@@ -539,7 +542,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void hideOverlay()
 	{
-		mOverlayLayout.setVisibility(View.GONE);
+		if (mOverlayLayout.getVisibility() == View.VISIBLE) 
+		{
+			Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
+			mOverlayLayout.setAnimation(fadeOut);
+			mOverlayLayout.setVisibility(View.INVISIBLE);
+			isOverlayShowing = false;
+		}
 	}
 
 	@Override
@@ -1329,6 +1338,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(),
 				InputMethodManager.HIDE_NOT_ALWAYS);
 
+		if(mOverlayLayout.getVisibility() != View.VISIBLE && !isOverlayShowing)
+		{
+			Animation fadeIn = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
+			mOverlayLayout.setAnimation(fadeIn);
+		}
 		mOverlayLayout.setVisibility(View.VISIBLE);
 		// To prevent the views in the background from being clickable
 		mOverlayLayout.setOnClickListener(new OnClickListener() 
@@ -1457,6 +1471,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	protected void onSaveInstanceState(Bundle outState) {
 		//For preventing the tool tip from animating again if its already showing
 		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, toolTipLayout != null && toolTipLayout.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.OVERLAY_SHOWING, mOverlayLayout.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
 	}
 }
