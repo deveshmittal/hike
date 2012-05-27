@@ -32,8 +32,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -187,17 +185,9 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mConversationsView.setOnItemClickListener(this);
 
 		mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
-		ImageButton close = (ImageButton) mInviteToolTip.findViewById(R.id.close);
-		TextView text = (TextView) mInviteToolTip.findViewById(R.id.tool_tip);
-
-		mInviteToolTip.findViewById(R.id.padding_view).setVisibility(View.VISIBLE);
-		close.setVisibility(View.GONE);
+		TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
 		text.setText(getString(R.string.invite_tooltip));
 
-		/* set this to invisible, not gone, to add some padding */
-		Button b = (Button) mEmptyView.findViewById(R.id.learn_more_btn);
-		b.setText("");
-		b.setVisibility(View.INVISIBLE);
 		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
 		btnBar = findViewById(R.id.button_bar);
 
