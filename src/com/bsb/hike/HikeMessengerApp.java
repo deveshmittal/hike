@@ -60,6 +60,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String EMAIL = "email";
 
+	public static final String CHAT_TOOLTIP_DISMISSED = "dismissChatToolTip";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;

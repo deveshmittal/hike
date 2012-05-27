@@ -33,6 +33,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -150,6 +151,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private TextView smsCount;
 
 	private boolean animatedOnce = false;
+
+	private ViewGroup toolTipLayout;
+
+	private boolean isToolTipShowing = false;
 
 	@Override
 	protected void onPause()
@@ -344,6 +349,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		app.connectToService();
 
 		setContentView(R.layout.chatthread);
+
+		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 
 		config = getResources().getConfiguration();
 		
@@ -1371,6 +1378,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onTitleIconClick(View v)
 	{
 		inviteUser();
+		if(toolTipLayout != null && toolTipLayout.getVisibility() == View.VISIBLE)
+		{
+			dismissToolTip();
+		}
 	}
 
 	@Override
@@ -1397,5 +1408,55 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		titleIconView.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 		titleIconView.setImageResource(R.drawable.ic_invite_top);
 		btnBar.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
+
+		prefs = prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs;
+
+ 		if(!mConversation.isOnhike() && !prefs.getBoolean(HikeMessengerApp.CHAT_TOOLTIP_DISMISSED, false))
+		{
+			showInviteToolTip();
+		}
+	}
+	
+	private void showInviteToolTip()
+	{
+		toolTipLayout = (ViewGroup) findViewById(R.id.credits_help_layout);
+		if (toolTipLayout.getVisibility() != View.VISIBLE && !isToolTipShowing) 
+		{
+			Animation fadeIn = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
+			fadeIn.setStartOffset(1000);
+			toolTipLayout.setAnimation(fadeIn);
+		}
+		toolTipLayout.setVisibility(View.VISIBLE);
+		TextView toolTipTxt = (TextView) toolTipLayout.findViewById(R.id.tool_tip);
+		String formatString = String.format(getString(R.string.press_btn_invite), mConversation.getContactName());
+		toolTipTxt.setText(formatString); 
+	}
+	
+	public void onToolTipClosed(View v)
+	{
+		dismissToolTip();
+	}
+
+	public void onToolTipClicked(View v)
+	{}
+	
+	private void dismissToolTip()
+	{
+		Editor editor = prefs.edit();
+		editor.putBoolean(HikeMessengerApp.CHAT_TOOLTIP_DISMISSED, true);
+		editor.commit();
+		if (toolTipLayout.getVisibility() == View.VISIBLE) 
+		{
+			Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
+			toolTipLayout.setAnimation(fadeOut);
+			toolTipLayout.setVisibility(View.INVISIBLE);
+		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		//For preventing the tool tip from animating again if its already showing
+		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, toolTipLayout != null && toolTipLayout.getVisibility() == View.VISIBLE);
+		super.onSaveInstanceState(outState);
 	}
 }
