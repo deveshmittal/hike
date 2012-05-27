@@ -206,23 +206,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mLabelView.setText("New Message");
 		
 		/* if we've got some pre-filled text, add it here */
-		if (TextUtils.isEmpty(msg)) {
-			mBottomView.setVisibility(View.GONE);
-		} else {
+		if (!TextUtils.isEmpty(msg)) {
 			mComposeView.setText(msg);
 			/* make sure that the autoselect text is empty */
 			mInputNumberView.setText("");
 			/* disable the send button */
 			mSendBtn.setEnabled(false);
 		}
-
-		/* if we've got some pre-filled text, add it here */
-		if (TextUtils.isEmpty(msg)) {
-			mBottomView.setVisibility(View.GONE);
-		} else {
-			mComposeView.setText(msg);
-			mBottomView.setVisibility(View.GONE);
-		}
+		mBottomView.setVisibility(View.GONE);
 
 		mDbhelper = new HikeUserDatabase(this);
 		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
