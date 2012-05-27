@@ -14,6 +14,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
@@ -139,12 +141,16 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			Log.d("SignupTask", "Task was cancelled");
 			return Boolean.FALSE;
 		}
-		
+
 		if (msisdn == null)
 		{
-			/* need to get the MSISDN */
+
+			/* need to get the MSISDN.  If we're on Wifi don't bother trying to autodetect */
+			ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Activity.CONNECTIVITY_SERVICE);
+			NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
 			AccountUtils.AccountInfo accountInfo = null;
-			if (!SignupTask.isAlreadyFetchingNumber) 
+			if (!SignupTask.isAlreadyFetchingNumber && !wifi.isConnected()) 
 			{
 				accountInfo = AccountUtils.registerAccount(null, null);
 				if (accountInfo == null) 

@@ -136,7 +136,7 @@ public class ContactUtils
 		HikeUserDatabase db = new HikeUserDatabase(ctx);
 
 		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(getContacts(ctx));
-		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts());
+		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts(false));
 
 		/*
 		 * iterate over every item in the phone db, items that are equal remove from both maps items that are different, leave in 'new' map and remove from 'hike' map send the
@@ -165,7 +165,6 @@ public class ContactUtils
 				hike_contacts_by_id.remove(id);
 				continue;
 			}
-
 			/* item is different than our db, so send an update */
 			hike_contacts_by_id.remove(id);
 		}
