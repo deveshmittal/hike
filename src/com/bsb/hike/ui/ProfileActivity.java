@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -24,8 +25,10 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -200,6 +203,24 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		mEmailEdit.setSelection(emailTxt.length());
 
 		onEmoticonClick(mActivityState.genderType == 0 ? null : mActivityState.genderType == 1 ? gender.findViewById(R.id.guy) : gender.findViewById(R.id.girl));
+
+		//This hack is to prevent the cursor from being shown initially on the text box in touch screen devices. On touching the text box the cursor becomes visible 
+		if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS 
+				|| getResources().getConfiguration().hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
+			mNameEdit.setCursorVisible(false);
+			mNameEdit.setOnTouchListener(new OnTouchListener() 
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event) 
+				{
+					if(event.getAction() == MotionEvent.ACTION_DOWN)
+					{
+						mNameEdit.setCursorVisible(true);
+					}
+					return false;
+				}
+			});
+		}
 	}
 	
 	private void setupProfileScreen()
