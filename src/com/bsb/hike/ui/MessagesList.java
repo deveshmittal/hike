@@ -77,8 +77,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private View btnBar;
 
-	private boolean hasAnimated = false;
-
 	@Override
 	protected void onPause()
 	{
@@ -92,10 +90,6 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	{
 		super.onResume();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
-		if(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.CREDITS_SCREEN_SHOWN, false))
-		{
-			mInviteToolTip.setVisibility(View.GONE);
-		}
 	}
 	
 	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
@@ -258,10 +252,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		if(mInviteToolTip.getVisibility() == View.VISIBLE)
-		{
-			outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, true);
-		}
+		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mInviteToolTip.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -344,7 +335,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		switch (item.getItemId())
 		{
 		case R.id.invite:
-			invite();
+			onTitleIconClick(null);
 			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {
@@ -571,19 +562,34 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		overridePendingTransition(R.anim.slide_in_right_noalpha, R.anim.slide_out_left_noalpha);
 	}
 
-	public void onToolTipClosed(View v)
-	{}
-
-	public void onInviteClick(View v)
+	private void setToolTipDismissed()
 	{
-		invite();
+		if (mInviteToolTip.getVisibility() == View.VISIBLE) {
+			Animation alphaOut = AnimationUtils.loadAnimation(
+					MessagesList.this, android.R.anim.fade_out);
+			alphaOut.setDuration(200);
+			mInviteToolTip.setAnimation(alphaOut);
+			mInviteToolTip.setVisibility(View.INVISIBLE);
+		}
+
+		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, true);
+		editor.commit();
+	}
+
+	public void onToolTipClosed(View v)
+	{
+		setToolTipDismissed();
 	}
 
 	public void onTitleIconClick(View v)
 	{
+		setToolTipDismissed();
 		invite();
 	}
 
 	public void onToolTipClicked(View v)
-	{}
+	{
+		onTitleIconClick(null);
+	}
 }

@@ -37,7 +37,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	private ViewGroup mInviteToolTip;
 	private SharedPreferences sharedPreferences;
 	private ImageButton creditsHelpBtn;
-	private boolean hasAnimated = false;
 
 	HikeArrayAdapter createListAdapter() throws Exception
 	{
@@ -97,8 +96,7 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		creditsHelpBtn.setVisibility(View.VISIBLE);
 		creditsHelpBtn.setImageResource(R.drawable.credits_btn_selector);
 
-		if (!sharedPreferences.getBoolean(HikeMessengerApp.CREDITS_SCREEN_SHOWN, false)) {
-			if (!sharedPreferences.getBoolean(
+		if (!sharedPreferences.getBoolean(
 					HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, false)) {
 				filterText.setEnabled(false);
 				mInviteToolTip = (ViewGroup) findViewById(R.id.credits_help_layout);
@@ -113,7 +111,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 				mInviteToolTip.setVisibility(View.VISIBLE);
 				return;
 			}
-		}
 	}
 
 	@Override
@@ -136,14 +133,13 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	private void setToolTipDismissed()
 	{
 		filterText.setEnabled(true);
-		if (mInviteToolTip != null && !hasAnimated) 
+		if (mInviteToolTip != null && mInviteToolTip.getVisibility() == View.VISIBLE) 
 		{
 			Animation alphaOut = AnimationUtils.loadAnimation(
 					HikeListActivity.this, android.R.anim.fade_out);
 			alphaOut.setDuration(200);
 			mInviteToolTip.setAnimation(alphaOut);
 			mInviteToolTip.setVisibility(View.INVISIBLE);
-			hasAnimated = true;
 		}
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
