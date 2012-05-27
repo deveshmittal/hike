@@ -212,6 +212,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mInputNumberView.setText("");
 			/* disable the send button */
 			mSendBtn.setEnabled(false);
+			//Doing a toggle instead of a show since the show method was not working here
+			InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+			imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 		}
 		mBottomView.setVisibility(View.GONE);
 
