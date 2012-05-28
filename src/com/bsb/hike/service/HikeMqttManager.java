@@ -608,7 +608,7 @@ public class HikeMqttManager implements Listener
 		PublishCB pbCB = new PublishCB(packet);
 
 		mqttConnection.publish(new UTF8Buffer(this.topic + HikeConstants.PUBLISH_TOPIC),
-				new Buffer(packet.getMessage()), QoS.AT_LEAST_ONCE,
+				new Buffer(packet.getMessage()), qos == 0 ? QoS.AT_MOST_ONCE : QoS.AT_LEAST_ONCE,
 				false, pbCB);
 	}
 
