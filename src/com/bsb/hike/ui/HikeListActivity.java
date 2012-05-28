@@ -94,7 +94,7 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		View buttonBar = (View) findViewById(R.id.button_bar);
 		buttonBar.setVisibility(View.VISIBLE);
 		creditsHelpBtn.setVisibility(View.VISIBLE);
-		creditsHelpBtn.setImageResource(R.drawable.credits_btn_selector);
+		creditsHelpBtn.setImageResource(R.drawable.credits_btn);
 
 		if (!sharedPreferences.getBoolean(
 					HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, false)) {
