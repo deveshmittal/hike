@@ -90,5 +90,6 @@ public class HikeConstants
 		public static final String EDIT_PROFILE = "editProfile";
 		public static final String EMAIL = "email";
 		public static final String GENDER = "gender";
+		public static final String OVERLAY_SHOWING = "overlayShowing";
 	}
 }

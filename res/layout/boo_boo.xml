@@ -13,17 +13,17 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:visibility="gone" >
+        android:visibility="visible" >
 
         <ImageView
-            android:id="@+id/hike_logo"
+            android:id="@+id/hike_logo_error"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:src="@drawable/hike_logo" />
 
         <View
-            android:id="@+id/header_dropshadow"
+            android:id="@+id/header_dropshadow_error"
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_marginLeft="20dp"
@@ -38,10 +38,10 @@
         android:gravity="bottom" >
 
         <ImageView
-            android:id="@+id/ic_hike_logo"
+            android:id="@+id/error_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/boo_boo" />
+            android:src="@drawable/ic_tower_large2" />
     </LinearLayout>
 
     <LinearLayout
@@ -54,6 +54,7 @@
 
         <ImageView
             android:id="@+id/welcome_1"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/error_txt" />

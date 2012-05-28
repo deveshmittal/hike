@@ -66,6 +66,8 @@
 		        android:fadingEdge="none" >
 		    </ListView>
 
+		    <include layout="@layout/tool_tip"/>
+		    
 		    <com.bsb.hike.view.CustomFontTextView
 		        android:id="@+id/sms_counter"
 		        android:layout_width="fill_parent"

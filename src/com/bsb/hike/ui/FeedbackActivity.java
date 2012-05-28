@@ -6,11 +6,14 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -62,6 +65,24 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 		mButtonBar.setVisibility(View.VISIBLE);
 
 		mFeedbackButton.setEnabled(false);
+
+		//This hack is to prevent the cursor from being shown initially on the text box in touch screen devices. On touching the text box the cursor becomes visible 
+		if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS 
+				|| getResources().getConfiguration().hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
+			mFeedbackText.setCursorVisible(false);
+			mFeedbackText.setOnTouchListener(new OnTouchListener() 
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event) 
+				{
+					if(event.getAction() == MotionEvent.ACTION_DOWN)
+					{
+						mFeedbackText.setCursorVisible(true);
+					}
+					return false;
+				}
+			});
+		}
 
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof HikeHTTPTask)

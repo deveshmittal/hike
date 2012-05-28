@@ -54,11 +54,11 @@ public class HikeMessengerApp extends Application
 
 	public static final String SPLASH_SEEN = "splashseen";
 
-	public static final String CREDITS_SCREEN_SHOWN = "creditScreenShown";
-	
 	public static final String INVITE_TOOLTIP_DISMISSED = "inviteToolTip";
 
 	public static final String EMAIL = "email";
+
+	public static final String CHAT_TOOLTIP_DISMISSED = "dismissChatToolTip";
 
 	private static HikePubSub mPubSubInstance;
 

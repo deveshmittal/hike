@@ -50,12 +50,6 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical" >
 
-                    <View
-                        android:id="@+id/divider"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@drawable/ic_thread_divider_profile" />
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -66,10 +60,10 @@
                             android:id="@+id/name_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="11dp"
-                            android:layout_marginTop="11dp"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginTop="15dp"
                             android:layout_weight="1"
-                            android:paddingLeft="10dp"
+                            android:paddingLeft="15dp"
                             android:text="Name"
                             android:textColor="@color/lightblack"
                             android:textSize="16sp" />
@@ -110,10 +104,10 @@
                             android:id="@+id/phone_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="11dp"
-                            android:layout_marginTop="11dp"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginTop="15dp"
                             android:layout_weight="1"
-                            android:paddingLeft="10dp"
+                            android:paddingLeft="15dp"
                             android:text="Name"
                             android:textColor="@color/lightblack"
                             android:textSize="16sp" />
@@ -154,10 +148,10 @@
                             android:id="@+id/email_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="11dp"
-                            android:layout_marginTop="11dp"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginTop="15dp"
                             android:layout_weight="1"
-                            android:paddingLeft="10dp"
+                            android:paddingLeft="15dp"
                             android:text="Name"
                             android:textColor="@color/lightblack"
                             android:textSize="16sp" />
@@ -198,10 +192,10 @@
                             android:id="@+id/gender_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="11dp"
-                            android:layout_marginTop="11dp"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginTop="15dp"
                             android:layout_weight="1"
-                            android:paddingLeft="10dp"
+                            android:paddingLeft="15dp"
                             android:text="Name"
                             android:textColor="@color/lightblack"
                             android:textSize="16sp" />
@@ -266,10 +260,10 @@
                             android:id="@+id/photo_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="11dp"
-                            android:layout_marginTop="11dp"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginTop="15dp"
                             android:layout_weight="1"
-                            android:paddingLeft="10dp"
+                            android:paddingLeft="15dp"
                             android:text="Name"
                             android:textColor="@color/lightblack"
                             android:textSize="16sp" />

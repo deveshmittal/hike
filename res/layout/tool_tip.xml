@@ -26,7 +26,7 @@
             android:paddingRight="11dp"
             android:paddingTop="15dp"
             android:src="@drawable/close" />
-
+        	
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/tool_tip"
             style="@style/Text.Shadow.White"
@@ -35,21 +35,9 @@
             android:shadowDy="0.4"
             android:shadowRadius="0.3"
             android:text="@string/earn_200_sms"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            android:paddingRight="15dp" />
 
-        <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/learn_more_btn"
-            style="@style/Text.Shadow.White"
-            android:layout_marginLeft="2dp"
-            android:background="@null"
-            android:paddingRight="15dp"
-            android:shadowColor="#4c000000"
-            android:shadowDx="0.4"
-            android:shadowDy="0.4"
-            android:shadowRadius="0.3"
-            android:text="@string/learn_more"
-            android:textColor="#6bd0ff"
-            android:textSize="14sp" />
     </LinearLayout>
 
 </LinearLayout>

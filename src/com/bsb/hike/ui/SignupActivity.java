@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -51,6 +52,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	private ImageButton tapHereText;
 	private ImageButton submitBtn;
 	private ImageView invalidNum;
+	private ImageView errorImage;
 
 	private ImageButton tryAgainBtn;
 	private Handler mHandler;
@@ -74,6 +76,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
 		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
+		errorImage = (ImageView) findViewById(R.id.error_img);
 
 		if(savedInstanceState != null)
 		{
@@ -118,6 +121,16 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		setAnimation();
 		setListeners();
 		mTask = SignupTask.startTask(this);
+
+		AnimationDrawable ad = new AnimationDrawable();
+		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large0), 600);
+		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large1), 600);
+		ad.addFrame(getResources().getDrawable(R.drawable.ic_tower_large2), 600);
+		ad.setOneShot(false);
+		ad.setVisible(true, true);
+
+		errorImage.setImageDrawable(ad);
+		ad.start();
 	}
 
 	@Override

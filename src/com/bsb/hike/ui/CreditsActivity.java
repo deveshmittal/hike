@@ -3,7 +3,6 @@ package com.bsb.hike.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -38,10 +37,6 @@ public class CreditsActivity extends Activity
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
-
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-		editor.putBoolean(HikeMessengerApp.CREDITS_SCREEN_SHOWN, true);
-		editor.commit();
 
 		numHike = 0;
 		

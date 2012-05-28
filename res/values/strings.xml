@@ -132,4 +132,5 @@
 	<string name="more">More »</string>
 	<string name="edit_profile">Edit Profile</string>
 	<string name="no_sd_card">Please insert an SD Card</string>
+	<string name="press_btn_invite">Tap this button to invite %1$s to hike.</string>
 </resources>

@@ -363,13 +363,13 @@ public class ConvMessage
 		switch(mState)
 		{
 		case SENT_DELIVERED:
-			return R.drawable.ic_delivered_small;
+			return R.drawable.ic_delivered;
 		case SENT_DELIVERED_READ:
-			return R.drawable.ic_read_small;
+			return R.drawable.ic_read;
 		case SENT_CONFIRMED:
-			return R.drawable.ic_sent_small;
+			return R.drawable.ic_sent;
 		case SENT_UNCONFIRMED:
-			return R.drawable.ic_trying2;
+			return R.drawable.ic_tower2;
 		default:
 			return R.drawable.ic_blank;
 		}
