@@ -206,7 +206,7 @@ public class MessagesAdapter extends BaseAdapter
 		if (resId > 0)
 		{
 			holder.image.setImageResource(resId);
-			if (convMessage.getState() == State.SENT_UNCONFIRMED) 
+			if (convMessage.getState() == State.SENT_UNCONFIRMED && position == getCount() - 1) 
 			{
 				showTryingAgainIcon(holder.image, convMessage.getTimestamp());
 			}
@@ -244,8 +244,8 @@ public class MessagesAdapter extends BaseAdapter
 			anim.setDuration(1);
 
 			iv.setAnimation(anim);
-			iv.setVisibility(View.VISIBLE);
 		}
+		iv.setVisibility(View.VISIBLE);
 		AnimationDrawable ad = new AnimationDrawable();
 		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_tower0), 600);
 		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_tower1), 600);
