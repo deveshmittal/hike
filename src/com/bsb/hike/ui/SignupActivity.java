@@ -242,6 +242,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	private void prepareLayoutForGettingPin()
 	{
 		initializeViews(pinLayout);
+		enterEditText.setText("");
 		infoTxt.setImageResource(R.drawable.enter_pin);
 		tapHereText.setOnClickListener(this);
 	}
