@@ -26,7 +26,7 @@
     <string name="hikebot_message">Thanks for joining hike!  If you have questions or comments you can send us a message here!</string>
     <string name="address_book_failed">Shucks, we couldn\'t scan your address book.  Try again?</string>
     <string name="credits_left">%1$d SMS left</string>
-    <string name="service_running_message">Connected to Hike</string>
+    <string name="service_running_message">Connected to hike</string>
     <string name="forward">Forward</string>
     <string name="copy">Copy</string>
     <string name="preferences">Preferences</string>
@@ -43,11 +43,11 @@
     <string name="phone_hint">9999999999</string>
     <string name="smsFallBack_send_button">Send</string>
     <string name="smsFallBack_reenter_phone">ReEnter PhoneNo</string>
-    <string name="connected">Connected to Hike!</string>
+    <string name="connected">Connected to hike!</string>
     <string name="hike_network_connection">Network Connection</string>
-    <string name="notconnected_data_disabled">Boss, you\'ve got to turn on data to experience Hike!</string>
+    <string name="notconnected_data_disabled">Boss, you\'ve got to turn on data to experience hike!</string>
     <string name="notconnected_no_internet">Boss, check the internet!</string>
-    <string name="notconnected_reconnected">Trying to reconnect to Hike!</string>
+    <string name="notconnected_reconnected">Trying to reconnect to hike!</string>
     <string name="already_hike_user">Good News! Your friend is already on hike!</string>
     <string name="no_phone_number">Sorry! Your friend doesn\'t have a phone number</string>
     <string name="block_users">Block Users</string>
@@ -81,7 +81,7 @@
 	<string name="block_key">block</string>
 	<string name="delete_key">deleteAccount</string>
 	<string name="unlink_key">unlinkAccount</string>
-	<string name="how_hike_feel">How does Hike make you feel?</string>
+	<string name="how_hike_feel">How does hike make you feel?</string>
 	<string name="edit">Edit</string>
 	<string name="save">Save</string>
 	<string name="saving_name">Getting you in...</string>
