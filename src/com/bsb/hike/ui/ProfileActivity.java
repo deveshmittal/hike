@@ -306,6 +306,15 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	{
 		ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
 
+		if (isEditingProfile && !TextUtils.isEmpty(mEmailEdit.getText()))
+		{
+			if (!Utils.isValidEmail(mEmailEdit.getText()))
+			{
+				Toast.makeText(this, getResources().getString(R.string.invalid_email), Toast.LENGTH_LONG).show();
+				return;
+			}
+		}
+
 		if (mNameEdit != null && !TextUtils.isEmpty(mNameEdit.getText()) && !nameTxt.equals(mNameEdit.getText().toString()))
 		{
 			/* user edited the text, so update the profile */
@@ -399,6 +408,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 				editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
 						.getText().toString());
 			}
+
 			editor.putInt(HikeConstants.Extras.GENDER,
 					currentSelection == null ? 0
 							: currentSelection.getId() == R.id.guy ? 1 : 2);
