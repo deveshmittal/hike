@@ -60,7 +60,7 @@ public class ConvMessage
 		SENT_DELIVERED, /* message delivered to client device */
 		SENT_DELIVERED_READ , /* message viewed by recipient */
 		RECEIVED_UNREAD, /* message received, but currently unread */
-		RECEIVED_READ, /* message received an read */
+		RECEIVED_READ, /* message received and read */
 		UNKNOWN
 	};
 
