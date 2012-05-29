@@ -132,7 +132,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ArrayList<ConvMessage> messages;
 
-	private boolean shouldScrollToBottom = true;
+	private boolean shouldScrollToBottom = false;
 
 	private CustomLinearLayout chatLayout;
 
