@@ -5,6 +5,11 @@ public class HikePacket
 	private boolean retry;
 	private byte[] message;
 	private long msgId;
+	private long timeStamp;
+
+	public long getTimeStamp() {
+		return timeStamp;
+	}
 
 	public byte[] getMessage()
 	{
@@ -26,10 +31,11 @@ public class HikePacket
 		retry = val;
 	}
 
-	public HikePacket(byte[] message, long msgId)
+	public HikePacket(byte[] message, long msgId, long timeStamp)
 	{
 		this.message = message;
 		this.msgId = msgId;
 		this.retry = true;
+		this.timeStamp = timeStamp;
 	}
 }
