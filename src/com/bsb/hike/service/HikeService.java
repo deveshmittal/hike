@@ -124,7 +124,7 @@ public class HikeService extends Service
 				Bundle bundle = msg.getData();
 				String message = bundle.getString(HikeConstants.MESSAGE);
 				long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-				mMqttManager.send(new HikePacket(message.getBytes(), msgId), msg.arg1);
+				mMqttManager.send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis()), msg.arg1);
 			}
 		}
 	}

@@ -109,12 +109,7 @@ public class MessagesAdapter extends BaseAdapter
 		if (v == null)
 		{
 			holder = new ViewHolder();
-			if (convMessage == null)
-			{
-				v = inflater.inflate(R.layout.invite_view, parent, false);
-				v.setTag(holder);
-			}
-			else if (convMessage.isSent())
+			if (convMessage.isSent())
 			{
 				v = inflater.inflate(R.layout.message_item_send, parent, false);
 
@@ -205,13 +200,13 @@ public class MessagesAdapter extends BaseAdapter
 		int resId = convMessage.getImageState();
 		if (resId > 0)
 		{
-			holder.image.setImageResource(resId);
-			if (convMessage.getState() == State.SENT_UNCONFIRMED && position == getCount() - 1) 
+			if (convMessage.getState() == State.SENT_UNCONFIRMED) 
 			{
 				showTryingAgainIcon(holder.image, convMessage.getTimestamp());
 			}
 			else
 			{
+				holder.image.setImageResource(resId);
 				holder.image.setAnimation(null);
 				holder.image.setVisibility(View.VISIBLE);
 			}
@@ -240,21 +235,28 @@ public class MessagesAdapter extends BaseAdapter
 
 			Animation anim = AnimationUtils.loadAnimation(context,
 					android.R.anim.fade_in);
-			anim.setStartOffset(3000);
+			anim.setStartOffset(4000);
 			anim.setDuration(1);
 
 			iv.setAnimation(anim);
 		}
 		iv.setVisibility(View.VISIBLE);
-		AnimationDrawable ad = new AnimationDrawable();
-		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_tower0), 600);
-		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_tower1), 600);
-		ad.addFrame(context.getResources().getDrawable(R.drawable.ic_tower2), 600);
-		ad.setOneShot(false);
-		ad.setVisible(true, true);
-
-		iv.setImageDrawable(ad);
-		ad.start();
+		
+		if(!(iv.getDrawable() instanceof AnimationDrawable))
+		{
+			Log.e(getClass().getSimpleName(), "Creating new ANIMATION DRAWABLE For msg");
+			AnimationDrawable ad = new AnimationDrawable();
+			ad.addFrame(context.getResources()
+					.getDrawable(R.drawable.ic_tower0), 600);
+			ad.addFrame(context.getResources()
+					.getDrawable(R.drawable.ic_tower1), 600);
+			ad.addFrame(context.getResources()
+					.getDrawable(R.drawable.ic_tower2), 600);
+			ad.setOneShot(false);
+			ad.setVisible(true, true);
+			iv.setImageDrawable(ad);
+			ad.start();
+		}
 	}
 
 	private boolean shouldDisplayTimestamp(int position)
