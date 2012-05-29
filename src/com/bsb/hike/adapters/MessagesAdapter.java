@@ -109,12 +109,7 @@ public class MessagesAdapter extends BaseAdapter
 		if (v == null)
 		{
 			holder = new ViewHolder();
-			if (convMessage == null)
-			{
-				v = inflater.inflate(R.layout.invite_view, parent, false);
-				v.setTag(holder);
-			}
-			else if (convMessage.isSent())
+			if (convMessage.isSent())
 			{
 				v = inflater.inflate(R.layout.message_item_send, parent, false);
 
