@@ -446,7 +446,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			String msisdn = (String) object;
 			Conversation conv = mConversationsByMSISDN.get(msisdn);
 			ConvMessage msg = conv.getMessages().get(conv.getMessages().size() - 1);
-			msg.setState(ConvMessage.State.RECEIVED_READ);
+			msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 			conv.getMessages().set(conv.getMessages().size() - 1, msg);
 			mAdapter.setNotifyOnChange(false);
 			runOnUiThread(this);
