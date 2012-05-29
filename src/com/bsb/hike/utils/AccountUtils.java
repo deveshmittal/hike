@@ -51,7 +51,7 @@ public class AccountUtils
 {
 	public static final String HOST = "im.hike.in";
 	
-	private static final int PORT = 3001;
+	private static final int PORT = 8080;
 
 	private static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
