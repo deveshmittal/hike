@@ -1419,7 +1419,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		prefs = prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs;
 
- 		if(!mConversation.isOnhike() && !prefs.getBoolean(HikeMessengerApp.CHAT_TOOLTIP_DISMISSED, false))
+ 		if(!prefs.getBoolean(HikeMessengerApp.CHAT_TOOLTIP_DISMISSED, false))
 		{
 			showInviteToolTip();
 		}
@@ -1434,7 +1434,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			fadeIn.setStartOffset(1000);
 			toolTipLayout.setAnimation(fadeIn);
 		}
-		toolTipLayout.setVisibility(View.VISIBLE);
+		toolTipLayout.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 		TextView toolTipTxt = (TextView) toolTipLayout.findViewById(R.id.tool_tip);
 		String formatString = String.format(getString(R.string.press_btn_invite), mConversation.getContactName());
 		toolTipTxt.setText(formatString); 
