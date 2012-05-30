@@ -445,9 +445,24 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		{
 			String msisdn = (String) object;
 			Conversation conv = mConversationsByMSISDN.get(msisdn);
-			ConvMessage msg = conv.getMessages().get(conv.getMessages().size() - 1);
-			msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
-			conv.getMessages().set(conv.getMessages().size() - 1, msg);
+			/* look for the latest received messages and set them to read.
+			 * Exit when we've found some read messages
+			 */
+			List<ConvMessage> messages = conv.getMessages();
+			for(int i = messages.size() - 1; i > 0; --i)
+			{
+				ConvMessage msg = messages.get(i);
+				if (!msg.isSent())
+				{
+					ConvMessage.State currentState = msg.getState();
+					msg.setState(ConvMessage.State.RECEIVED_READ);
+					if (currentState == ConvMessage.State.RECEIVED_READ)
+					{
+						break;
+					}
+				}
+			}
+
 			mAdapter.setNotifyOnChange(false);
 			runOnUiThread(this);
 		}
