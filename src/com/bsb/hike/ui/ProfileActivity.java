@@ -191,6 +191,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 
 		picture.setOnClickListener(this);
 		picture.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		picture.setFocusable(true);
 
 		mTitleView.setText(getResources().getString(R.string.edit_profile));
 		((EditText)phone.findViewById(R.id.phone_input)).setText(mLocalMSISDN);
@@ -267,6 +268,12 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		mNameView.setText(nameTxt);
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId());
 		mIconView.setImageDrawable(drawable);
+		
+		myInfo.setFocusable(true);
+		credits.setFocusable(true);
+		notifications.setFocusable(true);
+		privacy.setFocusable(true);
+		help.setFocusable(true);
 	}
 
 	private void fetchPersistentData()
