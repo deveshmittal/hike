@@ -84,7 +84,7 @@ public class ConvMessage
 					msgState == State.SENT_FAILED);
 		setState(msgState);
 	}
-	
+
 	public ConvMessage(JSONObject obj) throws JSONException
 	{
 		this.mMsisdn = obj.getString(HikeConstants.FROM); /*represents msg is coming from another client*/
@@ -233,7 +233,7 @@ public class ConvMessage
 		JSONObject data = new JSONObject();
 		try
 		{
-			data.put(HikeConstants.HIKE_MESSAGE, mMessage);
+			data.put(mConversation.isOnhike() ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP,mTimestamp);
 			data.put(HikeConstants.MESSAGE_ID,msgID);
 
