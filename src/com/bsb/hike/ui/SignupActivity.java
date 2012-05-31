@@ -417,14 +417,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		if(enterEditText.getText().length()==0)
-		{
-			submitBtn.setEnabled(false);
-		}
-		else
-		{
-			submitBtn.setEnabled(true);
-		}
+		submitBtn.setEnabled(!TextUtils.isEmpty(enterEditText.getText().toString().trim()));
 	}
 
 	@Override
