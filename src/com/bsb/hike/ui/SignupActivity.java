@@ -189,7 +189,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		startLoading();
 		if (!addressBookError) 
 		{
-			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches("[0-9]{10,13}")) 
+			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches("\\+?[0-9]{10,13}")) 
 			{
 				loadingLayout.setVisibility(View.GONE);
 				submitBtn.setVisibility(View.VISIBLE);
