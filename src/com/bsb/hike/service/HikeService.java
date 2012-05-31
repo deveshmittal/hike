@@ -504,12 +504,14 @@ public class HikeService extends Service
 				ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 				if (cm.getBackgroundDataSetting())
 				{
+					Log.d("HikeService", "User has enabled data");
 					// user has allowed background data - we start again - picking
 					// up where we left off in handleStart before
 					asyncStart();
 				}
 				else
 				{
+					Log.w("HikeService", "User has disabled data");
 					// user has disabled background data
 					mMqttManager.setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_DATADISABLED);
 
