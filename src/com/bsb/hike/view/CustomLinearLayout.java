@@ -21,7 +21,7 @@ public class CustomLinearLayout extends LinearLayout {
 		if (onSoftKeyboardListener != null) {
 			final int newSpec = MeasureSpec.getSize(heightMeasureSpec);
 			final int oldSpec = getMeasuredHeight();
-			if ((int)(0.65*oldSpec) > newSpec){
+			if ((int)(0.66*oldSpec) > newSpec){
 				onSoftKeyboardListener.onShown();
 			} else {
 				onSoftKeyboardListener.onHidden();
