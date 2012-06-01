@@ -1409,10 +1409,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	public void onTitleIconClick(View v)
 	{
-		inviteUser();
-		if(toolTipLayout != null && toolTipLayout.getVisibility() == View.VISIBLE)
-		{
-			dismissToolTip();
+		
+		if (v.getId() == R.id.title_image_btn) {
+			inviteUser();
+			if (toolTipLayout != null
+					&& toolTipLayout.getVisibility() == View.VISIBLE) {
+				dismissToolTip();
+			}
+		}
+		else if (v.getId() == R.id.info_layout) {
+			showOverlay(false);
 		}
 	}
 
