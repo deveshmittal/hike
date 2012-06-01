@@ -17,6 +17,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.ClipboardManager;
 import android.text.Editable;
 import android.text.Spannable;
@@ -33,8 +35,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
@@ -62,6 +64,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -157,6 +160,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private boolean isToolTipShowing = false;
 
 	private boolean isOverlayShowing = false;
+
+	private ViewPager emoticonViewPager;
+
+	private EmoticonAdapter emoticonAdapter;
+
+	private ViewGroup emoticonLayout;
 
 	@Override
 	protected void onPause()
@@ -385,6 +394,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
 		onNewIntent(intent);
 
+		if(savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.EMOTICON_SHOWING))
+		{
+			onEmoticonBtnClicked(null);
+		}
+
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
@@ -403,19 +417,25 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onBackPressed()
 	{
-		super.onBackPressed();
-		Intent intent = new Intent(this, MessagesList.class);
-		startActivity(intent);
-		/* slide down if we're still selecting a user, otherwise slide back */
-		if (mConversation == null)
+		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE) 
 		{
-			overridePendingTransition(R.anim.no_animation, R.anim.slide_down_noalpha);
+			super.onBackPressed();
+			Intent intent = new Intent(this, MessagesList.class);
+			startActivity(intent);
+			/* slide down if we're still selecting a user, otherwise slide back */
+			if (mConversation == null) {
+				overridePendingTransition(R.anim.no_animation,
+						R.anim.slide_down_noalpha);
+			} else {
+				overridePendingTransition(R.anim.slide_in_left_noalpha,
+						R.anim.slide_out_right_noalpha);
+			}
+			finish();
 		}
 		else
 		{
-			overridePendingTransition(R.anim.slide_in_left_noalpha, R.anim.slide_out_right_noalpha);
+			onEmoticonBtnClicked(null);
 		}
-		finish();
 	}
 
 	@Override
@@ -596,6 +616,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.onMessageSent();
+		}
+		if (emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE)
+		{
+			onEmoticonBtnClicked(null);
 		}
 	}
 
@@ -1466,6 +1490,58 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		//For preventing the tool tip from animating again if its already showing
 		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, toolTipLayout != null && toolTipLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.OVERLAY_SHOWING, mOverlayLayout.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.EMOTICON_SHOWING, emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
+	}
+
+	public void onEmoticonBtnClicked(View v)
+	{
+		ImageView emoArrw = (ImageView) findViewById(R.id.emoticon_arrow);
+		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
+		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
+		if (emoticonAdapter == null) 
+		{
+			emoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView);
+			emoticonViewPager.setAdapter(emoticonAdapter);
+		}
+		if(emoticonLayout.getVisibility() == View.VISIBLE)
+		{
+			Animation slideDown = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
+			slideDown.setDuration(300);
+			emoticonLayout.startAnimation(slideDown);
+			emoticonLayout.setVisibility(View.INVISIBLE);
+			emoArrw.setAnimation(slideDown);
+			emoArrw.setVisibility(View.INVISIBLE);
+		}
+		else
+		{
+			Animation slideUp = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
+			slideUp.setDuration(400);
+			emoticonLayout.setAnimation(slideUp);
+			emoticonLayout.setVisibility(View.VISIBLE);
+			emoArrw.setAnimation(slideUp);
+			emoArrw.setVisibility(View.VISIBLE);
+		}
+		setEmoticonArrows();
+		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() 
+		{
+			@Override
+			public void onPageSelected(int arg0) 
+			{
+				setEmoticonArrows();
+			}
+			
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {}
+			
+			@Override
+			public void onPageScrollStateChanged(int arg0) {}
+		});
+	}
+	
+	private void setEmoticonArrows()
+	{
+		findViewById(R.id.emo_arrow_left).setVisibility((emoticonViewPager.getCurrentItem() > 0) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
+		findViewById(R.id.emo_arrow_right).setVisibility((emoticonViewPager.getCurrentItem() < emoticonViewPager.getChildCount() - 1) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
 	}
 }

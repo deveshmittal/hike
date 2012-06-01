@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/emoticon_page"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:numColumns="7"
+    android:listSelector="@android:color/transparent"
+    android:drawSelectorOnTop="false"
+    android:background="@null" />
