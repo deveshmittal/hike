@@ -4,12 +4,14 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.bsb.hike.R;
-
 import android.content.Context;
+import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
+import android.widget.EditText;
+
+import com.bsb.hike.R;
 
 /**
  * A class for annotating a CharSequence with spans to convert textual emoticons to graphical ones.
@@ -49,10 +51,10 @@ public class SmileyParser
 
 	static class Smileys
 	{
-		private static final int[] sIconIds = { R.drawable.emo_im_happy, R.drawable.emo_im_sad, R.drawable.emo_im_winking, R.drawable.emo_im_tongue_sticking_out,
-				R.drawable.emo_im_surprised, R.drawable.emo_im_kissing, R.drawable.emo_im_yelling, R.drawable.emo_im_cool, R.drawable.emo_im_money_mouth,
-				R.drawable.emo_im_foot_in_mouth, R.drawable.emo_im_embarrassed, R.drawable.emo_im_angel, R.drawable.emo_im_undecided, R.drawable.emo_im_crying,
-				R.drawable.emo_im_lips_are_sealed, R.drawable.emo_im_laughing, R.drawable.emo_im_wtf };
+		private static final int[] sIconIds = { R.drawable.emo_im_happy, R.drawable.emo_im_sad, R.drawable.emo_im_winking, R.drawable.emo_im_3d,
+				R.drawable.emo_im_angry, R.drawable.emo_im_kissing, R.drawable.emo_im_yelling, R.drawable.emo_im_cool, R.drawable.emo_im_blush,
+				R.drawable.emo_im_zzz, R.drawable.emo_im_double_thumbs_up, R.drawable.emo_im_angel, R.drawable.emo_im_undecided, R.drawable.emo_im_crying,
+				R.drawable.emo_im_lips_are_sealed, R.drawable.emo_im_nerd, R.drawable.emo_im_wtf };
 
 		public static int HAPPY = 0;
 
@@ -60,9 +62,9 @@ public class SmileyParser
 
 		public static int WINKING = 2;
 
-		public static int TONGUE_STICKING_OUT = 3;
+		public static int IM_3D = 3;
 
-		public static int SURPRISED = 4;
+		public static int ANGRY = 4;
 
 		public static int KISSING = 5;
 
@@ -70,11 +72,11 @@ public class SmileyParser
 
 		public static int COOL = 7;
 
-		public static int MONEY_MOUTH = 8;
+		public static int BLUSH = 8;
 
-		public static int FOOT_IN_MOUTH = 9;
+		public static int ZZZ = 9;
 
-		public static int EMBARRASSED = 10;
+		public static int DOUBLE_THUMBS_UP = 10;
 
 		public static int ANGEL = 11;
 
@@ -84,7 +86,7 @@ public class SmileyParser
 
 		public static int LIPS_ARE_SEALED = 14;
 
-		public static int LAUGHING = 15;
+		public static int NERD = 15;
 
 		public static int WTF = 16;
 
@@ -99,19 +101,19 @@ public class SmileyParser
 	public static final int[] DEFAULT_SMILEY_RES_IDS = { Smileys.getSmileyResource(Smileys.HAPPY), // 0
 			Smileys.getSmileyResource(Smileys.SAD), // 1
 			Smileys.getSmileyResource(Smileys.WINKING), // 2
-			Smileys.getSmileyResource(Smileys.TONGUE_STICKING_OUT), // 3
-			Smileys.getSmileyResource(Smileys.SURPRISED), // 4
+			Smileys.getSmileyResource(Smileys.IM_3D), // 3
+			Smileys.getSmileyResource(Smileys.ANGRY), // 4
 			Smileys.getSmileyResource(Smileys.KISSING), // 5
 			Smileys.getSmileyResource(Smileys.YELLING), // 6
 			Smileys.getSmileyResource(Smileys.COOL), // 7
-			Smileys.getSmileyResource(Smileys.MONEY_MOUTH), // 8
-			Smileys.getSmileyResource(Smileys.FOOT_IN_MOUTH), // 9
-			Smileys.getSmileyResource(Smileys.EMBARRASSED), // 10
+			Smileys.getSmileyResource(Smileys.BLUSH), // 8
+			Smileys.getSmileyResource(Smileys.ZZZ), // 9
+			Smileys.getSmileyResource(Smileys.DOUBLE_THUMBS_UP), // 10
 			Smileys.getSmileyResource(Smileys.ANGEL), // 11
 			Smileys.getSmileyResource(Smileys.UNDECIDED), // 12
 			Smileys.getSmileyResource(Smileys.CRYING), // 13
 			Smileys.getSmileyResource(Smileys.LIPS_ARE_SEALED), // 14
-			Smileys.getSmileyResource(Smileys.LAUGHING), // 15
+			Smileys.getSmileyResource(Smileys.NERD), // 15
 			Smileys.getSmileyResource(Smileys.WTF), // 16
 	};
 
@@ -182,5 +184,19 @@ public class SmileyParser
 		}
 
 		return builder;
+	}
+	
+	/**
+	 * Adds an emoticon image to the compose box 
+	 * @param composeBox: A reference to the text box in which the emoticon will be shown.
+	 * @param whichEmoticon: Integer value of the emoticon which is to be shown.
+	 */
+	public void addSmiley(EditText composeBox, int whichEmoticon)
+	{
+		Editable text = composeBox.getText();
+		text.append(mSmileyTexts[whichEmoticon]);
+
+		composeBox.setText(addSmileySpans(text));
+		composeBox.setSelection(composeBox.length());
 	}
 }

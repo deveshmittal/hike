@@ -244,7 +244,6 @@ public class MessagesAdapter extends BaseAdapter
 		
 		if(!(iv.getDrawable() instanceof AnimationDrawable))
 		{
-			Log.e(getClass().getSimpleName(), "Creating new ANIMATION DRAWABLE For msg");
 			AnimationDrawable ad = new AnimationDrawable();
 			ad.addFrame(context.getResources()
 					.getDrawable(R.drawable.ic_tower0), 600);

@@ -218,6 +218,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getInt(onhikeIdx) != 0,c.getString(phoneNumIdx), c.getInt(hasCustomPhotoIdx)==1);
 			contactInfos.add(contactInfo);
 		}
+		c.close();
 		return contactInfos;
 	}
 	

@@ -115,7 +115,9 @@
                 android:onClick="onEmoticonClicked"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:src="@drawable/ic_emo_happy" />
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:src="@drawable/emo_im_happy" />
 
             <ImageView
                 android:id="@+id/btn_ok"
@@ -127,7 +129,9 @@
                 android:onClick="onEmoticonClicked"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:src="@drawable/ic_emo_ok" />
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:src="@drawable/emo_im_straight_face" />
 
             <ImageView
                 android:id="@+id/btn_sad"
@@ -137,7 +141,9 @@
                 android:onClick="onEmoticonClicked"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:src="@drawable/ic_emo_sad" />
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:src="@drawable/emo_im_sad" />
         </LinearLayout>
     </LinearLayout>
 

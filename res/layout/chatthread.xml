@@ -80,6 +80,42 @@
 		        android:textColor="@color/green"
 		        android:textSize="14sp"
 		        android:visibility="invisible" />
+		    
+		    <RelativeLayout
+		        android:id="@+id/emoticon_layout"
+		        android:layout_width="match_parent"
+		        android:layout_height="96dp"
+		        android:background="@color/emoticon_page_bg"
+		        android:layout_alignParentBottom="true"
+		        android:visibility="invisible" >
+
+		        <android.support.v4.view.ViewPager
+		            android:id="@+id/emoticon_pager"
+		            android:layout_width="match_parent"
+		            android:layout_height="match_parent"
+		            android:layout_marginLeft="10dp"
+		            android:layout_marginRight="10dp" />
+		        
+		        <ImageView android:id="@+id/emo_arrow_left"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_centerVertical="true"
+		            android:layout_alignParentLeft="true"
+		            android:src="@drawable/emoticon_page_arrow_left"
+		            android:layout_marginLeft="10dp"
+		            android:visibility="invisible"/>
+		        
+		        <ImageView android:id="@+id/emo_arrow_right"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_centerVertical="true"
+		            android:layout_alignParentRight="true"
+		            android:src="@drawable/emoticon_page_arrow_right"
+		            android:layout_marginRight="10dp"
+		            android:visibility="invisible"/>
+		        
+		    </RelativeLayout>
+
 		</RelativeLayout>
         
         <RelativeLayout
@@ -87,65 +123,88 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/compose_box" >
-			
+		    
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/send_message"
                 android:layout_alignParentRight="true"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_alignBottom="@+id/msg_compose"
+                android:layout_alignBottom="@+id/tb_layout"
                 android:background="@drawable/send_hike_btn_selector"
                 android:state_enabled="false"
                 android:text="@string/send"
                 style="@style/Text"
                 android:textStyle="bold"
                 android:textSize="13sp"
-                android:onClick="onSendClick"
                 android:layout_width="50dp"
                 android:layout_height="35dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
+                android:onClick="onSendClick"
+                android:layout_marginBottom="7dp"
                 android:textColor="@drawable/top_bar_btn_txt_selector" />
             
-            <com.bsb.hike.view.CustomFontEditText
-                android:id="@+id/msg_compose"
+            <LinearLayout
+                android:id="@+id/tb_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="12dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="13dp"
                 android:layout_toLeftOf="@+id/send_message"
-                android:autoText="true"
                 android:background="@drawable/chat_thread"
-                android:hint="@string/type_to_compose"
-                android:gravity="top"
-                android:imeOptions="actionSend"
-                android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
-                android:maxLines="4"
-                android:textSize="15sp"
-                android:textColor="@color/chat_color"
-                android:textColorHint="#cdcdc8"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:lineSpacingExtra="2dp" >
+                android:gravity="center_vertical" >
+				
+                <ImageButton 
+                    android:id="@+id/emo_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:src="@drawable/emoticon_btn"
+                    android:onClick="onEmoticonBtnClicked"
+                    android:background="@null"/>
+                
+                <com.bsb.hike.view.CustomFontEditText
+                    android:id="@+id/msg_compose"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:gravity="center_vertical"
+                    android:hint="@string/type_to_compose"
+                    android:imeOptions="actionSend"
+                    android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="4"
+                    android:paddingRight="5dp"
+                    android:textColor="@color/chat_color"
+                    android:textColorHint="#cdcdc8"
+                    android:textSize="15sp" >
 
-                <requestFocus />
-            </com.bsb.hike.view.CustomFontEditText>
-			
+                    <requestFocus />
+                </com.bsb.hike.view.CustomFontEditText>
+            </LinearLayout>
+            
+            <ImageView 
+                android:id="@+id/emoticon_arrow"
+                android:layout_alignLeft="@id/tb_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:layout_alignParentTop="true"
+                android:src="@drawable/emo_arrow_down"
+                android:visibility="invisible"/>
+            
             <LinearLayout
                 android:id="@+id/info_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/msg_compose"
-                android:layout_alignLeft="@id/msg_compose"
-                android:layout_alignRight="@id/msg_compose"
-                android:layout_alignTop="@id/msg_compose"
+                android:layout_alignBottom="@+id/tb_layout"
+                android:layout_alignLeft="@+id/tb_layout"
+                android:layout_alignRight="@+id/tb_layout"
+                android:layout_alignTop="@+id/tb_layout"
                 android:gravity="right|center_vertical"
                 android:onClick="onTitleIconClick"
-                android:visibility="gone" >
+                android:visibility="gone"
+                android:layout_marginBottom="15dp" >
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -154,13 +213,6 @@
                     android:src="@drawable/ic_info" />
             </LinearLayout>
             
-            <View
-                android:id="@+id/dummy"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_below="@id/msg_compose"
-                android:layout_marginTop="8dp" />
-
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/sms_chat_metadata_num_chars"
                 android:layout_width="wrap_content"
@@ -168,8 +220,8 @@
                 android:layout_alignLeft="@id/send_message"
                 android:layout_alignRight="@id/send_message"
                 android:gravity="center_horizontal"
-                android:layout_alignTop="@id/msg_compose"
-                android:visibility="invisible" />
+                android:visibility="invisible"
+                android:layout_marginTop="5dp" />
             
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
