@@ -18,6 +18,7 @@ import com.bsb.hike.R;
  */
 public class SmileyParser
 {
+	private static int MAX_EMOTICONS = 20;
 	// Singleton stuff
 	private static SmileyParser sInstance = null;
 
@@ -177,8 +178,10 @@ public class SmileyParser
 		SpannableStringBuilder builder = new SpannableStringBuilder(text);
 
 		Matcher matcher = mPattern.matcher(text);
-		while (matcher.find())
+		int count = 0;
+		while (matcher.find() && (count < MAX_EMOTICONS))
 		{
+			count++;
 			int resId = mSmileyToRes.get(matcher.group());
 			builder.setSpan(new ImageSpan(mContext, resId), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
