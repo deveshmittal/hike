@@ -15,6 +15,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.MessagesList;
+import com.bsb.hike.utils.SmileyParser;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation>
 {
@@ -59,7 +60,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			setImgStatus(message, imgStatus);
 
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
-			messageView.setText(message.getMessage());
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			CharSequence markedUp = smileyParser.addSmileySpans(message.getMessage());
+			messageView.setText(markedUp);
 			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
 			tsView.setText(message.getTimestampFormatted(true));
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)

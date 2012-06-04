@@ -694,6 +694,19 @@ public class HikeMqttManager implements Listener
 				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
 				this.convDb.updateOnHikeStatus(msisdn, joined);
 			}
+			else if (NetworkManager.INVITE_INFO.equals(type))
+			{
+				Log.d("HikeMqttManager", "INvitee_info" + jsonObj.toString());
+				JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+				int invited = data.optInt(HikeConstants.ALL_INVITEE);
+				int invited_joined = data.optInt(HikeConstants.ALL_INVITEE_JOINED);
+				Log.d("HikeMQttManager", "Data is " + invited + " " + invited_joined);
+				Editor editor = settings.edit();
+				editor.putInt(HikeMessengerApp.INVITED, invited);
+				editor.putInt(HikeMessengerApp.INVITED_JOINED, invited_joined);
+				editor.commit();
+			}
+
 			/*
 			 * Check if message was already received by the receiver
 			 */

@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -29,6 +30,7 @@ public class CreditsActivity extends Activity
 	private Button inviteFriendsBtn;
 	private SharedPreferences settings;
 	private int numHike;
+	private int numInvited;
 	private TextView impTxt;
 	private TextView friendsNumTxt;
 
@@ -38,8 +40,11 @@ public class CreditsActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
 
-		numHike = 0;
-		
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		numHike = settings.getInt(HikeMessengerApp.INVITED_JOINED, 0);
+		numInvited = settings.getInt(HikeMessengerApp.INVITED, 0);
+
 		mTitleView = (TextView) findViewById(R.id.title);
 		creditItemContainer = (LinearLayout) findViewById(R.id.credit_item_container);
 		creditsNum = (TextView) findViewById(R.id.credit_no);
@@ -62,7 +67,7 @@ public class CreditsActivity extends Activity
 		impTxt.setText(s);
 
 		String formatString = getResources().getString(R.string.friends_on_hike_0);
-		String num = Integer.toString(numHike);
+		String num = Integer.toString(numInvited);
 		String formatted = String.format(formatString, num);
 		
 		SpannableString str = new SpannableString(formatted);
