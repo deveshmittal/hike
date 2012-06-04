@@ -233,7 +233,7 @@ public class ConvMessage
 		JSONObject data = new JSONObject();
 		try
 		{
-			data.put(mConversation.isOnhike() ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
+			data.put(mConversation != null && mConversation.isOnhike() ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP,mTimestamp);
 			data.put(HikeConstants.MESSAGE_ID,msgID);
 

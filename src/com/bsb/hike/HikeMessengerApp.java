@@ -60,6 +60,10 @@ public class HikeMessengerApp extends Application
 
 	public static final String CHAT_TOOLTIP_DISMISSED = "dismissChatToolTip";
 
+	public static final String INVITED = "invited";
+
+	public static final String INVITED_JOINED = "invitedJoined";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;

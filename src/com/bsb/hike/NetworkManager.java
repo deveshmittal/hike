@@ -41,6 +41,8 @@ public class NetworkManager implements HikePubSub.Listener
 
 	public static final String ICON = "ic";
 
+	public static final String INVITE_INFO = "ii";
+
 	private HikePubSub pubSub;
 
 
