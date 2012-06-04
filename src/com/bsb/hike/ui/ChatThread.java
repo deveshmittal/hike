@@ -1526,7 +1526,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			emoticonLayout.setAnimation(slideUp);
 			emoticonLayout.setVisibility(View.VISIBLE);
 			emoArrw.setAnimation(slideUp);
-			emoArrw.setVisibility(View.VISIBLE);
+//			emoArrw.setVisibility(View.VISIBLE);
 		}
 		setEmoticonArrows();
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() 
