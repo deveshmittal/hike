@@ -1195,7 +1195,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				hideOverlay();
 			}
 
-			if(mComposeView.getLineCount()>1)
+			if(mComposeView.getLineCount()>2)
 			{
 				mMetadataNumChars.setVisibility(View.VISIBLE);
 				int length = mComposeView.getText().length();
