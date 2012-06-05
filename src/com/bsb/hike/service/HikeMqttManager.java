@@ -688,7 +688,7 @@ public class HikeMqttManager implements Listener
 			}
 			else if ((NetworkManager.USER_JOINED.equals(type)) || (NetworkManager.USER_LEFT.equals(type)))
 			{
-				String msisdn = jsonObj.optString(HikeConstants.FROM);
+				String msisdn = jsonObj.optString(HikeConstants.DATA);
 				Log.d("HikeMqttManager", "UPDATING USER LIST: "+ msisdn);
 				boolean joined = NetworkManager.USER_JOINED.equals(type);
 				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
