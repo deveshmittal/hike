@@ -583,7 +583,11 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			}
 			v.setSelected(currentSelection != v);
 			currentSelection = v == currentSelection ? null : v;
-			mActivityState.genderType = currentSelection.getId() == R.id.guy ? 1 : 2;
+			if (currentSelection != null)
+			{
+				mActivityState.genderType = currentSelection.getId() == R.id.guy ? 1 : 2;
+			}
+
 		}
 	}
 }
