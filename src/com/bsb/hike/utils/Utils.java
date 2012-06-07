@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -27,7 +28,10 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.Settings.Secure;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -37,6 +41,7 @@ import android.view.animation.TranslateAnimation;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.JSONSerializable;
@@ -407,5 +412,88 @@ public class Utils
 	{
 		return (!TextUtils.isEmpty(text) &&
 				android.util.Patterns.EMAIL_ADDRESS.matcher(text).matches());
+	}
+
+	/**
+	 * Used for logging the UI based events from the clients side. 
+	 * @param context
+	 * @param event: The event which is to be logged.
+	 * @param time: This is only used to signify the time the user was on a screen for. For cases where this is not relevant we send 0.s
+	 */
+	public static void logEvent(Context context, String event, int time)
+	{
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
+		
+		int currentVal = prefs.getInt(event, 0);
+		currentVal = time == 0 ? currentVal+1 : currentVal + time;
+
+		Editor editor = prefs.edit();
+		editor.putInt(event, currentVal);
+		editor.commit();
+	}
+	
+	public static JSONObject getDeviceDetails(Context context)
+	{
+		//{"t": "le", "d"{"tag":"cbs", "device_id": "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device": "FFF","_resolution": "GGG","_carrier": "HHH"}}
+		int height = ((Activity)context).getWindowManager().getDefaultDisplay().getHeight();
+		int width = ((Activity)context).getWindowManager().getDefaultDisplay().getWidth();
+		TelephonyManager manager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+		
+		String osVersion = Build.VERSION.RELEASE;
+		String deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+		String os = "Android";
+		String resolution = height + "x" + width;
+		String carrier = manager.getNetworkOperatorName();
+		String device = Build.MANUFACTURER + " " + Build.MODEL;
+				
+		JSONObject object = new JSONObject();
+		JSONObject data = new JSONObject();
+		
+		try {
+			object.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
+			data.put(HikeConstants.LogEvent.TAG, "cbs");
+			data.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
+			data.put(HikeConstants.LogEvent.OS, os);
+			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			data.put(HikeConstants.LogEvent.DEVICE, device);
+			data.put(HikeConstants.LogEvent.RESOLUTION, resolution);
+			data.put(HikeConstants.LogEvent.CARRIER, carrier);
+			object.put(HikeConstants.DATA, data);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return object;
+	}
+	
+	public static JSONObject getDeviceStats(Context context)
+	{
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
+		Map<String, ?> keys = prefs.getAll();
+		Iterator<String> i= keys.keySet().iterator();
+
+		JSONObject data = new JSONObject();
+		JSONObject obj = new JSONObject();
+
+		try 
+		{
+			while (i.hasNext())
+			{
+				String key = i.next();
+				Log.d("Utils", "Getting keys: " + key);
+				data.put(key, prefs.getInt(key, 0));
+			}
+			data.put(HikeConstants.LogEvent.TAG, "mob");
+			
+			obj.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
+			obj.put(HikeConstants.DATA, data);
+		} 
+		catch (JSONException e) 
+		{
+			e.printStackTrace();
+		}
+
+		return obj;
 	}
 }

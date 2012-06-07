@@ -455,6 +455,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			clipboard.setText(message.getMessage());
 			return true;
 		case R.id.forward:
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG, 0);
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra(HikeConstants.Extras.MSG, message.getMessage());
 			startActivity(intent);
@@ -526,6 +527,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (item.getItemId() == R.id.block_menu)
 		{
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_BLOCK, 0);
 			mPubSub.publish(HikePubSub.BLOCK_USER, mContactNumber);
 			mUserIsBlocked = true;
 			showOverlay(true);
@@ -546,6 +548,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if(v.getId() != R.id.overlay_layout)
 		{
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.INVITE_OVERLAY_BUTTON, 0);
 			inviteUser();
 		}
 		if(!blockOverlay)
@@ -1393,6 +1396,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				
 				@Override
 				public void onClick(View v) {
+					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.INVITE_OVERLAY_DISMISS, 0);
 					onOverlayButtonClick(mOverlayLayout);
 				}
 			});
@@ -1472,6 +1476,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	public void onToolTipClosed(View v)
 	{
+		Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.CHAT_TOOL_TIP_CLOSED, 0);
 		dismissToolTip();
 	}
 

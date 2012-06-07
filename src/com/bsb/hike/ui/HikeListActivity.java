@@ -27,6 +27,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeArrayAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
+import com.bsb.hike.utils.Utils;
 
 public class HikeListActivity extends Activity implements OnScrollListener, TextWatcher
 {
@@ -124,6 +125,10 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 
 	public void onTitleIconClick(View v) 
 	{
+		if(v != null)
+		{
+			Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.CREDIT_TOP_BUTTON, 0);
+		}
 		setToolTipDismissed();
 		Intent i = new Intent(HikeListActivity.this, CreditsActivity.class);
 		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -148,11 +153,13 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	
 	public void onToolTipClicked(View v)
 	{
+		Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.INVITE_TOOL_TIP_CLICKED, 0);
 		onTitleIconClick(null);
 	}
 
 	public void onToolTipClosed(View v)
 	{
+		Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.INVITE_TOOL_TIP_CLOSED, 0);
 		setToolTipDismissed();
 	}
 	
