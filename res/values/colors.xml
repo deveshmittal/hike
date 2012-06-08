@@ -31,4 +31,8 @@
     <color name="notif_subtext">#717069</color>
     <color name="credits_blue">#3e8ec3</color>
     <color name="emoticon_page_bg">#eef7f7f4</color>
+    <color name="list_selected">#f7f7f4</color>
+    <color name="list_pressed">#deddd7</color>
+    <color name="other_list_selected">#eeeeeb</color>
+    <color name="other_list_pressed">#deddd7</color>
 </resources>
