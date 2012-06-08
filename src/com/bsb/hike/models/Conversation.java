@@ -14,7 +14,8 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.NetworkManager;
-import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.Utils;
 
 public class Conversation implements Comparable<Conversation>
@@ -89,9 +90,13 @@ public class Conversation implements Comparable<Conversation>
 	/*
 	 * Returns a friendly name for this conversation (name if non-empty, otherwise msisdn)
 	 */
-	public String getLabel(Context context)
+	public String getLabel()
 	{
-		return TextUtils.isEmpty(contactName) ? (isGroupConversation() ? Utils.defaultGroupName(this.groupParticipants, context) : msisdn) : contactName;
+		if (isGroupConversation())
+		{
+			return !TextUtils.isEmpty(contactName) ? contactName : Utils.defaultGroupName(getGroupParticipants());
+		}
+		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
 	}
 
 	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike)
@@ -112,13 +117,23 @@ public class Conversation implements Comparable<Conversation>
 
 		this.groupParticipants = new ArrayList<ContactInfo>();
 		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);
+		HikeUserDatabase huDB = new HikeUserDatabase(context);
 		for (int i = 0; i < array.length(); i++) 
 		{
 			String contactNum = array.getString(i);
-			ContactInfo contactInfo = ContactUtils.getContactInfo(array.getString(i), context);
+			ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(array.getString(i));
 			Log.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
-			this.groupParticipants.add(contactInfo != null ? contactInfo : new ContactInfo(contactNum, contactNum, contactNum, contactNum));
+			this.groupParticipants.add(contactInfo);
 		}
+		huDB.close();
+
+		if (this.isGroupConversation())
+		{
+			HikeConversationsDatabase db = new HikeConversationsDatabase(context);
+			this.contactName = db.getGroupName(this.msisdn);
+			db.close();
+		}
+
 	}
 
 	public boolean isOnhike()
@@ -147,7 +162,7 @@ public class Conversation implements Comparable<Conversation>
 		this.groupParticipants = groupParticipants;
 	}
 
-	public void addGroupParticipant(ContactInfo contactInfo)
+	public void aaddGroupParticipant(ContactInfo contactInfo)
 	{
 		this.groupParticipants.add(contactInfo);
 	}

@@ -470,23 +470,20 @@ public class Utils
 		return !msisdn.startsWith("+");
 	}
 
-	public static String defaultGroupName(List<ContactInfo> participantList, Context context)
+	public static String defaultGroupName(List<ContactInfo> participantList)
 	{
-		if (participantList.size() > 0) {
-			Log.d("Utils",
-					"Fetching name for contact: " + participantList.get(0));
-			switch (participantList.size()) {
-			case 1:
-				return participantList.get(0).getFirstName();
-			case 2:
-				return participantList.get(0).getFirstName() + " and "
-						+ participantList.get(1).getFirstName();
-			default:
-				return participantList.get(0).getFirstName() + " and "
-						+ (participantList.size() - 1) + " others";
-			}
+		switch (participantList.size()) {
+		case 0:
+			return "";
+		case 1:
+			return participantList.get(0).getFirstName();
+		case 2:
+			return participantList.get(0).getFirstName() + " and "
+			+ participantList.get(1).getFirstName();
+		default:
+			return participantList.get(0).getFirstName() + " and "
+			+ (participantList.size() - 1) + " others";
 		}
-		return "";
 	}
 
 	
@@ -560,6 +557,7 @@ public class Utils
 		String name = msisdn;
 		for(ContactInfo contactInfo : participantList)
 		{
+			Log.d("Utils", "CHecking " + contactInfo.getMsisdn() + "==" + msisdn);
 			if(contactInfo.getMsisdn().equals(msisdn))
 			{
 				return contactInfo.getFirstName();

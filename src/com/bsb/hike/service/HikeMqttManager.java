@@ -739,7 +739,7 @@ public class HikeMqttManager implements Listener
 
 					conversation = this.convDb.getConversation(conversation.getMsisdn(), 0);
 					convMessage.setConversation(conversation);
-					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel(mHikeService));
+					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel());
 				}
 				
 			}
@@ -787,7 +787,15 @@ public class HikeMqttManager implements Listener
 					ConvMessage convMessage = new ConvMessage(jsonObj);
 					this.convDb.addConversationMessages(convMessage);
 					ContactInfo contactInfo;
-					contactInfo = !convMessage.isGroupChat() ? ContactUtils.getContactInfo(convMessage.getMsisdn(), this.mHikeService) : new ContactInfo(convMessage.getMsisdn(), convMessage.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), convMessage.getMsisdn());
+					if (convMessage.isGroupChat())
+					{
+						contactInfo = new ContactInfo(convMessage.getMsisdn(), convMessage.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), convMessage.getMsisdn());
+					}
+					else
+					{
+						contactInfo = userDb.getContactInfoFromMSISDN(convMessage.getMsisdn());
+					}
+
 					toaster.notify(contactInfo, convMessage);
 				}
 				catch (JSONException e)
@@ -802,8 +810,8 @@ public class HikeMqttManager implements Listener
 				// Only notify user if participant has joined.
 				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 				{
-					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel(mHikeService));
-					toaster.notify(new ContactInfo(conversation.getMsisdn(), conversation.getMsisdn(), conversation.getLabel(mHikeService), conversation.getMsisdn()), convMessage);
+					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel());
+					toaster.notify(new ContactInfo(conversation.getMsisdn(), conversation.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), conversation.getMsisdn()), convMessage);
 				}
 			}
 			else

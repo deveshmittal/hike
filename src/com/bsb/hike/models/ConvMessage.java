@@ -15,6 +15,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
@@ -76,6 +77,25 @@ public class ConvMessage
 		PARTICIPANT_LEFT, // The participant has left
 		PARTICIPANT_JOINED, // The participant has joined
 		GROUP_END // Group chat has ended
+;
+
+		public static ParticipantInfoState fromJSON(JSONObject obj)
+		{
+			String type = obj.optString(HikeConstants.TYPE);
+			if(NetworkManager.GROUP_CHAT_JOIN.equals(type))
+			{
+				return ParticipantInfoState.PARTICIPANT_JOINED;
+			}
+			else if(NetworkManager.GROUP_CHAT_LEAVE.equals(type))
+			{
+				return ParticipantInfoState.PARTICIPANT_LEFT;
+			}
+			else if (NetworkManager.GROUP_CHAT_END.equals(type))
+			{
+				return ParticipantInfoState.GROUP_END;
+			}
+			return ParticipantInfoState.NO_INFO;
+		}
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState)
@@ -159,19 +179,8 @@ public class ConvMessage
 		// If the message is a group message we get a TO field consisting of the Group ID
 		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*represents msg is coming from another client*/
 		this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
-		
-		if(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_JOIN))
-		{
-			this.participantInfoState = ParticipantInfoState.PARTICIPANT_JOINED;
-		}
-		else if(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_LEAVE))
-		{
-			this.participantInfoState = ParticipantInfoState.PARTICIPANT_LEFT;
-		}
-		else
-		{
-			this.participantInfoState = ParticipantInfoState.GROUP_END;
-		}
+
+		this.participantInfoState = ParticipantInfoState.fromJSON(obj);
 
 		this.metadata = new MessageMetadata(obj);
 		if (this.participantInfoState == ParticipantInfoState.PARTICIPANT_JOINED) 
@@ -187,7 +196,17 @@ public class ConvMessage
 		} 
 		else 
 		{
-			this.mMessage = this.participantInfoState == ParticipantInfoState.GROUP_END ? context.getString(R.string.group_chat_end) : ContactUtils.getContactInfo(obj.getString(HikeConstants.DATA), context).getFirstName() + " " + context.getString(R.string.left_conversation);
+			if (this.participantInfoState == ParticipantInfoState.GROUP_END)
+			{
+				this.mMessage = context.getString(R.string.group_chat_end);
+			}
+			else
+			{
+				HikeUserDatabase huDB = new HikeUserDatabase(context);
+				ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(obj.getString(HikeConstants.DATA));
+				huDB.close();
+				this.mMessage = contactInfo.getFirstName() +  " " + context.getString(R.string.left_conversation);
+			}
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
 		this.mConversation = conversation;
@@ -208,6 +227,8 @@ public class ConvMessage
 		{
 			JSONObject metadata = new JSONObject(metadataString);
 			setMetadata(metadata);
+			ParticipantInfoState participantInfoState = this.metadata.getParticipantInfoState();
+			setParticipantInfoState(participantInfoState);
 		}
 	}
 

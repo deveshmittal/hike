@@ -17,6 +17,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -38,6 +39,8 @@ public class ToastListener implements Listener
 
 	private MQTTConnectionStatus mCurrentUnnotifiedStatus;
 
+	private HikeConversationsDatabase convDb;
+
 	public ToastListener(Context context)
 	{
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
@@ -45,6 +48,7 @@ public class ToastListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTION_STATUS, this);
 		this.toaster = new HikeNotification(context);
 		this.db = new HikeUserDatabase(context);
+		this.convDb = new HikeConversationsDatabase(context);
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.INITIAL;
 	}
@@ -77,10 +81,19 @@ public class ToastListener implements Listener
 						return;
 					}
 				}
+
 				/* the foreground activity isn't going to show this message so Toast it */
-				ContactInfo contactInfo = message.isGroupChat() ? 
-						new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(context), message.getMsisdn()) 
-							: this.db.getContactInfoFromMSISDN(message.getMsisdn());
+				ContactInfo contactInfo;
+				if (message.isGroupChat())
+				{
+					Log.d("ToastListener", "GroupName is " + this.convDb.getGroupName(message.getMsisdn()));
+					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), this.convDb.getGroupName(message.getMsisdn()), message.getMsisdn());
+				}
+				else
+				{
+					contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn());
+				}
+
 				this.toaster.notify(contactInfo, message);
 			}
 		}

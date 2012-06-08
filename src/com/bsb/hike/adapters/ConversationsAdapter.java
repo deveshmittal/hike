@@ -45,7 +45,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		}
 
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
-		String name = conversation.getLabel(getContext());
+		String name = conversation.getLabel();
 
 		contactView.setText(name);
 		Log.d(getClass().getSimpleName(), "Contact Name = " + name);

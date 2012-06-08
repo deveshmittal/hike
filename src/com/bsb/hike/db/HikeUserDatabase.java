@@ -220,7 +220,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		if (contactInfos.isEmpty())
 		{
 			Log.d(getClass().getSimpleName(), "No contact found");
-			return null;
+			return new ContactInfo(msisdn, msisdn, null, msisdn);
 		}
 
 		return contactInfos.get(0);

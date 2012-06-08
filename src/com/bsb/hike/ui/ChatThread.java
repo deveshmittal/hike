@@ -933,7 +933,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mConversation = mConversationDb.addConversation(mContactNumber, false, "");
 		}
 
-		mLabel = mConversation.getLabel(ChatThread.this);
+		mLabel = mConversation.getLabel();
 
 		mLabelView.setText(mLabel);
 
@@ -1041,8 +1041,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			long convID = mConversation.getConvId();
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
-			/* If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read. */
-			if (ids != null)
+			/* If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read
+			 * avoid sending read notifications for group chats */
+			if (ids != null && !mConversation.isGroupConversation())
 			{
 				JSONObject object = new JSONObject();
 				try
@@ -1111,7 +1112,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				 */
 				message.setConversation(mConversation);
 
-				if (hasWindowFocus())
+				if (hasWindowFocus() && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
@@ -1119,11 +1120,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 
+				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+				{
+					HikeConversationsDatabase hCDB = new HikeConversationsDatabase(this);
+					mConversation.setGroupParticipants(hCDB.getGroupParticipants(mConversation.getMsisdn()));
+					hCDB.close();
+				}
+
+				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
 				runOnUiThread(new Runnable()
 				{
 					@Override
 					public void run()
 					{
+						if (label != null)
+						{
+							mLabelView.setText(label);
+						}
+
 						addMessage(message);
 					}
 				});
@@ -1528,7 +1542,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
 
 		mComposeView.setEnabled(false);
-		String label = mConversation.getLabel(ChatThread.this);
+		String label = mConversation.getLabel();
 		String formatString;
 		if (blockOverlay) 
 		{
@@ -1553,7 +1567,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		/* bold the blocked users name */
 		String formatted = String.format(formatString,
-				mConversation.getLabel(ChatThread.this));
+				mConversation.getLabel());
 		SpannableString str = new SpannableString(formatted);
 		int start = formatString.indexOf("%1$s");
 		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
@@ -1610,13 +1624,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			selectedParticipants = Utils.splitSelectedContacts(selectedContacts);
 			ArrayList<ContactInfo> contactInfoList = new ArrayList<ContactInfo>();
+
+			HikeUserDatabase huDB = new HikeUserDatabase(this);
 			for(String msisdn : selectedParticipants)
 			{
-				ContactInfo contactInfo = ContactUtils.getContactInfo(msisdn, ChatThread.this);
-				contactInfoList.add(contactInfo != null ? contactInfo : new ContactInfo(msisdn, msisdn, msisdn, msisdn));
+				ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn);
+				contactInfoList.add(contactInfo);
 			}
-			
-			Conversation conversation = new Conversation(mContactNumber, 0, mContactNumber, "", false);
+			huDB.close();
+
+			Conversation conversation = new Conversation(mContactNumber, 0, mContactNumber, null, false);
 			conversation.setGroupParticipants(contactInfoList);
 
 			Log.d(getClass().getSimpleName(), "Creating group: " + mContactNumber);
@@ -1636,7 +1653,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mComposeViewWatcher.init();
 			mComposeView.requestFocus();
 
-			mContactName = conversation.getLabel(ChatThread.this);
+			mContactName = conversation.getLabel();
 			mContactId = conversation.getMsisdn();
 
 			// To prevent the Contact picker layout from being shown on orientation change

@@ -3,6 +3,8 @@ package com.bsb.hike.models;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.text.TextUtils;
+
 import com.bsb.hike.models.utils.JSONSerializable;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
@@ -33,12 +35,12 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public String getFirstName()
 	{
-		int i;
-		if((i = this.name.indexOf(" ")) != -1)
+		if (TextUtils.isEmpty(name))
 		{
-			return name.substring(0, i);
+			return this.msisdn;
 		}
-		return name;
+
+		return this.name.split(" ", 2)[0];
 	}
 
 	public void setName(String name)

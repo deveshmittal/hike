@@ -239,7 +239,7 @@ public class MessagesAdapter extends BaseAdapter
 		if (dndMissedCalledNumber != null)
 		{
 			String content = "tap here";
-			String message = context.getString(R.string.dnd_message, convMessage.getConversation().getLabel(this.context), dndMissedCalledNumber);
+			String message = context.getString(R.string.dnd_message, convMessage.getConversation().getLabel(), dndMissedCalledNumber);
 			Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
 			int index = message.indexOf(content);
 			spannable.setSpan(new ClickableSpan()

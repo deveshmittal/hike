@@ -300,7 +300,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			Intent intent = new Intent();
 			Log.i("CreateShortcut", "Creating intent for broadcasting");
 			intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-			intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel(MessagesList.this));
+			intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
 			Drawable d = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
 			Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
 			Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 60, 60, false);
@@ -314,6 +314,11 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			if(conv.isGroupConversation())
 			{
 				leaveGroup(conv);
+			}
+			else
+			{
+				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+				task.execute(conv);
 			}
 			return true;
 		default:
@@ -431,6 +436,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 				// when the conversation is broadcasted it will contain the messages
 				return;
 			}
+
 			// For updating the group name if some participant has joined or left the group
 			else if(conv.isGroupConversation() && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
