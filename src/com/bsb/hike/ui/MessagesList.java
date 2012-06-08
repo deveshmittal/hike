@@ -371,7 +371,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			intent = new Intent(this, ProfileActivity.class);
 			startActivity(intent);
 			return true;
-		case R.id.feedback:
+		case R.id.group_chat:
 //			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.FEEDBACK_MENU, 0);
 			intent = new Intent(this, ChatThread.class);
 			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
