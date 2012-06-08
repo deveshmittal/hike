@@ -431,7 +431,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event) {
 		if((actionId == EditorInfo.IME_ACTION_DONE 
 				|| event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-				&& enterEditText.getText().length()>0 
+				&& !TextUtils.isEmpty(enterEditText.getText().toString().trim()) 
 				&& loadingLayout.getVisibility() != View.VISIBLE)
 		{
 			submitClicked();
