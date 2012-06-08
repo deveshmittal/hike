@@ -45,6 +45,14 @@
 		    android:layout_gravity="center"
 		    android:background="@drawable/ic_chatthread_divider"/>
 	</LinearLayout>
+	
+	<LinearLayout 
+    android:id="@+id/participant_info_container"
+    android:layout_below="@id/timestamp_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:orientation="vertical" />
 
 	<RelativeLayout
 	    android:layout_height="wrap_content"

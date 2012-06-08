@@ -172,22 +172,43 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	
 	
 
-	public Cursor findUsers(String partialName)
+	public Cursor findUsers(String partialName, String selectedContacts)
 	{
-		Cursor cursor = mDb.rawQuery("SELECT "
-															+ DBConstants.NAME+", "
-															+ DBConstants.ID+" AS _id, "
-															+ DBConstants.MSISDN+", "
-															+ DBConstants.ONHIKE+", "
-															+ DBConstants.ONHIKE+"=0 "+ "AS NotOnHike, "
-															+ DBConstants.PHONE+", "
-															+ DBConstants.HAS_CUSTOM_PHOTO
-														+ " FROM " + DBConstants.USERS_TABLE
-														+ " WHERE (" + DBConstants.NAME+" LIKE ? OR "
-														+ DBConstants.MSISDN + " LIKE ? )"
-														+ " AND " + DBConstants.MSISDN + " != 'null' "
-														+ "ORDER BY NotOnHike, " + DBConstants.NAME,
-														new String[] { partialName, partialName });
+		ArrayList<String> contacts = Utils.splitSelectedContacts(selectedContacts);
+		StringBuilder selectedNumbers = new StringBuilder("");
+		
+		if (contacts.size() > 0) 
+		{
+			for (String contact : contacts) 
+			{
+				selectedNumbers.append("'"
+						+ contact
+						+ "',");
+			}
+			selectedNumbers.delete(selectedNumbers.length() - 1,
+					selectedNumbers.length());
+		}
+
+		String[] columns = new String[] {
+				DBConstants.NAME, 
+				DBConstants.ID + " AS _id", 
+				DBConstants.MSISDN, 
+				DBConstants.ONHIKE, 
+				DBConstants.ONHIKE + "=0 AS NotOnHike", 
+				DBConstants.PHONE, 
+				DBConstants.HAS_CUSTOM_PHOTO}; 
+
+		String selection = "(("  
+				+ DBConstants.NAME + " LIKE ? OR " 
+				+ DBConstants.MSISDN + " LIKE ?) AND "
+				+ DBConstants.MSISDN + " NOT IN (" + selectedNumbers + ")) AND "
+				+ DBConstants.MSISDN + " != 'null'";
+
+		String[] selectionArgs = new String[] {partialName, partialName};
+
+		String orderBy = "NotOnHike";
+
+		Cursor cursor = mDb.query(DBConstants.USERS_TABLE, columns, selection, selectionArgs, null, null, orderBy);
 		return cursor;
 	}
 
@@ -198,6 +219,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		c.close();
 		if (contactInfos.isEmpty())
 		{
+			Log.d(getClass().getSimpleName(), "No contact found");
 			return null;
 		}
 

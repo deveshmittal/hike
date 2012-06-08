@@ -95,6 +95,12 @@ public class HikePubSub implements Runnable
 
 	public static final String USER_LEFT = "userLeft";
 
+	public static final String GROUP_JOINED = "groupJoined";
+
+	public static final String GROUP_LEFT = "groupLeft";
+
+	public static final String GROUP_END = "groupEnd";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
@@ -172,6 +178,7 @@ public class HikePubSub implements Runnable
 
 			for (Listener l : list)
 			{
+				
 				l.onEventReceived(type, o);
 			}
 		}

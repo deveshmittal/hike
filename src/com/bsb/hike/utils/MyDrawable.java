@@ -1,0 +1,51 @@
+package com.bsb.hike.utils;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+
+import com.bsb.hike.R;
+
+public class MyDrawable extends ShapeDrawable 
+{
+	private String text;
+	private Paint paint;
+	private Context context;
+	private boolean onHike;
+
+	public MyDrawable(String text, Context context, boolean onHike) 
+	{
+		this.text = text;
+		this.context = context;
+		this.onHike = onHike;
+
+		paint = new Paint();
+		paint.setColor(Color.WHITE);
+		paint.setTextSize(13.5f * Utils.densityMultiplier);
+		paint.setAntiAlias(true);
+		paint.setDither(true);
+		paint.setFakeBoldText(true);
+		paint.setShadowLayer(0.1f * Utils.densityMultiplier, 0, 0.2f * Utils.densityMultiplier, Color.BLACK);
+
+		getPaint().set(paint);
+	}
+
+	@Override
+	public void draw(Canvas canvas) 
+	{
+		Drawable d = context.getResources().getDrawable(onHike ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
+
+		int left =(int) (0 * Utils.densityMultiplier);
+		int top =(int) (1.5 * Utils.densityMultiplier);
+		int right =(int) (paint.measureText(text) + ((int) (14* Utils.densityMultiplier)));
+		int bottom =(int) (25 * Utils.densityMultiplier);
+
+		d.setBounds(left, top, right, bottom);
+		d.draw(canvas);
+
+		canvas.drawText(text, 7 * Utils.densityMultiplier, 18 * Utils.densityMultiplier, paint);
+	}
+}

@@ -468,6 +468,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		}
 		else if(view == myInfo)
 		{
+			Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.EDIT_PROFILE);
 			Intent i = new Intent(ProfileActivity.this, ProfileActivity.class);
 			i.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
 			startActivity(i);

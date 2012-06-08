@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.NetworkManager;
+import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Utils;
 
 public class Conversation implements Comparable<Conversation>
 {
@@ -67,6 +72,10 @@ public class Conversation implements Comparable<Conversation>
 
 	private boolean onhike;
 
+	private List<ContactInfo> groupParticipants;
+
+	private String groupLeader;
+
 	public void setOnhike(boolean onhike)
 	{
 		this.onhike = onhike;
@@ -80,9 +89,9 @@ public class Conversation implements Comparable<Conversation>
 	/*
 	 * Returns a friendly name for this conversation (name if non-empty, otherwise msisdn)
 	 */
-	public String getLabel()
+	public String getLabel(Context context)
 	{
-		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
+		return TextUtils.isEmpty(contactName) ? (isGroupConversation() ? Utils.defaultGroupName(this.groupParticipants, context) : msisdn) : contactName;
 	}
 
 	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike)
@@ -93,6 +102,23 @@ public class Conversation implements Comparable<Conversation>
 		this.contactName = contactName;
 		this.onhike = onhike;
 		this.messages = new ArrayList<ConvMessage>();
+		this.groupParticipants = new ArrayList<ContactInfo>();
+	}
+
+	public Conversation(JSONObject jsonObject, Context context) throws JSONException
+	{
+		this.msisdn = jsonObject.getString(HikeConstants.TO);
+		this.groupLeader = jsonObject.getString(HikeConstants.FROM);
+
+		this.groupParticipants = new ArrayList<ContactInfo>();
+		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);
+		for (int i = 0; i < array.length(); i++) 
+		{
+			String contactNum = array.getString(i);
+			ContactInfo contactInfo = ContactUtils.getContactInfo(array.getString(i), context);
+			Log.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
+			this.groupParticipants.add(contactInfo != null ? contactInfo : new ContactInfo(contactNum, contactNum, contactNum, contactNum));
+		}
 	}
 
 	public boolean isOnhike()
@@ -109,6 +135,21 @@ public class Conversation implements Comparable<Conversation>
 	public void addMessage(ConvMessage message)
 	{
 		this.messages.add(message);
+	}
+
+	public List<ContactInfo> getGroupParticipants() 
+	{
+		return groupParticipants;
+	}
+
+	public void setGroupParticipants(List<ContactInfo> groupParticipants) 
+	{
+		this.groupParticipants = groupParticipants;
+	}
+
+	public void addGroupParticipant(ContactInfo contactInfo)
+	{
+		this.groupParticipants.add(contactInfo);
 	}
 
 	@Override
@@ -150,6 +191,11 @@ public class Conversation implements Comparable<Conversation>
 	public List<ConvMessage> getMessages()
 	{
 		return messages;
+	}
+
+	public boolean isGroupConversation()
+	{
+		return Utils.isGroupConversation(this.msisdn);
 	}
 
 	@Override
@@ -218,6 +264,15 @@ public class Conversation implements Comparable<Conversation>
 		{
 			object.put(HikeConstants.TYPE, type);
 			object.put(HikeConstants.TO, msisdn);
+			if(type.equals(NetworkManager.GROUP_CHAT_JOIN))
+			{
+				JSONArray array = new JSONArray();
+				for(ContactInfo participant : groupParticipants)
+				{
+					array.put(participant.getMsisdn());
+				}
+				object.put(HikeConstants.DATA, array);
+			}
 		}
 		catch (JSONException e)
 		{

@@ -13,6 +13,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.utils.Utils;
 
 public abstract class ProfileItem
 {
@@ -98,6 +99,7 @@ public abstract class ProfileItem
 		@Override
 		public Intent getIntent(Context context)
 		{
+			Utils.logEvent(context, HikeConstants.LogEvent.CREDITS_SCREEN);
 			return new Intent(context, CreditsActivity.class);
 /*			Uri uri = Uri.parse("http://www.bsb.com/hike-help/" + settingsName);
 			return new Intent(Intent.ACTION_VIEW, uri);

@@ -2,11 +2,14 @@ package com.bsb.hike.utils;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONArray;
@@ -17,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -25,11 +29,20 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.Settings.Secure;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -37,6 +50,7 @@ import android.view.animation.TranslateAnimation;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.JSONSerializable;
@@ -47,6 +61,7 @@ import com.bsb.hike.utils.AccountUtils.AccountInfo;
 public class Utils
 {
 	public static Pattern shortCodeRegex;
+	public static Pattern msisdnRegex; 
 
 	public static String shortCodeIntent;
 
@@ -57,9 +72,12 @@ public class Utils
 
 	private static TranslateAnimation mInFromRight;
 
+	public static float densityMultiplier;
+
 	static
 	{
 		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
+		msisdnRegex = Pattern.compile("\\[(\\+\\d*)\\]");
 	}
 
 	public static String join(Collection<?> s, String delimiter, boolean quote)
@@ -407,5 +425,175 @@ public class Utils
 	{
 		return (!TextUtils.isEmpty(text) &&
 				android.util.Patterns.EMAIL_ADDRESS.matcher(text).matches());
+	}
+
+	public static void logEvent(Context context, String event)
+	{
+		logEvent(context, event, 1);
+	}
+
+	/**
+	 * Used for logging the UI based events from the clients side. 
+	 * @param context
+	 * @param event: The event which is to be logged.
+	 * @param time: This is only used to signify the time the user was on a screen for. For cases where this is not relevant we send 0.s
+	 */
+	public static void logEvent(Context context, String event, long increment)
+	{
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
+		
+		long currentVal = prefs.getLong(event, 0) + increment;
+
+		Editor editor = prefs.edit();
+		editor.putLong(event, currentVal);
+		editor.commit();
+	}
+
+	public static ArrayList<String> splitSelectedContacts(String selections)
+	{
+		Matcher matcher = msisdnRegex.matcher(selections);
+		ArrayList<String> contacts = new ArrayList<String>();
+		if (matcher.find()) 
+		{
+			do 
+			{
+				contacts.add(matcher.group().substring(1, matcher.group().length() - 1));
+				Log.d("Utils", "Adding: " + matcher.group().substring(1, matcher.group().length() - 1));
+			} 
+			while (matcher.find(matcher.end()));
+		}
+		return contacts;
+	}
+
+	public static boolean isGroupConversation(String msisdn)
+	{
+		return !msisdn.startsWith("+");
+	}
+
+	public static String defaultGroupName(List<ContactInfo> participantList, Context context)
+	{
+		if (participantList.size() > 0) {
+			Log.d("Utils",
+					"Fetching name for contact: " + participantList.get(0));
+			switch (participantList.size()) {
+			case 1:
+				return participantList.get(0).getFirstName();
+			case 2:
+				return participantList.get(0).getFirstName() + " and "
+						+ participantList.get(1).getFirstName();
+			default:
+				return participantList.get(0).getFirstName() + " and "
+						+ (participantList.size() - 1) + " others";
+			}
+		}
+		return "";
+	}
+
+	
+	public static JSONObject getDeviceDetails(Context context)
+	{
+		//{"t": "le", "d"{"tag":"cbs", "device_id": "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device": "FFF","_resolution": "GGG","_carrier": "HHH"}}
+		int height = ((Activity)context).getWindowManager().getDefaultDisplay().getHeight();
+		int width = ((Activity)context).getWindowManager().getDefaultDisplay().getWidth();
+		TelephonyManager manager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+		
+		String osVersion = Build.VERSION.RELEASE;
+		String deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+		String os = "Android";
+		String resolution = height + "x" + width;
+		String carrier = manager.getNetworkOperatorName();
+		String device = Build.MANUFACTURER + " " + Build.MODEL;
+				
+		JSONObject object = new JSONObject();
+		JSONObject data = new JSONObject();
+		
+		try {
+			object.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
+			data.put(HikeConstants.LogEvent.TAG, "cbs");
+			data.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
+			data.put(HikeConstants.LogEvent.OS, os);
+			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+			data.put(HikeConstants.LogEvent.DEVICE, device);
+			data.put(HikeConstants.LogEvent.RESOLUTION, resolution);
+			data.put(HikeConstants.LogEvent.CARRIER, carrier);
+			object.put(HikeConstants.DATA, data);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return object;
+	}
+	
+	public static JSONObject getDeviceStats(Context context)
+	{
+		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
+		Map<String, ?> keys = prefs.getAll();
+		Iterator<String> i= keys.keySet().iterator();
+
+		JSONObject data = new JSONObject();
+		JSONObject obj = new JSONObject();
+
+		try 
+		{
+			while (i.hasNext())
+			{
+				String key = i.next();
+				Log.d("Utils", "Getting keys: " + key);
+				data.put(key, prefs.getLong(key, 0));
+			}
+			data.put(HikeConstants.LogEvent.TAG, "mob");
+			
+			obj.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
+			obj.put(HikeConstants.DATA, data);
+		} 
+		catch (JSONException e) 
+		{
+			e.printStackTrace();
+		}
+
+		return obj;
+	}
+
+	public static String getContactName(List<ContactInfo> participantList, String msisdn)
+	{
+		String name = msisdn;
+		for(ContactInfo contactInfo : participantList)
+		{
+			if(contactInfo.getMsisdn().equals(msisdn))
+			{
+				return contactInfo.getFirstName();
+			}
+		}
+		return name;
+	}
+
+	public static CharSequence addContactName(List<ContactInfo> participantList, String msisdn, CharSequence message)
+	{
+		String name = getContactName(participantList, msisdn);
+		SpannableStringBuilder messageWithName = new SpannableStringBuilder(name + " - " + message);
+		messageWithName.setSpan(new StyleSpan(Typeface.BOLD), 0, name.length() + 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		return messageWithName;
+	}
+
+	/**
+	 * Used for setting the density multiplier, which is to be multiplied with any pixel value that is programmatically given
+	 * @param activity
+	 */
+	public static void setDensityMultiplier(Activity activity)
+	{
+		if(Utils.densityMultiplier == 0.0f)
+		{
+			DisplayMetrics metrics = new DisplayMetrics();
+			activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+			Utils.densityMultiplier = metrics.scaledDensity;
+		}
+	}
+
+	public static CharSequence getFormattedParticipantInfo(String info)
+	{
+		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
+		ssb.setSpan(new ForegroundColorSpan(0xff666666), 0, info.indexOf(" "), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		return ssb;
 	}
 }

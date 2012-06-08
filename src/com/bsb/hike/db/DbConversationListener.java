@@ -11,6 +11,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 
 public class DbConversationListener implements Listener
 {
@@ -21,7 +22,7 @@ public class DbConversationListener implements Listener
 
 	HikeMqttPersistence persistence;
 	private HikePubSub mPubSub;
-
+	private Context context;
 
 	public DbConversationListener(Context context)
 	{
@@ -29,6 +30,7 @@ public class DbConversationListener implements Listener
 		mConversationDb = new HikeConversationsDatabase(context);
 		mUserDb = new HikeUserDatabase(context);
 		persistence = new HikeMqttPersistence(context);
+		this.context = context;
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, this);
@@ -48,8 +50,12 @@ public class DbConversationListener implements Listener
 		{
 			ConvMessage convMessage = (ConvMessage) object;
 			mConversationDb.addConversationMessages(convMessage);
-			Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getConversation().getContactName());
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+
+			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO) 
+			{
+				Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getMsisdn());
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+			}
 		}
 		else if (HikePubSub.MESSAGE_RECEIVED_FROM_SENDER.equals(type))  // represents event when a client receive msg from other client through server.
 		{

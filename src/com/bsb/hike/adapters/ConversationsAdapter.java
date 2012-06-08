@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,13 +45,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		}
 
 		TextView contactView = (TextView) v.findViewById(R.id.contact);
-		String name = conversation.getContactName();
-		if (name == null)
-		{
-			name = conversation.getMsisdn();
-		}
+		String name = conversation.getLabel(getContext());
 
 		contactView.setText(name);
+		Log.d(getClass().getSimpleName(), "Contact Name = " + name);
 		List<ConvMessage> messages = conversation.getMessages();
 		if (!messages.isEmpty())
 		{
@@ -62,6 +60,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			CharSequence markedUp = smileyParser.addSmileySpans(message.getMessage());
+			messageView.setVisibility(View.VISIBLE);
 			messageView.setText(markedUp);
 			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);
 			tsView.setText(message.getTimestampFormatted(true));

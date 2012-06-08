@@ -17,6 +17,7 @@ import com.bsb.hike.service.HikeService;
 import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 
@@ -37,6 +38,8 @@ public class HikeMessengerApp extends Application
 	public static final String UID_SETTING = "uid";
 	
 	public static final String UPDATE_SETTING = "update";
+
+	public static final String ANALYTICS = "analytics";
 
 	public static final String ADDRESS_BOOK_SCANNED = "abscanned";
 
@@ -187,6 +190,8 @@ public class HikeMessengerApp extends Application
 		{
 			AccountUtils.setToken(token);
 		}
+		/*For logging the time each activity is seen by the user*/
+		new ActivityTimeLogger();
 	}
 
 	public static HikePubSub getPubSub()

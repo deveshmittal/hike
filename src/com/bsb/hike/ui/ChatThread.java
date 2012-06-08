@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +27,7 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -54,6 +56,8 @@ import android.widget.FilterQueryProvider;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.MultiAutoCompleteTextView;
+import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -72,7 +76,9 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.MyDrawable;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
@@ -167,6 +173,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ViewGroup emoticonLayout;
 
+	private MultiAutoCompleteTextView mInputMultiNumberView;
+	
+	private String selectedContacts = "";
+
+	private ArrayList<String> selectedParticipants;
+
+	private StringBuilder existingParticipants;
+
+	private ImageView titleIconView;
+
+	private Button titleBtn;
+
 	@Override
 	protected void onPause()
 	{
@@ -210,6 +228,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* msg is any text we want to show initially */
 	private void createAutoCompleteView(String msg)
 	{
+		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false); 
+
 		mComposeView.removeTextChangedListener(this);
 
 		mLabelView.setText("New Message");
@@ -238,7 +258,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			public CharSequence convertToString(Cursor cursor)
 			{
 				mContactName = cursor.getString(cursor.getColumnIndex("name"));
-				return mContactName;
+				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
+
+				//We are showing contacts in the format of Name[Msisdn]. Its much clearer for the user this way, specially when he is in group chat.
+				return mContactName + "[" + mContactNumber + "]";
 			}
 		});
 
@@ -248,46 +271,118 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			public Cursor runQuery(CharSequence constraint)
 			{
 				String str = (constraint != null) ? "%" + constraint + "%" : "%";
-				mCursor = mDbhelper.findUsers(str);
+				mCursor = mDbhelper.findUsers(str, TextUtils.isEmpty(existingParticipants) ? selectedContacts : existingParticipants + selectedContacts);
 				return mCursor;
 			}
 		});
 
-		mInputNumberView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+		if (!isGroupChat) 
 		{
+			mInputNumberView
+					.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-			@Override
-			public void onItemClick(AdapterView<?> list, View _empty, int position, long id)
+						@Override
+						public void onItemClick(AdapterView<?> list,
+								View _empty, int position, long id) {
+							/* Extract selected values from the cursor */
+							Cursor cursor = (Cursor) list
+									.getItemAtPosition(position);
+							mContactId = cursor.getString(cursor
+									.getColumnIndex("_id"));
+							mContactNumber = cursor.getString(cursor
+									.getColumnIndex("msisdn"));
+							mContactName = cursor.getString(cursor
+									.getColumnIndex("name"));
+
+							setIntentFromField();
+
+							/* close the db */
+							mDbhelper.close();
+							mDbhelper = null;
+
+							/* initialize the conversation */
+							createConversation();
+
+							/* initialize the text watcher */
+							mComposeViewWatcher.init();
+
+							/*
+							 * set the focus on the input text box TODO can this be done in createConversation?
+							 */
+							mComposeView.requestFocus();
+						}
+					});
+			mInputNumberView.setAdapter(adapter);
+			mInputNumberView.setVisibility(View.VISIBLE);
+			mInputNumberView.requestFocus();
+
+			mInputMultiNumberView.setVisibility(View.GONE);
+		}
+		else
+		{
+			// Checking if the current conversation already exists. If it does we load the current participant list to prevent the user from selecting them again
+			String existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+			List<ContactInfo> existingParticipantList = TextUtils.isEmpty(existingGroupId) ? null : mConversationDb.getGroupParticipants(existingGroupId);
+			existingParticipants = new StringBuilder();
+			if (existingParticipantList != null ) 
 			{
-				/* Extract selected values from the cursor */
-				Cursor cursor = (Cursor) list.getItemAtPosition(position);
-				mContactId = cursor.getString(cursor.getColumnIndex("_id"));
-				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
-				mContactName = cursor.getString(cursor.getColumnIndex("name"));
-
-				setIntentFromField();
-
-				/* close the db */
-				mDbhelper.close();
-				mDbhelper = null;
-
-				/* initialize the conversation */
-				createConversation();
-
-				/* initialize the text watcher */
-				mComposeViewWatcher.init();
-
-				/*
-				 * set the focus on the input text box TODO can this be done in createConversation?
-				 */
-				mComposeView.requestFocus();
+				for (ContactInfo participant : existingParticipantList) 
+				{
+					existingParticipants.append("["+participant.getMsisdn() + "],");
+				}
 			}
-		});
+			Log.d(getClass().getSimpleName(), "Exisiting participants: " + existingParticipants);
+			mInputMultiNumberView.setOnItemClickListener(new OnItemClickListener() 
+			{
+				@Override
+				public void onItemClick(AdapterView<?> list,
+						View view, int position, long id) 
+				{
+					Cursor cursor = (Cursor) list
+							.getItemAtPosition(position);
+					String msisdn = cursor.getString(cursor
+									.getColumnIndex("msisdn"));
+					String name = cursor.getString(cursor
+							.getColumnIndex("name"));
+					int onHike = cursor.getInt(cursor.getColumnIndex("onhike"));
 
-		mInputNumberView.setAdapter(adapter);
-		mInputNumberView.setVisibility(View.VISIBLE);
+					int indexOfName = mInputMultiNumberView.getText().toString().indexOf(name + "[" + msisdn);
+
+					//TODO Change all these pixel values to dp and test!
+					MyDrawable myDrawable = new MyDrawable(name, ChatThread.this, onHike == 1);
+					myDrawable.setBounds(
+							(int) (0 * Utils.densityMultiplier), 
+							(int) (0 * Utils.densityMultiplier), 
+							(int) (myDrawable.getPaint().measureText(name) + ((int)17 * Utils.densityMultiplier)),
+							(int) (27 * Utils.densityMultiplier));
+
+					ImageSpan imageSpan = new ImageSpan(myDrawable);
+
+					// The +4 accounts for the "[]" and ", "
+					mInputMultiNumberView.getEditableText().setSpan(
+							imageSpan,
+							indexOfName, 
+							indexOfName + msisdn.length() + name.length() + 4,
+							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				}
+			});
+			mInputMultiNumberView.setText("");
+			mInputMultiNumberView.setAdapter(adapter);
+			mInputMultiNumberView.setTokenizer(new CommaTokenizer());
+			mInputMultiNumberView.setVisibility(View.VISIBLE);
+			mInputMultiNumberView.requestFocus();
+
+			titleBtn = (Button) findViewById(R.id.title_icon);
+			titleBtn.setText("Done");
+			titleBtn.setEnabled(false);
+			titleBtn.setVisibility(View.VISIBLE);
+			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+
+			mInputNumberView.setVisibility(View.GONE);
+			findViewById(R.id.title_image_btn).setVisibility(View.GONE);
+			findViewById(R.id.button_bar).setVisibility(View.GONE);
+		}
 		mInputNumberContainer.setVisibility(View.VISIBLE);
-		mInputNumberView.requestFocus();
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 	}
 
@@ -330,6 +425,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	}
 
+	
 	@Override
 	public Object onRetainNonConfigurationInstance()
 	{
@@ -355,6 +451,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		setContentView(R.layout.chatthread);
 
+		Utils.setDensityMultiplier(ChatThread.this);
+
 		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		isOverlayShowing  = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
 
@@ -371,10 +469,38 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mLabelView = (TextView) findViewById(R.id.title);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
+		mInputMultiNumberView = (MultiAutoCompleteTextView) findViewById(R.id.input_number_multi);
 
 		/*For removing the white bar in the top of the drop-down*/
 		mInputNumberView.setDropDownBackgroundDrawable(null);
 		mInputNumberView.setFadingEdgeLength(0);
+		mInputMultiNumberView.setDropDownBackgroundDrawable(null);
+		mInputMultiNumberView.setFadingEdgeLength(0);
+
+		mInputMultiNumberView.addTextChangedListener(new TextWatcher() 
+		{
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) 
+			{}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {}
+
+			@Override
+			public void afterTextChanged(Editable s) 
+			{
+				String text = s.toString();
+				
+				// We only fill this string if there is at least one contact selected
+				selectedContacts = text.indexOf(",") != -1 ? text.substring(0, text.lastIndexOf(",")) : "";
+				if (titleBtn != null) 
+				{
+					titleBtn.setEnabled(selectedContacts.contains(",") || (!TextUtils.isEmpty(existingParticipants) && !TextUtils.isEmpty(selectedContacts)));
+				}
+			}
+		});
+
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 
@@ -419,11 +545,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE) 
 		{
-			super.onBackPressed();
-			Intent intent = new Intent(this, MessagesList.class);
+			Intent intent;
+			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) 
+			{
+				intent = new Intent(this, MessagesList.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			}
+			else
+			{
+				intent = getIntent();
+				intent.removeExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+				intent.removeExtra(HikeConstants.Extras.GROUP_CHAT);
+			}
 			startActivity(intent);
 			/* slide down if we're still selecting a user, otherwise slide back */
-			if (mConversation == null) {
+			if (mConversation == null && !intent.hasExtra(HikeConstants.Extras.NAME)) {
 				overridePendingTransition(R.anim.no_animation,
 						R.anim.slide_down_noalpha);
 			} else {
@@ -443,7 +579,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		ConvMessage message = mAdapter.getItem((int) info.id);
-		if (message == null)
+		if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			return false;
 		}
@@ -455,6 +591,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			clipboard.setText(message.getMessage());
 			return true;
 		case R.id.forward:
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra(HikeConstants.Extras.MSG, message.getMessage());
 			startActivity(intent);
@@ -483,12 +620,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
 		super.onPrepareOptionsMenu(menu);
-		/* disable invite if this is a hike user */
-		if (mConversation.isOnhike())
-		{
-			MenuItem item = menu.findItem(R.id.invite_menu);
-			item.setVisible(false);
-		}
 
 		/* don't show a menu item for unblock (since the overlay will be present */
 		MenuItem item = menu.findItem(R.id.block_menu);
@@ -505,9 +636,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			return false;
 		}
-
+		
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.chatthread_menu, menu);
+
+		if (mConversation.isGroupConversation()) 
+		{
+			MenuItem menuItem = menu.findItem(R.id.block_menu);
+			menuItem.setTitle(R.string.leave_group);
+		}
 		return true;
 	}
 
@@ -520,15 +657,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return false;
 		}
 
-		if (item.getItemId() == R.id.invite_menu)
+		if (item.getItemId() == R.id.block_menu)
 		{
-			inviteUser();
-		}
-		else if (item.getItemId() == R.id.block_menu)
-		{
-			mPubSub.publish(HikePubSub.BLOCK_USER, mContactNumber);
-			mUserIsBlocked = true;
-			showOverlay(true);
+			if (!mConversation.isGroupConversation()) 
+			{
+				Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_BLOCK);
+				mPubSub.publish(HikePubSub.BLOCK_USER, mContactNumber);
+				mUserIsBlocked = true;
+				showOverlay(true);
+			}
+			else
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.GROUP_LEFT, mConversation.getMsisdn());
+
+				finish();
+				overridePendingTransition(R.anim.slide_in_left_noalpha,
+						R.anim.slide_out_right_noalpha);
+				
+			}
 		}
 
 		return true;
@@ -546,6 +692,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if(v.getId() != R.id.overlay_layout)
 		{
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.INVITE_OVERLAY_BUTTON);
 			inviteUser();
 		}
 		if(!blockOverlay)
@@ -574,7 +721,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		AdapterView.AdapterContextMenuInfo adapterInfo =
 	            (AdapterView.AdapterContextMenuInfo) menuInfo;
 		ConvMessage message = mAdapter.getItem(adapterInfo.position);
-		if (message == null)
+		if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			return;
 		}
@@ -683,7 +830,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 			createConversation();
 		}
-		else if (intent.hasExtra(HikeConstants.Extras.MSISDN))
+		else if (intent.hasExtra(HikeConstants.Extras.MSISDN) && !intent.hasExtra(HikeConstants.Extras.GROUP_CHAT))
 		{
 			
 			prevContactNumber = mContactNumber;
@@ -768,6 +915,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void createConversation()
 	{
+		findViewById(R.id.title_icon).setVisibility(View.GONE);
+		findViewById(R.id.button_bar_2).setVisibility(View.GONE);
+
 		mComposeView.setFocusable(true);
 		mComposeView.requestFocus();
 		/* hide the number picker */
@@ -780,10 +930,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mConversation = mConversationDb.getConversation(mContactNumber, 1000);
 		if (mConversation == null)
 		{
-			mConversation = mConversationDb.addConversation(mContactNumber, false);
+			mConversation = mConversationDb.addConversation(mContactNumber, false, "");
 		}
 
-		mLabel = mConversation.getLabel();
+		mLabel = mConversation.getLabel(ChatThread.this);
 
 		mLabelView.setText(mLabel);
 
@@ -1300,17 +1450,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	private void addMessage(ConvMessage convMessage)
 	{
-		messages.add(convMessage);
-		mAdapter.notifyDataSetChanged();
-		//Smooth scroll by the minimum distance in the opposite direction, to fix the bug where the list does not scroll at all.
-		mConversationsView.smoothScrollBy(-1, 1);
-		int itemsToScroll = messages.size() - (mConversationsView.getFirstVisiblePosition() + mConversationsView.getChildCount());
-
-		if(itemsToScroll>3)
+		if (messages != null && mAdapter != null) 
 		{
-			mConversationsView.setSelection(messages.size() - 3);
+			messages.add(convMessage);
+			mAdapter.notifyDataSetChanged();
+			//Smooth scroll by the minimum distance in the opposite direction, to fix the bug where the list does not scroll at all.
+			mConversationsView.smoothScrollBy(-1, 1);
+			int itemsToScroll = messages.size()
+					- (mConversationsView.getFirstVisiblePosition() + mConversationsView
+							.getChildCount());
+			if (itemsToScroll > 3) {
+				mConversationsView.setSelection(messages.size() - 3);
+			}
+			mConversationsView.smoothScrollToPosition(messages.size() - 1);
 		}
-		mConversationsView.smoothScrollToPosition(messages.size() - 1);
 	}
 
 	private void removeMessage(ConvMessage convMessage)
@@ -1375,7 +1528,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
 
 		mComposeView.setEnabled(false);
-		String label = mConversation.getLabel();
+		String label = mConversation.getLabel(ChatThread.this);
 		String formatString;
 		if (blockOverlay) 
 		{
@@ -1393,13 +1546,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				
 				@Override
 				public void onClick(View v) {
+					Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.INVITE_OVERLAY_DISMISS);
 					onOverlayButtonClick(mOverlayLayout);
 				}
 			});
 		}
 		/* bold the blocked users name */
 		String formatted = String.format(formatString,
-				mConversation.getLabel());
+				mConversation.getLabel(ChatThread.this));
 		SpannableString str = new SpannableString(formatted);
 		int start = formatString.indexOf("%1$s");
 		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
@@ -1411,14 +1565,82 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		
 		if (v.getId() == R.id.title_image_btn) {
-			inviteUser();
-			if (toolTipLayout != null
-					&& toolTipLayout.getVisibility() == View.VISIBLE) {
-				dismissToolTip();
+			if (!this.mConversation.isGroupConversation()) 
+			{
+				Utils.logEvent(ChatThread.this,
+						HikeConstants.LogEvent.CHAT_INVITE_TOP_BUTTON);
+				inviteUser();
+				if (toolTipLayout != null
+						&& toolTipLayout.getVisibility() == View.VISIBLE) {
+					dismissToolTip();
+				}
+			}
+			else
+			{
+				Intent intent = getIntent();
+				intent.setClass(ChatThread.this, ChatThread.class);
+				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+				intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, this.mConversation.getMsisdn());
+				finish();
+				startActivity(intent);
+				
+				overridePendingTransition(R.anim.slide_in_right_noalpha,
+						R.anim.slide_out_left_noalpha);
 			}
 		}
 		else if (v.getId() == R.id.info_layout) {
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.I_BUTTON);
 			showOverlay(false);
+		}
+		else if (v.getId() == R.id.title_icon) 
+		{
+			mDbhelper.close();
+
+			String groupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+			if (TextUtils.isEmpty(groupId))
+			{
+				// Create new group
+				String uid = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.UID_SETTING, "");
+				mContactNumber = uid + ":" +System.currentTimeMillis();
+			}
+			else
+			{
+				// Group alredy exists. Fetch existing participants.
+				mContactNumber = groupId;
+			}
+			selectedParticipants = Utils.splitSelectedContacts(selectedContacts);
+			ArrayList<ContactInfo> contactInfoList = new ArrayList<ContactInfo>();
+			for(String msisdn : selectedParticipants)
+			{
+				ContactInfo contactInfo = ContactUtils.getContactInfo(msisdn, ChatThread.this);
+				contactInfoList.add(contactInfo != null ? contactInfo : new ContactInfo(msisdn, msisdn, msisdn, msisdn));
+			}
+			
+			Conversation conversation = new Conversation(mContactNumber, 0, mContactNumber, "", false);
+			conversation.setGroupParticipants(contactInfoList);
+
+			Log.d(getClass().getSimpleName(), "Creating group: " + mContactNumber);
+			mConversationDb.addGroupParticipants(mContactNumber, conversation.getGroupParticipants());
+			mConversationDb.addConversation(conversation.getMsisdn(), false, "");
+
+			try 
+			{
+				sendMessage(new ConvMessage(conversation.serialize(NetworkManager.GROUP_CHAT_JOIN), conversation, ChatThread.this, true));
+			}
+			catch (JSONException e) 
+			{
+				e.printStackTrace();
+			}
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, conversation.serialize(NetworkManager.GROUP_CHAT_JOIN));
+			createConversation();
+			mComposeViewWatcher.init();
+			mComposeView.requestFocus();
+
+			mContactName = conversation.getLabel(ChatThread.this);
+			mContactId = conversation.getMsisdn();
+
+			// To prevent the Contact picker layout from being shown on orientation change
+			setIntentFromField();
 		}
 	}
 
@@ -1441,7 +1663,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void changeInviteButtonVisibility()
 	{
-		ImageView titleIconView = (ImageView) findViewById(R.id.title_image_btn);
+		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
 		View btnBar = findViewById(R.id.button_bar);
 		titleIconView.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 		titleIconView.setImageResource(R.drawable.ic_invite_top);
@@ -1449,7 +1671,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		prefs = prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs;
 
- 		if(!prefs.getBoolean(HikeMessengerApp.CHAT_TOOLTIP_DISMISSED, false))
+ 		if(!prefs.getBoolean(HikeMessengerApp.CHAT_TOOLTIP_DISMISSED, false) && !this.mConversation.isGroupConversation())
 		{
 			showInviteToolTip();
 		}
@@ -1472,6 +1694,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	public void onToolTipClosed(View v)
 	{
+		Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.CHAT_TOOL_TIP_CLOSED);
 		dismissToolTip();
 	}
 

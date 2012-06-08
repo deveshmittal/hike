@@ -6,10 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
-import android.sax.StartElementListener;
 import android.text.Spannable;
 import android.text.Spanned;
-import android.text.format.Time;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
@@ -22,10 +20,12 @@ import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.MessageMetadata;
@@ -38,10 +38,10 @@ public class MessagesAdapter extends BaseAdapter
 
 	private enum ViewType
 	{
-		INVITE,
 		RECEIVE,
 		SEND_SMS,
-		SEND_HIKE
+		SEND_HIKE,
+		PARTICIPANT_INFO
 	};
 
 	private class ViewHolder
@@ -50,6 +50,7 @@ public class MessagesAdapter extends BaseAdapter
 		TextView messageTextView;
 		TextView timestampTextView;
 		ImageView image;
+		ViewGroup participantInfoContainer;
 	}
 
 	private Conversation conversation;
@@ -71,9 +72,9 @@ public class MessagesAdapter extends BaseAdapter
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage == null)
+		if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
-			type = ViewType.INVITE;
+			type = ViewType.PARTICIPANT_INFO;
 		}
 		else if (convMessage.isSent())
 		{
@@ -109,7 +110,21 @@ public class MessagesAdapter extends BaseAdapter
 		if (v == null)
 		{
 			holder = new ViewHolder();
-			if (convMessage.isSent())
+			if(convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+			{
+				v = inflater.inflate(R.layout.message_item_receive, null);
+				
+				holder.image = (ImageView) v.findViewById(R.id.avatar);
+				holder.messageTextView = (TextView) v.findViewById(R.id.message_receive);
+				holder.timestampContainer = (LinearLayout) v.findViewById(R.id.timestamp_container);
+				holder.timestampTextView = (TextView) v.findViewById(R.id.timestamp);
+				holder.participantInfoContainer = (ViewGroup) v.findViewById(R.id.participant_info_container);
+
+				holder.image.setVisibility(View.GONE);
+				holder.messageTextView.setVisibility(View.GONE);
+				v.setTag(holder);
+			}
+			else if (convMessage.isSent())
 			{
 				v = inflater.inflate(R.layout.message_item_send, parent, false);
 
@@ -140,6 +155,9 @@ public class MessagesAdapter extends BaseAdapter
 				holder.messageTextView = (TextView) v.findViewById(R.id.message_receive);
 				holder.timestampContainer = (LinearLayout) v.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v.findViewById(R.id.timestamp);
+				holder.participantInfoContainer = (ViewGroup) v.findViewById(R.id.participant_info_container);
+
+				holder.participantInfoContainer.setVisibility(View.GONE);
 				v.setTag(holder);
 			}
 		}
@@ -148,10 +166,72 @@ public class MessagesAdapter extends BaseAdapter
 			holder = (ViewHolder) v.getTag();
 		}
 
-		if (convMessage == null)
+		if (shouldDisplayTimestamp(position))
 		{
+			String dateFormatted = convMessage.getTimestampFormatted(false);
+			holder.timestampTextView.setText(dateFormatted.toUpperCase());
+			holder.timestampContainer.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			holder.timestampContainer.setVisibility(View.GONE);
+		}
+
+		if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+		{
+			((ViewGroup)holder.participantInfoContainer).removeAllViews();
+
+			if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
+			{
+				int left = (int) (0 * Utils.densityMultiplier);
+				int top = (int) (0 * Utils.densityMultiplier);
+				int right = (int) (0 * Utils.densityMultiplier);
+				int bottom = (int) (6 * Utils.densityMultiplier);
+
+				String msg = convMessage.getMessage();
+				String[] participantInfoArray = msg.contains(", ") ? msg.split(", ") : new String[] {msg};
+
+				for (int i = 0; i < participantInfoArray.length; i++) 
+				{
+					Log.d(getClass().getSimpleName(), "Joined: " + participantInfoArray[i]);
+
+					TextView participantInfo = (TextView) inflater.inflate(
+							R.layout.participant_info, null);
+
+					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+
+					if (i != participantInfoArray.length - 1) 
+					{
+						participantInfo.setText(Utils.getFormattedParticipantInfo(participantInfoArray[i] + " " + context.getString(R.string.joined_conversation)));
+						lp.setMargins(left, top, right, bottom);
+					}
+					else
+					{
+						participantInfo.setText(Utils.getFormattedParticipantInfo(participantInfoArray[i]));
+						lp.setMargins(left, top, right, 0);
+					}
+					participantInfo.setLayoutParams(lp);
+
+					((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+				}
+			} 
+			else 
+			{
+				Log.d(getClass().getSimpleName(), "Left: " + convMessage.getMessage());
+				TextView participantInfo = (TextView) inflater.inflate(R.layout.participant_info, null);
+				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
+				{
+					participantInfo.setText(Utils.getFormattedParticipantInfo(convMessage.getMessage()));
+				}
+				else
+				{
+					participantInfo.setText(convMessage.getMessage());
+				}
+				((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+			}
 			return v;
 		}
+			
 
 		MessageMetadata metadata = convMessage.getMetadata();
 		final String dndMissedCalledNumber = metadata != null ? metadata.getDNDMissedCallNumber() : null;
@@ -159,7 +239,7 @@ public class MessagesAdapter extends BaseAdapter
 		if (dndMissedCalledNumber != null)
 		{
 			String content = "tap here";
-			String message = context.getString(R.string.dnd_message, convMessage.getConversation().getLabel(), dndMissedCalledNumber);
+			String message = context.getString(R.string.dnd_message, convMessage.getConversation().getLabel(this.context), dndMissedCalledNumber);
 			Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
 			int index = message.indexOf(content);
 			spannable.setSpan(new ClickableSpan()
@@ -180,20 +260,13 @@ public class MessagesAdapter extends BaseAdapter
 		{
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			CharSequence markedUp = smileyParser.addSmileySpans(convMessage.getMessage());
+			if(convMessage.isGroupChat() && !convMessage.isSent() && convMessage.getGroupParticipantMsisdn() != null)
+			{
+				markedUp = Utils.addContactName(this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp);
+			}
 			holder.messageTextView.setText(markedUp);
 			Linkify.addLinks(holder.messageTextView, Linkify.ALL);
 			Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
-		}
-
-		if (shouldDisplayTimestamp(position))
-		{
-			String dateFormatted = convMessage.getTimestampFormatted(false);
-			holder.timestampTextView.setText(dateFormatted.toUpperCase());
-			holder.timestampContainer.setVisibility(View.VISIBLE);
-		}
-		else
-		{
-			holder.timestampContainer.setVisibility(View.GONE);
 		}
 
 		/* set the image resource, getImageState returns -1 if this is a received image */
@@ -217,7 +290,7 @@ public class MessagesAdapter extends BaseAdapter
 		}
 		else
 		{
-			holder.image.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(convMessage.getMsisdn()));
+			holder.image.setImageDrawable(convMessage.isGroupChat() ? IconCacheManager.getInstance().getIconForMSISDN(convMessage.getGroupParticipantMsisdn()) : IconCacheManager.getInstance().getIconForMSISDN(convMessage.getMsisdn()));
 		}
 
 		return v;

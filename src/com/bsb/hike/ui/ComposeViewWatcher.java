@@ -138,7 +138,7 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 	}
 
 	@Override
-	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
+	public void onTextChanged(CharSequence s, int arg1, int arg2, int arg3)
 	{
 	}
 
@@ -150,4 +150,4 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 			mCredits = ((Integer) object).intValue();
 		}
 	}
-};
+}

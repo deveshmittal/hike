@@ -31,6 +31,16 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		return name;
 	}
 
+	public String getFirstName()
+	{
+		int i;
+		if((i = this.name.indexOf(" ")) != -1)
+		{
+			return name.substring(0, i);
+		}
+		return name;
+	}
+
 	public void setName(String name)
 	{
 		this.name = name;

@@ -20,6 +20,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
@@ -65,19 +66,23 @@ public class ToastListener implements Listener
 		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			ConvMessage message = (ConvMessage) object;
-			Activity activity = (currentActivity != null) ? currentActivity.get() : null;
-			if ((activity instanceof ChatThread))
+			if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 			{
-				String contactNumber = ((ChatThread) activity).getContactNumber();
-				if (message.getMsisdn().equals(contactNumber))
-				{
-					return;
+				Activity activity = (currentActivity != null) ? currentActivity
+						.get() : null;
+				if ((activity instanceof ChatThread)) {
+					String contactNumber = ((ChatThread) activity)
+							.getContactNumber();
+					if (message.getMsisdn().equals(contactNumber)) {
+						return;
+					}
 				}
+				/* the foreground activity isn't going to show this message so Toast it */
+				ContactInfo contactInfo = message.isGroupChat() ? 
+						new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(context), message.getMsisdn()) 
+							: this.db.getContactInfoFromMSISDN(message.getMsisdn());
+				this.toaster.notify(contactInfo, message);
 			}
-
-			/* the foreground activity isn't going to show this message so Toast it */
-			ContactInfo contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn());
-			this.toaster.notify(contactInfo, message);
 		}
 		else if (HikePubSub.CONNECTION_STATUS.equals(type))
 		{

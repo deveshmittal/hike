@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,12 +23,16 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NetworkManager;
+import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.mqtt.client.Buffer;
 import com.bsb.hike.mqtt.client.Callback;
@@ -224,6 +227,10 @@ public class HikeMqttManager implements Listener
 
 	private SharedPreferences settings;
 	private SharedPreferences prefs;
+
+	private ConvMessage convMessage;
+
+	private Conversation conversation;
 
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
@@ -706,7 +713,42 @@ public class HikeMqttManager implements Listener
 				editor.putInt(HikeMessengerApp.INVITED_JOINED, invited_joined);
 				editor.commit();
 			}
+			else if (NetworkManager.GROUP_CHAT_JOIN.equals(type))
+			{
+				conversation = new Conversation(jsonObj, this.mHikeService);
+				this.convDb.addGroupParticipants(conversation.getMsisdn(), conversation.getGroupParticipants());
 
+				if (!this.convDb.doesConversationExist(conversation)) 
+				{
+					Log.d(getClass().getSimpleName(), "The group conversation does not exists");
+					conversation = this.convDb.addConversation(conversation.getMsisdn(), false, "");
+
+					convMessage = new ConvMessage(this.mHikeService.getString(R.string.you_joined_conversation), conversation.getMsisdn(), System.currentTimeMillis(), State.RECEIVED_UNREAD);
+					convMessage.setConversation(conversation);
+					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + convMessage.getMessage());
+				}
+				else
+				{
+					StringBuilder participants = new StringBuilder();
+					for(ContactInfo contactInfo : conversation.getGroupParticipants())
+					{
+						participants.append(contactInfo.getFirstName() + ", ");
+					}
+					participants.delete(participants.length() - 2, participants.length());
+					convMessage = new ConvMessage(participants + this.mHikeService.getString(R.string.joined_conversation), conversation.getMsisdn(), System.currentTimeMillis(), State.RECEIVED_UNREAD);
+
+					conversation = this.convDb.getConversation(conversation.getMsisdn(), 0);
+					convMessage.setConversation(conversation);
+					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel(mHikeService));
+				}
+				
+			}
+			else if (NetworkManager.GROUP_CHAT_LEAVE.equals(type))
+			{
+				String groupId = jsonObj.optString(HikeConstants.TO);
+				String msisdn = jsonObj.optString(HikeConstants.FROM);
+				this.convDb.removeParticipant(groupId, msisdn);
+			}
 			/*
 			 * Check if message was already received by the receiver
 			 */
@@ -744,7 +786,8 @@ public class HikeMqttManager implements Listener
 				{
 					ConvMessage convMessage = new ConvMessage(jsonObj);
 					this.convDb.addConversationMessages(convMessage);
-					ContactInfo contactInfo = ContactUtils.getContactInfo(convMessage.getMsisdn(), this.mHikeService);
+					ContactInfo contactInfo;
+					contactInfo = !convMessage.isGroupChat() ? ContactUtils.getContactInfo(convMessage.getMsisdn(), this.mHikeService) : new ContactInfo(convMessage.getMsisdn(), convMessage.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), convMessage.getMsisdn());
 					toaster.notify(contactInfo, convMessage);
 				}
 				catch (JSONException e)
@@ -752,13 +795,22 @@ public class HikeMqttManager implements Listener
 					Log.e("JSON", "Invalid JSON", e);
 				}
 			}
+			else if (NetworkManager.GROUP_CHAT_JOIN.equals(type) || NetworkManager.GROUP_CHAT_LEAVE.equals(type) || NetworkManager.GROUP_CHAT_END.equals(type))
+			{
+				ConvMessage convMessageToBeAddedToDB = new ConvMessage(jsonObj, conversation, this.mHikeService, false);
+				this.convDb.addConversationMessages(convMessageToBeAddedToDB);
+				// Only notify user if participant has joined.
+				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
+				{
+					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel(mHikeService));
+					toaster.notify(new ContactInfo(conversation.getMsisdn(), conversation.getMsisdn(), conversation.getLabel(mHikeService), conversation.getMsisdn()), convMessage);
+				}
+			}
 			else
 			{
 				/* just save it */
 				this.mHikeService.storeMessage(messageBody);
 			}
-			
-
 			// receiving this message will have kept the connection alive for us, so
 			// we take advantage of this to postpone the next scheduled ping
 			this.mHikeService.scheduleNextPing();
