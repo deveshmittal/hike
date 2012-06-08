@@ -31,6 +31,7 @@ public class HikeConstants
 	public static final String PIN_ERROR = "PinError";
 	public static final String ADDRESS_BOOK_ERROR = "AddressBookError";
 	public static final String CHANGE_NUMBER = "ChangeNumber"; 
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 
@@ -93,7 +94,10 @@ public class HikeConstants
 		public static final String EMAIL = "email";
 		public static final String GENDER = "gender";
 		public static final String OVERLAY_SHOWING = "overlayShowing";
+		public static final String GROUP_CHAT = "groupChat";
 		public static final String EMOTICON_SHOWING = "emoticonShowing";
+		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
+		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
 	}
 
 	public static final class LogEvent

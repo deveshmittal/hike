@@ -7,14 +7,15 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
 
 public class ConvMessage
@@ -41,6 +42,12 @@ public class ConvMessage
 
 	private MessageMetadata metadata;
 
+	private String groupParticipantMsisdn;
+
+	private boolean mIsGroupParticipantInfo;
+
+	private boolean mHasParticipantJoined;
+	
 	public boolean isInvite()
 	{
 		return mInvite;
@@ -71,6 +78,16 @@ public class ConvMessage
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId)
 	{
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, null);
+	}
+
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId, String groupParticipantMsisdn)
+	{
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false, false);
+	}
+	
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId, String groupParticipantMsisdn, boolean isGroupParticipantInfo, boolean mHasParticipantJoined)
+	{
 		assert(msisdn != null);
 		this.mMsisdn = msisdn;
 		this.mMessage = message;
@@ -83,46 +100,80 @@ public class ConvMessage
 					msgState == State.SENT_DELIVERED_READ ||
 					msgState == State.SENT_FAILED);
 		setState(msgState);
+		this.groupParticipantMsisdn = groupParticipantMsisdn;
+		this.mIsGroupParticipantInfo = isGroupParticipantInfo;
+		this.mHasParticipantJoined = mHasParticipantJoined;
 	}
 
 	public ConvMessage(JSONObject obj) throws JSONException
 	{
-		this.mMsisdn = obj.getString(HikeConstants.FROM); /*represents msg is coming from another client*/
+		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*represents msg is coming from another client*/
+		this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
 		JSONObject data = obj.getJSONObject(HikeConstants.DATA);
-		if (data.has(HikeConstants.SMS_MESSAGE))
+		if (data.has(HikeConstants.SMS_MESSAGE)) 
 		{
 			this.mMessage = data.getString(HikeConstants.SMS_MESSAGE);
 			mIsSMS = true;
-		} else
+		} 
+		else 
 		{
 			this.mMessage = data.getString(HikeConstants.HIKE_MESSAGE);
 			mIsSMS = false;
 		}
-
 		this.mTimestamp = data.getLong(HikeConstants.TIMESTAMP);
-
 		/* prevent us from receiving a message from the future */
-		long now = System.currentTimeMillis()/1000;
+		long now = System.currentTimeMillis() / 1000;
 		this.mTimestamp = (this.mTimestamp > now) ? now : this.mTimestamp;
 		/* if we're deserialized an object from json, it's always unread */
 		setState(State.RECEIVED_UNREAD);
 		msgID = -1;
 		String mappedMsgID = data.getString(HikeConstants.MESSAGE_ID);
-		try
+		try 
 		{
-			this.mappedMsgId=Long.parseLong(mappedMsgID);
-		}
-		catch(NumberFormatException e)
+			this.mappedMsgId = Long.parseLong(mappedMsgID);
+		} 
+		catch (NumberFormatException e) 
 		{
-			Log.e("CONVMESSAGE", "Exception occured while parsing msgId. Exception : "+e);
+			Log.e("CONVMESSAGE",
+					"Exception occured while parsing msgId. Exception : "
+							+ e);
 			this.mappedMsgId = -1;
 			throw new JSONException("Problem in JSON while parsing msgID.");
 		}
-
-		if (data.has(HikeConstants.METADATA))
+		if (data.has(HikeConstants.METADATA)) 
 		{
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
+	}
+
+	public ConvMessage(JSONObject obj, Conversation conversation, Context context, boolean isSelfGenerated) throws JSONException
+	{
+		// GCL or GCJ
+		// If the message is a group message we get a TO field consisting of the Group ID
+		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*represents msg is coming from another client*/
+		this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
+		this.mIsGroupParticipantInfo = true;
+		this.mHasParticipantJoined = obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_JOIN);
+		this.metadata = new MessageMetadata(obj);
+		if (hasParticipantJoined()) 
+		{
+			JSONArray arr = obj.getJSONArray(HikeConstants.DATA);
+			StringBuilder newParticipants = new StringBuilder();
+			for (int i = 0; i < arr.length(); i++) 
+			{
+				Log.d(getClass().getSimpleName(), "Joined: " + arr.getString(i));
+				newParticipants.append(Utils.getContactName(conversation.getGroupParticipants(), arr.getString(i)) + ", ");
+			}
+			this.mMessage = newParticipants.substring(0, newParticipants.length() - 2) + " " + context.getString(R.string.joined_conversation); 
+		} 
+		else 
+		{
+			Log.d(getClass().getSimpleName(), "Left: " + obj.getString(HikeConstants.DATA));
+			this.mMessage = Utils.getContactName(conversation.getGroupParticipants(), obj.getString(HikeConstants.DATA)) + " " + context.getString(R.string.left_conversation);
+		}
+		this.mTimestamp = System.currentTimeMillis() / 1000;
+		this.mConversation = conversation;
+		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}
 
 	public void setMetadata(JSONObject metadata)
@@ -170,6 +221,31 @@ public class ConvMessage
 	public String getMsisdn()
 	{
 		return mMsisdn;
+	}
+
+	public String getGroupParticipantMsisdn()
+	{
+		return groupParticipantMsisdn;
+	}
+
+	public boolean isGroupParticipantInfo()
+	{
+		return mIsGroupParticipantInfo;
+	}
+
+	public boolean hasParticipantJoined()
+	{
+		return mHasParticipantJoined;
+	}
+
+	public void setIsGroupParticipantInfo(boolean mIsGroupParticipantInfo)
+	{
+		this.mIsGroupParticipantInfo = mIsGroupParticipantInfo;
+	}
+
+	public void setHasParticipantJoined(boolean mHasParticipantJoined)
+	{
+		this.mHasParticipantJoined = mHasParticipantJoined;
 	}
 
 	@Override
@@ -373,5 +449,10 @@ public class ConvMessage
 		default:
 			return R.drawable.ic_blank;
 		}
+	}
+
+	public boolean isGroupChat()
+	{
+		return Utils.isGroupConversation(this.mMsisdn);
 	}
 }

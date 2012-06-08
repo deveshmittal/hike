@@ -161,6 +161,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 		setContentView(R.layout.main);
 
+		Utils.setDensityMultiplier(MessagesList.this);
 		//TODO Remove this from here. Analytics - For testing purposes only
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(MessagesList.this));
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceStats(MessagesList.this));
@@ -221,7 +222,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		{
 			Conversation conv = (Conversation) iter.next();
 			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-			if (conv.getMessages().isEmpty())
+			if (conv.getMessages().isEmpty() && !conv.isGroupConversation())
 			{
 				iter.remove();
 			}
@@ -252,6 +253,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MSG_READ, this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_LEFT, this);
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
@@ -297,7 +299,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			Intent intent = new Intent();
 			Log.i("CreateShortcut", "Creating intent for broadcasting");
 			intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-			intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
+			intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel(MessagesList.this));
 			Drawable d = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
 			Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
 			Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 60, 60, false);
@@ -308,8 +310,10 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			return true;
 		case R.id.delete:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DELETE_CONVERSATION, 0);
-			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-			task.execute(conv);
+			if(conv.isGroupConversation())
+			{
+				leaveGroup(conv);
+			}
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -368,7 +372,9 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			startActivity(intent);
 			return true;
 		case R.id.feedback:
-			intent = new Intent(this, FeedbackActivity.class);
+//			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.FEEDBACK_MENU, 0);
+			intent = new Intent(this, ChatThread.class);
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			startActivity(intent);
 			return true;
 		default:
@@ -380,6 +386,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	protected void onDestroy()
 	{
 		super.onDestroy();
+		Log.d(getClass().getSimpleName(), "onDestroy " + this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MSG_READ, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
@@ -389,6 +396,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_LEFT, this);
 	}
 
 	@Override
@@ -414,6 +422,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			/* find the conversation corresponding to this message */
 			String msisdn = message.getMsisdn();
 			final Conversation conv = mConversationsByMSISDN.get(msisdn);
+			
 			if (conv == null)
 			{
 				// When a message gets sent from a user we don't have a conversation for, the message gets
@@ -421,7 +430,13 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 				// when the conversation is broadcasted it will contain the messages
 				return;
 			}
-
+			// For updating the group name if some participant has joined or left the group
+			else if(conv.isGroupConversation() && message.isGroupParticipantInfo())
+			{
+				HikeConversationsDatabase hCDB = new HikeConversationsDatabase(MessagesList.this);
+				conv.setGroupParticipants(hCDB.getGroupParticipants(conv.getMsisdn()));
+				hCDB.close();
+			}
 			runOnUiThread(new Runnable(){
 				@Override
 				public void run()
@@ -444,8 +459,9 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		else if (HikePubSub.NEW_CONVERSATION.equals(type))
 		{
 			final Conversation conversation = (Conversation) object;
+			Log.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + conversation.isGroupConversation());
 			mConversationsByMSISDN.put(conversation.getMsisdn(), conversation);
-			if (conversation.getMessages().isEmpty())
+			if (conversation.getMessages().isEmpty() && !conversation.isGroupConversation())
 			{
 				return;
 			}
@@ -456,6 +472,10 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 				public void run()
 				{
 					mAdapter.add(conversation);
+					if (conversation.isGroupConversation()) 
+					{
+						mAdapter.notifyDataSetChanged();
+					}
 					mAdapter.setNotifyOnChange(false);
 				}
 			});
@@ -533,6 +553,18 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		{
 			/* an icon changed, so update the view */
 			runOnUiThread(this);
+		}
+		else if (HikePubSub.GROUP_LEFT.equals(type))
+		{
+			final String groupId = (String) object;
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					leaveGroup(MessagesList.this.mConversationsByMSISDN.get(groupId));
+				}
+			});
 		}
 	}
 
@@ -630,5 +662,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	{
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLICKED, 0);
 		onTitleIconClick(null);
+	}
+
+	private void leaveGroup(Conversation conv)
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(NetworkManager.GROUP_CHAT_LEAVE));
+		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+		task.execute(conv);
 	}
 }

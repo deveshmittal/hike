@@ -134,4 +134,8 @@
 	<string name="no_sd_card">Please insert an SD Card</string>
 	<string name="press_btn_invite">Tap this button to invite %1$s to hike.</string>
 	<string name="invalid_email">Invalid email address</string>
+	<string name="joined_conversation">&#160;joined the group chat!</string>
+	<string name="left_conversation">&#160;left the group chat.</string>
+	<string name="you_joined_conversation">You just joined a group chat!</string>
+	<string name="leave_group">Leave group</string>
 </resources>

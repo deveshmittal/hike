@@ -76,7 +76,8 @@
                 android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
                 android:textSize="14sp"
                 android:textColor="@color/lightblack" 
-                android:textStyle="italic"/>
+                android:textStyle="italic"
+                android:visibility="invisible"/>
         </LinearLayout>
     </RelativeLayout>
 

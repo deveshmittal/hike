@@ -98,7 +98,7 @@ public class ContactUtils
 			String id = cursor.getString(cursor.getColumnIndexOrThrow(PhoneLookup._ID));
 			db = new HikeUserDatabase(context);
 			ContactInfo contactInfo = db.getContactInfoFromId(id);
-			return contactInfo;
+			return contactInfo != null ? contactInfo : new ContactInfo(id, phoneNumber, cursor.getString(cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME)), phoneNumber);
 		}
 		catch (Exception e)
 		{

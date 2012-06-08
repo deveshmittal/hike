@@ -7,7 +7,9 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.util.Log;
 
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 
 /**
@@ -43,15 +45,25 @@ public class NetworkManager implements HikePubSub.Listener
 
 	public static final String INVITE_INFO = "ii";
 
+	public static final String GROUP_CHAT_JOIN = "gcj";
+
+	public static final String GROUP_CHAT_LEAVE = "gcl";
+
+	public static final String GROUP_CHAT_END = "gce";
+
+	public static final String ANALYTICS_EVENT = "le";
+
 	private HikePubSub pubSub;
 
-
 	private static volatile NetworkManager instance;
+
+	private Context context;
 
 	private NetworkManager(Context context)
 	{
 		pubSub = HikeMessengerApp.getPubSub();
 		pubSub.addListener(HikePubSub.WS_RECEIVED, this);
+		this.context = context;
 	}
 
 	public static NetworkManager getInstance(Context context)
@@ -168,6 +180,26 @@ public class NetworkManager implements HikePubSub.Listener
 		else if ((ICON.equals(type)))
 		{
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		}
+		else if(GROUP_CHAT_JOIN.equals(type) || GROUP_CHAT_LEAVE.equals(type))
+		{
+			try
+			{
+				HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
+				Conversation conversation = hCDB.getConversation(jsonObj.getString(HikeConstants.TO), 0);
+				hCDB.close();
+				ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
+				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, convMessage);
+			}
+			catch (JSONException e)
+			{
+				Log.d("NETWORK MANAGER", "Invalid JSON", e);
+			}
+		}
+		else if(GROUP_CHAT_END.equals(type))
+		{
+			String groupId = jsonObj.optString(HikeConstants.FROM);
+			this.pubSub.publish(HikePubSub.GROUP_END, groupId);
 		}
 		else
 		{

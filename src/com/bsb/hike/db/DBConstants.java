@@ -19,7 +19,9 @@ public class DBConstants
 	public static final String USERS_DATABASE_NAME = "hikeusers";
 	
 	public static final String USERS_TABLE = "users";
-	
+
+	public static final String GROUP_TABLE = "groups";
+
 	/* Table Constants */
 	
 	public static final String MESSAGE = "message";
@@ -57,4 +59,12 @@ public class DBConstants
 	public static final String IMAGE = "image";
 
 	public static final String OVERLAY_DISMISSED = "overlayDismissed";
+
+	public static final String GROUP_ID = "groupId";
+
+	public static final String GROUP_NAME = "groupName";
+
+	public static final String GROUP_INDEX = "group_idx";
+
+	public static final String GROUP_PARTICIPANT = "groupParticipant";
 }

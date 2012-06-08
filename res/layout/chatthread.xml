@@ -21,7 +21,8 @@
         <LinearLayout
             android:id="@+id/input_number_container"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
             android:background="@color/white"
             android:orientation="horizontal"
             android:gravity="center_vertical" >
@@ -50,6 +51,28 @@
                 android:textColorHint="#cdcdc8"
                 android:textColor="@color/lightblack" >
             </AutoCompleteTextView>
+            
+            <MultiAutoCompleteTextView 
+                android:id="@+id/input_number_multi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:completionThreshold="1"
+                android:dropDownVerticalOffset="7dp"
+                android:dropDownWidth="match_parent"
+                android:fadingEdge="none"
+                android:hint="Start typing a name..."
+                android:imeOptions="actionNone"
+                android:paddingBottom="7dp"
+                android:paddingRight="18dp"
+                android:paddingTop="7dp"
+                android:paddingLeft="10dp"
+                android:drawableLeft="@drawable/ic_name_2"
+                android:drawablePadding="10dp"
+                android:textSize="16sp"
+                android:textColorHint="#cdcdc8"
+                android:textColor="@color/lightblack"
+                android:visibility="gone" />
         </LinearLayout>
 		
 		<RelativeLayout
@@ -63,7 +86,8 @@
 		        android:layout_height="fill_parent"
 		        android:cacheColorHint="#00000000"
 		        android:divider="@null"
-		        android:fadingEdge="none" >
+		        android:fadingEdge="none"
+		        android:listSelector="@android:color/transparent" >
 		    </ListView>
 
 		    <include layout="@layout/tool_tip"/>

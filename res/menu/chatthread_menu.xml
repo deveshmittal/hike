@@ -3,8 +3,4 @@
         android:id="@+id/block_menu"
         android:title="@string/block_title"
         android:icon="@drawable/ic_unblock"/>
-    <item
-        android:id="@+id/invite_menu"
-        android:title="@string/invite"
-        android:icon="@drawable/ic_invite"/>
 </menu>

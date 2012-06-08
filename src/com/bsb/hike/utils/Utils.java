@@ -2,11 +2,14 @@ package com.bsb.hike.utils;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.JSONArray;
@@ -26,6 +29,7 @@ import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -33,7 +37,12 @@ import android.os.Environment;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -52,6 +61,7 @@ import com.bsb.hike.utils.AccountUtils.AccountInfo;
 public class Utils
 {
 	public static Pattern shortCodeRegex;
+	public static Pattern msisdnRegex; 
 
 	public static String shortCodeIntent;
 
@@ -62,9 +72,12 @@ public class Utils
 
 	private static TranslateAnimation mInFromRight;
 
+	public static float densityMultiplier;
+
 	static
 	{
 		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
+		msisdnRegex = Pattern.compile("\\[(\\+\\d*)\\]");
 	}
 
 	public static String join(Collection<?> s, String delimiter, boolean quote)
@@ -431,6 +444,47 @@ public class Utils
 		editor.putInt(event, currentVal);
 		editor.commit();
 	}
+
+	public static ArrayList<String> splitSelectedContacts(String selections)
+	{
+		Matcher matcher = msisdnRegex.matcher(selections);
+		ArrayList<String> contacts = new ArrayList<String>();
+		if (matcher.find()) 
+		{
+			do 
+			{
+				contacts.add(matcher.group().substring(1, matcher.group().length() - 1));
+				Log.d("Utils", "Adding: " + matcher.group().substring(1, matcher.group().length() - 1));
+			} 
+			while (matcher.find(matcher.end()));
+		}
+		return contacts;
+	}
+
+	public static boolean isGroupConversation(String msisdn)
+	{
+		return !msisdn.startsWith("+");
+	}
+
+	public static String defaultGroupName(List<ContactInfo> participantList, Context context)
+	{
+		if (participantList.size() > 0) {
+			Log.d("Utils",
+					"Fetching name for contact: " + participantList.get(0));
+			switch (participantList.size()) {
+			case 1:
+				return participantList.get(0).getFirstName();
+			case 2:
+				return participantList.get(0).getFirstName() + " and "
+						+ participantList.get(1).getFirstName();
+			default:
+				return participantList.get(0).getFirstName() + " and "
+						+ (participantList.size() - 1) + " others";
+			}
+		}
+		return "";
+	}
+
 	
 	public static JSONObject getDeviceDetails(Context context)
 	{
@@ -495,5 +549,47 @@ public class Utils
 		}
 
 		return obj;
+	}
+
+	public static String getContactName(List<ContactInfo> participantList, String msisdn)
+	{
+		String name = msisdn;
+		for(ContactInfo contactInfo : participantList)
+		{
+			if(contactInfo.getMsisdn().equals(msisdn))
+			{
+				return contactInfo.getFirstName();
+			}
+		}
+		return name;
+	}
+
+	public static CharSequence addContactName(List<ContactInfo> participantList, String msisdn, CharSequence message)
+	{
+		String name = getContactName(participantList, msisdn);
+		SpannableStringBuilder messageWithName = new SpannableStringBuilder(name + " - " + message);
+		messageWithName.setSpan(new StyleSpan(Typeface.BOLD), 0, name.length() + 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		return messageWithName;
+	}
+
+	/**
+	 * Used for setting the density multiplier, which is to be multiplied with any pixel value that is programmatically given
+	 * @param activity
+	 */
+	public static void setDensityMultiplier(Activity activity)
+	{
+		if(Utils.densityMultiplier == 0.0f)
+		{
+			DisplayMetrics metrics = new DisplayMetrics();
+			activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+			Utils.densityMultiplier = metrics.scaledDensity;
+		}
+	}
+
+	public static CharSequence getFormattedParticipantInfo(String info)
+	{
+		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
+		ssb.setSpan(new ForegroundColorSpan(0xff666666), 0, info.indexOf(" "), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		return ssb;
 	}
 }
