@@ -427,21 +427,25 @@ public class Utils
 				android.util.Patterns.EMAIL_ADDRESS.matcher(text).matches());
 	}
 
+	public static void logEvent(Context context, String event)
+	{
+		logEvent(context, event, 1);
+	}
+
 	/**
 	 * Used for logging the UI based events from the clients side. 
 	 * @param context
 	 * @param event: The event which is to be logged.
 	 * @param time: This is only used to signify the time the user was on a screen for. For cases where this is not relevant we send 0.s
 	 */
-	public static void logEvent(Context context, String event, int time)
+	public static void logEvent(Context context, String event, long increment)
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
 		
-		int currentVal = prefs.getInt(event, 0);
-		currentVal = time == 0 ? currentVal+1 : currentVal + time;
+		long currentVal = prefs.getLong(event, 0) + increment;
 
 		Editor editor = prefs.edit();
-		editor.putInt(event, currentVal);
+		editor.putLong(event, currentVal);
 		editor.commit();
 	}
 
@@ -536,7 +540,7 @@ public class Utils
 			{
 				String key = i.next();
 				Log.d("Utils", "Getting keys: " + key);
-				data.put(key, prefs.getInt(key, 0));
+				data.put(key, prefs.getLong(key, 0));
 			}
 			data.put(HikeConstants.LogEvent.TAG, "mob");
 			

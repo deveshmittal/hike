@@ -99,7 +99,7 @@ public abstract class ProfileItem
 		@Override
 		public Intent getIntent(Context context)
 		{
-			Utils.logEvent(context, HikeConstants.LogEvent.CREDITS_SCREEN, 0);
+			Utils.logEvent(context, HikeConstants.LogEvent.CREDITS_SCREEN);
 			return new Intent(context, CreditsActivity.class);
 /*			Uri uri = Uri.parse("http://www.bsb.com/hike-help/" + settingsName);
 			return new Intent(Intent.ACTION_VIEW, uri);

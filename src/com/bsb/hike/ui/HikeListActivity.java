@@ -127,7 +127,7 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	{
 		if(v != null)
 		{
-			Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.CREDIT_TOP_BUTTON, 0);
+			Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.CREDIT_TOP_BUTTON);
 		}
 		setToolTipDismissed();
 		Intent i = new Intent(HikeListActivity.this, CreditsActivity.class);
@@ -153,13 +153,13 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	
 	public void onToolTipClicked(View v)
 	{
-		Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.INVITE_TOOL_TIP_CLICKED, 0);
+		Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.INVITE_TOOL_TIP_CLICKED);
 		onTitleIconClick(null);
 	}
 
 	public void onToolTipClosed(View v)
 	{
-		Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.INVITE_TOOL_TIP_CLOSED, 0);
+		Utils.logEvent(HikeListActivity.this, HikeConstants.LogEvent.INVITE_TOOL_TIP_CLOSED);
 		setToolTipDismissed();
 	}
 	

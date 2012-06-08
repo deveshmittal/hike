@@ -57,12 +57,12 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		Preference blockPreference = getPreferenceScreen().findPreference(getString(R.string.block_key));
 		if (blockPreference != null)
 		{
-			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.PRIVACY_SCREEN, 0);
+			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.PRIVACY_SCREEN);
 			blockPreference.setOnPreferenceClickListener(this);
 		}
 		else
 		{
-			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.NOTIFICATION_SCREEN, 0);
+			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.NOTIFICATION_SCREEN);
 		}
 		Preference deletePreference = getPreferenceScreen().findPreference(getString(R.string.delete_key));
 		if(deletePreference != null)
@@ -114,7 +114,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		Log.d("HikePreferences", "Preference clicked: "+preference.getKey());
 		if (preference.getKey().equals(getString(R.string.block_key))) 
 		{
-			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.BLOCK_SCREEN, 0);
+			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.BLOCK_SCREEN);
 			Intent intent = new Intent(this, HikeListActivity.class);
 			intent.putExtra(HikeConstants.ADAPTER_NAME,
 					HikeBlockedUserAdapter.class.getName());

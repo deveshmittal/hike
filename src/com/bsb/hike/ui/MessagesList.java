@@ -294,7 +294,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		switch (item.getItemId())
 		{
 		case R.id.shortcut:
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.ADD_SHORTCUT, 0);
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.ADD_SHORTCUT);
 			Intent shortcutIntent = createIntentForConversation(conv);
 			Intent intent = new Intent();
 			Log.i("CreateShortcut", "Creating intent for broadcasting");
@@ -309,7 +309,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			sendBroadcast(intent);
 			return true;
 		case R.id.delete:
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DELETE_CONVERSATION, 0);
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DELETE_CONVERSATION);
 			if(conv.isGroupConversation())
 			{
 				leaveGroup(conv);
@@ -344,7 +344,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.MENU, 0);
+		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.MENU);
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -354,12 +354,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		switch (item.getItemId())
 		{
 		case R.id.invite:
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU, 0);
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU);
 			onTitleIconClick(null);
 			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {
-				Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU, 0);
+				Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setMessage(R.string.delete_all_question)
 						.setPositiveButton("Delete", this)
@@ -367,7 +367,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			}
 			return true;
 		case R.id.profile:
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.PROFILE_MENU, 0);
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.PROFILE_MENU);
 			intent = new Intent(this, ProfileActivity.class);
 			startActivity(intent);
 			return true;
@@ -404,7 +404,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 	{
 		if ((v == mEditMessageIconView))
 		{
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.COMPOSE_BUTTON, 0);
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.COMPOSE_BUTTON);
 			Intent intent = new Intent(this, ChatThread.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 			startActivity(intent);
@@ -645,14 +645,14 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	public void onToolTipClosed(View v)
 	{
-		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLOSED, 0);
+		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLOSED);
 		setToolTipDismissed();
 	}
 
 	public void onTitleIconClick(View v)
 	{
 		if (v != null) {
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_INVITE_TOP_BUTTON, 0);
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_INVITE_TOP_BUTTON);
 		}
 		setToolTipDismissed();
 		invite();
@@ -660,7 +660,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	public void onToolTipClicked(View v)
 	{
-		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLICKED, 0);
+		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLICKED);
 		onTitleIconClick(null);
 	}
 
