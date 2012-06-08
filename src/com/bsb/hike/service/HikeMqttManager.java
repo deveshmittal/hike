@@ -30,6 +30,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikePacket;
@@ -794,12 +795,12 @@ public class HikeMqttManager implements Listener
 					Log.e("JSON", "Invalid JSON", e);
 				}
 			}
-			else if (NetworkManager.GROUP_CHAT_JOIN.equals(type) || NetworkManager.GROUP_CHAT_LEAVE.equals(type))
+			else if (NetworkManager.GROUP_CHAT_JOIN.equals(type) || NetworkManager.GROUP_CHAT_LEAVE.equals(type) || NetworkManager.GROUP_CHAT_END.equals(type))
 			{
 				ConvMessage convMessageToBeAddedToDB = new ConvMessage(jsonObj, conversation, this.mHikeService, false);
 				this.convDb.addConversationMessages(convMessageToBeAddedToDB);
 				// Only notify user if participant has joined.
-				if (convMessage.hasParticipantJoined()) 
+				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 				{
 					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel(mHikeService));
 					toaster.notify(new ContactInfo(conversation.getMsisdn(), conversation.getMsisdn(), conversation.getLabel(mHikeService), conversation.getMsisdn()), convMessage);

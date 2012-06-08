@@ -11,8 +11,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.utils.Utils;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 
 public class DbConversationListener implements Listener
 {
@@ -52,7 +51,7 @@ public class DbConversationListener implements Listener
 			ConvMessage convMessage = (ConvMessage) object;
 			mConversationDb.addConversationMessages(convMessage);
 
-			if (!convMessage.isGroupParticipantInfo()) 
+			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO) 
 			{
 				Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getMsisdn());
 				mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());

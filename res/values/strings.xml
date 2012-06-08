@@ -139,4 +139,5 @@
 	<string name="you_joined_conversation">You just joined a group chat!</string>
 	<string name="leave_group">Leave group</string>
 	<string name="group_chat">Group Chat</string>
+	<string name="group_chat_end">This group chat has ended.</string>
 </resources>

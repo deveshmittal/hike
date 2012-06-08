@@ -14,7 +14,6 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.NetworkManager;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 

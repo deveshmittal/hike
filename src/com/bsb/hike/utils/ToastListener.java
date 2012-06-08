@@ -20,6 +20,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
@@ -65,7 +66,7 @@ public class ToastListener implements Listener
 		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			ConvMessage message = (ConvMessage) object;
-			if (!message.isGroupParticipantInfo() || message.hasParticipantJoined()) 
+			if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 			{
 				Activity activity = (currentActivity != null) ? currentActivity
 						.get() : null;

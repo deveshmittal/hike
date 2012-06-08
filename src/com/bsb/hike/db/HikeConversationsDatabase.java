@@ -23,11 +23,10 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NetworkManager;
-import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 
@@ -346,12 +345,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					message.setMetadata(metadata);
 					JSONObject obj = new JSONObject(metadata);
 					Log.d(getClass().getSimpleName(), "Message Metadata: " + obj.toString());
-					if(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_JOIN) ||
-							obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_LEAVE))
+					if(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_JOIN))
 					{
-						Log.d(getClass().getSimpleName(), "This is a GCL or GCJ message");
-						message.setIsGroupParticipantInfo(true);
-						message.setHasParticipantJoined(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_JOIN));
+						message.setParticipantInfoState(ParticipantInfoState.PARTICIPANT_JOINED);
+					}
+					else if(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_LEAVE))
+					{
+						message.setParticipantInfoState(ParticipantInfoState.PARTICIPANT_LEFT);
+					}
+					else if(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_END))
+					{
+						message.setParticipantInfoState(ParticipantInfoState.GROUP_END);
 					}
 				}
 				catch (JSONException e)

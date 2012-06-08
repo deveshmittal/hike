@@ -25,6 +25,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.MessageMetadata;
@@ -71,7 +72,7 @@ public class MessagesAdapter extends BaseAdapter
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.isGroupParticipantInfo())
+		if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			type = ViewType.PARTICIPANT_INFO;
 		}
@@ -109,7 +110,7 @@ public class MessagesAdapter extends BaseAdapter
 		if (v == null)
 		{
 			holder = new ViewHolder();
-			if(convMessage.isGroupParticipantInfo())
+			if(convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
 				v = inflater.inflate(R.layout.message_item_receive, null);
 				
@@ -176,11 +177,11 @@ public class MessagesAdapter extends BaseAdapter
 			holder.timestampContainer.setVisibility(View.GONE);
 		}
 
-		if (convMessage.isGroupParticipantInfo())
+		if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			((ViewGroup)holder.participantInfoContainer).removeAllViews();
 
-			if (convMessage.hasParticipantJoined()) 
+			if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 			{
 				int left = (int) (0 * Utils.densityMultiplier);
 				int top = (int) (0 * Utils.densityMultiplier);
@@ -218,8 +219,14 @@ public class MessagesAdapter extends BaseAdapter
 			{
 				Log.d(getClass().getSimpleName(), "Left: " + convMessage.getMessage());
 				TextView participantInfo = (TextView) inflater.inflate(R.layout.participant_info, null);
-				participantInfo.setText(Utils.getFormattedParticipantInfo(convMessage.getMessage()));
-
+				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
+				{
+					participantInfo.setText(Utils.getFormattedParticipantInfo(convMessage.getMessage()));
+				}
+				else
+				{
+					participantInfo.setText(convMessage.getMessage());
+				}
 				((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
 			}
 			return v;

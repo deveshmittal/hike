@@ -76,6 +76,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.MyDrawable;
 import com.bsb.hike.utils.Utils;
@@ -578,7 +579,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		ConvMessage message = mAdapter.getItem((int) info.id);
-		if (message.isGroupParticipantInfo())
+		if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			return false;
 		}
@@ -720,7 +721,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		AdapterView.AdapterContextMenuInfo adapterInfo =
 	            (AdapterView.AdapterContextMenuInfo) menuInfo;
 		ConvMessage message = mAdapter.getItem(adapterInfo.position);
-		if (message.isGroupParticipantInfo())
+		if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			return;
 		}

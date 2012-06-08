@@ -44,9 +44,7 @@ public class ConvMessage
 
 	private String groupParticipantMsisdn;
 
-	private boolean mIsGroupParticipantInfo;
-
-	private boolean mHasParticipantJoined;
+	private ParticipantInfoState participantInfoState;
 	
 	public boolean isInvite()
 	{
@@ -71,6 +69,14 @@ public class ConvMessage
 		UNKNOWN
 	};
 
+	public static enum ParticipantInfoState
+	{
+		NO_INFO, // This is a normal message
+		PARTICIPANT_LEFT, // The participant has left
+		PARTICIPANT_JOINED, // The participant has joined
+		GROUP_END // Group chat has ended
+	}
+
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState)
 	{
 		this(message, msisdn, timestamp, msgState, -1, -1);
@@ -83,10 +89,10 @@ public class ConvMessage
 
 	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId, String groupParticipantMsisdn)
 	{
-		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, false, false);
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId, groupParticipantMsisdn, ParticipantInfoState.NO_INFO);
 	}
 	
-	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId, String groupParticipantMsisdn, boolean isGroupParticipantInfo, boolean mHasParticipantJoined)
+	public ConvMessage(String message, String msisdn, long timestamp, State msgState,long msgid , long mappedMsgId, String groupParticipantMsisdn, ParticipantInfoState participantInfoState)
 	{
 		assert(msisdn != null);
 		this.mMsisdn = msisdn;
@@ -101,8 +107,7 @@ public class ConvMessage
 					msgState == State.SENT_FAILED);
 		setState(msgState);
 		this.groupParticipantMsisdn = groupParticipantMsisdn;
-		this.mIsGroupParticipantInfo = isGroupParticipantInfo;
-		this.mHasParticipantJoined = mHasParticipantJoined;
+		this.participantInfoState = participantInfoState;
 	}
 
 	public ConvMessage(JSONObject obj) throws JSONException
@@ -144,6 +149,7 @@ public class ConvMessage
 		{
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
+		this.participantInfoState = ParticipantInfoState.NO_INFO;
 	}
 
 	public ConvMessage(JSONObject obj, Conversation conversation, Context context, boolean isSelfGenerated) throws JSONException
@@ -152,10 +158,22 @@ public class ConvMessage
 		// If the message is a group message we get a TO field consisting of the Group ID
 		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*represents msg is coming from another client*/
 		this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
-		this.mIsGroupParticipantInfo = true;
-		this.mHasParticipantJoined = obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_JOIN);
+		
+		if(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_JOIN))
+		{
+			this.participantInfoState = ParticipantInfoState.PARTICIPANT_JOINED;
+		}
+		else if(obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_LEAVE))
+		{
+			this.participantInfoState = ParticipantInfoState.PARTICIPANT_LEFT;
+		}
+		else
+		{
+			this.participantInfoState = ParticipantInfoState.GROUP_END;
+		}
+
 		this.metadata = new MessageMetadata(obj);
-		if (hasParticipantJoined()) 
+		if (this.participantInfoState == ParticipantInfoState.PARTICIPANT_JOINED) 
 		{
 			JSONArray arr = obj.getJSONArray(HikeConstants.DATA);
 			StringBuilder newParticipants = new StringBuilder();
@@ -168,8 +186,7 @@ public class ConvMessage
 		} 
 		else 
 		{
-			Log.d(getClass().getSimpleName(), "Left: " + obj.getString(HikeConstants.DATA));
-			this.mMessage = Utils.getContactName(conversation.getGroupParticipants(), obj.getString(HikeConstants.DATA)) + " " + context.getString(R.string.left_conversation);
+			this.mMessage = obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_END) ? context.getString(R.string.group_chat_end) : Utils.getContactName(conversation.getGroupParticipants(), obj.getString(HikeConstants.DATA)) + " " + context.getString(R.string.left_conversation);
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
 		this.mConversation = conversation;
@@ -191,6 +208,14 @@ public class ConvMessage
 			JSONObject metadata = new JSONObject(metadataString);
 			setMetadata(metadata);
 		}
+	}
+
+	public ParticipantInfoState getParticipantInfoState() {
+		return participantInfoState;
+	}
+
+	public void setParticipantInfoState(ParticipantInfoState participantInfoState) {
+		this.participantInfoState = participantInfoState;
 	}
 
 	public MessageMetadata getMetadata()
@@ -226,26 +251,6 @@ public class ConvMessage
 	public String getGroupParticipantMsisdn()
 	{
 		return groupParticipantMsisdn;
-	}
-
-	public boolean isGroupParticipantInfo()
-	{
-		return mIsGroupParticipantInfo;
-	}
-
-	public boolean hasParticipantJoined()
-	{
-		return mHasParticipantJoined;
-	}
-
-	public void setIsGroupParticipantInfo(boolean mIsGroupParticipantInfo)
-	{
-		this.mIsGroupParticipantInfo = mIsGroupParticipantInfo;
-	}
-
-	public void setHasParticipantJoined(boolean mHasParticipantJoined)
-	{
-		this.mHasParticipantJoined = mHasParticipantJoined;
 	}
 
 	@Override

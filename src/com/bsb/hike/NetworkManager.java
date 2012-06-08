@@ -181,7 +181,7 @@ public class NetworkManager implements HikePubSub.Listener
 		{
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 		}
-		else if(GROUP_CHAT_JOIN.equals(type) || GROUP_CHAT_LEAVE.equals(type))
+		else if(GROUP_CHAT_JOIN.equals(type) || GROUP_CHAT_LEAVE.equals(type) || GROUP_CHAT_END.equals(type))
 		{
 			try
 			{

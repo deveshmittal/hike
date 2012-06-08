@@ -45,6 +45,7 @@ import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
 import com.bsb.hike.utils.Utils;
@@ -431,7 +432,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 				return;
 			}
 			// For updating the group name if some participant has joined or left the group
-			else if(conv.isGroupConversation() && message.isGroupParticipantInfo())
+			else if(conv.isGroupConversation() && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
 				HikeConversationsDatabase hCDB = new HikeConversationsDatabase(MessagesList.this);
 				conv.setGroupParticipants(hCDB.getGroupParticipants(conv.getMsisdn()));
