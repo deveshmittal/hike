@@ -745,8 +745,8 @@ public class HikeMqttManager implements Listener
 			}
 			else if (NetworkManager.GROUP_CHAT_LEAVE.equals(type))
 			{
-				String groupId = jsonObj.optString(HikeConstants.FROM);
-				String msisdn = jsonObj.optString(HikeConstants.DATA);
+				String groupId = jsonObj.optString(HikeConstants.TO);
+				String msisdn = jsonObj.optString(HikeConstants.FROM);
 				this.convDb.removeParticipant(groupId, msisdn);
 			}
 			/*

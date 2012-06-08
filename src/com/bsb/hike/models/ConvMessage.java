@@ -15,6 +15,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
 
@@ -186,7 +187,7 @@ public class ConvMessage
 		} 
 		else 
 		{
-			this.mMessage = obj.getString(HikeConstants.TYPE).equals(NetworkManager.GROUP_CHAT_END) ? context.getString(R.string.group_chat_end) : Utils.getContactName(conversation.getGroupParticipants(), obj.getString(HikeConstants.DATA)) + " " + context.getString(R.string.left_conversation);
+			this.mMessage = this.participantInfoState == ParticipantInfoState.GROUP_END ? context.getString(R.string.group_chat_end) : ContactUtils.getContactInfo(obj.getString(HikeConstants.DATA), context).getFirstName() + " " + context.getString(R.string.left_conversation);
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
 		this.mConversation = conversation;
