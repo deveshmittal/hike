@@ -1043,8 +1043,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			JSONArray ids = mConversationDb.updateStatusAndSendDeliveryReport(convID);
 			/* If there are msgs which are RECEIVED UNREAD then only broadcast a msg that these are read
 			 * avoid sending read notifications for group chats */
-			if (ids != null && !mConversation.isGroupConversation())
+			if (ids != null)
 			{
+				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+
+				if (mConversation.isGroupConversation())
+				{
+					return;
+				}
+
 				JSONObject object = new JSONObject();
 				try
 				{
@@ -1056,7 +1063,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				{
 					e.printStackTrace();
 				}
-				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
+
 				mPubSub.publish(HikePubSub.MQTT_PUBLISH, object);
 			}
 		}
@@ -1116,7 +1123,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
-					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
+					if (!mConversation.isGroupConversation())
+					{
+						mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
+					}
+
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 
