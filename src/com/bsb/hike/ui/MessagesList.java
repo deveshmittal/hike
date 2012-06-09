@@ -112,7 +112,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			try
 			{
 				db = new HikeConversationsDatabase(MessagesList.this);
-				db.deleteConversation(ids.toArray(new Long[] {}));
+				db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
 			}
 			finally
 			{

@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,18 +15,13 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.text.TextUtils;
 import android.util.Log;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.utils.Utils;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper
@@ -237,14 +231,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		mDb.endTransaction();
 	}
 
-	public void deleteConversation(Long[] ids)
+	public void deleteConversation(Long[] ids, List<String> msisdns)
 	{
 		mDb.beginTransaction();
 		for (int i = 0; i < ids.length; i++)
 		{
 			Long[] bindArgs = new Long[] { ids[i] };
+			String msisdn = msisdns.get(i);
 			mDb.execSQL("DELETE FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE "+ DBConstants.CONV_ID +"= ?", bindArgs);
 			mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE "+ DBConstants.CONV_ID +"= ?", bindArgs);
+			if (Utils.isGroupConversation(msisdn))
+			{
+				mDb.delete(DBConstants.GROUP_TABLE, DBConstants.GROUP_ID + " =?", new String[]{msisdn});
+			}
 		}
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
