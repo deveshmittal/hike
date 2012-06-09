@@ -545,21 +545,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE) 
 		{
-			Intent intent;
+			Intent intent = null;
 			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) 
 			{
 				intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
 			}
-			else
-			{
-				intent = getIntent();
-				intent.removeExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
-				intent.removeExtra(HikeConstants.Extras.GROUP_CHAT);
-			}
-			startActivity(intent);
+			
 			/* slide down if we're still selecting a user, otherwise slide back */
-			if (mConversation == null && !intent.hasExtra(HikeConstants.Extras.NAME)) {
+			if (mConversation == null) {
 				overridePendingTransition(R.anim.no_animation,
 						R.anim.slide_down_noalpha);
 			} else {
@@ -1611,10 +1606,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			else
 			{
 				Intent intent = getIntent();
-				intent.setClass(ChatThread.this, ChatThread.class);
+				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 				intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, this.mConversation.getMsisdn());
-				finish();
 				startActivity(intent);
 				
 				overridePendingTransition(R.anim.slide_in_right_noalpha,

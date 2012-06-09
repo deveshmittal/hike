@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,20 +25,27 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.cropimage.Util;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -69,6 +77,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private boolean isBackPressed = false;
 	private EditText mEmailEdit;
 	private String emailTxt;
+	private String groupId;
+	private List<ContactInfo> participantList;
+
 	private class ActivityState
 	{
 		public HikeHTTPTask task; /* the task to update the global profile */
@@ -130,20 +141,71 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		{
 			mActivityState = new ActivityState();
 		}
-		fetchPersistentData();
 
-		isEditingProfile = getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false);
-
-		if(isEditingProfile)
+		if(getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT))
 		{
-			setupEditScreen();
+			setupGroupProfileScreen();
 		}
 		else
 		{
-			setupProfileScreen();
+			fetchPersistentData();
+			isEditingProfile = getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false);
+
+			if(isEditingProfile)
+			{
+				setupEditScreen();
+			}
+			else
+			{
+				setupProfileScreen();
+			}
 		}
 	}
-	
+
+	private void setupGroupProfileScreen()
+	{
+		setContentView(R.layout.group_info);
+
+		ViewGroup groupInfoLayout = (ViewGroup) findViewById(R.id.group_info);
+		TextView mTitleView = (TextView) findViewById(R.id.title);
+		mNameEdit = (EditText) findViewById(R.id.name_input);
+
+		groupInfoLayout.setFocusable(true);
+		groupInfoLayout.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+
+		groupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+
+		HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+		Conversation conv = hCDB.getConversation(groupId, 0);
+		hCDB.close();
+		participantList = conv.getGroupParticipants();
+
+		ViewGroup participantNameContainer = (ViewGroup) findViewById(R.id.group_participant_container);
+
+		int left = (int) (0 * Utils.densityMultiplier);
+		int top = (int) (0 * Utils.densityMultiplier);
+		int right = (int) (0 * Utils.densityMultiplier);
+		int bottom = (int) (6 * Utils.densityMultiplier);
+
+		for(ContactInfo contactInfo : conv.getGroupParticipants())
+		{
+			TextView participantNameItem = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
+			participantNameItem.setText(contactInfo.getName());
+			participantNameItem.setBackgroundResource(contactInfo.isOnhike() ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
+
+			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			lp.setMargins(left, top, right, bottom);
+			participantNameItem.setLayoutParams(lp);
+
+			participantNameContainer.addView(participantNameItem);
+		}
+		mNameEdit.setText(conv.getLabel());
+		mTitleView.setText(R.string.group_info);
+		
+		// Hide the cursor initially
+		Utils.hideCursor(mNameEdit, getResources());
+	}
+
 	private void setupEditScreen()
 	{
 		setContentView(R.layout.profile_edit);
@@ -549,4 +611,33 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		startActivity(i);
 		finish();
     }
+
+    public void onInviteAllClicked(View v)
+	{
+    	for(ContactInfo contactInfo : participantList)
+    	{
+    		if (!contactInfo.isOnhike()) 
+    		{
+    			long time = (long) System.currentTimeMillis() / 1000;
+				ConvMessage convMessage = new ConvMessage(getResources()
+						.getString(R.string.invite_message), contactInfo.getMsisdn(), time,
+						ConvMessage.State.SENT_UNCONFIRMED);
+				convMessage.setInvite(true);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						convMessage.serialize());
+			}
+    	}
+	}
+
+	public void onGroupInfoClicked(View v)
+	{
+		Intent intent = getIntent();
+		intent.setClass(ProfileActivity.this, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, groupId);
+		startActivity(intent);
+		
+		overridePendingTransition(R.anim.slide_in_right_noalpha,
+				R.anim.slide_out_left_noalpha);
+	}
 }

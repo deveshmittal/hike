@@ -140,4 +140,5 @@
 	<string name="leave_group">Leave group</string>
 	<string name="group_chat">Group Chat</string>
 	<string name="group_chat_end">This group chat has ended.</string>
+	<string name="group_info">Group Info</string>
 </resources>
