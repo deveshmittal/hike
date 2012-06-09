@@ -61,11 +61,13 @@ public class HikeMessengerApp extends Application
 
 	public static final String EMAIL = "email";
 
-	public static final String CHAT_TOOLTIP_DISMISSED = "dismissChatToolTip";
+	public static final String CHAT_INVITE_TOOL_TIP_DISMISSED = "chatInviteToolTipDismissed";
 
 	public static final String INVITED = "invited";
 
 	public static final String INVITED_JOINED = "invitedJoined";
+
+	public static final String CHAT_GROUP_INFO_TOOL_TIP_DISMISSED = "chatGroupInfoToolTipDismissed";
 
 	private static HikePubSub mPubSubInstance;
 
