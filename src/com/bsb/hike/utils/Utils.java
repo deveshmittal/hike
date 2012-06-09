@@ -21,6 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -44,9 +46,13 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.EditText;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -593,5 +599,29 @@ public class Utils
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
 		ssb.setSpan(new ForegroundColorSpan(0xff666666), 0, info.indexOf(" "), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;
+	}
+
+	/**
+	 * Used for preventing the cursor from being shown initially on the text box in touch screen devices. On touching the text box the cursor becomes visible
+	 * @param editText
+	 */
+	public static void hideCursor(final EditText editText, Resources resources)
+	{
+		if (resources.getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS 
+				|| resources.getConfiguration().hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
+			editText.setCursorVisible(false);
+			editText.setOnTouchListener(new OnTouchListener() 
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event) 
+				{
+					if(event.getAction() == MotionEvent.ACTION_DOWN)
+					{
+						editText.setCursorVisible(true);
+					}
+					return false;
+				}
+			});
+		}
 	}
 }
