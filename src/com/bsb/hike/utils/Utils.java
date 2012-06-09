@@ -234,6 +234,10 @@ public class Utils
 
 	public static Drawable getDefaultIconForUser(Context context, String msisdn)
 	{
+		if(isGroupConversation(msisdn))
+		{
+			return context.getResources().getDrawable(R.drawable.ic_group_avatar);
+		}
 		int count = 1;
 		int id;
 		switch(iconHash(msisdn) % count)
