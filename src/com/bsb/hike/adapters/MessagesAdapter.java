@@ -258,12 +258,13 @@ public class MessagesAdapter extends BaseAdapter
 		}
 		else
 		{
-			SmileyParser smileyParser = SmileyParser.getInstance();
-			CharSequence markedUp = smileyParser.addSmileySpans(convMessage.getMessage());
+			CharSequence markedUp = convMessage.getMessage();
 			if(convMessage.isGroupChat() && !convMessage.isSent() && convMessage.getGroupParticipantMsisdn() != null)
 			{
 				markedUp = Utils.addContactName(this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp);
 			}
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			markedUp = smileyParser.addSmileySpans(markedUp);
 			holder.messageTextView.setText(markedUp);
 			Linkify.addLinks(holder.messageTextView, Linkify.ALL);
 			Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
