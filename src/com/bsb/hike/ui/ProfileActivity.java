@@ -27,7 +27,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -48,7 +47,7 @@ import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
 
-public class ProfileActivity extends Activity implements OnClickListener, FinishableEvent, android.content.DialogInterface.OnClickListener
+public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener
 {
 	/* dialog IDs */
 	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
@@ -60,21 +59,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	private static final int CROP_RESULT = 2;
 
 	private ImageView mIconView;
-	private TextView mNameView;
-	private TextView mTitleView;
 	private EditText mNameEdit;
-
-	private ViewGroup credits;
-	private ViewGroup notifications;
-	private ViewGroup privacy;
-	private ViewGroup help;
-	private ViewGroup myInfo;
-
-	private ViewGroup name;
-	private ViewGroup phone;
-	private ViewGroup email;
-	private ViewGroup gender;
-	private ViewGroup picture;
 
 	private View currentSelection;
 
@@ -127,7 +112,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.profile);
 
 		if (Utils.requireAuth(this))
 		{
@@ -151,8 +135,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		}
 		fetchPersistentData();
 
-		mTitleView = (TextView) findViewById(R.id.title);
-
 		isEditingProfile = getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false);
 
 		if(isEditingProfile)
@@ -167,18 +149,15 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	
 	private void setupEditScreen()
 	{
-		findViewById(R.id.me_layout).setVisibility(View.GONE);
-		findViewById(R.id.settings_txt).setVisibility(View.GONE);
-		findViewById(R.id.prefs).setVisibility(View.GONE);
-		findViewById(R.id.with_love_layout).setVisibility(View.GONE);
-		ViewGroup editProfile =(ViewGroup) findViewById(R.id.edit_profile);
-		editProfile.setVisibility(View.VISIBLE);
+		setContentView(R.layout.profile_edit);
 
-		name = (ViewGroup) findViewById(R.id.name);
-		phone = (ViewGroup) findViewById(R.id.phone);
-		email = (ViewGroup) findViewById(R.id.email);
-		gender = (ViewGroup) findViewById(R.id.gender);
-		picture = (ViewGroup) findViewById(R.id.photo);
+		TextView mTitleView = (TextView) findViewById(R.id.title);
+
+		ViewGroup name = (ViewGroup) findViewById(R.id.name);
+		ViewGroup phone = (ViewGroup) findViewById(R.id.phone);
+		ViewGroup email = (ViewGroup) findViewById(R.id.email);
+		ViewGroup gender = (ViewGroup) findViewById(R.id.gender);
+		ViewGroup picture = (ViewGroup) findViewById(R.id.photo);
 
 		mNameEdit = (EditText) name.findViewById(R.id.name_input);
 		mEmailEdit = (EditText) email.findViewById(R.id.email_input);
@@ -189,7 +168,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		((TextView)gender.findViewById(R.id.gender_edit_field)).setText("Gender");
 		((TextView)picture.findViewById(R.id.photo_edit_field)).setText("Edit Picture");
 
-		picture.setOnClickListener(this);
 		picture.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 		picture.setFocusable(true);
 
@@ -226,11 +204,16 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	
 	private void setupProfileScreen()
 	{
-		myInfo = (ViewGroup) findViewById(R.id.my_info); 
-		credits = (ViewGroup) findViewById(R.id.free_sms);
-		notifications = (ViewGroup) findViewById(R.id.notifications);
-		privacy = (ViewGroup) findViewById(R.id.privacy);
-		help = (ViewGroup) findViewById(R.id.help);
+		setContentView(R.layout.profile);
+
+		TextView mTitleView = (TextView) findViewById(R.id.title);
+		TextView mNameView = (TextView) findViewById(R.id.name_current);
+
+		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info); 
+		ViewGroup credits = (ViewGroup) findViewById(R.id.free_sms);
+		ViewGroup notifications = (ViewGroup) findViewById(R.id.notifications);
+		ViewGroup privacy = (ViewGroup) findViewById(R.id.privacy);
+		ViewGroup help = (ViewGroup) findViewById(R.id.help);
 
 		myInfo.setBackgroundResource(R.drawable.profile_top_item_selector);
 		credits.setBackgroundResource(R.drawable.profile_bottom_item_selector);
@@ -239,7 +222,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		help.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 
 		mIconView = (ImageView) findViewById(R.id.profile);
-		mNameView = (TextView) findViewById(R.id.name_current);
 
 		ViewGroup[] itemLayouts = new ViewGroup[]
 				{
@@ -261,8 +243,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		}
 
 		notifications.findViewById(R.id.divider).setVisibility(View.GONE);
-		mIconView.setOnClickListener(this);
-		myInfo.setOnClickListener(this);
 
 		mTitleView.setText(getResources().getString(R.string.profile_title));
 		mNameView.setText(nameTxt);
@@ -406,7 +386,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			requests.add(request);
 		}
 
-		if (mEmailEdit != null) {
+		if (isEditingProfile) {
 			SharedPreferences prefs = getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 			Editor editor = prefs.edit();
@@ -449,31 +429,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	protected String getLargerIconId()
 	{
 		return mLocalMSISDN + "::large";
-	}
-
-	@Override
-	public void onClick(View view)
-	{
-		Log.d("ProfileActivity", "View is " + view);
-		if (view == mIconView || view == picture)
-		{
-			/* The wants to change their profile picture.
-			 * Open a dialog to allow them pick Camera or Gallery 
-			 */
-			final CharSequence[] items = {"Camera", "Gallery"};/*TODO externalize these */
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Choose a picture");
-			builder.setItems(items, this);
-			mDialog = builder.show();
-		}
-		else if(view == myInfo)
-		{
-			Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.EDIT_PROFILE);
-			Intent i = new Intent(ProfileActivity.this, ProfileActivity.class);
-			i.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
-			startActivity(i);
-			finish();
-		}
 	}
 
 	@Override
@@ -591,4 +546,25 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 
 		}
 	}
+
+    public void onChangeImageClicked(View v)
+    {
+    	/* The wants to change their profile picture.
+		 * Open a dialog to allow them pick Camera or Gallery 
+		 */
+		final CharSequence[] items = {"Camera", "Gallery"};/*TODO externalize these */
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Choose a picture");
+		builder.setItems(items, this);
+		mDialog = builder.show();
+    }
+
+    public void onEditProfileClicked(View v)
+    {
+    	Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.EDIT_PROFILE);
+		Intent i = new Intent(ProfileActivity.this, ProfileActivity.class);
+		i.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
+		startActivity(i);
+		finish();
+    }
 }
