@@ -86,8 +86,8 @@ public class ToastListener implements Listener
 				ContactInfo contactInfo;
 				if (message.isGroupChat())
 				{
-					Log.d("ToastListener", "GroupName is " + this.convDb.getGroupName(message.getMsisdn()));
-					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), this.convDb.getGroupName(message.getMsisdn()), message.getMsisdn());
+					Log.d("ToastListener", "GroupName is " + message.getConversation().getLabel());
+					contactInfo = new ContactInfo(message.getMsisdn(), message.getMsisdn(), message.getConversation().getLabel(), message.getMsisdn());
 				}
 				else
 				{
