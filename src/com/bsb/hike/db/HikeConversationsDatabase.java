@@ -432,8 +432,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				String msisdn = c.getString(msisdnIdx);
 				ContactInfo contactInfo = null;
 				contactInfo = Utils.isGroupConversation(msisdn) ?
-								huDb.getContactInfoFromMSISDN(msisdn) :
-								new ContactInfo(msisdn, msisdn, c.getString(groupNameIdx), msisdn);
+								new ContactInfo(msisdn, msisdn, c.getString(groupNameIdx), msisdn) :
+								huDb.getContactInfoFromMSISDN(msisdn);
 
 				Conversation conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx), contactInfo.getName(),
 						(contactInfo != null) ? contactInfo.isOnhike() : false);
