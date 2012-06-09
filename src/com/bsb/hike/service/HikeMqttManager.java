@@ -684,30 +684,25 @@ public class HikeMqttManager implements Listener
 				{
 					if(credits > 0)
 					{
-						Log.d("HikeMqttManager", "RESETING THE OVERLAYS");
 						convDb.setOverlay(false, null);
 					}
 				}
 				Editor mEditor = settings.edit();
-				Log.d("HikeMqttManager", "UPDATING CREDITS THROUGH SERVICE: "+ credits);
 				mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
 				mEditor.commit();
 			}
 			else if ((NetworkManager.USER_JOINED.equals(type)) || (NetworkManager.USER_LEFT.equals(type)))
 			{
 				String msisdn = jsonObj.optString(HikeConstants.DATA);
-				Log.d("HikeMqttManager", "UPDATING USER LIST: "+ msisdn);
 				boolean joined = NetworkManager.USER_JOINED.equals(type);
 				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
 				this.convDb.updateOnHikeStatus(msisdn, joined);
 			}
 			else if (NetworkManager.INVITE_INFO.equals(type))
 			{
-				Log.d("HikeMqttManager", "INvitee_info" + jsonObj.toString());
 				JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 				int invited = data.optInt(HikeConstants.ALL_INVITEE);
 				int invited_joined = data.optInt(HikeConstants.ALL_INVITEE_JOINED);
-				Log.d("HikeMQttManager", "Data is " + invited + " " + invited_joined);
 				Editor editor = settings.edit();
 				editor.putInt(HikeMessengerApp.INVITED, invited);
 				editor.putInt(HikeMessengerApp.INVITED_JOINED, invited_joined);
@@ -741,7 +736,6 @@ public class HikeMqttManager implements Listener
 					convMessage.setConversation(conversation);
 					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel());
 				}
-				
 			}
 			else if (NetworkManager.GROUP_CHAT_LEAVE.equals(type))
 			{
