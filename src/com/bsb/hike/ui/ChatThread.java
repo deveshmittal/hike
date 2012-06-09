@@ -669,7 +669,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			else
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.GROUP_LEFT, mConversation.getMsisdn());
-
 				finish();
 				overridePendingTransition(R.anim.slide_in_left_noalpha,
 						R.anim.slide_out_right_noalpha);
@@ -930,6 +929,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mConversation = mConversationDb.getConversation(mContactNumber, 1000);
 		if (mConversation == null)
 		{
+			if (Utils.isGroupConversation(mContactNumber))
+			{
+				/* the user must have deleted the chat.  */
+				Toast toast = Toast.makeText(this, "Group chat no longer exists", Toast.LENGTH_LONG);
+				toast.show();
+				onBackPressed();
+				return;
+			}
+
 			mConversation = mConversationDb.addConversation(mContactNumber, false, "");
 		}
 
