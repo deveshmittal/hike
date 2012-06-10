@@ -579,7 +579,7 @@ public class Utils
 	public static CharSequence addContactName(List<ContactInfo> participantList, String msisdn, CharSequence message)
 	{
 		String name = getContactName(participantList, msisdn);
-		SpannableStringBuilder messageWithName = new SpannableStringBuilder(name + " - " + message);
+		SpannableStringBuilder messageWithName = new SpannableStringBuilder(name + HikeConstants.SEPARATOR + message);
 		messageWithName.setSpan(new StyleSpan(Typeface.BOLD), 0, name.length() + 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return messageWithName;
 	}

@@ -32,6 +32,8 @@ public class HikeConstants
 	public static final String ADDRESS_BOOK_ERROR = "AddressBookError";
 	public static final String CHANGE_NUMBER = "ChangeNumber"; 
 
+	public static final String SEPARATOR = " - ";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 
