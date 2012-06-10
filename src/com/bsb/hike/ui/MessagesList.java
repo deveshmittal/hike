@@ -255,7 +255,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_LEFT, this);
-
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 	}
@@ -403,6 +403,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_LEFT, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
 	}
 
 	@Override
@@ -572,6 +573,18 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 					leaveGroup(MessagesList.this.mConversationsByMSISDN.get(groupId));
 				}
 			});
+		}
+		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
+		{
+			String groupId = (String) object;
+			HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+			final String groupName = db.getGroupName(groupId);
+			db.close();
+
+			Conversation conv = mConversationsByMSISDN.get(groupId);
+			conv.setContactName(groupName);
+
+			runOnUiThread(this);
 		}
 	}
 

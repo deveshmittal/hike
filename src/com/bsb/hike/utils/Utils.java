@@ -344,6 +344,7 @@ public class Utils
 			return true;
 		}
 
+		Log.d("Utils", "auth token is " + settings.getString(HikeMessengerApp.TOKEN_SETTING, null));
 		return false;
 	}
 	
@@ -557,7 +558,6 @@ public class Utils
 		String name = msisdn;
 		for(ContactInfo contactInfo : participantList)
 		{
-			Log.d("Utils", "CHecking " + contactInfo.getMsisdn() + "==" + msisdn);
 			if(contactInfo.getMsisdn().equals(msisdn))
 			{
 				return contactInfo.getFirstName();
