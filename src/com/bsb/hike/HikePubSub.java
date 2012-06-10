@@ -101,6 +101,8 @@ public class HikePubSub implements Runnable
 
 	public static final String GROUP_END = "groupEnd";
 
+	public static final String GROUP_NAME_CHANGED = "groupNameChanged";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

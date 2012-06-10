@@ -650,4 +650,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			c.close();
 		}
 	}
+
+	public void setGroupName(String groupId, String groupname)
+	{
+		ContentValues values = new ContentValues(1);
+		values.put(DBConstants.GROUP_NAME, groupname);
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + " = ?", new String[]{groupId});
+	}
 }

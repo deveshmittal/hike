@@ -743,6 +743,12 @@ public class HikeMqttManager implements Listener
 				String msisdn = jsonObj.optString(HikeConstants.FROM);
 				this.convDb.removeParticipant(groupId, msisdn);
 			}
+			else if (NetworkManager.GROUP_CHAT_NAME.equals(type))
+			{
+				String groupname = jsonObj.optString(HikeConstants.DATA);
+				String groupId = jsonObj.optString(HikeConstants.FROM);
+				this.convDb.setGroupName(groupId, groupname);
+			}
 			/*
 			 * Check if message was already received by the receiver
 			 */

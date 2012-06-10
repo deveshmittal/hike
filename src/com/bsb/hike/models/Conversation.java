@@ -162,7 +162,7 @@ public class Conversation implements Comparable<Conversation>
 		this.groupParticipants = groupParticipants;
 	}
 
-	public void aaddGroupParticipant(ContactInfo contactInfo)
+	public void addGroupParticipant(ContactInfo contactInfo)
 	{
 		this.groupParticipants.add(contactInfo);
 	}
@@ -294,5 +294,10 @@ public class Conversation implements Comparable<Conversation>
 			Log.e("ConvMessage", "invalid json message", e);
 		}
 		return object;
+	}
+
+	public void setContactName(String contactName)
+	{
+		this.contactName = contactName;
 	}
 }

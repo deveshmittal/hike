@@ -401,6 +401,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_JOINED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_LEFT, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
+
 		if (mComposeViewWatcher != null)
 		{
 			mComposeViewWatcher.uninit();
@@ -538,6 +540,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_JOINED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_LEFT, this);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 	}
 
 	@Override
@@ -1004,7 +1008,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void updateUIForHikeStatus()
 	{
-		if (mConversation.isOnhike())
+		if (mConversation.isOnhike() ||
+			mConversation.isGroupConversation())
 		{
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn_selector);
 			mComposeView.setHint("Free Message...");
@@ -1292,6 +1297,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					mUpdateAdapter.run();
 				}
 			});
+		}
+		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
+		{
+			String groupId = (String) object;
+			if (groupId.equals(mContactNumber))
+			{
+				HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+				final String groupName = db.getGroupName(groupId);
+				db.close();
+				mConversation.setContactName(groupName);
+
+				runOnUiThread(new Runnable() {
+					public void run()
+					{
+						mLabelView.setText(groupName);
+					}
+				});
+			}
 		}
 	}
 

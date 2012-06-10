@@ -51,6 +51,8 @@ public class NetworkManager implements HikePubSub.Listener
 
 	public static final String GROUP_CHAT_END = "gce";
 
+	public static final String GROUP_CHAT_NAME = "gcn";
+
 	public static final String ANALYTICS_EVENT = "le";
 
 	private HikePubSub pubSub;
@@ -200,6 +202,11 @@ public class NetworkManager implements HikePubSub.Listener
 		{
 			String groupId = jsonObj.optString(HikeConstants.FROM);
 			this.pubSub.publish(HikePubSub.GROUP_END, groupId);
+		}
+		else if(GROUP_CHAT_NAME.equals(type))
+		{
+			String groupId = jsonObj.optString(HikeConstants.FROM);
+			pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
 		}
 		else
 		{
