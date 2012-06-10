@@ -1272,7 +1272,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (HikePubSub.ICON_CHANGED.equals(type))
 		{
 			String msisdn = (String) object;
-			if (msisdn.equals(mContactNumber))
+			if (mContactNumber.equals(msisdn))
 			{
 				/* update the image drawable */
 				runOnUiThread(mUpdateAdapter);
