@@ -58,6 +58,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.ui.SignupActivity;
@@ -563,22 +564,28 @@ public class Utils
 		return obj;
 	}
 
-	public static String getContactName(List<ContactInfo> participantList, String msisdn)
+	public static String getContactName(List<ContactInfo> participantList, String msisdn, Context context)
 	{
-		String name = msisdn;
-		for(ContactInfo contactInfo : participantList)
+		if (participantList != null && participantList.size() > 0) 
 		{
-			if(contactInfo.getMsisdn().equals(msisdn))
+			for (ContactInfo contactInfo : participantList) 
 			{
-				return contactInfo.getFirstName();
+				if (contactInfo.getMsisdn().equals(msisdn)) 
+				{
+					return contactInfo.getFirstName();
+				}
 			}
 		}
-		return name;
+		HikeUserDatabase hUDB = new HikeUserDatabase(context);
+		ContactInfo contactInfo = hUDB.getContactInfoFromMSISDN(msisdn);
+		hUDB.close();
+
+		return contactInfo.getFirstName();
 	}
 
-	public static CharSequence addContactName(List<ContactInfo> participantList, String msisdn, CharSequence message)
+	public static CharSequence addContactName(List<ContactInfo> participantList, String msisdn, CharSequence message, Context context)
 	{
-		String name = getContactName(participantList, msisdn);
+		String name = getContactName(participantList, msisdn, context);
 		SpannableStringBuilder messageWithName = new SpannableStringBuilder(name + HikeConstants.SEPARATOR + message);
 		messageWithName.setSpan(new StyleSpan(Typeface.BOLD), 0, name.length() + 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return messageWithName;

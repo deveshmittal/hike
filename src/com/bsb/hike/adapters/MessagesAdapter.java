@@ -259,9 +259,10 @@ public class MessagesAdapter extends BaseAdapter
 		else
 		{
 			CharSequence markedUp = convMessage.getMessage();
+			// Fix for bug where if a participant leaves the group chat, the participant's name is never shown 
 			if(convMessage.isGroupChat() && !convMessage.isSent() && convMessage.getGroupParticipantMsisdn() != null)
 			{
-				markedUp = Utils.addContactName(this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp);
+				markedUp = Utils.addContactName(this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp, this.context);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp);
