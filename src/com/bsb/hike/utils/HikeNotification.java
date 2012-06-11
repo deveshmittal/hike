@@ -10,12 +10,14 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.ChatThread;
 
 public class HikeNotification
@@ -42,7 +44,13 @@ public class HikeNotification
 		String message = convMsg.getMessage();
 		long timestamp = convMsg.getTimestamp();
 		String key = (contactInfo != null) ? contactInfo.getName() : msisdn;
-		
+
+		// For showing the name of the contact that sent the message in a group chat
+		if(convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+		{
+			message = Utils.getContactName(null, convMsg.getGroupParticipantMsisdn(), context) + HikeConstants.SEPARATOR + message;
+		}
+
 		int icon = R.drawable.ic_contact_logo;
 
 		// TODO this doesn't turn the text bold :(

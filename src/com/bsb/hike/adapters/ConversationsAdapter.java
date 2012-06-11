@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +14,12 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.Utils;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation>
 {
@@ -60,6 +63,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			CharSequence markedUp = smileyParser.addSmileySpans(message.getMessage());
+			// For showing the name of the contact that sent the message in a group chat
+			if(message.isGroupChat() && !TextUtils.isEmpty(message.getGroupParticipantMsisdn()) && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+			{
+				markedUp = Utils.addContactName(conversation.getGroupParticipants(), message.getGroupParticipantMsisdn(), markedUp, context);
+			}
 			messageView.setVisibility(View.VISIBLE);
 			messageView.setText(markedUp);
 			TextView tsView = (TextView) v.findViewById(R.id.last_message_timestamp);

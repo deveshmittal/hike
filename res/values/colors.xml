@@ -35,4 +35,5 @@
     <color name="list_pressed">#deddd7</color>
     <color name="other_list_selected">#eeeeeb</color>
     <color name="other_list_pressed">#deddd7</color>
+    <color name="invite_all">#9c9a93</color>
 </resources>

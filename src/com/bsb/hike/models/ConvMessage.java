@@ -190,7 +190,7 @@ public class ConvMessage
 			for (int i = 0; i < arr.length(); i++) 
 			{
 				Log.d(getClass().getSimpleName(), "Joined: " + arr.getString(i));
-				newParticipants.append(Utils.getContactName(conversation.getGroupParticipants(), arr.getString(i)) + ", ");
+				newParticipants.append(Utils.getContactName(conversation.getGroupParticipants(), arr.getString(i), context) + ", ");
 			}
 			this.mMessage = newParticipants.substring(0, newParticipants.length() - 2) + " " + context.getString(R.string.joined_conversation); 
 		} 

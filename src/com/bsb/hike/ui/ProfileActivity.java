@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,7 +16,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -25,30 +25,35 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.MotionEvent;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.cropimage.Util;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
 
-public class ProfileActivity extends Activity implements OnClickListener, FinishableEvent, android.content.DialogInterface.OnClickListener
+public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
 {
 	/* dialog IDs */
 	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
@@ -60,33 +65,30 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	private static final int CROP_RESULT = 2;
 
 	private ImageView mIconView;
-	private TextView mNameView;
-	private TextView mTitleView;
 	private EditText mNameEdit;
-
-	private ViewGroup credits;
-	private ViewGroup notifications;
-	private ViewGroup privacy;
-	private ViewGroup help;
-	private ViewGroup myInfo;
-
-	private ViewGroup name;
-	private ViewGroup phone;
-	private ViewGroup email;
-	private ViewGroup gender;
-	private ViewGroup picture;
 
 	private View currentSelection;
 
 	private Dialog mDialog;
-	public String mLocalMSISDN = null;
+	private String mLocalMSISDN = null;
 
 	private ActivityState mActivityState; /* config state of this activity */
 	private String nameTxt;
-	private boolean isEditingProfile = false;
 	private boolean isBackPressed = false;
 	private EditText mEmailEdit;
 	private String emailTxt;
+	private List<ContactInfo> participantList;
+
+	private ProfileType profileType;
+	private String httpRequestURL;
+
+	private static enum ProfileType
+	{
+		USER_PROFILE, // The user profile screen
+		USER_PROFILE_EDIT, // The user profile edit screen
+		GROUP_INFO // The group info screen
+	};
+
 	private class ActivityState
 	{
 		public HikeHTTPTask task; /* the task to update the global profile */
@@ -120,6 +122,11 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		{
 			mActivityState.task.setActivity(null);
 		}
+		if(profileType == ProfileType.GROUP_INFO)
+		{
+			HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
+			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
+		}
 		mActivityState = null;
 	}
 
@@ -127,7 +134,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.profile);
 
 		if (Utils.requireAuth(this))
 		{
@@ -149,36 +155,93 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		{
 			mActivityState = new ActivityState();
 		}
-		fetchPersistentData();
 
-		mTitleView = (TextView) findViewById(R.id.title);
-
-		isEditingProfile = getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false);
-
-		if(isEditingProfile)
+		if(getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT))
 		{
-			setupEditScreen();
+			this.profileType = ProfileType.GROUP_INFO;
+			HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
+			HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
+			setupGroupProfileScreen();
 		}
 		else
 		{
-			setupProfileScreen();
+			httpRequestURL = "/account";
+			fetchPersistentData();
+
+			if(getIntent().getBooleanExtra(HikeConstants.Extras.EDIT_PROFILE, false))
+			{
+				this.profileType = ProfileType.USER_PROFILE_EDIT;
+				setupEditScreen();
+			}
+			else
+			{
+				this.profileType = ProfileType.USER_PROFILE;
+				setupProfileScreen();
+			}
 		}
 	}
-	
+
+	private void setupGroupProfileScreen()
+	{
+		setContentView(R.layout.group_info);
+
+		ViewGroup groupInfoLayout = (ViewGroup) findViewById(R.id.group_info);
+		TextView mTitleView = (TextView) findViewById(R.id.title);
+		mNameEdit = (EditText) findViewById(R.id.name_input);
+		mIconView = (ImageView) findViewById(R.id.profile);
+
+		groupInfoLayout.setFocusable(true);
+		groupInfoLayout.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+
+		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+
+		HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+		Conversation conv = hCDB.getConversation(mLocalMSISDN, 0);
+		hCDB.close();
+		participantList = conv.getGroupParticipants();
+		httpRequestURL = "/group/" + conv.getMsisdn();
+
+		ViewGroup participantNameContainer = (ViewGroup) findViewById(R.id.group_participant_container);
+
+		int left = (int) (0 * Utils.densityMultiplier);
+		int top = (int) (0 * Utils.densityMultiplier);
+		int right = (int) (0 * Utils.densityMultiplier);
+		int bottom = (int) (6 * Utils.densityMultiplier);
+
+		for(ContactInfo contactInfo : conv.getGroupParticipants())
+		{
+			TextView participantNameItem = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
+			participantNameItem.setText(contactInfo.getName());
+			participantNameItem.setBackgroundResource(contactInfo.isOnhike() ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
+
+			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			lp.setMargins(left, top, right, bottom);
+			participantNameItem.setLayoutParams(lp);
+
+			participantNameContainer.addView(participantNameItem);
+		}
+		nameTxt = conv.getLabel();
+		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
+
+		mIconView.setImageDrawable(drawable);
+		mNameEdit.setText(nameTxt);
+		mTitleView.setText(R.string.group_info);
+		
+		// Hide the cursor initially
+		Utils.hideCursor(mNameEdit, getResources());
+	}
+
 	private void setupEditScreen()
 	{
-		findViewById(R.id.me_layout).setVisibility(View.GONE);
-		findViewById(R.id.settings_txt).setVisibility(View.GONE);
-		findViewById(R.id.prefs).setVisibility(View.GONE);
-		findViewById(R.id.with_love_layout).setVisibility(View.GONE);
-		ViewGroup editProfile =(ViewGroup) findViewById(R.id.edit_profile);
-		editProfile.setVisibility(View.VISIBLE);
+		setContentView(R.layout.profile_edit);
 
-		name = (ViewGroup) findViewById(R.id.name);
-		phone = (ViewGroup) findViewById(R.id.phone);
-		email = (ViewGroup) findViewById(R.id.email);
-		gender = (ViewGroup) findViewById(R.id.gender);
-		picture = (ViewGroup) findViewById(R.id.photo);
+		TextView mTitleView = (TextView) findViewById(R.id.title);
+
+		ViewGroup name = (ViewGroup) findViewById(R.id.name);
+		ViewGroup phone = (ViewGroup) findViewById(R.id.phone);
+		ViewGroup email = (ViewGroup) findViewById(R.id.email);
+		ViewGroup gender = (ViewGroup) findViewById(R.id.gender);
+		ViewGroup picture = (ViewGroup) findViewById(R.id.photo);
 
 		mNameEdit = (EditText) name.findViewById(R.id.name_input);
 		mEmailEdit = (EditText) email.findViewById(R.id.email_input);
@@ -189,7 +252,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		((TextView)gender.findViewById(R.id.gender_edit_field)).setText("Gender");
 		((TextView)picture.findViewById(R.id.photo_edit_field)).setText("Edit Picture");
 
-		picture.setOnClickListener(this);
 		picture.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 		picture.setFocusable(true);
 
@@ -205,32 +267,22 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 
 		onEmoticonClick(mActivityState.genderType == 0 ? null : mActivityState.genderType == 1 ? gender.findViewById(R.id.guy) : gender.findViewById(R.id.girl));
 
-		//This hack is to prevent the cursor from being shown initially on the text box in touch screen devices. On touching the text box the cursor becomes visible 
-		if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS 
-				|| getResources().getConfiguration().hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_YES) {
-			mNameEdit.setCursorVisible(false);
-			mNameEdit.setOnTouchListener(new OnTouchListener() 
-			{
-				@Override
-				public boolean onTouch(View v, MotionEvent event) 
-				{
-					if(event.getAction() == MotionEvent.ACTION_DOWN)
-					{
-						mNameEdit.setCursorVisible(true);
-					}
-					return false;
-				}
-			});
-		}
+		//Hide the cursor initially
+		Utils.hideCursor(mNameEdit, getResources());
 	}
 	
 	private void setupProfileScreen()
 	{
-		myInfo = (ViewGroup) findViewById(R.id.my_info); 
-		credits = (ViewGroup) findViewById(R.id.free_sms);
-		notifications = (ViewGroup) findViewById(R.id.notifications);
-		privacy = (ViewGroup) findViewById(R.id.privacy);
-		help = (ViewGroup) findViewById(R.id.help);
+		setContentView(R.layout.profile);
+
+		TextView mTitleView = (TextView) findViewById(R.id.title);
+		TextView mNameView = (TextView) findViewById(R.id.name_current);
+
+		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info); 
+		ViewGroup credits = (ViewGroup) findViewById(R.id.free_sms);
+		ViewGroup notifications = (ViewGroup) findViewById(R.id.notifications);
+		ViewGroup privacy = (ViewGroup) findViewById(R.id.privacy);
+		ViewGroup help = (ViewGroup) findViewById(R.id.help);
 
 		myInfo.setBackgroundResource(R.drawable.profile_top_item_selector);
 		credits.setBackgroundResource(R.drawable.profile_bottom_item_selector);
@@ -239,7 +291,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		help.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 
 		mIconView = (ImageView) findViewById(R.id.profile);
-		mNameView = (TextView) findViewById(R.id.name_current);
 
 		ViewGroup[] itemLayouts = new ViewGroup[]
 				{
@@ -261,8 +312,6 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		}
 
 		notifications.findViewById(R.id.divider).setVisibility(View.GONE);
-		mIconView.setOnClickListener(this);
-		myInfo.setOnClickListener(this);
 
 		mTitleView.setText(getResources().getString(R.string.profile_title));
 		mNameView.setText(nameTxt);
@@ -287,7 +336,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 
 	public void onBackPressed()
 	{
-		if(isEditingProfile)
+		if(this.profileType == ProfileType.USER_PROFILE_EDIT || this.profileType == ProfileType.GROUP_INFO)
 		{
 			isBackPressed = true;
 			saveChanges();
@@ -313,7 +362,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 	{
 		ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
 
-		if (isEditingProfile && !TextUtils.isEmpty(mEmailEdit.getText()))
+		if (this.profileType == ProfileType.USER_PROFILE_EDIT && !TextUtils.isEmpty(mEmailEdit.getText()))
 		{
 			if (!Utils.isValidEmail(mEmailEdit.getText()))
 			{
@@ -325,7 +374,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		if (mNameEdit != null && !TextUtils.isEmpty(mNameEdit.getText()) && !nameTxt.equals(mNameEdit.getText().toString()))
 		{
 			/* user edited the text, so update the profile */
-			HikeHttpRequest request = new HikeHttpRequest("/account/name", new HikeHttpRequest.HikeHttpCallback()
+			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/name", new HikeHttpRequest.HikeHttpCallback()
 			{
 				public void onFailure()
 				{
@@ -336,11 +385,21 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 
 				public void onSuccess()
 				{
-					/* if the request was successful, update the shared preferences and the UI */
-					String name = mNameEdit.getText().toString();
-					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
-					editor.putString(HikeMessengerApp.NAME_SETTING, name);
-					editor.commit();
+					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO) 
+					{
+						/* if the request was successful, update the shared preferences and the UI */
+						String name = mNameEdit.getText().toString();
+						Editor editor = getSharedPreferences(
+								HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+						editor.putString(HikeMessengerApp.NAME_SETTING, name);
+						editor.commit();
+					}
+					else
+					{
+						HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+						hCDB.setGroupName(ProfileActivity.this.mLocalMSISDN, mNameEdit.getText().toString());
+						hCDB.close();
+					}
 					if (isBackPressed) {
 						finishEditing();
 					}
@@ -369,11 +428,20 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			smallerBitmap.compress(Bitmap.CompressFormat.JPEG, 95, bao);
 			final byte[] bytes = bao.toByteArray();
 
-			bao = new ByteArrayOutputStream();
-			mActivityState.newBitmap.compress(Bitmap.CompressFormat.PNG, 90, bao);
-			final byte[] larger_bytes = bao.toByteArray();
+			final byte[] larger_bytes;
+			if (this.profileType != ProfileType.GROUP_INFO) 
+			{
+				bao = new ByteArrayOutputStream();
+				mActivityState.newBitmap.compress(Bitmap.CompressFormat.PNG,
+						90, bao);
+				larger_bytes = bao.toByteArray();
+			}
+			else
+			{
+				larger_bytes = null;
+			}
 
-			HikeHttpRequest request = new HikeHttpRequest("/account/avatar", new HikeHttpRequest.HikeHttpCallback()
+			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/avatar", new HikeHttpRequest.HikeHttpCallback()
 			{
 				public void onFailure()
 				{
@@ -382,8 +450,8 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 					if (mIconView != null) {
 						/* reset the image */
 						mIconView.setImageDrawable(IconCacheManager
-								.getInstance().getIconForMSISDN(
-										getLargerIconId()));
+								.getInstance().getIconForMSISDN(ProfileActivity.this.profileType != ProfileType.GROUP_INFO ?
+										getLargerIconId() : mLocalMSISDN));
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -394,7 +462,10 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 				{
 					HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
 					db.setIcon(mLocalMSISDN, bytes);
-					db.setIcon(getLargerIconId(), larger_bytes);
+					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
+ 					{
+						db.setIcon(getLargerIconId(), larger_bytes);
+					}
 					db.close();
 					if (isBackPressed) {
 						finishEditing();
@@ -406,7 +477,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			requests.add(request);
 		}
 
-		if (mEmailEdit != null) {
+		if (this.profileType == ProfileType.USER_PROFILE_EDIT) {
 			SharedPreferences prefs = getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 			Editor editor = prefs.edit();
@@ -432,48 +503,24 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 		}
 		else if(isBackPressed)
 		{
-			Intent i = new Intent(this, ProfileActivity.class);
-			startActivity(i);
-			finish();
+			finishEditing();
 		}
 	}
 
 	private void finishEditing()
 	{
-		Intent i = new Intent(this, ProfileActivity.class);
-		i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(i);
+		if (this.profileType != ProfileType.GROUP_INFO) 
+		{
+			Intent i = new Intent(this, ProfileActivity.class);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(i);
+		}
 		finish();
 	}
 
 	protected String getLargerIconId()
 	{
 		return mLocalMSISDN + "::large";
-	}
-
-	@Override
-	public void onClick(View view)
-	{
-		Log.d("ProfileActivity", "View is " + view);
-		if (view == mIconView || view == picture)
-		{
-			/* The wants to change their profile picture.
-			 * Open a dialog to allow them pick Camera or Gallery 
-			 */
-			final CharSequence[] items = {"Camera", "Gallery"};/*TODO externalize these */
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Choose a picture");
-			builder.setItems(items, this);
-			mDialog = builder.show();
-		}
-		else if(view == myInfo)
-		{
-			Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.EDIT_PROFILE);
-			Intent i = new Intent(ProfileActivity.this, ProfileActivity.class);
-			i.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
-			startActivity(i);
-			finish();
-		}
 	}
 
 	@Override
@@ -521,7 +568,7 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 			if (mIconView != null) {
 				mIconView.setImageBitmap(mActivityState.newBitmap);
 			}
-			if (!isEditingProfile) {
+			if (this.profileType == ProfileType.USER_PROFILE) {
 				saveChanges();
 			}
 			break;
@@ -589,6 +636,91 @@ public class ProfileActivity extends Activity implements OnClickListener, Finish
 				mActivityState.genderType = currentSelection.getId() == R.id.guy ? 1 : 2;
 			}
 
+		}
+	}
+
+    public void onChangeImageClicked(View v)
+    {
+    	/* The wants to change their profile picture.
+		 * Open a dialog to allow them pick Camera or Gallery 
+		 */
+		final CharSequence[] items = {"Camera", "Gallery"};/*TODO externalize these */
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("Choose a picture");
+		builder.setItems(items, this);
+		mDialog = builder.show();
+    }
+
+    public void onEditProfileClicked(View v)
+    {
+    	Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.EDIT_PROFILE);
+		Intent i = new Intent(ProfileActivity.this, ProfileActivity.class);
+		i.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
+		startActivity(i);
+		finish();
+    }
+
+    public void onInviteAllClicked(View v)
+	{
+    	for(ContactInfo contactInfo : participantList)
+    	{
+    		if (!contactInfo.isOnhike()) 
+    		{
+    			long time = (long) System.currentTimeMillis() / 1000;
+				ConvMessage convMessage = new ConvMessage(getResources()
+						.getString(R.string.invite_message), contactInfo.getMsisdn(), time,
+						ConvMessage.State.SENT_UNCONFIRMED);
+				convMessage.setInvite(true);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						convMessage.serialize());
+			}
+    	}
+	}
+
+	public void onGroupInfoClicked(View v)
+	{
+		Intent intent = getIntent();
+		intent.setClass(ProfileActivity.this, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
+		startActivity(intent);
+		
+		overridePendingTransition(R.anim.slide_in_right_noalpha,
+				R.anim.slide_out_left_noalpha);
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) {
+		if (mLocalMSISDN.equals((String)object)) 
+		{
+			if (HikePubSub.ICON_CHANGED.equals(type)) 
+			{
+				HikeConversationsDatabase db = new HikeConversationsDatabase(
+						this);
+				nameTxt = db.getGroupName(mLocalMSISDN);
+				db.close();
+				runOnUiThread(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						mNameEdit.setText(nameTxt);
+					}
+				});
+			} 
+			else if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) 
+			{
+				final Drawable drawable = IconCacheManager.getInstance()
+						.getIconForMSISDN(mLocalMSISDN);
+				runOnUiThread(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						mIconView.setImageDrawable(drawable);
+					}
+				});
+			}
 		}
 	}
 }

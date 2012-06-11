@@ -2,6 +2,10 @@ package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
@@ -23,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -180,54 +185,66 @@ public class MessagesAdapter extends BaseAdapter
 		if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			((ViewGroup)holder.participantInfoContainer).removeAllViews();
-
-			if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
+			try 
 			{
-				int left = (int) (0 * Utils.densityMultiplier);
-				int top = (int) (0 * Utils.densityMultiplier);
-				int right = (int) (0 * Utils.densityMultiplier);
-				int bottom = (int) (6 * Utils.densityMultiplier);
-
-				String msg = convMessage.getMessage();
-				String[] participantInfoArray = msg.contains(", ") ? msg.split(", ") : new String[] {msg};
-
-				for (int i = 0; i < participantInfoArray.length; i++) 
+				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 				{
-					Log.d(getClass().getSimpleName(), "Joined: " + participantInfoArray[i]);
+					int left = (int) (0 * Utils.densityMultiplier);
+					int top = (int) (0 * Utils.densityMultiplier);
+					int right = (int) (0 * Utils.densityMultiplier);
+					int bottom = (int) (6 * Utils.densityMultiplier);
 
-					TextView participantInfo = (TextView) inflater.inflate(
-							R.layout.participant_info, null);
+					JSONArray participantInfoArray = new JSONObject(convMessage.getMetadata().serialize()).getJSONArray(HikeConstants.DATA);
 
-					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-
-					if (i != participantInfoArray.length - 1) 
+					for (int i = 0; i < participantInfoArray.length(); i++) 
 					{
-						participantInfo.setText(Utils.getFormattedParticipantInfo(participantInfoArray[i] + " " + context.getString(R.string.joined_conversation)));
-						lp.setMargins(left, top, right, bottom);
+						Log.d(getClass().getSimpleName(), "Joined: " + participantInfoArray.getString(i));
+
+						TextView participantInfo = (TextView) inflater.inflate(
+								R.layout.participant_info, null);
+
+						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+
+						participantInfo.setText(
+								Utils.getFormattedParticipantInfo(
+										Utils.getContactName(conversation.getGroupParticipants(), participantInfoArray.getString(i), context) + " " 
+												+ context.getString(R.string.joined_conversation)));
+						if (i != participantInfoArray.length() - 1) 
+						{
+							lp.setMargins(left, top, right, bottom);
+						}
+						else
+						{
+							lp.setMargins(left, top, right, 0);
+						}
+						participantInfo.setLayoutParams(lp);
+
+						((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+					}
+				} 
+				else 
+				{
+					String participantMsisdn = new JSONObject(convMessage.getMetadata().serialize()).optString(HikeConstants.DATA);
+					TextView participantInfo = (TextView) inflater.inflate(R.layout.participant_info, null);
+
+					Log.d(getClass().getSimpleName(), "Left: " + participantMsisdn);
+
+					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
+					{
+						participantInfo.setText(
+								Utils.getContactName(conversation.getGroupParticipants(), participantMsisdn, context) + " " 
+										+ context.getString(R.string.left_conversation));
 					}
 					else
 					{
-						participantInfo.setText(Utils.getFormattedParticipantInfo(participantInfoArray[i]));
-						lp.setMargins(left, top, right, 0);
+						participantInfo.setText(R.string.group_chat_end);
 					}
-					participantInfo.setLayoutParams(lp);
-
 					((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
 				}
 			} 
-			else 
+			catch (JSONException e) 
 			{
-				Log.d(getClass().getSimpleName(), "Left: " + convMessage.getMessage());
-				TextView participantInfo = (TextView) inflater.inflate(R.layout.participant_info, null);
-				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
-				{
-					participantInfo.setText(Utils.getFormattedParticipantInfo(convMessage.getMessage()));
-				}
-				else
-				{
-					participantInfo.setText(convMessage.getMessage());
-				}
-				((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 			return v;
 		}
@@ -258,12 +275,14 @@ public class MessagesAdapter extends BaseAdapter
 		}
 		else
 		{
-			SmileyParser smileyParser = SmileyParser.getInstance();
-			CharSequence markedUp = smileyParser.addSmileySpans(convMessage.getMessage());
+			CharSequence markedUp = convMessage.getMessage();
+			// Fix for bug where if a participant leaves the group chat, the participant's name is never shown 
 			if(convMessage.isGroupChat() && !convMessage.isSent() && convMessage.getGroupParticipantMsisdn() != null)
 			{
-				markedUp = Utils.addContactName(this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp);
+				markedUp = Utils.addContactName(this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp, this.context);
 			}
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			markedUp = smileyParser.addSmileySpans(markedUp);
 			holder.messageTextView.setText(markedUp);
 			Linkify.addLinks(holder.messageTextView, Linkify.ALL);
 			Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");

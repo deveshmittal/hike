@@ -549,21 +549,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE) 
 		{
-			Intent intent;
+			Intent intent = null;
 			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) 
 			{
 				intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
 			}
-			else
-			{
-				intent = getIntent();
-				intent.removeExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
-				intent.removeExtra(HikeConstants.Extras.GROUP_CHAT);
-			}
-			startActivity(intent);
+			
 			/* slide down if we're still selecting a user, otherwise slide back */
-			if (mConversation == null && !intent.hasExtra(HikeConstants.Extras.NAME)) {
+			if (mConversation == null) {
 				overridePendingTransition(R.anim.no_animation,
 						R.anim.slide_down_noalpha);
 			} else {
@@ -1277,7 +1272,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (HikePubSub.ICON_CHANGED.equals(type))
 		{
 			String msisdn = (String) object;
-			if (msisdn.equals(mContactNumber))
+			if (mContactNumber.equals(msisdn))
 			{
 				/* update the image drawable */
 				runOnUiThread(mUpdateAdapter);
@@ -1621,23 +1616,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		
 		if (v.getId() == R.id.title_image_btn) {
+			dismissToolTip();
 			if (!this.mConversation.isGroupConversation()) 
 			{
 				Utils.logEvent(ChatThread.this,
 						HikeConstants.LogEvent.CHAT_INVITE_TOP_BUTTON);
 				inviteUser();
-				if (toolTipLayout != null
-						&& toolTipLayout.getVisibility() == View.VISIBLE) {
-					dismissToolTip();
-				}
+				
 			}
 			else
 			{
+				Utils.logEvent(ChatThread.this,
+						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
 				Intent intent = getIntent();
-				intent.setClass(ChatThread.this, ChatThread.class);
+				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 				intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, this.mConversation.getMsisdn());
-				finish();
 				startActivity(intent);
 				
 				overridePendingTransition(R.anim.slide_in_right_noalpha,
@@ -1730,10 +1724,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		prefs = prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs;
 
- 		if(!prefs.getBoolean(HikeMessengerApp.CHAT_TOOLTIP_DISMISSED, false) && !this.mConversation.isGroupConversation())
+ 		if(!prefs.getBoolean(mConversation.isGroupConversation() ? 
+				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, false))
 		{
 			showInviteToolTip();
 		}
+ 		else
+ 		{
+ 			// Fix for bug where the tool tip would remain visible in a hike thread.
+ 			hideToolTip();
+ 		}
 	}
 	
 	private void showInviteToolTip()
@@ -1747,13 +1747,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		toolTipLayout.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 		TextView toolTipTxt = (TextView) toolTipLayout.findViewById(R.id.tool_tip);
-		String formatString = String.format(getString(R.string.press_btn_invite), mConversation.getContactName());
+		String formatString = mConversation.isGroupConversation() ? 
+				getString(R.string.tap_group_info) : String.format(getString(R.string.press_btn_invite), mConversation.getContactName());
 		toolTipTxt.setText(formatString); 
 	}
 	
 	public void onToolTipClosed(View v)
 	{
-		Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.CHAT_TOOL_TIP_CLOSED);
+		Utils.logEvent(ChatThread.this, mConversation.isGroupConversation() ? 
+				HikeConstants.LogEvent.CHAT_GROUP_INFO_TOOL_TIP_CLOSED : HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
 		dismissToolTip();
 	}
 
@@ -1763,9 +1765,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void dismissToolTip()
 	{
 		Editor editor = prefs.edit();
-		editor.putBoolean(HikeMessengerApp.CHAT_TOOLTIP_DISMISSED, true);
+		editor.putBoolean(mConversation.isGroupConversation() ? 
+				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, true);
 		editor.commit();
-		if (toolTipLayout.getVisibility() == View.VISIBLE) 
+
+		hideToolTip();
+	}
+
+	private void hideToolTip()
+	{
+		if (toolTipLayout != null && toolTipLayout.getVisibility() == View.VISIBLE) 
 		{
 			Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
 			toolTipLayout.setAnimation(fadeOut);

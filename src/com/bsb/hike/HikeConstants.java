@@ -32,6 +32,8 @@ public class HikeConstants
 	public static final String ADDRESS_BOOK_ERROR = "AddressBookError";
 	public static final String CHANGE_NUMBER = "ChangeNumber"; 
 
+	public static final String SEPARATOR = " - ";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 
@@ -120,8 +122,8 @@ public class HikeConstants
 		public static final String COMPOSE_BUTTON = "homeComposeBtn";
 		public static final String ADD_SHORTCUT = "homeAddShortcut";
 		public static final String HOME_INVITE_TOP_BUTTON = "homeInviteTopBtn";
-		public static final String HOME_TOOL_TIP_CLOSED = "homeInviteOverlayClosed";
-		public static final String HOME_TOOL_TIP_CLICKED = "homeInviteOverlayClicked";
+		public static final String HOME_TOOL_TIP_CLOSED = "homeInviteToolTipClosed";
+		public static final String HOME_TOOL_TIP_CLICKED = "homeInviteToolTipClicked";
 
 		// Profile screen events
 		public static final String EDIT_PROFILE = "profileEdit";
@@ -132,13 +134,15 @@ public class HikeConstants
 		public static final String HELP_SCREEN = "profileHelpScreen";
 
 		// Invite screen events
-		public static final String INVITE_TOOL_TIP_CLOSED = "inviteOverlayClosed";
-		public static final String INVITE_TOOL_TIP_CLICKED = "inviteOverlayClicked";
+		public static final String INVITE_TOOL_TIP_CLOSED = "inviteToolTipClosed";
+		public static final String INVITE_TOOL_TIP_CLICKED = "inviteToolTipClicked";
 		public static final String CREDIT_TOP_BUTTON = "inviteCreditTopBtn";
 		
 		// Chat thread screen events
-		public static final String CHAT_TOOL_TIP_CLOSED = "chatInviteOverlayClicked";
+		public static final String CHAT_INVITE_TOOL_TIP_CLOSED = "chatInviteToolTipClosed";
+		public static final String CHAT_GROUP_INFO_TOOL_TIP_CLOSED = "chatGroupInfoToolTipClosed";
 		public static final String CHAT_INVITE_TOP_BUTTON = "chatInviteBtn";
+		public static final String CHAT_GROUP_INFO_TOP_BUTTON = "chatGroupInfoBtn";
 		public static final String MENU_BLOCK = "chatMenuBlock";
 		public static final String FORWARD_MSG = "chatForwardMsg";
 		public static final String I_BUTTON = "chatIBtn";
