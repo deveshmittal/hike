@@ -454,6 +454,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		setContentView(R.layout.chatthread);
 
+		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		Utils.setDensityMultiplier(ChatThread.this);
 
 		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
@@ -528,8 +529,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			onEmoticonBtnClicked(null);
 		}
 
-		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
@@ -551,6 +550,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onBackPressed()
 	{
+		if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT) && this.mConversation != null) 
+		{
+			if (this.mConversation.isGroupConversation()) {
+				Utils.incrementNumTimesScreenOpen(prefs,
+						HikeMessengerApp.NUM_TIMES_CHAT_THREAD_GROUP);
+			} else if (!this.mConversation.isOnhike()) {
+				Utils.incrementNumTimesScreenOpen(prefs,
+						HikeMessengerApp.NUM_TIMES_CHAT_THREAD_INVITE);
+			}
+		}
 		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE) 
 		{
 			Intent intent = null;
@@ -1743,7 +1752,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		btnBar.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 
  		if(!prefs.getBoolean(mConversation.isGroupConversation() ? 
-				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, false))
+				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, false) 
+				&& Utils.wasScreenOpenedNNumberOfTimes(prefs, mConversation.isGroupConversation() ? 
+						HikeMessengerApp.NUM_TIMES_CHAT_THREAD_GROUP : HikeMessengerApp.NUM_TIMES_CHAT_THREAD_INVITE))
 		{
 			showInviteToolTip();
 		}

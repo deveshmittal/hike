@@ -88,6 +88,16 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		}
 	}
 
+	@Override
+	public void onBackPressed() 
+	{
+		if(adapter instanceof HikeInviteAdapter)
+		{
+			Utils.incrementNumTimesScreenOpen(sharedPreferences, HikeMessengerApp.NUM_TIMES_INVITE);
+		}
+		super.onBackPressed();
+	}
+
 	private void showCreditsHelp(Bundle savedInstanceState)
 	{
 		sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
@@ -97,21 +107,22 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		creditsHelpBtn.setVisibility(View.VISIBLE);
 		creditsHelpBtn.setImageResource(R.drawable.credits_btn);
 
-		if (!sharedPreferences.getBoolean(
-					HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, false)) {
-				filterText.setEnabled(false);
-				mInviteToolTip = (ViewGroup) findViewById(R.id.credits_help_layout);
+		if (!sharedPreferences.getBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, false) 
+				&& Utils.wasScreenOpenedNNumberOfTimes(sharedPreferences, HikeMessengerApp.NUM_TIMES_INVITE)) 
+		{
+			filterText.setEnabled(false);
+			mInviteToolTip = (ViewGroup) findViewById(R.id.credits_help_layout);
 
-				if (savedInstanceState == null || !savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING))
-				{
-					Animation alphaIn = AnimationUtils.loadAnimation(
-							HikeListActivity.this, android.R.anim.fade_in);
-					alphaIn.setStartOffset(500);
-					mInviteToolTip.setAnimation(alphaIn);
-				}
-				mInviteToolTip.setVisibility(View.VISIBLE);
-				return;
+			if (savedInstanceState == null || !savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING))
+			{
+				Animation alphaIn = AnimationUtils.loadAnimation(
+						HikeListActivity.this, android.R.anim.fade_in);
+				alphaIn.setStartOffset(500);
+				mInviteToolTip.setAnimation(alphaIn);
 			}
+			mInviteToolTip.setVisibility(View.VISIBLE);
+			return;
+		}
 	}
 
 	@Override
