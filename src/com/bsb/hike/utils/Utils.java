@@ -549,6 +549,7 @@ public class Utils
 	public static JSONObject getDeviceStats(Context context)
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
+		Editor editor = prefs.edit();
 		Map<String, ?> keys = prefs.getAll();
 		Iterator<String> i= keys.keySet().iterator();
 
@@ -562,7 +563,9 @@ public class Utils
 				String key = i.next();
 				Log.d("Utils", "Getting keys: " + key);
 				data.put(key, prefs.getLong(key, 0));
+				editor.remove(key);
 			}
+			editor.commit();
 			data.put(HikeConstants.LogEvent.TAG, "mob");
 			
 			obj.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
