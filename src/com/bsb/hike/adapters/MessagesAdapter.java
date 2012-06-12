@@ -233,8 +233,9 @@ public class MessagesAdapter extends BaseAdapter
 					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
 					{
 						participantInfo.setText(
-								Utils.getContactName(conversation.getMsisdn(), conversation.getGroupParticipants(), participantMsisdn, context) + " " 
-										+ context.getString(R.string.left_conversation));
+								Utils.getFormattedParticipantInfo(
+										Utils.getContactName(conversation.getMsisdn(), conversation.getGroupParticipants(), participantMsisdn, context) + " " 
+												+ context.getString(R.string.left_conversation)));
 					}
 					else
 					{
