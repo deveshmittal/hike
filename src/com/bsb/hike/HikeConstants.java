@@ -62,6 +62,9 @@ public class HikeConstants
 	public static final int CRITICAL_UPDATE = 1;
 	public static final int NO_UPDATE = 0;
 	
+	// More explanation required?
+	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 4;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";

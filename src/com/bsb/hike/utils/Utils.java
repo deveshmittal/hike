@@ -667,4 +667,16 @@ public class Utils
 		String myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
 		return new ContactInfo(myMsisdn, myMsisdn, myName, myMsisdn);
 	}
+
+	public static boolean wasScreenOpenedNNumberOfTimes(SharedPreferences prefs, String whichScreen)
+	{
+		return prefs.getInt(whichScreen, 0) >= HikeConstants.NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP;
+	}
+
+	public static void incrementNumTimesScreenOpen(SharedPreferences prefs, String whichScreen)
+	{
+		Editor editor= prefs.edit();
+		editor.putInt(whichScreen, prefs.getInt(whichScreen, 0) + 1);
+		editor.commit();
+	}
 }
