@@ -365,7 +365,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		Log.d(getClass().getSimpleName(), "Fetching conversation with msisdn: " + msisdn);
 		Cursor c = null;
-		Cursor groupCursor = null;
 		HikeUserDatabase huDb = null;
 		Conversation conv = null;
 		try
@@ -395,32 +394,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			if(Utils.isGroupConversation(msisdn))
 			{
-				groupCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, 
-													new String[] 
-															{ 
-																DBConstants.GROUP_NAME, 
-																DBConstants.GROUP_OWNER, 
-																DBConstants.GROUP_ALIVE
-															}, 
-													DBConstants.GROUP_ID + " = ? ", 
-													new String[] 
-															{
-																msisdn
-															}, 
-													null, null, null);
-				if(!groupCursor.moveToFirst())
-				{
-					Log.d(getClass().getSimpleName(), "Could not find db entry");
-					return null;
-				}
-
-				String groupName = groupCursor.getString(groupCursor.getColumnIndex(DBConstants.GROUP_NAME));
-				String groupOwner = groupCursor.getString(groupCursor.getColumnIndex(DBConstants.GROUP_OWNER));
-				boolean isGroupAlive = groupCursor.getInt(groupCursor.getColumnIndex(DBConstants.GROUP_ALIVE)) != 0;
-
-				ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, groupName, msisdn);
-
-				conv = new Conversation(msisdn, convid, contactid, contactInfo.getName(), onhike, groupOwner, isGroupAlive);
+				conv = getGroupConversation(msisdn, convid, contactid);
 				conv.setGroupParticipants(getGroupParticipants(msisdn));
 			}
 			else
@@ -444,10 +418,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if (c != null)
 			{
 				c.close();
-			}
-			if(groupCursor != null)
-			{
-				groupCursor.close();
 			}
 			if (huDb != null)
 			{
@@ -481,52 +451,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				Conversation conv;
 				// TODO this can be expressed in a single sql query
 				String msisdn = c.getString(msisdnIdx);
+				long convid = c.getInt(convIdx);
+				String contactid = c.getString(contactIdx);
 				Log.d(getClass().getSimpleName(), "Fetching Converstaions: " + msisdn);
 				if(Utils.isGroupConversation(msisdn))
 				{
-					Cursor groupCursor = null;
-					try 
-					{
-						groupCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, 
-								new String[] 
-										{ 
-								DBConstants.GROUP_NAME, 
-								DBConstants.GROUP_OWNER, 
-								DBConstants.GROUP_ALIVE
-										}, 
-										DBConstants.GROUP_ID + " = ? ", 
-										new String[] 
-												{
-													msisdn
-												}, 
-												null, null, null);
-						if(!groupCursor.moveToFirst())
-						{
-							Log.d(getClass().getSimpleName(), "Could not find db entry");
-							return null;
-						}
-
-						String groupName = groupCursor.getString(groupCursor.getColumnIndex(DBConstants.GROUP_NAME));
-						String groupOwner = groupCursor.getString(groupCursor.getColumnIndex(DBConstants.GROUP_OWNER));
-						boolean isGroupAlive = groupCursor.getInt(groupCursor.getColumnIndex(DBConstants.GROUP_ALIVE)) != 0;
-
-						ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, groupName, msisdn);
-
-						conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx), contactInfo.getName(),
-								(contactInfo != null) ? contactInfo.isOnhike() : false, groupOwner, isGroupAlive);
-						conv.setGroupParticipants(getGroupParticipants(msisdn));
-					} 
-					finally
-					{
-						if (groupCursor != null) {
-							groupCursor.close();
-						}
-					}
+					conv = getGroupConversation(msisdn, convid, contactid);
 				}
 				else
 				{
 					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
-					conv = new Conversation(msisdn, c.getLong(convIdx), c.getString(contactIdx), contactInfo.getName(),
+					conv = new Conversation(msisdn, convid, contactid, contactInfo.getName(),
 							(contactInfo != null) ? contactInfo.isOnhike() : false);
 				}
 
@@ -546,6 +481,50 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
+	}
+
+	private Conversation getGroupConversation(String msisdn, long convid, String contactid)
+	{
+		Cursor groupCursor = null;
+		try 
+		{
+			groupCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, 
+					new String[] 
+							{ 
+					DBConstants.GROUP_NAME, 
+					DBConstants.GROUP_OWNER, 
+					DBConstants.GROUP_ALIVE
+							}, 
+							DBConstants.GROUP_ID + " = ? ", 
+							new String[] 
+									{
+										msisdn
+									}, 
+									null, null, null);
+			if(!groupCursor.moveToFirst())
+			{
+				Log.w(getClass().getSimpleName(), "Could not find db entry: " + msisdn);
+				return null;
+			}
+
+			String groupName = groupCursor.getString(groupCursor.getColumnIndex(DBConstants.GROUP_NAME));
+			String groupOwner = groupCursor.getString(groupCursor.getColumnIndex(DBConstants.GROUP_OWNER));
+			boolean isGroupAlive = groupCursor.getInt(groupCursor.getColumnIndex(DBConstants.GROUP_ALIVE)) != 0;
+
+			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, groupName, msisdn);
+
+			Conversation conv = new Conversation(msisdn, convid, contactid, contactInfo.getName(),
+					(contactInfo != null) ? contactInfo.isOnhike() : false, groupOwner, isGroupAlive);
+			conv.setGroupParticipants(getGroupParticipants(msisdn));
+
+			return conv;
+		} 
+		finally
+		{
+			if (groupCursor != null) {
+				groupCursor.close();
+			}
+		}
 	}
 
 	public JSONArray updateStatusAndSendDeliveryReport(long convID)
