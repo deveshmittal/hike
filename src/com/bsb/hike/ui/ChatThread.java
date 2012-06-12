@@ -1402,7 +1402,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					mComposeView.setText("");
 				}
 				mComposeView.setHint(R.string.type_to_compose);
-				mComposeView.setEnabled(true);
+				if (mConversation.getIsGroupAlive()) 
+				{
+					mComposeView.setEnabled(true);
+				}
 			}
 			findViewById(R.id.info_layout).setVisibility(View.GONE);
 
