@@ -17,7 +17,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -39,8 +38,6 @@ public class ToastListener implements Listener
 
 	private MQTTConnectionStatus mCurrentUnnotifiedStatus;
 
-	private HikeConversationsDatabase convDb;
-
 	public ToastListener(Context context)
 	{
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
@@ -48,7 +45,6 @@ public class ToastListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTION_STATUS, this);
 		this.toaster = new HikeNotification(context);
 		this.db = new HikeUserDatabase(context);
-		this.convDb = new HikeConversationsDatabase(context);
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.INITIAL;
 	}
