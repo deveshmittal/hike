@@ -600,6 +600,7 @@ public class Utils
 		{
 			HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
 			contactInfo.setName(hCDB.getParticipantName(groupId, msisdn));
+			hCDB.close();
 		}
 		return contactInfo.getFirstName();
 	}
