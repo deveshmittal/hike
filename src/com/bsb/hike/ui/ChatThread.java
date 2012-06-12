@@ -528,6 +528,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			onEmoticonBtnClicked(null);
 		}
 
+		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
@@ -1212,7 +1214,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					updateChatMetadata();
 					if (!animatedOnce) 
 					{
-						prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 						animatedOnce = prefs.getBoolean(HikeConstants.Extras.ANIMATED_ONCE, false);
 						if (!animatedOnce) {
 							Editor editor = prefs.edit();
@@ -1686,7 +1687,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, name, msisdn);
 				contactInfoList.add(contactInfo);
 			}
-			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs);
+			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs);
 
 			Conversation conversation = new Conversation(mContactNumber, 0, mContactNumber, null, false, userContactInfo.getMsisdn(), true);
 			conversation.setGroupParticipants(contactInfoList);
@@ -1740,8 +1741,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		titleIconView.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 		titleIconView.setImageResource(R.drawable.ic_invite_top);
 		btnBar.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
-
-		prefs = prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs;
 
  		if(!prefs.getBoolean(mConversation.isGroupConversation() ? 
 				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, false))
