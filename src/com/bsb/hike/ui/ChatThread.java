@@ -1686,9 +1686,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, name, msisdn);
 				contactInfoList.add(contactInfo);
 			}
-
-			ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
-			contactInfoList.add(userContactInfo);
+			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs);
 
 			Conversation conversation = new Conversation(mContactNumber, 0, mContactNumber, null, false, userContactInfo.getMsisdn(), true);
 			conversation.setGroupParticipants(contactInfoList);
