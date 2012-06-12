@@ -208,11 +208,14 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		int right = (int) (0 * Utils.densityMultiplier);
 		int bottom = (int) (6 * Utils.densityMultiplier);
 
+		ContactInfo userInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0));
+		conv.getGroupParticipants().add(userInfo);
+
 		for(ContactInfo contactInfo : conv.getGroupParticipants())
 		{
 			TextView participantNameItem = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
-			participantNameItem.setText(contactInfo.getName());
-			participantNameItem.setBackgroundResource(contactInfo.isOnhike() ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
+			participantNameItem.setText(!TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getFirstName() : Utils.getContactName(conv.getMsisdn(), conv.getGroupParticipants(), contactInfo.getMsisdn(), ProfileActivity.this));
+			participantNameItem.setBackgroundResource(contactInfo.isOnhike() || userInfo.getMsisdn().equals(contactInfo.getMsisdn()) ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
 
 			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.setMargins(left, top, right, bottom);
@@ -220,6 +223,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 			participantNameContainer.addView(participantNameItem);
 		}
+		conv.getGroupParticipants().remove(userInfo);
+		
 		nameTxt = conv.getLabel();
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
 
