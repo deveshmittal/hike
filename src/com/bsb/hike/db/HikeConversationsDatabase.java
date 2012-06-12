@@ -15,6 +15,7 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -695,13 +696,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {DBConstants.MSISDN}, DBConstants.GROUP_ID + " = ? ", new String[] {groupId}, null, null, null);
 
 		List<ContactInfo> participantList = new ArrayList<ContactInfo>();
-
+		
 		HikeUserDatabase huDB = new HikeUserDatabase(mCtx);
 		while(c.moveToNext())
 		{
 			String msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
 			ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn);
 			Log.d(getClass().getSimpleName(), "Contact info is null: " + msisdn + " " + contactInfo); 
+			if(TextUtils.isEmpty(contactInfo.getName()))
+			{
+				contactInfo.setName(getParticipantName(groupId, contactInfo.getMsisdn()));
+			}
 			participantList.add(contactInfo);
 			Log.d(getClass().getSimpleName(), "Fetching participant: " + c.getString(c.getColumnIndex(DBConstants.MSISDN)));
 		}
