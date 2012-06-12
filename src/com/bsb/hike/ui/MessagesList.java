@@ -32,7 +32,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -75,9 +74,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private View mInviteToolTip;
 
-	private ImageView titleIconView;
-
-	private View btnBar;
+	private SharedPreferences accountPrefs;
 
 	@Override
 	protected void onPause()
@@ -187,18 +184,17 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
-		TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
-		text.setText(getString(R.string.invite_tooltip));
+		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
-		btnBar = findViewById(R.id.button_bar);
-
-		titleIconView.setVisibility(View.VISIBLE);
-		titleIconView.setImageResource(R.drawable.ic_invite_top);
-		btnBar.setVisibility(View.VISIBLE);
-		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false))
+		if (!accountPrefs.getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false) 
+				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
 		{
+			mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
+			mInviteToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
+
+			TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
+			text.setText(getString(R.string.earn_200_sms_tap_here));
+
 			if (savedInstanceState == null || !savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING)) 
 			{
 				Animation alphaIn = AnimationUtils.loadAnimation(
@@ -262,13 +258,14 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mInviteToolTip.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mInviteToolTip != null && mInviteToolTip.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onBackPressed()
 	{
+		Utils.incrementNumTimesScreenOpen(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
 		super.onBackPressed();
 	}
 
@@ -341,10 +338,9 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		return true;
 	}
 
-	private void invite()
+	private void showCreditsScreen()
 	{
-		Intent intent = new Intent(this, HikeListActivity.class);
-		intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
+		Intent intent = new Intent(this, CreditsActivity.class);
 		startActivity(intent);		
 	}
 
@@ -361,7 +357,9 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		{
 		case R.id.invite:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU);
-			onTitleIconClick(null);
+			intent = new Intent(this, HikeListActivity.class);
+			intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
+			startActivity(intent);
 			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {
@@ -675,11 +673,8 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	public void onTitleIconClick(View v)
 	{
-		if (v != null) {
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_INVITE_TOP_BUTTON);
-		}
 		setToolTipDismissed();
-		invite();
+		showCreditsScreen();
 	}
 
 	public void onToolTipClicked(View v)

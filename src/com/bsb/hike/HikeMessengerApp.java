@@ -69,6 +69,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String CHAT_GROUP_INFO_TOOL_TIP_DISMISSED = "chatGroupInfoToolTipDismissed";
 
+	public static final String NUM_TIMES_HOME_SCREEN = "numTimesHomeScreen";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;
