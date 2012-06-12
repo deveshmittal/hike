@@ -22,6 +22,8 @@ public class HikeConstants
 	public static final String ANALYTICS_EVENT = "ae";
 	public static final String ALL_INVITEE = "ai";
 	public static final String ALL_INVITEE_JOINED = "aij";
+	public static final String NAME = "name";
+	public static final String MSISDN = "msisdn";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

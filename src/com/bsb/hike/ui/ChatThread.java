@@ -402,6 +402,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_JOINED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_LEFT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -542,6 +543,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_LEFT, this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
 	}
 
 	@Override
@@ -937,7 +939,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				return;
 			}
 
-			mConversation = mConversationDb.addConversation(mContactNumber, false, "");
+			mConversation = mConversationDb.addConversation(mContactNumber, false, "", null);
 		}
 
 		mLabel = mConversation.getLabel();
@@ -954,6 +956,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		db.close();
 
 		changeInviteButtonVisibility();
+		if(mConversation.isGroupConversation() && !mConversation.getIsGroupAlive())
+		{
+			groupChatDead();
+		}
 		/* make a copy of the message list since it's used internally by the adapter */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
@@ -1316,6 +1322,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				});
 			}
 		}
+		else if (HikePubSub.GROUP_END.equals(type))
+		{
+			String groupId = (String) object;
+			if(groupId.equals(mContactNumber))
+			{
+				groupChatDead();
+			}
+		}
 	}
 
 	private ConvMessage findMessageById(long msgID)
@@ -1659,22 +1673,26 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mContactNumber = groupId;
 			}
 			selectedParticipants = Utils.splitSelectedContacts(selectedContacts);
+			List<String> selectedParticipantNames = Utils.splitSelectedContactsName(selectedContacts);
 			ArrayList<ContactInfo> contactInfoList = new ArrayList<ContactInfo>();
 
-			HikeUserDatabase huDB = new HikeUserDatabase(this);
-			for(String msisdn : selectedParticipants)
+			for(int i = 0; i < selectedParticipants.size(); i++)
 			{
-				ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn);
+				String msisdn = selectedParticipants.get(i);
+				String name = selectedParticipantNames.get(i);
+				ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, name, msisdn);
 				contactInfoList.add(contactInfo);
 			}
-			huDB.close();
 
-			Conversation conversation = new Conversation(mContactNumber, 0, mContactNumber, null, false);
+			ContactInfo userContactInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
+			contactInfoList.add(userContactInfo);
+
+			Conversation conversation = new Conversation(mContactNumber, 0, mContactNumber, null, false, userContactInfo.getMsisdn(), true);
 			conversation.setGroupParticipants(contactInfoList);
 
 			Log.d(getClass().getSimpleName(), "Creating group: " + mContactNumber);
 			mConversationDb.addGroupParticipants(mContactNumber, conversation.getGroupParticipants());
-			mConversationDb.addConversation(conversation.getMsisdn(), false, "");
+			mConversationDb.addConversation(conversation.getMsisdn(), false, "", conversation.getGroupOwner());
 
 			try 
 			{
@@ -1840,5 +1858,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		findViewById(R.id.emo_arrow_left).setVisibility((emoticonViewPager.getCurrentItem() > 0) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
 		findViewById(R.id.emo_arrow_right).setVisibility((emoticonViewPager.getCurrentItem() < emoticonViewPager.getChildCount() - 1) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
+	}
+
+	private void groupChatDead()
+	{
+		this.mComposeView.setEnabled(false);
+		this.titleIconView.setEnabled(false);
 	}
 }
