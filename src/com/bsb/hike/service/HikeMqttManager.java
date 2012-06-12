@@ -746,7 +746,7 @@ public class HikeMqttManager implements Listener
 			else if (NetworkManager.GROUP_CHAT_NAME.equals(type))
 			{
 				String groupname = jsonObj.optString(HikeConstants.DATA);
-				String groupId = jsonObj.optString(HikeConstants.FROM);
+				String groupId = jsonObj.optString(HikeConstants.TO);
 				this.convDb.setGroupName(groupId, groupname);
 			}
 			else if (NetworkManager.GROUP_CHAT_END.equals(type))

@@ -205,7 +205,7 @@ public class NetworkManager implements HikePubSub.Listener
 		}
 		else if(GROUP_CHAT_NAME.equals(type))
 		{
-			String groupId = jsonObj.optString(HikeConstants.FROM);
+			String groupId = jsonObj.optString(HikeConstants.TO);
 			pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
 		}
 		else
