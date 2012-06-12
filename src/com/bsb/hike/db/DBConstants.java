@@ -20,7 +20,9 @@ public class DBConstants
 	
 	public static final String USERS_TABLE = "users";
 
-	public static final String GROUP_TABLE = "groups";
+	public static final String GROUP_MEMBERS_TABLE = "groupMembers";
+
+	public static final String GROUP_INFO_TABLE = "groupInfo";
 
 	/* Table Constants */
 	
@@ -67,4 +69,8 @@ public class DBConstants
 	public static final String GROUP_INDEX = "group_idx";
 
 	public static final String GROUP_PARTICIPANT = "groupParticipant";
+
+	public static final String GROUP_OWNER = "groupOwner";
+
+	public static final String GROUP_ALIVE = "groupAlive";
 }

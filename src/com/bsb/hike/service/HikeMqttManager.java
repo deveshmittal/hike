@@ -716,7 +716,7 @@ public class HikeMqttManager implements Listener
 				if (!this.convDb.doesConversationExist(conversation)) 
 				{
 					Log.d(getClass().getSimpleName(), "The group conversation does not exists");
-					conversation = this.convDb.addConversation(conversation.getMsisdn(), false, "");
+					conversation = this.convDb.addConversation(conversation.getMsisdn(), false, "", conversation.getGroupOwner());
 
 					convMessage = new ConvMessage(this.mHikeService.getString(R.string.you_joined_conversation), conversation.getMsisdn(), System.currentTimeMillis(), State.RECEIVED_UNREAD);
 					convMessage.setConversation(conversation);
@@ -746,8 +746,13 @@ public class HikeMqttManager implements Listener
 			else if (NetworkManager.GROUP_CHAT_NAME.equals(type))
 			{
 				String groupname = jsonObj.optString(HikeConstants.DATA);
-				String groupId = jsonObj.optString(HikeConstants.FROM);
+				String groupId = jsonObj.optString(HikeConstants.TO);
 				this.convDb.setGroupName(groupId, groupname);
+			}
+			else if (NetworkManager.GROUP_CHAT_END.equals(type))
+			{
+				String groupId = jsonObj.optString(HikeConstants.TO);
+				this.convDb.setGroupDead(groupId);
 			}
 			/*
 			 * Check if message was already received by the receiver

@@ -58,6 +58,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.JSONSerializable;
@@ -477,6 +478,17 @@ public class Utils
 		return contacts;
 	}
 
+	public static List<String> splitSelectedContactsName(String selections)
+	{
+		String[] selectedContacts = selections.split(", ");
+		List<String> contactNames = new ArrayList<String>(selectedContacts.length);
+		for(int i = 0; i<selectedContacts.length; i++)
+		{
+			contactNames.add(selectedContacts[i].substring(0, selectedContacts[i].indexOf("[")));
+		}
+		return contactNames;
+	}
+
 	public static boolean isGroupConversation(String msisdn)
 	{
 		return !msisdn.startsWith("+");
@@ -564,28 +576,38 @@ public class Utils
 		return obj;
 	}
 
-	public static String getContactName(List<ContactInfo> participantList, String msisdn, Context context)
+	public static String getContactName(String groupId, List<ContactInfo> participantList, String msisdn, Context context)
 	{
+		ContactInfo contactInfo = null;
 		if (participantList != null && participantList.size() > 0) 
 		{
-			for (ContactInfo contactInfo : participantList) 
+			for (ContactInfo cInfo : participantList) 
 			{
-				if (contactInfo.getMsisdn().equals(msisdn)) 
+				if (cInfo.getMsisdn().equals(msisdn)) 
 				{
-					return contactInfo.getFirstName();
+					contactInfo = cInfo;
+					break;
 				}
 			}
 		}
-		HikeUserDatabase hUDB = new HikeUserDatabase(context);
-		ContactInfo contactInfo = hUDB.getContactInfoFromMSISDN(msisdn);
-		hUDB.close();
-
+		if (contactInfo == null) 
+		{
+			HikeUserDatabase hUDB = new HikeUserDatabase(context);
+			contactInfo = hUDB.getContactInfoFromMSISDN(msisdn);
+			hUDB.close();
+		}
+		if(TextUtils.isEmpty(contactInfo.getName()))
+		{
+			HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
+			contactInfo.setName(hCDB.getParticipantName(groupId, msisdn));
+			hCDB.close();
+		}
 		return contactInfo.getFirstName();
 	}
 
-	public static CharSequence addContactName(List<ContactInfo> participantList, String msisdn, CharSequence message, Context context)
+	public static CharSequence addContactName(String groupId, List<ContactInfo> participantList, String msisdn, CharSequence message, Context context)
 	{
-		String name = getContactName(participantList, msisdn, context);
+		String name = getContactName(groupId, participantList, msisdn, context);
 		SpannableStringBuilder messageWithName = new SpannableStringBuilder(name + HikeConstants.SEPARATOR + message);
 		messageWithName.setSpan(new StyleSpan(Typeface.BOLD), 0, name.length() + 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return messageWithName;
@@ -634,5 +656,12 @@ public class Utils
 				}
 			});
 		}
+	}
+	
+	public static ContactInfo getUserContactInfo(SharedPreferences prefs)
+	{
+		String myMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		String myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
+		return new ContactInfo(myMsisdn, myMsisdn, myName, myMsisdn);
 	}
 }

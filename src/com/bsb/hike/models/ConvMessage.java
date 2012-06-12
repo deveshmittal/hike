@@ -15,8 +15,6 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
 
@@ -189,8 +187,9 @@ public class ConvMessage
 			StringBuilder newParticipants = new StringBuilder();
 			for (int i = 0; i < arr.length(); i++) 
 			{
+				JSONObject nameMsisdn = arr.getJSONObject(i);
 				Log.d(getClass().getSimpleName(), "Joined: " + arr.getString(i));
-				newParticipants.append(Utils.getContactName(conversation.getGroupParticipants(), arr.getString(i), context) + ", ");
+				newParticipants.append(Utils.getContactName(this.mMsisdn, conversation.getGroupParticipants(), nameMsisdn.getString(HikeConstants.MSISDN), context) + ", ");
 			}
 			this.mMessage = newParticipants.substring(0, newParticipants.length() - 2) + " " + context.getString(R.string.joined_conversation); 
 		} 
@@ -202,10 +201,7 @@ public class ConvMessage
 			}
 			else
 			{
-				HikeUserDatabase huDB = new HikeUserDatabase(context);
-				ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(obj.getString(HikeConstants.DATA));
-				huDB.close();
-				this.mMessage = contactInfo.getFirstName() +  " " + context.getString(R.string.left_conversation);
+				this.mMessage = Utils.getContactName(this.mMsisdn, conversation.getGroupParticipants(), obj.getString(HikeConstants.DATA), context) +  " " + context.getString(R.string.left_conversation);
 			}
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;

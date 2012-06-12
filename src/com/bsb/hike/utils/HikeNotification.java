@@ -48,7 +48,7 @@ public class HikeNotification
 		// For showing the name of the contact that sent the message in a group chat
 		if(convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
-			message = Utils.getContactName(null, convMsg.getGroupParticipantMsisdn(), context) + HikeConstants.SEPARATOR + message;
+			message = Utils.getContactName(msisdn, null, convMsg.getGroupParticipantMsisdn(), context) + HikeConstants.SEPARATOR + message;
 		}
 
 		int icon = R.drawable.ic_contact_logo;

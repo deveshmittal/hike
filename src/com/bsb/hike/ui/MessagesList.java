@@ -44,8 +44,8 @@ import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
 import com.bsb.hike.utils.Utils;
@@ -631,6 +631,10 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			for (int i = 0; i < convs.length; i++)
 			{
 				convs[i] = mAdapter.getItem(i);
+				if (convs[i].isGroupConversation()) 
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convs[i].serialize(NetworkManager.GROUP_CHAT_LEAVE));
+				}
 			}
 			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 			task.execute(convs);

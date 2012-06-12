@@ -66,7 +66,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			// For showing the name of the contact that sent the message in a group chat
 			if(message.isGroupChat() && !TextUtils.isEmpty(message.getGroupParticipantMsisdn()) && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 			{
-				markedUp = Utils.addContactName(conversation.getGroupParticipants(), message.getGroupParticipantMsisdn(), markedUp, context);
+				markedUp = Utils.addContactName(conversation.getMsisdn(), conversation.getGroupParticipants(), message.getGroupParticipantMsisdn(), markedUp, context);
 			}
 			messageView.setVisibility(View.VISIBLE);
 			messageView.setText(markedUp);

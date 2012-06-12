@@ -198,6 +198,7 @@ public class MessagesAdapter extends BaseAdapter
 
 					for (int i = 0; i < participantInfoArray.length(); i++) 
 					{
+						JSONObject nameMsisdn = participantInfoArray.getJSONObject(i);
 						Log.d(getClass().getSimpleName(), "Joined: " + participantInfoArray.getString(i));
 
 						TextView participantInfo = (TextView) inflater.inflate(
@@ -207,7 +208,7 @@ public class MessagesAdapter extends BaseAdapter
 
 						participantInfo.setText(
 								Utils.getFormattedParticipantInfo(
-										Utils.getContactName(conversation.getGroupParticipants(), participantInfoArray.getString(i), context) + " " 
+										Utils.getContactName(conversation.getMsisdn(), conversation.getGroupParticipants(), nameMsisdn.getString(HikeConstants.MSISDN), context) + " " 
 												+ context.getString(R.string.joined_conversation)));
 						if (i != participantInfoArray.length() - 1) 
 						{
@@ -232,8 +233,9 @@ public class MessagesAdapter extends BaseAdapter
 					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
 					{
 						participantInfo.setText(
-								Utils.getContactName(conversation.getGroupParticipants(), participantMsisdn, context) + " " 
-										+ context.getString(R.string.left_conversation));
+								Utils.getFormattedParticipantInfo(
+										Utils.getContactName(conversation.getMsisdn(), conversation.getGroupParticipants(), participantMsisdn, context) + " " 
+												+ context.getString(R.string.left_conversation)));
 					}
 					else
 					{
@@ -279,7 +281,7 @@ public class MessagesAdapter extends BaseAdapter
 			// Fix for bug where if a participant leaves the group chat, the participant's name is never shown 
 			if(convMessage.isGroupChat() && !convMessage.isSent() && convMessage.getGroupParticipantMsisdn() != null)
 			{
-				markedUp = Utils.addContactName(this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp, this.context);
+				markedUp = Utils.addContactName(conversation.getMsisdn(), this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp, this.context);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp);

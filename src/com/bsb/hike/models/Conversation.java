@@ -15,7 +15,6 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.Utils;
 
 public class Conversation implements Comparable<Conversation>
@@ -75,7 +74,9 @@ public class Conversation implements Comparable<Conversation>
 
 	private List<ContactInfo> groupParticipants;
 
-	private String groupLeader;
+	private String groupOwner;
+
+	private boolean isGroupAlive;
 
 	public void setOnhike(boolean onhike)
 	{
@@ -87,6 +88,15 @@ public class Conversation implements Comparable<Conversation>
 		return contactName;
 	}
 
+	public String getGroupOwner()
+	{
+		return groupOwner;
+	}
+
+	public boolean getIsGroupAlive()
+	{
+		return isGroupAlive;
+	}
 	/*
 	 * Returns a friendly name for this conversation (name if non-empty, otherwise msisdn)
 	 */
@@ -101,6 +111,11 @@ public class Conversation implements Comparable<Conversation>
 
 	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike)
 	{
+		this(msisdn, convId, contactId, contactName, onhike, null, false);
+	}
+
+	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike, String groupOwner, boolean isGroupAlive)
+	{
 		this.msisdn = msisdn;
 		this.convId = convId;
 		this.contactId = contactId;
@@ -108,24 +123,26 @@ public class Conversation implements Comparable<Conversation>
 		this.onhike = onhike;
 		this.messages = new ArrayList<ConvMessage>();
 		this.groupParticipants = new ArrayList<ContactInfo>();
+		this.groupOwner = groupOwner;
+		this.isGroupAlive = isGroupAlive;
 	}
 
 	public Conversation(JSONObject jsonObject, Context context) throws JSONException
 	{
 		this.msisdn = jsonObject.getString(HikeConstants.TO);
-		this.groupLeader = jsonObject.getString(HikeConstants.FROM);
+		this.groupOwner = jsonObject.getString(HikeConstants.FROM);
 
 		this.groupParticipants = new ArrayList<ContactInfo>();
 		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);
-		HikeUserDatabase huDB = new HikeUserDatabase(context);
 		for (int i = 0; i < array.length(); i++) 
 		{
-			String contactNum = array.getString(i);
-			ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(array.getString(i));
+			JSONObject nameMsisdn = array.getJSONObject(i);
+			String contactNum = nameMsisdn.getString(HikeConstants.MSISDN);
+			String contactName = nameMsisdn.getString(HikeConstants.NAME);
+			ContactInfo contactInfo = new ContactInfo(contactNum, contactNum, contactName, contactNum);
 			Log.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
 			this.groupParticipants.add(contactInfo);
 		}
-		huDB.close();
 
 		if (this.isGroupConversation())
 		{
@@ -284,7 +301,10 @@ public class Conversation implements Comparable<Conversation>
 				JSONArray array = new JSONArray();
 				for(ContactInfo participant : groupParticipants)
 				{
-					array.put(participant.getMsisdn());
+					JSONObject nameMsisdn = new JSONObject();
+					nameMsisdn.put(HikeConstants.NAME, participant.getName());
+					nameMsisdn.put(HikeConstants.MSISDN, participant.getMsisdn());
+					array.put(nameMsisdn);
 				}
 				object.put(HikeConstants.DATA, array);
 			}
