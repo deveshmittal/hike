@@ -741,6 +741,7 @@ public class HikeMqttManager implements Listener
 			{
 				String groupId = jsonObj.optString(HikeConstants.TO);
 				String msisdn = jsonObj.optString(HikeConstants.FROM);
+				this.conversation = this.convDb.getConversation(groupId, 0);
 				this.convDb.removeParticipant(groupId, msisdn);
 			}
 			else if (NetworkManager.GROUP_CHAT_NAME.equals(type))
@@ -810,13 +811,15 @@ public class HikeMqttManager implements Listener
 			}
 			else if (NetworkManager.GROUP_CHAT_JOIN.equals(type) || NetworkManager.GROUP_CHAT_LEAVE.equals(type) || NetworkManager.GROUP_CHAT_END.equals(type))
 			{
-				ConvMessage convMessageToBeAddedToDB = new ConvMessage(jsonObj, conversation, this.mHikeService, false);
-				this.convDb.addConversationMessages(convMessageToBeAddedToDB);
-				// Only notify user if participant has joined.
-				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
+				if (conversation != null) 
 				{
-					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel());
-					toaster.notify(new ContactInfo(conversation.getMsisdn(), conversation.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), conversation.getMsisdn()), convMessage);
+					ConvMessage convMessageToBeAddedToDB = new ConvMessage(jsonObj, conversation, this.mHikeService, false);
+					this.convDb.addConversationMessages(convMessageToBeAddedToDB);
+					// Only notify user if participant has joined.
+					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) {
+						Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + conversation.getLabel());
+						toaster.notify(new ContactInfo(conversation.getMsisdn(), conversation.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), conversation.getMsisdn()), convMessage);
+					}
 				}
 			}
 			else
