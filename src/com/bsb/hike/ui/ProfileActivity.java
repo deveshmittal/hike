@@ -29,6 +29,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -81,6 +82,11 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 	private ProfileType profileType;
 	private String httpRequestURL;
+	private ImageButton blockBtn;
+	private String groupOwner;
+
+	private boolean shouldShowBlockButton = true;
+	private boolean shouldShowInviteAllButton = false;
 
 	private static enum ProfileType
 	{
@@ -185,13 +191,15 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	{
 		setContentView(R.layout.group_info);
 
-		ViewGroup groupInfoLayout = (ViewGroup) findViewById(R.id.group_info);
+		ViewGroup addParticipantsLayout = (ViewGroup) findViewById(R.id.add_participants_layout);
 		TextView mTitleView = (TextView) findViewById(R.id.title);
+		TextView groupOwnerTextView = (TextView) findViewById(R.id.group_owner);
 		mNameEdit = (EditText) findViewById(R.id.name_input);
 		mIconView = (ImageView) findViewById(R.id.profile);
+		blockBtn = (ImageButton) findViewById(R.id.block_owner);
 
-		groupInfoLayout.setFocusable(true);
-		groupInfoLayout.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		addParticipantsLayout.setFocusable(true);
+		addParticipantsLayout.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
@@ -211,10 +219,21 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		ContactInfo userInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0));
 		conv.getGroupParticipants().add(userInfo);
 
+		groupOwner = conv.getGroupOwner();
 		for(ContactInfo contactInfo : conv.getGroupParticipants())
 		{
+			if(contactInfo.getMsisdn().equals(groupOwner))
+			{
+				groupOwnerTextView.setText(contactInfo.getFirstName());
+				shouldShowBlockButton = !groupOwner.equals(userInfo.getMsisdn());
+				continue;
+			}
+			if(!contactInfo.isOnhike())
+			{
+				shouldShowInviteAllButton = true;
+			}
 			TextView participantNameItem = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
-			participantNameItem.setText(!TextUtils.isEmpty(contactInfo.getName()) ? contactInfo.getFirstName() : Utils.getContactName(conv.getMsisdn(), conv.getGroupParticipants(), contactInfo.getMsisdn(), ProfileActivity.this));
+			participantNameItem.setText(contactInfo.getFirstName());
 			participantNameItem.setBackgroundResource(contactInfo.isOnhike() || userInfo.getMsisdn().equals(contactInfo.getMsisdn()) ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
 
 			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -224,7 +243,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			participantNameContainer.addView(participantNameItem);
 		}
 		conv.getGroupParticipants().remove(userInfo);
-		
+
+		findViewById(R.id.block_owner).setVisibility(shouldShowBlockButton ? View.VISIBLE : View.INVISIBLE);
+		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
+
 		nameTxt = conv.getLabel();
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
 
@@ -682,7 +704,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
     	}
 	}
 
-	public void onGroupInfoClicked(View v)
+	public void onAddNewParticipantsClicked(View v)
 	{
 		Intent intent = getIntent();
 		intent.setClass(ProfileActivity.this, ChatThread.class);
@@ -692,6 +714,12 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		
 		overridePendingTransition(R.anim.slide_in_right_noalpha,
 				R.anim.slide_out_left_noalpha);
+	}
+
+	public void onBlockGroupOwnerClicked(View v)
+	{
+		HikeMessengerApp.getPubSub().publish(v.isSelected() ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER, this.groupOwner);
+		v.setSelected(!v.isSelected());
 	}
 
 	@Override
