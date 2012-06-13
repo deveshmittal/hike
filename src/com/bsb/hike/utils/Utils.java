@@ -665,7 +665,7 @@ public class Utils
 	{
 		String myMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
-		return new ContactInfo(myMsisdn, myMsisdn, myName, true, myMsisdn);
+		return new ContactInfo(myMsisdn, myMsisdn, myName, myMsisdn, true);
 	}
 
 	public static boolean wasScreenOpenedNNumberOfTimes(SharedPreferences prefs, String whichScreen)

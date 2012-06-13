@@ -237,7 +237,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 		while (c.moveToNext())
 		{
-			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getInt(onhikeIdx) != 0,c.getString(phoneNumIdx), c.getInt(hasCustomPhotoIdx)==1);
+			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0, c.getInt(hasCustomPhotoIdx)==1);
 			contactInfos.add(contactInfo);
 		}
 		c.close();
