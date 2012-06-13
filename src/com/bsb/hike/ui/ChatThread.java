@@ -1747,9 +1747,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
 		View btnBar = findViewById(R.id.button_bar);
-		titleIconView.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
+		titleIconView.setVisibility(mConversation.isOnhike() && !mConversation.isGroupConversation() ? View.GONE : View.VISIBLE);
 		titleIconView.setImageResource(R.drawable.ic_invite_top);
-		btnBar.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
+		btnBar.setVisibility(mConversation.isOnhike() && !mConversation.isGroupConversation() ? View.GONE : View.VISIBLE);
 
  		if(!prefs.getBoolean(mConversation.isGroupConversation() ? 
 				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, false) 

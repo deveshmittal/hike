@@ -120,7 +120,7 @@ public class Conversation implements Comparable<Conversation>
 		this.convId = convId;
 		this.contactId = contactId;
 		this.contactName = contactName;
-		this.onhike = onhike;
+		this.onhike = isGroupConversation() ? true : onhike;
 		this.messages = new ArrayList<ConvMessage>();
 		this.groupParticipants = new ArrayList<ContactInfo>();
 		this.groupOwner = groupOwner;
@@ -133,6 +133,7 @@ public class Conversation implements Comparable<Conversation>
 		this.groupOwner = jsonObject.getString(HikeConstants.FROM);
 
 		this.groupParticipants = new ArrayList<ContactInfo>();
+		this.onhike = true;
 		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);
 		for (int i = 0; i < array.length(); i++) 
 		{
