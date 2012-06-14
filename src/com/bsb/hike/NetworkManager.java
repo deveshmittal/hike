@@ -193,16 +193,14 @@ public class NetworkManager implements HikePubSub.Listener
 				hCDB.close();
 				ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
 				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, convMessage);
+				this.pubSub.publish(GROUP_CHAT_JOIN.equals(type) ?
+						HikePubSub.PARTICIPANT_JOINED_GROUP : GROUP_CHAT_LEAVE.equals(type) ? 
+								HikePubSub.PARTICIPANT_LEFT_GROUP : HikePubSub.GROUP_END, jsonObj);
 			}
 			catch (JSONException e)
 			{
 				Log.d("NETWORK MANAGER", "Invalid JSON", e);
 			}
-		}
-		else if(GROUP_CHAT_END.equals(type))
-		{
-			String groupId = jsonObj.optString(HikeConstants.FROM);
-			this.pubSub.publish(HikePubSub.GROUP_END, groupId);
 		}
 		else if(GROUP_CHAT_NAME.equals(type))
 		{
