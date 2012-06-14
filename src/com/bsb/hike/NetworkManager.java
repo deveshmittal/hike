@@ -176,8 +176,9 @@ public class NetworkManager implements HikePubSub.Listener
 		}
 		else if ((USER_JOINED.equals(type)) || (USER_LEFT.equals(type)))
 		{
+			String uMsisdn = jsonObj.optString(HikeConstants.DATA);
 			boolean joined = USER_JOINED.equals(type);
-			this.pubSub.publish(joined ? HikePubSub.USER_JOINED : HikePubSub.USER_LEFT, msisdn);
+			this.pubSub.publish(joined ? HikePubSub.USER_JOINED : HikePubSub.USER_LEFT, uMsisdn);
 		}
 		else if ((ICON.equals(type)))
 		{
