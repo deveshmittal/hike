@@ -12,6 +12,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.text.Spannable;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
@@ -254,7 +255,7 @@ public class MessagesAdapter extends BaseAdapter
 		MessageMetadata metadata = convMessage.getMetadata();
 		final String dndMissedCalledNumber = metadata != null ? metadata.getDNDMissedCallNumber() : null;
 
-		if (dndMissedCalledNumber != null)
+		if (!TextUtils.isEmpty(dndMissedCalledNumber))
 		{
 			String content = "tap here";
 			String message = context.getString(R.string.dnd_message, convMessage.getConversation().getLabel(), dndMissedCalledNumber);
