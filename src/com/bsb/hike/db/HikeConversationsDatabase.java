@@ -220,8 +220,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			bindConversationInsert(insertStatement, conv);
 			msgId = insertStatement.executeInsert();
-			/* Represents we dont have any conversation made for this msisdn.*/
-			if (msgId <= 0)
+			/* Represents we dont have any conversation made for this msisdn. Here we are also checking whether the message is a group message, If it is and the conversation does not exist we do not add a conversation.*/
+			if (msgId <= 0 && !Utils.isGroupConversation(conv.getMsisdn()))
 			{
 				Conversation conversation = addConversation(conv.getMsisdn(), !conv.isSMS(), null, null);
 				if (conversation != null)
