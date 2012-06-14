@@ -1298,7 +1298,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			/* only update the UI if the message is for this conversation */
 			String msisdn = (String) object;
-			if (!msisdn.equals(mContactNumber))
+			if (!mContactNumber.equals(msisdn))
 			{
 				return;
 			}
@@ -1317,7 +1317,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
 			String groupId = (String) object;
-			if (groupId.equals(mContactNumber))
+			if (mContactNumber.equals(groupId))
 			{
 				HikeConversationsDatabase db = new HikeConversationsDatabase(this);
 				final String groupName = db.getGroupName(groupId);
