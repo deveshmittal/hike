@@ -73,4 +73,6 @@ public class DBConstants
 	public static final String GROUP_OWNER = "groupOwner";
 
 	public static final String GROUP_ALIVE = "groupAlive";
+
+	public static final String HAS_LEFT = "hasLeft";
 }

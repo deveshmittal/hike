@@ -33,6 +33,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.SmileyParser;
@@ -208,7 +209,7 @@ public class MessagesAdapter extends BaseAdapter
 
 						participantInfo.setText(
 								Utils.getFormattedParticipantInfo(
-										Utils.getContactName(conversation.getMsisdn(), conversation.getGroupParticipants(), nameMsisdn.getString(HikeConstants.MSISDN), context) + " " 
+										((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName() + " " 
 												+ context.getString(R.string.joined_conversation)));
 						if (i != participantInfoArray.length() - 1) 
 						{
@@ -225,16 +226,14 @@ public class MessagesAdapter extends BaseAdapter
 				} 
 				else 
 				{
-					String participantMsisdn = new JSONObject(convMessage.getMetadata().serialize()).optString(HikeConstants.DATA);
 					TextView participantInfo = (TextView) inflater.inflate(R.layout.participant_info, null);
-
-					Log.d(getClass().getSimpleName(), "Left: " + participantMsisdn);
 
 					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
 					{
+						String participantMsisdn = new JSONObject(convMessage.getMetadata().serialize()).optString(HikeConstants.DATA);
 						participantInfo.setText(
 								Utils.getFormattedParticipantInfo(
-										Utils.getContactName(conversation.getMsisdn(), conversation.getGroupParticipants(), participantMsisdn, context) + " " 
+										((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName() + " " 
 												+ context.getString(R.string.left_conversation)));
 					}
 					else
@@ -281,7 +280,7 @@ public class MessagesAdapter extends BaseAdapter
 			// Fix for bug where if a participant leaves the group chat, the participant's name is never shown 
 			if(convMessage.isGroupChat() && !convMessage.isSent() && convMessage.getGroupParticipantMsisdn() != null)
 			{
-				markedUp = Utils.addContactName(conversation.getMsisdn(), this.conversation.getGroupParticipants(), convMessage.getGroupParticipantMsisdn(), markedUp, this.context);
+				markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().getFirstName(), markedUp);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp);

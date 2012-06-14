@@ -3,7 +3,8 @@ package com.bsb.hike.ui;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,11 +79,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private boolean isBackPressed = false;
 	private EditText mEmailEdit;
 	private String emailTxt;
-	private List<ContactInfo> participantList;
+	private Map<String, GroupParticipant> participantList;
 
 	private ProfileType profileType;
 	private String httpRequestURL;
-	private ImageButton blockBtn;
 	private String groupOwner;
 
 	private boolean shouldShowBlockButton = true;
@@ -196,7 +196,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		TextView groupOwnerTextView = (TextView) findViewById(R.id.group_owner);
 		mNameEdit = (EditText) findViewById(R.id.name_input);
 		mIconView = (ImageView) findViewById(R.id.profile);
-		blockBtn = (ImageButton) findViewById(R.id.block_owner);
 
 		addParticipantsLayout.setFocusable(true);
 		addParticipantsLayout.setBackgroundResource(R.drawable.profile_bottom_item_selector);
@@ -204,10 +203,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
-		Conversation conv = hCDB.getConversation(mLocalMSISDN, 0);
+		GroupConversation groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
 		hCDB.close();
-		participantList = conv.getGroupParticipants();
-		httpRequestURL = "/group/" + conv.getMsisdn();
+		participantList = groupConversation.getGroupParticipantList();
+		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
 		ViewGroup participantNameContainer = (ViewGroup) findViewById(R.id.group_participant_container);
 
@@ -216,25 +215,32 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		int right = (int) (0 * Utils.densityMultiplier);
 		int bottom = (int) (6 * Utils.densityMultiplier);
 
-		ContactInfo userInfo = Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0));
-		conv.getGroupParticipants().add(userInfo);
+		GroupParticipant userInfo = new GroupParticipant(Utils.getUserContactInfo(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0)));
+		participantList.put(userInfo.getContactInfo().getMsisdn(), userInfo);
 
-		groupOwner = conv.getGroupOwner();
-		for(ContactInfo contactInfo : conv.getGroupParticipants())
+		groupOwner = groupConversation.getGroupOwner();
+
+		for(Entry<String, GroupParticipant> participant : participantList.entrySet())
 		{
-			if(contactInfo.getMsisdn().equals(groupOwner))
+			ContactInfo contactInfo = participant.getValue().getContactInfo();
+			if(participant.getKey().equals(groupOwner))
 			{
-				groupOwnerTextView.setText(contactInfo.getFirstName());
-				shouldShowBlockButton = !groupOwner.equals(userInfo.getMsisdn());
+				groupOwnerTextView.setText(participant.getValue().getContactInfo().getFirstName());
+				shouldShowBlockButton = !groupOwner.equals(userInfo.getContactInfo().getMsisdn());
 				continue;
 			}
 			if(!contactInfo.isOnhike())
 			{
 				shouldShowInviteAllButton = true;
 			}
+			// Dont show participant that has left group
+			if(participant.getValue().hasLeft())
+			{
+				continue;
+			}
 			TextView participantNameItem = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
 			participantNameItem.setText(contactInfo.getFirstName());
-			participantNameItem.setBackgroundResource(contactInfo.isOnhike() || userInfo.getMsisdn().equals(contactInfo.getMsisdn()) ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
+			participantNameItem.setBackgroundResource(contactInfo.isOnhike() ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
 
 			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.setMargins(left, top, right, bottom);
@@ -242,13 +248,13 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 			participantNameContainer.addView(participantNameItem);
 		}
-		conv.getGroupParticipants().remove(userInfo);
+		participantList.remove(userInfo.getContactInfo().getMsisdn());
 
 		findViewById(R.id.block_owner).setVisibility(shouldShowBlockButton ? View.VISIBLE : View.INVISIBLE);
 		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
 
-		nameTxt = conv.getLabel();
-		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(conv.getMsisdn());
+		nameTxt = groupConversation.getLabel();
+		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(groupConversation.getMsisdn());
 
 		mIconView.setImageDrawable(drawable);
 		mNameEdit.setText(nameTxt);
@@ -297,7 +303,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		//Hide the cursor initially
 		Utils.hideCursor(mNameEdit, getResources());
 	}
-	
+
 	private void setupProfileScreen()
 	{
 		setContentView(R.layout.profile);
@@ -321,16 +327,16 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		ViewGroup[] itemLayouts = new ViewGroup[]
 				{
-					credits, notifications, privacy, help
+				credits, notifications, privacy, help
 				};
 
 		ProfileItem[] items = new ProfileItem[] 
-			{
+				{
 				new ProfileItem.ProfileSettingsItem("Free hike SMS left", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
 				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, R.xml.notification_preferences),
 				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
 				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, "http://www.bsb.im/about")
-			};
+				};
 
 		for(int i = 0; i < items.length; i++)
 		{
@@ -344,7 +350,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		mNameView.setText(nameTxt);
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(getLargerIconId());
 		mIconView.setImageDrawable(drawable);
-		
+
 		myInfo.setFocusable(true);
 		credits.setFocusable(true);
 		notifications.setFocusable(true);
@@ -374,7 +380,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			super.onBackPressed();
 		}
 	}
-	
+
 	public void onProfileItemClick(View v)
 	{
 		ProfileItem item = (ProfileItem) v.getTag(R.id.profile);
@@ -384,7 +390,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			startActivity(intent);
 		}
 	}
-	
+
 	public void saveChanges()
 	{
 		ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
@@ -490,7 +496,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
 					db.setIcon(mLocalMSISDN, bytes);
 					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
- 					{
+					{
 						db.setIcon(getLargerIconId(), larger_bytes);
 					}
 					db.close();
@@ -604,20 +610,20 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 	private String getGalleryPath(Uri selectedImage)
 	{
-        String[] filePathColumn = {MediaStore.Images.Media.DATA};
+		String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-        Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-        if (cursor == null)
-        {
-        	return selectedImage.getPath();
-        }
+		Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
+		if (cursor == null)
+		{
+			return selectedImage.getPath();
+		}
 
-        cursor.moveToFirst();
+		cursor.moveToFirst();
 
-        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-        String filePath = cursor.getString(columnIndex);
-        cursor.close();
-        return filePath;
+		int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+		String filePath = cursor.getString(columnIndex);
+		cursor.close();
+		return filePath;
 	}
 
 	@Override
@@ -648,7 +654,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			break;
 		}
 	}
-	
+
 	public void onEmoticonClick(View v)
 	{
 		if (v != null) 
@@ -666,9 +672,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		}
 	}
 
-    public void onChangeImageClicked(View v)
-    {
-    	/* The wants to change their profile picture.
+	public void onChangeImageClicked(View v)
+	{
+		/* The wants to change their profile picture.
 		 * Open a dialog to allow them pick Camera or Gallery 
 		 */
 		final CharSequence[] items = {"Camera", "Gallery"};/*TODO externalize these */
@@ -676,32 +682,32 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		builder.setTitle("Choose a picture");
 		builder.setItems(items, this);
 		mDialog = builder.show();
-    }
+	}
 
-    public void onEditProfileClicked(View v)
-    {
-    	Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.EDIT_PROFILE);
+	public void onEditProfileClicked(View v)
+	{
+		Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.EDIT_PROFILE);
 		Intent i = new Intent(ProfileActivity.this, ProfileActivity.class);
 		i.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
 		startActivity(i);
 		finish();
-    }
+	}
 
-    public void onInviteAllClicked(View v)
+	public void onInviteAllClicked(View v)
 	{
-    	for(ContactInfo contactInfo : participantList)
-    	{
-    		if (!contactInfo.isOnhike()) 
-    		{
-    			long time = (long) System.currentTimeMillis() / 1000;
+		for(Entry<String, GroupParticipant> participant : participantList.entrySet())
+		{
+			if (!participant.getValue().getContactInfo().isOnhike()) 
+			{
+				long time = (long) System.currentTimeMillis() / 1000;
 				ConvMessage convMessage = new ConvMessage(getResources()
-						.getString(R.string.invite_message), contactInfo.getMsisdn(), time,
+						.getString(R.string.invite_message), participant.getKey(), time,
 						ConvMessage.State.SENT_UNCONFIRMED);
 				convMessage.setInvite(true);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 						convMessage.serialize());
 			}
-    	}
+		}
 	}
 
 	public void onAddNewParticipantsClicked(View v)
@@ -711,7 +717,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);
 		startActivity(intent);
-		
+
 		overridePendingTransition(R.anim.slide_in_right_noalpha,
 				R.anim.slide_out_left_noalpha);
 	}

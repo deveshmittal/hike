@@ -220,7 +220,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		if (contactInfos.isEmpty())
 		{
 			Log.d(getClass().getSimpleName(), "No contact found");
-			return new ContactInfo(msisdn, msisdn, null, msisdn);
+			return new ContactInfo(msisdn, msisdn, null, msisdn, false);
 		}
 
 		return contactInfos.get(0);
@@ -304,7 +304,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public void deleteMultipleRows(Collection<String> ids)
 	{
-		String ids_joined = "(" + Utils.join(ids, ",", true) + ")";
+		String ids_joined = "(" + Utils.join(ids, ",", "\"", "\"") + ")";
 		mDb.delete(DBConstants.USERS_TABLE, DBConstants.ID+" in " + ids_joined, null);
 	}
 

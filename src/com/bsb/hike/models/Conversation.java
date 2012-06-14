@@ -4,18 +4,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.NetworkManager;
-import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.utils.Utils;
 
 public class Conversation implements Comparable<Conversation>
 {
@@ -72,12 +67,6 @@ public class Conversation implements Comparable<Conversation>
 
 	private boolean onhike;
 
-	private List<ContactInfo> groupParticipants;
-
-	private String groupOwner;
-
-	private boolean isGroupAlive;
-
 	public void setOnhike(boolean onhike)
 	{
 		this.onhike = onhike;
@@ -87,71 +76,22 @@ public class Conversation implements Comparable<Conversation>
 	{
 		return contactName;
 	}
-
-	public String getGroupOwner()
-	{
-		return groupOwner;
-	}
-
-	public boolean getIsGroupAlive()
-	{
-		return isGroupAlive;
-	}
 	/*
 	 * Returns a friendly name for this conversation (name if non-empty, otherwise msisdn)
 	 */
 	public String getLabel()
 	{
-		if (isGroupConversation())
-		{
-			return !TextUtils.isEmpty(contactName) ? contactName : Utils.defaultGroupName(getGroupParticipants());
-		}
 		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
 	}
 
 	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike)
 	{
-		this(msisdn, convId, contactId, contactName, onhike, null, false);
-	}
-
-	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike, String groupOwner, boolean isGroupAlive)
-	{
 		this.msisdn = msisdn;
 		this.convId = convId;
 		this.contactId = contactId;
 		this.contactName = contactName;
-		this.onhike = isGroupConversation() ? true : onhike;
+		this.onhike = onhike;
 		this.messages = new ArrayList<ConvMessage>();
-		this.groupParticipants = new ArrayList<ContactInfo>();
-		this.groupOwner = groupOwner;
-		this.isGroupAlive = isGroupAlive;
-	}
-
-	public Conversation(JSONObject jsonObject, Context context) throws JSONException
-	{
-		this.msisdn = jsonObject.getString(HikeConstants.TO);
-		this.groupOwner = jsonObject.getString(HikeConstants.FROM);
-
-		this.groupParticipants = new ArrayList<ContactInfo>();
-		this.onhike = true;
-		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);
-		for (int i = 0; i < array.length(); i++) 
-		{
-			JSONObject nameMsisdn = array.getJSONObject(i);
-			String contactNum = nameMsisdn.getString(HikeConstants.MSISDN);
-			String contactName = nameMsisdn.getString(HikeConstants.NAME);
-			ContactInfo contactInfo = new ContactInfo(contactNum, contactNum, contactName, contactNum);
-			Log.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
-			this.groupParticipants.add(contactInfo);
-		}
-
-		if (this.isGroupConversation())
-		{
-			HikeConversationsDatabase db = new HikeConversationsDatabase(context);
-			this.contactName = db.getGroupName(this.msisdn);
-			db.close();
-		}
-
 	}
 
 	public boolean isOnhike()
@@ -168,21 +108,6 @@ public class Conversation implements Comparable<Conversation>
 	public void addMessage(ConvMessage message)
 	{
 		this.messages.add(message);
-	}
-
-	public List<ContactInfo> getGroupParticipants() 
-	{
-		return groupParticipants;
-	}
-
-	public void setGroupParticipants(List<ContactInfo> groupParticipants) 
-	{
-		this.groupParticipants = groupParticipants;
-	}
-
-	public void addGroupParticipant(ContactInfo contactInfo)
-	{
-		this.groupParticipants.add(contactInfo);
 	}
 
 	@Override
@@ -224,11 +149,6 @@ public class Conversation implements Comparable<Conversation>
 	public List<ConvMessage> getMessages()
 	{
 		return messages;
-	}
-
-	public boolean isGroupConversation()
-	{
-		return Utils.isGroupConversation(this.msisdn);
 	}
 
 	@Override
@@ -297,18 +217,6 @@ public class Conversation implements Comparable<Conversation>
 		{
 			object.put(HikeConstants.TYPE, type);
 			object.put(HikeConstants.TO, msisdn);
-			if(type.equals(NetworkManager.GROUP_CHAT_JOIN))
-			{
-				JSONArray array = new JSONArray();
-				for(ContactInfo participant : groupParticipants)
-				{
-					JSONObject nameMsisdn = new JSONObject();
-					nameMsisdn.put(HikeConstants.NAME, participant.getName());
-					nameMsisdn.put(HikeConstants.MSISDN, participant.getMsisdn());
-					array.put(nameMsisdn);
-				}
-				object.put(HikeConstants.DATA, array);
-			}
 		}
 		catch (JSONException e)
 		{
