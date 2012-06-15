@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,8 +30,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -48,14 +49,17 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CustomLinearLayout;
+import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
-public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
+public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener, OnSoftKeyboardListener
 {
 	/* dialog IDs */
 	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
@@ -87,6 +91,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 	private boolean shouldShowBlockButton = true;
 	private boolean shouldShowInviteAllButton = false;
+	private TextView mNameDisplay;
+	private ViewGroup participantNameContainer;
 
 	private static enum ProfileType
 	{
@@ -132,6 +138,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		{
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
+			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
+			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
+			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
 		}
 		mActivityState = null;
 	}
@@ -167,6 +176,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			this.profileType = ProfileType.GROUP_INFO;
 			HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
 			HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
+			HikeMessengerApp.getPubSub().addListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
+			HikeMessengerApp.getPubSub().addListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
+			HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
 			setupGroupProfileScreen();
 		}
 		else
@@ -195,6 +207,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		TextView mTitleView = (TextView) findViewById(R.id.title);
 		TextView groupOwnerTextView = (TextView) findViewById(R.id.group_owner);
 		mNameEdit = (EditText) findViewById(R.id.name_input);
+		mNameDisplay = (TextView) findViewById(R.id.name_display);
 		mIconView = (ImageView) findViewById(R.id.profile);
 
 		addParticipantsLayout.setFocusable(true);
@@ -208,7 +221,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		participantList = groupConversation.getGroupParticipantList();
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
-		ViewGroup participantNameContainer = (ViewGroup) findViewById(R.id.group_participant_container);
+		participantNameContainer = (ViewGroup) findViewById(R.id.group_participant_container);
 
 		int left = (int) (0 * Utils.densityMultiplier);
 		int top = (int) (0 * Utils.densityMultiplier);
@@ -245,6 +258,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.setMargins(left, top, right, bottom);
 			participantNameItem.setLayoutParams(lp);
+			participantNameItem.setId(participant.getKey().hashCode());
 
 			participantNameContainer.addView(participantNameItem);
 		}
@@ -253,15 +267,18 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		findViewById(R.id.block_owner).setVisibility(shouldShowBlockButton ? View.VISIBLE : View.INVISIBLE);
 		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
 
+		((CustomLinearLayout)findViewById(R.id.group_parent_layout)).setOnSoftKeyboardListener(this);
+
 		nameTxt = groupConversation.getLabel();
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(groupConversation.getMsisdn());
 
 		mIconView.setImageDrawable(drawable);
 		mNameEdit.setText(nameTxt);
+		mNameDisplay.setText(nameTxt);
 		mTitleView.setText(R.string.group_info);
-		
-		// Hide the cursor initially
-		Utils.hideCursor(mNameEdit, getResources());
+
+		mNameEdit.setVisibility(View.GONE);
+		mNameDisplay.setVisibility(View.VISIBLE);
 	}
 
 	private void setupEditScreen()
@@ -728,38 +745,150 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		v.setSelected(!v.isSelected());
 	}
 
+	public void onEditGroupNameClicked(View v)
+	{
+		onShown();
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+	}
+
 	@Override
 	public void onEventReceived(String type, Object object) {
-		if (mLocalMSISDN.equals((String)object)) 
+		if(mLocalMSISDN == null)
 		{
-			if (HikePubSub.ICON_CHANGED.equals(type)) 
+			Log.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
+			return;
+		}
+		if (HikePubSub.ICON_CHANGED.equals(type)) 
+		{
+			if (mLocalMSISDN.equals((String)object)) 
 			{
 				HikeConversationsDatabase db = new HikeConversationsDatabase(
 						this);
 				nameTxt = db.getGroupName(mLocalMSISDN);
 				db.close();
-				runOnUiThread(new Runnable() 
-				{
+				runOnUiThread(new Runnable() {
 					@Override
-					public void run() 
-					{
+					public void run() {
 						mNameEdit.setText(nameTxt);
 					}
 				});
-			} 
-			else if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) 
+			}
+		} 
+		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) 
+		{
+			if (mLocalMSISDN.equals((String)object)) 
 			{
 				final Drawable drawable = IconCacheManager.getInstance()
 						.getIconForMSISDN(mLocalMSISDN);
-				runOnUiThread(new Runnable() 
-				{
+				runOnUiThread(new Runnable() {
 					@Override
-					public void run() 
-					{
+					public void run() {
 						mIconView.setImageDrawable(drawable);
 					}
 				});
 			}
 		}
+
+		if (HikePubSub.PARTICIPANT_LEFT_GROUP.equals(type))
+		{
+			if(mLocalMSISDN.equals(((JSONObject)object).optString(HikeConstants.TO)))
+			{
+				final JSONObject obj = (JSONObject) object;
+				this.participantList.remove(object);
+				runOnUiThread(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						participantNameContainer.removeView(participantNameContainer.findViewById(obj.optString(HikeConstants.DATA).hashCode()));
+						participantNameContainer.requestLayout();
+					}
+				});
+			}
+		}
+		else if (HikePubSub.PARTICIPANT_JOINED_GROUP.equals(type))
+		{
+			if(mLocalMSISDN.equals(((JSONObject)object).optString(HikeConstants.TO)))
+			{
+				final JSONObject obj = (JSONObject) object;
+				final JSONArray participants = obj.optJSONArray(HikeConstants.DATA);
+				runOnUiThread(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						for (int i = 0; i < participants.length(); i++) 
+						{
+							String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
+
+							HikeUserDatabase hUDB = new HikeUserDatabase(ProfileActivity.this);
+							ContactInfo participant = hUDB.getContactInfoFromMSISDN(msisdn);
+							hUDB.close();
+
+							if (TextUtils.isEmpty(participant.getName())) 
+							{
+								HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+								participant.setName(hCDB.getParticipantName(mLocalMSISDN, msisdn));
+								hCDB.close();
+							}
+
+							if (!participant.isOnhike()) 
+							{
+								shouldShowInviteAllButton = true;
+								findViewById(R.id.invite_all_btn).setVisibility(View.VISIBLE);
+							}
+
+							TextView participantNameItem = (TextView) ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE))
+									.inflate(R.layout.participant_name_item, null);
+							participantNameItem.setText(participant.getFirstName());
+							participantNameItem.setBackgroundResource(participant.isOnhike() ?
+									R.drawable.hike_contact_bg: R.drawable.sms_contact_bg);
+
+							LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+							lp.setMargins(0, 0, 0, (int) (6 * Utils.densityMultiplier));
+							participantNameItem.setLayoutParams(lp);
+
+							participantNameItem.setId(msisdn.hashCode());
+							participantNameContainer.addView(participantNameItem);
+
+							participantList.put(msisdn, new GroupParticipant(participant));
+						}
+
+					}
+				});
+			}
+		}
+		else if(HikePubSub.GROUP_END.equals(type))
+		{
+			mLocalMSISDN.equals(((JSONObject)object).optString(HikeConstants.TO));
+			{
+				runOnUiThread(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						ProfileActivity.this.finish();
+					}
+				});
+			}
+		}
+	}
+
+	@Override
+	public void onShown() 
+	{
+		mNameDisplay.setVisibility(View.GONE);
+		mNameEdit.setVisibility(View.VISIBLE);
+		mNameEdit.setSelection(mNameDisplay.getText().length());
+		mNameEdit.requestFocus();
+	}
+
+	@Override
+	public void onHidden() 
+	{
+		mNameDisplay.setVisibility(View.VISIBLE);
+		mNameEdit.setVisibility(View.GONE);
+		mNameDisplay.setText(mNameEdit.getText());
 	}
 }

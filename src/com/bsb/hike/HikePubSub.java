@@ -95,13 +95,15 @@ public class HikePubSub implements Runnable
 
 	public static final String USER_LEFT = "userLeft";
 
-	public static final String GROUP_JOINED = "groupJoined";
-
 	public static final String GROUP_LEFT = "groupLeft";
 
 	public static final String GROUP_END = "groupEnd";
 
 	public static final String GROUP_NAME_CHANGED = "groupNameChanged";
+
+	public static final String PARTICIPANT_JOINED_GROUP = "participantJoinedGroup";
+
+	public static final String PARTICIPANT_LEFT_GROUP = "participantLeftGroup";
 
 	private final Thread mThread;
 

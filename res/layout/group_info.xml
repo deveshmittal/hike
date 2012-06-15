@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.bsb.hike.view.CustomLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/group_parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/thatch_repeat"
@@ -83,7 +84,7 @@
                         android:text="Group Name"
                         android:textColor="@color/lightblack"
                         android:textSize="16sp" />
-
+					
                     <com.bsb.hike.view.CustomFontEditText
                         android:id="@+id/name_input"
                         android:layout_width="0dp"
@@ -94,7 +95,24 @@
                         android:textColor="@color/subtext"
                         android:textSize="16sp"
                         android:textStyle="italic"
-                        android:visibility="visible" />
+                        android:visibility="gone"
+						android:paddingRight="1dp" />
+                    
+                    <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/name_display"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="5"
+                        android:onClick="onEditGroupNameClicked"
+                        android:background="@null"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:clickable="true"
+                        android:textColor="@color/subtext"
+                        android:textSize="16sp"
+                        android:textStyle="italic"
+                        android:visibility="visible"
+                        android:paddingRight="1dp" />
                 </LinearLayout>
             </RelativeLayout>
 
@@ -215,6 +233,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
                 android:background="@drawable/invite_chatthread_button"
                 android:onClick="onInviteAllClicked"
                 android:text="@string/invite_all_to_hike"
@@ -223,4 +242,4 @@
         </LinearLayout>
     </ScrollView>
 
-</LinearLayout>
+</com.bsb.hike.view.CustomLinearLayout>
