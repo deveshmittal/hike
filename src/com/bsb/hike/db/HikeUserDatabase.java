@@ -220,7 +220,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		if (contactInfos.isEmpty())
 		{
 			Log.d(getClass().getSimpleName(), "No contact found");
-			return new ContactInfo(msisdn, msisdn, null, msisdn);
+			return new ContactInfo(msisdn, msisdn, null, msisdn, false);
 		}
 
 		return contactInfos.get(0);
@@ -237,7 +237,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 		while (c.moveToNext())
 		{
-			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getInt(onhikeIdx) != 0,c.getString(phoneNumIdx), c.getInt(hasCustomPhotoIdx)==1);
+			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0, c.getInt(hasCustomPhotoIdx)==1);
 			contactInfos.add(contactInfo);
 		}
 		c.close();
@@ -304,7 +304,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public void deleteMultipleRows(Collection<String> ids)
 	{
-		String ids_joined = "(" + Utils.join(ids, ",", true) + ")";
+		String ids_joined = "(" + Utils.join(ids, ",", "\"", "\"") + ")";
 		mDb.delete(DBConstants.USERS_TABLE, DBConstants.ID+" in " + ids_joined, null);
 	}
 

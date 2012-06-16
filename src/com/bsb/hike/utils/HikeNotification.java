@@ -15,6 +15,8 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -48,7 +50,16 @@ public class HikeNotification
 		// For showing the name of the contact that sent the message in a group chat
 		if(convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
-			message = Utils.getContactName(msisdn, null, convMsg.getGroupParticipantMsisdn(), context) + HikeConstants.SEPARATOR + message;
+			HikeUserDatabase hUDB = new HikeUserDatabase(context);
+			ContactInfo participant = hUDB.getContactInfoFromMSISDN(convMsg.getGroupParticipantMsisdn());
+			hUDB.close();
+			if(TextUtils.isEmpty(participant.getName()))
+			{
+				HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
+				participant.setName(hCDB.getParticipantName(msisdn, convMsg.getGroupParticipantMsisdn()));
+				hCDB.close();
+			}
+			message = participant.getFirstName() + HikeConstants.SEPARATOR + message;
 		}
 
 		int icon = R.drawable.ic_contact_logo;

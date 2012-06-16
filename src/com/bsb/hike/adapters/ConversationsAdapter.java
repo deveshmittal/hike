@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -64,9 +65,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			CharSequence markedUp = smileyParser.addSmileySpans(message.getMessage());
 			// For showing the name of the contact that sent the message in a group chat
-			if(message.isGroupChat() && !TextUtils.isEmpty(message.getGroupParticipantMsisdn()) && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+			if(conversation instanceof GroupConversation && !TextUtils.isEmpty(message.getGroupParticipantMsisdn()) && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 			{
-				markedUp = Utils.addContactName(conversation.getMsisdn(), conversation.getGroupParticipants(), message.getGroupParticipantMsisdn(), markedUp, context);
+				markedUp = Utils.addContactName(((GroupConversation)conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().getFirstName(), markedUp);
 			}
 			messageView.setVisibility(View.VISIBLE);
 			messageView.setText(markedUp);

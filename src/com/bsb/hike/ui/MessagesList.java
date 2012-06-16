@@ -32,7 +32,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -46,6 +45,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
 import com.bsb.hike.utils.Utils;
@@ -75,9 +75,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private View mInviteToolTip;
 
-	private ImageView titleIconView;
-
-	private View btnBar;
+	private SharedPreferences accountPrefs;
 
 	@Override
 	protected void onPause()
@@ -187,18 +185,17 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
-		TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
-		text.setText(getString(R.string.invite_tooltip));
+		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
-		btnBar = findViewById(R.id.button_bar);
-
-		titleIconView.setVisibility(View.VISIBLE);
-		titleIconView.setImageResource(R.drawable.ic_invite_top);
-		btnBar.setVisibility(View.VISIBLE);
-		if (!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false))
+		if (!accountPrefs.getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false) 
+				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
 		{
+			mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
+			mInviteToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
+
+			TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
+			text.setText(getString(R.string.earn_200_sms_tap_here));
+
 			if (savedInstanceState == null || !savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING)) 
 			{
 				Animation alphaIn = AnimationUtils.loadAnimation(
@@ -223,7 +220,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		{
 			Conversation conv = (Conversation) iter.next();
 			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-			if (conv.getMessages().isEmpty() && !conv.isGroupConversation())
+			if (conv.getMessages().isEmpty() && !(conv instanceof GroupConversation))
 			{
 				iter.remove();
 			}
@@ -262,13 +259,14 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mInviteToolTip.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mInviteToolTip != null && mInviteToolTip.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onBackPressed()
 	{
+		Utils.incrementNumTimesScreenOpen(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
 		super.onBackPressed();
 	}
 
@@ -311,7 +309,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			return true;
 		case R.id.delete:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DELETE_CONVERSATION);
-			if(conv.isGroupConversation())
+			if(conv instanceof GroupConversation)
 			{
 				leaveGroup(conv);
 			}
@@ -341,10 +339,9 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		return true;
 	}
 
-	private void invite()
+	private void showCreditsScreen()
 	{
-		Intent intent = new Intent(this, HikeListActivity.class);
-		intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
+		Intent intent = new Intent(this, CreditsActivity.class);
 		startActivity(intent);		
 	}
 
@@ -361,7 +358,9 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		{
 		case R.id.invite:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU);
-			onTitleIconClick(null);
+			intent = new Intent(this, HikeListActivity.class);
+			intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
+			startActivity(intent);
 			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {
@@ -439,10 +438,10 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			}
 
 			// For updating the group name if some participant has joined or left the group
-			else if(conv.isGroupConversation() && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+			else if((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
 				HikeConversationsDatabase hCDB = new HikeConversationsDatabase(MessagesList.this);
-				conv.setGroupParticipants(hCDB.getGroupParticipants(conv.getMsisdn()));
+				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn()));
 				hCDB.close();
 			}
 			runOnUiThread(new Runnable(){
@@ -467,9 +466,9 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		else if (HikePubSub.NEW_CONVERSATION.equals(type))
 		{
 			final Conversation conversation = (Conversation) object;
-			Log.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + conversation.isGroupConversation());
+			Log.d(getClass().getSimpleName(), "New Conversation. Group Conversation? " + (conversation instanceof GroupConversation));
 			mConversationsByMSISDN.put(conversation.getMsisdn(), conversation);
-			if (conversation.getMessages().isEmpty() && !conversation.isGroupConversation())
+			if (conversation.getMessages().isEmpty() && !(conversation instanceof GroupConversation))
 			{
 				return;
 			}
@@ -480,7 +479,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 				public void run()
 				{
 					mAdapter.add(conversation);
-					if (conversation.isGroupConversation()) 
+					if (conversation instanceof GroupConversation) 
 					{
 						mAdapter.notifyDataSetChanged();
 					}
@@ -631,7 +630,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			for (int i = 0; i < convs.length; i++)
 			{
 				convs[i] = mAdapter.getItem(i);
-				if (convs[i].isGroupConversation()) 
+				if ((convs[i] instanceof GroupConversation)) 
 				{
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convs[i].serialize(NetworkManager.GROUP_CHAT_LEAVE));
 				}
@@ -675,11 +674,8 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	public void onTitleIconClick(View v)
 	{
-		if (v != null) {
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_INVITE_TOP_BUTTON);
-		}
 		setToolTipDismissed();
-		invite();
+		showCreditsScreen();
 	}
 
 	public void onToolTipClicked(View v)

@@ -142,4 +142,6 @@
 	<string name="group_chat_end">This group chat has ended.</string>
 	<string name="group_info">Group Info</string>
 	<string name="tap_group_info">Tap this button for group info.</string>
+	<string name="earn_200_sms_tap_here">Earn up to 200 free SMS. Tap here for more info.</string>
+	<string name="invite_all_to_hike">Invite members on SMS to hike</string>
 </resources>

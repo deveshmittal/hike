@@ -171,7 +171,7 @@ public class ConvMessage
 		this.participantInfoState = ParticipantInfoState.NO_INFO;
 	}
 
-	public ConvMessage(JSONObject obj, Conversation conversation, Context context, boolean isSelfGenerated) throws JSONException
+	public ConvMessage(JSONObject obj, Conversation groupConversation, Context context, boolean isSelfGenerated) throws JSONException
 	{
 		// GCL or GCJ
 		// If the message is a group message we get a TO field consisting of the Group ID
@@ -189,7 +189,7 @@ public class ConvMessage
 			{
 				JSONObject nameMsisdn = arr.getJSONObject(i);
 				Log.d(getClass().getSimpleName(), "Joined: " + arr.getString(i));
-				newParticipants.append(Utils.getContactName(this.mMsisdn, conversation.getGroupParticipants(), nameMsisdn.getString(HikeConstants.MSISDN), context) + ", ");
+				newParticipants.append(((GroupConversation)groupConversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName() + ", ");
 			}
 			this.mMessage = newParticipants.substring(0, newParticipants.length() - 2) + " " + context.getString(R.string.joined_conversation); 
 		} 
@@ -201,11 +201,11 @@ public class ConvMessage
 			}
 			else
 			{
-				this.mMessage = Utils.getContactName(this.mMsisdn, conversation.getGroupParticipants(), obj.getString(HikeConstants.DATA), context) +  " " + context.getString(R.string.left_conversation);
+				this.mMessage = ((GroupConversation)groupConversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName() +  " " + context.getString(R.string.left_conversation);
 			}
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
-		this.mConversation = conversation;
+		this.mConversation = groupConversation;
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}
 

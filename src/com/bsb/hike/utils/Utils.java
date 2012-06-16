@@ -4,10 +4,12 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,9 +60,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -88,20 +89,20 @@ public class Utils
 		msisdnRegex = Pattern.compile("\\[(\\+\\d*)\\]");
 	}
 
-	public static String join(Collection<?> s, String delimiter, boolean quote)
+	public static String join(Collection<?> s, String delimiter, String startWith, String endWith)
 	{
 		StringBuilder builder = new StringBuilder();
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext())
 		{
-			if (quote)
+			if (!TextUtils.isEmpty(startWith))
 			{
-				builder.append("\"");
+				builder.append(startWith);
 			}
 			builder.append(iter.next());
-			if (quote)
+			if (!TextUtils.isEmpty(endWith))
 			{
-				builder.append("\"");
+				builder.append(endWith);
 			}
 			if (!iter.hasNext())
 			{
@@ -109,6 +110,7 @@ public class Utils
 			}
 			builder.append(delimiter);
 		}
+		Log.d("Utils", "Joined string is: " + builder.toString());
 		return builder.toString();
 	}
 
@@ -494,22 +496,32 @@ public class Utils
 		return !msisdn.startsWith("+");
 	}
 
-	public static String defaultGroupName(List<ContactInfo> participantList)
+	public static String defaultGroupName(Map<String, GroupParticipant> participantList)
 	{
-		switch (participantList.size()) {
+		List<GroupParticipant> groupParticipants = new ArrayList<GroupParticipant>();
+		for(Entry<String, GroupParticipant> participant : participantList.entrySet())
+		{
+			if(!participant.getValue().hasLeft())
+			{
+				groupParticipants.add(participant.getValue());
+			}
+		}
+		Collections.sort(groupParticipants);
+
+		switch (groupParticipants.size()) 
+		{
 		case 0:
 			return "";
 		case 1:
-			return participantList.get(0).getFirstName();
+			return groupParticipants.get(0).getContactInfo().getFirstName();
 		case 2:
-			return participantList.get(0).getFirstName() + " and "
-			+ participantList.get(1).getFirstName();
+			return groupParticipants.get(0).getContactInfo().getFirstName() + " and "
+			+ groupParticipants.get(1).getContactInfo().getFirstName();
 		default:
-			return participantList.get(0).getFirstName() + " and "
-			+ (participantList.size() - 1) + " others";
+			return groupParticipants.get(0).getContactInfo().getFirstName() + " and "
+			+ (groupParticipants.size() - 1) + " others";
 		}
 	}
-
 	
 	public static JSONObject getDeviceDetails(Context context)
 	{
@@ -549,20 +561,21 @@ public class Utils
 	public static JSONObject getDeviceStats(Context context)
 	{
 		SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ANALYTICS, 0);
+		Editor editor = prefs.edit();
 		Map<String, ?> keys = prefs.getAll();
-		Iterator<String> i= keys.keySet().iterator();
 
 		JSONObject data = new JSONObject();
 		JSONObject obj = new JSONObject();
 
 		try 
 		{
-			while (i.hasNext())
+			for (String key : keys.keySet())
 			{
-				String key = i.next();
 				Log.d("Utils", "Getting keys: " + key);
 				data.put(key, prefs.getLong(key, 0));
+				editor.remove(key);
 			}
+			editor.commit();
 			data.put(HikeConstants.LogEvent.TAG, "mob");
 			
 			obj.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
@@ -576,40 +589,10 @@ public class Utils
 		return obj;
 	}
 
-	public static String getContactName(String groupId, List<ContactInfo> participantList, String msisdn, Context context)
+	public static CharSequence addContactName(String firstName, CharSequence message)
 	{
-		ContactInfo contactInfo = null;
-		if (participantList != null && participantList.size() > 0) 
-		{
-			for (ContactInfo cInfo : participantList) 
-			{
-				if (cInfo.getMsisdn().equals(msisdn)) 
-				{
-					contactInfo = cInfo;
-					break;
-				}
-			}
-		}
-		if (contactInfo == null) 
-		{
-			HikeUserDatabase hUDB = new HikeUserDatabase(context);
-			contactInfo = hUDB.getContactInfoFromMSISDN(msisdn);
-			hUDB.close();
-		}
-		if(TextUtils.isEmpty(contactInfo.getName()))
-		{
-			HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
-			contactInfo.setName(hCDB.getParticipantName(groupId, msisdn));
-			hCDB.close();
-		}
-		return contactInfo.getFirstName();
-	}
-
-	public static CharSequence addContactName(String groupId, List<ContactInfo> participantList, String msisdn, CharSequence message, Context context)
-	{
-		String name = getContactName(groupId, participantList, msisdn, context);
-		SpannableStringBuilder messageWithName = new SpannableStringBuilder(name + HikeConstants.SEPARATOR + message);
-		messageWithName.setSpan(new StyleSpan(Typeface.BOLD), 0, name.length() + 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		SpannableStringBuilder messageWithName = new SpannableStringBuilder(firstName + HikeConstants.SEPARATOR + message);
+		messageWithName.setSpan(new StyleSpan(Typeface.BOLD), 0, firstName.length() + 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return messageWithName;
 	}
 
@@ -662,6 +645,18 @@ public class Utils
 	{
 		String myMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
-		return new ContactInfo(myMsisdn, myMsisdn, myName, myMsisdn);
+		return new ContactInfo(myMsisdn, myMsisdn, myName, myMsisdn, true);
+	}
+
+	public static boolean wasScreenOpenedNNumberOfTimes(SharedPreferences prefs, String whichScreen)
+	{
+		return prefs.getInt(whichScreen, 0) >= HikeConstants.NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP;
+	}
+
+	public static void incrementNumTimesScreenOpen(SharedPreferences prefs, String whichScreen)
+	{
+		Editor editor= prefs.edit();
+		editor.putInt(whichScreen, prefs.getInt(whichScreen, 0) + 1);
+		editor.commit();
 	}
 }

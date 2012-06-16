@@ -66,6 +66,11 @@ public class ToastListener implements Listener
 		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			ConvMessage message = (ConvMessage) object;
+			if(message.getConversation() == null)
+			{
+				Log.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
+				return;
+			}
 			if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 			{
 				Activity activity = (currentActivity != null) ? currentActivity

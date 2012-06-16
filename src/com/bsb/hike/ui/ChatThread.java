@@ -1,7 +1,9 @@
 package com.bsb.hike.ui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,8 +77,10 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.MyDrawable;
 import com.bsb.hike.utils.Utils;
@@ -179,7 +183,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ArrayList<String> selectedParticipants;
 
-	private StringBuilder existingParticipants;
+	private String existingParticipants;
 
 	private ImageView titleIconView;
 
@@ -322,14 +326,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			// Checking if the current conversation already exists. If it does we load the current participant list to prevent the user from selecting them again
 			String existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
-			List<ContactInfo> existingParticipantList = TextUtils.isEmpty(existingGroupId) ? null : mConversationDb.getGroupParticipants(existingGroupId);
-			existingParticipants = new StringBuilder();
-			if (existingParticipantList != null ) 
+			Map<String, GroupParticipant> existingParticipantList = TextUtils.isEmpty(existingGroupId) ? null : mConversationDb.getGroupParticipants(existingGroupId);
+			if (existingParticipantList != null && !existingParticipantList.isEmpty()) 
 			{
-				for (ContactInfo participant : existingParticipantList) 
-				{
-					existingParticipants.append("["+participant.getMsisdn() + "],");
-				}
+				existingParticipants = Utils.join(existingParticipantList.keySet(), ", ", "[", "]");
 			}
 			Log.d(getClass().getSimpleName(), "Exisiting participants: " + existingParticipants);
 			mInputMultiNumberView.setOnItemClickListener(new OnItemClickListener() 
@@ -454,6 +454,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		setContentView(R.layout.chatthread);
 
+		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		Utils.setDensityMultiplier(ChatThread.this);
 
 		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
@@ -549,6 +550,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onBackPressed()
 	{
+		if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT) && this.mConversation != null) 
+		{
+			if ((mConversation instanceof GroupConversation)) {
+				Utils.incrementNumTimesScreenOpen(prefs,
+						HikeMessengerApp.NUM_TIMES_CHAT_THREAD_GROUP);
+			} else if (!this.mConversation.isOnhike()) {
+				Utils.incrementNumTimesScreenOpen(prefs,
+						HikeMessengerApp.NUM_TIMES_CHAT_THREAD_INVITE);
+			}
+		}
 		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE) 
 		{
 			Intent intent = null;
@@ -641,7 +652,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.chatthread_menu, menu);
 
-		if (mConversation.isGroupConversation()) 
+		if ((mConversation instanceof GroupConversation)) 
 		{
 			MenuItem menuItem = menu.findItem(R.id.block_menu);
 			menuItem.setTitle(R.string.leave_group);
@@ -660,7 +671,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		if (item.getItemId() == R.id.block_menu)
 		{
-			if (!mConversation.isGroupConversation()) 
+			if (!(mConversation instanceof GroupConversation)) 
 			{
 				Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_BLOCK);
 				mPubSub.publish(HikePubSub.BLOCK_USER, mContactNumber);
@@ -956,7 +967,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		db.close();
 
 		changeInviteButtonVisibility();
-		if(mConversation.isGroupConversation() && !mConversation.getIsGroupAlive())
+		if((mConversation instanceof GroupConversation) && !((GroupConversation)mConversation).getIsGroupAlive())
 		{
 			groupChatDead();
 		}
@@ -1015,7 +1026,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void updateUIForHikeStatus()
 	{
 		if (mConversation.isOnhike() ||
-			mConversation.isGroupConversation())
+				(mConversation instanceof GroupConversation))
 		{
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn_selector);
 			mComposeView.setHint("Free Message...");
@@ -1061,7 +1072,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
-				if (mConversation.isGroupConversation())
+				if (mConversation instanceof GroupConversation)
 				{
 					return;
 				}
@@ -1137,7 +1148,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
-					if (!mConversation.isGroupConversation())
+					if (!(mConversation instanceof GroupConversation))
 					{
 						mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
 					}
@@ -1145,10 +1156,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}
 
-				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
 				{
 					HikeConversationsDatabase hCDB = new HikeConversationsDatabase(this);
-					mConversation.setGroupParticipants(hCDB.getGroupParticipants(mConversation.getMsisdn()));
+					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn()));
 					hCDB.close();
 				}
 
@@ -1212,7 +1223,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					updateChatMetadata();
 					if (!animatedOnce) 
 					{
-						prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 						animatedOnce = prefs.getBoolean(HikeConstants.Extras.ANIMATED_ONCE, false);
 						if (!animatedOnce) {
 							Editor editor = prefs.edit();
@@ -1288,7 +1298,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			/* only update the UI if the message is for this conversation */
 			String msisdn = (String) object;
-			if (!msisdn.equals(mContactNumber))
+			if (!mContactNumber.equals(msisdn))
 			{
 				return;
 			}
@@ -1307,7 +1317,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
 			String groupId = (String) object;
-			if (groupId.equals(mContactNumber))
+			if (mContactNumber.equals(groupId))
 			{
 				HikeConversationsDatabase db = new HikeConversationsDatabase(this);
 				final String groupName = db.getGroupName(groupId);
@@ -1324,8 +1334,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (HikePubSub.GROUP_END.equals(type))
 		{
-			String groupId = (String) object;
-			if(groupId.equals(mContactNumber))
+			String groupId = ((JSONObject)object).optString(HikeConstants.TO);
+			if(mContactNumber.equals(groupId))
 			{
 				groupChatDead();
 			}
@@ -1402,7 +1412,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					mComposeView.setText("");
 				}
 				mComposeView.setHint(R.string.type_to_compose);
-				if (mConversation.getIsGroupAlive()) 
+				if ((mConversation instanceof GroupConversation) && ((GroupConversation)mConversation).getIsGroupAlive()) 
 				{
 					mComposeView.setEnabled(true);
 				}
@@ -1634,7 +1644,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		
 		if (v.getId() == R.id.title_image_btn) {
 			dismissToolTip();
-			if (!this.mConversation.isGroupConversation()) 
+			if (!(mConversation instanceof GroupConversation)) 
 			{
 				Utils.logEvent(ChatThread.this,
 						HikeConstants.LogEvent.CHAT_INVITE_TOP_BUTTON);
@@ -1677,39 +1687,39 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			selectedParticipants = Utils.splitSelectedContacts(selectedContacts);
 			List<String> selectedParticipantNames = Utils.splitSelectedContactsName(selectedContacts);
-			ArrayList<ContactInfo> contactInfoList = new ArrayList<ContactInfo>();
+			Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
 
 			for(int i = 0; i < selectedParticipants.size(); i++)
 			{
 				String msisdn = selectedParticipants.get(i);
 				String name = selectedParticipantNames.get(i);
-				ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, name, msisdn);
-				contactInfoList.add(contactInfo);
+				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, name, msisdn));
+				participantList.put(msisdn, groupParticipant);
 			}
-			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs);
+			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs);
 
-			Conversation conversation = new Conversation(mContactNumber, 0, mContactNumber, null, false, userContactInfo.getMsisdn(), true);
-			conversation.setGroupParticipants(contactInfoList);
+			GroupConversation groupConversation= new GroupConversation(mContactNumber, 0, mContactNumber, null, userContactInfo.getMsisdn(), true);
+			groupConversation.setGroupParticipantList(participantList);
 
 			Log.d(getClass().getSimpleName(), "Creating group: " + mContactNumber);
-			mConversationDb.addGroupParticipants(mContactNumber, conversation.getGroupParticipants());
-			mConversationDb.addConversation(conversation.getMsisdn(), false, "", conversation.getGroupOwner());
+			mConversationDb.addGroupParticipants(mContactNumber, groupConversation.getGroupParticipantList());
+			mConversationDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
 
 			try 
 			{
-				sendMessage(new ConvMessage(conversation.serialize(NetworkManager.GROUP_CHAT_JOIN), conversation, ChatThread.this, true));
+				sendMessage(new ConvMessage(groupConversation.serialize(NetworkManager.GROUP_CHAT_JOIN), groupConversation, ChatThread.this, true));
 			}
 			catch (JSONException e) 
 			{
 				e.printStackTrace();
 			}
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, conversation.serialize(NetworkManager.GROUP_CHAT_JOIN));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(NetworkManager.GROUP_CHAT_JOIN));
 			createConversation();
 			mComposeViewWatcher.init();
 			mComposeView.requestFocus();
 
-			mContactName = conversation.getLabel();
-			mContactId = conversation.getMsisdn();
+			mContactName = groupConversation.getLabel();
+			mContactId = groupConversation.getMsisdn();
 
 			// To prevent the Contact picker layout from being shown on orientation change
 			setIntentFromField();
@@ -1737,14 +1747,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
 		View btnBar = findViewById(R.id.button_bar);
-		titleIconView.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
+		titleIconView.setVisibility(mConversation.isOnhike() && !(mConversation instanceof GroupConversation) ? View.GONE : View.VISIBLE);
 		titleIconView.setImageResource(R.drawable.ic_invite_top);
-		btnBar.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
+		btnBar.setVisibility(mConversation.isOnhike() && !(mConversation instanceof GroupConversation) ? View.GONE : View.VISIBLE);
 
-		prefs = prefs == null ? getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE) : prefs;
-
- 		if(!prefs.getBoolean(mConversation.isGroupConversation() ? 
-				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, false))
+ 		if(!prefs.getBoolean((mConversation instanceof GroupConversation) ? 
+				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, false) 
+				&& Utils.wasScreenOpenedNNumberOfTimes(prefs, (mConversation instanceof GroupConversation) ? 
+						HikeMessengerApp.NUM_TIMES_CHAT_THREAD_GROUP : HikeMessengerApp.NUM_TIMES_CHAT_THREAD_INVITE))
 		{
 			showInviteToolTip();
 		}
@@ -1766,14 +1776,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		toolTipLayout.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 		TextView toolTipTxt = (TextView) toolTipLayout.findViewById(R.id.tool_tip);
-		String formatString = mConversation.isGroupConversation() ? 
+		String formatString = (mConversation instanceof GroupConversation) ? 
 				getString(R.string.tap_group_info) : String.format(getString(R.string.press_btn_invite), mConversation.getContactName());
 		toolTipTxt.setText(formatString); 
 	}
 	
 	public void onToolTipClosed(View v)
 	{
-		Utils.logEvent(ChatThread.this, mConversation.isGroupConversation() ? 
+		Utils.logEvent(ChatThread.this, (mConversation instanceof GroupConversation) ? 
 				HikeConstants.LogEvent.CHAT_GROUP_INFO_TOOL_TIP_CLOSED : HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
 		dismissToolTip();
 	}
@@ -1784,7 +1794,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void dismissToolTip()
 	{
 		Editor editor = prefs.edit();
-		editor.putBoolean(mConversation.isGroupConversation() ? 
+		editor.putBoolean((mConversation instanceof GroupConversation) ? 
 				HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED : HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, true);
 		editor.commit();
 

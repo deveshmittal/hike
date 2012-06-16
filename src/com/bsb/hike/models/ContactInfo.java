@@ -98,15 +98,15 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 
 	public ContactInfo(String id, String number, String name,String phoneNum)
 	{
-		this(id, number, name, false,phoneNum, false);
+		this(id, number, name, phoneNum, false, false);
 	}
 
-	public ContactInfo(String id, String number, String name, boolean onHike, String phoneNum)
+	public ContactInfo(String id, String number, String name, String phoneNum, boolean onHike)
 	{
-		this(id, number, name, onHike,phoneNum, false);
+		this(id, number, name, phoneNum, onHike, false);
 	}
 
-	public ContactInfo(String id, String msisdn, String name, boolean onhike, String phoneNum, boolean hasCustomPhoto)
+	public ContactInfo(String id, String msisdn, String name, String phoneNum, boolean onhike, boolean hasCustomPhoto)
 	{
 		this.id = id;
 		this.msisdn = msisdn;

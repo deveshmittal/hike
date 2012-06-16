@@ -28,7 +28,6 @@ public class CreditsActivity extends Activity
 	private TextView mTitleView;
 	private TextView creditsNum;
 	private Button inviteFriendsBtn;
-	private SharedPreferences settings;
 	private int numHike;
 	private int numInvited;
 	private TextView impTxt;
@@ -41,6 +40,9 @@ public class CreditsActivity extends Activity
 		setContentView(R.layout.credits);
 
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		Editor editor = settings.edit();
+		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
+		editor.commit();
 
 		numHike = settings.getInt(HikeMessengerApp.INVITED_JOINED, 0);
 		numInvited = settings.getInt(HikeMessengerApp.INVITED, 0);
