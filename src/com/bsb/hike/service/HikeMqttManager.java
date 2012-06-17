@@ -812,7 +812,7 @@ public class HikeMqttManager implements Listener
 					ConvMessage convMessageToBeAddedToDB = new ConvMessage(jsonObj, groupConversation, this.mHikeService, false);
 					this.convDb.addConversationMessages(convMessageToBeAddedToDB);
 					// Only notify user if participant has joined.
-					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) {
+					if (convMessage != null && convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) {
 						Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + groupConversation.getLabel());
 						toaster.notify(new ContactInfo(groupConversation.getMsisdn(), groupConversation.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), groupConversation.getMsisdn()), convMessage);
 					}
