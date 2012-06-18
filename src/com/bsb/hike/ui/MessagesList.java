@@ -494,7 +494,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			 * Exit when we've found some read messages
 			 */
 			List<ConvMessage> messages = conv.getMessages();
-			for(int i = messages.size() - 1; i > 0; --i)
+			for(int i = messages.size() - 1; i >= 0; --i)
 			{
 				ConvMessage msg = messages.get(i);
 				if (!msg.isSent())
