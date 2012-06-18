@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -329,7 +330,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			Map<String, GroupParticipant> existingParticipantList = TextUtils.isEmpty(existingGroupId) ? null : mConversationDb.getGroupParticipants(existingGroupId);
 			if (existingParticipantList != null && !existingParticipantList.isEmpty()) 
 			{
-				existingParticipants = Utils.join(existingParticipantList.keySet(), ", ", "[", "]");
+				List<String> currentParticipantList = new ArrayList<String>();
+				for(Entry<String, GroupParticipant> participant : existingParticipantList.entrySet())
+				{
+					Log.d(getClass().getSimpleName(), "Current Participant: " + participant.getKey() + " has left? " + participant.getValue().hasLeft());
+					if(!participant.getValue().hasLeft())
+					{
+						currentParticipantList.add(participant.getKey());
+					}
+				}
+				existingParticipants = !currentParticipantList.isEmpty() ? Utils.join(currentParticipantList, ", ", "[", "]") : null;
 			}
 			Log.d(getClass().getSimpleName(), "Exisiting participants: " + existingParticipants);
 			mInputMultiNumberView.setOnItemClickListener(new OnItemClickListener() 
