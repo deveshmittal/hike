@@ -1337,7 +1337,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			String groupId = ((JSONObject)object).optString(HikeConstants.TO);
 			if(mContactNumber.equals(groupId))
 			{
-				groupChatDead();
+				runOnUiThread(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						groupChatDead();
+					}
+				});
 			}
 		}
 	}
