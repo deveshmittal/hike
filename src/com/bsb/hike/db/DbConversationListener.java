@@ -15,14 +15,13 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 
 public class DbConversationListener implements Listener
 {
-
 	HikeConversationsDatabase mConversationDb;
 
 	HikeUserDatabase mUserDb;
 
 	HikeMqttPersistence persistence;
+
 	private HikePubSub mPubSub;
-	private Context context;
 
 	public DbConversationListener(Context context)
 	{
@@ -30,13 +29,8 @@ public class DbConversationListener implements Listener
 		mConversationDb = new HikeConversationsDatabase(context);
 		mUserDb = new HikeUserDatabase(context);
 		persistence = new HikeMqttPersistence(context);
-		this.context = context;
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELETED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.BLOCK_USER, this);
@@ -56,30 +50,6 @@ public class DbConversationListener implements Listener
 				Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getMsisdn());
 				mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
 			}
-		}
-		else if (HikePubSub.MESSAGE_RECEIVED_FROM_SENDER.equals(type))  // represents event when a client receive msg from other client through server.
-		{
-			ConvMessage message = (ConvMessage) object;
-			mConversationDb.addConversationMessages(message);
-			Log.d("DBCONVERSATION LISTENER","Receiver received Message : "+message.getMessage() + "		;	Receiver Msg ID : "+message.getMsgID()+"	; Mapped msgID : "+message.getMappedMsgID());
-
-			mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, message);		
-		}
-		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server got msg from client 1 and sent back received msg receipt
-		{
-			Log.d("DBCONVERSATION LISTENER","(Sender) Message sent confirmed for msgID -> "+(Long)object);
-			updateDB(object,ConvMessage.State.SENT_CONFIRMED.ordinal());
-		}
-		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))  // server got msg from client 1 and sent back received msg receipt
-		{
-			Log.d("DBCONVERSATION LISTENER","Msg delivered to receiver for msgID -> "+(Long)object);
-			updateDB(object,ConvMessage.State.SENT_DELIVERED.ordinal());
-		}
-		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))  // server got msg from client 1 and sent back received msg receipt
-		{
-			long[] ids = (long[]) object;
-			Log.d("DBCONVERSATION LISTENER", "Message delivered read for ids " + ids);
-			updateDbBatch(ids,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
 		}
 		else if (HikePubSub.MESSAGE_DELETED.equals(type))
 		{
@@ -121,11 +91,6 @@ public class DbConversationListener implements Listener
 			e.printStackTrace();
 		}
 		return obj;
-	}
-
-	private void updateDbBatch(long[] ids, int status)
-	{
-		mConversationDb.updateBatch(ids, ConvMessage.State.SENT_DELIVERED_READ.ordinal());
 	}
 
 	private void updateDB(Object object, int status)

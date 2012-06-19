@@ -17,6 +17,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -66,6 +67,11 @@ public class ToastListener implements Listener
 		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			ConvMessage message = (ConvMessage) object;
+
+			HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
+			message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
+			hCDB.close();
+			
 			if(message.getConversation() == null)
 			{
 				Log.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");

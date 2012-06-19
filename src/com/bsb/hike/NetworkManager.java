@@ -108,7 +108,7 @@ public class NetworkManager implements HikePubSub.Listener
 			try
 			{
 				ConvMessage convMessage = new ConvMessage(jsonObj);
-				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, convMessage);
+				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 			}
 			catch (JSONException e)
 			{
@@ -194,7 +194,7 @@ public class NetworkManager implements HikePubSub.Listener
 				Conversation conversation = hCDB.getConversation(jsonObj.getString(HikeConstants.TO), 0);
 				hCDB.close();
 				ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
-				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED_FROM_SENDER, convMessage);
+				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 				this.pubSub.publish(GROUP_CHAT_JOIN.equals(type) ?
 						HikePubSub.PARTICIPANT_JOINED_GROUP : GROUP_CHAT_LEAVE.equals(type) ? 
 								HikePubSub.PARTICIPANT_LEFT_GROUP : HikePubSub.GROUP_END, jsonObj);
