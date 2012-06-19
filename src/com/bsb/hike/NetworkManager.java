@@ -29,6 +29,8 @@ public class NetworkManager implements HikePubSub.Listener
 
 	public static final String SMS_CREDITS = "sc";
 
+	public static final String SERVER_RECEIVED = "sr";
+
 	public static final String DELIVERY_REPORT = "dr";
 
 	public static final String USER_JOINED = "uj";
@@ -126,7 +128,7 @@ public class NetworkManager implements HikePubSub.Listener
 			int sms_credits = jsonObj.optInt(HikeConstants.DATA);
 			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
 		}
-		else if("sr".equals(type)) /* Represents Server has received the msg*/
+		else if(SERVER_RECEIVED.equals(type)) /* Represents Server has received the msg*/
 		{
 			String id = jsonObj.optString(HikeConstants.DATA);
 			long msgID;
@@ -159,7 +161,7 @@ public class NetworkManager implements HikePubSub.Listener
 		}
 		else if(MESSAGE_READ.equals(type)) // Message read by recipient
 		{
-			JSONArray msgIds = jsonObj.optJSONArray("d");
+			JSONArray msgIds = jsonObj.optJSONArray(HikeConstants.DATA);
 			if(msgIds == null)
 			{
 				Log.e("NETWORK MANAGER", "Update Error : Message id Array is empty or null . Check problem");
