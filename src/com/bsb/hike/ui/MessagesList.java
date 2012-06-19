@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -125,8 +126,10 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		@Override
 		protected void onPostExecute(Conversation[] deleted)
 		{
+			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			for (Conversation conversation : deleted)
 			{
+				mgr.cancel((int) conversation.getConvId());
 				mAdapter.remove(conversation);
 				mConversationsByMSISDN.remove(conversation.getMsisdn());
 				mConversationsAdded.remove(conversation.getMsisdn());
