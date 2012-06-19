@@ -1,7 +1,7 @@
 package com.bsb.hike.ui;
 
-import android.app.AlertDialog.Builder;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.HikeBlockedUserAdapter;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.utils.Utils;
@@ -112,15 +111,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 	public boolean onPreferenceClick(Preference preference)
 	{
 		Log.d("HikePreferences", "Preference clicked: "+preference.getKey());
-		if (preference.getKey().equals(getString(R.string.block_key))) 
-		{
-			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.BLOCK_SCREEN);
-			Intent intent = new Intent(this, HikeListActivity.class);
-			intent.putExtra(HikeConstants.ADAPTER_NAME,
-					HikeBlockedUserAdapter.class.getName());
-			startActivity(intent);
-		}
-		else if(preference.getKey().equals(getString(R.string.delete_key)))
+		if(preference.getKey().equals(getString(R.string.delete_key)))
 		{
 			Builder builder = new Builder(HikePreferences.this);
 			builder.setMessage("Are you sure you want to delete your account?");
