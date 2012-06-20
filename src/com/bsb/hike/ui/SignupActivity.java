@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
@@ -291,6 +292,14 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		}
 		enterEditText.setOnEditorActionListener(this);
 		enterEditText.addTextChangedListener(this);
+		enterEditText.setOnKeyListener(new OnKeyListener()
+		{
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) 
+			{
+				return loadingLayout.getVisibility() == View.VISIBLE;
+			}
+		});
 	}
 
 	@Override

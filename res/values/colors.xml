@@ -36,4 +36,6 @@
     <color name="other_list_selected">#eeeeeb</color>
     <color name="other_list_pressed">#deddd7</color>
     <color name="invite_all">#9c9a93</color>
+    <color name="send_blue">#a1cfe6</color>
+    <color name="send_green">#c7d9a3</color>
 </resources>

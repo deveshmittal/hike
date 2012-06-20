@@ -45,7 +45,7 @@ public class HikeNotification
 		String msisdn = convMsg.getMsisdn();
 		String message = convMsg.getMessage();
 		long timestamp = convMsg.getTimestamp();
-		String key = (contactInfo != null) ? contactInfo.getName() : msisdn;
+		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo.getName())) ? contactInfo.getName() : msisdn;
 
 		// For showing the name of the contact that sent the message in a group chat
 		if(convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)

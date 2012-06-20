@@ -273,7 +273,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public List<ContactInfo> getNonHikeContacts()
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE,DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.ONHIKE + "=0", null, null, null, null);
+		Cursor c = mReadDb.rawQuery("SELECT " + DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + ", " +
+								DBConstants.USERS_TABLE + "." + DBConstants.ID + ", " +
+								DBConstants.USERS_TABLE + "." + DBConstants.NAME + ", " +
+								DBConstants.USERS_TABLE + "." + DBConstants.ONHIKE + ", " +
+								DBConstants.USERS_TABLE + "." + DBConstants.PHONE+  ", " +
+								DBConstants.USERS_TABLE + "." + DBConstants.HAS_CUSTOM_PHOTO +
+								" FROM " + DBConstants.USERS_TABLE + " WHERE "
+								+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN 
+								+ " NOT IN (SELECT " + DBConstants.MSISDN + " FROM " 
+								+ DBConstants.BLOCK_TABLE + ") AND " + DBConstants.USERS_TABLE + "." + DBConstants.ONHIKE + " =0 ", null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
