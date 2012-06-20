@@ -188,7 +188,7 @@ public class SmileyParser
 
 		return builder;
 	}
-	
+
 	/**
 	 * Adds an emoticon image to the compose box 
 	 * @param composeBox: A reference to the text box in which the emoticon will be shown.
@@ -201,5 +201,22 @@ public class SmileyParser
 
 		composeBox.setText(addSmileySpans(text));
 		composeBox.setSelection(composeBox.length());
+	}
+
+	/**
+	 * Used for adding smileys to the compose box while the user is typing.
+	 * @param editable: this should be the same editable passed to us in the afterTextChanged method of the TextWatcher.
+	 */
+	public void addSmileyToEditable(Editable editable)
+	{
+		Matcher matcher = mPattern.matcher(editable);
+		int count = 0;
+		while (matcher.find() && (count < MAX_EMOTICONS))
+		{
+			count++;
+			int resId = mSmileyToRes.get(matcher.group());
+			editable.setSpan(new ImageSpan(mContext, resId), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+
 	}
 }

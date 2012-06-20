@@ -13,6 +13,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.utils.SmileyParser;
 
 public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 {
@@ -130,6 +131,8 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 	{
 		onTextLastChanged();
 		setBtnEnabled();
+		// For adding smileys as the user is typing.
+		SmileyParser.getInstance().addSmileyToEditable(editable);
 	}
 
 	@Override
