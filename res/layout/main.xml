@@ -29,9 +29,9 @@
             android:layout_below="@id/top_panel"
             android:scrollbars="none"
             android:cacheColorHint="#00000000"
-            android:background="@drawable/thatch_repeat"
+            android:background="@color/offwhite"
             android:choiceMode="none"
-            android:divider="@drawable/ic_thread_divider_profile"
+            android:divider="@drawable/ic_thread_divider_other"
             android:dividerHeight="1dp"
             android:fadingEdge="none"
             android:footerDividersEnabled="false" >
