@@ -19,10 +19,12 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 
-public class CreditsActivity extends Activity 
+public class CreditsActivity extends Activity implements Listener
 {
 	private LinearLayout creditItemContainer;
 	private TextView mTitleView;
@@ -32,6 +34,7 @@ public class CreditsActivity extends Activity
 	private int numInvited;
 	private TextView impTxt;
 	private TextView friendsNumTxt;
+	private SharedPreferences settings;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -39,7 +42,7 @@ public class CreditsActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
 
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Editor editor = settings.edit();
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
 		editor.commit();
@@ -78,11 +81,9 @@ public class CreditsActivity extends Activity
 				start + num.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		str.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), start, start + num.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		friendsNumTxt.setText(str);
-		
-		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		int credits = settings.getInt(HikeMessengerApp.SMS_SETTING, 0);
 
-		creditsNum.setText(credits+"");
+		updateCredits();
+
 		mTitleView.setText("Free SMS");
 		LayoutInflater layoutInflater = LayoutInflater.from(CreditsActivity.this);
 
@@ -122,5 +123,35 @@ public class CreditsActivity extends Activity
 				startActivity(i);
 			}
 		});
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+	}
+
+	@Override
+	protected void onDestroy() 
+	{
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		super.onDestroy();
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) 
+	{
+		if(HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					updateCredits();
+				}
+			});
+		}
+	}
+
+	private void updateCredits()
+	{
+		creditsNum.setText(settings.getInt(HikeMessengerApp.SMS_SETTING, 0) + "");
 	}
 }

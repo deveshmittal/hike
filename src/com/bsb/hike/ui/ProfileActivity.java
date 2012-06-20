@@ -93,6 +93,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private boolean shouldShowInviteAllButton = false;
 	private TextView mNameDisplay;
 	private ViewGroup participantNameContainer;
+	private ProfileItem[] items;
+	private ViewGroup credits;
 
 	private static enum ProfileType
 	{
@@ -141,6 +143,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
+		}
+		else if(profileType == ProfileType.USER_PROFILE)
+		{
+			HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		}
 		mActivityState = null;
 	}
@@ -194,6 +200,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			else
 			{
 				this.profileType = ProfileType.USER_PROFILE;
+				HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 				setupProfileScreen();
 			}
 		}
@@ -328,8 +335,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		TextView mTitleView = (TextView) findViewById(R.id.title);
 		TextView mNameView = (TextView) findViewById(R.id.name_current);
 
+		credits = (ViewGroup) findViewById(R.id.free_sms);
 		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info); 
-		ViewGroup credits = (ViewGroup) findViewById(R.id.free_sms);
 		ViewGroup notifications = (ViewGroup) findViewById(R.id.notifications);
 		ViewGroup privacy = (ViewGroup) findViewById(R.id.privacy);
 		ViewGroup help = (ViewGroup) findViewById(R.id.help);
@@ -347,7 +354,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 				credits, notifications, privacy, help
 				};
 
-		ProfileItem[] items = new ProfileItem[] 
+		items = new ProfileItem[] 
 				{
 				new ProfileItem.ProfileSettingsItem("Free hike SMS left", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
 				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, R.xml.notification_preferences),
@@ -872,6 +879,17 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				});
 			}
+		}
+		else if(HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					items[0].bindView(ProfileActivity.this, credits);
+				}
+			});
 		}
 	}
 
