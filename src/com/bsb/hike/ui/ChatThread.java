@@ -1038,13 +1038,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mConversation.isOnhike() ||
 				(mConversation instanceof GroupConversation))
 		{
-			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn_selector);
+			mSendBtn.setTextColor(getResources().getColor(R.color.send_blue));
 			mComposeView.setHint("Free Message...");
 		}
 		else
 		{
 			updateChatMetadata();
-			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn_selector);
+			mSendBtn.setTextColor(getResources().getColor(R.color.send_green));
 			mComposeView.setHint("SMS Message...");
 		}
 	}
@@ -1449,7 +1449,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				int numSms = ((int)(length/140)) + 1;
 				String charNumString = Integer.toString(charNum);
 				SpannableString ss = new SpannableString(charNumString + "/#" + Integer.toString(numSms));
-				ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.green)), 0, charNumString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.send_green)), 0, charNumString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				mMetadataNumChars.setText(ss);
 			}
 			else
@@ -1839,7 +1839,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	public void onEmoticonBtnClicked(View v)
 	{
-		ImageView emoArrw = (ImageView) findViewById(R.id.emoticon_arrow);
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
 		if (emoticonAdapter == null) 
@@ -1853,8 +1852,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			slideDown.setDuration(300);
 			emoticonLayout.startAnimation(slideDown);
 			emoticonLayout.setVisibility(View.INVISIBLE);
-			emoArrw.setAnimation(slideDown);
-			emoArrw.setVisibility(View.INVISIBLE);
 		}
 		else
 		{
@@ -1862,8 +1859,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			slideUp.setDuration(400);
 			emoticonLayout.setAnimation(slideUp);
 			emoticonLayout.setVisibility(View.VISIBLE);
-			emoArrw.setAnimation(slideUp);
-//			emoArrw.setVisibility(View.VISIBLE);
 		}
 		setEmoticonArrows();
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() 
