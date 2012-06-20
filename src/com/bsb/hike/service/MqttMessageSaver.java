@@ -133,21 +133,6 @@ public class MqttMessageSaver {
 					Log.d(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 			}
-			else if (NetworkManager.SERVER_RECEIVED.equals(type)) //Message sent to server
-			{
-				String id = jsonObj.optString(HikeConstants.DATA);
-				long msgID;
-				try
-				{
-					msgID=Long.parseLong(id);
-				}
-				catch(NumberFormatException e)
-				{
-					Log.e(getClass().getSimpleName(), "Exception occured while parsing msgId. Exception : "+e);
-					msgID = -1;
-				}
-				updateDB(msgID,ConvMessage.State.SENT_CONFIRMED.ordinal());
-			}
 			else if (NetworkManager.DELIVERY_REPORT.equals(type)) //Message delivered to receiver
 			{
 				String id = jsonObj.optString(HikeConstants.DATA);

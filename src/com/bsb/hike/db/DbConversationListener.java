@@ -35,6 +35,7 @@ public class DbConversationListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.BLOCK_USER, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.UNBLOCK_USER, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 	}
 
 	@Override
@@ -74,6 +75,11 @@ public class DbConversationListener implements Listener
 			mUserDb.unblock(msisdn);
 			JSONObject unblockObj = blockUnblockSerialize("ub",msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, unblockObj);
+		}
+		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server got msg from client 1 and sent back received msg receipt
+		{
+			Log.d("DBCONVERSATION LISTENER","(Sender) Message sent confirmed for msgID -> "+(Long)object);
+			updateDB(object,ConvMessage.State.SENT_CONFIRMED.ordinal());
 		}
 	}
 

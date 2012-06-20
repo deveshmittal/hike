@@ -29,8 +29,6 @@ public class NetworkManager implements HikePubSub.Listener
 
 	public static final String SMS_CREDITS = "sc";
 
-	public static final String SERVER_RECEIVED = "sr";
-
 	public static final String DELIVERY_REPORT = "dr";
 
 	public static final String USER_JOINED = "uj";
@@ -127,21 +125,6 @@ public class NetworkManager implements HikePubSub.Listener
 		{
 			int sms_credits = jsonObj.optInt(HikeConstants.DATA);
 			this.pubSub.publish(HikePubSub.SMS_CREDIT_CHANGED, new Integer(sms_credits));
-		}
-		else if(SERVER_RECEIVED.equals(type)) /* Represents Server has received the msg*/
-		{
-			String id = jsonObj.optString(HikeConstants.DATA);
-			long msgID;
-			try
-			{
-				msgID=Long.parseLong(id);
-			}
-			catch(NumberFormatException e)
-			{
-				Log.e("NETWORK MANAGER", "Exception occured while parsing msgId. Exception : "+e);
-				msgID = -1;
-			}
-			this.pubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgID);	
 		}
 		else if(DELIVERY_REPORT.equals(type)) // this handles the case when msg with msgId is recieved by the tornado server and it send back a received msg
 		{
