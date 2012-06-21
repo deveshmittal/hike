@@ -33,6 +33,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -50,7 +51,6 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.UpdateAppBaseActivity;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.HikeListView;
 
 public class MessagesList extends UpdateAppBaseActivity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
@@ -58,7 +58,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	public static final Object COMPOSE = "compose";
 
-	private HikeListView mConversationsView;
+	private ListView mConversationsView;
 
 	private View mSearchIconView;
 
@@ -169,7 +169,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceStats(MessagesList.this));
 		//Analytics - For testing purposes only
 
-		mConversationsView = (HikeListView) findViewById(R.id.conversations);
+		mConversationsView = (ListView) findViewById(R.id.conversations);
 
 		View view = findViewById(R.id.title_hikeicon);
 		view.setVisibility(View.VISIBLE);
