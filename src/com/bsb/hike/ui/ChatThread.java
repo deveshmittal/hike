@@ -56,6 +56,7 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -1038,13 +1039,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mConversation.isOnhike() ||
 				(mConversation instanceof GroupConversation))
 		{
-			mSendBtn.setTextColor(getResources().getColor(R.color.send_blue));
+			((ImageButton)findViewById(R.id.emo_btn)).setImageResource(R.drawable.emoticon_hike_btn);
+			mSendBtn.setTextColor(getResources().getColorStateList(R.color.send_hike));
+			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
 			mComposeView.setHint("Free Message...");
 		}
 		else
 		{
 			updateChatMetadata();
-			mSendBtn.setTextColor(getResources().getColor(R.color.send_green));
+			((ImageButton)findViewById(R.id.emo_btn)).setImageResource(R.drawable.emoticon_sms_btn);
+			mSendBtn.setTextColor(getResources().getColorStateList(R.color.send_sms));
+			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn);
 			mComposeView.setHint("SMS Message...");
 		}
 	}
