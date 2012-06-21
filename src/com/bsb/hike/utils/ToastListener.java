@@ -148,9 +148,6 @@ public class ToastListener implements Listener
 		Log.d("ToastListener", "status is " + status);
 		switch (status)
 		{
-		case CONNECTING:
-			id = R.string.notconnected_reconnected;
-			break;
 		case NOTCONNECTED_DATADISABLED:
 			id = R.string.notconnected_data_disabled;
 			break;
