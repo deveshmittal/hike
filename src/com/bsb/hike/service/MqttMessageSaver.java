@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.NetworkManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -127,6 +128,8 @@ public class MqttMessageSaver {
 					Log.d(getClass().getSimpleName(),"Receiver received Message : "
 							+ convMessage.getMessage() + "		;	Receiver Msg ID : "
 							+ convMessage.getMsgID()+"	; Mapped msgID : " + convMessage.getMappedMsgID());
+					// We have to do publish this here since we are adding the message to the db here, and the id is set after inserting into the db.
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 				}
 				catch (JSONException e)
 				{

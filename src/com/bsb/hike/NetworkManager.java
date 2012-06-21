@@ -101,19 +101,7 @@ public class NetworkManager implements HikePubSub.Listener
 
 		String msisdn = jsonObj.optString(HikeConstants.FROM);
 
-		if (MESSAGE.equals(type))  // this represents msg from another client through tornado server.
-		{
-			try
-			{
-				ConvMessage convMessage = new ConvMessage(jsonObj);
-				this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-			}
-			catch (JSONException e)
-			{
-				Log.d("NETWORK MANAGER", "Invalid JSON", e);
-			}
-		}
-		else if (START_TYPING.equals(type)) /* Start Typing event received*/
+		if (START_TYPING.equals(type)) /* Start Typing event received*/
 		{
 			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
 		}
