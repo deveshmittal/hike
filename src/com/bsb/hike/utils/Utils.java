@@ -70,7 +70,8 @@ import com.bsb.hike.utils.AccountUtils.AccountInfo;
 public class Utils
 {
 	public static Pattern shortCodeRegex;
-	public static Pattern msisdnRegex; 
+	public static Pattern msisdnRegex;
+	public static Pattern pinRegex;
 
 	public static String shortCodeIntent;
 
@@ -87,6 +88,7 @@ public class Utils
 	{
 		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
 		msisdnRegex = Pattern.compile("\\[(\\+\\d*)\\]");
+		pinRegex = Pattern.compile("\\d{6}");
 	}
 
 	public static String join(Collection<?> s, String delimiter, String startWith, String endWith)
@@ -338,7 +340,8 @@ public class Utils
 	 */
 	public static String getSMSPinCode(String body)
 	{
-		return body;
+		Matcher m = pinRegex.matcher(body);
+		return m.find() ? m.group() : null;
 	}
 
 	public static boolean requireAuth(Activity activity)
