@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:drawable="@drawable/emoticon_btn_disabled" android:state_enabled="false"/>
     <item android:drawable="@drawable/emoticon_btn_hike_pressed" android:state_pressed="true" android:state_enabled="true"/>
 	<item android:drawable="@drawable/emoticon_btn_hike_pressed" android:state_focused="true"/>
     <item android:drawable="@drawable/emoticon_btn_hike"></item>
