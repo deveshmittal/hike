@@ -47,7 +47,7 @@
 	<string name="your_free_sms">Your free SMS</string>
 	<string name="availble_month">Available this month</string>
 	<string name="free_sms">Want free SMS?</string>
-	<string name="every_month">Every month, you get 100 SMS. To get more free SMS, invite your friends to hike!</string>
+	<string name="every_month">Every month, you get 100 SMS. Get an additional 10 free SMS for each friend that joins hike because of you.</string>
 	<string name="invite_now">Invite Now</string>
 	<string name="friends_on_hike_0">You\'ve invited %1$s friends.</string>
 	<string name="free_always_world">Free, always, worldwide!</string>
@@ -56,7 +56,7 @@
 	<string name="shortcut">Add Shortcut</string>
 	<string name="earn_200_sms">Earn up to 200 free SMS.</string>
 	<string name="important">Important:</string>
-	<string name="dnd"> Due to SMS regulations, friends on the Do Not Disturb (DND) list need to opt in to hike to receive your free SMS. \n\nGet an additional 10 SMS for every friend you opt-in.</string>
+	<string name="dnd"> Due to SMS regulations, friends on the Do Not Disturb (DND) list need to opt in to hike to receive your free SMS.</string>
 	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 20 more!</string>
 	<string name="dnd_message">We can\'t send %1$s a message as this person is on the DND list. Why don\'t you have %1$s opt-in to receive your messages? Just ask %1$s to give a missed call to %2$s. You\'ll get an extra 10 free SMS per month for every person you have opt-in!\n\nTo send this information to %1$s as a normal SMS, tap here.</string>
 	<string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s</string>
@@ -72,4 +72,5 @@
 	<string name="tap_group_info">Tap this button for group info.</string>
 	<string name="earn_200_sms_tap_here">Earn up to 200 free SMS. Tap here for more info.</string>
 	<string name="invite_all_to_hike">Invite members on SMS to hike</string>
+	<string name="string_to_be_formatted">additional 10 free SMS</string>
 </resources>

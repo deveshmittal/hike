@@ -35,6 +35,7 @@ public class CreditsActivity extends Activity implements Listener
 	private TextView impTxt;
 	private TextView friendsNumTxt;
 	private SharedPreferences settings;
+	private TextView everyMonthTxt;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -56,6 +57,24 @@ public class CreditsActivity extends Activity implements Listener
 		inviteFriendsBtn = (Button) findViewById(R.id.invite_now);
 		impTxt = (TextView) findViewById(R.id.imp_txt);
 		friendsNumTxt = (TextView) findViewById(R.id.friends_num);
+		everyMonthTxt = (TextView) findViewById(R.id.every_month_text);
+
+		String everyMonth = getString(R.string.every_month);
+		SpannableString everyMonthSpan = new SpannableString(everyMonth);
+		String stringToBeFormatted = getString(R.string.string_to_be_formatted);
+		everyMonthSpan.setSpan(
+								new StyleSpan(Typeface.BOLD), 
+								everyMonth.indexOf(stringToBeFormatted), 
+								everyMonth.indexOf(stringToBeFormatted) + stringToBeFormatted.length() + 1,
+								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+								);
+		everyMonthSpan.setSpan(
+								new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), 
+								everyMonth.indexOf(stringToBeFormatted), 
+								everyMonth.indexOf(stringToBeFormatted) + stringToBeFormatted.length() + 1,
+								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+								);
+		everyMonthTxt.setText(everyMonthSpan);
 
 		String imp = getString(R.string.important);
 		String dnd = getString(R.string.dnd);
@@ -63,11 +82,6 @@ public class CreditsActivity extends Activity implements Listener
 
 		s.setSpan(new StyleSpan(Typeface.BOLD), 0, imp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		s.setSpan(new ForegroundColorSpan(0xffff3333), 0, imp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-		int ind = dnd.indexOf("10 SMS");
-		int l = new String("10 SMS").length();
-		s.setSpan(new StyleSpan(Typeface.BOLD), imp.length() + ind, imp.length() + ind + l + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		s.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), imp.length() + ind, imp.length() + ind + l + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 		impTxt.setText(s);
 
@@ -87,28 +101,34 @@ public class CreditsActivity extends Activity implements Listener
 		mTitleView.setText("Free SMS");
 		LayoutInflater layoutInflater = LayoutInflater.from(CreditsActivity.this);
 
-		for(int i = 0; i<=5; i++)
+		for(int i = 0; i<=2; i++)
 		{
 			View v = layoutInflater.inflate(R.layout.credits_item, null);
 			TextView friendNum = (TextView) v.findViewById(R.id.friends_no);
 			TextView smsNum = (TextView) v.findViewById(R.id.sms_no);
-			
-			int smsNo = 100 + (i*20);
 
-			friendNum.setText(i + "");
-			if (i == 5) 
+			int smsNo;
+			if(numHike < 2)
 			{
-				friendNum.setText(i + "+");
-				if(numHike >= 5)
+				smsNo = 100 + (i*20);
+				friendNum.setText(i + "");
+				if(i == numHike)
 				{
 					v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
 				}
+				
 			}
-			else if(i == numHike)
+			else
 			{
-				v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
+				int numToShow = ((numHike + i) - 1);
+				smsNo = 100 + (numToShow * 20);
+				friendNum.setText(numToShow + "");
+				if(i == 1)
+				{
+					v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
+				}
+				smsNum.setText(smsNo+"");
 			}
-			
 			smsNum.setText(smsNo+"");
 			creditItemContainer.addView(v);
 		}
