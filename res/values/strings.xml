@@ -54,7 +54,7 @@
 	<string name="disclaimer_india">*Free SMS works within India only.</string>
 	<string name="hike_to_hike">hike to hike</string>
 	<string name="shortcut">Add Shortcut</string>
-	<string name="earn_200_sms">Earn up to 200 free SMS.</string>
+	<string name="earn_200_sms">Earn unlimited free SMS.</string>
 	<string name="important">Important:</string>
 	<string name="dnd"> Due to SMS regulations, friends on the Do Not Disturb (DND) list need to opt in to hike to receive your free SMS.</string>
 	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 20 more!</string>
@@ -70,7 +70,9 @@
 	<string name="group_chat_end">This group chat has ended.</string>
 	<string name="group_info">Group Info</string>
 	<string name="tap_group_info">Tap this button for group info.</string>
-	<string name="earn_200_sms_tap_here">Earn up to 200 free SMS. Tap here for more info.</string>
+	<string name="earn_200_sms_tap_here">Earn unlimited free SMS. Tap here for more info.</string>
 	<string name="invite_all_to_hike">Invite members on SMS to hike</string>
 	<string name="string_to_be_formatted">additional 10 free SMS</string>
+	<string name="friend_joined_hike_no_creds">%1$s just joined hike because of you. Great job!</string>
+	<string name="friend_joined_hike_with_creds">%1$s just joined hike because of you. Great job! As promised, here are your additional 10 free SMS for bringing a friend. To see your total free SMS, tap here.</string>
 </resources>

@@ -37,6 +37,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -254,24 +255,38 @@ public class MessagesAdapter extends BaseAdapter
 
 		MessageMetadata metadata = convMessage.getMetadata();
 		final String dndMissedCalledNumber = metadata != null ? metadata.getDNDMissedCallNumber() : null;
+		final boolean newUser = metadata != null ? metadata.getNewUser() : false;
 
-		if (!TextUtils.isEmpty(dndMissedCalledNumber))
+		if (!TextUtils.isEmpty(dndMissedCalledNumber) || metadata != null)
 		{
 			String content = "tap here";
-			String message = context.getString(R.string.dnd_message, convMessage.getConversation().getLabel(), dndMissedCalledNumber);
+			String message = context.getString(
+					!TextUtils.isEmpty(dndMissedCalledNumber) ? 
+							R.string.dnd_message : !newUser ? 
+									R.string.friend_joined_hike_no_creds : R.string.friend_joined_hike_with_creds, 
+									convMessage.getConversation().getLabel(), 
+									dndMissedCalledNumber);
 			Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
 			int index = message.indexOf(content);
-			spannable.setSpan(new ClickableSpan()
+			if (index != -1) 
 			{
-				@Override
-				public void onClick(View blah)
+				spannable.setSpan(new ClickableSpan() 
 				{
-					Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-					smsIntent.setData(Uri.parse("sms:" + convMessage.getMsisdn()));
-					smsIntent.putExtra("sms_body", context.getString(R.string.dnd_invite_message, dndMissedCalledNumber));
-					context.startActivity(smsIntent);
-				}
-			}, index, index + content.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+					@Override
+					public void onClick(View blah) 
+					{
+						Intent intent = !TextUtils.isEmpty(dndMissedCalledNumber) ? new Intent(Intent.ACTION_VIEW) : new Intent(context, CreditsActivity.class);
+						if (!TextUtils.isEmpty(dndMissedCalledNumber)) 
+						{
+							intent = new Intent(Intent.ACTION_VIEW);
+							intent.setData(Uri.parse("sms:" + convMessage.getMsisdn()));
+							intent.putExtra("sms_body", context.getString(R.string.dnd_invite_message, dndMissedCalledNumber));
+						}
+						context.startActivity(intent);
+					}
+				}, index, index + content.length(),
+						Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+			}
 			holder.messageTextView.setText(spannable);
 			holder.messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		}
