@@ -58,7 +58,6 @@ import android.widget.EditText;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
@@ -544,7 +543,7 @@ public class Utils
 		JSONObject data = new JSONObject();
 		
 		try {
-			object.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
+			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			data.put(HikeConstants.LogEvent.TAG, "cbs");
 			data.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
 			data.put(HikeConstants.LogEvent.OS, os);
@@ -581,7 +580,7 @@ public class Utils
 			editor.commit();
 			data.put(HikeConstants.LogEvent.TAG, "mob");
 			
-			obj.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
+			obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 			obj.put(HikeConstants.DATA, data);
 		} 
 		catch (JSONException e) 

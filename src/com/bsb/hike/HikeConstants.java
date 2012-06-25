@@ -154,4 +154,24 @@ public class HikeConstants
 		public static final String INVITE_OVERLAY_BUTTON = "chatInviteOverlayBtn";
 		public static final String INVITE_OVERLAY_DISMISS = "chatInviteOverlayDismiss";
 	}
+
+	public static final class MqttMessageTypes
+	{
+		public static final String MESSAGE_READ = "mr";
+		public static final String MESSAGE = "m";
+		public static final String SMS_CREDITS = "sc";
+		public static final String DELIVERY_REPORT = "dr";
+		public static final String USER_JOINED = "uj";
+		public static final String USER_LEFT = "ul";
+		public static final String START_TYPING = "st";
+		public static final String END_TYPING = "et";
+		public static final String INVITE = "i";
+		public static final String ICON = "ic";
+		public static final String INVITE_INFO = "ii";
+		public static final String GROUP_CHAT_JOIN = "gcj";
+		public static final String GROUP_CHAT_LEAVE = "gcl";
+		public static final String GROUP_CHAT_END = "gce";
+		public static final String GROUP_CHAT_NAME = "gcn";
+		public static final String ANALYTICS_EVENT = "le";
+	}
 }

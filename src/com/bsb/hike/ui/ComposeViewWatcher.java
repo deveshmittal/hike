@@ -8,10 +8,10 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.SmileyParser;
 
@@ -87,7 +87,7 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 			mTextLastChanged = lastChanged;
 
 			// fire an event
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(NetworkManager.START_TYPING));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(HikeConstants.MqttMessageTypes.START_TYPING));
 
 			// create a timer to clear the event
 			mUIThreadHandler.removeCallbacks(this); 
@@ -115,7 +115,7 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 		if (current - mTextLastChanged >= 5 * 1000)
 		{
 			/* text hasn't changed in 10 seconds, send an event */
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(NetworkManager.END_TYPING));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(HikeConstants.MqttMessageTypes.END_TYPING));
 			mTextLastChanged = 0;
 		}
 		else

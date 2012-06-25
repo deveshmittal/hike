@@ -3,7 +3,6 @@ package com.bsb.hike;
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -81,8 +80,6 @@ public class HikeMessengerApp extends Application
 
 	private static Messenger mMessenger;
 
-	private NetworkManager mNetworkManager;
-
 	private Messenger mService;
 
 	private HikeServiceConnection mServiceConnection;
@@ -97,17 +94,11 @@ public class HikeMessengerApp extends Application
 			Log.d("HikeMessengerApp", "In handleMessage " + msg.what);
 			switch (msg.what)
 			{
-				case HikeService.MSG_APP_PUBLISH:
-					Log.d("HikeMessengerApp", "received message " );
-					Bundle bundle = msg.getData();
-					String message = bundle.getString("msg");
-					Log.d("HikeMessengerApp", "received message " + message);
-					mPubSubInstance.publish(HikePubSub.WS_RECEIVED, message);
-					break;
 				case HikeService.MSG_APP_MESSAGE_STATUS:
 					boolean success = msg.arg1 != 0;
 					Long msgId = (Long) msg.obj;
 					Log.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
+					// TODO handle this where we are saving all the mqtt messages
 					String event = success ? HikePubSub.SERVER_RECEIVED_MSG : HikePubSub.MESSAGE_FAILED;
 					mPubSubInstance.publish(event, msgId);
 					break;
@@ -185,9 +176,6 @@ public class HikeMessengerApp extends Application
 		IconCacheManager.init(this);
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
-
-		/* add the generic websocket listener. This will turn strings into objects and re-broadcast them */
-		mNetworkManager = NetworkManager.getInstance(getApplicationContext());
 
 		/* add a handler to handle toasts. The object initializes itself it it's constructor */
 		new ToastListener(getApplicationContext());

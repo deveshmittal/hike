@@ -39,7 +39,6 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
@@ -634,7 +633,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 				convs[i] = mAdapter.getItem(i);
 				if ((convs[i] instanceof GroupConversation)) 
 				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convs[i].serialize(NetworkManager.GROUP_CHAT_LEAVE));
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convs[i].serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 				}
 			}
 			DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
@@ -688,7 +687,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private void leaveGroup(Conversation conv)
 	{
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(NetworkManager.GROUP_CHAT_LEAVE));
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
 	}

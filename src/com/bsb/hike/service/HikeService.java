@@ -120,34 +120,6 @@ public class HikeService extends Service
 		}
 	}
 
-	public boolean sendToApp(String message)
-	{
-		if (mApp == null)
-		{
-			Log.d("HikeService", "no app connected for message " + message);
-			return false;
-		}
-
-		try
-		{
-			Message msg = Message.obtain();
-			msg.what = MSG_APP_PUBLISH;
-			Bundle bundle = new Bundle();
-			bundle.putString("msg", message);
-			msg.setData(bundle);
-			mApp.send(msg);
-		}
-		catch (RemoteException e)
-		{
-			// client is dead :(
-			mApp = null;
-			mMqttManager.unsubscribeFromUIEvents();
-			Log.e("HikeService", "Can't send message to the application");
-			return false;
-		}
-		return true;
-	}
-
 	private Messenger mMessenger;
 
 	/************************************************************************/

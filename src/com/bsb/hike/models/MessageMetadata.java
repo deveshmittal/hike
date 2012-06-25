@@ -3,7 +3,6 @@ package com.bsb.hike.models;
 import org.json.JSONObject;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 
 public class MessageMetadata

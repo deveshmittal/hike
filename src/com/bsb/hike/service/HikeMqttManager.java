@@ -20,14 +20,10 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.db.MqttPersistenceException;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.mqtt.client.Buffer;
 import com.bsb.hike.mqtt.client.Callback;
@@ -230,7 +226,7 @@ public class HikeMqttManager implements Listener
 		persistence = new HikeMqttPersistence(hikeService);
 		mConnectTimeoutHandler = new ConnectTimeoutHandler();
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
-		this.mqttMessageSaver = new MqttMessageSaver(mHikeService);
+		this.mqttMessageSaver = MqttMessageSaver.getInstance(mHikeService);
 	}
 
 	public HikePacket getPacketIfUnsent(int mqttId)
@@ -655,19 +651,10 @@ public class HikeMqttManager implements Listener
 
 			Log.d("HikeMqttManager", "onPublish called " + messageBody);
 			JSONObject jsonObj = new JSONObject(messageBody);
-			String type = jsonObj.getString(HikeConstants.TYPE);
 
-			/* handle icons/credit/user join/leave here so we don't risk losing them when the app is not open.
+			/* handle saving of messages here so we don't risk losing them when the app is not open.
 			 */
 			mqttMessageSaver.saveMqttMessage(jsonObj);
-
-			/*
-			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
-			 */			
-			if (this.mHikeService.sendToApp(messageBody))
-			{
-				return;
-			}
 
 			/* don't bother saving messages for the UI topic */
 			if ((topic != null) &&

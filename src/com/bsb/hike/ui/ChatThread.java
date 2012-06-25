@@ -70,7 +70,6 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
@@ -1095,7 +1094,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put(HikeConstants.TYPE, NetworkManager.MESSAGE_READ);
+					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
 					object.put(HikeConstants.TO, mConversation.getMsisdn());
 					object.put(HikeConstants.DATA, ids);
 				}
@@ -1726,13 +1725,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 			try 
 			{
-				sendMessage(new ConvMessage(groupConversation.serialize(NetworkManager.GROUP_CHAT_JOIN), groupConversation, ChatThread.this, true));
+				sendMessage(new ConvMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN), groupConversation, ChatThread.this, true));
 			}
 			catch (JSONException e) 
 			{
 				e.printStackTrace();
 			}
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(NetworkManager.GROUP_CHAT_JOIN));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN));
 			createConversation();
 			mComposeViewWatcher.init();
 			mComposeView.requestFocus();

@@ -41,7 +41,7 @@ import org.json.JSONObject;
 import android.accounts.NetworkErrorException;
 import android.util.Log;
 
-import com.bsb.hike.NetworkManager;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
@@ -267,7 +267,7 @@ public class AccountUtils
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
 		String uid = obj.optString("uid");
-		int smsCredits = obj.optInt(NetworkManager.SMS_CREDITS);
+		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
 
 		Log.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
 		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits);
