@@ -204,6 +204,7 @@ public class MqttMessageSaver {
 			
 			ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
 			convDb.addConversationMessages(convMessage);
+			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

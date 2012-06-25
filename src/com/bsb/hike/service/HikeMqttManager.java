@@ -40,7 +40,6 @@ import com.bsb.hike.mqtt.msg.ConnAckMessage.ConnectionStatus;
 import com.bsb.hike.mqtt.msg.QoS;
 import com.bsb.hike.pubsub.Topic;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.HikeNotification;
 
 /**
  * @author vr
@@ -199,8 +198,6 @@ public class HikeMqttManager implements Listener
 
 	private String password;
 
-	private HikeNotification toaster;
-
 	private HikeConversationsDatabase convDb;
 
 	private Map<Integer, HikePacket> mqttIdToPacket;
@@ -226,7 +223,6 @@ public class HikeMqttManager implements Listener
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
-		this.toaster = new HikeNotification(hikeService);
 		this.convDb = new HikeConversationsDatabase(hikeService);
 		this.userDb = new HikeUserDatabase(hikeService);
 		mqttIdToPacket = Collections.synchronizedMap(new HashMap<Integer, HikePacket>());
@@ -680,38 +676,6 @@ public class HikeMqttManager implements Listener
 				return;
 			}			
 
-			/*
-			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
-			 */
-			if (NetworkManager.MESSAGE.equals(type))
-			{
-				try
-				{
-					ConvMessage convMessage = new ConvMessage(jsonObj);
-					ContactInfo contactInfo;
-					if (convMessage.isGroupChat())
-					{
-						contactInfo = new ContactInfo(convMessage.getMsisdn(), convMessage.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), convMessage.getMsisdn());
-					}
-					else
-					{
-						contactInfo = userDb.getContactInfoFromMSISDN(convMessage.getMsisdn());
-					}
-
-					toaster.notify(contactInfo, convMessage);
-				}
-				catch (JSONException e)
-				{
-					Log.e("JSON", "Invalid JSON", e);
-				}
-			}
-			else if (NetworkManager.GROUP_CHAT_JOIN.equals(type))
-			{
-				String groupId = jsonObj.getString(HikeConstants.TO);
-				GroupConversation groupConversation = (GroupConversation) convDb.getConversation(groupId, 0);
-				ConvMessage convMessage = new ConvMessage(jsonObj, groupConversation, this.mHikeService, false);
-				toaster.notify(new ContactInfo(groupId, groupId, convDb.getGroupName(groupId), groupId), convMessage);
-			}
 			// receiving this message will have kept the connection alive for us, so
 			// we take advantage of this to postpone the next scheduled ping
 			this.mHikeService.scheduleNextPing();
