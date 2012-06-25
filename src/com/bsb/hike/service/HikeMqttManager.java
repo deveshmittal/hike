@@ -214,7 +214,7 @@ public class HikeMqttManager implements Listener
 
 	private SharedPreferences settings;
 
-	private MqttMessageSaver mqttMessageSaver;
+	private MqttMessagesManager mqttMessageManager;
 
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
@@ -226,7 +226,7 @@ public class HikeMqttManager implements Listener
 		persistence = new HikeMqttPersistence(hikeService);
 		mConnectTimeoutHandler = new ConnectTimeoutHandler();
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
-		this.mqttMessageSaver = MqttMessageSaver.getInstance(mHikeService);
+		this.mqttMessageManager = MqttMessagesManager.getInstance(mHikeService);
 	}
 
 	public HikePacket getPacketIfUnsent(int mqttId)
@@ -279,7 +279,7 @@ public class HikeMqttManager implements Listener
 		this.persistence.close();
 		this.convDb.close();
 		this.userDb.close();
-		this.mqttMessageSaver.close();
+		this.mqttMessageManager.close();
 	}
 
 	/*
@@ -654,7 +654,7 @@ public class HikeMqttManager implements Listener
 
 			/* handle saving of messages here so we don't risk losing them when the app is not open.
 			 */
-			mqttMessageSaver.saveMqttMessage(jsonObj);
+			mqttMessageManager.saveMqttMessage(jsonObj);
 
 			/* don't bother saving messages for the UI topic */
 			if ((topic != null) &&

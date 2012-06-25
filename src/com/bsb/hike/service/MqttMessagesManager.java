@@ -31,7 +31,7 @@ import com.bsb.hike.utils.ContactUtils;
  *	This class should be a singleton, since only one instance should be used managing
  *	these messages
  */
-public class MqttMessageSaver {
+public class MqttMessagesManager {
 
 	private HikeConversationsDatabase convDb;
 
@@ -43,9 +43,9 @@ public class MqttMessageSaver {
 
 	private HikePubSub pubSub;
 
-	private static MqttMessageSaver instance;
+	private static MqttMessagesManager instance;
 
-	private MqttMessageSaver(Context context) 
+	private MqttMessagesManager(Context context) 
 	{
 		this.convDb = new HikeConversationsDatabase(context);
 		this.userDb = new HikeUserDatabase(context);
@@ -54,15 +54,15 @@ public class MqttMessageSaver {
 		this.pubSub = HikeMessengerApp.getPubSub();
 	}
 
-	public static MqttMessageSaver getInstance(Context context)
+	public static MqttMessagesManager getInstance(Context context)
 	{
 		if(instance == null)
 		{
-			synchronized (MqttMessageSaver.class) 
+			synchronized (MqttMessagesManager.class) 
 			{
 				if(instance == null)
 				{
-					instance = new MqttMessageSaver(context);
+					instance = new MqttMessagesManager(context);
 				}
 			}
 		}
