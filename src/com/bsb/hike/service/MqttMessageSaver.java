@@ -123,7 +123,14 @@ public class MqttMessageSaver {
 			{
 				try
 				{
+					Log.d(getClass().getSimpleName(), "Checking if message exists");
 					ConvMessage convMessage = new ConvMessage(jsonObj);
+					if (this.convDb.wasMessageReceived(convMessage)) // Check if message was already received by the receiver 
+					{
+						Log.d(getClass().getSimpleName(), "Message already exists");
+						return;
+					}
+
 					convDb.addConversationMessages(convMessage);
 					Log.d(getClass().getSimpleName(),"Receiver received Message : "
 							+ convMessage.getMessage() + "		;	Receiver Msg ID : "

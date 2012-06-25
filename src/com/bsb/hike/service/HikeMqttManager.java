@@ -661,19 +661,6 @@ public class HikeMqttManager implements Listener
 			JSONObject jsonObj = new JSONObject(messageBody);
 			String type = jsonObj.getString(HikeConstants.TYPE);
 
-			/*
-			 * Check if message was already received by the receiver
-			 */
-			if (NetworkManager.MESSAGE.equals(type))
-			{
-				Log.d(getClass().getSimpleName(), "Checking if message exists");
-				ConvMessage convMessage = new ConvMessage(jsonObj);
-				if (this.convDb.wasMessageReceived(convMessage)) 
-				{
-					Log.d(getClass().getSimpleName(), "Message already exists");
-					return;
-				}
-			}
 			/* handle icons/credit/user join/leave here so we don't risk losing them when the app is not open.
 			 */
 			mqttMessageSaver.saveMqttMessage(jsonObj);
