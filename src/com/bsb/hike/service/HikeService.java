@@ -1,6 +1,5 @@
 package com.bsb.hike.service;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import android.app.AlarmManager;
@@ -82,8 +81,6 @@ public class HikeService extends Service
 
 	protected Messenger mApp;
 
-	protected ArrayList<String> pendingMessages;
-
 	class IncomingHandler extends Handler
 	{
 		public IncomingHandler(Looper looper)
@@ -104,12 +101,6 @@ public class HikeService extends Service
 				handleStart();
 
 				mApp = msg.replyTo;
-				/* TODO what if the app crashes while we're sending the message? */
-				for (String m : pendingMessages)
-				{
-					sendToApp(m);
-				}
-				pendingMessages.clear();
 				broadcastServiceStatus(mMqttManager.getConnectionStatus());
 				break;
 			case MSG_APP_DISCONNECTED:
@@ -127,11 +118,6 @@ public class HikeService extends Service
 				mMqttManager.send(new HikePacket(message.getBytes(), msgId, System.currentTimeMillis()), msg.arg1);
 			}
 		}
-	}
-
-	public void storeMessage(String message)
-	{
-		pendingMessages.add(message);
 	}
 
 	public boolean sendToApp(String message)
@@ -224,7 +210,6 @@ public class HikeService extends Service
 		mMqttHandlerLooper = mqttHandlerThread.getLooper();
 		this.mHandler = new Handler(mMqttHandlerLooper);
 		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper));
-		pendingMessages = new ArrayList<String>();
 
 		// reset status variable to initial state
 		mMqttManager = new HikeMqttManager(this, this.mHandler);

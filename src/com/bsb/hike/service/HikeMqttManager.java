@@ -712,11 +712,6 @@ public class HikeMqttManager implements Listener
 				ConvMessage convMessage = new ConvMessage(jsonObj, groupConversation, this.mHikeService, false);
 				toaster.notify(new ContactInfo(groupId, groupId, convDb.getGroupName(groupId), groupId), convMessage);
 			}
-			else
-			{
-				/* just save it */
-				this.mHikeService.storeMessage(messageBody);
-			}
 			// receiving this message will have kept the connection alive for us, so
 			// we take advantage of this to postpone the next scheduled ping
 			this.mHikeService.scheduleNextPing();
