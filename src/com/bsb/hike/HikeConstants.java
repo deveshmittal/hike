@@ -66,6 +66,9 @@ public class HikeConstants
 	// More explanation required?
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 4;
 
+	public static int NUM_SMS_PER_FRIEND = 10;
+	public static int INITIAL_NUM_SMS = 100;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";

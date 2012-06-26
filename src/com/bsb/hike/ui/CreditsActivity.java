@@ -110,7 +110,7 @@ public class CreditsActivity extends Activity implements Listener
 			int smsNo;
 			if(numHike < 2)
 			{
-				smsNo = 100 + (i*20);
+				smsNo = INITIAL_NUM_SMS + (i * NUM_SMS_PER_FRIEND);
 				friendNum.setText(i + "");
 				if(i == numHike)
 				{
@@ -121,7 +121,7 @@ public class CreditsActivity extends Activity implements Listener
 			else
 			{
 				int numToShow = ((numHike + i) - 1);
-				smsNo = 100 + (numToShow * 20);
+				smsNo = INITIAL_NUM_SMS + (numToShow * NUM_SMS_PER_FRIEND);
 				friendNum.setText(numToShow + "");
 				if(i == 1)
 				{
