@@ -107,28 +107,15 @@ public class CreditsActivity extends Activity implements Listener
 			TextView friendNum = (TextView) v.findViewById(R.id.friends_no);
 			TextView smsNum = (TextView) v.findViewById(R.id.sms_no);
 
-			int smsNo;
-			if(numHike < 2)
+			int numToShow = numHike < 2 ? i : ((numHike + i) - 1);
+
+			if(i == ((numHike < 2) ? numHike : 1))
 			{
-				smsNo = INITIAL_NUM_SMS + (i * NUM_SMS_PER_FRIEND);
-				friendNum.setText(i + "");
-				if(i == numHike)
-				{
-					v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
-				}
-				
+				v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
 			}
-			else
-			{
-				int numToShow = ((numHike + i) - 1);
-				smsNo = INITIAL_NUM_SMS + (numToShow * NUM_SMS_PER_FRIEND);
-				friendNum.setText(numToShow + "");
-				if(i == 1)
-				{
-					v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
-				}
-				smsNum.setText(smsNo+"");
-			}
+
+			int smsNo = HikeConstants.INITIAL_NUM_SMS + (numToShow * HikeConstants.NUM_SMS_PER_FRIEND);
+			friendNum.setText(numToShow + "");
 			smsNum.setText(smsNo+"");
 			creditItemContainer.addView(v);
 		}
