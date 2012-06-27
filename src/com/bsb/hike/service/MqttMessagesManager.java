@@ -120,6 +120,7 @@ public class MqttMessagesManager {
 			editor.putInt(HikeMessengerApp.INVITED, invited);
 			editor.putInt(HikeMessengerApp.INVITED_JOINED, invited_joined);
 			editor.commit();
+			this.pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN.equals(type)) //Group chat join
 		{

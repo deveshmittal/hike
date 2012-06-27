@@ -103,6 +103,8 @@ public class HikePubSub implements Runnable
 
 	public static final String PARTICIPANT_LEFT_GROUP = "participantLeftGroup";
 
+	public static final String INVITEE_NUM_CHANGED = "inviteeNoChanged";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
