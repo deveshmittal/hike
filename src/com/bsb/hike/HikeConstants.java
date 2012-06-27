@@ -22,6 +22,8 @@ public class HikeConstants
 	public static final String ANALYTICS_EVENT = "ae";
 	public static final String ALL_INVITEE = "ai";
 	public static final String ALL_INVITEE_JOINED = "aij";
+	public static final String ALL_INVITEE_2 = "all_invitee";
+	public static final String ALL_INVITEE_JOINED_2 = "all_invitee_joined";
 	public static final String NAME = "name";
 	public static final String MSISDN = "msisdn";
 	public static final String NEW_USER = "nu";

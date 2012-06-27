@@ -211,12 +211,18 @@ public class AccountUtils
 
 		public int smsCredits;
 
-		public AccountInfo(String token, String msisdn, String uid, int smsCredits)
+		public int all_invitee;
+
+		public int all_invitee_joined;
+
+		public AccountInfo(String token, String msisdn, String uid, int smsCredits, int all_invitee, int all_invitee_joined)
 		{
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
 			this.smsCredits = smsCredits;
+			this.all_invitee = all_invitee;
+			this.all_invitee_joined = all_invitee_joined;
 		}
 	}
 
@@ -260,17 +266,19 @@ public class AccountUtils
 		if("fail".equals(obj.optString("stat")))
 		{
 			if(pin != null)
-				return new AccountUtils.AccountInfo(null, null, null, -1);
+				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
 			/* represents normal account creation , when user is on wifi and account creation failed */
-			return new AccountUtils.AccountInfo(null, null, null, -1); 
+			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
 		}
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
 		String uid = obj.optString("uid");
 		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
+		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
+		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
 
 		Log.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
-		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits);
+		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits, all_invitee, all_invitee_joined);
 	}
 
 	public static String validateNumber(String number)
@@ -525,5 +533,10 @@ public class AccountUtils
 		{
 			Log.wtf("AccountUtils", "Unable to encode name");
 		}
+	}
+
+	public static String getServerUrl()
+	{
+		return BASE;
 	}
 }
