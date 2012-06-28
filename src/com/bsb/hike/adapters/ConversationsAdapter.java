@@ -65,18 +65,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
 
 			MessageMetadata metadata = message.getMetadata();
-			final String dndMissedCalledNumber = metadata != null ? metadata.getDNDMissedCallNumber() : null;
-			final boolean newUser = metadata != null ? metadata.getNewUser() : false;
 
 			CharSequence markedUp;
-			if (!TextUtils.isEmpty(dndMissedCalledNumber) || metadata != null)
+			if (metadata != null)
 			{
-				markedUp = context.getString(
-						!TextUtils.isEmpty(dndMissedCalledNumber) ? 
-								R.string.dnd_message : !newUser ? 
-										R.string.friend_joined_hike_no_creds : R.string.friend_joined_hike_with_creds, 
-										message.getConversation().getLabel(), 
-										dndMissedCalledNumber);
+				markedUp = metadata.getMessage(context, message, false);
 			}
 			else
 			{

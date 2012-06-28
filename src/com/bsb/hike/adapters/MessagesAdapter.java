@@ -7,14 +7,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
-import android.net.Uri;
 import android.text.Spannable;
-import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,7 +32,6 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -254,39 +248,9 @@ public class MessagesAdapter extends BaseAdapter
 			
 
 		MessageMetadata metadata = convMessage.getMetadata();
-		final String dndMissedCalledNumber = metadata != null ? metadata.getDNDMissedCallNumber() : null;
-		final boolean newUser = metadata != null ? metadata.getNewUser() : false;
-
-		if (!TextUtils.isEmpty(dndMissedCalledNumber) || metadata != null)
+		if (metadata != null)
 		{
-			String content = "tap here";
-			String message = context.getString(
-					!TextUtils.isEmpty(dndMissedCalledNumber) ? 
-							R.string.dnd_message : !newUser ? 
-									R.string.friend_joined_hike_no_creds : R.string.friend_joined_hike_with_creds, 
-									convMessage.getConversation().getLabel(), 
-									dndMissedCalledNumber);
-			Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
-			int index = message.indexOf(content);
-			if (index != -1) 
-			{
-				spannable.setSpan(new ClickableSpan() 
-				{
-					@Override
-					public void onClick(View blah) 
-					{
-						Intent intent = !TextUtils.isEmpty(dndMissedCalledNumber) ? new Intent(Intent.ACTION_VIEW) : new Intent(context, CreditsActivity.class);
-						if (!TextUtils.isEmpty(dndMissedCalledNumber)) 
-						{
-							intent = new Intent(Intent.ACTION_VIEW);
-							intent.setData(Uri.parse("sms:" + convMessage.getMsisdn()));
-							intent.putExtra("sms_body", context.getString(R.string.dnd_invite_message, dndMissedCalledNumber));
-						}
-						context.startActivity(intent);
-					}
-				}, index, index + content.length(),
-						Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-			}
+			Spannable spannable = metadata.getMessage(context, convMessage, true);
 			holder.messageTextView.setText(spannable);
 			holder.messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		}
