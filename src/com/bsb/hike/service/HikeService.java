@@ -30,9 +30,11 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Utils;
 
 public class HikeService extends Service
 {
@@ -127,6 +129,9 @@ public class HikeService extends Service
 
 	// constant used internally to schedule the next ping event
 	public static final String MQTT_PING_ACTION = "com.bsb.hike.PING";
+
+	// constant used internally to send user stats
+	public static final String MQTT_USER_STATS_SEND_ACTION = "com.bsb.hike.USER_STATS";
 	
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
@@ -145,6 +150,9 @@ public class HikeService extends Service
 
 	// receiver that wakes the Service up when it's time to ping the server
 	private PingSender pingSender;
+
+	// receiver that sends the user stats once every 24 hours
+	private UserStatsSender userStatsSender;
 
 	private HikeMqttManager mMqttManager;
 	private String mToken;
@@ -209,6 +217,12 @@ public class HikeService extends Service
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
 
+		if(userStatsSender == null)
+		{
+			userStatsSender = new UserStatsSender();
+			registerReceiver(userStatsSender, new IntentFilter(MQTT_USER_STATS_SEND_ACTION));
+			scheduleNextUserStatsSending();
+		}
 		/* register with the Contact list to get an update whenever the phone book changes.
 		 * Use the application thread for the intent receiver, the IntentReceiver will take
 		 * care of running the event on a different thread */
@@ -342,6 +356,12 @@ public class HikeService extends Service
 		if (mContactHandlerLooper != null)
 		{
 			mContactHandlerLooper.quit();
+		}
+
+		if(userStatsSender != null)
+		{
+			unregisterReceiver(userStatsSender);
+			userStatsSender = null;
 		}
 	}
 
@@ -553,7 +573,36 @@ public class HikeService extends Service
 
 		}
 	}
-	
+
+	/*
+	 *	Used for sending the user stats to the server once every 24 hours. 
+	 */
+	private class UserStatsSender extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive(Context context, Intent intent) 
+		{
+			sendUserStats();
+		}
+	}
+
+	private void sendUserStats()
+	{
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceStats(getApplicationContext()));
+		scheduleNextUserStatsSending();
+	}
+
+	private void scheduleNextUserStatsSending()
+	{
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(MQTT_USER_STATS_SEND_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+
+		Calendar wakeUpTime = Calendar.getInstance();
+		wakeUpTime.add(Calendar.HOUR, 24);
+
+		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
+	}
+
 	public boolean isUserOnline()
 	{
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);

@@ -20,6 +20,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -163,10 +164,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		setContentView(R.layout.main);
 
 		Utils.setDensityMultiplier(MessagesList.this);
-		//TODO Remove this from here. Analytics - For testing purposes only
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(MessagesList.this));
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceStats(MessagesList.this));
-		//Analytics - For testing purposes only
+
+		// Checking if the app was started for the first time. If true we send the device details to our server. 
+		if(getIntent().getBooleanExtra(HikeConstants.Extras.APP_STARTED_FIRST_TIME, false))
+		{
+			sendDeviceDetails();
+		}
 
 		mConversationsView = (ListView) findViewById(R.id.conversations);
 
@@ -257,6 +260,19 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
+	}
+
+	private void sendDeviceDetails() 
+	{
+		// We're adding this delay to ensure that the service is alive before sending the message
+		(new Handler()).postDelayed(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(MessagesList.this));
+			}
+		}, 10 * 1000);
 	}
 
 	@Override

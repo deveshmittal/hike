@@ -145,6 +145,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 				public void run() 
 				{
 					Intent intent = new Intent(SignupActivity.this, MessagesList.class);
+					intent.putExtra(HikeConstants.Extras.APP_STARTED_FIRST_TIME, true);
 					startActivity(intent);
 					finish();
 				}

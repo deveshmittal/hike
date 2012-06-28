@@ -111,6 +111,7 @@ public class HikeConstants
 		public static final String EMOTICON_SHOWING = "emoticonShowing";
 		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
 		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
+		public static final String APP_STARTED_FIRST_TIME = "appStartedFirstTime";
 	}
 
 	public static final class LogEvent
