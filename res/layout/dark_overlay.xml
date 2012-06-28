@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/overlay_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent_black"
+    android:visibility="gone" >
+
+    <RelativeLayout
+        android:id="@+id/info_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="onOverlayButtonClick"
+        android:visibility="visible" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/overlay_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="32dp"
+            android:layout_marginRight="32dp"
+            android:bufferType="spannable"
+            android:gravity="center"
+            android:text="@string/block_overlay_message"
+            android:textColor="@color/white"
+            android:textSize="18dp" />
+
+        <ImageView
+            android:id="@+id/overlay_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/overlay_message"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="25dp"
+            android:src="@drawable/ic_no" />
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/overlay_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/overlay_message"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/rounded_button"
+            android:onClick="onOverlayButtonClick"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:shadowColor="#000000"
+            android:shadowDx="-0.5"
+            android:shadowDy="-0.5"
+            android:shadowRadius="1"
+            android:text="@string/unblock_title"
+            android:textColor="@color/white"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/update_progress_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="3dp"
+            android:text="Updating..."
+            android:textColor="@color/white"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/update_progress"
+            android:layout_width="150dp"
+            android:layout_height="18dp"
+            android:background="@drawable/bg_update_progress"
+            android:indeterminateOnly="false"
+            android:max="100"
+            android:minWidth="10dp"
+            android:paddingBottom="3dp"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:paddingTop="1dp"
+            android:progress="20"
+            android:progressDrawable="@drawable/update_progress_drawable" />
+    </LinearLayout>
+
+</RelativeLayout>

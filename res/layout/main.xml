@@ -69,5 +69,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:background="@drawable/newmessage" />
+    
+    <include layout="@layout/dark_overlay"/>
 
 </RelativeLayout>
