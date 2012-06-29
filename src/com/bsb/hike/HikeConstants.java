@@ -135,7 +135,6 @@ public class HikeConstants
 		public static final String DELETE_CONVERSATION = "homeDeleteConversation";
 		public static final String COMPOSE_BUTTON = "homeComposeBtn";
 		public static final String ADD_SHORTCUT = "homeAddShortcut";
-		public static final String HOME_INVITE_TOP_BUTTON = "homeInviteTopBtn";
 		public static final String HOME_TOOL_TIP_CLOSED = "homeInviteToolTipClosed";
 		public static final String HOME_TOOL_TIP_CLICKED = "homeInviteToolTipClicked";
 
@@ -144,7 +143,6 @@ public class HikeConstants
 		public static final String CREDITS_SCREEN = "profileCreditScreen";
 		public static final String NOTIFICATION_SCREEN = "profileNotificationScreen";
 		public static final String PRIVACY_SCREEN = "profilePrivacyScreen";
-		public static final String BLOCK_SCREEN = "profileBlockScreen";
 		public static final String HELP_SCREEN = "profileHelpScreen";
 
 		// Invite screen events
@@ -162,6 +160,9 @@ public class HikeConstants
 		public static final String I_BUTTON = "chatIBtn";
 		public static final String INVITE_OVERLAY_BUTTON = "chatInviteOverlayBtn";
 		public static final String INVITE_OVERLAY_DISMISS = "chatInviteOverlayDismiss";
+
+		// Credits screen events
+		public static final String INVITE_BUTTON_CLICKED = "inviteButtonClicked";
 	}
 
 	public static final class MqttMessageTypes
