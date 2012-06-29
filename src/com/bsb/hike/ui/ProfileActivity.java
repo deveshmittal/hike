@@ -95,6 +95,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private ViewGroup participantNameContainer;
 	private ProfileItem[] items;
 	private ViewGroup credits;
+	private int lastSavedGender;
 
 	private static enum ProfileType
 	{
@@ -388,7 +389,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		nameTxt = settings.getString(HikeMessengerApp.NAME, "Set a name!");
 		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		emailTxt = settings.getString(HikeConstants.Extras.EMAIL, "");
-		mActivityState.genderType = mActivityState.genderType == 0 ? settings.getInt(HikeConstants.Extras.GENDER, 0) : mActivityState.genderType;
+		lastSavedGender = settings.getInt(HikeConstants.Extras.GENDER, 0);
+		mActivityState.genderType = mActivityState.genderType == 0 ? lastSavedGender : mActivityState.genderType;
 	}
 
 	public void onBackPressed()
@@ -534,20 +536,55 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			requests.add(request);
 		}
 
-		if (this.profileType == ProfileType.USER_PROFILE_EDIT) {
-			SharedPreferences prefs = getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-			Editor editor = prefs.edit();
-			if (Utils.isValidEmail(mEmailEdit.getText()))
+		if (this.profileType == ProfileType.USER_PROFILE_EDIT && 
+				((!emailTxt.equals(mEmailEdit.getText().toString())) || 
+						((mActivityState.genderType != lastSavedGender) && mActivityState.genderType != 0)))
+		{
+			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/profile", new HikeHttpRequest.HikeHttpCallback()
 			{
-				editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
-						.getText().toString());
-			}
+				public void onFailure()
+				{
+					if (isBackPressed) {
+						finishEditing();
+					}
+				}
 
-			editor.putInt(HikeConstants.Extras.GENDER,
-					currentSelection == null ? 0
-							: currentSelection.getId() == R.id.guy ? 1 : 2);
-			editor.commit();
+				public void onSuccess()
+				{
+					SharedPreferences prefs = getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+					Editor editor = prefs.edit();
+					if (Utils.isValidEmail(mEmailEdit.getText()))
+					{
+						editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
+								.getText().toString());
+					}
+					editor.putInt(HikeConstants.Extras.GENDER, currentSelection.getId() == R.id.guy ? 1 : 2);
+					editor.commit();
+					if (isBackPressed) {
+						finishEditing();
+					}
+				}
+			});
+			JSONObject obj = new JSONObject();
+			try
+			{
+				if(Utils.isValidEmail(mEmailEdit.getText()) && !emailTxt.equals(mEmailEdit.getText().toString()))
+				{
+					obj.put(HikeConstants.EMAIL, mEmailEdit.getText());
+				}
+				if(currentSelection != null && ((mActivityState.genderType != lastSavedGender) && mActivityState.genderType != 0))
+				{
+					obj.put(HikeConstants.GENDER, mActivityState.genderType == 1 ? "m" : "f");
+				}
+				Log.d(getClass().getSimpleName(), "JSON to be sent is: " + obj.toString());
+				request.setJSONData(obj);
+			}
+			catch(JSONException e)
+			{
+				Log.e("ProfileActivity", "Could not set email or gender", e);
+			}
+			requests.add(request);
 		}
 
 		if (!requests.isEmpty())
