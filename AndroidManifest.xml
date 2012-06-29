@@ -79,7 +79,7 @@
 
         </activity>
         <activity
-			android:theme="@android:style/Theme.NoTitleBar"
+			android:theme="@style/NoTitleBar"
             android:name=".ui.HikePreferences"
             android:label="@string/preferences">
             
@@ -104,7 +104,7 @@
             android:theme="@style/NoTitleBar"
             android:name=".cropimage.CropImage"/>
         <activity android:name=".ui.CreditsActivity"
-            android:theme="@android:style/Theme.NoTitleBar" >
+            android:theme="@style/NoTitleBar" >
         </activity>
         <activity android:name=".ui.TermsAndConditionsActivity"
             android:theme="@style/NoTitleBar" >
