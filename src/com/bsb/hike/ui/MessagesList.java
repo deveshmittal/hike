@@ -24,17 +24,23 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -195,8 +201,11 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		if (!accountPrefs.getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false) 
 				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
 		{
+			((LinearLayout)findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
 			mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
 			mInviteToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
+
+			((MarginLayoutParams)mInviteToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
 
 			TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
 			text.setText(getString(R.string.earn_200_sms_tap_here));
