@@ -253,8 +253,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mBottomView.setVisibility(View.GONE);
 
 		mDbhelper = new HikeUserDatabase(this);
-		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
-		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike };
+		String[] columns = new String[] { "name", "msisdn", "onhike", "msisdn", "_id" };
+		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike, R.id.user_img };
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
 		adapter.setViewBinder(new DropDownViewBinder());
 		adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter()
