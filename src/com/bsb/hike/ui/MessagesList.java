@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONObject;
+
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.DialogInterface;
@@ -279,7 +282,11 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			@Override
 			public void run() 
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(MessagesList.this));
+				JSONObject obj = Utils.getDeviceDetails(MessagesList.this);
+				if (obj != null) 
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(MessagesList.this));
+				}
 			}
 		}, 10 * 1000);
 	}

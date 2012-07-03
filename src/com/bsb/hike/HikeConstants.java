@@ -29,6 +29,7 @@ public class HikeConstants
 	public static final String NEW_USER = "nu";
 	public static final String EMAIL = "email";
 	public static final String GENDER = "gender";
+	public static final String APP_VERSION = "appversion";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
