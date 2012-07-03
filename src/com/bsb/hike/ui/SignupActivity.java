@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -29,10 +30,9 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
-import com.bsb.hike.utils.UpdateAppBaseActivity;
 import com.bsb.hike.view.MSISDNView;
 
-public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener
+public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener
 {
 
 	private SignupTask mTask;
