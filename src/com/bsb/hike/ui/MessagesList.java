@@ -82,9 +82,11 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	private Set<String> mConversationsAdded;
 
-	private View mInviteToolTip;
+	private View mToolTip;
 
 	private SharedPreferences accountPrefs;
+
+	private boolean isToolTipShowing;
 
 	@Override
 	protected void onPause()
@@ -173,6 +175,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		Utils.setDensityMultiplier(MessagesList.this);
 
+		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
+
 		// Checking if the app was started for the first time. If true we send the device details to our server. 
 		if(getIntent().getBooleanExtra(HikeConstants.Extras.APP_STARTED_FIRST_TIME, false))
 		{
@@ -204,22 +208,22 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
 		{
 			((LinearLayout)findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
-			mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
-			mInviteToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
+			mToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
+			mToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
 
-			((MarginLayoutParams)mInviteToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
+			((MarginLayoutParams)mToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
 
 			TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
 			text.setText(getString(R.string.earn_200_sms_tap_here));
 
-			if (savedInstanceState == null || !savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING)) 
+			if (!isToolTipShowing) 
 			{
 				Animation alphaIn = AnimationUtils.loadAnimation(
 						MessagesList.this, android.R.anim.fade_in);
 				alphaIn.setStartOffset(1000);
-				mInviteToolTip.setAnimation(alphaIn);
+				mToolTip.setAnimation(alphaIn);
 			}
-			mInviteToolTip.setVisibility(View.VISIBLE);
+			mToolTip.setVisibility(View.VISIBLE);
 		}
 
 		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
@@ -292,7 +296,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mInviteToolTip != null && mInviteToolTip.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mToolTip != null && mToolTip.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -683,17 +687,23 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		overridePendingTransition(R.anim.slide_in_right_noalpha, R.anim.slide_out_left_noalpha);
 	}
 
-	private void setToolTipDismissed()
+	private void hideToolTip()
 	{
-		if (mInviteToolTip.getVisibility() == View.VISIBLE) {
+		if (mToolTip.getVisibility() == View.VISIBLE) 
+		{
 			Animation alphaOut = AnimationUtils.loadAnimation(
 					MessagesList.this, android.R.anim.fade_out);
 			alphaOut.setDuration(200);
-			mInviteToolTip.setAnimation(alphaOut);
-			mInviteToolTip.setVisibility(View.INVISIBLE);
+			mToolTip.setAnimation(alphaOut);
+			mToolTip.setVisibility(View.INVISIBLE);
 		}
+	}
 
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+	private void setToolTipDismissed()
+	{
+		hideToolTip();
+
+		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, true);
 		editor.commit();
 	}
