@@ -686,4 +686,19 @@ public class Utils
 		editor.putInt(whichScreen, prefs.getInt(whichScreen, 0) + 1);
 		editor.commit();
 	}
+
+	public static boolean isUpdateRequired(String version, Context context)
+	{
+		try 
+		{
+			String appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0 ).versionName;
+			return convertVersionToInt(appVersion) < convertVersionToInt(version);
+		} 
+		catch (NameNotFoundException e) 
+		{
+			Log.e("Utils", "Invalid package", e);
+			return false;
+		}
+	}
+
 }

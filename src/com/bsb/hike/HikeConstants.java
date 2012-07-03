@@ -29,6 +29,8 @@ public class HikeConstants
 	public static final String NEW_USER = "nu";
 	public static final String EMAIL = "email";
 	public static final String GENDER = "gender";
+	public static final String VERSION = "v";
+	public static final String CRITICAL = "c";
 	public static final String APP_VERSION = "appversion";
 
 	public static final String SOUND_PREF = "soundPref";
@@ -64,7 +66,7 @@ public class HikeConstants
 	public static final String ADAPTER_NAME = "hikeadapter";
 	
 	/* constants for defining what to do after checking for updates*/
-	public static final int UPDATE_AVAILABLE = 2;
+	public static final int NORMAL_UPDATE = 2;
 	public static final int CRITICAL_UPDATE = 1;
 	public static final int NO_UPDATE = 0;
 	
@@ -184,5 +186,6 @@ public class HikeConstants
 		public static final String GROUP_CHAT_END = "gce";
 		public static final String GROUP_CHAT_NAME = "gcn";
 		public static final String ANALYTICS_EVENT = "le";
+		public static final String UPDATE_AVAILABLE = "ua";
 	}
 }
