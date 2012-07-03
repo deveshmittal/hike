@@ -117,6 +117,10 @@ public class HikeConstants
 		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
 		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
 		public static final String APP_STARTED_FIRST_TIME = "appStartedFirstTime";
+		public static final String LATEST_VERSION = "latestVersion";
+		public static final String SHOW_UPDATE_OVERLAY = "showUpdateOverlay";
+		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip"; 
+		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
 	}
 
 	public static final class LogEvent

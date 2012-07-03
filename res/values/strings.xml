@@ -75,4 +75,6 @@
 	<string name="string_to_be_formatted">additional 10 free SMS</string>
 	<string name="friend_joined_hike_no_creds">%1$s just joined hike because of you. Great job!</string>
 	<string name="friend_joined_hike_with_creds">%1$s just joined hike because of you. Great job! As promised, here are your additional 10 free SMS for bringing a friend. To see your total free SMS, tap here.</string>
+	<string name="update_available">An update is available. Tap to download now</string>
+	<string name="critical_update_available">Critical update available. Tap to download now</string>
 </resources>

@@ -43,8 +43,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -85,6 +85,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	private View mToolTip;
 
 	private SharedPreferences accountPrefs;
+
+	private View updateToolTipParent;
 
 	private boolean isToolTipShowing;
 
@@ -177,6 +179,9 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 
+		int updateTypeAvailable = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
+		updateApp(updateTypeAvailable);
+
 		// Checking if the app was started for the first time. If true we send the device details to our server. 
 		if(getIntent().getBooleanExtra(HikeConstants.Extras.APP_STARTED_FIRST_TIME, false))
 		{
@@ -203,7 +208,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		mConversationsView.setOnItemClickListener(this);
 
 		if (!accountPrefs.getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false) 
-				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
+				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN)
+				&& updateTypeAvailable == HikeConstants.NO_UPDATE)
 		{
 			((LinearLayout)findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
 			mToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
@@ -271,6 +277,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_LEFT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPDATE_AVAILABLE, this);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 	}
@@ -437,6 +444,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_LEFT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPDATE_AVAILABLE, this);
 	}
 
 	@Override
@@ -619,6 +627,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 			runOnUiThread(this);
 		}
+		else if (HikePubSub.UPDATE_AVAILABLE.equals(type))
+		{
+			updateApp((Integer) object);
+		}
 	}
 
 	ConvMessage findMessageById(long msgId)
@@ -708,6 +720,16 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	public void onToolTipClosed(View v)
 	{
+		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
+		{
+			Editor editor = accountPrefs.edit();
+			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP, false);
+			//Doing this so that we show this tip after the user has opened the home screen a few times.
+			editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+			editor.commit();
+			hideToolTip();
+			return;
+		}
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLOSED);
 		setToolTipDismissed();
 	}
@@ -720,6 +742,12 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	public void onToolTipClicked(View v)
 	{
+		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
+		{
+			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();	
+			hideToolTip();
+			return;
+		}
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLICKED);
 		onTitleIconClick(null);
 	}
@@ -729,5 +757,76 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
+	}
+
+	private void updateApp(int updateType)
+	{
+		if(updateType == HikeConstants.NO_UPDATE)
+		{
+			return;
+		}
+		if(updateType == HikeConstants.CRITICAL_UPDATE && 
+				accountPrefs.getBoolean(HikeConstants.Extras.SHOW_UPDATE_OVERLAY, true))
+		{
+			updateAppOverlay();
+		}
+		else if(updateType == HikeConstants.CRITICAL_UPDATE ||
+					accountPrefs.getBoolean(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP, true) || 
+						Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
+		{
+			showUpdateToolTip(updateType);
+		}
+	}
+
+	private void updateAppOverlay()
+	{
+		findViewById(R.id.overlay_layout).setVisibility(View.VISIBLE);
+		((TextView)findViewById(R.id.overlay_message)).setText("Update available!");
+		((ImageView)findViewById(R.id.overlay_image)).setImageResource(R.drawable.ic_update);
+		((Button)findViewById(R.id.overlay_button)).setText("Update now");
+	}
+
+	public void onOverlayButtonClick(View v)
+	{
+		if (v.getId() != R.id.info_layout) 
+		{
+			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Editor editor = accountPrefs.edit();
+			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_OVERLAY, false);
+			editor.commit();
+
+			findViewById(R.id.overlay_layout).setVisibility(View.GONE);
+			showUpdateToolTip(HikeConstants.CRITICAL_UPDATE);
+		}
+	}
+
+	private void showUpdateToolTip(int updateType)
+	{
+		updateToolTipParent = findViewById(R.id.update_tool_tip);
+		updateToolTipParent.setVisibility(View.VISIBLE);
+		((LinearLayout)updateToolTipParent.findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
+		mToolTip = updateToolTipParent.findViewById(R.id.credits_help_layout);
+		mToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
+
+		// To make the tool tip non closable if a critical update is available
+		mToolTip.findViewById(R.id.close).setVisibility(updateType == HikeConstants.NORMAL_UPDATE ? View.VISIBLE : View.GONE);
+
+		((MarginLayoutParams)mToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
+
+		TextView text = (TextView) mToolTip.findViewById(R.id.tool_tip);
+		((MarginLayoutParams)text.getLayoutParams()).setMargins((updateType == HikeConstants.NORMAL_UPDATE ? 0 : (int) (15*Utils.densityMultiplier)), 0, 0, 0);
+		text.setText(updateType == HikeConstants.NORMAL_UPDATE ? R.string.update_available : R.string.critical_update_available);
+
+		if (!isToolTipShowing) {
+			Animation alphaIn = AnimationUtils.loadAnimation(MessagesList.this,
+					android.R.anim.fade_in);
+			alphaIn.setStartOffset(1000);
+			mToolTip.setAnimation(alphaIn);
+		}
+		mToolTip.setVisibility(View.VISIBLE);
+
 	}
 }
