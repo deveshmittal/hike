@@ -1,5 +1,7 @@
 package com.bsb.hike.view;
 
+import com.bsb.hike.utils.Utils;
+
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
@@ -30,6 +32,19 @@ public class CustomFontButton extends Button {
 	@Override
 	public void setTypeface(Typeface tf, int style) {
 		if (!isInEditMode()) {
+			/*
+			 *  If we are dealing with LDPI phones, we use the default font,
+			 *  They have a rendering issue with the font that we're using
+			 */
+			if (Utils.densityMultiplier <= 0.75f) 
+			{
+				if (style == Typeface.ITALIC) 
+				{
+					style = Typeface.NORMAL;
+				}
+				super.setTypeface(tf, style);
+				return;
+			}
 			if (CustomTypeFace.customTypeFace == null) {
 				CustomTypeFace.customTypeFace = new CustomTypeFace(getContext(), fontName);
 			}
