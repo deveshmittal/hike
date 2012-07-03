@@ -33,6 +33,20 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(context));
 			}
 
+			/*
+			 *  Checking if the current version is the latest version. If it is we reset the preference which
+			 *  prompts the user to update the app.
+			 */
+			SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+			if(!Utils.isUpdateRequired(prefs.getString(HikeConstants.Extras.LATEST_VERSION, ""), context))
+			{
+				Editor editor = prefs.edit();
+				editor.remove(HikeConstants.Extras.UPDATE_AVAILABLE);
+				editor.remove(HikeConstants.Extras.SHOW_UPDATE_OVERLAY);
+				editor.remove(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP);
+				editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+				editor.commit();
+			}
 		}
 	}
 }
