@@ -240,6 +240,11 @@ public class ConvMessage
 		return this.metadata;
 	}
 
+	public void setMessage(String mMessage)
+	{
+		this.mMessage = mMessage;
+	}
+
 	public String getMessage()
 	{
 		return mMessage;
