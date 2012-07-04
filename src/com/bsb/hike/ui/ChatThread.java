@@ -36,6 +36,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -63,6 +64,10 @@ import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TabHost;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.TabHost.TabContentFactory;
+import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -189,6 +194,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private ImageView titleIconView;
 
 	private Button titleBtn;
+
+	private TabHost tabHost;
 
 	@Override
 	protected void onPause()
@@ -435,6 +442,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
 			adapter.changeCursor(null);
+		}
+		if(tabHost != null)
+		{
+			tabHost.removeAllViews();
+			tabHost = null;
 		}
 	}
 
@@ -1842,6 +1854,35 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
+
+		if(tabHost == null)
+		{
+			tabHost = (TabHost) findViewById(android.R.id.tabhost);
+			tabHost.setup();
+			
+			TextView tabHead = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			
+			TabSpec ts1 = tabHost.newTabSpec("tab1");
+			tabHead.setText("Tab1");
+			ts1.setIndicator(tabHead);
+			ts1.setContent(new TabFactory());
+			tabHost.addTab(ts1);
+
+			TextView tabHead2 = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			TabSpec ts2 = tabHost.newTabSpec("tab2");
+			tabHead2.setText("Tab2");
+			ts2.setIndicator(tabHead2);
+			ts2.setContent(new TabFactory());
+			tabHost.addTab(ts2);
+
+			TextView tabHead3 = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			TabSpec ts3 = tabHost.newTabSpec("tab3");
+			tabHead3.setText("Tab3");
+			ts3.setIndicator(tabHead3);
+			ts3.setContent(new TabFactory());
+			tabHost.addTab(ts3);
+		}
+
 		if (emoticonAdapter == null) 
 		{
 			emoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView);
@@ -1861,13 +1902,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			emoticonLayout.setAnimation(slideUp);
 			emoticonLayout.setVisibility(View.VISIBLE);
 		}
-		setEmoticonArrows();
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() 
 		{
 			@Override
 			public void onPageSelected(int arg0) 
 			{
-				setEmoticonArrows();
+				tabHost.setCurrentTab(arg0);
 			}
 			
 			@Override
@@ -1876,12 +1916,28 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			@Override
 			public void onPageScrollStateChanged(int arg0) {}
 		});
+		
+		tabHost.setOnTabChangedListener(new OnTabChangeListener() 
+		{
+			@Override
+			public void onTabChanged(String tabId) 
+			{
+				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab(), true);
+			}
+		});
 	}
 	
-	private void setEmoticonArrows()
-	{
-		findViewById(R.id.emo_arrow_left).setVisibility((emoticonViewPager.getCurrentItem() > 0) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
-		findViewById(R.id.emo_arrow_right).setVisibility((emoticonViewPager.getCurrentItem() < emoticonViewPager.getChildCount() - 1) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
+	private class TabFactory implements TabContentFactory {
+
+		@Override
+		public View createTabContent(String tag) {
+			View v = new View(getApplicationContext());
+			v.setMinimumWidth(0);
+			v.setMinimumHeight(0);
+			return v;
+
+		}
+
 	}
 
 	private void groupChatDead()

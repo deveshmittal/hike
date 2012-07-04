@@ -107,38 +107,14 @@
             <RelativeLayout
                 android:id="@+id/emoticon_layout"
                 android:layout_width="match_parent"
-                android:layout_height="96dp"
+                android:layout_height="192dp"
                 android:layout_alignParentBottom="true"
                 android:background="@color/emoticon_page_bg"
                 android:visibility="invisible" >
 
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/emoticon_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp" />
-
-                <ImageView
-                    android:id="@+id/emo_arrow_left"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="10dp"
-                    android:src="@drawable/emoticon_page_arrow_left"
-                    android:visibility="invisible" />
-
-                <ImageView
-                    android:id="@+id/emo_arrow_right"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="10dp"
-                    android:src="@drawable/emoticon_page_arrow_right"
-                    android:visibility="invisible" />
+                <include layout="@layout/emoticon_layout" />
             </RelativeLayout>
+
         </RelativeLayout>
 
         <RelativeLayout

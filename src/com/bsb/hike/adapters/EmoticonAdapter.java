@@ -19,7 +19,8 @@ import com.bsb.hike.utils.SmileyParser;
 
 public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener{
 
-	private static final int EMOTICON_COUNT_PER_PAGE = 14;
+	private static final int EMOTICON_COUNT_PER_PAGE = SmileyParser.DEFAULT_SMILEY_RES_IDS.length;
+	private static final int EMOTICON_TAB_NUMBER = 3;
 
 	private LayoutInflater inflater;
 	private Context context;
@@ -38,7 +39,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 
 	@Override
 	public int getCount() {
-		return (int) (Math.ceil(SmileyParser.DEFAULT_SMILEY_RES_IDS.length/EMOTICON_COUNT_PER_PAGE)) + 1;
+		return EMOTICON_TAB_NUMBER;
 	}
 	
 	@Override
