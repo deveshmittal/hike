@@ -131,7 +131,8 @@ public class ToastListener implements Listener
 		}
 
 		/* don't show any connection message until we've connected once */
-		if (!connectedOnce)
+		// Not showing any connection statuses for now..
+		if (true)
 		{
 			return;
 		}
