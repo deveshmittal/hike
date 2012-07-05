@@ -301,48 +301,70 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			HikeUserDatabase huDb = new HikeUserDatabase(mCtx);
 			ContactInfo contactInfo = Utils.isGroupConversation(msisdn) ?  new ContactInfo(msisdn, msisdn, groupName, msisdn) : huDb.getContactInfoFromMSISDN(msisdn);
 			huDb.close();
-			InsertHelper ih = new InsertHelper(mDb, DBConstants.CONVERSATIONS_TABLE);
-			ih.prepareForInsert();
-			ih.bind(ih.getColumnIndex(DBConstants.MSISDN), msisdn);
-			if (contactInfo != null)
+			InsertHelper ih = null;
+			try 
 			{
-				ih.bind(ih.getColumnIndex(DBConstants.CONTACT_ID), contactInfo.getId());
-				onhike |= contactInfo.isOnhike();
-			}
+				ih = new InsertHelper(mDb, DBConstants.CONVERSATIONS_TABLE);
+				ih.prepareForInsert();
+				ih.bind(ih.getColumnIndex(DBConstants.MSISDN), msisdn);
+				if (contactInfo != null)
+				{
+					ih.bind(ih.getColumnIndex(DBConstants.CONTACT_ID), contactInfo.getId());
+					onhike |= contactInfo.isOnhike();
+				}
 
-			ih.bind(ih.getColumnIndex(DBConstants.ONHIKE), onhike);
+				ih.bind(ih.getColumnIndex(DBConstants.ONHIKE), onhike);
 
-			long id = ih.execute();
+				long id = ih.execute();
 
-			if (id >= 0)
+				if (id >= 0)
+				{
+					Conversation conv;
+					if (Utils.isGroupConversation(msisdn)) 
+					{
+						conv = new GroupConversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null, groupOwner, true);
+						Log.d(getClass().getSimpleName(), "Adding a new group conversation: " + msisdn);
+						InsertHelper groupInfoIH = null;
+						try 
+						{
+							groupInfoIH = new InsertHelper(mDb, DBConstants.GROUP_INFO_TABLE);
+							groupInfoIH.prepareForInsert();
+							groupInfoIH.bind(groupInfoIH.getColumnIndex(DBConstants.GROUP_ID), msisdn);
+							groupInfoIH.bind(groupInfoIH.getColumnIndex(DBConstants.GROUP_NAME), groupName);
+							groupInfoIH.bind(groupInfoIH.getColumnIndex(DBConstants.GROUP_OWNER), groupOwner);
+							groupInfoIH.bind(groupInfoIH.getColumnIndex(DBConstants.GROUP_ALIVE), 1);
+							groupInfoIH.execute();
+						} 
+						finally 
+						{
+							if (groupInfoIH != null) 
+							{
+								groupInfoIH.close();
+							}
+						}
+
+						Log.d(getClass().getSimpleName(), "Fetching participants...");
+						((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn));
+						Log.d(getClass().getSimpleName(), "Participants size: " + ((GroupConversation)conv).getGroupParticipantList().size());
+					}
+					else
+					{
+						conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null, onhike);
+					}
+					HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
+					return conv;
+				}
+				/* TODO does this happen? If so, what should we do? */
+				Log.wtf("Conversationadding", "Couldn't add conversation --- race condition?");
+				return null;
+			} 
+			finally 
 			{
-				Conversation conv;
-				if (Utils.isGroupConversation(msisdn)) 
+				if (ih != null) 
 				{
-					conv = new GroupConversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null, groupOwner, true);
-					Log.d(getClass().getSimpleName(), "Adding a new group conversation: " + msisdn);
-					InsertHelper groupInfoIH = new InsertHelper(mDb, DBConstants.GROUP_INFO_TABLE);
-					groupInfoIH.prepareForInsert();
-					groupInfoIH.bind(groupInfoIH.getColumnIndex(DBConstants.GROUP_ID), msisdn);
-					groupInfoIH.bind(groupInfoIH.getColumnIndex(DBConstants.GROUP_NAME), groupName);
-					groupInfoIH.bind(groupInfoIH.getColumnIndex(DBConstants.GROUP_OWNER), groupOwner);
-					groupInfoIH.bind(groupInfoIH.getColumnIndex(DBConstants.GROUP_ALIVE), 1);
-					groupInfoIH.execute();
-
-					Log.d(getClass().getSimpleName(), "Fetching participants...");
-					((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn));
-					Log.d(getClass().getSimpleName(), "Participants size: " + ((GroupConversation)conv).getGroupParticipantList().size());
+					ih.close();
 				}
-				else
-				{
-					conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null, onhike);
-				}
-				HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
-				return conv;
 			}
-			/* TODO does this happen? If so, what should we do? */
-			Log.wtf("Conversationadding", "Couldn't add conversation --- race condition?");
-			return null;
 		}
 	}
 
@@ -681,10 +703,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		synchronized(mDb)
 		{
-			InsertHelper ih = new InsertHelper(mDb, DBConstants.GROUP_MEMBERS_TABLE);
 			SQLiteStatement insertStatement = null;
+			InsertHelper ih = null;
 			try
 			{
+				ih = new InsertHelper(mDb, DBConstants.GROUP_MEMBERS_TABLE);
 				insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.GROUP_MEMBERS_TABLE + " VALUES (?, ?, ?, ?)");
 				mDb.beginTransaction();
 				for(Entry<String, GroupParticipant> participant : participantList.entrySet())
@@ -702,6 +725,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				if (insertStatement != null) 
 				{
 					insertStatement.close();
+				}
+				if (ih != null) 
+				{
+					ih.close();
 				}
 				mDb.setTransactionSuccessful();
 				mDb.endTransaction();

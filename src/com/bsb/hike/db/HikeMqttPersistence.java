@@ -43,16 +43,27 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	public void addSentMessage(HikePacket packet) throws MqttPersistenceException
 	{
-		Log.d("HikeMqttPersistence", "Persisting message data: " + new String(packet.getMessage()));
-		InsertHelper ih = new InsertHelper(mDb, MQTT_DATABASE_TABLE);
-		ih.prepareForReplace();
-		ih.bind(ih.getColumnIndex(MQTT_MESSAGE), packet.getMessage());
-		ih.bind(ih.getColumnIndex(MQTT_MESSAGE_ID), packet.getMsgId());
-		ih.bind(ih.getColumnIndex(MQTT_TIME_STAMP), packet.getTimeStamp());
-		long rowid = ih.execute();
-		if (rowid < 0)
+		InsertHelper ih = null;
+		try 
 		{
-			throw new MqttPersistenceException("Unable to persist message");
+			Log.d("HikeMqttPersistence", "Persisting message data: " + new String(packet.getMessage()));
+			ih = new InsertHelper(mDb, MQTT_DATABASE_TABLE);
+			ih.prepareForReplace();
+			ih.bind(ih.getColumnIndex(MQTT_MESSAGE), packet.getMessage());
+			ih.bind(ih.getColumnIndex(MQTT_MESSAGE_ID), packet.getMsgId());
+			ih.bind(ih.getColumnIndex(MQTT_TIME_STAMP), packet.getTimeStamp());
+			long rowid = ih.execute();
+			if (rowid < 0)
+			{
+				throw new MqttPersistenceException("Unable to persist message");
+			}
+		} 
+		finally 
+		{
+			if (ih != null) 
+			{
+				ih.close();
+			}
 		}
 	}
 

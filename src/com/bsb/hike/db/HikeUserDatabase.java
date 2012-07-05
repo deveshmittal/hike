@@ -89,9 +89,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
 
+		InsertHelper ih = null;
 		try
 		{
-			InsertHelper ih = new InsertHelper(db, DBConstants.USERS_TABLE);
+			ih = new InsertHelper(db, DBConstants.USERS_TABLE);
 			final int msisdnColumn = ih.getColumnIndex(DBConstants.MSISDN);
 			final int idColumn = ih.getColumnIndex(DBConstants.ID);
 			final int nameColumn = ih.getColumnIndex(DBConstants.NAME);
@@ -116,6 +117,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 		finally
 		{
+			if(ih != null)
+			{
+				ih.close();
+			}
 			db.endTransaction();
 		}
 	}
@@ -130,9 +135,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
 
+		InsertHelper ih = null;
 		try
 		{
-			InsertHelper ih = new InsertHelper(db, DBConstants.BLOCK_TABLE);
+			ih = new InsertHelper(db, DBConstants.BLOCK_TABLE);
 			final int msisdnColumn = ih.getColumnIndex(DBConstants.MSISDN);
 			for (String msisdn : msisdns)
 			{
@@ -149,6 +155,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 		finally
 		{
+			if (ih != null) 
+			{
+				ih.close();
+			}
 			db.endTransaction();
 		}
 	}
