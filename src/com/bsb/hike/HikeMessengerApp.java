@@ -1,5 +1,9 @@
 package com.bsb.hike;
 
+import org.acra.ACRA;
+import org.acra.ReportField;
+import org.acra.annotation.ReportsCrashes;
+
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,19 +24,20 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 
-//@ReportsCrashes(formKey = "dDk0UVZXM2NpSmhvZGdBaW15U2FBTXc6MQ", 
-//				customReportContent = {
-//										ReportField.APP_VERSION_CODE,
-//										ReportField.APP_VERSION_NAME,
-//										ReportField.PHONE_MODEL,
-//										ReportField.BRAND,
-//										ReportField.PRODUCT,
-//										ReportField.ANDROID_VERSION,
-//										ReportField.STACK_TRACE,
-//										ReportField.USER_APP_START_DATE,
-//										ReportField.USER_CRASH_DATE
-//										}
-//				)
+@ReportsCrashes(formKey = "",
+				formUri = "http://im.hike.in:8080/v1/logs/android",
+				customReportContent = {
+										ReportField.APP_VERSION_CODE,
+										ReportField.APP_VERSION_NAME,
+										ReportField.PHONE_MODEL,
+										ReportField.BRAND,
+										ReportField.PRODUCT,
+										ReportField.ANDROID_VERSION,
+										ReportField.STACK_TRACE,
+										ReportField.USER_APP_START_DATE,
+										ReportField.USER_CRASH_DATE
+										}
+				)
 public class HikeMessengerApp extends Application
 {
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
@@ -182,7 +187,7 @@ public class HikeMessengerApp extends Application
 
 	public void onCreate()
 	{
-//		ACRA.init(this);
+		ACRA.init(this);
 		super.onCreate();
 
 		SmileyParser.init(this);

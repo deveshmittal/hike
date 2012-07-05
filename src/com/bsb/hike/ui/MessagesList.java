@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONObject;
+
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.DialogInterface;
@@ -40,8 +43,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -55,10 +58,9 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.utils.UpdateAppBaseActivity;
 import com.bsb.hike.utils.Utils;
 
-public class MessagesList extends UpdateAppBaseActivity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
+public class MessagesList extends Activity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
 	private static final int INVITE_PICKER_RESULT = 1001;
 
@@ -80,9 +82,13 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	private Set<String> mConversationsAdded;
 
-	private View mInviteToolTip;
+	private View mToolTip;
 
 	private SharedPreferences accountPrefs;
+
+	private View updateToolTipParent;
+
+	private boolean isToolTipShowing;
 
 	@Override
 	protected void onPause()
@@ -161,8 +167,8 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			return;
 		}
 
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		String token = accountPrefs.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
@@ -170,6 +176,11 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		setContentView(R.layout.main);
 
 		Utils.setDensityMultiplier(MessagesList.this);
+
+		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
+
+		int updateTypeAvailable = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
+		updateApp(updateTypeAvailable);
 
 		// Checking if the app was started for the first time. If true we send the device details to our server. 
 		if(getIntent().getBooleanExtra(HikeConstants.Extras.APP_STARTED_FIRST_TIME, false))
@@ -196,28 +207,27 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
 		if (!accountPrefs.getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false) 
-				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
+				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN)
+				&& updateTypeAvailable == HikeConstants.NO_UPDATE)
 		{
 			((LinearLayout)findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
-			mInviteToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
-			mInviteToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
+			mToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
+			mToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
 
-			((MarginLayoutParams)mInviteToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
+			((MarginLayoutParams)mToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
 
 			TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
 			text.setText(getString(R.string.earn_200_sms_tap_here));
 
-			if (savedInstanceState == null || !savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING)) 
+			if (!isToolTipShowing) 
 			{
 				Animation alphaIn = AnimationUtils.loadAnimation(
 						MessagesList.this, android.R.anim.fade_in);
 				alphaIn.setStartOffset(1000);
-				mInviteToolTip.setAnimation(alphaIn);
+				mToolTip.setAnimation(alphaIn);
 			}
-			mInviteToolTip.setVisibility(View.VISIBLE);
+			mToolTip.setVisibility(View.VISIBLE);
 		}
 
 		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
@@ -267,6 +277,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_LEFT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPDATE_AVAILABLE, this);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 	}
@@ -279,14 +290,18 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 			@Override
 			public void run() 
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(MessagesList.this));
+				JSONObject obj = Utils.getDeviceDetails(MessagesList.this);
+				if (obj != null) 
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(MessagesList.this));
+				}
 			}
 		}, 10 * 1000);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mInviteToolTip != null && mInviteToolTip.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mToolTip != null && mToolTip.getVisibility() == View.VISIBLE);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -429,6 +444,7 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_LEFT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPDATE_AVAILABLE, this);
 	}
 
 	@Override
@@ -611,6 +627,10 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 			runOnUiThread(this);
 		}
+		else if (HikePubSub.UPDATE_AVAILABLE.equals(type))
+		{
+			updateApp((Integer) object);
+		}
 	}
 
 	ConvMessage findMessageById(long msgId)
@@ -677,23 +697,39 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		overridePendingTransition(R.anim.slide_in_right_noalpha, R.anim.slide_out_left_noalpha);
 	}
 
-	private void setToolTipDismissed()
+	private void hideToolTip()
 	{
-		if (mInviteToolTip.getVisibility() == View.VISIBLE) {
+		if (mToolTip.getVisibility() == View.VISIBLE) 
+		{
 			Animation alphaOut = AnimationUtils.loadAnimation(
 					MessagesList.this, android.R.anim.fade_out);
 			alphaOut.setDuration(200);
-			mInviteToolTip.setAnimation(alphaOut);
-			mInviteToolTip.setVisibility(View.INVISIBLE);
+			mToolTip.setAnimation(alphaOut);
+			mToolTip.setVisibility(View.INVISIBLE);
 		}
+	}
 
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+	private void setToolTipDismissed()
+	{
+		hideToolTip();
+
+		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, true);
 		editor.commit();
 	}
 
 	public void onToolTipClosed(View v)
 	{
+		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
+		{
+			Editor editor = accountPrefs.edit();
+			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP, false);
+			//Doing this so that we show this tip after the user has opened the home screen a few times.
+			editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+			editor.commit();
+			hideToolTip();
+			return;
+		}
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLOSED);
 		setToolTipDismissed();
 	}
@@ -706,6 +742,12 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 
 	public void onToolTipClicked(View v)
 	{
+		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
+		{
+			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();	
+			hideToolTip();
+			return;
+		}
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLICKED);
 		onTitleIconClick(null);
 	}
@@ -715,5 +757,76 @@ public class MessagesList extends UpdateAppBaseActivity implements OnClickListen
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
+	}
+
+	private void updateApp(int updateType)
+	{
+		if(updateType == HikeConstants.NO_UPDATE)
+		{
+			return;
+		}
+		if(updateType == HikeConstants.CRITICAL_UPDATE && 
+				accountPrefs.getBoolean(HikeConstants.Extras.SHOW_UPDATE_OVERLAY, true))
+		{
+			updateAppOverlay();
+		}
+		else if(updateType == HikeConstants.CRITICAL_UPDATE ||
+					accountPrefs.getBoolean(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP, true) || 
+						Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
+		{
+			showUpdateToolTip(updateType);
+		}
+	}
+
+	private void updateAppOverlay()
+	{
+		findViewById(R.id.overlay_layout).setVisibility(View.VISIBLE);
+		((TextView)findViewById(R.id.overlay_message)).setText("Update available!");
+		((ImageView)findViewById(R.id.overlay_image)).setImageResource(R.drawable.ic_update);
+		((Button)findViewById(R.id.overlay_button)).setText("Update now");
+	}
+
+	public void onOverlayButtonClick(View v)
+	{
+		if (v.getId() != R.id.info_layout) 
+		{
+			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Editor editor = accountPrefs.edit();
+			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_OVERLAY, false);
+			editor.commit();
+
+			findViewById(R.id.overlay_layout).setVisibility(View.GONE);
+			showUpdateToolTip(HikeConstants.CRITICAL_UPDATE);
+		}
+	}
+
+	private void showUpdateToolTip(int updateType)
+	{
+		updateToolTipParent = findViewById(R.id.update_tool_tip);
+		updateToolTipParent.setVisibility(View.VISIBLE);
+		((LinearLayout)updateToolTipParent.findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
+		mToolTip = updateToolTipParent.findViewById(R.id.credits_help_layout);
+		mToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
+
+		// To make the tool tip non closable if a critical update is available
+		mToolTip.findViewById(R.id.close).setVisibility(updateType == HikeConstants.NORMAL_UPDATE ? View.VISIBLE : View.GONE);
+
+		((MarginLayoutParams)mToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
+
+		TextView text = (TextView) mToolTip.findViewById(R.id.tool_tip);
+		((MarginLayoutParams)text.getLayoutParams()).setMargins((updateType == HikeConstants.NORMAL_UPDATE ? 0 : (int) (15*Utils.densityMultiplier)), 0, 0, 0);
+		text.setText(updateType == HikeConstants.NORMAL_UPDATE ? R.string.update_available : R.string.critical_update_available);
+
+		if (!isToolTipShowing) {
+			Animation alphaIn = AnimationUtils.loadAnimation(MessagesList.this,
+					android.R.anim.fade_in);
+			alphaIn.setStartOffset(1000);
+			mToolTip.setAnimation(alphaIn);
+		}
+		mToolTip.setVisibility(View.VISIBLE);
+
 	}
 }

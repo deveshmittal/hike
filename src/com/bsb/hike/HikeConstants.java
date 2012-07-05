@@ -29,6 +29,9 @@ public class HikeConstants
 	public static final String NEW_USER = "nu";
 	public static final String EMAIL = "email";
 	public static final String GENDER = "gender";
+	public static final String VERSION = "v";
+	public static final String CRITICAL = "c";
+	public static final String APP_VERSION = "appversion";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -63,7 +66,7 @@ public class HikeConstants
 	public static final String ADAPTER_NAME = "hikeadapter";
 	
 	/* constants for defining what to do after checking for updates*/
-	public static final int UPDATE_AVAILABLE = 2;
+	public static final int NORMAL_UPDATE = 2;
 	public static final int CRITICAL_UPDATE = 1;
 	public static final int NO_UPDATE = 0;
 	
@@ -114,6 +117,10 @@ public class HikeConstants
 		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
 		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
 		public static final String APP_STARTED_FIRST_TIME = "appStartedFirstTime";
+		public static final String LATEST_VERSION = "latestVersion";
+		public static final String SHOW_UPDATE_OVERLAY = "showUpdateOverlay";
+		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip"; 
+		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
 	}
 
 	public static final class LogEvent
@@ -183,5 +190,6 @@ public class HikeConstants
 		public static final String GROUP_CHAT_END = "gce";
 		public static final String GROUP_CHAT_NAME = "gcn";
 		public static final String ANALYTICS_EVENT = "le";
+		public static final String UPDATE_AVAILABLE = "ua";
 	}
 }

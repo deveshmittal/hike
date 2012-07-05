@@ -105,6 +105,8 @@ public class HikePubSub implements Runnable
 
 	public static final String INVITEE_NUM_CHANGED = "inviteeNoChanged";
 
+	public static final String UPDATE_AVAILABLE = "updateAvailable";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

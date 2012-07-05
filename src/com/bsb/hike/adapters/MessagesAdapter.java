@@ -251,6 +251,11 @@ public class MessagesAdapter extends BaseAdapter
 		if (metadata != null)
 		{
 			Spannable spannable = metadata.getMessage(context, convMessage, true);
+			convMessage.setMessage(spannable.toString());
+			/*
+			 *  This is being done so that if the user chooses to forward or copy this message, 
+			 *  he see's the metadata message and not the original one sent from the server.
+			 */
 			holder.messageTextView.setText(spannable);
 			holder.messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		}

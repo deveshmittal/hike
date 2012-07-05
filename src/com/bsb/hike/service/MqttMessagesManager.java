@@ -21,6 +21,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Utils;
 
 /**
  * 
@@ -219,6 +220,21 @@ public class MqttMessagesManager {
 		{
 			String msisdn = jsonObj.optString(HikeConstants.FROM);
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
+		}
+		else if (HikeConstants.MqttMessageTypes.UPDATE_AVAILABLE.equals(type))
+		{
+			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
+			String version = data.optString(HikeConstants.VERSION);
+			Editor editor = settings.edit();
+			int update = Utils.isUpdateRequired(version, context) ?
+					(jsonObj.optBoolean(HikeConstants.CRITICAL) ? 
+							HikeConstants.CRITICAL_UPDATE : HikeConstants.NORMAL_UPDATE) : HikeConstants.NO_UPDATE;
+			editor.putInt(HikeConstants.Extras.UPDATE_AVAILABLE, update);
+			editor.commit();
+			if(update != HikeConstants.NO_UPDATE)
+			{
+				this.pubSub.publish(HikePubSub.UPDATE_AVAILABLE, update);
+			}
 		}
 	}
 

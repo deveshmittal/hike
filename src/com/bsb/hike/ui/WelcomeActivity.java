@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.AnimationDrawable;
@@ -21,9 +22,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
-import com.bsb.hike.utils.UpdateAppBaseActivity;
 
-public class WelcomeActivity extends UpdateAppBaseActivity implements SignupTask.OnSignupTaskProgressUpdate
+public class WelcomeActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate
 {
 	private ImageButton mAcceptButton;
 	private ViewGroup loadingLayout;

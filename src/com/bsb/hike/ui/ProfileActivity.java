@@ -559,7 +559,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 						editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
 								.getText().toString());
 					}
-					editor.putInt(HikeConstants.Extras.GENDER, currentSelection.getId() == R.id.guy ? 1 : 2);
+					editor.putInt(HikeConstants.Extras.GENDER, currentSelection !=null ? (currentSelection.getId() == R.id.guy ? 1 : 2) : 0);
 					editor.commit();
 					if (isBackPressed) {
 						finishEditing();

@@ -56,38 +56,4 @@
             android:textStyle="bold" />
     </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/update_progress_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone" >
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="3dp"
-            android:text="Updating..."
-            android:textColor="@color/white"
-            android:textSize="18dp"
-            android:textStyle="bold" />
-
-        <ProgressBar
-            android:id="@+id/update_progress"
-            android:layout_width="150dp"
-            android:layout_height="18dp"
-            android:background="@drawable/bg_update_progress"
-            android:indeterminateOnly="false"
-            android:max="100"
-            android:minWidth="10dp"
-            android:paddingBottom="3dp"
-            android:paddingLeft="2dp"
-            android:paddingRight="2dp"
-            android:paddingTop="1dp"
-            android:progress="20"
-            android:progressDrawable="@drawable/update_progress_drawable" />
-    </LinearLayout>
-
 </RelativeLayout>
