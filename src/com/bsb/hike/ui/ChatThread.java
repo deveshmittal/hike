@@ -1683,8 +1683,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			else
 			{
-				Utils.logEvent(ChatThread.this,
-						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
+//				Utils.logEvent(ChatThread.this,
+//						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
 				Intent intent = getIntent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
@@ -1813,8 +1813,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	public void onToolTipClosed(View v)
 	{
-		Utils.logEvent(ChatThread.this, (mConversation instanceof GroupConversation) ? 
-				HikeConstants.LogEvent.CHAT_GROUP_INFO_TOOL_TIP_CLOSED : HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
+		Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
 		dismissToolTip();
 	}
 
