@@ -1889,9 +1889,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		if(emoticonLayout.getVisibility() == View.VISIBLE)
 		{
-			Animation slideDown = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
-			slideDown.setDuration(300);
-			emoticonLayout.startAnimation(slideDown);
 			emoticonLayout.setVisibility(View.INVISIBLE);
 		}
 		else
