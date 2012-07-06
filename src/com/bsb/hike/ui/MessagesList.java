@@ -616,13 +616,13 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		}
 		else if (HikePubSub.UPDATE_AVAILABLE.equals(type))
 		{
-			final int appVersion = (Integer) object;
+			final int updateType = (Integer) object;
 			runOnUiThread(new Runnable() 
 			{
 				@Override
 				public void run() 
 				{
-					updateApp(appVersion);
+					updateApp(updateType);
 				}
 			});
 		}
@@ -813,7 +813,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		TextView text = (TextView) mToolTip.findViewById(R.id.tool_tip);
 		((MarginLayoutParams)text.getLayoutParams()).setMargins((updateType == HikeConstants.NORMAL_UPDATE ? 0 : (int) (15*Utils.densityMultiplier)), 0, 0, 0);
-		text.setText(updateType == HikeConstants.NORMAL_UPDATE ? R.string.update_available : R.string.critical_update_available);
+		text.setText(this.accountPrefs.getString(HikeConstants.Extras.UPDATE_MESSAGE, ""));
 
 		if (!isToolTipShowing) {
 			Animation alphaIn = AnimationUtils.loadAnimation(MessagesList.this,

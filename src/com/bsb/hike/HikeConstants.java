@@ -121,6 +121,7 @@ public class HikeConstants
 		public static final String SHOW_UPDATE_OVERLAY = "showUpdateOverlay";
 		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip"; 
 		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
+		public static final String UPDATE_MESSAGE = "updateMessage";
 	}
 
 	public static final class LogEvent

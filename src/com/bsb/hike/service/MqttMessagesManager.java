@@ -228,6 +228,7 @@ public class MqttMessagesManager {
 					(data.optBoolean(HikeConstants.CRITICAL) ? 
 							HikeConstants.CRITICAL_UPDATE : HikeConstants.NORMAL_UPDATE) : HikeConstants.NO_UPDATE;
 			editor.putInt(HikeConstants.Extras.UPDATE_AVAILABLE, update);
+			editor.putString(HikeConstants.Extras.UPDATE_MESSAGE, data.optString(HikeConstants.MqttMessageTypes.MESSAGE));
 			editor.commit();
 			if(update != HikeConstants.NO_UPDATE)
 			{
