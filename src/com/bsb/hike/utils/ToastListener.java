@@ -45,7 +45,7 @@ public class ToastListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTION_STATUS, this);
 		this.toaster = new HikeNotification(context);
-		this.db = new HikeUserDatabase(context);
+		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.INITIAL;
 	}
@@ -68,9 +68,8 @@ public class ToastListener implements Listener
 		{
 			ConvMessage message = (ConvMessage) object;
 
-			HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
+			HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 			message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
-			hCDB.close();
 			
 			if(message.getConversation() == null)
 			{

@@ -34,8 +34,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
-		HikeUserDatabase db = new HikeUserDatabase(activity);
-		HikeConversationsDatabase convDb = new HikeConversationsDatabase(activity);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
+		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
 		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 
 		try
@@ -62,8 +62,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		}
 		finally
 		{
-			db.close();
-			convDb.close();
 			editor.commit();
 		}
 	}

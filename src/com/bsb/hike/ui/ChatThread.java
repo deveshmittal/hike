@@ -259,7 +259,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		mBottomView.setVisibility(View.GONE);
 
-		mDbhelper = new HikeUserDatabase(this);
+		mDbhelper = HikeUserDatabase.getInstance();
 		String[] columns = new String[] { "name", "msisdn", "onhike", "msisdn", "_id" };
 		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike, R.id.user_img };
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
@@ -307,10 +307,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 									.getColumnIndex("name"));
 
 							setIntentFromField();
-
-							/* close the db */
-							mDbhelper.close();
-							mDbhelper = null;
 
 							/* initialize the conversation */
 							createConversation();
@@ -427,17 +423,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mComposeViewWatcher = null;
 		}
 
-		if (mDbhelper != null)
-		{
-			mDbhelper.close();
-			mDbhelper = null;
-		}
-		if (mConversationDb != null)
-		{
-			mConversationDb.close();
-			mConversationDb = null;
-		}
-
 		if ((mInputNumberView != null) && (mInputNumberView.getAdapter() != null))
 		{
 			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
@@ -538,7 +523,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
 
-		mConversationDb = new HikeConversationsDatabase(this);
+		mConversationDb = HikeConversationsDatabase.getInstance();
 
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
@@ -979,14 +964,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mLabelView.setText(mLabel);
 
-		HikeUserDatabase db = new HikeUserDatabase(this);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		mUserIsBlocked = db.isBlocked(mContactNumber);
 		if (mUserIsBlocked)
 		{
 			showOverlay(true);
 		}
-
-		db.close();
 
 		changeInviteButtonVisibility();
 		if((mConversation instanceof GroupConversation) && !((GroupConversation)mConversation).getIsGroupAlive())
@@ -1184,9 +1167,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
 				{
-					HikeConversationsDatabase hCDB = new HikeConversationsDatabase(this);
+					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn()));
-					hCDB.close();
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
@@ -1345,9 +1327,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			String groupId = (String) object;
 			if (mContactNumber.equals(groupId))
 			{
-				HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+				HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 				final String groupName = db.getGroupName(groupId);
-				db.close();
 				mConversation.setContactName(groupName);
 
 				runOnUiThread(new Runnable() {
@@ -1701,8 +1682,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (v.getId() == R.id.title_icon) 
 		{
-			mDbhelper.close();
-
 			String groupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 			if (TextUtils.isEmpty(groupId))
 			{

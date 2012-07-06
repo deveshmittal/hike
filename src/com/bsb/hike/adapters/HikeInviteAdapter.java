@@ -35,9 +35,8 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 
 	private static List<ContactInfo> getItems(Activity activity)
 	{
-		HikeUserDatabase db = new HikeUserDatabase(activity);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		List<ContactInfo> contacts = db.getNonHikeContacts();
-		db.close();
 		Collections.sort(contacts);
 		return contacts;
 	}

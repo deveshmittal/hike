@@ -35,7 +35,22 @@ public class HikeMqttPersistence extends SQLiteOpenHelper
 
 	private SQLiteDatabase mDb;
 
-	public HikeMqttPersistence(Context context)
+	private static HikeMqttPersistence hikeMqttPersistence;
+
+	public static void init(Context context)
+	{
+		if(hikeMqttPersistence == null)
+		{
+			hikeMqttPersistence = new HikeMqttPersistence(context);
+		}
+	}
+
+	public static HikeMqttPersistence getInstance()
+	{
+		return hikeMqttPersistence;
+	}
+
+	private HikeMqttPersistence(Context context)
 	{
 		super(context, MQTT_DATABASE_NAME, null, MQTT_DATABASE_VERSION);
 		mDb = getWritableDatabase();

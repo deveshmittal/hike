@@ -48,8 +48,8 @@ public class MqttMessagesManager {
 
 	private MqttMessagesManager(Context context) 
 	{
-		this.convDb = new HikeConversationsDatabase(context);
-		this.userDb = new HikeUserDatabase(context);
+		this.convDb = HikeConversationsDatabase.getInstance();
+		this.userDb = HikeUserDatabase.getInstance();
 		this.settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.context = context;
 		this.pubSub = HikeMessengerApp.getPubSub();
@@ -72,8 +72,6 @@ public class MqttMessagesManager {
 
 	public void close()
 	{
-		convDb.close();
-		userDb.close();
 		instance = null;
 	}
 
@@ -252,9 +250,7 @@ public class MqttMessagesManager {
 
 	private void saveGroupStatusMsg(JSONObject jsonObj) throws JSONException
 	{
-		HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
-		Conversation conversation = hCDB.getConversation(jsonObj.getString(HikeConstants.TO), 0);
-		hCDB.close();
+		Conversation conversation = convDb.getConversation(jsonObj.getString(HikeConstants.TO), 0);
 
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
 		convDb.addConversationMessages(convMessage);

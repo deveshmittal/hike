@@ -223,9 +223,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
-		HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 		GroupConversation groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
-		hCDB.close();
+
 		participantList = groupConversation.getGroupParticipantList();
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
@@ -455,9 +455,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 					else
 					{
-						HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+						HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 						hCDB.setGroupName(ProfileActivity.this.mLocalMSISDN, mNameEdit.getText().toString());
-						hCDB.close();
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -519,13 +518,12 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 				public void onSuccess()
 				{
-					HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
+					HikeUserDatabase db = HikeUserDatabase.getInstance();
 					db.setIcon(mLocalMSISDN, bytes);
 					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
 					{
 						db.setIcon(getLargerIconId(), larger_bytes);
 					}
-					db.close();
 					if (isBackPressed) {
 						finishEditing();
 					}
@@ -807,10 +805,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		{
 			if (mLocalMSISDN.equals((String)object)) 
 			{
-				HikeConversationsDatabase db = new HikeConversationsDatabase(
-						this);
+				HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 				nameTxt = db.getGroupName(mLocalMSISDN);
-				db.close();
+
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -866,15 +863,13 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 						{
 							String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
 
-							HikeUserDatabase hUDB = new HikeUserDatabase(ProfileActivity.this);
+							HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
 							ContactInfo participant = hUDB.getContactInfoFromMSISDN(msisdn);
-							hUDB.close();
 
 							if (TextUtils.isEmpty(participant.getName())) 
 							{
-								HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+								HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 								participant.setName(hCDB.getParticipantName(mLocalMSISDN, msisdn));
-								hCDB.close();
 							}
 
 							if (!participant.isOnhike()) 

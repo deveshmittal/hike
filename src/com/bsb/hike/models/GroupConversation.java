@@ -45,9 +45,8 @@ public class GroupConversation extends Conversation {
 			this.groupParticipantList.put(contactNum, groupParticipant);
 		}
 
-		HikeConversationsDatabase db = new HikeConversationsDatabase(context);
+		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		setContactName(db.getGroupName(getMsisdn()));
-		db.close();
 	}
 
 	public String getGroupOwner()

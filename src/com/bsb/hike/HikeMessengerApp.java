@@ -26,6 +26,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.bsb.hike.db.DbConversationListener;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -264,9 +267,13 @@ public class HikeMessengerApp extends Application
 
 		super.onCreate();
 
-		SmileyParser.init(this);
+		HikeConversationsDatabase.init(this);
+		HikeUserDatabase.init(this);
+		HikeMqttPersistence.init(this);
 
-		IconCacheManager.init(this);
+		SmileyParser.init(this);
+		
+		IconCacheManager.init();
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
 

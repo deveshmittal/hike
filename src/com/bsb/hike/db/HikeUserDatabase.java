@@ -30,6 +30,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	private Context mContext;
 
+	private static HikeUserDatabase hikeUserDatabase;
+
+	public static void init(Context context)
+	{
+		if(hikeUserDatabase == null)
+		{
+			hikeUserDatabase = new HikeUserDatabase(context);
+		}
+	}
+
+	public static HikeUserDatabase getInstance()
+	{
+		return hikeUserDatabase;
+	}
+
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
@@ -60,7 +75,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		db.execSQL(create);
 	}
 
-	public HikeUserDatabase(Context context)
+	private HikeUserDatabase(Context context)
 	{
 		super(context, DBConstants.USERS_DATABASE_NAME, null, DBConstants.USERS_DATABASE_VERSION);
 		mDb = getWritableDatabase();
@@ -69,7 +84,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	}
 
 	@Override
-	public synchronized void close()
+	public void close()
 	{
 		mDb.close();
 		mReadDb.close();

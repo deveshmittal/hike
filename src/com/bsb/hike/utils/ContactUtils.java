@@ -44,7 +44,7 @@ public class ContactUtils
 		String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
 		cursor.close();
 
-		HikeUserDatabase db = new HikeUserDatabase(context);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		ContactInfo contactInfo = db.getContactInfoFromId(contactId);
 		if (contactInfo == null)
 		{
@@ -72,8 +72,6 @@ public class ContactUtils
 				contactInfo = db.getContactInfoFromPhoneNo(number);
 			}
 		}
-
-		db.close();
 		return contactInfo;
 	}
 
@@ -96,7 +94,7 @@ public class ContactUtils
 
 			// lookup the user via the retrieved contactID
 			String id = cursor.getString(cursor.getColumnIndexOrThrow(PhoneLookup._ID));
-			db = new HikeUserDatabase(context);
+			db = HikeUserDatabase.getInstance();
 			ContactInfo contactInfo = db.getContactInfoFromId(id);
 			return contactInfo != null ? contactInfo : new ContactInfo(id, phoneNumber, cursor.getString(cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME)), phoneNumber);
 		}
@@ -109,10 +107,6 @@ public class ContactUtils
 			if (cursor != null)
 			{
 				cursor.close();
-			}
-			if (db != null)
-			{
-				db.close();
 			}
 		}
 	}
@@ -133,7 +127,7 @@ public class ContactUtils
 			Log.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
 			return;
 		}
-		HikeUserDatabase db = new HikeUserDatabase(ctx);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 
 		Map<String, List<ContactInfo>> new_contacts_by_id = convertToMap(getContacts(ctx));
 		Map<String, List<ContactInfo>> hike_contacts_by_id = convertToMap(db.getContacts(false));
@@ -175,7 +169,6 @@ public class ContactUtils
 		if ((new_contacts_by_id.isEmpty()) && (hike_contacts_by_id.isEmpty()))
 		{
 			Log.d("ContactUtils", "DB in sync");
-			db.close();
 			return;
 		}
 
@@ -196,11 +189,6 @@ public class ContactUtils
 		catch (Exception e)
 		{
 			Log.e("ContactUtils", "error updating addressbook", e);
-		}
-		finally
-		{
-			db.close();
-			db = null;
 		}
 	}
 
@@ -312,8 +300,7 @@ public class ContactUtils
 
 	public static void updateHikeStatus(Context ctx, String msisdn, boolean onhike)
 	{
-		HikeUserDatabase db = new HikeUserDatabase(ctx);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		db.updateHikeContact(msisdn, onhike);
-		db.close();
 	}
 }

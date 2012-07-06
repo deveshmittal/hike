@@ -29,9 +29,8 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 
 	private static List<ContactInfo> getItems(Activity activity)
 	{
-		HikeUserDatabase db = new HikeUserDatabase(activity);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		List<ContactInfo> contacts = db.getContacts();
-		db.close();
 		Collections.sort(contacts);
 		return contacts;
 	}
@@ -40,9 +39,8 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements OnClickL
 	{
 		super(activity, viewItemId, getItems(activity));
 		this.context = activity;
-		HikeUserDatabase db = new HikeUserDatabase(activity);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		this.blockedUsers = db.getBlockedUsers();
-		db.close();
 	}
 
 	@Override
