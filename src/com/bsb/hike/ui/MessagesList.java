@@ -616,7 +616,15 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		}
 		else if (HikePubSub.UPDATE_AVAILABLE.equals(type))
 		{
-			updateApp((Integer) object);
+			final int appVersion = (Integer) object;
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					updateApp(appVersion);
+				}
+			});
 		}
 	}
 

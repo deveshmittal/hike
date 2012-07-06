@@ -225,7 +225,7 @@ public class MqttMessagesManager {
 			String version = data.optString(HikeConstants.VERSION);
 			Editor editor = settings.edit();
 			int update = Utils.isUpdateRequired(version, context) ?
-					(jsonObj.optBoolean(HikeConstants.CRITICAL) ? 
+					(data.optBoolean(HikeConstants.CRITICAL) ? 
 							HikeConstants.CRITICAL_UPDATE : HikeConstants.NORMAL_UPDATE) : HikeConstants.NO_UPDATE;
 			editor.putInt(HikeConstants.Extras.UPDATE_AVAILABLE, update);
 			editor.commit();
