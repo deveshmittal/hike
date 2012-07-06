@@ -107,38 +107,14 @@
             <RelativeLayout
                 android:id="@+id/emoticon_layout"
                 android:layout_width="match_parent"
-                android:layout_height="96dp"
+                android:layout_height="192dp"
                 android:layout_alignParentBottom="true"
                 android:background="@color/emoticon_page_bg"
                 android:visibility="invisible" >
 
-                <android.support.v4.view.ViewPager
-                    android:id="@+id/emoticon_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp" />
-
-                <ImageView
-                    android:id="@+id/emo_arrow_left"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="10dp"
-                    android:src="@drawable/emoticon_page_arrow_left"
-                    android:visibility="invisible" />
-
-                <ImageView
-                    android:id="@+id/emo_arrow_right"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="10dp"
-                    android:src="@drawable/emoticon_page_arrow_right"
-                    android:visibility="invisible" />
+                <include layout="@layout/emoticon_layout" />
             </RelativeLayout>
+
         </RelativeLayout>
 
         <RelativeLayout
@@ -157,7 +133,7 @@
                     android:id="@+id/send_message"
                     android:layout_width="45dp"
                     android:layout_height="33dp"
-                    android:layout_marginBottom="4dp"
+                    android:layout_marginBottom="6dp"
                     android:layout_marginRight="4dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
@@ -173,14 +149,13 @@
                     android:id="@+id/emo_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/tb_layout"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
                     android:background="@null"
                     android:onClick="onEmoticonBtnClicked"
-                    android:paddingBottom="11dp"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
-                    android:paddingTop="9dp"
                     android:src="@drawable/emoticon_hike_btn" />
 
                 <RelativeLayout
@@ -188,8 +163,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginTop="8dp"
                     android:layout_toLeftOf="@id/send_message"
                     android:layout_toRightOf="@id/emo_btn"
                     android:gravity="center_vertical" >
@@ -198,19 +171,19 @@
                         android:id="@+id/msg_compose"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="46dp"
+                        android:paddingTop="2dp"
+                        android:paddingBottom="2dp"
                         android:layout_alignParentLeft="true"
                         android:layout_alignParentTop="true"
                         android:background="@null"
-                        android:ems="10"
                         android:gravity="center_vertical"
                         android:hint="@string/type_to_compose"
                         android:imeOptions="actionSend"
                         android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
-                        android:lineSpacingExtra="2dp"
+                        android:lineSpacingExtra="3dp"
                         android:maxLines="4"
-                        android:paddingBottom="5dp"
                         android:paddingRight="5dp"
-                        android:paddingTop="5dp"
                         android:textColor="@color/chat_color"
                         android:textColorHint="#cdcdc8"
                         android:textSize="15sp" />

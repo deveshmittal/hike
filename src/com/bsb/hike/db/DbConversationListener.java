@@ -26,9 +26,9 @@ public class DbConversationListener implements Listener
 	public DbConversationListener(Context context)
 	{
 		mPubSub = HikeMessengerApp.getPubSub();
-		mConversationDb = new HikeConversationsDatabase(context);
-		mUserDb = new HikeUserDatabase(context);
-		persistence = new HikeMqttPersistence(context);
+		mConversationDb = HikeConversationsDatabase.getInstance();
+		mUserDb = HikeUserDatabase.getInstance();
+		persistence = HikeMqttPersistence.getInstance();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELETED, this);

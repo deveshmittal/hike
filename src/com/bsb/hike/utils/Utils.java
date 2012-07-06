@@ -596,21 +596,28 @@ public class Utils
 
 		try 
 		{
-			for (String key : keys.keySet())
+			if(keys.isEmpty())
 			{
-				Log.d("Utils", "Getting keys: " + key);
-				data.put(key, prefs.getLong(key, 0));
-				editor.remove(key);
+				obj = null;
 			}
-			editor.commit();
-			data.put(HikeConstants.LogEvent.TAG, "mob");
-			
-			obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-			obj.put(HikeConstants.DATA, data);
+			else
+			{
+				for (String key : keys.keySet())
+				{
+					Log.d("Utils", "Getting keys: " + key);
+					data.put(key, prefs.getLong(key, 0));
+					editor.remove(key);
+				}
+				editor.commit();
+				data.put(HikeConstants.LogEvent.TAG, "mob");
+
+				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+				obj.put(HikeConstants.DATA, data);
+			}
 		} 
 		catch (JSONException e) 
 		{
-			e.printStackTrace();
+			Log.e("Utils", "Invalid JSON", e);
 		}
 
 		return obj;

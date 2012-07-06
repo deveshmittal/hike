@@ -36,6 +36,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -63,6 +64,10 @@ import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TabHost;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.TabHost.TabContentFactory;
+import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -190,6 +195,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private Button titleBtn;
 
+	private TabHost tabHost;
+
 	@Override
 	protected void onPause()
 	{
@@ -252,7 +259,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		mBottomView.setVisibility(View.GONE);
 
-		mDbhelper = new HikeUserDatabase(this);
+		mDbhelper = HikeUserDatabase.getInstance();
 		String[] columns = new String[] { "name", "msisdn", "onhike", "msisdn", "_id" };
 		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike, R.id.user_img };
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
@@ -300,10 +307,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 									.getColumnIndex("name"));
 
 							setIntentFromField();
-
-							/* close the db */
-							mDbhelper.close();
-							mDbhelper = null;
 
 							/* initialize the conversation */
 							createConversation();
@@ -420,21 +423,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mComposeViewWatcher = null;
 		}
 
-		if (mDbhelper != null)
-		{
-			mDbhelper.close();
-			mDbhelper = null;
-		}
-		if (mConversationDb != null)
-		{
-			mConversationDb.close();
-			mConversationDb = null;
-		}
-
 		if ((mInputNumberView != null) && (mInputNumberView.getAdapter() != null))
 		{
 			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
 			adapter.changeCursor(null);
+		}
+		if(tabHost != null)
+		{
+			tabHost.removeAllViews();
+			tabHost = null;
 		}
 	}
 
@@ -526,7 +523,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
 
-		mConversationDb = new HikeConversationsDatabase(this);
+		mConversationDb = HikeConversationsDatabase.getInstance();
 
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
@@ -967,14 +964,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mLabelView.setText(mLabel);
 
-		HikeUserDatabase db = new HikeUserDatabase(this);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		mUserIsBlocked = db.isBlocked(mContactNumber);
 		if (mUserIsBlocked)
 		{
 			showOverlay(true);
 		}
-
-		db.close();
 
 		changeInviteButtonVisibility();
 		if((mConversation instanceof GroupConversation) && !((GroupConversation)mConversation).getIsGroupAlive())
@@ -1172,9 +1167,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
 				{
-					HikeConversationsDatabase hCDB = new HikeConversationsDatabase(this);
+					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn()));
-					hCDB.close();
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
@@ -1333,9 +1327,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			String groupId = (String) object;
 			if (mContactNumber.equals(groupId))
 			{
-				HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+				HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 				final String groupName = db.getGroupName(groupId);
-				db.close();
 				mConversation.setContactName(groupName);
 
 				runOnUiThread(new Runnable() {
@@ -1441,7 +1434,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				hideOverlay();
 			}
 
-			if(mComposeView.getLineCount()>1)
+			if(mComposeView.getLineCount()>2)
 			{
 				mMetadataNumChars.setVisibility(View.VISIBLE);
 				int length = mComposeView.getText().length();
@@ -1671,8 +1664,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			else
 			{
-				Utils.logEvent(ChatThread.this,
-						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
+//				Utils.logEvent(ChatThread.this,
+//						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
 				Intent intent = getIntent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
@@ -1689,8 +1682,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (v.getId() == R.id.title_icon) 
 		{
-			mDbhelper.close();
-
 			String groupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 			if (TextUtils.isEmpty(groupId))
 			{
@@ -1801,8 +1792,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	public void onToolTipClosed(View v)
 	{
-		Utils.logEvent(ChatThread.this, (mConversation instanceof GroupConversation) ? 
-				HikeConstants.LogEvent.CHAT_GROUP_INFO_TOOL_TIP_CLOSED : HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
+		Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
 		dismissToolTip();
 	}
 
@@ -1842,6 +1832,35 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
+
+		if(tabHost == null)
+		{
+			tabHost = (TabHost) findViewById(android.R.id.tabhost);
+			tabHost.setup();
+			
+			TextView tabHead = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			
+			TabSpec ts1 = tabHost.newTabSpec("tab1");
+			tabHead.setText("Tab1");
+			ts1.setIndicator(tabHead);
+			ts1.setContent(new TabFactory());
+			tabHost.addTab(ts1);
+
+			TextView tabHead2 = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			TabSpec ts2 = tabHost.newTabSpec("tab2");
+			tabHead2.setText("Tab2");
+			ts2.setIndicator(tabHead2);
+			ts2.setContent(new TabFactory());
+			tabHost.addTab(ts2);
+
+			TextView tabHead3 = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			TabSpec ts3 = tabHost.newTabSpec("tab3");
+			tabHead3.setText("Tab3");
+			ts3.setIndicator(tabHead3);
+			ts3.setContent(new TabFactory());
+			tabHost.addTab(ts3);
+		}
+
 		if (emoticonAdapter == null) 
 		{
 			emoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView);
@@ -1849,9 +1868,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		if(emoticonLayout.getVisibility() == View.VISIBLE)
 		{
-			Animation slideDown = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
-			slideDown.setDuration(300);
-			emoticonLayout.startAnimation(slideDown);
 			emoticonLayout.setVisibility(View.INVISIBLE);
 		}
 		else
@@ -1861,13 +1877,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			emoticonLayout.setAnimation(slideUp);
 			emoticonLayout.setVisibility(View.VISIBLE);
 		}
-		setEmoticonArrows();
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() 
 		{
 			@Override
 			public void onPageSelected(int arg0) 
 			{
-				setEmoticonArrows();
+				tabHost.setCurrentTab(arg0);
 			}
 			
 			@Override
@@ -1876,12 +1891,28 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			@Override
 			public void onPageScrollStateChanged(int arg0) {}
 		});
+		
+		tabHost.setOnTabChangedListener(new OnTabChangeListener() 
+		{
+			@Override
+			public void onTabChanged(String tabId) 
+			{
+				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab(), true);
+			}
+		});
 	}
 	
-	private void setEmoticonArrows()
-	{
-		findViewById(R.id.emo_arrow_left).setVisibility((emoticonViewPager.getCurrentItem() > 0) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
-		findViewById(R.id.emo_arrow_right).setVisibility((emoticonViewPager.getCurrentItem() < emoticonViewPager.getChildCount() - 1) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
+	private class TabFactory implements TabContentFactory {
+
+		@Override
+		public View createTabContent(String tag) {
+			View v = new View(getApplicationContext());
+			v.setMinimumWidth(0);
+			v.setMinimumHeight(0);
+			return v;
+
+		}
+
 	}
 
 	private void groupChatDead()

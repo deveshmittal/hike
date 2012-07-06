@@ -22,9 +22,9 @@
     <color name="notif_subtext">#717069</color>
     <color name="credits_blue">#3e8ec3</color>
     <color name="emoticon_page_bg">#eef7f7f4</color>
-    <color name="list_selected">#f7f7f4</color>
+    <color name="list_selected">#efefec</color>
     <color name="list_pressed">#eaeae8</color>
-    <color name="other_list_selected">#eeeeeb</color>
+    <color name="other_list_selected">#efefec</color>
     <color name="other_list_pressed">#eaeae8</color>
     <color name="invite_all">#9c9a93</color>
     <color name="send_blue">#a1cfe6</color>

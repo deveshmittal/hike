@@ -1,8 +1,20 @@
 package com.bsb.hike;
 
+import static org.acra.ACRA.LOG_TAG;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
+
 import org.acra.ACRA;
+import org.acra.CrashReportData;
+import org.acra.ErrorReporter;
 import org.acra.ReportField;
 import org.acra.annotation.ReportsCrashes;
+import org.acra.sender.ReportSender;
+import org.acra.sender.ReportSenderException;
+import org.acra.util.HttpRequest;
 
 import android.app.Application;
 import android.content.Intent;
@@ -14,6 +26,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.bsb.hike.db.DbConversationListener;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -104,6 +119,10 @@ public class HikeMessengerApp extends Application
 
 	private boolean mInitialized;
 
+	private String token;
+
+	private String msisdn;
+
 	class IncomingHandler extends Handler
 	{
 		@Override
@@ -185,14 +204,76 @@ public class HikeMessengerApp extends Application
 		}
 	}
 
+	private class CustomReportSender implements ReportSender
+	{
+
+		@Override
+		public void send(CrashReportData crashReportData) throws ReportSenderException {
+			try {
+				final String reportUrl = AccountUtils.BASE + "/logs/android";
+				Log.d(LOG_TAG, "Connect to " + reportUrl.toString());
+
+				final String login = msisdn;
+				final String password = token;
+
+				if (login != null && password != null) 
+				{
+					final HttpRequest request = new HttpRequest(login, password);
+					String params = getParamsAsString(crashReportData);
+					Log.e(getClass().getSimpleName(), "Params: "+ params);
+					request.sendPost(reportUrl, params);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	/**
+     * Converts a Map of parameters into a URL encoded Sting.
+     *
+     * @param parameters    Map of parameters to convert.
+     * @return URL encoded String representing the parameters.
+     * @throws UnsupportedEncodingException if one of the parameters couldn't be converted to UTF-8.
+     */
+    private String getParamsAsString(Map<?,?> parameters) throws UnsupportedEncodingException {
+
+		final StringBuilder dataBfr = new StringBuilder();
+		for (final Object key : parameters.keySet()) {
+			if (dataBfr.length() != 0) {
+				dataBfr.append('&');
+			}
+			final Object preliminaryValue = parameters.get(key);
+            final Object value = (preliminaryValue == null) ? "" : preliminaryValue;
+			dataBfr.append(URLEncoder.encode(key.toString(), "UTF-8"));
+            dataBfr.append('=');
+            dataBfr.append(URLEncoder.encode(value.toString(), "UTF-8"));
+		}
+
+        return dataBfr.toString();
+    }
+
 	public void onCreate()
 	{
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+
 		ACRA.init(this);
+		CustomReportSender customReportSender = new CustomReportSender();
+        ErrorReporter.getInstance().setReportSender(customReportSender);
+
 		super.onCreate();
 
-		SmileyParser.init(this);
+		HikeConversationsDatabase.init(this);
+		HikeUserDatabase.init(this);
+		HikeMqttPersistence.init(this);
 
-		IconCacheManager.init(this);
+		SmileyParser.init(this);
+		
+		IconCacheManager.init();
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
 
@@ -201,8 +282,6 @@ public class HikeMessengerApp extends Application
 
 		mMessenger = new Messenger(new IncomingHandler());
 
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		if (token != null)
 		{
 			AccountUtils.setToken(token);

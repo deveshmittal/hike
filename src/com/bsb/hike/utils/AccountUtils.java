@@ -53,7 +53,7 @@ public class AccountUtils
 	
 	private static final int PORT = 8080;
 
-	private static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 

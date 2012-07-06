@@ -120,18 +120,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				msisdns.add(conv.getMsisdn());
 			}
 
-			try
-			{
-				db = new HikeConversationsDatabase(MessagesList.this);
-				db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
-			}
-			finally
-			{
-				if (db != null)
-				{
-					db.close();
-				}
-			}
+			db = HikeConversationsDatabase.getInstance();
+			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
 			return convs;
 		}
 
@@ -230,9 +220,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			mToolTip.setVisibility(View.VISIBLE);
 		}
 
-		HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		List<Conversation> conversations = db.getConversations();
-		db.close();
 
 		mConversationsByMSISDN = new HashMap<String, Conversation>(conversations.size());
 		mConversationsAdded = new HashSet<String>();
@@ -482,9 +471,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			// For updating the group name if some participant has joined or left the group
 			else if((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
-				HikeConversationsDatabase hCDB = new HikeConversationsDatabase(MessagesList.this);
+				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn()));
-				hCDB.close();
 			}
 			runOnUiThread(new Runnable(){
 				@Override
@@ -618,9 +606,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
 			String groupId = (String) object;
-			HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+			HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 			final String groupName = db.getGroupName(groupId);
-			db.close();
 
 			Conversation conv = mConversationsByMSISDN.get(groupId);
 			conv.setContactName(groupName);
@@ -629,7 +616,15 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		}
 		else if (HikePubSub.UPDATE_AVAILABLE.equals(type))
 		{
-			updateApp((Integer) object);
+			final int updateType = (Integer) object;
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					updateApp(updateType);
+				}
+			});
 		}
 	}
 
@@ -818,7 +813,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		TextView text = (TextView) mToolTip.findViewById(R.id.tool_tip);
 		((MarginLayoutParams)text.getLayoutParams()).setMargins((updateType == HikeConstants.NORMAL_UPDATE ? 0 : (int) (15*Utils.densityMultiplier)), 0, 0, 0);
-		text.setText(updateType == HikeConstants.NORMAL_UPDATE ? R.string.update_available : R.string.critical_update_available);
+		text.setText(this.accountPrefs.getString(HikeConstants.Extras.UPDATE_MESSAGE, ""));
 
 		if (!isToolTipShowing) {
 			Animation alphaIn = AnimationUtils.loadAnimation(MessagesList.this,

@@ -2,6 +2,8 @@ package com.bsb.hike.service;
 
 import java.util.Calendar;
 
+import org.json.JSONObject;
+
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -588,7 +590,11 @@ public class HikeService extends Service
 
 	private void sendUserStats()
 	{
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceStats(getApplicationContext()));
+		JSONObject obj = Utils.getDeviceStats(getApplicationContext());
+		if (obj != null) 
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+		}
 		scheduleNextUserStatsSending();
 	}
 

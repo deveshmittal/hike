@@ -219,11 +219,11 @@ public class HikeMqttManager implements Listener
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
-		this.convDb = new HikeConversationsDatabase(hikeService);
-		this.userDb = new HikeUserDatabase(hikeService);
+		this.convDb = HikeConversationsDatabase.getInstance();
+		this.userDb = HikeUserDatabase.getInstance();
 		mqttIdToPacket = Collections.synchronizedMap(new HashMap<Integer, HikePacket>());
 		this.handler = handler;
-		persistence = new HikeMqttPersistence(hikeService);
+		persistence = HikeMqttPersistence.getInstance();
 		mConnectTimeoutHandler = new ConnectTimeoutHandler();
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 		this.mqttMessageManager = MqttMessagesManager.getInstance(mHikeService);
@@ -276,9 +276,6 @@ public class HikeMqttManager implements Listener
 
 	public void finish()
 	{
-		this.persistence.close();
-		this.convDb.close();
-		this.userDb.close();
 		this.mqttMessageManager.close();
 	}
 
