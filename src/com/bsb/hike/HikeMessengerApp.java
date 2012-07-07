@@ -40,7 +40,6 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 
 @ReportsCrashes(formKey = "",
-				formUri = "http://im.hike.in:8080/v1/logs/android",
 				customReportContent = {
 										ReportField.APP_VERSION_CODE,
 										ReportField.APP_VERSION_NAME,
@@ -204,12 +203,17 @@ public class HikeMessengerApp extends Application
 		}
 	}
 
+	/*
+	 * Implement a Custom report sender to add our own custom msisdn and token for the username
+	 * and password
+	 */
 	private class CustomReportSender implements ReportSender
 	{
-
 		@Override
-		public void send(CrashReportData crashReportData) throws ReportSenderException {
-			try {
+		public void send(CrashReportData crashReportData) throws ReportSenderException 
+		{
+			try 
+			{
 				final String reportUrl = AccountUtils.BASE + "/logs/android";
 				Log.d(LOG_TAG, "Connect to " + reportUrl.toString());
 
@@ -219,13 +223,14 @@ public class HikeMessengerApp extends Application
 				if (login != null && password != null) 
 				{
 					final HttpRequest request = new HttpRequest(login, password);
-					String params = getParamsAsString(crashReportData);
-					Log.e(getClass().getSimpleName(), "Params: "+ params);
-					request.sendPost(reportUrl, params);
+					String paramsAsString = getParamsAsString(crashReportData);
+					Log.e(getClass().getSimpleName(), "Params: "+ paramsAsString);
+					request.sendPost(reportUrl, paramsAsString);
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} 
+			catch (IOException e) 
+			{
+				Log.e(getClass().getSimpleName(), "IOException", e);
 			}
 		}
 		
