@@ -87,7 +87,10 @@ public class WelcomeActivity extends Activity implements SignupTask.OnSignupTask
 			@Override
 			public void onClick(View v) 
 			{
-				startActivity(new Intent(WelcomeActivity.this, TermsAndConditionsActivity.class));
+				Intent intent = new Intent(WelcomeActivity.this, WebViewActivity.class);
+				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.T_AND_C_URL);
+				intent.putExtra(HikeConstants.Extras.TITLE, R.string.terms_privacy);
+				startActivity(intent);
 			}
 		});
 

@@ -360,7 +360,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 				new ProfileItem.ProfileSettingsItem("Free hike SMS left", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
 				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, R.xml.notification_preferences),
 				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
-				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, "http://www.bsb.im/about")
+				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, HikeConstants.HELP_URL)
 				};
 
 		for(int i = 0; i < items.length; i++)

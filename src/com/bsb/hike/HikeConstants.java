@@ -44,6 +44,9 @@ public class HikeConstants
 
 	public static final String SEPARATOR = " - ";
 
+	public static final String HELP_URL = "http://www.hike.in/help/android";
+	public static final String T_AND_C_URL = "http://www.hike.in/terms";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 
@@ -122,6 +125,8 @@ public class HikeConstants
 		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip"; 
 		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
 		public static final String UPDATE_MESSAGE = "updateMessage";
+		public static final String URL_TO_LOAD = "urlToLoad";
+		public static final String TITLE = "title";
 	}
 
 	public static final class LogEvent

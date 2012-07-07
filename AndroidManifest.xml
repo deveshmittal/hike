@@ -108,7 +108,7 @@
         <activity android:name=".ui.CreditsActivity"
             android:theme="@style/NoTitleBar" >
         </activity>
-        <activity android:name=".ui.TermsAndConditionsActivity"
+        <activity android:name=".ui.WebViewActivity"
             android:theme="@style/NoTitleBar" >
         </activity>
         <receiver android:name=".service.BootService" >
