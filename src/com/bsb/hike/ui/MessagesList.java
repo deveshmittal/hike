@@ -717,6 +717,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	{
 		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
 		{
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UPDATE_TOOL_TIP_CLOSED);
 			Editor editor = accountPrefs.edit();
 			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP, false);
 			//Doing this so that we show this tip after the user has opened the home screen a few times.
@@ -739,7 +740,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	{
 		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
 		{
-			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();	
+			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UPDATE_TOOL_TIP_CLICKED);
 			hideToolTip();
 			return;
 		}
@@ -785,10 +787,12 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	{
 		if (v.getId() != R.id.overlay_layout) 
 		{
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UDPATE_OVERLAY_BUTTON_CLICKED);
 			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();
 		}
 		else
 		{
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UPDATE_OVERLAY_DISMISSED);
 			Editor editor = accountPrefs.edit();
 			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_OVERLAY, false);
 			editor.commit();
