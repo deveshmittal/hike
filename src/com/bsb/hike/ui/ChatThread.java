@@ -701,20 +701,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onOverlayButtonClick(View v)
 	{
 		/* user clicked the unblock button in the chat-screen */
-		hideOverlay();
-		if (v.getId() != R.id.info_layout && blockOverlay) 
+		if (v.getId() != R.id.overlay_layout && blockOverlay) 
 		{
 			mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
 			mUserIsBlocked = false;
 			mComposeView.setEnabled(true);
+			hideOverlay();
 		}
-		else if(v.getId() != R.id.info_layout)
+		else if(v.getId() != R.id.overlay_layout)
 		{
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.INVITE_OVERLAY_BUTTON);
 			inviteUser();
+			hideOverlay();
 		}
+
 		if(!blockOverlay)
 		{
+			hideOverlay();
 			mConversationDb.setOverlay(true, mConversation.getMsisdn());
 		}
 	}

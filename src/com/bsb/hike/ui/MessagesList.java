@@ -783,7 +783,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	public void onOverlayButtonClick(View v)
 	{
-		if (v.getId() != R.id.info_layout) 
+		if (v.getId() != R.id.overlay_layout) 
 		{
 			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();
 		}
