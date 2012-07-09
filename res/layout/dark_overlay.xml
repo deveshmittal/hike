@@ -4,56 +4,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/transparent_black"
+    android:onClick="onOverlayButtonClick"
     android:visibility="gone" >
 
-    <RelativeLayout
-        android:id="@+id/info_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/overlay_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="32dp"
+        android:layout_marginRight="32dp"
+        android:bufferType="spannable"
+        android:gravity="center"
+        android:text="@string/block_overlay_message"
+        android:textColor="@color/white"
+        android:textSize="18dp" />
+
+    <ImageView
+        android:id="@+id/overlay_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/overlay_message"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="25dp"
+        android:src="@drawable/ic_no" />
+
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/overlay_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/overlay_message"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/rounded_button"
         android:onClick="onOverlayButtonClick"
-        android:visibility="visible" >
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/overlay_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_marginLeft="32dp"
-            android:layout_marginRight="32dp"
-            android:bufferType="spannable"
-            android:gravity="center"
-            android:text="@string/block_overlay_message"
-            android:textColor="@color/white"
-            android:textSize="18dp" />
-
-        <ImageView
-            android:id="@+id/overlay_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/overlay_message"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="25dp"
-            android:src="@drawable/ic_no" />
-
-        <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/overlay_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/overlay_message"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp"
-            android:background="@drawable/rounded_button"
-            android:onClick="onOverlayButtonClick"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:shadowColor="#000000"
-            android:shadowDx="-0.5"
-            android:shadowDy="-0.5"
-            android:shadowRadius="1"
-            android:text="@string/unblock_title"
-            android:textColor="@color/white"
-            android:textSize="18dp"
-            android:textStyle="bold" />
-    </RelativeLayout>
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:shadowColor="#000000"
+        android:shadowDx="-0.5"
+        android:shadowDy="-0.5"
+        android:shadowRadius="1"
+        android:text="@string/unblock_title"
+        android:textColor="@color/white"
+        android:textSize="18dp"
+        android:textStyle="bold" />
 
 </RelativeLayout>

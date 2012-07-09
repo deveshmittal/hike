@@ -117,7 +117,7 @@
                 android:paddingRight="15dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:src="@drawable/emo_im_happy" />
+                android:src="@drawable/emo_im_83_haha" />
 
             <ImageView
                 android:id="@+id/btn_ok"
@@ -131,7 +131,7 @@
                 android:paddingRight="15dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:src="@drawable/emo_im_straight_face" />
+                android:src="@drawable/emo_im_99_nothing" />
 
             <ImageView
                 android:id="@+id/btn_sad"
@@ -143,7 +143,7 @@
                 android:paddingRight="15dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:src="@drawable/emo_im_sad" />
+                android:src="@drawable/emo_im_108_unhappy" />
         </LinearLayout>
     </LinearLayout>
 

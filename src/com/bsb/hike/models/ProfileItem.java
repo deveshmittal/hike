@@ -3,7 +3,6 @@ package com.bsb.hike.models;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,6 +12,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.Utils;
 
 public abstract class ProfileItem
@@ -25,19 +25,21 @@ public abstract class ProfileItem
 	static public class ProfileLinkItem extends ProfileItem
 	{
 
-		private Uri url;
+		private String url;
 
 		public ProfileLinkItem(String title, int icon, String url)
 		{
 			super(title, icon);
-			this.url = Uri.parse(url);
+			this.url = url;
 		}
 
 		@Override
 		public Intent getIntent(Context context)
 		{
-			return null;
-//			return new Intent(Intent.ACTION_VIEW, this.url);
+			Intent intent = new Intent(context, WebViewActivity.class);
+			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, this.url);
+			intent.putExtra(HikeConstants.Extras.TITLE, "Help");
+			return intent;
 		}
 
 		@Override

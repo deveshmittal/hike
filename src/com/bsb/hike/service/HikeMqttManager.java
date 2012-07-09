@@ -36,6 +36,7 @@ import com.bsb.hike.mqtt.msg.ConnAckMessage.ConnectionStatus;
 import com.bsb.hike.mqtt.msg.QoS;
 import com.bsb.hike.pubsub.Topic;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.Utils;
 
 /**
  * @author vr
@@ -468,7 +469,7 @@ public class HikeMqttManager implements Listener
 			//
 			// have we lost our data connection?
 			//
-			if (this.mHikeService.isUserOnline() == false)
+			if (!Utils.isUserOnline(mHikeService))
 			{
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
 
@@ -555,7 +556,7 @@ public class HikeMqttManager implements Listener
 			return;
 		}
 
-		if (this.mHikeService.isUserOnline())
+		if (Utils.isUserOnline(mHikeService))
 		{
 			Log.d("HikeMqttManager", "netconnection valid, try to connect");
 			// set the status to show we're trying to connect

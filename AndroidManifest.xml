@@ -108,7 +108,7 @@
         <activity android:name=".ui.CreditsActivity"
             android:theme="@style/NoTitleBar" >
         </activity>
-        <activity android:name=".ui.TermsAndConditionsActivity"
+        <activity android:name=".ui.WebViewActivity"
             android:theme="@style/NoTitleBar" >
         </activity>
         <receiver android:name=".service.BootService" >
@@ -122,6 +122,14 @@
 				<data android:scheme="package"/>                
             </intent-filter>
         </receiver>
+		<receiver
+		    android:name=".service.ReferralReceiver"
+		    android:exported="true" >
+		    <intent-filter>
+		        <action android:name="com.android.vending.INSTALL_REFERRER" />
+		    </intent-filter>
+		</receiver>
+        
     </application>
 
 </manifest>
