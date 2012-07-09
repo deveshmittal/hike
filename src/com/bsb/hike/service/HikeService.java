@@ -523,7 +523,7 @@ public class HikeService extends Service
 			WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
 			wl.acquire();
 
-			if (isUserOnline())
+			if (Utils.isUserOnline(HikeService.this))
 			{
 				mHandler.post(new Runnable() {
 					@Override
@@ -649,17 +649,6 @@ public class HikeService extends Service
 
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
-	}
-
-	public boolean isUserOnline()
-	{
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-		if (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected())
-		{
-			return true;
-		}
-
-		return false;
 	}
 
 	public boolean appIsConnected()
