@@ -30,7 +30,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 			JSONObject obj = Utils.getDeviceDetails(context);
 			if (obj != null) 
 			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(context));
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 			}
 
 			/*

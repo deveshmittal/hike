@@ -282,7 +282,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				JSONObject obj = Utils.getDeviceDetails(MessagesList.this);
 				if (obj != null) 
 				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.getDeviceDetails(MessagesList.this));
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 				}
 			}
 		}, 10 * 1000);
