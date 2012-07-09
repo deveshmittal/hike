@@ -169,6 +169,8 @@ public class WelcomeActivity extends Activity implements SignupTask.OnSignupTask
 	{
 		if (v.getId() == mAcceptButton.getId())
 		{
+			// Disable the t and c button
+			tcText.setEnabled(false);
 			loadingLayout.setVisibility(View.VISIBLE);
 			mAcceptButton.setVisibility(View.GONE);
 			SignupTask.startTask(this);
