@@ -15,7 +15,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -134,6 +133,8 @@ public class HikeService extends Service
 
 	// constant used internally to send user stats
 	public static final String MQTT_USER_STATS_SEND_ACTION = "com.bsb.hike.USER_STATS";
+
+	public static final String MQTT_CONTACT_SYNC_ACTION = "com.bsb.hike.CONTACT_SYNC";
 	
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
@@ -155,6 +156,9 @@ public class HikeService extends Service
 
 	// receiver that sends the user stats once every 24 hours
 	private UserStatsSender userStatsSender;
+
+	// receiver that triggers a contact sync
+	private ManualContactSyncTrigger manualContactSyncTrigger;
 
 	private HikeMqttManager mMqttManager;
 	private String mToken;
@@ -231,8 +235,16 @@ public class HikeService extends Service
 		contactsReceived = new ContactListChangeIntentReceiver(new Handler());
 		/* listen for changes in the addressbook */
 		getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
-		/* listen for changes on the simcard */
-		getContentResolver().registerContentObserver(Uri.parse("content://icc/adn"), true, contactsReceived);
+		if(manualContactSyncTrigger == null)
+		{
+			manualContactSyncTrigger = new ManualContactSyncTrigger();
+			registerReceiver(manualContactSyncTrigger, new IntentFilter(MQTT_CONTACT_SYNC_ACTION));
+			/*
+			 *  Forcing a sync first time service is created to fix bug where if the app is force stopped
+			 *  no contacts are synced if they are added when the app is in force stopped state 
+			 */
+			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
+		}
 	}
 
 	@Override
@@ -365,6 +377,12 @@ public class HikeService extends Service
 			unregisterReceiver(userStatsSender);
 			userStatsSender = null;
 		}
+
+		if(manualContactSyncTrigger != null)
+		{
+			unregisterReceiver(manualContactSyncTrigger);
+			manualContactSyncTrigger = null;
+		}
 	}
 
 	/************************************************************************/
@@ -443,6 +461,8 @@ public class HikeService extends Service
 			HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
 			HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
 			Log.d("ContactListChangeIntentReceiver", "onChange called");
+			// Schedule the next manual sync to happed 24 hours from now.
+			scheduleNextManualContactSync();
 		}
 	}
 
@@ -586,6 +606,28 @@ public class HikeService extends Service
 		{
 			sendUserStats();
 		}
+	}
+
+	private class ManualContactSyncTrigger extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive(Context context, Intent intent) 
+		{
+			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
+		}
+	}
+
+	private void scheduleNextManualContactSync()
+	{
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(MQTT_CONTACT_SYNC_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+
+		Calendar wakeUpTime = Calendar.getInstance();
+		wakeUpTime.add(Calendar.HOUR, 24);
+
+		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+		// Cancel any pending alarms with this pending intent
+		aMgr.cancel(pendingIntent);
+		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
 	}
 
 	private void sendUserStats()
