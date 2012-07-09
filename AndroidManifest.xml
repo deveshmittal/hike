@@ -122,6 +122,14 @@
 				<data android:scheme="package"/>                
             </intent-filter>
         </receiver>
+		<receiver
+		    android:name=".service.ReferralReceiver"
+		    android:exported="true" >
+		    <intent-filter>
+		        <action android:name="com.android.vending.INSTALL_REFERRER" />
+		    </intent-filter>
+		</receiver>
+        
     </application>
 
 </manifest>

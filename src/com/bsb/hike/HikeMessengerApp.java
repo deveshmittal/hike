@@ -72,6 +72,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String ANALYTICS = "analytics";
 
+	public static final String REFERRAL = "referral";
+
 	public static final String ADDRESS_BOOK_SCANNED = "abscanned";
 
 	public static final String CONTACT_LIST_EMPTY = "contactlistempty";

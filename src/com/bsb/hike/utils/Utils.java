@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.NameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -561,6 +563,14 @@ public class Utils
 			String appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0 ).versionName;
 
 			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+			Map<String, String> referralValues = retrieveReferralParams(context);
+			if(!referralValues.isEmpty())
+			{
+				for(Entry<String, String> entry: referralValues.entrySet())
+				{
+					data.put(entry.getKey(), entry.getValue());
+				}
+			}
 			data.put(HikeConstants.LogEvent.TAG, "cbs");
 			data.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
 			data.put(HikeConstants.LogEvent.OS, os);
@@ -708,6 +718,48 @@ public class Utils
 			return false;
 		}
 	}
+	
+	 /*
+     * Stores the referral parameters in the app's sharedPreferences.
+     */
+    public static void storeReferralParams(Context context, List<NameValuePair> params)
+    {
+        SharedPreferences storage = context.getSharedPreferences(HikeMessengerApp.REFERRAL, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = storage.edit();
+ 
+        for(NameValuePair nameValuePair: params)
+        {
+        	String name = nameValuePair.getName();
+            String value = nameValuePair.getValue();
+            editor.putString(name, value);
+        }
+ 
+        editor.commit();
+    }
+ 
+    /*
+     * Returns a map with the Market Referral parameters pulled from the sharedPreferences.
+     */
+    public static Map<String, String> retrieveReferralParams(Context context)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        SharedPreferences storage = context.getSharedPreferences(HikeMessengerApp.REFERRAL, Context.MODE_PRIVATE);
+ 
+        for(String key : storage.getAll().keySet())
+        {
+            String value = storage.getString(key, null);
+            if(value != null)
+            {
+                params.put(key, value);
+            }
+        }
+        // We don't need these values anymore
+        Editor editor = storage.edit();
+        editor.clear();
+        editor.commit();
+        return params;
+    }
+
     
     public static boolean isUserOnline(Context context)
 	{
