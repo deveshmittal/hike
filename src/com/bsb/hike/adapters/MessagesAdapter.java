@@ -268,7 +268,7 @@ public class MessagesAdapter extends BaseAdapter
 				markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().getFirstName(), markedUp);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
-			markedUp = smileyParser.addSmileySpans(markedUp);
+			markedUp = smileyParser.addSmileySpans(markedUp, false);
 			holder.messageTextView.setText(markedUp);
 			Linkify.addLinks(holder.messageTextView, Linkify.ALL);
 			Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");

@@ -89,7 +89,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			else
 			{
 				SmileyParser smileyParser = SmileyParser.getInstance();
-				markedUp = smileyParser.addSmileySpans(message.getMessage());
+				markedUp = smileyParser.addSmileySpans(message.getMessage(), true);
 				// For showing the name of the contact that sent the message in a group chat
 				if(conversation instanceof GroupConversation && !TextUtils.isEmpty(message.getGroupParticipantMsisdn()) && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 				{

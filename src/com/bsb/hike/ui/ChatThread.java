@@ -1841,24 +1841,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			tabHost = (TabHost) findViewById(android.R.id.tabhost);
 			tabHost.setup();
 			
-			TextView tabHead = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
-			
+			ImageView tabHead = (ImageView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
 			TabSpec ts1 = tabHost.newTabSpec("tab1");
-			tabHead.setText("Tab1");
+			tabHead.setImageResource(R.drawable.emo_im_01_bigsmile);
 			ts1.setIndicator(tabHead);
 			ts1.setContent(new TabFactory());
 			tabHost.addTab(ts1);
 
-			TextView tabHead2 = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			ImageView tabHead2 = (ImageView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
 			TabSpec ts2 = tabHost.newTabSpec("tab2");
-			tabHead2.setText("Tab2");
+			tabHead2.setImageResource(R.drawable.emo_im_81_exciting);
 			ts2.setIndicator(tabHead2);
 			ts2.setContent(new TabFactory());
 			tabHost.addTab(ts2);
 
-			TextView tabHead3 = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			ImageView tabHead3 = (ImageView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
 			TabSpec ts3 = tabHost.newTabSpec("tab3");
-			tabHead3.setText("Tab3");
+			tabHead3.setImageResource(R.drawable.emo_im_111_grin);
 			ts3.setIndicator(tabHead3);
 			ts3.setContent(new TabFactory());
 			tabHost.addTab(ts3);

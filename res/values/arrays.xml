@@ -17,42 +17,155 @@
  -->
 <resources>
     <string-array name="default_smiley_texts">
-      <item>:-)</item>
-      <item>:-(</item>
-      <item>;-)</item>
-      <item>:-P</item>
-      <item>=-O</item>
-      <item>:-*</item>
-      <item>:O</item>
-      <item>B-)</item>
-      <item>:-$</item>
-      <item>:-!</item>
-      <item>:-[</item>
-      <item>O:-)</item>
-      <item>:-\\</item>
-      <item>:\'(</item>
-      <item>:-X</item>
-      <item>:-D</item>
-      <item>o_O</item>
-    </string-array>
-
-    <string-array name="default_smiley_names">
-        <item>Happy</item>                   <!-- 0: :-) -->
-        <item>Sad</item>                     <!-- 1: :-( -->
-        <item>Winking</item>                 <!-- 2: ;-) -->
-        <item>Tongue sticking out</item>     <!-- 3: :-P -->
-        <item>Surprised</item>               <!-- 4: =-O -->
-        <item>Kissing</item>                 <!-- 5: :-* -->
-        <item>Yelling</item>                 <!-- 6: :O -->
-        <item>Cool</item>                    <!-- 7: B-) -->
-        <item>Money mouth</item>             <!-- 8: :-$ -->
-        <item>Foot in mouth</item>           <!-- 9: :-! -->
-        <item>Embarrassed</item>             <!-- 10: :-[ -->
-        <item>Angel</item>                   <!-- 11: O:-) -->
-        <item>Undecided</item>               <!-- 12: :-\\ -->
-        <item>Crying</item>                  <!-- 13: :\'( -->
-        <item>Lips are sealed</item>         <!-- 14: :-X -->
-        <item>Laughing</item>                <!-- 15: :-D -->
-        <item>Confused</item>                <!-- 16: o_O -->
+        <item>:))</item> <!-- 01 bigsmile -->
+        <item>:-)</item> <!-- 02 happy -->
+        <item>:-D</item> <!-- 03 laugh -->
+        <item>=)</item> <!-- 04 smile -->
+        <item>;)</item> <!-- 05 wink -->
+        <item>:-X</item> <!-- 06 adore -->
+        <item>:-*</item> <!-- 07 kiss -->
+        <item>(kissed)</item> <!-- 08 kissed -->
+        <item>:-|</item> <!-- 09 expressionless -->
+        <item>:\")</item> <!-- 10 pudently -->
+        <item>^.^</item> <!-- 11 satisfied -->
+        <item>(giggle)</item> <!-- 12 giggle -->
+        <item>:-P</item> <!-- 13 impish -->
+        <item>=\</item> <!-- 14 disappointment -->
+        <item>;-)</item> <!-- 15 beuptonogood -->
+        <item>X[</item> <!-- 16 frustrated -->
+        <item>:-(</item> <!-- 17 sad -->
+        <item>:?-(</item> <!-- 18 sorry -->
+        <item>:\'-(</item> <!-- 19 cry -->
+        <item>l-o</item> <!-- 20 boring -->
+        <item>:0</item> <!-- 21 hungry -->
+        <item>(scared)</item> <!-- 22 scared -->
+        <item>o_o</item> <!-- 23 shock -->
+        <item>(sweat)</item> <!-- 24 sweat -->
+        <item>T_T</item> <!-- 25 crying -->
+        <item>:D</item> <!-- 26 lol -->
+        <item>:o</item> <!-- 27 woo -->
+        <item>:-O</item> <!-- 28 surprise -->
+        <item>:-&lt;</item> <!-- 29 frown -->
+        <item>X(</item> <!-- 30 angry -->
+        <item>(wornout)</item> <!-- 31 wornout -->
+        <item>(stop)</item> <!-- 32 stop -->
+        <item>X-(</item> <!-- 33 furious -->
+        <item>(smoking)</item> <!-- 34 smoking -->
+        <item>XD</item> <!-- 35 hysterical -->
+        <item>:@</item> <!-- 36 exclamation -->
+        <item>:-Q</item> <!-- 37 question -->
+        <item>u_u</item> <!-- 38 sleep -->
+        <item>:-Z</item> <!-- 39 aggressive -->
+        <item>:-=</item> <!-- 40 badly -->
+        <item>(^o^)</item> <!-- 41 singing -->
+        <item>(@=)</item> <!-- 42 bomb -->
+        <item>b-(</item> <!-- 43 beaten -->
+        <item>:-q</item> <!-- 44 thumbsdown -->
+        <item>:-b</item> <!-- 45 thumbsup -->
+        <item>(beer)</item> <!-- 46 beer -->
+        <item>:-c</item> <!-- 47 call -->
+        <item>(hi)</item> <!-- 48 hi -->
+        <item>(hug)</item> <!-- 49 hug -->
+        <item>(face palm)</item> <!-- 50 facepalm -->
+        <item>$-)</item> <!-- 51 easymoney -->
+        <item>%-}</item> <!-- 52 dizzy -->
+        <item>DX</item> <!-- 53 disgust -->
+        <item>(\_/)</item> <!-- 54 cocktail -->
+        <item>(coffee)</item> <!-- 55 coffee -->
+        <item>:-`|</item> <!-- 56 cold -->
+        <item>B-)</item> <!-- 57 cool -->
+        <item>:-E</item> <!-- 58 despair -->
+        <item>(@-))</item> <!-- 59 hypnotic -->
+        <item>%-)</item> <!-- 60 stars -->
+        <item>!:-)</item> <!-- 61 idea -->
+        <item>(monocle)</item> <!-- 62 monocle -->
+        <item>(movie)</item> <!-- 63 movie -->
+        <item>(music)</item> <!-- 64 music -->
+        <item>:-B</item> <!-- 65 nerd -->
+        <item>(ninja)</item> <!-- 66 ninja -->
+        <item>&lt;:o)</item> <!-- 67 party -->
+        <item>P-(</item> <!-- 68 pirate -->
+        <item>:-@</item> <!-- 69 rage -->
+        <item>(@>---)</item> <!-- 70 rose -->
+        <item>:-s</item> <!-- 71 sick -->
+        <item>(snotty)</item> <!-- 72 snotty -->
+        <item>-.-</item> <!-- 73 stressed -->
+        <item>(struggle)</item> <!-- 74 struggle -->
+        <item>(study)</item> <!-- 75 study -->
+        <item>O:-)</item> <!-- 76 sweetangel -->
+        <item>*-)</item> <!-- 77 thinking -->
+        <item>:-w</item> <!-- 78 waiting -->
+        <item>:-"</item> <!-- 79 whistling -->
+        <item>(yawn)</item> <!-- 80 yawn -->
+        <item>(exciting1)</item> <!-- 81 exciting -->
+        <item>(big smile1)</item> <!-- 82 big smile -->
+        <item>(haha1)</item> <!-- 83 haha -->
+        <item>(victory1)</item> <!-- 84 victory -->
+        <item>(red heart1)</item> <!-- 85 red heart -->
+        <item>(amazing1)</item> <!-- 86 amazing -->
+        <item>(black heart1)</item> <!-- 87 black heart -->
+        <item>(what1)</item> <!-- 88 what -->
+        <item>(bad smile1)</item> <!-- 89 bad smile -->
+        <item>(bad egg1)</item> <!-- 90 bad egg -->
+        <item>(grimace1)</item> <!-- 91 grimace -->
+        <item>(girl1)</item> <!-- 92 girl -->
+        <item>(greedy1)</item> <!-- 93 greedy -->
+        <item>(anger1)</item> <!-- 94 anger -->
+        <item>(eyes droped1)</item> <!-- 95 eyes droped -->
+        <item>(happy1)</item> <!-- 96 happy -->
+        <item>(horror1)</item> <!-- 97 horror -->
+        <item>(money1)</item> <!-- 98 money -->
+        <item>(nothing1)</item> <!-- 99 nothing -->
+        <item>(nothing to say1)</item> <!-- 100 nothing to say -->
+        <item>(cry1)</item> <!-- 101 cry -->
+        <item>(scorn1)</item> <!-- 102 scorn -->
+        <item>(secret smile1)</item> <!-- 103 secret smile -->
+        <item>(shame1)</item> <!-- 104 shame -->
+        <item>(shocked1)</item> <!-- 105 shocked -->
+        <item>(super man1)</item> <!-- 106 super man -->
+        <item>(iron man1)</item> <!-- 107 the iron man -->
+        <item>(unhappy1)</item> <!-- 108 unhappy -->
+        <item>(electric shock1)</item> <!-- 109 electric shock -->
+        <item>(beaten1)</item> <!-- 110 beaten -->
+        <item>(grin2)</item> <!-- 111 grin -->
+        <item>(happy2)</item> <!-- 112 happy -->
+        <item>(fake smile2)</item> <!-- 113 fake smile -->
+        <item>(in love2)</item> <!-- 114 in love -->
+        <item>(kiss2)</item> <!-- 115 kiss -->
+        <item>(straight face2)</item> <!-- 116 straight face -->
+        <item>(meow2)</item> <!-- 117 meaw -->
+        <item>(drunk2)</item> <!-- 118 drunk -->
+        <item>(x_x2)</item> <!-- 119 x x -->
+        <item>(kidding right2)</item> <!-- 120 youre kidding right -->
+        <item>(o_o2)</item> <!-- 121 o o -->
+        <item>(sweat2)</item> <!-- 122 sweat -->
+        <item>(nerd2)</item> <!-- 123 nerd -->
+        <item>(angry2)</item> <!-- 124 angry -->
+        <item>(disappearing2)</item> <!-- 125 disappearing -->
+        <item>(dizzy2)</item> <!-- 126 dizzy -->
+        <item>(music2)</item> <!-- 127 music -->
+        <item>(evilish)</item> <!-- 128 evilish -->
+        <item>(graffiti)</item> <!-- 129 graffiti -->
+        <item>(omg2)</item> <!-- 130 omg -->
+        <item>(on fire2)</item> <!-- 131 on fire -->
+        <item>(ouch2)</item> <!-- 132 ouch -->
+        <item>(angry2)</item> <!-- 133 angry -->
+        <item>(business2)</item> <!-- 134 serious business -->
+        <item>(sick2)</item> <!-- 135 sick -->
+        <item>(slow2)</item> <!-- 136 slow -->
+        <item>(snooty2)</item> <!-- 137 snooty -->
+        <item>(suspicious2)</item> <!-- 138 suspicious -->
+        <item>(crying2)</item> <!-- 139 crying -->
+        <item>(want2)</item> <!-- 140 want -->
+        <item>(gonna die2)</item> <!-- 141 we all gonna die -->
+        <item>(wut2)</item> <!-- 142 wut -->
+        <item>(boo2)</item> <!-- 143 boo -->
+        <item>(xd2)</item> <!-- 144 xd -->
+        <item>(kaboom2)</item> <!-- 145 kaboom -->
+        <item>(yarr2)</item> <!-- 146 yarr -->
+        <item>(ninja2)</item> <!-- 147 ninja -->
+        <item>(yuush2)</item> <!-- 148 yuush -->
+        <item>(brains2)</item> <!-- 149 brains -->
+        <item>(sleeping2)</item> <!-- 150 sleeping -->
     </string-array>
 </resources>
