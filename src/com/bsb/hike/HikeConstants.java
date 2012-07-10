@@ -188,7 +188,7 @@ public class HikeConstants
 	    /* 
 	     * Chat thread screen events
 	     * <screen> = chatS
-	     * <event> = inVtiPN, inVtopB, blocK, forMsg, infoB, invOB, invOBD
+	     * <event> = inVtiPN, inVtopB, blocK, forMsg, infoB, invOB, invOBD, opTiNtaP
 	     */
 	    public static final String CHAT_INVITE_TOOL_TIP_CLOSED = "chatSinVtiPN";
 	    public static final String CHAT_INVITE_TOP_BUTTON = "chatSinVtopB";
@@ -197,6 +197,7 @@ public class HikeConstants
 	    public static final String I_BUTTON = "chatSinfoB";
 	    public static final String INVITE_OVERLAY_BUTTON = "chatSinvOB";
 	    public static final String INVITE_OVERLAY_DISMISS = "chatSinvOBD";
+	    public static final String OPT_IN_TAP_HERE = "chatSopTiNtaP";
 	    
 	    /* 
 	     * Credits screen events
