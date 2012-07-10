@@ -59,7 +59,7 @@ public class MessageMetadata
 				!TextUtils.isEmpty(dndMissedCallNumber) ? 
 						R.string.dnd_message : !newUser ? 
 								R.string.friend_joined_hike_no_creds : R.string.friend_joined_hike_with_creds, 
-								convMessage.getConversation().getLabel(), 
+								convMessage.getConversation().getLabel().split(" ", 2)[0], 
 								dndMissedCallNumber);
 		Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
 		int index = message.indexOf(content);
