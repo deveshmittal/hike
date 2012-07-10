@@ -59,7 +59,7 @@
 	<string name="dnd"> Due to SMS regulations, friends on the Do Not Disturb (DND) list need to opt in to hike to receive your free SMS.</string>
 	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 10 more!</string>
 	<string name="dnd_message">We can\'t send %1$s a message as this person is on the DND list. For %1$s to receive hike messages he needs to opt-in to hike by giving a missed call to %2$s.\n\nYou\'ll get an extra 10 free SMS\' per month if %1$s opts-in!\n\nTo send this information to %1$s as a normal SMS, tap here.</string>
-	<string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s.\n\nIf you\'re on Android, download the app at http://get.hike.in.</string>
+	<string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s.</string>
 	<string name="edit_profile">Edit Profile</string>
 	<string name="no_sd_card">Please insert an SD Card</string>
 	<string name="press_btn_invite">Tap this button to invite %1$s to hike.</string>
