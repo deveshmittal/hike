@@ -1841,23 +1841,25 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			tabHost = (TabHost) findViewById(android.R.id.tabhost);
 			tabHost.setup();
 			
-			ImageView tabHead = (ImageView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			View tabHead = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
 			TabSpec ts1 = tabHost.newTabSpec("tab1");
-			tabHead.setImageResource(R.drawable.emo_im_01_bigsmile);
+			((ImageView)tabHead.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_01_bigsmile);
+			tabHead.findViewById(R.id.divider_left).setVisibility(View.GONE);
 			ts1.setIndicator(tabHead);
 			ts1.setContent(new TabFactory());
 			tabHost.addTab(ts1);
 
-			ImageView tabHead2 = (ImageView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			View tabHead2 = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
 			TabSpec ts2 = tabHost.newTabSpec("tab2");
-			tabHead2.setImageResource(R.drawable.emo_im_81_exciting);
+			((ImageView)tabHead2.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_81_exciting);
 			ts2.setIndicator(tabHead2);
 			ts2.setContent(new TabFactory());
 			tabHost.addTab(ts2);
 
-			ImageView tabHead3 = (ImageView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			View tabHead3 = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
 			TabSpec ts3 = tabHost.newTabSpec("tab3");
-			tabHead3.setImageResource(R.drawable.emo_im_111_grin);
+			((ImageView)tabHead3.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_111_grin);
+			tabHead3.findViewById(R.id.divider_right).setVisibility(View.GONE);
 			ts3.setIndicator(tabHead3);
 			ts3.setContent(new TabFactory());
 			tabHost.addTab(ts3);

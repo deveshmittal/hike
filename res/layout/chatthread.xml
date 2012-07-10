@@ -109,7 +109,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="192dp"
                 android:layout_alignParentBottom="true"
-                android:background="@color/emoticon_page_bg"
+                android:background="@color/offwhite"
                 android:visibility="invisible" >
 
                 <include layout="@layout/emoticon_layout" />
