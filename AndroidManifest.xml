@@ -109,6 +109,7 @@
             android:theme="@style/NoTitleBar" >
         </activity>
         <activity android:name=".ui.WebViewActivity"
+            android:configChanges="orientation|keyboardHidden"
             android:theme="@style/NoTitleBar" >
         </activity>
         <receiver android:name=".service.BootService" >
