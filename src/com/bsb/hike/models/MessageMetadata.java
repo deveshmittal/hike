@@ -15,6 +15,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.utils.Utils;
 
 public class MessageMetadata
 {
@@ -58,7 +59,7 @@ public class MessageMetadata
 				!TextUtils.isEmpty(dndMissedCallNumber) ? 
 						R.string.dnd_message : !newUser ? 
 								R.string.friend_joined_hike_no_creds : R.string.friend_joined_hike_with_creds, 
-								convMessage.getConversation().getLabel(), 
+								convMessage.getConversation().getLabel().split(" ", 2)[0], 
 								dndMissedCallNumber);
 		Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
 		int index = message.indexOf(content);
@@ -72,6 +73,7 @@ public class MessageMetadata
 					Intent intent = !TextUtils.isEmpty(dndMissedCallNumber) ? new Intent(Intent.ACTION_VIEW) : new Intent(context, CreditsActivity.class);
 					if (!TextUtils.isEmpty(dndMissedCallNumber)) 
 					{
+						Utils.logEvent(context, HikeConstants.LogEvent.OPT_IN_TAP_HERE);
 						intent = new Intent(Intent.ACTION_VIEW);
 						intent.setData(Uri.parse("sms:" + convMessage.getMsisdn()));
 						intent.putExtra("sms_body", context.getString(R.string.dnd_invite_message, dndMissedCallNumber));

@@ -778,7 +778,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	private void updateAppOverlay()
 	{
 		findViewById(R.id.overlay_layout).setVisibility(View.VISIBLE);
-		((TextView)findViewById(R.id.overlay_message)).setText("Update available!");
+		((TextView)findViewById(R.id.overlay_message)).setText(this.accountPrefs.getString(HikeConstants.Extras.UPDATE_MESSAGE, ""));
 		((ImageView)findViewById(R.id.overlay_image)).setImageResource(R.drawable.ic_update);
 		((Button)findViewById(R.id.overlay_button)).setText("Update now");
 	}

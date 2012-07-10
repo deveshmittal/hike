@@ -213,7 +213,6 @@ public class CropImage extends MonitoredActivity {
 					public void run() {
 						if (b != mBitmap && b != null) {
 							mImageView.setImageBitmapResetBase(b, true);
-							mBitmap.recycle();
 							mBitmap = b;
 						}
 						if (mImageView.getScale() == 1F) {
@@ -281,12 +280,8 @@ public class CropImage extends MonitoredActivity {
 		if (mOutputX != 0 && mOutputY != 0) {
 			if (mScale) {
 				/* Scale the image to the required dimensions */
-				Bitmap old = croppedImage;
 				croppedImage = Util.transform(new Matrix(),
 						croppedImage, mOutputX, mOutputY, mScaleUp);
-				if (old != croppedImage) {
-					old.recycle();
-				}
 			} else {
 
 				/* Don't scale the image crop it to the size requested.
@@ -316,7 +311,6 @@ public class CropImage extends MonitoredActivity {
 				canvas.drawBitmap(mBitmap, srcRect, dstRect, null);
 
 				/* Set the cropped bitmap as the new bitmap */
-				croppedImage.recycle();
 				croppedImage = b;
 			}
 		}
@@ -358,7 +352,6 @@ public class CropImage extends MonitoredActivity {
 			Bundle extras = new Bundle();
 			setResult(RESULT_OK, new Intent(mSaveUri.toString())
 			.putExtras(extras));
-			croppedImage.recycle();
 		} else {
 			Bundle extras = new Bundle();
 			extras.putParcelable(HikeConstants.Extras.BITMAP, croppedImage);
@@ -376,10 +369,9 @@ public class CropImage extends MonitoredActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (mBitmap != null)
-		{
-			mBitmap.recycle();
-		}
+		this.mBitmap = null;
+		// Good time for GC
+		System.gc();
 	}
 
 
@@ -494,10 +486,6 @@ public class CropImage extends MonitoredActivity {
 				FaceDetector detector = new FaceDetector(faceBitmap.getWidth(),
 						faceBitmap.getHeight(), mFaces.length);
 				mNumFaces = detector.findFaces(faceBitmap, mFaces);
-			}
-
-			if (faceBitmap != null && faceBitmap != mBitmap) {
-				faceBitmap.recycle();
 			}
 
 			mHandler.post(new Runnable() {

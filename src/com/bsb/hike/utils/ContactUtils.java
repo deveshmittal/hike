@@ -116,7 +116,7 @@ public class ContactUtils
 	public static void syncUpdates(Context ctx)
 	{
 
-		if(Utils.isUserOnline(ctx))
+		if(!Utils.isUserOnline(ctx))
 		{
 			Log.d("CONTACT UTILS", "Airplane mode is on , skipping sync update tasks.");
 			return;

@@ -18,9 +18,8 @@
                 android:id="@android:id/tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:background="@color/emoticon_page_bg"
-                android:tabStripEnabled="false" />
+                android:layout_weight="1"
+                android:background="@color/offwhite" />
 
             <FrameLayout
                 android:id="@android:id/tabcontent"
@@ -32,7 +31,7 @@
                 android:id="@+id/emoticon_pager"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_weight="5" />
         </LinearLayout>
     </TabHost>
 

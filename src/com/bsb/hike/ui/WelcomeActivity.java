@@ -89,7 +89,7 @@ public class WelcomeActivity extends Activity implements SignupTask.OnSignupTask
 			{
 				Intent intent = new Intent(WelcomeActivity.this, WebViewActivity.class);
 				intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.T_AND_C_URL);
-				intent.putExtra(HikeConstants.Extras.TITLE, R.string.terms_privacy);
+				intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.terms_privacy));
 				startActivity(intent);
 			}
 		});
@@ -169,6 +169,8 @@ public class WelcomeActivity extends Activity implements SignupTask.OnSignupTask
 	{
 		if (v.getId() == mAcceptButton.getId())
 		{
+			// Disable the t and c button
+			tcText.setEnabled(false);
 			loadingLayout.setVisibility(View.VISIBLE);
 			mAcceptButton.setVisibility(View.GONE);
 			SignupTask.startTask(this);
