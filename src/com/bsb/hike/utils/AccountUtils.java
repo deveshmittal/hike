@@ -39,6 +39,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
+import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
+import android.provider.Settings.Secure;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -226,14 +231,37 @@ public class AccountUtils
 		}
 	}
 
-	public static AccountInfo registerAccount(String pin, String unAuthMSISDN)
+	public static AccountInfo registerAccount(Context context, String pin, String unAuthMSISDN)
 	{
 		HttpPost httppost = new HttpPost(BASE + "/account");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try
 		{
+			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+
+			String osVersion = Build.VERSION.RELEASE;
+			String deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+			String os = "Android";
+			String carrier = manager.getNetworkOperatorName();
+			String device = Build.MANUFACTURER + " " + Build.MODEL;
+			String appVersion = "";
+			try
+			{
+				appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0 ).versionName;
+			}
+			catch (NameNotFoundException e)
+			{
+				Log.e("AccountUtils", "Unable to get app version");
+			}
+
 			data.put("set_cookie", "0");
+			data.put("devicetype", os);
+			data.put("deviceid", deviceId);
+			data.put("devicetoken", deviceId);
+			data.put("deviceversion", device);
+			data.put("appversion", appVersion);
+
 			if (pin != null)
 			{
 				data.put("msisdn", unAuthMSISDN);

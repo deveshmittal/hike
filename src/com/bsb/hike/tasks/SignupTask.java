@@ -152,7 +152,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			AccountUtils.AccountInfo accountInfo = null;
 			if (!SignupTask.isAlreadyFetchingNumber && !wifi.isConnected()) 
 			{
-				accountInfo = AccountUtils.registerAccount(null, null);
+				accountInfo = AccountUtils.registerAccount(context, null, null);
 				if (accountInfo == null) 
 				{
 					/* network error, signal a failure */
@@ -245,7 +245,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						signupTask = null;
 						return Boolean.FALSE;
 					}
-					accountInfo = AccountUtils.registerAccount(pin,
+					accountInfo = AccountUtils.registerAccount(context, pin,
 							unauthedMSISDN);
 					if (accountInfo == null) {
 						this.data = null;
