@@ -26,6 +26,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -46,7 +49,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -200,7 +202,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		mConversationsView.setOnItemClickListener(this);
 
 		if (!accountPrefs.getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false) 
-				&& Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN)
 				&& updateTypeAvailable == HikeConstants.NO_UPDATE)
 		{
 			((LinearLayout)findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
@@ -210,7 +211,14 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			((MarginLayoutParams)mToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
 
 			TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
-			text.setText(getString(R.string.earn_200_sms_tap_here));
+			mToolTip.findViewById(R.id.close).setVisibility(View.GONE);
+
+			String creditTip = getString(R.string.earn_200_sms_tap_here);
+			SpannableString creditTipText = new SpannableString(creditTip);
+			creditTipText.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.tip_blue)), creditTip.indexOf("Tap here"), creditTip.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			text.setText(creditTipText);
+
+			((MarginLayoutParams)text.getLayoutParams()).setMargins(((int) (15*Utils.densityMultiplier)), 0, 0, 0);
 
 			if (!isToolTipShowing) 
 			{
