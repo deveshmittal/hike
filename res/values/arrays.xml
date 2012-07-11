@@ -30,7 +30,7 @@
         <item>^.^</item> <!-- 11 satisfied -->
         <item>(giggle)</item> <!-- 12 giggle -->
         <item>:-P</item> <!-- 13 impish -->
-        <item>=\</item> <!-- 14 disappointment -->
+        <item>=\\</item> <!-- 14 disappointment -->
         <item>;-)</item> <!-- 15 beuptonogood -->
         <item>X[</item> <!-- 16 frustrated -->
         <item>:-(</item> <!-- 17 sad -->
@@ -83,7 +83,7 @@
         <item>(music)</item> <!-- 64 music -->
         <item>:-B</item> <!-- 65 nerd -->
         <item>(ninja)</item> <!-- 66 ninja -->
-        <item>&lt;:o)</item> <!-- 67 party -->
+        <item>&lt;:--)</item> <!-- 67 party -->
         <item>P-(</item> <!-- 68 pirate -->
         <item>:-@</item> <!-- 69 rage -->
         <item>(@>---)</item> <!-- 70 rose -->
@@ -95,7 +95,7 @@
         <item>O:-)</item> <!-- 76 sweetangel -->
         <item>*-)</item> <!-- 77 thinking -->
         <item>:-w</item> <!-- 78 waiting -->
-        <item>:-"</item> <!-- 79 whistling -->
+        <item>:-\"</item> <!-- 79 whistling -->
         <item>(yawn)</item> <!-- 80 yawn -->
         <item>(exciting1)</item> <!-- 81 exciting -->
         <item>(big smile1)</item> <!-- 82 big smile -->
