@@ -46,7 +46,7 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 	{
 		ContactInfo contactInfo = (ContactInfo) getItem(position);
 		LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View v = null;
+		View v = convertView;
 		if (v == null)
 		{
 			v = inflater.inflate(R.layout.invite_item, parent, false);
