@@ -197,6 +197,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private TabHost tabHost;
 
+	private boolean isTabInitialised = false;
+
 	@Override
 	protected void onPause()
 	{
@@ -428,11 +430,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
 			adapter.changeCursor(null);
 		}
-		if(tabHost != null)
-		{
-			tabHost.removeAllViews();
-			tabHost = null;
-		}
 	}
 
 	
@@ -511,6 +508,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 			}
 		});
+
+		tabHost = (TabHost) findViewById(android.R.id.tabhost);
+		tabHost.setup();
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
@@ -1836,11 +1836,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
 
-		if(tabHost == null)
+		if(tabHost != null && !isTabInitialised)
 		{
-			tabHost = (TabHost) findViewById(android.R.id.tabhost);
-			tabHost.setup();
-			
+			isTabInitialised  = true;
+			Log.d(getClass().getSimpleName(), "Initialising boolean for emoticon layout setup.: " + isTabInitialised);
+
 			View tabHead = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
 			TabSpec ts1 = tabHost.newTabSpec("tab1");
 			((ImageView)tabHead.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_01_bigsmile);
