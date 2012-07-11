@@ -20,7 +20,7 @@ public class SmileyParser
 {
 	private static int MAX_EMOTICONS = 10;
 
-	public static final int[] SIZES_EMOTICON_SETS = {80, 30, 40};
+	public static final int[] SIZES_EMOTICON_SETS = {80, 30, 39};
 
 	// Singleton stuff
 	private static SmileyParser sInstance = null;
@@ -178,7 +178,6 @@ public class SmileyParser
 			R.drawable.emo_im_118_drunk,
 			R.drawable.emo_im_119_x_x,
 			R.drawable.emo_im_120_youre_kidding_right,
-			R.drawable.emo_im_121_o_o,
 			R.drawable.emo_im_122_sweat,
 			R.drawable.emo_im_123_nerd,
 			R.drawable.emo_im_124_angry,
@@ -329,7 +328,6 @@ public class SmileyParser
 			R.drawable.emo_im_118_drunk_small,
 			R.drawable.emo_im_119_x_x_small,
 			R.drawable.emo_im_120_youre_kidding_right_small,
-			R.drawable.emo_im_121_o_o_small,
 			R.drawable.emo_im_122_sweat_small,
 			R.drawable.emo_im_123_nerd_small,
 			R.drawable.emo_im_124_angry_small,
@@ -480,36 +478,35 @@ public class SmileyParser
 		public static final int DRUNK_118 = 118;
 		public static final int XX_119 = 119;
 		public static final int YOUREKIDDINGRIGHT_120 = 120;
-		public static final int OO_121 = 121;
-		public static final int SWEAT_122 = 122;
-		public static final int NERD_123 = 123;
-		public static final int ANGRY_124 = 124;
-		public static final int DISAPPEARING_125 = 125;
-		public static final int DIZZY_126 = 126;
-		public static final int MUSIC_127 = 127;
-		public static final int EVILISH_128 = 128;
-		public static final int GRAFFITI_129 = 129;
-		public static final int OMG_130 = 130;
-		public static final int ONFIRE_131 = 131;
-		public static final int OUCH_132 = 132;
-		public static final int ANGRY_133 = 133;
-		public static final int SERIOUSBUSINESS_134 = 134;
-		public static final int SICK_135 = 135;
-		public static final int SLOW_136 = 136;
-		public static final int SNOOTY_137 = 137;
-		public static final int SUSPICIOUS_138 = 138;
-		public static final int CRYING_139 = 139;
-		public static final int WANT_140 = 140;
-		public static final int WEALLGONNADIE_141 = 141;
-		public static final int WUT_142 = 142;
-		public static final int BOO_143 = 143;
-		public static final int XD_144 = 144;
-		public static final int KABOOM_145 = 145;
-		public static final int YARR_146 = 146;
-		public static final int NINJA_147 = 147;
-		public static final int YUUSH_148 = 148;
-		public static final int BRAINS_149 = 149;
-		public static final int SLEEPING_150 = 150;
+		public static final int SWEAT_122 = 121;
+		public static final int NERD_123 = 122;
+		public static final int ANGRY_124 = 123;
+		public static final int DISAPPEARING_125 = 124;
+		public static final int DIZZY_126 = 125;
+		public static final int MUSIC_127 = 126;
+		public static final int EVILISH_128 = 127;
+		public static final int GRAFFITI_129 = 128;
+		public static final int OMG_130 = 129;
+		public static final int ONFIRE_131 = 130;
+		public static final int OUCH_132 = 131;
+		public static final int ANGRY_133 = 132;
+		public static final int SERIOUSBUSINESS_134 = 133;
+		public static final int SICK_135 = 134;
+		public static final int SLOW_136 = 135;
+		public static final int SNOOTY_137 = 136;
+		public static final int SUSPICIOUS_138 = 137;
+		public static final int CRYING_139 = 138;
+		public static final int WANT_140 = 139;
+		public static final int WEALLGONNADIE_141 = 140;
+		public static final int WUT_142 = 141;
+		public static final int BOO_143 = 142;
+		public static final int XD_144 = 143;
+		public static final int KABOOM_145 = 144;
+		public static final int YARR_146 = 145;
+		public static final int NINJA_147 = 146;
+		public static final int YUUSH_148 = 147;
+		public static final int BRAINS_149 = 148;
+		public static final int SLEEPING_150 = 149;
 
 		public static int getSmileyResource(int which)
 		{
@@ -645,7 +642,6 @@ public class SmileyParser
 		Smileys.getSmileyResource(Smileys.DRUNK_118),
 		Smileys.getSmileyResource(Smileys.XX_119),
 		Smileys.getSmileyResource(Smileys.YOUREKIDDINGRIGHT_120),
-		Smileys.getSmileyResource(Smileys.OO_121),
 		Smileys.getSmileyResource(Smileys.SWEAT_122),
 		Smileys.getSmileyResource(Smileys.NERD_123),
 		Smileys.getSmileyResource(Smileys.ANGRY_124),
@@ -798,7 +794,6 @@ public class SmileyParser
 		Smileys.getSmallSmileyResource(Smileys.DRUNK_118),
 		Smileys.getSmallSmileyResource(Smileys.XX_119),
 		Smileys.getSmallSmileyResource(Smileys.YOUREKIDDINGRIGHT_120),
-		Smileys.getSmallSmileyResource(Smileys.OO_121),
 		Smileys.getSmallSmileyResource(Smileys.SWEAT_122),
 		Smileys.getSmallSmileyResource(Smileys.NERD_123),
 		Smileys.getSmallSmileyResource(Smileys.ANGRY_124),
