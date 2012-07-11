@@ -131,7 +131,7 @@
                 android:paddingRight="15dp"
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
-                android:src="@drawable/emo_im_14_disappointment" />
+                android:src="@drawable/emo_im_09_expressionless" />
 
             <ImageView
                 android:id="@+id/btn_sad"
