@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,6 +22,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -736,12 +738,25 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		showCreditsScreen();
 	}
 
+	private void openMarket()
+	{
+		Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
+		marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+		try
+		{
+			startActivity(marketIntent);				
+		}
+		catch(ActivityNotFoundException e)
+		{
+			Log.e(MessagesList.class.getSimpleName(), "Unable to open market");
+		}
+	}
 	public void onToolTipClicked(View v)
 	{
 		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
 		{
-			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UPDATE_TOOL_TIP_CLICKED);
+			openMarket();
 			hideToolTip();
 			return;
 		}
@@ -788,7 +803,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		if (v.getId() != R.id.overlay_layout) 
 		{
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UDPATE_OVERLAY_BUTTON_CLICKED);
-			Toast.makeText(MessagesList.this, "Redirect to market (Needs to be added)", Toast.LENGTH_SHORT).show();
+			openMarket();			
 		}
 		else
 		{
