@@ -1,8 +1,10 @@
 package com.bsb.hike.ui;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.MailTo;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
@@ -42,11 +44,38 @@ public class WebViewActivity extends Activity {
 				findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
 				super.onPageStarted(view, url, favicon);
 			}
+
+			@Override
+			public boolean shouldOverrideUrlLoading(WebView view, String url) 
+			{
+				if(url.startsWith("mailto:"))
+				{
+					MailTo mt = MailTo.parse(url);
+					Intent i = newEmailIntent(WebViewActivity.this, mt.getTo(), mt.getSubject(), mt.getBody(), mt.getCc());
+					startActivity(i);
+					view.reload();
+				}
+				else
+				{
+					view.loadUrl(url);
+				}
+				return true;
+			}
 		};
-		client.shouldOverrideUrlLoading(webView, urlToLoad);
 
 		webView.getSettings().setJavaScriptEnabled(true);
 		webView.loadUrl(urlToLoad);
 		webView.setWebViewClient(client);
+	}
+
+	public Intent newEmailIntent(Context context, String address, String subject, String body, String cc) 
+	{
+	      Intent intent = new Intent(Intent.ACTION_SEND);
+	      intent.putExtra(Intent.EXTRA_EMAIL, new String[] {address});
+	      intent.putExtra(Intent.EXTRA_TEXT, body);
+	      intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+	      intent.putExtra(Intent.EXTRA_CC, cc);
+	      intent.setType("message/rfc822");
+	      return intent;
 	}
 }
