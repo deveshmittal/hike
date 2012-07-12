@@ -2,6 +2,7 @@ package com.bsb.hike.service;
 
 import java.util.Calendar;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlarmManager;
@@ -251,6 +252,23 @@ public class HikeService extends Service
 	public int onStartCommand(final Intent intent, int flags, final int startId)
 	{
 		asyncStart();
+		Log.d("HikeService", "Intent is " + intent);
+		if (intent != null &&
+			intent.hasExtra(HikeConstants.Extras.SMS_MESSAGE))
+		{
+			String s = intent.getExtras().getString(HikeConstants.Extras.SMS_MESSAGE);
+			try
+			{
+				JSONObject msg = new JSONObject(s);
+				Log.d("HikeService", "Intent contained SMS message " + msg.getString(HikeConstants.TYPE));
+				MqttMessagesManager mgr = MqttMessagesManager.getInstance(this);
+				mgr.saveMqttMessage(msg);
+			}
+			catch (JSONException e)
+			{
+				e.printStackTrace();
+			}
+		}
 		// return START_NOT_STICKY - we want this Service to be left running
 		// unless explicitly stopped, and it's process is killed, we want it to
 		// be restarted
