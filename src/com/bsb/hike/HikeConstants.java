@@ -130,6 +130,7 @@ public class HikeConstants
 		public static final String TITLE = "title";
 		public static final String FIRST_TIME_USER = "firstTimeUser";
 		public static final String IS_DELETING_ACCOUNT = "isDeletingAccount";
+		public static final String SMS_MESSAGE = "incomingSMSMessage";
 	}
 
 	public static final class LogEvent
