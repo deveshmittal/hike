@@ -1,7 +1,8 @@
 package com.bsb.hike.service;
 
-import java.util.ArrayList;
 import java.util.Calendar;
+
+import org.json.JSONObject;
 
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -14,7 +15,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -31,10 +31,11 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
-import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.utils.ContactUtils;
+import com.bsb.hike.utils.Utils;
 
 public class HikeService extends Service
 {
@@ -82,8 +83,6 @@ public class HikeService extends Service
 
 	protected Messenger mApp;
 
-	protected ArrayList<String> pendingMessages;
-
 	class IncomingHandler extends Handler
 	{
 		public IncomingHandler(Looper looper)
@@ -104,12 +103,6 @@ public class HikeService extends Service
 				handleStart();
 
 				mApp = msg.replyTo;
-				/* TODO what if the app crashes while we're sending the message? */
-				for (String m : pendingMessages)
-				{
-					sendToApp(m);
-				}
-				pendingMessages.clear();
 				broadcastServiceStatus(mMqttManager.getConnectionStatus());
 				break;
 			case MSG_APP_DISCONNECTED:
@@ -129,39 +122,6 @@ public class HikeService extends Service
 		}
 	}
 
-	public void storeMessage(String message)
-	{
-		pendingMessages.add(message);
-	}
-
-	public boolean sendToApp(String message)
-	{
-		if (mApp == null)
-		{
-			Log.d("HikeService", "no app connected for message " + message);
-			return false;
-		}
-
-		try
-		{
-			Message msg = Message.obtain();
-			msg.what = MSG_APP_PUBLISH;
-			Bundle bundle = new Bundle();
-			bundle.putString("msg", message);
-			msg.setData(bundle);
-			mApp.send(msg);
-		}
-		catch (RemoteException e)
-		{
-			// client is dead :(
-			mApp = null;
-			mMqttManager.unsubscribeFromUIEvents();
-			Log.e("HikeService", "Can't send message to the application");
-			return false;
-		}
-		return true;
-	}
-
 	private Messenger mMessenger;
 
 	/************************************************************************/
@@ -170,9 +130,11 @@ public class HikeService extends Service
 
 	// constant used internally to schedule the next ping event
 	public static final String MQTT_PING_ACTION = "com.bsb.hike.PING";
-	
-	// constant used internally to schedule the next check for update
-	public static final String APP_UPDATE_ACTION = "com.bsb.hike.UPDATE";
+
+	// constant used internally to send user stats
+	public static final String MQTT_USER_STATS_SEND_ACTION = "com.bsb.hike.USER_STATS";
+
+	public static final String MQTT_CONTACT_SYNC_ACTION = "com.bsb.hike.CONTACT_SYNC";
 	
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
@@ -192,6 +154,12 @@ public class HikeService extends Service
 	// receiver that wakes the Service up when it's time to ping the server
 	private PingSender pingSender;
 
+	// receiver that sends the user stats once every 24 hours
+	private UserStatsSender userStatsSender;
+
+	// receiver that triggers a contact sync
+	private ManualContactSyncTrigger manualContactSyncTrigger;
+
 	private HikeMqttManager mMqttManager;
 	private String mToken;
 	private ContactListChangeIntentReceiver contactsReceived;
@@ -206,7 +174,6 @@ public class HikeService extends Service
 
 	private Looper mMqttHandlerLooper;
 	
-	private UpdateChecker updateChecker;
 	/************************************************************************/
 	/* METHODS - core Service lifecycle methods */
 	/************************************************************************/
@@ -224,7 +191,6 @@ public class HikeService extends Service
 		mMqttHandlerLooper = mqttHandlerThread.getLooper();
 		this.mHandler = new Handler(mMqttHandlerLooper);
 		mMessenger = new Messenger(new IncomingHandler(mMqttHandlerLooper));
-		pendingMessages = new ArrayList<String>();
 
 		// reset status variable to initial state
 		mMqttManager = new HikeMqttManager(this, this.mHandler);
@@ -257,22 +223,27 @@ public class HikeService extends Service
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
 
+		if(userStatsSender == null)
+		{
+			userStatsSender = new UserStatsSender();
+			registerReceiver(userStatsSender, new IntentFilter(MQTT_USER_STATS_SEND_ACTION));
+			scheduleNextUserStatsSending();
+		}
 		/* register with the Contact list to get an update whenever the phone book changes.
 		 * Use the application thread for the intent receiver, the IntentReceiver will take
 		 * care of running the event on a different thread */
 		contactsReceived = new ContactListChangeIntentReceiver(new Handler());
 		/* listen for changes in the addressbook */
 		getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
-		/* listen for changes on the simcard */
-		getContentResolver().registerContentObserver(Uri.parse("content://icc/adn"), true, contactsReceived);
-		
-		// Check for updates
-		if (updateChecker == null)
+		if(manualContactSyncTrigger == null)
 		{
-			Log.d("HikeService", "Registering UPDATE CHECK receiver");
-			updateChecker = new UpdateChecker();
-			registerReceiver(updateChecker, new IntentFilter(APP_UPDATE_ACTION));
-			scheduleNextUpdateCheck();
+			manualContactSyncTrigger = new ManualContactSyncTrigger();
+			registerReceiver(manualContactSyncTrigger, new IntentFilter(MQTT_CONTACT_SYNC_ACTION));
+			/*
+			 *  Forcing a sync first time service is created to fix bug where if the app is force stopped
+			 *  no contacts are synced if they are added when the app is in force stopped state 
+			 */
+			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
 		}
 	}
 
@@ -400,11 +371,17 @@ public class HikeService extends Service
 		{
 			mContactHandlerLooper.quit();
 		}
-		
-		if(updateChecker != null)
+
+		if(userStatsSender != null)
 		{
-			unregisterReceiver(updateChecker);
-			updateChecker = null;
+			unregisterReceiver(userStatsSender);
+			userStatsSender = null;
+		}
+
+		if(manualContactSyncTrigger != null)
+		{
+			unregisterReceiver(manualContactSyncTrigger);
+			manualContactSyncTrigger = null;
 		}
 	}
 
@@ -484,6 +461,8 @@ public class HikeService extends Service
 			HikeService.this.mContactsChangedHandler.removeCallbacks(mContactsChanged);
 			HikeService.this.mContactsChangedHandler.postDelayed(mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
 			Log.d("ContactListChangeIntentReceiver", "onChange called");
+			// Schedule the next manual sync to happed 24 hours from now.
+			scheduleNextManualContactSync();
 		}
 	}
 
@@ -544,7 +523,7 @@ public class HikeService extends Service
 			WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
 			wl.acquire();
 
-			if (isUserOnline())
+			if (Utils.isUserOnline(HikeService.this))
 			{
 				mHandler.post(new Runnable() {
 					@Override
@@ -616,49 +595,60 @@ public class HikeService extends Service
 
 		}
 	}
-	
-	/**
-	 * Used for checking for an update to the application once a day.
-	 * @author rs
-	 *
+
+	/*
+	 *	Used for sending the user stats to the server once every 24 hours. 
 	 */
-	public class UpdateChecker extends BroadcastReceiver
+	private class UserStatsSender extends BroadcastReceiver
 	{
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			checkForUpdate();
+		public void onReceive(Context context, Intent intent) 
+		{
+			sendUserStats();
 		}
 	}
-	
-	/**
-	 * Schedule an update check once a day. 
-	 */
-	private void scheduleNextUpdateCheck()
+
+	private class ManualContactSyncTrigger extends BroadcastReceiver
 	{
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(APP_UPDATE_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+		@Override
+		public void onReceive(Context context, Intent intent) 
+		{
+			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
+		}
+	}
+
+	private void scheduleNextManualContactSync()
+	{
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(MQTT_CONTACT_SYNC_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+
 		Calendar wakeUpTime = Calendar.getInstance();
 		wakeUpTime.add(Calendar.HOUR, 24);
+
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+		// Cancel any pending alarms with this pending intent
+		aMgr.cancel(pendingIntent);
 		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
 	}
-	
-	private void checkForUpdate()
-	{
-		CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(getApplicationContext());
-		checkForUpdateTask.execute();
-		// Schedule next check
-		scheduleNextUpdateCheck();
-	}
-	
-	public boolean isUserOnline()
-	{
-		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-		if (cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected())
-		{
-			return true;
-		}
 
-		return false;
+	private void sendUserStats()
+	{
+		JSONObject obj = Utils.getDeviceStats(getApplicationContext());
+		if (obj != null) 
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+		}
+		scheduleNextUserStatsSending();
+	}
+
+	private void scheduleNextUserStatsSending()
+	{
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(MQTT_USER_STATS_SEND_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+
+		Calendar wakeUpTime = Calendar.getInstance();
+		wakeUpTime.add(Calendar.HOUR, 24);
+
+		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
 	}
 
 	public boolean appIsConnected()

@@ -12,27 +12,18 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.NetworkManager;
-import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.db.MqttPersistenceException;
-import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.ConvMessage.State;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.mqtt.client.Buffer;
 import com.bsb.hike.mqtt.client.Callback;
@@ -45,8 +36,6 @@ import com.bsb.hike.mqtt.msg.ConnAckMessage.ConnectionStatus;
 import com.bsb.hike.mqtt.msg.QoS;
 import com.bsb.hike.pubsub.Topic;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.HikeNotification;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -206,8 +195,6 @@ public class HikeMqttManager implements Listener
 
 	private String password;
 
-	private HikeNotification toaster;
-
 	private HikeConversationsDatabase convDb;
 
 	private Map<Integer, HikePacket> mqttIdToPacket;
@@ -227,24 +214,20 @@ public class HikeMqttManager implements Listener
 	private Runnable mConnectTimeoutHandler;
 
 	private SharedPreferences settings;
-	private SharedPreferences prefs;
 
-	private ConvMessage convMessage;
-
-	private GroupConversation groupConversation;
+	private MqttMessagesManager mqttMessageManager;
 
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
 		this.mHikeService = hikeService;
-		this.toaster = new HikeNotification(hikeService);
-		this.convDb = new HikeConversationsDatabase(hikeService);
-		this.userDb = new HikeUserDatabase(hikeService);
+		this.convDb = HikeConversationsDatabase.getInstance();
+		this.userDb = HikeUserDatabase.getInstance();
 		mqttIdToPacket = Collections.synchronizedMap(new HashMap<Integer, HikePacket>());
 		this.handler = handler;
-		persistence = new HikeMqttPersistence(hikeService);
+		persistence = HikeMqttPersistence.getInstance();
 		mConnectTimeoutHandler = new ConnectTimeoutHandler();
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
-		prefs = hikeService.getApplicationContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		this.mqttMessageManager = MqttMessagesManager.getInstance(mHikeService);
 	}
 
 	public HikePacket getPacketIfUnsent(int mqttId)
@@ -294,9 +277,7 @@ public class HikeMqttManager implements Listener
 
 	public void finish()
 	{
-		this.persistence.close();
-		this.convDb.close();
-		this.userDb.close();
+		this.mqttMessageManager.close();
 	}
 
 	/*
@@ -488,7 +469,7 @@ public class HikeMqttManager implements Listener
 			//
 			// have we lost our data connection?
 			//
-			if (this.mHikeService.isUserOnline() == false)
+			if (!Utils.isUserOnline(mHikeService))
 			{
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
 
@@ -575,7 +556,7 @@ public class HikeMqttManager implements Listener
 			return;
 		}
 
-		if (this.mHikeService.isUserOnline())
+		if (Utils.isUserOnline(mHikeService))
 		{
 			Log.d("HikeMqttManager", "netconnection valid, try to connect");
 			// set the status to show we're trying to connect
@@ -668,108 +649,10 @@ public class HikeMqttManager implements Listener
 
 			Log.d("HikeMqttManager", "onPublish called " + messageBody);
 			JSONObject jsonObj = new JSONObject(messageBody);
-			String type = jsonObj.getString(HikeConstants.TYPE);
 
-			/* handle icons/credit/user join/leave here so we don't risk losing them when the app is not open.
+			/* handle saving of messages here so we don't risk losing them when the app is not open.
 			 */
-			if (NetworkManager.ICON.equals(type))
-			{
-				String msisdn = jsonObj.getString(HikeConstants.FROM);
-				String iconBase64 = jsonObj.getString(HikeConstants.DATA);
-				this.userDb.setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT));
-			}
-			else if (NetworkManager.SMS_CREDITS.equals(type))
-			{
-				Integer credits =  jsonObj.optInt(HikeConstants.DATA);
-				if(settings.getInt(HikeMessengerApp.SMS_SETTING, 0) == 0)
-				{
-					if(credits > 0)
-					{
-						convDb.setOverlay(false, null);
-					}
-				}
-				Editor mEditor = settings.edit();
-				mEditor.putInt(HikeMessengerApp.SMS_SETTING, credits.intValue());
-				mEditor.commit();
-			}
-			else if ((NetworkManager.USER_JOINED.equals(type)) || (NetworkManager.USER_LEFT.equals(type)))
-			{
-				String msisdn = jsonObj.optString(HikeConstants.DATA);
-				boolean joined = NetworkManager.USER_JOINED.equals(type);
-				ContactUtils.updateHikeStatus(this.mHikeService, msisdn, joined);
-				this.convDb.updateOnHikeStatus(msisdn, joined);
-			}
-			else if (NetworkManager.INVITE_INFO.equals(type))
-			{
-				JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-				int invited = data.optInt(HikeConstants.ALL_INVITEE);
-				int invited_joined = data.optInt(HikeConstants.ALL_INVITEE_JOINED);
-				Editor editor = settings.edit();
-				editor.putInt(HikeMessengerApp.INVITED, invited);
-				editor.putInt(HikeMessengerApp.INVITED_JOINED, invited_joined);
-				editor.commit();
-			}
-			else if (NetworkManager.GROUP_CHAT_JOIN.equals(type))
-			{
-				groupConversation = new GroupConversation(jsonObj, this.mHikeService);
-				this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList());
-
-				if (!this.convDb.doesConversationExist(groupConversation)) 
-				{
-					Log.d(getClass().getSimpleName(), "The group conversation does not exists");
-					groupConversation =(GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
-
-					convMessage = new ConvMessage(this.mHikeService.getString(R.string.you_joined_conversation), groupConversation.getMsisdn(), System.currentTimeMillis(), State.RECEIVED_UNREAD);
-					convMessage.setConversation(groupConversation);
-					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + convMessage.getMessage());
-				}
-				else
-				{
-					String participants = Utils.join(groupConversation.getGroupParticipantList().keySet(), ", ", null, null);
-					convMessage = new ConvMessage(participants + this.mHikeService.getString(R.string.joined_conversation), groupConversation.getMsisdn(), System.currentTimeMillis(), State.RECEIVED_UNREAD);
-
-					groupConversation = (GroupConversation)this.convDb.getConversation(groupConversation.getMsisdn(), 0);
-					convMessage.setConversation(groupConversation);
-					Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + groupConversation.getLabel());
-				}
-			}
-			else if (NetworkManager.GROUP_CHAT_LEAVE.equals(type))
-			{
-				String groupId = jsonObj.optString(HikeConstants.TO);
-				String msisdn = jsonObj.optString(HikeConstants.FROM);
-				this.groupConversation =(GroupConversation) this.convDb.getConversation(groupId, 0);
-				this.convDb.setParticipantLeft(groupId, msisdn);
-			}
-			else if (NetworkManager.GROUP_CHAT_NAME.equals(type))
-			{
-				String groupname = jsonObj.optString(HikeConstants.DATA);
-				String groupId = jsonObj.optString(HikeConstants.TO);
-				this.convDb.setGroupName(groupId, groupname);
-			}
-			else if (NetworkManager.GROUP_CHAT_END.equals(type))
-			{
-				String groupId = jsonObj.optString(HikeConstants.TO);
-				this.convDb.setGroupDead(groupId);
-			}
-			/*
-			 * Check if message was already received by the receiver
-			 */
-			if (NetworkManager.MESSAGE.equals(type))
-			{
-				Log.d("HikeMqttManager", "Checking if message exists");
-				ConvMessage convMessage = new ConvMessage(jsonObj);
-				if (this.convDb.wasMessageReceived(convMessage)) 
-				{
-						return;
-				}
-			}
-			/*
-			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
-			 */			
-			if (this.mHikeService.sendToApp(messageBody))
-			{
-				return;
-			}
+			mqttMessageManager.saveMqttMessage(jsonObj);
 
 			/* don't bother saving messages for the UI topic */
 			if ((topic != null) &&
@@ -778,51 +661,6 @@ public class HikeMqttManager implements Listener
 				return;
 			}			
 
-			/*
-			 * couldn't send a message to the app if it's a message -- toast and write it now otherwise, just save it in memory until the app connects
-			 */
-			if (NetworkManager.MESSAGE.equals(type))
-			{
-				/* toast and save it */
-				try
-				{
-					ConvMessage convMessage = new ConvMessage(jsonObj);
-					this.convDb.addConversationMessages(convMessage);
-					ContactInfo contactInfo;
-					if (convMessage.isGroupChat())
-					{
-						contactInfo = new ContactInfo(convMessage.getMsisdn(), convMessage.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), convMessage.getMsisdn());
-					}
-					else
-					{
-						contactInfo = userDb.getContactInfoFromMSISDN(convMessage.getMsisdn());
-					}
-
-					toaster.notify(contactInfo, convMessage);
-				}
-				catch (JSONException e)
-				{
-					Log.e("JSON", "Invalid JSON", e);
-				}
-			}
-			else if (NetworkManager.GROUP_CHAT_JOIN.equals(type) || NetworkManager.GROUP_CHAT_LEAVE.equals(type) || NetworkManager.GROUP_CHAT_END.equals(type))
-			{
-				if (groupConversation != null) 
-				{
-					ConvMessage convMessageToBeAddedToDB = new ConvMessage(jsonObj, groupConversation, this.mHikeService, false);
-					this.convDb.addConversationMessages(convMessageToBeAddedToDB);
-					// Only notify user if participant has joined.
-					if (convMessage != null && convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) {
-						Log.d(getClass().getSimpleName(), "GROUP CHAT JOIN: " + groupConversation.getLabel());
-						toaster.notify(new ContactInfo(groupConversation.getMsisdn(), groupConversation.getMsisdn(), convDb.getGroupName(convMessage.getMsisdn()), groupConversation.getMsisdn()), convMessage);
-					}
-				}
-			}
-			else
-			{
-				/* just save it */
-				this.mHikeService.storeMessage(messageBody);
-			}
 			// receiving this message will have kept the connection alive for us, so
 			// we take advantage of this to postpone the next scheduled ping
 			this.mHikeService.scheduleNextPing();

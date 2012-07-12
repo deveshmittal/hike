@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="@drawable/thatch_repeat" >
 
     <include layout="@layout/top_panel" />
 
@@ -10,7 +11,6 @@
         android:id="@+id/profile_sv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/thatch_repeat"
         android:fadingEdge="none"
         android:paddingLeft="10dp"
         android:paddingRight="10dp" >
@@ -207,7 +207,7 @@
                                 android:id="@+id/guy"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:background="@drawable/ic_emo_selector"
+                                android:background="@drawable/ic_profile_emo_selector"
                                 android:onClick="onEmoticonClick"
                                 android:paddingBottom="5dp"
                                 android:paddingLeft="30dp"
@@ -221,7 +221,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginLeft="5dp"
                                 android:layout_marginRight="5dp"
-                                android:background="@drawable/ic_emo_selector"
+                                android:background="@drawable/ic_profile_emo_selector"
                                 android:onClick="onEmoticonClick"
                                 android:paddingBottom="5dp"
                                 android:paddingLeft="30dp"

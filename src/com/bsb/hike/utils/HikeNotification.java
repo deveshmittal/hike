@@ -43,21 +43,20 @@ public class HikeNotification
 		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true) ? Notification.DEFAULT_VIBRATE : 0;
 
 		String msisdn = convMsg.getMsisdn();
-		String message = convMsg.getMessage();
+		String message = convMsg.getMetadata() == null ? convMsg.getMessage() : convMsg.getMetadata().getMessage(context, convMsg, false).toString();
 		long timestamp = convMsg.getTimestamp();
-		String key = (contactInfo != null) ? contactInfo.getName() : msisdn;
+		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo.getName())) ? contactInfo.getName() : msisdn;
 
 		// For showing the name of the contact that sent the message in a group chat
 		if(convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
-			HikeUserDatabase hUDB = new HikeUserDatabase(context);
+			HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
 			ContactInfo participant = hUDB.getContactInfoFromMSISDN(convMsg.getGroupParticipantMsisdn());
-			hUDB.close();
+
 			if(TextUtils.isEmpty(participant.getName()))
 			{
-				HikeConversationsDatabase hCDB = new HikeConversationsDatabase(context);
+				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 				participant.setName(hCDB.getParticipantName(msisdn, convMsg.getGroupParticipantMsisdn()));
-				hCDB.close();
 			}
 			message = participant.getFirstName() + HikeConstants.SEPARATOR + message;
 		}

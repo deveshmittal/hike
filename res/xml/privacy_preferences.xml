@@ -4,14 +4,6 @@
     android:title="Privacy">
 
     <com.bsb.hike.view.IconPreference
-		icon="ic_block_priv"
-		android:layout="@layout/icon_preference"
-        android:defaultValue="false"
-        android:key="@string/block_key"
-        android:summary="Block Users"
-        android:title="Block" />
-
-    <com.bsb.hike.view.IconPreference
 		icon="ic_delete_priv"
 		android:layout="@layout/icon_preference"
         android:key="@string/delete_key"

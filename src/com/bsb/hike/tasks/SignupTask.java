@@ -152,7 +152,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 			AccountUtils.AccountInfo accountInfo = null;
 			if (!SignupTask.isAlreadyFetchingNumber && !wifi.isConnected()) 
 			{
-				accountInfo = AccountUtils.registerAccount(null, null);
+				accountInfo = AccountUtils.registerAccount(context, null, null);
 				if (accountInfo == null) 
 				{
 					/* network error, signal a failure */
@@ -245,7 +245,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 						signupTask = null;
 						return Boolean.FALSE;
 					}
-					accountInfo = AccountUtils.registerAccount(pin,
+					accountInfo = AccountUtils.registerAccount(context, pin,
 							unauthedMSISDN);
 					if (accountInfo == null) {
 						this.data = null;
@@ -304,7 +304,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					throw new IOException("Unable to retrieve address book");
 				}
 				Log.d("SignupTask", "about to insert addressbook");
-				db = new HikeUserDatabase(this.context);
+				db = HikeUserDatabase.getInstance();
 				db.setAddressBookAndBlockList(addressbook, blockList);
 				
 			}
@@ -313,13 +313,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				Log.e("SignupTask", "Unable to post address book", e);
 				publishProgress(new StateValue(State.ERROR, HikeConstants.ADDRESS_BOOK_ERROR));
 				return Boolean.FALSE;
-			}
-			finally
-			{
-				if (db != null)
-				{
-					db.close();
-				}
 			}
 
 			Editor editor = settings.edit();

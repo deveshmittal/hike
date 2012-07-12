@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@drawable/bg_send_hike_btn_pressed" android:state_pressed="true" android:state_enabled="true"/>
+	<item android:drawable="@drawable/bg_send_hike_btn_pressed" android:state_focused="true"/>
+    <item android:drawable="@drawable/bg_send_hike_btn"></item>
+
+</selector>

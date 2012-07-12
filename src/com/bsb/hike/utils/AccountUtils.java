@@ -39,9 +39,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
+import android.content.Context;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Build;
+import android.provider.Settings.Secure;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.bsb.hike.NetworkManager;
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
@@ -53,7 +58,7 @@ public class AccountUtils
 	
 	private static final int PORT = 8080;
 
-	private static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
@@ -211,23 +216,52 @@ public class AccountUtils
 
 		public int smsCredits;
 
-		public AccountInfo(String token, String msisdn, String uid, int smsCredits)
+		public int all_invitee;
+
+		public int all_invitee_joined;
+
+		public AccountInfo(String token, String msisdn, String uid, int smsCredits, int all_invitee, int all_invitee_joined)
 		{
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
 			this.smsCredits = smsCredits;
+			this.all_invitee = all_invitee;
+			this.all_invitee_joined = all_invitee_joined;
 		}
 	}
 
-	public static AccountInfo registerAccount(String pin, String unAuthMSISDN)
+	public static AccountInfo registerAccount(Context context, String pin, String unAuthMSISDN)
 	{
 		HttpPost httppost = new HttpPost(BASE + "/account");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try
 		{
+			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+
+			String osVersion = Build.VERSION.RELEASE;
+			String deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+			String os = "Android";
+			String carrier = manager.getNetworkOperatorName();
+			String device = Build.MANUFACTURER + " " + Build.MODEL;
+			String appVersion = "";
+			try
+			{
+				appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0 ).versionName;
+			}
+			catch (NameNotFoundException e)
+			{
+				Log.e("AccountUtils", "Unable to get app version");
+			}
+
 			data.put("set_cookie", "0");
+			data.put("devicetype", os);
+			data.put("deviceid", deviceId);
+			data.put("devicetoken", deviceId);
+			data.put("deviceversion", device);
+			data.put("appversion", appVersion);
+
 			if (pin != null)
 			{
 				data.put("msisdn", unAuthMSISDN);
@@ -260,17 +294,19 @@ public class AccountUtils
 		if("fail".equals(obj.optString("stat")))
 		{
 			if(pin != null)
-				return new AccountUtils.AccountInfo(null, null, null, -1);
+				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
 			/* represents normal account creation , when user is on wifi and account creation failed */
-			return new AccountUtils.AccountInfo(null, null, null, -1); 
+			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
 		}
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
 		String uid = obj.optString("uid");
-		int smsCredits = obj.optInt(NetworkManager.SMS_CREDITS);
+		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
+		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
+		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
 
 		Log.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
-		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits);
+		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits, all_invitee, all_invitee_joined);
 	}
 
 	public static String validateNumber(String number)
@@ -525,5 +561,10 @@ public class AccountUtils
 		{
 			Log.wtf("AccountUtils", "Unable to encode name");
 		}
+	}
+
+	public static String getServerUrl()
+	{
+		return BASE;
 	}
 }

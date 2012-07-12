@@ -13,6 +13,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
@@ -33,8 +34,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 	@Override
 	protected Boolean doInBackground(Void... unused)
 	{
-		HikeUserDatabase db = new HikeUserDatabase(activity);
-		HikeConversationsDatabase convDb = new HikeConversationsDatabase(activity);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
+		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
 		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 
 		try
@@ -50,6 +51,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 			db.deleteAll();
 			convDb.deleteAll();
+			IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
 			return true;
@@ -60,8 +62,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		}
 		finally
 		{
-			db.close();
-			convDb.close();
 			editor.commit();
 		}
 	}

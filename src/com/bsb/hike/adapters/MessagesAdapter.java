@@ -7,14 +7,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
-import android.net.Uri;
 import android.text.Spannable;
-import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -253,25 +248,14 @@ public class MessagesAdapter extends BaseAdapter
 			
 
 		MessageMetadata metadata = convMessage.getMetadata();
-		final String dndMissedCalledNumber = metadata != null ? metadata.getDNDMissedCallNumber() : null;
-
-		if (!TextUtils.isEmpty(dndMissedCalledNumber))
+		if (metadata != null)
 		{
-			String content = "tap here";
-			String message = context.getString(R.string.dnd_message, convMessage.getConversation().getLabel(), dndMissedCalledNumber);
-			Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
-			int index = message.indexOf(content);
-			spannable.setSpan(new ClickableSpan()
-			{
-				@Override
-				public void onClick(View blah)
-				{
-					Intent smsIntent = new Intent(Intent.ACTION_VIEW);
-					smsIntent.setData(Uri.parse("sms:" + convMessage.getMsisdn()));
-					smsIntent.putExtra("sms_body", context.getString(R.string.dnd_invite_message, dndMissedCalledNumber));
-					context.startActivity(smsIntent);
-				}
-			}, index, index + content.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+			Spannable spannable = metadata.getMessage(context, convMessage, true);
+			convMessage.setMessage(spannable.toString());
+			/*
+			 *  This is being done so that if the user chooses to forward or copy this message, 
+			 *  he see's the metadata message and not the original one sent from the server.
+			 */
 			holder.messageTextView.setText(spannable);
 			holder.messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
 		}
@@ -284,7 +268,7 @@ public class MessagesAdapter extends BaseAdapter
 				markedUp = Utils.addContactName(((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().getFirstName(), markedUp);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
-			markedUp = smileyParser.addSmileySpans(markedUp);
+			markedUp = smileyParser.addSmileySpans(markedUp, false);
 			holder.messageTextView.setText(markedUp);
 			Linkify.addLinks(holder.messageTextView, Linkify.ALL);
 			Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");

@@ -13,7 +13,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.utils.Utils;
 
@@ -46,9 +45,8 @@ public class GroupConversation extends Conversation {
 			this.groupParticipantList.put(contactNum, groupParticipant);
 		}
 
-		HikeConversationsDatabase db = new HikeConversationsDatabase(context);
+		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		setContactName(db.getGroupName(getMsisdn()));
-		db.close();
 	}
 
 	public String getGroupOwner()
@@ -88,7 +86,7 @@ public class GroupConversation extends Conversation {
 		{
 			object.put(HikeConstants.TYPE, type);
 			object.put(HikeConstants.TO, getMsisdn());
-			if(type.equals(NetworkManager.GROUP_CHAT_JOIN))
+			if(type.equals(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN))
 			{
 				JSONArray array = new JSONArray();
 				for(Entry<String, GroupParticipant> participant : groupParticipantList.entrySet())

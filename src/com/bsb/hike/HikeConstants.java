@@ -22,8 +22,16 @@ public class HikeConstants
 	public static final String ANALYTICS_EVENT = "ae";
 	public static final String ALL_INVITEE = "ai";
 	public static final String ALL_INVITEE_JOINED = "aij";
+	public static final String ALL_INVITEE_2 = "all_invitee";
+	public static final String ALL_INVITEE_JOINED_2 = "all_invitee_joined";
 	public static final String NAME = "name";
 	public static final String MSISDN = "msisdn";
+	public static final String NEW_USER = "nu";
+	public static final String EMAIL = "email";
+	public static final String GENDER = "gender";
+	public static final String VERSION = "v";
+	public static final String CRITICAL = "c";
+	public static final String APP_VERSION = "appversion";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -35,6 +43,9 @@ public class HikeConstants
 	public static final String CHANGE_NUMBER = "ChangeNumber"; 
 
 	public static final String SEPARATOR = " - ";
+
+	public static final String HELP_URL = "http://www.hike.in/help/android";
+	public static final String T_AND_C_URL = "http://www.hike.in/terms";
 
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
@@ -58,12 +69,15 @@ public class HikeConstants
 	public static final String ADAPTER_NAME = "hikeadapter";
 	
 	/* constants for defining what to do after checking for updates*/
-	public static final int UPDATE_AVAILABLE = 2;
+	public static final int NORMAL_UPDATE = 2;
 	public static final int CRITICAL_UPDATE = 1;
 	public static final int NO_UPDATE = 0;
 	
 	// More explanation required?
-	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 4;
+	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
+
+	public static int NUM_SMS_PER_FRIEND = 10;
+	public static int INITIAL_NUM_SMS = 100;
 
 	public static final class Extras
 	{
@@ -105,53 +119,112 @@ public class HikeConstants
 		public static final String EMOTICON_SHOWING = "emoticonShowing";
 		public static final String EXISTING_GROUP_CHAT = "existingGroupChat";
 		public static final String LEAVE_GROUP_CHAT = "leaveGroupChat";
+		public static final String APP_STARTED_FIRST_TIME = "appStartedFirstTime";
+		public static final String LATEST_VERSION = "latestVersion";
+		public static final String SHOW_UPDATE_OVERLAY = "showUpdateOverlay";
+		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip"; 
+		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
+		public static final String UPDATE_MESSAGE = "updateMessage";
+		public static final String URL_TO_LOAD = "urlToLoad";
+		public static final String TITLE = "title";
 	}
 
 	public static final class LogEvent
 	{
-		public static final String TAG = "tag";
-		public static final String DEVICE_ID = "device_id";
-		public static final String OS = "_os";
-		public static final String OS_VERSION = "_os_version";
-		public static final String DEVICE = "_device";
-		public static final String RESOLUTION = "_resolution";
-		public static final String CARRIER = "_carrier";
+		// Common tags for Countly. Don't change.
 
-		// Home screen events
-		public static final String MENU = "homeMenu";
-		public static final String PROFILE_MENU = "homeMenuProfile";
-		public static final String INVITE_MENU = "homeMenuInvite";
-		public static final String FEEDBACK_MENU = "homeMenuFeedback";
-		public static final String DELETE_ALL_CONVERSATIONS_MENU = "homeMenuDeleteAllConversations";
-		public static final String DELETE_CONVERSATION = "homeDeleteConversation";
-		public static final String COMPOSE_BUTTON = "homeComposeBtn";
-		public static final String ADD_SHORTCUT = "homeAddShortcut";
-		public static final String HOME_INVITE_TOP_BUTTON = "homeInviteTopBtn";
-		public static final String HOME_TOOL_TIP_CLOSED = "homeInviteToolTipClosed";
-		public static final String HOME_TOOL_TIP_CLICKED = "homeInviteToolTipClicked";
+	    public static final String TAG = "tag";
+	    public static final String DEVICE_ID = "device_id";
+	    public static final String OS = "_os";
+	    public static final String OS_VERSION = "_os_version";
+	    public static final String DEVICE = "_device";
+	    public static final String RESOLUTION = "_resolution";
+	    public static final String CARRIER = "_carrier";
 
-		// Profile screen events
-		public static final String EDIT_PROFILE = "profileEdit";
-		public static final String CREDITS_SCREEN = "profileCreditScreen";
-		public static final String NOTIFICATION_SCREEN = "profileNotificationScreen";
-		public static final String PRIVACY_SCREEN = "profilePrivacyScreen";
-		public static final String BLOCK_SCREEN = "profileBlockScreen";
-		public static final String HELP_SCREEN = "profileHelpScreen";
+	    /*
+	     *  Naming Convention - <screen><event><sub-event>
+	     */
+	    
+	    /* 
+	     * Home screen events
+	     * <screen> = hoS
+	     * <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB
+	     */
+	    public static final String MENU = "hoS";
+	    public static final String PROFILE_MENU = "hoSprofS";
+	    public static final String INVITE_MENU = "hoSinvS";
+	    public static final String FEEDBACK_MENU = "hoSfeedS";
+	    public static final String DELETE_ALL_CONVERSATIONS_MENU = "hoSdelAC";
+	    public static final String DELETE_CONVERSATION = "hoSdelC";
+	    public static final String COMPOSE_BUTTON = "hoScompB";
+	    public static final String ADD_SHORTCUT = "hoSaddSC";
+	    public static final String HOME_TOOL_TIP_CLOSED = "hoScreDtiPN";
+	    public static final String HOME_TOOL_TIP_CLICKED = "hoScreDtiPY";
+	    public static final String HOME_UPDATE_TOOL_TIP_CLOSED = "hoSupDtiPN";
+	    public static final String HOME_UPDATE_TOOL_TIP_CLICKED = "hoSupDtiPY";
+	    public static final String HOME_UPDATE_OVERLAY_DISMISSED = "hoSupDOBD";
+	    public static final String HOME_UDPATE_OVERLAY_BUTTON_CLICKED = "hoSupDOB";
 
-		// Invite screen events
-		public static final String INVITE_TOOL_TIP_CLOSED = "inviteToolTipClosed";
-		public static final String INVITE_TOOL_TIP_CLICKED = "inviteToolTipClicked";
-		public static final String CREDIT_TOP_BUTTON = "inviteCreditTopBtn";
-		
-		// Chat thread screen events
-		public static final String CHAT_INVITE_TOOL_TIP_CLOSED = "chatInviteToolTipClosed";
-		public static final String CHAT_GROUP_INFO_TOOL_TIP_CLOSED = "chatGroupInfoToolTipClosed";
-		public static final String CHAT_INVITE_TOP_BUTTON = "chatInviteBtn";
-		public static final String CHAT_GROUP_INFO_TOP_BUTTON = "chatGroupInfoBtn";
-		public static final String MENU_BLOCK = "chatMenuBlock";
-		public static final String FORWARD_MSG = "chatForwardMsg";
-		public static final String I_BUTTON = "chatIBtn";
-		public static final String INVITE_OVERLAY_BUTTON = "chatInviteOverlayBtn";
-		public static final String INVITE_OVERLAY_DISMISS = "chatInviteOverlayDismiss";
+	    /* 
+	     * Profile screen events
+	     * <screen> = profS
+	     * <event> = proES, credS, notyS, privS, helpS
+	     */
+	    public static final String EDIT_PROFILE = "profSproES";
+	    public static final String CREDITS_SCREEN = "profScredS";
+	    public static final String NOTIFICATION_SCREEN = "profSnotyS";
+	    public static final String PRIVACY_SCREEN = "profSprivS";
+	    public static final String HELP_SCREEN = "profShelpS";
+
+	    /* 
+	     * Invite screen events
+	     * <screen> = invS
+	     * <event> = credB, creDtiPN, creDtiPY
+	     */
+	    public static final String INVITE_TOOL_TIP_CLOSED = "invScreDtiPN";
+	    public static final String INVITE_TOOL_TIP_CLICKED = "invScreDtiPY";
+	    public static final String CREDIT_TOP_BUTTON = "invScredB";
+	    
+	    /* 
+	     * Chat thread screen events
+	     * <screen> = chatS
+	     * <event> = inVtiPN, inVtopB, blocK, forMsg, infoB, invOB, invOBD, opTiNtaP
+	     */
+	    public static final String CHAT_INVITE_TOOL_TIP_CLOSED = "chatSinVtiPN";
+	    public static final String CHAT_INVITE_TOP_BUTTON = "chatSinVtopB";
+	    public static final String MENU_BLOCK = "chatSblocK";
+	    public static final String FORWARD_MSG = "chatSforMSG";
+	    public static final String I_BUTTON = "chatSinfoB";
+	    public static final String INVITE_OVERLAY_BUTTON = "chatSinvOB";
+	    public static final String INVITE_OVERLAY_DISMISS = "chatSinvOBD";
+	    public static final String OPT_IN_TAP_HERE = "chatSopTiNtaP";
+	    
+	    /* 
+	     * Credits screen events
+	     * <screen> = credS
+	     * <event> = inVB
+	     */
+	    public static final String INVITE_BUTTON_CLICKED = "credSinVB";
+	}
+
+	public static final class MqttMessageTypes
+	{
+		public static final String MESSAGE_READ = "mr";
+		public static final String MESSAGE = "m";
+		public static final String SMS_CREDITS = "sc";
+		public static final String DELIVERY_REPORT = "dr";
+		public static final String USER_JOINED = "uj";
+		public static final String USER_LEFT = "ul";
+		public static final String START_TYPING = "st";
+		public static final String END_TYPING = "et";
+		public static final String INVITE = "i";
+		public static final String ICON = "ic";
+		public static final String INVITE_INFO = "ii";
+		public static final String GROUP_CHAT_JOIN = "gcj";
+		public static final String GROUP_CHAT_LEAVE = "gcl";
+		public static final String GROUP_CHAT_END = "gce";
+		public static final String GROUP_CHAT_NAME = "gcn";
+		public static final String ANALYTICS_EVENT = "le";
+		public static final String UPDATE_AVAILABLE = "ua";
 	}
 }

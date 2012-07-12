@@ -14,9 +14,10 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.SmileyParser;
@@ -59,15 +60,41 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			ConvMessage message = messages.get(messages.size() - 1);
 
 			ImageView imgStatus = (ImageView) v.findViewById(R.id.msg_status_indicator);
-			setImgStatus(message, imgStatus);
+			int resId = message.getImageState();
+			if (resId > 0)
+			{
+				imgStatus.setImageResource(resId);
+				imgStatus.setVisibility(View.VISIBLE);
+			}
+			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			{
+				imgStatus.setImageResource(R.drawable.ic_unread);
+				imgStatus.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				imgStatus.setImageResource(0);
+				imgStatus.setVisibility(View.GONE);
+			}
 
 			TextView messageView = (TextView) v.findViewById(R.id.last_message);
-			SmileyParser smileyParser = SmileyParser.getInstance();
-			CharSequence markedUp = smileyParser.addSmileySpans(message.getMessage());
-			// For showing the name of the contact that sent the message in a group chat
-			if(conversation instanceof GroupConversation && !TextUtils.isEmpty(message.getGroupParticipantMsisdn()) && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+
+			MessageMetadata metadata = message.getMetadata();
+
+			CharSequence markedUp;
+			if (metadata != null)
 			{
-				markedUp = Utils.addContactName(((GroupConversation)conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().getFirstName(), markedUp);
+				markedUp = metadata.getMessage(context, message, false);
+			}
+			else
+			{
+				SmileyParser smileyParser = SmileyParser.getInstance();
+				markedUp = smileyParser.addSmileySpans(message.getMessage(), true);
+				// For showing the name of the contact that sent the message in a group chat
+				if(conversation instanceof GroupConversation && !TextUtils.isEmpty(message.getGroupParticipantMsisdn()) && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+				{
+					markedUp = Utils.addContactName(((GroupConversation)conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().getFirstName(), markedUp);
+				}
 			}
 			messageView.setVisibility(View.VISIBLE);
 			messageView.setText(markedUp);
@@ -88,33 +115,5 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 		avatarView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(conversation.getMsisdn()));
 
 		return v;
-	}
-
-	private void setImgStatus(ConvMessage message, ImageView imgStatus)
-	{
-		imgStatus.setVisibility(View.VISIBLE);
-		switch (message.getState()) {
-		case SENT_CONFIRMED:
-			imgStatus.setImageResource(R.drawable.ic_sent_small);
-			break;
-		case SENT_DELIVERED:
-			imgStatus.setImageResource(R.drawable.ic_delivered_small);
-			break;
-		case SENT_DELIVERED_READ:
-			imgStatus.setImageResource(R.drawable.ic_read_small);
-			break;
-		case RECEIVED_UNREAD:
-			imgStatus.setImageResource(R.drawable.ic_unread);
-			break;
-		case SENT_FAILED:
-			imgStatus.setImageResource(R.drawable.ic_failed);
-			break;
-		case SENT_UNCONFIRMED:
-			imgStatus.setImageResource(R.drawable.ic_tower_small);
-			break;
-		default:
-			imgStatus.setImageResource(0);
-			imgStatus.setVisibility(View.GONE);
-		}
 	}
 }

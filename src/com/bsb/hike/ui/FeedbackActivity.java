@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -127,7 +128,16 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 			JSONObject obj = new JSONObject();
 			try
 			{
-				obj.put("data", feedback);
+				if(!TextUtils.isEmpty(feedback))
+				{
+					obj.put("msg", feedback);
+				}
+				if(selectedEmoticon != null)
+				{
+					obj.put("emo", selectedEmoticon.getId() == R.id.btn_happy ? 
+								0 : (selectedEmoticon.getId() == R.id.btn_ok ? 
+										1 : 2));
+				}
 				request.setJSONData(obj);
 			}
 			catch (JSONException e)

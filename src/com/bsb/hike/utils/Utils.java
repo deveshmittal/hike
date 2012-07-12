@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.NameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -35,6 +38,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -58,7 +62,6 @@ import android.widget.EditText;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
@@ -70,7 +73,8 @@ import com.bsb.hike.utils.AccountUtils.AccountInfo;
 public class Utils
 {
 	public static Pattern shortCodeRegex;
-	public static Pattern msisdnRegex; 
+	public static Pattern msisdnRegex;
+	public static Pattern pinRegex;
 
 	public static String shortCodeIntent;
 
@@ -87,6 +91,7 @@ public class Utils
 	{
 		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
 		msisdnRegex = Pattern.compile("\\[(\\+\\d*)\\]");
+		pinRegex = Pattern.compile("\\d{6}");
 	}
 
 	public static String join(Collection<?> s, String delimiter, String startWith, String endWith)
@@ -328,6 +333,8 @@ public class Utils
 		editor.putString(HikeMessengerApp.TOKEN_SETTING, accountInfo.token);
 		editor.putString(HikeMessengerApp.UID_SETTING, accountInfo.uid);
 		editor.putInt(HikeMessengerApp.SMS_SETTING, accountInfo.smsCredits);
+		editor.putInt(HikeMessengerApp.INVITED, accountInfo.all_invitee);
+		editor.putInt(HikeMessengerApp.INVITED_JOINED, accountInfo.all_invitee_joined);
 		editor.commit();
 	}
 
@@ -338,7 +345,8 @@ public class Utils
 	 */
 	public static String getSMSPinCode(String body)
 	{
-		return body;
+		Matcher m = pinRegex.matcher(body);
+		return m.find() ? m.group() : null;
 	}
 
 	public static boolean requireAuth(Activity activity)
@@ -525,37 +533,67 @@ public class Utils
 	
 	public static JSONObject getDeviceDetails(Context context)
 	{
-		//{"t": "le", "d"{"tag":"cbs", "device_id": "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device": "FFF","_resolution": "GGG","_carrier": "HHH"}}
-		int height = ((Activity)context).getWindowManager().getDefaultDisplay().getHeight();
-		int width = ((Activity)context).getWindowManager().getDefaultDisplay().getWidth();
-		TelephonyManager manager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-		
-		String osVersion = Build.VERSION.RELEASE;
-		String deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-		String os = "Android";
-		String resolution = height + "x" + width;
-		String carrier = manager.getNetworkOperatorName();
-		String device = Build.MANUFACTURER + " " + Build.MODEL;
-				
-		JSONObject object = new JSONObject();
-		JSONObject data = new JSONObject();
-		
-		try {
-			object.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
+		try 
+		{
+			//{"t": "le", "d"{"tag":"cbs", "device_id": "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device": "FFF","_resolution": "GGG","_carrier": "HHH", "appversion" : "x.x.x"}}
+			int height;
+			int width;
+			JSONObject object = new JSONObject();
+			JSONObject data = new JSONObject();
+
+			/*
+			 *  Doing this to avoid the ClassCastException when the context is sent from the BroadcastReceiver.
+			 *  As it is, we don't need to send the resolution from the BroadcastReceiver since it should have
+			 *  already been sent to the server.
+			 */
+			if (context instanceof Activity) 
+			{
+				height = ((Activity) context).getWindowManager().getDefaultDisplay().getHeight();
+				width = ((Activity) context).getWindowManager().getDefaultDisplay().getWidth();
+				String resolution = height + "x" + width;
+				data.put(HikeConstants.LogEvent.RESOLUTION, resolution);
+			}
+			TelephonyManager manager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+
+			String osVersion = Build.VERSION.RELEASE;
+			String deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+			String os = "Android";
+			String carrier = manager.getNetworkOperatorName();
+			String device = Build.MANUFACTURER + " " + Build.MODEL;
+			String appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0 ).versionName;
+
+			object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+			Map<String, String> referralValues = retrieveReferralParams(context);
+			if(!referralValues.isEmpty())
+			{
+				for(Entry<String, String> entry: referralValues.entrySet())
+				{
+					data.put(entry.getKey(), entry.getValue());
+				}
+			}
 			data.put(HikeConstants.LogEvent.TAG, "cbs");
 			data.put(HikeConstants.LogEvent.DEVICE_ID, deviceId);
 			data.put(HikeConstants.LogEvent.OS, os);
 			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 			data.put(HikeConstants.LogEvent.DEVICE, device);
-			data.put(HikeConstants.LogEvent.RESOLUTION, resolution);
 			data.put(HikeConstants.LogEvent.CARRIER, carrier);
+			data.put(HikeConstants.APP_VERSION, appVersion);
 			object.put(HikeConstants.DATA, data);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			return object;
+		} 
+		catch (JSONException e) 
+		{
+			Log.e("Utils", "Invalid JSON", e);
+			return null;
+		} 
+		catch (NameNotFoundException e) 
+		{
+			Log.e("Utils", "Package not found", e);
+			return null;
 		}
-		
-		return object;
+
+
 	}
 	
 	public static JSONObject getDeviceStats(Context context)
@@ -569,21 +607,28 @@ public class Utils
 
 		try 
 		{
-			for (String key : keys.keySet())
+			if(keys.isEmpty())
 			{
-				Log.d("Utils", "Getting keys: " + key);
-				data.put(key, prefs.getLong(key, 0));
-				editor.remove(key);
+				obj = null;
 			}
-			editor.commit();
-			data.put(HikeConstants.LogEvent.TAG, "mob");
-			
-			obj.put(HikeConstants.TYPE, NetworkManager.ANALYTICS_EVENT);
-			obj.put(HikeConstants.DATA, data);
+			else
+			{
+				for (String key : keys.keySet())
+				{
+					Log.d("Utils", "Getting keys: " + key);
+					data.put(key, prefs.getLong(key, 0));
+					editor.remove(key);
+				}
+				editor.commit();
+				data.put(HikeConstants.LogEvent.TAG, "mob");
+
+				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+				obj.put(HikeConstants.DATA, data);
+			}
 		} 
 		catch (JSONException e) 
 		{
-			e.printStackTrace();
+			Log.e("Utils", "Invalid JSON", e);
 		}
 
 		return obj;
@@ -658,5 +703,67 @@ public class Utils
 		Editor editor= prefs.edit();
 		editor.putInt(whichScreen, prefs.getInt(whichScreen, 0) + 1);
 		editor.commit();
+	}
+
+	public static boolean isUpdateRequired(String version, Context context)
+	{
+		try 
+		{
+			String appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0 ).versionName;
+			return convertVersionToInt(appVersion) < convertVersionToInt(version);
+		} 
+		catch (NameNotFoundException e) 
+		{
+			Log.e("Utils", "Invalid package", e);
+			return false;
+		}
+	}
+	
+	 /*
+     * Stores the referral parameters in the app's sharedPreferences.
+     */
+    public static void storeReferralParams(Context context, List<NameValuePair> params)
+    {
+        SharedPreferences storage = context.getSharedPreferences(HikeMessengerApp.REFERRAL, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = storage.edit();
+ 
+        for(NameValuePair nameValuePair: params)
+        {
+        	String name = nameValuePair.getName();
+            String value = nameValuePair.getValue();
+            editor.putString(name, value);
+        }
+ 
+        editor.commit();
+    }
+ 
+    /*
+     * Returns a map with the Market Referral parameters pulled from the sharedPreferences.
+     */
+    public static Map<String, String> retrieveReferralParams(Context context)
+    {
+        Map<String, String> params = new HashMap<String, String>();
+        SharedPreferences storage = context.getSharedPreferences(HikeMessengerApp.REFERRAL, Context.MODE_PRIVATE);
+ 
+        for(String key : storage.getAll().keySet())
+        {
+            String value = storage.getString(key, null);
+            if(value != null)
+            {
+                params.put(key, value);
+            }
+        }
+        // We don't need these values anymore
+        Editor editor = storage.edit();
+        editor.clear();
+        editor.commit();
+        return params;
+    }
+
+    
+    public static boolean isUserOnline(Context context)
+	{
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
 	}
 }

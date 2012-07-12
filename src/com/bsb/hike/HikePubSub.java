@@ -41,8 +41,6 @@ public class HikePubSub implements Runnable
 
 	public static final String WS_CLOSE = "ws_close";
 
-	public static final String WS_RECEIVED = "ws_received";
-
 	public static final String WS_OPEN = "ws_open";
 
 //	public static final String WS_SEND = "ws_send";
@@ -104,6 +102,10 @@ public class HikePubSub implements Runnable
 	public static final String PARTICIPANT_JOINED_GROUP = "participantJoinedGroup";
 
 	public static final String PARTICIPANT_LEFT_GROUP = "participantLeftGroup";
+
+	public static final String INVITEE_NUM_CHANGED = "inviteeNoChanged";
+
+	public static final String UPDATE_AVAILABLE = "updateAvailable";
 
 	private final Thread mThread;
 

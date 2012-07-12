@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -45,21 +44,18 @@ public class IconCacheManager
 	    }
 	}
 
-	private Context mContext;
-
 	private Map<String, Drawable> mIcons; /* maps strings to bitmaps.  Should be an LRU cache */
 
 	private HikeUserDatabase mDb;
 	private static IconCacheManager mCacheManager;
 
-	public IconCacheManager(Context context)
+	public IconCacheManager()
 	{
-		mContext = context.getApplicationContext();
 		mIcons = Collections.synchronizedMap(new LRUCache<String, Drawable>(20)); /* only keep 20 entries @ a time */
-		mDb = new HikeUserDatabase(mContext);
+		mDb = HikeUserDatabase.getInstance();
 	}
 
-	public static void init(Context context)
+	public static void init()
 	{
 		if (mCacheManager == null)
 		{
@@ -67,7 +63,7 @@ public class IconCacheManager
 			{
 				if (mCacheManager == null)
 				{
-					mCacheManager = new IconCacheManager(context);
+					mCacheManager = new IconCacheManager();
 				}
 			}
 		}
@@ -94,5 +90,10 @@ public class IconCacheManager
 	{
 		mIcons.remove(msisdn);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
+	}
+
+	public synchronized void clearIconCache()
+	{
+		mIcons.clear();
 	}
 }

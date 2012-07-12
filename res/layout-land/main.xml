@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/thatch_repeat" >
+
+    <include
+        android:id="@+id/top_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/top_panel" />
+
+    <ListView
+        android:id="@+id/conversations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_panel"
+        android:background="@color/offwhite"
+        android:cacheColorHint="#00000000"
+        android:divider="@drawable/ic_thread_divider_other"
+        android:dividerHeight="1dp"
+        android:fadingEdge="none"
+        android:footerDividersEnabled="false" />
+
+    <View
+        android:id="@+id/conversation_list_dropshadow"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/conversations"
+        android:background="@drawable/dropshadow" />
+
+    <View
+        android:id="@+id/messages_list_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/transparent_white"
+        android:visibility="visible" >
+    </View>
+
+    <RelativeLayout
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_panel"
+        android:background="@drawable/thatch_repeat"
+        android:visibility="visible" >
+
+        <include layout="@layout/tool_tip" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true" >
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:src="@drawable/no_threads" />
+            
+            <ImageView 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="60dp"
+                android:layout_marginBottom="26dp"
+                android:src="@drawable/start_help"/>
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/edit_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/newmessage" />
+
+    <LinearLayout
+        android:id="@+id/update_tool_tip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_panel"
+        android:visibility="visible" >
+
+        <include layout="@layout/tool_tip" />
+    </LinearLayout>
+
+    <include layout="@layout/dark_overlay" />
+
+</RelativeLayout>

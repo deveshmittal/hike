@@ -13,7 +13,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
@@ -80,15 +79,15 @@ public class ConvMessage
 		public static ParticipantInfoState fromJSON(JSONObject obj)
 		{
 			String type = obj.optString(HikeConstants.TYPE);
-			if(NetworkManager.GROUP_CHAT_JOIN.equals(type))
+			if(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN.equals(type))
 			{
 				return ParticipantInfoState.PARTICIPANT_JOINED;
 			}
-			else if(NetworkManager.GROUP_CHAT_LEAVE.equals(type))
+			else if(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE.equals(type))
 			{
 				return ParticipantInfoState.PARTICIPANT_LEFT;
 			}
-			else if (NetworkManager.GROUP_CHAT_END.equals(type))
+			else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type))
 			{
 				return ParticipantInfoState.GROUP_END;
 			}
@@ -241,6 +240,11 @@ public class ConvMessage
 		return this.metadata;
 	}
 
+	public void setMessage(String mMessage)
+	{
+		this.mMessage = mMessage;
+	}
+
 	public String getMessage()
 	{
 		return mMessage;
@@ -339,7 +343,7 @@ public class ConvMessage
 			object.put(HikeConstants.TO, mMsisdn);
 			object.put(HikeConstants.DATA,data);
 
-			object.put(HikeConstants.TYPE, mInvite ? NetworkManager.INVITE : NetworkManager.MESSAGE);
+			object.put(HikeConstants.TYPE, mInvite ? HikeConstants.MqttMessageTypes.INVITE : HikeConstants.MqttMessageTypes.MESSAGE);
 		}
 		catch (JSONException e)
 		{
@@ -425,7 +429,7 @@ public class ConvMessage
 				{
 					ids.put(String.valueOf(mappedMsgId));
 					object.put(HikeConstants.DATA, ids);
-					object.put(HikeConstants.TYPE, NetworkManager.MESSAGE_READ);
+					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
 					object.put(HikeConstants.TO, mMsisdn);
 				}
 				catch (JSONException e)

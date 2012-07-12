@@ -17,6 +17,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -44,7 +45,7 @@ public class ToastListener implements Listener
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTION_STATUS, this);
 		this.toaster = new HikeNotification(context);
-		this.db = new HikeUserDatabase(context);
+		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
 		mCurrentUnnotifiedStatus = MQTTConnectionStatus.INITIAL;
 	}
@@ -66,6 +67,10 @@ public class ToastListener implements Listener
 		else if (HikePubSub.MESSAGE_RECEIVED.equals(type))
 		{
 			ConvMessage message = (ConvMessage) object;
+
+			HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
+			message.setConversation(hCDB.getConversation(message.getMsisdn(), 0));
+			
 			if(message.getConversation() == null)
 			{
 				Log.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
@@ -125,7 +130,8 @@ public class ToastListener implements Listener
 		}
 
 		/* don't show any connection message until we've connected once */
-		if (!connectedOnce)
+		// Not showing any connection statuses for now..
+		if (true)
 		{
 			return;
 		}
@@ -142,9 +148,6 @@ public class ToastListener implements Listener
 		Log.d("ToastListener", "status is " + status);
 		switch (status)
 		{
-		case CONNECTING:
-			id = R.string.notconnected_reconnected;
-			break;
 		case NOTCONNECTED_DATADISABLED:
 			id = R.string.notconnected_data_disabled;
 			break;

@@ -19,7 +19,7 @@ import com.bsb.hike.utils.SmileyParser;
 
 public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener{
 
-	private static final int EMOTICON_COUNT_PER_PAGE = 14;
+	private static final int EMOTICON_TAB_NUMBER = 3;
 
 	private LayoutInflater inflater;
 	private Context context;
@@ -38,7 +38,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 
 	@Override
 	public int getCount() {
-		return (int) (Math.ceil(SmileyParser.DEFAULT_SMILEY_RES_IDS.length/EMOTICON_COUNT_PER_PAGE)) + 1;
+		return EMOTICON_TAB_NUMBER;
 	}
 	
 	@Override
@@ -66,16 +66,20 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 
 		int currentPage;
 		LayoutInflater inflater;
+		int startIndex;
 
 		public EmoticonPageAdapter(int currentPage) {
 			this.currentPage = currentPage;
 			this.inflater = LayoutInflater.from(context);
+			for(int i=currentPage-1; i>=0; i--)
+			{
+				startIndex += SmileyParser.SIZES_EMOTICON_SETS[i];
+			}
 		}
 
 		@Override
 		public int getCount() {
-			return (SmileyParser.DEFAULT_SMILEY_RES_IDS.length - (currentPage * EMOTICON_COUNT_PER_PAGE)) >= EMOTICON_COUNT_PER_PAGE 
-					? EMOTICON_COUNT_PER_PAGE : (SmileyParser.DEFAULT_SMILEY_RES_IDS.length % EMOTICON_COUNT_PER_PAGE);
+			return SmileyParser.SIZES_EMOTICON_SETS[currentPage];
 		}
 
 		@Override
@@ -94,8 +98,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			{
 				convertView = inflater.inflate(R.layout.emoticon_item, null);
 			}
-			convertView.setTag(new Integer((currentPage * EMOTICON_COUNT_PER_PAGE) + position));
-			((ImageView) convertView).setImageResource(SmileyParser.DEFAULT_SMILEY_RES_IDS[(currentPage * EMOTICON_COUNT_PER_PAGE) + position]);
+			convertView.setTag(new Integer(startIndex + position));
+			((ImageView) convertView).setImageResource(SmileyParser.DEFAULT_SMILEY_RES_IDS[startIndex + position]);
 			return convertView;
 		}
 	}

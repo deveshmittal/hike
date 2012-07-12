@@ -1,9 +1,24 @@
 package com.bsb.hike;
 
+import static org.acra.ACRA.LOG_TAG;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Map;
+
+import org.acra.ACRA;
+import org.acra.CrashReportData;
+import org.acra.ErrorReporter;
+import org.acra.ReportField;
+import org.acra.annotation.ReportsCrashes;
+import org.acra.sender.ReportSender;
+import org.acra.sender.ReportSenderException;
+import org.acra.util.HttpRequest;
+
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -11,6 +26,9 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.bsb.hike.db.DbConversationListener;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeMqttPersistence;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -21,6 +39,19 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 
+@ReportsCrashes(formKey = "",
+				customReportContent = {
+										ReportField.APP_VERSION_CODE,
+										ReportField.APP_VERSION_NAME,
+										ReportField.PHONE_MODEL,
+										ReportField.BRAND,
+										ReportField.PRODUCT,
+										ReportField.ANDROID_VERSION,
+										ReportField.STACK_TRACE,
+										ReportField.USER_APP_START_DATE,
+										ReportField.USER_CRASH_DATE
+										}
+				)
 public class HikeMessengerApp extends Application
 {
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
@@ -40,6 +71,8 @@ public class HikeMessengerApp extends Application
 	public static final String UPDATE_SETTING = "update";
 
 	public static final String ANALYTICS = "analytics";
+
+	public static final String REFERRAL = "referral";
 
 	public static final String ADDRESS_BOOK_SCANNED = "abscanned";
 
@@ -81,13 +114,15 @@ public class HikeMessengerApp extends Application
 
 	private static Messenger mMessenger;
 
-	private NetworkManager mNetworkManager;
-
 	private Messenger mService;
 
 	private HikeServiceConnection mServiceConnection;
 
 	private boolean mInitialized;
+
+	private String token;
+
+	private String msisdn;
 
 	class IncomingHandler extends Handler
 	{
@@ -97,17 +132,11 @@ public class HikeMessengerApp extends Application
 			Log.d("HikeMessengerApp", "In handleMessage " + msg.what);
 			switch (msg.what)
 			{
-				case HikeService.MSG_APP_PUBLISH:
-					Log.d("HikeMessengerApp", "received message " );
-					Bundle bundle = msg.getData();
-					String message = bundle.getString("msg");
-					Log.d("HikeMessengerApp", "received message " + message);
-					mPubSubInstance.publish(HikePubSub.WS_RECEIVED, message);
-					break;
 				case HikeService.MSG_APP_MESSAGE_STATUS:
 					boolean success = msg.arg1 != 0;
 					Long msgId = (Long) msg.obj;
 					Log.d("HikeMessengerApp", "received msg status msgId:" + msgId + " state: " + success);
+					// TODO handle this where we are saving all the mqtt messages
 					String event = success ? HikePubSub.SERVER_RECEIVED_MSG : HikePubSub.MESSAGE_FAILED;
 					mPubSubInstance.publish(event, msgId);
 					break;
@@ -176,26 +205,90 @@ public class HikeMessengerApp extends Application
 		}
 	}
 
+	/*
+	 * Implement a Custom report sender to add our own custom msisdn and token for the username
+	 * and password
+	 */
+	private class CustomReportSender implements ReportSender
+	{
+		@Override
+		public void send(CrashReportData crashReportData) throws ReportSenderException 
+		{
+			try 
+			{
+				final String reportUrl = AccountUtils.BASE + "/logs/android";
+				Log.d(LOG_TAG, "Connect to " + reportUrl.toString());
+
+				final String login = msisdn;
+				final String password = token;
+
+				if (login != null && password != null) 
+				{
+					final HttpRequest request = new HttpRequest(login, password);
+					String paramsAsString = getParamsAsString(crashReportData);
+					Log.e(getClass().getSimpleName(), "Params: "+ paramsAsString);
+					request.sendPost(reportUrl, paramsAsString);
+				}
+			} 
+			catch (IOException e) 
+			{
+				Log.e(getClass().getSimpleName(), "IOException", e);
+			}
+		}
+		
+	}
+
+	/**
+     * Converts a Map of parameters into a URL encoded Sting.
+     *
+     * @param parameters    Map of parameters to convert.
+     * @return URL encoded String representing the parameters.
+     * @throws UnsupportedEncodingException if one of the parameters couldn't be converted to UTF-8.
+     */
+    private String getParamsAsString(Map<?,?> parameters) throws UnsupportedEncodingException {
+
+		final StringBuilder dataBfr = new StringBuilder();
+		for (final Object key : parameters.keySet()) {
+			if (dataBfr.length() != 0) {
+				dataBfr.append('&');
+			}
+			final Object preliminaryValue = parameters.get(key);
+            final Object value = (preliminaryValue == null) ? "" : preliminaryValue;
+			dataBfr.append(URLEncoder.encode(key.toString(), "UTF-8"));
+            dataBfr.append('=');
+            dataBfr.append(URLEncoder.encode(value.toString(), "UTF-8"));
+		}
+
+        return dataBfr.toString();
+    }
+
 	public void onCreate()
 	{
+		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
+		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+
+		ACRA.init(this);
+		CustomReportSender customReportSender = new CustomReportSender();
+        ErrorReporter.getInstance().setReportSender(customReportSender);
+
 		super.onCreate();
 
-		SmileyParser.init(this);
+		HikeConversationsDatabase.init(this);
+		HikeUserDatabase.init(this);
+		HikeMqttPersistence.init(this);
 
-		IconCacheManager.init(this);
+		SmileyParser.init(this);
+		
+		IconCacheManager.init();
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
-
-		/* add the generic websocket listener. This will turn strings into objects and re-broadcast them */
-		mNetworkManager = NetworkManager.getInstance(getApplicationContext());
 
 		/* add a handler to handle toasts. The object initializes itself it it's constructor */
 		new ToastListener(getApplicationContext());
 
 		mMessenger = new Messenger(new IncomingHandler());
 
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		String token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		if (token != null)
 		{
 			AccountUtils.setToken(token);

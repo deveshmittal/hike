@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/thatch_repeat"
+    android:orientation="vertical" >
+
+    <include layout="@layout/top_panel" android:id="@+id/top_panel" />
+
+    <WebView
+        android:id="@+id/t_and_c_page"
+        android:layout_below="@id/top_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:id="@+id/loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible" >
+
+        <ProgressBar
+            android:id="@+id/loading_page"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_centerInParent="true"
+            android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
+    </RelativeLayout>
+
+</RelativeLayout>

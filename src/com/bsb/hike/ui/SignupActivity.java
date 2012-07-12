@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
@@ -28,10 +30,9 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
-import com.bsb.hike.utils.UpdateAppBaseActivity;
 import com.bsb.hike.view.MSISDNView;
 
-public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener
+public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener
 {
 
 	private SignupTask mTask;
@@ -144,6 +145,7 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 				public void run() 
 				{
 					Intent intent = new Intent(SignupActivity.this, MessagesList.class);
+					intent.putExtra(HikeConstants.Extras.APP_STARTED_FIRST_TIME, true);
 					startActivity(intent);
 					finish();
 				}
@@ -291,6 +293,14 @@ public class SignupActivity extends UpdateAppBaseActivity implements SignupTask.
 		}
 		enterEditText.setOnEditorActionListener(this);
 		enterEditText.addTextChangedListener(this);
+		enterEditText.setOnKeyListener(new OnKeyListener()
+		{
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) 
+			{
+				return loadingLayout.getVisibility() == View.VISIBLE;
+			}
+		});
 	}
 
 	@Override

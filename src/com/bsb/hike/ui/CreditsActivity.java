@@ -19,19 +19,22 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
+import com.bsb.hike.utils.Utils;
 
-public class CreditsActivity extends Activity 
+public class CreditsActivity extends Activity implements Listener
 {
 	private LinearLayout creditItemContainer;
 	private TextView mTitleView;
 	private TextView creditsNum;
 	private Button inviteFriendsBtn;
-	private int numHike;
-	private int numInvited;
 	private TextView impTxt;
 	private TextView friendsNumTxt;
+	private SharedPreferences settings;
+	private TextView everyMonthTxt;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -39,13 +42,10 @@ public class CreditsActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
 
-		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Editor editor = settings.edit();
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
 		editor.commit();
-
-		numHike = settings.getInt(HikeMessengerApp.INVITED_JOINED, 0);
-		numInvited = settings.getInt(HikeMessengerApp.INVITED, 0);
 
 		mTitleView = (TextView) findViewById(R.id.title);
 		creditItemContainer = (LinearLayout) findViewById(R.id.credit_item_container);
@@ -53,6 +53,24 @@ public class CreditsActivity extends Activity
 		inviteFriendsBtn = (Button) findViewById(R.id.invite_now);
 		impTxt = (TextView) findViewById(R.id.imp_txt);
 		friendsNumTxt = (TextView) findViewById(R.id.friends_num);
+		everyMonthTxt = (TextView) findViewById(R.id.every_month_text);
+
+		String everyMonth = getString(R.string.every_month);
+		SpannableString everyMonthSpan = new SpannableString(everyMonth);
+		String stringToBeFormatted = getString(R.string.string_to_be_formatted);
+		everyMonthSpan.setSpan(
+								new StyleSpan(Typeface.BOLD), 
+								everyMonth.indexOf(stringToBeFormatted), 
+								everyMonth.indexOf(stringToBeFormatted) + stringToBeFormatted.length() + 1,
+								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+								);
+		everyMonthSpan.setSpan(
+								new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), 
+								everyMonth.indexOf(stringToBeFormatted), 
+								everyMonth.indexOf(stringToBeFormatted) + stringToBeFormatted.length() + 1,
+								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+								);
+		everyMonthTxt.setText(everyMonthSpan);
 
 		String imp = getString(R.string.important);
 		String dnd = getString(R.string.dnd);
@@ -61,12 +79,75 @@ public class CreditsActivity extends Activity
 		s.setSpan(new StyleSpan(Typeface.BOLD), 0, imp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		s.setSpan(new ForegroundColorSpan(0xffff3333), 0, imp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-		int ind = dnd.indexOf("10 SMS");
-		int l = new String("10 SMS").length();
-		s.setSpan(new StyleSpan(Typeface.BOLD), imp.length() + ind, imp.length() + ind + l + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		s.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), imp.length() + ind, imp.length() + ind + l + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
 		impTxt.setText(s);
+
+		mTitleView.setText("Free SMS");
+
+		updateCredits();
+
+		updateInviteeNum();
+
+		inviteFriendsBtn.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				Utils.logEvent(CreditsActivity.this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
+				Intent i = new Intent(CreditsActivity.this, HikeListActivity.class);
+				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				i.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
+				startActivity(i);
+			}
+		});
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.INVITEE_NUM_CHANGED, this);
+	}
+
+	@Override
+	protected void onDestroy() 
+	{
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.INVITEE_NUM_CHANGED, this);
+		super.onDestroy();
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) 
+	{
+		if(HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					updateCredits();
+				}
+			});
+		}
+		else if(HikePubSub.INVITEE_NUM_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					updateInviteeNum();
+				}
+			});
+		}
+	}
+
+	private void updateCredits()
+	{
+		creditsNum.setText(settings.getInt(HikeMessengerApp.SMS_SETTING, 0) + "");
+	}
+
+	private void updateInviteeNum()
+	{
+		int numInvited = settings.getInt(HikeMessengerApp.INVITED, 0);
+		int numHike = settings.getInt(HikeMessengerApp.INVITED_JOINED, 0);
 
 		String formatString = getResources().getString(R.string.friends_on_hike_0);
 		String num = Integer.toString(numInvited);
@@ -78,49 +159,27 @@ public class CreditsActivity extends Activity
 				start + num.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		str.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), start, start + num.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		friendsNumTxt.setText(str);
-		
-		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		int credits = settings.getInt(HikeMessengerApp.SMS_SETTING, 0);
 
-		creditsNum.setText(credits+"");
-		mTitleView.setText("Free SMS");
+		creditItemContainer.removeAllViews();
+
 		LayoutInflater layoutInflater = LayoutInflater.from(CreditsActivity.this);
-
-		for(int i = 0; i<=5; i++)
+		for(int i = 0; i<=2; i++)
 		{
 			View v = layoutInflater.inflate(R.layout.credits_item, null);
 			TextView friendNum = (TextView) v.findViewById(R.id.friends_no);
 			TextView smsNum = (TextView) v.findViewById(R.id.sms_no);
-			
-			int smsNo = 100 + (i*20);
 
-			friendNum.setText(i + "");
-			if (i == 5) 
-			{
-				friendNum.setText(i + "+");
-				if(numHike >= 5)
-				{
-					v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
-				}
-			}
-			else if(i == numHike)
+			int numToShow = numHike < 2 ? i : ((numHike + i) - 1);
+
+			if(i == ((numHike < 2) ? numHike : 1))
 			{
 				v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
 			}
-			
+
+			int smsNo = HikeConstants.INITIAL_NUM_SMS + (numToShow * HikeConstants.NUM_SMS_PER_FRIEND);
+			friendNum.setText(numToShow + "");
 			smsNum.setText(smsNo+"");
 			creditItemContainer.addView(v);
 		}
-		inviteFriendsBtn.setOnClickListener(new OnClickListener() 
-		{
-			@Override
-			public void onClick(View v) 
-			{
-				Intent i = new Intent(CreditsActivity.this, HikeListActivity.class);
-				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				i.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
-				startActivity(i);
-			}
-		});
 	}
 }

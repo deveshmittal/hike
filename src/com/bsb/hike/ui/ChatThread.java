@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,6 +36,7 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -55,12 +57,17 @@ import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.FilterQueryProvider;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TabHost;
+import android.widget.TabHost.OnTabChangeListener;
+import android.widget.TabHost.TabContentFactory;
+import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
@@ -68,7 +75,6 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.NetworkManager;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
@@ -189,6 +195,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private Button titleBtn;
 
+	private TabHost tabHost;
+
+	private boolean isTabInitialised = false;
+
 	@Override
 	protected void onPause()
 	{
@@ -251,9 +261,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		mBottomView.setVisibility(View.GONE);
 
-		mDbhelper = new HikeUserDatabase(this);
-		String[] columns = new String[] { "name", "msisdn", "onhike", "_id" };
-		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike };
+		mDbhelper = HikeUserDatabase.getInstance();
+		String[] columns = new String[] { "name", "msisdn", "onhike", "msisdn", "_id" };
+		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike, R.id.user_img };
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
 		adapter.setViewBinder(new DropDownViewBinder());
 		adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter()
@@ -300,10 +310,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 							setIntentFromField();
 
-							/* close the db */
-							mDbhelper.close();
-							mDbhelper = null;
-
 							/* initialize the conversation */
 							createConversation();
 
@@ -329,7 +335,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			Map<String, GroupParticipant> existingParticipantList = TextUtils.isEmpty(existingGroupId) ? null : mConversationDb.getGroupParticipants(existingGroupId);
 			if (existingParticipantList != null && !existingParticipantList.isEmpty()) 
 			{
-				existingParticipants = Utils.join(existingParticipantList.keySet(), ", ", "[", "]");
+				List<String> currentParticipantList = new ArrayList<String>();
+				for(Entry<String, GroupParticipant> participant : existingParticipantList.entrySet())
+				{
+					Log.d(getClass().getSimpleName(), "Current Participant: " + participant.getKey() + " has left? " + participant.getValue().hasLeft());
+					if(!participant.getValue().hasLeft())
+					{
+						currentParticipantList.add(participant.getKey());
+					}
+				}
+				existingParticipants = !currentParticipantList.isEmpty() ? Utils.join(currentParticipantList, ", ", "[", "]") : null;
 			}
 			Log.d(getClass().getSimpleName(), "Exisiting participants: " + existingParticipants);
 			mInputMultiNumberView.setOnItemClickListener(new OnItemClickListener() 
@@ -408,17 +423,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mComposeViewWatcher.uninit();
 			mComposeViewWatcher = null;
-		}
-
-		if (mDbhelper != null)
-		{
-			mDbhelper.close();
-			mDbhelper = null;
-		}
-		if (mConversationDb != null)
-		{
-			mConversationDb.close();
-			mConversationDb = null;
 		}
 
 		if ((mInputNumberView != null) && (mInputNumberView.getAdapter() != null))
@@ -505,6 +509,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 		});
 
+		tabHost = (TabHost) findViewById(android.R.id.tabhost);
+		tabHost.setup();
+
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 
@@ -516,7 +523,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
 
-		mConversationDb = new HikeConversationsDatabase(this);
+		mConversationDb = HikeConversationsDatabase.getInstance();
 
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
@@ -694,20 +701,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onOverlayButtonClick(View v)
 	{
 		/* user clicked the unblock button in the chat-screen */
-		hideOverlay();
 		if (v.getId() != R.id.overlay_layout && blockOverlay) 
 		{
 			mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
 			mUserIsBlocked = false;
 			mComposeView.setEnabled(true);
+			hideOverlay();
 		}
 		else if(v.getId() != R.id.overlay_layout)
 		{
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.INVITE_OVERLAY_BUTTON);
 			inviteUser();
+			hideOverlay();
 		}
+
 		if(!blockOverlay)
 		{
+			hideOverlay();
 			mConversationDb.setOverlay(true, mConversation.getMsisdn());
 		}
 	}
@@ -957,14 +967,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mLabelView.setText(mLabel);
 
-		HikeUserDatabase db = new HikeUserDatabase(this);
+		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		mUserIsBlocked = db.isBlocked(mContactNumber);
 		if (mUserIsBlocked)
 		{
 			showOverlay(true);
 		}
-
-		db.close();
 
 		changeInviteButtonVisibility();
 		if((mConversation instanceof GroupConversation) && !((GroupConversation)mConversation).getIsGroupAlive())
@@ -1028,13 +1036,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mConversation.isOnhike() ||
 				(mConversation instanceof GroupConversation))
 		{
-			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn_selector);
+			((ImageButton)findViewById(R.id.emo_btn)).setImageResource(R.drawable.emoticon_hike_btn);
+			mSendBtn.setTextColor(getResources().getColorStateList(R.color.send_hike));
+			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
 			mComposeView.setHint("Free Message...");
 		}
 		else
 		{
 			updateChatMetadata();
-			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn_selector);
+			((ImageButton)findViewById(R.id.emo_btn)).setImageResource(R.drawable.emoticon_sms_btn);
+			mSendBtn.setTextColor(getResources().getColorStateList(R.color.send_sms));
+			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn);
 			mComposeView.setHint("SMS Message...");
 		}
 	}
@@ -1080,7 +1092,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				JSONObject object = new JSONObject();
 				try
 				{
-					object.put(HikeConstants.TYPE, NetworkManager.MESSAGE_READ);
+					object.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.MESSAGE_READ);
 					object.put(HikeConstants.TO, mConversation.getMsisdn());
 					object.put(HikeConstants.DATA, ids);
 				}
@@ -1158,9 +1170,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
 				{
-					HikeConversationsDatabase hCDB = new HikeConversationsDatabase(this);
+					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn()));
-					hCDB.close();
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
@@ -1319,9 +1330,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			String groupId = (String) object;
 			if (mContactNumber.equals(groupId))
 			{
-				HikeConversationsDatabase db = new HikeConversationsDatabase(this);
+				HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 				final String groupName = db.getGroupName(groupId);
-				db.close();
 				mConversation.setContactName(groupName);
 
 				runOnUiThread(new Runnable() {
@@ -1337,7 +1347,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			String groupId = ((JSONObject)object).optString(HikeConstants.TO);
 			if(mContactNumber.equals(groupId))
 			{
-				groupChatDead();
+				runOnUiThread(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						groupChatDead();
+					}
+				});
 			}
 		}
 	}
@@ -1412,10 +1429,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					mComposeView.setText("");
 				}
 				mComposeView.setHint(R.string.type_to_compose);
-				if ((mConversation instanceof GroupConversation) && ((GroupConversation)mConversation).getIsGroupAlive()) 
-				{
-					mComposeView.setEnabled(true);
-				}
+				mComposeView.setEnabled(true);
 			}
 			findViewById(R.id.info_layout).setVisibility(View.GONE);
 
@@ -1432,7 +1446,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				int numSms = ((int)(length/140)) + 1;
 				String charNumString = Integer.toString(charNum);
 				SpannableString ss = new SpannableString(charNumString + "/#" + Integer.toString(numSms));
-				ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.green)), 0, charNumString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.send_green)), 0, charNumString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				mMetadataNumChars.setText(ss);
 			}
 			else
@@ -1653,8 +1667,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			else
 			{
-				Utils.logEvent(ChatThread.this,
-						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
+//				Utils.logEvent(ChatThread.this,
+//						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
 				Intent intent = getIntent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
@@ -1671,8 +1685,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (v.getId() == R.id.title_icon) 
 		{
-			mDbhelper.close();
-
 			String groupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 			if (TextUtils.isEmpty(groupId))
 			{
@@ -1707,13 +1719,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 			try 
 			{
-				sendMessage(new ConvMessage(groupConversation.serialize(NetworkManager.GROUP_CHAT_JOIN), groupConversation, ChatThread.this, true));
+				sendMessage(new ConvMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN), groupConversation, ChatThread.this, true));
 			}
 			catch (JSONException e) 
 			{
 				e.printStackTrace();
 			}
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(NetworkManager.GROUP_CHAT_JOIN));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN));
 			createConversation();
 			mComposeViewWatcher.init();
 			mComposeView.requestFocus();
@@ -1783,8 +1795,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	public void onToolTipClosed(View v)
 	{
-		Utils.logEvent(ChatThread.this, (mConversation instanceof GroupConversation) ? 
-				HikeConstants.LogEvent.CHAT_GROUP_INFO_TOOL_TIP_CLOSED : HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
+		Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
 		dismissToolTip();
 	}
 
@@ -1822,9 +1833,38 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	public void onEmoticonBtnClicked(View v)
 	{
-		ImageView emoArrw = (ImageView) findViewById(R.id.emoticon_arrow);
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
+
+		if(tabHost != null && !isTabInitialised)
+		{
+			isTabInitialised  = true;
+			Log.d(getClass().getSimpleName(), "Initialising boolean for emoticon layout setup.: " + isTabInitialised);
+
+			View tabHead = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			TabSpec ts1 = tabHost.newTabSpec("tab1");
+			((ImageView)tabHead.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_01_bigsmile);
+			tabHead.findViewById(R.id.divider_left).setVisibility(View.GONE);
+			ts1.setIndicator(tabHead);
+			ts1.setContent(new TabFactory());
+			tabHost.addTab(ts1);
+
+			View tabHead2 = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			TabSpec ts2 = tabHost.newTabSpec("tab2");
+			((ImageView)tabHead2.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_81_exciting);
+			ts2.setIndicator(tabHead2);
+			ts2.setContent(new TabFactory());
+			tabHost.addTab(ts2);
+
+			View tabHead3 = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
+			TabSpec ts3 = tabHost.newTabSpec("tab3");
+			((ImageView)tabHead3.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_111_grin);
+			tabHead3.findViewById(R.id.divider_right).setVisibility(View.GONE);
+			ts3.setIndicator(tabHead3);
+			ts3.setContent(new TabFactory());
+			tabHost.addTab(ts3);
+		}
+
 		if (emoticonAdapter == null) 
 		{
 			emoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView);
@@ -1832,12 +1872,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		if(emoticonLayout.getVisibility() == View.VISIBLE)
 		{
-			Animation slideDown = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_out);
-			slideDown.setDuration(300);
-			emoticonLayout.startAnimation(slideDown);
 			emoticonLayout.setVisibility(View.INVISIBLE);
-			emoArrw.setAnimation(slideDown);
-			emoArrw.setVisibility(View.INVISIBLE);
 		}
 		else
 		{
@@ -1845,16 +1880,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			slideUp.setDuration(400);
 			emoticonLayout.setAnimation(slideUp);
 			emoticonLayout.setVisibility(View.VISIBLE);
-			emoArrw.setAnimation(slideUp);
-//			emoArrw.setVisibility(View.VISIBLE);
 		}
-		setEmoticonArrows();
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() 
 		{
 			@Override
 			public void onPageSelected(int arg0) 
 			{
-				setEmoticonArrows();
+				tabHost.setCurrentTab(arg0);
 			}
 			
 			@Override
@@ -1863,12 +1895,28 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			@Override
 			public void onPageScrollStateChanged(int arg0) {}
 		});
+		
+		tabHost.setOnTabChangedListener(new OnTabChangeListener() 
+		{
+			@Override
+			public void onTabChanged(String tabId) 
+			{
+				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab(), true);
+			}
+		});
 	}
 	
-	private void setEmoticonArrows()
-	{
-		findViewById(R.id.emo_arrow_left).setVisibility((emoticonViewPager.getCurrentItem() > 0) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
-		findViewById(R.id.emo_arrow_right).setVisibility((emoticonViewPager.getCurrentItem() < emoticonViewPager.getChildCount() - 1) && (emoticonViewPager.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
+	private class TabFactory implements TabContentFactory {
+
+		@Override
+		public View createTabContent(String tag) {
+			View v = new View(getApplicationContext());
+			v.setMinimumWidth(0);
+			v.setMinimumHeight(0);
+			return v;
+
+		}
+
 	}
 
 	private void groupChatDead()

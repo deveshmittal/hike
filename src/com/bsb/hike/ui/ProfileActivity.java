@@ -93,6 +93,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private boolean shouldShowInviteAllButton = false;
 	private TextView mNameDisplay;
 	private ViewGroup participantNameContainer;
+	private ProfileItem[] items;
+	private ViewGroup credits;
+	private int lastSavedGender;
 
 	private static enum ProfileType
 	{
@@ -141,6 +144,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
+		}
+		else if(profileType == ProfileType.USER_PROFILE)
+		{
+			HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		}
 		mActivityState = null;
 	}
@@ -194,6 +201,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			else
 			{
 				this.profileType = ProfileType.USER_PROFILE;
+				HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 				setupProfileScreen();
 			}
 		}
@@ -215,9 +223,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
-		HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 		GroupConversation groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
-		hCDB.close();
+
 		participantList = groupConversation.getGroupParticipantList();
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
@@ -328,8 +336,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		TextView mTitleView = (TextView) findViewById(R.id.title);
 		TextView mNameView = (TextView) findViewById(R.id.name_current);
 
+		credits = (ViewGroup) findViewById(R.id.free_sms);
 		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info); 
-		ViewGroup credits = (ViewGroup) findViewById(R.id.free_sms);
 		ViewGroup notifications = (ViewGroup) findViewById(R.id.notifications);
 		ViewGroup privacy = (ViewGroup) findViewById(R.id.privacy);
 		ViewGroup help = (ViewGroup) findViewById(R.id.help);
@@ -347,12 +355,12 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 				credits, notifications, privacy, help
 				};
 
-		ProfileItem[] items = new ProfileItem[] 
+		items = new ProfileItem[] 
 				{
 				new ProfileItem.ProfileSettingsItem("Free hike SMS left", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
 				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, R.xml.notification_preferences),
 				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
-				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, "http://www.bsb.im/about")
+				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, HikeConstants.HELP_URL)
 				};
 
 		for(int i = 0; i < items.length; i++)
@@ -381,7 +389,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		nameTxt = settings.getString(HikeMessengerApp.NAME, "Set a name!");
 		mLocalMSISDN = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		emailTxt = settings.getString(HikeConstants.Extras.EMAIL, "");
-		mActivityState.genderType = mActivityState.genderType == 0 ? settings.getInt(HikeConstants.Extras.GENDER, 0) : mActivityState.genderType;
+		lastSavedGender = settings.getInt(HikeConstants.Extras.GENDER, 0);
+		mActivityState.genderType = mActivityState.genderType == 0 ? lastSavedGender : mActivityState.genderType;
 	}
 
 	public void onBackPressed()
@@ -446,9 +455,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 					else
 					{
-						HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+						HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 						hCDB.setGroupName(ProfileActivity.this.mLocalMSISDN, mNameEdit.getText().toString());
-						hCDB.close();
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -510,13 +518,12 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 				public void onSuccess()
 				{
-					HikeUserDatabase db = new HikeUserDatabase(ProfileActivity.this);
+					HikeUserDatabase db = HikeUserDatabase.getInstance();
 					db.setIcon(mLocalMSISDN, bytes);
 					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
 					{
 						db.setIcon(getLargerIconId(), larger_bytes);
 					}
-					db.close();
 					if (isBackPressed) {
 						finishEditing();
 					}
@@ -527,20 +534,55 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			requests.add(request);
 		}
 
-		if (this.profileType == ProfileType.USER_PROFILE_EDIT) {
-			SharedPreferences prefs = getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-			Editor editor = prefs.edit();
-			if (Utils.isValidEmail(mEmailEdit.getText()))
+		if (this.profileType == ProfileType.USER_PROFILE_EDIT && 
+				((!emailTxt.equals(mEmailEdit.getText().toString())) || 
+						((mActivityState.genderType != lastSavedGender) && mActivityState.genderType != 0)))
+		{
+			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/profile", new HikeHttpRequest.HikeHttpCallback()
 			{
-				editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
-						.getText().toString());
-			}
+				public void onFailure()
+				{
+					if (isBackPressed) {
+						finishEditing();
+					}
+				}
 
-			editor.putInt(HikeConstants.Extras.GENDER,
-					currentSelection == null ? 0
-							: currentSelection.getId() == R.id.guy ? 1 : 2);
-			editor.commit();
+				public void onSuccess()
+				{
+					SharedPreferences prefs = getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+					Editor editor = prefs.edit();
+					if (Utils.isValidEmail(mEmailEdit.getText()))
+					{
+						editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
+								.getText().toString());
+					}
+					editor.putInt(HikeConstants.Extras.GENDER, currentSelection !=null ? (currentSelection.getId() == R.id.guy ? 1 : 2) : 0);
+					editor.commit();
+					if (isBackPressed) {
+						finishEditing();
+					}
+				}
+			});
+			JSONObject obj = new JSONObject();
+			try
+			{
+				if(Utils.isValidEmail(mEmailEdit.getText()) && !emailTxt.equals(mEmailEdit.getText().toString()))
+				{
+					obj.put(HikeConstants.EMAIL, mEmailEdit.getText());
+				}
+				if(currentSelection != null && ((mActivityState.genderType != lastSavedGender) && mActivityState.genderType != 0))
+				{
+					obj.put(HikeConstants.GENDER, mActivityState.genderType == 1 ? "m" : "f");
+				}
+				Log.d(getClass().getSimpleName(), "JSON to be sent is: " + obj.toString());
+				request.setJSONData(obj);
+			}
+			catch(JSONException e)
+			{
+				Log.e("ProfileActivity", "Could not set email or gender", e);
+			}
+			requests.add(request);
 		}
 
 		if (!requests.isEmpty())
@@ -763,10 +805,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		{
 			if (mLocalMSISDN.equals((String)object)) 
 			{
-				HikeConversationsDatabase db = new HikeConversationsDatabase(
-						this);
+				HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 				nameTxt = db.getGroupName(mLocalMSISDN);
-				db.close();
+
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -822,15 +863,13 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 						{
 							String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
 
-							HikeUserDatabase hUDB = new HikeUserDatabase(ProfileActivity.this);
+							HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
 							ContactInfo participant = hUDB.getContactInfoFromMSISDN(msisdn);
-							hUDB.close();
 
 							if (TextUtils.isEmpty(participant.getName())) 
 							{
-								HikeConversationsDatabase hCDB = new HikeConversationsDatabase(ProfileActivity.this);
+								HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
 								participant.setName(hCDB.getParticipantName(mLocalMSISDN, msisdn));
-								hCDB.close();
 							}
 
 							if (!participant.isOnhike()) 
@@ -872,6 +911,17 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				});
 			}
+		}
+		else if(HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					items[0].bindView(ProfileActivity.this, credits);
+				}
+			});
 		}
 	}
 
