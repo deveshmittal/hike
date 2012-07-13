@@ -894,10 +894,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (!mConversation.isOnhike())
 		{
 			long time = (long) System.currentTimeMillis() / 1000;
-			ConvMessage convMessage = new ConvMessage(getResources().getString(R.string.invite_message),
-												mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+
+			// Adding the user's invite token to the invite url
+			String inviteMessage = getString(R.string.invite_message);
+			String defaultInviteURL = getString(R.string.default_invite_url);
+			String inviteToken = this.prefs.getString(HikeMessengerApp.INVITE_TOKEN, "");
+			inviteMessage.replace(defaultInviteURL, defaultInviteURL + inviteToken);
+
+			ConvMessage convMessage = new ConvMessage(inviteMessage, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
 			convMessage.setInvite(true);
 			convMessage.setConversation(mConversation);
+
 			sendMessage(convMessage);
 		}
 		else
