@@ -1,14 +1,15 @@
 package com.bsb.hike.ui;
 
-import java.lang.reflect.Constructor;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,8 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	private ViewGroup mInviteToolTip;
 	private SharedPreferences sharedPreferences;
 	private ImageButton creditsHelpBtn;
+	private TextView inviteUrl;
+	private String inviteUrlWithToken;
 
 	HikeArrayAdapter createListAdapter() throws Exception
 	{
@@ -59,6 +62,8 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		setContentView(R.layout.hikelistactivity);
 		labelView = (TextView) findViewById(R.id.title);
 		listView = (ListView) findViewById(R.id.contact_list);
+		inviteUrl = (TextView) findViewById(R.id.invite_url);
+
 		listView.setTextFilterEnabled(true);
 		try
 		{
@@ -79,10 +84,30 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		filterText = (EditText) findViewById(R.id.filter);
 		filterText.addTextChangedListener(this);
 
+		inviteUrlWithToken = getString(R.string.default_invite_url) + getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.INVITE_TOKEN, "");
+		String inviteUrlWithText = getString(R.string.invite_url) + " " + inviteUrlWithToken;
+		SpannableString invite = new SpannableString(inviteUrlWithText);
+		invite.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.credits_blue)), inviteUrlWithText.indexOf(inviteUrlWithToken), inviteUrlWithText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		inviteUrl.setText(invite);
+
 		if(adapter instanceof HikeInviteAdapter)
 		{
 			showCreditsHelp(savedInstanceState);
 		}
+	}
+
+	public void onShareUrlClicked(View v)
+	{
+		// Adding the user's invite token to the invite url
+		String inviteMessage = getString(R.string.invite_message);
+		String defaultInviteURL = getString(R.string.default_invite_url);
+		inviteMessage = inviteMessage.replace(defaultInviteURL, inviteUrlWithToken);
+
+		Intent s = new Intent(android.content.Intent.ACTION_SEND);
+
+		s.setType("text/plain");
+		s.putExtra(Intent.EXTRA_TEXT, inviteMessage);
+		startActivity(s);
 	}
 
 	@Override
