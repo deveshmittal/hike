@@ -335,6 +335,7 @@ public class Utils
 		editor.putInt(HikeMessengerApp.SMS_SETTING, accountInfo.smsCredits);
 		editor.putInt(HikeMessengerApp.INVITED, accountInfo.all_invitee);
 		editor.putInt(HikeMessengerApp.INVITED_JOINED, accountInfo.all_invitee_joined);
+		editor.putString(HikeMessengerApp.INVITE_TOKEN, accountInfo.invite_token);
 		editor.commit();
 	}
 

@@ -27,7 +27,7 @@
             android:minHeight="48dp"
             android:orientation="horizontal" >
 
-            <AutoCompleteTextView
+            <EditText
                 android:id="@+id/input_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,7 +49,7 @@
                 android:textColorHint="#cdcdc8"
                 android:textSize="16sp"
                 android:visibility="visible" >
-            </AutoCompleteTextView>
+            </EditText>
 
             <MultiAutoCompleteTextView
                 android:id="@+id/input_number_multi"
@@ -73,6 +73,21 @@
                 android:textSize="16sp"
                 android:visibility="gone" />
         </LinearLayout>
+
+        <ListView
+            android:id="@+id/contact_search_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/offwhite"
+            android:layout_marginTop="1px"
+            android:divider="@drawable/ic_thread_divider_other"
+            android:fadingEdge="none" />
+
+        <View
+            android:id="@+id/bottom_nav_bar_dropshadow"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@drawable/dropshadow" />
 
         <RelativeLayout
             android:layout_width="fill_parent"
@@ -114,15 +129,14 @@
 
                 <include layout="@layout/emoticon_layout" />
             </RelativeLayout>
-
         </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/bottom_panel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:padding="3dp"
-            android:background="@drawable/bg_compose_box" >
+            android:background="@drawable/bg_compose_box"
+            android:padding="3dp" >
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -133,10 +147,10 @@
                     android:id="@+id/send_message"
                     android:layout_width="45dp"
                     android:layout_height="33dp"
-                    android:layout_marginBottom="6dp"
-                    android:layout_marginRight="4dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
+                    android:layout_marginBottom="6dp"
+                    android:layout_marginRight="4dp"
                     android:background="@drawable/bg_send_hike_btn"
                     android:onClick="onSendClick"
                     android:state_enabled="false"
@@ -149,9 +163,9 @@
                     android:id="@+id/emo_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/tb_layout"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
+                    android:layout_alignTop="@id/tb_layout"
                     android:background="@null"
                     android:onClick="onEmoticonBtnClicked"
                     android:paddingLeft="10dp"
@@ -171,9 +185,6 @@
                         android:id="@+id/msg_compose"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="46dp"
-                        android:paddingTop="2dp"
-                        android:paddingBottom="2dp"
                         android:layout_alignParentLeft="true"
                         android:layout_alignParentTop="true"
                         android:background="@null"
@@ -183,7 +194,10 @@
                         android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
                         android:lineSpacingExtra="3dp"
                         android:maxLines="4"
+                        android:minHeight="46dp"
+                        android:paddingBottom="2dp"
                         android:paddingRight="5dp"
+                        android:paddingTop="2dp"
                         android:textColor="@color/chat_color"
                         android:textColorHint="#cdcdc8"
                         android:textSize="15sp" />
@@ -222,6 +236,6 @@
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
 
-    <include layout="@layout/dark_overlay"/>
+    <include layout="@layout/dark_overlay" />
 
 </RelativeLayout>

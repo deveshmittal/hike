@@ -27,7 +27,7 @@
     <string name="image_failed">Unable to open image</string>
     <string name="block_title">Block</string>
     <string name="unblock_title">Unblock</string>
-    <string name="invite_message">Hey! I\'m using hike to send SMS for free. Download it at http://get.hike.in and start messaging me and other friends for free!</string>
+    <string name="invite_message">Hey! I\'m using hike to send SMS for free. Download it at http://get.hike.in/ and start messaging me and other friends for free!</string>
 	<string name="feedback">Feedback</string>
 	<string name="sending_feedback">Sending Feedback</string>
 	<string name="sending_feedback_failed">Unable to send feedback</string>
@@ -44,17 +44,17 @@
 	<string name="terms_privacy">Terms and Privacy</string>
 	<string name="friends">friends</string>
 	<string name="sms_month">SMS/month</string>
-	<string name="your_free_sms">Your free SMS</string>
+	<string name="your_free_sms">Your free hike SMS</string>
 	<string name="availble_month">Available this month</string>
-	<string name="free_sms">Want free SMS?</string>
-	<string name="every_month">Every month, you get 100 SMS. Get an additional 10 free SMS for each friend that joins hike because of you.</string>
+	<string name="free_sms">hike to SMS</string>
+	<string name="every_month">Every month, you get 100 SMS to message friends not on hike.\n\nGet an additional 10 free SMS for each friend that joins hike because of you.</string>
 	<string name="invite_now">Invite Now</string>
 	<string name="friends_on_hike_0">You\'ve invited %1$s friends.</string>
 	<string name="free_always_world">Free, always, worldwide!</string>
 	<string name="disclaimer_india">*Free SMS works within India only.</string>
 	<string name="hike_to_hike">hike to hike</string>
 	<string name="shortcut">Add Shortcut</string>
-	<string name="earn_200_sms">Earn unlimited free SMS.</string>
+	<string name="earn_200_sms">Invite friends, earn more free SMS.</string>
 	<string name="important">Important:</string>
 	<string name="dnd"> Due to SMS regulations, friends on the Do Not Disturb (DND) list need to opt in to hike to receive your free SMS.</string>
 	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 10 more!</string>
@@ -73,8 +73,13 @@
 	<string name="earn_200_sms_tap_here">Learn about free hike SMS. Tap here »</string>
 	<string name="invite_all_to_hike">Invite members on SMS to hike</string>
 	<string name="string_to_be_formatted">additional 10 free SMS</string>
+	<string name="string_to_be_formatted2">not on hike.</string>
 	<string name="friend_joined_hike_no_creds">%1$s just joined hike because of you. Great job!</string>
 	<string name="friend_joined_hike_with_creds">%1$s just joined hike because of you. Great job! As promised, here are your additional 10 free SMS for bringing a friend. To see your total free SMS, tap here.</string>
 	<string name="update_available">An update is available. Tap to download now</string>
 	<string name="critical_update_available">Critical update available. Tap to download now</string>
+	<string name="default_invite_url">http://get.hike.in/</string>
+	<string name="hike_to_hike_info">Have friends on hike? Don\’t worry about the free SMS, hike to hike is always unlimited!</string>
+	<string name="invite_url">Your unique invite URL:</string>
+	<string name="tap_share">Tap to share</string>
 </resources>
