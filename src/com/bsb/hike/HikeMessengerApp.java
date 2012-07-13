@@ -100,6 +100,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String INVITED_JOINED = "invitedJoined";
 
+	public static final String INVITE_TOKEN = "inviteToken";
+
 	public static final String CHAT_GROUP_INFO_TOOL_TIP_DISMISSED = "chatGroupInfoToolTipDismissed";
 
 	public static final String NUM_TIMES_HOME_SCREEN = "numTimesHomeScreen";

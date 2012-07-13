@@ -27,7 +27,7 @@
     <string name="image_failed">Unable to open image</string>
     <string name="block_title">Block</string>
     <string name="unblock_title">Unblock</string>
-    <string name="invite_message">Hey! I\'m using hike to send SMS for free. Download it at http://get.hike.in and start messaging me and other friends for free!</string>
+    <string name="invite_message">Hey! I\'m using hike to send SMS for free. Download it at http://get.hike.in/ and start messaging me and other friends for free!</string>
 	<string name="feedback">Feedback</string>
 	<string name="sending_feedback">Sending Feedback</string>
 	<string name="sending_feedback_failed">Unable to send feedback</string>
@@ -77,4 +77,5 @@
 	<string name="friend_joined_hike_with_creds">%1$s just joined hike because of you. Great job! As promised, here are your additional 10 free SMS for bringing a friend. To see your total free SMS, tap here.</string>
 	<string name="update_available">An update is available. Tap to download now</string>
 	<string name="critical_update_available">Critical update available. Tap to download now</string>
+	<string name="default_invite_url">http://get.hike.in/</string>
 </resources>

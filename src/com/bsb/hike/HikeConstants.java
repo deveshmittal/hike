@@ -32,6 +32,7 @@ public class HikeConstants
 	public static final String VERSION = "v";
 	public static final String CRITICAL = "c";
 	public static final String APP_VERSION = "appversion";
+	public static final String INVITE_TOKEN = "invite_token";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

@@ -323,6 +323,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return getContacts(true);
 	}
 
+	public List<ContactInfo> getContactsOrderedByOnHike()
+	{
+		String selection = DBConstants.MSISDN + " != 'null'";
+		String orderBy = DBConstants.NAME + " COLLATE NOCASE";
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, selection, null, null, null, orderBy);
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		c.close();
+		if (contactInfos.isEmpty())
+		{
+			return contactInfos;
+		}
+		return contactInfos;
+	}
+
 	public List<ContactInfo> getContacts(boolean ignoreEmpty)
 	{
 		String selection = ignoreEmpty ? DBConstants.MSISDN + " != 'null'" : null;
