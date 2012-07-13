@@ -31,7 +31,6 @@ public class CreditsActivity extends Activity implements Listener
 	private TextView mTitleView;
 	private TextView creditsNum;
 	private Button inviteFriendsBtn;
-	private TextView impTxt;
 	private TextView friendsNumTxt;
 	private SharedPreferences settings;
 	private TextView everyMonthTxt;
@@ -51,13 +50,13 @@ public class CreditsActivity extends Activity implements Listener
 		creditItemContainer = (LinearLayout) findViewById(R.id.credit_item_container);
 		creditsNum = (TextView) findViewById(R.id.credit_no);
 		inviteFriendsBtn = (Button) findViewById(R.id.invite_now);
-		impTxt = (TextView) findViewById(R.id.imp_txt);
 		friendsNumTxt = (TextView) findViewById(R.id.friends_num);
 		everyMonthTxt = (TextView) findViewById(R.id.every_month_text);
 
 		String everyMonth = getString(R.string.every_month);
 		SpannableString everyMonthSpan = new SpannableString(everyMonth);
 		String stringToBeFormatted = getString(R.string.string_to_be_formatted);
+		String stringToBeFormatted2 = getString(R.string.string_to_be_formatted2);
 		everyMonthSpan.setSpan(
 								new StyleSpan(Typeface.BOLD), 
 								everyMonth.indexOf(stringToBeFormatted), 
@@ -65,21 +64,24 @@ public class CreditsActivity extends Activity implements Listener
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 								);
 		everyMonthSpan.setSpan(
-								new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), 
+								new ForegroundColorSpan(getResources().getColor(R.color.subtext)), 
 								everyMonth.indexOf(stringToBeFormatted), 
 								everyMonth.indexOf(stringToBeFormatted) + stringToBeFormatted.length() + 1,
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 								);
+		everyMonthSpan.setSpan(
+				new StyleSpan(Typeface.BOLD), 
+				everyMonth.indexOf(stringToBeFormatted2), 
+				everyMonth.indexOf(stringToBeFormatted2) + stringToBeFormatted2.length() + 1,
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+				);
+		everyMonthSpan.setSpan(
+				new ForegroundColorSpan(getResources().getColor(R.color.subtext)), 
+				everyMonth.indexOf(stringToBeFormatted2), 
+				everyMonth.indexOf(stringToBeFormatted2) + stringToBeFormatted2.length() + 1,
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+				);
 		everyMonthTxt.setText(everyMonthSpan);
-
-		String imp = getString(R.string.important);
-		String dnd = getString(R.string.dnd);
-		SpannableString s = new SpannableString(imp + " " + dnd);
-
-		s.setSpan(new StyleSpan(Typeface.BOLD), 0, imp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		s.setSpan(new ForegroundColorSpan(0xffff3333), 0, imp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-		impTxt.setText(s);
 
 		mTitleView.setText("Free SMS");
 
