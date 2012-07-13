@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,7 +16,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,7 +28,6 @@ import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -52,18 +49,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.EditText;
-import android.widget.FilterQueryProvider;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.MultiAutoCompleteTextView;
-import android.widget.MultiAutoCompleteTextView.CommaTokenizer;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabContentFactory;
@@ -77,6 +68,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.HikeSearchContactAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -88,7 +80,6 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.utils.ContactUtils;
-import com.bsb.hike.utils.MyDrawable;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
@@ -98,8 +89,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private HikePubSub mPubSub;
 
 	private HikeConversationsDatabase mConversationDb;
-
-	private HikeUserDatabase mDbhelper;
 
 	private String mContactId;
 
@@ -130,8 +119,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ListView mConversationsView;
 
-	private AutoCompleteTextView mInputNumberView;
-
 	int mMaxSmsLength = 140;
 
 	private String mLabel;
@@ -145,8 +132,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean mUserIsBlocked;
 	
-	private Cursor mCursor;
-
 	private View mOverlayLayout;
 
 	private ArrayList<ConvMessage> messages;
@@ -183,8 +168,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ViewGroup emoticonLayout;
 
-	private MultiAutoCompleteTextView mInputMultiNumberView;
-	
 	private String selectedContacts = "";
 
 	private ArrayList<String> selectedParticipants;
@@ -198,6 +181,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private TabHost tabHost;
 
 	private boolean isTabInitialised = false;
+	
+	private EditText mInputNumberView;
+	
+	private ListView mContactSearchView;
 
 	@Override
 	protected void onPause()
@@ -251,8 +238,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* if we've got some pre-filled text, add it here */
 		if (!TextUtils.isEmpty(msg)) {
 			mComposeView.setText(msg);
-			/* make sure that the autoselect text is empty */
-			mInputNumberView.setText("");
 			/* disable the send button */
 			mSendBtn.setEnabled(false);
 			//Doing a toggle instead of a show since the show method was not working here
@@ -261,142 +246,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		mBottomView.setVisibility(View.GONE);
 
-		mDbhelper = HikeUserDatabase.getInstance();
-		String[] columns = new String[] { "name", "msisdn", "onhike", "msisdn", "_id" };
-		int[] to = new int[] { R.id.name, R.id.number, R.id.onhike, R.id.user_img };
-		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.name_item, null, columns, to);
-		adapter.setViewBinder(new DropDownViewBinder());
-		adapter.setCursorToStringConverter(new SimpleCursorAdapter.CursorToStringConverter()
-		{
-			@Override
-			public CharSequence convertToString(Cursor cursor)
-			{
-				mContactName = cursor.getString(cursor.getColumnIndex("name"));
-				mContactNumber = cursor.getString(cursor.getColumnIndex("msisdn"));
+		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this);
+		mContactSearchView.setAdapter(adapter);
+		mInputNumberView.addTextChangedListener(adapter);
 
-				//We are showing contacts in the format of Name[Msisdn]. Its much clearer for the user this way, specially when he is in group chat.
-				return mContactName + "[" + mContactNumber + "]";
-			}
-		});
-
-		adapter.setFilterQueryProvider(new FilterQueryProvider()
-		{
-			@Override
-			public Cursor runQuery(CharSequence constraint)
-			{
-				String str = (constraint != null) ? "%" + constraint + "%" : "%";
-				mCursor = mDbhelper.findUsers(str, TextUtils.isEmpty(existingParticipants) ? selectedContacts : existingParticipants + selectedContacts);
-				return mCursor;
-			}
-		});
-
-		if (!isGroupChat) 
-		{
-			mInputNumberView
-					.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-						@Override
-						public void onItemClick(AdapterView<?> list,
-								View _empty, int position, long id) {
-							/* Extract selected values from the cursor */
-							Cursor cursor = (Cursor) list
-									.getItemAtPosition(position);
-							mContactId = cursor.getString(cursor
-									.getColumnIndex("_id"));
-							mContactNumber = cursor.getString(cursor
-									.getColumnIndex("msisdn"));
-							mContactName = cursor.getString(cursor
-									.getColumnIndex("name"));
-
-							setIntentFromField();
-
-							/* initialize the conversation */
-							createConversation();
-
-							/* initialize the text watcher */
-							mComposeViewWatcher.init();
-
-							/*
-							 * set the focus on the input text box TODO can this be done in createConversation?
-							 */
-							mComposeView.requestFocus();
-						}
-					});
-			mInputNumberView.setAdapter(adapter);
-			mInputNumberView.setVisibility(View.VISIBLE);
-			mInputNumberView.requestFocus();
-
-			mInputMultiNumberView.setVisibility(View.GONE);
-		}
-		else
-		{
-			// Checking if the current conversation already exists. If it does we load the current participant list to prevent the user from selecting them again
-			String existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
-			Map<String, GroupParticipant> existingParticipantList = TextUtils.isEmpty(existingGroupId) ? null : mConversationDb.getGroupParticipants(existingGroupId);
-			if (existingParticipantList != null && !existingParticipantList.isEmpty()) 
-			{
-				List<String> currentParticipantList = new ArrayList<String>();
-				for(Entry<String, GroupParticipant> participant : existingParticipantList.entrySet())
-				{
-					Log.d(getClass().getSimpleName(), "Current Participant: " + participant.getKey() + " has left? " + participant.getValue().hasLeft());
-					if(!participant.getValue().hasLeft())
-					{
-						currentParticipantList.add(participant.getKey());
-					}
-				}
-				existingParticipants = !currentParticipantList.isEmpty() ? Utils.join(currentParticipantList, ", ", "[", "]") : null;
-			}
-			Log.d(getClass().getSimpleName(), "Exisiting participants: " + existingParticipants);
-			mInputMultiNumberView.setOnItemClickListener(new OnItemClickListener() 
-			{
-				@Override
-				public void onItemClick(AdapterView<?> list,
-						View view, int position, long id) 
-				{
-					Cursor cursor = (Cursor) list
-							.getItemAtPosition(position);
-					String msisdn = cursor.getString(cursor
-									.getColumnIndex("msisdn"));
-					String name = cursor.getString(cursor
-							.getColumnIndex("name"));
-					int onHike = cursor.getInt(cursor.getColumnIndex("onhike"));
-
-					int indexOfName = mInputMultiNumberView.getText().toString().indexOf(name + "[" + msisdn);
-
-					//TODO Change all these pixel values to dp and test!
-					MyDrawable myDrawable = new MyDrawable(name, ChatThread.this, onHike == 1);
-					myDrawable.setBounds(
-							(int) (0 * Utils.densityMultiplier), 
-							(int) (0 * Utils.densityMultiplier), 
-							(int) (myDrawable.getPaint().measureText(name) + ((int)17 * Utils.densityMultiplier)),
-							(int) (27 * Utils.densityMultiplier));
-
-					ImageSpan imageSpan = new ImageSpan(myDrawable);
-
-					// The +4 accounts for the "[]" and ", "
-					mInputMultiNumberView.getEditableText().setSpan(
-							imageSpan,
-							indexOfName, 
-							indexOfName + msisdn.length() + name.length() + 4,
-							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				}
-			});
-			mInputMultiNumberView.setText("");
-			mInputMultiNumberView.setAdapter(adapter);
-			mInputMultiNumberView.setTokenizer(new CommaTokenizer());
-			mInputMultiNumberView.setVisibility(View.VISIBLE);
-			mInputMultiNumberView.requestFocus();
-
-			titleBtn = (Button) findViewById(R.id.title_icon);
-			titleBtn.setText("Done");
-			titleBtn.setEnabled(false);
-			titleBtn.setVisibility(View.VISIBLE);
-			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-
-			mInputNumberView.setVisibility(View.GONE);
-			findViewById(R.id.title_image_btn).setVisibility(View.GONE);
-			findViewById(R.id.button_bar).setVisibility(View.GONE);
-		}
 		mInputNumberContainer.setVisibility(View.VISIBLE);
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 	}
@@ -423,12 +276,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			mComposeViewWatcher.uninit();
 			mComposeViewWatcher = null;
-		}
-
-		if ((mInputNumberView != null) && (mInputNumberView.getAdapter() != null))
-		{
-			CursorAdapter adapter = (CursorAdapter) mInputNumberView.getAdapter();
-			adapter.changeCursor(null);
 		}
 	}
 
@@ -469,7 +316,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* bind views to variables */
 		chatLayout = (CustomLinearLayout) findViewById(R.id.chat_layout);
 		mBottomView = findViewById(R.id.bottom_panel);
-		mInputNumberView = (AutoCompleteTextView) findViewById(R.id.input_number);
 		mInputNumberContainer = (LinearLayout) findViewById(R.id.input_number_container);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
@@ -477,37 +323,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mLabelView = (TextView) findViewById(R.id.title);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
-		mInputMultiNumberView = (MultiAutoCompleteTextView) findViewById(R.id.input_number_multi);
-
-		/*For removing the white bar in the top of the drop-down*/
-		mInputNumberView.setDropDownBackgroundDrawable(null);
-		mInputNumberView.setFadingEdgeLength(0);
-		mInputMultiNumberView.setDropDownBackgroundDrawable(null);
-		mInputMultiNumberView.setFadingEdgeLength(0);
-
-		mInputMultiNumberView.addTextChangedListener(new TextWatcher() 
-		{
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) 
-			{}
-			
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {}
-
-			@Override
-			public void afterTextChanged(Editable s) 
-			{
-				String text = s.toString();
-				
-				// We only fill this string if there is at least one contact selected
-				selectedContacts = text.indexOf(",") != -1 ? text.substring(0, text.lastIndexOf(",")) : "";
-				if (titleBtn != null) 
-				{
-					titleBtn.setEnabled(selectedContacts.contains(",") || (!TextUtils.isEmpty(existingParticipants) && !TextUtils.isEmpty(selectedContacts)));
-				}
-			}
-		});
+		mInputNumberView = (EditText) findViewById(R.id.input_number);
+		mContactSearchView = (ListView) findViewById(R.id.contact_search_result);
 
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
@@ -519,6 +336,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		 * button we have), we send the message.
 		 */
 		mComposeView.setOnEditorActionListener(this);
+		mContactSearchView.setOnItemClickListener(this);
 
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
@@ -950,6 +768,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mComposeView.requestFocus();
 		/* hide the number picker */
 		mInputNumberView.setVisibility(View.GONE);
+		mContactSearchView.setVisibility(View.GONE);
 		mInputNumberContainer.setVisibility(View.GONE);
 
 		/*
