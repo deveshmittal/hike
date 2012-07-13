@@ -246,7 +246,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		mBottomView.setVisibility(View.GONE);
 
-		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this);
+		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike());
 		mContactSearchView.setAdapter(adapter);
 		mInputNumberView.addTextChangedListener(adapter);
 

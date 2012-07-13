@@ -1,39 +1,41 @@
 package com.bsb.hike.adapters;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Filterable;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
 
+@SuppressWarnings("unchecked")
 public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implements TextWatcher
 {
-	private static List<ContactInfo> getItems()
-	{
-		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		List<ContactInfo> contacts = db.getContactsOrderedByOnHike();
-		return contacts;
-	}
-
 	private Context context;
+	private List<ContactInfo> filteredList;
+	private List<ContactInfo> completeList;
+	private ContactFilter contactFilter;
 
-	public HikeSearchContactAdapter(Activity context)
+	public HikeSearchContactAdapter(Activity context, List<ContactInfo> contactList)
 	{
-		super(context, -1, getItems());
+		super(context, -1, contactList);
+		this.filteredList = contactList;
+		this.completeList = new ArrayList<ContactInfo>();
+		this.completeList.addAll(contactList);
 		this.context = context;
+		this.contactFilter = new ContactFilter();
 	}
 
 	@Override
@@ -67,7 +69,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
-		((Filterable) this).getFilter().filter(editable.toString());
+		this.contactFilter.filter(editable.toString());
 	}
 
 	@Override
@@ -78,5 +80,48 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
 	{}
 
-	
+	private class ContactFilter extends Filter
+	{
+
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) 
+		{
+			FilterResults results = new FilterResults();
+			if(!TextUtils.isEmpty(constraint))
+			{
+				constraint = constraint.toString().toLowerCase();
+				List<ContactInfo> filteredContacts = new ArrayList<ContactInfo>();
+
+				for (ContactInfo info : HikeSearchContactAdapter.this.completeList)
+				{
+					if(info.getName().toLowerCase().contains(constraint) || info.getMsisdn().contains(constraint))
+					{
+						filteredContacts.add(info);
+					}
+				}
+				results.count = filteredContacts.size();
+				results.values = filteredContacts;
+			}
+			else
+			{
+				results.count = HikeSearchContactAdapter.this.completeList.size();
+				results.values = HikeSearchContactAdapter.this.completeList;
+			}
+			return results;
+		}
+
+		@Override
+		protected void publishResults(CharSequence constraint, FilterResults results) 
+		{
+			filteredList = (ArrayList<ContactInfo>) results.values;
+			notifyDataSetChanged();
+			clear();
+			for(ContactInfo contactInfo : filteredList)
+			{
+				add(contactInfo);
+			}
+			notifyDataSetInvalidated();
+		}
+		
+	}
 }
