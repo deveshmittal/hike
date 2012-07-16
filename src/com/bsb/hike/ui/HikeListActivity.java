@@ -119,10 +119,7 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	private void setInviteToken()
 	{
 		inviteUrlWithToken = getString(R.string.default_invite_url) + getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeConstants.INVITE_TOKEN, "");
-		String inviteUrlWithText = getString(R.string.invite_url) + " " + inviteUrlWithToken;
-		SpannableString invite = new SpannableString(inviteUrlWithText);
-		invite.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.credits_blue)), inviteUrlWithText.indexOf(inviteUrlWithToken), inviteUrlWithText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		inviteUrl.setText(invite);
+		inviteUrl.setText(inviteUrlWithToken);
 	}
 
 	@Override
