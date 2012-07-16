@@ -210,35 +210,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		if (!accountPrefs.getBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED, false) 
-				&& updateTypeAvailable == HikeConstants.NO_UPDATE)
-		{
-			((LinearLayout)findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
-			mToolTip = mEmptyView.findViewById(R.id.credits_help_layout);
-			mToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
-
-			((MarginLayoutParams)mToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
-
-			TextView text = (TextView) mEmptyView.findViewById(R.id.tool_tip);
-			mToolTip.findViewById(R.id.close).setVisibility(View.GONE);
-
-			String creditTip = getString(R.string.earn_200_sms_tap_here);
-			SpannableString creditTipText = new SpannableString(creditTip);
-			creditTipText.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.tip_blue)), creditTip.indexOf("Tap here"), creditTip.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			text.setText(creditTipText);
-
-			((MarginLayoutParams)text.getLayoutParams()).setMargins(((int) (15*Utils.densityMultiplier)), 0, 0, 0);
-
-			if (!isToolTipShowing) 
-			{
-				Animation alphaIn = AnimationUtils.loadAnimation(
-						MessagesList.this, android.R.anim.fade_in);
-				alphaIn.setStartOffset(1000);
-				mToolTip.setAnimation(alphaIn);
-			}
-			mToolTip.setVisibility(View.VISIBLE);
-		}
-
 		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
 		List<Conversation> conversations = db.getConversations();
 
