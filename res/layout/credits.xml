@@ -15,7 +15,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/top_panel" >
+        android:layout_below="@id/top_panel"
+        android:fadingEdge="none" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -128,13 +129,6 @@
                     android:textStyle="italic" />
             </RelativeLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/feedback_dropshadow_top" />
-
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -172,6 +166,15 @@
                 android:textSize="15sp"
                 android:textStyle="italic" />
 
+            <LinearLayout
+                android:id="@+id/credit_item_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="5dp"
+                android:orientation="vertical" />
+            
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -203,27 +206,6 @@
                     android:textSize="15sp"
                     android:textStyle="italic" />
             </RelativeLayout>
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/friends_joined_num"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="15dp"
-                android:gravity="left"
-                android:text="Friends joined:"
-                android:textColor="@color/notif_subtext"
-                android:textSize="15sp"
-                android:textStyle="italic" />
-
-            <LinearLayout
-                android:id="@+id/credit_item_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginTop="5dp"
-                android:orientation="vertical" />
 
             <View
                 android:layout_width="match_parent"

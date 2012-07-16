@@ -74,7 +74,7 @@ public class CreditsActivity extends Activity implements Listener
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 								);
 		everyMonthSpan.setSpan(
-								new ForegroundColorSpan(getResources().getColor(R.color.subtext)), 
+								new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), 
 								everyMonth.indexOf(stringToBeFormatted), 
 								everyMonth.indexOf(stringToBeFormatted) + stringToBeFormatted.length() + 1,
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -86,7 +86,7 @@ public class CreditsActivity extends Activity implements Listener
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
 				);
 		everyMonthSpan.setSpan(
-				new ForegroundColorSpan(getResources().getColor(R.color.subtext)), 
+				new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), 
 				everyMonth.indexOf(stringToBeFormatted2), 
 				everyMonth.indexOf(stringToBeFormatted2) + stringToBeFormatted2.length() + 1,
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -169,7 +169,7 @@ public class CreditsActivity extends Activity implements Listener
 		String formatString = getResources().getString(R.string.friends_on_hike_0);
 		String num = Integer.toString(numInvited);
 		String formatted = String.format(formatString, num);
-		
+
 		SpannableString str = new SpannableString(formatted);
 		int start = formatString.indexOf("%1$s");
 		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
@@ -180,23 +180,14 @@ public class CreditsActivity extends Activity implements Listener
 		creditItemContainer.removeAllViews();
 
 		LayoutInflater layoutInflater = LayoutInflater.from(CreditsActivity.this);
-		for(int i = 0; i<=2; i++)
-		{
-			View v = layoutInflater.inflate(R.layout.credits_item, null);
-			TextView friendNum = (TextView) v.findViewById(R.id.friends_no);
-			TextView smsNum = (TextView) v.findViewById(R.id.sms_no);
+		View v = layoutInflater.inflate(R.layout.credits_item, null);
+		TextView friendNum = (TextView) v.findViewById(R.id.friends_no);
+		TextView smsNum = (TextView) v.findViewById(R.id.sms_no);
 
-			int numToShow = numHike < 2 ? i : ((numHike + i) - 1);
-
-			if(i == ((numHike < 2) ? numHike : 1))
-			{
-				v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
-			}
-
-			int smsNo = HikeConstants.INITIAL_NUM_SMS + (numToShow * HikeConstants.NUM_SMS_PER_FRIEND);
-			friendNum.setText(numToShow + "");
-			smsNum.setText(smsNo+"");
-			creditItemContainer.addView(v);
-		}
+		v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
+		int smsNo = numHike * HikeConstants.NUM_SMS_PER_FRIEND;
+		friendNum.setText(numHike + "");
+		smsNum.setText("+"+smsNo+"");
+		creditItemContainer.addView(v);
 	}
 }
