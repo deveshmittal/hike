@@ -6,10 +6,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.text.TextWatcher;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,14 +22,12 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeArrayAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.utils.Utils;
 
-public class HikeListActivity extends Activity implements OnScrollListener, TextWatcher, Listener
+public class HikeListActivity extends Activity implements OnScrollListener, TextWatcher
 {
 	private HikeArrayAdapter adapter;
 	private ListView listView;
@@ -41,8 +36,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	private ViewGroup mInviteToolTip;
 	private SharedPreferences sharedPreferences;
 	private ImageButton creditsHelpBtn;
-	private TextView inviteUrl;
-	private String inviteUrlWithToken;
 
 	HikeArrayAdapter createListAdapter() throws Exception
 	{
@@ -64,7 +57,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		setContentView(R.layout.hikelistactivity);
 		labelView = (TextView) findViewById(R.id.title);
 		listView = (ListView) findViewById(R.id.contact_list);
-		inviteUrl = (TextView) findViewById(R.id.invite_url);
 
 		listView.setTextFilterEnabled(true);
 		try
@@ -86,24 +78,15 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		filterText = (EditText) findViewById(R.id.filter);
 		filterText.addTextChangedListener(this);
 
-		setInviteToken();
-
 		if(adapter instanceof HikeInviteAdapter)
 		{
 			showCreditsHelp(savedInstanceState);
 		}
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.INVITE_TOKEN_ADDED, this);
-	}
-
-	@Override
-	protected void onDestroy() 
-	{
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.INVITE_TOKEN_ADDED, this);
-		super.onDestroy();
 	}
 
 	public void onShareUrlClicked(View v)
 	{
+		String inviteUrlWithToken = getString(R.string.default_invite_url) + getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeConstants.INVITE_TOKEN, "");
 		// Adding the user's invite token to the invite url
 		String inviteMessage = getString(R.string.invite_message);
 		String defaultInviteURL = getString(R.string.default_invite_url);
@@ -114,15 +97,6 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 		s.setType("text/plain");
 		s.putExtra(Intent.EXTRA_TEXT, inviteMessage);
 		startActivity(s);
-	}
-
-	private void setInviteToken()
-	{
-		inviteUrlWithToken = getString(R.string.default_invite_url) + getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeConstants.INVITE_TOKEN, "");
-		String inviteUrlWithText = getString(R.string.invite_url) + " " + inviteUrlWithToken;
-		SpannableString invite = new SpannableString(inviteUrlWithText);
-		invite.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.credits_blue)), inviteUrlWithText.indexOf(inviteUrlWithToken), inviteUrlWithText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		inviteUrl.setText(invite);
 	}
 
 	@Override
@@ -264,21 +238,5 @@ public class HikeListActivity extends Activity implements OnScrollListener, Text
 	@Override
 	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
 	{
-	}
-
-	@Override
-	public void onEventReceived(String type, Object object) 
-	{
-		if(HikePubSub.INVITE_TOKEN_ADDED.equals(type))
-		{
-			runOnUiThread(new Runnable() 
-			{
-				@Override
-				public void run() 
-				{
-					setInviteToken();
-				}
-			});
-		}
 	}
 }

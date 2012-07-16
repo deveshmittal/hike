@@ -247,11 +247,6 @@ public class MqttMessagesManager {
 				editor.putString(key, value);
 			}
 			editor.commit();
-			if(data.has(HikeConstants.INVITE_TOKEN))
-			{
-				this.pubSub.publish(HikePubSub.INVITE_TOKEN_ADDED, null);
-				
-			}
 		}
 	}
 
