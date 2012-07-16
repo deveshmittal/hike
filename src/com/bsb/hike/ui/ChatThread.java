@@ -251,6 +251,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mInputNumberView.addTextChangedListener(adapter);
 
 		mInputNumberContainer.setVisibility(View.VISIBLE);
+		mInputNumberView.setVisibility(View.VISIBLE);
+		mContactSearchView.setVisibility(View.VISIBLE);
+		mInputNumberView.requestFocus();
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 	}
 
