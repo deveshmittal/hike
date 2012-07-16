@@ -19,6 +19,7 @@ import org.acra.util.HttpRequest;
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -216,6 +217,12 @@ public class HikeMessengerApp extends Application
 		@Override
 		public void send(CrashReportData crashReportData) throws ReportSenderException 
 		{
+			/* only send ACRA reports if we're in release mode */
+			if ( 0 != ( getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) )
+			{
+				return;
+			}
+
 			try 
 			{
 				final String reportUrl = AccountUtils.BASE + "/logs/android";
