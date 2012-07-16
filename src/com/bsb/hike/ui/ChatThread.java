@@ -695,7 +695,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			createAutoCompleteView(intent.getStringExtra(HikeConstants.Extras.MSG));
+			/*
+			 * Checking if intent was received from the 'tap to invite' box in the invite screen.
+			 * If it was we fill in the text of that intent
+			 */
+			createAutoCompleteView(("text/plain".equals(intent.getType())) ? 
+					intent.getStringExtra(Intent.EXTRA_TEXT) : intent.getStringExtra(HikeConstants.Extras.MSG));
 		}
 		/* close context menu(if open) if the previous MSISDN is different from the current one)*/
 		if (prevContactNumber != null && !prevContactNumber.equalsIgnoreCase(mContactNumber)) {
