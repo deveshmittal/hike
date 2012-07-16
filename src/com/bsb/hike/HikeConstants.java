@@ -227,5 +227,7 @@ public class HikeConstants
 		public static final String GROUP_CHAT_NAME = "gcn";
 		public static final String ANALYTICS_EVENT = "le";
 		public static final String UPDATE_AVAILABLE = "ua";
+		public static final String ACCOUNT_INFO = "ai";
+		public static final String REQUEST_ACCOUNT_INFO = "rai";
 	}
 }

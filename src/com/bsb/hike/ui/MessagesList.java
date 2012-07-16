@@ -294,6 +294,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				{
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 				}
+				Utils.requestAccountInfo();
 			}
 		}, 10 * 1000);
 	}

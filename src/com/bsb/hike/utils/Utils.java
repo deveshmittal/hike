@@ -62,6 +62,7 @@ import android.widget.EditText;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
@@ -335,7 +336,6 @@ public class Utils
 		editor.putInt(HikeMessengerApp.SMS_SETTING, accountInfo.smsCredits);
 		editor.putInt(HikeMessengerApp.INVITED, accountInfo.all_invitee);
 		editor.putInt(HikeMessengerApp.INVITED_JOINED, accountInfo.all_invitee_joined);
-		editor.putString(HikeMessengerApp.INVITE_TOKEN, accountInfo.invite_token);
 		editor.commit();
 	}
 
@@ -767,4 +767,22 @@ public class Utils
 		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return (cm != null && cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isAvailable() && cm.getActiveNetworkInfo().isConnected());
 	}
+
+    /**
+     * Requests the server to send an account info packet
+     */
+    public static void requestAccountInfo()
+    {
+    	Log.d("Utils", "Requesting account info");
+    	JSONObject requestAccountInfo = new JSONObject();
+		try 
+		{
+			requestAccountInfo.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.REQUEST_ACCOUNT_INFO);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, requestAccountInfo);
+		} 
+		catch (JSONException e) 
+		{
+			Log.e("Utils", "Invalid JSON", e);
+		}
+    }
 }

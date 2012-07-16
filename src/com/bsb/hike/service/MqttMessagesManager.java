@@ -235,6 +235,24 @@ public class MqttMessagesManager {
 				this.pubSub.publish(HikePubSub.UPDATE_AVAILABLE, update);
 			}
 		}
+		else if (HikeConstants.MqttMessageTypes.ACCOUNT_INFO.equals(type))
+		{
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			JSONArray keys = data.names();
+			Editor editor = settings.edit();
+			for(int i =0; i<keys.length(); i++)
+			{
+				String key = keys.getString(i);
+				String value = data.optString(key);
+				editor.putString(key, value);
+			}
+			editor.commit();
+			if(data.has(HikeConstants.INVITE_TOKEN))
+			{
+				this.pubSub.publish(HikePubSub.INVITE_TOKEN_ADDED, null);
+				
+			}
+		}
 	}
 
 	private void updateDbBatch(long[] ids, int status)
