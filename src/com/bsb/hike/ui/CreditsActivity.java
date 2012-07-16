@@ -41,6 +41,16 @@ public class CreditsActivity extends Activity implements Listener
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
 
+		if(getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER, false))
+		{
+			Button mFeedbackButton = (Button) findViewById(R.id.title_icon);
+			View mButtonBar = (View) findViewById(R.id.button_bar_2);
+
+			mFeedbackButton.setText(R.string.done);
+			mFeedbackButton.setVisibility(View.VISIBLE);
+			mButtonBar.setVisibility(View.VISIBLE);
+		}
+
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Editor editor = settings.edit();
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
@@ -112,6 +122,11 @@ public class CreditsActivity extends Activity implements Listener
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.INVITEE_NUM_CHANGED, this);
 		super.onDestroy();
+	}
+
+	public void onTitleIconClick(View v)
+	{
+		finish();
 	}
 
 	@Override

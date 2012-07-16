@@ -167,6 +167,15 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
 
+		if(accountPrefs.getBoolean(HikeMessengerApp.SHOW_CREDIT_SCREEN, true))
+		{
+			Intent i = new Intent(MessagesList.this, CreditsActivity.class);
+			i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
+			startActivity(i);
+			Editor editor = accountPrefs.edit();
+			editor.putBoolean(HikeMessengerApp.SHOW_CREDIT_SCREEN, false);
+			editor.commit();
+		}
 		setContentView(R.layout.main);
 
 		Utils.setDensityMultiplier(MessagesList.this);

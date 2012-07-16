@@ -111,6 +111,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String NUM_TIMES_INVITE = "numTimesInvite";
 
+	public static final String SHOW_CREDIT_SCREEN = "showCreditScreen";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;

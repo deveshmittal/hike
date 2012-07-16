@@ -128,6 +128,7 @@ public class HikeConstants
 		public static final String UPDATE_MESSAGE = "updateMessage";
 		public static final String URL_TO_LOAD = "urlToLoad";
 		public static final String TITLE = "title";
+		public static final String FIRST_TIME_USER = "firstTimeUser";
 	}
 
 	public static final class LogEvent
