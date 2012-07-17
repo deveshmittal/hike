@@ -170,7 +170,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private String selectedContacts = "";
 
-	private ArrayList<String> selectedParticipants;
+	private List<String> selectedParticipants;
 
 	private String existingParticipants;
 
