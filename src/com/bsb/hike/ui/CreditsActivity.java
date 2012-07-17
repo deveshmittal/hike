@@ -32,6 +32,7 @@ public class CreditsActivity extends Activity implements Listener
 	private SharedPreferences settings;
 	private TextView everyMonthTxt;
 	private TextView joinedNumTxt;
+	private boolean firstTimeUser = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -39,7 +40,8 @@ public class CreditsActivity extends Activity implements Listener
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
 
-		if(getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER, false))
+		firstTimeUser = getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER, false);
+		if(firstTimeUser)
 		{
 			Button mFeedbackButton = (Button) findViewById(R.id.title_icon);
 			View mButtonBar = (View) findViewById(R.id.button_bar_2);
@@ -124,7 +126,19 @@ public class CreditsActivity extends Activity implements Listener
 
 	public void onTitleIconClick(View v)
 	{
-		finish();
+		onBackPressed();
+	}
+
+	@Override
+	public void onBackPressed() {
+		if(firstTimeUser)
+		{
+			Intent intent = new Intent(CreditsActivity.this, MessagesList.class);
+			intent.putExtra(HikeConstants.Extras.APP_STARTED_FIRST_TIME, true);
+			startActivity(intent);
+			finish();
+		}
+		super.onBackPressed();
 	}
 
 	@Override

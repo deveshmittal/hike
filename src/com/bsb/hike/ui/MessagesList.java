@@ -175,6 +175,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			Editor editor = accountPrefs.edit();
 			editor.putBoolean(HikeMessengerApp.SHOW_CREDIT_SCREEN, false);
 			editor.commit();
+			finish();
+			return;
 		}
 		setContentView(R.layout.main);
 
