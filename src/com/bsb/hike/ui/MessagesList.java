@@ -26,9 +26,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -175,6 +172,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			Editor editor = accountPrefs.edit();
 			editor.putBoolean(HikeMessengerApp.SHOW_CREDIT_SCREEN, false);
 			editor.commit();
+			finish();
+			return;
 		}
 		setContentView(R.layout.main);
 

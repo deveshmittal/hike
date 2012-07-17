@@ -12,11 +12,11 @@
         android:layout_alignParentTop="true"
         layout="@layout/top_panel" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <RelativeLayout
         android:layout_below="@id/top_panel"
-        android:fadingEdge="none" >
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -199,32 +199,35 @@
             </RelativeLayout>
 
             <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/joined_num"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginRight="15dp"
-                    android:text="@string/friends_on_hike_0"
-                    android:textColor="@color/notif_subtext"
-                    android:textSize="15sp"
-                    android:textStyle="italic" />
-            
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@drawable/dropshadow" />
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/thatch_repeat"
-                android:gravity="center"
-                android:text="@string/disclaimer_india"
-                android:textColor="@color/subtext"
-                android:textSize="11sp"
+                android:id="@+id/joined_num"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="15dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:text="@string/friends_on_hike_0"
+                android:textColor="@color/notif_subtext"
+                android:textSize="15sp"
                 android:textStyle="italic" />
         </LinearLayout>
-    </ScrollView>
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/disclaimer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/thatch_repeat"
+            android:gravity="center"
+            android:text="@string/disclaimer_india"
+            android:textColor="@color/subtext"
+            android:textSize="11sp"
+            android:textStyle="italic" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_above="@id/disclaimer"
+            android:background="@drawable/dropshadow" />
+    </RelativeLayout>
 
 </RelativeLayout>
