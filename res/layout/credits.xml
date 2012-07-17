@@ -166,15 +166,6 @@
                 android:textSize="15sp"
                 android:textStyle="italic" />
 
-            <LinearLayout
-                android:id="@+id/credit_item_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginTop="5dp"
-                android:orientation="vertical" />
-            
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -207,6 +198,18 @@
                     android:textStyle="italic" />
             </RelativeLayout>
 
+            <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/joined_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginRight="15dp"
+                    android:text="@string/friends_on_hike_0"
+                    android:textColor="@color/notif_subtext"
+                    android:textSize="15sp"
+                    android:textStyle="italic" />
+            
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

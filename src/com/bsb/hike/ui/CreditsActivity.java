@@ -10,11 +10,9 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -27,13 +25,13 @@ import com.bsb.hike.utils.Utils;
 
 public class CreditsActivity extends Activity implements Listener
 {
-	private LinearLayout creditItemContainer;
 	private TextView mTitleView;
 	private TextView creditsNum;
 	private Button inviteFriendsBtn;
 	private TextView friendsNumTxt;
 	private SharedPreferences settings;
 	private TextView everyMonthTxt;
+	private TextView joinedNumTxt;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -57,11 +55,11 @@ public class CreditsActivity extends Activity implements Listener
 		editor.commit();
 
 		mTitleView = (TextView) findViewById(R.id.title);
-		creditItemContainer = (LinearLayout) findViewById(R.id.credit_item_container);
 		creditsNum = (TextView) findViewById(R.id.credit_no);
 		inviteFriendsBtn = (Button) findViewById(R.id.invite_now);
 		friendsNumTxt = (TextView) findViewById(R.id.friends_num);
 		everyMonthTxt = (TextView) findViewById(R.id.every_month_text);
+		joinedNumTxt = (TextView) findViewById(R.id.joined_num);
 
 		String everyMonth = getString(R.string.every_month);
 		SpannableString everyMonthSpan = new SpannableString(everyMonth);
@@ -172,22 +170,16 @@ public class CreditsActivity extends Activity implements Listener
 
 		SpannableString str = new SpannableString(formatted);
 		int start = formatString.indexOf("%1$s");
-		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
+		str.setSpan(new StyleSpan(Typeface.BOLD), start,
 				start + num.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		str.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), start, start + num.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		friendsNumTxt.setText(str);
 
-		creditItemContainer.removeAllViews();
-
-		LayoutInflater layoutInflater = LayoutInflater.from(CreditsActivity.this);
-		View v = layoutInflater.inflate(R.layout.credits_item, null);
-		TextView friendNum = (TextView) v.findViewById(R.id.friends_no);
-		TextView smsNum = (TextView) v.findViewById(R.id.sms_no);
-
-		v.setBackgroundResource(R.drawable.credit_item_bckg_selected);
-		int smsNo = numHike * HikeConstants.NUM_SMS_PER_FRIEND;
-		friendNum.setText(numHike + "");
-		smsNum.setText("+"+smsNo+"");
-		creditItemContainer.addView(v);
+		String joinedNum = ((numHike != 1) ? (numHike + " friends have "):(numHike + " friend has ")) + "joined hike because of you.";
+		int idx = joinedNum.indexOf("friend");
+		SpannableString ss = new SpannableString(joinedNum);
+		ss.setSpan(new StyleSpan(Typeface.BOLD), 0, idx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ss.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), 0, idx, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		joinedNumTxt.setText(ss);
 	}
 }
