@@ -165,11 +165,12 @@
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:layout_alignTop="@id/tb_layout"
                     android:background="@null"
                     android:onClick="onEmoticonBtnClicked"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
+                    android:paddingBottom="13dp"
+                    android:paddingTop="13dp"
                     android:src="@drawable/emoticon_hike_btn" />
 
                 <RelativeLayout
@@ -211,7 +212,6 @@
                     android:layout_alignLeft="@+id/tb_layout"
                     android:layout_alignRight="@+id/tb_layout"
                     android:layout_alignTop="@+id/tb_layout"
-                    android:layout_marginBottom="8dp"
                     android:gravity="right|center_vertical"
                     android:onClick="onTitleIconClick"
                     android:visibility="gone" >

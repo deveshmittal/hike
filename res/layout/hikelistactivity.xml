@@ -5,77 +5,86 @@
     android:background="#eeeeeb"
     android:orientation="vertical" >
 
-   <include
+    <include
         android:id="@+id/top_panel_ref"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         layout="@layout/top_panel" />
-	
-   <RelativeLayout
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:background="@color/white" >
 
-       <com.bsb.hike.view.CustomFontEditText
-           android:id="@+id/filter"
-           android:layout_width="match_parent"
-           android:layout_height="48dp"
-           android:paddingLeft="10dp"
-           android:background="@color/white"
-           android:hint="Search"
-           android:paddingBottom="10dp"
-           android:paddingTop="10dp"
-           android:singleLine="true"
-           android:drawableLeft="@drawable/ic_search_et"
-           android:drawablePadding="10dp"
-           android:textSize="16sp"
-           android:gravity="center_vertical"
-           android:textColorHint="#cdcdc8"
-           android:textColor="@color/lightblack" >
-       </com.bsb.hike.view.CustomFontEditText>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white" >
 
-      	<include layout="@layout/tool_tip"/>
+        <com.bsb.hike.view.CustomFontEditText
+            android:id="@+id/filter"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@color/white"
+            android:drawableLeft="@drawable/ic_search_et"
+            android:drawablePadding="10dp"
+            android:gravity="center_vertical"
+            android:hint="Search"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="10dp"
+            android:singleLine="true"
+            android:textColor="@color/lightblack"
+            android:textColorHint="#cdcdc8"
+            android:textSize="16sp" >
+        </com.bsb.hike.view.CustomFontEditText>
 
-   </RelativeLayout>
+        <include layout="@layout/tool_tip" />
+    </RelativeLayout>
 
-   <RelativeLayout
-       android:layout_width="match_parent"
-       android:layout_height="48dp"
-       android:background="#e6e6e0"
-       android:orientation="vertical"
-       android:onClick="onShareUrlClicked" >
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/dropshadow" />
 
-       <View
-           android:layout_width="match_parent"
-           android:layout_height="1dp"
-           android:background="@drawable/dropshadow" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="46dp"
+        android:background="#f3f3f0"
+        android:gravity="center"
+        android:onClick="onShareUrlClicked"
+        android:orientation="vertical" >
 
-       <com.bsb.hike.view.CustomFontTextView
-           android:id="@+id/invite_url"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           android:text="@string/tap_share"
-           android:textColor="@color/credits_blue"
-           android:textSize="14sp"
-           android:layout_centerInParent="true"
-           android:gravity="center" />
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/tap_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="@string/tap_share"
+            android:textColor="@color/subtext"
+            android:textSize="14sp"
+            android:textStyle="italic" />
 
-       <View
-           android:layout_width="match_parent"
-           android:layout_height="1dp"
-           android:layout_alignParentBottom="true"
-           android:background="@drawable/feedback_dropshadow_top" />
-   </RelativeLayout>
-   
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/invite_url"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tap_share"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/credits_blue"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/invite_box_dropshadow" />
+
     <ListView
         android:id="@+id/contact_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="5"
+        android:background="@color/offwhite"
         android:cacheColorHint="#000000"
         android:divider="@drawable/ic_thread_divider_other"
-        android:background="@color/offwhite"
         android:dividerHeight="1dp"
         android:fadingEdge="none"
         android:fadingEdgeLength="2dp"

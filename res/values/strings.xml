@@ -80,7 +80,6 @@
 	<string name="critical_update_available">Critical update available. Tap to download now</string>
 	<string name="default_invite_url">http://get.hike.in/</string>
 	<string name="hike_to_hike_info">Have friends on hike? Don\’t worry about the free SMS, hike to hike is always unlimited!</string>
-	<string name="invite_url">Your unique invite URL:</string>
-	<string name="tap_share">Tap to share your unique invite URL</string>
+	<string name="tap_share">Tap to share your unique invite URL:</string>
 	<string name="done">Done</string>
 </resources>
