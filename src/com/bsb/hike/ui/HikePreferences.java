@@ -24,6 +24,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 
 	private ActivityCallableTask mTask;
 	ProgressDialog mDialog;
+	private boolean isDeleting;
 
 	@Override
 	public Object onRetainNonConfigurationInstance()
@@ -48,6 +49,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof ActivityCallableTask)
 		{
+			isDeleting = savedInstanceState != null ? savedInstanceState.getBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT) : isDeleting; 
 			setBlockingTask((ActivityCallableTask) retained);
 			mTask.setActivity(this);
 		}
@@ -76,6 +78,12 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 	}
 
 	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT, isDeleting);
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	public void onDestroy()
 	{
 		super.onDestroy();
@@ -94,7 +102,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		if (!task.isFinished())
 		{
 			mTask = task;
-			mDialog = ProgressDialog.show(this, "Account", "Deleting Account");	
+			mDialog = ProgressDialog.show(this, "Account", isDeleting ? "Deleting Account" : "Unlinking Account");	
 		}
 	}
 
@@ -121,6 +129,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 				public void onClick(DialogInterface dialog, int which) 
 				{
 					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, true);
+					isDeleting = true;
 					setBlockingTask(task);
 					task.execute();
 				}
@@ -145,6 +154,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 				public void onClick(DialogInterface dialog, int which) 
 				{
 					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, false);
+					isDeleting = false;
 					setBlockingTask(task);
 					task.execute();
 				}
