@@ -47,6 +47,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
@@ -261,6 +262,7 @@ public class AccountUtils
 			data.put("devicetoken", deviceId);
 			data.put("deviceversion", device);
 			data.put("appversion", appVersion);
+			data.put("invite_token", context.getSharedPreferences(HikeMessengerApp.REFERRAL, Context.MODE_PRIVATE).getString("utm_source", ""));
 
 			if (pin != null)
 			{

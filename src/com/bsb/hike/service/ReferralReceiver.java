@@ -51,6 +51,7 @@ public class ReferralReceiver extends BroadcastReceiver
             return;
         }
 
+        Log.d(getClass().getSimpleName(), "Referrer: " + referrer);
         Scanner referrerScanner = new Scanner(referrer);
 		URLEncodedUtils.parse(referralParams, referrerScanner, Charset.defaultCharset().displayName());
 
