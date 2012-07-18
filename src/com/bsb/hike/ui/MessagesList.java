@@ -54,6 +54,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
@@ -256,6 +257,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_LEFT, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPDATE_AVAILABLE, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 	}
@@ -425,6 +427,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_LEFT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPDATE_AVAILABLE, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
 	}
 
 	@Override
@@ -616,6 +619,16 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 					updateApp(updateType);
 				}
 			});
+		}
+		else if (HikePubSub.CONTACT_ADDED.equals(type))
+		{
+			ContactInfo contactInfo = (ContactInfo) object;
+			Conversation conversation = this.mConversationsByMSISDN.get(contactInfo.getMsisdn());
+			if (conversation != null) 
+			{
+				conversation.setContactName(contactInfo.getName());
+				runOnUiThread(this);
+			}
 		}
 	}
 

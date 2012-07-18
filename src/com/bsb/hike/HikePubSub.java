@@ -109,6 +109,8 @@ public class HikePubSub implements Runnable
 
 	public static final String INVITE_TOKEN_ADDED = "inviteTokenAdded";
 
+	public static final String CONTACT_ADDED = "contactAdded";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

@@ -289,6 +289,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_LEFT, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -384,6 +385,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_JOINED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_LEFT, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
@@ -1212,6 +1214,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					public void run() 
 					{
 						groupChatDead();
+					}
+				});
+			}
+		}
+		else if (HikePubSub.CONTACT_ADDED.equals(type))
+		{
+			ContactInfo contactInfo = (ContactInfo) object;
+			if (this.mContactNumber.equals(contactInfo.getMsisdn())) 
+			{
+				this.mContactName = contactInfo.getName();
+				this.mLabel = contactInfo.getName();
+				runOnUiThread(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						mLabelView.setText(mLabel);
 					}
 				});
 			}
