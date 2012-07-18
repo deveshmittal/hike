@@ -107,8 +107,8 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 			FilterResults results = new FilterResults();
 
 			String textInEditText = TextUtils.isEmpty(constraint) ? "" : constraint.toString().toLowerCase();
-			int indexTextToBeFiltered = textInEditText.lastIndexOf(", ") + 2;
-			String textToBeFiltered = (!textInEditText.contains(", ") ?
+			int indexTextToBeFiltered = textInEditText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2;
+			String textToBeFiltered = (!textInEditText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ?
 							textInEditText : textInEditText.substring(indexTextToBeFiltered));
 
 			if(!TextUtils.isEmpty(textToBeFiltered) || !TextUtils.isEmpty(textInEditText))
@@ -179,9 +179,9 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		{
 			ContactInfo contactInfo = (ContactInfo) view.getTag();
 			String currentText = inputNumber.getText().toString();
-			int insertIndex = currentText.contains(", ") ? currentText.lastIndexOf(", ") + 2 : 0;
+			int insertIndex = currentText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? currentText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2 : 0;
 
-			String textToBeShown = contactInfo.getName() + "[" + contactInfo.getMsisdn() + "], ";
+			String textToBeShown = contactInfo.getName() + "[" + contactInfo.getMsisdn() + "]" + HikeConstants.GROUP_PARTICIPANT_SEPARATOR;
 
 			MyDrawable myDrawable = new MyDrawable(contactInfo.getName(), context, contactInfo.isOnhike());
 			myDrawable.setBounds(

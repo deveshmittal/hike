@@ -44,6 +44,7 @@ public class HikeConstants
 	public static final String CHANGE_NUMBER = "ChangeNumber"; 
 
 	public static final String SEPARATOR = " - ";
+	public static final String GROUP_PARTICIPANT_SEPARATOR = ", ";
 
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms";

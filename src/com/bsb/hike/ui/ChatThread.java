@@ -1533,7 +1533,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mContactNumber = groupId;
 			}
 			selectedContacts = this.mInputNumberView.getText().toString();
-			selectedContacts = selectedContacts.substring(0, selectedContacts.lastIndexOf(", "));
+			selectedContacts = selectedContacts.substring(0, selectedContacts.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR));
 			selectedParticipants = Utils.splitSelectedContacts(selectedContacts);
 			List<String> selectedParticipantNames = Utils.splitSelectedContactsName(selectedContacts);
 			Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
