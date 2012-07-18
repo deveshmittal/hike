@@ -15,6 +15,7 @@
     <string name="preferences">Preferences</string>
     <string name="resend">Resend</string>
     <string name="delete_account_failed">Couldn\'t delete account</string>
+    <string name="unlink_account_failed">Couldn\'t unlink account</string>
     <string name="hike_network_connection">Network Connection</string>
     <string name="notconnected_data_disabled">Boss, you\'ve got to turn on data to experience hike!</string>
     <string name="notconnected_no_internet">Boss, check the internet!</string>
@@ -27,7 +28,7 @@
     <string name="image_failed">Unable to open image</string>
     <string name="block_title">Block</string>
     <string name="unblock_title">Unblock</string>
-    <string name="invite_message">Hey! I\'m using hike to send SMS for free. Download it at http://get.hike.in/ and start messaging me and other friends for free!</string>
+    <string name="invite_message">Hey! I\'m using hike, a new free messaging service from Bharti SoftBank. Download the app at http://get.hike.in/ to start messaging me for free!</string>
 	<string name="feedback">Feedback</string>
 	<string name="sending_feedback">Sending Feedback</string>
 	<string name="sending_feedback_failed">Unable to send feedback</string>
