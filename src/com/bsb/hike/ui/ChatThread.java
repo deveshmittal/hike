@@ -48,7 +48,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -84,7 +83,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
-public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnItemClickListener, OnSoftKeyboardListener, View.OnKeyListener
+public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener
 {
 	private HikePubSub mPubSub;
 
@@ -170,7 +169,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private String selectedContacts = "";
 
-	private ArrayList<String> selectedParticipants;
+	private List<String> selectedParticipants;
 
 	private String existingParticipants;
 
@@ -246,15 +245,29 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		mBottomView.setVisibility(View.GONE);
 
-		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike());
+		if(isGroupChat)
+		{
+			titleBtn = (Button) findViewById(R.id.title_icon);
+			titleBtn.setText(R.string.done);
+			titleBtn.setEnabled(false);
+			titleBtn.setVisibility(View.VISIBLE);
+			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+		}
+
+		mInputNumberView.setText("");
+		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
+				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, !TextUtils.isEmpty(msg), titleBtn);
 		mContactSearchView.setAdapter(adapter);
+		mContactSearchView.setOnItemClickListener(adapter);
 		mInputNumberView.addTextChangedListener(adapter);
+		mInputNumberView.setSingleLine(!isGroupChat);
 
 		mInputNumberContainer.setVisibility(View.VISIBLE);
 		mInputNumberView.setVisibility(View.VISIBLE);
 		mContactSearchView.setVisibility(View.VISIBLE);
 		mInputNumberView.requestFocus();
 		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
 	}
 
 	@Override
@@ -339,7 +352,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		 * button we have), we send the message.
 		 */
 		mComposeView.setOnEditorActionListener(this);
-		mContactSearchView.setOnItemClickListener(this);
 
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
@@ -1364,16 +1376,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		return false;
 	}
 
-	@Override
-	public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) 
-	{
-		ContactInfo contactInfo = (ContactInfo) view.getTag();
-		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
-		intent.setClass(this, ChatThread.class);
-		intent.putExtra(HikeConstants.Extras.KEEP_MESSAGE, !TextUtils.isEmpty(mComposeView.getText()));
-		startActivity(intent);
-	}
-	
 	private void addMessage(ConvMessage convMessage)
 	{
 		if (messages != null && mAdapter != null) 
@@ -1531,6 +1533,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				// Group alredy exists. Fetch existing participants.
 				mContactNumber = groupId;
 			}
+			selectedContacts = this.mInputNumberView.getText().toString();
+			selectedContacts = selectedContacts.substring(0, selectedContacts.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR));
 			selectedParticipants = Utils.splitSelectedContacts(selectedContacts);
 			List<String> selectedParticipantNames = Utils.splitSelectedContactsName(selectedContacts);
 			Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();

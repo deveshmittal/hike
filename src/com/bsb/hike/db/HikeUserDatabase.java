@@ -199,7 +199,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public Cursor findUsers(String partialName, String selectedContacts)
 	{
-		ArrayList<String> contacts = Utils.splitSelectedContacts(selectedContacts);
+		List<String> contacts = Utils.splitSelectedContacts(selectedContacts);
 		StringBuilder selectedNumbers = new StringBuilder("");
 		
 		if (contacts.size() > 0) 

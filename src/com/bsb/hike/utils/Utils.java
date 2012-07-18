@@ -473,10 +473,10 @@ public class Utils
 		editor.commit();
 	}
 
-	public static ArrayList<String> splitSelectedContacts(String selections)
+	public static List<String> splitSelectedContacts(String selections)
 	{
 		Matcher matcher = msisdnRegex.matcher(selections);
-		ArrayList<String> contacts = new ArrayList<String>();
+		List<String> contacts = new ArrayList<String>();
 		if (matcher.find()) 
 		{
 			do 
