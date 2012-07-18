@@ -84,4 +84,5 @@
 	<string name="tap_share">Tap to share your unique invite URL:</string>
 	<string name="done">Done</string>
 	<string name="group_chat">Group Chat</string>
+	<string name="add_to_contacts">Add to Contacts</string>
 </resources>

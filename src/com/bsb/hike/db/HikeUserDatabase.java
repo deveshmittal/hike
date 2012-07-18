@@ -18,6 +18,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
@@ -99,7 +101,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		onCreate(db);
 	}
 
-	public void addContacts(List<ContactInfo> contacts) throws DbException
+	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
 	{
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
@@ -122,6 +124,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				ih.bind(onHikeColumn, contact.isOnhike());
 				ih.bind(phoneColumn, contact.getPhoneNum());
 				ih.execute();
+				if (!isFirstSync) 
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_ADDED, contact);
+				}
 			}
 			db.setTransactionSuccessful();
 		}
@@ -191,7 +197,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		mDb.delete(DBConstants.BLOCK_TABLE, null, null);
 		
-		addContacts(contacts);
+		addContacts(contacts, true);
 		addBlockList(blockedMsisdns);
 	}
 	
@@ -293,7 +299,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	{
 		List<ContactInfo> l = new LinkedList<ContactInfo>();
 		l.add(hikeContactInfo);
-		addContacts(l);
+		addContacts(l, false);
 	}
 
 	public List<ContactInfo> getNonHikeContacts()
@@ -376,7 +382,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		deleteMultipleRows(ids);
 		try
 		{
-			addContacts(updatedContacts);
+			addContacts(updatedContacts, false);
 		}
 		catch (DbException e)
 		{
