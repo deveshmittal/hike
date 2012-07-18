@@ -248,7 +248,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if(isGroupChat)
 		{
 			titleBtn = (Button) findViewById(R.id.title_icon);
-			titleBtn.setText("Done");
+			titleBtn.setText(R.string.done);
 			titleBtn.setEnabled(false);
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
