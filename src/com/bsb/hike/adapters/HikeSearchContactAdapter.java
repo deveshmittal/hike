@@ -113,9 +113,21 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 
 			if(!TextUtils.isEmpty(textToBeFiltered) || !TextUtils.isEmpty(textInEditText))
 			{
-				List<String> numbersSelected = Utils.splitSelectedContacts(textInEditText);
+				final List<String> numbersSelected = Utils.splitSelectedContacts(textInEditText);
 				List<ContactInfo> filteredContacts = new ArrayList<ContactInfo>();
 
+				if (topBarBtn != null) 
+				{
+					((Activity) context).runOnUiThread(new Runnable() 
+					{
+						@Override
+						public void run() 
+						{
+							// We only enable this if the user has selected more than one participant 
+							topBarBtn.setEnabled(numbersSelected.size() > 1);
+						}
+					});
+				}
 				for (ContactInfo info : HikeSearchContactAdapter.this.completeList)
 				{
 					if(!numbersSelected.isEmpty())
@@ -199,8 +211,6 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 					insertIndex, 
 					insertIndex + textToBeShown.length(),
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-			topBarBtn.setEnabled(editable.toString().contains(", "));
 		}
 	}
 }
