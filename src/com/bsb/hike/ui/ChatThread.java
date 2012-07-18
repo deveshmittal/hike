@@ -254,6 +254,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
 
+		mInputNumberView.setText("");
 		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
 				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, !TextUtils.isEmpty(msg), titleBtn);
 		mContactSearchView.setAdapter(adapter);
