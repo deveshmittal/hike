@@ -83,7 +83,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 		{
 			activity.dismissProgressDialog();
 			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText(activity, activity.getResources().getString(R.string.delete_account_failed), duration);
+			Toast toast = Toast.makeText(activity, this.delete ? activity.getResources().getString(R.string.delete_account_failed) : activity.getResources().getString(R.string.unlink_account_failed), duration);
 			toast.show();
 		}
 	}

@@ -128,6 +128,14 @@
                     android:textSize="15sp"
                     android:textStyle="italic" />
             </RelativeLayout>
+            
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/ic_thread_divider_profile" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -196,19 +204,20 @@
                     android:textColor="@color/notif_subtext"
                     android:textSize="15sp"
                     android:textStyle="italic" />
-            </RelativeLayout>
+                
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/joined_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/invite_now"
+                    android:layout_marginTop="15dp"
+                    android:text="@string/friends_on_hike_0"
+                    android:textColor="@color/notif_subtext"
+                    android:textSize="15sp"
+                    android:textStyle="italic" />
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/joined_num"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:text="@string/friends_on_hike_0"
-                android:textColor="@color/notif_subtext"
-                android:textSize="15sp"
-                android:textStyle="italic" />
+            </RelativeLayout>
+			
         </LinearLayout>
 
         <com.bsb.hike.view.CustomFontTextView
