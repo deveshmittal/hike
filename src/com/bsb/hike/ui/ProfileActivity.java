@@ -536,7 +536,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		if (this.profileType == ProfileType.USER_PROFILE_EDIT && 
 				((!emailTxt.equals(mEmailEdit.getText().toString())) || 
-						((mActivityState.genderType != lastSavedGender) && mActivityState.genderType != 0)))
+						((mActivityState.genderType != lastSavedGender))))
 		{
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL + "/profile", new HikeHttpRequest.HikeHttpCallback()
 			{
@@ -567,13 +567,14 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			JSONObject obj = new JSONObject();
 			try
 			{
-				if(Utils.isValidEmail(mEmailEdit.getText()) && !emailTxt.equals(mEmailEdit.getText().toString()))
+				Log.d(getClass().getSimpleName(), "Profile details Email: " + mEmailEdit.getText() + " Gender: " + mActivityState.genderType);
+				if(!emailTxt.equals(mEmailEdit.getText().toString()))
 				{
 					obj.put(HikeConstants.EMAIL, mEmailEdit.getText());
 				}
-				if(currentSelection != null && ((mActivityState.genderType != lastSavedGender) && mActivityState.genderType != 0))
+				if(mActivityState.genderType != lastSavedGender)
 				{
-					obj.put(HikeConstants.GENDER, mActivityState.genderType == 1 ? "m" : "f");
+					obj.put(HikeConstants.GENDER, mActivityState.genderType == 1 ? "m" : mActivityState.genderType == 2 ? "f" : "");
 				}
 				Log.d(getClass().getSimpleName(), "JSON to be sent is: " + obj.toString());
 				request.setJSONData(obj);
@@ -726,8 +727,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			if (currentSelection != null)
 			{
 				mActivityState.genderType = currentSelection.getId() == R.id.guy ? 1 : 2;
+				return;
 			}
-
+			mActivityState.genderType = 0;
 		}
 	}
 
