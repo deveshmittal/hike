@@ -19,6 +19,8 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.Intents.Insert;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.ClipboardManager;
@@ -472,10 +474,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
 		super.onPrepareOptionsMenu(menu);
-
 		/* don't show a menu item for unblock (since the overlay will be present */
 		MenuItem item = menu.findItem(R.id.block_menu);
 		item.setVisible(!mUserIsBlocked);
+		MenuItem item2 = menu.findItem(R.id.add_contact_menu);
+		item2.setVisible(mConversation!= null && 
+				TextUtils.isEmpty(mConversation.getContactName()) && 
+				!(mConversation instanceof GroupConversation) && 
+				!mUserIsBlocked);
 		return true;
 	}
 
@@ -526,6 +532,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						R.anim.slide_out_right_noalpha);
 				
 			}
+		}
+		else if(item.getItemId() == R.id.add_contact_menu)
+		{
+			Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+			i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+			i.putExtra(Insert.PHONE, mConversation.getMsisdn());
+			startActivity(i);
 		}
 
 		return true;
