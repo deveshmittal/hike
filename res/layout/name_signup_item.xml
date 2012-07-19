@@ -51,6 +51,7 @@
         android:inputType="textCapWords"
         android:singleLine="true"
         android:textSize="15sp"
+		android:maxLength="20"        
         android:visibility="visible" />
 
     <RelativeLayout
