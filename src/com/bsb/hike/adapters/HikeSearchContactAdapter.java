@@ -1,7 +1,9 @@
 package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;
@@ -25,6 +27,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
@@ -42,8 +45,12 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	private EditText inputNumber;
 	private boolean hasPrefillText;
 	private Button topBarBtn;
+	private String groupId;
 
-	public HikeSearchContactAdapter(Activity context, List<ContactInfo> contactList, EditText inputNumber, boolean isGroupChat, boolean hasPrefillText, Button topBarBtn)
+	public HikeSearchContactAdapter(
+			Activity context, List<ContactInfo> contactList, 
+			EditText inputNumber, boolean isGroupChat, boolean hasPrefillText, 
+			Button topBarBtn, String groupId)
 	{
 		super(context, -1, contactList);
 		this.filteredList = contactList;
@@ -55,6 +62,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		this.isGroupChat = isGroupChat;
 		this.hasPrefillText = hasPrefillText;
 		this.topBarBtn = topBarBtn;
+		this.groupId = groupId;
 	}
 
 	@Override
@@ -111,9 +119,19 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 			String textToBeFiltered = (!textInEditText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ?
 							textInEditText : textInEditText.substring(indexTextToBeFiltered));
 
-			if(!TextUtils.isEmpty(textToBeFiltered) || !TextUtils.isEmpty(textInEditText))
+			if(!TextUtils.isEmpty(textToBeFiltered) || !TextUtils.isEmpty(textInEditText) || !TextUtils.isEmpty(groupId))
 			{
-				final List<String> numbersSelected = Utils.splitSelectedContacts(textInEditText);
+				final List<String> currentSelectionsInTextBox = Utils.splitSelectedContacts(textInEditText);
+				final Set<String> currentSelectionSet = new HashSet<String>();
+				/*
+				 * Making a set of all the currently selected contacts. Only used in case of group chat.
+				 */
+				currentSelectionSet.addAll(currentSelectionsInTextBox);
+				if(!TextUtils.isEmpty(groupId))
+				{
+					currentSelectionSet.addAll(HikeConversationsDatabase.getInstance().getGroupParticipants(groupId).keySet());
+				}
+
 				List<ContactInfo> filteredContacts = new ArrayList<ContactInfo>();
 
 				if (topBarBtn != null) 
@@ -123,25 +141,19 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 						@Override
 						public void run() 
 						{
-							// We only enable this if the user has selected more than one participant 
-							topBarBtn.setEnabled(numbersSelected.size() > 1);
+							/*
+							 *  We only enable this if the user has selected more than one participant OR if we are adding participants in an
+							 *  existing group the user should have selected at least one participant 
+							 */
+							topBarBtn.setEnabled((currentSelectionSet.size() > 1 && currentSelectionsInTextBox.size() > 0) || (currentSelectionsInTextBox.size() > 1));
 						}
 					});
 				}
 				for (ContactInfo info : HikeSearchContactAdapter.this.completeList)
 				{
-					if(!numbersSelected.isEmpty())
+					if(!currentSelectionSet.isEmpty())
 					{
-						boolean alreadySelected = false;
-						for(String number: numbersSelected)
-						{
-							if(number.equals(info.getMsisdn()))
-							{
-								alreadySelected = true;
-								break;
-							}
-						}
-						if(alreadySelected)
+						if(currentSelectionSet.contains(info.getMsisdn()))
 						{
 							continue;
 						}

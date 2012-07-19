@@ -260,7 +260,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mInputNumberView.setText("");
 		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
-				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, !TextUtils.isEmpty(msg), titleBtn);
+				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, !TextUtils.isEmpty(msg), titleBtn, existingGroupId);
 		mContactSearchView.setAdapter(adapter);
 		mContactSearchView.setOnItemClickListener(adapter);
 		mInputNumberView.addTextChangedListener(adapter);
