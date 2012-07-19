@@ -85,4 +85,7 @@
 	<string name="done">Done</string>
 	<string name="group_chat">Group Chat</string>
 	<string name="add_to_contacts">Add to Contacts</string>
+	<string name="new_message">New Message</string>
+	<string name="new_group">New Group</string>
+	<string name="add_group">Add to Group</string>
 </resources>
