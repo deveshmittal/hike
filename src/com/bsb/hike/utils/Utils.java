@@ -792,4 +792,9 @@ public class Utils
 			Log.e("Utils", "Invalid JSON", e);
 		}
     }
+
+    public static String ellipsizeName(String name)
+    {
+    	return name.length() <= HikeConstants.MAX_CHAR_IN_NAME ? name : (name.substring(0, HikeConstants.MAX_CHAR_IN_NAME - 3) + "...");
+    }
 }

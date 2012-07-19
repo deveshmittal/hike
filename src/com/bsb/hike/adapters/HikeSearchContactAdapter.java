@@ -206,12 +206,13 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 			int insertIndex = currentText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? currentText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2 : 0;
 
 			String textToBeShown = contactInfo.getName() + "[" + contactInfo.getMsisdn() + "]" + HikeConstants.GROUP_PARTICIPANT_SEPARATOR;
+			String nameToBeShown = Utils.ellipsizeName(contactInfo.getName());
 
-			MyDrawable myDrawable = new MyDrawable(contactInfo.getName(), context, contactInfo.isOnhike());
+			MyDrawable myDrawable = new MyDrawable(nameToBeShown, context, contactInfo.isOnhike());
 			myDrawable.setBounds(
 					(int) (0 * Utils.densityMultiplier), 
 					(int) (0 * Utils.densityMultiplier), 
-					(int) (myDrawable.getPaint().measureText(contactInfo.getName()) + ((int)17 * Utils.densityMultiplier)),
+					(int) (myDrawable.getPaint().measureText(nameToBeShown) + ((int)17 * Utils.densityMultiplier)),
 					(int) (27 * Utils.densityMultiplier));
 
 			ImageSpan imageSpan = new ImageSpan(myDrawable);

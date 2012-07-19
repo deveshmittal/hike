@@ -81,6 +81,8 @@ public class HikeConstants
 	public static int NUM_SMS_PER_FRIEND = 10;
 	public static int INITIAL_NUM_SMS = 100;
 
+	public static int MAX_CHAR_IN_NAME = 20;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
