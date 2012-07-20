@@ -371,19 +371,6 @@ public class Utils
 		return false;
 	}
 	
-	public static int convertVersionToInt(String version)
-	{
-		int v = 0;
-		int multiplier = 100;
-		StringTokenizer st = new StringTokenizer(version,".");
-		while(st.hasMoreTokens())
-		{
-			v += (Integer.parseInt(st.nextToken())*multiplier);
-			multiplier /=10;
-		}
-		return v;
-	}
-	
 	public static int[] getNumberImage(String msisdn)
 	{
 		int[] msisdnRes = new int[msisdn.length()];
@@ -708,14 +695,34 @@ public class Utils
 
 	public static boolean isUpdateRequired(String version, Context context)
 	{
-		try 
-		{
+		try {
 			String appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0 ).versionName;
-			return convertVersionToInt(appVersion) < convertVersionToInt(version);
+
+			StringTokenizer updateVersion = new StringTokenizer(version,".");
+			StringTokenizer currentVersion = new StringTokenizer(appVersion, ".");
+			while(currentVersion.hasMoreTokens())
+			{
+				if(!updateVersion.hasMoreTokens())
+				{
+					return false;
+				}
+				if(Integer.parseInt(updateVersion.nextToken()) > Integer.parseInt(currentVersion.nextToken()))
+				{
+					return true;
+				}
+			}
+			while(updateVersion.hasMoreTokens())
+			{
+				if(Integer.parseInt(updateVersion.nextToken()) > 0)
+				{
+					return true;
+				}
+			}
+			return false;
 		} 
 		catch (NameNotFoundException e) 
 		{
-			Log.e("Utils", "Invalid package", e);
+			Log.e("Utils", "Package not found...", e);
 			return false;
 		}
 	}
@@ -784,5 +791,10 @@ public class Utils
 		{
 			Log.e("Utils", "Invalid JSON", e);
 		}
+    }
+
+    public static String ellipsizeName(String name)
+    {
+    	return name.length() <= HikeConstants.MAX_CHAR_IN_NAME ? name : (name.substring(0, HikeConstants.MAX_CHAR_IN_NAME - 3) + "...");
     }
 }

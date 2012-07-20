@@ -231,10 +231,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private void createAutoCompleteView(String msg)
 	{
 		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false); 
+		// Getting the group id. This will be a valid value if the intent was passed to add group participants.
+		String existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		mComposeView.removeTextChangedListener(this);
 
-		mLabelView.setText("New Message");
+		mLabelView.setText(!TextUtils.isEmpty(existingGroupId) ? R.string.add_group : (isGroupChat ? R.string.new_group : R.string.new_message));
 		
 		/* if we've got some pre-filled text, add it here */
 		if (!TextUtils.isEmpty(msg)) {
@@ -258,7 +260,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mInputNumberView.setText("");
 		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
-				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, !TextUtils.isEmpty(msg), titleBtn);
+				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, !TextUtils.isEmpty(msg), titleBtn, existingGroupId);
 		mContactSearchView.setAdapter(adapter);
 		mContactSearchView.setOnItemClickListener(adapter);
 		mInputNumberView.addTextChangedListener(adapter);

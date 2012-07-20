@@ -72,6 +72,7 @@
                             android:inputType="textCapWords"
                             android:textColor="@color/subtext"
                             android:textSize="16sp"
+                            android:maxLength="20"
                             android:textStyle="italic"
                             android:visibility="visible" />
                     </LinearLayout>
