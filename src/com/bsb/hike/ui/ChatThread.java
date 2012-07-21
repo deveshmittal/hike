@@ -947,11 +947,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
-				if (mConversation instanceof GroupConversation)
-				{
-					return;
-				}
-
 				JSONObject object = new JSONObject();
 				try
 				{
@@ -1023,10 +1018,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
-					if (!(mConversation instanceof GroupConversation))
-					{
-						mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
-					}
+					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
 
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 				}

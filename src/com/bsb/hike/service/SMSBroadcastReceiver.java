@@ -11,12 +11,14 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 
 public class SMSBroadcastReceiver extends BroadcastReceiver
 {
 	HikeUserDatabase mDb;
+	private boolean mAccountInitialized = false;
 
 	@Override
 	public void onReceive(Context context, Intent intent)
@@ -24,6 +26,16 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 		if (mDb == null)
 		{
 			mDb = HikeUserDatabase.getInstance();
+		}
+
+		if (!mAccountInitialized)
+		{
+			if (!context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).contains(HikeMessengerApp.NAME_SETTING))
+			{
+				/* no name setting, so don't bother pulling in SMS's yet */
+				return;
+			}
+			mAccountInitialized = true;
 		}
 
 		Log.d(getClass().getSimpleName(), "Received SMS message");
@@ -41,6 +53,11 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 				long timestamp = sms.getTimestampMillis()/1000;
 				String from = sms.getOriginatingAddress();
 				ContactInfo contactInfo = mDb.getContactInfoFromPhoneNo(from);
+				if (contactInfo == null)
+				{
+					Log.d(getClass().getSimpleName(), "Ignoring SMS message because contact not in addressbook phone_no=" + from);
+					return;
+				}
 				JSONObject msg = new JSONObject();
 				try
 				{
