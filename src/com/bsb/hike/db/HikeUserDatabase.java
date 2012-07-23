@@ -16,7 +16,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteStatement;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -606,5 +605,23 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			extraInfo.close();
 			mDb.endTransaction();
 		}
+	}
+	
+	public boolean isOnBlockedList(String msisdn)
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.BLOCK_TABLE, null, DBConstants.MSISDN + "=?", new String[]{msisdn}, null, null, null);
+			return c.moveToFirst();
+		}
+		finally
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+		}
+				
 	}
 }
