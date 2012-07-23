@@ -35,6 +35,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 
@@ -245,6 +246,13 @@ public class HikeService extends Service
 			 *  no contacts are synced if they are added when the app is in force stopped state 
 			 */
 			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
+		}
+
+		if(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
+		{
+			Log.d(getClass().getSimpleName(), "SYNCING");
+			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();
+			syncContactExtraInfo.execute();
 		}
 	}
 

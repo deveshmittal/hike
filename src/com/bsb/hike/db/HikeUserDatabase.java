@@ -11,10 +11,12 @@ import java.util.Set;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -123,9 +125,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			// Adding the last contacted and phone type info
 			Cursor extraInfo = this.mContext.getContentResolver().query(
 					Phone.CONTENT_URI,
-					new String[] { Phone.CONTACT_ID, Phone.TYPE }, null, null, null);
+					new String[] { Phone.NUMBER, Phone.TYPE }, null, null, null);
 
-			int idIdx = extraInfo.getColumnIndex(Phone.CONTACT_ID);
+			int msisdnIdx = extraInfo.getColumnIndex(Phone.NUMBER);
 			int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
 
 			while (extraInfo.moveToNext()) 
@@ -133,7 +135,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				String msisdnType = Phone.getTypeLabel(this.mContext.getResources(),
 						extraInfo.getInt(typeIdx), "Custom").toString();
 
-				msisdnTypeMap.put(extraInfo.getString(idIdx), msisdnType);
+				msisdnTypeMap.put(extraInfo.getString(msisdnIdx), msisdnType);
 			}
 			extraInfo.close();
 		}
@@ -176,7 +178,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				}
 				else
 				{
-					ih.bind(msisdnTypeColumn, msisdnTypeMap.get(contact.getId()));
+					ih.bind(msisdnTypeColumn, msisdnTypeMap.get(contact.getPhoneNum()));
+					/*
+					 * We're saving this parameter to notify that the extra info that we are now 
+					 * fetching (Msisdn type) has been synced. So for apps that update from an older 
+					 * version, we can just check this value to verify whether the contacts have their
+					 * extra info synced. 
+					 */
+					Editor editor = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+					editor.putBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, true);
+					editor.commit();
 				}
 				ih.execute();
 			}
@@ -560,5 +571,40 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		String whereClause = DBConstants.MSISDN + "=?";
 		int rows = mDb.update(DBConstants.USERS_TABLE, updatedTime, whereClause, new String[] {msisdn});
 		Log.d(getClass().getSimpleName(), "Row has been updated: " + rows);
+	}
+
+	public void syncContactExtraInfo()
+	{
+		Cursor extraInfo = this.mContext.getContentResolver().query(
+				Phone.CONTENT_URI,
+				new String[] { Phone.NUMBER, Phone.TYPE }, null, null, null);
+
+		int msisdnIdx = extraInfo.getColumnIndex(Phone.NUMBER);
+		int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
+
+		mDb.beginTransaction();
+
+		try
+		{
+			while (extraInfo.moveToNext()) 
+			{
+				String msisdnType = Phone.getTypeLabel(this.mContext.getResources(),
+						extraInfo.getInt(typeIdx), "Custom").toString();
+				Log.d(getClass().getSimpleName(), "Msisdntype: " + msisdnType);
+				ContentValues contentValues = new ContentValues(1);
+				contentValues.put(DBConstants.MSISDN_TYPE, msisdnType);
+				String whereClause = DBConstants.PHONE + " =? ";
+				mDb.update(DBConstants.USERS_TABLE, contentValues, whereClause, new String[] {extraInfo.getString(msisdnIdx)});
+			}
+			mDb.setTransactionSuccessful();
+			Editor editor = mContext.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, true);
+			editor.commit();
+		}
+		finally
+		{
+			extraInfo.close();
+			mDb.endTransaction();
+		}
 	}
 }
