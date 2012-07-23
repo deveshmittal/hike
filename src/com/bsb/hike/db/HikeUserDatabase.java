@@ -551,4 +551,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			c.close();
 		}
 	}
+
+	public void updateContactRecency(String msisdn, long timeStamp)
+	{
+		ContentValues updatedTime = new ContentValues(1);
+		updatedTime.put(DBConstants.LAST_MESSAGED, timeStamp);
+
+		String whereClause = DBConstants.MSISDN + "=?";
+		int rows = mDb.update(DBConstants.USERS_TABLE, updatedTime, whereClause, new String[] {msisdn});
+		Log.d(getClass().getSimpleName(), "Row has been updated: " + rows);
+	}
 }
