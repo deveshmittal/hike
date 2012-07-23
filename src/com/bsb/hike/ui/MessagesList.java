@@ -437,7 +437,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			else if((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
 				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn()));
+				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false));
 			}
 			runOnUiThread(new Runnable(){
 				@Override

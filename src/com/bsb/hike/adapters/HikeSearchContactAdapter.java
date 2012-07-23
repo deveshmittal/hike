@@ -137,7 +137,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 				currentSelectionSet.addAll(currentSelectionsInTextBox);
 				if(!TextUtils.isEmpty(groupId))
 				{
-					currentSelectionSet.addAll(HikeConversationsDatabase.getInstance().getGroupParticipants(groupId).keySet());
+					currentSelectionSet.addAll(HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, true).keySet());
 				}
 
 				List<ContactInfo> filteredContacts = new ArrayList<ContactInfo>();

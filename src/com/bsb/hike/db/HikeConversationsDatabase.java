@@ -335,7 +335,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 
 					Log.d(getClass().getSimpleName(), "Fetching participants...");
-					((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn));
+					((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn, false));
 					Log.d(getClass().getSimpleName(), "Participants size: " + ((GroupConversation)conv).getGroupParticipantList().size());
 				}
 				else
@@ -440,7 +440,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if(Utils.isGroupConversation(msisdn))
 			{
 				conv = getGroupConversation(msisdn, convid, contactid);
-				((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn));
+				((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn, false));
 			}
 			else
 			{
@@ -554,7 +554,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, groupName, msisdn);
 
 			GroupConversation conv = new GroupConversation(msisdn, convid, contactid, contactInfo.getName(), groupOwner, isGroupAlive);
-			conv.setGroupParticipantList(getGroupParticipants(msisdn));
+			conv.setGroupParticipantList(getGroupParticipants(msisdn, false));
 
 			return conv;
 		} 
@@ -723,9 +723,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param groupId
 	 * @return
 	 */
-	public Map<String, GroupParticipant> getGroupParticipants(String groupId)
+	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly)
 	{
-		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {DBConstants.MSISDN, DBConstants.HAS_LEFT}, DBConstants.GROUP_ID + " = ? ", new String[] {groupId}, null, null, null);
+		String selection = DBConstants.GROUP_ID + " =? " + (activeOnly ? "AND " + DBConstants.HAS_LEFT + "=0" : "");
+		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {DBConstants.MSISDN, DBConstants.HAS_LEFT}, selection, new String[] {groupId}, null, null, null);
 
 		Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
 
