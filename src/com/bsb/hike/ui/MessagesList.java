@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
@@ -25,7 +23,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -184,12 +181,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		int updateTypeAvailable = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 		updateApp(updateTypeAvailable);
 
-		// Checking if the app was started for the first time. If true we send the device details to our server. 
-		if(getIntent().getBooleanExtra(HikeConstants.Extras.APP_STARTED_FIRST_TIME, false))
-		{
-			sendDeviceDetails();
-		}
-
 		mConversationsView = (ListView) findViewById(R.id.conversations);
 
 		View view = findViewById(R.id.title_hikeicon);
@@ -259,24 +250,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
-	}
-
-	private void sendDeviceDetails() 
-	{
-		// We're adding this delay to ensure that the service is alive before sending the message
-		(new Handler()).postDelayed(new Runnable() 
-		{
-			@Override
-			public void run() 
-			{
-				JSONObject obj = Utils.getDeviceDetails(MessagesList.this);
-				if (obj != null) 
-				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-				}
-				Utils.requestAccountInfo();
-			}
-		}, 10 * 1000);
 	}
 
 	@Override

@@ -1,11 +1,14 @@
 package com.bsb.hike.ui;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -36,6 +39,10 @@ public class CreditsActivity extends Activity implements Listener
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
+		// TODO this is being called everytime this activity is created. Way too often
+		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
+		app.connectToService();
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
 
@@ -48,6 +55,7 @@ public class CreditsActivity extends Activity implements Listener
 			mFeedbackButton.setText(R.string.done);
 			mFeedbackButton.setVisibility(View.VISIBLE);
 			mButtonBar.setVisibility(View.VISIBLE);
+			sendDeviceDetails();
 		}
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -110,6 +118,24 @@ public class CreditsActivity extends Activity implements Listener
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.INVITEE_NUM_CHANGED, this);
+	}
+
+	private void sendDeviceDetails() 
+	{
+		// We're adding this delay to ensure that the service is alive before sending the message
+		(new Handler()).postDelayed(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				JSONObject obj = Utils.getDeviceDetails(CreditsActivity.this);
+				if (obj != null) 
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+				}
+				Utils.requestAccountInfo();
+			}
+		}, 10 * 1000);
 	}
 
 	@Override
