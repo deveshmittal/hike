@@ -5,7 +5,7 @@ public class DBConstants
 	
 	public static final int CONVERSATIONS_DATABASE_VERSION = 1;
 	
-	public static final int USERS_DATABASE_VERSION = 2;
+	public static final int USERS_DATABASE_VERSION = 3;
 	
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 	

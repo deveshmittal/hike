@@ -101,9 +101,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
-		String drop = "DROP TABLE IF EXISTS " + DBConstants.USERS_TABLE;
-		mDb.execSQL(drop);
-		onCreate(db);
+		Log.d(getClass().getSimpleName(), "Upgrading users table from " + oldVersion + " to " + newVersion);
+		String alter1 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.MSISDN_TYPE + " STRING";
+		String alter2 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.LAST_MESSAGED + " INTEGER";
+		db.execSQL(alter1);
+		db.execSQL(alter2);
 	}
 
 	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
