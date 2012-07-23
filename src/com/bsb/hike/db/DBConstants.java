@@ -75,4 +75,8 @@ public class DBConstants
 	public static final String GROUP_ALIVE = "groupAlive";
 
 	public static final String HAS_LEFT = "hasLeft";
+
+	public static final String LAST_MESSAGED = "lastMessaged";
+
+	public static final String MSISDN_TYPE = "msisdnType";
 }

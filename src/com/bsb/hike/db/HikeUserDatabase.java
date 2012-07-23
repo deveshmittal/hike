@@ -2,9 +2,11 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.content.ContentValues;
@@ -16,6 +18,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -58,7 +61,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 														+ DBConstants.ONHIKE+" INTEGER, "
 														+ DBConstants.PHONE+" TEXT, "
 														+ DBConstants.HAS_CUSTOM_PHOTO+" INTEGER, "
-														+ DBConstants.OVERLAY_DISMISSED+" INTEGER"
+														+ DBConstants.OVERLAY_DISMISSED+" INTEGER, "
+														+ DBConstants.MSISDN_TYPE+" STRING, "
+														+ DBConstants.LAST_MESSAGED + " INTEGER"
 												+ " )";
 
 		db.execSQL(create);
@@ -106,6 +111,31 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
 
+		Map<String, String> msisdnTypeMap = new HashMap<String, String>();
+		/*
+		 *  Since this is the first sync, we just run one query and pickup all the extra info required.
+		 *  For all subsequent syncs we run the query for each contact separately. 
+		 */
+		if (isFirstSync) 
+		{
+			// Adding the last contacted and phone type info
+			Cursor extraInfo = this.mContext.getContentResolver().query(
+					Phone.CONTENT_URI,
+					new String[] { Phone.CONTACT_ID, Phone.TYPE }, null, null, null);
+
+			int idIdx = extraInfo.getColumnIndex(Phone.CONTACT_ID);
+			int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
+
+			while (extraInfo.moveToNext()) 
+			{
+				String msisdnType = Phone.getTypeLabel(this.mContext.getResources(),
+						extraInfo.getInt(typeIdx), "Custom").toString();
+
+				msisdnTypeMap.put(extraInfo.getString(idIdx), msisdnType);
+			}
+			extraInfo.close();
+		}
+
 		InsertHelper ih = null;
 		try
 		{
@@ -115,6 +145,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			final int nameColumn = ih.getColumnIndex(DBConstants.NAME);
 			final int onHikeColumn = ih.getColumnIndex(DBConstants.ONHIKE);
 			final int phoneColumn = ih.getColumnIndex(DBConstants.PHONE);
+			final int msisdnTypeColumn = ih.getColumnIndex(DBConstants.MSISDN_TYPE);
 			for (ContactInfo contact : contacts)
 			{
 				ih.prepareForReplace();
@@ -123,11 +154,29 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				ih.bind(idColumn, contact.getId());
 				ih.bind(onHikeColumn, contact.isOnhike());
 				ih.bind(phoneColumn, contact.getPhoneNum());
-				ih.execute();
 				if (!isFirstSync) 
 				{
+					String selection = Phone.CONTACT_ID + " =? " + " AND " + Phone.NUMBER + " =? ";
+					// Adding the last contacted and phone type info
+					Cursor additionalInfo = this.mContext.getContentResolver().query(
+							Phone.CONTENT_URI, new String[] { Phone.TYPE }, selection, new String[] {contact.getId(), contact.getMsisdn()}, null);
+
+					int typeIdx = additionalInfo.getColumnIndex(Phone.TYPE);
+					if(additionalInfo.moveToFirst())
+					{
+						contact.setMsisdnType(Phone.getTypeLabel(this.mContext.getResources(),
+								additionalInfo.getInt(typeIdx), "Custom").toString());
+					}
+					additionalInfo.close();
+
+					ih.bind(msisdnTypeColumn, contact.getMsisdnType());
 					HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_ADDED, contact);
 				}
+				else
+				{
+					ih.bind(msisdnTypeColumn, msisdnTypeMap.get(contact.getId()));
+				}
+				ih.execute();
 			}
 			db.setTransactionSuccessful();
 		}
