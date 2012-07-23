@@ -113,6 +113,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String SHOW_CREDIT_SCREEN = "showCreditScreen";
 
+	public static final String CONTACT_EXTRA_INFO_SYNCED = "contactExtraInfoSynced";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;
