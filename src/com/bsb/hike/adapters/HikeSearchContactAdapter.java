@@ -83,6 +83,10 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 
 		textView = (TextView) v.findViewById(R.id.number);
 		textView.setText(contactInfo.getMsisdn());
+		if(!TextUtils.isEmpty(contactInfo.getMsisdnType()))
+		{
+			textView.append("(" + contactInfo.getMsisdnType() + ")");
+		}
 
 		ImageView onhike = (ImageView) v.findViewById(R.id.onhike);
 		onhike.setImageResource(contactInfo.isOnhike() ? R.drawable.ic_hike_user : R.drawable.ic_sms_user);

@@ -20,7 +20,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.utils.Utils;
 
 public class CreditsActivity extends Activity implements Listener
@@ -105,10 +104,7 @@ public class CreditsActivity extends Activity implements Listener
 			public void onClick(View v) 
 			{
 				Utils.logEvent(CreditsActivity.this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
-				Intent i = new Intent(CreditsActivity.this, HikeListActivity.class);
-				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				i.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
-				startActivity(i);
+				Utils.startInviteShareIntent(CreditsActivity.this);
 			}
 		});
 

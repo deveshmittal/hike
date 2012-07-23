@@ -260,7 +260,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 				continue;
 			}
 			TextView participantNameItem = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
-			participantNameItem.setText(contactInfo.getFirstName());
+			participantNameItem.setText(Utils.ellipsizeName(contactInfo.getName()));
 			participantNameItem.setBackgroundResource(contactInfo.isOnhike() ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
 
 			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);

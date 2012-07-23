@@ -45,6 +45,7 @@ public class DbConversationListener implements Listener
 		{
 			ConvMessage convMessage = (ConvMessage) object;
 			mConversationDb.addConversationMessages(convMessage);
+			mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
 
 			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO) 
 			{

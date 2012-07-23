@@ -5,7 +5,7 @@ public class DBConstants
 	
 	public static final int CONVERSATIONS_DATABASE_VERSION = 1;
 	
-	public static final int USERS_DATABASE_VERSION = 2;
+	public static final int USERS_DATABASE_VERSION = 3;
 	
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 	
@@ -75,4 +75,8 @@ public class DBConstants
 	public static final String GROUP_ALIVE = "groupAlive";
 
 	public static final String HAS_LEFT = "hasLeft";
+
+	public static final String LAST_MESSAGED = "lastMessaged";
+
+	public static final String MSISDN_TYPE = "msisdnType";
 }

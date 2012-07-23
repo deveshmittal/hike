@@ -2,9 +2,11 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.content.ContentValues;
@@ -16,6 +18,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
@@ -58,7 +61,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 														+ DBConstants.ONHIKE+" INTEGER, "
 														+ DBConstants.PHONE+" TEXT, "
 														+ DBConstants.HAS_CUSTOM_PHOTO+" INTEGER, "
-														+ DBConstants.OVERLAY_DISMISSED+" INTEGER"
+														+ DBConstants.OVERLAY_DISMISSED+" INTEGER, "
+														+ DBConstants.MSISDN_TYPE+" STRING, "
+														+ DBConstants.LAST_MESSAGED + " INTEGER"
 												+ " )";
 
 		db.execSQL(create);
@@ -96,15 +101,42 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
 	{
-		String drop = "DROP TABLE IF EXISTS " + DBConstants.USERS_TABLE;
-		mDb.execSQL(drop);
-		onCreate(db);
+		Log.d(getClass().getSimpleName(), "Upgrading users table from " + oldVersion + " to " + newVersion);
+		String alter1 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.MSISDN_TYPE + " STRING";
+		String alter2 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.LAST_MESSAGED + " INTEGER";
+		db.execSQL(alter1);
+		db.execSQL(alter2);
 	}
 
 	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync) throws DbException
 	{
 		SQLiteDatabase db = mDb;
 		db.beginTransaction();
+
+		Map<String, String> msisdnTypeMap = new HashMap<String, String>();
+		/*
+		 *  Since this is the first sync, we just run one query and pickup all the extra info required.
+		 *  For all subsequent syncs we run the query for each contact separately. 
+		 */
+		if (isFirstSync) 
+		{
+			// Adding the last contacted and phone type info
+			Cursor extraInfo = this.mContext.getContentResolver().query(
+					Phone.CONTENT_URI,
+					new String[] { Phone.CONTACT_ID, Phone.TYPE }, null, null, null);
+
+			int idIdx = extraInfo.getColumnIndex(Phone.CONTACT_ID);
+			int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
+
+			while (extraInfo.moveToNext()) 
+			{
+				String msisdnType = Phone.getTypeLabel(this.mContext.getResources(),
+						extraInfo.getInt(typeIdx), "Custom").toString();
+
+				msisdnTypeMap.put(extraInfo.getString(idIdx), msisdnType);
+			}
+			extraInfo.close();
+		}
 
 		InsertHelper ih = null;
 		try
@@ -115,6 +147,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			final int nameColumn = ih.getColumnIndex(DBConstants.NAME);
 			final int onHikeColumn = ih.getColumnIndex(DBConstants.ONHIKE);
 			final int phoneColumn = ih.getColumnIndex(DBConstants.PHONE);
+			final int msisdnTypeColumn = ih.getColumnIndex(DBConstants.MSISDN_TYPE);
 			for (ContactInfo contact : contacts)
 			{
 				ih.prepareForReplace();
@@ -123,11 +156,29 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				ih.bind(idColumn, contact.getId());
 				ih.bind(onHikeColumn, contact.isOnhike());
 				ih.bind(phoneColumn, contact.getPhoneNum());
-				ih.execute();
 				if (!isFirstSync) 
 				{
+					String selection = Phone.CONTACT_ID + " =? " + " AND " + Phone.NUMBER + " =? ";
+					// Adding the last contacted and phone type info
+					Cursor additionalInfo = this.mContext.getContentResolver().query(
+							Phone.CONTENT_URI, new String[] { Phone.TYPE }, selection, new String[] {contact.getId(), contact.getMsisdn()}, null);
+
+					int typeIdx = additionalInfo.getColumnIndex(Phone.TYPE);
+					if(additionalInfo.moveToFirst())
+					{
+						contact.setMsisdnType(Phone.getTypeLabel(this.mContext.getResources(),
+								additionalInfo.getInt(typeIdx), "Custom").toString());
+					}
+					additionalInfo.close();
+
+					ih.bind(msisdnTypeColumn, contact.getMsisdnType());
 					HikeMessengerApp.getPubSub().publish(HikePubSub.CONTACT_ADDED, contact);
 				}
+				else
+				{
+					ih.bind(msisdnTypeColumn, msisdnTypeMap.get(contact.getId()));
+				}
+				ih.execute();
 			}
 			db.setTransactionSuccessful();
 		}
@@ -226,7 +277,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				DBConstants.MSISDN, 
 				DBConstants.ONHIKE, 
 				DBConstants.ONHIKE + "=0 AS NotOnHike", 
-				DBConstants.PHONE, 
+				DBConstants.PHONE,
+				DBConstants.LAST_MESSAGED,
+				DBConstants.MSISDN_TYPE,
 				DBConstants.HAS_CUSTOM_PHOTO}; 
 
 		String selection = "(("  
@@ -245,7 +298,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public ContactInfo getContactInfoFromMSISDN(String msisdn)
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.MSISDN+"=?", new String[] { msisdn }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.MSISDN+"=?", new String[] { msisdn }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -265,10 +318,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		int nameIdx = c.getColumnIndex(DBConstants.NAME);
 		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
 		int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+		int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
 		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 		while (c.moveToNext())
 		{
-			ContactInfo contactInfo = new ContactInfo(c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0, c.getInt(hasCustomPhotoIdx)==1);
+			ContactInfo contactInfo = new ContactInfo(
+					c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getString(phoneNumIdx),
+					c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx), c.getInt(hasCustomPhotoIdx)==1);
 			contactInfos.add(contactInfo);
 		}
 		c.close();
@@ -277,7 +334,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	
 	public ContactInfo getContactInfoFromId(String id)
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.ID+"=?", new String[] { id }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.ID+"=?", new String[] { id }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -332,8 +389,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public List<ContactInfo> getContactsOrderedByOnHike()
 	{
 		String selection = DBConstants.MSISDN + " != 'null'";
-		String orderBy = DBConstants.NAME + " COLLATE NOCASE";
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, selection, null, null, null, orderBy);
+		String orderBy = DBConstants.LAST_MESSAGED + " DESC, " + DBConstants.NAME + " COLLATE NOCASE";
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, selection, null, null, null, orderBy);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -346,7 +403,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public List<ContactInfo> getContacts(boolean ignoreEmpty)
 	{
 		String selection = ignoreEmpty ? DBConstants.MSISDN + " != 'null'" : null;
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, selection, null, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, selection, null, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -407,7 +464,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public ContactInfo getContactInfoFromPhoneNo(String number)
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.HAS_CUSTOM_PHOTO }, 
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, 
 												DBConstants.PHONE + "=?", new String[] { number }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
@@ -493,5 +550,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		{
 			c.close();
 		}
+	}
+
+	public void updateContactRecency(String msisdn, long timeStamp)
+	{
+		ContentValues updatedTime = new ContentValues(1);
+		updatedTime.put(DBConstants.LAST_MESSAGED, timeStamp);
+
+		String whereClause = DBConstants.MSISDN + "=?";
+		int rows = mDb.update(DBConstants.USERS_TABLE, updatedTime, whereClause, new String[] {msisdn});
+		Log.d(getClass().getSimpleName(), "Row has been updated: " + rows);
 	}
 }

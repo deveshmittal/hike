@@ -52,7 +52,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
-import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -381,9 +380,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		{
 		case R.id.invite:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU);
-			intent = new Intent(this, HikeListActivity.class);
-			intent.putExtra(HikeConstants.ADAPTER_NAME, HikeInviteAdapter.class.getName());
-			startActivity(intent);
+			Utils.startInviteShareIntent(MessagesList.this);
 			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {

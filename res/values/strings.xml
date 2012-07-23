@@ -3,7 +3,7 @@
     <string name="app_name">hike</string>
 	<string name="scanning_ab">Scanning Address Book</string>
     <string name="looking_for_friends">Just checking to see if any friends are on hike. Won\'t be long, we promise.</string>
-    <string name="invite">Invite</string>
+    <string name="invite">Tell a friend</string>
     <string name="deleteconversations">Delete Conversations</string>
     <string name="send">Send</string>
     <string name="type_to_compose">Type to Compose</string>
@@ -88,4 +88,5 @@
 	<string name="new_message">New Message</string>
 	<string name="new_group">New Group</string>
 	<string name="add_group">Add to Group</string>
+	<string name="invite_share_message">Hi! I\'m using hike, a new messenger from Bharti SoftBank to message friends and family for free! Download it at http://get.hike.in/</string>
 </resources>

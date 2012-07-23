@@ -24,7 +24,10 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 	private boolean onhike;
 	
 	private boolean hasCustomPhoto;
-	
+
+	private String msisdnType;
+
+	private long lastMessaged;
 
 	private String phoneNum;
 
@@ -96,17 +99,42 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		this.hasCustomPhoto = hasCustomPhoto;
 	}
 
+	public String getMsisdnType()
+	{
+		return msisdnType;
+	}
+
+	public void setMsisdnType(String msisdnType)
+	{
+		this.msisdnType = msisdnType;
+	}
+
+	public long getLastMessaged()
+	{
+		return lastMessaged;
+	}
+
+	public void setLastMessaged(long lastMessaged)
+	{
+		this.lastMessaged = lastMessaged;
+	}
+
 	public ContactInfo(String id, String number, String name,String phoneNum)
 	{
-		this(id, number, name, phoneNum, false, false);
+		this(id, number, name, phoneNum, false, "", 0, false);
 	}
 
 	public ContactInfo(String id, String number, String name, String phoneNum, boolean onHike)
 	{
-		this(id, number, name, phoneNum, onHike, false);
+		this(id, number, name, phoneNum, onHike, "", 0, false);
 	}
 
-	public ContactInfo(String id, String msisdn, String name, String phoneNum, boolean onhike, boolean hasCustomPhoto)
+	public ContactInfo(String id, String number, String name, String phoneNum, boolean onHike, String msisdnType, long lastMessaged)
+	{
+		this(id, number, name, phoneNum, onHike, msisdnType, lastMessaged, false);
+	}
+
+	public ContactInfo(String id, String msisdn, String name, String phoneNum, boolean onhike, String msisdnType, long lastMessaged, boolean hasCustomPhoto)
 	{
 		this.id = id;
 		this.msisdn = msisdn;
@@ -114,6 +142,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		this.onhike = onhike;
 		this.phoneNum = phoneNum;
 		this.hasCustomPhoto = hasCustomPhoto;
+		this.msisdnType = msisdnType;
+		this.lastMessaged = lastMessaged;
 	}
 	
 	@Override
