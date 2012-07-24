@@ -475,7 +475,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	public ContactInfo getContactInfoFromPhoneNo(String number)
 	{
 		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, 
-												DBConstants.PHONE + "=?", new String[] { number }, null, null, null);
+												DBConstants.MSISDN + "=?", new String[] { number }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
