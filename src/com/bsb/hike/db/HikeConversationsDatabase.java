@@ -440,7 +440,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			if(Utils.isGroupConversation(msisdn))
 			{
 				conv = getGroupConversation(msisdn, convid, contactid);
-				((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn, false));
 			}
 			else
 			{
