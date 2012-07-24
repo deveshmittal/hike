@@ -48,7 +48,7 @@
 	<string name="your_free_sms">Your free hike SMS</string>
 	<string name="availble_month">Available this month</string>
 	<string name="free_sms">hike to SMS</string>
-	<string name="every_month">Every month, you get 100 SMS to message friends not on hike.\n\nGet an additional 10 free SMS for each friend that joins hike because of you.</string>
+	<string name="every_month">Every month, you get 100 SMS to message friends not on hike.\n\nGet an additional 50 free SMS for each friend that joins hike because of you.</string>
 	<string name="invite_now">Invite Now</string>
 	<string name="friends_on_hike_0">You\'ve invited %1$s friends.</string>
 	<string name="free_always_world">Free, always, worldwide!</string>
@@ -58,7 +58,7 @@
 	<string name="earn_200_sms">Invite friends, earn more free SMS.</string>
 	<string name="important">Important:</string>
 	<string name="dnd"> Due to SMS regulations, friends on the Do Not Disturb (DND) list need to opt in to hike to receive your free SMS.</string>
-	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 10 more!</string>
+	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 50 more!</string>
 	<string name="dnd_message">We can\'t send %1$s a message as this person is on the DND list. For %1$s to receive hike messages he needs to opt-in to hike by giving a missed call to %2$s.\n\nYou\'ll get an extra 10 free SMS\' per month if %1$s opts-in!\n\nTo send this information to %1$s as a normal SMS, tap here.</string>
 	<string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s.</string>
 	<string name="edit_profile">Edit Profile</string>
@@ -73,10 +73,10 @@
 	<string name="tap_group_info">Tap this button for group info.</string>
 	<string name="earn_200_sms_tap_here">Learn about free hike SMS. Tap here »</string>
 	<string name="invite_all_to_hike">Invite members on SMS to hike</string>
-	<string name="string_to_be_formatted">additional 10 free SMS</string>
+	<string name="string_to_be_formatted">additional 50 free SMS</string>
 	<string name="string_to_be_formatted2">not on hike.</string>
 	<string name="friend_joined_hike_no_creds">%1$s just joined hike because of you. Great job!</string>
-	<string name="friend_joined_hike_with_creds">%1$s just joined hike because of you. Great job! As promised, here are your additional 10 free SMS for bringing a friend. To see your total free SMS, tap here.</string>
+	<string name="friend_joined_hike_with_creds">%1$s just joined hike because of you. Great job! As promised, here are your additional 50 free SMS for bringing a friend. To see your total free SMS, tap here.</string>
 	<string name="update_available">An update is available. Tap to download now</string>
 	<string name="critical_update_available">Critical update available. Tap to download now</string>
 	<string name="default_invite_url">http://get.hike.in/</string>
