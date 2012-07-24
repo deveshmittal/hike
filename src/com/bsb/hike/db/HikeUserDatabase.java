@@ -500,8 +500,19 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public boolean isBlocked(String msisdn)
 	{
-		/* TODO could make this only select one entry */
-		return getBlockedUsers().contains(msisdn);
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.BLOCK_TABLE, null, DBConstants.MSISDN + "=?", new String[]{msisdn}, null, null, null);
+			return c.moveToFirst();
+		}
+		finally
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+		}
 	}
 
 	public Set<String> getBlockedUsers()
@@ -605,23 +616,5 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			extraInfo.close();
 			mDb.endTransaction();
 		}
-	}
-	
-	public boolean isOnBlockedList(String msisdn)
-	{
-		Cursor c = null;
-		try
-		{
-			c = mDb.query(DBConstants.BLOCK_TABLE, null, DBConstants.MSISDN + "=?", new String[]{msisdn}, null, null, null);
-			return c.moveToFirst();
-		}
-		finally
-		{
-			if(c != null)
-			{
-				c.close();
-			}
-		}
-				
 	}
 }
