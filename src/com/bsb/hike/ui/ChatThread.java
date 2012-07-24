@@ -802,6 +802,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		findViewById(R.id.button_bar_2).setVisibility(View.GONE);
 
 		mComposeView.setFocusable(true);
+		mComposeView.setVisibility(View.VISIBLE);
 		mComposeView.requestFocus();
 		/* hide the number picker */
 		mInputNumberView.setVisibility(View.GONE);
@@ -1026,7 +1027,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
 				{
 					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn()));
+					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn(), false));
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
@@ -1785,7 +1786,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void groupChatDead()
 	{
-		this.mComposeView.setEnabled(false);
+		this.mComposeView.setVisibility(View.INVISIBLE);
 		this.titleIconView.setEnabled(false);
+		findViewById(R.id.emo_btn).setEnabled(false);
 	}
 }

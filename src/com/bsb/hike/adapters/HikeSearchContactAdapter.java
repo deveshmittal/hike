@@ -13,6 +13,7 @@ import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -46,6 +48,8 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	private boolean hasPrefillText;
 	private Button topBarBtn;
 	private String groupId;
+	private int numContactsSelected = 0;
+	private int numSMSContactsSelected = 0;
 
 	public HikeSearchContactAdapter(
 			Activity context, List<ContactInfo> contactList, 
@@ -133,7 +137,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 				currentSelectionSet.addAll(currentSelectionsInTextBox);
 				if(!TextUtils.isEmpty(groupId))
 				{
-					currentSelectionSet.addAll(HikeConversationsDatabase.getInstance().getGroupParticipants(groupId).keySet());
+					currentSelectionSet.addAll(HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, true).keySet());
 				}
 
 				List<ContactInfo> filteredContacts = new ArrayList<ContactInfo>();
@@ -153,12 +157,17 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 						}
 					});
 				}
+				Set<String> selectedSMSContacts = new HashSet<String>();
 				for (ContactInfo info : HikeSearchContactAdapter.this.completeList)
 				{
 					if(!currentSelectionSet.isEmpty())
 					{
 						if(currentSelectionSet.contains(info.getMsisdn()))
 						{
+							if(!info.isOnhike())
+							{
+								selectedSMSContacts.add(info.getMsisdn());
+							}
 							continue;
 						}
 					}
@@ -169,11 +178,17 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 				}
 				results.count = filteredContacts.size();
 				results.values = filteredContacts;
+
+				numContactsSelected = currentSelectionSet.size();
+				numSMSContactsSelected = selectedSMSContacts.size();
 			}
 			else
 			{
 				results.count = HikeSearchContactAdapter.this.completeList.size();
 				results.values = HikeSearchContactAdapter.this.completeList;
+
+				numContactsSelected = 0;
+				numSMSContactsSelected = 0;
 			}
 			return results;
 		}
@@ -195,6 +210,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) 
 	{
+		
 		if (!isGroupChat) 
 		{
 			ContactInfo contactInfo = (ContactInfo) view.getTag();
@@ -206,6 +222,21 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		else
 		{
 			ContactInfo contactInfo = (ContactInfo) view.getTag();
+			/*
+			 * Checking if the number of participants has crossed the set limit.
+			 * We have two limits - SMS contacts and total contacts.
+			 */
+			if (numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP || 
+					(numSMSContactsSelected >= HikeConstants.MAX_SMS_CONTACTS_IN_GROUP && !contactInfo.isOnhike()))
+			{
+				Toast toast = Toast.makeText(
+						getContext(), 
+						((numContactsSelected < HikeConstants.MAX_CONTACTS_IN_GROUP) ? R.string.max_sms : R.string.max_contact), 
+						Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.TOP, 0, (int) (50 * Utils.densityMultiplier));
+				toast.show();
+				return;
+			}
 			String currentText = inputNumber.getText().toString();
 			int insertIndex = currentText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? currentText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2 : 0;
 

@@ -919,11 +919,14 @@ public class SmileyParser
 	 */
 	public void addSmiley(EditText composeBox, int whichEmoticon)
 	{
+		int cursorStart = composeBox.getSelectionStart();
+		int selectionAfterInsert = cursorStart + mSmileyTexts[whichEmoticon].length();
+
 		Editable text = composeBox.getText();
-		text.append(mSmileyTexts[whichEmoticon]);
+		text.insert(cursorStart, mSmileyTexts[whichEmoticon]);
 
 		composeBox.setText(addSmileySpans(text, false));
-		composeBox.setSelection(composeBox.length());
+		composeBox.setSelection(selectionAfterInsert);
 	}
 
 	/**

@@ -273,6 +273,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		participantList.remove(userInfo.getContactInfo().getMsisdn());
 
 		findViewById(R.id.block_owner).setVisibility(shouldShowBlockButton ? View.VISIBLE : View.INVISIBLE);
+		findViewById(R.id.block_owner).setSelected(HikeUserDatabase.getInstance().isBlocked(groupOwner) ? true : false);
+
 		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
 
 		((CustomLinearLayout)findViewById(R.id.group_parent_layout)).setOnSoftKeyboardListener(this);

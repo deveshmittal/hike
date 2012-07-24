@@ -188,7 +188,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				Log.d("SignupTask", "NUMBER RECEIVED: "+number);
 				/* register broadcast receiver to get the actual PIN code, and pass it to us */
 				IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-				intentFilter.setPriority(99);
+				intentFilter.setPriority(999);
 				receiver = new SMSReceiver();
 				
 				this.context.getApplicationContext().registerReceiver(receiver, new IntentFilter(intentFilter));
