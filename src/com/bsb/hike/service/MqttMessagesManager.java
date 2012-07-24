@@ -276,7 +276,7 @@ public class MqttMessagesManager {
 
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
 		this.pubSub.publish(convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED ?
-				HikePubSub.PARTICIPANT_JOINED_GROUP : convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED ? 
+				HikePubSub.PARTICIPANT_JOINED_GROUP : convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT ? 
 						HikePubSub.PARTICIPANT_LEFT_GROUP : HikePubSub.GROUP_END, jsonObj);
 	}
 }
