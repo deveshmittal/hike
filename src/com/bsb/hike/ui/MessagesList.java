@@ -234,6 +234,12 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		mAdapter.setNotifyOnChange(false);
 		mConversationsView.setAdapter(mAdapter);
 
+		if(getIntent().hasExtra(HikeConstants.Extras.GROUP_LEFT))
+		{
+			Log.d(getClass().getSimpleName(), "LEAVING GROUP FROM ONCREATE");
+			leaveGroup(mConversationsByMSISDN.get(getIntent().getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
+		}
+
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
