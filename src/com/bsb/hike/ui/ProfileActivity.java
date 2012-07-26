@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -771,6 +772,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 						convMessage.serialize());
 			}
 		}
+		Toast toast = Toast.makeText(ProfileActivity.this, R.string.invite_sent, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.BOTTOM, 0, 0);
+		toast.show();
 	}
 
 	public void onAddNewParticipantsClicked(View v)
