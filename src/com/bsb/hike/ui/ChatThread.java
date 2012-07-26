@@ -506,6 +506,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			MenuItem menuItem = menu.findItem(R.id.block_menu);
 			menuItem.setTitle(R.string.leave_group);
+			menuItem.setIcon(R.drawable.ic_group_leave);
 		}
 		return true;
 	}
