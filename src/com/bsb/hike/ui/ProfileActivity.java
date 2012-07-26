@@ -322,8 +322,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		mNameEdit.setText(nameTxt);
 		mEmailEdit.setText(emailTxt);
 
-		mNameEdit.setSelection(nameTxt.length());
-		mEmailEdit.setSelection(emailTxt.length());
+		mNameEdit.setSelection(nameTxt.length() == 0 ? 0 : nameTxt.length() - 1);
+		mEmailEdit.setSelection(emailTxt.length() == 0 ? 0 : emailTxt.length() - 1);
 
 		onEmoticonClick(mActivityState.genderType == 0 ? null : mActivityState.genderType == 1 ? gender.findViewById(R.id.guy) : gender.findViewById(R.id.girl));
 
@@ -934,7 +934,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	{
 		mNameDisplay.setVisibility(View.GONE);
 		mNameEdit.setVisibility(View.VISIBLE);
-		mNameEdit.setSelection(mNameDisplay.getText().length());
+		mNameEdit.setSelection(mNameDisplay.length() == 0 ? 0 : mNameDisplay.length() - 1);
 		mNameEdit.requestFocus();
 	}
 
