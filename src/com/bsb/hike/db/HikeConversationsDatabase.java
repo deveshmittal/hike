@@ -710,11 +710,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param groupId: The group ID of the group containing the participant
 	 * @param msisdn: The msisdn of the participant
 	 */
-	public void setParticipantLeft(String groupId, String msisdn)
+	public int setParticipantLeft(String groupId, String msisdn)
 	{
+		if(!doesConversationExist(groupId))
+		{
+			return 0;
+		}
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.HAS_LEFT, 1);
-		mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues, DBConstants.GROUP_ID + " = ? AND " + DBConstants.MSISDN + " = ? ", new String[] {groupId, msisdn});
+		return mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues, DBConstants.GROUP_ID + " = ? AND " + DBConstants.MSISDN + " = ? ", new String[] {groupId, msisdn});
 	}
 
 	/**
@@ -777,11 +781,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void setGroupName(String groupId, String groupname)
+	public int setGroupName(String groupId, String groupname)
 	{
+		if(!doesConversationExist(groupId))
+		{
+			return 0;
+		}
 		ContentValues values = new ContentValues(1);
 		values.put(DBConstants.GROUP_NAME, groupname);
-		mDb.update(DBConstants.GROUP_INFO_TABLE, values, DBConstants.GROUP_ID + " = ?", new String[] { groupId });
+		return mDb.update(DBConstants.GROUP_INFO_TABLE, values, DBConstants.GROUP_ID + " = ?", new String[] { groupId });
 	}
 
 	public String getParticipantName(String groupId, String msisdn)
@@ -796,10 +804,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return name;
 	}
 
-	public void setGroupDead(String groupId)
+	public int setGroupDead(String groupId)
 	{
+		if(!doesConversationExist(groupId))
+		{
+			return 0;
+		}
 		ContentValues values = new ContentValues(1);
 		values.put(DBConstants.GROUP_ALIVE, 0);
-		mDb.update(DBConstants.GROUP_INFO_TABLE, values, DBConstants.GROUP_ID + " = ?", new String[]{groupId});
+		return mDb.update(DBConstants.GROUP_INFO_TABLE, values, DBConstants.GROUP_ID + " = ?", new String[]{groupId});
 	}
 }
