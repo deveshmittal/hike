@@ -157,9 +157,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = accountPrefs.getString(HikeMessengerApp.TOKEN_SETTING, null);
-		// TODO this is being called everytime this activity is created. Way too often
-		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
-		app.connectToService();
 
 		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL, false))
 		{
@@ -168,6 +165,12 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			finish();
 			return;
 		}
+
+		// TODO this is being called everytime this activity is created. Way too often
+		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
+		app.connectToService();
+
+
 		setContentView(R.layout.main);
 
 		Utils.setDensityMultiplier(MessagesList.this);
