@@ -92,4 +92,9 @@
 	<string name="max_sms">You can only have 5 SMS contacts in a group.</string>
 	<string name="max_contact">You can only have 10 contacts in a group.</string>
 	<string name="invite_sent">Invite sent.</string>
+	<string name="free_hike_sms">Free Hike SMS</string>
+	<string name="valid_till">Valid till %1$s</string>
+	<string name="sms_renew">Your free hike SMS renews on the 1st of every month.</string>
+	<string name="invite_friend_free_sms">Get 50 free hike SMS for every friend you invite to hike.</string>
+	<string name="group_chat_free">Group chat is free till 30th Sept.\nCredits don\'t apply.</string>
 </resources>

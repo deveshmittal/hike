@@ -661,6 +661,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
+		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
+		View btnBar = findViewById(R.id.button_bar);
+		titleIconView.setVisibility(View.GONE);
+		btnBar.setVisibility(View.GONE);
+
 		shouldScrollToBottom = true;
 		String prevContactNumber = null;
 		/* prevent any callbacks from previous instances of this activity from being fired now */
@@ -1546,6 +1551,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 //						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
 				Intent intent = getIntent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 				intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, this.mConversation.getMsisdn());
 				startActivity(intent);
