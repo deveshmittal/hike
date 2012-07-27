@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
@@ -23,6 +25,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -182,6 +185,11 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		mConversationsView = (ListView) findViewById(R.id.conversations);
 
+		if(getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER, false))
+		{
+			sendDeviceDetails();
+		}
+
 		View view = findViewById(R.id.title_hikeicon);
 		view.setVisibility(View.VISIBLE);
 
@@ -255,6 +263,24 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
+	}
+
+	private void sendDeviceDetails() 
+	{
+		// We're adding this delay to ensure that the service is alive before sending the message
+		(new Handler()).postDelayed(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				JSONObject obj = Utils.getDeviceDetails(MessagesList.this);
+				if (obj != null) 
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+				}
+				Utils.requestAccountInfo();
+			}
+		}, 10 * 1000);
 	}
 
 	@Override

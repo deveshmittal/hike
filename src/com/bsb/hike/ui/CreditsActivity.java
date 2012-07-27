@@ -39,24 +39,8 @@ public class CreditsActivity extends Activity implements Listener
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
-		// TODO this is being called everytime this activity is created. Way too often
-		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
-		app.connectToService();
-
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
-
-		firstTimeUser = getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER, false);
-		if(firstTimeUser)
-		{
-			Button mFeedbackButton = (Button) findViewById(R.id.title_icon);
-			View mButtonBar = (View) findViewById(R.id.button_bar_2);
-
-			mFeedbackButton.setText(R.string.done);
-			mFeedbackButton.setVisibility(View.VISIBLE);
-			mButtonBar.setVisibility(View.VISIBLE);
-			sendDeviceDetails();
-		}
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Editor editor = settings.edit();
@@ -117,25 +101,6 @@ public class CreditsActivity extends Activity implements Listener
 		});
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.INVITEE_NUM_CHANGED, this);
-	}
-
-	private void sendDeviceDetails() 
-	{
-		// We're adding this delay to ensure that the service is alive before sending the message
-		(new Handler()).postDelayed(new Runnable() 
-		{
-			@Override
-			public void run() 
-			{
-				JSONObject obj = Utils.getDeviceDetails(CreditsActivity.this);
-				if (obj != null) 
-				{
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
-				}
-				Utils.requestAccountInfo();
-			}
-		}, 10 * 1000);
 	}
 
 	@Override
