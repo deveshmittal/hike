@@ -127,7 +127,7 @@ public class MqttMessagesManager {
 
 			this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList());
 
-			if (!this.convDb.doesConversationExist(groupConversation)) 
+			if (!this.convDb.doesConversationExist(groupConversation.getMsisdn())) 
 			{
 				Log.d(getClass().getSimpleName(), "The group conversation does not exists");
 				groupConversation =(GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());

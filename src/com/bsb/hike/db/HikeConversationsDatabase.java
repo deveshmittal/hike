@@ -764,9 +764,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return groupName;
 	}
 
-	public boolean doesConversationExist(Conversation conversation)
+	public boolean doesConversationExist(String msisdn)
 	{
-		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {DBConstants.MSISDN}, DBConstants.MSISDN + " = ? ", new String[] {conversation.getMsisdn()}, null, null, null);
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {DBConstants.MSISDN}, DBConstants.MSISDN + " = ? ", new String[] {msisdn}, null, null, null);
 		try
 		{
 			return c.moveToFirst();
