@@ -2,7 +2,6 @@ package com.bsb.hike.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -145,12 +144,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 				@Override
 				public void run() 
 				{
-					Intent i = new Intent(SignupActivity.this, CreditsActivity.class);
-					i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
+					Intent i = new Intent(SignupActivity.this, Tutorial.class);
 					startActivity(i);
-					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-					editor.putBoolean(HikeMessengerApp.SHOW_CREDIT_SCREEN, false);
-					editor.commit();
 					finish();
 				}
 			}, 2500);

@@ -115,6 +115,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String CONTACT_EXTRA_INFO_SYNCED = "contactExtraInfoSynced";
 
+	public static final String SHOWN_TUTORIAL = "showTutorial";
+
 	public static final String HOST = "host";
 
 	private static HikePubSub mPubSubInstance;
