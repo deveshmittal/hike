@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
@@ -23,6 +24,14 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
+		/*
+		 * The user doesn't want us pulling in his SMS.
+		 */
+		if(!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SMS_PREF, true))
+		{
+			return;
+		}
+
 		if (mDb == null)
 		{
 			mDb = HikeUserDatabase.getInstance();

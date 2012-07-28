@@ -36,6 +36,7 @@ public class HikeConstants
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
+	public static final String SMS_PREF = "smsPref";
 	public static final String HIKEBOT = "TD-HIKE";
 	
 	public static final String DONE = "Done";
