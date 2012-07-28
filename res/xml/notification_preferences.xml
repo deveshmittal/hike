@@ -19,4 +19,13 @@
         android:title="Sound"
         android:widgetLayout="@layout/checkbox_widget" />
 
+	<com.bsb.hike.view.IconCheckBoxPreference
+        icon="preference_sms"
+        android:defaultValue="true"
+        android:key="smsPref"
+        android:layout="@layout/icon_preference"
+        android:summary="All SMS received will be shown in hike*"
+        android:title="Default SMS client"
+        android:widgetLayout="@layout/checkbox_widget" />    
+
 </PreferenceScreen>
