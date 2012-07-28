@@ -139,6 +139,8 @@ public class HikeConstants
 		public static final String IS_DELETING_ACCOUNT = "isDeletingAccount";
 		public static final String SMS_MESSAGE = "incomingSMSMessage";
 		public static final String GROUP_LEFT = "groupLeft";
+		public static final String ALERT_CANCELLED = "alertCancelled";
+		public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
 	}
 
 	public static final class LogEvent

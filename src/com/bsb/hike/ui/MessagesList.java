@@ -92,6 +92,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	private boolean isToolTipShowing;
 
+	private boolean wasAlertCancelled = false;
+
+	private boolean deviceDetailsSent = false;
+
 	@Override
 	protected void onPause()
 	{
@@ -180,6 +184,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		Utils.setDensityMultiplier(MessagesList.this);
 
 		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
+		wasAlertCancelled = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
+		deviceDetailsSent = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
 
 		int updateTypeAvailable = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 		updateApp(updateTypeAvailable);
@@ -188,8 +194,14 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		if(getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER, false))
 		{
-			sendDeviceDetails();
-			showSMSNotificationAlert();
+			if(!deviceDetailsSent)
+			{
+				sendDeviceDetails();
+			}
+			if(!wasAlertCancelled)
+			{
+				showSMSNotificationAlert();
+			}
 		}
 
 		View view = findViewById(R.id.title_hikeicon);
@@ -281,6 +293,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 				}
 				Utils.requestAccountInfo();
+				deviceDetailsSent = true;
 			}
 		}, 10 * 1000);
 	}
@@ -299,6 +312,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			public void onClick(View v) 
 			{
 				smsNotificationAlert.dismiss();
+				wasAlertCancelled = true;
 			}
 		});
 
@@ -308,6 +322,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mToolTip != null && mToolTip.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT, deviceDetailsSent);
+		outState.putBoolean(HikeConstants.Extras.ALERT_CANCELLED, wasAlertCancelled);
 		super.onSaveInstanceState(outState);
 	}
 
