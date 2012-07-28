@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
@@ -188,6 +189,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		if(getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER, false))
 		{
 			sendDeviceDetails();
+			showSMSNotificationAlert();
 		}
 
 		View view = findViewById(R.id.title_hikeicon);
@@ -281,6 +283,26 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				Utils.requestAccountInfo();
 			}
 		}, 10 * 1000);
+	}
+
+	private void showSMSNotificationAlert()
+	{
+		final Dialog smsNotificationAlert = new Dialog(MessagesList.this, R.style.Theme_CustomDialog);
+		smsNotificationAlert.setContentView(R.layout.alert_box);
+
+		((TextView)smsNotificationAlert.findViewById(R.id.alert_title)).setText(R.string.sms);
+		((TextView)smsNotificationAlert.findViewById(R.id.alert_text)).setText(R.string.sms_alert_text);
+		Button okBtn = (Button) smsNotificationAlert.findViewById(R.id.alert_ok_btn);
+		okBtn.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				smsNotificationAlert.dismiss();
+			}
+		});
+
+		smsNotificationAlert.show();
 	}
 
 	@Override
