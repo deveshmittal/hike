@@ -71,7 +71,7 @@ public class GroupConversation extends Conversation {
 
 	public GroupParticipant getGroupParticipant(String msisdn)
 	{
-		return groupParticipantList.get(msisdn);
+		return groupParticipantList.containsKey(msisdn) ? groupParticipantList.get(msisdn) : new GroupParticipant(new ContactInfo(msisdn, msisdn, msisdn, msisdn));
 	}
 
 	public String getLabel()
