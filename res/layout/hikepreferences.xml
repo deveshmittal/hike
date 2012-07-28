@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/thatch_repeat">
+    android:background="@drawable/thatch_repeat" >
 
     <include
         android:id="@+id/top_panel_ref"
@@ -24,8 +24,24 @@
         android:fadingEdge="none" />
 
     <View
+        android:id="@+id/dropshadow"
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:layout_below="@android:id/list"
         android:background="@drawable/dropshadow_top" />
+
+    <TextView
+		android:id="@+id/sms_disclaimer"        
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dropshadow"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="@string/sms_disclaimer"
+        android:textColor="@color/subtext"
+        android:textSize="11sp" />
+
 </RelativeLayout>
