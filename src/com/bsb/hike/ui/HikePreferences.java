@@ -54,23 +54,17 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 			setBlockingTask((ActivityCallableTask) retained);
 			mTask.setActivity(this);
 		}
-		
 
-		Preference blockPreference = getPreferenceScreen().findPreference(getString(R.string.block_key));
-		if (blockPreference != null)
+		Preference deletePreference = getPreferenceScreen().findPreference(getString(R.string.delete_key));
+		if(deletePreference != null)
 		{
 			findViewById(R.id.sms_disclaimer).setVisibility(View.GONE);
 			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.PRIVACY_SCREEN);
-			blockPreference.setOnPreferenceClickListener(this);
+			deletePreference.setOnPreferenceClickListener(this);
 		}
 		else
 		{
 			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.NOTIFICATION_SCREEN);
-		}
-		Preference deletePreference = getPreferenceScreen().findPreference(getString(R.string.delete_key));
-		if(deletePreference != null)
-		{
-			deletePreference.setOnPreferenceClickListener(this);
 		}
 		Preference unlinkPreference = getPreferenceScreen().findPreference(getString(R.string.unlink_key));
 		if (unlinkPreference != null)
