@@ -192,7 +192,7 @@ public class MqttMessagesManager {
 				msgID = -1;
 			}
 			Log.d(getClass().getSimpleName(),"Delivery report received for msgid : "+msgID +"	;	REPORT : DELIVERED");
-			updateDB(msgID,ConvMessage.State.SENT_DELIVERED.ordinal());
+			updateDB(msgID, ConvMessage.State.SENT_DELIVERED);
 
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
 		}
@@ -211,7 +211,7 @@ public class MqttMessagesManager {
 				ids[i] = msgIds.optLong(i);
 			}
 			Log.d(getClass().getSimpleName(),"Delivery report received : " +"	;	REPORT : DELIVERED READ");
-			updateDbBatch(ids,ConvMessage.State.SENT_DELIVERED_READ.ordinal());
+			updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ);
 
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);	
 		}
@@ -261,16 +261,16 @@ public class MqttMessagesManager {
 		}
 	}
 
-	private void updateDbBatch(long[] ids, int status)
+	private void updateDbBatch(long[] ids, ConvMessage.State status)
 	{
-		convDb.updateBatch(ids, ConvMessage.State.SENT_DELIVERED_READ.ordinal());
+		convDb.updateBatch(ids, status.ordinal());
 	}
 
-	private void updateDB(Object object, int status)
+	private void updateDB(Object object, ConvMessage.State status)
 	{
 		long msgID = (Long)object;
 		/* TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations */
-		convDb.updateMsgStatus(msgID,status);
+		convDb.updateMsgStatus(msgID, status.ordinal());
 	}
 
 	private void saveGroupStatusMsg(JSONObject jsonObj) throws JSONException
