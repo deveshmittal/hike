@@ -814,4 +814,40 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		values.put(DBConstants.GROUP_ALIVE, 0);
 		return mDb.update(DBConstants.GROUP_INFO_TABLE, values, DBConstants.GROUP_ID + " = ?", new String[]{groupId});
 	}
+
+	public long[] getUnreadMessageIds(long convId)
+	{
+		Cursor cursor = mDb.query(
+				DBConstants.MESSAGES_TABLE, 
+				new String[] {DBConstants.MESSAGE_ID}, 
+				DBConstants.MSG_STATUS + " NOT IN " + 
+				"(" + ConvMessage.State.SENT_DELIVERED_READ.ordinal() + ", " 
+						+ ConvMessage.State.RECEIVED_READ.ordinal() + ", " 
+				+ ConvMessage.State.RECEIVED_UNREAD.ordinal() +	", " 
+						+ ConvMessage.State.SENT_UNCONFIRMED.ordinal() + ")" 
+				+ " AND " 
+						+ DBConstants.CONV_ID + " =?", 
+				new String[] {convId + ""}, null, null, null);
+		try
+		{
+			Log.d(getClass().getSimpleName(), "Number of unread messages for conversation " + convId + " = " + cursor.getCount());
+			if(!cursor.moveToFirst())
+			{
+				return null;
+			}
+			long[] ids = new long[cursor.getCount()];
+			int i = 0;
+			int idIdx = cursor.getColumnIndex(DBConstants.MESSAGE_ID);
+			do
+			{
+				ids[i++] = cursor.getLong(idIdx);
+				Log.d(getClass().getSimpleName(), "Inserting id: " + ids[i - 1]);
+			} while(cursor.moveToNext());
+			return ids;
+		}
+		finally
+		{
+			cursor.close();
+		}
+	}
 }
