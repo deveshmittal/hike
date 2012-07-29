@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -322,8 +323,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		mNameEdit.setText(nameTxt);
 		mEmailEdit.setText(emailTxt);
 
-		mNameEdit.setSelection(nameTxt.length());
-		mEmailEdit.setSelection(emailTxt.length());
+		mNameEdit.setSelection(nameTxt.length() == 0 ? 0 : nameTxt.length() - 1);
+		mEmailEdit.setSelection(emailTxt.length() == 0 ? 0 : emailTxt.length() - 1);
 
 		onEmoticonClick(mActivityState.genderType == 0 ? null : mActivityState.genderType == 1 ? gender.findViewById(R.id.guy) : gender.findViewById(R.id.girl));
 
@@ -771,6 +772,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 						convMessage.serialize());
 			}
 		}
+		Toast toast = Toast.makeText(ProfileActivity.this, R.string.invite_sent, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.BOTTOM, 0, 0);
+		toast.show();
 	}
 
 	public void onAddNewParticipantsClicked(View v)
@@ -934,7 +938,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	{
 		mNameDisplay.setVisibility(View.GONE);
 		mNameEdit.setVisibility(View.VISIBLE);
-		mNameEdit.setSelection(mNameDisplay.getText().length());
+		mNameEdit.setSelection(mNameDisplay.length() == 0 ? 0 : mNameDisplay.length() - 1);
 		mNameEdit.requestFocus();
 	}
 

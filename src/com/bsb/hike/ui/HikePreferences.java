@@ -11,6 +11,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -58,6 +59,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		Preference blockPreference = getPreferenceScreen().findPreference(getString(R.string.block_key));
 		if (blockPreference != null)
 		{
+			findViewById(R.id.sms_disclaimer).setVisibility(View.GONE);
 			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.PRIVACY_SCREEN);
 			blockPreference.setOnPreferenceClickListener(this);
 		}

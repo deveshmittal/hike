@@ -55,11 +55,15 @@ import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils
 {
-	public static final String HOST = "im.hike.in";
-	
-	private static final int PORT = 8080;
+	public static final String DEFAULT_HOST = "im.hike.in";
 
-	public static final String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static final String STAGING_HOST = "staging.im.hike.in";
+
+	public static String HOST = DEFAULT_HOST;
+	
+	public static final int PORT = 8080;
+
+	public static String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 

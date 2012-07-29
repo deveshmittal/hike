@@ -127,7 +127,7 @@ public class MqttMessagesManager {
 
 			this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList());
 
-			if (!this.convDb.doesConversationExist(groupConversation)) 
+			if (!this.convDb.doesConversationExist(groupConversation.getMsisdn())) 
 			{
 				Log.d(getClass().getSimpleName(), "The group conversation does not exists");
 				groupConversation =(GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
@@ -138,22 +138,28 @@ public class MqttMessagesManager {
 		{
 			String groupId = jsonObj.optString(HikeConstants.TO);
 			String msisdn = jsonObj.optString(HikeConstants.FROM);
-			this.convDb.setParticipantLeft(groupId, msisdn);
-			saveGroupStatusMsg(jsonObj);
+			if(this.convDb.setParticipantLeft(groupId, msisdn) > 0)
+			{
+				saveGroupStatusMsg(jsonObj);
+			}
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_NAME.equals(type)) //Group chat name change
 		{
 			String groupname = jsonObj.optString(HikeConstants.DATA);
 			String groupId = jsonObj.optString(HikeConstants.TO);
-			this.convDb.setGroupName(groupId, groupname);
 
-			this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
+			if(this.convDb.setGroupName(groupId, groupname) > 0)
+			{
+				this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
+			}
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type)) //Group chat end
 		{
 			String groupId = jsonObj.optString(HikeConstants.TO);
-			this.convDb.setGroupDead(groupId);
-			saveGroupStatusMsg(jsonObj);
+			if(this.convDb.setGroupDead(groupId) > 0)
+			{
+				saveGroupStatusMsg(jsonObj);
+			}
 		}
 		else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) //Message received from server
 		{

@@ -3,6 +3,7 @@ package com.bsb.hike.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +23,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
+import com.bsb.hike.utils.AccountUtils;
 
 public class WelcomeActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate
 {
@@ -103,6 +105,28 @@ public class WelcomeActivity extends Activity implements SignupTask.OnSignupTask
 
 		errorImage.setImageDrawable(ad);
 		ad.start();
+	}
+
+	public void onHikeIconClicked(View v)
+	{
+		changeHost();
+	}
+
+	private void changeHost()
+	{
+		Log.d(getClass().getSimpleName(), "Hike Icon CLicked");
+
+		SharedPreferences sharedPreferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+		String currentHost = sharedPreferences.getString(HikeMessengerApp.HOST, AccountUtils.DEFAULT_HOST);
+
+		AccountUtils.HOST =  AccountUtils.DEFAULT_HOST.equals(currentHost) ? AccountUtils.STAGING_HOST : AccountUtils.DEFAULT_HOST;
+		AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
+
+		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+		editor.putString(HikeMessengerApp.HOST, AccountUtils.HOST);
+		editor.commit();
+		Log.d(getClass().getSimpleName(), "Host Changed to " + AccountUtils.HOST);
+		Log.d(getClass().getSimpleName(), "Base is " + AccountUtils.BASE);
 	}
 
 	private void startAnimations()

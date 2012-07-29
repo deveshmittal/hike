@@ -115,6 +115,10 @@ public class HikeMessengerApp extends Application
 
 	public static final String CONTACT_EXTRA_INFO_SYNCED = "contactExtraInfoSynced";
 
+	public static final String SHOWN_TUTORIAL = "showTutorial";
+
+	public static final String HOST = "host";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;
@@ -278,6 +282,9 @@ public class HikeMessengerApp extends Application
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+
+		AccountUtils.HOST = settings.getString(HikeMessengerApp.HOST, AccountUtils.DEFAULT_HOST);
+		AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
 
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();

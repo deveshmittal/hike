@@ -248,7 +248,7 @@ public class HikeService extends Service
 			getContentResolver().notifyChange(ContactsContract.Contacts.CONTENT_URI, null);
 		}
 
-		if(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
+		if(!getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.CONTACT_EXTRA_INFO_SYNCED, false))
 		{
 			Log.d(getClass().getSimpleName(), "SYNCING");
 			SyncContactExtraInfo syncContactExtraInfo = new SyncContactExtraInfo();

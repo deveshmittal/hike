@@ -74,7 +74,8 @@
 		style="@style/WelcomeHikeMessage"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/hike_welcome_image"/>
+        android:src="@drawable/hike_welcome_image"
+        android:onClick="onHikeIconClicked"/>
 
 	<include
 	    android:layout_below="@id/header_dropshadow"

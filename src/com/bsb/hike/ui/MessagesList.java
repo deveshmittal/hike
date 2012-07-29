@@ -9,8 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
@@ -23,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -56,7 +60,6 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.Utils;
 
 public class MessagesList extends Activity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
@@ -88,6 +91,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	private View updateToolTipParent;
 
 	private boolean isToolTipShowing;
+
+	private boolean wasAlertCancelled = false;
+
+	private boolean deviceDetailsSent = false;
 
 	@Override
 	protected void onPause()
@@ -158,31 +165,44 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = accountPrefs.getString(HikeMessengerApp.TOKEN_SETTING, null);
+
+		if(!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL, false))
+		{
+			Intent i = new Intent(MessagesList.this, Tutorial.class);
+			startActivity(i);
+			finish();
+			return;
+		}
+
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
 
-		if(accountPrefs.getBoolean(HikeMessengerApp.SHOW_CREDIT_SCREEN, true))
-		{
-			Intent i = new Intent(MessagesList.this, CreditsActivity.class);
-			i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
-			startActivity(i);
-			Editor editor = accountPrefs.edit();
-			editor.putBoolean(HikeMessengerApp.SHOW_CREDIT_SCREEN, false);
-			editor.commit();
-			finish();
-			return;
-		}
+
 		setContentView(R.layout.main);
 
 		Utils.setDensityMultiplier(MessagesList.this);
 
 		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
+		wasAlertCancelled = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
+		deviceDetailsSent = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
 
 		int updateTypeAvailable = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 		updateApp(updateTypeAvailable);
 
 		mConversationsView = (ListView) findViewById(R.id.conversations);
+
+		if(getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER, false))
+		{
+			if(!deviceDetailsSent)
+			{
+				sendDeviceDetails();
+			}
+			if(!wasAlertCancelled)
+			{
+				showSMSNotificationAlert();
+			}
+		}
 
 		View view = findViewById(R.id.title_hikeicon);
 		view.setVisibility(View.VISIBLE);
@@ -234,6 +254,12 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		mAdapter.setNotifyOnChange(false);
 		mConversationsView.setAdapter(mAdapter);
 
+		if(getIntent().hasExtra(HikeConstants.Extras.GROUP_LEFT))
+		{
+			Log.d(getClass().getSimpleName(), "LEAVING GROUP FROM ONCREATE");
+			leaveGroup(mConversationsByMSISDN.get(getIntent().getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
+		}
+
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
@@ -253,9 +279,51 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		registerForContextMenu(mConversationsView);
 	}
 
+	private void sendDeviceDetails() 
+	{
+		// We're adding this delay to ensure that the service is alive before sending the message
+		(new Handler()).postDelayed(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				JSONObject obj = Utils.getDeviceDetails(MessagesList.this);
+				if (obj != null) 
+				{
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+				}
+				Utils.requestAccountInfo();
+				deviceDetailsSent = true;
+			}
+		}, 10 * 1000);
+	}
+
+	private void showSMSNotificationAlert()
+	{
+		final Dialog smsNotificationAlert = new Dialog(MessagesList.this, R.style.Theme_CustomDialog);
+		smsNotificationAlert.setContentView(R.layout.alert_box);
+
+		((TextView)smsNotificationAlert.findViewById(R.id.alert_title)).setText(R.string.sms);
+		((TextView)smsNotificationAlert.findViewById(R.id.alert_text)).setText(R.string.sms_alert_text);
+		Button okBtn = (Button) smsNotificationAlert.findViewById(R.id.alert_ok_btn);
+		okBtn.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				smsNotificationAlert.dismiss();
+				wasAlertCancelled = true;
+			}
+		});
+
+		smsNotificationAlert.show();
+	}
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mToolTip != null && mToolTip.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT, deviceDetailsSent);
+		outState.putBoolean(HikeConstants.Extras.ALERT_CANCELLED, wasAlertCancelled);
 		super.onSaveInstanceState(outState);
 	}
 

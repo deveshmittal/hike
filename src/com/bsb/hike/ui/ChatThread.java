@@ -506,6 +506,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			MenuItem menuItem = menu.findItem(R.id.block_menu);
 			menuItem.setTitle(R.string.leave_group);
+			menuItem.setIcon(R.drawable.ic_group_leave);
 		}
 		return true;
 	}
@@ -531,6 +532,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			else
 			{
 				HikeMessengerApp.getPubSub().publish(HikePubSub.GROUP_LEFT, mConversation.getMsisdn());
+				/*
+				 * Fix for when the user opens the app from a notification of the group and leaves the group,
+				 * the user would not leave the group.
+				 */
+				if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) 
+				{
+					Intent intent = new Intent(this, MessagesList.class);
+					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mConversation.getMsisdn());
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					startActivity(intent);
+				}
 				finish();
 				overridePendingTransition(R.anim.slide_in_left_noalpha,
 						R.anim.slide_out_right_noalpha);
@@ -649,6 +661,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
+		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
+		View btnBar = findViewById(R.id.button_bar);
+		titleIconView.setVisibility(View.GONE);
+		btnBar.setVisibility(View.GONE);
+
 		shouldScrollToBottom = true;
 		String prevContactNumber = null;
 		/* prevent any callbacks from previous instances of this activity from being fired now */
@@ -1534,6 +1551,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 //						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
 				Intent intent = getIntent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 				intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, this.mConversation.getMsisdn());
 				startActivity(intent);
@@ -1625,7 +1643,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
 		View btnBar = findViewById(R.id.button_bar);
 		titleIconView.setVisibility(mConversation.isOnhike() && !(mConversation instanceof GroupConversation) ? View.GONE : View.VISIBLE);
-		titleIconView.setImageResource(R.drawable.ic_invite_top);
+		titleIconView.setImageResource(mConversation instanceof GroupConversation ? R.drawable.ic_i : R.drawable.ic_invite_top);
 		btnBar.setVisibility(mConversation.isOnhike() && !(mConversation instanceof GroupConversation) ? View.GONE : View.VISIBLE);
 
  		if(!prefs.getBoolean((mConversation instanceof GroupConversation) ? 

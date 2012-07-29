@@ -36,6 +36,7 @@ public class HikeConstants
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
+	public static final String SMS_PREF = "smsPref";
 	public static final String HIKEBOT = "TD-HIKE";
 	
 	public static final String DONE = "Done";
@@ -62,7 +63,7 @@ public class HikeConstants
 	public static final long CONTACT_UPDATE_TIMEOUT = 10*1000;
 
 	/* how often to ping the server */
-	public static final short KEEP_ALIVE = 10 * 60; /* 10 minutes */
+	public static final short KEEP_ALIVE = 2 * 60; /* 10 minutes */
 
 	/* how often to ping after a failure */
 	public static final int RECONNECT_TIME = 10; /* 10 seconds */
@@ -137,6 +138,9 @@ public class HikeConstants
 		public static final String FIRST_TIME_USER = "firstTimeUser";
 		public static final String IS_DELETING_ACCOUNT = "isDeletingAccount";
 		public static final String SMS_MESSAGE = "incomingSMSMessage";
+		public static final String GROUP_LEFT = "groupLeft";
+		public static final String ALERT_CANCELLED = "alertCancelled";
+		public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
 	}
 
 	public static final class LogEvent
