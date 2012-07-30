@@ -44,7 +44,19 @@ import com.bsb.hike.utils.Utils;
  */
 public class HikeMqttManager implements Listener
 {
-	public class DisconnectCB implements Callback<Void>
+	private final class RetryFailedMessages implements Runnable {
+        public void run(){
+        	final List<HikePacket> packets = persistence.getAllSentMessages();
+            HikeMqttManager.this.haveUnsentMessages = false;
+        	for (HikePacket hikePacket : packets)
+        	{
+        		Log.d("HikeMqttManager", "resending message " + new String(hikePacket.getMessage()));
+        		send(hikePacket, 1);
+        	}
+        }
+    }
+
+    public class DisconnectCB implements Callback<Void>
 	{
 
 		private boolean reconnect;
@@ -120,6 +132,11 @@ public class HikeMqttManager implements Listener
 			{
 				mHikeService.sendMessageStatus(packet.getMsgId(), true);
 			}
+
+			if (HikeMqttManager.this.haveUnsentMessages)
+			{
+			    handler.post(new RetryFailedMessages());
+			}
 		}
 
 		@Override
@@ -137,6 +154,7 @@ public class HikeMqttManager implements Listener
 			ping();
 			try
 			{
+			    HikeMqttManager.this.haveUnsentMessages = true;
 				persistence.addSentMessage(packet);
 			}
 			catch (MqttPersistenceException e)
@@ -216,6 +234,8 @@ public class HikeMqttManager implements Listener
 	private SharedPreferences settings;
 
 	private MqttMessagesManager mqttMessageManager;
+
+    private boolean haveUnsentMessages;
 
 	public HikeMqttManager(HikeService hikeService, Handler handler)
 	{
@@ -620,16 +640,7 @@ public class HikeMqttManager implements Listener
 		subscribeToTopics(getTopics());
 
 		/* Accesses the persistence object from the main handler thread */
-		handler.post(new Runnable() {
-			public void run(){
-				final List<HikePacket> packets = persistence.getAllSentMessages();
-				for (HikePacket hikePacket : packets)
-				{
-					Log.d("HikeMqttManager", "resending message " + new String(hikePacket.getMessage()));
-					send(hikePacket, 1);
-				}
-			}
-		});
+		handler.post(new RetryFailedMessages());
 	}
 
 	@Override
