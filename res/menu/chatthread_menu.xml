@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:id="@+id/add_contact_menu"
 	    android:title="@string/add_to_contacts"
-	    android:icon="@drawable/ic_invite"
+	    android:icon="@drawable/ic_add_to_contacts"
 	    android:visible="false"/>    
     <item
         android:id="@+id/block_menu"
