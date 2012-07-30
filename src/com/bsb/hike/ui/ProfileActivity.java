@@ -57,10 +57,8 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.CustomLinearLayout;
-import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
-public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener, OnSoftKeyboardListener
+public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
 {
 	/* dialog IDs */
 	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
@@ -278,8 +276,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
 
-		((CustomLinearLayout)findViewById(R.id.group_parent_layout)).setOnSoftKeyboardListener(this);
-
 		nameTxt = groupConversation.getLabel();
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(groupConversation.getMsisdn());
 
@@ -323,8 +319,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		mNameEdit.setText(nameTxt);
 		mEmailEdit.setText(emailTxt);
 
-		mNameEdit.setSelection(nameTxt.length() == 0 ? 0 : nameTxt.length() - 1);
-		mEmailEdit.setSelection(emailTxt.length() == 0 ? 0 : emailTxt.length() - 1);
+		mNameEdit.setSelection(nameTxt.length());
+		mEmailEdit.setSelection(emailTxt.length());
 
 		onEmoticonClick(mActivityState.genderType == 0 ? null : mActivityState.genderType == 1 ? gender.findViewById(R.id.guy) : gender.findViewById(R.id.girl));
 
@@ -797,9 +793,13 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 	public void onEditGroupNameClicked(View v)
 	{
-		onShown();
 		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+		Log.d(getClass().getSimpleName(), "ONSHOWN");
+		mNameDisplay.setVisibility(View.GONE);
+		mNameEdit.setVisibility(View.VISIBLE);
+		mNameEdit.setSelection(mNameDisplay.length());
+		mNameEdit.requestFocus();
 	}
 
 	@Override
@@ -931,22 +931,5 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 				}
 			});
 		}
-	}
-
-	@Override
-	public void onShown() 
-	{
-		mNameDisplay.setVisibility(View.GONE);
-		mNameEdit.setVisibility(View.VISIBLE);
-		mNameEdit.setSelection(mNameDisplay.length() == 0 ? 0 : mNameDisplay.length() - 1);
-		mNameEdit.requestFocus();
-	}
-
-	@Override
-	public void onHidden() 
-	{
-		mNameDisplay.setVisibility(View.VISIBLE);
-		mNameEdit.setVisibility(View.GONE);
-		mNameDisplay.setText(mNameEdit.getText());
 	}
 }
