@@ -820,11 +820,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor cursor = mDb.query(
 				DBConstants.MESSAGES_TABLE, 
 				new String[] {DBConstants.MESSAGE_ID}, 
-				DBConstants.MSG_STATUS + " NOT IN " + 
-				"(" + ConvMessage.State.SENT_DELIVERED_READ.ordinal() + ", " 
-						+ ConvMessage.State.RECEIVED_READ.ordinal() + ", " 
-				+ ConvMessage.State.RECEIVED_UNREAD.ordinal() +	", " 
-						+ ConvMessage.State.SENT_UNCONFIRMED.ordinal() + ")" 
+				DBConstants.MSG_STATUS + " IN " + 
+				"(" + ConvMessage.State.SENT_CONFIRMED.ordinal() + ", " 
+						+ ConvMessage.State.SENT_DELIVERED.ordinal() + ")" 
 				+ " AND " 
 						+ DBConstants.CONV_ID + " =?", 
 				new String[] {convId + ""}, null, null, null);
