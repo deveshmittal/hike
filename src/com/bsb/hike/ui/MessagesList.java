@@ -27,6 +27,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -312,6 +313,11 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			public void onClick(View v) 
 			{
 				smsNotificationAlert.dismiss();
+
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(MessagesList.this).edit();
+				editor.putBoolean(HikeConstants.SMS_PREF, true);
+				editor.commit();
+
 				wasAlertCancelled = true;
 			}
 		});

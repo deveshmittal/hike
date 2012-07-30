@@ -98,7 +98,7 @@
 	<string name="invite_friend_free_sms">Get 50 free hike SMS for every friend you invite to hike.</string>
 	<string name="group_chat_free">Group chat is free till 30th Sept.\nCredits don\'t apply.</string>
 	<string name="sms_disclaimer">*SMSs that are received and shown in hike are\nstored locally and never uploaded to our servers.\n\nWe promise.</string>
-	<string name="sms_alert_text">All SMSs you receive will now be shown in hike. You can turn this feature off in Notifications.</string>
+	<string name="sms_alert_text">You can now receive all your SMSs in hike. Tap below to turn this feature on.</string>
 	<string name="sms">SMS</string>
-	<string name="ok">Ok</string>
+	<string name="turn_on">Turn On</string>
 </resources>

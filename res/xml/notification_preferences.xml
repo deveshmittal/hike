@@ -21,7 +21,7 @@
 
 	<com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_sms"
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="smsPref"
         android:layout="@layout/icon_preference"
         android:summary="All SMS received will be shown in hike*"
