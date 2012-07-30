@@ -261,7 +261,7 @@ public class HikeMqttManager implements Listener
 		settings = this.mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null) + ":" + HikeConstants.APP_API_VERSION;
 		Log.d("HikeMqttManager", "clientId is " + clientId);
 		return !TextUtils.isEmpty(topic) && !TextUtils.isEmpty(clientId) && !TextUtils.isEmpty(password);
 	}
