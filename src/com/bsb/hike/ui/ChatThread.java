@@ -549,13 +549,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			 * Fix for when the user opens the app from a notification of the group and leaves the group,
 			 * the user would not leave the group.
 			 */
-			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) 
-			{
-				Intent intent = new Intent(this, MessagesList.class);
-				intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mConversation.getMsisdn());
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(intent);
-			}
+			Intent intent = new Intent(this, MessagesList.class);
+			intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mConversation.getMsisdn());
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 			finish();
 			overridePendingTransition(R.anim.slide_in_left_noalpha,
 					R.anim.slide_out_right_noalpha);
@@ -820,6 +817,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void createConversation()
 	{
+		// This prevent the activity from simply finishing and opens up the last screen.
+		getIntent().removeExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+
 		findViewById(R.id.title_icon).setVisibility(View.GONE);
 		findViewById(R.id.button_bar_2).setVisibility(View.GONE);
 
