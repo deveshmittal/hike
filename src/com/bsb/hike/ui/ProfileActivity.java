@@ -88,7 +88,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private String httpRequestURL;
 	private String groupOwner;
 
-	private boolean shouldShowBlockButton = true;
 	private boolean shouldShowInviteAllButton = false;
 	private TextView mNameDisplay;
 	private ViewGroup participantNameContainer;
@@ -246,7 +245,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			if(participant.getKey().equals(groupOwner))
 			{
 				groupOwnerTextView.setText(participant.getValue().getContactInfo().getFirstName());
-				shouldShowBlockButton = !groupOwner.equals(userInfo.getContactInfo().getMsisdn());
 				continue;
 			}
 			if(!contactInfo.isOnhike())
@@ -270,9 +268,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			participantNameContainer.addView(participantNameItem);
 		}
 		participantList.remove(userInfo.getContactInfo().getMsisdn());
-
-		findViewById(R.id.block_owner).setVisibility(shouldShowBlockButton ? View.VISIBLE : View.INVISIBLE);
-		findViewById(R.id.block_owner).setSelected(HikeUserDatabase.getInstance().isBlocked(groupOwner) ? true : false);
 
 		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
 

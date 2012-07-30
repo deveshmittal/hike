@@ -101,4 +101,5 @@
 	<string name="sms_alert_text">You can now receive all your SMSs in hike. Tap below to turn this feature on.</string>
 	<string name="sms">SMS</string>
 	<string name="turn_on">Turn On</string>
+	<string name="block_owner">Block group owner</string>
 </resources>
