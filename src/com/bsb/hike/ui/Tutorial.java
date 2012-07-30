@@ -99,6 +99,7 @@ public class Tutorial extends Activity
 			((ImageView)tutorialPage.findViewById(R.id.info)).setImageResource(position == 0 ? R.drawable.hike_to_hike_info_txt : R.drawable.hike_to_sms_info_txt);
 			tutorialPage.findViewById(R.id.swipe_left).setVisibility(position == 0 ? View.VISIBLE : View.GONE);
 			tutorialPage.findViewById(R.id.btn_continue).setVisibility(position == 1 ? View.VISIBLE : View.GONE);
+			tutorialPage.findViewById(R.id.india_only).setVisibility(position == 1 ? View.VISIBLE : View.GONE);
 
 			((ViewPager) container).addView(tutorialPage);
 			return tutorialPage;
