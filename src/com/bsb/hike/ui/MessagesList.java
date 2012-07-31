@@ -324,6 +324,23 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			}
 		});
 
+		smsNotificationAlert.setOnCancelListener(new OnCancelListener() 
+		{
+			@Override
+			public void onCancel(DialogInterface dialog) 
+			{
+				wasAlertCancelled = true;
+			}
+		});
+		smsNotificationAlert.setOnDismissListener(new OnDismissListener() 
+		{
+			@Override
+			public void onDismiss(DialogInterface dialog) 
+			{
+				wasAlertCancelled = true;
+			}
+		});
+
 		smsNotificationAlert.show();
 	}
 
