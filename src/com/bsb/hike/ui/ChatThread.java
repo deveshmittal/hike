@@ -187,6 +187,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	
 	private ListView mContactSearchView;
 
+	private GroupParticipant myInfo;
+
 	@Override
 	protected void onPause()
 	{
@@ -478,14 +480,26 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public boolean onPrepareOptionsMenu(Menu menu)
 	{
 		super.onPrepareOptionsMenu(menu);
+
+		boolean amIGroupOwner = false;
+		if(mConversation instanceof GroupConversation)
+		{
+			amIGroupOwner = ((GroupConversation)mConversation).getGroupOwner().equals(myInfo.getContactInfo().getMsisdn());
+		}
 		/* don't show a menu item for unblock (since the overlay will be present */
 		MenuItem item = menu.findItem(R.id.block_menu);
-		item.setVisible(!mUserIsBlocked);
+		item.setTitle(mConversation instanceof GroupConversation ? R.string.block_owner : R.string.block_title);
+		item.setVisible(!mUserIsBlocked && !amIGroupOwner);
+
 		MenuItem item2 = menu.findItem(R.id.add_contact_menu);
 		item2.setVisible(mConversation!= null && 
 				TextUtils.isEmpty(mConversation.getContactName()) && 
 				!(mConversation instanceof GroupConversation) && 
 				!mUserIsBlocked);
+
+		MenuItem item3 = menu.findItem(R.id.leave_menu);
+		item3.setVisible((mConversation != null) && (mConversation instanceof GroupConversation) && !mUserIsBlocked);
+
 		return true;
 	}
 
@@ -502,12 +516,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.chatthread_menu, menu);
 
-		if ((mConversation instanceof GroupConversation)) 
-		{
-			MenuItem menuItem = menu.findItem(R.id.block_menu);
-			menuItem.setTitle(R.string.leave_group);
-			menuItem.setIcon(R.drawable.ic_group_leave);
-		}
 		return true;
 	}
 
@@ -522,32 +530,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		if (item.getItemId() == R.id.block_menu)
 		{
-			if (!(mConversation instanceof GroupConversation)) 
-			{
 				Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_BLOCK);
-				mPubSub.publish(HikePubSub.BLOCK_USER, mContactNumber);
+				mPubSub.publish(HikePubSub.BLOCK_USER, getMsisdnMainUser());
 				mUserIsBlocked = true;
 				showOverlay(true);
-			}
-			else
-			{
-				HikeMessengerApp.getPubSub().publish(HikePubSub.GROUP_LEFT, mConversation.getMsisdn());
-				/*
-				 * Fix for when the user opens the app from a notification of the group and leaves the group,
-				 * the user would not leave the group.
-				 */
-				if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) 
-				{
-					Intent intent = new Intent(this, MessagesList.class);
-					intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mConversation.getMsisdn());
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					startActivity(intent);
-				}
-				finish();
-				overridePendingTransition(R.anim.slide_in_left_noalpha,
-						R.anim.slide_out_right_noalpha);
-				
-			}
 		}
 		else if(item.getItemId() == R.id.add_contact_menu)
 		{
@@ -555,6 +541,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
 			i.putExtra(Insert.PHONE, mConversation.getMsisdn());
 			startActivity(i);
+		}
+		else if(item.getItemId() == R.id.leave_menu)
+		{
+			HikeMessengerApp.getPubSub().publish(HikePubSub.GROUP_LEFT, mConversation.getMsisdn());
+			/*
+			 * Fix for when the user opens the app from a notification of the group and leaves the group,
+			 * the user would not leave the group.
+			 */
+			Intent intent = new Intent(this, MessagesList.class);
+			intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mConversation.getMsisdn());
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+			finish();
+			overridePendingTransition(R.anim.slide_in_left_noalpha,
+					R.anim.slide_out_right_noalpha);
+			
 		}
 
 		return true;
@@ -565,7 +567,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* user clicked the unblock button in the chat-screen */
 		if (v.getId() != R.id.overlay_layout && blockOverlay) 
 		{
-			mPubSub.publish(HikePubSub.UNBLOCK_USER, mContactNumber);
+			mPubSub.publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
 			mUserIsBlocked = false;
 			mComposeView.setEnabled(true);
 			hideOverlay();
@@ -815,6 +817,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	 */
 	private void createConversation()
 	{
+		// This prevent the activity from simply finishing and opens up the last screen.
+		getIntent().removeExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+
 		findViewById(R.id.title_icon).setVisibility(View.GONE);
 		findViewById(R.id.button_bar_2).setVisibility(View.GONE);
 
@@ -849,7 +854,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mLabelView.setText(mLabel);
 
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		mUserIsBlocked = db.isBlocked(mContactNumber);
+		mUserIsBlocked = db.isBlocked(getMsisdnMainUser());
 		if (mUserIsBlocked)
 		{
 			showOverlay(true);
@@ -907,6 +912,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		/* clear any toast notifications */
 		NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		mgr.cancel((int) mConversation.getConvId());
+
+		if (mConversation instanceof GroupConversation) 
+		{
+			myInfo = new GroupParticipant(Utils.getUserContactInfo(prefs));
+		}
 	}
 
 	/*
@@ -1500,7 +1510,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		ImageView overlayImg = (ImageView) mOverlayLayout.findViewById(R.id.overlay_image);
 
 		mComposeView.setEnabled(false);
-		String label = mConversation.getLabel();
+		String label = mConversation instanceof GroupConversation ? 
+				((GroupConversation)mConversation).getGroupParticipant(getMsisdnMainUser()).getContactInfo().getFirstName() : mLabel;
 		String formatString;
 		if (blockOverlay) 
 		{
@@ -1525,7 +1536,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		/* bold the blocked users name */
 		String formatted = String.format(formatString,
-				mConversation.getLabel());
+				label);
 		SpannableString str = new SpannableString(formatted);
 		int start = formatString.indexOf("%1$s");
 		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
@@ -1807,5 +1818,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		this.mComposeView.setVisibility(View.INVISIBLE);
 		this.titleIconView.setEnabled(false);
 		findViewById(R.id.emo_btn).setEnabled(false);
+	}
+
+	private String getMsisdnMainUser()
+	{
+		return mConversation instanceof GroupConversation ? ((GroupConversation)mConversation).getGroupOwner() : mContactNumber;
 	}
 }

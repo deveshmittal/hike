@@ -158,17 +158,6 @@
                             android:id="@+id/group_owner"
                             layout="@layout/participant_name_item" />
 
-                        <ImageButton
-                            android:id="@+id/block_owner"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:background="@null"
-                            android:paddingLeft="10dp"
-                            android:paddingRight="10dp"
-                            android:src="@drawable/block_button" 
-                            android:onClick="onBlockGroupOwnerClicked"/>
                     </RelativeLayout>
                 </LinearLayout>
 
