@@ -47,6 +47,7 @@ public class CreditsActivity extends Activity implements Listener
 		mTitleView.setText("Free SMS");
 
 		updateCredits();
+		updateTotalCredits();
 
 		inviteFriendsBtn.setOnClickListener(new OnClickListener() 
 		{
@@ -59,12 +60,14 @@ public class CreditsActivity extends Activity implements Listener
 		});
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.INVITEE_NUM_CHANGED, this);
 	}
 
 	@Override
 	protected void onDestroy() 
 	{
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.INVITEE_NUM_CHANGED, this);
 		super.onDestroy();
 	}
 
@@ -82,6 +85,17 @@ public class CreditsActivity extends Activity implements Listener
 				}
 			});
 		}
+		else if(HikePubSub.INVITEE_NUM_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					updateTotalCredits();
+				}
+			});
+		}
 	}
 
 	private void updateCredits()
@@ -89,6 +103,12 @@ public class CreditsActivity extends Activity implements Listener
 		int credits = settings.getInt(HikeMessengerApp.SMS_SETTING, 0);
 		creditsNum.setText(credits + "");
 		creditsGaugeView.setActualCreditsAngle(credits);
+		creditsGaugeView.invalidate();
+	}
+
+	private void updateTotalCredits()
+	{
+		creditsGaugeView.setMaxCreditsAngle(settings.getInt(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, 0));
 		creditsGaugeView.invalidate();
 	}
 }
