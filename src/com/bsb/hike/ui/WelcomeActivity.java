@@ -17,6 +17,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -127,6 +128,7 @@ public class WelcomeActivity extends Activity implements SignupTask.OnSignupTask
 		editor.commit();
 		Log.d(getClass().getSimpleName(), "Host Changed to " + AccountUtils.HOST);
 		Log.d(getClass().getSimpleName(), "Base is " + AccountUtils.BASE);
+		Toast.makeText(WelcomeActivity.this, AccountUtils.BASE, Toast.LENGTH_SHORT).show();
 	}
 
 	private void startAnimations()

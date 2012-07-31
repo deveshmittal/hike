@@ -108,7 +108,7 @@ public class CreditsActivity extends Activity implements Listener
 
 	private void updateTotalCredits()
 	{
-		creditsGaugeView.setMaxCreditsAngle(settings.getInt(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, 0));
+		creditsGaugeView.setMaxCreditsAngle(Integer.parseInt(settings.getString(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "0")));
 		creditsGaugeView.invalidate();
 	}
 }

@@ -115,13 +115,13 @@ public class MqttMessagesManager {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			int invited = data.optInt(HikeConstants.ALL_INVITEE);
 			int invited_joined = data.optInt(HikeConstants.ALL_INVITEE_JOINED);
-			int totalCreditsPerMonth = data.optInt(HikeConstants.TOTAL_CREDITS_PER_MONTH);
+			String totalCreditsPerMonth = data.optString(HikeConstants.TOTAL_CREDITS_PER_MONTH);
 			Editor editor = settings.edit();
 			editor.putInt(HikeMessengerApp.INVITED, invited);
 			editor.putInt(HikeMessengerApp.INVITED_JOINED, invited_joined);
-			if(totalCreditsPerMonth > 0)
+			if(Integer.parseInt(totalCreditsPerMonth) > 0)
 			{
-				editor.putInt(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, totalCreditsPerMonth);
+				editor.putString(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, totalCreditsPerMonth);
 			}
 			editor.commit();
 			this.pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
@@ -185,16 +185,16 @@ public class MqttMessagesManager {
 			{
 				return;
 			}
-			/*
-			 * We are forcing the app to set all the messages sent by the user before this
-			 * as read.
-			 */
-			long[] ids = convDb.getUnreadMessageIds(convMessage.getConversation().getConvId());
-			if(ids != null && convMessage.getMetadata() == null )
-			{
-				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ);
-				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);
-			}
+//			/*
+//			 * We are forcing the app to set all the messages sent by the user before this
+//			 * as read.
+//			 */
+//			long[] ids = convDb.getUnreadMessageIds(convMessage.getConversation().getConvId());
+//			if(ids != null && convMessage.getMetadata() == null )
+//			{
+//				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ);
+//				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);
+//			}
 
 			Log.d(getClass().getSimpleName(),"Receiver received Message : "
 					+ convMessage.getMessage() + "		;	Receiver Msg ID : "
