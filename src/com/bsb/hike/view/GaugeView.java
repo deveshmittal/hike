@@ -18,13 +18,13 @@ public class GaugeView extends View
 	private int actualCreditsAngle;
 	private int maxCreditsAngle;
 
-	private static final int START_ANGLE = 140;
+	private static final int START_ANGLE = 138;
 
-	private static final int OFFSET = 10;
+	private static final int OFFSET = 7;
 
 	private static final int MAX_CREDIT_TO_SHOW = 600;
 
-	private static final int MAX_ANGLE = 260;
+	private static final int MAX_ANGLE = 263;
 
 	private static final int ACTUAL_CREDIT_GAUGE_INCREMENT = 4;
 
@@ -80,8 +80,8 @@ public class GaugeView extends View
 			return;
 		}
 		RectF actualCreditsArea = new RectF((int)(15 * Utils.densityMultiplier), (int)(27 * Utils.densityMultiplier), (int)(214 * Utils.densityMultiplier), (int)(225 * Utils.densityMultiplier));
-		RectF maxCreditsOuterArea = new RectF((int)(6 * Utils.densityMultiplier), (int)(18 * Utils.densityMultiplier), (int)(223 * Utils.densityMultiplier), (int)(235 * Utils.densityMultiplier));
-		RectF maxCreditsInnerArea = new RectF((int)(25 * Utils.densityMultiplier), (int)(37 * Utils.densityMultiplier), (int)(204 * Utils.densityMultiplier), (int)(217 * Utils.densityMultiplier));
+		RectF maxCreditsOuterArea = new RectF((int)(6 * Utils.densityMultiplier), (int)(18 * Utils.densityMultiplier), (int)(224 * Utils.densityMultiplier), (int)(235 * Utils.densityMultiplier));
+		RectF maxCreditsInnerArea = new RectF((int)(25 * Utils.densityMultiplier), (int)(37 * Utils.densityMultiplier), (int)(205 * Utils.densityMultiplier), (int)(217 * Utils.densityMultiplier));
 
 		canvas.drawArc(actualCreditsArea, START_ANGLE - OFFSET, actualCreditsAngle + OFFSET, false, actualCreditsGauge);
 		canvas.drawArc(maxCreditsOuterArea, START_ANGLE, maxCreditsAngle, false, maxCreditsOuterGauge);
@@ -92,13 +92,27 @@ public class GaugeView extends View
 
 	private int creditsToAngle(int credits)
 	{
+		int additional = 0;
+
+		if(credits>0)
+			additional = (int) (1000/credits);
+
+		if(credits >= 500 && credits < 600)
+		{
+			additional -= 3;
+		}
+		else if(credits >= 200 && credits < 300)
+		{
+			additional += 3;
+		}
+
 		if(credits >= MAX_CREDIT_TO_SHOW)
 		{
 			return MAX_ANGLE;
 		}
+
 		float ratio = (credits * 100)/MAX_CREDIT_TO_SHOW;
-		Log.d(getClass().getSimpleName(), "Ratio: " + ratio);
 		int angle = (int) (ratio * MAX_ANGLE)/100;
-		return angle;
+		return angle + additional;
 	}
 }
