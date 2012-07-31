@@ -17,6 +17,8 @@ import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -294,9 +296,9 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
 				}
 				Utils.requestAccountInfo();
-				deviceDetailsSent = true;
 			}
 		}, 10 * 1000);
+		deviceDetailsSent = true;
 	}
 
 	private void showSMSNotificationAlert()
@@ -318,6 +320,23 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				editor.putBoolean(HikeConstants.SMS_PREF, true);
 				editor.commit();
 
+				wasAlertCancelled = true;
+			}
+		});
+
+		smsNotificationAlert.setOnCancelListener(new OnCancelListener() 
+		{
+			@Override
+			public void onCancel(DialogInterface dialog) 
+			{
+				wasAlertCancelled = true;
+			}
+		});
+		smsNotificationAlert.setOnDismissListener(new OnDismissListener() 
+		{
+			@Override
+			public void onDismiss(DialogInterface dialog) 
+			{
 				wasAlertCancelled = true;
 			}
 		});
@@ -444,10 +463,9 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			intent = new Intent(this, ProfileActivity.class);
 			startActivity(intent);
 			return true;
-		case R.id.group_chat:
-//			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.FEEDBACK_MENU, 0);
-			intent = new Intent(this, ChatThread.class);
-			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+		case R.id.feedback:
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.FEEDBACK_MENU, 0);
+			intent = new Intent(this, FeedbackActivity.class);
 			startActivity(intent);
 			return true;
 		default:

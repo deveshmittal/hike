@@ -33,6 +33,7 @@ public class HikeConstants
 	public static final String CRITICAL = "c";
 	public static final String APP_VERSION = "appversion";
 	public static final String INVITE_TOKEN = "invite_token";
+	public static final String TOTAL_CREDITS_PER_MONTH = "tc";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -78,7 +79,7 @@ public class HikeConstants
 	
 	// More explanation required?
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
-    public static final String APP_API_VERSION = "1";
+    public static final String APP_API_VERSION = "0";
 
 	public static int NUM_SMS_PER_FRIEND = 10;
 	public static int INITIAL_NUM_SMS = 100;

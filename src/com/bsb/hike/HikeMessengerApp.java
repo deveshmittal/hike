@@ -117,6 +117,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String SHOWN_TUTORIAL = "showTutorial";
 
+	public static final String TOTAL_CREDITS_PER_MONTH = HikeConstants.TOTAL_CREDITS_PER_MONTH;
+
 	public static final String HOST = "host";
 
 	private static HikePubSub mPubSubInstance;
