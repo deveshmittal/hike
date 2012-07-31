@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
@@ -119,7 +120,7 @@ public class MqttMessagesManager {
 			Editor editor = settings.edit();
 			editor.putInt(HikeMessengerApp.INVITED, invited);
 			editor.putInt(HikeMessengerApp.INVITED_JOINED, invited_joined);
-			if(Integer.parseInt(totalCreditsPerMonth) > 0)
+			if(!TextUtils.isEmpty(totalCreditsPerMonth) && Integer.parseInt(totalCreditsPerMonth) > 0)
 			{
 				editor.putString(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, totalCreditsPerMonth);
 			}
