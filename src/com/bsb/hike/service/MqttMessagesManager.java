@@ -185,16 +185,16 @@ public class MqttMessagesManager {
 			{
 				return;
 			}
-			/*
-			 * We are forcing the app to set all the messages sent by the user before this
-			 * as read.
-			 */
-			long[] ids = convDb.getUnreadMessageIds(convMessage.getConversation().getConvId());
-			if(ids != null && convMessage.getMetadata() == null )
-			{
-				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ);
-				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);
-			}
+//			/*
+//			 * We are forcing the app to set all the messages sent by the user before this
+//			 * as read.
+//			 */
+//			long[] ids = convDb.getUnreadMessageIds(convMessage.getConversation().getConvId());
+//			if(ids != null && convMessage.getMetadata() == null )
+//			{
+//				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ);
+//				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);
+//			}
 
 			Log.d(getClass().getSimpleName(),"Receiver received Message : "
 					+ convMessage.getMessage() + "		;	Receiver Msg ID : "
