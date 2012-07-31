@@ -22,7 +22,7 @@ public class GaugeView extends View
 
 	private static final int OFFSET = 10;
 
-	private static final int MAX_CREDIT_TO_SHOW = 800;
+	private static final int MAX_CREDIT_TO_SHOW = 600;
 
 	private static final int MAX_ANGLE = 260;
 
