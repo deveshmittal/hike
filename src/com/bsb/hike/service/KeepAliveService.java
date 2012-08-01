@@ -24,7 +24,7 @@ public class KeepAliveService extends BroadcastReceiver
 	{
 		prefs = prefs == null ? context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0) : prefs;
 		Log.d(getClass().getSimpleName(), "KeepAliveService Triggered");
-		if (!TextUtils.isEmpty(prefs.getString(HikeMessengerApp.TOKEN_SETTING, null))) 
+		if (!TextUtils.isEmpty(prefs.getString(HikeMessengerApp.TOKEN_SETTING, null)) && prefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL, false)) 
 		{
 			HikeMessengerApp app = (HikeMessengerApp) context
 					.getApplicationContext();

@@ -309,18 +309,27 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		((TextView)smsNotificationAlert.findViewById(R.id.alert_title)).setText(R.string.sms);
 		((TextView)smsNotificationAlert.findViewById(R.id.alert_text)).setText(R.string.sms_alert_text);
 		Button okBtn = (Button) smsNotificationAlert.findViewById(R.id.alert_ok_btn);
+		Button cancelBtn = (Button) smsNotificationAlert.findViewById(R.id.alert_cancel_btn);
 		okBtn.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) 
 			{
-				smsNotificationAlert.dismiss();
-
 				Editor editor = PreferenceManager.getDefaultSharedPreferences(MessagesList.this).edit();
 				editor.putBoolean(HikeConstants.SMS_PREF, true);
 				editor.commit();
-
-				wasAlertCancelled = true;
+				smsNotificationAlert.dismiss();
+			}
+		});
+		cancelBtn.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(MessagesList.this).edit();
+				editor.putBoolean(HikeConstants.SMS_PREF, false);
+				editor.commit();
+				smsNotificationAlert.dismiss();
 			}
 		});
 

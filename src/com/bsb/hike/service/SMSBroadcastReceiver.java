@@ -61,6 +61,10 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 				String body = sms.getMessageBody();
 				long timestamp = sms.getTimestampMillis()/1000;
 				String from = sms.getOriginatingAddress();
+				if (!from.startsWith("+91"))
+				{
+					return;
+				}
 				ContactInfo contactInfo = mDb.getContactInfoFromPhoneNo(from);
 				if (contactInfo == null)
 				{
