@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.bsb.hike.utils.Utils;
@@ -18,13 +17,13 @@ public class GaugeView extends View
 	private int actualCreditsAngle;
 	private int maxCreditsAngle;
 
-	private static final int START_ANGLE = 138;
+	private static final int START_ANGLE = 139;
 
 	private static final int OFFSET = 7;
 
 	private static final int MAX_CREDIT_TO_SHOW = 600;
 
-	private static final int MAX_ANGLE = 263;
+	private static final int MAX_ANGLE = 262;
 
 	private static final int ACTUAL_CREDIT_GAUGE_INCREMENT = 4;
 
@@ -92,20 +91,6 @@ public class GaugeView extends View
 
 	private int creditsToAngle(int credits)
 	{
-		int additional = 0;
-
-		if(credits>0)
-			additional = (int) (1000/credits);
-
-		if(credits >= 500 && credits < 600)
-		{
-			additional -= 3;
-		}
-		else if(credits >= 200 && credits < 300)
-		{
-			additional += 3;
-		}
-
 		if(credits >= MAX_CREDIT_TO_SHOW)
 		{
 			return MAX_ANGLE;
@@ -113,6 +98,6 @@ public class GaugeView extends View
 
 		float ratio = (credits * 100)/MAX_CREDIT_TO_SHOW;
 		int angle = (int) (ratio * MAX_ANGLE)/100;
-		return angle + additional;
+		return angle;
 	}
 }
