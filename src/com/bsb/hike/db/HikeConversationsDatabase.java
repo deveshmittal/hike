@@ -201,11 +201,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE + "," + DBConstants.CONVERSATIONS_TABLE,
 				new String[] { DBConstants.MESSAGE },
 				DBConstants.MAPPED_MSG_ID + "=? AND "
-						+ DBConstants.TIMESTAMP + "=? AND "
+						+ DBConstants.MESSAGE + "=? AND "
 						+ DBConstants.CONVERSATIONS_TABLE + "."
 						+ DBConstants.MSISDN + "=?",
 						new String[] { Long.toString(conv.getMappedMsgID()),
-				Long.toString(conv.getTimestamp()),
+				conv.getMessage(),
 				conv.getMsisdn() }, null, null, null);
 		int count = c.getCount();
 		c.close();
