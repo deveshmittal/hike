@@ -792,7 +792,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		Log.d(getClass().getSimpleName(), "ONSHOWN");
 		mNameDisplay.setVisibility(View.GONE);
 		mNameEdit.setVisibility(View.VISIBLE);
-		mNameEdit.setSelection(mNameDisplay.length());
+		mNameEdit.setSelection(mNameEdit.length());
 		mNameEdit.requestFocus();
 	}
 
