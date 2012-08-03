@@ -124,15 +124,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			// Adding the last contacted and phone type info
 			Cursor extraInfo = this.mContext.getContentResolver().query(
 					Phone.CONTENT_URI,
-					new String[] { Phone.NUMBER, Phone.TYPE }, null, null, null);
+					new String[] { Phone.NUMBER, Phone.TYPE, Phone.LABEL }, null, null, null);
 
 			int msisdnIdx = extraInfo.getColumnIndex(Phone.NUMBER);
 			int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
+			int labelIdx = extraInfo.getColumnIndex(Phone.LABEL);
 
 			while (extraInfo.moveToNext()) 
 			{
 				String msisdnType = Phone.getTypeLabel(this.mContext.getResources(),
-						extraInfo.getInt(typeIdx), "Custom").toString();
+						extraInfo.getInt(typeIdx), extraInfo.getString(labelIdx)).toString();
 
 				msisdnTypeMap.put(extraInfo.getString(msisdnIdx), msisdnType);
 			}
@@ -162,14 +163,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 					String selection = Phone.CONTACT_ID + " =? " + " AND " + Phone.NUMBER + " =? ";
 					// Adding the last contacted and phone type info
 					Cursor additionalInfo = this.mContext.getContentResolver().query(
-							Phone.CONTENT_URI, new String[] { Phone.TYPE }, selection, new String[] {contact.getId(), contact.getMsisdn()}, null);
+							Phone.CONTENT_URI, new String[] { Phone.TYPE, Phone.LABEL }, selection, new String[] {contact.getId(), contact.getPhoneNum()}, null);
 
 					int typeIdx = additionalInfo.getColumnIndex(Phone.TYPE);
+					int labelIdx = additionalInfo.getColumnIndex(Phone.LABEL);
 					if(additionalInfo.moveToFirst())
 					{
 						contact.setMsisdnType(Phone.getTypeLabel(this.mContext.getResources(),
-								additionalInfo.getInt(typeIdx), "Custom").toString());
+								additionalInfo.getInt(typeIdx), additionalInfo.getString(labelIdx)).toString());
 					}
+					Log.d(getClass().getSimpleName(), "Msisdn Type: " + contact.getMsisdnType());
 					additionalInfo.close();
 
 					ih.bind(msisdnTypeColumn, contact.getMsisdnType());
@@ -587,10 +590,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	{
 		Cursor extraInfo = this.mContext.getContentResolver().query(
 				Phone.CONTENT_URI,
-				new String[] { Phone.NUMBER, Phone.TYPE }, null, null, null);
+				new String[] { Phone.NUMBER, Phone.TYPE, Phone.LABEL }, null, null, null);
 
 		int msisdnIdx = extraInfo.getColumnIndex(Phone.NUMBER);
 		int typeIdx = extraInfo.getColumnIndex(Phone.TYPE);
+		int labelIdx = extraInfo.getColumnIndex(Phone.LABEL);
 
 		mDb.beginTransaction();
 
@@ -599,7 +603,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			while (extraInfo.moveToNext()) 
 			{
 				String msisdnType = Phone.getTypeLabel(this.mContext.getResources(),
-						extraInfo.getInt(typeIdx), "Custom").toString();
+						extraInfo.getInt(typeIdx), extraInfo.getString(labelIdx)).toString();
 				Log.d(getClass().getSimpleName(), "Msisdntype: " + msisdnType);
 				ContentValues contentValues = new ContentValues(1);
 				contentValues.put(DBConstants.MSISDN_TYPE, msisdnType);
