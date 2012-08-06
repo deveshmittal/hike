@@ -925,7 +925,6 @@ public class SmileyParser
 		Editable text = composeBox.getText();
 		text.insert(cursorStart, mSmileyTexts[whichEmoticon]);
 
-		composeBox.setText(addSmileySpans(text, false));
 		composeBox.setSelection(selectionAfterInsert);
 	}
 

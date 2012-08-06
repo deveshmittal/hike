@@ -588,6 +588,13 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		{
 			String msisdn = (String) object;
 			Conversation conv = mConversationsByMSISDN.get(msisdn);
+			if(conv == null)
+			{
+				/*
+				 * We don't really need to do anything if the conversation does not exist.
+				 */
+				return;
+			}
 			/* look for the latest received messages and set them to read.
 			 * Exit when we've found some read messages
 			 */

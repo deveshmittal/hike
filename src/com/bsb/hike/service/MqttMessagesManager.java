@@ -131,7 +131,12 @@ public class MqttMessagesManager {
 		{
 			GroupConversation groupConversation = new GroupConversation(jsonObj, this.context);
 
-			this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList());
+			if(this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList()))
+			{
+				Log.d(getClass().getSimpleName(), "GCJ Message was already received");
+				return;
+			}
+			Log.d(getClass().getSimpleName(), "GCJ Message is new");
 
 			if (!this.convDb.doesConversationExist(groupConversation.getMsisdn())) 
 			{

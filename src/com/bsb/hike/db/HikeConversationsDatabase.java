@@ -671,8 +671,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param groupId The id of the group to which the participants are to be added
 	 * @param participantList A list of the participants to be added
 	 */
-	public void addGroupParticipants(String groupId, Map<String, GroupParticipant> participantList)
+	public boolean addGroupParticipants(String groupId, Map<String, GroupParticipant> participantList)
 	{
+		boolean participantsAlreadyAdded = true;
+		Map<String, GroupParticipant> currentParticipants = getGroupParticipants(groupId, true);
+		for(Entry<String, GroupParticipant> participant : currentParticipants.entrySet())
+		{
+			if(!participantList.containsKey(participant.getKey()))
+			{
+				participantsAlreadyAdded = false;
+				break;
+			}
+		}
+		if(participantsAlreadyAdded)
+		{
+			return participantsAlreadyAdded;
+		}
+
 		SQLiteStatement insertStatement = null;
 		InsertHelper ih = null;
 		try
@@ -689,6 +704,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				insertStatement.executeInsert();
 			}
+			return participantsAlreadyAdded;
 		}
 		finally
 		{
