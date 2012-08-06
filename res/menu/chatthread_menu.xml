@@ -2,7 +2,11 @@
 	<item android:id="@+id/add_contact_menu"
 	    android:title="@string/add_to_contacts"
 	    android:icon="@drawable/ic_add_to_contacts"
-	    android:visible="false"/>    
+	    android:visible="false"/>
+	<item android:id="@+id/call"
+	    android:title="@string/call"
+	    android:icon="@drawable/ic_call"
+	    android:visible="true"/>    
 	<item
         android:id="@+id/leave_menu"
         android:title="@string/leave_group"

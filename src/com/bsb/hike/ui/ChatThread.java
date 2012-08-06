@@ -500,6 +500,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		MenuItem item3 = menu.findItem(R.id.leave_menu);
 		item3.setVisible((mConversation != null) && (mConversation instanceof GroupConversation) && !mUserIsBlocked);
 
+		MenuItem item4 = menu.findItem(R.id.call);
+		item4.setVisible(!mUserIsBlocked);
+
 		return true;
 	}
 
@@ -557,6 +560,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			overridePendingTransition(R.anim.slide_in_left_noalpha,
 					R.anim.slide_out_right_noalpha);
 			
+		}
+		else if(item.getItemId() == R.id.call)
+		{
+			Intent callIntent = new Intent(Intent.ACTION_CALL);
+	        callIntent.setData(Uri.parse("tel:"+mContactNumber));
+	        startActivity(callIntent);
 		}
 
 		return true;

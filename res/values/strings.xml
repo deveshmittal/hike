@@ -103,4 +103,5 @@
 	<string name="turn_on">Turn On</string>
 	<string name="block_owner">Block group owner</string>
 	<string name="no_thanks">Not now</string>
+	<string name="call">Call</string>
 </resources>
