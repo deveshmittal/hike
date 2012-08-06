@@ -14,6 +14,7 @@ import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,21 +85,26 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		v.setTag(contactInfo);
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
-		textView.setText(contactInfo.getName());
+		textView.setText(contactInfo != null ? contactInfo.getName() : inputNumber.getText());
 
-		textView = (TextView) v.findViewById(R.id.number);
-		textView.setText(contactInfo.getMsisdn());
-		if(!TextUtils.isEmpty(contactInfo.getMsisdnType()))
+		TextView numberTextView = (TextView) v.findViewById(R.id.number);
+		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn() : context.getString(R.string.tap_to_message));
+		if(contactInfo != null && !TextUtils.isEmpty(contactInfo.getMsisdnType()))
 		{
 			textView.append(" (" + contactInfo.getMsisdnType() + ")");
 		}
 
 		ImageView onhike = (ImageView) v.findViewById(R.id.onhike);
-		onhike.setImageResource(contactInfo.isOnhike() ? R.drawable.ic_hike_user : R.drawable.ic_sms_user);
+		onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike() ? R.drawable.ic_hike_user : R.drawable.ic_sms_user) : 0);
 
 		ImageView avatar = (ImageView) v.findViewById(R.id.user_img);
-		avatar.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
+		avatar.setImageDrawable(contactInfo != null ? IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()) : context.getResources().getDrawable(R.drawable.ic_avatar0));
 
+		if(contactInfo == null)
+		{
+			numberTextView.setVisibility(inputNumber.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX) ? View.VISIBLE: View.INVISIBLE);
+			onhike.setVisibility(View.GONE);
+		}
 		return v;
 	}
 
@@ -161,21 +167,28 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 				Set<String> selectedSMSContacts = new HashSet<String>();
 				for (ContactInfo info : HikeSearchContactAdapter.this.completeList)
 				{
-					if(!currentSelectionSet.isEmpty())
+					if(info != null)
 					{
-						if(currentSelectionSet.contains(info.getMsisdn()))
+						if(!currentSelectionSet.isEmpty())
 						{
-							if(!info.isOnhike())
+							if(currentSelectionSet.contains(info.getMsisdn()))
 							{
-								selectedSMSContacts.add(info.getMsisdn());
+								if(!info.isOnhike())
+								{
+									selectedSMSContacts.add(info.getMsisdn());
+								}
+								continue;
 							}
-							continue;
+						}
+						if(info.getName().toLowerCase().contains(textToBeFiltered) || info.getMsisdn().contains(textToBeFiltered))
+						{
+							filteredContacts.add(info);
 						}
 					}
-					if(info.getName().toLowerCase().contains(textToBeFiltered) || info.getMsisdn().contains(textToBeFiltered))
-					{
-						filteredContacts.add(info);
-					}
+				}
+				if(!isGroupChat && shouldShowExtraElement(textToBeFiltered))
+				{
+					filteredContacts.add(null);
 				}
 				results.count = filteredContacts.size();
 				results.values = filteredContacts;
@@ -211,10 +224,19 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) 
 	{
-		
+		ContactInfo contactInfo = (ContactInfo) view.getTag();
+		if(contactInfo == null)
+		{
+			String number = normalizeNumber(inputNumber.getText().toString());
+			if(!number.matches(HikeConstants.VALID_MSISDN_REGEX))
+			{
+				return;
+			}
+			Log.d(getClass().getSimpleName(), "Formatted number: " + number);
+			contactInfo = new ContactInfo(number, number, number, number);
+		}
 		if (!isGroupChat) 
 		{
-			ContactInfo contactInfo = (ContactInfo) view.getTag();
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 			intent.setClass(context, ChatThread.class);
 			intent.putExtra(HikeConstants.Extras.KEEP_MESSAGE, hasPrefillText);
@@ -223,7 +245,6 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		else
 		{
 			inputNumber.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-			ContactInfo contactInfo = (ContactInfo) view.getTag();
 			/*
 			 * Checking if the number of participants has crossed the set limit.
 			 * We have two limits - SMS contacts and total contacts.
@@ -263,5 +284,19 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			inputNumber.setSelection(inputNumber.length());
 		}
+	}
+	
+	private boolean shouldShowExtraElement(String s)
+	{
+	    String pattern= "(\\+?\\d*)";
+	        if(s.matches(pattern)){
+	            return true;
+	        }
+	        return false;   
+	}
+
+	private String normalizeNumber(String inputNumber)
+	{
+		return inputNumber.startsWith("+") ? inputNumber : inputNumber.startsWith("0") ? inputNumber.replaceFirst("0", "+91") : ("+91" + inputNumber);
 	}
 }
