@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -221,6 +222,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		}
 		else
 		{
+			inputNumber.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 			ContactInfo contactInfo = (ContactInfo) view.getTag();
 			/*
 			 * Checking if the number of participants has crossed the set limit.
@@ -259,6 +261,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 					insertIndex, 
 					insertIndex + textToBeShown.length(),
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			inputNumber.setSelection(inputNumber.length());
 		}
 	}
 }
