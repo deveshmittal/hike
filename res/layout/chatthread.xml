@@ -32,12 +32,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
-                android:completionThreshold="1"
                 android:drawableLeft="@drawable/ic_name_2"
                 android:drawablePadding="10dp"
-                android:dropDownVerticalOffset="7dp"
-                android:dropDownWidth="match_parent"
-                android:fadingEdge="none"
                 android:hint="Start typing a name..."
                 android:imeOptions="actionNone"
                 android:paddingBottom="7dp"
@@ -51,27 +47,6 @@
                 android:visibility="visible" >
             </EditText>
 
-            <MultiAutoCompleteTextView
-                android:id="@+id/input_number_multi"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:completionThreshold="1"
-                android:drawableLeft="@drawable/ic_name_2"
-                android:drawablePadding="10dp"
-                android:dropDownVerticalOffset="7dp"
-                android:dropDownWidth="match_parent"
-                android:fadingEdge="none"
-                android:hint="Start typing a name..."
-                android:imeOptions="actionNone"
-                android:paddingBottom="7dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="18dp"
-                android:paddingTop="7dp"
-                android:textColor="@color/lightblack"
-                android:textColorHint="#cdcdc8"
-                android:textSize="16sp"
-                android:visibility="gone" />
         </LinearLayout>
 
         <ListView
