@@ -565,7 +565,7 @@ public class Utils
 			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 			data.put(HikeConstants.LogEvent.DEVICE, device);
 			data.put(HikeConstants.LogEvent.CARRIER, carrier);
-			data.put(HikeConstants.APP_VERSION, appVersion);
+			data.put(HikeConstants.LogEvent.APP_VERSION, appVersion);
 			object.put(HikeConstants.DATA, data);
 
 			return object;
