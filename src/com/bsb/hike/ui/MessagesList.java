@@ -901,7 +901,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	private void showUpdateToolTip(int updateType)
 	{
-		updateToolTipParent = findViewById(R.id.update_tool_tip);
+		updateToolTipParent = findViewById(R.id.tool_tip_on_top);
 		updateToolTipParent.setVisibility(View.VISIBLE);
 		((LinearLayout)updateToolTipParent.findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
 		mToolTip = updateToolTipParent.findViewById(R.id.credits_help_layout);
