@@ -166,7 +166,7 @@ public class HikeConstants
 	    /* 
 	     * Home screen events
 	     * <screen> = hoS
-	     * <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB
+	     * <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB, hoSsmSY, hoSsmSN
 	     */
 	    public static final String MENU = "hoS";
 	    public static final String PROFILE_MENU = "hoSprofS";
@@ -182,6 +182,8 @@ public class HikeConstants
 	    public static final String HOME_UPDATE_TOOL_TIP_CLICKED = "hoSupDtiPY";
 	    public static final String HOME_UPDATE_OVERLAY_DISMISSED = "hoSupDOBD";
 	    public static final String HOME_UDPATE_OVERLAY_BUTTON_CLICKED = "hoSupDOB";
+	    public static final String DEFAULT_SMS_DIALOG_YES = "hoSsmSY";
+	    public static final String DEFAULT_SMS_DIALOG_NO = "hoSsmSN";
 
 	    /* 
 	     * Profile screen events
