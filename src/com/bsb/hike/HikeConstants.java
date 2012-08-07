@@ -86,7 +86,7 @@ public class HikeConstants
 	public static int MAX_CHAR_IN_NAME = 20;
 
 	public static int MAX_SMS_CONTACTS_IN_GROUP = 5;
-	public static int MAX_CONTACTS_IN_GROUP = 10;
+	public static int MAX_CONTACTS_IN_GROUP = 9;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
 
