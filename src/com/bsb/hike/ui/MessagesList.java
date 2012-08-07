@@ -861,8 +861,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			hideToolTip();
 			return;
 		}
-		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLICKED);
-		onTitleIconClick(null);
 	}
 
 	private void leaveGroup(Conversation conv)
