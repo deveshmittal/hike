@@ -31,7 +31,6 @@ public class HikeConstants
 	public static final String GENDER = "gender";
 	public static final String VERSION = "v";
 	public static final String CRITICAL = "c";
-	public static final String APP_VERSION = "appversion";
 	public static final String INVITE_TOKEN = "invite_token";
 	public static final String TOTAL_CREDITS_PER_MONTH = "tc";
 
@@ -87,7 +86,9 @@ public class HikeConstants
 	public static int MAX_CHAR_IN_NAME = 20;
 
 	public static int MAX_SMS_CONTACTS_IN_GROUP = 5;
-	public static int MAX_CONTACTS_IN_GROUP = 10;
+	public static int MAX_CONTACTS_IN_GROUP = 9;
+
+	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
 
 	public static final class Extras
 	{
@@ -156,6 +157,7 @@ public class HikeConstants
 	    public static final String DEVICE = "_device";
 	    public static final String RESOLUTION = "_resolution";
 	    public static final String CARRIER = "_carrier";
+	    public static final String APP_VERSION = "_app_version";
 
 	    /*
 	     *  Naming Convention - <screen><event><sub-event>

@@ -190,7 +190,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		startLoading();
 		if (!addressBookError) 
 		{
-			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches("\\+?[0-9]{10,13}")) 
+			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX)) 
 			{
 				loadingLayout.setVisibility(View.GONE);
 				submitBtn.setVisibility(View.VISIBLE);

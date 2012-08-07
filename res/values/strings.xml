@@ -89,8 +89,8 @@
 	<string name="new_group">New Group</string>
 	<string name="add_group">Add to Group</string>
 	<string name="invite_share_message">Hi! I\'m using hike, a new messenger from Bharti SoftBank to message friends and family for free! Download it at http://get.hike.in/</string>
-	<string name="max_sms">You can only have 5 SMS contacts in a group.</string>
-	<string name="max_contact">You can only have 10 contacts in a group.</string>
+	<string name="max_sms">Max 5 SMS contacts in a group.</string>
+	<string name="max_contact">Max 10 contacts in a group.</string>
 	<string name="invite_sent">Invite sent.</string>
 	<string name="free_hike_sms">Free Hike SMS</string>
 	<string name="valid_till">Valid till %1$s</string>
@@ -103,4 +103,8 @@
 	<string name="turn_on">Turn On</string>
 	<string name="block_owner">Block group owner</string>
 	<string name="no_thanks">Not now</string>
+	<string name="tap_to_message">Tap here to message this person</string>
+	<string name="tap_to_add">Tap here to add this person</string>
+	<string name="call">Call</string>
+	<string name="we_have_gc">We now have Group Chat! Tap the menu get started with it.</string>
 </resources>

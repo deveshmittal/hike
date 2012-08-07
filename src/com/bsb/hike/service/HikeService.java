@@ -671,7 +671,7 @@ public class HikeService extends Service
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(MQTT_USER_STATS_SEND_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
 
 		Calendar wakeUpTime = Calendar.getInstance();
-		wakeUpTime.add(Calendar.HOUR, 1);
+		wakeUpTime.add(Calendar.HOUR, 12);
 
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);

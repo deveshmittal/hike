@@ -169,12 +169,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ViewGroup emoticonLayout;
 
-	private String selectedContacts = "";
-
-	private List<String> selectedParticipants;
-
-	private String existingParticipants;
-
 	private ImageView titleIconView;
 
 	private Button titleBtn;
@@ -500,6 +494,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		MenuItem item3 = menu.findItem(R.id.leave_menu);
 		item3.setVisible((mConversation != null) && (mConversation instanceof GroupConversation) && !mUserIsBlocked);
 
+		MenuItem item4 = menu.findItem(R.id.call);
+		item4.setVisible(!mUserIsBlocked);
+
 		return true;
 	}
 
@@ -557,6 +554,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			overridePendingTransition(R.anim.slide_in_left_noalpha,
 					R.anim.slide_out_right_noalpha);
 			
+		}
+		else if(item.getItemId() == R.id.call)
+		{
+			Intent callIntent = new Intent(Intent.ACTION_CALL);
+	        callIntent.setData(Uri.parse("tel:"+mContactNumber));
+	        startActivity(callIntent);
 		}
 
 		return true;
@@ -1589,9 +1592,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				// Group alredy exists. Fetch existing participants.
 				mContactNumber = groupId;
 			}
-			selectedContacts = this.mInputNumberView.getText().toString();
+			String selectedContacts = this.mInputNumberView.getText().toString();
 			selectedContacts = selectedContacts.substring(0, selectedContacts.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR));
-			selectedParticipants = Utils.splitSelectedContacts(selectedContacts);
+			List<String> selectedParticipants = Utils.splitSelectedContacts(selectedContacts);
 			List<String> selectedParticipantNames = Utils.splitSelectedContactsName(selectedContacts);
 			Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
 

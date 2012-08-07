@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:background="@color/offwhite"
             android:layout_marginTop="1px"
-            android:divider="@drawable/ic_thread_divider_other"
+            android:divider="@null"
             android:fadingEdge="none" />
 
         <View
