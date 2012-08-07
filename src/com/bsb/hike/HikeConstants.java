@@ -225,6 +225,13 @@ public class HikeConstants
 	     * <event> = inVB
 	     */
 	    public static final String INVITE_BUTTON_CLICKED = "credSinVB";
+
+	    /*
+	     * User Preferences
+	     * <screen> = prefS
+	     * <event> = smS
+	     */
+	    public static final String DEFAULT_SMS_CLIENT = "prefSsmS";
 	}
 
 	public static final class MqttMessageTypes
