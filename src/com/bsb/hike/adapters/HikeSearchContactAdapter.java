@@ -88,7 +88,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		textView.setText(contactInfo != null ? contactInfo.getName() : inputNumber.getText());
 
 		TextView numberTextView = (TextView) v.findViewById(R.id.number);
-		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn() : context.getString(R.string.tap_to_message));
+		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn() : isGroupChat ? context.getString(R.string.tap_to_add) : context.getString(R.string.tap_to_message));
 		if(contactInfo != null && !TextUtils.isEmpty(contactInfo.getMsisdnType()))
 		{
 			textView.append(" (" + contactInfo.getMsisdnType() + ")");
@@ -183,7 +183,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 						}
 					}
 				}
-				if(!isGroupChat && shouldShowExtraElement(textToBeFiltered))
+				if(shouldShowExtraElement(textToBeFiltered))
 				{
 					filteredContacts.add(null);
 				}
