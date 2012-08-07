@@ -242,6 +242,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		else
 		{
 			inputNumber.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+			inputNumber.setSingleLine(false);
 			/*
 			 * Checking if the number of participants has crossed the set limit.
 			 * We have two limits - SMS contacts and total contacts.
