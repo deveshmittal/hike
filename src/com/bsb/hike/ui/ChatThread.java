@@ -495,7 +495,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		item3.setVisible((mConversation != null) && (mConversation instanceof GroupConversation) && !mUserIsBlocked);
 
 		MenuItem item4 = menu.findItem(R.id.call);
-		item4.setVisible(!mUserIsBlocked);
+		item4.setVisible(!mUserIsBlocked && !(mConversation instanceof GroupConversation));
 
 		return true;
 	}
