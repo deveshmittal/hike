@@ -100,11 +100,8 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		ImageView avatar = (ImageView) v.findViewById(R.id.user_img);
 		avatar.setImageDrawable(contactInfo != null ? IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()) : context.getResources().getDrawable(R.drawable.ic_avatar0));
 
-		if(contactInfo == null)
-		{
-			numberTextView.setVisibility(inputNumber.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX) ? View.VISIBLE: View.INVISIBLE);
-			onhike.setVisibility(View.GONE);
-		}
+		numberTextView.setVisibility(isEnabled(position) ? View.VISIBLE : View.INVISIBLE);
+		onhike.setVisibility(isEnabled(position) ? View.VISIBLE : View.GONE);
 		return v;
 	}
 
@@ -298,5 +295,19 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	private String normalizeNumber(String inputNumber)
 	{
 		return inputNumber.startsWith("+") ? inputNumber : inputNumber.startsWith("0") ? inputNumber.replaceFirst("0", "+91") : ("+91" + inputNumber);
+	}
+
+	@Override
+	public boolean areAllItemsEnabled() {
+		return false;
+	}
+
+	@Override
+	public boolean isEnabled(int position) {
+		if(filteredList.get(position) == null)
+		{
+			return inputNumber.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX);
+		}
+		return super.isEnabled(position);
 	}
 }
