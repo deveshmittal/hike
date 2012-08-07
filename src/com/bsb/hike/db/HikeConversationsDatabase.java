@@ -675,6 +675,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	{
 		boolean participantsAlreadyAdded = true;
 		Map<String, GroupParticipant> currentParticipants = getGroupParticipants(groupId, true);
+		if(currentParticipants.isEmpty())
+		{
+			participantsAlreadyAdded = false;
+		}
 		for(Entry<String, GroupParticipant> participant : currentParticipants.entrySet())
 		{
 			if(!participantList.containsKey(participant.getKey()))
