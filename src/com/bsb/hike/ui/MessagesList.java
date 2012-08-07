@@ -836,7 +836,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	public void onTitleIconClick(View v)
 	{
 		setToolTipDismissed();
-		showCreditsScreen();
+		openOptionsMenu();
 	}
 
 	private void openMarket()
