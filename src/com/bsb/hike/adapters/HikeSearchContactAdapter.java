@@ -91,7 +91,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn() : isGroupChat ? context.getString(R.string.tap_to_add) : context.getString(R.string.tap_to_message));
 		if(contactInfo != null && !TextUtils.isEmpty(contactInfo.getMsisdnType()))
 		{
-			textView.append(" (" + contactInfo.getMsisdnType() + ")");
+			numberTextView.append(" (" + contactInfo.getMsisdnType() + ")");
 		}
 
 		ImageView onhike = (ImageView) v.findViewById(R.id.onhike);
