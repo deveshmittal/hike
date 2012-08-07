@@ -93,6 +93,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	private View updateToolTipParent;
 
+	private View groupChatToolTipParent;
+
 	private boolean isToolTipShowing;
 
 	private boolean wasAlertCancelled = false;
@@ -261,6 +263,11 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		{
 			Log.d(getClass().getSimpleName(), "LEAVING GROUP FROM ONCREATE");
 			leaveGroup(mConversationsByMSISDN.get(getIntent().getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
+		}
+
+		if(this.accountPrefs.getBoolean(HikeMessengerApp.SHOW_GROUP_CHAT_TOOL_TIP, true))
+		{
+			showGroupChatToolTip();
 		}
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
@@ -446,6 +453,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.MENU);
+		if(groupChatToolTipParent != null && groupChatToolTipParent.getVisibility() == View.VISIBLE)
+		{
+			onToolTipClosed(null);
+		}
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -810,6 +821,14 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			hideToolTip();
 			return;
 		}
+		else if(groupChatToolTipParent != null && groupChatToolTipParent.getVisibility() == View.VISIBLE)
+		{
+			Editor editor = accountPrefs.edit();
+			editor.putBoolean(HikeMessengerApp.SHOW_GROUP_CHAT_TOOL_TIP, false);
+			editor.commit();
+			hideToolTip();
+			return;
+		}
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLOSED);
 		setToolTipDismissed();
 	}
@@ -915,6 +934,29 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		TextView text = (TextView) mToolTip.findViewById(R.id.tool_tip);
 		((MarginLayoutParams)text.getLayoutParams()).setMargins((updateType == HikeConstants.NORMAL_UPDATE ? 0 : (int) (15*Utils.densityMultiplier)), 0, 0, 0);
 		text.setText(this.accountPrefs.getString(HikeConstants.Extras.UPDATE_MESSAGE, ""));
+
+		if (!isToolTipShowing) {
+			Animation alphaIn = AnimationUtils.loadAnimation(MessagesList.this,
+					android.R.anim.fade_in);
+			alphaIn.setStartOffset(1000);
+			mToolTip.setAnimation(alphaIn);
+		}
+		mToolTip.setVisibility(View.VISIBLE);
+
+	}
+
+	private void showGroupChatToolTip()
+	{
+		groupChatToolTipParent = findViewById(R.id.tool_tip_on_top);
+		groupChatToolTipParent.setVisibility(View.VISIBLE);
+		((LinearLayout)groupChatToolTipParent.findViewById(R.id.tool_tip_parent_layout)).setGravity(Gravity.CENTER_HORIZONTAL);
+		mToolTip = groupChatToolTipParent.findViewById(R.id.credits_help_layout);
+		mToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
+
+		((MarginLayoutParams)mToolTip.getLayoutParams()).setMargins(0, 0, 0, 0);
+
+		TextView text = (TextView) mToolTip.findViewById(R.id.tool_tip);
+		text.setText(R.string.we_have_gc);
 
 		if (!isToolTipShowing) {
 			Animation alphaIn = AnimationUtils.loadAnimation(MessagesList.this,
