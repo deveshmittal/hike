@@ -534,6 +534,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if(item.getItemId() == R.id.add_contact_menu)
 		{
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_ADD_TO_CONTACTS);
 			Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
 			i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
 			i.putExtra(Insert.PHONE, mConversation.getMsisdn());
@@ -557,6 +558,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if(item.getItemId() == R.id.call)
 		{
+			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_CALL);
 			Intent callIntent = new Intent(Intent.ACTION_CALL);
 	        callIntent.setData(Uri.parse("tel:"+mContactNumber));
 	        startActivity(callIntent);
@@ -1561,8 +1563,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			else
 			{
-//				Utils.logEvent(ChatThread.this,
-//						HikeConstants.LogEvent.CHAT_GROUP_INFO_TOP_BUTTON);
+				Utils.logEvent(ChatThread.this,
+						HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 				Intent intent = getIntent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
