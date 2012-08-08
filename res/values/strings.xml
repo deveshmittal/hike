@@ -106,5 +106,5 @@
 	<string name="tap_to_message">Tap here to message this person</string>
 	<string name="tap_to_add">Tap here to add this person</string>
 	<string name="call">Call</string>
-	<string name="we_have_gc">We now have Group Chat! Tap the menu get started with it.</string>
+	<string name="we_have_gc">Tap menu to start a Group Chat.</string>
 </resources>
