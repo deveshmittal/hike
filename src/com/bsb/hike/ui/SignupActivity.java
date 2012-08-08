@@ -59,6 +59,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private Handler mHandler;
 
 	private boolean addressBookError = false;
+	private boolean msisdnErrorDuringSignup = false;
 
 	private final int NAME = 2;
 	private final int PIN = 1;
@@ -83,6 +84,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 		if(savedInstanceState != null)
 		{
+			msisdnErrorDuringSignup = savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
 			int dispChild = savedInstanceState.getInt(HikeConstants.Extras.SIGNUP_PART);
 			removeAnimation();
 			viewFlipper.setDisplayedChild(dispChild);
@@ -239,6 +241,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private void prepareLayoutForFetchingNumber()
 	{
 		initializeViews(numLayout);
+		infoTxt.setImageResource(msisdnErrorDuringSignup ? R.drawable.enter_phone_again : R.drawable.enter_phone);
 		invalidNum.setVisibility(View.INVISIBLE);
 	}
 
@@ -257,6 +260,13 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		if (msisdnView == null) 
 		{
 			String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
+			if(TextUtils.isEmpty(msisdn))
+			{
+				msisdnErrorDuringSignup = true;
+				resetViewFlipper();
+				restartTask();
+				return;
+			}
 			msisdnView = new MSISDNView(SignupActivity.this, msisdn);
 			numberContainer.addView(msisdnView);
 		}
@@ -313,6 +323,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, booBooLayout.getVisibility() == View.VISIBLE);
 		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
 		super.onSaveInstanceState(outState);
 	}
 
