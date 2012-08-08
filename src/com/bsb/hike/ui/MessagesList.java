@@ -325,6 +325,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				Editor editor = PreferenceManager.getDefaultSharedPreferences(MessagesList.this).edit();
 				editor.putBoolean(HikeConstants.SMS_PREF, true);
 				editor.commit();
+				Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DEFAULT_SMS_DIALOG_YES);
 				smsNotificationAlert.dismiss();
 			}
 		});
@@ -336,6 +337,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				Editor editor = PreferenceManager.getDefaultSharedPreferences(MessagesList.this).edit();
 				editor.putBoolean(HikeConstants.SMS_PREF, false);
 				editor.commit();
+				Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DEFAULT_SMS_DIALOG_NO);
 				smsNotificationAlert.dismiss();
 			}
 		});
@@ -345,6 +347,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			@Override
 			public void onCancel(DialogInterface dialog) 
 			{
+				Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DEFAULT_SMS_DIALOG_NO);
 				wasAlertCancelled = true;
 			}
 		});
@@ -861,8 +864,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			hideToolTip();
 			return;
 		}
-		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLICKED);
-		onTitleIconClick(null);
 	}
 
 	private void leaveGroup(Conversation conv)

@@ -1,6 +1,5 @@
 package com.bsb.hike.tasks;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -301,7 +300,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 				//TODO this exception should be raised from the postAddressBook code
 				if (addressbook == null)
 				{
-					throw new IOException("Unable to retrieve address book");
+					publishProgress(new StateValue(State.ERROR, HikeConstants.ADDRESS_BOOK_ERROR));
+					return Boolean.FALSE;
 				}
 				Log.d("SignupTask", "about to insert addressbook");
 				db = HikeUserDatabase.getInstance();

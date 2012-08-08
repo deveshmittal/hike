@@ -42,6 +42,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -483,6 +484,10 @@ public class Utils
 		List<String> contactNames = new ArrayList<String>(selectedContacts.length);
 		for(int i = 0; i<selectedContacts.length; i++)
 		{
+			if(!selectedContacts[i].contains("["))
+			{
+				continue;
+			}
 			contactNames.add(selectedContacts[i].substring(0, selectedContacts[i].indexOf("[")));
 		}
 		return contactNames;
@@ -610,6 +615,7 @@ public class Utils
 				}
 				editor.commit();
 				data.put(HikeConstants.LogEvent.TAG, "mob");
+				data.put(HikeConstants.LogEvent.DEFAULT_SMS_CLIENT, PreferenceManager.getDefaultSharedPreferences(context).getBoolean(HikeConstants.SMS_PREF, false));
 
 				obj.put(HikeConstants.TYPE, HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
 				obj.put(HikeConstants.DATA, data);

@@ -770,6 +770,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 	public void onAddNewParticipantsClicked(View v)
 	{
+		Utils.logEvent(ProfileActivity.this, HikeConstants.LogEvent.ADD_PARTICIPANT);
+
 		Intent intent = new Intent(ProfileActivity.this, ChatThread.class);
 		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 		intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT, mLocalMSISDN);

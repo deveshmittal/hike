@@ -144,6 +144,7 @@ public class HikeConstants
 		public static final String GROUP_LEFT = "groupLeft";
 		public static final String ALERT_CANCELLED = "alertCancelled";
 		public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
+		public static final String SIGNUP_MSISDN_ERROR = "signupMsisdnError";
 	}
 
 	public static final class LogEvent
@@ -166,13 +167,13 @@ public class HikeConstants
 	    /* 
 	     * Home screen events
 	     * <screen> = hoS
-	     * <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB
+	     * <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB, smSY, smSN, groupS
 	     */
 	    public static final String MENU = "hoS";
 	    public static final String PROFILE_MENU = "hoSprofS";
 	    public static final String INVITE_MENU = "hoSinvS";
-	    public static final String FEEDBACK_MENU = "hoSfeedS";
 	    public static final String DELETE_ALL_CONVERSATIONS_MENU = "hoSdelAC";
+	    public static final String GROUP_CHAT_MENU = "hoSgroupS";
 	    public static final String DELETE_CONVERSATION = "hoSdelC";
 	    public static final String COMPOSE_BUTTON = "hoScompB";
 	    public static final String ADD_SHORTCUT = "hoSaddSC";
@@ -182,6 +183,8 @@ public class HikeConstants
 	    public static final String HOME_UPDATE_TOOL_TIP_CLICKED = "hoSupDtiPY";
 	    public static final String HOME_UPDATE_OVERLAY_DISMISSED = "hoSupDOBD";
 	    public static final String HOME_UDPATE_OVERLAY_BUTTON_CLICKED = "hoSupDOB";
+	    public static final String DEFAULT_SMS_DIALOG_YES = "hoSsmSY";
+	    public static final String DEFAULT_SMS_DIALOG_NO = "hoSsmSN";
 
 	    /* 
 	     * Profile screen events
@@ -206,7 +209,7 @@ public class HikeConstants
 	    /* 
 	     * Chat thread screen events
 	     * <screen> = chatS
-	     * <event> = inVtiPN, inVtopB, blocK, forMsg, infoB, invOB, invOBD, opTiNtaP
+	     * <event> = inVtiPN, inVtopB, blocK, forMsg, infoB, invOB, invOBD, opTiNtaP, calL, adD, grPinfO
 	     */
 	    public static final String CHAT_INVITE_TOOL_TIP_CLOSED = "chatSinVtiPN";
 	    public static final String CHAT_INVITE_TOP_BUTTON = "chatSinVtopB";
@@ -216,6 +219,9 @@ public class HikeConstants
 	    public static final String INVITE_OVERLAY_BUTTON = "chatSinvOB";
 	    public static final String INVITE_OVERLAY_DISMISS = "chatSinvOBD";
 	    public static final String OPT_IN_TAP_HERE = "chatSopTiNtaP";
+	    public static final String MENU_CALL = "chatScalL";
+	    public static final String MENU_ADD_TO_CONTACTS = "chatSadD";
+	    public static final String GROUP_INFO_TOP_BUTTON = "chatSgrPinfO";
 	    
 	    /* 
 	     * Credits screen events
@@ -223,6 +229,27 @@ public class HikeConstants
 	     * <event> = inVB
 	     */
 	    public static final String INVITE_BUTTON_CLICKED = "credSinVB";
+
+	    /*
+	     * User Preferences
+	     * <screen> = prefS
+	     * <event> = smS
+	     */
+	    public static final String DEFAULT_SMS_CLIENT = "prefSsmS";
+
+	    /*
+	     * Group Info screen
+	     * <screen> = groupS
+	     * <event> = adDparT
+	     */
+	    public static final String ADD_PARTICIPANT = "groupSadDparT";
+	    
+	    /*
+	     * SignUp screen
+	     * <screen> = signupS
+	     * <event> = erroR
+	     */
+	    public static final String SIGNUP_ERROR = "signupSerroR";
 	}
 
 	public static final class MqttMessageTypes

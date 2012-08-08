@@ -30,6 +30,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.MSISDNView;
 
 public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener
@@ -59,10 +60,13 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private Handler mHandler;
 
 	private boolean addressBookError = false;
+	private boolean msisdnErrorDuringSignup = false;
 
 	private final int NAME = 2;
 	private final int PIN = 1;
 	private final int NUMBER = 0;
+
+	private MSISDNView msisdnView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -81,6 +85,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 		if(savedInstanceState != null)
 		{
+			msisdnErrorDuringSignup = savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
 			int dispChild = savedInstanceState.getInt(HikeConstants.Extras.SIGNUP_PART);
 			removeAnimation();
 			viewFlipper.setDisplayedChild(dispChild);
@@ -237,6 +242,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private void prepareLayoutForFetchingNumber()
 	{
 		initializeViews(numLayout);
+		infoTxt.setImageResource(msisdnErrorDuringSignup ? R.drawable.enter_phone_again : R.drawable.enter_phone);
 		invalidNum.setVisibility(View.INVISIBLE);
 	}
 
@@ -252,9 +258,20 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	{
 		initializeViews(nameLayout);
 
-		String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
-		MSISDNView v = new MSISDNView(SignupActivity.this, msisdn);
-		numberContainer.addView(v);
+		if (msisdnView == null) 
+		{
+			String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
+			if(TextUtils.isEmpty(msisdn))
+			{
+				Utils.logEvent(SignupActivity.this, HikeConstants.LogEvent.SIGNUP_ERROR);
+				msisdnErrorDuringSignup = true;
+				resetViewFlipper();
+				restartTask();
+				return;
+			}
+			msisdnView = new MSISDNView(SignupActivity.this, msisdn);
+			numberContainer.addView(msisdnView);
+		}
 	}
 	
 	private void resetViewFlipper()
@@ -308,6 +325,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, booBooLayout.getVisibility() == View.VISIBLE);
 		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
 		super.onSaveInstanceState(outState);
 	}
 
