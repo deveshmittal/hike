@@ -64,6 +64,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private final int PIN = 1;
 	private final int NUMBER = 0;
 
+	private MSISDNView msisdnView;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -252,9 +254,12 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	{
 		initializeViews(nameLayout);
 
-		String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
-		MSISDNView v = new MSISDNView(SignupActivity.this, msisdn);
-		numberContainer.addView(v);
+		if (msisdnView == null) 
+		{
+			String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
+			msisdnView = new MSISDNView(SignupActivity.this, msisdn);
+			numberContainer.addView(msisdnView);
+		}
 	}
 	
 	private void resetViewFlipper()
