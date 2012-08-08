@@ -63,7 +63,7 @@
 	<string name="dnd_invite_message">Hey, I\'m using hike to send SMS for free! For you to start receiving messages from hike, I need you to opt-in. Just give a missed call to %1$s.</string>
 	<string name="edit_profile">Edit Profile</string>
 	<string name="no_sd_card">Please insert an SD Card</string>
-	<string name="press_btn_invite">Tap this button to invite %1$s to hike.</string>
+	<string name="press_btn_invite">To invite %1$s to hike, tap here.</string>
 	<string name="invalid_email">Invalid email address</string>
 	<string name="joined_conversation">&#160;joined the group chat!</string>
 	<string name="left_conversation">&#160;left the group chat.</string>
