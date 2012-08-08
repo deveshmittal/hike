@@ -484,6 +484,10 @@ public class Utils
 		List<String> contactNames = new ArrayList<String>(selectedContacts.length);
 		for(int i = 0; i<selectedContacts.length; i++)
 		{
+			if(!selectedContacts[i].contains("["))
+			{
+				continue;
+			}
 			contactNames.add(selectedContacts[i].substring(0, selectedContacts[i].indexOf("[")));
 		}
 		return contactNames;
