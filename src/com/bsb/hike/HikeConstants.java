@@ -243,6 +243,13 @@ public class HikeConstants
 	     * <event> = adDparT
 	     */
 	    public static final String ADD_PARTICIPANT = "groupSadDparT";
+	    
+	    /*
+	     * SignUp screen
+	     * <screen> = signupS
+	     * <event> = erroR
+	     */
+	    public static final String SIGNUP_ERROR = "signupSerroR";
 	}
 
 	public static final class MqttMessageTypes

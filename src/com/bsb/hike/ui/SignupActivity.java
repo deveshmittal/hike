@@ -30,6 +30,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
+import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.MSISDNView;
 
 public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener
@@ -262,6 +263,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
 			if(TextUtils.isEmpty(msisdn))
 			{
+				Utils.logEvent(SignupActivity.this, HikeConstants.LogEvent.SIGNUP_ERROR);
 				msisdnErrorDuringSignup = true;
 				resetViewFlipper();
 				restartTask();
