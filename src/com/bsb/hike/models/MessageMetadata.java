@@ -1,14 +1,20 @@
 package com.bsb.hike.models;
 
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.text.Spannable;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.view.View;
 
 import com.bsb.hike.HikeConstants;
@@ -22,12 +28,14 @@ public class MessageMetadata
 	private String dndMissedCallNumber;
 	private boolean newUser;
 	private JSONObject json;
+	private JSONArray dndNumbers;
 	private ParticipantInfoState participantInfoState = ParticipantInfoState.NO_INFO;
 
 	public MessageMetadata(JSONObject metadata)
 	{
 		this.newUser = metadata.optString(HikeConstants.NEW_USER).equals("true");
 		this.dndMissedCallNumber = metadata.optString(HikeConstants.METADATA_DND);
+		this.dndNumbers = metadata.optJSONArray(HikeConstants.DND_NUMBERS);
 		this.participantInfoState = ParticipantInfoState.fromJSON(metadata);
 		this.json = metadata;
 	}
@@ -55,11 +63,40 @@ public class MessageMetadata
 	public Spannable getMessage(final Context context, final ConvMessage convMessage, boolean shouldSetClickListener)
 	{
 		String content = "tap here";
+		StringBuilder formatArg = new StringBuilder();
+		final StringBuilder dndMsisdn = new StringBuilder();
+		if(dndNumbers != null)
+		{
+			try
+			{
+				Map<String, GroupParticipant> participantList = ((GroupConversation)convMessage.getConversation()).getGroupParticipantList();
+				for(int i = 0; i<dndNumbers.length(); i++)
+				{
+					GroupParticipant dndParticipant = participantList.get(dndNumbers.getString(i));
+					if(dndParticipant != null)
+					{
+						String separator = (i == (dndNumbers.length() -2)) ? " and " : ((i < dndNumbers.length() -2) ? ", " : "");
+						formatArg.append(dndParticipant.getContactInfo().getFirstName() + separator);
+					}
+					String msisdnSeparator = (i < (dndNumbers.length() - 1)) ? Build.MANUFACTURER.equalsIgnoreCase("Samsung") ? "," : ";" : "";
+					dndMsisdn.append(dndNumbers.getString(i) + msisdnSeparator);
+				}
+			}
+			catch (JSONException e) 
+			{
+				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+		}
+		else
+		{
+			formatArg.append(convMessage.getConversation().getLabel().split(" ", 2)[0]);
+			dndMsisdn.append(convMessage.getMsisdn());
+		}
 		String message = context.getString(
 				!TextUtils.isEmpty(dndMissedCallNumber) ? 
 						R.string.dnd_message : !newUser ? 
 								R.string.friend_joined_hike_no_creds : R.string.friend_joined_hike_with_creds, 
-								convMessage.getConversation().getLabel().split(" ", 2)[0], 
+								formatArg, 
 								dndMissedCallNumber);
 		Spannable spannable = Spannable.Factory.getInstance().newSpannable(message);
 		int index = message.indexOf(content);
@@ -75,7 +112,7 @@ public class MessageMetadata
 					{
 						Utils.logEvent(context, HikeConstants.LogEvent.OPT_IN_TAP_HERE);
 						intent = new Intent(Intent.ACTION_VIEW);
-						intent.setData(Uri.parse("sms:" + convMessage.getMsisdn()));
+						intent.setData(Uri.parse("sms:" + dndMsisdn));
 						intent.putExtra("sms_body", context.getString(R.string.dnd_invite_message, dndMissedCallNumber));
 					}
 					context.startActivity(intent);

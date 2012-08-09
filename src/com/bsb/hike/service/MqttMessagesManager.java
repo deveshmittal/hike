@@ -129,6 +129,10 @@ public class MqttMessagesManager {
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN.equals(type)) //Group chat join
 		{
+			if(jsonObj.getJSONArray(HikeConstants.DATA).length() == 0)
+			{
+				return;
+			}
 			GroupConversation groupConversation = new GroupConversation(jsonObj, this.context);
 
 			if(this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList()))
