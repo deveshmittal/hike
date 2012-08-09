@@ -864,6 +864,12 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			hideToolTip();
 			return;
 		}
+		if(groupChatToolTipParent != null && groupChatToolTipParent.getVisibility() == View.VISIBLE)
+		{
+			setToolTipDismissed();
+			openOptionsMenu();
+			return;
+		}
 	}
 
 	private void leaveGroup(Conversation conv)

@@ -225,10 +225,6 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		if(contactInfo == null)
 		{
 			String number = normalizeNumber(inputNumber.getText().toString());
-			if(!number.matches(HikeConstants.VALID_MSISDN_REGEX))
-			{
-				return;
-			}
 			Log.d(getClass().getSimpleName(), "Formatted number: " + number);
 			contactInfo = new ContactInfo(number, number, number, number);
 		}
