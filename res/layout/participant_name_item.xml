@@ -4,9 +4,5 @@
     android:layout_height="wrap_content"
     android:background="@drawable/hike_contact_bg"
     android:gravity="center"
-    android:shadowColor="@color/black"
-    android:shadowDy="-0.3"
-    android:shadowRadius="0.2"
-    android:textColor="@color/white"
-    android:textSize="14sp"
-    android:textStyle="bold" />
+    android:textColor="@color/contact_blue"
+    android:textSize="14sp" />

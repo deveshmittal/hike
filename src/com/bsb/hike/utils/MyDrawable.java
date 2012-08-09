@@ -2,7 +2,6 @@ package com.bsb.hike.utils;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -23,12 +22,10 @@ public class MyDrawable extends ShapeDrawable
 		this.onHike = onHike;
 
 		paint = new Paint();
-		paint.setColor(Color.WHITE);
+		paint.setColor(context.getResources().getColor(onHike ? R.color.contact_blue : R.color.contact_green));
 		paint.setTextSize(13.5f * Utils.densityMultiplier);
 		paint.setAntiAlias(true);
 		paint.setDither(true);
-		paint.setFakeBoldText(true);
-		paint.setShadowLayer(0.1f * Utils.densityMultiplier, 0, 0.2f * Utils.densityMultiplier, Color.BLACK);
 
 		getPaint().set(paint);
 	}
