@@ -23,23 +23,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
-            android:gravity="center_vertical"
             android:minHeight="48dp"
-            android:orientation="horizontal" >
+            android:orientation="horizontal"
+            android:gravity="center_vertical" >
 
+            <TextView 
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:text="To"
+                android:textColor="#818181"
+                android:paddingLeft="10dp"
+                android:textSize="16sp"
+				android:gravity="center_vertical"/>
+            
             <EditText
                 android:id="@+id/input_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="48dp"
                 android:background="@color/white"
-                android:drawableLeft="@drawable/ic_name_2"
-                android:drawablePadding="10dp"
+                android:gravity="center_vertical"
                 android:hint="Start typing a name..."
                 android:imeOptions="actionNone"
-                android:paddingBottom="7dp"
                 android:paddingLeft="10dp"
                 android:paddingRight="18dp"
-                android:paddingTop="7dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
                 android:singleLine="true"
                 android:textColor="@color/lightblack"
                 android:textColorHint="#cdcdc8"

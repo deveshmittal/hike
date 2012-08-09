@@ -264,8 +264,8 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 			myDrawable.setBounds(
 					(int) (0 * Utils.densityMultiplier), 
 					(int) (0 * Utils.densityMultiplier), 
-					(int) (myDrawable.getPaint().measureText(nameToBeShown) + ((int)17 * Utils.densityMultiplier)),
-					(int) (27 * Utils.densityMultiplier));
+					(int) (myDrawable.getPaint().measureText(nameToBeShown) + ((int)18 * Utils.densityMultiplier)),
+					(int) (28 * Utils.densityMultiplier));
 
 			ImageSpan imageSpan = new ImageSpan(myDrawable);
 
