@@ -85,7 +85,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		v.setTag(contactInfo);
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
-		textView.setText(contactInfo != null ? contactInfo.getName() : inputNumber.getText());
+		textView.setText(contactInfo != null ? contactInfo.getName() : getNumber(inputNumber.getText().toString()));
 
 		TextView numberTextView = (TextView) v.findViewById(R.id.number);
 		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn() : isGroupChat ? context.getString(R.string.tap_to_add) : context.getString(R.string.tap_to_message));
@@ -224,7 +224,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		ContactInfo contactInfo = (ContactInfo) view.getTag();
 		if(contactInfo == null)
 		{
-			String number = normalizeNumber(inputNumber.getText().toString());
+			String number = normalizeNumber(getNumber(inputNumber.getText().toString()));
 			Log.d(getClass().getSimpleName(), "Formatted number: " + number);
 			contactInfo = new ContactInfo(number, number, number, number);
 		}
@@ -303,8 +303,16 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	public boolean isEnabled(int position) {
 		if(filteredList.get(position) == null)
 		{
-			return inputNumber.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX);
+			return getNumber(inputNumber.getText().toString()).matches(HikeConstants.VALID_MSISDN_REGEX);
 		}
 		return super.isEnabled(position);
+	}
+
+	private String getNumber(String textInEditText)
+	{
+		int indexTextToBeFiltered = textInEditText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2;
+
+		return !textInEditText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ?
+				textInEditText : textInEditText.substring(indexTextToBeFiltered);
 	}
 }
