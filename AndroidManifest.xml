@@ -113,6 +113,7 @@
             android:theme="@style/NoTitleBar" >
         </activity>
         <activity android:name=".ui.Tutorial"
+            android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
         </activity>
         <receiver android:name=".service.BootService" >
