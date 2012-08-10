@@ -80,7 +80,6 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
@@ -668,6 +667,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	protected void onNewIntent(Intent intent)
 	{
+		Log.d(getClass().getSimpleName(), "Intent: " + intent.toString());
 		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
 		View btnBar = findViewById(R.id.button_bar);
 		titleIconView.setVisibility(View.GONE);
@@ -700,11 +700,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mConversation = null;
 
-		if ((dataURI != null) && "smsto".equals(dataURI.getScheme()))
+		if ((dataURI != null) && ("smsto".equals(dataURI.getScheme()) || "sms".equals(dataURI.getScheme())))
 		{
 			// Intent received externally
 			String phoneNumber = dataURI.getSchemeSpecificPart();
-			ContactInfo contactInfo = ContactUtils.getContactInfo(phoneNumber, this);
+			// We were getting msisdns with spaces in them. Replacing all spaces so that lookup is correct
+			phoneNumber = phoneNumber.replaceAll(" ", "");
+			Log.d(getClass().getSimpleName(), "SMS To: " + phoneNumber);
+			ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromPhoneNo(phoneNumber);
 			/*
 			 * phone lookup fails for a *lot* of people. If that happens, fall back to using their msisdn
 			 */
