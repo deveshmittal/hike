@@ -65,7 +65,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver
 				{
 					return;
 				}
-				ContactInfo contactInfo = mDb.getContactInfoFromPhoneNo(from);
+				ContactInfo contactInfo = mDb.getContactInfoFromMSISDN(from);
 				if (contactInfo == null)
 				{
 					Log.d(getClass().getSimpleName(), "Ignoring SMS message because contact not in addressbook phone_no=" + from);
