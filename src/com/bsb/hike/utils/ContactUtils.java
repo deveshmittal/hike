@@ -10,13 +10,11 @@ import java.util.Map;
 
 import org.json.JSONArray;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.provider.ContactsContract.PhoneLookup;
 import android.util.Log;
 
 import com.bsb.hike.db.HikeUserDatabase;
@@ -72,42 +70,6 @@ public class ContactUtils
 			}
 		}
 		return contactInfo;
-	}
-
-	public static ContactInfo getContactInfo(String phoneNumber, Context context)
-	{
-		ContentResolver contentResolver = context.getContentResolver();
-		Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-
-		Cursor cursor = null;
-		HikeUserDatabase db = null;
-		try
-		{
-
-			cursor = contentResolver.query(uri, new String[] { PhoneLookup.DISPLAY_NAME, PhoneLookup._ID }, null, null, null);
-			// if cursor is empty, just return null
-			if (!cursor.moveToFirst())
-			{
-				return null;
-			}
-
-			// lookup the user via the retrieved contactID
-			String id = cursor.getString(cursor.getColumnIndexOrThrow(PhoneLookup._ID));
-			db = HikeUserDatabase.getInstance();
-			ContactInfo contactInfo = db.getContactInfoFromId(id);
-			return contactInfo != null ? contactInfo : new ContactInfo(id, phoneNumber, cursor.getString(cursor.getColumnIndex(PhoneLookup.DISPLAY_NAME)), phoneNumber);
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
-		finally
-		{
-			if (cursor != null)
-			{
-				cursor.close();
-			}
-		}
 	}
 
 	/*
