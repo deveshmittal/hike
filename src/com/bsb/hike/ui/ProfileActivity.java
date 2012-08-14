@@ -437,7 +437,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				}
 
-				public void onSuccess()
+				public void onSuccess(JSONObject response)
 				{
 					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO) 
 					{
@@ -511,7 +511,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				}
 
-				public void onSuccess()
+				public void onSuccess(JSONObject response)
 				{
 					HikeUserDatabase db = HikeUserDatabase.getInstance();
 					db.setIcon(mLocalMSISDN, bytes);
@@ -542,7 +542,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				}
 
-				public void onSuccess()
+				public void onSuccess(JSONObject response)
 				{
 					SharedPreferences prefs = getSharedPreferences(
 							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);

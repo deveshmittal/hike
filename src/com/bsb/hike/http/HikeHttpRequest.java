@@ -7,7 +7,7 @@ public class HikeHttpRequest
 
 	public static abstract class HikeHttpCallback
 	{
-		public void onSuccess() {}
+		public void onSuccess(JSONObject response) {}
 		public void onFailure() {}
 	}
 
@@ -22,6 +22,7 @@ public class HikeHttpRequest
 	private JSONObject mJSONData;
 	private HikeHttpCallback mCompletionRunnable;
 	private byte[] mPostData;
+	private JSONObject response;
 
 	public HikeHttpRequest(String path, HikeHttpCallback completionRunnable)
 	{
@@ -48,7 +49,7 @@ public class HikeHttpRequest
 	{
 		if (mCompletionRunnable != null)
 		{
-			mCompletionRunnable.onSuccess();
+			mCompletionRunnable.onSuccess(response);
 		}
 	}
 
@@ -85,5 +86,15 @@ public class HikeHttpRequest
 		{
 			return "";
 		}
+	}
+
+	public void setResponse(JSONObject response)
+	{
+		this.response = response;
+	}
+
+	public JSONObject getResponse()
+	{
+		return response;
 	}
 }

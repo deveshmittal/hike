@@ -115,7 +115,7 @@ public class FeedbackActivity extends Activity implements FinishableEvent
 
 				}
 
-				public void onSuccess()
+				public void onSuccess(JSONObject response)
 				{
 					/* show a toast */
 					Toast toast = Toast.makeText(FeedbackActivity.this,
