@@ -375,7 +375,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	public void onBackPressed()
 	{
 		Utils.incrementNumTimesScreenOpen(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
-		super.onBackPressed();
+		// super.onBackPressed() would crash the application sometimes. Android Bug.
+		finish();
 	}
 
 	private Intent createIntentForConversation(Conversation conversation)
