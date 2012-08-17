@@ -1,5 +1,7 @@
 package com.bsb.hike.service;
 
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -106,6 +108,10 @@ public class MqttMessagesManager {
 		{
 			String msisdn = jsonObj.optString(HikeConstants.DATA);
 			boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED.equals(type);
+			if(convDb.doesConversationExist(msisdn) && joined)
+			{
+				saveStatusMsg(jsonObj, msisdn);
+			}
 			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			this.convDb.updateOnHikeStatus(msisdn, joined);
 
@@ -294,6 +300,19 @@ public class MqttMessagesManager {
 			if(data.has(HikeConstants.TOTAL_CREDITS_PER_MONTH))
 			{
 				this.pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
+			}
+		}
+		else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type))
+		{
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			if(convDb.doesConversationExist(msisdn))
+			{
+				saveStatusMsg(jsonObj, msisdn);
+			}
+			List<String> groupConversations = convDb.listOfGroupConversationsWithMsisdn(msisdn);
+			for(String groupId:groupConversations)
+			{
+				saveStatusMsg(jsonObj, groupId);
 			}
 		}
 	}

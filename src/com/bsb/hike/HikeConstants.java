@@ -276,5 +276,6 @@ public class HikeConstants
 		public static final String UPDATE_AVAILABLE = "ua";
 		public static final String ACCOUNT_INFO = "ai";
 		public static final String REQUEST_ACCOUNT_INFO = "rai";
+		public static final String USER_OPT_IN = "uo";
 	}
 }
