@@ -474,6 +474,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		super.onPrepareOptionsMenu(menu);
 
+		/*if the number ends with Hike, disable blocking, add to contacts and call */
+		if ((mContactNumber != null) &&
+		    (mContactNumber.endsWith("HIKE")))
+		{
+		    return false;
+		}
+
 		boolean amIGroupOwner = false;
 		if(mConversation instanceof GroupConversation)
 		{
