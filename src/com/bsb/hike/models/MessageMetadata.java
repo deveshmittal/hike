@@ -40,6 +40,11 @@ public class MessageMetadata
 		this.json = metadata;
 	}
 
+
+	public JSONArray getDndNumbers()
+	{
+		return dndNumbers;
+	}
 	public String getDNDMissedCallNumber()
 	{
 		return dndMissedCallNumber;
