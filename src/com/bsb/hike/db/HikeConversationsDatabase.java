@@ -694,13 +694,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			ih = new InsertHelper(mDb, DBConstants.GROUP_MEMBERS_TABLE);
-			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.GROUP_MEMBERS_TABLE + " VALUES (?, ?, ?, ?)");
+			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.GROUP_MEMBERS_TABLE + " VALUES (?, ?, ?, ?, ?)");
 			mDb.beginTransaction();
 			for(Entry<String, GroupParticipant> participant : participantList.entrySet())
 			{
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.GROUP_ID), groupId);
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.MSISDN), participant.getKey());
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.NAME), participant.getValue().getContactInfo().getName());
+				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ONHIKE), participant.getValue().getContactInfo().isOnhike() ? 1 : 0);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.HAS_LEFT), 0);
 
 				insertStatement.executeInsert();
@@ -746,7 +747,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly)
 	{
 		String selection = DBConstants.GROUP_ID + " =? " + (activeOnly ? "AND " + DBConstants.HAS_LEFT + "=0" : "");
-		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {DBConstants.MSISDN, DBConstants.HAS_LEFT}, selection, new String[] {groupId}, null, null, null);
+		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {DBConstants.MSISDN, DBConstants.HAS_LEFT, DBConstants.ONHIKE, DBConstants.NAME}, selection, new String[] {groupId}, null, null, null);
 
 		Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
 
@@ -757,7 +758,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn);
 			if(TextUtils.isEmpty(contactInfo.getName()))
 			{
-				contactInfo.setName(getParticipantName(groupId, contactInfo.getMsisdn()));
+				contactInfo.setName(c.getString(c.getColumnIndex(DBConstants.NAME)));
+			}
+			if(!contactInfo.isOnhike())
+			{
+				contactInfo.setOnhike(c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) == 1 ? true : false);
 			}
 
 			GroupParticipant groupParticipant = new GroupParticipant(contactInfo, c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0);
