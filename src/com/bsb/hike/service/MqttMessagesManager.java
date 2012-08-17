@@ -147,7 +147,7 @@ public class MqttMessagesManager {
 				Log.d(getClass().getSimpleName(), "The group conversation does not exists");
 				groupConversation =(GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
 			}
-			saveGroupStatusMsg(jsonObj);
+			saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE.equals(type)) //Group chat leave
 		{
@@ -155,7 +155,7 @@ public class MqttMessagesManager {
 			String msisdn = jsonObj.optString(HikeConstants.FROM);
 			if(this.convDb.setParticipantLeft(groupId, msisdn) > 0)
 			{
-				saveGroupStatusMsg(jsonObj);
+				saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 			}
 		}
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_NAME.equals(type)) //Group chat name change
@@ -173,7 +173,7 @@ public class MqttMessagesManager {
 			String groupId = jsonObj.optString(HikeConstants.TO);
 			if(this.convDb.setGroupDead(groupId) > 0)
 			{
-				saveGroupStatusMsg(jsonObj);
+				saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 			}
 		}
 		else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) //Message received from server
@@ -310,16 +310,21 @@ public class MqttMessagesManager {
 		convDb.updateMsgStatus(msgID, status.ordinal());
 	}
 
-	private void saveGroupStatusMsg(JSONObject jsonObj) throws JSONException
+	private void saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException
 	{
-		Conversation conversation = convDb.getConversation(jsonObj.getString(HikeConstants.TO), 0);
+		Conversation conversation = convDb.getConversation(msisdn, 0);
 
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
 		convDb.addConversationMessages(convMessage);
 
 		this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-		this.pubSub.publish(convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED ?
-				HikePubSub.PARTICIPANT_JOINED_GROUP : convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT ? 
-						HikePubSub.PARTICIPANT_LEFT_GROUP : HikePubSub.GROUP_END, jsonObj);
+		if(convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED ||
+				convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT ||
+				convMessage.getParticipantInfoState() == ParticipantInfoState.GROUP_END)
+		{
+			this.pubSub.publish(convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED ?
+					HikePubSub.PARTICIPANT_JOINED_GROUP : convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT ? 
+							HikePubSub.PARTICIPANT_LEFT_GROUP : HikePubSub.GROUP_END, jsonObj);
+		}
 	}
 }
