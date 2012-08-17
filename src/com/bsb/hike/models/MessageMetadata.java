@@ -36,7 +36,7 @@ public class MessageMetadata
 		this.newUser = metadata.optString(HikeConstants.NEW_USER).equals("true");
 		this.dndMissedCallNumber = metadata.optString(HikeConstants.METADATA_DND);
 		this.dndNumbers = metadata.optJSONArray(HikeConstants.DND_NUMBERS);
-		this.participantInfoState = ParticipantInfoState.fromJSON(metadata);
+		this.participantInfoState = this.dndNumbers == null ? ParticipantInfoState.fromJSON(metadata) : ParticipantInfoState.DND_USER;
 		this.json = metadata;
 	}
 
