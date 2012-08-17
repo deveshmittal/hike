@@ -60,6 +60,11 @@ public class MessageMetadata
 		return newUser;
 	}
 
+	public JSONObject getJSON()
+	{
+		return json;
+	}
+
 	public Spannable getMessage(final Context context, final ConvMessage convMessage, boolean shouldSetClickListener)
 	{
 		String content = "tap here";
