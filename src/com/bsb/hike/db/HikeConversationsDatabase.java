@@ -870,4 +870,27 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			cursor.close();
 		}
 	}
+	
+	public List<String> listOfGroupConversationsWithMsisdn(String msisdn)
+	{
+		Cursor cursor = null;
+		try
+		{
+			List<String> groupConversations = new ArrayList<String>();
+			cursor = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {DBConstants.GROUP_ID}, DBConstants.MSISDN + "=? AND " + DBConstants.HAS_LEFT + "=0", new String[] {msisdn}, null, null, null);
+			int groupIdIdx = cursor.getColumnIndex(DBConstants.GROUP_ID);
+			while(cursor.moveToNext())
+			{
+				groupConversations.add(cursor.getString(groupIdIdx));
+			}
+			return groupConversations;
+		}
+		finally
+		{
+			if(cursor != null)
+			{
+				cursor.close();
+			}
+		}
+	}
 }
