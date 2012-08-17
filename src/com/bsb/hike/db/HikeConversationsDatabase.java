@@ -95,6 +95,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.GROUP_ID +" STRING, "
 				+ DBConstants.MSISDN + " TEXT, "
 				+ DBConstants.NAME + " STRING, "
+				+ DBConstants.ONHIKE +" INTEGER, "
 				+ DBConstants.HAS_LEFT + " INTEGER"
 				+ " )";
 		db.execSQL(sql);
@@ -136,12 +137,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			db = mDb;
 		}
-
-		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.CONVERSATIONS_TABLE);
-		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.MESSAGES_TABLE);
-		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.GROUP_MEMBERS_TABLE);
-		db.execSQL("DROP TABLE IF EXISTS " + DBConstants.GROUP_INFO_TABLE);
-		onCreate(db);
+		String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ONHIKE + " INTEGER";
+		db.execSQL(alter);
 	}
 
 	public void updateOnHikeStatus(String msisdn, boolean onHike)
