@@ -1,6 +1,11 @@
 package com.bsb.hike.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,13 +38,15 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -51,6 +58,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -65,6 +73,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.utils.JSONSerializable;
@@ -818,5 +827,12 @@ public class Utils
     	s.setType("text/plain");
     	s.putExtra(Intent.EXTRA_TEXT, inviteMessage);
     	context.startActivity(s);
+    }
+
+    public static byte[] bitmapToBytes(Bitmap bitmap)
+    {
+    	ByteArrayOutputStream bao = new ByteArrayOutputStream();
+    	bitmap.compress(Bitmap.CompressFormat.JPEG, 95, bao);
+		return bao.toByteArray();
     }
 }
