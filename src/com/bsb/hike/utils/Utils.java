@@ -887,6 +887,16 @@ public class Utils
 		}
 	}
 
+    public static Drawable stringToDrawable(String encodedString)
+	{
+    	if(TextUtils.isEmpty(encodedString))
+    	{
+    		return null;
+    	}
+		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
+		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+	}
+
     public static byte[] bitmapToBytes(Bitmap bitmap)
     {
     	ByteArrayOutputStream bao = new ByteArrayOutputStream();
