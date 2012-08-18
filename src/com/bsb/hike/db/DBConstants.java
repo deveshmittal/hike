@@ -79,4 +79,10 @@ public class DBConstants
 	public static final String LAST_MESSAGED = "lastMessaged";
 
 	public static final String MSISDN_TYPE = "msisdnType";
+
+	public static final String FILE_TABLE = "fileTable";
+
+	public static final String FILE_KEY = "fileKey";
+
+	public static final String FILE_NAME = "fileName";
 }

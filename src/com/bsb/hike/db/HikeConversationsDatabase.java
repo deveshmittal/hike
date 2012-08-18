@@ -27,6 +27,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.utils.Utils;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper
@@ -113,6 +114,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.GROUP_ALIVE + " INTEGER"
 				+ " )";
 		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_TABLE
+				+ " ( "
+				+ DBConstants.FILE_KEY + " STRING PRIMARY KEY, "
+				+ DBConstants.FILE_NAME + " STRING UNIQUE"
+				+ " )";
+		db.execSQL(sql);
 	}
 
 	public void deleteAll()
@@ -139,6 +146,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 		String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ONHIKE + " INTEGER";
 		db.execSQL(alter);
+		onCreate(db);
 	}
 
 	public void updateOnHikeStatus(String msisdn, boolean onHike)
@@ -868,6 +876,48 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		finally
 		{
 			cursor.close();
+		}
+	}
+
+	public void addFile(String fileKey, String fileName) 
+	{
+		Log.d(getClass().getSimpleName(), "Adding file with File Key: " + fileKey + " File Name: " + fileName);
+		InsertHelper ih = null;
+		try
+		{
+		ih = new InsertHelper(mDb, DBConstants.FILE_TABLE);
+		ih.prepareForInsert();
+		ih.bind(ih.getColumnIndex(DBConstants.FILE_KEY), fileKey);
+		ih.bind(ih.getColumnIndex(DBConstants.FILE_NAME), fileName);
+		ih.execute();
+		}
+		finally
+		{
+			if(ih != null)
+			{
+				ih.close();
+			}
+		}
+	}
+
+	public String getFileKey(String fileName)
+	{
+		Cursor cursor = null;
+		try
+		{
+			cursor = mDb.query(DBConstants.FILE_TABLE, new String[] {DBConstants.FILE_KEY}, DBConstants.FILE_NAME + " =?", new String[] {fileName}, null, null, null);
+			if(cursor.moveToFirst())
+			{
+				return cursor.getString(cursor.getColumnIndex(DBConstants.FILE_KEY));
+			}
+			return null;
+		}
+		finally
+		{
+			if(cursor != null)
+			{
+				cursor.close();
+			}
 		}
 	}
 	
