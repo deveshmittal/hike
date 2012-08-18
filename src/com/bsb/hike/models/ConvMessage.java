@@ -186,11 +186,11 @@ public class ConvMessage
 			this.mappedMsgId = -1;
 			throw new JSONException("Problem in JSON while parsing msgID.");
 		}
+		this.participantInfoState = ParticipantInfoState.NO_INFO;
 		if (data.has(HikeConstants.METADATA)) 
 		{
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
-		this.participantInfoState = ParticipantInfoState.NO_INFO;
 	}
 
 	public ConvMessage(JSONObject obj, Conversation conversation, Context context, boolean isSelfGenerated) throws JSONException
@@ -200,9 +200,7 @@ public class ConvMessage
 		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*represents msg is coming from another client*/
 		this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
 
-		this.participantInfoState = ParticipantInfoState.fromJSON(obj);
-
-		this.metadata = new MessageMetadata(obj);
+		setMetadata(obj);
 		switch (this.participantInfoState) 
 		{
 		case PARTICIPANT_JOINED:
@@ -242,6 +240,7 @@ public class ConvMessage
 			isFileTransferMessage = metadata.has(HikeConstants.FILES);
 			Log.d(getClass().getSimpleName(), "File Transfer: " + isFileTransferMessage);
 			this.metadata = new MessageMetadata(metadata);
+			participantInfoState = this.metadata.getParticipantInfoState();
 		}
 	}
 
@@ -251,8 +250,6 @@ public class ConvMessage
 		{
 			JSONObject metadata = new JSONObject(metadataString);
 			setMetadata(metadata);
-			ParticipantInfoState participantInfoState = this.metadata.getParticipantInfoState();
-			setParticipantInfoState(participantInfoState);
 		}
 	}
 
