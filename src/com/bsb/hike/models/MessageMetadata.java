@@ -1,5 +1,7 @@
 package com.bsb.hike.models;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
@@ -30,6 +32,7 @@ public class MessageMetadata
 	private JSONObject json;
 	private JSONArray dndNumbers;
 	private ParticipantInfoState participantInfoState = ParticipantInfoState.NO_INFO;
+	private List<HikeFile> hikeFileList;
 
 	public MessageMetadata(JSONObject metadata)
 	{
@@ -37,14 +40,34 @@ public class MessageMetadata
 		this.dndMissedCallNumber = metadata.optString(HikeConstants.METADATA_DND);
 		this.dndNumbers = metadata.optJSONArray(HikeConstants.DND_NUMBERS);
 		this.participantInfoState = this.dndNumbers == null ? ParticipantInfoState.fromJSON(metadata) : ParticipantInfoState.DND_USER;
+		this.hikeFileList = getHikeFileListFromJSONArray(metadata.optJSONArray(HikeConstants.FILES));
 		this.json = metadata;
 	}
 
+	private List<HikeFile> getHikeFileListFromJSONArray(JSONArray fileList)
+	{
+		if(fileList == null)
+		{
+			return null;
+		}
+		List<HikeFile> hikeFileList = new ArrayList<HikeFile>();
+		for(int i = 0; i<fileList.length(); i++)
+		{
+			hikeFileList.add(new HikeFile(fileList.optJSONObject(i)));
+		}
+		return hikeFileList;
+	}
 
 	public JSONArray getDndNumbers()
 	{
 		return dndNumbers;
 	}
+
+	public List<HikeFile> getHikeFiles()
+	{
+		return hikeFileList;
+	}
+
 	public String getDNDMissedCallNumber()
 	{
 		return dndMissedCallNumber;
