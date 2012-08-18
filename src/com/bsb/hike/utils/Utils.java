@@ -939,7 +939,7 @@ public class Utils
     	currentHeight = options.outHeight;
     	currentWidth = options.outWidth;
 
-    	options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth)/(HikeConstants.MAX_DIMENSION_THUMBNAIL_PX * Utils.densityMultiplier));
+    	options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth)/(HikeConstants.MAX_DIMENSION_THUMBNAIL_PX));
     	options.inJustDecodeBounds = false;
 
     	thumbnail = BitmapFactory.decodeFile(filePath, options);
