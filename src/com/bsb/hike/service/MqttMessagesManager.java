@@ -106,7 +106,7 @@ public class MqttMessagesManager {
 		}
 		else if ((HikeConstants.MqttMessageTypes.USER_JOINED.equals(type)) || (HikeConstants.MqttMessageTypes.USER_LEFT.equals(type))) //User joined/left
 		{
-			String msisdn = jsonObj.optString(HikeConstants.DATA);
+			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
 			boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED.equals(type);
 			if(convDb.doesConversationExist(msisdn) && joined)
 			{
@@ -304,7 +304,7 @@ public class MqttMessagesManager {
 		}
 		else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type))
 		{
-			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
 			if(convDb.doesConversationExist(msisdn))
 			{
 				saveStatusMsg(jsonObj, msisdn);
