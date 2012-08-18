@@ -34,6 +34,11 @@ public class HikeConstants
 	public static final String INVITE_TOKEN = "invite_token";
 	public static final String TOTAL_CREDITS_PER_MONTH = "tc";
 	public static final String DND_NUMBERS = "dndnumbers";
+	public static final String FILES = "files";
+	public static final String CONTENT_TYPE = "ct";
+	public static final String THUMBNAIL = "tn";
+	public static final String FILE_NAME = "fn";
+	public static final String FILE_KEY = "fk";
 	public static final String CREDITS = "credits";
 	public static final String ON_HIKE = "onhike";
 
