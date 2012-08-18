@@ -44,7 +44,9 @@ public class ConvMessage
 	private String groupParticipantMsisdn;
 
 	private ParticipantInfoState participantInfoState;
-	
+
+	private boolean isFileTransferMessage;
+
 	public boolean isInvite()
 	{
 		return mInvite;
@@ -53,6 +55,16 @@ public class ConvMessage
 	public void setInvite(boolean mIsInvite)
 	{
 		this.mInvite = mIsInvite;
+	}
+
+	public boolean isFileTransferMessage()
+	{
+		return isFileTransferMessage;
+	}
+
+	public void setIsFileTranferMessage(boolean isFileTransferMessage)
+	{
+		this.isFileTransferMessage = isFileTransferMessage;
 	}
 
 	/* Adding entries to the beginning of this list is not backwards compatible */
@@ -248,6 +260,9 @@ public class ConvMessage
 	{
 		if (metadata != null)
 		{
+			Log.d(getClass().getSimpleName(), "Metadata: " + metadata.toString());
+			isFileTransferMessage = metadata.has(HikeConstants.FILES);
+			Log.d(getClass().getSimpleName(), "File Transfer: " + isFileTransferMessage);
 			this.metadata = new MessageMetadata(metadata);
 		}
 	}
@@ -370,8 +385,14 @@ public class ConvMessage
 	{
 		JSONObject object = new JSONObject();
 		JSONObject data = new JSONObject();
+		JSONObject md = null;
 		try
 		{
+			if(metadata != null && isFileTransferMessage)
+			{
+				md = metadata.getJSON();
+				data.put(HikeConstants.METADATA, md);
+			}
 			data.put(mConversation != null && mConversation.isOnhike() ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP,mTimestamp);
 			data.put(HikeConstants.MESSAGE_ID,msgID);
