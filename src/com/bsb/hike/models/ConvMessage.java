@@ -222,33 +222,11 @@ public class ConvMessage
 		case GROUP_END:
 			this.mMessage = context.getString(R.string.group_chat_end);
 			break;
-		case DND_USER:
-			JSONArray dndNumbers = this.metadata.getDndNumbers();
-			StringBuilder dndNames = new StringBuilder(); 
-			for(int i=0; i<dndNumbers.length(); i++)
-			{
-				if(i < dndNumbers.length() - 2)
-				{
-					dndNames.append(((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName() + ", ");
-				}
-				else if(i < dndNumbers.length() - 1)
-				{
-					dndNames.append(((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName() + " and ");
-				}
-				else
-				{
-					dndNames.append(((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName());
-				}
-			}
-			this.mMessage = String.format(context.getString(R.string.dnd_msg_gc), dndNames.toString());
-			break;
 		case USER_JOIN:
 			this.mMessage = String.format(context.getString(R.string.joined_hike), conversation.getLabel().split(" ", 2)[0]);
 			break;
 		case USER_OPT_IN:
 			this.mMessage = String.format(context.getString(R.string.opt_in), conversation.getLabel().split(" ", 2)[0]);
-			break;
-		case NO_INFO:
 			break;
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
