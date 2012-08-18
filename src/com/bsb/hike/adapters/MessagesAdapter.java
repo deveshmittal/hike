@@ -8,12 +8,15 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,10 +36,16 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadFileTask;
+import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.CircularProgress;
 
 public class MessagesAdapter extends BaseAdapter
 {
@@ -46,7 +55,9 @@ public class MessagesAdapter extends BaseAdapter
 		RECEIVE,
 		SEND_SMS,
 		SEND_HIKE,
-		PARTICIPANT_INFO
+		PARTICIPANT_INFO,
+		FILE_TRANSFER_SEND,
+		FILE_TRANSFER_RECEIVE
 	};
 
 	private class ViewHolder
@@ -56,6 +67,10 @@ public class MessagesAdapter extends BaseAdapter
 		TextView timestampTextView;
 		ImageView image;
 		ViewGroup participantInfoContainer;
+		ImageView fileThumb;
+		ImageView showFileBtn;
+		CircularProgress circularProgress;
+		View marginView;
 	}
 
 	private Conversation conversation;
@@ -77,7 +92,11 @@ public class MessagesAdapter extends BaseAdapter
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+		if (convMessage.isFileTransferMessage())
+		{
+			type = convMessage.isSent() ? ViewType.FILE_TRANSFER_SEND : ViewType.FILE_TRANSFER_RECEIVE;
+		}
+		else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			type = ViewType.PARTICIPANT_INFO;
 		}
@@ -115,56 +134,78 @@ public class MessagesAdapter extends BaseAdapter
 		if (v == null)
 		{
 			holder = new ViewHolder();
-			if(convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+
+			switch(ViewType.values()[getItemViewType(position)])
 			{
+			case PARTICIPANT_INFO:
 				v = inflater.inflate(R.layout.message_item_receive, null);
-				
+
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
-				holder.messageTextView = (TextView) v.findViewById(R.id.message_receive);
 				holder.timestampContainer = (LinearLayout) v.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v.findViewById(R.id.timestamp);
 				holder.participantInfoContainer = (ViewGroup) v.findViewById(R.id.participant_info_container);
 
 				holder.image.setVisibility(View.GONE);
-				holder.messageTextView.setVisibility(View.GONE);
-				v.setTag(holder);
-			}
-			else if (convMessage.isSent())
-			{
+				v.findViewById(R.id.receive_message_container).setVisibility(View.GONE);
+				break;
+
+			case FILE_TRANSFER_SEND:
 				v = inflater.inflate(R.layout.message_item_send, parent, false);
+
+				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
+				holder.circularProgress = (CircularProgress) v.findViewById(R.id.file_transfer_progress);
+				holder.marginView = v.findViewById(R.id.margin_view);
+
+				showFileTransferElements(holder, v, true);
+			case SEND_HIKE:
+			case SEND_SMS:
+				if(v == null)
+				{
+					v = inflater.inflate(R.layout.message_item_send, parent, false);
+				}
 
 				holder.image = (ImageView) v.findViewById(R.id.msg_status_indicator);
 				holder.timestampContainer = (LinearLayout) v.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v.findViewById(R.id.timestamp);
-				v.setTag(holder);
 
+				holder.messageTextView = (TextView) v.findViewById(R.id.message_send);
 				/* label outgoing hike conversations in green */
-				if (conversation.isOnhike())
-				{
-					holder.messageTextView = (TextView) v.findViewById(R.id.message_hike);
-					holder.messageTextView.setVisibility(View.VISIBLE);
-					v.findViewById(R.id.message_sms).setVisibility(View.GONE);
-				}
-				else
-				{
-					holder.messageTextView = (TextView) v.findViewById(R.id.message_sms);
-					holder.messageTextView.setVisibility(View.VISIBLE);
-					v.findViewById(R.id.message_hike).setVisibility(View.GONE);
-				}
-			}
-			else
-			{
+				v.findViewById(R.id.sent_message_container).setBackgroundResource(conversation.isOnhike() ? R.drawable.ic_bubble_blue_selector : R.drawable.ic_bubble_green_selector);
+				break;
+
+			case FILE_TRANSFER_RECEIVE:
 				v = inflater.inflate(R.layout.message_item_receive, parent, false);
 
+				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
+				holder.showFileBtn = (ImageView) v.findViewById(R.id.btn_open_file);
+				holder.circularProgress = (CircularProgress) v.findViewById(R.id.file_transfer_progress);
+				holder.messageTextView = (TextView) v.findViewById(R.id.message_receive_ft);
+				holder.messageTextView.setVisibility(View.VISIBLE);
+
+				holder.circularProgress.setVisibility(View.INVISIBLE);
+				showFileTransferElements(holder, v, false);
+
+				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
+			case RECEIVE:
+			default:
+				if(v == null)
+				{
+					v = inflater.inflate(R.layout.message_item_receive, parent, false);
+				}
+
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
-				holder.messageTextView = (TextView) v.findViewById(R.id.message_receive);
+				if(holder.messageTextView == null)
+				{
+					holder.messageTextView = (TextView) v.findViewById(R.id.message_receive);
+				}
 				holder.timestampContainer = (LinearLayout) v.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v.findViewById(R.id.timestamp);
 				holder.participantInfoContainer = (ViewGroup) v.findViewById(R.id.participant_info_container);
 
 				holder.participantInfoContainer.setVisibility(View.GONE);
-				v.setTag(holder);
+				break;
 			}
+			v.setTag(holder);
 		}
 		else
 		{
@@ -286,7 +327,37 @@ public class MessagesAdapter extends BaseAdapter
 			
 
 		MessageMetadata metadata = convMessage.getMetadata();
-		if (metadata != null)
+		if(convMessage.isFileTransferMessage())
+		{
+			HikeFile hikeFile = metadata.getHikeFiles().get(0);
+
+			holder.fileThumb.setImageDrawable(
+					hikeFile.getThumbnail() != null ? 
+							hikeFile.getThumbnail() : 
+								context.getResources().getDrawable(
+										hikeFile.getHikeFileType() == HikeFileType.IMAGE ? 
+												R.drawable.ic_default_img : R.drawable.ic_default_mov));
+
+			holder.messageTextView.setVisibility(hikeFile.getThumbnail() == null ? View.VISIBLE : View.GONE);
+			holder.messageTextView.setText(hikeFile.getFileName());
+
+			if(holder.showFileBtn != null)
+			{
+				LayoutParams lp = (LayoutParams) holder.showFileBtn.getLayoutParams();
+				lp.gravity = hikeFile.getThumbnail() == null ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM;
+				holder.showFileBtn.setLayoutParams(lp);
+				holder.showFileBtn.setImageResource(ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) ?
+						R.drawable.ic_open_file_disabled : 
+							hikeFile.wasFileDownloaded() ? 
+									R.drawable.ic_open_received_file : 
+										R.drawable.ic_download_file);
+			}
+			if(holder.marginView != null)
+			{
+				holder.marginView.setVisibility(hikeFile.getThumbnail() == null ? View.VISIBLE : View.GONE);
+			}
+		}
+		else if (metadata != null)
 		{
 			Spannable spannable = metadata.getMessage(context, convMessage, true);
 			convMessage.setMessage(spannable.toString());
@@ -312,28 +383,62 @@ public class MessagesAdapter extends BaseAdapter
 			Linkify.addLinks(holder.messageTextView, Utils.shortCodeRegex, "tel:");
 		}
 
-		/* set the image resource, getImageState returns -1 if this is a received image */
-		int resId = convMessage.getImageState();
-		if (resId > 0)
+		if(convMessage.isFileTransferMessage() && ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
 		{
-			if (convMessage.getState() == State.SENT_UNCONFIRMED) 
+			AsyncTask<?, ?, ?> fileTransferTask = ChatThread.fileTransferTaskMap.get(convMessage.getMsgID());
+			holder.circularProgress.setVisibility(View.VISIBLE);
+			holder.circularProgress.setProgressAngle(fileTransferTask instanceof HikeHTTPTask ? ((HikeHTTPTask)fileTransferTask).getProgressFileTransfer() : ((DownloadFileTask)fileTransferTask).getProgressFileTransfer());
+			if(convMessage.isSent())
 			{
-				showTryingAgainIcon(holder.image, convMessage.getTimestamp());
-			}
-			else
-			{
-				holder.image.setImageResource(resId);
-				holder.image.setAnimation(null);
-				holder.image.setVisibility(View.VISIBLE);
+				holder.image.setVisibility(View.INVISIBLE);
 			}
 		}
-		else if (convMessage.isSent())
+		else if(convMessage.isFileTransferMessage() && convMessage.isSent() && TextUtils.isEmpty(metadata.getHikeFiles().get(0).getFileKey()))
 		{
-			holder.image.setImageResource(0);
+			if(holder.circularProgress != null)
+			{
+				holder.circularProgress.setVisibility(View.INVISIBLE);
+			}
+			holder.image.setVisibility(View.VISIBLE);
+			holder.image.setImageResource(R.drawable.ic_download_failed);
+			if(holder.showFileBtn != null)
+			{
+				holder.showFileBtn.setVisibility(View.VISIBLE);
+			}
 		}
 		else
 		{
-			holder.image.setImageDrawable(convMessage.isGroupChat() ? IconCacheManager.getInstance().getIconForMSISDN(convMessage.getGroupParticipantMsisdn()) : IconCacheManager.getInstance().getIconForMSISDN(convMessage.getMsisdn()));
+			if(holder.showFileBtn != null)
+			{
+				holder.showFileBtn.setVisibility(View.VISIBLE);
+			}
+			if(holder.circularProgress != null)
+			{
+				holder.circularProgress.setVisibility(View.INVISIBLE);
+			}
+			/* set the image resource, getImageState returns -1 if this is a received image */
+			int resId = convMessage.getImageState();
+			if (resId > 0)
+			{
+				if (convMessage.getState() == State.SENT_UNCONFIRMED) 
+				{
+					showTryingAgainIcon(holder.image, convMessage.getTimestamp());
+				}
+				else
+				{
+					holder.image.setImageResource(resId);
+					holder.image.setAnimation(null);
+					holder.image.setVisibility(View.VISIBLE);
+				}
+			}
+			else if (convMessage.isSent())
+			{
+				holder.image.setImageResource(0);
+			}
+			else
+			{
+				holder.image.setImageDrawable(convMessage.isGroupChat() ? IconCacheManager.getInstance().getIconForMSISDN(convMessage.getGroupParticipantMsisdn()) : IconCacheManager.getInstance().getIconForMSISDN(convMessage.getMsisdn()));
+			}
 		}
 
 		return v;
@@ -374,6 +479,16 @@ public class MessagesAdapter extends BaseAdapter
 		}
 	}
 
+	private void showFileTransferElements(ViewHolder holder, View v, boolean isSentMessage)
+	{
+		holder.fileThumb.setVisibility(View.VISIBLE);
+		if(holder.showFileBtn != null)
+		{
+			holder.showFileBtn.setVisibility(View.VISIBLE);
+			holder.showFileBtn.setImageResource(isSentMessage ? R.drawable.ic_open_sent_file : R.drawable.ic_open_received_file);
+		}
+	}
+
 	private boolean shouldDisplayTimestamp(int position)
 	{
 		/* 
@@ -409,5 +524,4 @@ public class MessagesAdapter extends BaseAdapter
 	{
 		return getCount() == 0;
 	}
-
 }
