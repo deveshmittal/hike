@@ -1,5 +1,7 @@
 package com.bsb.hike;
 
+import com.bsb.hike.utils.AccountUtils;
+
 public class HikeConstants
 {
 	public static final String MESSAGE = "msg";
@@ -97,6 +99,13 @@ public class HikeConstants
 	public static int MAX_CONTACTS_IN_GROUP = 9;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
+
+	public static final int MAX_BUFFER_SIZE_KB = 100;
+	public static final int MAX_FILE_SIZE = 4*1024*1024;
+	public static final int IMAGE_TRANSFER_CODE = 1188;
+	public static final int VIDEO_TRANSFER_CODE = 1189;
+	public static final int AUDIO_TRANSFER_CODE = 1190;
+	public static final String FILE_TRANSFER_BASE_URL = AccountUtils.BASE + "/user/ft/";
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 140; 
 

@@ -5,21 +5,33 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.bsb.hike.R;
+import com.bsb.hike.http.HikeFileTransferHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
 
-public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Void, Boolean> implements ActivityCallableTask
+public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> implements ActivityCallableTask
 {
 	boolean finished;
 	private FinishableEvent finishableEvent;
 	private HikeHttpRequest[] requests;
 	private int errorStringId;
+	private int progressFileTransfer;
+	private ChatThread chatThread;
 
 	public HikeHTTPTask(FinishableEvent activity, int errorStringId)
 	{
 		this.finishableEvent = activity;
 		this.errorStringId = errorStringId;
+		if(activity instanceof ChatThread)
+		{
+			this.chatThread = (ChatThread) activity;
+		}
+	}
+	
+	public void setChatThread(ChatThread activity)
+	{
+		this.chatThread = activity;
 	}
 
 	@Override
@@ -57,7 +69,14 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Void, Boolean> impl
 			for (HikeHttpRequest hikeHttpRequest : requests)
 			{
 				Log.d("HikeHTTPTask", "About to perform request:" + hikeHttpRequest.getPath());
-				AccountUtils.performRequest(hikeHttpRequest);
+				if(hikeHttpRequest instanceof HikeFileTransferHttpRequest)
+				{
+					hikeHttpRequest.setResponse(AccountUtils.executeFileTransferRequest(hikeHttpRequest, ((HikeFileTransferHttpRequest)hikeHttpRequest).getFileName(), this));
+				}
+				else
+				{
+					AccountUtils.performRequest(hikeHttpRequest);
+				}
 				Log.d("HikeHTTPTask", "Finished performing request:" + hikeHttpRequest.getPath());
 			}
 		}
@@ -68,6 +87,24 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Void, Boolean> impl
 		}
 
 		return Boolean.TRUE;
+	}
+
+	public void updateProgress(int progress)
+	{
+		publishProgress(progress);
+	}
+	
+	@Override
+	protected void onProgressUpdate(Integer... values) 
+	{
+		progressFileTransfer = values[0];
+		Log.d(getClass().getSimpleName(), "Progress Percentage: " + progressFileTransfer);
+		chatThread.runOnUiThread(chatThread.mUpdateAdapter);
+	}
+
+	public int getProgressFileTransfer()
+	{
+		return progressFileTransfer;
 	}
 
 	@Override

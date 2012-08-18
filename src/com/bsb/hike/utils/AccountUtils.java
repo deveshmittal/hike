@@ -1,9 +1,13 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +23,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -52,6 +57,7 @@ import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.tasks.HikeHTTPTask;
 
 public class AccountUtils
 {
@@ -567,6 +573,83 @@ public class AccountUtils
 		{
 			Log.wtf("AccountUtils", "Unable to encode name");
 		}
+	}
+
+	public static JSONObject executeFileTransferRequest(HikeHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask) throws Exception
+	{
+		byte[] bytes = GzipByteArrayEntity.gzip(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
+		ByteArrayInputStream fileInputStream = new ByteArrayInputStream(bytes);
+
+		URL url;
+		url = new URL(BASE + hikeHttpRequest.getPath());
+
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+		connection.setDoInput(true);
+		connection.setDoOutput(true);
+		connection.setUseCaches(false);
+
+		connection.setRequestMethod("PUT");
+
+		connection.setRequestProperty("Connection", "Keep-Alive");
+		connection.setRequestProperty("Content-Name", fileName);
+		connection.setRequestProperty("Content-Type", "");
+		connection.setRequestProperty("Content-Encoding", "gzip");
+		connection.setRequestProperty("Cookie", "user=" + mToken);
+		connection.setRequestProperty("X-Thumbnail-Required", "0");
+
+		DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
+
+		int bytesAvailable = bytes.length;
+		Log.d("Size",bytesAvailable+"");
+
+		int maxBufferSize = HikeConstants.MAX_BUFFER_SIZE_KB * 1024;
+		int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+		byte[] buffer = new byte[bufferSize];
+
+		// Read file
+		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+		int progress;
+		int totalBytesRead = bytesRead;
+
+		while (bytesRead > 0)
+		{
+			outputStream.write(buffer, 0, bufferSize);
+
+			bytesAvailable = fileInputStream.available();
+			Log.d("Available",bytesAvailable+"");
+
+			bufferSize = Math.min(bytesAvailable, maxBufferSize);
+			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+			totalBytesRead += bytesRead;
+
+			progress = bytesRead > 0 ? (int) ((totalBytesRead * 100)/bytes.length) : 100;
+			hikeHTTPTask.updateProgress(progress);
+
+			Thread.sleep(1000);
+		}
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		StringBuilder builder = new StringBuilder();
+		CharBuffer target = CharBuffer.allocate(10000);
+		int read = reader.read(target);
+		while (read >= 0)
+		{
+			builder.append(target.array(), 0, read);
+			target.clear();
+			read = reader.read(target);
+		}
+		Log.d("HTTP", "request finished");
+		outputStream.flush();
+		outputStream.close();
+
+		Log.d("AccountUtils", "Response: " + builder.toString());
+		JSONObject response = new JSONObject(builder.toString());
+		if ((response == null) || (!"ok".equals(response.optString("stat"))))
+		{
+			throw new NetworkErrorException("Unable to perform request");
+		}
+		return response;
 	}
 
 	public static String getServerUrl()
