@@ -309,6 +309,25 @@ public class MessagesAdapter extends BaseAdapter
 				{
 					TextView dndMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 
+					JSONArray dndNumbers = convMessage.getMetadata().getDndNumbers();
+					StringBuilder dndNames = new StringBuilder(); 
+					for(int i=0; i<dndNumbers.length(); i++)
+					{
+						if(i < dndNumbers.length() - 2)
+						{
+							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() + ", ");
+						}
+						else if(i < dndNumbers.length() - 1)
+						{
+							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() + " and ");
+						}
+						else
+						{
+							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName());
+						}
+					}
+					convMessage.setMessage(String.format(context.getString(R.string.dnd_msg_gc), dndNames.toString()));
+
 					SpannableStringBuilder ssb = new SpannableStringBuilder(convMessage.getMessage());
 					ssb.setSpan(new ForegroundColorSpan(0xff666666), context.getString(R.string.dnd_msg_gc).indexOf("%1$s"), convMessage.getMessage().indexOf("to join in"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
