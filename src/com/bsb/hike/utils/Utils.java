@@ -33,6 +33,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -46,9 +47,11 @@ import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -950,4 +953,17 @@ public class Utils
     	bitmap.compress(Bitmap.CompressFormat.JPEG, 95, bao);
 		return bao.toByteArray();
     }
+
+    public static String getRealPathFromUri(Uri contentUri, Activity activity) 
+	{
+	    String[] proj = { MediaStore.Images.Media.DATA };
+	    Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
+	    if (cursor == null)
+		{
+			return contentUri.getPath();
+		}
+	    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+	    cursor.moveToFirst();
+	    return cursor.getString(column_index);
+	}
 }

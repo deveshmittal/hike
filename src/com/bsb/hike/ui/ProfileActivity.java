@@ -17,7 +17,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
@@ -633,7 +632,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
 			Log.d("ProfileActivity", "The activity is " + this);
-			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon.getAbsolutePath() : getGalleryPath(data.getData());
+			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);
 			intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
@@ -656,24 +655,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			}
 			break;
 		}
-	}
-
-	private String getGalleryPath(Uri selectedImage)
-	{
-		String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-		Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-		if (cursor == null)
-		{
-			return selectedImage.getPath();
-		}
-
-		cursor.moveToFirst();
-
-		int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-		String filePath = cursor.getString(columnIndex);
-		cursor.close();
-		return filePath;
 	}
 
 	@Override
