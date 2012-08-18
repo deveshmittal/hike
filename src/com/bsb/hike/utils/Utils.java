@@ -897,6 +897,28 @@ public class Utils
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
 
+    public static Bitmap makeThumbnail(String filePath)
+    {
+    	Bitmap thumbnail = null;
+
+    	int currentWidth = 0;
+    	int currentHeight = 0;
+
+    	BitmapFactory.Options options = new BitmapFactory.Options();
+    	options.inJustDecodeBounds = true;
+
+    	BitmapFactory.decodeFile(filePath, options);
+    	currentHeight = options.outHeight;
+    	currentWidth = options.outWidth;
+
+    	options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth)/(HikeConstants.MAX_DIMENSION_THUMBNAIL_PX * Utils.densityMultiplier));
+    	options.inJustDecodeBounds = false;
+
+    	thumbnail = BitmapFactory.decodeFile(filePath, options);
+
+    	return thumbnail;
+    }
+
     public static byte[] bitmapToBytes(Bitmap bitmap)
     {
     	ByteArrayOutputStream bao = new ByteArrayOutputStream();

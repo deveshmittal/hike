@@ -93,6 +93,8 @@ public class HikeConstants
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
 
+	public static final int MAX_DIMENSION_THUMBNAIL_PX = 140; 
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
