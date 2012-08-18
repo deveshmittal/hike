@@ -177,6 +177,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ "	;	Rows Affected : " + rowsAffected);
 	}
 
+	public void updateMessageMetadata(long msgID, MessageMetadata metadata)
+	{
+		ContentValues contentValues = new ContentValues(1);
+		contentValues.put(DBConstants.MESSAGE_METADATA, metadata.serialize());
+		mDb.update(DBConstants.MESSAGES_TABLE, contentValues, DBConstants.MESSAGE_ID + "=?", new String[] {String.valueOf(msgID)});
+	}
+
 	private void bindConversationInsert(SQLiteStatement insertStatement, ConvMessage conv)
 	{
 		final int messageColumn = 1;
