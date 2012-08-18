@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
@@ -52,6 +51,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -684,7 +684,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		{
 		case PROFILE_PICTURE_FROM_CAMERA:
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			selectedFileIcon = Utils.getOutputMediaFile(Utils.MEDIA_TYPE_IMAGE); // create a file to save the image
+			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, null); // create a file to save the image
 			if (selectedFileIcon != null)
 			{
 				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));

@@ -75,6 +75,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -272,27 +273,37 @@ public class Utils
 		return context.getResources().getDrawable(id);
 	}
 
-	public static final int MEDIA_TYPE_IMAGE = 1;
-	public static final int MEDIA_TYPE_VIDEO = 2;
-
-	/** Create a file Uri for saving an image or video */
-	public static Uri getOutputMediaFileUri(int type){
-	      return Uri.fromFile(getOutputMediaFile(type));
-	}
-
 	/** Create a File for saving an image or video */
-	public static File getOutputMediaFile(int type){
+	public static File getOutputMediaFile(HikeFileType type, String orgFileName, String fileKey)
+	{
 	    // To be safe, you should check that the SDCard is mounted
 	    // using Environment.getExternalStorageState() before doing this.
 
-	    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-	              Environment.DIRECTORY_PICTURES), "Hike");
+		StringBuilder path = new StringBuilder(Environment.getExternalStorageDirectory() + "/Hike/Media");
+		switch (type) 
+		{
+		case PROFILE:
+			path.append("/hike Profile Images");
+			break;
+		case IMAGE:
+			path.append("/hike Images");
+			break;
+		case VIDEO:
+			path.append("/hike Videos");
+			break;
+		case AUDIO:
+			path.append("/hike Audios");
+		}
+		
+	    File mediaStorageDir = new File(path.toString());
 	    // This location works best if you want the created images to be shared
 	    // between applications and persist after your app has been uninstalled.
 
 	    // Create the storage directory if it does not exist
-	    if (! mediaStorageDir.exists()){
-	        if (! mediaStorageDir.mkdirs()){
+	    if (! mediaStorageDir.exists())
+	    {
+	        if (! mediaStorageDir.mkdirs())
+	        {
 	            Log.d("Hike", "failed to create directory");
 	            return null;
 	        }
@@ -300,18 +311,32 @@ public class Utils
 
 	    // Create a media file name
 	    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-	    File mediaFile;
-	    if (type == MEDIA_TYPE_IMAGE){
-	        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-	        "IMG_"+ timeStamp + ".jpg");
-	    } else if(type == MEDIA_TYPE_VIDEO) {
-	        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-	        "VID_"+ timeStamp + ".mp4");
-	    } else {
-	        return null;
-	    }
+	    boolean uniqueFileName = false;
 
-	    return mediaFile;
+	    // File name should only be blank in case of profile images or while capturing new media.
+	    orgFileName = TextUtils.isEmpty(orgFileName) ? 
+	    		((type == HikeFileType.PROFILE || type == HikeFileType.IMAGE) ? "IMG_" + timeStamp + ".jpg" : "MOV_" + timeStamp + ".mp4") : orgFileName;
+
+	    String fileExtension = orgFileName.substring(orgFileName.lastIndexOf("."), orgFileName.length());
+	    StringBuilder newFileName = new StringBuilder(orgFileName.substring(0, orgFileName.indexOf(fileExtension)));
+	    		
+	    int i = 1;
+	    Log.d("Utils", "File name: " + newFileName.toString() + " Extension: " + fileExtension);
+	    while(!uniqueFileName)
+	    {
+	    	String existingFileKey = HikeConversationsDatabase.getInstance().getFileKey(newFileName.toString());
+	    	if(TextUtils.isEmpty(existingFileKey) || existingFileKey.equals(fileKey))
+	    	{
+	    		break;
+	    	}
+	    	else
+	    	{
+	    		newFileName = new StringBuilder(orgFileName + "_" + i++);
+	    	}
+	    }
+	    newFileName.append(fileExtension);
+	    		
+	    return new File(mediaStorageDir, newFileName.toString());
 	}
 
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
