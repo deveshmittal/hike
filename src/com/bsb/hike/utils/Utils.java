@@ -35,17 +35,16 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.BitmapFactory;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.media.ThumbnailUtils;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Environment;
@@ -828,6 +827,65 @@ public class Utils
     	s.putExtra(Intent.EXTRA_TEXT, inviteMessage);
     	context.startActivity(s);
     }
+
+    public static void bytesToFile(byte[] bytes, File dst) 
+    {
+    	OutputStream out = null;
+    	try 
+    	{
+    		out = new FileOutputStream(dst);
+    		out.write(bytes, 0, bytes.length);
+    	} 
+    	catch (IOException e) 
+    	{
+    		Log.e("Utils", "Excecption while copying the file", e);
+    	}
+    	finally
+    	{
+    		if(out != null)
+    		{
+    			try
+    			{
+					out.close();
+				}
+    			catch (IOException e) 
+				{
+					Log.e("Utils", "Excecption while closing the stream", e);
+				}
+    		}
+    	}
+    }
+
+    public static byte[] fileToBytes(File file)
+	{
+		byte[] bytes = new byte[(int) file.length()];
+		FileInputStream fileInputStream = null;
+		try 
+		{
+			fileInputStream = new FileInputStream(file);
+			fileInputStream.read(bytes);
+			return bytes;
+		} 
+		catch (IOException e) 
+		{
+			Log.e("Utils", "Excecption while reading the file " + file.getName(), e);
+			return null;
+		}
+		finally
+		{
+			if(fileInputStream != null)
+			{
+				try 
+				{
+					fileInputStream.close();
+				} 
+				catch (IOException e) 
+				{
+					Log.e("Utils", "Excecption while closing the file " + file.getName(), e);
+				}
+			}
+		}
+	}
 
     public static byte[] bitmapToBytes(Bitmap bitmap)
     {
