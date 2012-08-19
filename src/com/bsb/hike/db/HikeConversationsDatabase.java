@@ -144,9 +144,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			db = mDb;
 		}
+		onCreate(db);
 		String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ONHIKE + " INTEGER";
 		db.execSQL(alter);
-		onCreate(db);
 	}
 
 	public void updateOnHikeStatus(String msisdn, boolean onHike)
