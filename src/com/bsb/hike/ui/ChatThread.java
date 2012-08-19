@@ -658,7 +658,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		AdapterView.AdapterContextMenuInfo adapterInfo =
 	            (AdapterView.AdapterContextMenuInfo) menuInfo;
 		ConvMessage message = mAdapter.getItem(adapterInfo.position);
-		if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
+		if (message == null || message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			return;
 		}
@@ -1065,11 +1065,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			if (direction)
 			{
-				mLabelView.setText(mLabel + " is typing");
+				if(messages.isEmpty() || messages.get(messages.size() - 1) != null)
+				{
+					addMessage(null);
+				}
 			}
 			else
 			{
-				mLabelView.setText(mLabel);
+				if(!messages.isEmpty() && messages.get(messages.size() - 1) == null)
+				{
+					messages.remove(messages.size() -1 );
+					mAdapter.notifyDataSetChanged();
+				}
 			}
 		}
 	}
@@ -1093,9 +1100,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			if (msisdn.equals(mContactNumber))
 			{
-				/* unset the typing notification */
-				runOnUiThread(mClearTypingCallback);
-				mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 				/*
 				 * we publish the message before the conversation is created, so it's safer to just tack it on here
 				 */
@@ -1493,7 +1497,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		if (messages != null && mAdapter != null) 
 		{
+			boolean wasShowingTypingItem = false;
+			/*
+			 *  If we were showing the typing bubble, we remove it from the add the new message
+			 *  and add the typing bubble back again
+			 */
+			if(!messages.isEmpty() && messages.get(messages.size() - 1) == null)
+			{
+				messages.remove(messages.size() - 1);
+				wasShowingTypingItem = true;
+			}
 			messages.add(convMessage);
+			if(convMessage != null && convMessage.isSent() && wasShowingTypingItem)
+			{
+				messages.add(null);
+			}
 			mAdapter.notifyDataSetChanged();
 			//Smooth scroll by the minimum distance in the opposite direction, to fix the bug where the list does not scroll at all.
 			mConversationsView.smoothScrollBy(-1, 1);

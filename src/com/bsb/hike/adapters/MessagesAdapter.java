@@ -57,7 +57,8 @@ public class MessagesAdapter extends BaseAdapter
 		SEND_HIKE,
 		PARTICIPANT_INFO,
 		FILE_TRANSFER_SEND,
-		FILE_TRANSFER_RECEIVE
+		FILE_TRANSFER_RECEIVE,
+		TYPING
 	};
 
 	private class ViewHolder
@@ -92,7 +93,11 @@ public class MessagesAdapter extends BaseAdapter
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.isFileTransferMessage())
+		if(convMessage == null)
+		{
+			type = ViewType.TYPING;
+		}
+		else if (convMessage.isFileTransferMessage())
 		{
 			type = convMessage.isSent() ? ViewType.FILE_TRANSFER_SEND : ViewType.FILE_TRANSFER_RECEIVE;
 		}
@@ -137,6 +142,9 @@ public class MessagesAdapter extends BaseAdapter
 
 			switch(ViewType.values()[getItemViewType(position)])
 			{
+			case TYPING:
+				v = inflater.inflate(R.layout.typing_layout, null);
+				break;
 			case PARTICIPANT_INFO:
 				v = inflater.inflate(R.layout.message_item_receive, null);
 
@@ -212,6 +220,10 @@ public class MessagesAdapter extends BaseAdapter
 			holder = (ViewHolder) v.getTag();
 		}
 
+		if (convMessage == null)
+		{
+			return v;
+		}
 		if (shouldDisplayTimestamp(position))
 		{
 			String dateFormatted = convMessage.getTimestampFormatted(false);
