@@ -24,8 +24,8 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="18dp"
         android:layout_marginRight="18dp"
+        android:layout_toLeftOf="@+id/top_button_container"
         android:layout_toRightOf="@id/title_hikeicon"
-        android:layout_toLeftOf="@+id/title_image_btn"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:shadowColor="#002147"
@@ -35,49 +35,74 @@
         android:textAppearance="@style/ChatLabelStyle"
         android:textSize="20dp" />
 
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/title_icon"
-        android:layout_width="60dp"
-        android:layout_height="47dp"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/top_bar_btn_selector"
-        android:gravity="center"
-        android:onClick="onTitleIconClick"
-        android:textColor="@drawable/top_bar_btn_txt_selector"
-        android:layout_marginTop="-1dp"
-        android:textSize="16dp"
-        android:textStyle="bold"
-        android:visibility="gone"
-        android:layout_alignParentTop="true"
-        android:text="Save" />
-
-    <ImageButton
-        android:id="@+id/title_image_btn"
+    <LinearLayout
+        android:id="@+id/top_button_container"
         android:layout_width="wrap_content"
-        android:layout_height="47dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="-2dp"
-        android:layout_alignParentTop="true"
-        android:onClick="onTitleIconClick"
-        android:src="@drawable/credits_btn"
-        android:background="@drawable/top_bar_btn_selector"
-        android:visibility="gone" />
-    
-    <View android:id="@+id/button_bar"
-        android:layout_width="3dp"
-        android:layout_height="47dp"
-        android:background="@drawable/button_separator"
-        android:layout_toLeftOf="@id/title_image_btn"
-        android:layout_marginRight="-2dp"
-        android:layout_marginTop="-1dp"
-        android:visibility="gone" />
-	
-    <View android:id="@+id/button_bar_2"
-        android:layout_width="3dp"
-        android:layout_height="47dp"
-        android:background="@drawable/button_separator"
-        android:layout_toLeftOf="@id/title_icon"
-        android:layout_marginRight="-2dp"
-        android:layout_marginTop="-1dp"
-        android:visibility="gone" />
+        android:gravity="right"
+        android:orientation="horizontal" >
+
+        <View
+            android:id="@+id/button_bar_2"
+            android:layout_width="3dp"
+            android:layout_height="47dp"
+            android:layout_marginRight="-2dp"
+            android:layout_marginTop="-1dp"
+            android:background="@drawable/button_separator"
+            android:visibility="gone" />
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/title_icon"
+            android:layout_width="60dp"
+            android:layout_height="47dp"
+            android:layout_marginTop="-1dp"
+            android:background="@drawable/top_bar_btn_selector"
+            android:gravity="center"
+            android:onClick="onTitleIconClick"
+            android:text="Save"
+            android:textColor="@drawable/top_bar_btn_txt_selector"
+            android:textSize="16dp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/button_bar"
+            android:layout_width="3dp"
+            android:layout_height="47dp"
+            android:layout_marginRight="-2dp"
+            android:layout_marginTop="-1dp"
+            android:background="@drawable/button_separator"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/title_image_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="47dp"
+            android:layout_marginTop="-2dp"
+            android:background="@drawable/top_bar_btn_selector"
+            android:onClick="onTitleIconClick"
+            android:src="@drawable/credits_btn"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/button_bar3"
+            android:layout_width="3dp"
+            android:layout_height="47dp"
+            android:layout_marginRight="-2dp"
+            android:layout_marginTop="-1dp"
+            android:background="@drawable/button_separator"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/title_image_btn2"
+            android:layout_width="wrap_content"
+            android:layout_height="47dp"
+            android:layout_marginTop="-2dp"
+            android:background="@drawable/top_bar_btn_selector"
+            android:onClick="onTitleIconClick"
+            android:src="@drawable/ic_attachment"
+            android:visibility="gone" />
+    </LinearLayout>
+
 </RelativeLayout>

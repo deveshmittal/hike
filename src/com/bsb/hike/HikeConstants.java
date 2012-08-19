@@ -1,5 +1,7 @@
 package com.bsb.hike;
 
+import com.bsb.hike.utils.AccountUtils;
+
 public class HikeConstants
 {
 	public static final String MESSAGE = "msg";
@@ -34,6 +36,13 @@ public class HikeConstants
 	public static final String INVITE_TOKEN = "invite_token";
 	public static final String TOTAL_CREDITS_PER_MONTH = "tc";
 	public static final String DND_NUMBERS = "dndnumbers";
+	public static final String FILES = "files";
+	public static final String CONTENT_TYPE = "ct";
+	public static final String THUMBNAIL = "tn";
+	public static final String FILE_NAME = "fn";
+	public static final String FILE_KEY = "fk";
+	public static final String CREDITS = "credits";
+	public static final String ON_HIKE = "onhike";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -90,6 +99,15 @@ public class HikeConstants
 	public static int MAX_CONTACTS_IN_GROUP = 9;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
+
+	public static final int MAX_BUFFER_SIZE_KB = 100;
+	public static final int MAX_FILE_SIZE = 4*1024*1024;
+	public static final int IMAGE_TRANSFER_CODE = 1188;
+	public static final int VIDEO_TRANSFER_CODE = 1189;
+	public static final int AUDIO_TRANSFER_CODE = 1190;
+	public static final String FILE_TRANSFER_BASE_URL = AccountUtils.BASE + "/user/ft/";
+
+	public static final int MAX_DIMENSION_THUMBNAIL_PX = 90; 
 
 	public static final class Extras
 	{
@@ -274,5 +292,6 @@ public class HikeConstants
 		public static final String UPDATE_AVAILABLE = "ua";
 		public static final String ACCOUNT_INFO = "ai";
 		public static final String REQUEST_ACCOUNT_INFO = "rai";
+		public static final String USER_OPT_IN = "uo";
 	}
 }

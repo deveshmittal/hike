@@ -82,7 +82,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			MessageMetadata metadata = message.getMetadata();
 
 			CharSequence markedUp;
-			if (metadata != null && metadata.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+			if (metadata != null && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO && metadata.getHikeFiles() == null)
 			{
 				markedUp = metadata.getMessage(context, message, false);
 			}

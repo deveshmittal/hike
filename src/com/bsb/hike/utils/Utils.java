@@ -1,6 +1,11 @@
 package com.bsb.hike.utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,8 +33,10 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
@@ -37,12 +44,14 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
@@ -51,6 +60,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -65,8 +75,10 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
@@ -264,27 +276,37 @@ public class Utils
 		return context.getResources().getDrawable(id);
 	}
 
-	public static final int MEDIA_TYPE_IMAGE = 1;
-	public static final int MEDIA_TYPE_VIDEO = 2;
-
-	/** Create a file Uri for saving an image or video */
-	public static Uri getOutputMediaFileUri(int type){
-	      return Uri.fromFile(getOutputMediaFile(type));
-	}
-
 	/** Create a File for saving an image or video */
-	public static File getOutputMediaFile(int type){
+	public static File getOutputMediaFile(HikeFileType type, String orgFileName, String fileKey)
+	{
 	    // To be safe, you should check that the SDCard is mounted
 	    // using Environment.getExternalStorageState() before doing this.
 
-	    File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-	              Environment.DIRECTORY_PICTURES), "Hike");
+		StringBuilder path = new StringBuilder(Environment.getExternalStorageDirectory() + "/Hike/Media");
+		switch (type) 
+		{
+		case PROFILE:
+			path.append("/hike Profile Images");
+			break;
+		case IMAGE:
+			path.append("/hike Images");
+			break;
+		case VIDEO:
+			path.append("/hike Videos");
+			break;
+		case AUDIO:
+			path.append("/hike Audios");
+		}
+		
+	    File mediaStorageDir = new File(path.toString());
 	    // This location works best if you want the created images to be shared
 	    // between applications and persist after your app has been uninstalled.
 
 	    // Create the storage directory if it does not exist
-	    if (! mediaStorageDir.exists()){
-	        if (! mediaStorageDir.mkdirs()){
+	    if (! mediaStorageDir.exists())
+	    {
+	        if (! mediaStorageDir.mkdirs())
+	        {
 	            Log.d("Hike", "failed to create directory");
 	            return null;
 	        }
@@ -292,18 +314,32 @@ public class Utils
 
 	    // Create a media file name
 	    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-	    File mediaFile;
-	    if (type == MEDIA_TYPE_IMAGE){
-	        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-	        "IMG_"+ timeStamp + ".jpg");
-	    } else if(type == MEDIA_TYPE_VIDEO) {
-	        mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-	        "VID_"+ timeStamp + ".mp4");
-	    } else {
-	        return null;
-	    }
+	    boolean uniqueFileName = false;
 
-	    return mediaFile;
+	    // File name should only be blank in case of profile images or while capturing new media.
+	    orgFileName = TextUtils.isEmpty(orgFileName) ? 
+	    		((type == HikeFileType.PROFILE || type == HikeFileType.IMAGE) ? "IMG_" + timeStamp + ".jpg" : "MOV_" + timeStamp + ".mp4") : orgFileName;
+
+	    String fileExtension = orgFileName.substring(orgFileName.lastIndexOf("."), orgFileName.length());
+	    StringBuilder newFileName = new StringBuilder(orgFileName.substring(0, orgFileName.indexOf(fileExtension)));
+	    		
+	    int i = 1;
+	    Log.d("Utils", "File name: " + newFileName.toString() + " Extension: " + fileExtension);
+	    while(!uniqueFileName)
+	    {
+	    	String existingFileKey = HikeConversationsDatabase.getInstance().getFileKey(newFileName.toString());
+	    	if(TextUtils.isEmpty(existingFileKey) || existingFileKey.equals(fileKey))
+	    	{
+	    		break;
+	    	}
+	    	else
+	    	{
+	    		newFileName = new StringBuilder(orgFileName + "_" + i++);
+	    	}
+	    }
+	    newFileName.append(fileExtension);
+	    		
+	    return new File(mediaStorageDir, newFileName.toString());
 	}
 
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap)
@@ -819,4 +855,115 @@ public class Utils
     	s.putExtra(Intent.EXTRA_TEXT, inviteMessage);
     	context.startActivity(s);
     }
+
+    public static void bytesToFile(byte[] bytes, File dst) 
+    {
+    	OutputStream out = null;
+    	try 
+    	{
+    		out = new FileOutputStream(dst);
+    		out.write(bytes, 0, bytes.length);
+    	} 
+    	catch (IOException e) 
+    	{
+    		Log.e("Utils", "Excecption while copying the file", e);
+    	}
+    	finally
+    	{
+    		if(out != null)
+    		{
+    			try
+    			{
+					out.close();
+				}
+    			catch (IOException e) 
+				{
+					Log.e("Utils", "Excecption while closing the stream", e);
+				}
+    		}
+    	}
+    }
+
+    public static byte[] fileToBytes(File file)
+	{
+		byte[] bytes = new byte[(int) file.length()];
+		FileInputStream fileInputStream = null;
+		try 
+		{
+			fileInputStream = new FileInputStream(file);
+			fileInputStream.read(bytes);
+			return bytes;
+		} 
+		catch (IOException e) 
+		{
+			Log.e("Utils", "Excecption while reading the file " + file.getName(), e);
+			return null;
+		}
+		finally
+		{
+			if(fileInputStream != null)
+			{
+				try 
+				{
+					fileInputStream.close();
+				} 
+				catch (IOException e) 
+				{
+					Log.e("Utils", "Excecption while closing the file " + file.getName(), e);
+				}
+			}
+		}
+	}
+
+    public static Drawable stringToDrawable(String encodedString)
+	{
+    	if(TextUtils.isEmpty(encodedString))
+    	{
+    		return null;
+    	}
+		byte[] thumbnailBytes = Base64.decode(encodedString, Base64.DEFAULT);
+		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
+	}
+
+    public static Bitmap makeThumbnail(String filePath)
+    {
+    	Bitmap thumbnail = null;
+
+    	int currentWidth = 0;
+    	int currentHeight = 0;
+
+    	BitmapFactory.Options options = new BitmapFactory.Options();
+    	options.inJustDecodeBounds = true;
+
+    	BitmapFactory.decodeFile(filePath, options);
+    	currentHeight = options.outHeight;
+    	currentWidth = options.outWidth;
+
+    	options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth)/(HikeConstants.MAX_DIMENSION_THUMBNAIL_PX));
+    	options.inJustDecodeBounds = false;
+
+    	thumbnail = BitmapFactory.decodeFile(filePath, options);
+
+    	return thumbnail;
+    }
+
+    public static byte[] bitmapToBytes(Bitmap bitmap)
+    {
+    	ByteArrayOutputStream bao = new ByteArrayOutputStream();
+    	bitmap.compress(Bitmap.CompressFormat.JPEG, 95, bao);
+		return bao.toByteArray();
+    }
+
+    public static String getRealPathFromUri(Uri contentUri, Activity activity) 
+	{
+	    String[] proj = { MediaStore.Images.Media.DATA };
+	    Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
+	    if (cursor == null)
+		{
+			return contentUri.getPath();
+		}
+	    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+	    cursor.moveToFirst();
+	    return cursor.getString(column_index);
+	}
 }

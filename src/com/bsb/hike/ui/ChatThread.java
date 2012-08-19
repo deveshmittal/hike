@@ -1,26 +1,34 @@
 package com.bsb.hike.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
+import android.provider.MediaStore;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.ClipboardManager;
@@ -31,6 +39,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Base64;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -50,6 +59,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -74,17 +84,24 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.http.HikeFileTransferHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.tasks.DownloadFileTask;
+import com.bsb.hike.tasks.FinishableEvent;
+import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
-public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener
+public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnItemClickListener
 {
 	private HikePubSub mPubSub;
 
@@ -124,7 +141,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private String mLabel;
 
 	/* notifies that the adapter has been updated */
-	private Runnable mUpdateAdapter;
+	public Runnable mUpdateAdapter;
 
 	private TextView mLabelView;
 
@@ -181,6 +198,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private ListView mContactSearchView;
 
 	private GroupParticipant myInfo;
+
+	private File selectedFile;
+
+	public static Map<Long, AsyncTask<?, ?, ?>> fileTransferTaskMap;
 
 	@Override
 	protected void onPause()
@@ -320,6 +341,26 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		app.connectToService();
 
 		setContentView(R.layout.chatthread);
+
+		if(ChatThread.fileTransferTaskMap != null)
+		{
+			for(Entry<Long, AsyncTask<?, ?, ?>> fileTransferTaskEntry : fileTransferTaskMap.entrySet())
+			{
+				AsyncTask<?, ?, ?> fileTransferTask = fileTransferTaskEntry.getValue();
+				if(fileTransferTask instanceof HikeHTTPTask)
+				{
+					((HikeHTTPTask) fileTransferTask).setChatThread(ChatThread.this);
+				}
+				else
+				{
+					((DownloadFileTask) fileTransferTask).setChatThread(ChatThread.this);
+				}
+			}
+		}
+		else
+		{
+			ChatThread.fileTransferTaskMap = new HashMap<Long, AsyncTask<?,?,?>>();
+		}
 
 		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		Utils.setDensityMultiplier(ChatThread.this);
@@ -837,6 +878,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		findViewById(R.id.title_icon).setVisibility(View.GONE);
 		findViewById(R.id.button_bar_2).setVisibility(View.GONE);
+		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
+		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
 		mComposeView.setFocusable(true);
 		mComposeView.setVisibility(View.VISIBLE);
@@ -885,6 +928,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
+		mConversationsView.setOnItemClickListener(this);
 
 		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE) 
 		{
@@ -1645,6 +1689,147 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			// To prevent the Contact picker layout from being shown on orientation change
 			setIntentFromField();
 		}
+		else if(v.getId() == R.id.title_image_btn2)
+		{
+			final CharSequence[] options = {"Image", "Video", "Audio"};
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
+
+			builder.setTitle("Share file");
+			builder.setItems(options, new DialogInterface.OnClickListener() 
+			{
+				@Override
+				public void onClick(DialogInterface dialog, int which) 
+				{
+					int requestCode;
+					Intent pickIntent = new Intent();
+					Intent newMediaFileIntent = null;
+					switch (which) 
+					{
+					case 0:
+						requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
+						pickIntent.setType("image/*");
+						newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+						selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
+						break;
+
+					case 1:
+						requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
+						pickIntent.setType("video/*");
+						newMediaFileIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+						selectedFile = Utils.getOutputMediaFile(HikeFileType.VIDEO, null, null);
+						break;
+					
+					case 2:
+						requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
+						pickIntent.setData(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+						newMediaFileIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+						selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO, null, null);
+						break;
+						
+					default:
+						requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
+						pickIntent.setType("image/*");
+						newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+						selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
+						break;
+					}
+					pickIntent.setAction(Intent.ACTION_PICK);
+					
+					Intent chooserIntent = Intent.createChooser(pickIntent, "");
+					chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { newMediaFileIntent });
+					if(which != 2)
+					{
+						newMediaFileIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
+					}
+					startActivityForResult(chooserIntent, requestCode);
+				}
+			});
+
+			AlertDialog alertDialog = builder.create();
+			alertDialog.show();
+
+
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+	{
+		if((requestCode == HikeConstants.IMAGE_TRANSFER_CODE || requestCode == HikeConstants.VIDEO_TRANSFER_CODE || requestCode == HikeConstants.AUDIO_TRANSFER_CODE) 
+				&& resultCode==RESULT_OK)
+		{
+			try
+			{
+				String filePath = data == null ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
+				Log.d(getClass().getSimpleName(), "File Path; " + filePath);
+
+				File file = new File(filePath);
+				String fileName = file.getName();
+
+				Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + fileName);
+
+				if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
+				{
+					Toast.makeText(ChatThread.this, "File Size is too large", Toast.LENGTH_SHORT).show();
+					return;
+				}
+
+				byte[] fileBytes = Utils.fileToBytes(file);
+
+				if(fileBytes == null)
+				{
+					Toast.makeText(ChatThread.this, "Unable to read file", Toast.LENGTH_SHORT).show();
+					return;
+				}
+
+				HikeFileType mediaType = requestCode == HikeConstants.IMAGE_TRANSFER_CODE ? 
+						HikeFileType.IMAGE : 
+							requestCode ==HikeConstants.VIDEO_TRANSFER_CODE ? 
+								HikeFileType.VIDEO : HikeFileType.AUDIO;
+
+				if(data != null)
+				{
+					selectedFile = Utils.getOutputMediaFile(mediaType, fileName, null);
+					// Saving the file to hike local folder
+					Utils.bytesToFile(fileBytes, selectedFile);
+				}
+				Bitmap thumbnail = null;
+				String thumbnailString = null;
+				if(mediaType == HikeFileType.IMAGE)
+				{
+					thumbnail = Utils.makeThumbnail(filePath);
+				}
+				else if(mediaType == HikeFileType.VIDEO)
+				{
+					thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Images.Thumbnails.MINI_KIND);
+				}
+				if(thumbnail != null)
+				{
+					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail), Base64.DEFAULT);
+				}
+
+				long time = System.currentTimeMillis()/1000;
+
+				JSONArray files = new JSONArray();
+				files.put(new HikeFile(fileName, HikeFileType.toString(mediaType), thumbnailString, thumbnail).serialize());
+				JSONObject metadata = new JSONObject();
+				metadata.putOpt(HikeConstants.FILES, files);
+
+				ConvMessage convMessage = new ConvMessage(fileName, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+				convMessage.setMetadata(metadata);
+
+				addMessage(convMessage);
+				mConversationDb.addConversationMessages(convMessage);
+				mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView.getText()));
+
+				beginFileUpload(convMessage, fileName, fileBytes);
+			}
+			catch (JSONException e)
+			{
+				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+		}
 	}
 
 	@Override
@@ -1838,5 +2023,112 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private String getMsisdnMainUser()
 	{
 		return mConversation instanceof GroupConversation ? ((GroupConversation)mConversation).getGroupOwner() : mContactNumber;
+	}
+
+	@Override
+	public void onFinish(boolean success) {}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View v, int position, long id) 
+	{
+		ConvMessage convMessage = (ConvMessage) ((MessagesAdapter)adapterView.getAdapter()).getItem(position);
+		if(convMessage != null && convMessage.isFileTransferMessage())
+		{
+			Log.d(getClass().getSimpleName(), "Message: " + convMessage.getMessage());
+			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			if(convMessage.isSent())
+			{
+				Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
+				File sentFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
+				// If uploading failed then we try again.
+				if(TextUtils.isEmpty(hikeFile.getFileKey()) && !fileTransferTaskMap.containsKey(convMessage.getMsgID()))
+				{
+					beginFileUpload(convMessage, 
+							hikeFile.getFileName(), 
+							Utils.fileToBytes(sentFile));
+				}
+				// Else we open it for the use to see
+				else
+				{
+					Log.d(getClass().getSimpleName(), "Opening file");
+					Intent openFile = new Intent(Intent.ACTION_VIEW);
+					openFile.setDataAndType(Uri.fromFile(sentFile), hikeFile.getFileTypeString());
+					startActivity(openFile);
+				}
+			}
+			else
+			{
+				File receivedFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
+				if(receivedFile.exists())
+				{
+					Log.d(getClass().getSimpleName(), "Opening file");
+					Intent openFile = new Intent(Intent.ACTION_VIEW);
+					openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
+					startActivity(openFile);
+				}
+				else
+				{
+					Log.d(getClass().getSimpleName(), "HIKEFILE: NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey() + " TYPE: " + hikeFile.getFileTypeString());
+					DownloadFileTask downloadFile = new DownloadFileTask(ChatThread.this, receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
+					downloadFile.execute();
+					fileTransferTaskMap.put(convMessage.getMsgID(), downloadFile);
+				}
+			}
+		}
+	}
+
+	private void beginFileUpload(final ConvMessage convMessage, String fileName, byte[] fileBytes)
+	{
+		HikeFileTransferHttpRequest hikeHttpRequest = new HikeFileTransferHttpRequest("/user/ft", new HikeHttpCallback() 
+		{
+			public void onFailure()
+			{
+				Log.d(getClass().getSimpleName(), "FAILURE");
+				fileTransferTaskMap.remove(convMessage.getMsgID());
+			}
+
+			public void onSuccess(JSONObject response)
+			{
+				try 
+				{
+					fileTransferTaskMap.remove(convMessage.getMsgID());
+					Log.d(getClass().getSimpleName(), "SUCCESS " + response.toString());
+
+					JSONObject metadata = new JSONObject();
+					JSONArray filesArray = new JSONArray();
+
+					filesArray.put(response.optJSONObject("data"));
+					HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+
+					JSONObject fileJSON = filesArray.getJSONObject(0);
+					fileJSON.put(HikeConstants.THUMBNAIL, hikeFile.getThumbnailString());
+
+					hikeFile.setFileKey(fileJSON.optString(HikeConstants.FILE_KEY));
+
+					metadata.put(HikeConstants.FILES, filesArray);
+					Log.d(getClass().getSimpleName(), "Response after uploading file: " + metadata.toString());
+
+					convMessage.setMetadata(metadata);
+					mConversationDb.addFile(hikeFile.getFileKey(), hikeFile.getFileName());
+
+					mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
+					runOnUiThread(mUpdateAdapter);
+				}
+				catch (JSONException e) 
+				{
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
+			}
+		}, fileName);
+		hikeHttpRequest.setPostData(fileBytes);
+
+		HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(this, R.string.upload_failed);
+
+		Log.d(getClass().getSimpleName(), "Adding message with msg id: " + convMessage.getMsgID());
+		fileTransferTaskMap.put(convMessage.getMsgID(), hikeHTTPTask);
+		mAdapter.notifyDataSetChanged();
+
+		hikeHTTPTask.execute(hikeHttpRequest);
+
 	}
 }

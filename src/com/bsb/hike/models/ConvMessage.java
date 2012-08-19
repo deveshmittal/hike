@@ -44,7 +44,9 @@ public class ConvMessage
 	private String groupParticipantMsisdn;
 
 	private ParticipantInfoState participantInfoState;
-	
+
+	private boolean isFileTransferMessage;
+
 	public boolean isInvite()
 	{
 		return mInvite;
@@ -53,6 +55,16 @@ public class ConvMessage
 	public void setInvite(boolean mIsInvite)
 	{
 		this.mInvite = mIsInvite;
+	}
+
+	public boolean isFileTransferMessage()
+	{
+		return isFileTransferMessage;
+	}
+
+	public void setIsFileTranferMessage(boolean isFileTransferMessage)
+	{
+		this.isFileTransferMessage = isFileTransferMessage;
 	}
 
 	/* Adding entries to the beginning of this list is not backwards compatible */
@@ -73,7 +85,10 @@ public class ConvMessage
 		NO_INFO, // This is a normal message
 		PARTICIPANT_LEFT, // The participant has left
 		PARTICIPANT_JOINED, // The participant has joined
-		GROUP_END // Group chat has ended
+		GROUP_END, // Group chat has ended
+		USER_OPT_IN,
+		DND_USER,
+		USER_JOIN
 ;
 
 		public static ParticipantInfoState fromJSON(JSONObject obj)
@@ -90,6 +105,14 @@ public class ConvMessage
 			else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type))
 			{
 				return ParticipantInfoState.GROUP_END;
+			}
+			else if (HikeConstants.MqttMessageTypes.USER_JOINED.equals(type))
+			{
+				return USER_JOIN;
+			}
+			else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type))
+			{
+				return USER_OPT_IN;
 			}
 			return ParticipantInfoState.NO_INFO;
 		}
@@ -163,48 +186,49 @@ public class ConvMessage
 			this.mappedMsgId = -1;
 			throw new JSONException("Problem in JSON while parsing msgID.");
 		}
+		this.participantInfoState = ParticipantInfoState.NO_INFO;
 		if (data.has(HikeConstants.METADATA)) 
 		{
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
-		this.participantInfoState = ParticipantInfoState.NO_INFO;
 	}
 
-	public ConvMessage(JSONObject obj, Conversation groupConversation, Context context, boolean isSelfGenerated) throws JSONException
+	public ConvMessage(JSONObject obj, Conversation conversation, Context context, boolean isSelfGenerated) throws JSONException
 	{
 		// GCL or GCJ
 		// If the message is a group message we get a TO field consisting of the Group ID
 		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*represents msg is coming from another client*/
 		this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
 
-		this.participantInfoState = ParticipantInfoState.fromJSON(obj);
-
-		this.metadata = new MessageMetadata(obj);
-		if (this.participantInfoState == ParticipantInfoState.PARTICIPANT_JOINED) 
+		setMetadata(obj);
+		switch (this.participantInfoState) 
 		{
+		case PARTICIPANT_JOINED:
 			JSONArray arr = obj.getJSONArray(HikeConstants.DATA);
 			StringBuilder newParticipants = new StringBuilder();
 			for (int i = 0; i < arr.length(); i++) 
 			{
 				JSONObject nameMsisdn = arr.getJSONObject(i);
 				Log.d(getClass().getSimpleName(), "Joined: " + arr.getString(i));
-				newParticipants.append(((GroupConversation)groupConversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName() + ", ");
+				newParticipants.append(((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName() + ", ");
 			}
 			this.mMessage = newParticipants.substring(0, newParticipants.length() - 2) + " " + context.getString(R.string.joined_conversation); 
-		} 
-		else 
-		{
-			if (this.participantInfoState == ParticipantInfoState.GROUP_END)
-			{
-				this.mMessage = context.getString(R.string.group_chat_end);
-			}
-			else
-			{
-				this.mMessage = ((GroupConversation)groupConversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName() +  " " + context.getString(R.string.left_conversation);
-			}
+			break;
+		case PARTICIPANT_LEFT:
+			this.mMessage = ((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName() +  " " + context.getString(R.string.left_conversation);
+			break;
+		case GROUP_END:
+			this.mMessage = context.getString(R.string.group_chat_end);
+			break;
+		case USER_JOIN:
+			this.mMessage = String.format(context.getString(R.string.joined_hike), conversation.getLabel().split(" ", 2)[0]);
+			break;
+		case USER_OPT_IN:
+			this.mMessage = String.format(context.getString(R.string.opt_in), conversation.getLabel().split(" ", 2)[0]);
+			break;
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
-		this.mConversation = groupConversation;
+		this.mConversation = conversation;
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}
 
@@ -212,7 +236,11 @@ public class ConvMessage
 	{
 		if (metadata != null)
 		{
+			Log.d(getClass().getSimpleName(), "Metadata: " + metadata.toString());
+			isFileTransferMessage = metadata.has(HikeConstants.FILES);
+			Log.d(getClass().getSimpleName(), "File Transfer: " + isFileTransferMessage);
 			this.metadata = new MessageMetadata(metadata);
+			participantInfoState = this.metadata.getParticipantInfoState();
 		}
 	}
 
@@ -222,8 +250,6 @@ public class ConvMessage
 		{
 			JSONObject metadata = new JSONObject(metadataString);
 			setMetadata(metadata);
-			ParticipantInfoState participantInfoState = this.metadata.getParticipantInfoState();
-			setParticipantInfoState(participantInfoState);
 		}
 	}
 
@@ -334,8 +360,14 @@ public class ConvMessage
 	{
 		JSONObject object = new JSONObject();
 		JSONObject data = new JSONObject();
+		JSONObject md = null;
 		try
 		{
+			if(metadata != null && isFileTransferMessage)
+			{
+				md = metadata.getJSON();
+				data.put(HikeConstants.METADATA, md);
+			}
 			data.put(mConversation != null && mConversation.isOnhike() ? HikeConstants.HIKE_MESSAGE : HikeConstants.SMS_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP,mTimestamp);
 			data.put(HikeConstants.MESSAGE_ID,msgID);

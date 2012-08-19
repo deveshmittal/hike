@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -44,10 +45,18 @@ public class DbConversationListener implements Listener
 		if (HikePubSub.MESSAGE_SENT.equals(type))
 		{
 			ConvMessage convMessage = (ConvMessage) object;
-			mConversationDb.addConversationMessages(convMessage);
+			boolean shouldSendMessage = convMessage.isFileTransferMessage() && !TextUtils.isEmpty(convMessage.getMetadata().getHikeFiles().get(0).getFileKey());
+			if(shouldSendMessage)
+			{
+				mConversationDb.updateMessageMetadata(convMessage.getMsgID(), convMessage.getMetadata());
+			}
+			else
+			{
+				mConversationDb.addConversationMessages(convMessage);
+			}
 			mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
 
-			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO) 
+			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO && (!convMessage.isFileTransferMessage() || shouldSendMessage)) 
 			{
 				Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getMsisdn());
 				mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());

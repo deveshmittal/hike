@@ -16,7 +16,7 @@ public class GzipByteArrayEntity extends ByteArrayEntity
 		setContentEncoding("gzip");
 	}
 
-	private static byte[] gzip(byte[] data, String encoding)
+	public static byte[] gzip(byte[] data, String encoding)
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		GZIPOutputStream zos;

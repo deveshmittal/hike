@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
@@ -18,7 +17,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
@@ -52,6 +50,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -437,7 +436,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				}
 
-				public void onSuccess()
+				public void onSuccess(JSONObject response)
 				{
 					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO) 
 					{
@@ -476,18 +475,13 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		{
 			/* the server only needs a 40x40 version */
 			final Bitmap smallerBitmap = Util.transform(new Matrix(),
-					mActivityState.newBitmap, 40, 40, false);
-			ByteArrayOutputStream bao = new ByteArrayOutputStream();
-			smallerBitmap.compress(Bitmap.CompressFormat.JPEG, 95, bao);
-			final byte[] bytes = bao.toByteArray();
+					mActivityState.newBitmap, 120, 120, false);
+			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap);
 
 			final byte[] larger_bytes;
 			if (this.profileType != ProfileType.GROUP_INFO) 
 			{
-				bao = new ByteArrayOutputStream();
-				mActivityState.newBitmap.compress(Bitmap.CompressFormat.PNG,
-						90, bao);
-				larger_bytes = bao.toByteArray();
+				larger_bytes = Utils.bitmapToBytes(mActivityState.newBitmap);
 			}
 			else
 			{
@@ -511,7 +505,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				}
 
-				public void onSuccess()
+				public void onSuccess(JSONObject response)
 				{
 					HikeUserDatabase db = HikeUserDatabase.getInstance();
 					db.setIcon(mLocalMSISDN, bytes);
@@ -542,7 +536,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				}
 
-				public void onSuccess()
+				public void onSuccess(JSONObject response)
 				{
 					SharedPreferences prefs = getSharedPreferences(
 							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
@@ -638,7 +632,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
 			Log.d("ProfileActivity", "The activity is " + this);
-			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon.getAbsolutePath() : getGalleryPath(data.getData());
+			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);
 			intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
@@ -663,24 +657,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		}
 	}
 
-	private String getGalleryPath(Uri selectedImage)
-	{
-		String[] filePathColumn = {MediaStore.Images.Media.DATA};
-
-		Cursor cursor = getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-		if (cursor == null)
-		{
-			return selectedImage.getPath();
-		}
-
-		cursor.moveToFirst();
-
-		int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-		String filePath = cursor.getString(columnIndex);
-		cursor.close();
-		return filePath;
-	}
-
 	@Override
 	public void onClick(DialogInterface dialog, int item)
 	{
@@ -689,7 +665,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		{
 		case PROFILE_PICTURE_FROM_CAMERA:
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			selectedFileIcon = Utils.getOutputMediaFile(Utils.MEDIA_TYPE_IMAGE); // create a file to save the image
+			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, null); // create a file to save the image
 			if (selectedFileIcon != null)
 			{
 				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFileIcon));

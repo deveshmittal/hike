@@ -16,6 +16,9 @@ public class GaugeView extends View
 	private Paint maxCreditsInnerGauge;
 	private int actualCreditsAngle;
 	private int maxCreditsAngle;
+	RectF actualCreditsArea;
+	RectF maxCreditsOuterArea;
+	RectF maxCreditsInnerArea;
 
 	private static final int START_ANGLE = 139;
 
@@ -50,6 +53,10 @@ public class GaugeView extends View
 		maxCreditsInnerGauge.setStyle(Paint.Style.STROKE);
 		maxCreditsInnerGauge.setStrokeWidth(2.67f * Utils.densityMultiplier);
 		maxCreditsInnerGauge.setAntiAlias(true);
+
+		actualCreditsArea = new RectF((int)(15 * Utils.densityMultiplier), (int)(27 * Utils.densityMultiplier), (int)(214 * Utils.densityMultiplier), (int)(225 * Utils.densityMultiplier));
+		maxCreditsOuterArea = new RectF((int)(6 * Utils.densityMultiplier), (int)(18 * Utils.densityMultiplier), (int)(224 * Utils.densityMultiplier), (int)(235 * Utils.densityMultiplier));
+		maxCreditsInnerArea = new RectF((int)(25 * Utils.densityMultiplier), (int)(37 * Utils.densityMultiplier), (int)(205 * Utils.densityMultiplier), (int)(217 * Utils.densityMultiplier));
 	}
 
 	public GaugeView(Context context, AttributeSet attrs) 
@@ -78,9 +85,6 @@ public class GaugeView extends View
 		{
 			return;
 		}
-		RectF actualCreditsArea = new RectF((int)(15 * Utils.densityMultiplier), (int)(27 * Utils.densityMultiplier), (int)(214 * Utils.densityMultiplier), (int)(225 * Utils.densityMultiplier));
-		RectF maxCreditsOuterArea = new RectF((int)(6 * Utils.densityMultiplier), (int)(18 * Utils.densityMultiplier), (int)(224 * Utils.densityMultiplier), (int)(235 * Utils.densityMultiplier));
-		RectF maxCreditsInnerArea = new RectF((int)(25 * Utils.densityMultiplier), (int)(37 * Utils.densityMultiplier), (int)(205 * Utils.densityMultiplier), (int)(217 * Utils.densityMultiplier));
 
 		canvas.drawArc(actualCreditsArea, START_ANGLE - OFFSET, actualCreditsAngle + OFFSET, false, actualCreditsGauge);
 		canvas.drawArc(maxCreditsOuterArea, START_ANGLE, maxCreditsAngle, false, maxCreditsOuterGauge);
