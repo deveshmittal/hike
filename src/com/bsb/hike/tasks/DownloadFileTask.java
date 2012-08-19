@@ -53,7 +53,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 
 			fos = new FileOutputStream(destinationFile);
 
-			byte[] buffer = new byte[4096];
+			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
 			int len = 0;
 			int totProg = 0;
 			int progress;
