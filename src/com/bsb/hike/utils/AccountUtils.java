@@ -23,7 +23,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -626,7 +625,7 @@ public class AccountUtils
 			progress = bytesRead > 0 ? (int) ((totalBytesRead * 100)/bytes.length) : 100;
 			hikeHTTPTask.updateProgress(progress);
 
-			Thread.sleep(1000);
+			Thread.sleep(100);
 		}
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
