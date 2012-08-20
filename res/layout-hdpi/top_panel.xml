@@ -45,9 +45,8 @@
 
         <View
             android:id="@+id/button_bar_2"
-            android:layout_width="3dp"
+            android:layout_width="1dp"
             android:layout_height="47dp"
-            android:layout_marginRight="-2dp"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -68,9 +67,8 @@
 
         <View
             android:id="@+id/button_bar"
-            android:layout_width="3dp"
+            android:layout_width="1dp"
             android:layout_height="47dp"
-            android:layout_marginRight="-2dp"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -87,9 +85,8 @@
 
         <View
             android:id="@+id/button_bar3"
-            android:layout_width="3dp"
+            android:layout_width="1dp"
             android:layout_height="47dp"
-            android:layout_marginRight="-2dp"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
