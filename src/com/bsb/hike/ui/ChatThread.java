@@ -1309,6 +1309,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			if (this.mContactNumber.equals(contactInfo.getMsisdn())) 
 			{
 				this.mContactName = contactInfo.getName();
+				mConversation.setContactName(this.mContactName);
 				this.mLabel = contactInfo.getName();
 				runOnUiThread(new Runnable() 
 				{
