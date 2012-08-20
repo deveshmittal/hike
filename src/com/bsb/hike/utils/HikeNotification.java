@@ -29,6 +29,9 @@ public class HikeNotification
 	private Context context;
 
 	private NotificationManager notificationManager;
+	private long lastNotificationTime;
+
+	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000; 
 
 	public HikeNotification(Context context)
 	{
@@ -38,9 +41,13 @@ public class HikeNotification
 
 	public void notify(ContactInfo contactInfo,ConvMessage convMsg)
 	{
+		int notificationId = (int)convMsg.getConversation().getConvId();
+
+		boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+
 		SharedPreferences preferenceManager = PreferenceManager.getDefaultSharedPreferences(this.context);
-		int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true) ? Notification.DEFAULT_SOUND : 0;
-		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true) ? Notification.DEFAULT_VIBRATE : 0;
+		int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND : 0;
+		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE : 0;
 
 		String msisdn = convMsg.getMsisdn();
 		String message = (convMsg.getMetadata() == null || convMsg.getParticipantInfoState() != ParticipantInfoState.NO_INFO || convMsg.isFileTransferMessage()) ? convMsg.getMessage() : convMsg.getMetadata().getMessage(context, convMsg, false).toString();
@@ -71,7 +78,6 @@ public class HikeNotification
 
 		notification.defaults |= playSound | vibrate;
 
-		int notificationId = (int)convMsg.getConversation().getConvId();
 		Intent notificationIntent = new Intent(context, ChatThread.class);
 
 		/* notifications appear to be cached, and their .equals doesn't check 'Extra's.
@@ -100,5 +106,8 @@ public class HikeNotification
 
 		Log.d("HikeNotification","CONVERSATION ID : " + notificationId);
 		notificationManager.notify(notificationId, notification);
+
+		// If the notification was played this time, we should reset the value. Else we leave it as is.
+		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime : System.currentTimeMillis();
 	}
 }
