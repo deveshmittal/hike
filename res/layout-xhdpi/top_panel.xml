@@ -25,7 +25,7 @@
         android:layout_marginLeft="18dp"
         android:layout_marginRight="18dp"
         android:layout_toRightOf="@id/title_hikeicon"
-        android:layout_toLeftOf="@+id/title_image_btn"
+        android:layout_toLeftOf="@+id/top_button_container"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:shadowColor="#002153"
