@@ -335,7 +335,8 @@ public class MqttMessagesManager {
 	{
 		Conversation conversation = convDb.getConversation(msisdn, 0);
 
-		if(conversation == null)
+		// Checking if the conversation exists or if the message type is 'uj' then we check whether its a known contact.
+		if(conversation == null || (HikeConstants.MqttMessageTypes.USER_JOINED.equals(jsonObj.getString(HikeConstants.TYPE)) && TextUtils.isEmpty(conversation.getContactName())))
 		{
 			return;
 		}
