@@ -86,6 +86,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			{
 				markedUp = metadata.getMessage(context, message, false);
 			}
+			else if (message.isFileTransferMessage())
+			{
+				markedUp = metadata.getHikeFiles().get(0).getFileName();
+			}
 			else
 			{
 				markedUp = message.getMessage();
