@@ -926,7 +926,7 @@ public class Utils
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
 
-    public static Bitmap makeThumbnail(String filePath)
+    public static Bitmap scaleDownImage(String filePath, int dimensionLimit)
     {
     	Bitmap thumbnail = null;
 
@@ -940,7 +940,7 @@ public class Utils
     	currentHeight = options.outHeight;
     	currentWidth = options.outWidth;
 
-    	options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth)/(HikeConstants.MAX_DIMENSION_THUMBNAIL_PX));
+    	options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth)/(dimensionLimit));
     	options.inJustDecodeBounds = false;
 
     	thumbnail = BitmapFactory.decodeFile(filePath, options);

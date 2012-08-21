@@ -1808,13 +1808,27 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 				Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + fileName);
 
-				if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
+				byte[] fileBytes = null;
+
+				if(requestCode == HikeConstants.IMAGE_TRANSFER_CODE)
+				{
+					Bitmap tempBmp = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX);
+					fileBytes = Utils.bitmapToBytes(tempBmp);
+					tempBmp.recycle();
+				}
+
+				if(HikeConstants.MAX_FILE_SIZE != -1 && 
+						(requestCode != HikeConstants.IMAGE_TRANSFER_CODE ? 
+								HikeConstants.MAX_FILE_SIZE < file.length() : HikeConstants.MAX_FILE_SIZE < fileBytes.length))
 				{
 					Toast.makeText(ChatThread.this, "File Size is too large", Toast.LENGTH_SHORT).show();
 					return;
 				}
 
-				byte[] fileBytes = Utils.fileToBytes(file);
+				if(requestCode != HikeConstants.IMAGE_TRANSFER_CODE)
+				{
+					fileBytes = Utils.fileToBytes(file);
+				}
 
 				if(fileBytes == null)
 				{
@@ -1837,7 +1851,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				String thumbnailString = null;
 				if(mediaType == HikeFileType.IMAGE)
 				{
-					thumbnail = Utils.makeThumbnail(filePath);
+					thumbnail = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
 				}
 				else if(mediaType == HikeFileType.VIDEO)
 				{
