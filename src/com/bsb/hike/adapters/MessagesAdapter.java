@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -490,7 +489,7 @@ public class MessagesAdapter extends BaseAdapter
 		 * We are checking this so that we can delay the try again icon from being shown immediately if the user 
 		 * just sent the msg. If it has been over 5 secs then the user will immediately see the icon though. 
 		 */
-		if ((((long)System.currentTimeMillis()/1000) - ts) < 5) 
+		if ((((long)System.currentTimeMillis()/1000) - ts) < 3) 
 		{
 			iv.setVisibility(View.INVISIBLE);
 
@@ -502,21 +501,7 @@ public class MessagesAdapter extends BaseAdapter
 			iv.setAnimation(anim);
 		}
 		iv.setVisibility(View.VISIBLE);
-		
-		if(!(iv.getDrawable() instanceof AnimationDrawable))
-		{
-			AnimationDrawable ad = new AnimationDrawable();
-			ad.addFrame(context.getResources()
-					.getDrawable(R.drawable.ic_tower0), 600);
-			ad.addFrame(context.getResources()
-					.getDrawable(R.drawable.ic_tower1), 600);
-			ad.addFrame(context.getResources()
-					.getDrawable(R.drawable.ic_tower2), 600);
-			ad.setOneShot(false);
-			ad.setVisible(true, true);
-			iv.setImageDrawable(ad);
-			ad.start();
-		}
+		iv.setImageResource(R.drawable.ic_retry_sending);
 	}
 
 	private void showFileTransferElements(ViewHolder holder, View v, boolean isSentMessage)
