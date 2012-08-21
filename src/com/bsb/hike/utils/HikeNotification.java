@@ -50,7 +50,11 @@ public class HikeNotification
 		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE : 0;
 
 		String msisdn = convMsg.getMsisdn();
-		String message = (convMsg.getMetadata() == null || convMsg.getParticipantInfoState() != ParticipantInfoState.NO_INFO || convMsg.isFileTransferMessage()) ? convMsg.getMessage() : convMsg.getMetadata().getMessage(context, convMsg, false).toString();
+		String message = (convMsg.getMetadata() == null || convMsg.getParticipantInfoState() != ParticipantInfoState.NO_INFO) ?
+				convMsg.getMessage() : 
+					convMsg.isFileTransferMessage() ?
+						convMsg.getMetadata().getHikeFiles().get(0).getFileName() : 
+							convMsg.getMetadata().getMessage(context, convMsg, false).toString();
 		long timestamp = convMsg.getTimestamp();
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo.getName())) ? contactInfo.getName() : msisdn;
 
