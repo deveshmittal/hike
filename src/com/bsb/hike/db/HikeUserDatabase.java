@@ -16,6 +16,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -542,8 +543,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return blocked;
 	}
 
-	public void setIcon(String msisdn, byte[] data)
+	public void setIcon(String msisdn, byte[] data, boolean isProfileImage)
 	{
+		if (!isProfileImage) 
+		{
+			Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+			Bitmap roundedBitmap = Utils.getRoundedCornerBitmap(tempBitmap);
+			data = Utils.bitmapToBytes(roundedBitmap);
+			tempBitmap.recycle();
+			roundedBitmap.recycle();
+		}
 		IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 		ContentValues vals = new ContentValues(2);
 		vals.put(DBConstants.MSISDN, msisdn);

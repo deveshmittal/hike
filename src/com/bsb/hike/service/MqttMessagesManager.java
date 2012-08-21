@@ -85,7 +85,7 @@ public class MqttMessagesManager {
 		{
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
-			this.userDb.setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT));
+			this.userDb.setIcon(msisdn, Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 		}
