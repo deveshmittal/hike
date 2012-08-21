@@ -2120,14 +2120,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				else
 				{
 					File receivedFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
-					if(receivedFile.exists())
+					if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) && receivedFile.exists())
 					{
 						Log.d(getClass().getSimpleName(), "Opening file");
 						Intent openFile = new Intent(Intent.ACTION_VIEW);
 						openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
 						startActivity(openFile);
 					}
-					else
+					else if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
 					{
 						Log.d(getClass().getSimpleName(), "HIKEFILE: NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey() + " TYPE: " + hikeFile.getFileTypeString());
 						DownloadFileTask downloadFile = new DownloadFileTask(ChatThread.this, receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
