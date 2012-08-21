@@ -98,6 +98,8 @@ public class HikeConstants
 	public static int MAX_SMS_CONTACTS_IN_GROUP = 5;
 	public static int MAX_CONTACTS_IN_GROUP = 9;
 
+	public static int PROFILE_IMAGE_DIMENSIONS = 96;
+
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;

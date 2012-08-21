@@ -473,9 +473,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		if (mActivityState.newBitmap != null)
 		{
-			/* the server only needs a 40x40 version */
+			/* the server only needs a smaller version */
 			final Bitmap smallerBitmap = Util.transform(new Matrix(),
-					mActivityState.newBitmap, 120, 120, false);
+					mActivityState.newBitmap, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS, false);
 			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap);
 
 			final byte[] larger_bytes;
