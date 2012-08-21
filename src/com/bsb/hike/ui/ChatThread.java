@@ -2138,6 +2138,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				Log.d(getClass().getSimpleName(), "FAILURE");
 				fileTransferTaskMap.remove(convMessage.getMsgID());
+				runOnUiThread(mUpdateAdapter);
 			}
 
 			public void onSuccess(JSONObject response)
