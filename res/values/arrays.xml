@@ -167,4 +167,9 @@
         <item>(brains2)</item> <!-- 149 brains -->
         <item>(sleeping2)</item> <!-- 150 sleeping -->
     </string-array>
+    <string-array name="file_transfer_items">
+        <item>Image</item>
+        <item>Video</item>
+        <item>Audio</item>
+    </string-array>
 </resources>

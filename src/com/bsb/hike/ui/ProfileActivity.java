@@ -56,6 +56,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
 {
@@ -473,9 +474,9 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		if (mActivityState.newBitmap != null)
 		{
-			/* the server only needs a 40x40 version */
+			/* the server only needs a smaller version */
 			final Bitmap smallerBitmap = Util.transform(new Matrix(),
-					mActivityState.newBitmap, 120, 120, false);
+					mActivityState.newBitmap, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS, false);
 			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap);
 
 			final byte[] larger_bytes;
@@ -664,6 +665,11 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		switch(item)
 		{
 		case PROFILE_PICTURE_FROM_CAMERA:
+			if(Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
+			{
+				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, null); // create a file to save the image
 			if (selectedFileIcon != null)
@@ -678,6 +684,11 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			}
 			break;
 		case PROFILE_PICTURE_FROM_GALLERY:
+			if(Utils.getExternalStorageState() == ExternalStorageState.NONE)
+			{
+				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			intent = new Intent(Intent.ACTION_PICK);
 			intent.setType("image/*");
 			startActivityForResult(intent, GALLERY_RESULT);

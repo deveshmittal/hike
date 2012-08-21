@@ -321,20 +321,21 @@ public class Utils
 	    		((type == HikeFileType.PROFILE || type == HikeFileType.IMAGE) ? "IMG_" + timeStamp + ".jpg" : "MOV_" + timeStamp + ".mp4") : orgFileName;
 
 	    String fileExtension = orgFileName.substring(orgFileName.lastIndexOf("."), orgFileName.length());
-	    StringBuilder newFileName = new StringBuilder(orgFileName.substring(0, orgFileName.indexOf(fileExtension)));
-	    		
+	    String orgFileNameWithoutExtension = orgFileName.substring(0, orgFileName.indexOf(fileExtension));
+	    StringBuilder newFileName = new StringBuilder(orgFileNameWithoutExtension);
+	
 	    int i = 1;
 	    Log.d("Utils", "File name: " + newFileName.toString() + " Extension: " + fileExtension);
 	    while(!uniqueFileName)
 	    {
-	    	String existingFileKey = HikeConversationsDatabase.getInstance().getFileKey(newFileName.toString());
+	    	String existingFileKey = HikeConversationsDatabase.getInstance().getFileKey(newFileName.toString()+fileExtension);
 	    	if(TextUtils.isEmpty(existingFileKey) || existingFileKey.equals(fileKey))
 	    	{
 	    		break;
 	    	}
 	    	else
 	    	{
-	    		newFileName = new StringBuilder(orgFileName + "_" + i++);
+	    		newFileName = new StringBuilder(orgFileNameWithoutExtension + "_" + i++);
 	    	}
 	    }
 	    newFileName.append(fileExtension);
@@ -925,7 +926,7 @@ public class Utils
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
 
-    public static Bitmap makeThumbnail(String filePath)
+    public static Bitmap scaleDownImage(String filePath, int dimensionLimit)
     {
     	Bitmap thumbnail = null;
 
@@ -939,7 +940,7 @@ public class Utils
     	currentHeight = options.outHeight;
     	currentWidth = options.outWidth;
 
-    	options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth)/(HikeConstants.MAX_DIMENSION_THUMBNAIL_PX));
+    	options.inSampleSize = Math.round((currentHeight > currentWidth ? currentHeight : currentWidth)/(dimensionLimit));
     	options.inJustDecodeBounds = false;
 
     	thumbnail = BitmapFactory.decodeFile(filePath, options);
@@ -966,4 +967,38 @@ public class Utils
 	    cursor.moveToFirst();
 	    return cursor.getString(column_index);
 	}
+
+    public static enum ExternalStorageState
+    {
+    	WRITEABLE,
+    	READ_ONLY,
+    	NONE
+    }
+
+    public static ExternalStorageState getExternalStorageState()
+    {
+    	String state = Environment.getExternalStorageState();
+
+    	if (Environment.MEDIA_MOUNTED.equals(state)) 
+    	{
+    	    // We can read and write the media
+    	    return ExternalStorageState.WRITEABLE;
+    	} 
+    	else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) 
+    	{
+    	    // We can only read the media
+    		return ExternalStorageState.READ_ONLY;
+    	} 
+    	else 
+    	{
+    	    // Something else is wrong. It may be one of many other states, but all we need
+    	    //  to know is we can neither read nor write
+    	    return ExternalStorageState.NONE;
+    	}
+    }
+
+    public static String getFirstName(String name)
+    {
+    	return name.split(" ", 2)[0];
+    }
 }

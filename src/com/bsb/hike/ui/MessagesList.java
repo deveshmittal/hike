@@ -203,10 +203,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			{
 				sendDeviceDetails();
 			}
-			if(!wasAlertCancelled)
-			{
-				showSMSNotificationAlert();
-			}
 		}
 
 		View view = findViewById(R.id.title_hikeicon);

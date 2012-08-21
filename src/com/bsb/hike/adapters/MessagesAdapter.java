@@ -57,7 +57,8 @@ public class MessagesAdapter extends BaseAdapter
 		SEND_HIKE,
 		PARTICIPANT_INFO,
 		FILE_TRANSFER_SEND,
-		FILE_TRANSFER_RECEIVE
+		FILE_TRANSFER_RECEIVE,
+		TYPING
 	};
 
 	private class ViewHolder
@@ -92,7 +93,11 @@ public class MessagesAdapter extends BaseAdapter
 	{
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage.isFileTransferMessage())
+		if(convMessage == null)
+		{
+			type = ViewType.TYPING;
+		}
+		else if (convMessage.isFileTransferMessage())
 		{
 			type = convMessage.isSent() ? ViewType.FILE_TRANSFER_SEND : ViewType.FILE_TRANSFER_RECEIVE;
 		}
@@ -137,6 +142,9 @@ public class MessagesAdapter extends BaseAdapter
 
 			switch(ViewType.values()[getItemViewType(position)])
 			{
+			case TYPING:
+				v = inflater.inflate(R.layout.typing_layout, null);
+				break;
 			case PARTICIPANT_INFO:
 				v = inflater.inflate(R.layout.message_item_receive, null);
 
@@ -212,6 +220,10 @@ public class MessagesAdapter extends BaseAdapter
 			holder = (ViewHolder) v.getTag();
 		}
 
+		if (convMessage == null)
+		{
+			return v;
+		}
 		if (shouldDisplayTimestamp(position))
 		{
 			String dateFormatted = convMessage.getTimestampFormatted(false);
@@ -291,7 +303,7 @@ public class MessagesAdapter extends BaseAdapter
 					mainMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_opt_in, 0, 0, 0);
 
 					TextView creditsMessage = null;
-					if(convMessage.getMetadata().getJSON().has(HikeConstants.DATA))
+					if(convMessage.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).has(HikeConstants.CREDITS))
 					{
 						creditsMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 						int credits = convMessage.getMetadata().getJSON().optJSONObject(HikeConstants.DATA).optInt(HikeConstants.CREDITS);
@@ -303,7 +315,10 @@ public class MessagesAdapter extends BaseAdapter
 						mainMessage.setLayoutParams(lp);
 					}
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
-					((ViewGroup) holder.participantInfoContainer).addView(creditsMessage);
+					if(creditsMessage != null)
+					{
+						((ViewGroup) holder.participantInfoContainer).addView(creditsMessage);
+					}
 				}
 				else
 				{
@@ -313,17 +328,19 @@ public class MessagesAdapter extends BaseAdapter
 					StringBuilder dndNames = new StringBuilder(); 
 					for(int i=0; i<dndNumbers.length(); i++)
 					{
+						String name = conversation instanceof GroupConversation ? 
+								((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
 						if(i < dndNumbers.length() - 2)
 						{
-							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() + ", ");
+							dndNames.append(name + ", ");
 						}
 						else if(i < dndNumbers.length() - 1)
 						{
-							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() + " and ");
+							dndNames.append(name + " and ");
 						}
 						else
 						{
-							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName());
+							dndNames.append(name);
 						}
 					}
 					convMessage.setMessage(String.format(context.getString(R.string.dnd_msg_gc), dndNames.toString()));
@@ -350,12 +367,16 @@ public class MessagesAdapter extends BaseAdapter
 		{
 			HikeFile hikeFile = metadata.getHikeFiles().get(0);
 
-			holder.fileThumb.setImageDrawable(
+			holder.fileThumb.setBackgroundDrawable(
 					hikeFile.getThumbnail() != null ? 
 							hikeFile.getThumbnail() : 
 								context.getResources().getDrawable(
 										hikeFile.getHikeFileType() == HikeFileType.IMAGE ? 
 												R.drawable.ic_default_img : R.drawable.ic_default_mov));
+			if(hikeFile.getHikeFileType() == HikeFileType.VIDEO && hikeFile.getThumbnail() != null)
+			{
+				holder.fileThumb.setImageResource(R.drawable.ic_video_play);
+			}
 
 			holder.messageTextView.setVisibility(hikeFile.getThumbnail() == null ? View.VISIBLE : View.GONE);
 			holder.messageTextView.setText(hikeFile.getFileName());

@@ -25,7 +25,7 @@
         android:layout_marginLeft="18dp"
         android:layout_marginRight="18dp"
         android:layout_toRightOf="@id/title_hikeicon"
-        android:layout_toLeftOf="@+id/title_image_btn"
+        android:layout_toLeftOf="@+id/top_button_container"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:shadowColor="#002147"
@@ -45,9 +45,8 @@
 
         <View
             android:id="@+id/button_bar_2"
-            android:layout_width="3dp"
+            android:layout_width="1dp"
             android:layout_height="47dp"
-            android:layout_marginRight="-2dp"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -68,9 +67,8 @@
 
         <View
             android:id="@+id/button_bar"
-            android:layout_width="3dp"
+            android:layout_width="1dp"
             android:layout_height="47dp"
-            android:layout_marginRight="-2dp"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -87,9 +85,8 @@
 
         <View
             android:id="@+id/button_bar3"
-            android:layout_width="3dp"
+            android:layout_width="1dp"
             android:layout_height="47dp"
-            android:layout_marginRight="-2dp"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />

@@ -52,9 +52,13 @@ public class DbConversationListener implements Listener
 			}
 			else
 			{
-				mConversationDb.addConversationMessages(convMessage);
+				if(!convMessage.isFileTransferMessage())
+				{
+					mConversationDb.addConversationMessages(convMessage);
+				}
+				// Recency was already updated when the ft message was added.
+				mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
 			}
-			mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
 
 			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO && (!convMessage.isFileTransferMessage() || shouldSendMessage)) 
 			{

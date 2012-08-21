@@ -122,7 +122,7 @@ public class MessageMetadata
 		}
 		else
 		{
-			formatArg.append(convMessage.getConversation().getLabel().split(" ", 2)[0]);
+			formatArg.append(Utils.getFirstName(convMessage.getConversation().getLabel()));
 			dndMsisdn.append(convMessage.getMsisdn());
 		}
 		String message = context.getString(

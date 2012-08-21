@@ -81,8 +81,14 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		{
 			try 
 			{
-				fos.close();
-				is.close();
+				if(fos != null)
+				{
+					fos.close();
+				}
+				if(is != null)
+				{
+					is.close();
+				}
 			} 
 			catch (IOException e) 
 			{
@@ -106,6 +112,11 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		if(result)
 		{
 			HikeConversationsDatabase.getInstance().addFile(fileKey, destinationFile.getName());
+		}
+		else
+		{
+			Log.d(getClass().getSimpleName(), "File not downloaded " + progressFileTransfer);
+			destinationFile.delete();
 		}
 
 		ChatThread.fileTransferTaskMap.remove(msgId);

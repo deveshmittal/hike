@@ -108,7 +108,7 @@ public class MqttMessagesManager {
 		{
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
 			boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED.equals(type);
-			if(convDb.doesConversationExist(msisdn) && joined)
+			if(joined)
 			{
 				saveStatusMsg(jsonObj, msisdn);
 			}
@@ -305,11 +305,13 @@ public class MqttMessagesManager {
 		else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type))
 		{
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
-			if(convDb.doesConversationExist(msisdn))
-			{
-				saveStatusMsg(jsonObj, msisdn);
-			}
+
+			// For one-to-one chat
+			saveStatusMsg(jsonObj, msisdn);
+
 			List<String> groupConversations = convDb.listOfGroupConversationsWithMsisdn(msisdn);
+
+			// For group chats
 			for(String groupId:groupConversations)
 			{
 				saveStatusMsg(jsonObj, groupId);
@@ -333,6 +335,11 @@ public class MqttMessagesManager {
 	{
 		Conversation conversation = convDb.getConversation(msisdn, 0);
 
+		// Checking if the conversation exists or if the message type is 'uj' then we check whether its a known contact.
+		if(conversation == null || (HikeConstants.MqttMessageTypes.USER_JOINED.equals(jsonObj.getString(HikeConstants.TYPE)) && TextUtils.isEmpty(conversation.getContactName())))
+		{
+			return;
+		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation, context, false);
 		convDb.addConversationMessages(convMessage);
 

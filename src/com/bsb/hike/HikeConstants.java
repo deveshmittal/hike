@@ -98,6 +98,8 @@ public class HikeConstants
 	public static int MAX_SMS_CONTACTS_IN_GROUP = 5;
 	public static int MAX_CONTACTS_IN_GROUP = 9;
 
+	public static int PROFILE_IMAGE_DIMENSIONS = 96;
+
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
@@ -109,6 +111,8 @@ public class HikeConstants
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 90; 
 
+	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
+ 
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -164,6 +168,7 @@ public class HikeConstants
 		public static final String ALERT_CANCELLED = "alertCancelled";
 		public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
 		public static final String SIGNUP_MSISDN_ERROR = "signupMsisdnError";
+		public static final String FILE_TRANSFER_DIALOG_SHOWING = "fileTransferDialogShowing";
 	}
 
 	public static final class LogEvent
