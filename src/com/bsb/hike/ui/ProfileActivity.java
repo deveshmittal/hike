@@ -509,10 +509,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 				public void onSuccess(JSONObject response)
 				{
 					HikeUserDatabase db = HikeUserDatabase.getInstance();
-					db.setIcon(mLocalMSISDN, bytes);
+					db.setIcon(mLocalMSISDN, bytes, false);
 					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
 					{
-						db.setIcon(getLargerIconId(), larger_bytes);
+						db.setIcon(getLargerIconId(), larger_bytes, true);
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -645,9 +645,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			startActivityForResult(intent, CROP_RESULT);
 			break;
 		case CROP_RESULT:
-			Bitmap bitmap = data.getParcelableExtra(HikeConstants.Extras.BITMAP);
-			mActivityState.newBitmap = Utils.getRoundedCornerBitmap(bitmap);
-			bitmap.recycle();
+			mActivityState.newBitmap = data.getParcelableExtra(HikeConstants.Extras.BITMAP);
 			if (mIconView != null) {
 				mIconView.setImageBitmap(mActivityState.newBitmap);
 			}
