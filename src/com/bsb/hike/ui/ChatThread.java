@@ -1710,11 +1710,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if(v.getId() == R.id.title_image_btn2)
 		{
-			final CharSequence[] options = {"Image", "Video", "Audio"};
+			final CharSequence[] options = getResources().getStringArray(R.array.file_transfer_items);
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
 
-			builder.setTitle("Share file");
+			builder.setTitle(R.string.share_file);
 			builder.setItems(options, new DialogInterface.OnClickListener() 
 			{
 				@Override
