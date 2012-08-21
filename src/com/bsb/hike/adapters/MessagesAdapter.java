@@ -325,17 +325,19 @@ public class MessagesAdapter extends BaseAdapter
 					StringBuilder dndNames = new StringBuilder(); 
 					for(int i=0; i<dndNumbers.length(); i++)
 					{
+						String name = conversation instanceof GroupConversation ? 
+								((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
 						if(i < dndNumbers.length() - 2)
 						{
-							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() + ", ");
+							dndNames.append(name + ", ");
 						}
 						else if(i < dndNumbers.length() - 1)
 						{
-							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() + " and ");
+							dndNames.append(name + " and ");
 						}
 						else
 						{
-							dndNames.append(((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName());
+							dndNames.append(name);
 						}
 					}
 					convMessage.setMessage(String.format(context.getString(R.string.dnd_msg_gc), dndNames.toString()));
