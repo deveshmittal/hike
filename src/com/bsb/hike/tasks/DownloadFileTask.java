@@ -113,6 +113,11 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		{
 			HikeConversationsDatabase.getInstance().addFile(fileKey, destinationFile.getName());
 		}
+		else
+		{
+			Log.d(getClass().getSimpleName(), "File not downloaded " + progressFileTransfer);
+			destinationFile.delete();
+		}
 
 		ChatThread.fileTransferTaskMap.remove(msgId);
 		chatThread.mUpdateAdapter.run();
