@@ -202,7 +202,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private GroupParticipant myInfo;
 
-	private File selectedFile;
+	private static File selectedFile;
 
 	private Dialog filePickerDialog;
 
