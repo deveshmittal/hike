@@ -112,5 +112,6 @@
 	<string name="opt_in">%1$s just opted in!</string>
 	<string name="dnd_msg_gc">Waiting for %1$s to join in</string>
 	<string name="earned_credits">You\'ve just earned %1$s free SMS</string>
+	<string name="no_external_storage">External storage not found</string>
 	<string name="share_file">Share file</string>
 </resources>

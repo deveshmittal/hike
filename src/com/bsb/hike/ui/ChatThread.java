@@ -13,7 +13,9 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -98,6 +100,7 @@ import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageType;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
@@ -1720,6 +1723,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				@Override
 				public void onClick(DialogInterface dialog, int which) 
 				{
+					if(Utils.getExternalStorageState() != ExternalStorageType.WRITEABLE)
+					{
+						Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+						return;
+					}
 					int requestCode;
 					Intent pickIntent = new Intent();
 					Intent newMediaFileIntent = null;
@@ -2050,49 +2058,62 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View v, int position, long id) 
 	{
-		ConvMessage convMessage = (ConvMessage) ((MessagesAdapter)adapterView.getAdapter()).getItem(position);
-		if(convMessage != null && convMessage.isFileTransferMessage())
+		try
 		{
-			Log.d(getClass().getSimpleName(), "Message: " + convMessage.getMessage());
-			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-			if(convMessage.isSent())
+			ConvMessage convMessage = (ConvMessage) ((MessagesAdapter)adapterView.getAdapter()).getItem(position);
+			if(convMessage != null && convMessage.isFileTransferMessage())
 			{
-				Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
-				File sentFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
-				// If uploading failed then we try again.
-				if(TextUtils.isEmpty(hikeFile.getFileKey()) && !fileTransferTaskMap.containsKey(convMessage.getMsgID()))
+				if(Utils.getExternalStorageState() == ExternalStorageType.NONE)
 				{
-					beginFileUpload(convMessage, 
-							hikeFile.getFileName(), 
-							Utils.fileToBytes(sentFile));
+					Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+					return;
 				}
-				// Else we open it for the use to see
+				Log.d(getClass().getSimpleName(), "Message: " + convMessage.getMessage());
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+				if(convMessage.isSent())
+				{
+					Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
+					File sentFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
+					// If uploading failed then we try again.
+					if(TextUtils.isEmpty(hikeFile.getFileKey()) && !fileTransferTaskMap.containsKey(convMessage.getMsgID()))
+					{
+						beginFileUpload(convMessage, 
+								hikeFile.getFileName(), 
+								Utils.fileToBytes(sentFile));
+					}
+					// Else we open it for the use to see
+					else
+					{
+						Log.d(getClass().getSimpleName(), "Opening file");
+						Intent openFile = new Intent(Intent.ACTION_VIEW);
+						openFile.setDataAndType(Uri.fromFile(sentFile), hikeFile.getFileTypeString());
+						startActivity(openFile);
+					}
+				}
 				else
 				{
-					Log.d(getClass().getSimpleName(), "Opening file");
-					Intent openFile = new Intent(Intent.ACTION_VIEW);
-					openFile.setDataAndType(Uri.fromFile(sentFile), hikeFile.getFileTypeString());
-					startActivity(openFile);
+					File receivedFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
+					if(receivedFile.exists())
+					{
+						Log.d(getClass().getSimpleName(), "Opening file");
+						Intent openFile = new Intent(Intent.ACTION_VIEW);
+						openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
+						startActivity(openFile);
+					}
+					else
+					{
+						Log.d(getClass().getSimpleName(), "HIKEFILE: NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey() + " TYPE: " + hikeFile.getFileTypeString());
+						DownloadFileTask downloadFile = new DownloadFileTask(ChatThread.this, receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
+						downloadFile.execute();
+						fileTransferTaskMap.put(convMessage.getMsgID(), downloadFile);
+					}
 				}
 			}
-			else
-			{
-				File receivedFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
-				if(receivedFile.exists())
-				{
-					Log.d(getClass().getSimpleName(), "Opening file");
-					Intent openFile = new Intent(Intent.ACTION_VIEW);
-					openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
-					startActivity(openFile);
-				}
-				else
-				{
-					Log.d(getClass().getSimpleName(), "HIKEFILE: NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey() + " TYPE: " + hikeFile.getFileTypeString());
-					DownloadFileTask downloadFile = new DownloadFileTask(ChatThread.this, receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
-					downloadFile.execute();
-					fileTransferTaskMap.put(convMessage.getMsgID(), downloadFile);
-				}
-			}
+		}
+		catch(ActivityNotFoundException e)
+		{
+			Log.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
+			Toast.makeText(ChatThread.this, "Unable to open file (Unknown format)", Toast.LENGTH_SHORT).show();
 		}
 	}
 

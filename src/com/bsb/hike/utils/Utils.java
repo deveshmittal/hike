@@ -966,4 +966,34 @@ public class Utils
 	    cursor.moveToFirst();
 	    return cursor.getString(column_index);
 	}
+
+    public static enum ExternalStorageType
+    {
+    	WRITEABLE,
+    	READ_ONLY,
+    	NONE
+    }
+
+    public static ExternalStorageType getExternalStorageState()
+    {
+    	String state = Environment.getExternalStorageState();
+
+    	if (Environment.MEDIA_MOUNTED.equals(state)) 
+    	{
+    	    // We can read and write the media
+    	    return ExternalStorageType.WRITEABLE;
+    	} 
+    	else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) 
+    	{
+    	    // We can only read the media
+    		return ExternalStorageType.READ_ONLY;
+    	} 
+    	else 
+    	{
+    	    // Something else is wrong. It may be one of many other states, but all we need
+    	    //  to know is we can neither read nor write
+    	    return ExternalStorageType.NONE;
+    	}
+    }
+    		
 }

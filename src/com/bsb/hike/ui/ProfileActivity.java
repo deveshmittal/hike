@@ -56,6 +56,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageType;
 
 public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
 {
@@ -664,6 +665,11 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		switch(item)
 		{
 		case PROFILE_PICTURE_FROM_CAMERA:
+			if(Utils.getExternalStorageState() != ExternalStorageType.WRITEABLE)
+			{
+				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			selectedFileIcon = Utils.getOutputMediaFile(HikeFileType.PROFILE, null, null); // create a file to save the image
 			if (selectedFileIcon != null)
@@ -678,6 +684,11 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			}
 			break;
 		case PROFILE_PICTURE_FROM_GALLERY:
+			if(Utils.getExternalStorageState() == ExternalStorageType.NONE)
+			{
+				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+				return;
+			}
 			intent = new Intent(Intent.ACTION_PICK);
 			intent.setType("image/*");
 			startActivityForResult(intent, GALLERY_RESULT);
