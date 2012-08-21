@@ -2072,6 +2072,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		this.mComposeView.setVisibility(View.INVISIBLE);
 		this.titleIconView.setEnabled(false);
 		findViewById(R.id.emo_btn).setEnabled(false);
+		findViewById(R.id.title_image_btn2).setEnabled(false);
 	}
 
 	private String getMsisdnMainUser()
