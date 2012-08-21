@@ -195,12 +195,14 @@ public class ConvMessage
 
 	public ConvMessage(JSONObject obj, Conversation conversation, Context context, boolean isSelfGenerated) throws JSONException
 	{
-		// GCL or GCJ
-		// If the message is a group message we get a TO field consisting of the Group ID
-		this.mMsisdn = obj.getString(obj.has(HikeConstants.TO) ? HikeConstants.TO : HikeConstants.FROM); /*represents msg is coming from another client*/
-		this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
-
 		setMetadata(obj);
+
+		this.mMsisdn = conversation.getMsisdn();
+		if(participantInfoState != ParticipantInfoState.USER_JOIN)
+		{
+			this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
+		}
+
 		switch (this.participantInfoState) 
 		{
 		case PARTICIPANT_JOINED:
@@ -221,10 +223,10 @@ public class ConvMessage
 			this.mMessage = context.getString(R.string.group_chat_end);
 			break;
 		case USER_JOIN:
-			this.mMessage = String.format(context.getString(R.string.joined_hike), conversation.getLabel().split(" ", 2)[0]);
+			this.mMessage = String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel()));
 			break;
 		case USER_OPT_IN:
-			this.mMessage = String.format(context.getString(R.string.opt_in), conversation.getLabel().split(" ", 2)[0]);
+			this.mMessage = String.format(context.getString(R.string.opt_in), Utils.getFirstName(conversation.getLabel()));
 			break;
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;

@@ -996,5 +996,9 @@ public class Utils
     	    return ExternalStorageState.NONE;
     	}
     }
-    		
+
+    public static String getFirstName(String name)
+    {
+    	return name.split(" ", 2)[0];
+    }
 }

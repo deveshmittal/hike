@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 
 import com.bsb.hike.models.utils.JSONSerializable;
+import com.bsb.hike.utils.Utils;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 {
@@ -43,7 +44,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 			return this.msisdn;
 		}
 
-		return this.name.split(" ", 2)[0];
+		return Utils.getFirstName(this.name);
 	}
 
 	public void setName(String name)

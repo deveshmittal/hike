@@ -1934,7 +1934,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		toolTipLayout.setVisibility(mConversation.isOnhike() ? View.GONE : View.VISIBLE);
 		TextView toolTipTxt = (TextView) toolTipLayout.findViewById(R.id.tool_tip);
 		String formatString = (mConversation instanceof GroupConversation) ? 
-				getString(R.string.tap_group_info) : String.format(getString(R.string.press_btn_invite), mLabel.split(" ", 2)[0]);
+				getString(R.string.tap_group_info) : String.format(getString(R.string.press_btn_invite), Utils.getFirstName(mLabel));
 		toolTipTxt.setText(formatString); 
 	}
 	
