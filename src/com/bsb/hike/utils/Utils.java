@@ -321,20 +321,21 @@ public class Utils
 	    		((type == HikeFileType.PROFILE || type == HikeFileType.IMAGE) ? "IMG_" + timeStamp + ".jpg" : "MOV_" + timeStamp + ".mp4") : orgFileName;
 
 	    String fileExtension = orgFileName.substring(orgFileName.lastIndexOf("."), orgFileName.length());
-	    StringBuilder newFileName = new StringBuilder(orgFileName.substring(0, orgFileName.indexOf(fileExtension)));
-	    		
+	    String orgFileNameWithoutExtension = orgFileName.substring(0, orgFileName.indexOf(fileExtension));
+	    StringBuilder newFileName = new StringBuilder(orgFileNameWithoutExtension);
+	
 	    int i = 1;
 	    Log.d("Utils", "File name: " + newFileName.toString() + " Extension: " + fileExtension);
 	    while(!uniqueFileName)
 	    {
-	    	String existingFileKey = HikeConversationsDatabase.getInstance().getFileKey(newFileName.toString());
+	    	String existingFileKey = HikeConversationsDatabase.getInstance().getFileKey(newFileName.toString()+fileExtension);
 	    	if(TextUtils.isEmpty(existingFileKey) || existingFileKey.equals(fileKey))
 	    	{
 	    		break;
 	    	}
 	    	else
 	    	{
-	    		newFileName = new StringBuilder(orgFileName + "_" + i++);
+	    		newFileName = new StringBuilder(orgFileNameWithoutExtension + "_" + i++);
 	    	}
 	    }
 	    newFileName.append(fileExtension);
