@@ -81,8 +81,14 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		{
 			try 
 			{
-				fos.close();
-				is.close();
+				if(fos != null)
+				{
+					fos.close();
+				}
+				if(is != null)
+				{
+					is.close();
+				}
 			} 
 			catch (IOException e) 
 			{
