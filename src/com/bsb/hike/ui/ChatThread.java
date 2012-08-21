@@ -1872,9 +1872,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				ConvMessage convMessage = new ConvMessage(fileName, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
 				convMessage.setMetadata(metadata);
 
-				addMessage(convMessage);
-				mConversationDb.addConversationMessages(convMessage);
-				mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView.getText()));
+				sendMessage(convMessage);
 
 				beginFileUpload(convMessage, fileName, fileBytes);
 			}
