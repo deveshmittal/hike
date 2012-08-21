@@ -679,6 +679,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			MenuItem item = menu.findItem(R.id.resend);
 			item.setVisible(true);
 		}
+		if (message.isFileTransferMessage() && message.isSent())
+		{
+			MenuItem item = menu.findItem(R.id.forward);
+			item.setVisible(false);
+
+			MenuItem item1 = menu.findItem(R.id.copy);
+			item1.setVisible(false);
+		}
 	}
 
 	private void sendMessage(ConvMessage convMessage)
