@@ -107,7 +107,7 @@
 	<string name="tap_to_add">Tap here to add this person</string>
 	<string name="call">Call</string>
 	<string name="we_have_gc">Tap the menu to start a Group Chat.</string>
-	<string name="upload_failed">Could not upload file</string>
+	<string name="upload_failed">Could not upload file. Check network settings.</string>
 	<string name="joined_hike">%1$s just joined hike!</string>
 	<string name="opt_in">%1$s just opted in!</string>
 	<string name="dnd_msg_gc">Waiting for %1$s to join in</string>
