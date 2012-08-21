@@ -303,7 +303,7 @@ public class MessagesAdapter extends BaseAdapter
 					mainMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_opt_in, 0, 0, 0);
 
 					TextView creditsMessage = null;
-					if(convMessage.getMetadata().getJSON().has(HikeConstants.DATA))
+					if(convMessage.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).has(HikeConstants.CREDITS))
 					{
 						creditsMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 						int credits = convMessage.getMetadata().getJSON().optJSONObject(HikeConstants.DATA).optInt(HikeConstants.CREDITS);
@@ -315,7 +315,10 @@ public class MessagesAdapter extends BaseAdapter
 						mainMessage.setLayoutParams(lp);
 					}
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
-					((ViewGroup) holder.participantInfoContainer).addView(creditsMessage);
+					if(creditsMessage != null)
+					{
+						((ViewGroup) holder.participantInfoContainer).addView(creditsMessage);
+					}
 				}
 				else
 				{
