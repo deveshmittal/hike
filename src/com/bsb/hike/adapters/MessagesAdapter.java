@@ -364,12 +364,16 @@ public class MessagesAdapter extends BaseAdapter
 		{
 			HikeFile hikeFile = metadata.getHikeFiles().get(0);
 
-			holder.fileThumb.setImageDrawable(
+			holder.fileThumb.setBackgroundDrawable(
 					hikeFile.getThumbnail() != null ? 
 							hikeFile.getThumbnail() : 
 								context.getResources().getDrawable(
 										hikeFile.getHikeFileType() == HikeFileType.IMAGE ? 
 												R.drawable.ic_default_img : R.drawable.ic_default_mov));
+			if(hikeFile.getHikeFileType() == HikeFileType.VIDEO && hikeFile.getThumbnail() != null)
+			{
+				holder.fileThumb.setImageResource(R.drawable.ic_video_play);
+			}
 
 			holder.messageTextView.setVisibility(hikeFile.getThumbnail() == null ? View.VISIBLE : View.GONE);
 			holder.messageTextView.setText(hikeFile.getFileName());
