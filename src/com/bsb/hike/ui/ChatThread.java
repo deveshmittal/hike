@@ -1756,7 +1756,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
 					pickIntent.setType("video/*");
 					newMediaFileIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.VIDEO, null, null);
+					//selectedFile = Utils.getOutputMediaFile(HikeFileType.VIDEO, null, null);
 					break;
 				
 				case 2:
@@ -1778,7 +1778,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				Intent chooserIntent = Intent.createChooser(pickIntent, "");
 				if(externalStorageState == ExternalStorageState.WRITEABLE)
 				{
-					if(which != 2)
+					/*
+					 *  Cannot send a file for new videos because of an android issue
+					 *  http://stackoverflow.com/questions/10494839/verifiyandsetparameter-error-when-trying-to-record-video
+					 */
+					if(which != 2 && which != 1)
 					{
 						newMediaFileIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
 					}
