@@ -166,6 +166,7 @@ public class HikeConstants
 		public static final String ALERT_CANCELLED = "alertCancelled";
 		public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
 		public static final String SIGNUP_MSISDN_ERROR = "signupMsisdnError";
+		public static final String FILE_TRANSFER_DIALOG_SHOWING = "fileTransferDialogShowing";
 	}
 
 	public static final class LogEvent

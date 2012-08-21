@@ -100,7 +100,7 @@ import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.ExternalStorageType;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
@@ -203,6 +203,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private GroupParticipant myInfo;
 
 	private File selectedFile;
+
+	private Dialog filePickerDialog;
 
 	public static Map<Long, AsyncTask<?, ?, ?>> fileTransferTaskMap;
 
@@ -411,6 +413,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if(savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.EMOTICON_SHOWING))
 		{
 			onEmoticonBtnClicked(null);
+		}
+		if(savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.FILE_TRANSFER_DIALOG_SHOWING))
+		{
+			showFilePickerDialog(Utils.getExternalStorageState());
 		}
 
 		/* register listeners */
@@ -1713,71 +1719,77 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if(v.getId() == R.id.title_image_btn2)
 		{
-			final CharSequence[] options = getResources().getStringArray(R.array.file_transfer_items);
+			showFilePickerDialog(Utils.getExternalStorageState());
+		}
+	}
 
-			AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
+	private void showFilePickerDialog(final ExternalStorageState externalStorageState)
+	{
+		if(externalStorageState == ExternalStorageState.NONE)
+		{
+			Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		final CharSequence[] options = getResources().getStringArray(R.array.file_transfer_items);
 
-			builder.setTitle(R.string.share_file);
-			builder.setItems(options, new DialogInterface.OnClickListener() 
+		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
+
+		builder.setTitle(R.string.share_file);
+		builder.setItems(options, new DialogInterface.OnClickListener() 
+		{
+			@Override
+			public void onClick(DialogInterface dialog, int which) 
 			{
-				@Override
-				public void onClick(DialogInterface dialog, int which) 
+				int requestCode;
+				Intent pickIntent = new Intent();
+				Intent newMediaFileIntent = null;
+				switch (which) 
 				{
-					if(Utils.getExternalStorageState() != ExternalStorageType.WRITEABLE)
-					{
-						Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-						return;
-					}
-					int requestCode;
-					Intent pickIntent = new Intent();
-					Intent newMediaFileIntent = null;
-					switch (which) 
-					{
-					case 0:
-						requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
-						pickIntent.setType("image/*");
-						newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-						selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
-						break;
+				case 0:
+					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
+					pickIntent.setType("image/*");
+					newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
+					break;
 
-					case 1:
-						requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
-						pickIntent.setType("video/*");
-						newMediaFileIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-						selectedFile = Utils.getOutputMediaFile(HikeFileType.VIDEO, null, null);
-						break;
+				case 1:
+					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
+					pickIntent.setType("video/*");
+					newMediaFileIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+					selectedFile = Utils.getOutputMediaFile(HikeFileType.VIDEO, null, null);
+					break;
+				
+				case 2:
+					requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
+					pickIntent.setData(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+					newMediaFileIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+					selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO, null, null);
+					break;
 					
-					case 2:
-						requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
-						pickIntent.setData(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-						newMediaFileIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-						selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO, null, null);
-						break;
-						
-					default:
-						requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
-						pickIntent.setType("image/*");
-						newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-						selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
-						break;
-					}
-					pickIntent.setAction(Intent.ACTION_PICK);
-					
-					Intent chooserIntent = Intent.createChooser(pickIntent, "");
-					chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { newMediaFileIntent });
+				default:
+					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
+					pickIntent.setType("image/*");
+					newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
+					break;
+				}
+				pickIntent.setAction(Intent.ACTION_PICK);
+
+				Intent chooserIntent = Intent.createChooser(pickIntent, "");
+				if(externalStorageState == ExternalStorageState.WRITEABLE)
+				{
 					if(which != 2)
 					{
 						newMediaFileIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
 					}
-					startActivityForResult(chooserIntent, requestCode);
+					chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { newMediaFileIntent });
 				}
-			});
+				startActivityForResult(chooserIntent, requestCode);
+			}
+		});
 
-			AlertDialog alertDialog = builder.create();
-			alertDialog.show();
-
-
-		}
+		filePickerDialog = builder.create();
+		filePickerDialog.show();
 	}
 
 	@Override
@@ -1949,6 +1961,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, toolTipLayout != null && toolTipLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.OVERLAY_SHOWING, mOverlayLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.EMOTICON_SHOWING, emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.FILE_TRANSFER_DIALOG_SHOWING, filePickerDialog != null && filePickerDialog.isShowing());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -2063,7 +2076,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			ConvMessage convMessage = (ConvMessage) ((MessagesAdapter)adapterView.getAdapter()).getItem(position);
 			if(convMessage != null && convMessage.isFileTransferMessage())
 			{
-				if(Utils.getExternalStorageState() == ExternalStorageType.NONE)
+				if(Utils.getExternalStorageState() == ExternalStorageState.NONE)
 				{
 					Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 					return;

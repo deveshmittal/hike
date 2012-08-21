@@ -56,7 +56,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.utils.Utils.ExternalStorageType;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
 {
@@ -665,7 +665,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		switch(item)
 		{
 		case PROFILE_PICTURE_FROM_CAMERA:
-			if(Utils.getExternalStorageState() != ExternalStorageType.WRITEABLE)
+			if(Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE)
 			{
 				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 				return;
@@ -684,7 +684,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			}
 			break;
 		case PROFILE_PICTURE_FROM_GALLERY:
-			if(Utils.getExternalStorageState() == ExternalStorageType.NONE)
+			if(Utils.getExternalStorageState() == ExternalStorageState.NONE)
 			{
 				Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 				return;
