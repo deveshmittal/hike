@@ -1836,6 +1836,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				String filePath = data == null ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 				Log.d(getClass().getSimpleName(), "File Path; " + filePath);
+				if(filePath == null)
+				{
+					Toast.makeText(ChatThread.this, "Cannot upload file", Toast.LENGTH_SHORT).show();
+					return;
+				}
 
 				File file = new File(filePath);
 				String fileName = file.getName();
