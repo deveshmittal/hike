@@ -491,12 +491,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 		case R.id.copy:
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-			clipboard.setText(message.getMessage());
+			if(message.isFileTransferMessage())
+			{
+				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+				clipboard.setText(HikeConstants.FILE_TRANSFER_BASE_URL + hikeFile.getFileKey());
+			}
+			else
+			{
+				clipboard.setText(message.getMessage());
+			}
 			return true;
 		case R.id.forward:
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(this, ChatThread.class);
-			intent.putExtra(HikeConstants.Extras.MSG, message.getMessage());
+			String msg;
+			if(message.isFileTransferMessage())
+			{
+				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+				msg = HikeConstants.FILE_TRANSFER_BASE_URL + hikeFile.getFileKey();
+			}
+			else
+			{
+				msg = message.getMessage();
+			}
+			intent.putExtra(HikeConstants.Extras.MSG, msg);
 			startActivity(intent);
 			return true;
 		case R.id.delete:
@@ -681,11 +699,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		if (message.isFileTransferMessage() && message.isSent())
 		{
-			MenuItem item = menu.findItem(R.id.forward);
-			item.setVisible(false);
+			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+			if(TextUtils.isEmpty(hikeFile.getFileKey()))
+			{
+				MenuItem item = menu.findItem(R.id.forward);
+				item.setVisible(false);
 
-			MenuItem item1 = menu.findItem(R.id.copy);
-			item1.setVisible(false);
+				MenuItem item1 = menu.findItem(R.id.copy);
+				item1.setVisible(false);
+			}
 		}
 	}
 
