@@ -114,4 +114,6 @@
 	<string name="earned_credits">You\'ve just earned %1$s free SMS</string>
 	<string name="no_external_storage">External storage not found</string>
 	<string name="share_file">Share file</string>
+	<string name="download_failed">Could not download file. Check network settings.</string>
+	<string name="not_enough_space">Your phone does not have enough space to download the file</string>
 </resources>
