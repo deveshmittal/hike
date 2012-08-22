@@ -202,7 +202,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private GroupParticipant myInfo;
 
-	private File selectedFile;
+	private static File selectedFile;
 
 	private Dialog filePickerDialog;
 
@@ -491,12 +491,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 		case R.id.copy:
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-			clipboard.setText(message.getMessage());
+			if(message.isFileTransferMessage())
+			{
+				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+				clipboard.setText(HikeConstants.FILE_TRANSFER_BASE_URL + hikeFile.getFileKey());
+			}
+			else
+			{
+				clipboard.setText(message.getMessage());
+			}
 			return true;
 		case R.id.forward:
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(this, ChatThread.class);
-			intent.putExtra(HikeConstants.Extras.MSG, message.getMessage());
+			String msg;
+			if(message.isFileTransferMessage())
+			{
+				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+				msg = HikeConstants.FILE_TRANSFER_BASE_URL + hikeFile.getFileKey();
+			}
+			else
+			{
+				msg = message.getMessage();
+			}
+			intent.putExtra(HikeConstants.Extras.MSG, msg);
 			startActivity(intent);
 			return true;
 		case R.id.delete:
@@ -678,6 +696,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			MenuItem item = menu.findItem(R.id.resend);
 			item.setVisible(true);
+		}
+		if (message.isFileTransferMessage() && message.isSent())
+		{
+			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+			if(TextUtils.isEmpty(hikeFile.getFileKey()))
+			{
+				MenuItem item = menu.findItem(R.id.forward);
+				item.setVisible(false);
+
+				MenuItem item1 = menu.findItem(R.id.copy);
+				item1.setVisible(false);
+			}
 		}
 	}
 
@@ -1806,6 +1836,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				String filePath = data == null ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 				Log.d(getClass().getSimpleName(), "File Path; " + filePath);
+				if(filePath == null)
+				{
+					Toast.makeText(ChatThread.this, "Cannot upload file", Toast.LENGTH_SHORT).show();
+					return;
+				}
 
 				File file = new File(filePath);
 				String fileName = file.getName();
@@ -1859,7 +1894,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 				else if(mediaType == HikeFileType.VIDEO)
 				{
-					thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Images.Thumbnails.MINI_KIND);
+					thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Images.Thumbnails.MICRO_KIND);
 				}
 				if(thumbnail != null)
 				{

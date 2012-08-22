@@ -50,6 +50,7 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
@@ -1000,5 +1001,13 @@ public class Utils
     public static String getFirstName(String name)
     {
     	return name.split(" ", 2)[0];
+    }
+
+    public static double getFreeSpace()
+    {
+    	StatFs stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+    	double sdAvailSize = (double)stat.getAvailableBlocks()
+    	                   * (double)stat.getBlockSize();
+    	return sdAvailSize;
     }
 }

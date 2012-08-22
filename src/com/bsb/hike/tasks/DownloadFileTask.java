@@ -11,10 +11,13 @@ import java.net.URLConnection;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.Utils;
 
 public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 {
@@ -23,6 +26,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 	private ChatThread chatThread;
 	private int progressFileTransfer;
 	private long msgId;
+	private boolean freeSpaceError = false;
 
 	public DownloadFileTask(ChatThread activity, File destinationFile, String fileKey, long msgId) 
 	{
@@ -48,6 +52,12 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 			URLConnection urlConnection = url.openConnection();
 
 			int length = urlConnection.getContentLength();
+
+			if(length > Utils.getFreeSpace())
+			{
+				freeSpaceError = true;
+				return Boolean.FALSE;
+			}
 
 			is = new BufferedInputStream(url.openConnection().getInputStream());
 
@@ -115,6 +125,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		}
 		else
 		{
+			Toast.makeText(chatThread, freeSpaceError ? R.string.not_enough_space : R.string.download_failed, Toast.LENGTH_SHORT).show();
 			Log.d(getClass().getSimpleName(), "File not downloaded " + progressFileTransfer);
 			destinationFile.delete();
 		}

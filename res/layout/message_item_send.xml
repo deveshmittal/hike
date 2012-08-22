@@ -78,12 +78,12 @@
 
 	    <ImageView
 	        android:id="@+id/file_thumb"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
+	        android:layout_width="100dp"
+	        android:layout_height="100dp"
 	        android:visibility="gone"
 	        android:layout_gravity="center"
 	        android:scaleType="centerInside"
-	        android:src="@drawable/ic_default_img" />
+	        android:background="@drawable/ic_default_img" />
 
 		<View android:id="@+id/margin_view"
 		    android:layout_width="5dp"

@@ -576,6 +576,10 @@ public class AccountUtils
 
 	public static JSONObject executeFileTransferRequest(HikeHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask) throws Exception
 	{
+		// Always start download with some initial progress
+		int progress = HikeConstants.INITIAL_PROGRESS;
+		hikeHTTPTask.updateProgress(progress);
+
 		byte[] bytes = GzipByteArrayEntity.gzip(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
 		ByteArrayInputStream fileInputStream = new ByteArrayInputStream(bytes);
 
@@ -608,7 +612,6 @@ public class AccountUtils
 
 		// Read file
 		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-		int progress;
 		int totalBytesRead = bytesRead;
 
 		while (bytesRead > 0)
@@ -622,13 +625,17 @@ public class AccountUtils
 			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 			totalBytesRead += bytesRead;
 
-			progress = bytesRead > 0 ? (int) ((totalBytesRead * 100)/bytes.length) : 100;
+			progress = HikeConstants.INITIAL_PROGRESS + (bytesRead > 0 ? (int) ((totalBytesRead * 75)/bytes.length) : 75);
 			hikeHTTPTask.updateProgress(progress);
 
 			Thread.sleep(100);
 		}
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+		progress = 90;
+		hikeHTTPTask.updateProgress(progress);
+
 		StringBuilder builder = new StringBuilder();
 		CharBuffer target = CharBuffer.allocate(10000);
 		int read = reader.read(target);
@@ -638,6 +645,9 @@ public class AccountUtils
 			target.clear();
 			read = reader.read(target);
 		}
+		progress = 100;
+		hikeHTTPTask.updateProgress(progress);
+
 		Log.d("HTTP", "request finished");
 		outputStream.flush();
 		outputStream.close();

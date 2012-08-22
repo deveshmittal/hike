@@ -19,6 +19,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -89,6 +90,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			else if (message.isFileTransferMessage())
 			{
 				markedUp = metadata.getHikeFiles().get(0).getFileName();
+				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()) ? View.GONE : View.VISIBLE);
 			}
 			else
 			{

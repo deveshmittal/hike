@@ -140,7 +140,8 @@
                 android:paddingRight="20dp"
                 android:text="@string/group_chat_free"
                 android:textColor="@color/timestampcolor"
-                android:textSize="10sp" />
+                android:textSize="10sp"
+                android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 

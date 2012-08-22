@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class HikeFile 
 {
@@ -142,6 +143,10 @@ public class HikeFile
 
 	public boolean wasFileDownloaded()
 	{
+		if(Utils.getExternalStorageState() == ExternalStorageState.NONE)
+		{
+			return false;
+		}
 		return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey).exists();
 	}
 }

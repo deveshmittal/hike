@@ -2,9 +2,11 @@ package com.bsb.hike.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -144,6 +146,10 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	{
 		if (success)
 		{	
+			// Added this code to prevent hike from pulling in sms by default.
+			Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+			editor.putBoolean(HikeConstants.SMS_PREF, false);
+			editor.commit();
 			mHandler.postDelayed(new Runnable() 
 			{
 				@Override
