@@ -366,30 +366,48 @@ public class MessagesAdapter extends BaseAdapter
 		{
 			HikeFile hikeFile = metadata.getHikeFiles().get(0);
 
+			boolean showThumbnail = (
+					(convMessage.isSent()) || 
+					(!TextUtils.isEmpty(conversation.getContactName())) || 
+					(hikeFile.wasFileDownloaded() && 
+							!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))) && 
+							(hikeFile.getThumbnail() != null);
+
 			holder.fileThumb.setBackgroundDrawable(
-					hikeFile.getThumbnail() != null ? 
+					showThumbnail ? 
 							hikeFile.getThumbnail() : 
 								context.getResources().getDrawable(
 										hikeFile.getHikeFileType() == HikeFileType.IMAGE ? 
 												R.drawable.ic_default_img : R.drawable.ic_default_mov));
-			if(hikeFile.getHikeFileType() == HikeFileType.VIDEO && hikeFile.getThumbnail() != null)
-			{
-				holder.fileThumb.setImageResource(R.drawable.ic_video_play);
-			}
 
-			holder.messageTextView.setVisibility(hikeFile.getThumbnail() == null ? View.VISIBLE : View.GONE);
+			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb.getLayoutParams();
+			fileThumbParams.width = (int) (showThumbnail ? (100 * Utils.densityMultiplier) : LayoutParams.WRAP_CONTENT);
+			fileThumbParams.height = (int) (showThumbnail ? (100 * Utils.densityMultiplier) : LayoutParams.WRAP_CONTENT);
+			holder.fileThumb.setLayoutParams(fileThumbParams);
+
+			holder.fileThumb.setImageResource(((hikeFile.getHikeFileType() == HikeFileType.VIDEO) && (hikeFile.getThumbnail() != null)) ? R.drawable.ic_video_play : 0);
+
+			holder.messageTextView.setVisibility(!showThumbnail ? View.VISIBLE : View.GONE);
 			holder.messageTextView.setText(hikeFile.getFileName());
 
 			if(holder.showFileBtn != null)
 			{
-				LayoutParams lp = (LayoutParams) holder.showFileBtn.getLayoutParams();
-				lp.gravity = hikeFile.getThumbnail() == null ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM;
-				holder.showFileBtn.setLayoutParams(lp);
-				holder.showFileBtn.setImageResource(ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) ?
-						R.drawable.ic_open_file_disabled : 
-							hikeFile.wasFileDownloaded() ? 
-									R.drawable.ic_open_received_file : 
-										R.drawable.ic_download_file);
+				if(hikeFile.wasFileDownloaded() && hikeFile.getThumbnail() != null && !ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
+				{
+					holder.showFileBtn.setVisibility(View.GONE);
+				}
+				else
+				{
+					holder.showFileBtn.setVisibility(View.VISIBLE);
+					LayoutParams lp = (LayoutParams) holder.showFileBtn.getLayoutParams();
+					lp.gravity = !showThumbnail ? Gravity.CENTER_VERTICAL : Gravity.BOTTOM;
+					holder.showFileBtn.setLayoutParams(lp);
+					holder.showFileBtn.setImageResource(ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) ?
+							R.drawable.ic_open_file_disabled : 
+								hikeFile.wasFileDownloaded() ? 
+										R.drawable.ic_open_received_file : 
+											R.drawable.ic_download_file);
+				}
 			}
 			if(holder.marginView != null)
 			{
@@ -440,17 +458,9 @@ public class MessagesAdapter extends BaseAdapter
 			}
 			holder.image.setVisibility(View.VISIBLE);
 			holder.image.setImageResource(R.drawable.ic_download_failed);
-			if(holder.showFileBtn != null)
-			{
-				holder.showFileBtn.setVisibility(View.VISIBLE);
-			}
 		}
 		else
 		{
-			if(holder.showFileBtn != null)
-			{
-				holder.showFileBtn.setVisibility(View.VISIBLE);
-			}
 			if(holder.circularProgress != null)
 			{
 				holder.circularProgress.setVisibility(View.INVISIBLE);
