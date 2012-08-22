@@ -226,7 +226,16 @@ public class ConvMessage
 			this.mMessage = String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel()));
 			break;
 		case USER_OPT_IN:
-			this.mMessage = String.format(context.getString(conversation instanceof GroupConversation ? R.string.opt_in : R.string.optin_one_to_one), Utils.getFirstName(conversation.getLabel()));
+			String name;
+			if(conversation instanceof GroupConversation)
+			{
+				name = ((GroupConversation)conversation).getGroupParticipant(obj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
+			}
+			else
+			{
+				name = Utils.getFirstName(conversation.getLabel());
+			}
+			this.mMessage = String.format(context.getString(conversation instanceof GroupConversation ? R.string.opt_in : R.string.optin_one_to_one), name);
 			break;
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
