@@ -109,7 +109,7 @@ public class HikeConstants
 	public static final int AUDIO_TRANSFER_CODE = 1190;
 	public static final String FILE_TRANSFER_BASE_URL = AccountUtils.BASE + "/user/ft/";
 
-	public static final int MAX_DIMENSION_THUMBNAIL_PX = 90; 
+	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180; 
 
 	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
  

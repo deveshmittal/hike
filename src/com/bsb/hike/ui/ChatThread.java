@@ -1867,7 +1867,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 				else if(mediaType == HikeFileType.VIDEO)
 				{
-					thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Images.Thumbnails.MINI_KIND);
+					thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Images.Thumbnails.MICRO_KIND);
 				}
 				if(thumbnail != null)
 				{
