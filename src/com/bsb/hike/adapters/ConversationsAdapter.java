@@ -2,6 +2,9 @@ package com.bsb.hike.adapters;
 
 import java.util.List;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
@@ -82,7 +85,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 
 			MessageMetadata metadata = message.getMetadata();
 
-			CharSequence markedUp;
+			CharSequence markedUp = null;
 			if (metadata != null && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO && metadata.getHikeFiles() == null)
 			{
 				markedUp = metadata.getMessage(context, message, false);
@@ -91,6 +94,37 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			{
 				markedUp = metadata.getHikeFiles().get(0).getFileName();
 				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()) ? View.GONE : View.VISIBLE);
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
+			{
+				try 
+				{
+					JSONArray dndNumbers = message.getMetadata().getDndNumbers();
+					StringBuilder dndNames = new StringBuilder(); 
+					for(int i=0; i<dndNumbers.length(); i++)
+					{
+						String dndName;
+						dndName = conversation instanceof GroupConversation ? 
+								((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
+								if(i < dndNumbers.length() - 2)
+								{
+									dndNames.append(dndName + ", ");
+								}
+								else if(i < dndNumbers.length() - 1)
+								{
+									dndNames.append(dndName + " and ");
+								}
+								else
+								{
+									dndNames.append(dndName);
+								}
+					}
+					markedUp = String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString());
+				} 
+				catch (JSONException e) 
+				{
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
 			}
 			else
 			{
