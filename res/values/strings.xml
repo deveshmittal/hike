@@ -116,4 +116,6 @@
 	<string name="share_file">Share file</string>
 	<string name="download_failed">Could not download file. Check network settings.</string>
 	<string name="not_enough_space">Your phone does not have enough space to download the file</string>
+	<string name="dnd_one_to_one">%1$s is on DND. Waiting for %1$s to reply.</string>
+	<string name="optin_one_to_one">%1$s just opted in to hike!</string>
 </resources>

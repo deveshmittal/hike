@@ -226,7 +226,7 @@ public class ConvMessage
 			this.mMessage = String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel()));
 			break;
 		case USER_OPT_IN:
-			this.mMessage = String.format(context.getString(R.string.opt_in), Utils.getFirstName(conversation.getLabel()));
+			this.mMessage = String.format(context.getString(conversation instanceof GroupConversation ? R.string.opt_in : R.string.optin_one_to_one), Utils.getFirstName(conversation.getLabel()));
 			break;
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;

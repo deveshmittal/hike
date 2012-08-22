@@ -7,4 +7,6 @@
     android:gravity="center"
     android:textColor="@color/timestampcolor"
     android:textSize="13sp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
     android:background="@drawable/participant_info_bg" />
