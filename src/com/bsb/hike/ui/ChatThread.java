@@ -313,6 +313,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPLOAD_FINISHED, this);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -436,6 +437,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPLOAD_FINISHED, this);
 	}
 
 	@Override
@@ -1360,6 +1363,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				});
 			}
 		}
+		else if (HikePubSub.UPLOAD_FINISHED.equals(type))
+		{
+			ConvMessage convMessage = (ConvMessage) object;
+			if(convMessage.getMsisdn() != this.mContactNumber)
+			{
+				return;
+			}
+			ConvMessage adapterMessage = findMessageById(convMessage.getMsgID());
+			if (adapterMessage != null) 
+			{
+				adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
+			}
+			runOnUiThread(mUpdateAdapter);
+		}
 	}
 
 	private ConvMessage findMessageById(long msgID)
@@ -2233,7 +2250,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					mConversationDb.addFile(hikeFile.getFileKey(), hikeFile.getFileName());
 
 					mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-					runOnUiThread(mUpdateAdapter);
+					mPubSub.publish(HikePubSub.UPLOAD_FINISHED, convMessage);
 				}
 				catch (JSONException e) 
 				{
