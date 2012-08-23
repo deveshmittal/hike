@@ -1366,7 +1366,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (HikePubSub.UPLOAD_FINISHED.equals(type))
 		{
 			ConvMessage convMessage = (ConvMessage) object;
-			if(convMessage.getMsisdn() != this.mContactNumber)
+			if(!convMessage.getMsisdn().equals(this.mContactNumber))
 			{
 				return;
 			}
