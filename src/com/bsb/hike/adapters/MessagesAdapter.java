@@ -355,7 +355,7 @@ public class MessagesAdapter extends BaseAdapter
 						String dndOneToOne = context.getString(R.string.dnd_one_to_one);
 						ssb = new SpannableStringBuilder(convMessage.getMessage());
 						ssb.setSpan(new ForegroundColorSpan(0xff666666), dndOneToOne.indexOf("%1$s"), convMessage.getMessage().indexOf("is on DND"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						ssb.setSpan(new ForegroundColorSpan(0xff666666), dndOneToOne.lastIndexOf("%1$s"), convMessage.getMessage().indexOf("to reply"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+						ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().lastIndexOf(dndNames.toString()), convMessage.getMessage().indexOf("to reply"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					}
 
 					dndMessage.setText(ssb);
