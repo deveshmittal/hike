@@ -321,8 +321,8 @@ public class Utils
 	    orgFileName = TextUtils.isEmpty(orgFileName) ? 
 	    		((type == HikeFileType.PROFILE || type == HikeFileType.IMAGE) ? "IMG_" + timeStamp + ".jpg" : "MOV_" + timeStamp + ".mp4") : orgFileName;
 
-	    String fileExtension = orgFileName.substring(orgFileName.lastIndexOf("."), orgFileName.length());
-	    String orgFileNameWithoutExtension = orgFileName.substring(0, orgFileName.indexOf(fileExtension));
+	    String fileExtension = orgFileName.contains(".") ? orgFileName.substring(orgFileName.lastIndexOf("."), orgFileName.length()) : "";
+	    String orgFileNameWithoutExtension = !TextUtils.isEmpty(fileExtension) ? orgFileName.substring(0, orgFileName.indexOf(fileExtension)) : orgFileName;
 	    StringBuilder newFileName = new StringBuilder(orgFileNameWithoutExtension);
 	
 	    int i = 1;
