@@ -99,7 +99,10 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 	{
 		progressFileTransfer = values[0];
 		Log.d(getClass().getSimpleName(), "Progress Percentage: " + progressFileTransfer);
-		chatThread.mUpdateAdapter.run();
+		if(chatThread.mUpdateAdapter != null)
+		{
+			chatThread.mUpdateAdapter.run();
+		}
 	}
 
 	public int getProgressFileTransfer()
