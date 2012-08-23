@@ -1858,7 +1858,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				if(requestCode == HikeConstants.IMAGE_TRANSFER_CODE)
 				{
 					Bitmap tempBmp = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX);
-					fileBytes = Utils.bitmapToBytes(tempBmp);
+					fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG);
 					tempBmp.recycle();
 				}
 
@@ -1904,7 +1904,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 				if(thumbnail != null)
 				{
-					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail), Base64.DEFAULT);
+					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
 				}
 
 				long time = System.currentTimeMillis()/1000;

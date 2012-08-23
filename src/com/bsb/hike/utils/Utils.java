@@ -949,10 +949,10 @@ public class Utils
     	return thumbnail;
     }
 
-    public static byte[] bitmapToBytes(Bitmap bitmap)
+    public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format)
     {
     	ByteArrayOutputStream bao = new ByteArrayOutputStream();
-    	bitmap.compress(Bitmap.CompressFormat.JPEG, 95, bao);
+    	bitmap.compress(format, 95, bao);
 		return bao.toByteArray();
     }
 

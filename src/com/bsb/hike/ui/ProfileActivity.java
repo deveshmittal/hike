@@ -477,12 +477,12 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			/* the server only needs a smaller version */
 			final Bitmap smallerBitmap = Util.transform(new Matrix(),
 					mActivityState.newBitmap, HikeConstants.PROFILE_IMAGE_DIMENSIONS, HikeConstants.PROFILE_IMAGE_DIMENSIONS, false);
-			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap);
+			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap, Bitmap.CompressFormat.JPEG);
 
 			final byte[] larger_bytes;
 			if (this.profileType != ProfileType.GROUP_INFO) 
 			{
-				larger_bytes = Utils.bitmapToBytes(mActivityState.newBitmap);
+				larger_bytes = Utils.bitmapToBytes(mActivityState.newBitmap, Bitmap.CompressFormat.JPEG);
 			}
 			else
 			{

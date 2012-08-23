@@ -549,7 +549,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		{
 			Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 			Bitmap roundedBitmap = Utils.getRoundedCornerBitmap(tempBitmap);
-			data = Utils.bitmapToBytes(roundedBitmap);
+			data = Utils.bitmapToBytes(roundedBitmap, Bitmap.CompressFormat.PNG);
 			tempBitmap.recycle();
 			roundedBitmap.recycle();
 		}
