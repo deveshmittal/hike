@@ -111,6 +111,8 @@ public class HikePubSub implements Runnable
 
 	public static final String CONTACT_ADDED = "contactAdded";
 
+	public static final String UPLOAD_FINISHED = "uploadFinished";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
