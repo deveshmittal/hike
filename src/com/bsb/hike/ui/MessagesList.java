@@ -261,11 +261,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			leaveGroup(mConversationsByMSISDN.get(getIntent().getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
 		}
 
-		if(this.accountPrefs.getBoolean(HikeMessengerApp.SHOW_GROUP_CHAT_TOOL_TIP, true))
-		{
-			showGroupChatToolTip();
-		}
-
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
