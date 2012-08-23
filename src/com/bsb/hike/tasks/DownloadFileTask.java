@@ -113,7 +113,10 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 	protected void onProgressUpdate(Integer... values) 
 	{
 		progressFileTransfer = values[0];
-		chatThread.mUpdateAdapter.run();
+		if(chatThread.mUpdateAdapter != null)
+		{
+			chatThread.mUpdateAdapter.run();
+		}
 	}
 
 	@Override
