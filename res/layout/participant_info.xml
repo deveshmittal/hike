@@ -9,4 +9,6 @@
     android:textSize="13sp"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp"
     android:background="@drawable/participant_info_bg" />

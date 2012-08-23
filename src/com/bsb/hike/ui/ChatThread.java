@@ -497,7 +497,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			if(message.isFileTransferMessage())
 			{
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				clipboard.setText(HikeConstants.FILE_TRANSFER_BASE_URL + hikeFile.getFileKey());
+				clipboard.setText(HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey());
 			}
 			else
 			{
@@ -511,7 +511,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			if(message.isFileTransferMessage())
 			{
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				msg = HikeConstants.FILE_TRANSFER_BASE_URL + hikeFile.getFileKey();
+				msg = HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey();
 			}
 			else
 			{
@@ -1366,7 +1366,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (HikePubSub.UPLOAD_FINISHED.equals(type))
 		{
 			ConvMessage convMessage = (ConvMessage) object;
-			if(convMessage.getMsisdn() != this.mContactNumber)
+			if(!convMessage.getMsisdn().equals(this.mContactNumber))
 			{
 				return;
 			}
