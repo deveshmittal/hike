@@ -103,7 +103,7 @@ public class HikeConstants
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
-	public static final int MAX_FILE_SIZE = 4*1024*1024;
+	public static final int MAX_FILE_SIZE = 6*1024*1024;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
 	public static final int AUDIO_TRANSFER_CODE = 1190;
