@@ -1814,6 +1814,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					 */
 					if(which != 2 && which != 1)
 					{
+					    if (selectedFile == null)
+					    {
+					        Log.w(getClass().getSimpleName(), "Unable to create file to store media.");
+					        Toast.makeText(ChatThread.this, ChatThread.this.getResources().getString(R.string.no_external_storage), Toast.LENGTH_LONG);
+					        return;
+					    }
 						newMediaFileIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
 					}
 					chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { newMediaFileIntent });
@@ -1834,7 +1840,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			try
 			{
-				String filePath = data == null ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
+				String filePath = (data == null || data.getData() == null) ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 				Log.d(getClass().getSimpleName(), "File Path; " + filePath);
 				if(filePath == null)
 				{
