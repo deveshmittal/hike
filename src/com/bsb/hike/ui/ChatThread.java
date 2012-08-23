@@ -1043,7 +1043,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* returns TRUE iff the last message was received and unread */
 	private boolean isLastMsgReceivedAndUnread()
 	{
-		int count = (mAdapter != null) ? mAdapter.getCount() : 0;
+		int count = (mAdapter != null && mConversation != null) ? mAdapter.getCount() : 0;
 		ConvMessage lastMsg = count > 0 ? mAdapter.getItem(count - 1) : null;
 		if (lastMsg == null)
 		{
