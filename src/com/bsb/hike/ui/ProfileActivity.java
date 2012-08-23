@@ -633,6 +633,11 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
 			Log.d("ProfileActivity", "The activity is " + this);
+			if(requestCode == CAMERA_RESULT && selectedFileIcon == null)
+			{
+				Toast.makeText(getApplicationContext(), "Error capturing image", Toast.LENGTH_SHORT).show();
+				return;
+			}
 			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);

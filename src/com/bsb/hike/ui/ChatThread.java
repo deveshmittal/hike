@@ -1840,6 +1840,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			try
 			{
+				if(data == null && selectedFile == null)
+				{
+					Toast.makeText(getApplicationContext(), "Error capturing image", Toast.LENGTH_SHORT).show();
+					return;
+				}
 				String filePath = (data == null || data.getData() == null) ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 				Log.d(getClass().getSimpleName(), "File Path; " + filePath);
 				if(filePath == null)
