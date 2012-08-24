@@ -2155,7 +2155,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				if(convMessage.isSent())
 				{
 					Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
-					File sentFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
+					File sentFile = hikeFile.getFile();
 					// If uploading failed then we try again.
 					if(TextUtils.isEmpty(hikeFile.getFileKey()) && !fileTransferTaskMap.containsKey(convMessage.getMsgID()))
 					{
@@ -2174,7 +2174,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 				else
 				{
-					File receivedFile = Utils.getOutputMediaFile(HikeFileType.fromString(hikeFile.getFileTypeString()), hikeFile.getFileName(), hikeFile.getFileKey());
+					File receivedFile = hikeFile.getFile();
 					if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) && receivedFile.exists())
 					{
 						Log.d(getClass().getSimpleName(), "Opening file");
