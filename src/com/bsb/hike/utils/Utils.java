@@ -1,10 +1,13 @@
 package com.bsb.hike.utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1009,5 +1012,48 @@ public class Utils
     	double sdAvailSize = (double)stat.getAvailableBlocks()
     	                   * (double)stat.getBlockSize();
     	return sdAvailSize;
+    }
+
+    public static boolean copyFile(String srcFilePath, String destFilePath, HikeFileType hikeFileType)
+    {
+    	try 
+    	{
+    		InputStream src;
+    		if(hikeFileType == HikeFileType.IMAGE)
+    		{
+    			Bitmap tempBmp = Utils.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX);
+				byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG);
+				tempBmp.recycle();
+				src = new ByteArrayInputStream(fileBytes);
+    		}
+    		else
+    		{
+    			src = new FileInputStream(new File(srcFilePath));
+    		}
+			OutputStream dest = new FileOutputStream(new File(destFilePath));
+
+			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+			int len;
+
+			while((len = src.read(buffer)) > 0)
+			{
+				dest.write(buffer, 0, len);
+			}
+
+			src.close();
+			dest.close();
+
+			return true;
+		} 
+    	catch (FileNotFoundException e) 
+    	{
+			Log.e("Utils", "File not found while copying", e);
+			return false;
+		} 
+    	catch (IOException e) 
+    	{
+    		Log.e("Utils", "Error while reading/writing/closing file", e);
+    		return false;
+		}
     }
 }
