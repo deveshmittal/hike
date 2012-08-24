@@ -149,4 +149,13 @@ public class HikeFile
 		}
 		return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey).exists();
 	}
+
+	public String getFilePath()
+	{
+		if(Utils.getExternalStorageState() == ExternalStorageState.NONE)
+		{
+			return null;
+		}
+		return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey).getPath();
+	}
 }

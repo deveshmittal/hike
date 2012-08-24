@@ -71,7 +71,7 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 				Log.d("HikeHTTPTask", "About to perform request:" + hikeHttpRequest.getPath());
 				if(hikeHttpRequest instanceof HikeFileTransferHttpRequest)
 				{
-					hikeHttpRequest.setResponse(AccountUtils.executeFileTransferRequest(hikeHttpRequest, ((HikeFileTransferHttpRequest)hikeHttpRequest).getFileName(), this));
+					hikeHttpRequest.setResponse(AccountUtils.executeFileTransferRequest(((HikeFileTransferHttpRequest)hikeHttpRequest), ((HikeFileTransferHttpRequest)hikeHttpRequest).getFileName(), this));
 				}
 				else
 				{

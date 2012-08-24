@@ -1875,31 +1875,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 				Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + fileName);
 
-				byte[] fileBytes = null;
-
-				if(requestCode == HikeConstants.IMAGE_TRANSFER_CODE)
-				{
-					Bitmap tempBmp = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX);
-					fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG);
-					tempBmp.recycle();
-				}
-
-				if(HikeConstants.MAX_FILE_SIZE != -1 && 
-						(requestCode != HikeConstants.IMAGE_TRANSFER_CODE ? 
-								HikeConstants.MAX_FILE_SIZE < file.length() : HikeConstants.MAX_FILE_SIZE < fileBytes.length))
+				if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
 				{
 					Toast.makeText(ChatThread.this, "File Size is too large", Toast.LENGTH_SHORT).show();
-					return;
-				}
-
-				if(requestCode != HikeConstants.IMAGE_TRANSFER_CODE)
-				{
-					fileBytes = Utils.fileToBytes(file);
-				}
-
-				if(fileBytes == null)
-				{
-					Toast.makeText(ChatThread.this, "Unable to read file", Toast.LENGTH_SHORT).show();
 					return;
 				}
 
@@ -1908,12 +1886,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 							requestCode ==HikeConstants.VIDEO_TRANSFER_CODE ? 
 								HikeFileType.VIDEO : HikeFileType.AUDIO;
 
-				if(data != null)
+				// For images that were captured, we need to scale them down and save
+				if(data != null || mediaType == HikeFileType.IMAGE)
 				{
 					selectedFile = Utils.getOutputMediaFile(mediaType, fileName, null);
+					Log.d(getClass().getSimpleName(), "Copying file: " + filePath + " to " + selectedFile.getPath());
 					// Saving the file to hike local folder
-					Utils.bytesToFile(fileBytes, selectedFile);
+					if(!Utils.copyFile(filePath, selectedFile.getPath(), mediaType))
+					{
+						Toast.makeText(ChatThread.this, "Unable to read file", Toast.LENGTH_SHORT).show();
+						return;
+					}
 				}
+
 				Bitmap thumbnail = null;
 				String thumbnailString = null;
 				if(mediaType == HikeFileType.IMAGE)
@@ -1945,7 +1930,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				// Called so that the UI in the Conversation lists screen is updated
 				mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 
-				beginFileUpload(convMessage, fileName, fileBytes);
+				beginFileUpload(convMessage, fileName, selectedFile.getPath());
 			}
 			catch (JSONException e)
 			{
@@ -2176,7 +2161,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					{
 						beginFileUpload(convMessage, 
 								hikeFile.getFileName(), 
-								Utils.fileToBytes(sentFile));
+								hikeFile.getFilePath());
 					}
 					// Else we open it for the use to see
 					else
@@ -2214,7 +2199,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 	}
 
-	private void beginFileUpload(final ConvMessage convMessage, String fileName, byte[] fileBytes)
+	private void beginFileUpload(final ConvMessage convMessage, String fileName, String filePath)
 	{
 		HikeFileTransferHttpRequest hikeHttpRequest = new HikeFileTransferHttpRequest("/user/ft", new HikeHttpCallback() 
 		{
@@ -2257,8 +2242,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 			}
-		}, fileName);
-		hikeHttpRequest.setPostData(fileBytes);
+		}, fileName, filePath);
 
 		HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(this, R.string.upload_failed);
 
