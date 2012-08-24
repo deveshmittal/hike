@@ -389,7 +389,8 @@ public class MessagesAdapter extends BaseAdapter
 							hikeFile.getThumbnail() : 
 								context.getResources().getDrawable(
 										hikeFile.getHikeFileType() == HikeFileType.IMAGE ? 
-												R.drawable.ic_default_img : R.drawable.ic_default_mov));
+												R.drawable.ic_default_img : hikeFile.getHikeFileType() == HikeFileType.VIDEO ? 
+														R.drawable.ic_default_mov : R.drawable.ic_default_audio));
 
 			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb.getLayoutParams();
 			fileThumbParams.width = (int) (showThumbnail ? (100 * Utils.densityMultiplier) : LayoutParams.WRAP_CONTENT);
