@@ -1897,6 +1897,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						Toast.makeText(ChatThread.this, "Unable to read file", Toast.LENGTH_SHORT).show();
 						return;
 					}
+					filePath = selectedFile.getPath();
 				}
 
 				Bitmap thumbnail = null;
