@@ -43,12 +43,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.Matrix;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
@@ -1054,6 +1056,21 @@ public class Utils
     	{
     		Log.e("Utils", "Error while reading/writing/closing file", e);
     		return false;
+		}
+    }
+
+    public static String getImageOrientation(String filePath)
+    {
+    	ExifInterface exif;
+		try 
+		{
+			exif = new ExifInterface(filePath);
+			return exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+		} 
+		catch (IOException e) 
+		{
+			Log.e("Utils", "Error while opening file", e);
+			return null;
 		}
     }
 }
