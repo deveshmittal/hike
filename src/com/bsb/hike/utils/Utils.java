@@ -1023,7 +1023,9 @@ public class Utils
     		InputStream src;
     		if(hikeFileType == HikeFileType.IMAGE)
     		{
+    			String imageOrientation = Utils.getImageOrientation(srcFilePath);
     			Bitmap tempBmp = Utils.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX);
+    			tempBmp = Utils.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG);
 				tempBmp.recycle();
 				src = new ByteArrayInputStream(fileBytes);
