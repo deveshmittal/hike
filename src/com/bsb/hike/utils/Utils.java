@@ -1073,4 +1073,21 @@ public class Utils
 			return null;
 		}
     }
+
+    public static int getRotatedAngle(String imageOrientation)
+    {
+    	if(!TextUtils.isEmpty(imageOrientation))
+		{
+			switch(Integer.parseInt(imageOrientation))
+			{
+			case ExifInterface.ORIENTATION_ROTATE_180:
+				return 180;
+			case ExifInterface.ORIENTATION_ROTATE_270:
+				return 270;
+			case ExifInterface.ORIENTATION_ROTATE_90:
+				return 90;
+			}
+		}
+    	return 0;
+    }
 }
