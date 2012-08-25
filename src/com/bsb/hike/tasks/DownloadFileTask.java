@@ -9,11 +9,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.ChatThread;
@@ -23,22 +26,17 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 {
 	private File destinationFile;
 	private String fileKey;
-	private ChatThread chatThread;
+	private Context context;
 	private int progressFileTransfer;
 	private long msgId;
 	private boolean freeSpaceError = false;
 
-	public DownloadFileTask(ChatThread activity, File destinationFile, String fileKey, long msgId) 
+	public DownloadFileTask(Context context, File destinationFile, String fileKey, long msgId) 
 	{
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
-		this.chatThread = activity;
+		this.context = context;
 		this.msgId = msgId;
-	}
-
-	public void setChatThread(ChatThread activity)
-	{
-		this.chatThread = activity;
 	}
 
 	@Override
@@ -113,10 +111,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 	protected void onProgressUpdate(Integer... values) 
 	{
 		progressFileTransfer = values[0];
-		if(chatThread.mUpdateAdapter != null)
-		{
-			chatThread.mUpdateAdapter.run();
-		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 	}
 
 	@Override
@@ -128,13 +123,13 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		}
 		else
 		{
-			Toast.makeText(chatThread, freeSpaceError ? R.string.not_enough_space : R.string.download_failed, Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, freeSpaceError ? R.string.not_enough_space : R.string.download_failed, Toast.LENGTH_SHORT).show();
 			Log.d(getClass().getSimpleName(), "File not downloaded " + progressFileTransfer);
 			destinationFile.delete();
 		}
 
 		ChatThread.fileTransferTaskMap.remove(msgId);
-		chatThread.mUpdateAdapter.run();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 	}
 
 	public int getProgressFileTransfer()

@@ -113,6 +113,8 @@ public class HikePubSub implements Runnable
 
 	public static final String UPLOAD_FINISHED = "uploadFinished";
 
+	public static final String FILE_TRANSFER_PROGRESS_UPDATED = "fileTransferProgressUpdated";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

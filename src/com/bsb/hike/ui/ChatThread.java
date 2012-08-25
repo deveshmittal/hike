@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -314,6 +313,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPLOAD_FINISHED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, this);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -348,22 +348,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		setContentView(R.layout.chatthread);
 
-		if(ChatThread.fileTransferTaskMap != null)
-		{
-			for(Entry<Long, AsyncTask<?, ?, ?>> fileTransferTaskEntry : fileTransferTaskMap.entrySet())
-			{
-				AsyncTask<?, ?, ?> fileTransferTask = fileTransferTaskEntry.getValue();
-				if(fileTransferTask instanceof HikeHTTPTask)
-				{
-					((HikeHTTPTask) fileTransferTask).setChatThread(ChatThread.this);
-				}
-				else
-				{
-					((DownloadFileTask) fileTransferTask).setChatThread(ChatThread.this);
-				}
-			}
-		}
-		else
+		if(ChatThread.fileTransferTaskMap == null)
 		{
 			ChatThread.fileTransferTaskMap = new HashMap<Long, AsyncTask<?,?,?>>();
 		}
@@ -439,6 +424,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPLOAD_FINISHED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, this);
 	}
 
 	@Override
@@ -1377,6 +1363,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			runOnUiThread(mUpdateAdapter);
 		}
+		else if (HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED.equals(type))
+		{
+			runOnUiThread(mUpdateAdapter);
+		}
 	}
 
 	private ConvMessage findMessageById(long msgID)
@@ -2187,7 +2177,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					else if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
 					{
 						Log.d(getClass().getSimpleName(), "HIKEFILE: NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey() + " TYPE: " + hikeFile.getFileTypeString());
-						DownloadFileTask downloadFile = new DownloadFileTask(ChatThread.this, receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
+						DownloadFileTask downloadFile = new DownloadFileTask(getApplicationContext(), receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
 						downloadFile.execute();
 						fileTransferTaskMap.put(convMessage.getMsgID(), downloadFile);
 					}

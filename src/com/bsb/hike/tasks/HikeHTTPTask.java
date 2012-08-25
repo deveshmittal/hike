@@ -5,9 +5,10 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.http.HikeFileTransferHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
 
 public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> implements ActivityCallableTask
@@ -17,23 +18,13 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 	private HikeHttpRequest[] requests;
 	private int errorStringId;
 	private int progressFileTransfer;
-	private ChatThread chatThread;
 
 	public HikeHTTPTask(FinishableEvent activity, int errorStringId)
 	{
 		this.finishableEvent = activity;
 		this.errorStringId = errorStringId;
-		if(activity instanceof ChatThread)
-		{
-			this.chatThread = (ChatThread) activity;
-		}
 	}
 	
-	public void setChatThread(ChatThread activity)
-	{
-		this.chatThread = activity;
-	}
-
 	@Override
 	protected void onPostExecute(Boolean result)
 	{
@@ -99,10 +90,7 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 	{
 		progressFileTransfer = values[0];
 		Log.d(getClass().getSimpleName(), "Progress Percentage: " + progressFileTransfer);
-		if(chatThread.mUpdateAdapter != null)
-		{
-			chatThread.mUpdateAdapter.run();
-		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 	}
 
 	public int getProgressFileTransfer()
