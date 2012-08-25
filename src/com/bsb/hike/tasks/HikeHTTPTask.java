@@ -1,5 +1,7 @@
 package com.bsb.hike.tasks;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -7,6 +9,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.http.HikeFileTransferHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.utils.AccountUtils;
@@ -18,13 +21,19 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 	private HikeHttpRequest[] requests;
 	private int errorStringId;
 	private int progressFileTransfer;
+	private AtomicBoolean cancelUpload = new AtomicBoolean();
 
 	public HikeHTTPTask(FinishableEvent activity, int errorStringId)
 	{
 		this.finishableEvent = activity;
 		this.errorStringId = errorStringId;
 	}
-	
+
+	public void cancelUpload()
+	{
+		cancelUpload.set(true);
+	}
+
 	@Override
 	protected void onPostExecute(Boolean result)
 	{
@@ -46,7 +55,8 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 			}
 
 			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText((Activity) finishableEvent, ((Activity) finishableEvent).getResources().getString(errorStringId), duration);
+			errorStringId = cancelUpload.get() ? R.string.upload_cancelled : errorStringId;
+			Toast toast = Toast.makeText((Activity) finishableEvent, errorStringId, duration);
 			toast.show();
 		}
 	}
@@ -62,7 +72,7 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 				Log.d("HikeHTTPTask", "About to perform request:" + hikeHttpRequest.getPath());
 				if(hikeHttpRequest instanceof HikeFileTransferHttpRequest)
 				{
-					hikeHttpRequest.setResponse(AccountUtils.executeFileTransferRequest(((HikeFileTransferHttpRequest)hikeHttpRequest), ((HikeFileTransferHttpRequest)hikeHttpRequest).getFileName(), this));
+					hikeHttpRequest.setResponse(AccountUtils.executeFileTransferRequest(((HikeFileTransferHttpRequest)hikeHttpRequest), ((HikeFileTransferHttpRequest)hikeHttpRequest).getFileName(), this, cancelUpload));
 				}
 				else
 				{

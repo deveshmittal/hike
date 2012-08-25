@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -576,7 +577,7 @@ public class AccountUtils
 		}
 	}
 
-	public static JSONObject executeFileTransferRequest(HikeFileTransferHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask) throws Exception
+	public static JSONObject executeFileTransferRequest(HikeFileTransferHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask, AtomicBoolean cancelUpload) throws Exception
 	{
 		// Always start download with some initial progress
 		int progress = HikeConstants.INITIAL_PROGRESS;
@@ -633,6 +634,10 @@ public class AccountUtils
 			hikeHTTPTask.updateProgress(progress);
 
 			Thread.sleep(100);
+			if(cancelUpload.get())
+			{
+				throw new Exception("Upload cancelled by user");
+			}
 		}
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -648,6 +653,10 @@ public class AccountUtils
 			builder.append(target.array(), 0, read);
 			target.clear();
 			read = reader.read(target);
+			if(cancelUpload.get())
+			{
+				throw new Exception("Upload cancelled by user");
+			}
 		}
 		progress = 100;
 		hikeHTTPTask.updateProgress(progress);

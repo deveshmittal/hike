@@ -517,6 +517,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
 			removeMessage(message);
 			return true;
+		case R.id.cancel_file_transfer:
+			AsyncTask<?, ?, ?> fileTransferTask = ChatThread.fileTransferTaskMap.get(message.getMsgID());
+			if(fileTransferTask != null)
+			{
+				if(message.isSent())
+				{
+					((HikeHTTPTask)fileTransferTask).cancelUpload();
+				}
+				else
+				{
+					((DownloadFileTask)fileTransferTask).cancelDownload();
+				}
+			}
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -697,6 +710,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				MenuItem item1 = menu.findItem(R.id.copy);
 				item1.setVisible(false);
 			}
+		}
+		if (message.isFileTransferMessage() && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()))
+		{
+			MenuItem item = menu.findItem(R.id.cancel_file_transfer);
+			item.setTitle(message.isSent() ? R.string.cancel_upload : R.string.cancel_download);
+			item.setVisible(true);
 		}
 	}
 

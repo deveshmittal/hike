@@ -30,6 +30,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 	private int progressFileTransfer;
 	private long msgId;
 	private boolean freeSpaceError = false;
+	private boolean cancelDownload = false;
 
 	public DownloadFileTask(Context context, File destinationFile, String fileKey, long msgId) 
 	{
@@ -37,6 +38,11 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		this.fileKey = fileKey;
 		this.context = context;
 		this.msgId = msgId;
+	}
+
+	public void cancelDownload()
+	{
+		cancelDownload = true;
 	}
 
 	@Override
@@ -72,6 +78,10 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 				fos.write(buffer, 0, len);
 				progress = (int) ((totProg*100/length));
 				publishProgress(progress);
+				if(cancelDownload)
+				{
+					throw new IOException("Download cancelled by the user");
+				}
 			}
 			Log.d(getClass().getSimpleName(), "Done downloading file");
 		} 
@@ -123,7 +133,8 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		}
 		else
 		{
-			Toast.makeText(context, freeSpaceError ? R.string.not_enough_space : R.string.download_failed, Toast.LENGTH_SHORT).show();
+			int errorStringId = freeSpaceError ? R.string.not_enough_space : cancelDownload ? R.string.download_cancelled : R.string.download_failed;
+			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
 			Log.d(getClass().getSimpleName(), "File not downloaded " + progressFileTransfer);
 			destinationFile.delete();
 		}
