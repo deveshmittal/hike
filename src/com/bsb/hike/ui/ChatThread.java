@@ -1891,6 +1891,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				{
 					selectedFile = Utils.getOutputMediaFile(mediaType, fileName, null);
 					Log.d(getClass().getSimpleName(), "Copying file: " + filePath + " to " + selectedFile.getPath());
+					// TODO Check performance on low end phones. If slow, should remove from UI thread.
 					// Saving the file to hike local folder
 					if(!Utils.copyFile(filePath, selectedFile.getPath(), mediaType))
 					{
