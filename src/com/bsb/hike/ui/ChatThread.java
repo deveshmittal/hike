@@ -1824,7 +1824,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					    if (selectedFile == null)
 					    {
 					        Log.w(getClass().getSimpleName(), "Unable to create file to store media.");
-					        Toast.makeText(ChatThread.this, ChatThread.this.getResources().getString(R.string.no_external_storage), Toast.LENGTH_LONG);
+					        Toast.makeText(ChatThread.this, ChatThread.this.getResources().getString(R.string.no_external_storage), Toast.LENGTH_LONG).show();
 					        return;
 					    }
 						newMediaFileIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(selectedFile));
