@@ -1,11 +1,14 @@
 package com.bsb.hike.models;
 
+import java.io.File;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -62,6 +65,7 @@ public class HikeFile
 	private Drawable thumbnail;
 	private String fileKey;
 	private HikeFileType hikeFileType;
+	private File file;
 
 	public HikeFile(JSONObject fileJSON)
 	{
@@ -71,6 +75,7 @@ public class HikeFile
 		this.thumbnail = thumbnail == null ? Utils.stringToDrawable(thumbnailString) : thumbnail;
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 		this.hikeFileType = HikeFileType.fromString(fileTypeString);
+		this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils.getOutputMediaFile(hikeFileType, fileName, fileKey); 
 	}
 
 	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail)
@@ -129,6 +134,7 @@ public class HikeFile
 	public void setFileKey(String fileKey)
 	{
 		this.fileKey = fileKey;
+		this.file = Utils.getOutputMediaFile(hikeFileType, fileName, fileKey);
 	}
 	
 	public String getFileKey() 
@@ -147,6 +153,32 @@ public class HikeFile
 		{
 			return false;
 		}
-		return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey).exists();
+		if(file == null)
+		{
+			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey).exists();
+		}
+		return file.exists();
+	}
+
+	public String getFilePath()
+	{
+		if(Utils.getExternalStorageState() == ExternalStorageState.NONE)
+		{
+			return null;
+		}
+		if(file == null)
+		{
+			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey).getPath();
+		}
+		return file.getPath();
+	}
+
+	public File getFile()
+	{
+		if(file == null)
+		{
+			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey);
+		}
+		return file;
 	}
 }

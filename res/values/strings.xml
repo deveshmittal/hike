@@ -118,4 +118,8 @@
 	<string name="not_enough_space">Your phone does not have enough space to download the file</string>
 	<string name="dnd_one_to_one">%1$s is on DND. Waiting for %1$s to reply.</string>
 	<string name="optin_one_to_one">%1$s just opted in to hike!</string>
+	<string name="download_cancelled">Download cancelled</string>
+	<string name="upload_cancelled">Upload cancelled</string>
+	<string name="cancel_download">Cancel download</string>
+	<string name="cancel_upload">Cancel upload</string>
 </resources>

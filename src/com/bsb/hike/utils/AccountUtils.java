@@ -1,8 +1,9 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -53,6 +55,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.GzipByteArrayEntity;
+import com.bsb.hike.http.HikeFileTransferHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
@@ -574,14 +577,14 @@ public class AccountUtils
 		}
 	}
 
-	public static JSONObject executeFileTransferRequest(HikeHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask) throws Exception
+	public static JSONObject executeFileTransferRequest(HikeFileTransferHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask, AtomicBoolean cancelUpload) throws Exception
 	{
 		// Always start download with some initial progress
 		int progress = HikeConstants.INITIAL_PROGRESS;
 		hikeHTTPTask.updateProgress(progress);
 
-		byte[] bytes = GzipByteArrayEntity.gzip(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
-		ByteArrayInputStream fileInputStream = new ByteArrayInputStream(bytes);
+		File file = new File(hikeHttpRequest.getFilePath());
+		FileInputStream fileInputStream = new FileInputStream(file);
 
 		URL url;
 		url = new URL(BASE + hikeHttpRequest.getPath());
@@ -603,7 +606,7 @@ public class AccountUtils
 
 		DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
 
-		int bytesAvailable = bytes.length;
+		int bytesAvailable = (int) file.length();
 		Log.d("Size",bytesAvailable+"");
 
 		int maxBufferSize = HikeConstants.MAX_BUFFER_SIZE_KB * 1024;
@@ -612,23 +615,29 @@ public class AccountUtils
 
 		// Read file
 		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+		byte[] gzippedBuffer = GzipByteArrayEntity.gzip(buffer, HTTP.DEFAULT_CONTENT_CHARSET);
 		int totalBytesRead = bytesRead;
 
 		while (bytesRead > 0)
 		{
-			outputStream.write(buffer, 0, bufferSize);
+			outputStream.write(gzippedBuffer, 0, gzippedBuffer.length);
 
 			bytesAvailable = fileInputStream.available();
 			Log.d("Available",bytesAvailable+"");
 
 			bufferSize = Math.min(bytesAvailable, maxBufferSize);
 			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+			gzippedBuffer = GzipByteArrayEntity.gzip(buffer, HTTP.DEFAULT_CONTENT_CHARSET);
 			totalBytesRead += bytesRead;
 
-			progress = HikeConstants.INITIAL_PROGRESS + (bytesRead > 0 ? (int) ((totalBytesRead * 75)/bytes.length) : 75);
+			progress = HikeConstants.INITIAL_PROGRESS + (bytesRead > 0 ? (int) ((totalBytesRead * 75)/file.length()) : 75);
 			hikeHTTPTask.updateProgress(progress);
 
 			Thread.sleep(100);
+			if(cancelUpload.get())
+			{
+				throw new Exception("Upload cancelled by user");
+			}
 		}
 
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -644,6 +653,10 @@ public class AccountUtils
 			builder.append(target.array(), 0, read);
 			target.clear();
 			read = reader.read(target);
+			if(cancelUpload.get())
+			{
+				throw new Exception("Upload cancelled by user");
+			}
 		}
 		progress = 100;
 		hikeHTTPTask.updateProgress(progress);

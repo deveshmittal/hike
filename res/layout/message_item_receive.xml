@@ -116,7 +116,7 @@
 	                android:id="@+id/message_receive_ft"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
-	                android:maxWidth="140dp"
+	                android:maxWidth="130dp"
 	                android:layout_marginLeft="5dp"
 	                android:gravity="left"
 	                android:text="Thanks lksad jfljasldkf alsdf lkasfdalskdfjlaslkfjalksdfjlas lf asdflasdf lasdjflkasdj flasdjfldsfl"
