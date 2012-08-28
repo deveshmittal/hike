@@ -1801,27 +1801,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				Intent newMediaFileIntent = null;
 				switch (which) 
 				{
-				case 0:
-					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
-					pickIntent.setType("image/*");
-					newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
-					break;
-
 				case 1:
 					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
 					pickIntent.setType("video/*");
 					newMediaFileIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-					//selectedFile = Utils.getOutputMediaFile(HikeFileType.VIDEO, null, null);
 					break;
 				
 				case 2:
 					requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
 					pickIntent.setData(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
 					newMediaFileIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO, null, null);
 					break;
 					
+				case 0:
 				default:
 					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
 					pickIntent.setType("image/*");
