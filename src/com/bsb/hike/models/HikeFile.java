@@ -111,6 +111,12 @@ public class HikeFile
 		return fileName;
 	}
 
+	public void setFileTypeString(String fileTypeString)
+	{
+		this.fileTypeString = fileTypeString;
+		this.hikeFileType = HikeFileType.fromString(fileTypeString);
+	}
+
 	public String getFileTypeString() 
 	{
 		return fileTypeString;

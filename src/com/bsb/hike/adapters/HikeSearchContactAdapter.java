@@ -8,6 +8,7 @@ import java.util.Set;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Spannable;
@@ -47,16 +48,16 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	private ContactFilter contactFilter;
 	private boolean isGroupChat;
 	private EditText inputNumber;
-	private boolean hasPrefillText;
 	private Button topBarBtn;
 	private String groupId;
+	private Intent presentIntent;
 	private int numContactsSelected = 0;
 	private int numSMSContactsSelected = 0;
 
 	public HikeSearchContactAdapter(
 			Activity context, List<ContactInfo> contactList, 
-			EditText inputNumber, boolean isGroupChat, boolean hasPrefillText, 
-			Button topBarBtn, String groupId)
+			EditText inputNumber, boolean isGroupChat, 
+			Button topBarBtn, String groupId, Intent presentIntent)
 	{
 		super(context, -1, contactList);
 		this.filteredList = contactList;
@@ -66,9 +67,9 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		this.contactFilter = new ContactFilter();
 		this.inputNumber = inputNumber;
 		this.isGroupChat = isGroupChat;
-		this.hasPrefillText = hasPrefillText;
 		this.topBarBtn = topBarBtn;
 		this.groupId = groupId;
+		this.presentIntent = presentIntent;
 	}
 
 	@Override
@@ -232,7 +233,24 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		{
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 			intent.setClass(context, ChatThread.class);
-			intent.putExtra(HikeConstants.Extras.KEEP_MESSAGE, hasPrefillText);
+			String type = presentIntent.getType();
+			if("text/plain".equals(type) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
+			{
+				String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
+				Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
+				intent.putExtra(HikeConstants.Extras.MSG, msg);
+			}
+			else if(presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY))
+			{
+				intent.putExtras(presentIntent);
+			}
+			else if(type != null && (type.startsWith("image") || type.startsWith("audio") || type.startsWith("video")))
+			{
+				Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
+				String filePath = Utils.getRealPathFromUri(fileUri, (Activity)context);
+				intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
+				intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
+			}
 			context.startActivity(intent);
 		}
 		else

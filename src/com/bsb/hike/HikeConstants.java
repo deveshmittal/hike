@@ -172,6 +172,10 @@ public class HikeConstants
 		public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
 		public static final String SIGNUP_MSISDN_ERROR = "signupMsisdnError";
 		public static final String FILE_TRANSFER_DIALOG_SHOWING = "fileTransferDialogShowing";
+		public static final String FILE_PATH = "filePath";
+		public static final String FILE_KEY = "fileKey";
+		public static final String FILE_TYPE = "fileType";
+		public static final String FILE_NAME = "fileName";
 	}
 
 	public static final class LogEvent
