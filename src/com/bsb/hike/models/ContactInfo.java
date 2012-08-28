@@ -153,7 +153,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((TextUtils.isEmpty(name)) ? 0 : name.hashCode());
 		result = prime * result + ((phoneNum == null) ? 0 : phoneNum.hashCode());
 		return result;
 	}
@@ -175,12 +175,12 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		}
 		else if (!id.equals(other.id))
 			return false;
-		if (name == null)
+		if (TextUtils.isEmpty(name))
 		{
-			if (other.name != null)
+			if (!TextUtils.isEmpty(other.name))
 				return false;
 		}
-		else if (!name.equals(other.name))
+		else if (!name.trim().equals(other.name.trim()))
 			return false;
 		if (phoneNum == null)
 		{
