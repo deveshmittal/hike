@@ -479,8 +479,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			startActivity(intent);
 			return true;
 		case R.id.group_chat:
-			intent = new Intent(this, FeedbackActivity.class);
-//			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			intent = new Intent(this, ChatThread.class);
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			startActivity(intent);
 			return true;
 		default:
