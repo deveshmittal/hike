@@ -1,5 +1,9 @@
 package com.bsb.hike.db;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,6 +16,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 
 public class DbConversationListener implements Listener
@@ -24,19 +29,23 @@ public class DbConversationListener implements Listener
 
 	private HikePubSub mPubSub;
 
+	private Context context;
+
 	public DbConversationListener(Context context)
 	{
+		this.context = context;
 		mPubSub = HikeMessengerApp.getPubSub();
 		mConversationDb = HikeConversationsDatabase.getInstance();
 		mUserDb = HikeUserDatabase.getInstance();
 		persistence = HikeMqttPersistence.getInstance();
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELETED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.BLOCK_USER, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.UNBLOCK_USER, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		mPubSub.addListener(HikePubSub.MESSAGE_SENT, this);
+		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		mPubSub.addListener(HikePubSub.MESSAGE_DELETED, this);
+		mPubSub.addListener(HikePubSub.MESSAGE_FAILED, this);
+		mPubSub.addListener(HikePubSub.BLOCK_USER, this);
+		mPubSub.addListener(HikePubSub.UNBLOCK_USER, this);
+		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
+		mPubSub.addListener(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, this);
 	}
 
 	@Override
@@ -64,6 +73,10 @@ public class DbConversationListener implements Listener
 			{
 				Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getMsisdn());
 				mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+				if(convMessage.isGroupChat())
+				{
+					mPubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, convMessage.getMsisdn());
+				}
 			}
 		}
 		else if (HikePubSub.MESSAGE_DELETED.equals(type))
@@ -94,6 +107,53 @@ public class DbConversationListener implements Listener
 		{
 			Log.d("DBCONVERSATION LISTENER","(Sender) Message sent confirmed for msgID -> "+(Long)object);
 			updateDB(object,ConvMessage.State.SENT_CONFIRMED.ordinal());
+		}
+		else if (HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE.equals(type))
+		{
+			String groupId = (String) object;
+
+			Map<String, GroupParticipant> smsParticipants = mConversationDb.getGroupParticipants(groupId, true, true);
+
+			if(smsParticipants.isEmpty())
+			{
+				return;
+			}
+
+			JSONObject dndJSON = new JSONObject();
+			JSONArray dndParticipants = new JSONArray();
+			JSONArray nonDndParticipants = new JSONArray();
+
+			for(Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants.entrySet())
+			{
+				GroupParticipant smsParticipant = smsParticipantEntry.getValue();
+				String msisdn = smsParticipantEntry.getKey();
+				if(smsParticipant.onDnd())
+				{
+					dndParticipants.put(msisdn);
+				}
+				else
+				{
+					nonDndParticipants.put(msisdn);
+				}
+			}
+
+			try 
+			{
+				dndJSON.put(HikeConstants.FROM, groupId);
+				dndJSON.put(HikeConstants.TYPE, HikeConstants.DND);
+				dndJSON.put(HikeConstants.DND_USERS, dndParticipants);
+				dndJSON.put(HikeConstants.NON_DND_USERS, nonDndParticipants);
+
+				ConvMessage convMessage = new ConvMessage(dndJSON, null, context, false);
+				mConversationDb.addConversationMessages(convMessage);
+				mConversationDb.updateShownStatus(groupId);
+
+				mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+			}
+			catch (JSONException e) 
+			{
+				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
 		}
 	}
 

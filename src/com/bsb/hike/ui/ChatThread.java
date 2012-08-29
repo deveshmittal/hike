@@ -1167,7 +1167,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
 				{
 					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn(), false));
+					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn(), false, false));
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
@@ -1745,7 +1745,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				String msisdn = selectedParticipants.get(i);
 				String name = selectedParticipantNames.get(i);
-				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, name, msisdn));
+				ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn);
+				contactInfo.setName(name);
+				GroupParticipant groupParticipant = new GroupParticipant(contactInfo);
 				participantList.put(msisdn, groupParticipant);
 			}
 			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs);

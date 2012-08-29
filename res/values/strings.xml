@@ -65,8 +65,8 @@
 	<string name="no_sd_card">Please insert an SD Card</string>
 	<string name="press_btn_invite">To invite %1$s to hike, tap here.</string>
 	<string name="invalid_email">Invalid email address</string>
-	<string name="joined_conversation">&#160;joined the group chat!</string>
-	<string name="left_conversation">&#160;left the group chat.</string>
+	<string name="joined_conversation">%1$s joined the group chat!</string>
+	<string name="left_conversation">%1$s left the group chat.</string>
 	<string name="leave_group">Leave group</string>
 	<string name="group_chat_end">This group chat has ended.</string>
 	<string name="group_info">Group Info</string>
@@ -122,4 +122,5 @@
 	<string name="upload_cancelled">Upload cancelled</string>
 	<string name="cancel_download">Cancel download</string>
 	<string name="cancel_upload">Cancel upload</string>
+	<string name="invited_to_gc">%1$s has been invited</string>
 </resources>

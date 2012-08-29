@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.app.Activity;
@@ -34,6 +35,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.MyDrawable;
@@ -53,6 +55,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	private Intent presentIntent;
 	private int numContactsSelected = 0;
 	private int numSMSContactsSelected = 0;
+	private Map<String, GroupParticipant> groupParticipants;
 
 	public HikeSearchContactAdapter(
 			Activity context, List<ContactInfo> contactList, 
@@ -70,6 +73,10 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		this.topBarBtn = topBarBtn;
 		this.groupId = groupId;
 		this.presentIntent = presentIntent;
+		if(!TextUtils.isEmpty(groupId))
+		{
+			groupParticipants = HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, true, false);
+		}
 	}
 
 	@Override
@@ -142,7 +149,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 				currentSelectionSet.addAll(currentSelectionsInTextBox);
 				if(!TextUtils.isEmpty(groupId))
 				{
-					currentSelectionSet.addAll(HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, true).keySet());
+					currentSelectionSet.addAll(groupParticipants.keySet());
 				}
 
 				List<ContactInfo> filteredContacts = new ArrayList<ContactInfo>();

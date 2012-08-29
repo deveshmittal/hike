@@ -1,6 +1,8 @@
 package com.bsb.hike.service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,6 +24,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -217,6 +220,11 @@ public class MqttMessagesManager {
 					+ convMessage.getMsgID()+"	; Mapped msgID : " + convMessage.getMappedMsgID());
 			// We have to do publish this here since we are adding the message to the db here, and the id is set after inserting into the db.
 			this.pubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+
+			if(convMessage.isGroupChat() && convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+			{
+				this.pubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, convMessage.getMsisdn());
+			}
 		}
 		else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) //Message delivered to receiver
 		{
@@ -311,6 +319,8 @@ public class MqttMessagesManager {
 
 			List<String> groupConversations = convDb.listOfGroupConversationsWithMsisdn(msisdn);
 
+			// Set the dnd status for the participant for all group chats
+			convDb.updateDndStatus(msisdn);
 			// For group chats
 			for(String groupId:groupConversations)
 			{

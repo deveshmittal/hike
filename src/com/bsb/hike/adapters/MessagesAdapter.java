@@ -239,10 +239,11 @@ public class MessagesAdapter extends BaseAdapter
 			((ViewGroup)holder.participantInfoContainer).removeAllViews();
 			try 
 			{
-				int left = (int) (0 * Utils.densityMultiplier);
-				int top = (int) (0 * Utils.densityMultiplier);
-				int right = (int) (0 * Utils.densityMultiplier);
-				int bottom = (int) (6 * Utils.densityMultiplier);
+				int positiveMargin = (int) (6 * Utils.densityMultiplier);
+				int left = 0;
+				int top = 0;
+				int right = 0;
+				int bottom = positiveMargin;
 
 				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 				{
@@ -259,10 +260,12 @@ public class MessagesAdapter extends BaseAdapter
 						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
 						GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
+						String participantName = participant.getContactInfo().getFirstName();
 						participantInfo.setCompoundDrawablesWithIntrinsicBounds(participant.getContactInfo().isOnhike() ? R.drawable.ic_hike_user : R.drawable.ic_sms_user, 0, 0, 0);
 						participantInfo.setText(
-								Utils.getFormattedParticipantInfo(participant.getContactInfo().getFirstName() + " " 
-												+ context.getString(R.string.joined_conversation)));
+								Utils.getFormattedParticipantInfo(
+										String.format(context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc), 
+												participantName)));
 						if (i != participantInfoArray.length() - 1) 
 						{
 							lp.setMargins(left, top, right, bottom);
@@ -285,14 +288,20 @@ public class MessagesAdapter extends BaseAdapter
 						String participantMsisdn = new JSONObject(convMessage.getMetadata().serialize()).optString(HikeConstants.DATA);
 						participantInfo.setText(
 								Utils.getFormattedParticipantInfo(
-										((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName() + " " 
-												+ context.getString(R.string.left_conversation)));
+										String.format(
+												context.getString(R.string.left_conversation), 
+												((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName())));
 					}
 					else
 					{
 						participantInfo.setText(R.string.group_chat_end);
 					}
 					participantInfo.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_left_chat, 0, 0, 0);
+
+					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+					lp.setMargins(left, top, right, bottom);
+					participantInfo.setLayoutParams(lp);
+
 					((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
 				}
 				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMessage.getParticipantInfoState() == ParticipantInfoState.USER_OPT_IN)
@@ -311,8 +320,12 @@ public class MessagesAdapter extends BaseAdapter
 
 						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 						lp.setMargins(left, top, right, bottom);
-						mainMessage.setLayoutParams(lp);
+						creditsMessage.setLayoutParams(lp);
 					}
+					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+					lp.setMargins(left, top, right, bottom);
+					mainMessage.setLayoutParams(lp);
+					
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
 					if(creditsMessage != null)
 					{
@@ -321,47 +334,83 @@ public class MessagesAdapter extends BaseAdapter
 				}
 				else
 				{
+					MessageMetadata metadata = convMessage.getMetadata();
+					if(conversation instanceof GroupConversation)
+					{
+						JSONArray nonDndNumbers = metadata.getJSON().optJSONArray(HikeConstants.NON_DND_USERS);
+						if(nonDndNumbers != null && nonDndNumbers.length()>0)
+						{
+							for(int i = 0; i<nonDndNumbers.length(); i++)
+							{
+								TextView participantInfo = (TextView) inflater.inflate(
+										R.layout.participant_info, null);
+
+								GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nonDndNumbers.getString(i));
+								String participantName = participant.getContactInfo().getFirstName();
+
+								participantInfo.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_opt_in, 0, 0, 0);
+
+								participantInfo.setText(
+										Utils.getFormattedParticipantInfo(
+												String.format(context.getString(R.string.joined_conversation), 
+														participantName)));
+
+								LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+								lp.setMargins(left, top, right, bottom);
+								participantInfo.setLayoutParams(lp);
+
+								((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+							}
+						}
+						
+					}
 					TextView dndMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 
-					JSONArray dndNumbers = convMessage.getMetadata().getDndNumbers();
-					StringBuilder dndNames = new StringBuilder(); 
-					for(int i=0; i<dndNumbers.length(); i++)
+					JSONArray dndNumbers = conversation instanceof GroupConversation ? metadata.getJSON().optJSONArray(HikeConstants.DND_NUMBERS) : convMessage.getMetadata().getDndNumbers();
+					if(dndNumbers != null && dndNumbers.length()>0)
 					{
-						String name = conversation instanceof GroupConversation ? 
-								((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
-						if(i < dndNumbers.length() - 2)
+						StringBuilder dndNames = new StringBuilder(); 
+						for(int i=0; i<dndNumbers.length(); i++)
 						{
-							dndNames.append(name + ", ");
+							String name = conversation instanceof GroupConversation ? 
+									((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
+									if(i < dndNumbers.length() - 2)
+									{
+										dndNames.append(name + ", ");
+									}
+									else if(i < dndNumbers.length() - 1)
+									{
+										dndNames.append(name + " and ");
+									}
+									else
+									{
+										dndNames.append(name);
+									}
 						}
-						else if(i < dndNumbers.length() - 1)
+						convMessage.setMessage(String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString()));
+
+						SpannableStringBuilder ssb;
+						if(conversation instanceof GroupConversation)
 						{
-							dndNames.append(name + " and ");
+							ssb = new SpannableStringBuilder(convMessage.getMessage());
+							ssb.setSpan(new ForegroundColorSpan(0xff666666), context.getString(R.string.dnd_msg_gc).indexOf("%1$s"), convMessage.getMessage().indexOf("to join in"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 						}
 						else
 						{
-							dndNames.append(name);
+							String dndOneToOne = context.getString(R.string.dnd_one_to_one);
+							ssb = new SpannableStringBuilder(convMessage.getMessage());
+							ssb.setSpan(new ForegroundColorSpan(0xff666666), dndOneToOne.indexOf("%1$s"), convMessage.getMessage().indexOf("is on DND"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().lastIndexOf(dndNames.toString()), convMessage.getMessage().indexOf("to reply"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 						}
-					}
-					convMessage.setMessage(String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString()));
 
-					SpannableStringBuilder ssb;
-					if(conversation instanceof GroupConversation)
-					{
-						ssb = new SpannableStringBuilder(convMessage.getMessage());
-						ssb.setSpan(new ForegroundColorSpan(0xff666666), context.getString(R.string.dnd_msg_gc).indexOf("%1$s"), convMessage.getMessage().indexOf("to join in"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
-					else
-					{
-						String dndOneToOne = context.getString(R.string.dnd_one_to_one);
-						ssb = new SpannableStringBuilder(convMessage.getMessage());
-						ssb.setSpan(new ForegroundColorSpan(0xff666666), dndOneToOne.indexOf("%1$s"), convMessage.getMessage().indexOf("is on DND"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().lastIndexOf(dndNames.toString()), convMessage.getMessage().indexOf("to reply"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-					}
+						dndMessage.setText(ssb);
+						dndMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_waiting_dnd, 0, 0, 0);
+						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+						lp.setMargins(left, top, right, bottom);
+						dndMessage.setLayoutParams(lp);
 
-					dndMessage.setText(ssb);
-					dndMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_waiting_dnd, 0, 0, 0);
-
-					((ViewGroup) holder.participantInfoContainer).addView(dndMessage);
+						((ViewGroup) holder.participantInfoContainer).addView(dndMessage);
+					}
 				}
 			} 
 			catch (JSONException e) 

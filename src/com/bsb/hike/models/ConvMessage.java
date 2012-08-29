@@ -114,6 +114,10 @@ public class ConvMessage
 			{
 				return USER_OPT_IN;
 			}
+			else if (HikeConstants.DND.equals(type))
+			{
+				return DND_USER;
+			}
 			return ParticipantInfoState.NO_INFO;
 		}
 	}
@@ -197,7 +201,7 @@ public class ConvMessage
 	{
 		setMetadata(obj);
 
-		this.mMsisdn = conversation.getMsisdn();
+		this.mMsisdn = conversation != null ? conversation.getMsisdn() : obj.has(HikeConstants.TO) ? obj.getString(HikeConstants.TO) : obj.getString(HikeConstants.FROM);
 		if(participantInfoState != ParticipantInfoState.USER_JOIN)
 		{
 			this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
@@ -217,7 +221,7 @@ public class ConvMessage
 			this.mMessage = newParticipants.substring(0, newParticipants.length() - 2) + " " + context.getString(R.string.joined_conversation); 
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = ((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName() +  " " + context.getString(R.string.left_conversation);
+			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName());
 			break;
 		case GROUP_END:
 			this.mMessage = context.getString(R.string.group_chat_end);
@@ -237,6 +241,8 @@ public class ConvMessage
 			}
 			this.mMessage = String.format(context.getString(conversation instanceof GroupConversation ? R.string.opt_in : R.string.optin_one_to_one), name);
 			break;
+		case DND_USER:
+			this.mMessage = "";
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
 		this.mConversation = conversation;

@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -99,27 +100,37 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			{
 				try 
 				{
-					JSONArray dndNumbers = message.getMetadata().getDndNumbers();
-					StringBuilder dndNames = new StringBuilder(); 
-					for(int i=0; i<dndNumbers.length(); i++)
+					JSONArray dndNumbers = conversation instanceof GroupConversation ? message.getMetadata().getJSON().optJSONArray(HikeConstants.DND_NUMBERS) : message.getMetadata().getDndNumbers();
+					if(dndNumbers != null && dndNumbers.length() > 0)
 					{
-						String dndName;
-						dndName = conversation instanceof GroupConversation ? 
-								((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
-								if(i < dndNumbers.length() - 2)
-								{
-									dndNames.append(dndName + ", ");
-								}
-								else if(i < dndNumbers.length() - 1)
-								{
-									dndNames.append(dndName + " and ");
-								}
-								else
-								{
-									dndNames.append(dndName);
-								}
+						StringBuilder dndNames = new StringBuilder(); 
+						for(int i=0; i<dndNumbers.length(); i++)
+						{
+							String dndName;
+							dndName = conversation instanceof GroupConversation ? 
+									((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
+									if(i < dndNumbers.length() - 2)
+									{
+										dndNames.append(dndName + ", ");
+									}
+									else if(i < dndNumbers.length() - 1)
+									{
+										dndNames.append(dndName + " and ");
+									}
+									else
+									{
+										dndNames.append(dndName);
+									}
+						}
+						markedUp = String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString());
 					}
-					markedUp = String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString());
+					else
+					{
+						// This scenario will only happen in case of group chats and when there is no one on DND
+						JSONArray nonDndNumbers = message.getMetadata().getJSON().optJSONArray(HikeConstants.NON_DND_USERS);
+						markedUp = nonDndNumbers != null && nonDndNumbers.length() > 0 ? 
+								String.format(context.getString(R.string.joined_conversation), ((GroupConversation)conversation).getGroupParticipant(nonDndNumbers.getString(nonDndNumbers.length() - 1)).getContactInfo().getFirstName()) : "";
+					}
 				} 
 				catch (JSONException e) 
 				{

@@ -41,7 +41,8 @@ public class GroupConversation extends Conversation {
 			String contactNum = nameMsisdn.getString(HikeConstants.MSISDN);
 			String contactName = nameMsisdn.getString(HikeConstants.NAME);
 			boolean onHike = nameMsisdn.optBoolean(HikeConstants.ON_HIKE);
-			GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(contactNum, contactNum, contactName, contactNum, onHike));
+			boolean onDnd = nameMsisdn.optBoolean(HikeConstants.DND);
+			GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(contactNum, contactNum, contactName, contactNum, onHike), false, onDnd);
 			Log.d(getClass().getSimpleName(), "Parsing JSON and adding contact to conversation: " + contactNum);
 			this.groupParticipantList.put(contactNum, groupParticipant);
 		}
