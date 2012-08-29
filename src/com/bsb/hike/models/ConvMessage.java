@@ -211,14 +211,11 @@ public class ConvMessage
 		{
 		case PARTICIPANT_JOINED:
 			JSONArray arr = obj.getJSONArray(HikeConstants.DATA);
-			StringBuilder newParticipants = new StringBuilder();
-			for (int i = 0; i < arr.length(); i++) 
-			{
-				JSONObject nameMsisdn = arr.getJSONObject(i);
-				Log.d(getClass().getSimpleName(), "Joined: " + arr.getString(i));
-				newParticipants.append(((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName() + ", ");
-			}
-			this.mMessage = newParticipants.substring(0, newParticipants.length() - 2) + " " + context.getString(R.string.joined_conversation); 
+			JSONObject nameMsisdn = arr.getJSONObject(arr.length() - 1);
+
+			GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
+
+			this.mMessage = String.format(context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc), participant.getContactInfo().getFirstName()); 
 			break;
 		case PARTICIPANT_LEFT:
 			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName());
