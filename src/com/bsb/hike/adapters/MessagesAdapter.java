@@ -598,7 +598,7 @@ public class MessagesAdapter extends BaseAdapter
 		{
 			return true;
 		}
-		return (current.getTimestamp() - previous.getTimestamp() > 60*10);
+		return (current.getTimestamp() - previous.getTimestamp() > 60*5);
 	}
 
 	@Override
