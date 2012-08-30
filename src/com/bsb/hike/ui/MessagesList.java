@@ -462,7 +462,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		{
 		case R.id.invite:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU);
-			Utils.startInviteShareIntent(MessagesList.this);
+			Utils.startShareIntent(MessagesList.this, Utils.getInviteMessage(MessagesList.this));
 			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {

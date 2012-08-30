@@ -55,7 +55,7 @@ public class CreditsActivity extends Activity implements Listener
 			public void onClick(View v) 
 			{
 				Utils.logEvent(CreditsActivity.this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
-				Utils.startInviteShareIntent(CreditsActivity.this);
+				Utils.startShareIntent(CreditsActivity.this, Utils.getInviteMessage(CreditsActivity.this));
 			}
 		});
 
