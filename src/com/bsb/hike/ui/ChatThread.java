@@ -523,6 +523,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					((DownloadFileTask)fileTransferTask).cancelDownload();
 				}
 			}
+			return true;
+		case R.id.share:
+			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+			Utils.startShareIntent(ChatThread.this, HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey());
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -692,23 +697,25 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			MenuItem item = menu.findItem(R.id.resend);
 			item.setVisible(true);
 		}
-		if (message.isFileTransferMessage() && message.isSent())
+		if (message.isFileTransferMessage())
 		{
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			if(TextUtils.isEmpty(hikeFile.getFileKey()))
-			{
-				MenuItem item = menu.findItem(R.id.forward);
-				item.setVisible(false);
 
-				MenuItem item1 = menu.findItem(R.id.copy);
-				item1.setVisible(false);
+			MenuItem shareItem = menu.findItem(R.id.share);
+			shareItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
+
+			MenuItem forwardItem = menu.findItem(R.id.forward);
+			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
+
+			MenuItem copyItem = menu.findItem(R.id.copy);
+			copyItem.setVisible(false);
+
+			if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()))
+			{
+				MenuItem item = menu.findItem(R.id.cancel_file_transfer);
+				item.setTitle(message.isSent() ? R.string.cancel_upload : R.string.cancel_download);
+				item.setVisible(true);
 			}
-		}
-		if (message.isFileTransferMessage() && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()))
-		{
-			MenuItem item = menu.findItem(R.id.cancel_file_transfer);
-			item.setTitle(message.isSent() ? R.string.cancel_upload : R.string.cancel_download);
-			item.setVisible(true);
 		}
 	}
 

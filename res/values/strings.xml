@@ -123,4 +123,5 @@
 	<string name="cancel_download">Cancel download</string>
 	<string name="cancel_upload">Cancel upload</string>
 	<string name="invited_to_gc">%1$s has been invited</string>
+	<string name="share">Share</string>
 </resources>

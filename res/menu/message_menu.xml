@@ -6,6 +6,10 @@
     <item
         android:id="@+id/copy"
         android:title="@string/copy"/>
+	<item
+        android:id="@+id/share"
+        android:title="@string/share"
+        android:visible="false"/>    
     <item
         android:id="@+id/delete"
         android:title="@string/delete"/>
