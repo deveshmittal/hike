@@ -13,6 +13,6 @@
         android:icon="@drawable/ic_delete"/>
     <item
         android:id="@+id/group_chat"
-        android:title="@string/feedback"
-        android:icon="@drawable/ic_feedback"/>
+        android:title="@string/group_chat"
+        android:icon="@drawable/ic_menu_group_chat"/>
 </menu>

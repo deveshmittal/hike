@@ -848,18 +848,20 @@ public class Utils
     	return name.length() <= HikeConstants.MAX_CHAR_IN_NAME ? name : (name.substring(0, HikeConstants.MAX_CHAR_IN_NAME - 3) + "...");
     }
 
-    public static void startInviteShareIntent(Context context)
+    public static String getInviteMessage(Context context)
     {
     	String inviteUrlWithToken = context.getString(R.string.default_invite_url) + context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeConstants.INVITE_TOKEN, "");
     	// Adding the user's invite token to the invite url
     	String inviteMessage = context.getString(R.string.invite_share_message);
     	String defaultInviteURL = context.getString(R.string.default_invite_url);
-    	inviteMessage = inviteMessage.replace(defaultInviteURL, inviteUrlWithToken);
+    	return inviteMessage.replace(defaultInviteURL, inviteUrlWithToken);
+    }
 
+    public static void startShareIntent(Context context, String message)
+    {
     	Intent s = new Intent(android.content.Intent.ACTION_SEND);
-
     	s.setType("text/plain");
-    	s.putExtra(Intent.EXTRA_TEXT, inviteMessage);
+    	s.putExtra(Intent.EXTRA_TEXT, message);
     	context.startActivity(s);
     }
 

@@ -248,7 +248,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	}
 
 	/* msg is any text we want to show initially */
-	private void createAutoCompleteView(String msg)
+	private void createAutoCompleteView()
 	{
 		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false); 
 		// Getting the group id. This will be a valid value if the intent was passed to add group participants.
@@ -258,15 +258,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mLabelView.setText(!TextUtils.isEmpty(existingGroupId) ? R.string.add_group : (isGroupChat ? R.string.new_group : R.string.new_message));
 		
-		/* if we've got some pre-filled text, add it here */
-		if (!TextUtils.isEmpty(msg)) {
-			mComposeView.setText(msg);
-			/* disable the send button */
-			mSendBtn.setEnabled(false);
-			//Doing a toggle instead of a show since the show method was not working here
-			InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-			imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-		}
 		mBottomView.setVisibility(View.GONE);
 
 		if(isGroupChat)
@@ -280,7 +271,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		mInputNumberView.setText("");
 		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
-				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, !TextUtils.isEmpty(msg), titleBtn, existingGroupId);
+				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, titleBtn, existingGroupId, getIntent());
 		mContactSearchView.setAdapter(adapter);
 		mContactSearchView.setOnItemClickListener(adapter);
 		mInputNumberView.addTextChangedListener(adapter);
@@ -497,13 +488,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			if(message.isFileTransferMessage())
 			{
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				msg = HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey();
+				intent.putExtra(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
+				intent.putExtra(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+				intent.putExtra(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
 			}
 			else
 			{
 				msg = message.getMessage();
+				intent.putExtra(HikeConstants.Extras.MSG, msg);
 			}
-			intent.putExtra(HikeConstants.Extras.MSG, msg);
 			startActivity(intent);
 			return true;
 		case R.id.delete:
@@ -530,6 +523,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					((DownloadFileTask)fileTransferTask).cancelDownload();
 				}
 			}
+			return true;
+		case R.id.share:
+			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+			Utils.startShareIntent(ChatThread.this, HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey());
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -699,23 +697,25 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			MenuItem item = menu.findItem(R.id.resend);
 			item.setVisible(true);
 		}
-		if (message.isFileTransferMessage() && message.isSent())
+		if (message.isFileTransferMessage())
 		{
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			if(TextUtils.isEmpty(hikeFile.getFileKey()))
-			{
-				MenuItem item = menu.findItem(R.id.forward);
-				item.setVisible(false);
 
-				MenuItem item1 = menu.findItem(R.id.copy);
-				item1.setVisible(false);
+			MenuItem shareItem = menu.findItem(R.id.share);
+			shareItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
+
+			MenuItem forwardItem = menu.findItem(R.id.forward);
+			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
+
+			MenuItem copyItem = menu.findItem(R.id.copy);
+			copyItem.setVisible(false);
+
+			if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()))
+			{
+				MenuItem item = menu.findItem(R.id.cancel_file_transfer);
+				item.setTitle(message.isSent() ? R.string.cancel_upload : R.string.cancel_download);
+				item.setVisible(true);
 			}
-		}
-		if (message.isFileTransferMessage() && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()))
-		{
-			MenuItem item = menu.findItem(R.id.cancel_file_transfer);
-			item.setTitle(message.isSent() ? R.string.cancel_upload : R.string.cancel_download);
-			item.setVisible(true);
 		}
 	}
 
@@ -839,19 +839,29 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				inviteUser();
 			}
 
-			if (!intent.getBooleanExtra(HikeConstants.Extras.KEEP_MESSAGE, false))
+			if(intent.hasExtra(HikeConstants.Extras.MSG))
 			{
-				mComposeView.setText("");
+				String msg = intent.getStringExtra(HikeConstants.Extras.MSG);
+				mComposeView.setText(msg);
+				mComposeView.setSelection(msg.length());
+			}
+			else if(intent.hasExtra(HikeConstants.Extras.FILE_PATH))
+			{
+				String fileKey = intent.getStringExtra(HikeConstants.Extras.FILE_KEY);
+				String filePath = intent.getStringExtra(HikeConstants.Extras.FILE_PATH);
+				String fileType = intent.getStringExtra(HikeConstants.Extras.FILE_TYPE);
+				HikeFileType hikeFileType = HikeFileType.fromString(fileType);
+
+				Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
+				initialiseFileTransfer(filePath, hikeFileType, fileKey, fileType);
 			}
 		}
 		else
 		{
 			/*
-			 * Checking if intent was received from the 'tap to invite' box in the invite screen.
-			 * If it was we fill in the text of that intent
+			 * The user chose to either start a new conversation or forward a message.
 			 */
-			createAutoCompleteView(("text/plain".equals(intent.getType())) ? 
-					intent.getStringExtra(Intent.EXTRA_TEXT) : intent.getStringExtra(HikeConstants.Extras.MSG));
+			createAutoCompleteView();
 		}
 		/* close context menu(if open) if the previous MSISDN is different from the current one)*/
 		if (prevContactNumber != null && !prevContactNumber.equalsIgnoreCase(mContactNumber)) {
@@ -1164,7 +1174,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				if(message.getParticipantInfoState() != ParticipantInfoState.NO_INFO && mConversation instanceof GroupConversation)
 				{
 					HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn(), false));
+					((GroupConversation) mConversation).setGroupParticipantList(hCDB.getGroupParticipants(mConversation.getMsisdn(), false, false));
 				}
 
 				final String label = message.getParticipantInfoState() != ParticipantInfoState.NO_INFO ? mConversation.getLabel() : null;
@@ -1742,7 +1752,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				String msisdn = selectedParticipants.get(i);
 				String name = selectedParticipantNames.get(i);
-				GroupParticipant groupParticipant = new GroupParticipant(new ContactInfo(msisdn, msisdn, name, msisdn));
+				ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn);
+				contactInfo.setName(name);
+				GroupParticipant groupParticipant = new GroupParticipant(contactInfo);
 				participantList.put(msisdn, groupParticipant);
 			}
 			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs);
@@ -1801,27 +1813,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				Intent newMediaFileIntent = null;
 				switch (which) 
 				{
-				case 0:
-					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
-					pickIntent.setType("image/*");
-					newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
-					break;
-
 				case 1:
 					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
 					pickIntent.setType("video/*");
 					newMediaFileIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-					//selectedFile = Utils.getOutputMediaFile(HikeFileType.VIDEO, null, null);
 					break;
 				
 				case 2:
 					requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
 					pickIntent.setData(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
 					newMediaFileIntent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-					selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO, null, null);
 					break;
 					
+				case 0:
 				default:
 					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
 					pickIntent.setType("image/*");
@@ -1864,89 +1868,106 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if((requestCode == HikeConstants.IMAGE_TRANSFER_CODE || requestCode == HikeConstants.VIDEO_TRANSFER_CODE || requestCode == HikeConstants.AUDIO_TRANSFER_CODE) 
 				&& resultCode==RESULT_OK)
 		{
-			try
+			if(data == null && selectedFile == null)
 			{
-				if(data == null && selectedFile == null)
-				{
-					Toast.makeText(getApplicationContext(), "Error capturing image", Toast.LENGTH_SHORT).show();
-					return;
-				}
-				String filePath = (data == null || data.getData() == null) ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
-				Log.d(getClass().getSimpleName(), "File Path; " + filePath);
-				if(filePath == null)
-				{
-					Toast.makeText(ChatThread.this, "Cannot upload file", Toast.LENGTH_SHORT).show();
-					return;
-				}
+				Toast.makeText(getApplicationContext(), "Error capturing image", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			String filePath = (data == null || data.getData() == null) ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 
-				File file = new File(filePath);
-				String fileName = file.getName();
-
-				Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + fileName);
-
-				if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
-				{
-					Toast.makeText(ChatThread.this, "File Size is too large", Toast.LENGTH_SHORT).show();
-					return;
-				}
-
-				HikeFileType mediaType = requestCode == HikeConstants.IMAGE_TRANSFER_CODE ? 
-						HikeFileType.IMAGE : 
-							requestCode ==HikeConstants.VIDEO_TRANSFER_CODE ? 
+			HikeFileType hikeFileType = requestCode == HikeConstants.IMAGE_TRANSFER_CODE ? 
+					HikeFileType.IMAGE : 
+						requestCode ==HikeConstants.VIDEO_TRANSFER_CODE ? 
 								HikeFileType.VIDEO : HikeFileType.AUDIO;
 
-				// For images that were captured, we need to scale them down and save
-				if(data != null || mediaType == HikeFileType.IMAGE)
+			initialiseFileTransfer(filePath, hikeFileType, null, null);
+		}
+	}
+
+	private void initialiseFileTransfer(String filePath, HikeFileType hikeFileType, String fileKey, String fileType)
+	{
+		try
+		{
+			Log.d(getClass().getSimpleName(), "File Path; " + filePath);
+			if(filePath == null)
+			{
+				Toast.makeText(ChatThread.this, "Cannot upload file", Toast.LENGTH_SHORT).show();
+				return;
+			}
+
+			File file = new File(filePath);
+			String fileName = file.getName();
+
+			Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + fileName);
+
+			if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
+			{
+				Toast.makeText(ChatThread.this, "File Size is too large", Toast.LENGTH_SHORT).show();
+				return;
+			}
+
+			if(TextUtils.isEmpty(fileKey))
+			{
+				selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName, null);
+				Log.d(getClass().getSimpleName(), "Copying file: " + filePath + " to " + selectedFile.getPath());
+				// TODO Check performance on low end phones. If slow, should remove from UI thread.
+				// Saving the file to hike local folder
+				if(!Utils.copyFile(filePath, selectedFile.getPath(), hikeFileType))
 				{
-					selectedFile = Utils.getOutputMediaFile(mediaType, fileName, null);
-					Log.d(getClass().getSimpleName(), "Copying file: " + filePath + " to " + selectedFile.getPath());
-					// TODO Check performance on low end phones. If slow, should remove from UI thread.
-					// Saving the file to hike local folder
-					if(!Utils.copyFile(filePath, selectedFile.getPath(), mediaType))
-					{
-						Toast.makeText(ChatThread.this, "Unable to read file", Toast.LENGTH_SHORT).show();
-						return;
-					}
-					filePath = selectedFile.getPath();
+					Toast.makeText(ChatThread.this, "Unable to read file", Toast.LENGTH_SHORT).show();
+					return;
 				}
+				filePath = selectedFile.getPath();
+			}
+			else
+			{
+				selectedFile = new File(filePath);
+			}
 
-				Bitmap thumbnail = null;
-				String thumbnailString = null;
-				if(mediaType == HikeFileType.IMAGE)
-				{
-					thumbnail = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
-				}
-				else if(mediaType == HikeFileType.VIDEO)
-				{
-					thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Images.Thumbnails.MICRO_KIND);
-				}
-				if(thumbnail != null)
-				{
-					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
-				}
+			Bitmap thumbnail = null;
+			String thumbnailString = null;
+			if(hikeFileType == HikeFileType.IMAGE)
+			{
+				thumbnail = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+			}
+			else if(hikeFileType == HikeFileType.VIDEO)
+			{
+				thumbnail = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Images.Thumbnails.MICRO_KIND);
+			}
+			if(thumbnail != null)
+			{
+				thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
+			}
 
-				long time = System.currentTimeMillis()/1000;
+			long time = System.currentTimeMillis()/1000;
 
-				JSONArray files = new JSONArray();
-				files.put(new HikeFile(fileName, HikeFileType.toString(mediaType), thumbnailString, thumbnail).serialize());
-				JSONObject metadata = new JSONObject();
-				metadata.putOpt(HikeConstants.FILES, files);
+			JSONArray files = new JSONArray();
+			files.put(new HikeFile(fileName, HikeFileType.toString(hikeFileType), thumbnailString, thumbnail).serialize());
+			JSONObject metadata = new JSONObject();
+			metadata.putOpt(HikeConstants.FILES, files);
 
-				ConvMessage convMessage = new ConvMessage(fileName, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
-				convMessage.setMetadata(metadata);
+			ConvMessage convMessage = new ConvMessage(fileName, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+			convMessage.setMetadata(metadata);
 
-				addMessage(convMessage);
-				mConversationDb.addConversationMessages(convMessage);
-				mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView.getText()));
+			addMessage(convMessage);
+			mConversationDb.addConversationMessages(convMessage);
+			mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView.getText()));
+
+			// If we don't have a file key, that means we haven't uploaded the file to the server yet
+			if(TextUtils.isEmpty(fileKey))
+			{
+				beginFileUpload(convMessage, fileName, selectedFile.getPath());
 				// Called so that the UI in the Conversation lists screen is updated
 				mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-
-				beginFileUpload(convMessage, fileName, selectedFile.getPath());
 			}
-			catch (JSONException e)
+			else
 			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				sendFileTransferMessage(convMessage, fileKey, fileType);
 			}
+		}
+		catch (JSONException e)
+		{
+			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 	}
 
@@ -2228,24 +2249,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					fileTransferTaskMap.remove(convMessage.getMsgID());
 					Log.d(getClass().getSimpleName(), "SUCCESS " + response.toString());
 
-					JSONObject metadata = new JSONObject();
-					JSONArray filesArray = new JSONArray();
+					JSONObject fileJSON = response.getJSONObject("data");
+					String fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
+					String fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
 
-					filesArray.put(response.optJSONObject("data"));
-					HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+					sendFileTransferMessage(convMessage, fileKey, fileType);
 
-					JSONObject fileJSON = filesArray.getJSONObject(0);
-					fileJSON.put(HikeConstants.THUMBNAIL, hikeFile.getThumbnailString());
-
-					hikeFile.setFileKey(fileJSON.optString(HikeConstants.FILE_KEY));
-
-					metadata.put(HikeConstants.FILES, filesArray);
-					Log.d(getClass().getSimpleName(), "Response after uploading file: " + metadata.toString());
-
-					convMessage.setMetadata(metadata);
-					mConversationDb.addFile(hikeFile.getFileKey(), hikeFile.getFileName());
-
-					mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 					mPubSub.publish(HikePubSub.UPLOAD_FINISHED, convMessage);
 				}
 				catch (JSONException e) 
@@ -2263,5 +2272,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		hikeHTTPTask.execute(hikeHttpRequest);
 
+	}
+
+	// Once we have the file key, send the MQTT message
+	private void sendFileTransferMessage(ConvMessage convMessage, String fileKey, String contentType) throws JSONException
+	{
+		JSONObject metadata = new JSONObject();
+		JSONArray filesArray = new JSONArray();
+
+		HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+		hikeFile.setFileKey(fileKey);
+		hikeFile.setFileTypeString(contentType);
+
+		filesArray.put(hikeFile.serialize());
+		metadata.put(HikeConstants.FILES, filesArray);
+
+		convMessage.setMetadata(metadata);
+
+		mConversationDb.addFile(hikeFile.getFileKey(), hikeFile.getFileName());
+		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 	}
 }

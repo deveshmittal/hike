@@ -462,7 +462,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		{
 		case R.id.invite:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU);
-			Utils.startInviteShareIntent(MessagesList.this);
+			Utils.startShareIntent(MessagesList.this, Utils.getInviteMessage(MessagesList.this));
 			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {
@@ -479,8 +479,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			startActivity(intent);
 			return true;
 		case R.id.group_chat:
-			intent = new Intent(this, FeedbackActivity.class);
-//			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			intent = new Intent(this, ChatThread.class);
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			startActivity(intent);
 			return true;
 		default:
@@ -544,7 +544,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			else if((conv instanceof GroupConversation) && message.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 			{
 				HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false));
+				((GroupConversation) conv).setGroupParticipantList(hCDB.getGroupParticipants(conv.getMsisdn(), false, false));
 			}
 			runOnUiThread(new Runnable(){
 				@Override

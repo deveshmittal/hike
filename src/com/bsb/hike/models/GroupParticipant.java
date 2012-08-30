@@ -4,17 +4,30 @@ public class GroupParticipant implements Comparable<GroupParticipant>
 {
 	private boolean hasLeft;
 
+	private boolean onDnd;
+
 	private ContactInfo contactInfo;
 
 	public GroupParticipant(ContactInfo contactInfo)
 	{
-		this(contactInfo, false);
+		this(contactInfo, false, false);
 	}
 
-	public GroupParticipant(ContactInfo contactInfo, boolean hasLeft)
+	public GroupParticipant(ContactInfo contactInfo, boolean hasLeft, boolean onDnd)
 	{
 		this.contactInfo = contactInfo;
 		this.hasLeft = hasLeft;
+		this.onDnd = onDnd;
+	}
+
+	public void setOnDnd(boolean onDnd)
+	{
+		this.onDnd = onDnd;
+	}
+
+	public boolean onDnd()
+	{
+		return onDnd;
 	}
 
 	public boolean hasLeft()

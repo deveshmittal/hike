@@ -97,7 +97,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.MSISDN + " TEXT, "
 				+ DBConstants.NAME + " STRING, "
 				+ DBConstants.ONHIKE +" INTEGER, "
-				+ DBConstants.HAS_LEFT + " INTEGER"
+				+ DBConstants.HAS_LEFT + " INTEGER, "
+				+ DBConstants.ON_DND + " INTEGER, "
+				+ DBConstants.SHOWN_STATUS + " INTEGER "
 				+ " )";
 		db.execSQL(sql);
 		sql = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.GROUP_INDEX + " ON " + DBConstants.GROUP_MEMBERS_TABLE 
@@ -145,8 +147,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db = mDb;
 		}
 		onCreate(db);
-		String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ONHIKE + " INTEGER";
-		db.execSQL(alter);
+		if(oldVersion < newVersion)
+		{
+			String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ON_DND + " INTEGER";
+			db.execSQL(alter);
+			alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.SHOWN_STATUS + " INTEGER";
+			db.execSQL(alter);
+		}
+		if(oldVersion < newVersion - 1)
+		{
+			String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ONHIKE + " INTEGER";
+			db.execSQL(alter);
+		}
 	}
 
 	public void updateOnHikeStatus(String msisdn, boolean onHike)
@@ -347,7 +359,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 					}
 
 					Log.d(getClass().getSimpleName(), "Fetching participants...");
-					((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn, false));
+					((GroupConversation)conv).setGroupParticipantList(getGroupParticipants(msisdn, false, false));
 					Log.d(getClass().getSimpleName(), "Participants size: " + ((GroupConversation)conv).getGroupParticipantList().size());
 				}
 				else
@@ -565,7 +577,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, groupName, msisdn);
 
 			GroupConversation conv = new GroupConversation(msisdn, convid, contactid, contactInfo.getName(), groupOwner, isGroupAlive);
-			conv.setGroupParticipantList(getGroupParticipants(msisdn, false));
+			conv.setGroupParticipantList(getGroupParticipants(msisdn, false, false));
 
 			return conv;
 		} 
@@ -686,17 +698,27 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public boolean addGroupParticipants(String groupId, Map<String, GroupParticipant> participantList)
 	{
 		boolean participantsAlreadyAdded = true;
-		Map<String, GroupParticipant> currentParticipants = getGroupParticipants(groupId, true);
+		Map<String, GroupParticipant> currentParticipants = getGroupParticipants(groupId, true, false);
 		if(currentParticipants.isEmpty())
 		{
 			participantsAlreadyAdded = false;
 		}
-		for(Entry<String, GroupParticipant> participant : currentParticipants.entrySet())
+		for(Entry<String, GroupParticipant> participantEntry : participantList.entrySet())
 		{
-			if(!participantList.containsKey(participant.getKey()))
+			if(!currentParticipants.containsKey(participantEntry.getKey()))
 			{
 				participantsAlreadyAdded = false;
 				break;
+			}
+			else
+			{
+				GroupParticipant currentParticipant = currentParticipants.get(participantEntry.getKey());
+				Log.d(getClass().getSimpleName(), "COMPARING current: " + currentParticipant.onDnd() + " new: " + participantEntry.getValue().onDnd());
+				if(currentParticipant.onDnd() != participantEntry.getValue().onDnd())
+				{
+					participantsAlreadyAdded = false;
+					break;
+				}
 			}
 		}
 		if(participantsAlreadyAdded)
@@ -709,15 +731,26 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		try
 		{
 			ih = new InsertHelper(mDb, DBConstants.GROUP_MEMBERS_TABLE);
-			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.GROUP_MEMBERS_TABLE + " VALUES (?, ?, ?, ?, ?)");
+			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.GROUP_MEMBERS_TABLE 
+					+ " ( " + DBConstants.GROUP_ID + ", " 
+ 							+ DBConstants.MSISDN + ", " 
+ 							+ DBConstants.NAME + ", " 
+ 							+ DBConstants.ONHIKE + ", " 
+ 							+ DBConstants.HAS_LEFT + ", " 
+ 							+ DBConstants.ON_DND + ", "
+ 		 					+ DBConstants.SHOWN_STATUS 
+ 					+ " ) " + " VALUES (?, ?, ?, ?, ?, ?, ?)");
 			mDb.beginTransaction();
 			for(Entry<String, GroupParticipant> participant : participantList.entrySet())
 			{
+				GroupParticipant groupParticipant = participant.getValue();
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.GROUP_ID), groupId);
 				insertStatement.bindString(ih.getColumnIndex(DBConstants.MSISDN), participant.getKey());
-				insertStatement.bindString(ih.getColumnIndex(DBConstants.NAME), participant.getValue().getContactInfo().getName());
-				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ONHIKE), participant.getValue().getContactInfo().isOnhike() ? 1 : 0);
+				insertStatement.bindString(ih.getColumnIndex(DBConstants.NAME), groupParticipant.getContactInfo().getName());
+				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ONHIKE), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
 				insertStatement.bindLong(ih.getColumnIndex(DBConstants.HAS_LEFT), 0);
+				insertStatement.bindLong(ih.getColumnIndex(DBConstants.ON_DND), groupParticipant.onDnd() ? 1 : 0);
+				insertStatement.bindLong(ih.getColumnIndex(DBConstants.SHOWN_STATUS), groupParticipant.getContactInfo().isOnhike() ? 1 : 0);
 
 				insertStatement.executeInsert();
 			}
@@ -736,6 +769,20 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
 		}
+	}
+
+	public int updateDndStatus(String msisdn)
+	{
+		ContentValues contentValues = new ContentValues(1);
+		contentValues.put(DBConstants.ON_DND, 0);
+		return mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[] {msisdn});
+	}
+
+	public int updateShownStatus(String groupId)
+	{
+		ContentValues contentValues = new ContentValues(1);
+		contentValues.put(DBConstants.SHOWN_STATUS, 1);
+		return mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] {groupId});
 	}
 
 	/**
@@ -759,10 +806,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param groupId
 	 * @return
 	 */
-	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly)
+	public Map<String, GroupParticipant> getGroupParticipants(String groupId, boolean activeOnly, boolean notShownStatusMsgOnly)
 	{
-		String selection = DBConstants.GROUP_ID + " =? " + (activeOnly ? "AND " + DBConstants.HAS_LEFT + "=0" : "");
-		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {DBConstants.MSISDN, DBConstants.HAS_LEFT, DBConstants.ONHIKE, DBConstants.NAME}, selection, new String[] {groupId}, null, null, null);
+		String selection = DBConstants.GROUP_ID + " =? " 
+										+ (activeOnly ? " AND " + DBConstants.HAS_LEFT + "=0" : "") 
+										+ (notShownStatusMsgOnly ? " AND " + DBConstants.SHOWN_STATUS + "=0" : "");
+		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {DBConstants.MSISDN, DBConstants.HAS_LEFT, DBConstants.ONHIKE, DBConstants.NAME, DBConstants.ON_DND}, selection, new String[] {groupId}, null, null, null);
 
 		Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
 
@@ -780,7 +829,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				contactInfo.setOnhike(c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) == 1 ? true : false);
 			}
 
-			GroupParticipant groupParticipant = new GroupParticipant(contactInfo, c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0);
+			GroupParticipant groupParticipant = new GroupParticipant(contactInfo, c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
 			participantList.put(msisdn, groupParticipant);
 			Log.d(getClass().getSimpleName(), "Fetching participant: " + msisdn);
 		}
