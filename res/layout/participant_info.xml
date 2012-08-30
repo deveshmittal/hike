@@ -11,4 +11,5 @@
     android:paddingRight="10dp"
     android:paddingTop="3dp"
     android:paddingBottom="3dp"
+    android:drawablePadding="5dp"
     android:background="@drawable/participant_info_bg" />
