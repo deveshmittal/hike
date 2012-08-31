@@ -100,7 +100,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			{
 				try 
 				{
-					JSONArray dndNumbers = conversation instanceof GroupConversation ? message.getMetadata().getJSON().optJSONArray(HikeConstants.DND_NUMBERS) : message.getMetadata().getDndNumbers();
+					JSONArray dndNumbers = conversation instanceof GroupConversation ? message.getMetadata().getJSON().optJSONArray(HikeConstants.DND_USERS) : message.getMetadata().getDndNumbers();
 					if(dndNumbers != null && dndNumbers.length() > 0)
 					{
 						StringBuilder dndNames = new StringBuilder(); 

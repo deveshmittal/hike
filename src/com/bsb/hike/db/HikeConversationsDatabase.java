@@ -20,6 +20,7 @@ import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
@@ -695,9 +696,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	 * @param groupId The id of the group to which the participants are to be added
 	 * @param participantList A list of the participants to be added
 	 */
-	public boolean addGroupParticipants(String groupId, Map<String, GroupParticipant> participantList)
+	public int addGroupParticipants(String groupId, Map<String, GroupParticipant> participantList)
 	{
 		boolean participantsAlreadyAdded = true;
+		boolean dndInfoChange = false;
+
 		Map<String, GroupParticipant> currentParticipants = getGroupParticipants(groupId, true, false);
 		if(currentParticipants.isEmpty())
 		{
@@ -717,13 +720,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				if(currentParticipant.onDnd() != participantEntry.getValue().onDnd())
 				{
 					participantsAlreadyAdded = false;
+					dndInfoChange = true;
 					break;
 				}
 			}
 		}
 		if(participantsAlreadyAdded)
 		{
-			return participantsAlreadyAdded;
+			return HikeConstants.NO_CHANGE;
 		}
 
 		SQLiteStatement insertStatement = null;
@@ -754,7 +758,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				insertStatement.executeInsert();
 			}
-			return participantsAlreadyAdded;
+			return dndInfoChange ? HikeConstants.DND_STATUS_CHANGE : HikeConstants.NEW_PARTICIPANT;
 		}
 		finally
 		{

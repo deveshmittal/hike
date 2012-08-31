@@ -1162,7 +1162,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				 */
 				message.setConversation(mConversation);
 
-				if (hasWindowFocus() && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
+				if (hasWindowFocus())
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
 					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
@@ -1713,7 +1713,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				Utils.logEvent(ChatThread.this,
 						HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
-				Intent intent = getIntent();
+				Intent intent = new Intent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
