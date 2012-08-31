@@ -1713,7 +1713,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				Utils.logEvent(ChatThread.this,
 						HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
-				Intent intent = getIntent();
+				Intent intent = new Intent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
