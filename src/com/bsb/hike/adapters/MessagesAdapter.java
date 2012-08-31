@@ -366,7 +366,7 @@ public class MessagesAdapter extends BaseAdapter
 					}
 					TextView dndMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 
-					JSONArray dndNumbers = conversation instanceof GroupConversation ? metadata.getJSON().optJSONArray(HikeConstants.DND_NUMBERS) : convMessage.getMetadata().getDndNumbers();
+					JSONArray dndNumbers = conversation instanceof GroupConversation ? metadata.getJSON().optJSONArray(HikeConstants.DND_USERS) : convMessage.getMetadata().getDndNumbers();
 					if(dndNumbers != null && dndNumbers.length()>0)
 					{
 						StringBuilder dndNames = new StringBuilder(); 
