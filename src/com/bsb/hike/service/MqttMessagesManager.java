@@ -1,8 +1,6 @@
 package com.bsb.hike.service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,7 +22,6 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -144,7 +141,7 @@ public class MqttMessagesManager {
 			}
 			GroupConversation groupConversation = new GroupConversation(jsonObj, this.context);
 
-			if(this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList()))
+			if(this.convDb.addGroupParticipants(groupConversation.getMsisdn(), groupConversation.getGroupParticipantList()) != HikeConstants.NEW_PARTICIPANT)
 			{
 				Log.d(getClass().getSimpleName(), "GCJ Message was already received");
 				return;
