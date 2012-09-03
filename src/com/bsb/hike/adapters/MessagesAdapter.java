@@ -239,7 +239,7 @@ public class MessagesAdapter extends BaseAdapter
 			((ViewGroup)holder.participantInfoContainer).removeAllViews();
 			try 
 			{
-				int positiveMargin = (int) (6 * Utils.densityMultiplier);
+				int positiveMargin = (int) (8 * Utils.densityMultiplier);
 				int left = 0;
 				int top = 0;
 				int right = 0;
@@ -299,7 +299,7 @@ public class MessagesAdapter extends BaseAdapter
 					participantInfo.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_left_chat, 0, 0, 0);
 
 					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-					lp.setMargins(left, top, right, bottom);
+					lp.setMargins(left, top, right, 0);
 					participantInfo.setLayoutParams(lp);
 
 					((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
@@ -319,11 +319,11 @@ public class MessagesAdapter extends BaseAdapter
 						creditsMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_got_credits, 0, 0, 0);
 
 						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-						lp.setMargins(left, top, right, bottom);
+						lp.setMargins(left, top, right, 0);
 						creditsMessage.setLayoutParams(lp);
 					}
 					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-					lp.setMargins(left, top, right, bottom);
+					lp.setMargins(left, top, right, creditsMessage != null ? bottom : 0);
 					mainMessage.setLayoutParams(lp);
 					
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
@@ -335,6 +335,7 @@ public class MessagesAdapter extends BaseAdapter
 				else
 				{
 					MessageMetadata metadata = convMessage.getMetadata();
+					JSONArray dndNumbers = conversation instanceof GroupConversation ? metadata.getJSON().optJSONArray(HikeConstants.DND_USERS) : convMessage.getMetadata().getDndNumbers();
 					if(conversation instanceof GroupConversation)
 					{
 						JSONArray nonDndNumbers = metadata.getJSON().optJSONArray(HikeConstants.NON_DND_USERS);
@@ -356,7 +357,14 @@ public class MessagesAdapter extends BaseAdapter
 														participantName)));
 
 								LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-								lp.setMargins(left, top, right, bottom);
+								if(i != nonDndNumbers.length() - 1)
+								{
+									lp.setMargins(left, top, right, bottom);
+								}
+								else if(dndNumbers == null || dndNumbers.length()==0)
+								{
+									lp.setMargins(left, top, right, 0);
+								}
 								participantInfo.setLayoutParams(lp);
 
 								((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
@@ -366,7 +374,6 @@ public class MessagesAdapter extends BaseAdapter
 					}
 					TextView dndMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 
-					JSONArray dndNumbers = conversation instanceof GroupConversation ? metadata.getJSON().optJSONArray(HikeConstants.DND_USERS) : convMessage.getMetadata().getDndNumbers();
 					if(dndNumbers != null && dndNumbers.length()>0)
 					{
 						StringBuilder dndNames = new StringBuilder(); 
@@ -406,7 +413,7 @@ public class MessagesAdapter extends BaseAdapter
 						dndMessage.setText(ssb);
 						dndMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_waiting_dnd, 0, 0, 0);
 						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-						lp.setMargins(left, top, right, bottom);
+						lp.setMargins(left, top, right, 0);
 						dndMessage.setLayoutParams(lp);
 
 						((ViewGroup) holder.participantInfoContainer).addView(dndMessage);
