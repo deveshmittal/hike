@@ -268,7 +268,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 			 * Checking if the number of participants has crossed the set limit.
 			 * We have two limits - SMS contacts and total contacts.
 			 */
-			if (numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP || 
+			if (numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1 || 
 					(numSMSContactsSelected >= HikeConstants.MAX_SMS_CONTACTS_IN_GROUP && !contactInfo.isOnhike()))
 			{
 				Toast toast = Toast.makeText(
