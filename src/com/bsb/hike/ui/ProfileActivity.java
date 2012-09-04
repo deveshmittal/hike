@@ -247,7 +247,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 				groupOwnerTextView.setText(participant.getValue().getContactInfo().getFirstName());
 				continue;
 			}
-			if(!contactInfo.isOnhike())
+			if(!contactInfo.isOnhike() && !participant.getValue().hasLeft())
 			{
 				shouldShowInviteAllButton = true;
 			}
@@ -749,7 +749,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	{
 		for(Entry<String, GroupParticipant> participant : participantList.entrySet())
 		{
-			if (!participant.getValue().getContactInfo().isOnhike()) 
+			if (!participant.getValue().getContactInfo().isOnhike() && !participant.getValue().hasLeft()) 
 			{
 				long time = (long) System.currentTimeMillis() / 1000;
 				ConvMessage convMessage = new ConvMessage(getResources()
