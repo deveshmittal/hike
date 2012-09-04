@@ -268,6 +268,12 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 			participantNameContainer.addView(participantNameItem);
 		}
+		// Disable the add participants item
+		if(participantList.size() == HikeConstants.MAX_CONTACTS_IN_GROUP)
+		{
+			addParticipantsLayout.setEnabled(false);
+			((TextView)findViewById(R.id.add_participants_txt)).setTextColor(getResources().getColor(R.color.lightgrey));
+		}
 		participantList.remove(userInfo.getContactInfo().getMsisdn());
 
 		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
