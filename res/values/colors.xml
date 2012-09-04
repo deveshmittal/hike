@@ -37,4 +37,10 @@
     <color name="tip_blue">#6bd0ff</color>
     <color name="contact_blue">#68b8de</color>
     <color name="contact_green">#a4cd69</color>
+    <color name="dialog_bg">#e5e5e2</color>
+    <color name="dialog_header_bg">#282828</color>
+    <color name="dialog_header_text">#a6a6a4</color>
+    <color name="dialog_btn_disabled_txt">#b0b0ae</color>
+    <color name="recording_txt">#f82830</color>
+    <color name="record_txt">#c1c1bf</color>
 </resources>

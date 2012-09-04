@@ -171,5 +171,6 @@
         <item>Image</item>
         <item>Video</item>
         <item>Audio</item>
+        <item>Voice message</item>
     </string-array>
 </resources>

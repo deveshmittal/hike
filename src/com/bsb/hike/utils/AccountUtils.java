@@ -50,6 +50,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -577,7 +578,7 @@ public class AccountUtils
 		}
 	}
 
-	public static JSONObject executeFileTransferRequest(HikeFileTransferHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask, AtomicBoolean cancelUpload) throws Exception
+	public static JSONObject executeFileTransferRequest(HikeFileTransferHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask, AtomicBoolean cancelUpload, String fileType) throws Exception
 	{
 		// Always start download with some initial progress
 		int progress = HikeConstants.INITIAL_PROGRESS;
@@ -599,7 +600,7 @@ public class AccountUtils
 
 		connection.setRequestProperty("Connection", "Keep-Alive");
 		connection.setRequestProperty("Content-Name", fileName);
-		connection.setRequestProperty("Content-Type", "");
+		connection.setRequestProperty("Content-Type", TextUtils.isEmpty(fileType) ? "" : fileType);
 		connection.setRequestProperty("Content-Encoding", "gzip");
 		connection.setRequestProperty("Cookie", "user=" + mToken);
 		connection.setRequestProperty("X-Thumbnail-Required", "0");
