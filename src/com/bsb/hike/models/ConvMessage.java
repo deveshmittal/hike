@@ -236,7 +236,7 @@ public class ConvMessage
 			{
 				name = Utils.getFirstName(conversation.getLabel());
 			}
-			this.mMessage = String.format(context.getString(conversation instanceof GroupConversation ? R.string.opt_in : R.string.optin_one_to_one), name);
+			this.mMessage = String.format(context.getString(conversation instanceof GroupConversation ? R.string.joined_conversation : R.string.optin_one_to_one), name);
 			break;
 		case DND_USER:
 			this.mMessage = "";
