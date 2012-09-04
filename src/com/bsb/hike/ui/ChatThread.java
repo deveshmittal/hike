@@ -68,11 +68,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
@@ -1825,11 +1827,32 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return;
 		}
 		final CharSequence[] options = getResources().getStringArray(R.array.file_transfer_items);
+		final int[] optionIcons = {R.drawable.ic_image_item, R.drawable.ic_video_item, R.drawable.ic_music_item, R.drawable.ic_record_item};
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
 
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
+			    android.R.layout.select_dialog_item,
+			    android.R.id.text1,
+			    options)
+			    {
+
+					@Override
+					public View getView(int position, View convertView,
+							ViewGroup parent) 
+					{
+						View v = super.getView(position, convertView, parent);
+						TextView tv = (TextView) v.findViewById(android.R.id.text1);
+						tv.setCompoundDrawablesWithIntrinsicBounds(optionIcons[position], 0, 0, 0);
+						tv.setCompoundDrawablePadding((int) (15*Utils.densityMultiplier));
+						return v;
+					}
+			
+			    };
+
 		builder.setTitle(R.string.share_file);
-		builder.setItems(options, new DialogInterface.OnClickListener() 
+		builder.setIcon(R.drawable.ic_share_header);
+		builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener() 
 		{
 			@Override
 			public void onClick(DialogInterface dialog, int which) 
