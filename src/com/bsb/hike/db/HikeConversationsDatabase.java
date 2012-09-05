@@ -203,7 +203,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		ContentValues values = new ContentValues();
 		values.put(DBConstants.ONHIKE, onHike);
 		String[] whereArgs = { msisdn };
-		int rowsAffected = mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", whereArgs);
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", whereArgs);
+		mDb.update(DBConstants.GROUP_MEMBERS_TABLE, values, DBConstants.MSISDN + "=?", whereArgs);
 	}
 
 	public void addConversationMessages(ConvMessage message)
