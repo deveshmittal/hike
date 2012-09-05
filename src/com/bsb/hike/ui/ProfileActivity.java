@@ -2,8 +2,10 @@ package com.bsb.hike.ui;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -239,6 +241,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		groupOwner = groupConversation.getGroupOwner();
 
+		Set<String> activeParticipants = new HashSet<String>();
+		activeParticipants.add(groupOwner);
 		for(Entry<String, GroupParticipant> participant : participantList.entrySet())
 		{
 			ContactInfo contactInfo = participant.getValue().getContactInfo();
@@ -257,6 +261,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			{
 				continue;
 			}
+			activeParticipants.add(participant.getKey());
 			View participantNameItem = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
 
 			TextView participantName = (TextView) participantNameItem.findViewById(R.id.participant_name);
@@ -275,7 +280,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			participantNameContainer.addView(participantNameItem);
 		}
 		// Disable the add participants item
-		if(participantList.size() == HikeConstants.MAX_CONTACTS_IN_GROUP)
+		if(activeParticipants.size() == HikeConstants.MAX_CONTACTS_IN_GROUP)
 		{
 			addParticipantsLayout.setEnabled(false);
 			((TextView)findViewById(R.id.add_participants_txt)).setTextColor(getResources().getColor(R.color.lightgrey));
