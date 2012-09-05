@@ -890,10 +890,12 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 								findViewById(R.id.invite_all_btn).setVisibility(View.VISIBLE);
 							}
 
-							TextView participantNameItem = (TextView) ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE))
+							View participantNameItem = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE))
 									.inflate(R.layout.participant_name_item, null);
-							participantNameItem.setText(participant.getFirstName());
-							participantNameItem.setBackgroundResource(participant.isOnhike() ?
+							TextView participantName = (TextView) participantNameItem.findViewById(R.id.participant_name);
+							participantName.setText(participant.getFirstName());
+							participantName.setTextColor(getResources().getColor(participant.isOnhike() ? R.color.contact_blue : R.color.contact_green));
+							participantName.setBackgroundResource(participant.isOnhike() ?
 									R.drawable.hike_contact_bg: R.drawable.sms_contact_bg);
 
 							LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
