@@ -2051,7 +2051,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			public void onClick(View v) 
 			{
 				recordingDialog.dismiss();
-				initialiseFileTransfer(selectedFile.getPath(), HikeFileType.AUDIO, null, "audio/mp4a-latm", true);
+				initialiseFileTransfer(selectedFile.getPath(), HikeFileType.AUDIO, null, "audio/voice", true);
 			}
 		});
 
