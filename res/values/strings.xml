@@ -96,7 +96,7 @@
 	<string name="valid_till">Valid till %1$s</string>
 	<string name="sms_renew">Your free hike SMS renews on the 1st of every month.</string>
 	<string name="invite_friend_free_sms">Get 50 free hike SMS for every friend you invite to hike.</string>
-	<string name="group_chat_free">Group chat is free till 30th Sept.\nCredits don\'t apply.</string>
+	<string name="group_chat_free">Group chat is free till 31st Dec.\nCredits don\'t apply.</string>
 	<string name="sms_disclaimer">*SMSs that are received and shown in hike are\nstored locally and never uploaded to our servers.\n\nWe promise.</string>
 	<string name="sms_alert_text">You can now receive all your SMSs in hike. Tap below to turn this feature on.</string>
 	<string name="sms">SMS</string>
@@ -124,4 +124,15 @@
 	<string name="cancel_upload">Cancel upload</string>
 	<string name="invited_to_gc">%1$s has been invited</string>
 	<string name="share">Share</string>
+	<string name="start_rec">Recorder</string>
+	<string name="recording">RECORDING</string>
+	<string name="start">Start</string>
+	<string name="stop">Stop</string>
+	<string name="preview">Preview</string>
+	<string name="error_recording">Audio could not be recorded.</string>
+	<string name="done_rec">Done recording</string>
+	<string name="delete_leave">Delete and leave group</string>
+	<string name="tap_to_record">TAP TO RECORD</string>
+	<string name="tap_to_play">TAP TO PLAY</string>
+	<string name="playing">PLAYING</string>
 </resources>

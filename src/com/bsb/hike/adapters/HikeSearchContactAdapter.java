@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import android.app.Activity;
@@ -147,9 +148,18 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 				 * Making a set of all the currently selected contacts. Only used in case of group chat.
 				 */
 				currentSelectionSet.addAll(currentSelectionsInTextBox);
+				Set<String> selectedSMSContacts = new HashSet<String>();
 				if(!TextUtils.isEmpty(groupId))
 				{
 					currentSelectionSet.addAll(groupParticipants.keySet());
+					// Done to add unknown numbers to the already selected list
+					for(Entry<String, GroupParticipant> participantEntry : groupParticipants.entrySet())
+					{
+						if(!participantEntry.getValue().getContactInfo().isOnhike())
+						{
+							selectedSMSContacts.add(participantEntry.getKey());
+						}
+					}
 				}
 
 				List<ContactInfo> filteredContacts = new ArrayList<ContactInfo>();
@@ -169,7 +179,6 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 						}
 					});
 				}
-				Set<String> selectedSMSContacts = new HashSet<String>();
 				for (ContactInfo info : HikeSearchContactAdapter.this.completeList)
 				{
 					if(info != null)
@@ -230,11 +239,13 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) 
 	{
 		ContactInfo contactInfo = (ContactInfo) view.getTag();
+		boolean isUnknownNumber = false; 
 		if(contactInfo == null)
 		{
 			String number = normalizeNumber(getNumber(inputNumber.getText().toString()));
 			Log.d(getClass().getSimpleName(), "Formatted number: " + number);
 			contactInfo = new ContactInfo(number, number, number, number);
+			isUnknownNumber = true;
 		}
 		if (!isGroupChat) 
 		{
@@ -262,23 +273,28 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		}
 		else
 		{
-			inputNumber.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-			inputNumber.setSingleLine(false);
 			/*
 			 * Checking if the number of participants has crossed the set limit.
 			 * We have two limits - SMS contacts and total contacts.
 			 */
-			if (numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP || 
+			if (numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1 || 
 					(numSMSContactsSelected >= HikeConstants.MAX_SMS_CONTACTS_IN_GROUP && !contactInfo.isOnhike()))
 			{
 				Toast toast = Toast.makeText(
 						getContext(), 
-						((numContactsSelected < HikeConstants.MAX_CONTACTS_IN_GROUP) ? R.string.max_sms : R.string.max_contact), 
+						((numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1) ? R.string.max_contact : R.string.max_sms), 
 						Toast.LENGTH_SHORT);
 				toast.setGravity(Gravity.TOP, 0, (int) (50 * Utils.densityMultiplier));
 				toast.show();
 				return;
 			}
+			if(isUnknownNumber)
+			{
+				// Done to add unknown numbers to the already selected list
+				completeList.add(contactInfo);
+			}
+			inputNumber.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+			inputNumber.setSingleLine(false);
 			String currentText = inputNumber.getText().toString();
 			int insertIndex = currentText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? currentText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2 : 0;
 

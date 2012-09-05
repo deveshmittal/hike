@@ -323,8 +323,20 @@ public class Utils
 	    boolean uniqueFileName = false;
 
 	    // File name should only be blank in case of profile images or while capturing new media.
-	    orgFileName = TextUtils.isEmpty(orgFileName) ? 
-	    		((type == HikeFileType.PROFILE || type == HikeFileType.IMAGE) ? "IMG_" + timeStamp + ".jpg" : "MOV_" + timeStamp + ".mp4") : orgFileName;
+	    if(TextUtils.isEmpty(orgFileName))
+	    {
+	    	switch (type) 
+	    	{
+			case PROFILE:
+			case IMAGE:
+				orgFileName = "IMG_" + timeStamp + ".jpg";
+				break;
+			case VIDEO:
+				orgFileName = "MOV_" + timeStamp + ".mp4";
+			case AUDIO:
+				orgFileName = "AUD_" + timeStamp + ".m4a";
+			}
+	    }
 
 	    String fileExtension = orgFileName.contains(".") ? orgFileName.substring(orgFileName.lastIndexOf("."), orgFileName.length()) : "";
 	    String orgFileNameWithoutExtension = !TextUtils.isEmpty(fileExtension) ? orgFileName.substring(0, orgFileName.indexOf(fileExtension)) : orgFileName;
@@ -959,7 +971,7 @@ public class Utils
     public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format)
     {
     	ByteArrayOutputStream bao = new ByteArrayOutputStream();
-    	bitmap.compress(format, 95, bao);
+    	bitmap.compress(format, 50, bao);
 		return bao.toByteArray();
     }
 

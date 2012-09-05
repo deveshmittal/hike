@@ -206,6 +206,7 @@
                     android:onClick="onAddNewParticipantsClicked" >
 
                     <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/add_participants_txt"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"

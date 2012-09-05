@@ -430,6 +430,14 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		super.onCreateContextMenu(menu, v, menuInfo);
 		android.view.MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.conversation_menu, menu);
+		
+		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+		Conversation conversation = mAdapter.getItem(adapterInfo.position);
+		if(conversation instanceof GroupConversation)
+		{
+			MenuItem delete = menu.findItem(R.id.delete);
+			delete.setTitle(R.string.delete_leave);
+		}
 	}
 
 	@Override

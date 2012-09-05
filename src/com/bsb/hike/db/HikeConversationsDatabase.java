@@ -96,7 +96,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ " ( "
 				+ DBConstants.GROUP_ID +" STRING, "
 				+ DBConstants.MSISDN + " TEXT, "
-				+ DBConstants.NAME + " STRING, "
+				+ DBConstants.NAME + " TEXT, "
 				+ DBConstants.ONHIKE +" INTEGER, "
 				+ DBConstants.HAS_LEFT + " INTEGER, "
 				+ DBConstants.ON_DND + " INTEGER, "
@@ -148,17 +148,53 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db = mDb;
 		}
 		onCreate(db);
-		if(oldVersion < newVersion)
+
+		if(oldVersion < 2)
+		{
+			String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ONHIKE + " INTEGER";
+			db.execSQL(alter);
+		}
+		if(oldVersion < 3)
 		{
 			String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ON_DND + " INTEGER";
 			db.execSQL(alter);
 			alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.SHOWN_STATUS + " INTEGER";
 			db.execSQL(alter);
 		}
-		if(oldVersion < newVersion - 1)
+		// This is being done to change the column type of column "name" in the group members table
+		if(oldVersion < 4)
 		{
-			String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " ADD COLUMN " + DBConstants.ONHIKE + " INTEGER";
+			String alter = "ALTER TABLE " + DBConstants.GROUP_MEMBERS_TABLE + " RENAME TO " + "temp_table";
+
+			String dropIndex = "DROP INDEX " + DBConstants.GROUP_INDEX;
+
+			String create = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_MEMBERS_TABLE
+					+ " ( "
+					+ DBConstants.GROUP_ID +" STRING, "
+					+ DBConstants.MSISDN + " TEXT, "
+					+ DBConstants.NAME + " TEXT, "
+					+ DBConstants.ONHIKE +" INTEGER, "
+					+ DBConstants.HAS_LEFT + " INTEGER, "
+					+ DBConstants.ON_DND + " INTEGER, "
+					+ DBConstants.SHOWN_STATUS + " INTEGER "
+					+ " )";
+			
+			String createIndex = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.GROUP_INDEX + " ON " + DBConstants.GROUP_MEMBERS_TABLE 
+					+ " ( "
+					+ DBConstants.GROUP_ID + ", "
+					+ DBConstants.MSISDN
+					+ " ) ";
+
+			String insert = "INSERT INTO " + DBConstants.GROUP_MEMBERS_TABLE + " SELECT * FROM temp_table";
+
+			String drop = "DROP TABLE temp_table";
+
 			db.execSQL(alter);
+			db.execSQL(dropIndex);
+			db.execSQL(create);
+			db.execSQL(createIndex);
+			db.execSQL(insert);
+			db.execSQL(drop);
 		}
 	}
 
@@ -167,7 +203,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		ContentValues values = new ContentValues();
 		values.put(DBConstants.ONHIKE, onHike);
 		String[] whereArgs = { msisdn };
-		int rowsAffected = mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", whereArgs);
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN + "=?", whereArgs);
+		mDb.update(DBConstants.GROUP_MEMBERS_TABLE, values, DBConstants.MSISDN + "=?", whereArgs);
 	}
 
 	public void addConversationMessages(ConvMessage message)

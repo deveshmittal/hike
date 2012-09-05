@@ -3,7 +3,7 @@ package com.bsb.hike.db;
 public class DBConstants
 {
 	
-	public static final int CONVERSATIONS_DATABASE_VERSION = 3;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 4;
 	
 	public static final int USERS_DATABASE_VERSION = 3;
 	

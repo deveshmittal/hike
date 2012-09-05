@@ -99,7 +99,7 @@ public class HikeConstants
 	public static int MAX_CHAR_IN_NAME = 20;
 
 	public static int MAX_SMS_CONTACTS_IN_GROUP = 5;
-	public static int MAX_CONTACTS_IN_GROUP = 9;
+	public static int MAX_CONTACTS_IN_GROUP = 10;
 
 	public static int PROFILE_IMAGE_DIMENSIONS = 80;
 
@@ -110,8 +110,10 @@ public class HikeConstants
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
 	public static final int AUDIO_TRANSFER_CODE = 1190;
+	public static final int RECORD_AUDIO_TRANSFER_CODE = 1191;
 	public static final String FILE_TRANSFER_BASE_URL = AccountUtils.BASE + "/user/ft/";
 	public static final String FILE_TRANSFER_BASE_URL_TO_SHOW = "http://hike.in/f/";
+	public static final int MAX_DURATION_RECORDING_SEC = 120;
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180; 
 
@@ -183,6 +185,8 @@ public class HikeConstants
 		public static final String FILE_KEY = "fileKey";
 		public static final String FILE_TYPE = "fileType";
 		public static final String FILE_NAME = "fileName";
+		public static final String RECORDER_DIALOG_SHOWING = "recorderDialogShowing";
+		public static final String RECORDER_START_TIME = "recorderStartTime";
 	}
 
 	public static final class LogEvent
