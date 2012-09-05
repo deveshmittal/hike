@@ -313,7 +313,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return cursor;
 	}
 
-	public ContactInfo getContactInfoFromMSISDN(String msisdn)
+	public ContactInfo getContactInfoFromMSISDN(String msisdn, boolean ifNotFoundReturnNull)
 	{
 		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.MSISDN+"=?", new String[] { msisdn }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
@@ -321,7 +321,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		if (contactInfos.isEmpty())
 		{
 			Log.d(getClass().getSimpleName(), "No contact found");
-			return new ContactInfo(msisdn, msisdn, null, msisdn, false);
+			return ifNotFoundReturnNull ? null : new ContactInfo(msisdn, msisdn, null, msisdn, false);
 		}
 
 		return contactInfos.get(0);

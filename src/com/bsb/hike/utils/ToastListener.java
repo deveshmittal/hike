@@ -97,7 +97,7 @@ public class ToastListener implements Listener
 				}
 				else
 				{
-					contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn());
+					contactInfo = this.db.getContactInfoFromMSISDN(message.getMsisdn(), false);
 				}
 
 				this.toaster.notify(contactInfo, message);

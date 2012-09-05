@@ -62,7 +62,7 @@ public class HikeNotification
 		if(convMsg.isGroupChat() && !TextUtils.isEmpty(convMsg.getGroupParticipantMsisdn()) && convMsg.getParticipantInfoState() == ParticipantInfoState.NO_INFO)
 		{
 			HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-			ContactInfo participant = hUDB.getContactInfoFromMSISDN(convMsg.getGroupParticipantMsisdn());
+			ContactInfo participant = hUDB.getContactInfoFromMSISDN(convMsg.getGroupParticipantMsisdn(), false);
 
 			if(TextUtils.isEmpty(participant.getName()))
 			{

@@ -1780,7 +1780,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				String msisdn = selectedParticipants.get(i);
 				String name = selectedParticipantNames.get(i);
-				ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn);
+				ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, false);
 				contactInfo.setName(name);
 				GroupParticipant groupParticipant = new GroupParticipant(contactInfo);
 				participantList.put(msisdn, groupParticipant);
