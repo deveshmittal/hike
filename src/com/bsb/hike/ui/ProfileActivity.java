@@ -211,7 +211,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 		ViewGroup addParticipantsLayout = (ViewGroup) findViewById(R.id.add_participants_layout);
 		TextView mTitleView = (TextView) findViewById(R.id.title);
-		TextView groupOwnerTextView = (TextView) findViewById(R.id.group_owner);
+		View groupOwnerItem = (View) findViewById(R.id.group_owner);
 		mNameEdit = (EditText) findViewById(R.id.name_input);
 		mNameDisplay = (TextView) findViewById(R.id.name_display);
 		mIconView = (ImageView) findViewById(R.id.profile);
@@ -244,6 +244,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			ContactInfo contactInfo = participant.getValue().getContactInfo();
 			if(participant.getKey().equals(groupOwner))
 			{
+				TextView groupOwnerTextView = (TextView) groupOwnerItem.findViewById(R.id.participant_name);
 				groupOwnerTextView.setText(participant.getValue().getContactInfo().getFirstName());
 				continue;
 			}
@@ -256,10 +257,15 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			{
 				continue;
 			}
-			TextView participantNameItem = (TextView) ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
-			participantNameItem.setText(Utils.ellipsizeName(contactInfo.getName()));
-			participantNameItem.setTextColor(getResources().getColor(contactInfo.isOnhike() ? R.color.contact_blue : R.color.contact_green));
-			participantNameItem.setBackgroundResource(contactInfo.isOnhike() ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
+			View participantNameItem = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.participant_name_item, null);
+
+			TextView participantName = (TextView) participantNameItem.findViewById(R.id.participant_name);
+			participantName.setText(Utils.ellipsizeName(contactInfo.getName()));
+			participantName.setTextColor(getResources().getColor(contactInfo.isOnhike() ? R.color.contact_blue : R.color.contact_green));
+			participantName.setBackgroundResource(contactInfo.isOnhike() ? R.drawable.hike_contact_bg : R.drawable.sms_contact_bg);
+
+			ImageView dndImg = (ImageView) participantNameItem.findViewById(R.id.dnd_img);
+			dndImg.setVisibility(!contactInfo.isOnhike() && participant.getValue().onDnd() ? View.VISIBLE : View.INVISIBLE);
 
 			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 			lp.setMargins(left, top, right, bottom);
