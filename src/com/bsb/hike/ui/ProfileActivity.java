@@ -871,7 +871,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 							String msisdn = participants.optJSONObject(i).optString(HikeConstants.MSISDN);
 
 							HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-							ContactInfo participant = hUDB.getContactInfoFromMSISDN(msisdn);
+							ContactInfo participant = hUDB.getContactInfoFromMSISDN(msisdn, false);
 
 							if (TextUtils.isEmpty(participant.getName())) 
 							{

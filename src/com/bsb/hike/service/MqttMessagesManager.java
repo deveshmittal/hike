@@ -158,7 +158,7 @@ public class MqttMessagesManager {
 		else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE.equals(type)) //Group chat leave
 		{
 			String groupId = jsonObj.optString(HikeConstants.TO);
-			String msisdn = jsonObj.optString(HikeConstants.FROM);
+			String msisdn = jsonObj.optString(HikeConstants.DATA);
 			if(this.convDb.setParticipantLeft(groupId, msisdn) > 0)
 			{
 				saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));

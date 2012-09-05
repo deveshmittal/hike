@@ -353,7 +353,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public Conversation addConversation(String msisdn, boolean onhike, String groupName, String groupOwner)
 	{
 		HikeUserDatabase huDb = HikeUserDatabase.getInstance();
-		ContactInfo contactInfo = Utils.isGroupConversation(msisdn) ?  new ContactInfo(msisdn, msisdn, groupName, msisdn) : huDb.getContactInfoFromMSISDN(msisdn);
+		ContactInfo contactInfo = Utils.isGroupConversation(msisdn) ?  new ContactInfo(msisdn, msisdn, groupName, msisdn) : huDb.getContactInfoFromMSISDN(msisdn, false);
 		InsertHelper ih = null;
 		try 
 		{
@@ -506,7 +506,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			else
 			{
 				huDb = HikeUserDatabase.getInstance();
-				ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
+				ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn, false);
 
 				onhike |= contactInfo.isOnhike();
 				conv = new Conversation(msisdn, convid, contactid, contactInfo.getName(), onhike);
@@ -562,7 +562,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				else
 				{
-					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn);
+					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn, false);
 					conv = new Conversation(msisdn, convid, contactid, contactInfo.getName(),
 							(contactInfo != null) ? contactInfo.isOnhike() : false);
 				}
@@ -860,7 +860,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		while(c.moveToNext())
 		{
 			String msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
-			ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn);
+			ContactInfo contactInfo = huDB.getContactInfoFromMSISDN(msisdn, false);
 			if(TextUtils.isEmpty(contactInfo.getName()))
 			{
 				contactInfo.setName(c.getString(c.getColumnIndex(DBConstants.NAME)));
