@@ -971,7 +971,7 @@ public class Utils
     public static byte[] bitmapToBytes(Bitmap bitmap, Bitmap.CompressFormat format)
     {
     	ByteArrayOutputStream bao = new ByteArrayOutputStream();
-    	bitmap.compress(format, 95, bao);
+    	bitmap.compress(format, 50, bao);
 		return bao.toByteArray();
     }
 
