@@ -435,6 +435,7 @@ public class MessagesAdapter extends BaseAdapter
 
 			boolean showThumbnail = (
 					(convMessage.isSent()) || 
+					(conversation instanceof GroupConversation) ||
 					(!TextUtils.isEmpty(conversation.getContactName())) || 
 					(hikeFile.wasFileDownloaded() && 
 							!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))) && 
