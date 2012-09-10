@@ -241,7 +241,9 @@ public class Utils
 	{
 		Intent intent = new Intent();
 		intent.putExtra(HikeConstants.Extras.ID, contactInfo.getId());
-		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+
+		// If the contact info was made using a group conversation, then the Group ID is in the contact ID
+		intent.putExtra(HikeConstants.Extras.MSISDN, Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn());
 		return intent;
 	}
 

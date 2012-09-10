@@ -289,10 +289,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
-
+		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByOnHike();
+		if(getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false))
+		{
+			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());
+		}
 		mInputNumberView.setText("");
 		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
-				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, titleBtn, existingGroupId, getIntent());
+				this, contactList, mInputNumberView, isGroupChat, titleBtn, existingGroupId, getIntent());
 		mContactSearchView.setAdapter(adapter);
 		mContactSearchView.setOnItemClickListener(adapter);
 		mInputNumberView.addTextChangedListener(adapter);
@@ -513,6 +517,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(this, ChatThread.class);
 			String msg;
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 			if(message.isFileTransferMessage())
 			{
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);

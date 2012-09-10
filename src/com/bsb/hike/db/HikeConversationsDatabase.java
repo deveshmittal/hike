@@ -1040,4 +1040,49 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 		}
 	}
+
+	/**
+	 * Called when forwarding a message so that the groups can also be displayed in the contact list.
+	 * @return
+	 */
+	public List<ContactInfo> getGroupNameAndParticipantsAsContacts()
+	{
+		Cursor groupCursor = null;
+		try 
+		{
+			List<ContactInfo> groups = new ArrayList<ContactInfo>();
+			groupCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, 
+					new String[] 
+							{
+								DBConstants.GROUP_ID,
+								DBConstants.GROUP_NAME
+							},  
+							DBConstants.GROUP_ALIVE + "=1",
+							null, null, null, null);
+			int groupNameIdx = groupCursor.getColumnIndex(DBConstants.GROUP_NAME);
+			int groupIdIdx = groupCursor.getColumnIndex(DBConstants.GROUP_ID);
+			while(groupCursor.moveToNext())
+			{
+				String groupId = groupCursor.getString(groupIdIdx);
+				String groupName = groupCursor.getString(groupNameIdx);
+
+				Map<String, GroupParticipant> groupParticipantMap = getGroupParticipants(groupId, true, false);
+				groupName = TextUtils.isEmpty(groupName) ? Utils.defaultGroupName(groupParticipantMap) : groupName;
+				int numMembers = groupParticipantMap.size();
+
+				// Here we make this string the msisdn so that it can be displayed in the list view when forwarding the message
+				String numberMembers = numMembers + (numMembers > 0 ? " Members" : " Member");
+
+				groups.add(new ContactInfo(groupId, numberMembers, groupName, groupId, true));
+			}
+
+			return groups;
+		} 
+		finally
+		{
+			if (groupCursor != null) {
+				groupCursor.close();
+			}
+		}
+	}
 }
