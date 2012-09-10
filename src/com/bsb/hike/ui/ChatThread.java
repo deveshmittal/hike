@@ -271,14 +271,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* msg is any text we want to show initially */
 	private void createAutoCompleteView()
 	{
-		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false); 
+		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false);
+		boolean isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
 		// Getting the group id. This will be a valid value if the intent was passed to add group participants.
 		String existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		mComposeView.removeTextChangedListener(this);
 
-		mLabelView.setText(!TextUtils.isEmpty(existingGroupId) ? R.string.add_group : (isGroupChat ? R.string.new_group : R.string.new_message));
-		
+		if(isForwardingMessage)
+		{
+			mLabelView.setText(R.string.forward);
+		}
+		else if(!TextUtils.isEmpty(existingGroupId))
+		{
+			mLabelView.setText(R.string.add_group);
+		}
+		else if(isGroupChat)
+		{
+			mLabelView.setText(R.string.new_group);
+		}
+		else
+		{
+			mLabelView.setText(R.string.new_message);
+		}
+
 		mBottomView.setVisibility(View.GONE);
 
 		if(isGroupChat)
@@ -290,7 +306,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByOnHike();
-		if(getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false))
+		if(isForwardingMessage)
 		{
 			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());
 		}
