@@ -167,6 +167,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		{
 			return;
 		}
+		Utils.setDensityMultiplier(MessagesList.this);
 
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = accountPrefs.getString(HikeMessengerApp.TOKEN_SETTING, null);
@@ -186,7 +187,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 		setContentView(R.layout.main);
 
-		Utils.setDensityMultiplier(MessagesList.this);
 
 		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		wasAlertCancelled = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);

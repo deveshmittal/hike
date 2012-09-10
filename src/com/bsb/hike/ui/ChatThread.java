@@ -357,6 +357,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			return;
 		}
+		Utils.setDensityMultiplier(ChatThread.this);
 
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
@@ -370,7 +371,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		Utils.setDensityMultiplier(ChatThread.this);
 
 		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		isOverlayShowing  = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
