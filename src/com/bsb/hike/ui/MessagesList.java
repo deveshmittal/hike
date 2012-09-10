@@ -34,11 +34,13 @@ import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -64,8 +66,9 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.DrawerLayout;
 
-public class MessagesList extends Activity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
+public class MessagesList extends Activity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable, DrawerLayout.Listener
 {
 	private static final int INVITE_PICKER_RESULT = 1001;
 
@@ -100,6 +103,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	private boolean wasAlertCancelled = false;
 
 	private boolean deviceDetailsSent = false;
+
+	private DrawerLayout parentLayout;
+
+	private TextView creditsNum;
 
 	@Override
 	protected void onPause()
@@ -211,6 +218,15 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		/*
 		 * mSearchIconView = findViewById(R.id.search); mSearchIconView.setOnClickListener(this);
 		 */
+		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+		parentLayout.setListener(this);
+		setUpDrawerView();
+		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
+		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
+		if(savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE))
+		{
+			parentLayout.toggleSidebar(true);
+		}
 
 		mEditMessageIconView = findViewById(R.id.edit_message);
 		mEditMessageIconView.setOnClickListener(this);
@@ -276,8 +292,114 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPDATE_AVAILABLE, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
+
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
+	}
+
+	private void setUpDrawerView()
+	{
+		LayoutInflater layoutInflater = LayoutInflater.from(MessagesList.this);
+
+		ImageView profileImg = (ImageView) findViewById(R.id.profile_image);
+		TextView profileName = (TextView) findViewById(R.id.name);
+
+		ContactInfo me = Utils.getUserContactInfo(accountPrefs);
+		profileImg.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(me.getMsisdn()));
+		profileName.setText(me.getName());
+
+		int[] parentIds = {R.id.top_half_items_container, R.id.bottom_half_items_container};
+		for(int i=0; i<parentIds.length; i++)
+		{
+			String[] itemTexts = i==0 ? getResources().getStringArray(R.array.top_half_drawer_text) : getResources().getStringArray(R.array.bottom_half_drawer_text);
+			int[] itemIcons = i==0 ? 
+					new int[] {R.drawable.ic_drawer_home, R.drawable.ic_drawer_group_chat, R.drawable.ic_drawer_invite} : 
+						new int[] {R.drawable.ic_drawer_free_sms, R.drawable.ic_drawer_rewards, R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help};
+
+			ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
+
+			for(int j=0; j<itemTexts.length; j++)
+			{
+				View itemView = layoutInflater.inflate(R.layout.drawer_item, null);
+				TextView itemTxt = (TextView) itemView.findViewById(R.id.item_name);
+				ImageView itemImg = (ImageView) itemView.findViewById(R.id.item_icon);
+
+				itemTxt.setText(itemTexts[j]);
+				itemImg.setImageResource(itemIcons[j]);
+
+				if(itemTexts[j].equals(getString(R.string.free_sms_txt)))
+				{
+					creditsNum = (TextView) itemView.findViewById(R.id.credit_num);
+					creditsNum.setVisibility(View.VISIBLE);
+					creditsNum.setText(Integer.toString(this.accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)));
+				}
+				if(j == 0)
+				{
+					itemView.setBackgroundResource(R.drawable.drawer_top_item_selector);
+				}
+				else if(j == itemTexts.length - 1)
+				{
+					itemView.findViewById(R.id.divider).setVisibility(View.GONE);
+					itemView.setBackgroundResource(R.drawable.drawer_bottom_item_selector);
+				}
+				else
+				{
+					itemView.setBackgroundResource(R.drawable.drawer_center_item_selector);
+				}
+				itemView.setFocusable(true);
+				int id = (100 * (i+1)) + (j);
+				itemView.setId(id);
+				parentView.addView(itemView);
+			}
+			parentView.setFocusable(true);
+		}
+	}
+
+	public void onDrawerItemClicked(View v)
+	{
+		Log.d(getClass().getSimpleName(), "Drawer item clicked: " + v.getId());
+		Intent intent = null;
+		switch (v.getId()) 
+		{
+		case 100:
+			parentLayout.closeSidebar();
+			break;
+		case 101:
+			intent = new Intent(this, ChatThread.class);
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			break;
+		case 102:
+			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_MENU);
+			Utils.startShareIntent(this, Utils.getInviteMessage(MessagesList.this));
+			break;
+		case 200:
+			Utils.logEvent(this, HikeConstants.LogEvent.CREDITS_SCREEN);
+			intent = new Intent(this, CreditsActivity.class);
+			break;
+		case 201:
+
+			break;
+		case 202:
+			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.PROFILE_MENU);
+			intent = new Intent(this, ProfileActivity.class);
+			break;
+		case 203:
+			intent = new Intent(this, WebViewActivity.class);
+			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
+			intent.putExtra(HikeConstants.Extras.TITLE, "Help");
+			break;
+		}
+		if (intent != null) 
+		{
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
+		}
+	}
+
+	public void onToggleSideBarClicked(View v)
+	{
+		parentLayout.toggleSidebar(false);
 	}
 
 	private void sendDeviceDetails() 
@@ -359,15 +481,23 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mToolTip != null && mToolTip.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT, deviceDetailsSent);
 		outState.putBoolean(HikeConstants.Extras.ALERT_CANCELLED, wasAlertCancelled);
+		outState.putBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE, this.parentLayout.isOpening());
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onBackPressed()
 	{
-		Utils.incrementNumTimesScreenOpen(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
-		// super.onBackPressed() would crash the application sometimes. Android Bug.
-		finish();
+		if(parentLayout.isOpening())
+		{
+			parentLayout.closeSidebar();
+		}
+		else
+		{
+			Utils.incrementNumTimesScreenOpen(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+			// super.onBackPressed() would crash the application sometimes. Android Bug.
+			finish();
+		}
 	}
 
 	private Intent createIntentForConversation(Conversation conversation)
@@ -465,13 +595,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		Intent intent;
 		switch (item.getItemId())
 		{
-		case R.id.invite:
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU);
-			Utils.startShareIntent(MessagesList.this, Utils.getInviteMessage(MessagesList.this));
-			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {
 				Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
@@ -480,16 +605,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 						.setPositiveButton("Delete", this)
 						.setNegativeButton(R.string.cancel, this).show();
 			}
-			return true;
-		case R.id.profile:
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.PROFILE_MENU);
-			intent = new Intent(this, ProfileActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.group_chat:
-			intent = new Intent(this, ChatThread.class);
-			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-			startActivity(intent);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -514,6 +629,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPDATE_AVAILABLE, this);
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 	}
 
 	@Override
@@ -722,6 +838,18 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 				conversation.setContactName(contactInfo.getName());
 				runOnUiThread(this);
 			}
+		}
+		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		{
+			final int credits = (Integer) object;
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					creditsNum.setText(Integer.toString(credits));
+				}
+			});
 		}
 	}
 
@@ -972,5 +1100,24 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		}
 		mToolTip.setVisibility(View.VISIBLE);
 
+	}
+
+	@Override
+	public void onSidebarOpened() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onSidebarClosed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean onContentTouchedWhenOpening() 
+	{
+		parentLayout.closeSidebar();
+		return true;
 	}
 }

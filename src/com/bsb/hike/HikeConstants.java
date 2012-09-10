@@ -187,6 +187,7 @@ public class HikeConstants
 		public static final String FILE_NAME = "fileName";
 		public static final String RECORDER_DIALOG_SHOWING = "recorderDialogShowing";
 		public static final String RECORDER_START_TIME = "recorderStartTime";
+		public static final String IS_DRAWER_VISIBLE = "isDrawerVisible";
 		public static final String FORWARD_MESSAGE = "forwardMessage";
 	}
 

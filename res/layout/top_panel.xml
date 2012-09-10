@@ -5,11 +5,30 @@
     android:layout_height="48dp"
     android:background="@drawable/headerbar" >
 
+    <ImageButton 
+        android:id="@+id/topbar_menu"
+        android:layout_width="48dp"
+        android:layout_marginTop="-2dp"
+        android:onClick="onToggleSideBarClicked"
+        android:layout_height="@dimen/top_bar_btn_height"
+        android:src="@drawable/ic_topbar_menu"
+        android:background="@drawable/top_bar_btn_selector"
+        android:visibility="gone" />
+    
+    <View
+        android:id="@+id/menu_bar"
+        android:layout_toRightOf="@+id/topbar_menu"
+        android:layout_width="1dp"
+        android:layout_height="@dimen/top_bar_btn_height"
+        android:layout_marginTop="-1dp"
+        android:background="@drawable/button_separator"
+        android:visibility="gone" />
+    
     <ImageView
         android:id="@+id/title_hikeicon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
         android:layout_marginLeft="17dp"

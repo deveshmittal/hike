@@ -167,10 +167,24 @@
         <item>(brains2)</item> <!-- 149 brains -->
         <item>(sleeping2)</item> <!-- 150 sleeping -->
     </string-array>
+    
     <string-array name="file_transfer_items">
         <item>Image</item>
         <item>Video</item>
         <item>Audio</item>
         <item>Voice message</item>
+    </string-array>
+    
+    <string-array name="top_half_drawer_text">
+        <item>@string/home</item>
+        <item>@string/group_chat</item>
+        <item>@string/invite</item>
+    </string-array>
+    
+    <string-array name="bottom_half_drawer_text">
+        <item>@string/free_sms_txt</item>
+        <item>@string/rewards</item>
+        <item>@string/profile_title</item>
+        <item>@string/help</item>
     </string-array>
 </resources>

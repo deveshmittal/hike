@@ -43,4 +43,5 @@
     <color name="dialog_btn_disabled_txt">#b0b0ae</color>
     <color name="recording_txt">#f82830</color>
     <color name="record_txt">#c1c1bf</color>
+    <color name="drawer_item_pressed">#66605a53</color>
 </resources>
