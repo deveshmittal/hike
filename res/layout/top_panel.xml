@@ -46,7 +46,7 @@
         <View
             android:id="@+id/button_bar_2"
             android:layout_width="1dp"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -54,7 +54,7 @@
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/title_icon"
             android:layout_width="60dp"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-1dp"
             android:background="@drawable/top_bar_btn_selector"
             android:gravity="center"
@@ -68,7 +68,7 @@
         <View
             android:id="@+id/button_bar"
             android:layout_width="1dp"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -76,7 +76,7 @@
         <ImageButton
             android:id="@+id/title_image_btn"
             android:layout_width="wrap_content"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-2dp"
             android:background="@drawable/top_bar_btn_selector"
             android:onClick="onTitleIconClick"
@@ -86,7 +86,7 @@
         <View
             android:id="@+id/button_bar3"
             android:layout_width="1dp"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -94,7 +94,7 @@
         <ImageButton
             android:id="@+id/title_image_btn2"
             android:layout_width="wrap_content"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-2dp"
             android:background="@drawable/top_bar_btn_selector"
             android:onClick="onTitleIconClick"
