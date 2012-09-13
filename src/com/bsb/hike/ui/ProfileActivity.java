@@ -94,7 +94,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private TextView mNameDisplay;
 	private ViewGroup participantNameContainer;
 	private ProfileItem[] items;
-	private ViewGroup credits;
 	private int lastSavedGender;
 
 	private static enum ProfileType
@@ -144,10 +143,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
 			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
-		}
-		else if(profileType == ProfileType.USER_PROFILE)
-		{
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		}
 		mActivityState = null;
 	}
@@ -201,7 +196,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			else
 			{
 				this.profileType = ProfileType.USER_PROFILE;
-				HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 				setupProfileScreen();
 			}
 		}
@@ -348,31 +342,25 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		TextView mTitleView = (TextView) findViewById(R.id.title);
 		TextView mNameView = (TextView) findViewById(R.id.name_current);
 
-		credits = (ViewGroup) findViewById(R.id.free_sms);
 		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info); 
 		ViewGroup notifications = (ViewGroup) findViewById(R.id.notifications);
 		ViewGroup privacy = (ViewGroup) findViewById(R.id.privacy);
-		ViewGroup help = (ViewGroup) findViewById(R.id.help);
 
-		myInfo.setBackgroundResource(R.drawable.profile_top_item_selector);
-		credits.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		myInfo.setBackgroundResource(R.drawable.profile_single_item_selector);
 		notifications.setBackgroundResource(R.drawable.profile_top_item_selector);
-		privacy.setBackgroundResource(R.drawable.profile_center_item_selector);
-		help.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		privacy.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 
 		mIconView = (ImageView) findViewById(R.id.profile);
 
 		ViewGroup[] itemLayouts = new ViewGroup[]
 				{
-				credits, notifications, privacy, help
+				notifications, privacy
 				};
 
 		items = new ProfileItem[] 
 				{
-				new ProfileItem.ProfileSettingsItem("Free hike SMS left", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
 				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, R.xml.notification_preferences),
-				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
-				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, HikeConstants.HELP_URL)
+				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences)
 				};
 
 		for(int i = 0; i < items.length; i++)
@@ -389,10 +377,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		mIconView.setImageDrawable(drawable);
 
 		myInfo.setFocusable(true);
-		credits.setFocusable(true);
 		notifications.setFocusable(true);
 		privacy.setFocusable(true);
-		help.setFocusable(true);
 	}
 
 	private void fetchPersistentData()
@@ -925,17 +911,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				});
 			}
-		}
-		else if(HikePubSub.SMS_CREDIT_CHANGED.equals(type))
-		{
-			runOnUiThread(new Runnable() 
-			{
-				@Override
-				public void run() 
-				{
-					items[0].bindView(ProfileActivity.this, credits);
-				}
-			});
 		}
 	}
 }

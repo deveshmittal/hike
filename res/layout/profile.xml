@@ -114,10 +114,6 @@
                         android:src="@drawable/ic_arrow" />
                 </RelativeLayout>
 
-                <include
-                    android:id="@+id/free_sms"
-                    android:layout_marginBottom="10dp"
-                    layout="@layout/profile_item" />
             </LinearLayout>
 
             <com.bsb.hike.view.CustomFontTextView
@@ -149,28 +145,8 @@
                     android:layout_marginBottom="10dp"
                     layout="@layout/profile_item" />
 
-                <include
-                    android:id="@+id/help"
-                    android:layout_marginBottom="10dp"
-                    layout="@layout/profile_item" />
             </LinearLayout>
 
-            <RelativeLayout
-                android:id="@+id/with_love_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="37dp"
-                android:layout_marginTop="37dp" >
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/made_with_love"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:background="@drawable/with_love"
-                    android:textColor="@color/white"
-                    android:textSize="16dp" />
-            </RelativeLayout>
         </LinearLayout>
     </ScrollView>
 
