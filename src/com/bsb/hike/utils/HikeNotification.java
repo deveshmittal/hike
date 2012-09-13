@@ -75,7 +75,7 @@ public class HikeNotification
 		int icon = R.drawable.ic_contact_logo;
 
 		// TODO this doesn't turn the text bold :(
-		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>:%2$s", key, message));
+		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s", key, message));
 		Notification notification = new Notification(icon, text, timestamp * 1000);
 
 		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
