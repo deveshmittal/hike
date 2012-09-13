@@ -182,8 +182,8 @@
     </string-array>
     
     <string-array name="bottom_half_drawer_text">
-        <item>@string/free_sms_txt</item>
         <item>@string/rewards</item>
+        <item>@string/free_sms_txt</item>
         <item>@string/profile_title</item>
         <item>@string/help</item>
     </string-array>

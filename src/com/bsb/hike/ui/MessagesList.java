@@ -318,7 +318,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			String[] itemTexts = i==0 ? getResources().getStringArray(R.array.top_half_drawer_text) : getResources().getStringArray(R.array.bottom_half_drawer_text);
 			int[] itemIcons = i==0 ? 
 					new int[] {R.drawable.ic_drawer_home, R.drawable.ic_drawer_group_chat, R.drawable.ic_drawer_invite} : 
-						new int[] {R.drawable.ic_drawer_free_sms, R.drawable.ic_drawer_rewards, R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help};
+						new int[] {R.drawable.ic_drawer_rewards, R.drawable.ic_drawer_free_sms, R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help};
 
 			ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
 
@@ -377,11 +377,11 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			Utils.startShareIntent(this, Utils.getInviteMessage(MessagesList.this));
 			break;
 		case 200:
-			Utils.logEvent(this, HikeConstants.LogEvent.CREDITS_SCREEN);
-			intent = new Intent(this, CreditsActivity.class);
+			intent = new Intent(this, Rewards.class);
 			break;
 		case 201:
-			intent = new Intent(this, Rewards.class);
+			Utils.logEvent(this, HikeConstants.LogEvent.CREDITS_SCREEN);
+			intent = new Intent(this, CreditsActivity.class);
 			break;
 		case 202:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.PROFILE_MENU);
