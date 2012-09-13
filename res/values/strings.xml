@@ -139,4 +139,10 @@
 	<string name="free_sms_txt">Free SMS</string>
 	<string name="rewards">Rewards</string>
 	<string name="help">Help</string>
+	<string name="rewards_info">Invite friends, earn rewards.\nFor every friend who joins you get:</string>
+	<string name="credit_to_balance">Rs.10 credited\nto your balance</string>
+	<string name="free_sms_month">50 free SMS\nevery month</string>
+	<string name="reward">Reward</string>
+	<string name="claimed_so_far">Claimed so far:</string>
+	<string name="rewards_disclaimer">You can claim a reward once it’s more than Rs.50.\nMore about Rewards in our FAQs.</string>
 </resources>

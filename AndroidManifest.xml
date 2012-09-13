@@ -131,6 +131,10 @@
             android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
         </activity>
+        <activity android:name=".ui.Rewards"
+            android:launchMode="singleTop"
+            android:theme="@style/NoTitleBar" >
+        </activity>
         <receiver android:name=".service.BootService" >
             <intent-filter >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

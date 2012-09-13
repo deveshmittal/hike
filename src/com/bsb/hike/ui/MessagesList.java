@@ -378,7 +378,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			intent = new Intent(this, CreditsActivity.class);
 			break;
 		case 201:
-
+			intent = new Intent(this, Rewards.class);
 			break;
 		case 202:
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.PROFILE_MENU);
