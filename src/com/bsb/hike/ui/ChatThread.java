@@ -228,6 +228,25 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private RecorderState recorderState;
 
+	private String[] pubSubListeners = {
+			HikePubSub.MESSAGE_RECEIVED, 
+			HikePubSub.TYPING_CONVERSATION, 
+			HikePubSub.END_TYPING_CONVERSATION, 
+			HikePubSub.SMS_CREDIT_CHANGED, 
+			HikePubSub.MESSAGE_DELIVERED_READ, 
+			HikePubSub.MESSAGE_DELIVERED, 
+			HikePubSub.SERVER_RECEIVED_MSG, 
+			HikePubSub.MESSAGE_FAILED, 
+			HikePubSub.ICON_CHANGED, 
+			HikePubSub.USER_JOINED, 
+			HikePubSub.USER_LEFT, 
+			HikePubSub.GROUP_NAME_CHANGED, 
+			HikePubSub.GROUP_END, 
+			HikePubSub.CONTACT_ADDED, 
+			HikePubSub.UPLOAD_FINISHED, 
+			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED
+	};
+
 	@Override
 	protected void onPause()
 	{
@@ -330,22 +349,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.END_TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_JOINED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_LEFT, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPLOAD_FINISHED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
+		}
 
 		if (mComposeViewWatcher != null)
 		{
@@ -445,25 +452,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		/* register listeners */
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_JOINED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_LEFT, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPLOAD_FINISHED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
+		}
 	}
 
 	@Override
@@ -1060,7 +1052,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		/* get the number of credits and also listen for changes */
 		mCredits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
-		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -1275,7 +1266,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mUiThreadHandler.postDelayed(mClearTypingCallback, 20 * 1000);
 			}
 		}
-		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		// We only consider this case if there is a valid conversation in the Chat Thread
+		else if (mConversation != null && HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{	
 			mCredits = ((Integer) object).intValue();
 			runOnUiThread(new Runnable()

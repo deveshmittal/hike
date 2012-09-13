@@ -95,6 +95,13 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private ViewGroup participantNameContainer;
 	private ProfileItem[] items;
 	private int lastSavedGender;
+	private String[] groupInfoPubSubListeners = {
+			HikePubSub.ICON_CHANGED, 
+			HikePubSub.GROUP_NAME_CHANGED, 
+			HikePubSub.GROUP_END, 
+			HikePubSub.PARTICIPANT_JOINED_GROUP, 
+			HikePubSub.PARTICIPANT_LEFT_GROUP
+	};
 
 	private static enum ProfileType
 	{
@@ -138,11 +145,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		}
 		if(profileType == ProfileType.GROUP_INFO)
 		{
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
+			for(String pubSubListener : groupInfoPubSubListeners)
+			{
+				HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
+			}
 		}
 		mActivityState = null;
 	}
@@ -176,11 +182,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		if(getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT))
 		{
 			this.profileType = ProfileType.GROUP_INFO;
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
+			for(String pubSubListener : groupInfoPubSubListeners)
+			{
+				HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
+			}
 			setupGroupProfileScreen();
 		}
 		else

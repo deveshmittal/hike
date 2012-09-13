@@ -108,6 +108,22 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	private TextView creditsNum;
 
+	private String[] pubSubListeners = {
+			HikePubSub.MESSAGE_RECEIVED, 
+			HikePubSub.SERVER_RECEIVED_MSG, 
+			HikePubSub.MESSAGE_DELIVERED_READ, 
+			HikePubSub.MESSAGE_DELIVERED, 
+			HikePubSub.MESSAGE_FAILED, 
+			HikePubSub.NEW_CONVERSATION, 
+			HikePubSub.MESSAGE_SENT, 
+			HikePubSub.MSG_READ, 
+			HikePubSub.ICON_CHANGED, 
+			HikePubSub.GROUP_LEFT, 
+			HikePubSub.GROUP_NAME_CHANGED, 
+			HikePubSub.UPDATE_AVAILABLE, 
+			HikePubSub.CONTACT_ADDED, 
+			HikePubSub.SMS_CREDIT_CHANGED
+	};
 	@Override
 	protected void onPause()
 	{
@@ -277,23 +293,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			leaveGroup(mConversationsByMSISDN.get(getIntent().getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
 		}
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MSG_READ, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_LEFT, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPDATE_AVAILABLE, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
+		}
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 	}
@@ -616,20 +619,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	{
 		super.onDestroy();
 		Log.d(getClass().getSimpleName(), "onDestroy " + this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MSG_READ, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_SENT, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_LEFT, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPDATE_AVAILABLE, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
+		}
 	}
 
 	@Override
