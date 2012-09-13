@@ -490,7 +490,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			
 			/* slide down if we're still selecting a user, otherwise slide back */
-			if (mConversation == null) {
+			if (mConversation == null && !getIntent().hasExtra(HikeConstants.Extras.GROUP_CHAT)) {
 				overridePendingTransition(R.anim.no_animation,
 						R.anim.slide_down_noalpha);
 			} else {
