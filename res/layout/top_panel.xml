@@ -53,6 +53,21 @@
         android:singleLine="true"
         android:textAppearance="@style/ChatLabelStyle"
         android:textSize="20dp" />
+    
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/title_centered"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:shadowColor="#002147"
+        android:shadowDy="-0.7"
+        android:shadowRadius="0.4"
+        android:singleLine="true"
+        android:textAppearance="@style/ChatLabelStyle"
+        android:textSize="20dp" />
 
     <LinearLayout
         android:id="@+id/top_button_container"

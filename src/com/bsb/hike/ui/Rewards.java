@@ -1,8 +1,6 @@
 package com.bsb.hike.ui;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -13,28 +11,25 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 
-public class Rewards extends Activity 
+public class Rewards extends DrawerBaseActivity
 {
 	private TextView currentAmount;
 	private TextView claimedAmount;
 
 	private ImageButton claimBtn;
 
-	private SharedPreferences preferences;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.rewards);
+		afterSetContentView(savedInstanceState);
 
-		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-
-		TextView mTitleView = (TextView) findViewById(R.id.title);
+		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 		mTitleView.setText(R.string.rewards);
 
 		currentAmount = (TextView) findViewById(R.id.current_amount);

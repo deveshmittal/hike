@@ -19,9 +19,13 @@
 package com.bsb.hike.view;
 
 // update the package name to match your app
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -31,13 +35,20 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.CreditsActivity;
+import com.bsb.hike.ui.MessagesList;
+import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.Rewards;
+import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.utils.Utils;
 
-public class DrawerLayout extends ViewGroup {
+public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 	public final static int DURATION = 250;
 
@@ -46,6 +57,7 @@ public class DrawerLayout extends ViewGroup {
 	private View mContent;
 	private int mSidebarWidth;
 	private int mSidebarOffsetForAnimation;
+	private int topBarButtonWidth;
 
 	private Animation contentAnimationIn;
 	private Animation sidebarTranslateAnimationIn;
@@ -61,6 +73,12 @@ public class DrawerLayout extends ViewGroup {
 	private TextView creditsNum;
 
 	private SharedPreferences accountPrefs;
+
+	private Intent intent;
+
+	private Activity activity;
+
+	private Handler handler;
 
 	public enum DrawerItems
 	{
@@ -84,8 +102,10 @@ public class DrawerLayout extends ViewGroup {
 	public DrawerLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		accountPrefs = getContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		handler = new Handler();
 		mSidebarWidth = (int) (272 * Utils.densityMultiplier);
 		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
+		topBarButtonWidth = (int) (48 * Utils.densityMultiplier);
 
 		/* Close Animations */
 		contentAnimationOut = new TranslateAnimation(0, -mSidebarWidth, 0, 0);
@@ -155,11 +175,74 @@ public class DrawerLayout extends ViewGroup {
 				itemView.setFocusable(true);
 				int id = DrawerItems.values()[itemNumber++].ordinal();
 				itemView.setId(id);
+				itemView.setOnClickListener(this);
 				parentView.addView(itemView);
 			}
 			parentView.setFocusable(true);
 		}
 	}
+
+	public void onClick(View v)
+	{
+		Log.d(getClass().getSimpleName(), "Drawer item clicked: " + v.getId());
+		intent = null;
+		switch (DrawerItems.values()[v.getId()]) 
+		{
+		case HOME:
+			intent = activity instanceof MessagesList ? null : new Intent(getContext(), MessagesList.class);
+			break;
+		case GROUP_CHAT:
+			intent = activity instanceof ChatThread ? null : new Intent(getContext(), ChatThread.class);
+			if(intent != null)
+			{
+				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			}
+			break;
+		case TELL_A_FRIEND:
+			Utils.startShareIntent(getContext(), Utils.getInviteMessage(getContext()));
+			break;
+		case REWARDS:
+			intent = activity instanceof Rewards ? null : new Intent(getContext(), Rewards.class);
+			break;
+		case FREE_SMS:
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.CREDITS_SCREEN);
+			intent = activity instanceof CreditsActivity ? null : new Intent(getContext(), CreditsActivity.class);
+			break;
+		case PROFILE:
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.PROFILE_MENU);
+			intent = activity instanceof ProfileActivity ? null : new Intent(getContext(), ProfileActivity.class);
+			break;
+		case HELP:
+			intent = activity instanceof Tutorial ? null : new Intent(getContext(), Tutorial.class);
+			if(intent != null)
+			{
+				intent.putExtra(HikeConstants.Extras.HELP_PAGE, true);
+			}
+			break;
+		}
+		if (intent != null) 
+		{
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			activity.startActivity(intent);
+			activity.overridePendingTransition(R.anim.slide_in_right_noalpha,
+					R.anim.slide_out_left_noalpha);
+			handler.postDelayed(resetSidebar, 400);
+		}
+		else
+		{
+			closeSidebar(false);
+		}
+	}
+
+	Runnable resetSidebar = new Runnable() 
+	{
+		@Override
+		public void run()
+		{
+			mContent.clearAnimation();
+			closeSidebar(true);
+		}
+	};
 
 	public void updateCredits(int credits)
 	{
@@ -236,7 +319,7 @@ public class DrawerLayout extends ViewGroup {
 		int x = (int) ev.getX();
 		int y = (int) ev.getY();
 		if (mContent.getLeft() < x && mContent.getRight() > x
-				&& mContent.getTop() < y && mContent.getBottom() > y) {
+				&& mContent.getTop() + topBarButtonWidth < y && mContent.getBottom() > y) {
 			if (action == MotionEvent.ACTION_DOWN) {
 				mPressed = true;
 			}
@@ -255,6 +338,7 @@ public class DrawerLayout extends ViewGroup {
 
 	public void setListener(Listener l) {
 		mListener = l;
+		activity = (Activity) l;
 	}
 
 	/* to see if the Sidebar is visible */
@@ -290,9 +374,9 @@ public class DrawerLayout extends ViewGroup {
 		}
 	}
 
-	public void closeSidebar() {
+	public void closeSidebar(boolean noAnimation) {
 		if (mOpened) {
-			toggleSidebar(false);
+			toggleSidebar(noAnimation);
 		}
 	}
 

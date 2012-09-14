@@ -11,7 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -57,10 +56,11 @@ import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
-public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
+public class ProfileActivity extends DrawerBaseActivity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
 {
 	/* dialog IDs */
 	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
@@ -201,7 +201,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			else
 			{
 				this.profileType = ProfileType.USER_PROFILE;
-				setupProfileScreen();
+				setupProfileScreen(savedInstanceState);
 			}
 		}
 	}
@@ -340,11 +340,12 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		Utils.hideCursor(mNameEdit, getResources());
 	}
 
-	private void setupProfileScreen()
+	private void setupProfileScreen(Bundle savedInstanceState)
 	{
 		setContentView(R.layout.profile);
+		afterSetContentView(savedInstanceState);
 
-		TextView mTitleView = (TextView) findViewById(R.id.title);
+		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 		TextView mNameView = (TextView) findViewById(R.id.name_current);
 
 		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info); 
@@ -406,7 +407,14 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		}
 		else
 		{
-			super.onBackPressed();
+			if(this.profileType == ProfileType.USER_PROFILE)
+			{
+				super.onBackPressed();
+			}
+			else
+			{
+				finish();
+			}
 		}
 	}
 
