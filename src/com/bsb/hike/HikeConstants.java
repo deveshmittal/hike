@@ -125,6 +125,8 @@ public class HikeConstants
 	public static final int DND_STATUS_CHANGE = 1;
 	public static final int NEW_PARTICIPANT = 2;
 
+	public static final String MAIL = "support@hike.in";
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -189,6 +191,7 @@ public class HikeConstants
 		public static final String RECORDER_START_TIME = "recorderStartTime";
 		public static final String IS_DRAWER_VISIBLE = "isDrawerVisible";
 		public static final String FORWARD_MESSAGE = "forwardMessage";
+		public static final String HELP_PAGE = "helpPage";
 	}
 
 	public static final class LogEvent

@@ -1,47 +1,102 @@
 package com.bsb.hike.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.DrawerBaseActivity;
+import com.bsb.hike.utils.Utils;
 
-public class Tutorial extends Activity 
+public class Tutorial extends DrawerBaseActivity implements OnClickListener
 {
 	private ViewPager tutorialPager;
-	private ImageView pageIndicator1;
-	private ImageView pageIndicator2;
+	private ImageView[] pageIndicators;
+	private ViewGroup pageIndicatorContainer;
+
+	private boolean isHelpPage;
+	private boolean isLandscape;
+	private TextView titleBtn;
+
+	private static final int PAGE_NUM = 3;
 
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.signup_tutorial_base);
 
+		isHelpPage = getIntent().getBooleanExtra(HikeConstants.Extras.HELP_PAGE, false);
+		isLandscape = getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT;
+
+		if(!isHelpPage)
+		{
+			titleBtn = (Button) findViewById(R.id.title_icon);
+			titleBtn.setText(R.string.done);
+			titleBtn.setEnabled(false);
+			titleBtn.setVisibility(View.VISIBLE);
+			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			afterSetContentView(savedInstanceState);
+		}
+
+		TextView mTitleView = (TextView) findViewById(isHelpPage ? R.id.title_centered : R.id.title);
+		mTitleView.setText(isHelpPage ? R.string.help : R.string.meet_hike);
+
 		tutorialPager = (ViewPager) findViewById(R.id.signup_tutorial_pager);
-		pageIndicator1 = (ImageView) findViewById(R.id.page1_indicator);
-		pageIndicator2 = (ImageView) findViewById(R.id.page2_indicator);
+		pageIndicatorContainer = (ViewGroup) findViewById(R.id.page_indicator_container);
+
+		int rightMargin = (int) (10 * Utils.densityMultiplier);
+		pageIndicators = new ImageView[PAGE_NUM];
+		for(int i = 0; i<PAGE_NUM; i++)
+		{
+			pageIndicators[i] = new ImageView(this);
+			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			if(i != PAGE_NUM - 1)
+			{
+				lp.setMargins(0, 0, rightMargin, 0);
+			}
+			pageIndicators[i].setImageResource(i == 0 ?
+					R.drawable.page_indicator_selected : R.drawable.page_indicator_unselected);
+			pageIndicators[i].setLayoutParams(lp);
+			pageIndicatorContainer.addView(pageIndicators[i]);
+		}
+		pageIndicatorContainer.requestLayout();
 
 		tutorialPager.setAdapter(new TutorialPagerAdapter());
 
-		tutorialPager.setOnPageChangeListener(new OnPageChangeListener() 
+		tutorialPager.setOnPageChangeListener(new OnPageChangeListener()
 		{
 			@Override
 			public void onPageSelected(int position) 
 			{
-				pageIndicator1.setImageResource(position == 0 ? R.drawable.page_indicatore_unselected : R.drawable.page_indicatore_selected);
-				pageIndicator2.setImageResource(position == 1 ? R.drawable.page_indicatore_unselected : R.drawable.page_indicatore_selected);
+				for(ImageView pageIndicator : pageIndicators)
+				{
+					pageIndicator.setImageResource(R.drawable.page_indicator_unselected);
+				}
+				pageIndicators[position].setImageResource(R.drawable.page_indicator_selected);
+				if(!isHelpPage)
+				{
+					titleBtn.setEnabled(position == PAGE_NUM - 1 ? true : false);
+				}
 			}
-
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {}
 			@Override
@@ -49,7 +104,19 @@ public class Tutorial extends Activity
 		});
 	}
 
-	public void onGetStartedClicked(View v)
+	public void onBackPressed()
+	{
+		if(isHelpPage)
+		{
+			super.onBackPressed();
+		}
+		else
+		{
+			finish();
+		}
+	}
+
+	public void onTitleIconClick(View v)
 	{
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 		editor.putBoolean(HikeMessengerApp.SHOWN_TUTORIAL, true);
@@ -63,7 +130,6 @@ public class Tutorial extends Activity
 
 	private class TutorialPagerAdapter extends PagerAdapter
 	{
-		private static final int TUTORIAL_PAGE_COUNT = 2;
 		private LayoutInflater inflater;
 
 		public TutorialPagerAdapter() 
@@ -74,7 +140,7 @@ public class Tutorial extends Activity
 		@Override
 		public int getCount() 
 		{
-			return TUTORIAL_PAGE_COUNT;
+			return PAGE_NUM;
 		}
 
 		@Override
@@ -93,17 +159,77 @@ public class Tutorial extends Activity
 		public Object instantiateItem(ViewGroup container, int position) 
 		{
 			ViewGroup tutorialPage = (ViewGroup) inflater.inflate(R.layout.signup_tutorial_page, null);
+			ImageView mainImg = (ImageView) tutorialPage.findViewById(R.id.img);
+			ImageView header = (ImageView) tutorialPage.findViewById(R.id.heading);
+			TextView info = (TextView) tutorialPage.findViewById(R.id.info);
+			ViewGroup rewardsInfo = (ViewGroup) tutorialPage.findViewById(R.id.rewards_info);
+			ViewGroup helpButtonsContainer = (ViewGroup) tutorialPage.findViewById(R.id.help_button_container);
+			TextView disclaimer = (TextView) tutorialPage.findViewById(R.id.india_only);
+			ImageButton btnContact = (ImageButton) tutorialPage.findViewById(R.id.btn_contact);
+			ImageButton btnFaq = (ImageButton) tutorialPage.findViewById(R.id.btn_faq);
 
-			((ImageView)tutorialPage.findViewById(R.id.img)).setImageResource(position == 0 ? R.drawable.hike_to_hike_img : R.drawable.hike_to_sms);
-			((ImageView)tutorialPage.findViewById(R.id.heading)).setImageResource(position == 0 ? R.drawable.hike_to_hike_txt : R.drawable.hike_to_sms_txt);
-			((ImageView)tutorialPage.findViewById(R.id.info)).setImageResource(position == 0 ? R.drawable.hike_to_hike_info_txt : R.drawable.hike_to_sms_info_txt);
-			tutorialPage.findViewById(R.id.swipe_left).setVisibility(position == 0 ? View.VISIBLE : View.GONE);
-			tutorialPage.findViewById(R.id.btn_continue).setVisibility(position == 1 ? View.VISIBLE : View.GONE);
-			tutorialPage.findViewById(R.id.india_only).setVisibility(position == 1 ? View.VISIBLE : View.GONE);
+			btnContact.setOnClickListener(Tutorial.this);
+			btnFaq.setOnClickListener(Tutorial.this);
+
+			switch (position) 
+			{
+			case 0:
+				mainImg.setImageResource(isHelpPage ? R.drawable.ic_hike_phone : R.drawable.hike_to_hike_img);
+				header.setImageResource(isHelpPage ? 0 : R.drawable.hike_to_hike_txt);
+				header.setVisibility(isHelpPage ? View.GONE : View.VISIBLE);
+				info.setText(isHelpPage ? R.string.help_info : R.string.hike_to_hike_free_always);
+				rewardsInfo.setVisibility(View.GONE);
+				helpButtonsContainer.setVisibility(isHelpPage ? View.VISIBLE : View.GONE);
+				disclaimer.setVisibility(isHelpPage ? View.GONE : View.VISIBLE);
+				break;
+			case 1:
+				mainImg.setImageResource(isHelpPage ? R.drawable.hike_to_hike_img : R.drawable.hike_to_sms_img);
+				header.setImageResource(isHelpPage ? R.drawable.hike_to_hike_txt : R.drawable.hike_to_sms_txt);
+				header.setVisibility(View.VISIBLE);
+				info.setText(isHelpPage ? R.string.hike_to_hike_free_always : R.string.hike_to_sms);
+				rewardsInfo.setVisibility(View.GONE);
+				helpButtonsContainer.setVisibility(View.GONE);
+				disclaimer.setText(isHelpPage ? "" : getString(R.string.hike_to_sms_disclaimer));
+				disclaimer.setVisibility(View.VISIBLE);
+				break;
+			case 2:
+				mainImg.setImageResource(isHelpPage ? R.drawable.hike_to_sms_img : R.drawable.rewards_img);
+				header.setImageResource(isHelpPage ? R.drawable.hike_to_sms_txt : R.drawable.rewards_txt);
+				header.setVisibility(View.VISIBLE);
+				info.setText(isHelpPage ? R.string.hike_to_sms : R.string.rewards_intro);
+				rewardsInfo.setVisibility(isHelpPage ? View.GONE : View.VISIBLE);
+				helpButtonsContainer.setVisibility(View.GONE);
+				disclaimer.setVisibility(isHelpPage ? View.VISIBLE : View.GONE);
+				disclaimer.setText(isHelpPage ?getString(R.string.hike_to_sms_disclaimer) : "");
+				break;
+			}
+			tutorialPage.findViewById(R.id.img_layout).setVisibility(isLandscape ? View.GONE : View.VISIBLE);
 
 			((ViewPager) container).addView(tutorialPage);
 			return tutorialPage;
 		}
 
+	}
+
+	@Override
+	public void onClick(View v) 
+	{
+		Intent intent = null;
+		if(v.getId() == R.id.btn_faq)
+		{
+			intent = new Intent(this, WebViewActivity.class);
+			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
+			intent.putExtra(HikeConstants.Extras.TITLE, "FAQs");
+		}
+		else if(v.getId() == R.id.btn_contact)
+		{
+			intent = new Intent(Intent.ACTION_SENDTO);
+			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
+			startActivity(intent);
+		}
+		if(intent != null)
+		{
+			startActivity(intent);
+		}
 	}
 }
