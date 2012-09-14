@@ -20,14 +20,21 @@ package com.bsb.hike.view;
 
 // update the package name to match your app
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
 
 public class DrawerLayout extends ViewGroup {
@@ -51,6 +58,21 @@ public class DrawerLayout extends ViewGroup {
 
 	private boolean mPressed = false;
 
+	private TextView creditsNum;
+
+	private SharedPreferences accountPrefs;
+
+	public enum DrawerItems
+	{
+		HOME,
+		GROUP_CHAT,
+		TELL_A_FRIEND,
+		REWARDS,
+		FREE_SMS,
+		PROFILE,
+		HELP
+	}
+
 	public DrawerLayout(Context context) {
 		this(context, null, 0);
 	}
@@ -61,6 +83,7 @@ public class DrawerLayout extends ViewGroup {
 	
 	public DrawerLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		accountPrefs = getContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		mSidebarWidth = (int) (272 * Utils.densityMultiplier);
 		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
 
@@ -77,6 +100,70 @@ public class DrawerLayout extends ViewGroup {
 		contentAnimationIn.setFillEnabled(true);
 
 		sidebarTranslateAnimationIn = new TranslateAnimation(-mSidebarOffsetForAnimation, 0, 0, 0);
+	}
+
+	public void setUpDrawerView()
+	{
+		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+
+		ImageView profileImg = (ImageView) findViewById(R.id.profile_image);
+		TextView profileName = (TextView) findViewById(R.id.name);
+
+		ContactInfo me = Utils.getUserContactInfo(accountPrefs);
+		profileImg.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(me.getMsisdn()));
+		profileName.setText(me.getName());
+
+		int[] parentIds = {R.id.top_half_items_container, R.id.bottom_half_items_container};
+		int itemNumber = 0;
+		for(int i=0; i<parentIds.length; i++)
+		{
+			String[] itemTexts = i==0 ? getResources().getStringArray(R.array.top_half_drawer_text) : getResources().getStringArray(R.array.bottom_half_drawer_text);
+			int[] itemIcons = i==0 ? 
+					new int[] {R.drawable.ic_drawer_home, R.drawable.ic_drawer_group_chat, R.drawable.ic_drawer_invite} : 
+						new int[] {R.drawable.ic_drawer_rewards, R.drawable.ic_drawer_free_sms, R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help};
+
+			ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
+
+			for(int j=0; j<itemTexts.length; j++)
+			{
+				View itemView = layoutInflater.inflate(R.layout.drawer_item, null);
+				TextView itemTxt = (TextView) itemView.findViewById(R.id.item_name);
+				ImageView itemImg = (ImageView) itemView.findViewById(R.id.item_icon);
+
+				itemTxt.setText(itemTexts[j]);
+				itemImg.setImageResource(itemIcons[j]);
+
+				if(itemTexts[j].equals(getContext().getString(R.string.free_sms_txt)))
+				{
+					creditsNum = (TextView) itemView.findViewById(R.id.credit_num);
+					creditsNum.setVisibility(View.VISIBLE);
+					creditsNum.setText(Integer.toString(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0)));
+				}
+				if(j == 0)
+				{
+					itemView.setBackgroundResource(R.drawable.drawer_top_item_selector);
+				}
+				else if(j == itemTexts.length - 1)
+				{
+					itemView.findViewById(R.id.divider).setVisibility(View.GONE);
+					itemView.setBackgroundResource(R.drawable.drawer_bottom_item_selector);
+				}
+				else
+				{
+					itemView.setBackgroundResource(R.drawable.drawer_center_item_selector);
+				}
+				itemView.setFocusable(true);
+				int id = DrawerItems.values()[itemNumber++].ordinal();
+				itemView.setId(id);
+				parentView.addView(itemView);
+			}
+			parentView.setFocusable(true);
+		}
+	}
+
+	public void updateCredits(int credits)
+	{
+		creditsNum.setText(Integer.toString(credits));
 	}
 
 	@Override
