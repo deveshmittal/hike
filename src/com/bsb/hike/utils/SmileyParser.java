@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -45,14 +46,11 @@ public class SmileyParser
 
 	private final HashMap<String, Integer> mSmileyToRes;
 
-	private final HashMap<String, Integer> mSmallSmileyToRes;
-
 	private SmileyParser(Context context)
 	{
 		mContext = context;
 		mSmileyTexts = mContext.getResources().getStringArray(DEFAULT_SMILEY_TEXTS);
 		mSmileyToRes = buildSmileyToRes();
-		mSmallSmileyToRes = buildSmallSmileyToRes();
 		mPattern = buildPattern();
 	}
 
@@ -207,156 +205,6 @@ public class SmileyParser
 			R.drawable.emo_im_148_yuush,
 			R.drawable.emo_im_149_brains,
 			R.drawable.emo_im_150_sleeping};
-
-		private static final int[] sIconIdsSmall = {R.drawable.emo_im_01_bigsmile_small,
-			R.drawable.emo_im_02_happy_small,
-			R.drawable.emo_im_03_laugh_small,
-			R.drawable.emo_im_04_smile_small,
-			R.drawable.emo_im_05_wink_small,
-			R.drawable.emo_im_06_adore_small,
-			R.drawable.emo_im_07_kiss_small,
-			R.drawable.emo_im_08_kissed_small,
-			R.drawable.emo_im_09_expressionless_small,
-			R.drawable.emo_im_10_pudently_small,
-			R.drawable.emo_im_11_satisfied_small,
-			R.drawable.emo_im_12_giggle_small,
-			R.drawable.emo_im_13_impish_small,
-			R.drawable.emo_im_14_disappointment_small,
-			R.drawable.emo_im_15_beuptonogood_small,
-			R.drawable.emo_im_16_frustrated_small,
-			R.drawable.emo_im_17_sad_small,
-			R.drawable.emo_im_18_sorry_small,
-			R.drawable.emo_im_19_cry_small,
-			R.drawable.emo_im_20_boring_small,
-			R.drawable.emo_im_21_hungry_small,
-			R.drawable.emo_im_22_scared_small,
-			R.drawable.emo_im_23_shock_small,
-			R.drawable.emo_im_24_sweat_small,
-			R.drawable.emo_im_25_crying_small,
-			R.drawable.emo_im_26_lol_small,
-			R.drawable.emo_im_27_woo_small,
-			R.drawable.emo_im_28_surprise_small,
-			R.drawable.emo_im_29_frown_small,
-			R.drawable.emo_im_30_angry_small,
-			R.drawable.emo_im_31_wornout_small,
-			R.drawable.emo_im_32_stop_small,
-			R.drawable.emo_im_33_furious_small,
-			R.drawable.emo_im_34_smoking_small,
-			R.drawable.emo_im_35_hysterical_small,
-			R.drawable.emo_im_36_exclamation_small,
-			R.drawable.emo_im_37_question_small,
-			R.drawable.emo_im_38_sleep_small,
-			R.drawable.emo_im_39_aggressive_small,
-			R.drawable.emo_im_40_badly_small,
-			R.drawable.emo_im_41_singing_small,
-			R.drawable.emo_im_42_bomb_small,
-			R.drawable.emo_im_43_beaten_small,
-			R.drawable.emo_im_44_thumbsdown_small,
-			R.drawable.emo_im_45_thumbsup_small,
-			R.drawable.emo_im_46_beer_small,
-			R.drawable.emo_im_47_call_small,
-			R.drawable.emo_im_48_hi_small,
-			R.drawable.emo_im_49_hug_small,
-			R.drawable.emo_im_50_facepalm_small,
-			R.drawable.emo_im_51_easymoney_small,
-			R.drawable.emo_im_52_dizzy_small,
-			R.drawable.emo_im_53_disgust_small,
-			R.drawable.emo_im_54_cocktail_small,
-			R.drawable.emo_im_55_coffee_small,
-			R.drawable.emo_im_56_cold_small,
-			R.drawable.emo_im_57_cool_small,
-			R.drawable.emo_im_58_despair_small,
-			R.drawable.emo_im_59_hypnotic_small,
-			R.drawable.emo_im_60_stars_small,
-			R.drawable.emo_im_61_idea_small,
-			R.drawable.emo_im_62_monocle_small,
-			R.drawable.emo_im_63_movie_small,
-			R.drawable.emo_im_64_music_small,
-			R.drawable.emo_im_65_nerd_small,
-			R.drawable.emo_im_66_ninja_small,
-			R.drawable.emo_im_67_party_small,
-			R.drawable.emo_im_68_pirate_small,
-			R.drawable.emo_im_69_rage_small,
-			R.drawable.emo_im_70_rose_small,
-			R.drawable.emo_im_71_sick_small,
-			R.drawable.emo_im_72_snotty_small,
-			R.drawable.emo_im_73_stressed_small,
-			R.drawable.emo_im_74_struggle_small,
-			R.drawable.emo_im_75_study_small,
-			R.drawable.emo_im_76_sweetangel_small,
-			R.drawable.emo_im_77_thinking_small,
-			R.drawable.emo_im_78_waiting_small,
-			R.drawable.emo_im_79_whistling_small,
-			R.drawable.emo_im_80_yawn_small,
-			R.drawable.emo_im_81_exciting_small,
-			R.drawable.emo_im_82_big_smile_small,
-			R.drawable.emo_im_83_haha_small,
-			R.drawable.emo_im_84_victory_small,
-			R.drawable.emo_im_85_red_heart_small,
-			R.drawable.emo_im_86_amazing_small,
-			R.drawable.emo_im_87_black_heart_small,
-			R.drawable.emo_im_88_what_small,
-			R.drawable.emo_im_89_bad_smile_small,
-			R.drawable.emo_im_90_bad_egg_small,
-			R.drawable.emo_im_91_grimace_small,
-			R.drawable.emo_im_92_girl_small,
-			R.drawable.emo_im_93_greedy_small,
-			R.drawable.emo_im_94_anger_small,
-			R.drawable.emo_im_95_eyes_droped_small,
-			R.drawable.emo_im_96_happy_small,
-			R.drawable.emo_im_97_horror_small,
-			R.drawable.emo_im_98_money_small,
-			R.drawable.emo_im_99_nothing_small,
-			R.drawable.emo_im_100_nothing_to_say_small,
-			R.drawable.emo_im_101_cry_small,
-			R.drawable.emo_im_102_scorn_small,
-			R.drawable.emo_im_103_secret_smile_small,
-			R.drawable.emo_im_104_shame_small,
-			R.drawable.emo_im_105_shocked_small,
-			R.drawable.emo_im_106_super_man_small,
-			R.drawable.emo_im_107_the_iron_man_small,
-			R.drawable.emo_im_108_unhappy_small,
-			R.drawable.emo_im_109_electric_shock_small,
-			R.drawable.emo_im_110_beaten_small,
-			R.drawable.emo_im_111_grin_small,
-			R.drawable.emo_im_112_happy_small,
-			R.drawable.emo_im_113_fake_smile_small,
-			R.drawable.emo_im_114_in_love_small,
-			R.drawable.emo_im_115_kiss_small,
-			R.drawable.emo_im_116_straight_face_small,
-			R.drawable.emo_im_117_meaw_small,
-			R.drawable.emo_im_118_drunk_small,
-			R.drawable.emo_im_119_x_x_small,
-			R.drawable.emo_im_120_youre_kidding_right_small,
-			R.drawable.emo_im_122_sweat_small,
-			R.drawable.emo_im_123_nerd_small,
-			R.drawable.emo_im_124_angry_small,
-			R.drawable.emo_im_125_disappearing_small,
-			R.drawable.emo_im_126_dizzy_small,
-			R.drawable.emo_im_127_music_small,
-			R.drawable.emo_im_128_evilish_small,
-			R.drawable.emo_im_129_graffiti_small,
-			R.drawable.emo_im_130_omg_small,
-			R.drawable.emo_im_131_on_fire_small,
-			R.drawable.emo_im_132_ouch_small,
-			R.drawable.emo_im_133_angry_small,
-			R.drawable.emo_im_134_serious_business_small,
-			R.drawable.emo_im_135_sick_small,
-			R.drawable.emo_im_136_slow_small,
-			R.drawable.emo_im_137_snooty_small,
-			R.drawable.emo_im_138_suspicious_small,
-			R.drawable.emo_im_139_crying_small,
-			R.drawable.emo_im_140_want_small,
-			R.drawable.emo_im_141_we_all_gonna_die_small,
-			R.drawable.emo_im_142_wut_small,
-			R.drawable.emo_im_143_boo_small,
-			R.drawable.emo_im_144_xd_small,
-			R.drawable.emo_im_145_kaboom_small,
-			R.drawable.emo_im_146_yarr_small,
-			R.drawable.emo_im_147_ninja_small,
-			R.drawable.emo_im_148_yuush_small,
-			R.drawable.emo_im_149_brains_small,
-			R.drawable.emo_im_150_sleeping_small,};
 
 		public static final int BIGSMILE_01 = 1;
 		public static final int HAPPY_02 = 2;
@@ -513,10 +361,6 @@ public class SmileyParser
 			return sIconIds[which - 1];
 		}
 
-		public static int getSmallSmileyResource(int which)
-		{
-			return sIconIdsSmall[which - 1];
-		}
 	}
 
 	// NOTE: if you change anything about this array, you must make the corresponding change
@@ -673,158 +517,6 @@ public class SmileyParser
 		Smileys.getSmileyResource(Smileys.SLEEPING_150)
 	};
 
-	public static final int[] DEFAULT_SMALL_SMILEY_RES_IDS = {
-		Smileys.getSmallSmileyResource(Smileys.BIGSMILE_01),
-		Smileys.getSmallSmileyResource(Smileys.HAPPY_02),
-		Smileys.getSmallSmileyResource(Smileys.LAUGH_03),
-		Smileys.getSmallSmileyResource(Smileys.SMILE_04),
-		Smileys.getSmallSmileyResource(Smileys.WINK_05),
-		Smileys.getSmallSmileyResource(Smileys.ADORE_06),
-		Smileys.getSmallSmileyResource(Smileys.KISS_07),
-		Smileys.getSmallSmileyResource(Smileys.KISSED_08),
-		Smileys.getSmallSmileyResource(Smileys.EXPRESSIONLESS_09),
-		Smileys.getSmallSmileyResource(Smileys.PUDENTLY_10),
-		Smileys.getSmallSmileyResource(Smileys.SATISFIED_11),
-		Smileys.getSmallSmileyResource(Smileys.GIGGLE_12),
-		Smileys.getSmallSmileyResource(Smileys.IMPISH_13),
-		Smileys.getSmallSmileyResource(Smileys.DISAPPOINTMENT_14),
-		Smileys.getSmallSmileyResource(Smileys.BEUPTONOGOOD_15),
-		Smileys.getSmallSmileyResource(Smileys.FRUSTRATED_16),
-		Smileys.getSmallSmileyResource(Smileys.SAD_17),
-		Smileys.getSmallSmileyResource(Smileys.SORRY_18),
-		Smileys.getSmallSmileyResource(Smileys.CRY_19),
-		Smileys.getSmallSmileyResource(Smileys.BORING_20),
-		Smileys.getSmallSmileyResource(Smileys.HUNGRY_21),
-		Smileys.getSmallSmileyResource(Smileys.SCARED_22),
-		Smileys.getSmallSmileyResource(Smileys.SHOCK_23),
-		Smileys.getSmallSmileyResource(Smileys.SWEAT_24),
-		Smileys.getSmallSmileyResource(Smileys.CRYING_25),
-		Smileys.getSmallSmileyResource(Smileys.LOL_26),
-		Smileys.getSmallSmileyResource(Smileys.WOO_27),
-		Smileys.getSmallSmileyResource(Smileys.SURPRISE_28),
-		Smileys.getSmallSmileyResource(Smileys.FROWN_29),
-		Smileys.getSmallSmileyResource(Smileys.ANGRY_30),
-		Smileys.getSmallSmileyResource(Smileys.WORNOUT_31),
-		Smileys.getSmallSmileyResource(Smileys.STOP_32),
-		Smileys.getSmallSmileyResource(Smileys.FURIOUS_33),
-		Smileys.getSmallSmileyResource(Smileys.SMOKING_34),
-		Smileys.getSmallSmileyResource(Smileys.HYSTERICAL_35),
-		Smileys.getSmallSmileyResource(Smileys.EXCLAMATION_36),
-		Smileys.getSmallSmileyResource(Smileys.QUESTION_37),
-		Smileys.getSmallSmileyResource(Smileys.SLEEP_38),
-		Smileys.getSmallSmileyResource(Smileys.AGGRESSIVE_39),
-		Smileys.getSmallSmileyResource(Smileys.BADLY_40),
-		Smileys.getSmallSmileyResource(Smileys.SINGING_41),
-		Smileys.getSmallSmileyResource(Smileys.BOMB_42),
-		Smileys.getSmallSmileyResource(Smileys.BEATEN_43),
-		Smileys.getSmallSmileyResource(Smileys.THUMBSDOWN_44),
-		Smileys.getSmallSmileyResource(Smileys.THUMBSUP_45),
-		Smileys.getSmallSmileyResource(Smileys.BEER_46),
-		Smileys.getSmallSmileyResource(Smileys.CALL_47),
-		Smileys.getSmallSmileyResource(Smileys.HI_48),
-		Smileys.getSmallSmileyResource(Smileys.HUG_49),
-		Smileys.getSmallSmileyResource(Smileys.FACEPALM_50),
-		Smileys.getSmallSmileyResource(Smileys.EASYMONEY_51),
-		Smileys.getSmallSmileyResource(Smileys.DIZZY_52),
-		Smileys.getSmallSmileyResource(Smileys.DISGUST_53),
-		Smileys.getSmallSmileyResource(Smileys.COCKTAIL_54),
-		Smileys.getSmallSmileyResource(Smileys.COFFEE_55),
-		Smileys.getSmallSmileyResource(Smileys.COLD_56),
-		Smileys.getSmallSmileyResource(Smileys.COOL_57),
-		Smileys.getSmallSmileyResource(Smileys.DESPAIR_58),
-		Smileys.getSmallSmileyResource(Smileys.HYPNOTIC_59),
-		Smileys.getSmallSmileyResource(Smileys.STARS_60),
-		Smileys.getSmallSmileyResource(Smileys.IDEA_61),
-		Smileys.getSmallSmileyResource(Smileys.MONOCLE_62),
-		Smileys.getSmallSmileyResource(Smileys.MOVIE_63),
-		Smileys.getSmallSmileyResource(Smileys.MUSIC_64),
-		Smileys.getSmallSmileyResource(Smileys.NERD_65),
-		Smileys.getSmallSmileyResource(Smileys.NINJA_66),
-		Smileys.getSmallSmileyResource(Smileys.PARTY_67),
-		Smileys.getSmallSmileyResource(Smileys.PIRATE_68),
-		Smileys.getSmallSmileyResource(Smileys.RAGE_69),
-		Smileys.getSmallSmileyResource(Smileys.ROSE_70),
-		Smileys.getSmallSmileyResource(Smileys.SICK_71),
-		Smileys.getSmallSmileyResource(Smileys.SNOTTY_72),
-		Smileys.getSmallSmileyResource(Smileys.STRESSED_73),
-		Smileys.getSmallSmileyResource(Smileys.STRUGGLE_74),
-		Smileys.getSmallSmileyResource(Smileys.STUDY_75),
-		Smileys.getSmallSmileyResource(Smileys.SWEETANGEL_76),
-		Smileys.getSmallSmileyResource(Smileys.THINKING_77),
-		Smileys.getSmallSmileyResource(Smileys.WAITING_78),
-		Smileys.getSmallSmileyResource(Smileys.WHISTLING_79),
-		Smileys.getSmallSmileyResource(Smileys.YAWN_80),
-		Smileys.getSmallSmileyResource(Smileys.EXCITING_81),
-		Smileys.getSmallSmileyResource(Smileys.BIGSMILE_82),
-		Smileys.getSmallSmileyResource(Smileys.HAHA_83),
-		Smileys.getSmallSmileyResource(Smileys.VICTORY_84),
-		Smileys.getSmallSmileyResource(Smileys.REDHEART_85),
-		Smileys.getSmallSmileyResource(Smileys.AMAZING_86),
-		Smileys.getSmallSmileyResource(Smileys.BLACKHEART_87),
-		Smileys.getSmallSmileyResource(Smileys.WHAT_88),
-		Smileys.getSmallSmileyResource(Smileys.BADSMILE_89),
-		Smileys.getSmallSmileyResource(Smileys.BADEGG_90),
-		Smileys.getSmallSmileyResource(Smileys.GRIMACE_91),
-		Smileys.getSmallSmileyResource(Smileys.GIRL_92),
-		Smileys.getSmallSmileyResource(Smileys.GREEDY_93),
-		Smileys.getSmallSmileyResource(Smileys.ANGER_94),
-		Smileys.getSmallSmileyResource(Smileys.EYESDROPED_95),
-		Smileys.getSmallSmileyResource(Smileys.HAPPY_96),
-		Smileys.getSmallSmileyResource(Smileys.HORROR_97),
-		Smileys.getSmallSmileyResource(Smileys.MONEY_98),
-		Smileys.getSmallSmileyResource(Smileys.NOTHING_99),
-		Smileys.getSmallSmileyResource(Smileys.NOTHINGTOSAY_100),
-		Smileys.getSmallSmileyResource(Smileys.CRY_101),
-		Smileys.getSmallSmileyResource(Smileys.SCORN_102),
-		Smileys.getSmallSmileyResource(Smileys.SECRETSMILE_103),
-		Smileys.getSmallSmileyResource(Smileys.SHAME_104),
-		Smileys.getSmallSmileyResource(Smileys.SHOCKED_105),
-		Smileys.getSmallSmileyResource(Smileys.SUPERMAN_106),
-		Smileys.getSmallSmileyResource(Smileys.THEIRONMAN_107),
-		Smileys.getSmallSmileyResource(Smileys.UNHAPPY_108),
-		Smileys.getSmallSmileyResource(Smileys.ELECTRICSHOCK_109),
-		Smileys.getSmallSmileyResource(Smileys.BEATEN_110),
-		Smileys.getSmallSmileyResource(Smileys.GRIN_111),
-		Smileys.getSmallSmileyResource(Smileys.HAPPY_112),
-		Smileys.getSmallSmileyResource(Smileys.FAKESMILE_113),
-		Smileys.getSmallSmileyResource(Smileys.INLOVE_114),
-		Smileys.getSmallSmileyResource(Smileys.KISS_115),
-		Smileys.getSmallSmileyResource(Smileys.STRAIGHTFACE_116),
-		Smileys.getSmallSmileyResource(Smileys.MEAW_117),
-		Smileys.getSmallSmileyResource(Smileys.DRUNK_118),
-		Smileys.getSmallSmileyResource(Smileys.XX_119),
-		Smileys.getSmallSmileyResource(Smileys.YOUREKIDDINGRIGHT_120),
-		Smileys.getSmallSmileyResource(Smileys.SWEAT_122),
-		Smileys.getSmallSmileyResource(Smileys.NERD_123),
-		Smileys.getSmallSmileyResource(Smileys.ANGRY_124),
-		Smileys.getSmallSmileyResource(Smileys.DISAPPEARING_125),
-		Smileys.getSmallSmileyResource(Smileys.DIZZY_126),
-		Smileys.getSmallSmileyResource(Smileys.MUSIC_127),
-		Smileys.getSmallSmileyResource(Smileys.EVILISH_128),
-		Smileys.getSmallSmileyResource(Smileys.GRAFFITI_129),
-		Smileys.getSmallSmileyResource(Smileys.OMG_130),
-		Smileys.getSmallSmileyResource(Smileys.ONFIRE_131),
-		Smileys.getSmallSmileyResource(Smileys.OUCH_132),
-		Smileys.getSmallSmileyResource(Smileys.ANGRY_133),
-		Smileys.getSmallSmileyResource(Smileys.SERIOUSBUSINESS_134),
-		Smileys.getSmallSmileyResource(Smileys.SICK_135),
-		Smileys.getSmallSmileyResource(Smileys.SLOW_136),
-		Smileys.getSmallSmileyResource(Smileys.SNOOTY_137),
-		Smileys.getSmallSmileyResource(Smileys.SUSPICIOUS_138),
-		Smileys.getSmallSmileyResource(Smileys.CRYING_139),
-		Smileys.getSmallSmileyResource(Smileys.WANT_140),
-		Smileys.getSmallSmileyResource(Smileys.WEALLGONNADIE_141),
-		Smileys.getSmallSmileyResource(Smileys.WUT_142),
-		Smileys.getSmallSmileyResource(Smileys.BOO_143),
-		Smileys.getSmallSmileyResource(Smileys.XD_144),
-		Smileys.getSmallSmileyResource(Smileys.KABOOM_145),
-		Smileys.getSmallSmileyResource(Smileys.YARR_146),
-		Smileys.getSmallSmileyResource(Smileys.NINJA_147),
-		Smileys.getSmallSmileyResource(Smileys.YUUSH_148),
-		Smileys.getSmallSmileyResource(Smileys.BRAINS_149),
-		Smileys.getSmallSmileyResource(Smileys.SLEEPING_150)
-	};
-
 	public static final int DEFAULT_SMILEY_TEXTS = R.array.default_smiley_texts;
 
 	/**
@@ -846,24 +538,6 @@ public class SmileyParser
 		}
 
 		return smileyToRes;
-	}
-
-	private HashMap<String, Integer> buildSmallSmileyToRes()
-	{
-		if (DEFAULT_SMALL_SMILEY_RES_IDS.length != mSmileyTexts.length)
-		{
-			// Throw an exception if someone updated DEFAULT_SMILEY_RES_IDS
-			// and failed to update arrays.xml
-			throw new IllegalStateException("Small Smiley resource ID/text mismatch");
-		}
-
-		HashMap<String, Integer> smallSmileyToRes = new HashMap<String, Integer>(mSmileyTexts.length);
-		for (int i = 0; i < mSmileyTexts.length; i++)
-		{
-			smallSmileyToRes.put(mSmileyTexts[i], DEFAULT_SMALL_SMILEY_RES_IDS[i]);
-		}
-
-		return smallSmileyToRes;
 	}
 
 	/**
@@ -905,8 +579,15 @@ public class SmileyParser
 		while (matcher.find() && (count < MAX_EMOTICONS))
 		{
 			count++;
-			int resId = showSmallIcon ? mSmallSmileyToRes.get(matcher.group()) : mSmileyToRes.get(matcher.group());
-			builder.setSpan(new ImageSpan(mContext, resId), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			int resId = mSmileyToRes.get(matcher.group());
+			Drawable smiley = mContext.getResources().getDrawable(resId);
+			smiley.setBounds(
+								0, 
+								0, 
+								showSmallIcon ? smiley.getIntrinsicWidth()/2 : smiley.getIntrinsicWidth(), 
+								showSmallIcon ? smiley.getIntrinsicHeight()/2 : smiley.getIntrinsicHeight()
+							);
+			builder.setSpan(new ImageSpan(smiley), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 
 		return builder;
