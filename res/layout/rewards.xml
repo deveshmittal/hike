@@ -98,10 +98,10 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/btn_blue_selector"
                         android:onClick="onInviteClicked"
-                        android:paddingBottom="10dp"
-                        android:paddingLeft="35dp"
-                        android:paddingRight="35dp"
-                        android:paddingTop="7dp"
+                        android:paddingBottom="12dp"
+                        android:paddingLeft="40dp"
+                        android:paddingRight="40dp"
+                        android:paddingTop="9dp"
                         android:src="@drawable/txt_invite_friends" />
                 </LinearLayout>
 
