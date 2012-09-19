@@ -21,7 +21,7 @@ public class SmileyParser
 {
 	private static int MAX_EMOTICONS = 10;
 
-	public static final int[] SIZES_EMOTICON_SETS = {80, 30, 39};
+	public static final int[] HIKE_EMOTICONS_SUBCATEGORIES = {80, 30, 39};
 
 	public static final int[] EMOJI_SUBCATEGORIES = {109, 53, 132, 69, 101};
 

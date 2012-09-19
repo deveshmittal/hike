@@ -73,13 +73,13 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			this.inflater = LayoutInflater.from(context);
 			for(int i=currentPage-1; i>=0; i--)
 			{
-				startIndex += SmileyParser.SIZES_EMOTICON_SETS[i];
+				startIndex += SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES[i];
 			}
 		}
 
 		@Override
 		public int getCount() {
-			return SmileyParser.SIZES_EMOTICON_SETS[currentPage];
+			return SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES[currentPage];
 		}
 
 		@Override
