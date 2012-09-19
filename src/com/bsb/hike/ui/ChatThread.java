@@ -2505,11 +2505,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			switch (currentEmoticonCategorySelected.getId()) 
 			{
 			case R.id.hike_emoticons_btn:
-				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin};
+				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin};
 				emoticonType = EmoticonType.HIKE_EMOTICON;
 				break;
 			case R.id.emoji_btn:
-				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin};
+				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin};
 				emoticonType = EmoticonType.EMOJI;
 				break;
 			}

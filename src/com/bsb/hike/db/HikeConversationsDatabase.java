@@ -23,12 +23,15 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 
 public class HikeConversationsDatabase extends SQLiteOpenHelper
@@ -122,6 +125,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.FILE_KEY + " STRING PRIMARY KEY, "
 				+ DBConstants.FILE_NAME + " STRING UNIQUE"
 				+ " )";
+		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.EMOTICON_TABLE
+				+ " ( "
+				+ DBConstants.EMOTICON_NUM + " INTEGER PRIMARY KEY, "
+				+ DBConstants.LAST_USED + " INTEGER"
+				+ " )";
+		db.execSQL(sql);
+		sql = "CREATE UNIQUE INDEX IF NOT EXISTS " + DBConstants.EMOTICON_INDEX + " ON " + DBConstants.EMOTICON_TABLE
+				+ " ( "
+				+ DBConstants.EMOTICON_NUM
+				+ " ) ";
 		db.execSQL(sql);
 	}
 
@@ -1082,6 +1096,74 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			if (groupCursor != null) {
 				groupCursor.close();
+			}
+		}
+	}
+
+	public void updateRecencyOfEmoticon(int emoticonIndex, long lastUsed)
+	{
+		SQLiteStatement insertStatement = null;
+		try
+		{
+			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO " + DBConstants.EMOTICON_TABLE 
+					+ " ( " + DBConstants.EMOTICON_NUM + ", " 
+ 		 					+ DBConstants.LAST_USED 
+ 					+ " ) " + " VALUES (?, ?)");
+
+			insertStatement.bindLong(1, emoticonIndex);
+			insertStatement.bindLong(2, lastUsed);
+
+			long id = insertStatement.executeInsert();
+			Log.d(getClass().getSimpleName(), "iNserted row: " + id);
+		}
+		finally
+		{
+			if (insertStatement != null) 
+			{
+				insertStatement.close();
+			}
+		}
+	}
+
+	public int[] fetchEmoticonsOfType(EmoticonType emoticonType)
+	{
+		int startOffset = 0;
+		int endOffset = 0;
+		switch (emoticonType)
+		{
+		case HIKE_EMOTICON:
+			startOffset = 0;
+			endOffset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+			break;
+		case EMOJI:
+			startOffset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+			endOffset = 0;
+			break;
+		}
+		Cursor c = null;
+		try
+		{
+			String[] columns = new String[] {DBConstants.EMOTICON_NUM};
+			String selection = DBConstants.EMOTICON_NUM + ">=" + startOffset + (endOffset != 0 ? " AND " + DBConstants.EMOTICON_NUM + "<" + (endOffset) : "");
+			Log.d(getClass().getSimpleName(), selection);
+			String orderBy = DBConstants.LAST_USED + " DESC LIMIT " + EmoticonAdapter.MAX_RECENT_EMOTICONS_TO_SHOW;
+
+			c = mDb.query(DBConstants.EMOTICON_TABLE, columns, selection, null, null, null, orderBy);
+			int[] emoticonIndices = new int[c.getCount()];
+			int emoticonIndexIdx = c.getColumnIndex(DBConstants.EMOTICON_NUM);
+			int i = 0;
+			while(c.moveToNext())
+			{
+				emoticonIndices[i++] = emoticonType == EmoticonType.HIKE_EMOTICON ? c.getInt(emoticonIndexIdx) : c.getInt(emoticonIndexIdx) - startOffset;
+			}
+			Log.d(getClass().getSimpleName(), "Emoticon RES ID size: " + emoticonIndices.length);
+			return emoticonIndices;
+		}
+		finally
+		{
+			if(c != null)
+			{
+				c.close();
 			}
 		}
 	}

@@ -14,6 +14,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
@@ -25,6 +26,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		HIKE_EMOTICON,
 		EMOJI
 	}
+
+	public static final int MAX_RECENT_EMOTICONS_TO_SHOW = 21; 
 
 	private final int EMOTICON_TAB_NUMBER;
 
@@ -40,11 +43,12 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		this.emoticonType = emoticonType;
 		switch (emoticonType) 
 		{
+		// Incrementing these numbers to show a recents tab as well.
 		case HIKE_EMOTICON:
-			EMOTICON_TAB_NUMBER = SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES.length;
+			EMOTICON_TAB_NUMBER = SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES.length + 1;
 			break;
 		case EMOJI:
-			EMOTICON_TAB_NUMBER = SmileyParser.EMOJI_SUBCATEGORIES.length;
+			EMOTICON_TAB_NUMBER = SmileyParser.EMOJI_SUBCATEGORIES.length + 1;
 			break;
 		default:
 			EMOTICON_TAB_NUMBER = 0;
@@ -89,6 +93,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		int startIndex;
 		final int[] emoticonSubCategories;
 		final int[] emoticonResIds;
+		int[] recentEmoticons;
 		int idOffset;
 
 		public EmoticonPageAdapter(int currentPage, EmoticonType emoticonType) {
@@ -97,12 +102,12 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			switch (emoticonType) 
 			{
 			case HIKE_EMOTICON:
-				emoticonSubCategories = SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES;
+				emoticonSubCategories = currentPage != 0 ? SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES : null;
 				emoticonResIds = EmoticonConstants.DEFAULT_SMILEY_RES_IDS;
 				idOffset = 0;
 				break;
 			case EMOJI:
-				emoticonSubCategories = SmileyParser.EMOJI_SUBCATEGORIES;
+				emoticonSubCategories = currentPage != 0 ? SmileyParser.EMOJI_SUBCATEGORIES : null;
 				emoticonResIds = EmoticonConstants.EMOJI_RES_IDS;
 				idOffset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 				break;
@@ -110,15 +115,25 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 				emoticonSubCategories = null;
 				emoticonResIds = null;
 			}
-			for(int i=currentPage-1; i>=0; i--)
+			if(currentPage != 0)
 			{
-				startIndex += emoticonSubCategories[i];
+				for(int i=currentPage-2; i>=0; i--)
+				{
+					startIndex += emoticonSubCategories[i];
+				}
+			}
+			else
+			{
+				recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType(emoticonType);
 			}
 		}
 
 		@Override
 		public int getCount() {
-			return emoticonSubCategories[currentPage];
+			return currentPage != 0 ? 
+					emoticonSubCategories[currentPage - 1] : 
+						(recentEmoticons.length > MAX_RECENT_EMOTICONS_TO_SHOW ? 
+								MAX_RECENT_EMOTICONS_TO_SHOW : recentEmoticons.length);
 		}
 
 		@Override
@@ -137,8 +152,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			{
 				convertView = inflater.inflate(R.layout.emoticon_item, null);
 			}
-			convertView.setTag(new Integer(startIndex + idOffset + position));
-			((ImageView) convertView).setImageResource(emoticonResIds[startIndex + position]);
+			convertView.setTag(new Integer(currentPage != 0 ? startIndex + idOffset + position : recentEmoticons[position]));
+			((ImageView) convertView).setImageResource(emoticonResIds[currentPage != 0 ? startIndex + position : recentEmoticons[position]]);
 			return convertView;
 		}
 	}
@@ -146,7 +161,9 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) 
 	{
-		SmileyParser.getInstance().addSmiley(composeBox, (Integer) arg1.getTag());
+		int emoticonIndex = (Integer) arg1.getTag();
+		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
+		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
 		((ChatThread)context).onEmoticonBtnClicked(null);
 	}
 }
