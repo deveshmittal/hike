@@ -657,6 +657,11 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 				return;
 			}
 			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
+			if(TextUtils.isEmpty(path))
+			{
+				Toast.makeText(getApplicationContext(), "Error getting image", Toast.LENGTH_SHORT).show();
+				return;
+			}
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);
 			intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);

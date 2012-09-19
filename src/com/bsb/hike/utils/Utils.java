@@ -981,9 +981,9 @@ public class Utils
 	{
 	    String[] proj = { MediaStore.Images.Media.DATA };
 	    Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
-	    if (cursor == null)
+	    if (cursor == null || cursor.getCount() == 0)
 		{
-			return contentUri.getPath();
+			return null;
 		}
 	    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 	    cursor.moveToFirst();
