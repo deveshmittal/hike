@@ -45,7 +45,6 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.Rewards;
 import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.utils.Utils;
 
@@ -92,7 +91,6 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		HOME,
 		GROUP_CHAT,
 		TELL_A_FRIEND,
-		REWARDS,
 		FREE_SMS,
 		PROFILE,
 		HELP
@@ -147,7 +145,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			String[] itemTexts = i==0 ? getResources().getStringArray(R.array.top_half_drawer_text) : getResources().getStringArray(R.array.bottom_half_drawer_text);
 			int[] itemIcons = i==0 ? 
 					new int[] {R.drawable.ic_drawer_home, R.drawable.ic_drawer_group_chat, R.drawable.ic_drawer_invite} : 
-						new int[] {R.drawable.ic_drawer_rewards, R.drawable.ic_drawer_free_sms, R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help};
+						new int[] {R.drawable.ic_drawer_free_sms, R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help};
 
 			ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
 
@@ -207,9 +205,6 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			break;
 		case TELL_A_FRIEND:
 			Utils.startShareIntent(getContext(), Utils.getInviteMessage(getContext()));
-			break;
-		case REWARDS:
-			intent = activity instanceof Rewards ? null : new Intent(getContext(), Rewards.class);
 			break;
 		case FREE_SMS:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.CREDITS_SCREEN);
