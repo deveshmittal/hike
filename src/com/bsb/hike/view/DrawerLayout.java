@@ -80,6 +80,12 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 	private Handler handler;
 
+	private ImageView profileImg;
+
+	private TextView profileName;
+
+	private ContactInfo me;
+
 	public enum DrawerItems
 	{
 		HOME,
@@ -126,12 +132,11 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	{
 		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 
-		ImageView profileImg = (ImageView) findViewById(R.id.profile_image);
-		TextView profileName = (TextView) findViewById(R.id.name);
+		profileImg = (ImageView) findViewById(R.id.profile_image);
+		profileName = (TextView) findViewById(R.id.name);
 
-		ContactInfo me = Utils.getUserContactInfo(accountPrefs);
-		profileImg.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(me.getMsisdn()));
-		profileName.setText(me.getName());
+		setProfileName();
+		setProfileImage();
 
 		int[] parentIds = {R.id.top_half_items_container, R.id.bottom_half_items_container};
 		int itemNumber = 0;
@@ -247,6 +252,17 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	public void updateCredits(int credits)
 	{
 		creditsNum.setText(Integer.toString(credits));
+	}
+	
+	public void setProfileImage()
+	{
+		profileImg.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(me.getMsisdn()));
+	}
+
+	public void setProfileName()
+	{
+		me = Utils.getUserContactInfo(accountPrefs);
+		profileName.setText(me.getName());
 	}
 
 	@Override

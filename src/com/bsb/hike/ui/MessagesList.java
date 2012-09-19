@@ -506,6 +506,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
+		super.onEventReceived(type, object);
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)))
 		{
 			Log.d("MESSAGE LIST", "New msg event sent or received.");

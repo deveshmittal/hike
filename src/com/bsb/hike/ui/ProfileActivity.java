@@ -463,6 +463,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 								HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 						editor.putString(HikeMessengerApp.NAME_SETTING, name);
 						editor.commit();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_NAME_CHANGED, null);
 					}
 					else
 					{
@@ -529,6 +530,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
 					{
 						db.setIcon(getLargerIconId(), larger_bytes, true);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_PIC_CHANGED, null);
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -807,6 +809,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 
 	@Override
 	public void onEventReceived(String type, Object object) {
+		super.onEventReceived(type, object);
 		if(mLocalMSISDN == null)
 		{
 			Log.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);

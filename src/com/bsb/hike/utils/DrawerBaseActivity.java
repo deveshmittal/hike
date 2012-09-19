@@ -27,6 +27,8 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 			parentLayout.toggleSidebar(true);
 		}
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_PIC_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_NAME_CHANGED, this);
 	}
 
 	@Override
@@ -34,6 +36,8 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 	{
 		super.onDestroy();
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PROFILE_PIC_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PROFILE_NAME_CHANGED, this);
 	}
 
 	public void onToggleSideBarClicked(View v)
@@ -85,6 +89,28 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 				public void run() 
 				{
 					parentLayout.updateCredits(credits);
+				}
+			});
+		}
+		else if (HikePubSub.PROFILE_PIC_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() 
+				{
+					parentLayout.setProfileImage();
+				}
+			});
+		}
+		else if (HikePubSub.PROFILE_NAME_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() 
+				{
+					parentLayout.setProfileName();
 				}
 			});
 		}

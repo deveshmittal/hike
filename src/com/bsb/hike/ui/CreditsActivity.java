@@ -75,6 +75,7 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener
 	@Override
 	public void onEventReceived(String type, Object object) 
 	{
+		super.onEventReceived(type, object);
 		if(HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{
 			runOnUiThread(new Runnable() 
