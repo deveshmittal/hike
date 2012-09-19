@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -109,9 +110,10 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		super(context, attrs, defStyle);
 		accountPrefs = getContext().getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		handler = new Handler();
-		mSidebarWidth = (int) (272 * Utils.densityMultiplier);
-		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
 		topBarButtonWidth = (int) (48 * Utils.densityMultiplier);
+		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+		mSidebarWidth = (int) ((isPortrait ? context.getResources().getDisplayMetrics().widthPixels : context.getResources().getDisplayMetrics().heightPixels) - topBarButtonWidth);
+		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
 
 		/* Close Animations */
 		contentAnimationOut = new TranslateAnimation(0, -mSidebarWidth, 0, 0);
@@ -278,6 +280,10 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		if (mContent == null) {
 			throw new NullPointerException("no view id = animation_content");
 		}
+
+		LayoutParams lp = mSidebar.getLayoutParams();
+		lp.width = mSidebarWidth;
+		mSidebar.setLayoutParams(lp);
 
 		mOpenListener = new OpenListener(mSidebar, mContent);
 		mCloseListener = new CloseListener(mSidebar, mContent);
