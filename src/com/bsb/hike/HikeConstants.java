@@ -63,6 +63,10 @@ public class HikeConstants
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms";
 
+	public static final String IMAGE = "Image";
+	public static final String VIDEO = "Video";
+	public static final String AUDIO = "Audio";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 

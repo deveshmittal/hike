@@ -20,6 +20,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.ChatThread;
 
 public class HikeNotification
@@ -53,7 +54,7 @@ public class HikeNotification
 		String message = (convMsg.getMetadata() == null || convMsg.getParticipantInfoState() != ParticipantInfoState.NO_INFO) ?
 				convMsg.getMessage() : 
 					convMsg.isFileTransferMessage() ?
-						convMsg.getMetadata().getHikeFiles().get(0).getFileName() : 
+						HikeFileType.toProperString(convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType()) : 
 							convMsg.getMetadata().getMessage(context, convMsg, false).toString();
 		long timestamp = convMsg.getTimestamp();
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo.getName())) ? contactInfo.getName() : msisdn;

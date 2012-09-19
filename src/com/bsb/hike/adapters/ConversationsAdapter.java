@@ -19,6 +19,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.MessageMetadata;
@@ -93,7 +94,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			}
 			else if (message.isFileTransferMessage())
 			{
-				markedUp = metadata.getHikeFiles().get(0).getFileName();
+				markedUp = HikeFileType.toProperString(metadata.getHikeFiles().get(0).getHikeFileType());
 				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()) ? View.GONE : View.VISIBLE);
 			}
 			else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
