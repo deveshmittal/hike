@@ -14,6 +14,15 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 
 	private DrawerLayout parentLayout;
 
+	@Override
+	protected void onCreate(Bundle savedInstanceState) 
+	{
+		super.onCreate(savedInstanceState);
+		// This does not apply to pre-Honeycomb devices, 
+		getWindow().setFlags(HikeConstants.FLAG_HARDWARE_ACCELERATED, 
+				HikeConstants.FLAG_HARDWARE_ACCELERATED);
+	}
+
 	public void afterSetContentView(Bundle savedInstanceState)
 	{
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);

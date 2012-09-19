@@ -127,6 +127,9 @@ public class HikeConstants
 
 	public static final String MAIL = "support@hike.in";
 
+	// Had to add this constant since its only available in the android API for Honeycomb and higher.
+	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
