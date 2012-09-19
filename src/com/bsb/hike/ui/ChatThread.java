@@ -89,6 +89,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.HikeSearchContactAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
@@ -192,7 +193,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ViewPager emoticonViewPager;
 
-	private EmoticonAdapter emoticonAdapter;
+	private EmoticonAdapter hikeEmoticonAdapter;
+
+	private EmoticonAdapter emojiAdapter;
 
 	private ViewGroup emoticonLayout;
 
@@ -246,6 +249,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			HikePubSub.UPLOAD_FINISHED, 
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED
 	};
+
+	private View currentEmoticonCategorySelected;
+
+	private EmoticonType emoticonType;
 
 	@Override
 	protected void onPause()
@@ -415,6 +422,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
+		currentEmoticonCategorySelected = findViewById(R.id.hike_emoticons_btn);
+		currentEmoticonCategorySelected.setSelected(true);
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
@@ -2485,42 +2494,64 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
+		boolean wasCategoryChanged = !isTabInitialised;
 
 		if(tabHost != null && !isTabInitialised)
 		{
 			isTabInitialised  = true;
 			Log.d(getClass().getSimpleName(), "Initialising boolean for emoticon layout setup.: " + isTabInitialised);
 
-			View tabHead = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
-			TabSpec ts1 = tabHost.newTabSpec("tab1");
-			((ImageView)tabHead.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_01_bigsmile);
-			tabHead.findViewById(R.id.divider_left).setVisibility(View.GONE);
-			ts1.setIndicator(tabHead);
-			ts1.setContent(new TabFactory());
-			tabHost.addTab(ts1);
+			int[] tabDrawables = null;
+			switch (currentEmoticonCategorySelected.getId()) 
+			{
+			case R.id.hike_emoticons_btn:
+				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin};
+				emoticonType = EmoticonType.HIKE_EMOTICON;
+				break;
+			case R.id.emoji_btn:
+				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin};
+				emoticonType = EmoticonType.EMOJI;
+				break;
+			}
 
-			View tabHead2 = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
-			TabSpec ts2 = tabHost.newTabSpec("tab2");
-			((ImageView)tabHead2.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_81_exciting);
-			ts2.setIndicator(tabHead2);
-			ts2.setContent(new TabFactory());
-			tabHost.addTab(ts2);
+			LayoutInflater layoutInflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+			for(int i = 0; i<tabDrawables.length; i++)
+			{
+				View tabHead = layoutInflater.inflate(R.layout.emoticon_tab_layout, null);
+				TabSpec ts = tabHost.newTabSpec("tab" + (i+1));
 
-			View tabHead3 = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
-			TabSpec ts3 = tabHost.newTabSpec("tab3");
-			((ImageView)tabHead3.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_111_grin);
-			tabHead3.findViewById(R.id.divider_right).setVisibility(View.GONE);
-			ts3.setIndicator(tabHead3);
-			ts3.setContent(new TabFactory());
-			tabHost.addTab(ts3);
+				((ImageView)tabHead.findViewById(R.id.tab_header_img)).setImageResource(tabDrawables[i]);
+				if(i == 0)
+				{
+					tabHead.findViewById(R.id.divider_left).setVisibility(View.GONE);
+				}
+				else if(i == tabDrawables.length - 1)
+				{
+					tabHead.findViewById(R.id.divider_right).setVisibility(View.GONE);
+				}
+				ts.setIndicator(tabHead);
+				ts.setContent(new TabFactory());
+				tabHost.addTab(ts);
+			}
+			if(emoticonType == EmoticonType.HIKE_EMOTICON)
+			{
+				if (hikeEmoticonAdapter == null) 
+				{
+					hikeEmoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView, EmoticonType.HIKE_EMOTICON);
+				}
+				emoticonViewPager.setAdapter(hikeEmoticonAdapter);
+			}
+			else if(emoticonType == EmoticonType.EMOJI)
+			{
+				if (emojiAdapter == null)
+				{
+					emojiAdapter = new EmoticonAdapter(ChatThread.this, mComposeView, EmoticonType.EMOJI);
+				}
+				emoticonViewPager.setAdapter(emojiAdapter);
+			}
 		}
 
-		if (emoticonAdapter == null) 
-		{
-			emoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView);
-			emoticonViewPager.setAdapter(emoticonAdapter);
-		}
-		if(emoticonLayout.getVisibility() == View.VISIBLE)
+		if(emoticonLayout.getVisibility() == View.VISIBLE && !wasCategoryChanged)
 		{
 			emoticonLayout.setVisibility(View.INVISIBLE);
 		}
@@ -2555,7 +2586,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 		});
 	}
-	
+
+	public void onEmoticonCategoryClick(View v)
+	{
+		if(v.isSelected())
+		{
+			return;
+		}
+		v.setSelected(true);
+		isTabInitialised = false;
+		currentEmoticonCategorySelected.setSelected(false);
+		currentEmoticonCategorySelected = v;
+		tabHost.clearAllTabs();
+		onEmoticonBtnClicked(null);
+	}
+
 	private class TabFactory implements TabContentFactory {
 
 		@Override

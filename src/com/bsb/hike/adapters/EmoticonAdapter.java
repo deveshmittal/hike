@@ -15,20 +15,40 @@ import android.widget.ImageView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 
 public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener{
 
-	private static final int EMOTICON_TAB_NUMBER = 3;
+	public enum EmoticonType
+	{
+		HIKE_EMOTICON,
+		EMOJI
+	}
+
+	private final int EMOTICON_TAB_NUMBER;
 
 	private LayoutInflater inflater;
 	private Context context;
 	private EditText composeBox;
+	private EmoticonType emoticonType;
 
-	public EmoticonAdapter(Context context, EditText composeBox) {
+	public EmoticonAdapter(Context context, EditText composeBox, EmoticonType emoticonType) {
 		this.inflater = LayoutInflater.from(context);
 		this.context = context;
 		this.composeBox = composeBox;
+		this.emoticonType = emoticonType;
+		switch (emoticonType) 
+		{
+		case HIKE_EMOTICON:
+			EMOTICON_TAB_NUMBER = SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES.length;
+			break;
+		case EMOJI:
+			EMOTICON_TAB_NUMBER = SmileyParser.EMOJI_SUBCATEGORIES.length;
+			break;
+		default:
+			EMOTICON_TAB_NUMBER = 0;
+		}
 	}
 
 	public void setComposeBox(EditText composeBox)
@@ -55,7 +75,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 	public Object instantiateItem(ViewGroup container, int position) 
 	{
 		GridView emoticonPage = (GridView) inflater.inflate(R.layout.emoticon_page, null);
-		emoticonPage.setAdapter(new EmoticonPageAdapter(position));
+		emoticonPage.setAdapter(new EmoticonPageAdapter(position, emoticonType));
 		emoticonPage.setOnItemClickListener(this);
 		
 		((ViewPager) container).addView(emoticonPage);
@@ -67,19 +87,38 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		int currentPage;
 		LayoutInflater inflater;
 		int startIndex;
+		final int[] emoticonSubCategories;
+		final int[] emoticonResIds;
+		int idOffset;
 
-		public EmoticonPageAdapter(int currentPage) {
+		public EmoticonPageAdapter(int currentPage, EmoticonType emoticonType) {
 			this.currentPage = currentPage;
 			this.inflater = LayoutInflater.from(context);
+			switch (emoticonType) 
+			{
+			case HIKE_EMOTICON:
+				emoticonSubCategories = SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES;
+				emoticonResIds = EmoticonConstants.DEFAULT_SMILEY_RES_IDS;
+				idOffset = 0;
+				break;
+			case EMOJI:
+				emoticonSubCategories = SmileyParser.EMOJI_SUBCATEGORIES;
+				emoticonResIds = EmoticonConstants.EMOJI_RES_IDS;
+				idOffset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+				break;
+			default:
+				emoticonSubCategories = null;
+				emoticonResIds = null;
+			}
 			for(int i=currentPage-1; i>=0; i--)
 			{
-				startIndex += SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES[i];
+				startIndex += emoticonSubCategories[i];
 			}
 		}
 
 		@Override
 		public int getCount() {
-			return SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES[currentPage];
+			return emoticonSubCategories[currentPage];
 		}
 
 		@Override
@@ -98,8 +137,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			{
 				convertView = inflater.inflate(R.layout.emoticon_item, null);
 			}
-			convertView.setTag(new Integer(startIndex + position));
-			((ImageView) convertView).setImageResource(SmileyParser.DEFAULT_SMILEY_RES_IDS[startIndex + position]);
+			convertView.setTag(new Integer(startIndex + idOffset + position));
+			((ImageView) convertView).setImageResource(emoticonResIds[startIndex + position]);
 			return convertView;
 		}
 	}
