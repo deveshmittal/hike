@@ -179,6 +179,39 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 				}
 				itemView.setFocusable(true);
 				int id = DrawerItems.values()[itemNumber++].ordinal();
+				switch (DrawerItems.values()[id]) 
+				{
+				case HOME:
+					if(activity instanceof MessagesList)
+					{
+						itemView.setBackgroundResource(R.drawable.drawer_top_item_pressed);
+					}
+					break;
+				case GROUP_CHAT:
+					if(activity instanceof ChatThread)
+					{
+						itemView.setBackgroundResource(R.drawable.drawer_center_item_pressed);
+					}
+					break;
+				case FREE_SMS:
+					if(activity instanceof CreditsActivity)
+					{
+						itemView.setBackgroundResource(R.drawable.drawer_top_item_pressed);
+					}
+					break;
+				case PROFILE:
+					if(activity instanceof ProfileActivity)
+					{
+						itemView.setBackgroundResource(R.drawable.drawer_center_item_pressed);
+					}
+					break;
+				case HELP:
+					if(activity instanceof Tutorial)
+					{
+						itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
+					}
+					break;
+				}
 				itemView.setId(id);
 				itemView.setOnClickListener(this);
 				parentView.addView(itemView);
