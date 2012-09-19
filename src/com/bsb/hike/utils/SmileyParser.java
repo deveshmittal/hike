@@ -1567,6 +1567,20 @@ public class SmileyParser
 	}
 
 	/**
+	 * Relaces all occurences of the emoji with a replacement string
+	 * @param text
+	 * @param replacement
+	 * @return
+	 */
+	public String replaceEmojiWithCharacter(CharSequence text, String replacement)
+	{
+		SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+		Matcher matcher = mEmojiPattern.matcher(spannableStringBuilder);
+
+		return matcher.replaceAll(replacement);
+	}
+
+	/**
 	 * Adds an emoticon image to the compose box 
 	 * @param composeBox: A reference to the text box in which the emoticon will be shown.
 	 * @param whichEmoticon: Integer value of the emoticon which is to be shown.

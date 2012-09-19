@@ -74,6 +74,9 @@ public class HikeNotification
 
 		int icon = R.drawable.ic_contact_logo;
 
+		//Replace emojis with a '*'
+		message = SmileyParser.getInstance().replaceEmojiWithCharacter(message, "*");
+
 		// TODO this doesn't turn the text bold :(
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s", key, message));
 		Notification notification = new Notification(icon, text, timestamp * 1000);
