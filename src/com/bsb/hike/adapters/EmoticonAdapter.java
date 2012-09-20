@@ -152,7 +152,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			{
 				convertView = inflater.inflate(R.layout.emoticon_item, null);
 			}
-			convertView.setTag(new Integer(currentPage != 0 ? startIndex + idOffset + position : recentEmoticons[position]));
+			convertView.setTag(Integer.valueOf((currentPage != 0 ? startIndex + position : recentEmoticons[position])+ idOffset));
 			((ImageView) convertView).setImageResource(emoticonResIds[currentPage != 0 ? startIndex + position : recentEmoticons[position]]);
 			return convertView;
 		}
