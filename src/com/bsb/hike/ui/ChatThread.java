@@ -299,12 +299,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false);
 		boolean isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
+		boolean isSharingFile = getIntent().getType() != null;
 		// Getting the group id. This will be a valid value if the intent was passed to add group participants.
 		String existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		mComposeView.removeTextChangedListener(this);
 
-		if(isForwardingMessage)
+		if(isSharingFile)
+		{
+			mLabelView.setText(R.string.share_file);
+		}
+		else if(isForwardingMessage)
 		{
 			mLabelView.setText(R.string.forward);
 		}
@@ -332,7 +337,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByOnHike();
-		if(isForwardingMessage)
+		if(isForwardingMessage || isSharingFile)
 		{
 			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());
 		}
