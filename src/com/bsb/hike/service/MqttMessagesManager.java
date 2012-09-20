@@ -111,6 +111,14 @@ public class MqttMessagesManager {
 			if(joined)
 			{
 				saveStatusMsg(jsonObj, msisdn);
+
+				List<String> groupConversations = convDb.listOfGroupConversationsWithMsisdn(msisdn);
+
+				// For group chats
+				for(String groupId:groupConversations)
+				{
+					saveStatusMsg(jsonObj, groupId);
+				}
 			}
 			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			this.convDb.updateOnHikeStatus(msisdn, joined);
