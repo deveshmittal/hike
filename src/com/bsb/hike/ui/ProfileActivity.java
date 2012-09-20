@@ -289,6 +289,14 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
 
 		nameTxt = groupConversation.getLabel();
+
+		// Make sure that the group name text does not exceed the permitted length
+		int maxLength = getResources().getInteger(R.integer.max_length_group_name);
+		if(nameTxt.length() > maxLength)
+		{
+			nameTxt = nameTxt.substring(0, maxLength);
+		}
+
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(groupConversation.getMsisdn());
 
 		mIconView.setImageDrawable(drawable);
@@ -327,6 +335,13 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		mTitleView.setText(getResources().getString(R.string.edit_profile));
 		((EditText)phone.findViewById(R.id.phone_input)).setText(mLocalMSISDN);
 		((EditText)phone.findViewById(R.id.phone_input)).setEnabled(false);
+
+		// Make sure that the name text does not exceed the permitted length
+		int maxLength = getResources().getInteger(R.integer.max_length_name);
+		if(nameTxt.length() > maxLength)
+		{
+			nameTxt = nameTxt.substring(0, maxLength);
+		}
 
 		mNameEdit.setText(nameTxt);
 		mEmailEdit.setText(emailTxt);
