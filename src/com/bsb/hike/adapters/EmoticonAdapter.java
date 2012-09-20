@@ -162,8 +162,13 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) 
 	{
 		int emoticonIndex = (Integer) arg1.getTag();
-		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
 		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
 		((ChatThread)context).onEmoticonBtnClicked(null);
+		// We don't add an emoticon if the compose box is near its maximum length of characters
+		if(composeBox.length() >= context.getResources().getInteger(R.integer.max_length_message) - 20)
+		{
+			return;
+		}
+		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
 	}
 }
