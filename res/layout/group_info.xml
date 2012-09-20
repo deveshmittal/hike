@@ -97,7 +97,7 @@
                         android:textStyle="italic"
                         android:visibility="gone"
 						android:paddingRight="1dp"
-						android:maxLength="30" />
+						android:maxLength="@integer/max_length_group_name" />
                     
                     <com.bsb.hike.view.CustomFontTextView
                         android:id="@+id/name_display"
