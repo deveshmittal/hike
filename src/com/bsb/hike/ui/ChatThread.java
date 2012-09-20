@@ -2557,9 +2557,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			Animation slideUp = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
-			slideUp.setDuration(400);
-			emoticonLayout.setAnimation(slideUp);
+			if(!wasCategoryChanged)
+			{
+				Animation slideUp = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
+				slideUp.setDuration(400);
+				emoticonLayout.setAnimation(slideUp);
+			}
 			emoticonLayout.setVisibility(View.VISIBLE);
 		}
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() 
