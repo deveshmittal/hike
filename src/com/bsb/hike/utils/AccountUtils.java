@@ -64,13 +64,17 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 
 public class AccountUtils
 {
-	public static final String DEFAULT_HOST = "im.hike.in";
+	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
 	public static final String STAGING_HOST = "staging.im.hike.in";
 
-	public static String HOST = DEFAULT_HOST;
+	public static final int PRODUCTION_PORT = 80;
+
+	public static final int STAGING_PORT = 8080;
+
+	public static String HOST = PRODUCTION_HOST;
 	
-	public static final int PORT = 8080;
+	public static int PORT = PRODUCTION_PORT;
 
 	public static String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 

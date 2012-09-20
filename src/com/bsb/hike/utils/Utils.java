@@ -41,9 +41,9 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.Matrix;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -1132,5 +1132,12 @@ public class Utils
             }
         }
         return b;
+    }
+
+    public static void setupServerURL(boolean isProductionServer)
+    {
+    	AccountUtils.HOST =  isProductionServer ? AccountUtils.PRODUCTION_HOST : AccountUtils.STAGING_HOST;
+		AccountUtils.PORT = isProductionServer ? AccountUtils.PRODUCTION_PORT : AccountUtils.STAGING_PORT;
+		AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
     }
 }
