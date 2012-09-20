@@ -299,7 +299,14 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(groupConversation.getMsisdn());
 
-		mIconView.setImageDrawable(drawable);
+		if(mActivityState.newBitmap == null)
+		{
+			mIconView.setImageDrawable(drawable);
+		}
+		else
+		{
+			mIconView.setImageBitmap(mActivityState.newBitmap);
+		}
 		mNameEdit.setText(nameTxt);
 		mNameDisplay.setText(nameTxt);
 		mTitleView.setText(R.string.group_info);
