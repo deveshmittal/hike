@@ -86,6 +86,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -412,6 +413,8 @@ public class Utils
 	public static boolean requireAuth(Activity activity)
 	{
 		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		// Added this line to prevent the bad username/password bug.
+		activity.stopService(new Intent(activity, HikeService.class));
 		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
 			activity.startActivity(new Intent(activity, WelcomeActivity.class));
