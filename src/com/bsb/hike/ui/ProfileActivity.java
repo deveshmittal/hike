@@ -11,7 +11,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -57,10 +56,11 @@ import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
-public class ProfileActivity extends Activity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
+public class ProfileActivity extends DrawerBaseActivity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
 {
 	/* dialog IDs */
 	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
@@ -94,8 +94,14 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 	private TextView mNameDisplay;
 	private ViewGroup participantNameContainer;
 	private ProfileItem[] items;
-	private ViewGroup credits;
 	private int lastSavedGender;
+	private String[] groupInfoPubSubListeners = {
+			HikePubSub.ICON_CHANGED, 
+			HikePubSub.GROUP_NAME_CHANGED, 
+			HikePubSub.GROUP_END, 
+			HikePubSub.PARTICIPANT_JOINED_GROUP, 
+			HikePubSub.PARTICIPANT_LEFT_GROUP
+	};
 
 	private static enum ProfileType
 	{
@@ -139,15 +145,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		}
 		if(profileType == ProfileType.GROUP_INFO)
 		{
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
-		}
-		else if(profileType == ProfileType.USER_PROFILE)
-		{
-			HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
+			for(String pubSubListener : groupInfoPubSubListeners)
+			{
+				HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
+			}
 		}
 		mActivityState = null;
 	}
@@ -181,11 +182,10 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		if(getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT))
 		{
 			this.profileType = ProfileType.GROUP_INFO;
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.PARTICIPANT_JOINED_GROUP, this);
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.PARTICIPANT_LEFT_GROUP, this);
-			HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
+			for(String pubSubListener : groupInfoPubSubListeners)
+			{
+				HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
+			}
 			setupGroupProfileScreen();
 		}
 		else
@@ -201,8 +201,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 			else
 			{
 				this.profileType = ProfileType.USER_PROFILE;
-				HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-				setupProfileScreen();
+				setupProfileScreen(savedInstanceState);
 			}
 		}
 	}
@@ -341,38 +340,33 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		Utils.hideCursor(mNameEdit, getResources());
 	}
 
-	private void setupProfileScreen()
+	private void setupProfileScreen(Bundle savedInstanceState)
 	{
 		setContentView(R.layout.profile);
+		afterSetContentView(savedInstanceState);
 
-		TextView mTitleView = (TextView) findViewById(R.id.title);
+		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 		TextView mNameView = (TextView) findViewById(R.id.name_current);
 
-		credits = (ViewGroup) findViewById(R.id.free_sms);
 		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info); 
 		ViewGroup notifications = (ViewGroup) findViewById(R.id.notifications);
 		ViewGroup privacy = (ViewGroup) findViewById(R.id.privacy);
-		ViewGroup help = (ViewGroup) findViewById(R.id.help);
 
-		myInfo.setBackgroundResource(R.drawable.profile_top_item_selector);
-		credits.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		myInfo.setBackgroundResource(R.drawable.profile_single_item_selector);
 		notifications.setBackgroundResource(R.drawable.profile_top_item_selector);
-		privacy.setBackgroundResource(R.drawable.profile_center_item_selector);
-		help.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		privacy.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 
 		mIconView = (ImageView) findViewById(R.id.profile);
 
 		ViewGroup[] itemLayouts = new ViewGroup[]
 				{
-				credits, notifications, privacy, help
+				notifications, privacy
 				};
 
 		items = new ProfileItem[] 
 				{
-				new ProfileItem.ProfileSettingsItem("Free hike SMS left", R.drawable.ic_credits, HikeMessengerApp.SMS_SETTING),
 				new ProfileItem.ProfilePreferenceItem("Notifications", R.drawable.ic_notifications, R.xml.notification_preferences),
-				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences),
-				new ProfileItem.ProfileLinkItem("Help", R.drawable.ic_help, HikeConstants.HELP_URL)
+				new ProfileItem.ProfilePreferenceItem("Privacy", R.drawable.ic_privacy, R.xml.privacy_preferences)
 				};
 
 		for(int i = 0; i < items.length; i++)
@@ -389,10 +383,8 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		mIconView.setImageDrawable(drawable);
 
 		myInfo.setFocusable(true);
-		credits.setFocusable(true);
 		notifications.setFocusable(true);
 		privacy.setFocusable(true);
-		help.setFocusable(true);
 	}
 
 	private void fetchPersistentData()
@@ -415,7 +407,14 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 		}
 		else
 		{
-			super.onBackPressed();
+			if(this.profileType == ProfileType.USER_PROFILE)
+			{
+				super.onBackPressed();
+			}
+			else
+			{
+				finish();
+			}
 		}
 	}
 
@@ -464,6 +463,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 								HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 						editor.putString(HikeMessengerApp.NAME_SETTING, name);
 						editor.commit();
+						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_NAME_CHANGED, null);
 					}
 					else
 					{
@@ -530,6 +530,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO)
 					{
 						db.setIcon(getLargerIconId(), larger_bytes, true);
+						HikeMessengerApp.getPubSub().publish(HikePubSub.PROFILE_PIC_CHANGED, null);
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -656,6 +657,11 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 				return;
 			}
 			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
+			if(TextUtils.isEmpty(path))
+			{
+				Toast.makeText(getApplicationContext(), "Error getting image", Toast.LENGTH_SHORT).show();
+				return;
+			}
 			/* Crop the image */
 			Intent intent = new Intent(this, CropImage.class);
 			intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
@@ -808,6 +814,7 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 
 	@Override
 	public void onEventReceived(String type, Object object) {
+		super.onEventReceived(type, object);
 		if(mLocalMSISDN == null)
 		{
 			Log.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
@@ -925,17 +932,6 @@ public class ProfileActivity extends Activity implements FinishableEvent, androi
 					}
 				});
 			}
-		}
-		else if(HikePubSub.SMS_CREDIT_CHANGED.equals(type))
-		{
-			runOnUiThread(new Runnable() 
-			{
-				@Override
-				public void run() 
-				{
-					items[0].bindView(ProfileActivity.this, credits);
-				}
-			});
 		}
 	}
 }

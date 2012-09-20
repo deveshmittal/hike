@@ -120,19 +120,19 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 		this.lastMessaged = lastMessaged;
 	}
 
-	public ContactInfo(String id, String number, String name,String phoneNum)
+	public ContactInfo(String id, String msisdn, String name,String phoneNum)
 	{
-		this(id, number, name, phoneNum, false, "", 0, false);
+		this(id, msisdn, name, phoneNum, false, "", 0, false);
 	}
 
-	public ContactInfo(String id, String number, String name, String phoneNum, boolean onHike)
+	public ContactInfo(String id, String msisdn, String name, String phoneNum, boolean onHike)
 	{
-		this(id, number, name, phoneNum, onHike, "", 0, false);
+		this(id, msisdn, name, phoneNum, onHike, "", 0, false);
 	}
 
-	public ContactInfo(String id, String number, String name, String phoneNum, boolean onHike, String msisdnType, long lastMessaged)
+	public ContactInfo(String id, String msisdn, String name, String phoneNum, boolean onHike, String msisdnType, long lastMessaged)
 	{
-		this(id, number, name, phoneNum, onHike, msisdnType, lastMessaged, false);
+		this(id, msisdn, name, phoneNum, onHike, msisdnType, lastMessaged, false);
 	}
 
 	public ContactInfo(String id, String msisdn, String name, String phoneNum, boolean onhike, String msisdnType, long lastMessaged, boolean hasCustomPhoto)

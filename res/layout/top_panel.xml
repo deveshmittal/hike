@@ -5,11 +5,30 @@
     android:layout_height="48dp"
     android:background="@drawable/headerbar" >
 
+    <ImageButton 
+        android:id="@+id/topbar_menu"
+        android:layout_width="48dp"
+        android:layout_marginTop="-2dp"
+        android:onClick="onToggleSideBarClicked"
+        android:layout_height="@dimen/top_bar_btn_height"
+        android:src="@drawable/ic_topbar_menu"
+        android:background="@drawable/top_bar_btn_selector"
+        android:visibility="gone" />
+    
+    <View
+        android:id="@+id/menu_bar"
+        android:layout_toRightOf="@+id/topbar_menu"
+        android:layout_width="1dp"
+        android:layout_height="@dimen/top_bar_btn_height"
+        android:layout_marginTop="-1dp"
+        android:background="@drawable/button_separator"
+        android:visibility="gone" />
+    
     <ImageView
         android:id="@+id/title_hikeicon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
+        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
         android:layout_marginLeft="17dp"
@@ -34,6 +53,21 @@
         android:singleLine="true"
         android:textAppearance="@style/ChatLabelStyle"
         android:textSize="20dp" />
+    
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/title_centered"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:shadowColor="#002147"
+        android:shadowDy="-0.7"
+        android:shadowRadius="0.4"
+        android:singleLine="true"
+        android:textAppearance="@style/ChatLabelStyle"
+        android:textSize="20dp" />
 
     <LinearLayout
         android:id="@+id/top_button_container"
@@ -46,7 +80,7 @@
         <View
             android:id="@+id/button_bar_2"
             android:layout_width="1dp"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -54,7 +88,7 @@
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/title_icon"
             android:layout_width="60dp"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-1dp"
             android:background="@drawable/top_bar_btn_selector"
             android:gravity="center"
@@ -68,7 +102,7 @@
         <View
             android:id="@+id/button_bar"
             android:layout_width="1dp"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -76,7 +110,7 @@
         <ImageButton
             android:id="@+id/title_image_btn"
             android:layout_width="wrap_content"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-2dp"
             android:background="@drawable/top_bar_btn_selector"
             android:onClick="onTitleIconClick"
@@ -86,7 +120,7 @@
         <View
             android:id="@+id/button_bar3"
             android:layout_width="1dp"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-1dp"
             android:background="@drawable/button_separator"
             android:visibility="gone" />
@@ -94,7 +128,7 @@
         <ImageButton
             android:id="@+id/title_image_btn2"
             android:layout_width="wrap_content"
-            android:layout_height="47dp"
+            android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-2dp"
             android:background="@drawable/top_bar_btn_selector"
             android:onClick="onTitleIconClick"

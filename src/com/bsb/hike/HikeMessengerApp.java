@@ -39,6 +39,7 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
+import com.bsb.hike.utils.Utils;
 
 @ReportsCrashes(formKey = "",
 				customReportContent = {
@@ -121,7 +122,7 @@ public class HikeMessengerApp extends Application
 
 	public static final String TOTAL_CREDITS_PER_MONTH = HikeConstants.TOTAL_CREDITS_PER_MONTH;
 
-	public static final String HOST = "host";
+	public static final String PRODUCTION = "production";
 
 	private static HikePubSub mPubSubInstance;
 
@@ -287,8 +288,7 @@ public class HikeMessengerApp extends Application
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 
-		AccountUtils.HOST = settings.getString(HikeMessengerApp.HOST, AccountUtils.DEFAULT_HOST);
-		AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
+		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION, true));
 
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();

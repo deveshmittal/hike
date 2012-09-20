@@ -14,21 +14,45 @@ import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 
 public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener{
 
-	private static final int EMOTICON_TAB_NUMBER = 3;
+	public enum EmoticonType
+	{
+		HIKE_EMOTICON,
+		EMOJI
+	}
+
+	public static final int MAX_RECENT_EMOTICONS_TO_SHOW = 21; 
+
+	private final int EMOTICON_TAB_NUMBER;
 
 	private LayoutInflater inflater;
 	private Context context;
 	private EditText composeBox;
+	private EmoticonType emoticonType;
 
-	public EmoticonAdapter(Context context, EditText composeBox) {
+	public EmoticonAdapter(Context context, EditText composeBox, EmoticonType emoticonType) {
 		this.inflater = LayoutInflater.from(context);
 		this.context = context;
 		this.composeBox = composeBox;
+		this.emoticonType = emoticonType;
+		switch (emoticonType) 
+		{
+		// Incrementing these numbers to show a recents tab as well.
+		case HIKE_EMOTICON:
+			EMOTICON_TAB_NUMBER = SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES.length + 1;
+			break;
+		case EMOJI:
+			EMOTICON_TAB_NUMBER = SmileyParser.EMOJI_SUBCATEGORIES.length + 1;
+			break;
+		default:
+			EMOTICON_TAB_NUMBER = 0;
+		}
 	}
 
 	public void setComposeBox(EditText composeBox)
@@ -55,7 +79,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 	public Object instantiateItem(ViewGroup container, int position) 
 	{
 		GridView emoticonPage = (GridView) inflater.inflate(R.layout.emoticon_page, null);
-		emoticonPage.setAdapter(new EmoticonPageAdapter(position));
+		emoticonPage.setAdapter(new EmoticonPageAdapter(position, emoticonType));
 		emoticonPage.setOnItemClickListener(this);
 		
 		((ViewPager) container).addView(emoticonPage);
@@ -67,19 +91,49 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		int currentPage;
 		LayoutInflater inflater;
 		int startIndex;
+		final int[] emoticonSubCategories;
+		final int[] emoticonResIds;
+		int[] recentEmoticons;
+		int idOffset;
 
-		public EmoticonPageAdapter(int currentPage) {
+		public EmoticonPageAdapter(int currentPage, EmoticonType emoticonType) {
 			this.currentPage = currentPage;
 			this.inflater = LayoutInflater.from(context);
-			for(int i=currentPage-1; i>=0; i--)
+			switch (emoticonType) 
 			{
-				startIndex += SmileyParser.SIZES_EMOTICON_SETS[i];
+			case HIKE_EMOTICON:
+				emoticonSubCategories = currentPage != 0 ? SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES : null;
+				emoticonResIds = EmoticonConstants.DEFAULT_SMILEY_RES_IDS;
+				idOffset = 0;
+				break;
+			case EMOJI:
+				emoticonSubCategories = currentPage != 0 ? SmileyParser.EMOJI_SUBCATEGORIES : null;
+				emoticonResIds = EmoticonConstants.EMOJI_RES_IDS;
+				idOffset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+				break;
+			default:
+				emoticonSubCategories = null;
+				emoticonResIds = null;
+			}
+			if(currentPage != 0)
+			{
+				for(int i=currentPage-2; i>=0; i--)
+				{
+					startIndex += emoticonSubCategories[i];
+				}
+			}
+			else
+			{
+				recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType(emoticonType);
 			}
 		}
 
 		@Override
 		public int getCount() {
-			return SmileyParser.SIZES_EMOTICON_SETS[currentPage];
+			return currentPage != 0 ? 
+					emoticonSubCategories[currentPage - 1] : 
+						(recentEmoticons.length > MAX_RECENT_EMOTICONS_TO_SHOW ? 
+								MAX_RECENT_EMOTICONS_TO_SHOW : recentEmoticons.length);
 		}
 
 		@Override
@@ -98,8 +152,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			{
 				convertView = inflater.inflate(R.layout.emoticon_item, null);
 			}
-			convertView.setTag(new Integer(startIndex + position));
-			((ImageView) convertView).setImageResource(SmileyParser.DEFAULT_SMILEY_RES_IDS[startIndex + position]);
+			convertView.setTag(new Integer(currentPage != 0 ? startIndex + idOffset + position : recentEmoticons[position]));
+			((ImageView) convertView).setImageResource(emoticonResIds[currentPage != 0 ? startIndex + position : recentEmoticons[position]]);
 			return convertView;
 		}
 	}
@@ -107,7 +161,9 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) 
 	{
-		SmileyParser.getInstance().addSmiley(composeBox, (Integer) arg1.getTag());
+		int emoticonIndex = (Integer) arg1.getTag();
+		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
+		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(emoticonIndex, System.currentTimeMillis());
 		((ChatThread)context).onEmoticonBtnClicked(null);
 	}
 }

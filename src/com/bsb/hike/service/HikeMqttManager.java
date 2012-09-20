@@ -187,13 +187,19 @@ public class HikeMqttManager implements Listener
 	/* VARIABLES used to configure MQTT connection */
 	/************************************************************************/
 
+	private static final String PRODUCTION_BROKER_HOST_NAME = "mqtt.im.hike.in";
+	private static final String STAGING_BROKER_HOST_NAME = AccountUtils.STAGING_HOST;
+
+	private static final int PRODUCTION_BROKER_PORT_NUMBER = 8080;
+	private static final int STAGING_BROKER_PORT_NUMBER = 1883;
+
 	// taken from preferences
 	// host name of the server we're receiving push notifications from
-	private String brokerHostName = AccountUtils.HOST;
+	private final String brokerHostName;
 
 	// defaults - this sample uses very basic defaults for it's interactions
 	// with message brokers
-	private int brokerPortNumber = 1883;
+	private final int brokerPortNumber;
 
 	private HikeMqttPersistence persistence = null;
 
@@ -248,6 +254,11 @@ public class HikeMqttManager implements Listener
 		mConnectTimeoutHandler = new ConnectTimeoutHandler();
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 		this.mqttMessageManager = MqttMessagesManager.getInstance(mHikeService);
+
+		settings = this.mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
+		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
+		brokerPortNumber = production ? PRODUCTION_BROKER_PORT_NUMBER : STAGING_BROKER_PORT_NUMBER;
 	}
 
 	public HikePacket getPacketIfUnsent(int mqttId)
@@ -258,7 +269,6 @@ public class HikeMqttManager implements Listener
 
 	private boolean init()
 	{
-		settings = this.mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
 		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null) + ":" + HikeConstants.APP_API_VERSION;

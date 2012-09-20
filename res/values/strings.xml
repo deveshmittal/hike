@@ -135,4 +135,20 @@
 	<string name="tap_to_record">TAP TO RECORD</string>
 	<string name="tap_to_play">TAP TO PLAY</string>
 	<string name="playing">PLAYING</string>
+	<string name="home">Home</string>
+	<string name="free_sms_txt">Free SMS</string>
+	<string name="rewards">Rewards</string>
+	<string name="help">Help</string>
+	<string name="rewards_info">Invite friends, earn rewards.\nFor every friend who joins you get:</string>
+	<string name="credit_to_balance">Rs.10 credited\nto your balance</string>
+	<string name="free_sms_month">50 free SMS\nevery month</string>
+	<string name="reward">Reward</string>
+	<string name="claimed_so_far">Claimed so far:</string>
+	<string name="rewards_disclaimer">You can claim a reward once it’s more than Rs.50.\nMore about Rewards in our FAQs.</string>
+	<string name="hike_to_hike_free_always">Messaging friends on hike is free,\nalways, worldwide.</string>
+	<string name="hike_to_sms">You can also message friends\nand family who aren\'t on hike with\nfree hike SMS.</string>
+	<string name="hike_to_sms_disclaimer">*works only in India</string>
+	<string name="rewards_intro">For every friend who joins you get:</string>
+	<string name="help_info">Questions? Write to us or read\nthrough frequently asked questions.</string>
+	<string name="meet_hike">Meet hike</string>
 </resources>

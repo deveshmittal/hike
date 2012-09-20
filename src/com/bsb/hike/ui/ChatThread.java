@@ -89,6 +89,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
+import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.HikeSearchContactAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
@@ -192,7 +193,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ViewPager emoticonViewPager;
 
-	private EmoticonAdapter emoticonAdapter;
+	private EmoticonAdapter hikeEmoticonAdapter;
+
+	private EmoticonAdapter emojiAdapter;
 
 	private ViewGroup emoticonLayout;
 
@@ -227,6 +230,29 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private Dialog recordingDialog;
 
 	private RecorderState recorderState;
+
+	private String[] pubSubListeners = {
+			HikePubSub.MESSAGE_RECEIVED, 
+			HikePubSub.TYPING_CONVERSATION, 
+			HikePubSub.END_TYPING_CONVERSATION, 
+			HikePubSub.SMS_CREDIT_CHANGED, 
+			HikePubSub.MESSAGE_DELIVERED_READ, 
+			HikePubSub.MESSAGE_DELIVERED, 
+			HikePubSub.SERVER_RECEIVED_MSG, 
+			HikePubSub.MESSAGE_FAILED, 
+			HikePubSub.ICON_CHANGED, 
+			HikePubSub.USER_JOINED, 
+			HikePubSub.USER_LEFT, 
+			HikePubSub.GROUP_NAME_CHANGED, 
+			HikePubSub.GROUP_END, 
+			HikePubSub.CONTACT_ADDED, 
+			HikePubSub.UPLOAD_FINISHED, 
+			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED
+	};
+
+	private View currentEmoticonCategorySelected;
+
+	private EmoticonType emoticonType;
 
 	@Override
 	protected void onPause()
@@ -271,14 +297,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	/* msg is any text we want to show initially */
 	private void createAutoCompleteView()
 	{
-		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false); 
+		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false);
+		boolean isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
 		// Getting the group id. This will be a valid value if the intent was passed to add group participants.
 		String existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		mComposeView.removeTextChangedListener(this);
 
-		mLabelView.setText(!TextUtils.isEmpty(existingGroupId) ? R.string.add_group : (isGroupChat ? R.string.new_group : R.string.new_message));
-		
+		if(isForwardingMessage)
+		{
+			mLabelView.setText(R.string.forward);
+		}
+		else if(!TextUtils.isEmpty(existingGroupId))
+		{
+			mLabelView.setText(R.string.add_group);
+		}
+		else if(isGroupChat)
+		{
+			mLabelView.setText(R.string.new_group);
+		}
+		else
+		{
+			mLabelView.setText(R.string.new_message);
+		}
+
 		mBottomView.setVisibility(View.GONE);
 
 		if(isGroupChat)
@@ -289,10 +331,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
-
+		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByOnHike();
+		if(isForwardingMessage)
+		{
+			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());
+		}
 		mInputNumberView.setText("");
 		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
-				this, HikeUserDatabase.getInstance().getContactsOrderedByOnHike(), mInputNumberView, isGroupChat, titleBtn, existingGroupId, getIntent());
+				this, contactList, mInputNumberView, isGroupChat, titleBtn, existingGroupId, getIntent());
 		mContactSearchView.setAdapter(adapter);
 		mContactSearchView.setOnItemClickListener(adapter);
 		mInputNumberView.addTextChangedListener(adapter);
@@ -310,22 +356,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.END_TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_JOINED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.USER_LEFT, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_END, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPLOAD_FINISHED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
+		}
 
 		if (mComposeViewWatcher != null)
 		{
@@ -353,6 +387,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			return;
 		}
+		Utils.setDensityMultiplier(ChatThread.this);
 
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
@@ -366,7 +401,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		Utils.setDensityMultiplier(ChatThread.this);
 
 		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		isOverlayShowing  = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
@@ -388,6 +422,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
+		currentEmoticonCategorySelected = findViewById(R.id.hike_emoticons_btn);
+		currentEmoticonCategorySelected.setSelected(true);
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
@@ -425,25 +461,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		/* register listeners */
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.TYPING_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.END_TYPING_CONVERSATION, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_JOINED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.USER_LEFT, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_END, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPLOAD_FINISHED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
+		}
 	}
 
 	@Override
@@ -470,7 +491,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			
 			/* slide down if we're still selecting a user, otherwise slide back */
-			if (mConversation == null) {
+			if (mConversation == null && !getIntent().hasExtra(HikeConstants.Extras.GROUP_CHAT)) {
 				overridePendingTransition(R.anim.no_animation,
 						R.anim.slide_down_noalpha);
 			} else {
@@ -513,6 +534,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
 			Intent intent = new Intent(this, ChatThread.class);
 			String msg;
+			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 			if(message.isFileTransferMessage())
 			{
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
@@ -1039,7 +1061,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		/* get the number of credits and also listen for changes */
 		mCredits = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.SMS_SETTING, 0);
-		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -1254,7 +1275,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mUiThreadHandler.postDelayed(mClearTypingCallback, 20 * 1000);
 			}
 		}
-		else if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
+		// We only consider this case if there is a valid conversation in the Chat Thread
+		else if (mConversation != null && HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{	
 			mCredits = ((Integer) object).intValue();
 			runOnUiThread(new Runnable()
@@ -2472,42 +2494,64 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
+		boolean wasCategoryChanged = !isTabInitialised;
 
 		if(tabHost != null && !isTabInitialised)
 		{
 			isTabInitialised  = true;
 			Log.d(getClass().getSimpleName(), "Initialising boolean for emoticon layout setup.: " + isTabInitialised);
 
-			View tabHead = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
-			TabSpec ts1 = tabHost.newTabSpec("tab1");
-			((ImageView)tabHead.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_01_bigsmile);
-			tabHead.findViewById(R.id.divider_left).setVisibility(View.GONE);
-			ts1.setIndicator(tabHead);
-			ts1.setContent(new TabFactory());
-			tabHost.addTab(ts1);
+			int[] tabDrawables = null;
+			switch (currentEmoticonCategorySelected.getId()) 
+			{
+			case R.id.hike_emoticons_btn:
+				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin};
+				emoticonType = EmoticonType.HIKE_EMOTICON;
+				break;
+			case R.id.emoji_btn:
+				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin};
+				emoticonType = EmoticonType.EMOJI;
+				break;
+			}
 
-			View tabHead2 = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
-			TabSpec ts2 = tabHost.newTabSpec("tab2");
-			((ImageView)tabHead2.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_81_exciting);
-			ts2.setIndicator(tabHead2);
-			ts2.setContent(new TabFactory());
-			tabHost.addTab(ts2);
+			LayoutInflater layoutInflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+			for(int i = 0; i<tabDrawables.length; i++)
+			{
+				View tabHead = layoutInflater.inflate(R.layout.emoticon_tab_layout, null);
+				TabSpec ts = tabHost.newTabSpec("tab" + (i+1));
 
-			View tabHead3 = ((LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.emoticon_tab_layout, null);
-			TabSpec ts3 = tabHost.newTabSpec("tab3");
-			((ImageView)tabHead3.findViewById(R.id.tab_header_img)).setImageResource(R.drawable.emo_im_111_grin);
-			tabHead3.findViewById(R.id.divider_right).setVisibility(View.GONE);
-			ts3.setIndicator(tabHead3);
-			ts3.setContent(new TabFactory());
-			tabHost.addTab(ts3);
+				((ImageView)tabHead.findViewById(R.id.tab_header_img)).setImageResource(tabDrawables[i]);
+				if(i == 0)
+				{
+					tabHead.findViewById(R.id.divider_left).setVisibility(View.GONE);
+				}
+				else if(i == tabDrawables.length - 1)
+				{
+					tabHead.findViewById(R.id.divider_right).setVisibility(View.GONE);
+				}
+				ts.setIndicator(tabHead);
+				ts.setContent(new TabFactory());
+				tabHost.addTab(ts);
+			}
+			if(emoticonType == EmoticonType.HIKE_EMOTICON)
+			{
+				if (hikeEmoticonAdapter == null) 
+				{
+					hikeEmoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView, EmoticonType.HIKE_EMOTICON);
+				}
+				emoticonViewPager.setAdapter(hikeEmoticonAdapter);
+			}
+			else if(emoticonType == EmoticonType.EMOJI)
+			{
+				if (emojiAdapter == null)
+				{
+					emojiAdapter = new EmoticonAdapter(ChatThread.this, mComposeView, EmoticonType.EMOJI);
+				}
+				emoticonViewPager.setAdapter(emojiAdapter);
+			}
 		}
 
-		if (emoticonAdapter == null) 
-		{
-			emoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView);
-			emoticonViewPager.setAdapter(emoticonAdapter);
-		}
-		if(emoticonLayout.getVisibility() == View.VISIBLE)
+		if(emoticonLayout.getVisibility() == View.VISIBLE && !wasCategoryChanged)
 		{
 			emoticonLayout.setVisibility(View.INVISIBLE);
 		}
@@ -2542,7 +2586,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 		});
 	}
-	
+
+	public void onEmoticonCategoryClick(View v)
+	{
+		if(v.isSelected())
+		{
+			return;
+		}
+		v.setSelected(true);
+		isTabInitialised = false;
+		currentEmoticonCategorySelected.setSelected(false);
+		currentEmoticonCategorySelected = v;
+		tabHost.clearAllTabs();
+		onEmoticonBtnClicked(null);
+	}
+
 	private class TabFactory implements TabContentFactory {
 
 		@Override

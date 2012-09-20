@@ -63,6 +63,10 @@ public class HikeConstants
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms";
 
+	public static final String IMAGE = "Image";
+	public static final String VIDEO = "Video";
+	public static final String AUDIO = "Audio";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 
@@ -124,6 +128,11 @@ public class HikeConstants
 	public static final int NO_CHANGE = 0;
 	public static final int DND_STATUS_CHANGE = 1;
 	public static final int NEW_PARTICIPANT = 2;
+
+	public static final String MAIL = "support@hike.in";
+
+	// Had to add this constant since its only available in the android API for Honeycomb and higher.
+	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
 	public static final class Extras
 	{
@@ -187,6 +196,9 @@ public class HikeConstants
 		public static final String FILE_NAME = "fileName";
 		public static final String RECORDER_DIALOG_SHOWING = "recorderDialogShowing";
 		public static final String RECORDER_START_TIME = "recorderStartTime";
+		public static final String IS_DRAWER_VISIBLE = "isDrawerVisible";
+		public static final String FORWARD_MESSAGE = "forwardMessage";
+		public static final String HELP_PAGE = "helpPage";
 	}
 
 	public static final class LogEvent

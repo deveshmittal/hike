@@ -39,7 +39,6 @@ public class DbConversationListener implements Listener
 		mUserDb = HikeUserDatabase.getInstance();
 		persistence = HikeMqttPersistence.getInstance();
 		mPubSub.addListener(HikePubSub.MESSAGE_SENT, this);
-		mPubSub.addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		mPubSub.addListener(HikePubSub.MESSAGE_DELETED, this);
 		mPubSub.addListener(HikePubSub.MESSAGE_FAILED, this);
 		mPubSub.addListener(HikePubSub.BLOCK_USER, this);

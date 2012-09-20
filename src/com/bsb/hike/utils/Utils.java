@@ -41,9 +41,9 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
-import android.graphics.Matrix;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -86,6 +86,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
+import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -241,7 +242,9 @@ public class Utils
 	{
 		Intent intent = new Intent();
 		intent.putExtra(HikeConstants.Extras.ID, contactInfo.getId());
-		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
+
+		// If the contact info was made using a group conversation, then the Group ID is in the contact ID
+		intent.putExtra(HikeConstants.Extras.MSISDN, Utils.isGroupConversation(contactInfo.getMsisdn()) ? contactInfo.getId() : contactInfo.getMsisdn());
 		return intent;
 	}
 
@@ -410,6 +413,8 @@ public class Utils
 	public static boolean requireAuth(Activity activity)
 	{
 		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		// Added this line to prevent the bad username/password bug.
+		activity.stopService(new Intent(activity, HikeService.class));
 		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
 			activity.startActivity(new Intent(activity, WelcomeActivity.class));
@@ -979,9 +984,9 @@ public class Utils
 	{
 	    String[] proj = { MediaStore.Images.Media.DATA };
 	    Cursor cursor = activity.managedQuery(contentUri, proj, null, null, null);
-	    if (cursor == null)
+	    if (cursor == null || cursor.getCount() == 0)
 		{
-			return contentUri.getPath();
+			return null;
 		}
 	    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
 	    cursor.moveToFirst();
@@ -1130,5 +1135,12 @@ public class Utils
             }
         }
         return b;
+    }
+
+    public static void setupServerURL(boolean isProductionServer)
+    {
+    	AccountUtils.HOST =  isProductionServer ? AccountUtils.PRODUCTION_HOST : AccountUtils.STAGING_HOST;
+		AccountUtils.PORT = isProductionServer ? AccountUtils.PRODUCTION_PORT : AccountUtils.STAGING_PORT;
+		AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
     }
 }

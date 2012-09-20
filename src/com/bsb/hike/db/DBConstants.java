@@ -3,7 +3,7 @@ package com.bsb.hike.db;
 public class DBConstants
 {
 	
-	public static final int CONVERSATIONS_DATABASE_VERSION = 4;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 5;
 	
 	public static final int USERS_DATABASE_VERSION = 3;
 	
@@ -89,4 +89,12 @@ public class DBConstants
 	public static final String ON_DND = "onDnd";
 
 	public static final String SHOWN_STATUS = "shownStatus";
+
+	public static final String EMOTICON_TABLE = "emoticonTable";
+
+	public static final String EMOTICON_NUM = "emoticonNum";
+
+	public static final String LAST_USED = "lastUsed";
+
+	public static final String EMOTICON_INDEX = "emoticonIdx";
 }

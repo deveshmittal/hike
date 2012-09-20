@@ -117,6 +117,10 @@ public class HikePubSub implements Runnable
 
 	public static final String SHOW_PARTICIPANT_STATUS_MESSAGE = "showParticipantStatusMessage";
 
+	public static final String PROFILE_PIC_CHANGED = "profilePicChanged";
+
+	public static final String PROFILE_NAME_CHANGED = "profileNameChanged";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

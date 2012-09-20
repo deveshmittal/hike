@@ -57,6 +57,24 @@ public class HikeFile
 			}
 			return null;
 		}
+
+		public static String toProperString(HikeFileType hikeFileType)
+		{
+			if (hikeFileType == PROFILE ||
+					hikeFileType == IMAGE)
+			{
+				return HikeConstants.IMAGE;
+			}
+			else if (hikeFileType == VIDEO)
+			{
+				return HikeConstants.VIDEO;
+			}
+			else if (hikeFileType == AUDIO)
+			{
+				return HikeConstants.AUDIO;
+			}
+			return null;
+		}
 	}
 
 	private String fileName;

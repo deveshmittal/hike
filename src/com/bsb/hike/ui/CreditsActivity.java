@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -14,10 +13,11 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.GaugeView;
 
-public class CreditsActivity extends Activity implements Listener
+public class CreditsActivity extends DrawerBaseActivity implements Listener
 {
 	private TextView mTitleView;
 	private TextView creditsNum;
@@ -31,13 +31,14 @@ public class CreditsActivity extends Activity implements Listener
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.credits);
+		afterSetContentView(savedInstanceState);
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Editor editor = settings.edit();
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
 		editor.commit();
 
-		mTitleView = (TextView) findViewById(R.id.title);
+		mTitleView = (TextView) findViewById(R.id.title_centered);
 		creditsGaugeView = (GaugeView) findViewById(R.id.gauge);
 		creditsNum = (TextView) findViewById(R.id.sms_num);
 		inviteFriendsBtn = (ImageButton) findViewById(R.id.invite_now);
@@ -74,6 +75,7 @@ public class CreditsActivity extends Activity implements Listener
 	@Override
 	public void onEventReceived(String type, Object object) 
 	{
+		super.onEventReceived(type, object);
 		if(HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{
 			runOnUiThread(new Runnable() 

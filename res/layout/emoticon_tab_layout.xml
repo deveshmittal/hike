@@ -15,7 +15,7 @@
     <ImageView
         android:id="@+id/tab_header_img"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="35dp"
         android:background="@drawable/tab_selector"
         android:gravity="center"
         android:paddingBottom="5dp"

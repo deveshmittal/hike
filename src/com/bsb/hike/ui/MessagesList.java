@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
@@ -63,9 +62,10 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 
-public class MessagesList extends Activity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
+public class MessagesList extends DrawerBaseActivity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
 	private static final int INVITE_PICKER_RESULT = 1001;
 
@@ -101,6 +101,21 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	private boolean deviceDetailsSent = false;
 
+	private String[] pubSubListeners = {
+			HikePubSub.MESSAGE_RECEIVED, 
+			HikePubSub.SERVER_RECEIVED_MSG, 
+			HikePubSub.MESSAGE_DELIVERED_READ, 
+			HikePubSub.MESSAGE_DELIVERED, 
+			HikePubSub.MESSAGE_FAILED, 
+			HikePubSub.NEW_CONVERSATION, 
+			HikePubSub.MESSAGE_SENT, 
+			HikePubSub.MSG_READ, 
+			HikePubSub.ICON_CHANGED, 
+			HikePubSub.GROUP_LEFT, 
+			HikePubSub.GROUP_NAME_CHANGED, 
+			HikePubSub.UPDATE_AVAILABLE, 
+			HikePubSub.CONTACT_ADDED 
+	};
 	@Override
 	protected void onPause()
 	{
@@ -162,11 +177,11 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		
 		if (Utils.requireAuth(this))
 		{
 			return;
 		}
+		Utils.setDensityMultiplier(MessagesList.this);
 
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		String token = accountPrefs.getString(HikeMessengerApp.TOKEN_SETTING, null);
@@ -183,10 +198,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
 		app.connectToService();
 
-
 		setContentView(R.layout.main);
-
-		Utils.setDensityMultiplier(MessagesList.this);
+		afterSetContentView(savedInstanceState);
 
 		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		wasAlertCancelled = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
@@ -261,21 +274,10 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 			leaveGroup(mConversationsByMSISDN.get(getIntent().getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
 		}
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_FAILED, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_SENT, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MSG_READ, this);
-
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.ICON_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_LEFT, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.GROUP_NAME_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.UPDATE_AVAILABLE, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONTACT_ADDED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
+		}
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 	}
@@ -360,14 +362,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT, deviceDetailsSent);
 		outState.putBoolean(HikeConstants.Extras.ALERT_CANCELLED, wasAlertCancelled);
 		super.onSaveInstanceState(outState);
-	}
-
-	@Override
-	public void onBackPressed()
-	{
-		Utils.incrementNumTimesScreenOpen(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
-		// super.onBackPressed() would crash the application sometimes. Android Bug.
-		finish();
 	}
 
 	private Intent createIntentForConversation(Conversation conversation)
@@ -465,13 +459,8 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		Intent intent;
 		switch (item.getItemId())
 		{
-		case R.id.invite:
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.INVITE_MENU);
-			Utils.startShareIntent(MessagesList.this, Utils.getInviteMessage(MessagesList.this));
-			return true;
 		case R.id.deleteconversations:
 			if (!mAdapter.isEmpty()) {
 				Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
@@ -481,16 +470,6 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 						.setNegativeButton(R.string.cancel, this).show();
 			}
 			return true;
-		case R.id.profile:
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.PROFILE_MENU);
-			intent = new Intent(this, ProfileActivity.class);
-			startActivity(intent);
-			return true;
-		case R.id.group_chat:
-			intent = new Intent(this, ChatThread.class);
-			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-			startActivity(intent);
-			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -499,21 +478,16 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	@Override
 	protected void onDestroy()
 	{
+		if(accountPrefs != null)
+		{
+			Utils.incrementNumTimesScreenOpen(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+		}
 		super.onDestroy();
 		Log.d(getClass().getSimpleName(), "onDestroy " + this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MSG_READ, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_SENT, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_RECEIVED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.NEW_CONVERSATION, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SERVER_RECEIVED_MSG, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED_READ, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_DELIVERED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.MESSAGE_FAILED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.ICON_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_LEFT, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.GROUP_NAME_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.UPDATE_AVAILABLE, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.CONTACT_ADDED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
+		}
 	}
 
 	@Override
@@ -532,6 +506,7 @@ public class MessagesList extends Activity implements OnClickListener, OnItemCli
 	@Override
 	public void onEventReceived(String type, Object object)
 	{
+		super.onEventReceived(type, object);
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type)) || (HikePubSub.MESSAGE_SENT.equals(type)))
 		{
 			Log.d("MESSAGE LIST", "New msg event sent or received.");
