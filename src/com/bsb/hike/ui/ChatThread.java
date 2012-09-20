@@ -2600,6 +2600,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		isTabInitialised = false;
 		currentEmoticonCategorySelected.setSelected(false);
 		currentEmoticonCategorySelected = v;
+		/*
+		 * Added this line for older android device issue
+		 * http://stackoverflow.com/questions/6157373/removing-a-tab-and-the-activity-intent-inside-of-it-from-a-tabhost
+		 */
+		tabHost.setCurrentTab(0);
 		tabHost.clearAllTabs();
 		onEmoticonBtnClicked(null);
 	}
