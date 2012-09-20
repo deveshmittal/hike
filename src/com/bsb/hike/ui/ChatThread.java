@@ -2350,7 +2350,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			String thumbnailString = null;
 			if(hikeFileType == HikeFileType.IMAGE)
 			{
-				thumbnail = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+				thumbnail = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, true);
 			}
 			else if(hikeFileType == HikeFileType.VIDEO)
 			{
