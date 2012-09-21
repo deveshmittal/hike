@@ -124,6 +124,8 @@ public class HikeMessengerApp extends Application
 
 	public static final String PRODUCTION = "production";
 
+	public static final String COUNTRY_CODE = "countryCode";
+
 	private static HikePubSub mPubSubInstance;
 
 	private static Messenger mMessenger;

@@ -230,7 +230,13 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 				if(viewFlipper.getDisplayedChild() == NUMBER)
 				{
 					String code = countryPicker.getText().toString();
-					input = code.substring(code.indexOf("+"), code.length()) + input;
+					code = code.substring(code.indexOf("+"), code.length());
+					input = code + input;
+
+					// Saving country code of the user. This will be used when the user tries to message an unknown number.
+					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
+					editor.commit();
 				}
 				mTask.addUserInput(input);
 			}
