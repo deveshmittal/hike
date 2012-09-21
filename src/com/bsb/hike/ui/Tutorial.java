@@ -249,7 +249,6 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 		{
 			intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
-			startActivity(intent);
 		}
 		if(intent != null)
 		{
