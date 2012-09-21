@@ -384,6 +384,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		Utils.setDensityMultiplier(ChatThread.this);
 		/* add a handler on the UI thread so we can post delayed messages */
 		mUiThreadHandler = new Handler();
 
@@ -392,7 +393,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			return;
 		}
-		Utils.setDensityMultiplier(ChatThread.this);
 
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
