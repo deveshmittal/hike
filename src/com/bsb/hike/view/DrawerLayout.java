@@ -275,7 +275,6 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		public void run()
 		{
 			mContent.clearAnimation();
-			closeSidebar(true);
 		}
 	};
 
