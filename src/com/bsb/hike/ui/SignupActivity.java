@@ -214,6 +214,10 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		if (tapHereText != null) {
 			tapHereText.setVisibility(View.GONE);
 		}
+		if(countryPicker != null)
+		{
+			countryPicker.setEnabled(false);
+		}
 	}
 
 	private void submitClicked()
@@ -282,6 +286,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	{
 		initializeViews(numLayout);
 
+		countryPicker.setEnabled(true);
 
 	    countryNamesAndCodes = getResources().getStringArray(R.array.country_names_and_codes);
 	    countryISOAndCodes = getResources().getStringArray(R.array.country_iso_and_codes);
