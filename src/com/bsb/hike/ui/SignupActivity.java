@@ -87,6 +87,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 	private String[] countryISOAndCodes;
 
+	private String countryCode;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -111,6 +113,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			switch(dispChild)
 			{
 			case NUMBER:
+				countryCode = savedInstanceState.getString(HikeConstants.Extras.COUNTRY_CODE);
 				prepareLayoutForFetchingNumber();
 				break;
 			case PIN:
@@ -279,22 +282,29 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	{
 		initializeViews(numLayout);
 
-		TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-	    String countryIso = manager.getNetworkCountryIso().toUpperCase();
 
 	    countryNamesAndCodes = getResources().getStringArray(R.array.country_names_and_codes);
 	    countryISOAndCodes = getResources().getStringArray(R.array.country_iso_and_codes);
 
-	    Log.d(getClass().getSimpleName(), "COUNTRY ISO: " + countryIso);
-	    for(String s : countryISOAndCodes)
+	    if(TextUtils.isEmpty(countryCode))
 	    {
-	    	if(s.contains(countryIso))
+	    	TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+	    	String countryIso = manager.getNetworkCountryIso().toUpperCase();
+	    	for(String s : countryISOAndCodes)
 	    	{
-	    		Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
-	    		countryPicker.setText(s);
+	    		if(s.contains(countryIso))
+	    		{
+	    			Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
+	    			countryPicker.setText(s);
+	    			break;
+	    		}
 	    	}
 	    }
-		formatCountryPickerText(countryPicker.getText().toString());
+	    else
+	    {
+	    	countryPicker.setText(countryCode);
+	    }
+	    formatCountryPickerText(countryPicker.getText().toString());
 
 		infoTxt.setImageResource(msisdnErrorDuringSignup ? R.drawable.enter_phone_again : R.drawable.enter_phone);
 		invalidNum.setVisibility(View.INVISIBLE);
@@ -302,6 +312,10 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 	private void formatCountryPickerText(String code)
 	{
+		if(countryPicker == null)
+		{
+			return;
+		}
 		SpannableStringBuilder ssb = new SpannableStringBuilder(code);
 		ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, code.indexOf("+"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		countryPicker.setText(ssb);
@@ -427,6 +441,10 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, booBooLayout.getVisibility() == View.VISIBLE);
 		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
+		if(viewFlipper.getDisplayedChild() == NUMBER)
+		{
+			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker.getText().toString());
+		}
 		super.onSaveInstanceState(outState);
 	}
 

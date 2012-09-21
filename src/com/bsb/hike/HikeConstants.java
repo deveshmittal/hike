@@ -201,6 +201,7 @@ public class HikeConstants
 		public static final String HELP_PAGE = "helpPage";
 		public static final String WHICH_EMOTICON_CATEGORY = "whichEmoticonCategory";
 		public static final String WHICH_EMOTICON_SUBCATEGORY = "whichEmoticonSubcategory";
+		public static final String COUNTRY_CODE = "countryCode";
 	}
 
 	public static final class LogEvent
