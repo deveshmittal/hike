@@ -59,19 +59,28 @@
                 android:background="@drawable/ic_emoticon_divider_1"
                 android:layout_below="@id/emoticons_categories_container"/>
             
-            <android.support.v4.view.ViewPager
-                android:id="@+id/emoticon_pager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@android:id/tabs"
-                android:layout_below="@id/divider" />
-
             <View 
+                android:id="@+id/divider_2"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@drawable/ic_emoticon_divider_2"
                 android:layout_above="@android:id/tabs"/>
             
+            <LinearLayout
+                android:id="@+id/page_indicator_container"
+                android:layout_width="match_parent"
+                android:layout_height="10dp"
+                android:layout_above="@id/divider_2"
+                android:gravity="center"
+                android:orientation="horizontal" />
+            
+            <android.support.v4.view.ViewPager
+                android:id="@+id/emoticon_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/page_indicator_container"
+                android:layout_below="@id/divider" />
+
             <FrameLayout
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"

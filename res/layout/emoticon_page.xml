@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/emoticon_page"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:numColumns="7"
-    android:fadingEdge="none"
-    android:listSelector="@android:color/transparent"
-    android:drawSelectorOnTop="false"
-    android:background="@null" />
+    android:layout_height="match_parent" >
+
+    <GridView
+        android:id="@+id/emoticon_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:drawSelectorOnTop="false"
+        android:fadingEdge="none"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="7" />
+
+    <TextView
+        android:id="@+id/recent_use_txt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="@string/recent_icon_text"
+        android:textColor="@color/black"
+        android:textSize="13sp"
+        android:visibility="gone" />
+
+</RelativeLayout>
