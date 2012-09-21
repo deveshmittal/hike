@@ -901,6 +901,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				String msg = intent.getStringExtra(HikeConstants.Extras.MSG);
 				mComposeView.setText(msg);
 				mComposeView.setSelection(msg.length());
+				SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText());
 			}
 			else if(intent.hasExtra(HikeConstants.Extras.FILE_PATH))
 			{
