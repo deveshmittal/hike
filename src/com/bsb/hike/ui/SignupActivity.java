@@ -434,7 +434,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) 
 			{
-				return loadingLayout.getVisibility() == View.VISIBLE;
+				return loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
 			}
 		});
 	}
