@@ -241,12 +241,14 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 		Intent intent = null;
 		if(v.getId() == R.id.btn_faq)
 		{
+			Utils.logEvent(this, HikeConstants.LogEvent.HELP_FAQ);
 			intent = new Intent(this, WebViewActivity.class);
 			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
 			intent.putExtra(HikeConstants.Extras.TITLE, "FAQs");
 		}
 		else if(v.getId() == R.id.btn_contact)
 		{
+			Utils.logEvent(this, HikeConstants.LogEvent.HELP_CONTACT);
 			intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
 		}

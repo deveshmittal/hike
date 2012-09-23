@@ -72,17 +72,18 @@ public class Rewards extends DrawerBaseActivity
 
 	public void onInviteClicked(View v)
 	{
-		Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
+		Utils.logEvent(this, HikeConstants.LogEvent.REWARDS_INVITE);
 		Utils.startShareIntent(this, Utils.getInviteMessage(this));
 	}
 
 	public void onClaimClicked(View v)
 	{
-		
+		Utils.logEvent(this, HikeConstants.LogEvent.REWARDS_CLAIM);
 	}
 
 	public void onFaqClicked(View v)
 	{
+		Utils.logEvent(this, HikeConstants.LogEvent.REWARDS_FAQ);
 		Intent intent = new Intent(this, WebViewActivity.class);
 		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
 		intent.putExtra(HikeConstants.Extras.TITLE, "Help");

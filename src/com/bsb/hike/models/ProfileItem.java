@@ -2,18 +2,14 @@ package com.bsb.hike.models;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.ui.WebViewActivity;
-import com.bsb.hike.utils.Utils;
 
 public abstract class ProfileItem
 {
@@ -83,42 +79,6 @@ public abstract class ProfileItem
 			holder.extraView.setVisibility(View.VISIBLE);
 		}	
 	}
-	/**
-	 * A profile item that displays the contents of a setting
-	 * @author vr
-	 *
-	 */
-	static public class ProfileSettingsItem extends ProfileItem
-	{
-		private String settingsName;
-
-		public ProfileSettingsItem(String title, int icon, String settingsName)
-		{
-			super(title, icon);
-			this.settingsName = settingsName;
-		}
-
-		@Override
-		public Intent getIntent(Context context)
-		{
-			Utils.logEvent(context, HikeConstants.LogEvent.CREDITS_SCREEN);
-			return new Intent(context, CreditsActivity.class);
-/*			Uri uri = Uri.parse("http://www.bsb.com/hike-help/" + settingsName);
-			return new Intent(Intent.ACTION_VIEW, uri);
-*/
-		}
-
-		@Override
-		public void bindView(Context context, View v)
-		{
-			super.bindView(context, v);
-			ProfileViewHolder holder = (ProfileViewHolder) v.getTag(R.id.profile_item_extra);
-			SharedPreferences settings = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			String credits = Integer.toString(settings.getInt(this.settingsName, 0));
-			((TextView) holder.extraView).setText(credits);
-			holder.extraView.setVisibility(View.VISIBLE);
-		}		
-	}
 
 	String title;
 	int icon;
@@ -160,15 +120,8 @@ public abstract class ProfileItem
 		v.setTag(R.id.profile, p);
 		holder.iconView = (ImageView) v.findViewById(R.id.profile_item_icon);
 		holder.titleView = (TextView) v.findViewById(R.id.profile_item_name);
-		if (p instanceof ProfileSettingsItem) 
-		{
-			holder.extraView = (TextView) v
-					.findViewById(R.id.profile_item_extra);
-		}
-		else
-		{
-			holder.extraView = (ImageView) v.findViewById(R.id.arrow);
-		}
+		
+		holder.extraView = (ImageView) v.findViewById(R.id.arrow);
 	
 		return holder;
 	}

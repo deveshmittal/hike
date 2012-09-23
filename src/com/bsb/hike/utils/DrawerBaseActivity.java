@@ -53,6 +53,7 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 
 	public void onToggleSideBarClicked(View v)
 	{
+		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
 		parentLayout.toggleSidebar(false);
 	}
 
