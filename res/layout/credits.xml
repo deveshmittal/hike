@@ -39,125 +39,130 @@
                 android:gravity="center_horizontal"
                 android:orientation="vertical" >
 
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/profile_bckg"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:paddingBottom="20dp"
+                    android:paddingTop="10dp" >
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="26dp"
-                        android:src="@drawable/bg_gauge" />
-
-                    <ImageView
-                        android:id="@+id/indicator_lines"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="28dp"
-                        android:src="@drawable/indicator_lines" />
-
-                    <com.bsb.hike.view.GaugeView
-                        android:id="@+id/gauge"
-                        android:layout_width="230dp"
-                        android:layout_height="230dp"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="10dp" />
-
-                    <ImageView
+                    <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:scaleType="fitXY"
-                        android:src="@drawable/gauge_area"
-                        android:visibility="visible" />
+                        android:layout_height="wrap_content" >
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="16dp"
-                        android:src="@drawable/indicator_numbers" />
+                        <com.bsb.hike.view.GaugeView
+                            android:id="@+id/gauge"
+                            android:layout_width="240dp"
+                            android:layout_height="140dp"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="30dp"
+                            android:visibility="visible" />
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="22dp"
+                            android:src="@drawable/gauge_area"
+                            android:visibility="visible" />
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="16dp"
+                            android:src="@drawable/ic_indicators" />
+
+                        <com.bsb.hike.view.RotatableImageView
+                            android:id="@+id/pointer"
+                            android:layout_width="241dp"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="25dp"
+                            android:scaleType="center"
+                            android:src="@drawable/ic_pointer"
+                            android:visibility="visible" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <LinearLayout
+                            android:id="@+id/credits_container"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginLeft="20dp"
+                            android:layout_toLeftOf="@id/credits_container"
+                            android:background="@drawable/ic_thread_divider_profile" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="20dp"
+                            android:layout_toRightOf="@id/credits_container"
+                            android:background="@drawable/ic_thread_divider_profile" />
+                    </RelativeLayout>
 
                     <TextView
-                        android:id="@+id/sms_num"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:paddingBottom="30dp"
-                        android:text="236"
-                        android:textColor="@color/subtext"
-                        android:textSize="45sp"
+                        android:layout_marginTop="5dp"
+                        android:text="@string/free_sms_left"
+                        android:textColor="@color/lightblack"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:paddingTop="30dp"
-                        android:text="@string/free_hike_sms"
-                        android:textColor="@color/subtext"
-                        android:textSize="14sp" />
+                        android:text="@string/sms_renew"
+                        android:textColor="@color/credits_text"
+                        android:textSize="10sp" />
 
                     <TextView
-                        android:id="@+id/validity"
+                        android:id="@+id/free_sms"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/indicator_lines"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginTop="5dp"
-                        android:text="@string/valid_till"
-                        android:textColor="@color/timestampcolor"
-                        android:textSize="11sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/validity"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginLeft="30dp"
-                        android:layout_marginRight="30dp"
                         android:layout_marginTop="10dp"
                         android:gravity="center"
-                        android:text="@string/sms_renew"
-                        android:textColor="@color/subtext"
-                        android:textSize="14sp" />
-                </RelativeLayout>
+                        android:text="@string/invite_friend_free_sms"
+                        android:textColor="@color/credits_text"
+                        android:textSize="13sp" />
+
+                    <ImageButton
+                        android:id="@+id/invite_now"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/btn_blue_selector"
+                        android:paddingBottom="12dp"
+                        android:paddingLeft="40dp"
+                        android:paddingRight="40dp"
+                        android:paddingTop="9dp"
+                        android:src="@drawable/txt_invite_friends" />
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="40dp"
-                    android:layout_marginRight="40dp"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:drawableRight="@drawable/ic_india"
                     android:gravity="center"
-                    android:text="@string/invite_friend_free_sms"
+                    android:text="@string/disclaimer_india"
                     android:textColor="@color/subtext"
-                    android:textSize="14sp" />
-
-                <ImageButton
-                    android:id="@+id/invite_now"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:background="@null"
-                    android:src="@drawable/credit_invite_btn" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="40dp"
-                    android:layout_marginRight="40dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/bg_group_chat_txt"
-                    android:gravity="center"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:text="@string/group_chat_free"
-                    android:textColor="@color/timestampcolor"
-                    android:textSize="10sp"
-                    android:visibility="visible" />
+                    android:textSize="12sp" />
             </LinearLayout>
         </ScrollView>
     </RelativeLayout>
