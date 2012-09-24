@@ -78,6 +78,10 @@ public class AccountUtils
 
 	public static String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
+	private static final String FILE_TRANSFER_HOST = "ft.im.hike.in";
+
+	private static final String FILE_TRANSFER_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
 	private static HttpClient mClient = null;
@@ -592,7 +596,7 @@ public class AccountUtils
 		FileInputStream fileInputStream = new FileInputStream(file);
 
 		URL url;
-		url = new URL(BASE + hikeHttpRequest.getPath());
+		url = new URL(FILE_TRANSFER_BASE + hikeHttpRequest.getPath());
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
