@@ -413,10 +413,10 @@ public class Utils
 	public static boolean requireAuth(Activity activity)
 	{
 		SharedPreferences settings = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		// Added this line to prevent the bad username/password bug.
-		activity.stopService(new Intent(activity, HikeService.class));
+		
 		if (!settings.getBoolean(HikeMessengerApp.ACCEPT_TERMS, false))
 		{
+			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, WelcomeActivity.class));
 			activity.finish();
 			return true;
@@ -424,6 +424,7 @@ public class Utils
 
 		if (settings.getString(HikeMessengerApp.NAME_SETTING, null) == null)
 		{
+			disconnectAndStopService(activity);
 			activity.startActivity(new Intent(activity, SignupActivity.class));
 			activity.finish();
 			return true;
@@ -432,7 +433,15 @@ public class Utils
 		Log.d("Utils", "auth token is " + settings.getString(HikeMessengerApp.TOKEN_SETTING, null));
 		return false;
 	}
-	
+
+	public static void disconnectAndStopService(Activity activity)
+	{
+		// Added these lines to prevent the bad username/password bug.
+		HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
+		app.disconnectFromService();
+		activity.stopService(new Intent(activity, HikeService.class));
+	}
+
 	public static int[] getNumberImage(String msisdn)
 	{
 		int[] msisdnRes = new int[msisdn.length()];
