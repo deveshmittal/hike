@@ -168,8 +168,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ArrayList<ConvMessage> messages;
 
-	private boolean shouldScrollToBottom = false;
-
 	private CustomLinearLayout chatLayout;
 
 	private Handler mHandler;
@@ -829,7 +827,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		titleIconView.setVisibility(View.GONE);
 		btnBar.setVisibility(View.GONE);
 
-		shouldScrollToBottom = true;
 		String prevContactNumber = null;
 		/* prevent any callbacks from previous instances of this activity from being fired now */
 		if (mClearTypingCallback != null)
@@ -1062,11 +1059,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mBottomView.setVisibility(View.VISIBLE);
 		}
 
-		if(shouldScrollToBottom)
-		{
-			shouldScrollToBottom = false;
-			mConversationsView.setSelection(messages.size()-1);
-		}
+		// Scroll to the bottom
+		mConversationsView.setSelection(messages.size()-1);
 
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
@@ -1150,6 +1144,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			 * avoid sending read notifications for group chats */
 			if (ids != null)
 			{
+				// Scroll to the last unread message
+				mConversationsView.setSelection(messages.size() - ids.length());
+
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
 				JSONObject object = new JSONObject();
