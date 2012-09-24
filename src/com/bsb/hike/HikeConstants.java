@@ -126,7 +126,7 @@ public class HikeConstants
 	public static final int INITIAL_PROGRESS = 5;
 
 	public static final int NO_CHANGE = 0;
-	public static final int DND_STATUS_CHANGE = 1;
+	public static final int PARTICIPANT_STATUS_CHANGE = 1;
 	public static final int NEW_PARTICIPANT = 2;
 
 	public static final String MAIL = "support@hike.in";
