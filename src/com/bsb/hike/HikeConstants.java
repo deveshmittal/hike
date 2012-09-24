@@ -107,7 +107,7 @@ public class HikeConstants
 
 	public static int PROFILE_IMAGE_DIMENSIONS = 80;
 
-	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{10,13}";
+	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{8,15}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 	public static final int MAX_FILE_SIZE = 6*1024*1024;
@@ -199,6 +199,9 @@ public class HikeConstants
 		public static final String IS_DRAWER_VISIBLE = "isDrawerVisible";
 		public static final String FORWARD_MESSAGE = "forwardMessage";
 		public static final String HELP_PAGE = "helpPage";
+		public static final String WHICH_EMOTICON_CATEGORY = "whichEmoticonCategory";
+		public static final String WHICH_EMOTICON_SUBCATEGORY = "whichEmoticonSubcategory";
+		public static final String COUNTRY_CODE = "countryCode";
 	}
 
 	public static final class LogEvent
@@ -221,13 +224,10 @@ public class HikeConstants
 	    /* 
 	     * Home screen events
 	     * <screen> = hoS
-	     * <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB, smSY, smSN, groupS
+	     * <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB, smSY, smSN, groupS, dRB
 	     */
 	    public static final String MENU = "hoS";
-	    public static final String PROFILE_MENU = "hoSprofS";
-	    public static final String INVITE_MENU = "hoSinvS";
 	    public static final String DELETE_ALL_CONVERSATIONS_MENU = "hoSdelAC";
-	    public static final String GROUP_CHAT_MENU = "hoSgroupS";
 	    public static final String DELETE_CONVERSATION = "hoSdelC";
 	    public static final String COMPOSE_BUTTON = "hoScompB";
 	    public static final String ADD_SHORTCUT = "hoSaddSC";
@@ -239,6 +239,7 @@ public class HikeConstants
 	    public static final String HOME_UDPATE_OVERLAY_BUTTON_CLICKED = "hoSupDOB";
 	    public static final String DEFAULT_SMS_DIALOG_YES = "hoSsmSY";
 	    public static final String DEFAULT_SMS_DIALOG_NO = "hoSsmSN";
+	    public static final String DRAWER_BUTTON = "hoSdRB";
 
 	    /* 
 	     * Profile screen events
@@ -246,10 +247,8 @@ public class HikeConstants
 	     * <event> = proES, credS, notyS, privS, helpS
 	     */
 	    public static final String EDIT_PROFILE = "profSproES";
-	    public static final String CREDITS_SCREEN = "profScredS";
 	    public static final String NOTIFICATION_SCREEN = "profSnotyS";
 	    public static final String PRIVACY_SCREEN = "profSprivS";
-	    public static final String HELP_SCREEN = "profShelpS";
 
 	    /* 
 	     * Invite screen events
@@ -296,7 +295,7 @@ public class HikeConstants
 	     * <screen> = groupS
 	     * <event> = adDparT
 	     */
-	    public static final String ADD_PARTICIPANT = "groupSadDparT";
+		public static final String ADD_PARTICIPANT = "groupSadDparT";
 	    
 	    /*
 	     * SignUp screen
@@ -304,6 +303,36 @@ public class HikeConstants
 	     * <event> = erroR
 	     */
 	    public static final String SIGNUP_ERROR = "signupSerroR";
+
+	    /*
+	     * Drawer screen
+	     * <screen> = drS
+	     * <event> = homE, gC, inV, reW, creD, proF, helP
+	     */
+	    public static final String DRAWER_HOME = "drShomE";
+	    public static final String DRAWER_GROUP_CHAT = "drSgC";
+	    public static final String DRAWER_INVITE = "drSinV";
+	    public static final String DRAWER_REWARDS = "drSreW";
+	    public static final String DRAWER_CREDITS = "drScreD";
+	    public static final String DRAWER_PROFILE = "drSproF";
+	    public static final String DRAWER_HELP = "drShelP";
+
+	    /*
+	     * Rewards screen
+	     * <screen> = rewS
+	     * <event> = inV, clM, faQ
+	     */
+	    public static final String REWARDS_INVITE = "rewSinV";
+	    public static final String REWARDS_CLAIM = "rewSclM";
+	    public static final String REWARDS_FAQ = "rewSfaQ";
+
+	    /*
+	     * Help screen
+	     * <screen> = helpS
+	     * <event> = conT, faQ
+	     */
+	    public static final String HELP_CONTACT = "helpSconT";
+	    public static final String HELP_FAQ = "helpSfaQ";
 	}
 
 	public static final class MqttMessageTypes

@@ -3,9 +3,15 @@ package com.bsb.hike.ui;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -16,15 +22,17 @@ import com.bsb.hike.R;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.GaugeView;
+import com.bsb.hike.view.RotatableImageView;
 
 public class CreditsActivity extends DrawerBaseActivity implements Listener
 {
 	private TextView mTitleView;
-	private TextView creditsNum;
+	private ViewGroup creditsContainer;
 	private ImageButton inviteFriendsBtn;
 	private SharedPreferences settings;
 	private GaugeView creditsGaugeView;
-	private TextView validityTxt;
+	private RotatableImageView creditsPointer;
+	private TextView freeSms;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -40,10 +48,19 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener
 
 		mTitleView = (TextView) findViewById(R.id.title_centered);
 		creditsGaugeView = (GaugeView) findViewById(R.id.gauge);
-		creditsNum = (TextView) findViewById(R.id.sms_num);
+		creditsContainer = (ViewGroup) findViewById(R.id.credits_container);
 		inviteFriendsBtn = (ImageButton) findViewById(R.id.invite_now);
-		validityTxt = (TextView) findViewById(R.id.validity);
-		validityTxt.setVisibility(View.INVISIBLE);
+		creditsPointer = (RotatableImageView) findViewById(R.id.pointer);
+		freeSms = (TextView) findViewById(R.id.free_sms);
+
+		String freeSmsString = getString(R.string.invite_friend_free_sms);
+		String textToColor = "50 free SMS";
+		int startIndex = freeSmsString.indexOf(textToColor);
+
+		SpannableStringBuilder ssb = new SpannableStringBuilder(freeSmsString);
+		ssb.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.lightblack)), startIndex, startIndex + textToColor.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+		freeSms.setText(ssb);
 
 		mTitleView.setText("Free SMS");
 
@@ -103,14 +120,30 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener
 	private void updateCredits()
 	{
 		int credits = settings.getInt(HikeMessengerApp.SMS_SETTING, 0);
-		creditsNum.setText(credits + "");
-		creditsGaugeView.setActualCreditsAngle(credits);
-		creditsGaugeView.invalidate();
+		creditsPointer.setCredits(credits);
+
+		creditsContainer.removeAllViews();
+		LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+
+		String creditsString = String.valueOf(credits);
+
+		for(int i = 0; i<creditsString.length(); i++)
+		{
+			TextView creditNum = (TextView) inflater.inflate(R.layout.credit_number, null);
+			creditNum.setText(creditsString.charAt(i) + "");
+			LayoutParams lp = new LayoutParams(getResources().getDimensionPixelSize(R.dimen.credits_num_width), getResources().getDimensionPixelSize(R.dimen.credits_num_height));
+			if(i == 0)
+			{
+				lp.leftMargin = (int) (5 * Utils.densityMultiplier);
+			}
+			lp.rightMargin = (int) (5 * Utils.densityMultiplier);
+			creditNum.setLayoutParams(lp);
+			creditsContainer.addView(creditNum);
+		}
 	}
 
 	private void updateTotalCredits()
 	{
 		creditsGaugeView.setMaxCreditsAngle(Integer.parseInt(settings.getString(HikeMessengerApp.TOTAL_CREDITS_PER_MONTH, "0")));
-		creditsGaugeView.invalidate();
 	}
 }

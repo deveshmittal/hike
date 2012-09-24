@@ -1,62 +1,59 @@
 package com.bsb.hike.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.view.View;
+import android.util.DisplayMetrics;
+import android.widget.ImageView;
 
 import com.bsb.hike.utils.Utils;
 
-public class GaugeView extends View
+public class GaugeView extends ImageView
 {
-	private Paint actualCreditsGauge;
-	private Paint maxCreditsOuterGauge;
-	private Paint maxCreditsInnerGauge;
-	private int actualCreditsAngle;
+	private Paint gaugeBackgroundPaint;
+	private Paint maxCreditsPaint;
 	private int maxCreditsAngle;
-	RectF actualCreditsArea;
-	RectF maxCreditsOuterArea;
-	RectF maxCreditsInnerArea;
 
-	private static final int START_ANGLE = 139;
+	private static final int START_ANGLE = 200;
+
+	private static final int END_ANGLE = 154;
+
+	private static final int MAX_CREDITS_TO_SHOW = 600;
+
+	private static final int MAX_ANGLE = 141;
 
 	private static final int OFFSET = 7;
-
-	private static final int MAX_CREDIT_TO_SHOW = 600;
-
-	private static final int MAX_ANGLE = 262;
-
-	private static final int ACTUAL_CREDIT_GAUGE_INCREMENT = 4;
-
-	private static final int MAX_CREDIT_GAUGE_INCREMENT = 8;
+	
+	private RectF gaugeArcArea;
 
 	public GaugeView(Context context, AttributeSet attrs, int defStyle) 
 	{
 		super(context, attrs, defStyle);
+		
+		DisplayMetrics metrics = new DisplayMetrics();
+		((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
-		actualCreditsGauge = new Paint();
-		actualCreditsGauge.setColor(0xff76b952);
-		actualCreditsGauge.setStyle(Paint.Style.STROKE);
-		actualCreditsGauge.setStrokeWidth(22.5f * Utils.densityMultiplier);
-		actualCreditsGauge.setAntiAlias(true);
+		gaugeBackgroundPaint = new Paint();
+		gaugeBackgroundPaint.setColor(0xffb2d989);
+		gaugeBackgroundPaint.setStyle(Paint.Style.STROKE);
+		gaugeBackgroundPaint.setStrokeWidth(56f * Utils.densityMultiplier);
+		gaugeBackgroundPaint.setAntiAlias(true);
 
-		maxCreditsOuterGauge = new Paint();
-		maxCreditsOuterGauge.setColor(0xff76b952);
-		maxCreditsOuterGauge.setStyle(Paint.Style.STROKE);
-		maxCreditsOuterGauge.setStrokeWidth(2.67f * Utils.densityMultiplier);
-		maxCreditsOuterGauge.setAntiAlias(true);
+		maxCreditsPaint = new Paint();
+		maxCreditsPaint.setColor(0xff90c86b);
+		maxCreditsPaint.setStyle(Paint.Style.STROKE);
+		maxCreditsPaint.setStrokeWidth(56f * Utils.densityMultiplier);
+		maxCreditsPaint.setAntiAlias(true);
 
-		maxCreditsInnerGauge = new Paint();
-		maxCreditsInnerGauge.setColor(0xff76b952);
-		maxCreditsInnerGauge.setStyle(Paint.Style.STROKE);
-		maxCreditsInnerGauge.setStrokeWidth(2.67f * Utils.densityMultiplier);
-		maxCreditsInnerGauge.setAntiAlias(true);
+		gaugeArcArea = new RectF(
+				(int)(24 * Utils.densityMultiplier), 
+				(int)(29 * Utils.densityMultiplier), 
+				(int)(214 * Utils.densityMultiplier), 
+				(int)(224 * Utils.densityMultiplier));
 
-		actualCreditsArea = new RectF((int)(15 * Utils.densityMultiplier), (int)(27 * Utils.densityMultiplier), (int)(214 * Utils.densityMultiplier), (int)(225 * Utils.densityMultiplier));
-		maxCreditsOuterArea = new RectF((int)(6 * Utils.densityMultiplier), (int)(18 * Utils.densityMultiplier), (int)(224 * Utils.densityMultiplier), (int)(235 * Utils.densityMultiplier));
-		maxCreditsInnerArea = new RectF((int)(25 * Utils.densityMultiplier), (int)(37 * Utils.densityMultiplier), (int)(205 * Utils.densityMultiplier), (int)(217 * Utils.densityMultiplier));
 	}
 
 	public GaugeView(Context context, AttributeSet attrs) 
@@ -64,14 +61,10 @@ public class GaugeView extends View
 		this(context, attrs, 0);
 	}
 
-	public void setActualCreditsAngle(int actualCredits)
+	public void setMaxCreditsAngle(int credits)
 	{
-		this.actualCreditsAngle = creditsToAngle(actualCredits);
-	}
-
-	public void setMaxCreditsAngle(int maxCredits)
-	{
-		this.maxCreditsAngle = creditsToAngle(maxCredits);
+		this.maxCreditsAngle = creditsToAngle(credits);
+		invalidate();
 	}
 
 	public GaugeView(Context context) 
@@ -81,26 +74,26 @@ public class GaugeView extends View
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		if(isInEditMode())
+		canvas.drawArc(gaugeArcArea, START_ANGLE - OFFSET, END_ANGLE, false, gaugeBackgroundPaint);
+		// Only show the arc if we have the credits per month is larger than zero
+		if(maxCreditsAngle > 0)
 		{
-			return;
+			canvas.drawArc(gaugeArcArea, START_ANGLE - OFFSET, maxCreditsAngle + OFFSET, false, maxCreditsPaint);
 		}
-
-		canvas.drawArc(actualCreditsArea, START_ANGLE - OFFSET, actualCreditsAngle + OFFSET, false, actualCreditsGauge);
-		canvas.drawArc(maxCreditsOuterArea, START_ANGLE, maxCreditsAngle, false, maxCreditsOuterGauge);
-		canvas.drawArc(maxCreditsInnerArea, START_ANGLE, maxCreditsAngle, false, maxCreditsInnerGauge);
-
 		super.onDraw(canvas);
 	}
 
 	private int creditsToAngle(int credits)
 	{
-		if(credits >= MAX_CREDIT_TO_SHOW)
+		if(credits == MAX_CREDITS_TO_SHOW)
 		{
 			return MAX_ANGLE;
 		}
-
-		float ratio = (credits * 100)/MAX_CREDIT_TO_SHOW;
+		else if(credits > MAX_CREDITS_TO_SHOW)
+		{
+			return END_ANGLE;
+		}
+		float ratio = (credits * 100)/MAX_CREDITS_TO_SHOW;
 		int angle = (int) (ratio * MAX_ANGLE)/100;
 		return angle;
 	}

@@ -9,6 +9,7 @@
         android:id="@+id/topbar_menu"
         android:layout_width="48dp"
         android:layout_marginTop="-2dp"
+        android:layout_marginLeft="-1dp"
         android:onClick="onToggleSideBarClicked"
         android:layout_height="@dimen/top_bar_btn_height"
         android:src="@drawable/ic_topbar_menu"

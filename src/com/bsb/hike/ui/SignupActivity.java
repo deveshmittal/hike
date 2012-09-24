@@ -1,15 +1,24 @@
 package com.bsb.hike.ui;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.telephony.TelephonyManager;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -19,10 +28,13 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.ViewFlipper;
@@ -57,6 +69,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private ImageButton submitBtn;
 	private ImageView invalidNum;
 	private ImageView errorImage;
+	private Button countryPicker;
 
 	private ImageButton tryAgainBtn;
 	private Handler mHandler;
@@ -69,6 +82,12 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private final int NUMBER = 0;
 
 	private MSISDNView msisdnView;
+
+	private String[] countryNamesAndCodes;
+
+	private String[] countryISOAndCodes;
+
+	private String countryCode;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -94,6 +113,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			switch(dispChild)
 			{
 			case NUMBER:
+				countryCode = savedInstanceState.getString(HikeConstants.Extras.COUNTRY_CODE);
 				prepareLayoutForFetchingNumber();
 				break;
 			case PIN:
@@ -194,6 +214,10 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		if (tapHereText != null) {
 			tapHereText.setVisibility(View.GONE);
 		}
+		if(countryPicker != null)
+		{
+			countryPicker.setEnabled(false);
+		}
 	}
 
 	private void submitClicked()
@@ -209,7 +233,19 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			}
 			else
 			{
-				mTask.addUserInput(enterEditText.getText().toString());
+				String input = enterEditText.getText().toString();
+				if(viewFlipper.getDisplayedChild() == NUMBER)
+				{
+					String code = countryPicker.getText().toString();
+					code = code.substring(code.indexOf("+"), code.length());
+					input = code + input;
+
+					// Saving country code of the user. This will be used when the user tries to message an unknown number.
+					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
+					editor.commit();
+				}
+				mTask.addUserInput(input);
 			}
 		} 
 		else 
@@ -240,6 +276,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		submitBtn = (ImageButton) layout.findViewById(R.id.btn_continue);
 		numberContainer = (LinearLayout) layout.findViewById(R.id.msisdn_container);
 		invalidNum = (ImageView) layout.findViewById(R.id.invalid_num);
+		countryPicker = (Button) layout.findViewById(R.id.country_picker);
 
 		loadingLayout.setVisibility(View.GONE);
 		submitBtn.setVisibility(View.VISIBLE);
@@ -248,8 +285,85 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private void prepareLayoutForFetchingNumber()
 	{
 		initializeViews(numLayout);
+
+		countryPicker.setEnabled(true);
+
+	    countryNamesAndCodes = getResources().getStringArray(R.array.country_names_and_codes);
+	    countryISOAndCodes = getResources().getStringArray(R.array.country_iso_and_codes);
+
+	    if(TextUtils.isEmpty(countryCode))
+	    {
+	    	TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+	    	String countryIso = manager.getNetworkCountryIso().toUpperCase();
+	    	for(String s : countryISOAndCodes)
+	    	{
+	    		if(s.contains(countryIso))
+	    		{
+	    			Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
+	    			countryPicker.setText(s);
+	    			break;
+	    		}
+	    	}
+	    }
+	    else
+	    {
+	    	countryPicker.setText(countryCode);
+	    }
+	    formatCountryPickerText(countryPicker.getText().toString());
+
 		infoTxt.setImageResource(msisdnErrorDuringSignup ? R.drawable.enter_phone_again : R.drawable.enter_phone);
 		invalidNum.setVisibility(View.INVISIBLE);
+	}
+
+	private void formatCountryPickerText(String code)
+	{
+		if(countryPicker == null)
+		{
+			return;
+		}
+		SpannableStringBuilder ssb = new SpannableStringBuilder(code);
+		ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, code.indexOf("+"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		countryPicker.setText(ssb);
+	}
+
+	public void onCountryPickerClick(View v)
+	{
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
+
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
+			    android.R.layout.select_dialog_item,
+			    android.R.id.text1,
+			    countryNamesAndCodes)
+			    {
+
+					@Override
+					public View getView(int position, View convertView,
+							ViewGroup parent) 
+					{
+						View v = super.getView(position, convertView, parent);
+						TextView tv = (TextView) v.findViewById(android.R.id.text1);
+
+						String text = tv.getText().toString();
+						SpannableStringBuilder spannable = new SpannableStringBuilder(text);
+						spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.country_code)), text.indexOf("+"), text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+						tv.setText(spannable);
+
+						return v;
+					}
+			    };
+
+				builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener() 
+				{
+					@Override
+					public void onClick(DialogInterface dialog, int which) 
+					{
+						formatCountryPickerText(countryISOAndCodes[which]);
+					}
+				});
+
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 
 	private void prepareLayoutForGettingPin()
@@ -320,7 +434,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) 
 			{
-				return loadingLayout.getVisibility() == View.VISIBLE;
+				return loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
 			}
 		});
 	}
@@ -332,6 +446,10 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, booBooLayout.getVisibility() == View.VISIBLE);
 		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
+		if(viewFlipper.getDisplayedChild() == NUMBER)
+		{
+			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker.getText().toString());
+		}
 		super.onSaveInstanceState(outState);
 	}
 

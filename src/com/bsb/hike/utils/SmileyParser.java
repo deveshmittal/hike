@@ -23,7 +23,7 @@ public class SmileyParser
 
 	public static final int[] HIKE_EMOTICONS_SUBCATEGORIES = {80, 30, 39};
 
-	public static final int[] EMOJI_SUBCATEGORIES = {109, 53, 132, 69, 101};
+	public static final int[] EMOJI_SUBCATEGORIES = {109, 53, 132, 72, 98};
 
 	public static final int CATEGORIES = 2;
 

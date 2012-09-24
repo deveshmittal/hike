@@ -1125,28 +1125,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public int[] fetchEmoticonsOfType(EmoticonType emoticonType)
+	public int[] fetchEmoticonsOfType(EmoticonType emoticonType, int startOffset, int endOffset, int limit)
 	{
-		int startOffset = 0;
-		int endOffset = 0;
-		switch (emoticonType)
-		{
-		case HIKE_EMOTICON:
-			startOffset = 0;
-			endOffset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
-			break;
-		case EMOJI:
-			startOffset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
-			endOffset = 0;
-			break;
-		}
 		Cursor c = null;
 		try
 		{
 			String[] columns = new String[] {DBConstants.EMOTICON_NUM};
 			String selection = DBConstants.EMOTICON_NUM + ">=" + startOffset + (endOffset != 0 ? " AND " + DBConstants.EMOTICON_NUM + "<" + (endOffset) : "");
 			Log.d(getClass().getSimpleName(), selection);
-			String orderBy = DBConstants.LAST_USED + " DESC LIMIT " + EmoticonAdapter.MAX_RECENT_EMOTICONS_TO_SHOW;
+			String orderBy = DBConstants.LAST_USED + " DESC LIMIT " + limit;
 
 			c = mDb.query(DBConstants.EMOTICON_TABLE, columns, selection, null, null, null, orderBy);
 			int[] emoticonIndices = new int[c.getCount()];
@@ -1154,7 +1141,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			int i = 0;
 			while(c.moveToNext())
 			{
-				emoticonIndices[i++] = emoticonType == EmoticonType.HIKE_EMOTICON ? c.getInt(emoticonIndexIdx) : c.getInt(emoticonIndexIdx) - startOffset;
+				emoticonIndices[i++] = emoticonType == EmoticonType.HIKE_EMOTICON ? c.getInt(emoticonIndexIdx) : c.getInt(emoticonIndexIdx) - EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 			}
 			Log.d(getClass().getSimpleName(), "Emoticon RES ID size: " + emoticonIndices.length);
 			return emoticonIndices;

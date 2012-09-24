@@ -951,7 +951,7 @@ public class Utils
 		return new BitmapDrawable(BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length));
 	}
 
-    public static Bitmap scaleDownImage(String filePath, int dimensionLimit)
+    public static Bitmap scaleDownImage(String filePath, int dimensionLimit, boolean makeSquareThumbnail)
     {
     	Bitmap thumbnail = null;
 
@@ -969,6 +969,20 @@ public class Utils
     	options.inJustDecodeBounds = false;
 
     	thumbnail = BitmapFactory.decodeFile(filePath, options);
+    	if(makeSquareThumbnail)
+    	{
+    		dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail.getWidth() : thumbnail.getHeight();
+
+    		int startX = thumbnail.getWidth() > dimensionLimit ? (int)((thumbnail.getWidth() - dimensionLimit)/2) : 0;
+    		int startY = thumbnail.getHeight() > dimensionLimit ? (int)((thumbnail.getHeight() - dimensionLimit)/2) : 0;
+
+    		Log.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
+    		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, dimensionLimit, dimensionLimit);
+
+    		thumbnail.recycle();
+    		thumbnail = null;
+    		return squareThumbnail;
+    	}
 
     	return thumbnail;
     }
@@ -1043,7 +1057,7 @@ public class Utils
     		if(hikeFileType == HikeFileType.IMAGE)
     		{
     			String imageOrientation = Utils.getImageOrientation(srcFilePath);
-    			Bitmap tempBmp = Utils.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX);
+    			Bitmap tempBmp = Utils.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, false);
     			tempBmp = Utils.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
 				byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG);
 				tempBmp.recycle();

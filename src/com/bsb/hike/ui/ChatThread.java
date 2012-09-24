@@ -74,6 +74,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TabHost;
@@ -108,6 +109,8 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -193,10 +196,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ViewPager emoticonViewPager;
 
-	private EmoticonAdapter hikeEmoticonAdapter;
-
-	private EmoticonAdapter emojiAdapter;
-
 	private ViewGroup emoticonLayout;
 
 	private ImageView titleIconView;
@@ -231,6 +230,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private RecorderState recorderState;
 
+	private ImageView pageSelected;
+
 	private String[] pubSubListeners = {
 			HikePubSub.MESSAGE_RECEIVED, 
 			HikePubSub.TYPING_CONVERSATION, 
@@ -253,6 +254,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private View currentEmoticonCategorySelected;
 
 	private EmoticonType emoticonType;
+
+	private EmoticonAdapter emoticonsAdapter;
+
+	private ViewGroup pageIndicatorContainer;
 
 	@Override
 	protected void onPause()
@@ -299,12 +304,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	{
 		boolean isGroupChat = getIntent().getBooleanExtra(HikeConstants.Extras.GROUP_CHAT, false);
 		boolean isForwardingMessage = getIntent().getBooleanExtra(HikeConstants.Extras.FORWARD_MESSAGE, false);
+		boolean isSharingFile = getIntent().getType() != null;
 		// Getting the group id. This will be a valid value if the intent was passed to add group participants.
 		String existingGroupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		mComposeView.removeTextChangedListener(this);
 
-		if(isForwardingMessage)
+		if(isSharingFile)
+		{
+			mLabelView.setText(R.string.share_file);
+		}
+		else if(isForwardingMessage)
 		{
 			mLabelView.setText(R.string.forward);
 		}
@@ -332,7 +342,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByOnHike();
-		if(isForwardingMessage)
+		if(isForwardingMessage || isSharingFile)
 		{
 			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());
 		}
@@ -379,6 +389,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		Utils.setDensityMultiplier(ChatThread.this);
 		/* add a handler on the UI thread so we can post delayed messages */
 		mUiThreadHandler = new Handler();
 
@@ -387,7 +398,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			return;
 		}
-		Utils.setDensityMultiplier(ChatThread.this);
 
 		// TODO this is being called everytime this activity is created. Way too often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
@@ -422,7 +432,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
-		currentEmoticonCategorySelected = findViewById(R.id.hike_emoticons_btn);
+		currentEmoticonCategorySelected = findViewById(savedInstanceState!= null ? 
+				savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY, R.id.hike_emoticons_btn) : R.id.hike_emoticons_btn);
 		currentEmoticonCategorySelected.setSelected(true);
 
 		/* register for long-press's */
@@ -452,7 +463,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			if(savedInstanceState.getBoolean(HikeConstants.Extras.EMOTICON_SHOWING))
 			{
-				onEmoticonBtnClicked(null);
+				onEmoticonBtnClicked(null, savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY, 0));
 			}
 			if(savedInstanceState.getBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING))
 			{
@@ -502,7 +513,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			onEmoticonBtnClicked(null);
+			onEmoticonBtnClicked(null, 0);
 		}
 	}
 
@@ -800,7 +811,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		if (emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE)
 		{
-			onEmoticonBtnClicked(null);
+			onEmoticonBtnClicked(null, 0);
 		}
 	}
 
@@ -894,6 +905,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				String msg = intent.getStringExtra(HikeConstants.Extras.MSG);
 				mComposeView.setText(msg);
 				mComposeView.setSelection(msg.length());
+				SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText());
 			}
 			else if(intent.hasExtra(HikeConstants.Extras.FILE_PATH))
 			{
@@ -2350,7 +2362,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			String thumbnailString = null;
 			if(hikeFileType == HikeFileType.IMAGE)
 			{
-				thumbnail = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+				thumbnail = Utils.scaleDownImage(filePath, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, true);
 			}
 			else if(hikeFileType == HikeFileType.VIDEO)
 			{
@@ -2487,13 +2499,30 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		outState.putBoolean(HikeConstants.Extras.FILE_TRANSFER_DIALOG_SHOWING, filePickerDialog != null && filePickerDialog.isShowing());
 		outState.putBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING, recordingDialog != null && recordingDialog.isShowing());
 		outState.putLong(HikeConstants.Extras.RECORDER_START_TIME, updateRecordingDuration != null ? updateRecordingDuration.getStartTime() : 0);
+		if(emoticonLayout != null && emoticonLayout.getVisibility() == View.VISIBLE)
+		{
+			outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY, currentEmoticonCategorySelected.getId());
+			outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY, tabHost.getCurrentTab());
+		}
 		super.onSaveInstanceState(outState);
 	}
 
 	public void onEmoticonBtnClicked(View v)
 	{
+		onEmoticonBtnClicked(v, tabHost != null ? tabHost.getCurrentTab() : 0);
+	}
+
+	public void onEmoticonBtnClicked(View v, int whichSubcategory)
+	{
+		// This will be -1 when the tab host was initialized, but not tabs were added to it.
+		if(whichSubcategory == -1)
+		{
+			whichSubcategory = 0;
+		}
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout) : emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager) : emoticonViewPager;
+		pageIndicatorContainer = pageIndicatorContainer == null ? (ViewGroup) findViewById(R.id.page_indicator_container) : pageIndicatorContainer;
+
 		boolean wasCategoryChanged = !isTabInitialised;
 
 		if(tabHost != null && !isTabInitialised)
@@ -2505,11 +2534,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			switch (currentEmoticonCategorySelected.getId()) 
 			{
 			case R.id.hike_emoticons_btn:
-				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin};
+				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin};
 				emoticonType = EmoticonType.HIKE_EMOTICON;
 				break;
 			case R.id.emoji_btn:
-				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin, R.drawable.emo_im_111_grin};
+				tabDrawables = new int[] {
+						EmoticonConstants.EMOJI_RES_IDS[0], 
+						EmoticonConstants.EMOJI_RES_IDS[109], 
+						EmoticonConstants.EMOJI_RES_IDS[162], 
+						EmoticonConstants.EMOJI_RES_IDS[294], 
+						EmoticonConstants.EMOJI_RES_IDS[392]
+										};
 				emoticonType = EmoticonType.EMOJI;
 				break;
 			}
@@ -2533,22 +2568,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				ts.setContent(new TabFactory());
 				tabHost.addTab(ts);
 			}
-			if(emoticonType == EmoticonType.HIKE_EMOTICON)
-			{
-				if (hikeEmoticonAdapter == null) 
-				{
-					hikeEmoticonAdapter = new EmoticonAdapter(ChatThread.this, mComposeView, EmoticonType.HIKE_EMOTICON);
-				}
-				emoticonViewPager.setAdapter(hikeEmoticonAdapter);
-			}
-			else if(emoticonType == EmoticonType.EMOJI)
-			{
-				if (emojiAdapter == null)
-				{
-					emojiAdapter = new EmoticonAdapter(ChatThread.this, mComposeView, EmoticonType.EMOJI);
-				}
-				emoticonViewPager.setAdapter(emojiAdapter);
-			}
+			setupEmoticonLayout(emoticonType, whichSubcategory);
+			tabHost.setCurrentTab(whichSubcategory);
 		}
 
 		if(emoticonLayout.getVisibility() == View.VISIBLE && !wasCategoryChanged)
@@ -2557,34 +2578,70 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else
 		{
-			Animation slideUp = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
-			slideUp.setDuration(400);
-			emoticonLayout.setAnimation(slideUp);
+			if(!wasCategoryChanged)
+			{
+				Animation slideUp = AnimationUtils.loadAnimation(ChatThread.this, android.R.anim.fade_in);
+				slideUp.setDuration(400);
+				emoticonLayout.setAnimation(slideUp);
+			}
 			emoticonLayout.setVisibility(View.VISIBLE);
 		}
+
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() 
 		{
 			@Override
-			public void onPageSelected(int arg0) 
+			public void onPageSelected(int pageNum) 
 			{
-				tabHost.setCurrentTab(arg0);
+				ImageView iv = (ImageView) pageIndicatorContainer.findViewById(pageNum);
+
+				iv.setImageResource(R.drawable.page_indicator_selected_small);
+				pageSelected.setImageResource(R.drawable.page_indicator_unselected_small);
+
+				pageSelected = iv;
 			}
 			
 			@Override
 			public void onPageScrolled(int arg0, float arg1, int arg2) {}
-			
 			@Override
 			public void onPageScrollStateChanged(int arg0) {}
 		});
-		
+
 		tabHost.setOnTabChangedListener(new OnTabChangeListener() 
 		{
 			@Override
 			public void onTabChanged(String tabId) 
 			{
-				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab(), true);
+				setupEmoticonLayout(emoticonType, tabHost.getCurrentTab());
 			}
 		});
+	}
+
+	private void setupEmoticonLayout(EmoticonType emoticonType, int whichSubcategory)
+	{
+		emoticonsAdapter = new EmoticonAdapter
+				(ChatThread.this, mComposeView, emoticonType, whichSubcategory, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+		emoticonViewPager.setAdapter(emoticonsAdapter);
+		emoticonViewPager.invalidate();
+
+		int rightMargin = (int) (5*Utils.densityMultiplier);
+		pageIndicatorContainer.removeAllViews();
+		for(int i=0; i<emoticonsAdapter.getCount(); i++)
+		{
+			ImageView iv = new ImageView(this);
+			LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			if(i != emoticonsAdapter.getCount() - 1)
+			{
+				layoutParams.rightMargin = rightMargin;
+			}
+			iv.setLayoutParams(layoutParams);
+			iv.setImageResource(i == 0 ? R.drawable.page_indicator_selected_small : R.drawable.page_indicator_unselected_small);
+			if(i == 0)
+			{
+				pageSelected = iv;
+			}
+			iv.setId(i);
+			pageIndicatorContainer.addView(iv);
+		}
 	}
 
 	public void onEmoticonCategoryClick(View v)
@@ -2597,8 +2654,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		isTabInitialised = false;
 		currentEmoticonCategorySelected.setSelected(false);
 		currentEmoticonCategorySelected = v;
+		/*
+		 * Added this line for older android device issue
+		 * http://stackoverflow.com/questions/6157373/removing-a-tab-and-the-activity-intent-inside-of-it-from-a-tabhost
+		 */
+		tabHost.setCurrentTab(0);
 		tabHost.clearAllTabs();
-		onEmoticonBtnClicked(null);
+		onEmoticonBtnClicked(null, 0);
 	}
 
 	private class TabFactory implements TabContentFactory {

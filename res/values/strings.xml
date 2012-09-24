@@ -52,7 +52,7 @@
 	<string name="invite_now">Invite Now</string>
 	<string name="friends_on_hike_0">You\'ve invited %1$s friends.</string>
 	<string name="free_always_world">Free, always, worldwide!</string>
-	<string name="disclaimer_india">*Free SMS works within India only.</string>
+	<string name="disclaimer_india">*Free SMS can only be sent to India at the moment.</string>
 	<string name="hike_to_hike">hike to hike</string>
 	<string name="shortcut">Add Shortcut</string>
 	<string name="earn_200_sms">Invite friends, earn more free SMS.</string>
@@ -94,8 +94,8 @@
 	<string name="invite_sent">Invite sent.</string>
 	<string name="free_hike_sms">Free Hike SMS</string>
 	<string name="valid_till">Valid till %1$s</string>
-	<string name="sms_renew">Your free hike SMS renews on the 1st of every month.</string>
-	<string name="invite_friend_free_sms">Get 50 free hike SMS for every friend you invite to hike.</string>
+	<string name="sms_renew">(refills 1st of every month)</string>
+	<string name="invite_friend_free_sms">Earn an extra 50 free SMS per month\nfor every friend that joins hike because of you.</string>
 	<string name="group_chat_free">Group chat is free till 31st Dec.\nCredits don\'t apply.</string>
 	<string name="sms_disclaimer">*SMSs that are received and shown in hike are\nstored locally and never uploaded to our servers.\n\nWe promise.</string>
 	<string name="sms_alert_text">You can now receive all your SMSs in hike. Tap below to turn this feature on.</string>
@@ -151,4 +151,6 @@
 	<string name="rewards_intro">For every friend who joins you get:</string>
 	<string name="help_info">Questions? Write to us or read\nthrough frequently asked questions.</string>
 	<string name="meet_hike">Meet hike</string>
+	<string name="recent_icon_text">This section will automatically collect your\nrecently used icons.</string>
+	<string name="free_sms_left">Free SMS left</string>
 </resources>

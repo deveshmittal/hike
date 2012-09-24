@@ -1,6 +1,7 @@
 package com.bsb.hike.utils;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -8,6 +9,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.view.DrawerLayout;
 
 public class DrawerBaseActivity extends Activity implements DrawerLayout.Listener, HikePubSub.Listener{
@@ -51,6 +53,7 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 
 	public void onToggleSideBarClicked(View v)
 	{
+		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
 		parentLayout.toggleSidebar(false);
 	}
 
@@ -69,7 +72,17 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		}
 		else
 		{
-			finish();
+			if(!(this instanceof MessagesList))
+			{
+				Intent intent = new Intent(this, MessagesList.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+				overridePendingTransition(R.anim.slide_in_left_noalpha, R.anim.slide_out_right_noalpha);
+			}
+			else
+			{
+				finish();
+			}
 		}
 	}
 

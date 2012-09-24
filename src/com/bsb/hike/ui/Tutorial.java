@@ -167,6 +167,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 			TextView disclaimer = (TextView) tutorialPage.findViewById(R.id.india_only);
 			ImageButton btnContact = (ImageButton) tutorialPage.findViewById(R.id.btn_contact);
 			ImageButton btnFaq = (ImageButton) tutorialPage.findViewById(R.id.btn_faq);
+			ViewGroup imgLayout = (ViewGroup) tutorialPage.findViewById(R.id.img_layout);
 
 			btnContact.setOnClickListener(Tutorial.this);
 			btnFaq.setOnClickListener(Tutorial.this);
@@ -193,6 +194,26 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				disclaimer.setVisibility(View.VISIBLE);
 				break;
 			case 2:
+				if(Integer.valueOf((int) (10*Utils.densityMultiplier)) < Integer.valueOf((int) (0.9f * 10)))
+				{
+					if(!isHelpPage)
+					{
+						imgLayout.setVisibility(View.GONE);
+						LayoutParams rewardsInfoLP = (LayoutParams) rewardsInfo.getLayoutParams();
+						rewardsInfoLP.weight = 1;
+						rewardsInfo.setLayoutParams(rewardsInfoLP);
+
+						LayoutParams headerLP = (LayoutParams) header.getLayoutParams();
+						headerLP.weight = isLandscape ? 4 : 5;
+						rewardsInfo.setLayoutParams(headerLP);
+					}
+					else
+					{
+						LayoutParams imgLayoutLP = (LayoutParams) imgLayout.getLayoutParams();
+						imgLayoutLP.weight--;
+						imgLayout.setLayoutParams(imgLayoutLP);
+					}
+				}
 				mainImg.setImageResource(isHelpPage ? R.drawable.hike_to_sms_img : R.drawable.rewards_img);
 				header.setImageResource(isHelpPage ? R.drawable.hike_to_sms_txt : R.drawable.rewards_txt);
 				header.setVisibility(View.VISIBLE);
@@ -203,7 +224,10 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				disclaimer.setText(isHelpPage ?getString(R.string.hike_to_sms_disclaimer) : "");
 				break;
 			}
-			tutorialPage.findViewById(R.id.img_layout).setVisibility(isLandscape ? View.GONE : View.VISIBLE);
+			if(isLandscape)
+			{
+				imgLayout.setVisibility(View.GONE);
+			}
 
 			((ViewPager) container).addView(tutorialPage);
 			return tutorialPage;
@@ -217,15 +241,16 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 		Intent intent = null;
 		if(v.getId() == R.id.btn_faq)
 		{
+			Utils.logEvent(this, HikeConstants.LogEvent.HELP_FAQ);
 			intent = new Intent(this, WebViewActivity.class);
 			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
 			intent.putExtra(HikeConstants.Extras.TITLE, "FAQs");
 		}
 		else if(v.getId() == R.id.btn_contact)
 		{
+			Utils.logEvent(this, HikeConstants.LogEvent.HELP_CONTACT);
 			intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
-			startActivity(intent);
 		}
 		if(intent != null)
 		{

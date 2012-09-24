@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -57,6 +58,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	private int numContactsSelected = 0;
 	private int numSMSContactsSelected = 0;
 	private Map<String, GroupParticipant> groupParticipants;
+	private String countryCode;
 
 	public HikeSearchContactAdapter(
 			Activity context, List<ContactInfo> contactList, 
@@ -74,6 +76,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		this.topBarBtn = topBarBtn;
 		this.groupId = groupId;
 		this.presentIntent = presentIntent;
+		this.countryCode = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.COUNTRY_CODE, "+91");
 		if(!TextUtils.isEmpty(groupId))
 		{
 			groupParticipants = HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, true, false);
@@ -332,7 +335,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 
 	private String normalizeNumber(String inputNumber)
 	{
-		return inputNumber.startsWith("+") ? inputNumber : inputNumber.startsWith("0") ? inputNumber.replaceFirst("0", "+91") : ("+91" + inputNumber);
+		return inputNumber.startsWith("+") ? inputNumber : inputNumber.startsWith("0") ? inputNumber.replaceFirst("0", countryCode) : (countryCode + inputNumber);
 	}
 
 	@Override

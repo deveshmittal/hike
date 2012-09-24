@@ -44,4 +44,10 @@
     <color name="recording_txt">#f82830</color>
     <color name="record_txt">#c1c1bf</color>
     <color name="drawer_item_pressed">#66605a53</color>
+    <color name="country_picker_dialog">#e9e9e4</color>
+    <color name="country_code">#bebeb9</color>
+    <color name="tab_unselected">#f1f1ee</color>
+    <color name="tab_selected">#d8d8d5</color>
+    <color name="tab_selected_2">#d9d9d7</color>
+    <color name="credits_text">#bcbcb5</color>
 </resources>

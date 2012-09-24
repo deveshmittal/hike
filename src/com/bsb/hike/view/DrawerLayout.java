@@ -227,9 +227,11 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		switch (DrawerItems.values()[v.getId()]) 
 		{
 		case HOME:
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HOME);
 			intent = activity instanceof MessagesList ? null : new Intent(getContext(), MessagesList.class);
 			break;
 		case GROUP_CHAT:
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_GROUP_CHAT);
 			intent = activity instanceof ChatThread ? null : new Intent(getContext(), ChatThread.class);
 			if(intent != null)
 			{
@@ -237,17 +239,19 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			}
 			break;
 		case TELL_A_FRIEND:
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_INVITE);
 			Utils.startShareIntent(getContext(), Utils.getInviteMessage(getContext()));
 			break;
 		case FREE_SMS:
-			Utils.logEvent(getContext(), HikeConstants.LogEvent.CREDITS_SCREEN);
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_CREDITS);
 			intent = activity instanceof CreditsActivity ? null : new Intent(getContext(), CreditsActivity.class);
 			break;
 		case PROFILE:
-			Utils.logEvent(getContext(), HikeConstants.LogEvent.PROFILE_MENU);
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_PROFILE);
 			intent = activity instanceof ProfileActivity ? null : new Intent(getContext(), ProfileActivity.class);
 			break;
 		case HELP:
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HELP);
 			intent = activity instanceof Tutorial ? null : new Intent(getContext(), Tutorial.class);
 			if(intent != null)
 			{
@@ -275,7 +279,6 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		public void run()
 		{
 			mContent.clearAnimation();
-			closeSidebar(true);
 		}
 	};
 

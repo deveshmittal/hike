@@ -98,11 +98,21 @@
                                 android:src="@drawable/ic_edit_profile" />
                         </RelativeLayout>
 
+                        <ImageView
+                            android:id="@+id/name_arrow"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="12dp"
+                            android:src="@drawable/ic_arrow" />
+
                         <LinearLayout
                             android:id="@+id/info_layout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
+                            android:layout_toLeftOf="@id/name_arrow"
                             android:layout_toRightOf="@id/avatar_border"
                             android:orientation="vertical" >
 
@@ -112,7 +122,6 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="10dp"
                                 android:ellipsize="end"
-                                android:maxLength="20"
                                 android:singleLine="true"
                                 android:text="Kavin Bharti Mittal"
                                 android:textColor="@color/lightblack"
@@ -120,13 +129,6 @@
                                 android:textStyle="bold" />
                         </LinearLayout>
 
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginRight="12dp"
-                            android:src="@drawable/ic_arrow" />
                     </RelativeLayout>
                 </LinearLayout>
 
