@@ -264,7 +264,7 @@ public class AccountUtils
 
 			String osVersion = Build.VERSION.RELEASE;
 			String deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-			String os = "Android";
+			String os = HikeConstants.ANDROID;
 			String carrier = manager.getNetworkOperatorName();
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
 			String appVersion = "";
@@ -575,6 +575,7 @@ public class AccountUtils
 			entity.setContentType(hikeHttpRequest.getContentType());
 			post.setEntity(entity);
 			JSONObject obj = executeRequest(post);
+			Log.d("AccountUtils", "Response: " + obj);
 			if ((obj == null) || (!"ok".equals(obj.optString("stat"))))
 			{
 				throw new NetworkErrorException("Unable to perform request");

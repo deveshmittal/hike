@@ -4,6 +4,10 @@ import com.bsb.hike.utils.AccountUtils;
 
 public class HikeConstants
 {
+	public static final String APP_PUSH_ID = "768395314950";
+
+	public static final String ANDROID = "android";
+
 	public static final String MESSAGE = "msg";
 	public static final String UI_TOPIC = "/u";
 	public static final String APP_TOPIC = "/a";
