@@ -228,6 +228,10 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 			{
 				imgLayout.setVisibility(View.GONE);
 			}
+			if(Integer.valueOf((int) (10*Utils.densityMultiplier)) > Integer.valueOf((int) (0.9f * 10)))
+			{
+				imgLayout.setBackgroundResource(R.drawable.background_gradient);
+			}
 
 			((ViewPager) container).addView(tutorialPage);
 			return tutorialPage;
