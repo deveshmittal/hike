@@ -306,9 +306,14 @@ public class MessagesAdapter extends BaseAdapter
 				}
 				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMessage.getParticipantInfoState() == ParticipantInfoState.USER_OPT_IN)
 				{
+					if(TextUtils.isEmpty(convMessage.getMessage()))
+					{
+						convMessage.setMessage(String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel())));
+					}
 					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 					mainMessage.setText(Utils.getFormattedParticipantInfo(convMessage.getMessage()));
-					mainMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_opt_in, 0, 0, 0);
+					mainMessage.setCompoundDrawablesWithIntrinsicBounds(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? 
+							R.drawable.ic_hike_user : R.drawable.ic_opt_in, 0, 0, 0);
 
 					TextView creditsMessage = null;
 					if(convMessage.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).has(HikeConstants.CREDITS))

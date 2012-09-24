@@ -201,10 +201,14 @@ public class ConvMessage
 	{
 		setMetadata(obj);
 
-		this.mMsisdn = conversation != null ? conversation.getMsisdn() : obj.has(HikeConstants.TO) ? obj.getString(HikeConstants.TO) : obj.getString(HikeConstants.FROM);
-		if(participantInfoState != ParticipantInfoState.USER_JOIN)
+		if(participantInfoState != ParticipantInfoState.USER_JOIN || conversation != null)
 		{
+			this.mMsisdn = conversation != null ? conversation.getMsisdn() : obj.has(HikeConstants.TO) ? obj.getString(HikeConstants.TO) : obj.getString(HikeConstants.FROM);
 			this.groupParticipantMsisdn = obj.has(HikeConstants.TO) && obj.has(HikeConstants.FROM) ? obj.getString(HikeConstants.FROM) : null;
+		}
+		else
+		{
+			this.mMsisdn = obj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
 		}
 
 		switch (this.participantInfoState) 
@@ -224,7 +228,7 @@ public class ConvMessage
 			this.mMessage = context.getString(R.string.group_chat_end);
 			break;
 		case USER_JOIN:
-			this.mMessage = String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel()));
+			this.mMessage = conversation != null ? String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel())) : "";
 			break;
 		case USER_OPT_IN:
 			String name;

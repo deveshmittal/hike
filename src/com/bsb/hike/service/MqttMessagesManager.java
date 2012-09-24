@@ -350,8 +350,19 @@ public class MqttMessagesManager {
 	{
 		Conversation conversation = convDb.getConversation(msisdn, 0);
 
-		// Checking if the conversation exists or if the message type is 'uj' then we check whether its a known contact.
-		if(conversation == null || (HikeConstants.MqttMessageTypes.USER_JOINED.equals(jsonObj.getString(HikeConstants.TYPE)) && TextUtils.isEmpty(conversation.getContactName())))
+		/*
+		 *  If the message is of type 'uj' we want to show it for all known contacts regardless of if the
+		 *  user currently has an existing conversation. We also want to show the 'uj' message in all the 
+		 *  group chats with that participant.
+		 *  Otherwise for other types, we only show the message if the user already has an existing 
+		 *  conversation.
+		 */
+		if((conversation == null && 
+				!HikeConstants.MqttMessageTypes.USER_JOINED.equals(jsonObj.getString(HikeConstants.TYPE)))
+				||
+				(conversation != null && 
+				TextUtils.isEmpty(conversation.getContactName()) && 
+				!(conversation instanceof GroupConversation)))
 		{
 			return;
 		}

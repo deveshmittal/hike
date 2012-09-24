@@ -138,6 +138,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
+			{
+				markedUp = TextUtils.isEmpty(message.getMessage()) ? 
+						String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel())) : message.getMessage();
+			}
 			else
 			{
 				markedUp = message.getMessage();
