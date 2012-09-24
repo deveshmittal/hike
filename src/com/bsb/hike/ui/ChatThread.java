@@ -257,6 +257,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ViewGroup pageIndicatorContainer;
 
+	private boolean wasOrientationChanged = false;
+
 	@Override
 	protected void onPause()
 	{
@@ -410,6 +412,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 
+		wasOrientationChanged = savedInstanceState != null;
 		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		isOverlayShowing  = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
 
@@ -1059,8 +1062,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mBottomView.setVisibility(View.VISIBLE);
 		}
 
-		// Scroll to the bottom
-		mConversationsView.setSelection(messages.size()-1);
+		// Scroll to the bottom if we just opened a new conversation
+		if(!wasOrientationChanged)
+		{
+			mConversationsView.setSelection(messages.size()-1);
+		}
 
 		/* add a text changed listener */
 		mComposeView.addTextChangedListener(this);
