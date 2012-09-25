@@ -38,6 +38,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 	public static final int MAX_EMOTICONS_PER_PAGE_LANDSCAPE = 20; 
 	public static final int MAX_EMOTICONS_PER_ROW_LANDSCAPE = 10;
 
+	public static final int RECENTS_SUBCATEGORY_INDEX = -1;
+
 	private int EMOTICON_NUM_PAGES;
 
 	private LayoutInflater inflater;
@@ -58,7 +60,9 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		this.inflater = LayoutInflater.from(context);
 		this.context = context;
 		this.composeBox = composeBox;
-		this.whichSubCategory = whichSubCategory;
+
+		// We want the value to be -1 to signify Recent Emoticons tab
+		this.whichSubCategory = whichSubCategory - 1;
 		switch (emoticonType) 
 		{
 		// Incrementing these numbers to show a recents tab as well.
@@ -73,22 +77,34 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			idOffset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 			break;
 		}
-		EMOTICON_NUM_PAGES = ((int)(emoticonSubCategories[whichSubCategory]/MAX_EMOTICONS_PER_PAGE)) + 2;
-		// Doing this to prevent an empty page when the numerator is a multiple of the denominator
-		if(emoticonSubCategories[whichSubCategory]%MAX_EMOTICONS_PER_PAGE == 0)
+		if(this.whichSubCategory != RECENTS_SUBCATEGORY_INDEX)
 		{
-			EMOTICON_NUM_PAGES--;
+			EMOTICON_NUM_PAGES = calculateNumPages(emoticonSubCategories[this.whichSubCategory]);
+			setOffset();
+		}
+		else
+		{
+			int startOffset = idOffset + this.offset;
+			int endOffset = startOffset + emoticonResIds.length;
+			recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType
+					(emoticonType, startOffset, endOffset, (isPortrait ? MAX_EMOTICONS_PER_PAGE : MAX_EMOTICONS_PER_PAGE_LANDSCAPE)*2);
+			EMOTICON_NUM_PAGES = calculateNumPages(recentEmoticons.length);
 		}
 
-		setOffset(emoticonSubCategories, whichSubCategory);
-
-		int startOffset = idOffset + this.offset;
-		int endOffset = startOffset + emoticonSubCategories[whichSubCategory];
-		recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType
-				(emoticonType, startOffset, endOffset, isPortrait ? MAX_EMOTICONS_PER_PAGE : MAX_EMOTICONS_PER_PAGE_LANDSCAPE);
 	}
 
-	private void setOffset(int[] subCategories, int whichSubCategory)
+	private int calculateNumPages(int numEmoticons)
+	{
+		int numPages = ((int)(numEmoticons/MAX_EMOTICONS_PER_PAGE)) + 1;
+		// Doing this to prevent an empty page when the numerator is a multiple of the denominator
+		if(numEmoticons%MAX_EMOTICONS_PER_PAGE == 0)
+		{
+			return numPages-1;
+		}
+		return numPages;
+	}
+
+	private void setOffset()
 	{
 		if(whichSubCategory == 0 || emoticonSubCategories == null)
 		{
@@ -96,13 +112,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		}
 		for(int i = 0; i<=whichSubCategory-1; i++)
 		{
-			offset += subCategories[i];
+			offset += emoticonSubCategories[i];
 		}
-	}
-
-	public int getRecentEmoticonsLength()
-	{
-		return recentEmoticons.length;
 	}
 
 	@Override
@@ -130,15 +141,15 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		emoticonGrid.setAdapter(new EmoticonPageAdapter(position));
 		emoticonGrid.setOnItemClickListener(this);
 
-		setRecentTextVisibility(position, (TextView)emoticonPage.findViewById(R.id.recent_use_txt));
+		setRecentTextVisibility((TextView)emoticonPage.findViewById(R.id.recent_use_txt));
 		
 		((ViewPager) container).addView(emoticonPage);
 		return emoticonPage;
 	}
 
-	private void setRecentTextVisibility(int pageNum, TextView recentUsedTxt)
+	private void setRecentTextVisibility(TextView recentUsedTxt)
 	{
-		if(pageNum > 0)
+		if(whichSubCategory != RECENTS_SUBCATEGORY_INDEX)
 		{
 			recentUsedTxt.setVisibility(View.GONE);
 			return;
@@ -177,16 +188,23 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 		@Override
 		public int getCount() 
 		{
-			if(currentPage == EMOTICON_NUM_PAGES - 1)
+			if(whichSubCategory == RECENTS_SUBCATEGORY_INDEX)
 			{
-				return emoticonSubCategories[whichSubCategory] % MAX_EMOTICONS_PER_PAGE == 0 ?
-						MAX_EMOTICONS_PER_PAGE : emoticonSubCategories[whichSubCategory] % MAX_EMOTICONS_PER_PAGE;
+				if(currentPage == EMOTICON_NUM_PAGES - 1)
+				{
+					return recentEmoticons.length % MAX_EMOTICONS_PER_PAGE;
+				}
+				return MAX_EMOTICONS_PER_PAGE;
 			}
-			else if(currentPage == 0)
+			else
 			{
-				return recentEmoticons.length;
+				if(currentPage == EMOTICON_NUM_PAGES - 1)
+				{
+					return emoticonSubCategories[whichSubCategory] % MAX_EMOTICONS_PER_PAGE == 0 ?
+							MAX_EMOTICONS_PER_PAGE : emoticonSubCategories[whichSubCategory] % MAX_EMOTICONS_PER_PAGE;
+				}
+				return MAX_EMOTICONS_PER_PAGE;
 			}
-			return MAX_EMOTICONS_PER_PAGE;
 		}
 
 		@Override
@@ -208,12 +226,12 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			{
 				convertView = inflater.inflate(R.layout.emoticon_item, null);
 			}
-			convertView.setTag(Integer.valueOf(currentPage > 0 ? 
-					(offset + ((currentPage - 1) * MAX_EMOTICONS_PER_PAGE) + position + idOffset) : 
-						(recentEmoticons[position] + idOffset)));
-			((ImageView) convertView).setImageResource(emoticonResIds[currentPage > 0 ? 
-					offset + ((currentPage - 1) * MAX_EMOTICONS_PER_PAGE) + position : 
-						recentEmoticons[position]]);
+			convertView.setTag(Integer.valueOf(whichSubCategory != RECENTS_SUBCATEGORY_INDEX ? 
+					(offset + ((currentPage) * MAX_EMOTICONS_PER_PAGE) + position + idOffset) : 
+						(recentEmoticons[((currentPage) * MAX_EMOTICONS_PER_PAGE) + position] + idOffset)));
+			((ImageView) convertView).setImageResource(emoticonResIds[whichSubCategory != RECENTS_SUBCATEGORY_INDEX ? 
+					offset + ((currentPage) * MAX_EMOTICONS_PER_PAGE) + position : 
+						recentEmoticons[((currentPage) * MAX_EMOTICONS_PER_PAGE) + position]]);
 			return convertView;
 		}
 	}
