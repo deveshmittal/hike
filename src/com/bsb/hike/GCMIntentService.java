@@ -13,6 +13,7 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.google.android.gcm.GCMBaseIntentService;
+import com.google.android.gcm.GCMRegistrar;
 
 public class GCMIntentService extends GCMBaseIntentService 
 {
@@ -50,7 +51,10 @@ public class GCMIntentService extends GCMBaseIntentService
 			public void onSuccess(JSONObject response) 
 			{}
 			public void onFailure() 
-			{}
+			{
+				// Could not send our server the device token. Unregister from GCM
+				GCMRegistrar.unregister(context);
+			}
 		});
 		JSONObject request = new JSONObject();
 		try 
