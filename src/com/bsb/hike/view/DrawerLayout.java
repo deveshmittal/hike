@@ -237,6 +237,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			{
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 			}
+			handler.postDelayed(resetSidebar, 400);
 			break;
 		case TELL_A_FRIEND:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_INVITE);
@@ -278,6 +279,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		public void run()
 		{
 			mContent.clearAnimation();
+			closeSidebar(true);
 		}
 	};
 
