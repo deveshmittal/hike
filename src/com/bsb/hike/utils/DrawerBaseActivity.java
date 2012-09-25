@@ -77,7 +77,7 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 				Intent intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
-				overridePendingTransition(R.anim.slide_in_left_noalpha, R.anim.slide_out_right_noalpha);
+				overridePendingTransition(R.anim.alpha_in, R.anim.slide_out_right_noalpha);
 			}
 			else
 			{

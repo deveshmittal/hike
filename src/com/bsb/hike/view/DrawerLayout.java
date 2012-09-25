@@ -264,8 +264,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			activity.startActivity(intent);
 			activity.overridePendingTransition(R.anim.slide_in_right_noalpha,
-					R.anim.slide_out_left_noalpha);
-			handler.postDelayed(resetSidebar, 400);
+					R.anim.alpha_out);
 		}
 		else
 		{
