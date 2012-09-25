@@ -71,6 +71,7 @@ public class MessagesAdapter extends BaseAdapter
 		ImageView showFileBtn;
 		CircularProgress circularProgress;
 		View marginView;
+		TextView participantNameFT;
 	}
 
 	private Conversation conversation;
@@ -200,6 +201,7 @@ public class MessagesAdapter extends BaseAdapter
 					v = inflater.inflate(R.layout.message_item_receive, parent, false);
 				}
 
+				holder.participantNameFT = (TextView) v.findViewById(R.id.participant_name_ft);
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
 				if(holder.messageTextView == null)
 				{
@@ -486,6 +488,12 @@ public class MessagesAdapter extends BaseAdapter
 			if(holder.marginView != null)
 			{
 				holder.marginView.setVisibility(hikeFile.getThumbnail() == null ? View.VISIBLE : View.GONE);
+			}
+			if(!convMessage.isSent() && (conversation instanceof GroupConversation))
+			{
+				holder.participantNameFT.setText(
+						((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().getFirstName() + HikeConstants.SEPARATOR);
+				holder.participantNameFT.setVisibility(View.VISIBLE);
 			}
 		}
 		else if (metadata != null)
