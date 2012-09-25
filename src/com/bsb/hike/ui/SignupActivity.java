@@ -89,6 +89,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 	private String countryCode;
 
+	private final String defaultCountryCode = "IN +91";
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -297,13 +299,14 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	    	String countryIso = manager.getNetworkCountryIso().toUpperCase();
 	    	for(String s : countryISOAndCodes)
 	    	{
-	    		if(s.contains(countryIso))
+	    		if(!TextUtils.isEmpty(countryIso) && s.contains(countryIso))
 	    		{
 	    			Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
-	    			countryPicker.setText(s);
+	    			countryCode = s;
 	    			break;
 	    		}
 	    	}
+	    	countryPicker.setText(TextUtils.isEmpty(countryCode) ? defaultCountryCode : countryCode);
 	    }
 	    else
 	    {
