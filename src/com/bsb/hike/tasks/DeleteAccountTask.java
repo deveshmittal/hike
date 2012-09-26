@@ -17,6 +17,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
+import com.google.android.gcm.GCMRegistrar;
 
 public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
 {
@@ -40,6 +41,9 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 
 		try
 		{
+			// Unregister from GCM service
+			GCMRegistrar.unregister(activity.getApplicationContext());
+
 			HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
 			app.disconnectFromService();
 			activity.stopService(new Intent(activity, HikeService.class));

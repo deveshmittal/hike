@@ -38,6 +38,7 @@ import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
+import com.google.android.gcm.GCMRegistrar;
 
 public class HikeService extends Service
 {
@@ -186,6 +187,18 @@ public class HikeService extends Service
 	public void onCreate()
 	{
 		super.onCreate();
+
+		GCMRegistrar.checkDevice(this);
+		GCMRegistrar.checkManifest(this);
+		final String regId = GCMRegistrar.getRegistrationId(this);
+		if (regId.equals(""))
+		{
+		  GCMRegistrar.register(this, HikeConstants.APP_PUSH_ID);
+		} 
+		else
+		{
+		  Log.d(getClass().getSimpleName(), "Already registered");
+		}
 
 		Log.d("HikeService", "onCreate called");
 		HandlerThread mqttHandlerThread = new HandlerThread("MQTTThread");

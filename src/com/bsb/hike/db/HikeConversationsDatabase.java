@@ -23,7 +23,6 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
@@ -750,29 +749,33 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	public int addGroupParticipants(String groupId, Map<String, GroupParticipant> participantList)
 	{
 		boolean participantsAlreadyAdded = true;
-		boolean dndInfoChange = false;
+		boolean infoChangeOnly = false;
 
 		Map<String, GroupParticipant> currentParticipants = getGroupParticipants(groupId, true, false);
 		if(currentParticipants.isEmpty())
 		{
 			participantsAlreadyAdded = false;
 		}
-		for(Entry<String, GroupParticipant> participantEntry : participantList.entrySet())
+		for(Entry<String, GroupParticipant> newParticipantEntry : participantList.entrySet())
 		{
-			if(!currentParticipants.containsKey(participantEntry.getKey()))
+			if(!currentParticipants.containsKey(newParticipantEntry.getKey()))
 			{
 				participantsAlreadyAdded = false;
-				break;
+				infoChangeOnly = false;
 			}
 			else
 			{
-				GroupParticipant currentParticipant = currentParticipants.get(participantEntry.getKey());
-				Log.d(getClass().getSimpleName(), "COMPARING current: " + currentParticipant.onDnd() + " new: " + participantEntry.getValue().onDnd());
-				if(currentParticipant.onDnd() != participantEntry.getValue().onDnd())
+				GroupParticipant currentParticipant = currentParticipants.get(newParticipantEntry.getKey());
+				Log.d(getClass().getSimpleName(), "COMPARING current: " + currentParticipant.onDnd() + " new: " + newParticipantEntry.getValue().onDnd());
+				if(currentParticipant.onDnd() != newParticipantEntry.getValue().onDnd())
 				{
 					participantsAlreadyAdded = false;
-					dndInfoChange = true;
-					break;
+					infoChangeOnly = true;
+				}
+				if(currentParticipant.getContactInfo().isOnhike() != newParticipantEntry.getValue().getContactInfo().isOnhike())
+				{
+					participantsAlreadyAdded = false;
+					infoChangeOnly = true;
 				}
 			}
 		}
@@ -809,7 +812,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 				insertStatement.executeInsert();
 			}
-			return dndInfoChange ? HikeConstants.DND_STATUS_CHANGE : HikeConstants.NEW_PARTICIPANT;
+			return infoChangeOnly ? HikeConstants.PARTICIPANT_STATUS_CHANGE : HikeConstants.NEW_PARTICIPANT;
 		}
 		finally
 		{
@@ -879,10 +882,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			{
 				contactInfo.setName(c.getString(c.getColumnIndex(DBConstants.NAME)));
 			}
-			if(!contactInfo.isOnhike())
-			{
-				contactInfo.setOnhike(c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) == 1 ? true : false);
-			}
+			contactInfo.setOnhike(c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) == 1 ? true : false);
 
 			GroupParticipant groupParticipant = new GroupParticipant(contactInfo, c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT)) != 0, c.getInt(c.getColumnIndex(DBConstants.ON_DND)) != 0);
 			participantList.put(msisdn, groupParticipant);

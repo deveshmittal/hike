@@ -168,8 +168,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private ArrayList<ConvMessage> messages;
 
-	private boolean shouldScrollToBottom = false;
-
 	private CustomLinearLayout chatLayout;
 
 	private Handler mHandler;
@@ -258,6 +256,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	private EmoticonAdapter emoticonsAdapter;
 
 	private ViewGroup pageIndicatorContainer;
+
+	private boolean wasOrientationChanged = false;
 
 	@Override
 	protected void onPause()
@@ -412,6 +412,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 
+		wasOrientationChanged = savedInstanceState != null;
 		isToolTipShowing = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		isOverlayShowing  = savedInstanceState == null ? false : savedInstanceState.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
 
@@ -829,7 +830,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		titleIconView.setVisibility(View.GONE);
 		btnBar.setVisibility(View.GONE);
 
-		shouldScrollToBottom = true;
 		String prevContactNumber = null;
 		/* prevent any callbacks from previous instances of this activity from being fired now */
 		if (mClearTypingCallback != null)
@@ -1062,9 +1062,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mBottomView.setVisibility(View.VISIBLE);
 		}
 
-		if(shouldScrollToBottom)
+		// Scroll to the bottom if we just opened a new conversation
+		if(!wasOrientationChanged)
 		{
-			shouldScrollToBottom = false;
 			mConversationsView.setSelection(messages.size()-1);
 		}
 
@@ -1150,6 +1150,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			 * avoid sending read notifications for group chats */
 			if (ids != null)
 			{
+				// Scroll to the last unread message
+				mConversationsView.setSelection(messages.size() - ids.length());
+
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
 				JSONObject object = new JSONObject();
@@ -2534,11 +2537,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			switch (currentEmoticonCategorySelected.getId()) 
 			{
 			case R.id.hike_emoticons_btn:
-				tabDrawables = new int[] {R.drawable.emo_im_01_bigsmile, R.drawable.emo_im_81_exciting, R.drawable.emo_im_111_grin};
+				tabDrawables = new int[] {
+						R.drawable.ic_recents_emo, 
+						R.drawable.emo_im_01_bigsmile, 
+						R.drawable.emo_im_81_exciting, 
+						R.drawable.emo_im_111_grin
+										};
 				emoticonType = EmoticonType.HIKE_EMOTICON;
 				break;
 			case R.id.emoji_btn:
 				tabDrawables = new int[] {
+						R.drawable.ic_recents_emo, 
 						EmoticonConstants.EMOJI_RES_IDS[0], 
 						EmoticonConstants.EMOJI_RES_IDS[109], 
 						EmoticonConstants.EMOJI_RES_IDS[162], 

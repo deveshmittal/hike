@@ -8,7 +8,7 @@
         android:layout_width="11dp"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
-        android:background="@drawable/activity_shadow" />
+        android:background="@drawable/shadow" />
 
     <ScrollView
         android:layout_width="match_parent"

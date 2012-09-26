@@ -4,6 +4,10 @@ import com.bsb.hike.utils.AccountUtils;
 
 public class HikeConstants
 {
+	public static final String APP_PUSH_ID = "768395314950";
+
+	public static final String ANDROID = "android";
+
 	public static final String MESSAGE = "msg";
 	public static final String UI_TOPIC = "/u";
 	public static final String APP_TOPIC = "/a";
@@ -126,7 +130,7 @@ public class HikeConstants
 	public static final int INITIAL_PROGRESS = 5;
 
 	public static final int NO_CHANGE = 0;
-	public static final int DND_STATUS_CHANGE = 1;
+	public static final int PARTICIPANT_STATUS_CHANGE = 1;
 	public static final int NEW_PARTICIPANT = 2;
 
 	public static final String MAIL = "support@hike.in";

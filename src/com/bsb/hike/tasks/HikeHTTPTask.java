@@ -38,7 +38,10 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 	protected void onPostExecute(Boolean result)
 	{
 		finished = true;
-		finishableEvent.onFinish(result.booleanValue());
+		if(finishableEvent != null)
+		{
+			finishableEvent.onFinish(result.booleanValue());
+		}
 		if (result.booleanValue())
 		{
 			for (HikeHttpRequest request : requests)
@@ -56,8 +59,11 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 
 			int duration = Toast.LENGTH_LONG;
 			errorStringId = cancelUpload.get() ? R.string.upload_cancelled : errorStringId;
-			Toast toast = Toast.makeText((Activity) finishableEvent, errorStringId, duration);
-			toast.show();
+			if(finishableEvent != null)
+			{
+				Toast toast = Toast.makeText((Activity) finishableEvent, errorStringId, duration);
+				toast.show();
+			}
 		}
 	}
 

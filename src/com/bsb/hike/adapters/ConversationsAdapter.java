@@ -95,6 +95,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			else if (message.isFileTransferMessage())
 			{
 				markedUp = HikeFileType.toProperString(metadata.getHikeFiles().get(0).getHikeFileType());
+				if((conversation instanceof GroupConversation) && !message.isSent())
+				{
+					markedUp = Utils.addContactName(((GroupConversation)conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().getFirstName(), markedUp);
+				}
 				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()) ? View.GONE : View.VISIBLE);
 			}
 			else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
@@ -137,6 +141,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				{
 					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
+			{
+				markedUp = TextUtils.isEmpty(message.getMessage()) ? 
+						String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel())) : message.getMessage();
 			}
 			else
 			{
