@@ -78,9 +78,11 @@ public class AccountUtils
 
 	public static String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
-	private static final String FILE_TRANSFER_HOST = "ft.im.hike.in";
+	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 
-	private static final String FILE_TRANSFER_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static String FILE_TRANSFER_HOST = PRODUCTION_FT_HOST;
+
+	public static String FILE_TRANSFER_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 

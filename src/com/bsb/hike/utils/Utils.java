@@ -1165,5 +1165,7 @@ public class Utils
     	AccountUtils.HOST =  isProductionServer ? AccountUtils.PRODUCTION_HOST : AccountUtils.STAGING_HOST;
 		AccountUtils.PORT = isProductionServer ? AccountUtils.PRODUCTION_PORT : AccountUtils.STAGING_PORT;
 		AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
+		AccountUtils.FILE_TRANSFER_HOST = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
+		AccountUtils.FILE_TRANSFER_BASE = "http://" + AccountUtils.FILE_TRANSFER_HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
     }
 }
