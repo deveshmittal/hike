@@ -101,7 +101,8 @@
 	                    android:textColor="@color/chat_color"
 	                    android:textSize="16sp"
 	                    android:textStyle="bold"
-	                    android:visibility="gone" />
+	                    android:visibility="gone"
+	                    android:layout_marginBottom="5dp" />
 	            
 	            <LinearLayout
 	                android:layout_width="wrap_content"
