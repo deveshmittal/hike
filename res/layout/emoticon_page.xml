@@ -9,6 +9,7 @@
         android:layout_height="match_parent"
         android:background="@null"
         android:drawSelectorOnTop="false"
+        android:scrollbars="none"
         android:fadingEdge="none"
         android:listSelector="@android:color/transparent"
         android:numColumns="7" />
