@@ -56,8 +56,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -444,6 +446,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		 * button we have), we send the message.
 		 */
 		mComposeView.setOnEditorActionListener(this);
+
+		/*
+		 * Fix for android bug, where the focus is removed from the edittext when you have a layout with tabs (Emoticon layout)
+		 * for hard keyboard devices
+		 * http://code.google.com/p/android/issues/detail?id=2516 
+		 */
+		if(getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)
+		{
+			mComposeView.setOnTouchListener(new OnTouchListener() 
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event) 
+				{
+					mComposeView.requestFocusFromTouch();
+					return event == null;
+				}
+			});
+		}
 
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
@@ -2623,6 +2643,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				setupEmoticonLayout(emoticonType, tabHost.getCurrentTab());
 			}
 		});
+
+		/*
+		 * Here we dispatch a touch event to the compose view so that it regains focus
+		 * http://code.google.com/p/android/issues/detail?id=2516 
+		 */
+		if(getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)
+		{
+			mComposeView.dispatchTouchEvent(null);
+		}
 	}
 
 	private void setupEmoticonLayout(EmoticonType emoticonType, int whichSubcategory)
