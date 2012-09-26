@@ -116,7 +116,8 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			HikePubSub.GROUP_LEFT, 
 			HikePubSub.GROUP_NAME_CHANGED, 
 			HikePubSub.UPDATE_AVAILABLE, 
-			HikePubSub.CONTACT_ADDED 
+			HikePubSub.CONTACT_ADDED,
+			HikePubSub.MESSAGE_DELETED
 	};
 	@Override
 	protected void onPause()
@@ -549,6 +550,53 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 
 					conv.addMessage(message);
 					Log.d("MessagesList", "new message is " + message);
+					mAdapter.sort(mConversationsComparator);
+					mAdapter.notifyDataSetChanged();
+					// notifyDataSetChanged sets notifyonChange to true but we want it to always be false
+					mAdapter.setNotifyOnChange(false);
+				}
+			});
+		}
+		else if (HikePubSub.MESSAGE_DELETED.equals(type))
+		{
+			Log.d(getClass().getSimpleName(), "Message Deleted");
+			final ConvMessage message = (ConvMessage) object;
+			String msisdn = message.getMsisdn();
+			final Conversation conversation = mConversationsByMSISDN.get(msisdn);
+
+			if(conversation == null)
+			{
+				return;
+			}
+
+			List<ConvMessage> existingList = conversation.getMessages();
+			/*
+			 *  Checking if the message deleted was the last message in the conversation.
+			 *  If it wasn't, no need to do anything here. 
+			 */
+			if(existingList.get(existingList.size() - 1).getMsgID() != message.getMsgID())
+			{
+				Log.d(getClass().getSimpleName(), "The last message was not deleted. No need to do anything here");
+				return;
+			}
+
+			final List<ConvMessage> messageList = HikeConversationsDatabase.getInstance().getConversationThread
+					(msisdn, conversation.getContactId(), conversation.getConvId(), 1, conversation);
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					if(messageList.isEmpty())
+					{
+						mConversationsByMSISDN.remove(conversation.getMsisdn());
+						mConversationsAdded.remove(conversation.getMsisdn());
+						mAdapter.remove(conversation);
+					}
+					else
+					{
+						conversation.setMessages(messageList);
+					}
 					mAdapter.sort(mConversationsComparator);
 					mAdapter.notifyDataSetChanged();
 					// notifyDataSetChanged sets notifyonChange to true but we want it to always be false
