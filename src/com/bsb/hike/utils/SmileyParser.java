@@ -188,21 +188,16 @@ public class SmileyParser
 	public void addSmiley(EditText composeBox, int whichEmoticon)
 	{
 		int cursorStart = composeBox.getSelectionStart();
-		int selectionAfterInsert;
 		Editable text = composeBox.getText();
 		if(whichEmoticon <= mSmileyTexts.length - 1)
 		{
-			selectionAfterInsert = cursorStart + mSmileyTexts[whichEmoticon].length();
 			text.insert(cursorStart, mSmileyTexts[whichEmoticon]);
 		}
 		else
 		{
 			whichEmoticon = whichEmoticon - mSmileyTexts.length;
-			selectionAfterInsert = cursorStart + EmoticonConstants.mEmojiUnicodes[whichEmoticon].length();
 			text.insert(cursorStart, EmoticonConstants.mEmojiUnicodes[whichEmoticon]);
 		}
-
-		composeBox.setSelection(selectionAfterInsert);
 	}
 
 	/**
