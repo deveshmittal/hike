@@ -2403,7 +2403,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			JSONObject metadata = new JSONObject();
 			metadata.putOpt(HikeConstants.FILES, files);
 
-			ConvMessage convMessage = new ConvMessage(fileName, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+			ConvMessage convMessage = new ConvMessage(fileName, mConversation.getMsisdn(), time, ConvMessage.State.SENT_UNCONFIRMED);
 			convMessage.setMetadata(metadata);
 
 			addMessage(convMessage);
