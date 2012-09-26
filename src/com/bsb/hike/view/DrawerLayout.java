@@ -24,6 +24,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.BitmapFactory;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -86,6 +89,8 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 	private ContactInfo me;
 
+	private BitmapDrawable sideBarBackground;
+
 	public enum DrawerItems
 	{
 		HOME,
@@ -126,6 +131,14 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		contentAnimationIn.setFillEnabled(true);
 
 		sidebarTranslateAnimationIn = new TranslateAnimation(-mSidebarOffsetForAnimation, 0, 0, 0);
+
+		/*
+		 * Fix for android v2.3 and below specific bug where the bitmap is not tiled and gets stretched instead
+		 * if we use the xml. So we're creating it via code.
+		 * http://stackoverflow.com/questions/7586209/xml-drawable-bitmap-tilemode-bug
+		 */
+		sideBarBackground = new BitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.bg_drawer));
+		sideBarBackground.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 	}
 
 	public void setUpDrawerView()
@@ -327,6 +340,8 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		LayoutParams lp = mSidebar.getLayoutParams();
 		lp.width = mSidebarWidth;
 		mSidebar.setLayoutParams(lp);
+
+		mSidebar.setBackgroundDrawable(sideBarBackground);
 
 		mOpenListener = new OpenListener(mSidebar, mContent);
 		mCloseListener = new CloseListener(mSidebar, mContent);
