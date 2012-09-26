@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -823,17 +824,24 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		openOptionsMenu();
 	}
 
-	private void openMarket()
+	private void updateApp()
 	{
-		Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
-		marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-		try
+		if(TextUtils.isEmpty(this.accountPrefs.getString(HikeConstants.Extras.UPDATE_URL, "")))
 		{
-			startActivity(marketIntent);				
+			Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
+			marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+			try
+			{
+				startActivity(marketIntent);				
+			}
+			catch(ActivityNotFoundException e)
+			{
+				Log.e(MessagesList.class.getSimpleName(), "Unable to open market");
+			}
 		}
-		catch(ActivityNotFoundException e)
+		else
 		{
-			Log.e(MessagesList.class.getSimpleName(), "Unable to open market");
+			// In app update!
 		}
 	}
 	public void onToolTipClicked(View v)
@@ -841,7 +849,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
 		{
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UPDATE_TOOL_TIP_CLICKED);
-			openMarket();
+			updateApp();
 			hideToolTip();
 			return;
 		}
@@ -892,7 +900,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		if (v.getId() != R.id.overlay_layout) 
 		{
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UDPATE_OVERLAY_BUTTON_CLICKED);
-			openMarket();			
+			updateApp();			
 		}
 		else
 		{
