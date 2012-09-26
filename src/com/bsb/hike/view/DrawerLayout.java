@@ -224,11 +224,13 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	{
 		Log.d(getClass().getSimpleName(), "Drawer item clicked: " + v.getId());
 		intent = null;
+		boolean goingBackToHome = false;
 		switch (DrawerItems.values()[v.getId()]) 
 		{
 		case HOME:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HOME);
 			intent = activity instanceof MessagesList ? null : new Intent(getContext(), MessagesList.class);
+			goingBackToHome = true;
 			break;
 		case GROUP_CHAT:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_GROUP_CHAT);
@@ -262,10 +264,19 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		}
 		if (intent != null) 
 		{
+			intent.putExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, goingBackToHome);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			activity.startActivity(intent);
-			activity.overridePendingTransition(R.anim.slide_in_right_noalpha,
-					R.anim.alpha_out);
+			if(!goingBackToHome)
+			{
+				activity.overridePendingTransition(R.anim.slide_in_right_noalpha,
+						R.anim.alpha_out);
+			}
+			else
+			{
+				activity.overridePendingTransition(R.anim.slide_in_right_noalpha,
+						R.anim.slide_out_left_noalpha);
+			}
 		}
 		else
 		{

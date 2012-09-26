@@ -64,6 +64,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.DrawerLayout;
 
 public class MessagesList extends DrawerBaseActivity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
@@ -171,6 +172,12 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 	@Override
 	protected void onNewIntent(Intent intent) {
 		Utils.requireAuth(this);
+
+		// Doing this to close the drawer when the user selects the home option on the drawer
+		if(intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, false))
+		{
+			((DrawerLayout) findViewById(R.id.drawer_layout)).closeSidebar(true);
+		}
 	}
 	
 	@Override
