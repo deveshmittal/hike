@@ -554,11 +554,11 @@ public class AccountUtils
 		return blockListMsisdns;
 	}
 
-	public static void deleteAccount() throws NetworkErrorException
+	public static void deleteOrUnlinkAccount(boolean deleteAccount) throws NetworkErrorException
 	{
-		HttpDelete delete = new HttpDelete(BASE + "/account");
-		addToken(delete);
-		JSONObject obj = executeRequest(delete);
+		HttpRequestBase request = deleteAccount ? new HttpDelete(BASE + "/account") : new HttpPost(BASE + "/account/unlink");
+		addToken(request);
+		JSONObject obj = executeRequest(request);
 		if ((obj == null) || "fail".equals(obj.optString("stat")))
 		{
 			throw new NetworkErrorException("Could not delete account");
