@@ -76,7 +76,9 @@ public class ToastListener implements Listener
 				Log.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
 				return;
 			}
-			if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
+			if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || 
+					message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED ||
+					message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) 
 			{
 				Activity activity = (currentActivity != null) ? currentActivity
 						.get() : null;
