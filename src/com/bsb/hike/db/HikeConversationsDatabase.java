@@ -710,10 +710,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	}
 
 	/* deletes a single message */
-	public void deleteMessage(long msgId)
+	public void deleteMessage(ConvMessage convMessage)
 	{
-		Long[] bindArgs = new Long[] { msgId };
+		Long[] bindArgs = new Long[] { convMessage.getMsgID() };
 		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE "+DBConstants.MESSAGE_ID+"= ?", bindArgs);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_DELETED, convMessage);
 	}
 
 	public boolean wasOverlayDismissed(String msisdn)

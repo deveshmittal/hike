@@ -582,14 +582,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			startActivity(intent);
 			return true;
 		case R.id.delete:
-			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
+			mPubSub.publish(HikePubSub.DELETE_MESSAGE, message);
 			removeMessage(message);
 			return true;
 		case R.id.resend:
 			/* we treat resend as delete the failed message, and paste the text in the compose buffer */
 			String m = message.getMessage();
 			mComposeView.setText(m);
-			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
+			mPubSub.publish(HikePubSub.DELETE_MESSAGE, message.getMsgID());
 			removeMessage(message);
 			return true;
 		case R.id.cancel_file_transfer:
