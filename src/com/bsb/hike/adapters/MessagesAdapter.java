@@ -383,38 +383,38 @@ public class MessagesAdapter extends BaseAdapter
 
 					if(dndNumbers != null && dndNumbers.length()>0)
 					{
-						StringBuilder dndNames = new StringBuilder(); 
+						StringBuilder dndNamesSB = new StringBuilder(); 
 						for(int i=0; i<dndNumbers.length(); i++)
 						{
 							String name = conversation instanceof GroupConversation ? 
 									((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
 									if(i < dndNumbers.length() - 2)
 									{
-										dndNames.append(name + ", ");
+										dndNamesSB.append(name + ", ");
 									}
 									else if(i < dndNumbers.length() - 1)
 									{
-										dndNames.append(name + " and ");
+										dndNamesSB.append(name + " and ");
 									}
 									else
 									{
-										dndNames.append(name);
+										dndNamesSB.append(name);
 									}
 						}
-						convMessage.setMessage(String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString()));
+						String dndNames = dndNamesSB.toString();
+						convMessage.setMessage(String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames));
 
 						SpannableStringBuilder ssb;
 						if(conversation instanceof GroupConversation)
 						{
 							ssb = new SpannableStringBuilder(convMessage.getMessage());
-							ssb.setSpan(new ForegroundColorSpan(0xff666666), context.getString(R.string.dnd_msg_gc).indexOf("%1$s"), convMessage.getMessage().indexOf("to join in"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().indexOf(dndNames), convMessage.getMessage().indexOf("to join in"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 						}
 						else
 						{
-							String dndOneToOne = context.getString(R.string.dnd_one_to_one);
 							ssb = new SpannableStringBuilder(convMessage.getMessage());
-							ssb.setSpan(new ForegroundColorSpan(0xff666666), dndOneToOne.indexOf("%1$s"), convMessage.getMessage().indexOf("is on DND"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().lastIndexOf(dndNames.toString()), convMessage.getMessage().indexOf("to reply"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().indexOf(dndNames), convMessage.getMessage().indexOf("is on DND"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().lastIndexOf(dndNames), convMessage.getMessage().indexOf("to reply"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 						}
 
 						dndMessage.setText(ssb);
