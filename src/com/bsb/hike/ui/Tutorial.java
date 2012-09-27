@@ -34,7 +34,10 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 	private boolean isLandscape;
 	private TextView titleBtn;
 
-	private static final int PAGE_NUM = 3;
+	private static final int PAGE_NUM_HELP = 3;
+	private static final int PAGE_NUM_INTRO = 2;
+
+	private int pageNum = 0;
 
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -51,10 +54,14 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 			titleBtn.setEnabled(false);
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+
+			pageNum = PAGE_NUM_INTRO;
 		}
 		else
 		{
 			afterSetContentView(savedInstanceState);
+
+			pageNum = PAGE_NUM_HELP;
 		}
 
 		TextView mTitleView = (TextView) findViewById(isHelpPage ? R.id.title_centered : R.id.title);
@@ -64,12 +71,12 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 		pageIndicatorContainer = (ViewGroup) findViewById(R.id.page_indicator_container);
 
 		int rightMargin = (int) (10 * Utils.densityMultiplier);
-		pageIndicators = new ImageView[PAGE_NUM];
-		for(int i = 0; i<PAGE_NUM; i++)
+		pageIndicators = new ImageView[pageNum];
+		for(int i = 0; i<pageNum; i++)
 		{
 			pageIndicators[i] = new ImageView(this);
 			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			if(i != PAGE_NUM - 1)
+			if(i != pageNum - 1)
 			{
 				lp.setMargins(0, 0, rightMargin, 0);
 			}
@@ -94,7 +101,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				pageIndicators[position].setImageResource(R.drawable.page_indicator_selected);
 				if(!isHelpPage)
 				{
-					titleBtn.setEnabled(position == PAGE_NUM - 1 ? true : false);
+					titleBtn.setEnabled(position == pageNum - 1 ? true : false);
 				}
 			}
 			@Override
@@ -140,7 +147,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 		@Override
 		public int getCount() 
 		{
-			return PAGE_NUM;
+			return pageNum;
 		}
 
 		@Override
