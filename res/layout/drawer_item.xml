@@ -33,7 +33,8 @@
             android:shadowRadius="0.5"
             android:text="Credits"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textStyle="bold|italic" />
         
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/credit_num"
