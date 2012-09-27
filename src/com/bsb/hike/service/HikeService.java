@@ -728,10 +728,18 @@ public class HikeService extends Service
 
 		// Randomizing the time when we will poll the server for an update 
 		Random random = new Random();
-		int hour = random.nextInt(48) + 1;
 
 		Calendar wakeUpTime = Calendar.getInstance();
-		wakeUpTime.add(Calendar.HOUR, hour);
+		if(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.PRODUCTION, true))
+		{
+			int hour = random.nextInt(48) + 1;
+			wakeUpTime.add(Calendar.HOUR, hour);
+		}
+		else
+		{
+			int min = random.nextInt(5) + 1;
+			wakeUpTime.add(Calendar.MINUTE, min);
+		}
 
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 		// Cancel any pending alarms with this pending intent
