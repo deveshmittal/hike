@@ -37,7 +37,7 @@
                     android:layout_marginRight="10dp"
                     android:src="@drawable/ic_avatar0" />
 
-                <TextView
+                <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
