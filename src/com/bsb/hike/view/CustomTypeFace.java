@@ -9,6 +9,7 @@ public class CustomTypeFace {
 	public Typeface bold;
 	public Typeface thin;
 	public Typeface normal;
+	public Typeface medium;
 
 	public static CustomTypeFace customTypeFace;
 	
@@ -23,5 +24,6 @@ public class CustomTypeFace {
 		bold = Typeface.createFromAsset(context.getAssets(), "fonts/" + name + "-Bold.ttf");
 		thin = Typeface.createFromAsset(context.getAssets(), "fonts/" + name + "-Light.ttf");
 		normal = Typeface.createFromAsset(context.getAssets(), "fonts/" + name + "-Regular.ttf");
+		medium = Typeface.createFromAsset(context.getAssets(), "fonts/" + name + "-Medium.ttf");
 	}
 }
