@@ -14,7 +14,7 @@
 
     <TextView
         android:id="@+id/alert_title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/alert_image"
         android:layout_toRightOf="@id/alert_image"
@@ -60,6 +60,7 @@
             android:textStyle="bold" />
 
         <View
+            android:id="@+id/btn_divider"
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:background="@drawable/button_divider" />
@@ -74,6 +75,18 @@
             android:textColor="@color/credits_blue"
             android:textSize="14sp"
             android:textStyle="bold" />
+        
+        <Button
+            android:id="@+id/alert_center_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_alert_btn_center"
+            android:text="@string/turn_on"
+            android:textColor="@color/credits_blue"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
     </LinearLayout>
 
 </RelativeLayout>

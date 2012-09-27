@@ -4,17 +4,17 @@
     <item android:state_pressed="true"><shape android:shape="rectangle">
             <solid android:color="@color/other_list_pressed" />
 
-            <corners android:bottomLeftRadius="7dp" />
+            <corners android:bottomLeftRadius="3dp" />
         </shape></item>
     <item android:state_focused="true" android:state_pressed="false"><shape android:shape="rectangle">
             <solid android:color="@color/other_list_selected" />
 
-            <corners android:bottomLeftRadius="7dp" />
+            <corners android:bottomLeftRadius="3dp" />
         </shape></item>
     <item><shape android:shape="rectangle">
             <solid android:color="@color/profile_item_bckg" />
 
-            <corners android:bottomLeftRadius="7dp" />
+            <corners android:bottomLeftRadius="3dp" />
         </shape></item>
 
 </selector>

@@ -208,6 +208,7 @@ public class HikeConstants
 		public static final String COUNTRY_CODE = "countryCode";
 		public static final String GOING_BACK_TO_HOME = "goingBackToHome";
 		public static final String UPDATE_URL = "updateURL";
+		public static final String UPDATE_TO_IGNORE = "updateToIgnore";
 	}
 
 	public static final class LogEvent
