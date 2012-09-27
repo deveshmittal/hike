@@ -609,6 +609,7 @@ public class AccountUtils
 
 		connection.setRequestMethod("PUT");
 
+		connection.setConnectTimeout(150 * 1000);
 		connection.setRequestProperty("Connection", "Keep-Alive");
 		connection.setRequestProperty("Content-Name", fileName);
 		connection.setRequestProperty("Content-Type", TextUtils.isEmpty(fileType) ? "" : fileType);
