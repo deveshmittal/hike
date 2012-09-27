@@ -786,6 +786,10 @@ public class Utils
 				{
 					return true;
 				}
+				else if(Integer.parseInt(updateVersion.nextToken()) < Integer.parseInt(currentVersion.nextToken()))
+				{
+					return false;
+				}
 			}
 			while(updateVersion.hasMoreTokens())
 			{
