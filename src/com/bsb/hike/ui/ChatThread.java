@@ -2358,7 +2358,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 			if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
 			{
-				Toast.makeText(ChatThread.this, "File Size is too large", Toast.LENGTH_SHORT).show();
+				Toast.makeText(ChatThread.this, "Max file size can be 6 MB", Toast.LENGTH_SHORT).show();
 				return;
 			}
 
