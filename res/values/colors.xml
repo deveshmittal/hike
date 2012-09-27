@@ -50,4 +50,6 @@
     <color name="tab_selected">#d8d8d5</color>
     <color name="tab_selected_2">#d9d9d7</color>
     <color name="credits_text">#bcbcb5</color>
+    <color name="emo_tab_unselected">#f1f1ee</color>
+    <color name="emo_tab_selected">#e5e5e2</color>
 </resources>
