@@ -4,7 +4,9 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="10dp" >
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="10dp" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -20,21 +22,6 @@
             android:orientation="vertical" >
 
             <LinearLayout
-                android:id="@+id/img_layout"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="6"
-                android:gravity="center"
-                android:orientation="vertical" >
-
-                <ImageView
-                    android:id="@+id/img"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/rewards_img" />
-            </LinearLayout>
-
-            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="4"
@@ -46,65 +33,28 @@
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
                     android:layout_gravity="center"
+                    android:scaleType="fitEnd"
                     android:layout_weight="1"
                     android:src="@drawable/hike_to_hike_txt"
-                    android:visibility="gone" />
+                    android:visibility="visible" />
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/info"
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="@string/help_info"
-                    android:textColor="@color/black"
-                    android:textSize="13sp" />
-
-                <LinearLayout
-                    android:id="@+id/help_button_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="2"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:visibility="visible" >
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="36dp"
-                        android:background="@drawable/btn_help"
-                        android:orientation="horizontal"
-                        android:layout_marginRight="20dp"
-                        android:layout_marginLeft="20dp" >
-
-                        <ImageButton
-                            android:id="@+id/btn_contact"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:background="@null"
-                            android:src="@drawable/txt_contact" />
-
-                        <View
-                            android:layout_width="1dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/ic_button_divider" />
-
-                        <ImageButton
-                            android:id="@+id/btn_faq"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:background="@null"
-                            android:src="@drawable/txt_faqs" />
-                    </LinearLayout>
-                </LinearLayout>
-
+                    android:layout_weight="0.8"
+                    android:gravity="center_horizontal|top"
+                    android:paddingTop="5dp"
+                    android:text="@string/hike_to_hike_free_always"
+                    android:textColor="@color/lightblack"
+                    android:textStyle="bold|italic"
+                    android:textSize="17sp" />
+                
                 <LinearLayout
                     android:id="@+id/rewards_info"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="5"
+                    android:layout_weight="2"
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:visibility="gone" >
@@ -138,16 +88,87 @@
                         android:textSize="13sp" />
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/img_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="3.5"
+                    android:gravity="center"
+                    android:orientation="vertical" >
+
+                    <ImageView
+                        android:id="@+id/img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitStart"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/rewards_img" />
+                </LinearLayout>
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/help_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:gravity="center_horizontal|bottom"
+                    android:paddingTop="5dp"
+                    android:text="@string/help_info"
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+                
+                <LinearLayout
+                    android:id="@+id/help_button_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1.5"
+                    android:gravity="center_horizontal|top"
+                  	android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:visibility="gone" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
+                        android:background="@drawable/btn_help"
+                        android:orientation="horizontal" >
+
+                        <ImageButton
+                            android:id="@+id/btn_contact"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:src="@drawable/txt_contact" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/ic_button_divider" />
+
+                        <ImageButton
+                            android:id="@+id/btn_faq"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:src="@drawable/txt_faqs" />
+                    </LinearLayout>
+                </LinearLayout>
+
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/india_only"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="0.5"
-                    android:gravity="right|bottom"
+                    android:gravity="center"
                     android:padding="5dp"
                     android:text=""
                     android:textColor="@color/timestampcolor"
-                    android:textSize="10sp"
+                    android:textSize="12sp"
                     android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
