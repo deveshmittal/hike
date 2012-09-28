@@ -91,7 +91,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			int startOffset = idOffset + this.offset;
 			int endOffset = startOffset + emoticonResIds.length;
 			recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType
-					(emoticonType, startOffset, endOffset, (isPortrait ? MAX_EMOTICONS_PER_PAGE : MAX_EMOTICONS_PER_PAGE_LANDSCAPE)*2);
+					(emoticonType, startOffset, endOffset, MAX_EMOTICONS_PER_PAGE*2);
 			EMOTICON_NUM_PAGES = recentEmoticons.length == 0 ? 1 : calculateNumPages(recentEmoticons.length);
 		}
 
