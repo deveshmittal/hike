@@ -22,6 +22,11 @@ public class GCMIntentService extends GCMBaseIntentService
 
 	private SharedPreferences prefs;
 
+	public GCMIntentService() 
+	{
+		super(HikeConstants.APP_PUSH_ID);
+	}
+
 	@Override
 	protected void onError(Context context, String errorId)
 	{
