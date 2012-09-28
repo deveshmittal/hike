@@ -13,7 +13,7 @@
         <include layout="@layout/drawer" />
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/animation_layout_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -28,20 +28,21 @@
             android:layout_alignParentTop="true"
             layout="@layout/top_panel" />
 
+        <LinearLayout
+            android:id="@+id/page_indicator_container"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_alignParentBottom="true"
+            android:gravity="center"
+            android:orientation="horizontal" />
+        
         <android.support.v4.view.ViewPager
             android:id="@+id/signup_tutorial_pager"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginTop="5dp"
-            android:layout_weight="10" />
+            android:layout_height="match_parent"
+            android:layout_above="@id/page_indicator_container"
+            android:layout_below="@id/top_panel_ref" />
 
-        <LinearLayout
-            android:id="@+id/page_indicator_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="horizontal" />
-    </LinearLayout>
+    </RelativeLayout>
 
 </com.bsb.hike.view.DrawerLayout>

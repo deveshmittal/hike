@@ -39,7 +39,7 @@ public class DbConversationListener implements Listener
 		mUserDb = HikeUserDatabase.getInstance();
 		persistence = HikeMqttPersistence.getInstance();
 		mPubSub.addListener(HikePubSub.MESSAGE_SENT, this);
-		mPubSub.addListener(HikePubSub.MESSAGE_DELETED, this);
+		mPubSub.addListener(HikePubSub.DELETE_MESSAGE, this);
 		mPubSub.addListener(HikePubSub.MESSAGE_FAILED, this);
 		mPubSub.addListener(HikePubSub.BLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.UNBLOCK_USER, this);
@@ -78,11 +78,11 @@ public class DbConversationListener implements Listener
 				}
 			}
 		}
-		else if (HikePubSub.MESSAGE_DELETED.equals(type))
+		else if (HikePubSub.DELETE_MESSAGE.equals(type))
 		{
-			Long msgId = (Long) object;
-			mConversationDb.deleteMessage(msgId);
-			persistence.removeMessage(msgId);
+			ConvMessage message = ((ConvMessage) object);
+			mConversationDb.deleteMessage(message);
+			persistence.removeMessage(message.getMsgID());
 		}
 		else if (HikePubSub.MESSAGE_FAILED.equals(type))  // server got msg from client 1 and sent back received msg receipt
 		{

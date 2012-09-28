@@ -29,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -62,8 +63,10 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.DrawerLayout;
 
 public class MessagesList extends DrawerBaseActivity implements OnClickListener, OnItemClickListener, HikePubSub.Listener, android.content.DialogInterface.OnClickListener, Runnable
 {
@@ -114,8 +117,13 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			HikePubSub.GROUP_LEFT, 
 			HikePubSub.GROUP_NAME_CHANGED, 
 			HikePubSub.UPDATE_AVAILABLE, 
-			HikePubSub.CONTACT_ADDED 
+			HikePubSub.CONTACT_ADDED,
+			HikePubSub.MESSAGE_DELETED
 	};
+
+	private Dialog updateAlert;
+
+	private Button updateAlertOkBtn;
 	@Override
 	protected void onPause()
 	{
@@ -171,6 +179,12 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 	@Override
 	protected void onNewIntent(Intent intent) {
 		Utils.requireAuth(this);
+
+		// Doing this to close the drawer when the user selects the home option on the drawer
+		if(intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, false))
+		{
+			((DrawerLayout) findViewById(R.id.drawer_layout)).closeSidebar(true);
+		}
 	}
 	
 	@Override
@@ -206,7 +220,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		deviceDetailsSent = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
 
 		int updateTypeAvailable = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
-		updateApp(updateTypeAvailable);
+		showUpdatePopup(updateTypeAvailable);
 
 		mConversationsView = (ListView) findViewById(R.id.conversations);
 
@@ -548,6 +562,53 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 				}
 			});
 		}
+		else if (HikePubSub.MESSAGE_DELETED.equals(type))
+		{
+			Log.d(getClass().getSimpleName(), "Message Deleted");
+			final ConvMessage message = (ConvMessage) object;
+			String msisdn = message.getMsisdn();
+			final Conversation conversation = mConversationsByMSISDN.get(msisdn);
+
+			if(conversation == null)
+			{
+				return;
+			}
+
+			List<ConvMessage> existingList = conversation.getMessages();
+			/*
+			 *  Checking if the message deleted was the last message in the conversation.
+			 *  If it wasn't, no need to do anything here. 
+			 */
+			if(existingList.get(existingList.size() - 1).getMsgID() != message.getMsgID())
+			{
+				Log.d(getClass().getSimpleName(), "The last message was not deleted. No need to do anything here");
+				return;
+			}
+
+			final List<ConvMessage> messageList = HikeConversationsDatabase.getInstance().getConversationThread
+					(msisdn, conversation.getContactId(), conversation.getConvId(), 1, conversation);
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					if(messageList.isEmpty())
+					{
+						mConversationsByMSISDN.remove(conversation.getMsisdn());
+						mConversationsAdded.remove(conversation.getMsisdn());
+						mAdapter.remove(conversation);
+					}
+					else
+					{
+						conversation.setMessages(messageList);
+					}
+					mAdapter.sort(mConversationsComparator);
+					mAdapter.notifyDataSetChanged();
+					// notifyDataSetChanged sets notifyonChange to true but we want it to always be false
+					mAdapter.setNotifyOnChange(false);
+				}
+			});
+		}
 		else if (HikePubSub.NEW_CONVERSATION.equals(type))
 		{
 			final Conversation conversation = (Conversation) object;
@@ -684,7 +745,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 				@Override
 				public void run() 
 				{
-					updateApp(updateType);
+					showUpdatePopup(updateType);
 				}
 			});
 		}
@@ -816,28 +877,39 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		openOptionsMenu();
 	}
 
-	private void openMarket()
+	private void updateApp(int updateType)
 	{
-		Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
-		marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-		try
+		if(TextUtils.isEmpty(this.accountPrefs.getString(HikeConstants.Extras.UPDATE_URL, "")))
 		{
-			startActivity(marketIntent);				
+			Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
+			marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+			try
+			{
+				startActivity(marketIntent);				
+			}
+			catch(ActivityNotFoundException e)
+			{
+				Log.e(MessagesList.class.getSimpleName(), "Unable to open market");
+			}
 		}
-		catch(ActivityNotFoundException e)
+		else
 		{
-			Log.e(MessagesList.class.getSimpleName(), "Unable to open market");
+			if(updateType == HikeConstants.NORMAL_UPDATE)
+			{
+				updateAlert.dismiss();
+			}
+			else
+			{
+				updateAlertOkBtn.setText("Downloading...");
+				updateAlertOkBtn.setEnabled(false);
+			}
+			// In app update!
+			DownloadAndInstallUpdateAsyncTask downloadAndInstallUpdateAsyncTask = new DownloadAndInstallUpdateAsyncTask(this, accountPrefs.getString(HikeConstants.Extras.UPDATE_URL, ""));
+			downloadAndInstallUpdateAsyncTask.execute();
 		}
 	}
 	public void onToolTipClicked(View v)
 	{
-		if(updateToolTipParent != null && updateToolTipParent.getVisibility() == View.VISIBLE)
-		{
-			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UPDATE_TOOL_TIP_CLICKED);
-			openMarket();
-			hideToolTip();
-			return;
-		}
 		if(groupChatToolTipParent != null && groupChatToolTipParent.getVisibility() == View.VISIBLE)
 		{
 			setToolTipDismissed();
@@ -853,31 +925,117 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		task.execute(conv);
 	}
 
-	private void updateApp(int updateType)
+	private void showUpdatePopup(final int updateType)
 	{
 		if(updateType == HikeConstants.NO_UPDATE)
 		{
 			return;
 		}
-		if(updateType == HikeConstants.CRITICAL_UPDATE && 
-				accountPrefs.getBoolean(HikeConstants.Extras.SHOW_UPDATE_OVERLAY, true))
+
+		if(updateType == HikeConstants.NORMAL_UPDATE)
 		{
-			updateAppOverlay();
+			// Here we check if the user cancelled the update popup for this version earlier
+			String updateToIgnore = accountPrefs.getString(HikeConstants.Extras.UPDATE_TO_IGNORE, ""); 
+			if(!TextUtils.isEmpty(updateToIgnore) && updateToIgnore.equals(accountPrefs.getString(HikeConstants.Extras.LATEST_VERSION, "")))
+			{
+				return;
+			}
 		}
-		else if(updateType == HikeConstants.CRITICAL_UPDATE ||
-					accountPrefs.getBoolean(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP, true) || 
-						Utils.wasScreenOpenedNNumberOfTimes(accountPrefs, HikeMessengerApp.NUM_TIMES_HOME_SCREEN))
+
+		// If we are already showing an update we don't need to do anything else
+		if(updateAlert != null && updateAlert.isShowing())
 		{
-			showUpdateToolTip(updateType);
+			return;
 		}
+
+		updateAlert = new Dialog(MessagesList.this, R.style.Theme_CustomDialog);
+		updateAlert.setContentView(R.layout.alert_box);
+
+		((ImageView)updateAlert.findViewById(R.id.alert_image)).setVisibility(View.GONE);
+
+		int padding = (int) (10 * Utils.densityMultiplier);
+
+		TextView updateText = ((TextView)updateAlert.findViewById(R.id.alert_text));
+		TextView updateTitle = (TextView)updateAlert.findViewById(R.id.alert_title);
+
+		updateText.setPadding(padding, 0, padding, padding);
+		updateText.setGravity(Gravity.CENTER);
+		updateText.setText(updateType == HikeConstants.CRITICAL_UPDATE ? R.string.critical_update : R.string.normal_update);
+
+		updateTitle.setPadding(padding, padding, padding, padding);
+		updateTitle.setGravity(Gravity.CENTER);
+		updateTitle.setText(updateType == HikeConstants.CRITICAL_UPDATE ? R.string.critical_update_head : R.string.normal_update_head);
+
+
+		Button cancelBtn = null;
+		if(updateType == HikeConstants.CRITICAL_UPDATE)
+		{
+			((Button)updateAlert.findViewById(R.id.alert_ok_btn)).setVisibility(View.GONE);
+			((Button)updateAlert.findViewById(R.id.alert_cancel_btn)).setVisibility(View.GONE);
+			(updateAlert.findViewById(R.id.btn_divider)).setVisibility(View.GONE);
+
+			updateAlertOkBtn = (Button) updateAlert.findViewById(R.id.alert_center_btn);
+			updateAlertOkBtn.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			updateAlertOkBtn = (Button) updateAlert.findViewById(R.id.alert_ok_btn);
+			cancelBtn = (Button) updateAlert.findViewById(R.id.alert_cancel_btn);
+			cancelBtn.setText(R.string.cancel);
+		}
+		updateAlertOkBtn.setText(R.string.update_app);
+
+		updateAlert.setCancelable(true);
+
+		updateAlertOkBtn.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View v) 
+			{
+				updateApp(updateType);
+			}
+		});
+
+		if(cancelBtn != null)
+		{
+			cancelBtn.setOnClickListener(new OnClickListener() 
+			{
+				@Override
+				public void onClick(View v) 
+				{
+					updateAlert.cancel();
+				}
+			});
+		}
+
+		updateAlert.setOnCancelListener(new OnCancelListener() 
+		{
+			@Override
+			public void onCancel(DialogInterface dialog) 
+			{
+				if(updateType == HikeConstants.CRITICAL_UPDATE)
+				{
+					finish();
+				}
+				else
+				{
+					Editor editor = accountPrefs.edit();
+					editor.putString(HikeConstants.Extras.UPDATE_TO_IGNORE, accountPrefs.getString(HikeConstants.Extras.LATEST_VERSION, ""));
+					editor.commit();
+				}
+			}
+		});
+
+		updateAlert.show();
 	}
 
-	private void updateAppOverlay()
+	public void updateFailed()
 	{
-		findViewById(R.id.overlay_layout).setVisibility(View.VISIBLE);
-		((TextView)findViewById(R.id.overlay_message)).setText(this.accountPrefs.getString(HikeConstants.Extras.UPDATE_MESSAGE, ""));
-		((ImageView)findViewById(R.id.overlay_image)).setImageResource(R.drawable.ic_update);
-		((Button)findViewById(R.id.overlay_button)).setText("Update now");
+		if(updateAlertOkBtn != null)
+		{
+			updateAlertOkBtn.setText(R.string.update_app);
+			updateAlertOkBtn.setEnabled(true);
+		}
 	}
 
 	public void onOverlayButtonClick(View v)
@@ -885,7 +1043,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		if (v.getId() != R.id.overlay_layout) 
 		{
 			Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_UDPATE_OVERLAY_BUTTON_CLICKED);
-			openMarket();			
 		}
 		else
 		{

@@ -48,10 +48,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			app.disconnectFromService();
 			activity.stopService(new Intent(activity, HikeService.class));
 
-			if (this.delete)
-			{
-				AccountUtils.deleteAccount();
-			}
+			AccountUtils.deleteOrUnlinkAccount(this.delete);
 
 			db.deleteAll();
 			convDb.deleteAll();

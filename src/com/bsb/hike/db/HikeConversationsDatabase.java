@@ -433,7 +433,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	private List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation)
+	public List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation)
 	{
 		String limitStr = new Integer(limit).toString();
 		/*TODO this should be ORDER BY timestamp */
@@ -710,10 +710,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 	}
 
 	/* deletes a single message */
-	public void deleteMessage(long msgId)
+	public void deleteMessage(ConvMessage convMessage)
 	{
-		Long[] bindArgs = new Long[] { msgId };
+		Long[] bindArgs = new Long[] { convMessage.getMsgID() };
 		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE "+DBConstants.MESSAGE_ID+"= ?", bindArgs);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_DELETED, convMessage);
 	}
 
 	public boolean wasOverlayDismissed(String msisdn)

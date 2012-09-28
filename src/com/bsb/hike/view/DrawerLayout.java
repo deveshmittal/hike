@@ -24,6 +24,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.BitmapFactory;
+import android.graphics.Shader.TileMode;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -86,6 +89,8 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 	private ContactInfo me;
 
+	private BitmapDrawable sideBarBackground;
+
 	public enum DrawerItems
 	{
 		HOME,
@@ -126,6 +131,14 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		contentAnimationIn.setFillEnabled(true);
 
 		sidebarTranslateAnimationIn = new TranslateAnimation(-mSidebarOffsetForAnimation, 0, 0, 0);
+
+		/*
+		 * Fix for android v2.3 and below specific bug where the bitmap is not tiled and gets stretched instead
+		 * if we use the xml. So we're creating it via code.
+		 * http://stackoverflow.com/questions/7586209/xml-drawable-bitmap-tilemode-bug
+		 */
+		sideBarBackground = new BitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.bg_drawer));
+		sideBarBackground.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 	}
 
 	public void setUpDrawerView()
@@ -224,11 +237,13 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	{
 		Log.d(getClass().getSimpleName(), "Drawer item clicked: " + v.getId());
 		intent = null;
+		boolean goingBackToHome = false;
 		switch (DrawerItems.values()[v.getId()]) 
 		{
 		case HOME:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HOME);
 			intent = activity instanceof MessagesList ? null : new Intent(getContext(), MessagesList.class);
+			goingBackToHome = true;
 			break;
 		case GROUP_CHAT:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_GROUP_CHAT);
@@ -262,10 +277,19 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		}
 		if (intent != null) 
 		{
+			intent.putExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, goingBackToHome);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			activity.startActivity(intent);
-			activity.overridePendingTransition(R.anim.slide_in_right_noalpha,
-					R.anim.alpha_out);
+			if(!goingBackToHome)
+			{
+				activity.overridePendingTransition(R.anim.slide_in_right_noalpha,
+						R.anim.alpha_out);
+			}
+			else
+			{
+				activity.overridePendingTransition(R.anim.slide_in_right_noalpha,
+						R.anim.slide_out_left_noalpha);
+			}
 		}
 		else
 		{
@@ -316,6 +340,8 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		LayoutParams lp = mSidebar.getLayoutParams();
 		lp.width = mSidebarWidth;
 		mSidebar.setLayoutParams(lp);
+
+		mSidebar.setBackgroundDrawable(sideBarBackground);
 
 		mOpenListener = new OpenListener(mSidebar, mContent);
 		mCloseListener = new CloseListener(mSidebar, mContent);

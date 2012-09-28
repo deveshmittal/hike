@@ -1,6 +1,7 @@
 package com.bsb.hike.service;
 
 import java.util.Calendar;
+import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +36,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -138,6 +140,9 @@ public class HikeService extends Service
 	public static final String MQTT_USER_STATS_SEND_ACTION = "com.bsb.hike.USER_STATS";
 
 	public static final String MQTT_CONTACT_SYNC_ACTION = "com.bsb.hike.CONTACT_SYNC";
+
+	// constant used internally to check for updates
+	public static final String UPDATE_CHECK_ACTION = "com.bsb.hike.UPDATE_CHECK";
 	
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
@@ -162,6 +167,9 @@ public class HikeService extends Service
 
 	// receiver that triggers a contact sync
 	private ManualContactSyncTrigger manualContactSyncTrigger;
+
+	// receiver that triggers a check for updates
+	private UpdateCheckTrigger updateCheckTrigger;
 
 	private HikeMqttManager mMqttManager;
 	private String mToken;
@@ -243,6 +251,13 @@ public class HikeService extends Service
 			userStatsSender = new UserStatsSender();
 			registerReceiver(userStatsSender, new IntentFilter(MQTT_USER_STATS_SEND_ACTION));
 			scheduleNextUserStatsSending();
+		}
+
+		if(updateCheckTrigger == null)
+		{
+			updateCheckTrigger = new UpdateCheckTrigger();
+			registerReceiver(updateCheckTrigger, new IntentFilter(UPDATE_CHECK_ACTION));
+			scheduleNextUpdateCheck();
 		}
 		/* register with the Contact list to get an update whenever the phone book changes.
 		 * Use the application thread for the intent receiver, the IntentReceiver will take
@@ -421,6 +436,12 @@ public class HikeService extends Service
 		{
 			unregisterReceiver(manualContactSyncTrigger);
 			manualContactSyncTrigger = null;
+		}
+
+		if(updateCheckTrigger != null)
+		{
+			unregisterReceiver(updateCheckTrigger);
+			updateCheckTrigger = null;
 		}
 	}
 
@@ -687,6 +708,42 @@ public class HikeService extends Service
 		wakeUpTime.add(Calendar.HOUR, 12);
 
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
+	}
+
+	private class UpdateCheckTrigger extends BroadcastReceiver
+	{
+		@Override
+		public void onReceive(Context context, Intent intent) 
+		{
+			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(HikeService.this);
+			checkForUpdateTask.execute();
+		}
+		
+	}
+
+	public void scheduleNextUpdateCheck()
+	{
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(UPDATE_CHECK_ACTION), PendingIntent.FLAG_UPDATE_CURRENT);
+
+		// Randomizing the time when we will poll the server for an update 
+		Random random = new Random();
+
+		Calendar wakeUpTime = Calendar.getInstance();
+		if(getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getBoolean(HikeMessengerApp.PRODUCTION, true))
+		{
+			int hour = random.nextInt(48) + 1;
+			wakeUpTime.add(Calendar.HOUR, hour);
+		}
+		else
+		{
+			int min = random.nextInt(5) + 1;
+			wakeUpTime.add(Calendar.MINUTE, min);
+		}
+
+		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+		// Cancel any pending alarms with this pending intent
+		aMgr.cancel(pendingIntent);
 		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(), pendingIntent);
 	}
 

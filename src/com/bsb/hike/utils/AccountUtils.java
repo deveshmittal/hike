@@ -78,9 +78,11 @@ public class AccountUtils
 
 	public static String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
 
-	private static final String FILE_TRANSFER_HOST = "ft.im.hike.in";
+	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 
-	private static final String FILE_TRANSFER_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static String FILE_TRANSFER_HOST = PRODUCTION_FT_HOST;
+
+	public static String FILE_TRANSFER_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
@@ -554,11 +556,11 @@ public class AccountUtils
 		return blockListMsisdns;
 	}
 
-	public static void deleteAccount() throws NetworkErrorException
+	public static void deleteOrUnlinkAccount(boolean deleteAccount) throws NetworkErrorException
 	{
-		HttpDelete delete = new HttpDelete(BASE + "/account");
-		addToken(delete);
-		JSONObject obj = executeRequest(delete);
+		HttpRequestBase request = deleteAccount ? new HttpDelete(BASE + "/account") : new HttpPost(BASE + "/account/unlink");
+		addToken(request);
+		JSONObject obj = executeRequest(request);
 		if ((obj == null) || "fail".equals(obj.optString("stat")))
 		{
 			throw new NetworkErrorException("Could not delete account");
@@ -607,6 +609,7 @@ public class AccountUtils
 
 		connection.setRequestMethod("PUT");
 
+		connection.setConnectTimeout(150 * 1000);
 		connection.setRequestProperty("Connection", "Keep-Alive");
 		connection.setRequestProperty("Content-Name", fileName);
 		connection.setRequestProperty("Content-Type", TextUtils.isEmpty(fileType) ? "" : fileType);

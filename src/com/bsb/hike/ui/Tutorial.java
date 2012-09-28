@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
@@ -34,7 +36,10 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 	private boolean isLandscape;
 	private TextView titleBtn;
 
-	private static final int PAGE_NUM = 3;
+	private static final int PAGE_NUM_HELP = 3;
+	private static final int PAGE_NUM_INTRO = 3;
+
+	private int pageNum = 0;
 
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -51,10 +56,14 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 			titleBtn.setEnabled(false);
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+
+			pageNum = PAGE_NUM_INTRO;
 		}
 		else
 		{
 			afterSetContentView(savedInstanceState);
+
+			pageNum = PAGE_NUM_HELP;
 		}
 
 		TextView mTitleView = (TextView) findViewById(isHelpPage ? R.id.title_centered : R.id.title);
@@ -64,12 +73,12 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 		pageIndicatorContainer = (ViewGroup) findViewById(R.id.page_indicator_container);
 
 		int rightMargin = (int) (10 * Utils.densityMultiplier);
-		pageIndicators = new ImageView[PAGE_NUM];
-		for(int i = 0; i<PAGE_NUM; i++)
+		pageIndicators = new ImageView[pageNum];
+		for(int i = 0; i<pageNum; i++)
 		{
 			pageIndicators[i] = new ImageView(this);
 			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			if(i != PAGE_NUM - 1)
+			if(i != pageNum - 1)
 			{
 				lp.setMargins(0, 0, rightMargin, 0);
 			}
@@ -94,7 +103,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				pageIndicators[position].setImageResource(R.drawable.page_indicator_selected);
 				if(!isHelpPage)
 				{
-					titleBtn.setEnabled(position == PAGE_NUM - 1 ? true : false);
+					titleBtn.setEnabled(position == pageNum - 1 ? true : false);
 				}
 			}
 			@Override
@@ -140,7 +149,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 		@Override
 		public int getCount() 
 		{
-			return PAGE_NUM;
+			return pageNum;
 		}
 
 		@Override
@@ -178,7 +187,16 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				mainImg.setImageResource(isHelpPage ? R.drawable.ic_hike_phone : R.drawable.hike_to_hike_img);
 				header.setImageResource(isHelpPage ? 0 : R.drawable.hike_to_hike_txt);
 				header.setVisibility(isHelpPage ? View.GONE : View.VISIBLE);
-				info.setText(isHelpPage ? R.string.help_info : R.string.hike_to_hike_free_always);
+				if(isHelpPage)
+				{
+					tutorialPage.findViewById(R.id.help_info).setVisibility(View.VISIBLE);
+					info.setVisibility(View.GONE);
+					mainImg.setScaleType(ScaleType.CENTER);
+				}
+				else
+				{
+					info.setText(R.string.hike_to_hike_free_always);
+				}
 				rewardsInfo.setVisibility(View.GONE);
 				helpButtonsContainer.setVisibility(isHelpPage ? View.VISIBLE : View.GONE);
 				disclaimer.setVisibility(isHelpPage ? View.GONE : View.VISIBLE);
@@ -200,11 +218,12 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 					{
 						imgLayout.setVisibility(View.GONE);
 						LayoutParams rewardsInfoLP = (LayoutParams) rewardsInfo.getLayoutParams();
-						rewardsInfoLP.weight = 1;
+						rewardsInfoLP.weight = 2;
+						rewardsInfoLP.gravity = Gravity.TOP|Gravity.CENTER_HORIZONTAL;
 						rewardsInfo.setLayoutParams(rewardsInfoLP);
 
 						LayoutParams headerLP = (LayoutParams) header.getLayoutParams();
-						headerLP.weight = isLandscape ? 4 : 5;
+						headerLP.weight = 1.5f;
 						rewardsInfo.setLayoutParams(headerLP);
 					}
 					else
@@ -216,6 +235,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				}
 				mainImg.setImageResource(isHelpPage ? R.drawable.hike_to_sms_img : R.drawable.rewards_img);
 				header.setImageResource(isHelpPage ? R.drawable.hike_to_sms_txt : R.drawable.rewards_txt);
+
 				header.setVisibility(View.VISIBLE);
 				info.setText(isHelpPage ? R.string.hike_to_sms : R.string.rewards_intro);
 				rewardsInfo.setVisibility(isHelpPage ? View.GONE : View.VISIBLE);
@@ -228,9 +248,9 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 			{
 				imgLayout.setVisibility(View.GONE);
 			}
-			if(Integer.valueOf((int) (10*Utils.densityMultiplier)) > Integer.valueOf((int) (0.9f * 10)))
+			if(Integer.valueOf((int) (10*Utils.densityMultiplier)) < Integer.valueOf((int) (0.9f * 10)))
 			{
-				imgLayout.setBackgroundResource(R.drawable.background_gradient);
+				mainImg.setScaleType(ScaleType.CENTER);
 			}
 
 			((ViewPager) container).addView(tutorialPage);

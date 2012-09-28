@@ -56,6 +56,11 @@ public class HikeNotification
 					convMsg.isFileTransferMessage() ?
 						HikeFileType.toProperString(convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType()) : 
 							convMsg.getMetadata().getMessage(context, convMsg, false).toString();
+		// Message will be empty for type 'uj' when the conversation does not exist
+		if(TextUtils.isEmpty(message) && convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
+		{
+			message = String.format(context.getString(R.string.joined_hike), contactInfo.getFirstName());
+		}
 		long timestamp = convMsg.getTimestamp();
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo.getName())) ? contactInfo.getName() : msisdn;
 

@@ -228,7 +228,23 @@ public class ConvMessage
 			this.mMessage = context.getString(R.string.group_chat_end);
 			break;
 		case USER_JOIN:
-			this.mMessage = conversation != null ? String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel())) : "";
+			if(conversation != null)
+			{
+				String name;
+				if(conversation instanceof GroupConversation)
+				{
+					name = ((GroupConversation)conversation).getGroupParticipant(obj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
+				}
+				else
+				{
+					name = Utils.getFirstName(conversation.getLabel());
+				}
+				this.mMessage = String.format(context.getString(R.string.joined_hike), name);
+			}
+			else
+			{
+				this.mMessage = "";
+			}
 			break;
 		case USER_OPT_IN:
 			String name;

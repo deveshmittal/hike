@@ -9,6 +9,7 @@
         android:layout_height="match_parent"
         android:background="@null"
         android:drawSelectorOnTop="false"
+        android:scrollbars="none"
         android:fadingEdge="none"
         android:listSelector="@android:color/transparent"
         android:numColumns="7" />
@@ -20,7 +21,10 @@
         android:gravity="center"
         android:padding="10dp"
         android:text="@string/recent_icon_text"
-        android:textColor="@color/black"
+        android:textColor="@color/timestampcolor"
+        android:shadowColor="#66FFFFFF"
+        android:shadowDy="0.8"
+        android:shadowRadius="0.8"
         android:textSize="13sp"
         android:visibility="gone" />
 

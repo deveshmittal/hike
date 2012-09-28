@@ -56,8 +56,10 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
@@ -445,6 +447,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		 */
 		mComposeView.setOnEditorActionListener(this);
 
+		/*
+		 * Fix for android bug, where the focus is removed from the edittext when you have a layout with tabs (Emoticon layout)
+		 * for hard keyboard devices
+		 * http://code.google.com/p/android/issues/detail?id=2516 
+		 */
+		if(getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)
+		{
+			mComposeView.setOnTouchListener(new OnTouchListener() 
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event) 
+				{
+					mComposeView.requestFocusFromTouch();
+					return event == null;
+				}
+			});
+		}
+
 		/* ensure that when we hit Alt+Enter, we insert a newline */
 		mComposeView.setOnKeyListener(this);
 
@@ -562,14 +582,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			startActivity(intent);
 			return true;
 		case R.id.delete:
-			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
+			mPubSub.publish(HikePubSub.DELETE_MESSAGE, message);
 			removeMessage(message);
 			return true;
 		case R.id.resend:
 			/* we treat resend as delete the failed message, and paste the text in the compose buffer */
 			String m = message.getMessage();
 			mComposeView.setText(m);
-			mPubSub.publish(HikePubSub.MESSAGE_DELETED, message.getMsgID());
+			mPubSub.publish(HikePubSub.DELETE_MESSAGE, message.getMsgID());
 			removeMessage(message);
 			return true;
 		case R.id.cancel_file_transfer:
@@ -2338,7 +2358,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 			if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
 			{
-				Toast.makeText(ChatThread.this, "File Size is too large", Toast.LENGTH_SHORT).show();
+				Toast.makeText(ChatThread.this, "Max file size can be 6 MB", Toast.LENGTH_SHORT).show();
 				return;
 			}
 
@@ -2383,7 +2403,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			JSONObject metadata = new JSONObject();
 			metadata.putOpt(HikeConstants.FILES, files);
 
-			ConvMessage convMessage = new ConvMessage(fileName, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+			ConvMessage convMessage = new ConvMessage(fileName, mConversation.getMsisdn(), time, ConvMessage.State.SENT_UNCONFIRMED);
 			convMessage.setMetadata(metadata);
 
 			addMessage(convMessage);
@@ -2534,6 +2554,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			Log.d(getClass().getSimpleName(), "Initialising boolean for emoticon layout setup.: " + isTabInitialised);
 
 			int[] tabDrawables = null;
+
+			int offset = 0;
+			int emoticonsListSize = 0;
 			switch (currentEmoticonCategorySelected.getId()) 
 			{
 			case R.id.hike_emoticons_btn:
@@ -2544,6 +2567,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						R.drawable.emo_im_111_grin
 										};
 				emoticonType = EmoticonType.HIKE_EMOTICON;
+				emoticonsListSize = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 				break;
 			case R.id.emoji_btn:
 				tabDrawables = new int[] {
@@ -2555,6 +2579,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						EmoticonConstants.EMOJI_RES_IDS[392]
 										};
 				emoticonType = EmoticonType.EMOJI;
+				offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+				emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
 				break;
 			}
 
@@ -2576,6 +2602,25 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				ts.setIndicator(tabHead);
 				ts.setContent(new TabFactory());
 				tabHost.addTab(ts);
+			}
+			/*
+			 * Checking whether we have a few emoticons in the recents category. If not we show the next tab emoticons.
+			 */
+			if(whichSubcategory == 0)
+			{
+				int startOffset = offset;
+				int endOffset = startOffset + emoticonsListSize;
+				int recentEmoticonsSizeReq = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 
+						EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT : EmoticonAdapter.MAX_EMOTICONS_PER_ROW_LANDSCAPE;
+				int[] recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType(
+								emoticonType, 
+								startOffset, 
+								endOffset, 
+								recentEmoticonsSizeReq);
+				if(recentEmoticons.length < recentEmoticonsSizeReq)
+				{
+					whichSubcategory++;
+				}
 			}
 			setupEmoticonLayout(emoticonType, whichSubcategory);
 			tabHost.setCurrentTab(whichSubcategory);
@@ -2623,6 +2668,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				setupEmoticonLayout(emoticonType, tabHost.getCurrentTab());
 			}
 		});
+
+		/*
+		 * Here we dispatch a touch event to the compose view so that it regains focus
+		 * http://code.google.com/p/android/issues/detail?id=2516 
+		 */
+		if(getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS)
+		{
+			mComposeView.dispatchTouchEvent(null);
+		}
 	}
 
 	private void setupEmoticonLayout(EmoticonType emoticonType, int whichSubcategory)

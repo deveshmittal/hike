@@ -157,8 +157,8 @@ public class SmileyParser
 			smiley.setBounds(
 								0, 
 								0, 
-								showSmallIcon ? smiley.getIntrinsicWidth()/2 : smiley.getIntrinsicWidth(), 
-								showSmallIcon ? smiley.getIntrinsicHeight()/2 : smiley.getIntrinsicHeight()
+								showSmallIcon ? smiley.getIntrinsicWidth()/2 : (9*smiley.getIntrinsicWidth())/10, 
+								showSmallIcon ? smiley.getIntrinsicHeight()/2 : (9*smiley.getIntrinsicHeight())/10
 							);
 			builder.setSpan(new ImageSpan(smiley), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
@@ -188,21 +188,16 @@ public class SmileyParser
 	public void addSmiley(EditText composeBox, int whichEmoticon)
 	{
 		int cursorStart = composeBox.getSelectionStart();
-		int selectionAfterInsert;
 		Editable text = composeBox.getText();
 		if(whichEmoticon <= mSmileyTexts.length - 1)
 		{
-			selectionAfterInsert = cursorStart + mSmileyTexts[whichEmoticon].length();
 			text.insert(cursorStart, mSmileyTexts[whichEmoticon]);
 		}
 		else
 		{
 			whichEmoticon = whichEmoticon - mSmileyTexts.length;
-			selectionAfterInsert = cursorStart + EmoticonConstants.mEmojiUnicodes[whichEmoticon].length();
 			text.insert(cursorStart, EmoticonConstants.mEmojiUnicodes[whichEmoticon]);
 		}
-
-		composeBox.setSelection(selectionAfterInsert);
 	}
 
 	/**

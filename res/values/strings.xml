@@ -40,7 +40,7 @@
 	<string name="name">Name</string>
 	<string name="terms_privacy">Terms and Privacy</string>
 	<string name="invite_now">Invite Now</string>
-	<string name="disclaimer_india">*Free SMS can only be sent to India at the moment.</string>
+	<string name="disclaimer_india">Free SMS can only be sent to India at the moment.</string>
 	<string name="shortcut">Add Shortcut</string>
 	<string name="earn_200_sms">Invite friends, earn more free SMS.</string>
 	<string name="no_credits">You\'ve run out of free SMS.  Invite %1$s to get 50 more!</string>
@@ -122,12 +122,18 @@
 	<string name="reward">Reward</string>
 	<string name="claimed_so_far">Claimed so far:</string>
 	<string name="rewards_disclaimer">You can claim a reward once it’s more than Rs.50.\nMore about Rewards in our FAQs.</string>
-	<string name="hike_to_hike_free_always">Messaging friends on hike is free,\nalways, worldwide.</string>
-	<string name="hike_to_sms">You can also message friends\nand family who aren\'t on hike with\nfree hike SMS.</string>
-	<string name="hike_to_sms_disclaimer">*works only in India</string>
+	<string name="hike_to_hike_free_always">Free, always, worldwide</string>
+	<string name="hike_to_sms">Also message friends not\non hike for free</string>
+	<string name="hike_to_sms_disclaimer">Free SMS only works to India</string>
 	<string name="rewards_intro">For every friend who joins you get:</string>
 	<string name="help_info">Questions? Write to us or read\nthrough frequently asked questions.</string>
 	<string name="meet_hike">Meet hike</string>
 	<string name="recent_icon_text">This section will automatically collect your\nrecently used icons.</string>
 	<string name="free_sms_left">Free SMS left</string>
+	<string name="normal_update">A new version of hike is out. Would you like to update the app?</string>
+	<string name="critical_update">To continue using hike, an update is required.</string>
+	<string name="normal_update_head">Update available</string>
+	<string name="critical_update_head">Important update</string>
+	<string name="quit">Quit</string>
+	<string name="update_app">Update</string>
 </resources>

@@ -112,7 +112,7 @@
             <RelativeLayout
                 android:id="@+id/emoticon_layout"
                 android:layout_width="match_parent"
-                android:layout_height="225dp"
+                android:layout_height="226dp"
                 android:layout_alignParentBottom="true"
                 android:visibility="invisible" >
 

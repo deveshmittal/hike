@@ -7,6 +7,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -20,6 +21,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.Utils;
 
 public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener{
 
@@ -51,6 +53,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 	private int[] emoticonResIds;
 	private int[] emoticonSubCategories;
 	private int idOffset;
+
+	private final int EMOTICON_SIZE = (int) (45 * Utils.densityMultiplier);
 
 	public EmoticonAdapter(Context context, EditText composeBox, EmoticonType emoticonType, int whichSubCategory, boolean isPortrait) 
 	{
@@ -87,8 +91,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			int startOffset = idOffset + this.offset;
 			int endOffset = startOffset + emoticonResIds.length;
 			recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType
-					(emoticonType, startOffset, endOffset, (isPortrait ? MAX_EMOTICONS_PER_PAGE : MAX_EMOTICONS_PER_PAGE_LANDSCAPE)*2);
-			EMOTICON_NUM_PAGES = calculateNumPages(recentEmoticons.length);
+					(emoticonType, startOffset, endOffset, MAX_EMOTICONS_PER_PAGE*2);
+			EMOTICON_NUM_PAGES = recentEmoticons.length == 0 ? 1 : calculateNumPages(recentEmoticons.length);
 		}
 
 	}
@@ -226,6 +230,8 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			{
 				convertView = inflater.inflate(R.layout.emoticon_item, null);
 			}
+			LayoutParams lp = new LayoutParams(EMOTICON_SIZE, EMOTICON_SIZE);
+			convertView.setLayoutParams(lp);
 			convertView.setTag(Integer.valueOf(whichSubCategory != RECENTS_SUBCATEGORY_INDEX ? 
 					(offset + ((currentPage) * MAX_EMOTICONS_PER_PAGE) + position + idOffset) : 
 						(recentEmoticons[((currentPage) * MAX_EMOTICONS_PER_PAGE) + position] + idOffset)));

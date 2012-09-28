@@ -55,6 +55,8 @@ public class CustomFontEditText extends EditText {
 				super.setTypeface(CustomTypeFace.customTypeFace.bold);
 			} else if (style == Typeface.ITALIC) {
 				super.setTypeface(CustomTypeFace.customTypeFace.thin);
+			} else if (style == Typeface.BOLD_ITALIC) {
+				super.setTypeface(CustomTypeFace.customTypeFace.medium);
 			} else {
 				super.setTypeface(CustomTypeFace.customTypeFace.normal);
 			}
