@@ -203,6 +203,12 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				break;
 			case 1:
 				mainImg.setImageResource(isHelpPage ? R.drawable.hike_to_hike_img : R.drawable.hike_to_sms_img);
+				if(Integer.valueOf((int) (10*Utils.densityMultiplier)) < Integer.valueOf((int) (0.9f * 10)))
+				{
+					LayoutParams imgLayoutLP = (LayoutParams) imgLayout.getLayoutParams();
+					imgLayoutLP.weight--;
+					imgLayout.setLayoutParams(imgLayoutLP);	
+				}
 				header.setImageResource(isHelpPage ? R.drawable.hike_to_hike_txt : R.drawable.hike_to_sms_txt);
 				header.setVisibility(View.VISIBLE);
 				info.setText(isHelpPage ? R.string.hike_to_hike_free_always : R.string.hike_to_sms);
