@@ -2554,6 +2554,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			Log.d(getClass().getSimpleName(), "Initialising boolean for emoticon layout setup.: " + isTabInitialised);
 
 			int[] tabDrawables = null;
+
+			int offset = 0;
+			int emoticonsListSize = 0;
 			switch (currentEmoticonCategorySelected.getId()) 
 			{
 			case R.id.hike_emoticons_btn:
@@ -2564,6 +2567,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						R.drawable.emo_im_111_grin
 										};
 				emoticonType = EmoticonType.HIKE_EMOTICON;
+				emoticonsListSize = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 				break;
 			case R.id.emoji_btn:
 				tabDrawables = new int[] {
@@ -2575,6 +2579,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						EmoticonConstants.EMOJI_RES_IDS[392]
 										};
 				emoticonType = EmoticonType.EMOJI;
+				offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+				emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
 				break;
 			}
 
@@ -2596,6 +2602,25 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				ts.setIndicator(tabHead);
 				ts.setContent(new TabFactory());
 				tabHost.addTab(ts);
+			}
+			/*
+			 * Checking whether we have a few emoticons in the recents category. If not we show the next tab emoticons.
+			 */
+			if(whichSubcategory == 0)
+			{
+				int startOffset = offset;
+				int endOffset = startOffset + emoticonsListSize;
+				int recentEmoticonsSizeReq = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? 
+						EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT : EmoticonAdapter.MAX_EMOTICONS_PER_ROW_LANDSCAPE;
+				int[] recentEmoticons = HikeConversationsDatabase.getInstance().fetchEmoticonsOfType(
+								emoticonType, 
+								startOffset, 
+								endOffset, 
+								recentEmoticonsSizeReq);
+				if(recentEmoticons.length < recentEmoticonsSizeReq)
+				{
+					whichSubcategory++;
+				}
 			}
 			setupEmoticonLayout(emoticonType, whichSubcategory);
 			tabHost.setCurrentTab(whichSubcategory);
