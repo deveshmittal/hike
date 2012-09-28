@@ -47,7 +47,7 @@
                     android:paddingTop="5dp"
                     android:text="@string/hike_to_hike_free_always"
                     android:textColor="@color/lightblack"
-                    android:textStyle="bold|italic"
+                    android:textStyle="bold"
                     android:textSize="17sp" />
                 
                 <LinearLayout
