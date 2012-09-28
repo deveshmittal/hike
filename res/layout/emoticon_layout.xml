@@ -32,23 +32,33 @@
                 android:layout_alignParentTop="true"
                 android:orientation="horizontal" >
                 
-                <Button 
+                <com.bsb.hike.view.CustomFontButton
                     android:id="@+id/hike_emoticons_btn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@drawable/tab_selector_left"
                     android:onClick="onEmoticonCategoryClick"
-                    android:text="hike"/>
+                    android:shadowColor="#FFFFFFFF"
+                    android:shadowDy="1.0"
+                    android:shadowRadius="1.0"
+                    android:text="hike"
+                    android:textColor="@drawable/tab_text_selector"
+                    android:textStyle="bold|italic" />
                 
-                <Button 
+                <com.bsb.hike.view.CustomFontButton
                     android:id="@+id/emoji_btn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@drawable/tab_selector_right"
                     android:onClick="onEmoticonCategoryClick"
-                    android:text="Emoji"/>
+                    android:shadowColor="#FFFFFFFF"
+                    android:shadowDy="1.0"
+                    android:shadowRadius="1.0"
+                    android:text="Emoji"
+                    android:textColor="@drawable/tab_text_selector"
+                    android:textStyle="bold|italic" />
                 
             </LinearLayout>
 
@@ -67,8 +77,25 @@
                 android:gravity="center"
                 android:orientation="horizontal" />
             
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/recent_use_head"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:shadowColor="#FFFFFFFF"
+                android:shadowDy="1.0"
+                android:shadowRadius="1.0"
+                android:layout_below="@id/emoticons_categories_container"
+                android:text="@string/recently_used"
+                android:textColor="@color/timestampcolor"
+                android:textSize="11sp"
+                android:layout_marginTop="3dp"
+                android:textStyle="bold"
+                android:visibility="visible" />
+            
             <android.support.v4.view.ViewPager
                 android:id="@+id/emoticon_pager"
+                android:paddingTop="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@id/page_indicator_container"

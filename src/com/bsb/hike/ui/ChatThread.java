@@ -2681,6 +2681,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void setupEmoticonLayout(EmoticonType emoticonType, int whichSubcategory)
 	{
+		findViewById(R.id.recent_use_head).setVisibility(whichSubcategory == 0 ? View.VISIBLE : View.GONE);
+
 		emoticonsAdapter = new EmoticonAdapter
 				(ChatThread.this, mComposeView, emoticonType, whichSubcategory, getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		emoticonViewPager.setAdapter(emoticonsAdapter);
