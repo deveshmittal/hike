@@ -58,7 +58,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		String create = "CREATE TABLE IF NOT EXISTS "+DBConstants.USERS_TABLE 
 												+" ( " 
 														+ DBConstants.ID + " STRING , "
-														+ DBConstants.NAME +" STRING, "
+														+ DBConstants.NAME +" TEXT, "
 														+ DBConstants.MSISDN+" TEXT COLLATE nocase, "
 														+ DBConstants.ONHIKE+" INTEGER, "
 														+ DBConstants.PHONE+" TEXT, "
@@ -110,6 +110,35 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			String alter2 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.LAST_MESSAGED + " INTEGER";
 			db.execSQL(alter1);
 			db.execSQL(alter2);
+		}
+		// Changing the datatype of the name column 
+		if(oldVersion < 4)
+		{
+			Log.d(getClass().getSimpleName(), "Updating table");
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE + " RENAME TO " + "temp_table";
+
+			String create = "CREATE TABLE IF NOT EXISTS "+DBConstants.USERS_TABLE 
+					+" ( " 
+					+ DBConstants.ID + " STRING , "
+					+ DBConstants.NAME +" TEXT, "
+					+ DBConstants.MSISDN+" TEXT COLLATE nocase, "
+					+ DBConstants.ONHIKE+" INTEGER, "
+					+ DBConstants.PHONE+" TEXT, "
+					+ DBConstants.HAS_CUSTOM_PHOTO+" INTEGER, "
+					+ DBConstants.OVERLAY_DISMISSED+" INTEGER, "
+					+ DBConstants.MSISDN_TYPE+" STRING, "
+					+ DBConstants.LAST_MESSAGED + " INTEGER"
+			+ " )";
+			
+			String insert = "INSERT INTO " + DBConstants.USERS_TABLE + " SELECT * FROM temp_table";
+
+			String drop = "DROP TABLE temp_table";
+
+			db.execSQL(alter);
+			db.execSQL(create);
+			db.execSQL(insert);
+			db.execSQL(drop);
+		
 		}
 	}
 
