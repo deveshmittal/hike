@@ -2,5 +2,4 @@
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="30dp"
     android:layout_height="30dp"
-    android:padding="10dp"
     android:background="@null" />

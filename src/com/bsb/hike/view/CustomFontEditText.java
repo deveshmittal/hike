@@ -39,7 +39,7 @@ public class CustomFontEditText extends EditText {
 			 */
 			if (Utils.densityMultiplier <= 0.75f) 
 			{
-				if (style == Typeface.ITALIC) 
+				if (style == Typeface.ITALIC || style == Typeface.BOLD_ITALIC) 
 				{
 					style = Typeface.NORMAL;
 				}

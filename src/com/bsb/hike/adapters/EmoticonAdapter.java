@@ -3,7 +3,6 @@ package com.bsb.hike.adapters;
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,7 +53,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 	private int[] emoticonSubCategories;
 	private int idOffset;
 
-	private final int EMOTICON_SIZE = (int) (45 * Utils.densityMultiplier);
+	private final int EMOTICON_SIZE = (int) (27 * Utils.densityMultiplier);
 
 	public EmoticonAdapter(Context context, EditText composeBox, EmoticonType emoticonType, int whichSubCategory, boolean isPortrait) 
 	{
@@ -158,23 +157,7 @@ public class EmoticonAdapter extends PagerAdapter implements OnItemClickListener
 			recentUsedTxt.setVisibility(View.GONE);
 			return;
 		}
-		int numLines = (int) (recentEmoticons.length*10)/(MAX_EMOTICONS_PER_ROW);
-		int maxLines = MAX_EMOTICONS_PER_PAGE/MAX_EMOTICONS_PER_ROW;
-
-		if(numLines <= ((maxLines-2)*10))
-		{
-			recentUsedTxt.setVisibility(View.VISIBLE);
-			recentUsedTxt.setGravity(Gravity.CENTER);
-		}
-		else if(numLines <= ((maxLines-1)*10))
-		{
-			recentUsedTxt.setVisibility(View.VISIBLE);
-			recentUsedTxt.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM);
-		}
-		else
-		{
-			recentUsedTxt.setVisibility(View.GONE);
-		}
+		recentUsedTxt.setVisibility(recentEmoticons.length > 0 ? View.GONE : View.VISIBLE);
 	}
 
 	private class EmoticonPageAdapter extends BaseAdapter 
