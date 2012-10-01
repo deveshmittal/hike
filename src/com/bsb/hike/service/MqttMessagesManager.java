@@ -12,6 +12,7 @@ import android.content.SharedPreferences.Editor;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -248,7 +249,9 @@ public class MqttMessagesManager {
 			Log.d(getClass().getSimpleName(),"Delivery report received for msgid : "+msgID +"	;	REPORT : DELIVERED");
 			updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
-			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
+			Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
+
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, pair);	
 		}
 		else if (HikeConstants.MqttMessageTypes.MESSAGE_READ.equals(type)) //Message has been read
 		{
@@ -268,7 +271,9 @@ public class MqttMessagesManager {
 			Log.d(getClass().getSimpleName(),"Delivery report received : " +"	;	REPORT : DELIVERED READ");
 			updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ, msisdn);
 
-			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);	
+			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, ids);
+
+			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);	
 		}
 		else if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)) // Start Typing event received
 		{

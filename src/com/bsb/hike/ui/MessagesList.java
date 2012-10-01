@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
@@ -651,7 +652,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			for(int i = messages.size() - 1; i >= 0; --i)
 			{
 				ConvMessage msg = messages.get(i);
-				if (!msg.isSent())
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.RECEIVED_READ.ordinal()))
 				{
 					ConvMessage.State currentState = msg.getState();
 					msg.setState(ConvMessage.State.RECEIVED_READ);
@@ -669,7 +670,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		{
 			long msgId = ((Long) object).longValue();
 			ConvMessage msg = findMessageById(msgId);
-			if (msg != null)
+			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 			{
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 				runOnUiThread(this);
@@ -677,13 +678,20 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
 		{
-			long[] ids = (long[]) object;
+			Pair<String, long[]> pair = (Pair<String, long[]>) object;
+
+			long[] ids = (long[]) pair.second;
 			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			for (int i = 0; i < ids.length; i++)
 			{
 				ConvMessage msg = findMessageById(ids[i]);
-				if (msg != null)
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
+					// If the msisdn don't match we simply return
+					if(!msg.getMsisdn().equals(pair.first))
+					{
+						return;
+					}
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 				}
 			}
@@ -691,10 +699,17 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))
 		{
-			long msgId = ((Long) object).longValue();
+			Pair<String, Long> pair = (Pair<String, Long>) object;
+
+			long msgId = pair.second;
 			ConvMessage msg = findMessageById(msgId);
-			if (msg != null)
+			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
 			{
+				// If the msisdn don't match we simply return
+				if(!msg.getMsisdn().equals(pair.first))
+				{
+					return;
+				}
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
 				runOnUiThread(this);
 			}

@@ -49,6 +49,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
@@ -1341,10 +1342,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))
 		{
-			long msgID = (Long) object;
+			Pair<String, Long> pair = (Pair<String, Long>) object;
+			// If the msisdn don't match we simply return
+			if(!mConversation.getMsisdn().equals(pair.first))
+			{
+				return;
+			}
+			long msgID = pair.second;
 			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			ConvMessage msg = findMessageById(msgID);
-			if (msg != null)
+			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
 			{
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
 				runOnUiThread(mUpdateAdapter);
@@ -1352,12 +1359,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
 		{
-			long[] ids = (long[]) object;
+			Pair<String, long[]> pair = (Pair<String, long[]>) object;
+			// If the msisdn don't match we simply return
+			if(!mConversation.getMsisdn().equals(pair.first))
+			{
+				return;
+			}
+			long[] ids = pair.second;
 			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			for (int i = 0; i < ids.length; i++)
 			{
 				ConvMessage msg = findMessageById(ids[i]);
-				if (msg != null)
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 				}
@@ -1378,7 +1391,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			long msgId = ((Long) object).longValue();
 			ConvMessage msg = findMessageById(msgId);
-			if (msg != null)
+			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 			{
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 				runOnUiThread(mUpdateAdapter);
