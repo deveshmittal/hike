@@ -216,7 +216,7 @@ public class MqttMessagesManager {
 			long[] ids = convDb.getUnreadMessageIds(convMessage.getConversation().getConvId());
 			if(ids != null && convMessage.isGroupChat() && convMessage.getMetadata() == null )
 			{
-				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ);
+				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ, convMessage.getMsisdn());
 				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);
 			}
 
@@ -234,6 +234,7 @@ public class MqttMessagesManager {
 		else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) //Message delivered to receiver
 		{
 			String id = jsonObj.optString(HikeConstants.DATA);
+			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM); 
 			long msgID;
 			try
 			{
@@ -245,13 +246,14 @@ public class MqttMessagesManager {
 				msgID = -1;
 			}
 			Log.d(getClass().getSimpleName(),"Delivery report received for msgid : "+msgID +"	;	REPORT : DELIVERED");
-			updateDB(msgID, ConvMessage.State.SENT_DELIVERED);
+			updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
 
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED, msgID);	
 		}
 		else if (HikeConstants.MqttMessageTypes.MESSAGE_READ.equals(type)) //Message has been read
 		{
 			JSONArray msgIds = jsonObj.optJSONArray(HikeConstants.DATA);
+			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 			if(msgIds == null)
 			{
 				Log.e(getClass().getSimpleName(), "Update Error : Message id Array is empty or null . Check problem");
@@ -264,7 +266,7 @@ public class MqttMessagesManager {
 				ids[i] = msgIds.optLong(i);
 			}
 			Log.d(getClass().getSimpleName(),"Delivery report received : " +"	;	REPORT : DELIVERED READ");
-			updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ);
+			updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ, msisdn);
 
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);	
 		}
@@ -334,16 +336,16 @@ public class MqttMessagesManager {
 		}
 	}
 
-	private void updateDbBatch(long[] ids, ConvMessage.State status)
+	private void updateDbBatch(long[] ids, ConvMessage.State status, String msisdn)
 	{
-		convDb.updateBatch(ids, status.ordinal());
+		convDb.updateBatch(ids, status.ordinal(), msisdn);
 	}
 
-	private void updateDB(Object object, ConvMessage.State status)
+	private void updateDB(Object object, ConvMessage.State status, String msisdn)
 	{
 		long msgID = (Long)object;
 		/* TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations */
-		convDb.updateMsgStatus(msgID, status.ordinal());
+		convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
 	}
 
 	private void saveStatusMsg(JSONObject jsonObj, String msisdn) throws JSONException

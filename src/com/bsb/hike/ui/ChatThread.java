@@ -1249,7 +1249,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				if (hasWindowFocus())
 				{
 					message.setState(ConvMessage.State.RECEIVED_READ);
-					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal());
+					mConversationDb.updateMsgStatus(message.getMsgID(), ConvMessage.State.RECEIVED_READ.ordinal(), mConversation.getMsisdn());
 					mPubSub.publish(HikePubSub.MQTT_PUBLISH, message.serializeDeliveryReportRead()); // handle return to sender
 
 					mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
