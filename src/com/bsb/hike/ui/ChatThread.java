@@ -699,7 +699,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 		else if(item.getItemId() == R.id.leave_menu)
 		{
-			HikeMessengerApp.getPubSub().publish(HikePubSub.GROUP_LEFT, mConversation.getMsisdn());
 			/*
 			 * Fix for when the user opens the app from a notification of the group and leaves the group,
 			 * the user would not leave the group.

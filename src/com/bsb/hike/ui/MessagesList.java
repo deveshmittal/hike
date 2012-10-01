@@ -115,7 +115,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			HikePubSub.MESSAGE_SENT, 
 			HikePubSub.MSG_READ, 
 			HikePubSub.ICON_CHANGED, 
-			HikePubSub.GROUP_LEFT, 
 			HikePubSub.GROUP_NAME_CHANGED, 
 			HikePubSub.UPDATE_AVAILABLE, 
 			HikePubSub.CONTACT_ADDED,
@@ -185,6 +184,13 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		if(intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, false))
 		{
 			((DrawerLayout) findViewById(R.id.drawer_layout)).closeSidebar(true);
+		}
+
+		if(intent.hasExtra(HikeConstants.Extras.GROUP_LEFT))
+		{
+			Log.d(getClass().getSimpleName(), "LEAVING GROUP FROM ONNEWINTENT");
+			leaveGroup(mConversationsByMSISDN.get(intent.getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
+			intent.removeExtra(HikeConstants.Extras.GROUP_LEFT);
 		}
 	}
 	
@@ -283,18 +289,18 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		mAdapter.setNotifyOnChange(false);
 		mConversationsView.setAdapter(mAdapter);
 
-		if(getIntent().hasExtra(HikeConstants.Extras.GROUP_LEFT))
-		{
-			Log.d(getClass().getSimpleName(), "LEAVING GROUP FROM ONCREATE");
-			leaveGroup(mConversationsByMSISDN.get(getIntent().getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
-		}
-
 		for(String pubSubListener : pubSubListeners)
 		{
 			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
 		}
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
+
+		/*
+		 *  Calling this manually since this method is not called when the activity is created.
+		 *  Need to call this to check if the user left the group.
+		 */
+		onNewIntent(getIntent());
 	}
 
 	private void sendDeviceDetails() 
@@ -729,18 +735,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			/* an icon changed, so update the view */
 			runOnUiThread(this);
 		}
-		else if (HikePubSub.GROUP_LEFT.equals(type))
-		{
-			final String groupId = (String) object;
-			runOnUiThread(new Runnable() 
-			{
-				@Override
-				public void run() 
-				{
-					leaveGroup(MessagesList.this.mConversationsByMSISDN.get(groupId));
-				}
-			});
-		}
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
 			String groupId = (String) object;
@@ -935,6 +929,11 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 
 	private void leaveGroup(Conversation conv)
 	{
+		if(conv == null)
+		{
+			Log.d(getClass().getSimpleName(), "Invalid conversation");
+			return;
+		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
