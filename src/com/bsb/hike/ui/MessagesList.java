@@ -178,8 +178,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 
 	@Override
 	protected void onNewIntent(Intent intent) {
-		Utils.requireAuth(this);
-
 		// Doing this to close the drawer when the user selects the home option on the drawer
 		if(intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, false))
 		{
