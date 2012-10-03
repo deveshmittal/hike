@@ -376,6 +376,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		if (mComposeViewWatcher != null)
 		{
+			// If we didn't send an end typing. We should send one before exiting
+			if (!mComposeViewWatcher.wasEndTypingSent())
+			{
+				mComposeViewWatcher.sendEndTyping();
+			}
 			mComposeViewWatcher.uninit();
 			mComposeViewWatcher = null;
 		}
