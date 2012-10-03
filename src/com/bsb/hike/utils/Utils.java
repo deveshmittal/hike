@@ -784,11 +784,13 @@ public class Utils
 				{
 					return false;
 				}
-				if(Integer.parseInt(updateVersion.nextToken()) > Integer.parseInt(currentVersion.nextToken()))
+				int currentVersionToken = Integer.parseInt(currentVersion.nextToken());
+				int updateVersionToken = Integer.parseInt(updateVersion.nextToken());
+				if(updateVersionToken > currentVersionToken)
 				{
 					return true;
 				}
-				else if(Integer.parseInt(updateVersion.nextToken()) < Integer.parseInt(currentVersion.nextToken()))
+				else if(updateVersionToken < currentVersionToken)
 				{
 					return false;
 				}
