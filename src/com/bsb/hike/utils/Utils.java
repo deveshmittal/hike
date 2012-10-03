@@ -994,7 +994,10 @@ public class Utils
     		Log.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
     		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, dimensionLimit, dimensionLimit);
 
-    		thumbnail.recycle();
+    		if(squareThumbnail != thumbnail)
+    		{
+    			thumbnail.recycle();
+    		}
     		thumbnail = null;
     		return squareThumbnail;
     	}
