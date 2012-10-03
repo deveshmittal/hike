@@ -176,6 +176,6 @@ public class DbConversationListener implements Listener
 	{
 		long msgID = (Long)object;
 		/* TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations */
-		mConversationDb.updateMsgStatus(msgID,status);
+		mConversationDb.updateMsgStatus(msgID,status, null);
 	}
 }
