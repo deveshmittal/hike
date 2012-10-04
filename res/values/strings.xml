@@ -12,8 +12,8 @@
     <string name="copy">Copy</string>
     <string name="preferences">Preferences</string>
     <string name="resend">Resend</string>
-    <string name="delete_account_failed">Couldn\'t delete account</string>
-    <string name="unlink_account_failed">Couldn\'t unlink account</string>
+    <string name="delete_account_failed">hike couldn\'t delete your account. Please try again.</string>
+    <string name="unlink_account_failed">hike couldn\'t unlink your account. Please try again</string>
     <string name="hike_network_connection">Network Connection</string>
     <string name="notconnected_data_disabled">Boss, you\'ve got to turn on data to experience hike!</string>
     <string name="notconnected_no_internet">Boss, check the internet!</string>
@@ -137,4 +137,7 @@
 	<string name="critical_update_head">Important update</string>
 	<string name="quit">Quit</string>
 	<string name="update_app">Update</string>
+	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
+	<string name="unlink_confirmation">Are you sure you want to unlink your account from this phone?</string>
+	<string name="unlink">Unlink</string>
 </resources>
