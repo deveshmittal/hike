@@ -25,7 +25,7 @@
     <string name="image_failed">Unable to open image</string>
     <string name="block_title">Block</string>
     <string name="unblock_title">Unblock</string>
-    <string name="invite_message">Hey! I\'m using hike, a new free messaging service from Bharti SoftBank. Download the app at http://get.hike.in/ to start messaging me for free!</string>
+    <string name="invite_message">I\'m using hike, an awesome new free messaging app! Download the app at http://get.hike.in/ to start messaging me for free!</string>
 	<string name="feedback">Feedback</string>
 	<string name="sending_feedback">Sending Feedback</string>
 	<string name="sending_feedback_failed">Unable to send feedback</string>
@@ -67,7 +67,7 @@
 	<string name="new_message">New Message</string>
 	<string name="new_group">New Group</string>
 	<string name="add_group">Add to Group</string>
-	<string name="invite_share_message">Hi! I\'m using hike, a new messenger from Bharti SoftBank to message friends and family for free! Download it at http://get.hike.in/</string>
+	<string name="invite_share_message">I\'m using hike, an awesome new free messaging app! Download the app at http://get.hike.in/ to start messaging me for free!</string>
 	<string name="max_sms">Max 5 SMS contacts in a group.</string>
 	<string name="max_contact">Max 10 contacts in a group.</string>
 	<string name="invite_sent">Invite sent.</string>
