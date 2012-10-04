@@ -26,6 +26,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -227,17 +228,63 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		addConversations(l);
 	}
 
-	public void updateMsgStatus(long msgID, int val)
+	public void updateMsgStatus(long msgID, int val, String msisdn)
 	{
-		ContentValues values = new ContentValues();
-		values.put(DBConstants.MSG_STATUS, val);
-		String[] whereArgs = { String.valueOf(msgID), String.valueOf(val) };
-		int rowsAffected = mDb.update(DBConstants.MESSAGES_TABLE, values,
-				DBConstants.MESSAGE_ID + "=? AND " + DBConstants.MSG_STATUS
-				+ " < ?", whereArgs);
-		Log.d("HIKE CONVERSATION DB", "Update Msg status to : "
-				+ ConvMessage.stateValue(val) + "	;	for msgID : " + msgID
-				+ "	;	Rows Affected : " + rowsAffected);
+		String initialWhereClause = DBConstants.MESSAGE_ID + " =" + String.valueOf(msgID);
+
+		String query = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET " + DBConstants.MSG_STATUS + " =" + val + " WHERE " + initialWhereClause;
+		
+		executeUpdateMessageStatusStatement(query, val, msisdn);
+	}
+
+	public void updateBatch(long[] ids, int status, String msisdn)
+	{
+		StringBuilder sb = new StringBuilder("(");
+		/* TODO make utils.join work for arrays */
+		for (int i = 0; i < ids.length; i++)
+		{
+			sb.append(ids[i]);
+			if (i != ids.length - 1)
+			{
+				sb.append(",");
+			}
+		}
+		sb.append(")");
+
+		String initialWhereClause =  DBConstants.MESSAGE_ID+" in " + sb.toString();
+
+		String query = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET " + DBConstants.MSG_STATUS + " =" + status + " WHERE " + initialWhereClause;
+
+		executeUpdateMessageStatusStatement(query, status, msisdn);
+	}
+
+	public void executeUpdateMessageStatusStatement(String updateStatement, int status, String msisdn)
+	{
+		int minStatusOrdinal;
+		int maxStatusOrdinal;
+		if(status <= State.SENT_DELIVERED_READ.ordinal())
+		{
+			minStatusOrdinal = State.SENT_UNCONFIRMED.ordinal();
+			maxStatusOrdinal = status;
+		}
+		else
+		{
+			minStatusOrdinal = State.RECEIVED_UNREAD.ordinal();
+			maxStatusOrdinal = status;
+		}
+
+		updateStatement = updateStatement + " AND " + 
+				DBConstants.MSG_STATUS + " >= " + minStatusOrdinal + " AND " + 
+				DBConstants.MSG_STATUS + " <= " + maxStatusOrdinal + 
+				(!TextUtils.isEmpty(msisdn) ? 
+						(" AND " + 
+								DBConstants.CONV_ID + "=(SELECT " + 
+								DBConstants.CONV_ID + " FROM " + 
+								DBConstants.CONVERSATIONS_TABLE + " WHERE " + 
+								DBConstants.MSISDN + " ='" + msisdn + "')") 
+								: "");
+		Log.d(getClass().getSimpleName(), "UPDATE STATEMENT: " + updateStatement);
+		mDb.execSQL(updateStatement);
 	}
 
 	public void updateMessageMetadata(long msgID, MessageMetadata metadata)
@@ -688,25 +735,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		Log.d("HIKE CONVERSATION DB ","Rows Updated : "+rowsAffected);
 		c.close();
 		return ids;
-	}
-
-	public void updateBatch(long[] ids, int status)
-	{
-		StringBuilder sb = new StringBuilder("(");
-		/* TODO make utils.join work for arrays */
-		for (int i = 0; i < ids.length; i++)
-		{
-			sb.append(ids[i]);
-			if (i != ids.length - 1)
-			{
-				sb.append(",");
-			}
-		}
-		sb.append(")");
-
-		ContentValues values = new ContentValues();
-		values.put(DBConstants.MSG_STATUS, status);
-		mDb.update(DBConstants.MESSAGES_TABLE, values, DBConstants.MESSAGE_ID+" in " + sb.toString(), null);
 	}
 
 	/* deletes a single message */

@@ -83,7 +83,9 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
@@ -782,11 +784,13 @@ public class Utils
 				{
 					return false;
 				}
-				if(Integer.parseInt(updateVersion.nextToken()) > Integer.parseInt(currentVersion.nextToken()))
+				int currentVersionToken = Integer.parseInt(currentVersion.nextToken());
+				int updateVersionToken = Integer.parseInt(updateVersion.nextToken());
+				if(updateVersionToken > currentVersionToken)
 				{
 					return true;
 				}
-				else if(Integer.parseInt(updateVersion.nextToken()) < Integer.parseInt(currentVersion.nextToken()))
+				else if(updateVersionToken < currentVersionToken)
 				{
 					return false;
 				}
@@ -992,7 +996,10 @@ public class Utils
     		Log.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: " + thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
     		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY, dimensionLimit, dimensionLimit);
 
-    		thumbnail.recycle();
+    		if(squareThumbnail != thumbnail)
+    		{
+    			thumbnail.recycle();
+    		}
     		thumbnail = null;
     		return squareThumbnail;
     	}
@@ -1171,5 +1178,33 @@ public class Utils
 		AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
 		AccountUtils.FILE_TRANSFER_HOST = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
 		AccountUtils.FILE_TRANSFER_BASE = "http://" + AccountUtils.FILE_TRANSFER_HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
+    }
+
+    public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)
+    {
+    	if(convMessage == null)
+    	{
+    		return false;
+    	}
+    	int minStatusOrdinal;
+		int maxStatusOrdinal;
+		if(stateOrdinal <= State.SENT_DELIVERED_READ.ordinal())
+		{
+			minStatusOrdinal = State.SENT_UNCONFIRMED.ordinal();
+			maxStatusOrdinal = stateOrdinal;
+		}
+		else
+		{
+			minStatusOrdinal = State.RECEIVED_UNREAD.ordinal();
+			maxStatusOrdinal = stateOrdinal;
+		}
+
+		int convMessageStateOrdinal = convMessage.getState().ordinal();
+
+		if(convMessageStateOrdinal <= maxStatusOrdinal && convMessageStateOrdinal>=minStatusOrdinal)
+		{
+			return true;
+		}
+		return false;
     }
 }

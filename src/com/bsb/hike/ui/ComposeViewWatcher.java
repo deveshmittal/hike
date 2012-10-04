@@ -115,8 +115,7 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 		if (current - mTextLastChanged >= 5 * 1000)
 		{
 			/* text hasn't changed in 10 seconds, send an event */
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(HikeConstants.MqttMessageTypes.END_TYPING));
-			mTextLastChanged = 0;
+			sendEndTyping();
 		}
 		else
 		{
@@ -124,6 +123,17 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 			long delta = 10 * 1000 - (current - mTextLastChanged);
 			mUIThreadHandler.postDelayed(this, delta);
 		}
+	}
+
+	public boolean wasEndTypingSent()
+	{
+		return mTextLastChanged == 0;
+	}
+
+	public void sendEndTyping()
+	{
+		mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(HikeConstants.MqttMessageTypes.END_TYPING));
+		mTextLastChanged = 0;
 	}
 
 	@Override

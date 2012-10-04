@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -200,6 +201,8 @@ public class HikeMqttManager implements Listener
 	// defaults - this sample uses very basic defaults for it's interactions
 	// with message brokers
 	private final int brokerPortNumber;
+
+	private int reconnectTime = 0;
 
 	private HikeMqttPersistence persistence = null;
 
@@ -644,6 +647,9 @@ public class HikeMqttManager implements Listener
 	@Override
 	public void onConnected()
 	{
+		//Resetting the reconnect time
+		reconnectTime = 0;
+
 		Log.d("HikeMqttManager", "mqtt connected");
 		setConnectionStatus(MQTTConnectionStatus.CONNECTED);
 
@@ -707,6 +713,18 @@ public class HikeMqttManager implements Listener
 	{
 		Log.e("HikeMqttManager", "onFailure called.", value);
 		disconnectFromBroker(false);
-		this.mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
+
+		if(reconnectTime == 0)
+		{
+			Random random = new Random();
+			reconnectTime = random.nextInt(HikeConstants.RECONNECT_TIME) + 1;
+		}
+		else
+		{
+			reconnectTime *= 2;
+		}
+		reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME : reconnectTime;
+
+		this.mHikeService.scheduleNextPing(reconnectTime);
 	}
 }

@@ -89,6 +89,9 @@ public class HikeConstants
 	/* how often to ping after a failure */
 	public static final int RECONNECT_TIME = 10; /* 10 seconds */
 
+	/* the max amount (in seconds) the reconnect time can be */
+	public static final int MAX_RECONNECT_TIME = 120;
+
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 	public static final String ADAPTER_NAME = "hikeadapter";
 	

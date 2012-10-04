@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
@@ -114,7 +115,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			HikePubSub.MESSAGE_SENT, 
 			HikePubSub.MSG_READ, 
 			HikePubSub.ICON_CHANGED, 
-			HikePubSub.GROUP_LEFT, 
 			HikePubSub.GROUP_NAME_CHANGED, 
 			HikePubSub.UPDATE_AVAILABLE, 
 			HikePubSub.CONTACT_ADDED,
@@ -178,12 +178,17 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 
 	@Override
 	protected void onNewIntent(Intent intent) {
-		Utils.requireAuth(this);
-
 		// Doing this to close the drawer when the user selects the home option on the drawer
 		if(intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, false))
 		{
 			((DrawerLayout) findViewById(R.id.drawer_layout)).closeSidebar(true);
+		}
+
+		if(intent.hasExtra(HikeConstants.Extras.GROUP_LEFT))
+		{
+			Log.d(getClass().getSimpleName(), "LEAVING GROUP FROM ONNEWINTENT");
+			leaveGroup(mConversationsByMSISDN.get(intent.getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
+			intent.removeExtra(HikeConstants.Extras.GROUP_LEFT);
 		}
 	}
 	
@@ -282,18 +287,18 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		mAdapter.setNotifyOnChange(false);
 		mConversationsView.setAdapter(mAdapter);
 
-		if(getIntent().hasExtra(HikeConstants.Extras.GROUP_LEFT))
-		{
-			Log.d(getClass().getSimpleName(), "LEAVING GROUP FROM ONCREATE");
-			leaveGroup(mConversationsByMSISDN.get(getIntent().getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
-		}
-
 		for(String pubSubListener : pubSubListeners)
 		{
 			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
 		}
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
+
+		/*
+		 *  Calling this manually since this method is not called when the activity is created.
+		 *  Need to call this to check if the user left the group.
+		 */
+		onNewIntent(getIntent());
 	}
 
 	private void sendDeviceDetails() 
@@ -651,7 +656,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			for(int i = messages.size() - 1; i >= 0; --i)
 			{
 				ConvMessage msg = messages.get(i);
-				if (!msg.isSent())
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.RECEIVED_READ.ordinal()))
 				{
 					ConvMessage.State currentState = msg.getState();
 					msg.setState(ConvMessage.State.RECEIVED_READ);
@@ -669,7 +674,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		{
 			long msgId = ((Long) object).longValue();
 			ConvMessage msg = findMessageById(msgId);
-			if (msg != null)
+			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_CONFIRMED.ordinal()))
 			{
 				msg.setState(ConvMessage.State.SENT_CONFIRMED);
 				runOnUiThread(this);
@@ -677,13 +682,20 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED_READ.equals(type))
 		{
-			long[] ids = (long[]) object;
+			Pair<String, long[]> pair = (Pair<String, long[]>) object;
+
+			long[] ids = (long[]) pair.second;
 			// TODO we could keep a map of msgId -> conversation objects somewhere to make this faster
 			for (int i = 0; i < ids.length; i++)
 			{
 				ConvMessage msg = findMessageById(ids[i]);
-				if (msg != null)
+				if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED_READ.ordinal()))
 				{
+					// If the msisdn don't match we simply return
+					if(!msg.getMsisdn().equals(pair.first))
+					{
+						return;
+					}
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
 				}
 			}
@@ -691,10 +703,17 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		}
 		else if (HikePubSub.MESSAGE_DELIVERED.equals(type))
 		{
-			long msgId = ((Long) object).longValue();
+			Pair<String, Long> pair = (Pair<String, Long>) object;
+
+			long msgId = pair.second;
 			ConvMessage msg = findMessageById(msgId);
-			if (msg != null)
+			if (Utils.shouldChangeMessageState(msg, ConvMessage.State.SENT_DELIVERED.ordinal()))
 			{
+				// If the msisdn don't match we simply return
+				if(!msg.getMsisdn().equals(pair.first))
+				{
+					return;
+				}
 				msg.setState(ConvMessage.State.SENT_DELIVERED);
 				runOnUiThread(this);
 			}
@@ -713,18 +732,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		{
 			/* an icon changed, so update the view */
 			runOnUiThread(this);
-		}
-		else if (HikePubSub.GROUP_LEFT.equals(type))
-		{
-			final String groupId = (String) object;
-			runOnUiThread(new Runnable() 
-			{
-				@Override
-				public void run() 
-				{
-					leaveGroup(MessagesList.this.mConversationsByMSISDN.get(groupId));
-				}
-			});
 		}
 		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type))
 		{
@@ -920,6 +927,11 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 
 	private void leaveGroup(Conversation conv)
 	{
+		if(conv == null)
+		{
+			Log.d(getClass().getSimpleName(), "Invalid conversation");
+			return;
+		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
