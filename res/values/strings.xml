@@ -87,7 +87,7 @@
 	<string name="upload_failed">Could not upload file. Check network settings.</string>
 	<string name="joined_hike">%1$s just joined hike!</string>
 	<string name="opt_in">%1$s just opted in!</string>
-	<string name="dnd_msg_gc">Waiting for %1$s to join in</string>
+	<string name="dnd_msg_gc">Waiting for %1$s to reply to join</string>
 	<string name="earned_credits">You\'ve just earned %1$s free SMS</string>
 	<string name="no_external_storage">External storage not found</string>
 	<string name="share_file">Share file</string>
