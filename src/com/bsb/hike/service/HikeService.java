@@ -737,7 +737,7 @@ public class HikeService extends Service
 		}
 		else
 		{
-			int min = random.nextInt(5) + 1;
+			int min = random.nextInt(2) + 1;
 			wakeUpTime.add(Calendar.MINUTE, min);
 		}
 
