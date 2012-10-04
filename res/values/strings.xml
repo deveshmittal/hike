@@ -123,7 +123,7 @@
 	<string name="claimed_so_far">Claimed so far:</string>
 	<string name="rewards_disclaimer">You can claim a reward once it’s more than Rs.50.\nMore about Rewards in our FAQs.</string>
 	<string name="hike_to_hike_free_always">Free, always, worldwide</string>
-	<string name="hike_to_sms">Also message friends not\non hike for free with Free hike SMS</string>
+	<string name="hike_to_sms">Also message friends not on hike\nfor free with Free hike SMS</string>
 	<string name="hike_to_sms_disclaimer">Free SMS only works to India</string>
 	<string name="rewards_intro">For every friend who joins you get\n50 Free hike SMS every month</string>
 	<string name="help_info">Questions? Write to us or read\nthrough frequently asked questions.</string>

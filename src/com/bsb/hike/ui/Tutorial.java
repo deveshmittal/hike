@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
@@ -191,15 +190,10 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				{
 					tutorialPage.findViewById(R.id.help_info).setVisibility(View.VISIBLE);
 					info.setVisibility(View.GONE);
-					mainImg.setScaleType(ScaleType.CENTER);
-				}
-				else
-				{
-					info.setText(R.string.hike_to_hike_free_always);
 				}
 				rewardsInfo.setVisibility(View.GONE);
 				helpButtonsContainer.setVisibility(isHelpPage ? View.VISIBLE : View.GONE);
-				disclaimer.setVisibility(View.GONE);
+				disclaimer.setVisibility(isHelpPage ? View.GONE : View.VISIBLE);
 				break;
 			case 1:
 				mainImg.setImageResource(isHelpPage ? R.drawable.hike_to_hike_img : R.drawable.hike_to_sms_img);
@@ -215,7 +209,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				rewardsInfo.setVisibility(View.GONE);
 				helpButtonsContainer.setVisibility(View.GONE);
 				disclaimer.setText(isHelpPage ? "" : getString(R.string.hike_to_sms_disclaimer));
-				disclaimer.setVisibility(isHelpPage ? View.GONE : View.VISIBLE);
+				disclaimer.setVisibility(View.VISIBLE);
 				break;
 			case 2:
 				if(Integer.valueOf((int) (10*Utils.densityMultiplier)) < Integer.valueOf((int) (0.9f * 10)))
@@ -251,10 +245,6 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 			if(isLandscape)
 			{
 				imgLayout.setVisibility(View.GONE);
-			}
-			if(Integer.valueOf((int) (10*Utils.densityMultiplier)) < Integer.valueOf((int) (0.9f * 10)))
-			{
-				mainImg.setScaleType(ScaleType.CENTER);
 			}
 
 			((ViewPager) container).addView(tutorialPage);
