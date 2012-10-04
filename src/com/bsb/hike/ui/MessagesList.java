@@ -177,7 +177,13 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 	}
 
 	@Override
-	protected void onNewIntent(Intent intent) {
+	protected void onNewIntent(Intent intent) 
+	{
+		// Required here since onCreate is not called when we come to this activity after deleting/unlinking account.
+		if (Utils.requireAuth(this))
+		{
+			return;
+		}
 		// Doing this to close the drawer when the user selects the home option on the drawer
 		if(intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, false))
 		{
