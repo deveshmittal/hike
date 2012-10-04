@@ -262,6 +262,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private boolean wasOrientationChanged = false;
 
+	/*
+	 *  Required for saving the current intent if the user has the option "Do not keep background activities checked.
+	 *  Otherwise the current intent gets reset to default and the app throws an NPE (observed during FT).
+	 */
+	private static Intent tempIntent;
+
 	@Override
 	protected void onPause()
 	{
@@ -480,6 +486,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mPubSub = HikeMessengerApp.getPubSub();
 		Object o = getLastNonConfigurationInstance();
 		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
+		intent = tempIntent != null ? tempIntent : intent;
 		onNewIntent(intent);
 
 		if(savedInstanceState != null)
@@ -1984,6 +1991,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				}
 				if(requestCode != HikeConstants.RECORD_AUDIO_TRANSFER_CODE)
 				{
+					tempIntent = getIntent();
 					startActivityForResult(chooserIntent, requestCode);
 				}
 				else
@@ -2353,6 +2361,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						requestCode ==HikeConstants.VIDEO_TRANSFER_CODE ? 
 								HikeFileType.VIDEO : HikeFileType.AUDIO;
 
+			tempIntent = null;
 			initialiseFileTransfer(filePath, hikeFileType, null, null, false);
 		}
 	}
