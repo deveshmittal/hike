@@ -218,7 +218,9 @@ public class MqttMessagesManager {
 			if(ids != null && convMessage.isGroupChat() && convMessage.getMetadata() == null )
 			{
 				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ, convMessage.getMsisdn());
-				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, ids);
+
+				Pair<String, long[]> pair = new Pair<String, long[]>(convMessage.getMsisdn(), ids);
+				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 			}
 
 			Log.d(getClass().getSimpleName(),"Receiver received Message : "
