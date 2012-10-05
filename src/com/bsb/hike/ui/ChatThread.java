@@ -297,6 +297,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mgr.cancel((int) mConversation.getConvId());				
 		}
 
+		tempIntent = null;
+
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
 		if (mComposeViewWatcher != null)
