@@ -29,13 +29,13 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 	{
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		parentLayout.setListener(this);
-		parentLayout.setUpDrawerView();
+		parentLayout.setUpLeftDrawerView();
 		
 		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
 		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
 		if(savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE))
 		{
-			parentLayout.toggleSidebar(true);
+			parentLayout.toggleLeftSidebar(true);
 		}
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_PIC_CHANGED, this);
@@ -54,21 +54,21 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 	public void onToggleSideBarClicked(View v)
 	{
 		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
-		parentLayout.toggleSidebar(false);
+		parentLayout.toggleLeftSidebar(false);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isOpening());
+		outState.putBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isLeftOpening());
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onBackPressed()
 	{
-		if(parentLayout.isOpening())
+		if(parentLayout.isLeftOpening())
 		{
-			parentLayout.closeSidebar(false);
+			parentLayout.closeLeftSidebar(false);
 		}
 		else
 		{
@@ -87,15 +87,9 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 	}
 
 	@Override
-	public void onSidebarOpened() {}
-
-	@Override
-	public void onSidebarClosed() {}
-
-	@Override
-	public boolean onContentTouchedWhenOpening() 
+	public boolean onContentTouchedWhenOpeningLeftSidebar() 
 	{
-		parentLayout.closeSidebar(false);
+		parentLayout.closeLeftSidebar(false);
 		return true;
 	}
 

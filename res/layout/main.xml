@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:visibility="invisible" >
 
-        <include layout="@layout/drawer" />
+        <include layout="@layout/left_drawer" />
     </LinearLayout>
 
     <RelativeLayout

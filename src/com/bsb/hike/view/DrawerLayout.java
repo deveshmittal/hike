@@ -18,7 +18,6 @@
 
 package com.bsb.hike.view;
 
-// update the package name to match your app
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +34,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -55,20 +55,20 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 	public final static int DURATION = 250;
 
-	private boolean mOpened;
-	private View mSidebar;
+	private boolean mLeftOpened;
+	private View mLeftSidebar;
 	private View mContent;
 	private int mSidebarWidth;
 	private int mSidebarOffsetForAnimation;
 	private int topBarButtonWidth;
 
-	private Animation contentAnimationIn;
-	private Animation sidebarTranslateAnimationIn;
-	private Animation contentAnimationOut;
-	private Animation sidebarTranslateAnimationOut;
+	private Animation contentAnimationLeftOut;
+	private Animation leftSidebarTranslateAnimationIn;
+	private Animation contentAnimationRightIn;
+	private Animation leftSidebarTranslateAnimationOut;
 
-	private OpenListener mOpenListener;
-	private CloseListener mCloseListener;
+	private OpenListener mLeftOpenListener;
+	private CloseListener mLeftCloseListener;
 	private Listener mListener;
 
 	private boolean mPressed = false;
@@ -91,7 +91,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 	private BitmapDrawable sideBarBackground;
 
-	public enum DrawerItems
+	public enum LeftDrawerItems
 	{
 		HOME,
 		GROUP_CHAT,
@@ -119,18 +119,18 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
 
 		/* Close Animations */
-		contentAnimationOut = new TranslateAnimation(0, -mSidebarWidth, 0, 0);
-		contentAnimationOut.setFillAfter(true);
-		contentAnimationOut.setFillEnabled(true);
+		contentAnimationRightIn = new TranslateAnimation(0, -mSidebarWidth, 0, 0);
+		contentAnimationRightIn.setFillAfter(true);
+		contentAnimationRightIn.setFillEnabled(true);
 
-		sidebarTranslateAnimationOut = new TranslateAnimation(0, -mSidebarOffsetForAnimation, 0, 0);
+		leftSidebarTranslateAnimationOut = new TranslateAnimation(0, -mSidebarOffsetForAnimation, 0, 0);
 
 		/* Open Animations */
-		contentAnimationIn = new TranslateAnimation(0, mSidebarWidth, 0, 0);
-		contentAnimationIn.setFillAfter(true);
-		contentAnimationIn.setFillEnabled(true);
+		contentAnimationLeftOut = new TranslateAnimation(0, mSidebarWidth, 0, 0);
+		contentAnimationLeftOut.setFillAfter(true);
+		contentAnimationLeftOut.setFillEnabled(true);
 
-		sidebarTranslateAnimationIn = new TranslateAnimation(-mSidebarOffsetForAnimation, 0, 0, 0);
+		leftSidebarTranslateAnimationIn = new TranslateAnimation(-mSidebarOffsetForAnimation, 0, 0, 0);
 
 		/*
 		 * Fix for android v2.3 and below specific bug where the bitmap is not tiled and gets stretched instead
@@ -141,7 +141,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		sideBarBackground.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 	}
 
-	public void setUpDrawerView()
+	public void setUpLeftDrawerView()
 	{
 		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 
@@ -164,7 +164,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 			for(int j=0; j<itemTexts.length; j++)
 			{
-				View itemView = layoutInflater.inflate(R.layout.drawer_item, null);
+				View itemView = layoutInflater.inflate(R.layout.left_drawer_item, null);
 				TextView itemTxt = (TextView) itemView.findViewById(R.id.item_name);
 				ImageView itemImg = (ImageView) itemView.findViewById(R.id.item_icon);
 
@@ -191,8 +191,8 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 					itemView.setBackgroundResource(R.drawable.drawer_center_item_selector);
 				}
 				itemView.setFocusable(true);
-				int id = DrawerItems.values()[itemNumber++].ordinal();
-				switch (DrawerItems.values()[id]) 
+				int id = LeftDrawerItems.values()[itemNumber++].ordinal();
+				switch (LeftDrawerItems.values()[id]) 
 				{
 				case HOME:
 					if(activity instanceof MessagesList)
@@ -238,7 +238,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		Log.d(getClass().getSimpleName(), "Drawer item clicked: " + v.getId());
 		intent = null;
 		boolean goingBackToHome = false;
-		switch (DrawerItems.values()[v.getId()]) 
+		switch (LeftDrawerItems.values()[v.getId()]) 
 		{
 		case HOME:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HOME);
@@ -293,7 +293,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		}
 		else
 		{
-			closeSidebar(false);
+			closeLeftSidebar(false);
 		}
 	}
 
@@ -303,7 +303,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		public void run()
 		{
 			mContent.clearAnimation();
-			closeSidebar(true);
+			closeLeftSidebar(true);
 		}
 	};
 
@@ -326,10 +326,10 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	@Override
 	public void onFinishInflate() {
 		super.onFinishInflate();
-		mSidebar = findViewById(R.id.animation_layout_sidebar);
+		mLeftSidebar = findViewById(R.id.animation_layout_sidebar);
 		mContent = findViewById(R.id.animation_layout_content);
 
-		if (mSidebar == null) {
+		if (mLeftSidebar == null) {
 			throw new NullPointerException("no view id = animation_sidebar");
 		}
 
@@ -337,22 +337,22 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			throw new NullPointerException("no view id = animation_content");
 		}
 
-		LayoutParams lp = mSidebar.getLayoutParams();
+		LayoutParams lp = mLeftSidebar.getLayoutParams();
 		lp.width = mSidebarWidth;
-		mSidebar.setLayoutParams(lp);
+		mLeftSidebar.setLayoutParams(lp);
 
-		mSidebar.setBackgroundDrawable(sideBarBackground);
+		mLeftSidebar.setBackgroundDrawable(sideBarBackground);
 
-		mOpenListener = new OpenListener(mSidebar, mContent);
-		mCloseListener = new CloseListener(mSidebar, mContent);
+		mLeftOpenListener = new OpenListener(mLeftSidebar, mContent, true);
+		mLeftCloseListener = new CloseListener(mLeftSidebar, mContent, true);
 	}
 
 	@Override
 	public void onLayout(boolean changed, int l, int t, int r, int b) {
 		/* the title bar assign top padding, drop it */
-		mSidebar.layout(l, 0, l + mSidebarWidth,
-				0 + mSidebar.getMeasuredHeight());
-		if (mOpened) {
+		mLeftSidebar.layout(l, 0, l + mSidebarWidth,
+				0 + mLeftSidebar.getMeasuredHeight());
+		if (mLeftOpened) {
 			mContent.layout(l + mSidebarWidth, 0, r + mSidebarWidth, b);
 		} else {
 			mContent.layout(l, 0, r, b);
@@ -363,13 +363,13 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	public void onMeasure(int w, int h) {
 		super.onMeasure(w, h);
 		super.measureChildren(w, h);
-		mSidebarWidth = mSidebar.getMeasuredWidth();
+		mSidebarWidth = mLeftSidebar.getMeasuredWidth();
 	}
 
 	@Override
 	protected void measureChild(View child, int parentWSpec, int parentHSpec) {
 		/* the max width of Sidebar is 90% of Parent */
-		if (child == mSidebar) {
+		if (child == mLeftSidebar) {
 			int mode = MeasureSpec.getMode(parentWSpec);
 			int width = (int) (getMeasuredWidth() * 0.9);
 			super.measureChild(child, MeasureSpec.makeMeasureSpec(width, mode),
@@ -381,7 +381,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
-		if (!isOpening()) {
+		if (!isLeftOpening()) {
 			return false;
 		}
 
@@ -407,7 +407,7 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			if (mPressed && action == MotionEvent.ACTION_UP
 					&& mListener != null) {
 				mPressed = false;
-				return mListener.onContentTouchedWhenOpening();
+				return mListener.onContentTouchedWhenOpeningLeftSidebar();
 			}
 		} else {
 			mPressed = false;
@@ -421,52 +421,55 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		activity = (Activity) l;
 	}
 
-	/* to see if the Sidebar is visible */
-	public boolean isOpening() {
-		return mOpened;
+	/* to see if the Left Sidebar is visible */
+	public boolean isLeftOpening() {
+		return mLeftOpened;
 	}
 
-	public void toggleSidebar(boolean noAnimation) {
+	public void toggleLeftSidebar(boolean noAnimation) {
 		if (mContent.getAnimation() != null) {
 			return;
 		}
 
-		if (mOpened) {
-			contentAnimationOut.setDuration(noAnimation ? 0 : DURATION);
-			sidebarTranslateAnimationOut.setDuration(noAnimation ? 0 : DURATION);
+		if (mLeftOpened) {
 			/* opened, make close animation */
-			mSidebar.startAnimation(sidebarTranslateAnimationOut);
-			mContent.startAnimation(contentAnimationOut);
-			contentAnimationOut.setAnimationListener(mCloseListener);
+			toggleSidebar(mLeftSidebar, leftSidebarTranslateAnimationOut, contentAnimationRightIn, mLeftCloseListener, noAnimation);
 		} else {
-			contentAnimationIn.setDuration(noAnimation ? 0 : DURATION);
-			sidebarTranslateAnimationIn.setDuration(noAnimation ? 0 : DURATION);
-			/* not opened, make open animation */
-			mSidebar.startAnimation(sidebarTranslateAnimationIn);
-			mContent.startAnimation(contentAnimationIn);
-			contentAnimationIn.setAnimationListener(mOpenListener);
+			toggleSidebar(mLeftSidebar, leftSidebarTranslateAnimationIn, contentAnimationLeftOut, mLeftOpenListener, noAnimation);
 		}
 	}
 
-	public void openSidebar() {
-		if (!mOpened) {
-			toggleSidebar(false);
+	public void toggleSidebar(View sidebar, Animation sidebarAnim, Animation contentAnim, AnimationListener listener, boolean noAnimation)
+	{
+		contentAnim.setDuration(noAnimation ? 0 : DURATION);
+		sidebarAnim.setDuration(noAnimation ? 0 : DURATION);
+		/* opened, make close animation */
+		sidebar.startAnimation(sidebarAnim);
+		mContent.startAnimation(contentAnim);
+		contentAnim.setAnimationListener(listener);
+	}
+
+	public void openLeftSidebar() {
+		if (!mLeftOpened) {
+			toggleLeftSidebar(false);
 		}
 	}
 
-	public void closeSidebar(boolean noAnimation) {
-		if (mOpened) {
-			toggleSidebar(noAnimation);
+	public void closeLeftSidebar(boolean noAnimation) {
+		if (mLeftOpened) {
+			toggleLeftSidebar(noAnimation);
 		}
 	}
 
 	class OpenListener implements Animation.AnimationListener {
 		View iSidebar;
 		View iContent;
+		boolean iLeftSidebar;
 
-		OpenListener(View sidebar, View content) {
+		OpenListener(View sidebar, View content, boolean leftSidebar) {
 			iSidebar = sidebar;
 			iContent = content;
+			iLeftSidebar = leftSidebar;
 		}
 
 		public void onAnimationRepeat(Animation animation) {
@@ -479,21 +482,23 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		public void onAnimationEnd(Animation animation) {
 			iContent.clearAnimation();
 			iSidebar.clearAnimation();
-			mOpened = !mOpened;
-			requestLayout();
-			if (mListener != null) {
-				mListener.onSidebarOpened();
+			if(iLeftSidebar)
+			{
+				mLeftOpened = !mLeftOpened;
 			}
+			requestLayout();
 		}
 	}
 
 	class CloseListener implements Animation.AnimationListener {
 		View iSidebar;
 		View iContent;
+		boolean iLeftSidebar;
 
-		CloseListener(View sidebar, View content) {
+		CloseListener(View sidebar, View content, boolean leftSidebar) {
 			iSidebar = sidebar;
 			iContent = content;
+			iLeftSidebar = leftSidebar;
 		}
 
 		public void onAnimationRepeat(Animation animation) {
@@ -506,19 +511,15 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			iContent.clearAnimation();
 			iSidebar.clearAnimation();
 			iSidebar.setVisibility(View.INVISIBLE);
-			mOpened = !mOpened;
-			requestLayout();
-			if (mListener != null) {
-				mListener.onSidebarClosed();
+			if(iLeftSidebar)
+			{
+				mLeftOpened = !mLeftOpened;
 			}
+			requestLayout();
 		}
 	}
 
 	public interface Listener {
-		public void onSidebarOpened();
-
-		public void onSidebarClosed();
-
-		public boolean onContentTouchedWhenOpening();
+		public boolean onContentTouchedWhenOpeningLeftSidebar();
 	}
 }

@@ -194,7 +194,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		// Doing this to close the drawer when the user selects the home option on the drawer
 		if(intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, false))
 		{
-			((DrawerLayout) findViewById(R.id.drawer_layout)).closeSidebar(true);
+			((DrawerLayout) findViewById(R.id.drawer_layout)).closeLeftSidebar(true);
 		}
 
 		if(intent.hasExtra(HikeConstants.Extras.GROUP_LEFT))
