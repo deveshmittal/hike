@@ -25,7 +25,7 @@
     <string name="image_failed">Unable to open image</string>
     <string name="block_title">Block</string>
     <string name="unblock_title">Unblock</string>
-    <string name="invite_message">I\'m using hike, an awesome new free messaging app! Download the app at http://get.hike.in/ to start messaging me for free!</string>
+    <string name="invite_message">Hi! I\'m using hike, an awesome new free messaging app from Bharti SoftBank. Download the app at http://get.hike.in/ to start messaging me for free!</string>
 	<string name="feedback">Feedback</string>
 	<string name="sending_feedback">Sending Feedback</string>
 	<string name="sending_feedback_failed">Unable to send feedback</string>
