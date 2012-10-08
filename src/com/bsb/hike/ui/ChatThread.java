@@ -1321,7 +1321,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					// clear it a while from now
 					mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 				}
-				mUiThreadHandler.postDelayed(mClearTypingCallback, 20 * 1000);
+				mUiThreadHandler.postDelayed(mClearTypingCallback, HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 			}
 		}
 		// We only consider this case if there is a valid conversation in the Chat Thread

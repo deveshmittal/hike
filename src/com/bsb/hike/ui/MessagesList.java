@@ -118,12 +118,19 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			HikePubSub.GROUP_NAME_CHANGED, 
 			HikePubSub.UPDATE_AVAILABLE, 
 			HikePubSub.CONTACT_ADDED,
-			HikePubSub.MESSAGE_DELETED
+			HikePubSub.MESSAGE_DELETED,
+			HikePubSub.TYPING_CONVERSATION,
+			HikePubSub.END_TYPING_CONVERSATION
 	};
 
 	private Dialog updateAlert;
 
 	private Button updateAlertOkBtn;
+	
+	private Handler clearTypingNotificationHandler;
+
+	private Map<String, ClearTypingNotification> pendingClearTypingNotifications;
+
 	@Override
 	protected void onPause()
 	{
@@ -225,6 +232,9 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 
 		setContentView(R.layout.main);
 		afterSetContentView(savedInstanceState);
+
+		clearTypingNotificationHandler = new Handler();
+		pendingClearTypingNotifications = new HashMap<String, MessagesList.ClearTypingNotification>();
 
 		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		wasAlertCancelled = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
@@ -772,6 +782,70 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 				runOnUiThread(this);
 			}
 		}
+		else if (HikePubSub.TYPING_CONVERSATION.equals(type))
+		{
+			String msisdn = (String) object;
+			toggleTypingNotification(true, msisdn);
+
+			if(!pendingClearTypingNotifications.containsKey(msisdn))
+			{
+				ClearTypingNotification clearTypingNotification = new ClearTypingNotification(msisdn);
+				pendingClearTypingNotifications.put(msisdn, clearTypingNotification);
+
+				clearTypingNotificationHandler.postDelayed(clearTypingNotification, HikeConstants.LOCAL_CLEAR_TYPING_TIME);
+			}
+		}
+		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
+		{
+			toggleTypingNotification(false, (String) object);
+		}
+	}
+
+	private class ClearTypingNotification implements Runnable 
+	{
+		String msisdn;
+
+		public ClearTypingNotification(String msisdn) 
+		{
+			this.msisdn = msisdn;
+		}
+
+		@Override
+		public void run() 
+		{
+			toggleTypingNotification(false, msisdn);
+		}
+	};
+
+	private void toggleTypingNotification(boolean isTyping, String msisdn)
+	{
+		Conversation conversation = mConversationsByMSISDN.get(msisdn);
+		List<ConvMessage> messageList = conversation.getMessages();
+		if(isTyping)
+		{
+			ConvMessage message = messageList.get(messageList.size() - 1);
+			if(!HikeConstants.IS_TYPING.equals(message.getMessage()) && message.getMsgID() == -1 && message.getMappedMsgID() == -1)
+			{
+				// Setting the msg id and mapped msg id as -1 to identify that this is an "is typing..." message.
+				ConvMessage convMessage = new ConvMessage(HikeConstants.IS_TYPING, msisdn, message.getTimestamp(), ConvMessage.State.RECEIVED_UNREAD, -1, -1);
+				messageList.add(convMessage);
+			}
+		}
+		else
+		{
+			ClearTypingNotification clearTypingNotification = pendingClearTypingNotifications.remove(msisdn);
+			if(clearTypingNotification != null)
+			{
+				clearTypingNotificationHandler.removeCallbacks(clearTypingNotification);
+			}
+
+			ConvMessage message = messageList.get(messageList.size() - 1);
+			if(HikeConstants.IS_TYPING.equals(message.getMessage()) && message.getMsgID() == -1 && message.getMappedMsgID() == -1)
+			{
+				messageList.remove(message);
+			}
+		}
+		runOnUiThread(this);
 	}
 
 	ConvMessage findMessageById(long msgId)

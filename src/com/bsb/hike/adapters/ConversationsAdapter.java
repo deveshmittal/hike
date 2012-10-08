@@ -72,7 +72,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				imgStatus.setImageResource(resId);
 				imgStatus.setVisibility(View.VISIBLE);
 			}
-			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD)
+			else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD && (message.getMsgID() > -1 || message.getMappedMsgID() > -1))
 			{
 				imgStatus.setImageResource(R.drawable.ic_unread);
 				imgStatus.setVisibility(View.VISIBLE);
