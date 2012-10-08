@@ -1,22 +1,7 @@
-/*
- * Copyright (C) 2012 0xlab - http://0xlab.org/
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * Authored by Julian Chu <walkingice AT 0xlab.org>
- */
-
 package com.bsb.hike.view;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -36,12 +21,19 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
+import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.DrawerFavoritesAdapter;
+import com.bsb.hike.adapters.DrawerFavoritesAdapter.FavoriteAdapterViewType;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
@@ -51,24 +43,39 @@ import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.utils.Utils;
 
-public class DrawerLayout extends ViewGroup implements View.OnClickListener{
+public class DrawerLayout extends RelativeLayout implements View.OnClickListener, OnItemClickListener{
 
 	public final static int DURATION = 250;
 
 	private boolean mLeftOpened;
+	private boolean mRightOpened;
+
 	private View mLeftSidebar;
+	private View mRightSidebar;
+
 	private View mContent;
 	private int mSidebarWidth;
 	private int mSidebarOffsetForAnimation;
 	private int topBarButtonWidth;
 
+	// Left drawer animations
 	private Animation contentAnimationLeftOut;
 	private Animation leftSidebarTranslateAnimationIn;
 	private Animation contentAnimationRightIn;
 	private Animation leftSidebarTranslateAnimationOut;
 
+	// Right drawer animations
+	private Animation contentAnimationRightOut;
+	private Animation rightSidebarTranslateAnimationIn;
+	private Animation contentAnimationLeftIn;
+	private Animation rightSidebarTranslateAnimationOut;
+
 	private OpenListener mLeftOpenListener;
 	private CloseListener mLeftCloseListener;
+
+	private OpenListener mRightOpenListener;
+	private CloseListener mRightCloseListener;
+
 	private Listener mListener;
 
 	private boolean mPressed = false;
@@ -90,6 +97,8 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	private ContactInfo me;
 
 	private BitmapDrawable sideBarBackground;
+
+	private DrawerFavoritesAdapter drawerFavoritesAdapter;
 
 	public enum LeftDrawerItems
 	{
@@ -118,6 +127,20 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		mSidebarWidth = (int) ((isPortrait ? context.getResources().getDisplayMetrics().widthPixels : context.getResources().getDisplayMetrics().heightPixels) - topBarButtonWidth);
 		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
 
+		initializeLeftDrawerAnimations();
+		initializeRightDrawerAnimations();
+
+		/*
+		 * Fix for android v2.3 and below specific bug where the bitmap is not tiled and gets stretched instead
+		 * if we use the xml. So we're creating it via code.
+		 * http://stackoverflow.com/questions/7586209/xml-drawable-bitmap-tilemode-bug
+		 */
+		sideBarBackground = new BitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.bg_drawer));
+		sideBarBackground.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+	}
+
+	private void initializeLeftDrawerAnimations()
+	{
 		/* Close Animations */
 		contentAnimationRightIn = new TranslateAnimation(0, -mSidebarWidth, 0, 0);
 		contentAnimationRightIn.setFillAfter(true);
@@ -131,14 +154,77 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		contentAnimationLeftOut.setFillEnabled(true);
 
 		leftSidebarTranslateAnimationIn = new TranslateAnimation(-mSidebarOffsetForAnimation, 0, 0, 0);
+	}
+
+	private void initializeRightDrawerAnimations()
+	{
+		/* Close Animations */
+		contentAnimationLeftIn = new TranslateAnimation(0, mSidebarWidth, 0, 0);
+		contentAnimationLeftIn.setFillAfter(true);
+		contentAnimationLeftIn.setFillEnabled(true);
+
+		rightSidebarTranslateAnimationOut = new TranslateAnimation(0, mSidebarOffsetForAnimation, 0, 0);
+
+		/* Open Animations */
+		contentAnimationRightOut = new TranslateAnimation(0, -mSidebarWidth, 0, 0);
+		contentAnimationRightOut.setFillAfter(true);
+		contentAnimationRightOut.setFillEnabled(true);
+
+		rightSidebarTranslateAnimationIn = new TranslateAnimation(mSidebarOffsetForAnimation, 0, 0, 0);
+	}
+
+	public void setUpRightDrawerView()
+	{
+		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
+		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
+
+		List<ContactInfo> completeList = new ArrayList<ContactInfo>();
+
+		List<ContactInfo> favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1, 1, false);
+		List<ContactInfo> recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(HikeConstants.RECENT_COUNT_IN_FAVORITE, 0, true);
+	
+		//Contact for "Favorite Section"
+		completeList.add(new ContactInfo(DrawerFavoritesAdapter.FAVORITES_SECTION_ID, null, HikeConstants.FAVORITES, null));
 
 		/*
-		 * Fix for android v2.3 and below specific bug where the bitmap is not tiled and gets stretched instead
-		 * if we use the xml. So we're creating it via code.
-		 * http://stackoverflow.com/questions/7586209/xml-drawable-bitmap-tilemode-bug
+		 * If favorite list is empty, we add an element to show the empty view in the listview.
 		 */
-		sideBarBackground = new BitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.bg_drawer));
-		sideBarBackground.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		if(favoriteList.isEmpty())
+		{
+			completeList.add(new ContactInfo(DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null, null, null));
+		}
+		else
+		{
+			completeList.addAll(favoriteList);
+		}
+		
+		//Contact for "Recent Section"
+		completeList.add(new ContactInfo(DrawerFavoritesAdapter.RECENTS_SECTION_ID, null, HikeConstants.RECENT, null));
+		
+		completeList.addAll(recentList);
+
+		drawerFavoritesAdapter = new DrawerFavoritesAdapter(completeList, favoriteList.size(), getContext());
+		favoriteListView.setAdapter(drawerFavoritesAdapter);
+
+		favoriteListView.setOnItemClickListener(this);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View view, int position, long id) 
+	{
+		FavoriteAdapterViewType viewType = FavoriteAdapterViewType.values()[drawerFavoritesAdapter.getItemViewType(position)];
+		if(viewType == FavoriteAdapterViewType.RECENT)
+		{
+			ContactInfo contactInfo = drawerFavoritesAdapter.getItem(position);
+			HikeUserDatabase.getInstance().setContactAsFavorite(contactInfo.getMsisdn());
+			drawerFavoritesAdapter.addFavoriteItem(contactInfo);
+		}
+		else if(viewType ==  FavoriteAdapterViewType.FAVORITE)
+		{
+			Intent intent = Utils.createIntentFromContactInfo(drawerFavoritesAdapter.getItem(position));
+			intent.setClass(getContext(), ChatThread.class);
+			getContext().startActivity(intent);
+		}
 	}
 
 	public void setUpLeftDrawerView()
@@ -164,7 +250,10 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 			for(int j=0; j<itemTexts.length; j++)
 			{
-				View itemView = layoutInflater.inflate(R.layout.left_drawer_item, null);
+				View itemView = layoutInflater.inflate(R.layout.drawer_item, null);
+				itemView.setFocusable(true);
+				itemView.setClickable(true);
+
 				TextView itemTxt = (TextView) itemView.findViewById(R.id.item_name);
 				ImageView itemImg = (ImageView) itemView.findViewById(R.id.item_icon);
 
@@ -326,25 +415,38 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	@Override
 	public void onFinishInflate() {
 		super.onFinishInflate();
-		mLeftSidebar = findViewById(R.id.animation_layout_sidebar);
+		mLeftSidebar = findViewById(R.id.animation_layout_left_sidebar);
+		mRightSidebar = findViewById(R.id.animation_layout_right_sidebar);
 		mContent = findViewById(R.id.animation_layout_content);
 
 		if (mLeftSidebar == null) {
-			throw new NullPointerException("no view id = animation_sidebar");
+			throw new NullPointerException("no view id = animation_left_sidebar");
+		}
+
+		if (mRightSidebar == null) {
+			throw new NullPointerException("no view id = animation_right_sidebar");
 		}
 
 		if (mContent == null) {
 			throw new NullPointerException("no view id = animation_content");
 		}
 
-		LayoutParams lp = mLeftSidebar.getLayoutParams();
-		lp.width = mSidebarWidth;
-		mLeftSidebar.setLayoutParams(lp);
+		LayoutParams leftLp = (LayoutParams) mLeftSidebar.getLayoutParams();
+		leftLp.width = mSidebarWidth;
+		mLeftSidebar.setLayoutParams(leftLp);
+
+		LayoutParams rightLp = (LayoutParams) mRightSidebar.getLayoutParams();
+		rightLp.width = mSidebarWidth;
+		mRightSidebar.setLayoutParams(rightLp);
 
 		mLeftSidebar.setBackgroundDrawable(sideBarBackground);
+		mRightSidebar.setBackgroundDrawable(sideBarBackground);
 
 		mLeftOpenListener = new OpenListener(mLeftSidebar, mContent, true);
 		mLeftCloseListener = new CloseListener(mLeftSidebar, mContent, true);
+
+		mRightOpenListener = new OpenListener(mRightSidebar, mContent, false);
+		mRightCloseListener = new CloseListener(mRightSidebar, mContent, false);
 	}
 
 	@Override
@@ -352,9 +454,20 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		/* the title bar assign top padding, drop it */
 		mLeftSidebar.layout(l, 0, l + mSidebarWidth,
 				0 + mLeftSidebar.getMeasuredHeight());
-		if (mLeftOpened) {
+
+		mRightSidebar.layout(r - mSidebarWidth , 0, r,
+				0 + mRightSidebar.getMeasuredHeight());
+
+		if (mLeftOpened) 
+		{
 			mContent.layout(l + mSidebarWidth, 0, r + mSidebarWidth, b);
-		} else {
+		} 
+		else if (mRightOpened)
+		{
+			mContent.layout(l - mSidebarWidth, 0, r - mSidebarWidth, b);
+		}
+		else 
+		{
 			mContent.layout(l, 0, r, b);
 		}
 	}
@@ -363,25 +476,28 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 	public void onMeasure(int w, int h) {
 		super.onMeasure(w, h);
 		super.measureChildren(w, h);
-		mSidebarWidth = mLeftSidebar.getMeasuredWidth();
 	}
 
 	@Override
 	protected void measureChild(View child, int parentWSpec, int parentHSpec) {
 		/* the max width of Sidebar is 90% of Parent */
-		if (child == mLeftSidebar) {
+		if (child == mLeftSidebar || child == mRightSidebar) 
+		{
 			int mode = MeasureSpec.getMode(parentWSpec);
 			int width = (int) (getMeasuredWidth() * 0.9);
 			super.measureChild(child, MeasureSpec.makeMeasureSpec(width, mode),
 					parentHSpec);
-		} else {
+		} 
+		else 
+		{
 			super.measureChild(child, parentWSpec, parentHSpec);
 		}
 	}
 
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
-		if (!isLeftOpening()) {
+		if (!isLeftOpening() && !isRightOpening()) 
+		{
 			return false;
 		}
 
@@ -399,17 +515,22 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		int x = (int) ev.getX();
 		int y = (int) ev.getY();
 		if (mContent.getLeft() < x && mContent.getRight() > x
-				&& mContent.getTop() + topBarButtonWidth < y && mContent.getBottom() > y) {
-			if (action == MotionEvent.ACTION_DOWN) {
+				&& mContent.getTop() + topBarButtonWidth < y && mContent.getBottom() > y) 
+		{
+			if (action == MotionEvent.ACTION_DOWN) 
+			{
 				mPressed = true;
 			}
 
 			if (mPressed && action == MotionEvent.ACTION_UP
-					&& mListener != null) {
+					&& mListener != null) 
+			{
 				mPressed = false;
-				return mListener.onContentTouchedWhenOpeningLeftSidebar();
+				return mLeftOpened ? mListener.onContentTouchedWhenOpeningLeftSidebar() : mListener.onContentTouchedWhenOpeningRightSidebar();
 			}
-		} else {
+		}
+		else 
+		{
 			mPressed = false;
 		}
 
@@ -426,20 +547,45 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 		return mLeftOpened;
 	}
 
-	public void toggleLeftSidebar(boolean noAnimation) {
-		if (mContent.getAnimation() != null) {
+	/* to see if the Right Sidebar is visible */
+	public boolean isRightOpening() {
+		return mRightOpened;
+	}
+
+	public void toggleSidebar(boolean noAnimation, boolean leftSidebar) 
+	{
+		if (mContent.getAnimation() != null)
+		{
 			return;
 		}
 
-		if (mLeftOpened) {
-			/* opened, make close animation */
-			toggleSidebar(mLeftSidebar, leftSidebarTranslateAnimationOut, contentAnimationRightIn, mLeftCloseListener, noAnimation);
-		} else {
-			toggleSidebar(mLeftSidebar, leftSidebarTranslateAnimationIn, contentAnimationLeftOut, mLeftOpenListener, noAnimation);
+		if(leftSidebar)
+		{
+			if (mLeftOpened)
+			{
+				/* opened, make close animation */
+				animateLayouts(mLeftSidebar, leftSidebarTranslateAnimationOut, contentAnimationRightIn, mLeftCloseListener, noAnimation);
+			}
+			else
+			{
+				animateLayouts(mLeftSidebar, leftSidebarTranslateAnimationIn, contentAnimationLeftOut, mLeftOpenListener, noAnimation);
+			}
+		}
+		else
+		{
+			if(mRightOpened)
+			{
+				animateLayouts(mRightSidebar, rightSidebarTranslateAnimationOut, contentAnimationLeftIn, mRightCloseListener, noAnimation);
+			}
+			else
+			{
+				animateLayouts(mRightSidebar, rightSidebarTranslateAnimationIn, contentAnimationRightOut, mRightOpenListener, noAnimation);
+			}
 		}
 	}
 
-	public void toggleSidebar(View sidebar, Animation sidebarAnim, Animation contentAnim, AnimationListener listener, boolean noAnimation)
+
+	private void animateLayouts(View sidebar, Animation sidebarAnim, Animation contentAnim, AnimationListener listener, boolean noAnimation)
 	{
 		contentAnim.setDuration(noAnimation ? 0 : DURATION);
 		sidebarAnim.setDuration(noAnimation ? 0 : DURATION);
@@ -451,13 +597,25 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 
 	public void openLeftSidebar() {
 		if (!mLeftOpened) {
-			toggleLeftSidebar(false);
+			toggleSidebar(false, true);
 		}
 	}
 
 	public void closeLeftSidebar(boolean noAnimation) {
 		if (mLeftOpened) {
-			toggleLeftSidebar(noAnimation);
+			toggleSidebar(noAnimation, true);
+		}
+	}
+
+	public void openRightSidebar() {
+		if (!mRightOpened) {
+			toggleSidebar(false, false);
+		}
+	}
+
+	public void closeRightSidebar(boolean noAnimation) {
+		if (mRightOpened) {
+			toggleSidebar(noAnimation, false);
 		}
 	}
 
@@ -485,6 +643,10 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			if(iLeftSidebar)
 			{
 				mLeftOpened = !mLeftOpened;
+			}
+			else
+			{
+				mRightOpened = !mRightOpened;
 			}
 			requestLayout();
 		}
@@ -515,11 +677,16 @@ public class DrawerLayout extends ViewGroup implements View.OnClickListener{
 			{
 				mLeftOpened = !mLeftOpened;
 			}
+			else
+			{
+				mRightOpened = !mRightOpened;
+			}
 			requestLayout();
 		}
 	}
 
 	public interface Listener {
 		public boolean onContentTouchedWhenOpeningLeftSidebar();
+		public boolean onContentTouchedWhenOpeningRightSidebar();
 	}
 }

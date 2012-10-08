@@ -73,6 +73,9 @@ public class HikeConstants
 
 	public static final String IS_TYPING = "is typing...";
 
+	public static final String FAVORITES = "Favorites";
+	public static final String RECENT = "Recent";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 
@@ -145,6 +148,9 @@ public class HikeConstants
 
 	public static final int LOCAL_CLEAR_TYPING_TIME = 20 * 1000;
 
+	// Number of recent contacts to show in the favorites drawer.
+	public static final int RECENT_COUNT_IN_FAVORITE = 10;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -207,7 +213,8 @@ public class HikeConstants
 		public static final String FILE_NAME = "fileName";
 		public static final String RECORDER_DIALOG_SHOWING = "recorderDialogShowing";
 		public static final String RECORDER_START_TIME = "recorderStartTime";
-		public static final String IS_DRAWER_VISIBLE = "isDrawerVisible";
+		public static final String IS_LEFT_DRAWER_VISIBLE = "isLeftDrawerVisible";
+		public static final String IS_RIGHT_DRAWER_VISIBLE = "isRightDrawerVisible";
 		public static final String FORWARD_MESSAGE = "forwardMessage";
 		public static final String HELP_PAGE = "helpPage";
 		public static final String WHICH_EMOTICON_CATEGORY = "whichEmoticonCategory";

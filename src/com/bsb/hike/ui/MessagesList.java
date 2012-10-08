@@ -958,12 +958,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		setToolTipDismissed();
 	}
 
-	public void onTitleIconClick(View v)
-	{
-		setToolTipDismissed();
-		openOptionsMenu();
-	}
-
 	private void updateApp(int updateType)
 	{
 		if(TextUtils.isEmpty(this.accountPrefs.getString(HikeConstants.Extras.UPDATE_URL, "")))

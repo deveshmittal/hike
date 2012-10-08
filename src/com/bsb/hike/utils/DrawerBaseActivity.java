@@ -30,13 +30,25 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		parentLayout.setListener(this);
 		parentLayout.setUpLeftDrawerView();
+		parentLayout.setUpRightDrawerView();
 		
 		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
 		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
-		if(savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE))
+		if(savedInstanceState != null)
 		{
-			parentLayout.toggleLeftSidebar(true);
+			if(savedInstanceState.getBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE))
+			{
+				parentLayout.toggleSidebar(true, true);
+			}
+			else if(savedInstanceState.getBoolean(HikeConstants.Extras.IS_RIGHT_DRAWER_VISIBLE))
+			{
+				parentLayout.toggleSidebar(true, false);
+			}
 		}
+
+		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
+		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_PIC_CHANGED, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_NAME_CHANGED, this);
@@ -51,15 +63,22 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PROFILE_NAME_CHANGED, this);
 	}
 
-	public void onToggleSideBarClicked(View v)
+	public void onToggleLeftSideBarClicked(View v)
 	{
 		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
-		parentLayout.toggleLeftSidebar(false);
+		parentLayout.toggleSidebar(false, true);
+	}
+
+	public void onTitleIconClick(View v)
+	{
+		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
+		parentLayout.toggleSidebar(false, false);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isLeftOpening());
+		outState.putBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isLeftOpening());
+		outState.putBoolean(HikeConstants.Extras.IS_RIGHT_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isRightOpening());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -69,6 +88,10 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		if(parentLayout.isLeftOpening())
 		{
 			parentLayout.closeLeftSidebar(false);
+		}
+		else if(parentLayout.isRightOpening())
+		{
+			parentLayout.closeRightSidebar(false);
 		}
 		else
 		{
@@ -90,6 +113,13 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 	public boolean onContentTouchedWhenOpeningLeftSidebar() 
 	{
 		parentLayout.closeLeftSidebar(false);
+		return true;
+	}
+
+	@Override
+	public boolean onContentTouchedWhenOpeningRightSidebar() 
+	{
+		parentLayout.closeRightSidebar(false);
 		return true;
 	}
 

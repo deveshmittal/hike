@@ -140,4 +140,5 @@
 	<string name="delete_confirmation">Are you sure you want to permanently delete your account?</string>
 	<string name="unlink_confirmation">Are you sure you want to unlink your account from this phone?</string>
 	<string name="unlink">Unlink</string>
+	<string name="no_favorite">You have no favorites.\nTap plus below to add.</string>
 </resources>
