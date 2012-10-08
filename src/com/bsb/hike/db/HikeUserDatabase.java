@@ -438,11 +438,33 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		return getContacts(true);
 	}
 
-	public List<ContactInfo> getContactsOrderedByOnHike()
+	/**
+	 * Returns a list of contact ordered by when they were last messaged
+	 * @param limit The number of contacts required. -1 if limit is not to be considered
+	 * @param favorite Whether we only need the favorite contacts or non favorite. -1 if we want to ignore this
+	 * @return
+	 */
+	public List<ContactInfo> getContactsOrderedByLastMessaged(int limit, int favorite, boolean onHikeOnly)
 	{
-		String selection = DBConstants.MSISDN + " != 'null'";
-		String orderBy = DBConstants.LAST_MESSAGED + " DESC, " + DBConstants.NAME + " COLLATE NOCASE";
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE,DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, selection, null, null, null, orderBy);
+		String selection = DBConstants.MSISDN + " != 'null'"
+							+ (favorite != -1 ? " AND " + DBConstants.FAVORITE + "=" + favorite : "")
+							+ (onHikeOnly ? " AND " + DBConstants.ONHIKE + "=1":"");
+		Log.d(getClass().getSimpleName(), "Selection: " + selection);
+		String orderBy = DBConstants.LAST_MESSAGED + " DESC, " 
+							+ DBConstants.NAME + " COLLATE NOCASE"
+							+ (limit > -1 ? " LIMIT " + limit : "");
+		String[] columns = 
+				{ 
+				DBConstants.MSISDN,
+				DBConstants.ID,
+				DBConstants.NAME,
+				DBConstants.ONHIKE,
+				DBConstants.PHONE,
+				DBConstants.MSISDN_TYPE,
+				DBConstants.LAST_MESSAGED,
+				DBConstants.HAS_CUSTOM_PHOTO
+				};
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection, null, null, null, orderBy);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -667,5 +689,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			extraInfo.close();
 			mDb.endTransaction();
 		}
+	}
+
+	public void setContactAsFavorite(String msisdn)
+	{
+		ContentValues contentValues = new ContentValues(1);
+		contentValues.put(DBConstants.FAVORITE, 1);
+
+		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[]{msisdn});
 	}
 }
