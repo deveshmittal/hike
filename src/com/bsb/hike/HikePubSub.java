@@ -124,6 +124,8 @@ public class HikePubSub implements Runnable
 
 	public static final String PROFILE_NAME_CHANGED = "profileNameChanged";
 
+	public static final String RECENT_CONTACTS_UPDATED = "recentContactsUpdated";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

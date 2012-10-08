@@ -6,6 +6,7 @@ import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +65,44 @@ public class DrawerFavoritesAdapter extends BaseAdapter
 		contactList.add(1, contactInfo);
 		favoriteCount++;
 
+		notifyDataSetChanged();
+	}
+
+	public void updateRecentContactsList(ContactInfo contactInfo)
+	{
+		// Return if object is null or we have a non hike contact
+		if(contactInfo == null || !contactInfo.isOnhike())
+		{
+			Log.d(getClass().getSimpleName(), "Null contact or SMS contact");
+			return;
+		}
+
+		int presentIndex = contactList.indexOf(contactInfo);
+		/*
+		 * Calculating the index at which the contact need to be inserted.
+		 * We need to consider the favorites list and the two sections.
+		 */
+		int indexToInsertAt = Math.max(1, favoriteCount) + 2;
+
+		if(presentIndex != -1 && (presentIndex < indexToInsertAt))
+		{
+			Log.d(getClass().getSimpleName(), "contact alread a favortie");
+			// This would be true if the contact is currently a favorite.
+			return;
+		}
+		/*
+		 * Remove the contact if it already exists in the list.
+		 */
+		boolean newContact = !contactList.remove(contactInfo);
+
+		contactList.add(indexToInsertAt, contactInfo);
+		/*
+		 * If we added a new contact then we delete the last item to maintain uniformity in size.
+		 */
+		if(newContact)
+		{
+			contactList.remove(contactList.size() - 1);
+		}
 		notifyDataSetChanged();
 	}
 

@@ -227,6 +227,21 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 		}
 	}
 
+	public void refreshFavoritesDrawer()
+	{
+		if(drawerFavoritesAdapter != null)
+		{
+			drawerFavoritesAdapter.notifyDataSetChanged();
+		}
+	}
+
+	public void updateRecentContacts(String msisdn)
+	{
+		Log.d(getClass().getSimpleName(), "Update Recent List");
+		ContactInfo contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(msisdn, true);
+		drawerFavoritesAdapter.updateRecentContactsList(contactInfo);
+	}
+
 	public void setUpLeftDrawerView()
 	{
 		LayoutInflater layoutInflater = LayoutInflater.from(getContext());

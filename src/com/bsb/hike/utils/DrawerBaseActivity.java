@@ -16,6 +16,15 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 
 	private DrawerLayout parentLayout;
 
+	private String[] pubSubListeners = 
+			{
+			HikePubSub.SMS_CREDIT_CHANGED,
+			HikePubSub.PROFILE_PIC_CHANGED,
+			HikePubSub.PROFILE_NAME_CHANGED,
+			HikePubSub.ICON_CHANGED,
+			HikePubSub.RECENT_CONTACTS_UPDATED
+			};
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -49,18 +58,20 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
 		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_PIC_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_NAME_CHANGED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
+		}
 	}
 
 	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PROFILE_PIC_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PROFILE_NAME_CHANGED, this);
+		for(String pubSubListener : pubSubListeners)
+		{
+			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
+		}
 	}
 
 	public void onToggleLeftSideBarClicked(View v)
@@ -124,7 +135,7 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) 
+	public void onEventReceived(String type, final Object object) 
 	{
 		if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{
@@ -157,6 +168,26 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 				public void run() 
 				{
 					parentLayout.setProfileName();
+				}
+			});
+		}
+		else if (HikePubSub.ICON_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					parentLayout.refreshFavoritesDrawer();
+				}
+			});
+		}
+		else if (HikePubSub.RECENT_CONTACTS_UPDATED.equals(type))
+		{
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					parentLayout.updateRecentContacts((String) object);
 				}
 			});
 		}
