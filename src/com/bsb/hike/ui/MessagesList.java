@@ -821,6 +821,10 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 	{
 		Conversation conversation = mConversationsByMSISDN.get(msisdn);
 		List<ConvMessage> messageList = conversation.getMessages();
+		if(messageList.isEmpty())
+		{
+			return;
+		}
 		if(isTyping)
 		{
 			ConvMessage message = messageList.get(messageList.size() - 1);
