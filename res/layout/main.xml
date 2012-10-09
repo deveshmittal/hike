@@ -55,6 +55,12 @@
             android:layout_below="@id/conversations"
             android:background="@drawable/dropshadow" />
 
+        <View 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:layout_below="@id/conversation_list_dropshadow"/>
+
         <View
             android:id="@+id/messages_list_overlay"
             android:layout_width="match_parent"
