@@ -7,8 +7,8 @@
 		icon="ic_delete_priv"
 		android:layout="@layout/icon_preference"
         android:key="@string/delete_key"
-        android:summary="Permanently delete your account!"
-        android:title="Delete Account?" />
+        android:summary="Permanently delete your account"
+        android:title="Delete Account" />
 
 	<com.bsb.hike.view.IconPreference
 		icon="ic_unlink_priv"
