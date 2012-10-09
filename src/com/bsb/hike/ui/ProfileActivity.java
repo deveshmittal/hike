@@ -842,7 +842,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 			Log.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
 			return;
 		}
-		if (HikePubSub.ICON_CHANGED.equals(type)) 
+		if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) 
 		{
 			if (mLocalMSISDN.equals((String)object)) 
 			{
@@ -853,11 +853,12 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 					@Override
 					public void run() {
 						mNameEdit.setText(nameTxt);
+						mNameDisplay.setText(nameTxt);
 					}
 				});
 			}
 		} 
-		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) 
+		else if (HikePubSub.ICON_CHANGED.equals(type)) 
 		{
 			if (mLocalMSISDN.equals((String)object)) 
 			{
