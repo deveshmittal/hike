@@ -108,7 +108,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		if(oldVersion < 3)
 		{
 			String alter1 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.MSISDN_TYPE + " STRING";
-			String alter2 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.LAST_MESSAGED + " INTEGER DEFAULT 0";
+			String alter2 = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.LAST_MESSAGED + " INTEGER";
 			db.execSQL(alter1);
 			db.execSQL(alter2);
 		}
@@ -143,7 +143,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		// Add favorite column
 		if(oldVersion < 5)
 		{
-			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.FAVORITE + " INTEGER";
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.FAVORITE + " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
 	}
