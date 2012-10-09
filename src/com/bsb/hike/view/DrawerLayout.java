@@ -283,6 +283,7 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 				}
 				if(j == 0)
 				{
+					itemView.findViewById(R.id.divider).setVisibility(View.VISIBLE);
 					itemView.setBackgroundResource(R.drawable.drawer_top_item_selector);
 				}
 				else if(j == itemTexts.length - 1)
@@ -292,6 +293,7 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 				}
 				else
 				{
+					itemView.findViewById(R.id.divider).setVisibility(View.VISIBLE);
 					itemView.setBackgroundResource(R.drawable.drawer_center_item_selector);
 				}
 				itemView.setFocusable(true);
