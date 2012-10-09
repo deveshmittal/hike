@@ -836,8 +836,12 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 
 	@Override
 	public void onEventReceived(String type, Object object) {
-		super.onEventReceived(type, object);
-		if(mLocalMSISDN == null)
+		// Only execute the super class method if we are in a drawer activity
+		if(profileType == ProfileType.USER_PROFILE)
+		{
+			super.onEventReceived(type, object);
+		}
+		if(mLocalMSISDN == null || profileType != ProfileType.GROUP_INFO)
 		{
 			Log.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
 			return;
