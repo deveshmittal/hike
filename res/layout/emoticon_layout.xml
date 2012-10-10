@@ -33,20 +33,6 @@
                 android:orientation="horizontal" >
                 
                 <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/hike_emoticons_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/tab_selector_left"
-                    android:onClick="onEmoticonCategoryClick"
-                    android:shadowColor="#FFFFFFFF"
-                    android:shadowDy="1.0"
-                    android:shadowRadius="1.0"
-                    android:text="hike"
-                    android:textColor="@drawable/tab_text_selector"
-                    android:textStyle="bold|italic" />
-                
-                <com.bsb.hike.view.CustomFontButton
                     android:id="@+id/emoji_btn"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -57,6 +43,20 @@
                     android:shadowDy="1.0"
                     android:shadowRadius="1.0"
                     android:text="Emoji"
+                    android:textColor="@drawable/tab_text_selector"
+                    android:textStyle="bold|italic" />
+
+                <com.bsb.hike.view.CustomFontButton
+                    android:id="@+id/hike_emoticons_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tab_selector_left"
+                    android:onClick="onEmoticonCategoryClick"
+                    android:shadowColor="#FFFFFFFF"
+                    android:shadowDy="1.0"
+                    android:shadowRadius="1.0"
+                    android:text="hike"
                     android:textColor="@drawable/tab_text_selector"
                     android:textStyle="bold|italic" />
                 
