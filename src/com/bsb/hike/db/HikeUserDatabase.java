@@ -418,7 +418,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 								DBConstants.USERS_TABLE + "." + DBConstants.NAME + ", " +
 								DBConstants.USERS_TABLE + "." + DBConstants.ONHIKE + ", " +
 								DBConstants.USERS_TABLE + "." + DBConstants.PHONE+  ", " +
-								DBConstants.USERS_TABLE + "." + DBConstants.HAS_CUSTOM_PHOTO +
+								DBConstants.USERS_TABLE + "." + DBConstants.MSISDN_TYPE + ", " +
+								DBConstants.USERS_TABLE + "." + DBConstants.HAS_CUSTOM_PHOTO + ", " +
+								DBConstants.USERS_TABLE + "." + DBConstants.LAST_MESSAGED +
 								" FROM " + DBConstants.USERS_TABLE + " WHERE "
 								+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN 
 								+ " NOT IN (SELECT " + DBConstants.MSISDN + " FROM " 
