@@ -1,36 +1,31 @@
 package com.bsb.hike.adapters;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Typeface;
+import android.text.TextUtils;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
 
-public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListener
+public class HikeInviteAdapter extends HikeArrayAdapter
 {
-	private Set<String> mInvitedUsers;
+	SparseBooleanArray checkedItems;
 
-	public HikeInviteAdapter(Activity activity, int viewItemId)
+	public HikeInviteAdapter(Activity activity, int viewItemId, SparseBooleanArray checkedItems)
 	{
 		super(activity, viewItemId, getItems(activity));
 		this.activity = activity;
-		mInvitedUsers = new HashSet<String>();
+		this.checkedItems = checkedItems;
 	}
 
 	private static List<ContactInfo> getItems(Activity activity)
@@ -57,50 +52,14 @@ public class HikeInviteAdapter extends HikeArrayAdapter implements OnClickListen
 		
 		TextView numView = (TextView) v.findViewById(R.id.number);
 		numView.setText(contactInfo.getPhoneNum());
-		
+		if(!TextUtils.isEmpty(contactInfo.getMsisdnType()))
+		{
+			numView.append(" (" + contactInfo.getMsisdnType() + ")");
+		}
+
+		((CheckBox)v.findViewById(R.id.checkbox)).setChecked(checkedItems.get(position));
 		v.setTag(contactInfo);
-
-		ImageView invitedTick = (ImageView) v.findViewById(R.id.invited_tick);
-		TextView inviteText = (TextView) v.findViewById(R.id.invited_text);
-
-		if(mInvitedUsers.contains(contactInfo.getMsisdn()))
-		{
-			invitedTick.setVisibility(View.VISIBLE);
-			inviteText.setVisibility(View.GONE);
-		}
-		else
-		{
-			invitedTick.setVisibility(View.GONE);
-			inviteText.setVisibility(View.VISIBLE);
-			inviteText.setBackgroundResource(R.drawable.blue_btn_small);
-			inviteText.setText(R.string.invite);
-			inviteText.setTextColor(activity.getResources().getColor(R.color.white));
-			inviteText.setTypeface(null, Typeface.BOLD);
-		}
-		
-		v.setOnClickListener(this);
-
 		return v;
-	}
-
-	@Override
-	public void onClick(View view)
-	{
-		ContactInfo info = (ContactInfo) view.getTag();
-		String msisdn = info.getMsisdn();
-		if (info.isOnhike() || mInvitedUsers.contains(msisdn))
-		{
-			return;
-		}
-
-		mInvitedUsers.add(info.getMsisdn());
-		long time = (long) System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(
-				this.activity.getResources().getString(R.string.invite_message),
-				msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
-		convMessage.setInvite(true);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
-		this.notifyDataSetChanged();
 	}
 
 	@Override

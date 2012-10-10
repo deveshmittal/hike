@@ -144,4 +144,5 @@
 	<string name="change_group_name">%1$s changed the group name.</string>
 	<string name="block_internation_sms">SMS work only to India at the moment</string>
 	<string name="block_internation_sms_bold_text">only to India</string>
+	<string name="invite_via_sms">Invite via SMS</string>
 </resources>

@@ -1,20 +1,28 @@
 package com.bsb.hike.adapters;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import android.app.Activity;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.SectionIndexer;
+import android.widget.TextView;
 
-import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.R;
 
-public abstract class HikeArrayAdapter extends ArrayAdapter<ContactInfo> implements SectionIndexer
+public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionIndexer
 {
 	private static final int SECTION_TYPE = 0;
 	private static final int ITEM_TYPE = 1;
 	public boolean isFiltering = false;
-	
+
 	static public class Section
 	{
 		public String title;
@@ -39,10 +47,40 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<ContactInfo> impleme
 		return false;
 	}
 
-	public <T> HikeArrayAdapter(Activity context, int viewItemId, List<ContactInfo> items)
+	public <T> HikeArrayAdapter(Activity context, int viewItemId, List<T> items)
 	{
-        super(context, viewItemId, items);
+		super(context, viewItemId);
 		this.activity = context;
+
+		alphaIndexer = new HashMap<String, Integer>(items.size());
+
+		String lastChar = null;
+		int i = 0;
+
+		for(T item : items)
+		{
+			String c = item.toString().substring(0,1).toUpperCase();
+			if (!c.equals(lastChar))
+			{
+				/* add a new entry */
+				alphaIndexer.put(c, i);
+				add(new Section(c));
+				lastChar = c;
+			}
+
+			add(item);
+			i++;
+		}
+
+		Set<String> sectionLetters = alphaIndexer.keySet();
+
+		ArrayList<String> sectionList = new ArrayList<String>(sectionLetters); 
+
+		Collections.sort(sectionList);
+
+		sections = new String[sectionList.size()];
+
+		sectionList.toArray(sections);
 	}
 
 	/**
@@ -62,8 +100,46 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<ContactInfo> impleme
 
 	public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent)
 	{
-		return getItemView(position, convertView, parent);
+		if (getItemViewType(position) == SECTION_TYPE)
+		{
+			return getHeaderView(position, convertView, parent);
+		}
+		else
+		{
+			return getItemView(position, convertView, parent);
+		}
 	};
+
+	@Override
+	public boolean isEnabled(int position)
+	{
+		return !(getItem(position) instanceof Section);
+	}
+
+	private View getHeaderView(int position, View convertView, ViewGroup parent)
+	{
+		Section section = (Section) getItem(position);
+		LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View v = convertView;
+		if (v == null)
+		{
+			v = inflater.inflate(R.layout.section, parent, false);
+		}
+
+		TextView tv = (TextView) v.findViewById(R.id.section_txt);
+		tv.setText(section.title);
+
+		if(isFiltering)
+		{
+			v.setVisibility(View.GONE);
+		}
+		else
+		{
+			v.setVisibility(View.VISIBLE);
+		}
+
+		return v;
+	}
 
 	public String idForPosition(int position)
 	{
@@ -71,17 +147,17 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<ContactInfo> impleme
 		return o.toString().substring(0,1).toUpperCase();
 	}
 
-    public int getPositionForSection(int section) {
-        return alphaIndexer.get(sections[section]);
-    }
+	public int getPositionForSection(int section) {
+		return alphaIndexer.get(sections[section]);
+	}
 
-    public int getSectionForPosition(int position) {
-        return 1;
-    }
+	public int getSectionForPosition(int position) {
+		return 1;
+	}
 
-    public String[] getSections() {
-         return sections;
-    }
+	public String[] getSections() {
+		return sections;
+	}
 
 	@Override
 	public long getItemId(int position)
@@ -106,4 +182,5 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<ContactInfo> impleme
 
 		return ITEM_TYPE;
 	}
+
 }
