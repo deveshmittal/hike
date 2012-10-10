@@ -347,6 +347,20 @@ public class MessagesAdapter extends BaseAdapter
 
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
 				}
+				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
+				{
+					String info = convMessage.getMessage();
+					String textToHighlight = context.getString(R.string.block_internation_sms_bold_text);
+
+					SpannableStringBuilder ssb = new SpannableStringBuilder(info);
+					ssb.setSpan(new ForegroundColorSpan(0xff666666), info.indexOf(textToHighlight), info.indexOf(textToHighlight) + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+					mainMessage.setText(ssb);
+					mainMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_int_sms, 0, 0, 0);
+
+					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+				}
 				else
 				{
 					MessageMetadata metadata = convMessage.getMetadata();

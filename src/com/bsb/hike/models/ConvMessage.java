@@ -90,7 +90,8 @@ public class ConvMessage
 		DND_USER,
 		USER_JOIN,
 		CHANGED_GROUP_NAME,
-		CHANGED_GROUP_IMAGE;
+		CHANGED_GROUP_IMAGE,
+		BLOCK_INTERNATIONAL_SMS;
 
 
 		public static ParticipantInfoState fromJSON(JSONObject obj)
@@ -127,6 +128,10 @@ public class ConvMessage
 			else if (HikeConstants.MqttMessageTypes.ICON.equals(type))
 			{
 				return CHANGED_GROUP_IMAGE;
+			}
+			else if (HikeConstants.MqttMessageTypes.BLOCK_INTERNATIONAL_SMS.equals(type))
+			{
+				return BLOCK_INTERNATIONAL_SMS;
 			}
 			return ParticipantInfoState.NO_INFO;
 		}
@@ -274,6 +279,9 @@ public class ConvMessage
 		case CHANGED_GROUP_NAME:
 			String participantName = ((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.FROM)).getContactInfo().getFirstName();
 			this.mMessage = String.format(context.getString(R.string.change_group_name), participantName);
+			break;
+		case BLOCK_INTERNATIONAL_SMS:
+			this.mMessage = context.getString(R.string.block_internation_sms);
 			break;
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;

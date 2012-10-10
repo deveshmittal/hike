@@ -342,6 +342,11 @@ public class MqttMessagesManager {
 				saveStatusMsg(jsonObj, groupId);
 			}
 		}
+		else if (HikeConstants.MqttMessageTypes.BLOCK_INTERNATIONAL_SMS.equals(type))
+		{
+			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
+			saveStatusMsg(jsonObj, msisdn);
+		}
 	}
 
 	private void updateDbBatch(long[] ids, ConvMessage.State status, String msisdn)
