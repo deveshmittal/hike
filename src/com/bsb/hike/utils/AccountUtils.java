@@ -76,7 +76,7 @@ public class AccountUtils
 	
 	public static int PORT = PRODUCTION_PORT;
 
-	public static String BASE = "http://" + HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static String BASE = "http://" + HOST + "/v1";
 
 	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 

@@ -45,6 +45,8 @@
                     android:layout_weight="0.8"
                     android:gravity="center_horizontal|top"
                     android:paddingTop="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
                     android:text="@string/hike_to_hike_free_always"
                     android:textColor="@color/lightblack"
                     android:textStyle="bold"
@@ -100,7 +102,7 @@
                         android:id="@+id/img"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:scaleType="fitStart"
+                        android:scaleType="fitCenter"
                         android:layout_marginTop="5dp"
                         android:src="@drawable/rewards_img" />
                 </LinearLayout>

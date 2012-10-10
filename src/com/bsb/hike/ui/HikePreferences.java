@@ -118,8 +118,8 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		if(preference.getKey().equals(getString(R.string.delete_key)))
 		{
 			Builder builder = new Builder(HikePreferences.this);
-			builder.setMessage("Are you sure you want to delete your account?");
-			builder.setPositiveButton("Yes", new OnClickListener() 
+			builder.setMessage(R.string.delete_confirmation);
+			builder.setPositiveButton(R.string.delete, new OnClickListener() 
 			{
 				@Override
 				public void onClick(DialogInterface dialog, int which) 
@@ -130,7 +130,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 					task.execute();
 				}
 			});
-			builder.setNegativeButton("No", new OnClickListener() 
+			builder.setNegativeButton(R.string.cancel, new OnClickListener() 
 			{
 				@Override
 				public void onClick(DialogInterface dialog, int which) 
@@ -143,8 +143,8 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		else if (preference.getKey().equals(getString(R.string.unlink_key)))
 		{
 			Builder builder = new Builder(HikePreferences.this);
-			builder.setMessage("Are you sure you want to unlink your account from this phone?");
-			builder.setPositiveButton("Yes", new OnClickListener() 
+			builder.setMessage(R.string.unlink_confirmation);
+			builder.setPositiveButton(R.string.unlink, new OnClickListener() 
 			{
 				@Override
 				public void onClick(DialogInterface dialog, int which) 
@@ -155,7 +155,7 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 					task.execute();
 				}
 			});
-			builder.setNegativeButton("No", new OnClickListener() 
+			builder.setNegativeButton(R.string.cancel, new OnClickListener() 
 			{
 				@Override
 				public void onClick(DialogInterface dialog, int which) 
