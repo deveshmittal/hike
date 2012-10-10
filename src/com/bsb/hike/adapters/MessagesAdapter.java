@@ -339,6 +339,14 @@ public class MessagesAdapter extends BaseAdapter
 						((ViewGroup) holder.participantInfoContainer).addView(creditsMessage);
 					}
 				}
+				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+				{
+					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+					mainMessage.setText(Utils.getFormattedParticipantInfo(convMessage.getMessage()));
+					mainMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group_info, 0, 0, 0);
+
+					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+				}
 				else
 				{
 					MessageMetadata metadata = convMessage.getMetadata();

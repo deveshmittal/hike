@@ -88,8 +88,10 @@ public class ConvMessage
 		GROUP_END, // Group chat has ended
 		USER_OPT_IN,
 		DND_USER,
-		USER_JOIN
-;
+		USER_JOIN,
+		CHANGED_GROUP_NAME,
+		CHANGED_GROUP_IMAGE;
+
 
 		public static ParticipantInfoState fromJSON(JSONObject obj)
 		{
@@ -117,6 +119,14 @@ public class ConvMessage
 			else if (HikeConstants.DND.equals(type))
 			{
 				return DND_USER;
+			}
+			else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_NAME.equals(type))
+			{
+				return CHANGED_GROUP_NAME;
+			}
+			else if (HikeConstants.MqttMessageTypes.ICON.equals(type))
+			{
+				return CHANGED_GROUP_IMAGE;
 			}
 			return ParticipantInfoState.NO_INFO;
 		}
@@ -260,6 +270,11 @@ public class ConvMessage
 			break;
 		case DND_USER:
 			this.mMessage = "";
+			break;
+		case CHANGED_GROUP_NAME:
+			String participantName = ((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.FROM)).getContactInfo().getFirstName();
+			this.mMessage = String.format(context.getString(R.string.change_group_name), participantName);
+			break;
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
 		this.mConversation = conversation;

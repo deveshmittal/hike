@@ -141,4 +141,5 @@
 	<string name="unlink_confirmation">Are you sure you want to unlink your account from this phone?</string>
 	<string name="unlink">Unlink</string>
 	<string name="no_favorite">You have no favorites.\nTap plus below to add.</string>
+	<string name="change_group_name">%1$s changed the group name.</string>
 </resources>
