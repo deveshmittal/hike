@@ -787,13 +787,18 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			String msisdn = (String) object;
 			toggleTypingNotification(true, msisdn);
 
+			ClearTypingNotification clearTypingNotification;
 			if(!pendingClearTypingNotifications.containsKey(msisdn))
 			{
-				ClearTypingNotification clearTypingNotification = new ClearTypingNotification(msisdn);
+				clearTypingNotification = new ClearTypingNotification(msisdn);
 				pendingClearTypingNotifications.put(msisdn, clearTypingNotification);
-
-				clearTypingNotificationHandler.postDelayed(clearTypingNotification, HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 			}
+			else
+			{
+				clearTypingNotification = pendingClearTypingNotifications.get(msisdn);
+				clearTypingNotificationHandler.removeCallbacks(clearTypingNotification);
+			}
+			clearTypingNotificationHandler.postDelayed(clearTypingNotification, HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 		}
 		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
 		{
@@ -820,15 +825,21 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 	private void toggleTypingNotification(boolean isTyping, String msisdn)
 	{
 		Conversation conversation = mConversationsByMSISDN.get(msisdn);
+		if(conversation == null)
+		{
+			Log.d(getClass().getSimpleName(), "Conversation Does not exist");
+			return;
+		}
 		List<ConvMessage> messageList = conversation.getMessages();
 		if(messageList.isEmpty())
 		{
+			Log.d(getClass().getSimpleName(), "Conversation is empty");
 			return;
 		}
 		if(isTyping)
 		{
 			ConvMessage message = messageList.get(messageList.size() - 1);
-			if(!HikeConstants.IS_TYPING.equals(message.getMessage()) && message.getMsgID() == -1 && message.getMappedMsgID() == -1)
+			if(!HikeConstants.IS_TYPING.equals(message.getMessage()) && message.getMsgID() != -1 && message.getMappedMsgID() != -1)
 			{
 				// Setting the msg id and mapped msg id as -1 to identify that this is an "is typing..." message.
 				ConvMessage convMessage = new ConvMessage(HikeConstants.IS_TYPING, msisdn, message.getTimestamp(), ConvMessage.State.RECEIVED_UNREAD, -1, -1);
