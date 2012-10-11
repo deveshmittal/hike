@@ -372,6 +372,15 @@ public class AccountUtils
 	private static void addToken(HttpRequestBase req)
 	{
 		req.addHeader("Cookie", "user=" + mToken);
+		throwExceptionIfTokenIsEmpty();
+	}
+
+	private static void throwExceptionIfTokenIsEmpty()
+	{
+		if(TextUtils.isEmpty(mToken))
+		{
+			throw new IllegalStateException("Token is null");
+		}
 	}
 
 	public static void setName(String name) throws NetworkErrorException
