@@ -567,10 +567,13 @@ public class AccountUtils
 		}
 	}
 
-	public static void performRequest(HikeHttpRequest hikeHttpRequest) throws NetworkErrorException
+	public static void performRequest(HikeHttpRequest hikeHttpRequest, boolean addToken) throws NetworkErrorException
 	{
 		HttpPost post = new HttpPost(BASE + hikeHttpRequest.getPath());
-		addToken(post);
+		if(addToken)
+		{
+			addToken(post);
+		}
 		try
 		{
 			AbstractHttpEntity entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
