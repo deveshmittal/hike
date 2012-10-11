@@ -145,10 +145,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		}
 		if(profileType == ProfileType.GROUP_INFO)
 		{
-			for(String pubSubListener : groupInfoPubSubListeners)
-			{
-				HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
-			}
+			HikeMessengerApp.getPubSub().removeListeners(this, groupInfoPubSubListeners);
 		}
 		mActivityState = null;
 	}
@@ -182,10 +179,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		if(getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT))
 		{
 			this.profileType = ProfileType.GROUP_INFO;
-			for(String pubSubListener : groupInfoPubSubListeners)
-			{
-				HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
-			}
+			HikeMessengerApp.getPubSub().addListeners(this, groupInfoPubSubListeners);
 			setupGroupProfileScreen();
 		}
 		else

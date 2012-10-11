@@ -303,10 +303,8 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		mAdapter.setNotifyOnChange(false);
 		mConversationsView.setAdapter(mAdapter);
 
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 
@@ -519,10 +517,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		}
 		super.onDestroy();
 		Log.d(getClass().getSimpleName(), "onDestroy " + this);
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 	}
 
 	@Override

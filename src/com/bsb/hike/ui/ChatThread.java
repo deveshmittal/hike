@@ -377,10 +377,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -508,10 +505,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		/* register listeners */
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	@Override

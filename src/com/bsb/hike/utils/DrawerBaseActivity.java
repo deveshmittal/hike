@@ -58,20 +58,14 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
 		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 	}
 
 	public void onToggleLeftSideBarClicked(View v)
