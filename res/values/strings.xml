@@ -145,4 +145,7 @@
 	<string name="block_internation_sms">SMS work only to India at the moment</string>
 	<string name="block_internation_sms_bold_text">only to India</string>
 	<string name="invite_via_sms">Invite via SMS</string>
+	<string name="call_me_pass">We will call you within a few seconds.</string>
+	<string name="call_me_fail">Unable to send request. Please try again.</string>
+	<string name="calling_you">Calling you now...</string>
 </resources>

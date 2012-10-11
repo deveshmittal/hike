@@ -1,7 +1,11 @@
 package com.bsb.hike.ui;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -42,12 +46,15 @@ import android.widget.ViewFlipper;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.tasks.FinishableEvent;
+import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.MSISDNView;
 
-public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener
+public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener, FinishableEvent
 {
 
 	private SignupTask mTask;
@@ -70,6 +77,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private ImageView invalidNum;
 	private ImageView errorImage;
 	private Button countryPicker;
+	private ImageButton callmeBtn;
 
 	private ImageButton tryAgainBtn;
 	private Handler mHandler;
@@ -91,6 +99,13 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 	private final String defaultCountryCode = "IN +91";
 
+	/*Used for the call me request*/
+	private String msisdnEntered;
+
+	private ProgressDialog dialog;
+
+	private static HikeHTTPTask hikeHTTPTask;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
@@ -105,6 +120,11 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
 		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
 		errorImage = (ImageView) findViewById(R.id.error_img);
+
+		if(hikeHTTPTask != null && !hikeHTTPTask.isFinished())
+		{
+			dialog = ProgressDialog.show(this, null, getString(R.string.calling_you));
+		}
 
 		if(savedInstanceState != null)
 		{
@@ -166,26 +186,38 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	@Override
 	public void onFinish(boolean success)
 	{
-		if (success)
-		{	
-			// Added this code to prevent hike from pulling in sms by default.
-			Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
-			editor.putBoolean(HikeConstants.SMS_PREF, false);
-			editor.commit();
-			mHandler.postDelayed(new Runnable() 
-			{
-				@Override
-				public void run() 
-				{
-					Intent i = new Intent(SignupActivity.this, Tutorial.class);
-					startActivity(i);
-					finish();
-				}
-			}, 2500);
-		}
-		else if(mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
+		if(dialog != null)
 		{
-			restartTask();
+			dialog.dismiss();
+			dialog = null;
+		}
+		if(hikeHTTPTask == null)
+		{
+			if (success)
+			{	
+				// Added this code to prevent hike from pulling in sms by default.
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+				editor.putBoolean(HikeConstants.SMS_PREF, false);
+				editor.commit();
+				mHandler.postDelayed(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						Intent i = new Intent(SignupActivity.this, Tutorial.class);
+						startActivity(i);
+						finish();
+					}
+				}, 2500);
+			}
+			else if(mCurrentState != null && mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
+			{
+				restartTask();
+			}
+		}
+		else
+		{
+			hikeHTTPTask = null;
 		}
 	}
 
@@ -203,8 +235,41 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		{
 			mTask.addUserInput("");
 		}
+		else if(callmeBtn != null && v.getId() == callmeBtn.getId())
+		{
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/pin-call", new HikeHttpRequest.HikeHttpCallback() 
+			{
+				public void onFailure(){}
+				public void onSuccess(JSONObject response){}
+			});
+			JSONObject request = new JSONObject();
+			try 
+			{
+				request.put("msisdn", msisdnEntered);
+			} 
+			catch (JSONException e) 
+			{
+				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+			hikeHttpRequest.setJSONData(request);
+
+			hikeHTTPTask = new HikeHTTPTask(this, R.string.call_me_fail, false);
+			hikeHTTPTask.execute(hikeHttpRequest);
+
+			dialog = ProgressDialog.show(this, null, getResources().getString(R.string.calling_you));
+		}
 	}
-	
+
+	protected void onDestroy()
+	{
+		super.onDestroy();
+		if(dialog != null)
+		{
+			dialog.dismiss();
+			dialog = null;
+		}
+	}
+
 	private void startLoading()
 	{
 		loadingLayout.setVisibility(View.VISIBLE);
@@ -219,6 +284,10 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		if(countryPicker != null)
 		{
 			countryPicker.setEnabled(false);
+		}
+		if(callmeBtn != null)
+		{
+			callmeBtn.setVisibility(View.GONE);
 		}
 	}
 
@@ -246,6 +315,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
 					editor.commit();
+
+					msisdnEntered = input;
 				}
 				mTask.addUserInput(input);
 			}
@@ -279,6 +350,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		numberContainer = (LinearLayout) layout.findViewById(R.id.msisdn_container);
 		invalidNum = (ImageView) layout.findViewById(R.id.invalid_num);
 		countryPicker = (Button) layout.findViewById(R.id.country_picker);
+		callmeBtn = (ImageButton) layout.findViewById(R.id.btn_call_me);
 
 		loadingLayout.setVisibility(View.GONE);
 		submitBtn.setVisibility(View.VISIBLE);
@@ -372,6 +444,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private void prepareLayoutForGettingPin()
 	{
 		initializeViews(pinLayout);
+		callmeBtn.setVisibility(View.VISIBLE);
+
 		enterEditText.setText("");
 		infoTxt.setImageResource(R.drawable.enter_pin);
 		tapHereText.setOnClickListener(this);

@@ -28,13 +28,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <ImageButton
-            android:id="@+id/btn_continue"
+        <LinearLayout
+            android:id="@+id/pin_btn_container"
             style="@style/SignupButton"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/signup_button"
-            android:onClick="onClick"
-            android:src="@drawable/next_btn_selector" />
+            android:layout_marginTop="10dp" >
+
+            <ImageButton
+                android:id="@+id/btn_call_me"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/signup_button"
+                android:onClick="onClick"
+                android:src="@drawable/txt_call_me" />
+
+            <View 
+                android:layout_width="5dp"
+                android:layout_height="1dp"/>
+            
+            <ImageButton
+                android:id="@+id/btn_continue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/signup_button"
+                android:onClick="onClick"
+                android:src="@drawable/next_btn_selector" />
+        </LinearLayout>
 
         <RelativeLayout
             android:id="@+id/loading_layout"
