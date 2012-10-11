@@ -262,12 +262,16 @@ public class MessagesAdapter extends BaseAdapter
 						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 
 						GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
+
 						String participantName = participant.getContactInfo().getFirstName();
-						participantInfo.setCompoundDrawablesWithIntrinsicBounds(participant.getContactInfo().isOnhike() ? R.drawable.ic_hike_user : R.drawable.ic_sms_user, 0, 0, 0);
-						participantInfo.setText(
-								Utils.getFormattedParticipantInfo(
-										String.format(context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc), 
-												participantName)));
+						String baseMessage = context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc);
+
+						setTextAndIconForSystemMessages(
+																participantInfo, 
+																Utils.getFormattedParticipantInfo(String.format(baseMessage, participantName)), 
+																participant.getContactInfo().isOnhike() ? 
+																		R.drawable.ic_hike_user : R.drawable.ic_sms_user
+														);
 						if (i != participantInfoArray.length() - 1) 
 						{
 							lp.setMargins(left, top, right, bottom);
@@ -285,20 +289,20 @@ public class MessagesAdapter extends BaseAdapter
 				{
 					TextView participantInfo = (TextView) inflater.inflate(R.layout.participant_info, null);
 
+					CharSequence message;
 					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
 					{
 						String participantMsisdn = new JSONObject(convMessage.getMetadata().serialize()).optString(HikeConstants.DATA);
-						participantInfo.setText(
-								Utils.getFormattedParticipantInfo(
+						message = Utils.getFormattedParticipantInfo(
 										String.format(
 												context.getString(R.string.left_conversation), 
-												((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName())));
+												((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName()));
 					}
 					else
 					{
-						participantInfo.setText(R.string.group_chat_end);
+						message = context.getString(R.string.group_chat_end);
 					}
-					participantInfo.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_left_chat, 0, 0, 0);
+					setTextAndIconForSystemMessages(participantInfo, message, R.drawable.ic_left_chat);
 
 					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 					lp.setMargins(left, top, right, 0);
@@ -313,17 +317,19 @@ public class MessagesAdapter extends BaseAdapter
 						convMessage.setMessage(String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel())));
 					}
 					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-					mainMessage.setText(Utils.getFormattedParticipantInfo(convMessage.getMessage()));
-					mainMessage.setCompoundDrawablesWithIntrinsicBounds(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? 
-							R.drawable.ic_hike_user : R.drawable.ic_opt_in, 0, 0, 0);
+					setTextAndIconForSystemMessages(
+														mainMessage, 
+														convMessage.getMessage(), 
+														convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? 
+																R.drawable.ic_hike_user : R.drawable.ic_opt_in
+													);
 
 					TextView creditsMessage = null;
 					if(convMessage.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).has(HikeConstants.CREDITS))
 					{
 						creditsMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 						int credits = convMessage.getMetadata().getJSON().optJSONObject(HikeConstants.DATA).optInt(HikeConstants.CREDITS);
-						creditsMessage.setText(String.format(context.getString(R.string.earned_credits), credits));
-						creditsMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_got_credits, 0, 0, 0);
+						setTextAndIconForSystemMessages(creditsMessage, String.format(context.getString(R.string.earned_credits), credits), R.drawable.ic_got_credits);
 
 						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 						lp.setMargins(left, top, right, 0);
@@ -342,8 +348,7 @@ public class MessagesAdapter extends BaseAdapter
 				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
 				{
 					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-					mainMessage.setText(Utils.getFormattedParticipantInfo(convMessage.getMessage()));
-					mainMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_group_info, 0, 0, 0);
+					setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(convMessage.getMessage()), R.drawable.ic_group_info);
 
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
 				}
@@ -356,8 +361,7 @@ public class MessagesAdapter extends BaseAdapter
 					ssb.setSpan(new ForegroundColorSpan(0xff666666), info.indexOf(textToHighlight), info.indexOf(textToHighlight) + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-					mainMessage.setText(ssb);
-					mainMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_no_int_sms, 0, 0, 0);
+					setTextAndIconForSystemMessages(mainMessage, ssb, R.drawable.ic_no_int_sms);
 
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
 				}
@@ -378,12 +382,11 @@ public class MessagesAdapter extends BaseAdapter
 								GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nonDndNumbers.getString(i));
 								String participantName = participant.getContactInfo().getFirstName();
 
-								participantInfo.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_opt_in, 0, 0, 0);
-
-								participantInfo.setText(
-										Utils.getFormattedParticipantInfo(
-												String.format(context.getString(R.string.joined_conversation), 
-														participantName)));
+								setTextAndIconForSystemMessages(
+																participantInfo, 
+																Utils.getFormattedParticipantInfo(
+																		String.format(context.getString(R.string.joined_conversation), participantName)), 
+																R.drawable.ic_opt_in);
 
 								LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 								if(i != nonDndNumbers.length() - 1)
@@ -439,8 +442,7 @@ public class MessagesAdapter extends BaseAdapter
 							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().lastIndexOf(dndNames), convMessage.getMessage().lastIndexOf(dndNames) + dndNames.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 						}
 
-						dndMessage.setText(ssb);
-						dndMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_waiting_dnd, 0, 0, 0);
+						setTextAndIconForSystemMessages(dndMessage, ssb, R.drawable.ic_waiting_dnd);
 						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 						lp.setMargins(left, top, right, 0);
 						dndMessage.setLayoutParams(lp);
@@ -595,6 +597,12 @@ public class MessagesAdapter extends BaseAdapter
 		}
 
 		return v;
+	}
+
+	private void setTextAndIconForSystemMessages(TextView textView, CharSequence text, int iconResId)
+	{
+		textView.setText(text);
+		textView.setCompoundDrawablesWithIntrinsicBounds(iconResId, 0, 0, 0);
 	}
 
 	private void showTryingAgainIcon(ImageView iv, long ts)
