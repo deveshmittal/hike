@@ -23,6 +23,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -222,6 +223,17 @@ public class MqttMessagesManager {
 
 				Pair<String, long[]> pair = new Pair<String, long[]>(convMessage.getMsisdn(), ids);
 				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
+			}
+
+			/*
+			 * We need to add the name here in order to fix the bug where if the client receives two files of the same name,
+			 * it shows the same file under both files.
+			 */
+			if(convMessage.isFileTransferMessage())
+			{
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+				Log.d(getClass().getSimpleName(), "FT MESSAGE: " + " NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey());
+				HikeConversationsDatabase.getInstance().addFile(hikeFile.getFileKey(), hikeFile.getFileName());
 			}
 
 			Log.d(getClass().getSimpleName(),"Receiver received Message : "
