@@ -2823,6 +2823,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						DownloadFileTask downloadFile = new DownloadFileTask(getApplicationContext(), receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
 						downloadFile.execute();
 						fileTransferTaskMap.put(convMessage.getMsgID(), downloadFile);
+						mAdapter.notifyDataSetChanged();
 					}
 				}
 			}
