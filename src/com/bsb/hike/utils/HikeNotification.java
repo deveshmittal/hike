@@ -89,7 +89,11 @@ public class HikeNotification
 
 		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
 
-		notification.defaults |= playSound | vibrate;
+		notification.defaults |= 0|vibrate;
+		if(playSound != 0)
+		{
+			notification.sound = Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.v1);
+		}
 
 		Intent notificationIntent = new Intent(context, ChatThread.class);
 
