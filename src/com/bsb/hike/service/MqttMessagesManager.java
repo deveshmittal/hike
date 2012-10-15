@@ -181,7 +181,6 @@ public class MqttMessagesManager {
 
 			if(this.convDb.setGroupName(groupId, groupname) > 0)
 			{
-				saveStatusMsg(jsonObj, groupId);
 				this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
 			}
 		}
