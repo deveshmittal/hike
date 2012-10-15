@@ -155,14 +155,18 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			HikeConversationsDatabase db = null;
 			ArrayList<Long> ids = new ArrayList<Long>(convs.length);
 			ArrayList<String> msisdns =new ArrayList<String>(convs.length);
+			Editor editor = getSharedPreferences(HikeConstants.DRAFT_SETTING, MODE_PRIVATE).edit();
 			for (Conversation conv : convs)
 			{
 				ids.add(conv.getConvId());
 				msisdns.add(conv.getMsisdn());
+				editor.remove(conv.getMsisdn());
 			}
+			editor.commit();
 
 			db = HikeConversationsDatabase.getInstance();
 			db.deleteConversation(ids.toArray(new Long[] {}), msisdns);
+
 			return convs;
 		}
 

@@ -540,6 +540,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				overridePendingTransition(R.anim.slide_in_left_noalpha,
 						R.anim.slide_out_right_noalpha);
 			}
+			/*
+			 *  If the user had typed something, we save it as a draft and will show it in the text box when 
+			 *  he comes back to this conversation. 
+			 */
+			if(mComposeView != null && mComposeView.getVisibility() == View.VISIBLE)
+			{
+				Editor editor = getSharedPreferences(HikeConstants.DRAFT_SETTING, MODE_PRIVATE).edit();
+				if(mComposeView.length() != 0)
+				{
+					editor.putString(mContactNumber, mComposeView.getText().toString());
+				}
+				else
+				{
+					editor.remove(mContactNumber);
+				}
+				editor.commit();
+			}
 			finish();
 		}
 		else
@@ -945,6 +962,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
 				initialiseFileTransfer(filePath, hikeFileType, fileKey, fileType, false);
+			}
+			/*
+			 *  Since the message was not forwarded, we check if we have any drafts saved for this conversation,
+			 *  if we do we enter it in the compose box.
+			 */
+			else
+			{
+				String message = getSharedPreferences(HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(mContactNumber, "");
+				mComposeView.setText(message);
+				mComposeView.setSelection(message.length());
+				SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText());
 			}
 		}
 		else
