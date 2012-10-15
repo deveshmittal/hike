@@ -162,6 +162,9 @@ public class MqttMessagesManager {
 			{
 				Log.d(getClass().getSimpleName(), "The group conversation does not exists");
 				groupConversation =(GroupConversation) this.convDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
+
+				// Adding a key to the json signify that this was the GCJ received for group creation
+				jsonObj.put(HikeConstants.NEW_GROUP, true);
 			}
 			saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 		}

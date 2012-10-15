@@ -76,6 +76,8 @@ public class HikeConstants
 	public static final String FAVORITES = "Favorites";
 	public static final String RECENT = "Recent";
 
+	public static final String NEW_GROUP = "new_group";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 

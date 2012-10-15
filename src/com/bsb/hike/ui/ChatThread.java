@@ -1827,16 +1827,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (v.getId() == R.id.title_icon) 
 		{
 			String groupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+			boolean newGroup = false;
+
 			if (TextUtils.isEmpty(groupId))
 			{
 				// Create new group
 				String uid = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.UID_SETTING, "");
 				mContactNumber = uid + ":" +System.currentTimeMillis();
+				newGroup = true;
 			}
 			else
 			{
 				// Group alredy exists. Fetch existing participants.
 				mContactNumber = groupId;
+				newGroup = false;
 			}
 			String selectedContacts = this.mInputNumberView.getText().toString();
 			selectedContacts = selectedContacts.substring(0, selectedContacts.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR));
@@ -1862,9 +1866,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mConversationDb.addGroupParticipants(mContactNumber, groupConversation.getGroupParticipantList());
 			mConversationDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
 
-			try 
+			try
 			{
-				sendMessage(new ConvMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN), groupConversation, ChatThread.this, true));
+				// Adding this boolean value to show a different system message if its a new group
+				JSONObject gcjPacket = groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
+				gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
+
+				sendMessage(new ConvMessage(gcjPacket, groupConversation, ChatThread.this, true));
 			}
 			catch (JSONException e) 
 			{

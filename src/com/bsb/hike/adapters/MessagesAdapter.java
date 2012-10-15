@@ -249,38 +249,57 @@ public class MessagesAdapter extends BaseAdapter
 
 				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 				{
-					JSONArray participantInfoArray = new JSONObject(convMessage.getMetadata().serialize()).getJSONArray(HikeConstants.DATA);
+					JSONObject gcjPacket = new JSONObject(convMessage.getMetadata().serialize());
+					JSONArray participantInfoArray = gcjPacket.getJSONArray(HikeConstants.DATA);
 
-					for (int i = 0; i < participantInfoArray.length(); i++) 
+					if(!gcjPacket.optBoolean(HikeConstants.NEW_GROUP))
 					{
-						JSONObject nameMsisdn = participantInfoArray.getJSONObject(i);
-						Log.d(getClass().getSimpleName(), "Joined: " + participantInfoArray.getString(i));
+						for (int i = 0; i < participantInfoArray.length(); i++) 
+						{
+							JSONObject nameMsisdn = participantInfoArray.getJSONObject(i);
+							Log.d(getClass().getSimpleName(), "Joined: " + participantInfoArray.getString(i));
 
+							TextView participantInfo = (TextView) inflater.inflate(
+									R.layout.participant_info, null);
+
+							LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+
+							GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
+
+							String participantName = participant.getContactInfo().getFirstName();
+							String baseMessage = context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc);
+
+							setTextAndIconForSystemMessages(
+									participantInfo, 
+									Utils.getFormattedParticipantInfo(String.format(baseMessage, participantName)), 
+									participant.getContactInfo().isOnhike() ? 
+											R.drawable.ic_hike_user : R.drawable.ic_sms_user
+									);
+							if (i != participantInfoArray.length() - 1) 
+							{
+								lp.setMargins(left, top, right, bottom);
+							}
+							else
+							{
+								lp.setMargins(left, top, right, 0);
+							}
+							participantInfo.setLayoutParams(lp);
+
+							((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+						}
+					}
+					else
+					{
 						TextView participantInfo = (TextView) inflater.inflate(
 								R.layout.participant_info, null);
 
-						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+						int count = participantInfoArray.length();
+						String message = String.format(context.getString(R.string.new_group_message), count);
 
-						GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
+						SpannableStringBuilder ssb = new SpannableStringBuilder(message);
+						ssb.setSpan(new ForegroundColorSpan(0xff666666), message.indexOf(""+count), message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-						String participantName = participant.getContactInfo().getFirstName();
-						String baseMessage = context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc);
-
-						setTextAndIconForSystemMessages(
-																participantInfo, 
-																Utils.getFormattedParticipantInfo(String.format(baseMessage, participantName)), 
-																participant.getContactInfo().isOnhike() ? 
-																		R.drawable.ic_hike_user : R.drawable.ic_sms_user
-														);
-						if (i != participantInfoArray.length() - 1) 
-						{
-							lp.setMargins(left, top, right, bottom);
-						}
-						else
-						{
-							lp.setMargins(left, top, right, 0);
-						}
-						participantInfo.setLayoutParams(lp);
+						setTextAndIconForSystemMessages(participantInfo, ssb, R.drawable.ic_hike_user);
 
 						((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
 					}

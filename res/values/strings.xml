@@ -148,4 +148,5 @@
 	<string name="call_me_pass">We will call you within a few seconds.</string>
 	<string name="call_me_fail">Unable to send request. Please try again.</string>
 	<string name="calling_you">Calling you now...</string>
+	<string name="new_group_message">Group Chat with %1$s friends</string>
 </resources>
