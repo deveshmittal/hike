@@ -352,7 +352,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
-		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByOnHike();
+		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(-1, -1, false);
 		if(isForwardingMessage || isSharingFile)
 		{
 			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());
@@ -377,10 +377,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 
 		if (mComposeViewWatcher != null)
 		{
@@ -450,7 +447,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
 		currentEmoticonCategorySelected = findViewById(savedInstanceState!= null ? 
-				savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY, R.id.hike_emoticons_btn) : R.id.hike_emoticons_btn);
+				savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY, R.id.emoji_btn) : R.id.emoji_btn);
 		currentEmoticonCategorySelected.setSelected(true);
 
 		/* register for long-press's */
@@ -508,10 +505,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		}
 
 		/* register listeners */
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	@Override
@@ -976,16 +970,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 		if (!mConversation.isOnhike())
 		{
-			long time = (long) System.currentTimeMillis() / 1000;
-
-			// Adding the user's invite token to the invite url
-			String inviteMessage = getString(R.string.invite_message);
-			String defaultInviteURL = getString(R.string.default_invite_url);
-			String inviteToken = this.prefs.getString(HikeConstants.INVITE_TOKEN, "");
-			inviteMessage = inviteMessage.replace(defaultInviteURL, defaultInviteURL + inviteToken);
-
-			ConvMessage convMessage = new ConvMessage(inviteMessage, mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
-			convMessage.setInvite(true);
+			ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(mContactNumber, this);
 			convMessage.setConversation(mConversation);
 
 			sendMessage(convMessage);
@@ -1321,7 +1306,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					// clear it a while from now
 					mUiThreadHandler.removeCallbacks(mClearTypingCallback);
 				}
-				mUiThreadHandler.postDelayed(mClearTypingCallback, 20 * 1000);
+				mUiThreadHandler.postDelayed(mClearTypingCallback, HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 			}
 		}
 		// We only consider this case if there is a valid conversation in the Chat Thread
@@ -1842,16 +1827,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		else if (v.getId() == R.id.title_icon) 
 		{
 			String groupId = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
+			boolean newGroup = false;
+
 			if (TextUtils.isEmpty(groupId))
 			{
 				// Create new group
 				String uid = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(HikeMessengerApp.UID_SETTING, "");
 				mContactNumber = uid + ":" +System.currentTimeMillis();
+				newGroup = true;
 			}
 			else
 			{
 				// Group alredy exists. Fetch existing participants.
 				mContactNumber = groupId;
+				newGroup = false;
 			}
 			String selectedContacts = this.mInputNumberView.getText().toString();
 			selectedContacts = selectedContacts.substring(0, selectedContacts.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR));
@@ -1877,9 +1866,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mConversationDb.addGroupParticipants(mContactNumber, groupConversation.getGroupParticipantList());
 			mConversationDb.addConversation(groupConversation.getMsisdn(), false, "", groupConversation.getGroupOwner());
 
-			try 
+			try
 			{
-				sendMessage(new ConvMessage(groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN), groupConversation, ChatThread.this, true));
+				// Adding this boolean value to show a different system message if its a new group
+				JSONObject gcjPacket = groupConversation.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
+				gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
+
+				sendMessage(new ConvMessage(gcjPacket, groupConversation, ChatThread.this, true));
 			}
 			catch (JSONException e) 
 			{
@@ -2838,6 +2831,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						DownloadFileTask downloadFile = new DownloadFileTask(getApplicationContext(), receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
 						downloadFile.execute();
 						fileTransferTaskMap.put(convMessage.getMsgID(), downloadFile);
+						mAdapter.notifyDataSetChanged();
 					}
 				}
 			}

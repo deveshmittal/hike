@@ -372,6 +372,15 @@ public class AccountUtils
 	private static void addToken(HttpRequestBase req)
 	{
 		req.addHeader("Cookie", "user=" + mToken);
+		throwExceptionIfTokenIsEmpty();
+	}
+
+	private static void throwExceptionIfTokenIsEmpty()
+	{
+		if(TextUtils.isEmpty(mToken))
+		{
+			throw new IllegalStateException("Token is null");
+		}
 	}
 
 	public static void setName(String name) throws NetworkErrorException
@@ -567,10 +576,13 @@ public class AccountUtils
 		}
 	}
 
-	public static void performRequest(HikeHttpRequest hikeHttpRequest) throws NetworkErrorException
+	public static void performRequest(HikeHttpRequest hikeHttpRequest, boolean addToken) throws NetworkErrorException
 	{
 		HttpPost post = new HttpPost(BASE + hikeHttpRequest.getPath());
-		addToken(post);
+		if(addToken)
+		{
+			addToken(post);
+		}
 		try
 		{
 			AbstractHttpEntity entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);

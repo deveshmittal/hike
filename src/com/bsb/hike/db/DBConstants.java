@@ -5,7 +5,7 @@ public class DBConstants
 	
 	public static final int CONVERSATIONS_DATABASE_VERSION = 5;
 	
-	public static final int USERS_DATABASE_VERSION = 4;
+	public static final int USERS_DATABASE_VERSION = 5;
 	
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 	
@@ -97,4 +97,6 @@ public class DBConstants
 	public static final String LAST_USED = "lastUsed";
 
 	public static final String EMOTICON_INDEX = "emoticonIdx";
+
+	public static final String FAVORITE = "favorite";
 }

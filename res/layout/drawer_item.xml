@@ -3,9 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:focusable="true"
-    android:clickable="true" >
+    android:orientation="horizontal" >
 
     <RelativeLayout
         android:id="@+id/content_container"
@@ -21,6 +19,16 @@
             android:layout_marginLeft="10dp"
             android:src="@drawable/ic_drawer_home" />
 
+        <ImageView
+            android:id="@+id/add_fav"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="12dp"
+            android:background="@drawable/ic_add_favorite"
+            android:visibility="gone" />
+
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/item_name"
             android:layout_width="wrap_content"
@@ -28,10 +36,13 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:layout_toRightOf="@id/item_icon"
+            android:layout_toLeftOf="@id/add_fav"
+            android:ellipsize="end"
             android:shadowColor="#66000000"
             android:shadowDy="0.3"
             android:shadowRadius="0.5"
-            android:text="Credits"
+            android:singleLine="true"
+            android:text="Credits asjfdlkjsadlf lasdflasjfl asldfjlasjflk jaslflkasdfj lasfas df lasfdlasj dflas"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold|italic" />
@@ -54,6 +65,7 @@
             android:textStyle="bold"
             android:visibility="gone" />
 
+
     </RelativeLayout>
 
     <View
@@ -61,6 +73,7 @@
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_alignParentBottom="true"
+        android:visibility="gone"
         android:background="@drawable/ic_drawer_divider" />
 
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -73,7 +74,7 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener
 			public void onClick(View v) 
 			{
 				Utils.logEvent(CreditsActivity.this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
-				Utils.startShareIntent(CreditsActivity.this, Utils.getInviteMessage(CreditsActivity.this));
+				startActivity(new Intent(CreditsActivity.this, HikeListActivity.class));
 			}
 		});
 

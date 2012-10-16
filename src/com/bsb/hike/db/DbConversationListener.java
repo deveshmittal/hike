@@ -66,6 +66,7 @@ public class DbConversationListener implements Listener
 				}
 				// Recency was already updated when the ft message was added.
 				mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
+				mPubSub.publish(HikePubSub.RECENT_CONTACTS_UPDATED, convMessage.getMsisdn());
 			}
 
 			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO && (!convMessage.isFileTransferMessage() || shouldSendMessage)) 

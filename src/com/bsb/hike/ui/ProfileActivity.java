@@ -145,10 +145,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		}
 		if(profileType == ProfileType.GROUP_INFO)
 		{
-			for(String pubSubListener : groupInfoPubSubListeners)
-			{
-				HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
-			}
+			HikeMessengerApp.getPubSub().removeListeners(this, groupInfoPubSubListeners);
 		}
 		mActivityState = null;
 	}
@@ -182,10 +179,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		if(getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT))
 		{
 			this.profileType = ProfileType.GROUP_INFO;
-			for(String pubSubListener : groupInfoPubSubListeners)
-			{
-				HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
-			}
+			HikeMessengerApp.getPubSub().addListeners(this, groupInfoPubSubListeners);
 			setupGroupProfileScreen();
 		}
 		else
@@ -836,13 +830,17 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 
 	@Override
 	public void onEventReceived(String type, Object object) {
-		super.onEventReceived(type, object);
-		if(mLocalMSISDN == null)
+		// Only execute the super class method if we are in a drawer activity
+		if(profileType == ProfileType.USER_PROFILE)
+		{
+			super.onEventReceived(type, object);
+		}
+		if(mLocalMSISDN == null || profileType != ProfileType.GROUP_INFO)
 		{
 			Log.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
 			return;
 		}
-		if (HikePubSub.ICON_CHANGED.equals(type)) 
+		if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) 
 		{
 			if (mLocalMSISDN.equals((String)object)) 
 			{
@@ -853,11 +851,12 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 					@Override
 					public void run() {
 						mNameEdit.setText(nameTxt);
+						mNameDisplay.setText(nameTxt);
 					}
 				});
 			}
 		} 
-		else if (HikePubSub.GROUP_NAME_CHANGED.equals(type)) 
+		else if (HikePubSub.ICON_CHANGED.equals(type)) 
 		{
 			if (mLocalMSISDN.equals((String)object)) 
 			{

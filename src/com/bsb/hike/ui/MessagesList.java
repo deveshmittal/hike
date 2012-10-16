@@ -118,12 +118,19 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			HikePubSub.GROUP_NAME_CHANGED, 
 			HikePubSub.UPDATE_AVAILABLE, 
 			HikePubSub.CONTACT_ADDED,
-			HikePubSub.MESSAGE_DELETED
+			HikePubSub.MESSAGE_DELETED,
+			HikePubSub.TYPING_CONVERSATION,
+			HikePubSub.END_TYPING_CONVERSATION
 	};
 
 	private Dialog updateAlert;
 
 	private Button updateAlertOkBtn;
+	
+	private Handler clearTypingNotificationHandler;
+
+	private Map<String, ClearTypingNotification> pendingClearTypingNotifications;
+
 	@Override
 	protected void onPause()
 	{
@@ -187,7 +194,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		// Doing this to close the drawer when the user selects the home option on the drawer
 		if(intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME, false))
 		{
-			((DrawerLayout) findViewById(R.id.drawer_layout)).closeSidebar(true);
+			((DrawerLayout) findViewById(R.id.drawer_layout)).closeLeftSidebar(true);
 		}
 
 		if(intent.hasExtra(HikeConstants.Extras.GROUP_LEFT))
@@ -225,6 +232,9 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 
 		setContentView(R.layout.main);
 		afterSetContentView(savedInstanceState);
+
+		clearTypingNotificationHandler = new Handler();
+		pendingClearTypingNotifications = new HashMap<String, MessagesList.ClearTypingNotification>();
 
 		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		wasAlertCancelled = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
@@ -293,10 +303,8 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		mAdapter.setNotifyOnChange(false);
 		mConversationsView.setAdapter(mAdapter);
 
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().addListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
 
@@ -509,10 +517,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		}
 		super.onDestroy();
 		Log.d(getClass().getSimpleName(), "onDestroy " + this);
-		for(String pubSubListener : pubSubListeners)
-		{
-			HikeMessengerApp.getPubSub().removeListener(pubSubListener, this);
-		}
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 	}
 
 	@Override
@@ -772,6 +777,85 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 				runOnUiThread(this);
 			}
 		}
+		else if (HikePubSub.TYPING_CONVERSATION.equals(type))
+		{
+			String msisdn = (String) object;
+			toggleTypingNotification(true, msisdn);
+
+			ClearTypingNotification clearTypingNotification;
+			if(!pendingClearTypingNotifications.containsKey(msisdn))
+			{
+				clearTypingNotification = new ClearTypingNotification(msisdn);
+				pendingClearTypingNotifications.put(msisdn, clearTypingNotification);
+			}
+			else
+			{
+				clearTypingNotification = pendingClearTypingNotifications.get(msisdn);
+				clearTypingNotificationHandler.removeCallbacks(clearTypingNotification);
+			}
+			clearTypingNotificationHandler.postDelayed(clearTypingNotification, HikeConstants.LOCAL_CLEAR_TYPING_TIME);
+		}
+		else if (HikePubSub.END_TYPING_CONVERSATION.equals(type))
+		{
+			toggleTypingNotification(false, (String) object);
+		}
+	}
+
+	private class ClearTypingNotification implements Runnable 
+	{
+		String msisdn;
+
+		public ClearTypingNotification(String msisdn) 
+		{
+			this.msisdn = msisdn;
+		}
+
+		@Override
+		public void run() 
+		{
+			toggleTypingNotification(false, msisdn);
+		}
+	};
+
+	private void toggleTypingNotification(boolean isTyping, String msisdn)
+	{
+		Conversation conversation = mConversationsByMSISDN.get(msisdn);
+		if(conversation == null)
+		{
+			Log.d(getClass().getSimpleName(), "Conversation Does not exist");
+			return;
+		}
+		List<ConvMessage> messageList = conversation.getMessages();
+		if(messageList.isEmpty())
+		{
+			Log.d(getClass().getSimpleName(), "Conversation is empty");
+			return;
+		}
+		if(isTyping)
+		{
+			ConvMessage message = messageList.get(messageList.size() - 1);
+			if(!HikeConstants.IS_TYPING.equals(message.getMessage()) && message.getMsgID() != -1 && message.getMappedMsgID() != -1)
+			{
+				// Setting the msg id and mapped msg id as -1 to identify that this is an "is typing..." message.
+				ConvMessage convMessage = new ConvMessage(HikeConstants.IS_TYPING, msisdn, message.getTimestamp(), ConvMessage.State.RECEIVED_UNREAD, -1, -1);
+				messageList.add(convMessage);
+			}
+		}
+		else
+		{
+			ClearTypingNotification clearTypingNotification = pendingClearTypingNotifications.remove(msisdn);
+			if(clearTypingNotification != null)
+			{
+				clearTypingNotificationHandler.removeCallbacks(clearTypingNotification);
+			}
+
+			ConvMessage message = messageList.get(messageList.size() - 1);
+			if(HikeConstants.IS_TYPING.equals(message.getMessage()) && message.getMsgID() == -1 && message.getMappedMsgID() == -1)
+			{
+				messageList.remove(message);
+			}
+		}
+		runOnUiThread(this);
 	}
 
 	ConvMessage findMessageById(long msgId)
@@ -882,12 +966,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		}
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.HOME_TOOL_TIP_CLOSED);
 		setToolTipDismissed();
-	}
-
-	public void onTitleIconClick(View v)
-	{
-		setToolTipDismissed();
-		openOptionsMenu();
 	}
 
 	private void updateApp(int updateType)

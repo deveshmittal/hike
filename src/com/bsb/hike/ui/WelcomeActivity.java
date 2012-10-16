@@ -243,4 +243,15 @@ public class WelcomeActivity extends Activity implements SignupTask.OnSignupTask
 			finish();
 		}
 	}
+
+	public void onBackPressed()
+	{
+		SignupTask mTask = SignupTask.getSignupTask(this);
+		if(mTask!=null)
+		{
+			mTask.cancelTask();
+			mTask = null;
+		}
+		super.onBackPressed();
+	}
 }

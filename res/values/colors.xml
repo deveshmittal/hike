@@ -52,4 +52,5 @@
     <color name="credits_text">#bcbcb5</color>
     <color name="emo_tab_unselected">#f1f1ee</color>
     <color name="emo_tab_selected">#e5e5e2</color>
+    <color name="drawer_section">#cbc5b9</color>
 </resources>

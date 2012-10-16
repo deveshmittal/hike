@@ -16,6 +16,15 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 
 	private DrawerLayout parentLayout;
 
+	private String[] pubSubListeners = 
+			{
+			HikePubSub.SMS_CREDIT_CHANGED,
+			HikePubSub.PROFILE_PIC_CHANGED,
+			HikePubSub.PROFILE_NAME_CHANGED,
+			HikePubSub.ICON_CHANGED,
+			HikePubSub.RECENT_CONTACTS_UPDATED
+			};
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -29,46 +38,65 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 	{
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		parentLayout.setListener(this);
-		parentLayout.setUpDrawerView();
+		parentLayout.setUpLeftDrawerView();
+		parentLayout.setUpRightDrawerView();
 		
 		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
 		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
-		if(savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE))
+		if(savedInstanceState != null)
 		{
-			parentLayout.toggleSidebar(true);
+			if(savedInstanceState.getBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE))
+			{
+				parentLayout.toggleSidebar(true, true);
+			}
+			else if(savedInstanceState.getBoolean(HikeConstants.Extras.IS_RIGHT_DRAWER_VISIBLE))
+			{
+				parentLayout.toggleSidebar(true, false);
+			}
 		}
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_PIC_CHANGED, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.PROFILE_NAME_CHANGED, this);
+
+		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
+		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	@Override
 	protected void onDestroy()
 	{
 		super.onDestroy();
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PROFILE_PIC_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(HikePubSub.PROFILE_NAME_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 	}
 
-	public void onToggleSideBarClicked(View v)
+	public void onToggleLeftSideBarClicked(View v)
 	{
 		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
-		parentLayout.toggleSidebar(false);
+		parentLayout.toggleSidebar(false, true);
+	}
+
+	public void onTitleIconClick(View v)
+	{
+		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
+		parentLayout.toggleSidebar(false, false);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.IS_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isOpening());
+		outState.putBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isLeftOpening());
+		outState.putBoolean(HikeConstants.Extras.IS_RIGHT_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isRightOpening());
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onBackPressed()
 	{
-		if(parentLayout.isOpening())
+		if(parentLayout.isLeftOpening())
 		{
-			parentLayout.closeSidebar(false);
+			parentLayout.closeLeftSidebar(false);
+		}
+		else if(parentLayout.isRightOpening())
+		{
+			parentLayout.closeRightSidebar(false);
 		}
 		else
 		{
@@ -87,20 +115,21 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 	}
 
 	@Override
-	public void onSidebarOpened() {}
-
-	@Override
-	public void onSidebarClosed() {}
-
-	@Override
-	public boolean onContentTouchedWhenOpening() 
+	public boolean onContentTouchedWhenOpeningLeftSidebar() 
 	{
-		parentLayout.closeSidebar(false);
+		parentLayout.closeLeftSidebar(false);
 		return true;
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) 
+	public boolean onContentTouchedWhenOpeningRightSidebar() 
+	{
+		parentLayout.closeRightSidebar(false);
+		return true;
+	}
+
+	@Override
+	public void onEventReceived(String type, final Object object) 
 	{
 		if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
 		{
@@ -133,6 +162,26 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 				public void run() 
 				{
 					parentLayout.setProfileName();
+				}
+			});
+		}
+		else if (HikePubSub.ICON_CHANGED.equals(type))
+		{
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					parentLayout.refreshFavoritesDrawer();
+				}
+			});
+		}
+		else if (HikePubSub.RECENT_CONTACTS_UPDATED.equals(type))
+		{
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					parentLayout.updateRecentContacts((String) object);
 				}
 			});
 		}

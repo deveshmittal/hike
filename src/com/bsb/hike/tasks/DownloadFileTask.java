@@ -18,7 +18,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.Utils;
 
@@ -127,11 +126,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 	@Override
 	protected void onPostExecute(Boolean result) 
 	{
-		if(result)
-		{
-			HikeConversationsDatabase.getInstance().addFile(fileKey, destinationFile.getName());
-		}
-		else
+		if(!result)
 		{
 			int errorStringId = freeSpaceError ? R.string.not_enough_space : cancelDownload ? R.string.download_cancelled : R.string.download_failed;
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.bsb.hike.view.CustomFontTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_drawer_section"
+    android:gravity="center_vertical"
+    android:paddingLeft="10dp"
+    android:shadowColor="@color/black"
+    android:shadowDy="0.5"
+    android:shadowRadius="0.5"
+    android:text="Text"
+    android:textColor="@color/drawer_section"
+    android:textSize="15sp"
+    android:textStyle="bold|italic" />

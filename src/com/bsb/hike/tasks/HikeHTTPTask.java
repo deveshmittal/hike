@@ -22,11 +22,18 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 	private int errorStringId;
 	private int progressFileTransfer;
 	private AtomicBoolean cancelUpload = new AtomicBoolean();
+	private boolean addToken;
 
 	public HikeHTTPTask(FinishableEvent activity, int errorStringId)
 	{
+		this(activity, errorStringId, true);
+	}
+
+	public HikeHTTPTask(FinishableEvent activity, int errorStringId, boolean addToken)
+	{
 		this.finishableEvent = activity;
 		this.errorStringId = errorStringId;
+		this.addToken = addToken;
 	}
 
 	public void cancelUpload()
@@ -88,7 +95,7 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 				}
 				else
 				{
-					AccountUtils.performRequest(hikeHttpRequest);
+					AccountUtils.performRequest(hikeHttpRequest, addToken);
 				}
 				Log.d("HikeHTTPTask", "Finished performing request:" + hikeHttpRequest.getPath());
 			}

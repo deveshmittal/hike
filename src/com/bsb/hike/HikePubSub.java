@@ -124,6 +124,8 @@ public class HikePubSub implements Runnable
 
 	public static final String PROFILE_NAME_CHANGED = "profileNameChanged";
 
+	public static final String RECENT_CONTACTS_UPDATED = "recentContactsUpdated";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
@@ -140,13 +142,21 @@ public class HikePubSub implements Runnable
 
 	synchronized public void addListener(String type, Listener listener)
 	{
-		Set<Listener> list = listeners.get(type);
-		if (list == null)
+		addListeners(listener, type);
+	}
+	
+	synchronized public void addListeners(Listener listener, String... types)
+	{
+		for(String type : types)
 		{
-			list = new CopyOnWriteArraySet<Listener>();
-			listeners.put(type, list);
+			Set<Listener> list = listeners.get(type);
+			if (list == null)
+			{
+				list = new CopyOnWriteArraySet<Listener>();
+				listeners.put(type, list);
+			}
+			list.add(listener);
 		}
-		list.add(listener);
 	}
 
 	synchronized public boolean publish(String type, Object o)
@@ -161,10 +171,18 @@ public class HikePubSub implements Runnable
 
 	public void removeListener(String type, Listener listener)
 	{
-		Set<Listener> l = listeners.get(type);
-		if (l != null)
+		removeListeners(listener, type);
+	}
+
+	public void removeListeners(Listener listener, String... types)
+	{
+		for(String type : types)
 		{
-			l.remove(listener);
+			Set<Listener> l = listeners.get(type);
+			if (l != null)
+			{
+				l.remove(listener);
+			}
 		}
 	}
 

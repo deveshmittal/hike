@@ -2,66 +2,60 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-	android:minHeight="?android:attr/listPreferredItemHeight"
     android:layout_marginBottom="7dp"
     android:layout_marginTop="7dp"
-    android:background="@drawable/list_item" >
+    android:background="@drawable/list_item"
+    android:minHeight="?android:attr/listPreferredItemHeight" >
 
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/invited_text"
-        android:layout_width="65dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="18dp"
-        android:background="@drawable/blue_btn_small"
-        android:gravity="center"
-        android:shadowColor="#990f3a56"
-        android:shadowDx="0.4"
-        android:shadowDy="0.4"
-        android:shadowRadius="0.25"
-        android:text="Invite"
-        android:textSize="13sp"
-        android:textStyle="bold" />
-    
-    <ImageView 
-        android:id="@+id/invited_tick"
+    <CheckBox
+        android:id="@+id/checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="42dp"
-        android:src="@drawable/ic_invited"
-        android:visibility="visible"/>
+        android:layout_marginRight="3dp"
+        android:button="@drawable/preference_checkbox"
+        android:clickable="false"
+        android:focusable="false" />
+
+    <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="18dp"
+            android:src="@drawable/ic_avatar0" />
     
-    <LinearLayout android:id="@+id/name_num_layout"
+    <LinearLayout
+        android:id="@+id/name_num_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/avatar"
         android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
-        android:layout_marginLeft="18dp"
-        android:layout_alignParentLeft="true"
-		android:layout_toLeftOf="@id/invited_text"
-		android:orientation="vertical" >
-    
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:ellipsize="end"
-        android:text="Vijay Raghunathan asdfasdfasd asdfasdfasdf ads adsasd"
-        android:textColor="@color/lightblack"
-        android:textSize="18sp" />
-    <com.bsb.hike.view.CustomFontTextView 
-        android:id="@+id/number"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Number"
-        android:textColor="@color/subtext"
-        android:textSize="13sp"
-        android:textStyle="italic"/>
-    
+        android:layout_toLeftOf="@id/checkbox"
+        android:orientation="vertical" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="Vijay Raghunathan asdfasdfasd asdfasdfasdf ads adsasd"
+            android:textColor="@color/lightblack"
+            android:textSize="18sp" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Number"
+            android:textColor="@color/subtext"
+            android:textSize="13sp"
+            android:textStyle="italic" />
     </LinearLayout>
 
 </RelativeLayout>

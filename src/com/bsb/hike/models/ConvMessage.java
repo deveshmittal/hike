@@ -88,8 +88,11 @@ public class ConvMessage
 		GROUP_END, // Group chat has ended
 		USER_OPT_IN,
 		DND_USER,
-		USER_JOIN
-;
+		USER_JOIN,
+		CHANGED_GROUP_NAME,
+		CHANGED_GROUP_IMAGE,
+		BLOCK_INTERNATIONAL_SMS;
+
 
 		public static ParticipantInfoState fromJSON(JSONObject obj)
 		{
@@ -117,6 +120,18 @@ public class ConvMessage
 			else if (HikeConstants.DND.equals(type))
 			{
 				return DND_USER;
+			}
+			else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_NAME.equals(type))
+			{
+				return CHANGED_GROUP_NAME;
+			}
+			else if (HikeConstants.MqttMessageTypes.ICON.equals(type))
+			{
+				return CHANGED_GROUP_IMAGE;
+			}
+			else if (HikeConstants.MqttMessageTypes.BLOCK_INTERNATIONAL_SMS.equals(type))
+			{
+				return BLOCK_INTERNATIONAL_SMS;
 			}
 			return ParticipantInfoState.NO_INFO;
 		}
@@ -215,11 +230,18 @@ public class ConvMessage
 		{
 		case PARTICIPANT_JOINED:
 			JSONArray arr = obj.getJSONArray(HikeConstants.DATA);
-			JSONObject nameMsisdn = arr.getJSONObject(arr.length() - 1);
+			if(!obj.optBoolean(HikeConstants.NEW_GROUP))
+			{
+				JSONObject nameMsisdn = arr.getJSONObject(arr.length() - 1);
 
-			GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
+				GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
 
-			this.mMessage = String.format(context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc), participant.getContactInfo().getFirstName()); 
+				this.mMessage = String.format(context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc), participant.getContactInfo().getFirstName()); 
+			}
+			else
+			{
+				this.mMessage = String.format(context.getString(R.string.new_group_message), arr.length());
+			}
 			break;
 		case PARTICIPANT_LEFT:
 			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.DATA)).getContactInfo().getFirstName());
@@ -260,6 +282,14 @@ public class ConvMessage
 			break;
 		case DND_USER:
 			this.mMessage = "";
+			break;
+		case CHANGED_GROUP_NAME:
+			String participantName = ((GroupConversation)conversation).getGroupParticipant(obj.getString(HikeConstants.FROM)).getContactInfo().getFirstName();
+			this.mMessage = String.format(context.getString(R.string.change_group_name), participantName);
+			break;
+		case BLOCK_INTERNATIONAL_SMS:
+			this.mMessage = context.getString(R.string.block_internation_sms);
+			break;
 		}
 		this.mTimestamp = System.currentTimeMillis() / 1000;
 		this.mConversation = conversation;

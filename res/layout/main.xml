@@ -5,12 +5,22 @@
     android:layout_height="match_parent" >
 
     <LinearLayout
-        android:id="@+id/animation_layout_sidebar"
+        android:id="@+id/animation_layout_left_sidebar"
         android:layout_width="272dp"
         android:layout_height="match_parent"
         android:visibility="invisible" >
 
-        <include layout="@layout/drawer" />
+        <include layout="@layout/left_drawer" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/animation_layout_right_sidebar"
+        android:layout_alignParentRight="true"
+        android:layout_width="272dp"
+        android:layout_height="match_parent"
+        android:visibility="invisible" >
+
+        <include layout="@layout/right_drawer" />
     </LinearLayout>
 
     <RelativeLayout
@@ -44,6 +54,12 @@
             android:layout_height="1dp"
             android:layout_below="@id/conversations"
             android:background="@drawable/dropshadow" />
+
+        <View 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:layout_below="@id/conversation_list_dropshadow"/>
 
         <View
             android:id="@+id/messages_list_overlay"
