@@ -118,6 +118,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnItemClickListener
 {
@@ -1803,7 +1804,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				Utils.logEvent(ChatThread.this,
 						HikeConstants.LogEvent.CHAT_INVITE_TOP_BUTTON);
 				inviteUser();
-				
+				// Tracking the invite event for fiksu
+				FiksuTrackingManager.uploadPurchaseEvent(this, "", HikeConstants.INVITE_SENT, "Rs");
 			}
 			else
 			{

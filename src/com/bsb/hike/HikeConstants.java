@@ -153,6 +153,12 @@ public class HikeConstants
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
 
+	//Fiksu Prices
+	public static final int FACEBOOK_CONNECT = 100;
+	public static final int TWITTER_CONNECT = 100;
+	public static final int INVITE_SENT = 50;
+	public static final int FIRST_MSG_IN_DAY = 2;
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";

@@ -53,6 +53,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.MSISDNView;
+import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener, FinishableEvent
 {
@@ -194,7 +195,10 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		if(hikeHTTPTask == null)
 		{
 			if (success)
-			{	
+			{
+				// Tracking the registration event for Fiksu
+				FiksuTrackingManager.uploadRegistrationEvent(this, "");
+
 				// Added this code to prevent hike from pulling in sms by default.
 				Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
 				editor.putBoolean(HikeConstants.SMS_PREF, false);
