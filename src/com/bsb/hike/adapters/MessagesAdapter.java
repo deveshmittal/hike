@@ -34,7 +34,6 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
@@ -252,54 +251,28 @@ public class MessagesAdapter extends BaseAdapter
 					JSONObject gcjPacket = new JSONObject(convMessage.getMetadata().serialize());
 					JSONArray participantInfoArray = gcjPacket.getJSONArray(HikeConstants.DATA);
 
-					if(!gcjPacket.optBoolean(HikeConstants.NEW_GROUP))
+					TextView participantInfo = (TextView) inflater.inflate(
+							R.layout.participant_info, null);
+
+					int count = participantInfoArray.length();
+
+					String message;
+					String highlight;
+
+					if(gcjPacket.optBoolean(HikeConstants.NEW_GROUP))
 					{
-						for (int i = 0; i < participantInfoArray.length(); i++) 
-						{
-							JSONObject nameMsisdn = participantInfoArray.getJSONObject(i);
-							Log.d(getClass().getSimpleName(), "Joined: " + participantInfoArray.getString(i));
-
-							TextView participantInfo = (TextView) inflater.inflate(
-									R.layout.participant_info, null);
-
-							LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-
-							GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
-
-							String participantName = participant.getContactInfo().getFirstName();
-							String baseMessage = context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc);
-
-							setTextAndIconForSystemMessages(
-									participantInfo, 
-									Utils.getFormattedParticipantInfo(String.format(baseMessage, participantName), participantName), 
-									participant.getContactInfo().isOnhike() ? 
-											R.drawable.ic_hike_user : R.drawable.ic_sms_user
-									);
-							if (i != participantInfoArray.length() - 1) 
-							{
-								lp.setMargins(left, top, right, bottom);
-							}
-							else
-							{
-								lp.setMargins(left, top, right, 0);
-							}
-							participantInfo.setLayoutParams(lp);
-
-							((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
-						}
+						message = String.format(context.getString(R.string.new_group_message), count);
+						highlight = String.format(context.getString(R.string.add_multiple_highlight), count);
 					}
 					else
 					{
-						TextView participantInfo = (TextView) inflater.inflate(
-								R.layout.participant_info, null);
-
-						int count = participantInfoArray.length();
-						String message = String.format(context.getString(R.string.new_group_message), count);
-
-						setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, count+""), R.drawable.ic_hike_user);
-
-						((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+						message = String.format(context.getString(count > 1 ? R.string.add_multiple_to_group_message : R.string.add_single_to_group_message), count);
+						highlight = String.format(context.getString(count > 1 ? R.string.add_multiple_highlight : R.string.add_single_highlight), count);
 					}
+
+					setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, highlight), R.drawable.ic_hike_user);
+
+					((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
 				} 
 				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT || convMessage.getParticipantInfoState() == ParticipantInfoState.GROUP_END)
 				{
