@@ -271,7 +271,7 @@ public class MessagesAdapter extends BaseAdapter
 
 							setTextAndIconForSystemMessages(
 									participantInfo, 
-									Utils.getFormattedParticipantInfo(String.format(baseMessage, participantName)), 
+									Utils.getFormattedParticipantInfo(String.format(baseMessage, participantName), participantName), 
 									participant.getContactInfo().isOnhike() ? 
 											R.drawable.ic_hike_user : R.drawable.ic_sms_user
 									);
@@ -296,10 +296,7 @@ public class MessagesAdapter extends BaseAdapter
 						int count = participantInfoArray.length();
 						String message = String.format(context.getString(R.string.new_group_message), count);
 
-						SpannableStringBuilder ssb = new SpannableStringBuilder(message);
-						ssb.setSpan(new ForegroundColorSpan(0xff666666), message.indexOf(""+count), message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-						setTextAndIconForSystemMessages(participantInfo, ssb, R.drawable.ic_hike_user);
+						setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, count+""), R.drawable.ic_hike_user);
 
 						((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
 					}
@@ -312,10 +309,8 @@ public class MessagesAdapter extends BaseAdapter
 					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
 					{
 						String participantMsisdn = new JSONObject(convMessage.getMetadata().serialize()).optString(HikeConstants.DATA);
-						message = Utils.getFormattedParticipantInfo(
-										String.format(
-												context.getString(R.string.left_conversation), 
-												((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName()));
+						String name = ((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName();
+						message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.left_conversation), name), name);
 					}
 					else
 					{
@@ -331,14 +326,13 @@ public class MessagesAdapter extends BaseAdapter
 				}
 				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMessage.getParticipantInfoState() == ParticipantInfoState.USER_OPT_IN)
 				{
-					if(TextUtils.isEmpty(convMessage.getMessage()))
-					{
-						convMessage.setMessage(String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel())));
-					}
+					String name = Utils.getFirstName(conversation.getLabel());
+					String message = String.format(context.getString(R.string.joined_hike), name);
+
 					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 					setTextAndIconForSystemMessages(
 														mainMessage, 
-														convMessage.getMessage(), 
+														Utils.getFormattedParticipantInfo(message, name), 
 														convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? 
 																R.drawable.ic_hike_user : R.drawable.ic_opt_in
 													);
@@ -366,8 +360,11 @@ public class MessagesAdapter extends BaseAdapter
 				}
 				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
 				{
+					String participantName = ((GroupConversation)conversation).getGroupParticipant(convMessage.getMetadata().getJSON().getString(HikeConstants.FROM)).getContactInfo().getFirstName();
+					String message = String.format(context.getString(R.string.change_group_name), participantName);
+
 					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-					setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(convMessage.getMessage()), R.drawable.ic_group_info);
+					setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, participantName), R.drawable.ic_group_info);
 
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
 				}
@@ -376,11 +373,8 @@ public class MessagesAdapter extends BaseAdapter
 					String info = convMessage.getMessage();
 					String textToHighlight = context.getString(R.string.block_internation_sms_bold_text);
 
-					SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-					ssb.setSpan(new ForegroundColorSpan(0xff666666), info.indexOf(textToHighlight), info.indexOf(textToHighlight) + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
 					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-					setTextAndIconForSystemMessages(mainMessage, ssb, R.drawable.ic_no_int_sms);
+					setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(info, textToHighlight), R.drawable.ic_no_int_sms);
 
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
 				}
@@ -404,7 +398,7 @@ public class MessagesAdapter extends BaseAdapter
 								setTextAndIconForSystemMessages(
 																participantInfo, 
 																Utils.getFormattedParticipantInfo(
-																		String.format(context.getString(R.string.joined_conversation), participantName)), 
+																		String.format(context.getString(R.string.joined_conversation), participantName), participantName), 
 																R.drawable.ic_opt_in);
 
 								LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);

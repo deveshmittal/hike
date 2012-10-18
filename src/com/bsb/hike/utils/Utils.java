@@ -721,10 +721,10 @@ public class Utils
 		}
 	}
 
-	public static CharSequence getFormattedParticipantInfo(String info)
+	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
 	{
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-		ssb.setSpan(new ForegroundColorSpan(0xff666666), 0, info.indexOf(" "), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ssb.setSpan(new ForegroundColorSpan(0xff666666), info.indexOf(textToHighight), info.indexOf(textToHighight) + textToHighight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;
 	}
 
