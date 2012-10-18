@@ -94,8 +94,11 @@ public class HikeFile
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 		this.hikeFileType = HikeFileType.fromString(fileTypeString);
 		this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils.getOutputMediaFile(hikeFileType, fileName, fileKey);
-		//Update the file name to prevent duplicacy
-		this.fileName = this.file.getName();
+		if(this.file != null)
+		{
+			//Update the file name to prevent duplicacy
+			this.fileName = this.file.getName();
+		}
 	}
 
 	public HikeFile(String fileName, String fileTypeString, String thumbnailString, Bitmap thumbnail)
