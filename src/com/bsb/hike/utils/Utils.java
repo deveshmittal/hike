@@ -600,7 +600,7 @@ public class Utils
 	{
 		try 
 		{
-			//{"t": "le", "d"{"tag":"cbs", "device_id": "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device": "FFF","_resolution": "GGG","_carrier": "HHH", "appversion" : "x.x.x"}}
+			//{"t": "le", "d"{"tag":"cbs", "device_id": "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device": "FFF","_resolution": "GGG","_carrier": "HHH", "_app_version" : "x.x.x"}}
 			int height;
 			int width;
 			JSONObject object = new JSONObject();
