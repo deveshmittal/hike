@@ -358,41 +358,7 @@ public class MessagesAdapter extends BaseAdapter
 				{
 					MessageMetadata metadata = convMessage.getMetadata();
 					JSONArray dndNumbers = conversation instanceof GroupConversation ? metadata.getJSON().optJSONArray(HikeConstants.DND_USERS) : convMessage.getMetadata().getDndNumbers();
-					if(conversation instanceof GroupConversation)
-					{
-						JSONArray nonDndNumbers = metadata.getJSON().optJSONArray(HikeConstants.NON_DND_USERS);
-						if(nonDndNumbers != null && nonDndNumbers.length()>0)
-						{
-							for(int i = 0; i<nonDndNumbers.length(); i++)
-							{
-								TextView participantInfo = (TextView) inflater.inflate(
-										R.layout.participant_info, null);
 
-								GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nonDndNumbers.getString(i));
-								String participantName = participant.getContactInfo().getFirstName();
-
-								setTextAndIconForSystemMessages(
-																participantInfo, 
-																Utils.getFormattedParticipantInfo(
-																		String.format(context.getString(R.string.joined_conversation), participantName), participantName), 
-																R.drawable.ic_opt_in);
-
-								LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-								if(i != nonDndNumbers.length() - 1)
-								{
-									lp.setMargins(left, top, right, bottom);
-								}
-								else if(dndNumbers == null || dndNumbers.length()==0)
-								{
-									lp.setMargins(left, top, right, 0);
-								}
-								participantInfo.setLayoutParams(lp);
-
-								((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
-							}
-						}
-						
-					}
 					TextView dndMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 
 					if(dndNumbers != null && dndNumbers.length()>0)
