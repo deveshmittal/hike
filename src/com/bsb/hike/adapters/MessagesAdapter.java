@@ -337,25 +337,28 @@ public class MessagesAdapter extends BaseAdapter
 																R.drawable.ic_hike_user : R.drawable.ic_opt_in
 													);
 
-					TextView creditsMessage = null;
+					TextView creditsMessageView = null;
 					if(convMessage.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).has(HikeConstants.CREDITS))
 					{
-						creditsMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 						int credits = convMessage.getMetadata().getJSON().optJSONObject(HikeConstants.DATA).optInt(HikeConstants.CREDITS);
-						setTextAndIconForSystemMessages(creditsMessage, String.format(context.getString(R.string.earned_credits), credits), R.drawable.ic_got_credits);
+						String creditsMessage = String.format(context.getString(R.string.earned_credits, credits));
+						String highlight = String.format(context.getString(R.string.earned_credits_highlight, credits));
+
+						creditsMessageView = (TextView) inflater.inflate(R.layout.participant_info, null);
+						setTextAndIconForSystemMessages(creditsMessageView, Utils.getFormattedParticipantInfo(creditsMessage, highlight), R.drawable.ic_got_credits);
 
 						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 						lp.setMargins(left, top, right, 0);
-						creditsMessage.setLayoutParams(lp);
+						creditsMessageView.setLayoutParams(lp);
 					}
 					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-					lp.setMargins(left, top, right, creditsMessage != null ? bottom : 0);
+					lp.setMargins(left, top, right, creditsMessageView != null ? bottom : 0);
 					mainMessage.setLayoutParams(lp);
 					
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
-					if(creditsMessage != null)
+					if(creditsMessageView != null)
 					{
-						((ViewGroup) holder.participantInfoContainer).addView(creditsMessage);
+						((ViewGroup) holder.participantInfoContainer).addView(creditsMessageView);
 					}
 				}
 				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
