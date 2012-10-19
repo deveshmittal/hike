@@ -70,9 +70,6 @@ public class HikeListActivity extends Activity
 				noItemsChecked = false;
 			}
 		}
-		if(noItemsChecked)
-		{
-			Toast.makeText(getApplicationContext(), "Select the contacts you want to invite", Toast.LENGTH_SHORT).show();
-		}
+		Toast.makeText(getApplicationContext(), noItemsChecked ? "Select the contacts you want to invite" : "Invites sent", Toast.LENGTH_SHORT).show();
 	}
 }
