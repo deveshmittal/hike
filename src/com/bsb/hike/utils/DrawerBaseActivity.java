@@ -39,7 +39,7 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		parentLayout.setListener(this);
 		parentLayout.setUpLeftDrawerView();
-		parentLayout.setUpRightDrawerView();
+//		parentLayout.setUpRightDrawerView();
 		
 		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
 		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
@@ -55,8 +55,8 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 			}
 		}
 
-		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
-		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+//		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
+//		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
