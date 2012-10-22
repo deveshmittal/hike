@@ -389,8 +389,9 @@ public class MqttMessagesManager {
 		if((conversation == null && 
 				!HikeConstants.MqttMessageTypes.USER_JOINED.equals(jsonObj.getString(HikeConstants.TYPE)))
 				||
-				(conversation != null && 
-				TextUtils.isEmpty(conversation.getContactName()) && 
+				(conversation != null &&
+				TextUtils.isEmpty(conversation.getContactName()) &&
+				HikeConstants.MqttMessageTypes.USER_JOINED.equals(jsonObj.getString(HikeConstants.TYPE)) &&
 				!(conversation instanceof GroupConversation)))
 		{
 			return;
