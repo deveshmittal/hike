@@ -82,6 +82,9 @@ public class HikeConstants
 
 	public static final String NEW_GROUP = "new_group";
 
+	/* Constant used to name the preference file which saves the drafts*/
+	public static final String DRAFT_SETTING = "draftSetting";
+
 	/* how long to wait between sending publish and receiving an acknowledgement */
 	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
 

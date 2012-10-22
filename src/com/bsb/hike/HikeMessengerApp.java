@@ -41,6 +41,7 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.Utils;
 import com.facebook.android.Facebook;
+import com.fiksu.asotracking.FiksuTrackingManager;
 
 @ReportsCrashes(formKey = "",
 				customReportContent = {
@@ -301,6 +302,8 @@ public class HikeMessengerApp extends Application
 
 	public void onCreate()
 	{
+		FiksuTrackingManager.initialize(this);
+
 		SharedPreferences settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);

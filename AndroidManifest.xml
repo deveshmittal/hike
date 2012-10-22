@@ -17,6 +17,7 @@
 	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
 	<uses-permission android:name="android.permission.CALL_PHONE"/>
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
 	<!-- C2DM -->
 	<permission android:name="com.bsb.hike.permission.C2D_MESSAGE" android:protectionLevel="signature" />
@@ -154,13 +155,16 @@
 				<data android:scheme="package"/>                
             </intent-filter>
         </receiver>
-		<receiver
-		    android:name=".service.ReferralReceiver"
-		    android:exported="true" >
-		    <intent-filter>
-		        <action android:name="com.android.vending.INSTALL_REFERRER" />
-		    </intent-filter>
-		</receiver>
+        <receiver
+            android:name="com.fiksu.asotracking.InstallTracking"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+            <meta-data
+                android:name="forward.1"
+                android:value="com.bsb.hike.service.ReferralReceiver" />
+        </receiver>
         <receiver
 		    android:name=".service.KeepAliveService" >
 		    <intent-filter>
