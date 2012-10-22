@@ -525,15 +525,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE) 
 		{
 			Intent intent = null;
-			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) 
+			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT) && !getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE)) 
 			{
 				intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			}
-			
+			else if(getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE))
+			{
+				finish();
+				intent = new Intent(this, ChatThread.class);
+				intent.putExtra(HikeConstants.Extras.NAME, getIntent().getStringExtra(HikeConstants.Extras.PREV_NAME));
+				intent.putExtra(HikeConstants.Extras.ID, getIntent().getStringExtra(HikeConstants.Extras.PREV_ID));
+				intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN));
+				startActivity(intent);
+			}
+
 			/* slide down if we're still selecting a user, otherwise slide back */
-			if (mConversation == null && !getIntent().hasExtra(HikeConstants.Extras.GROUP_CHAT)) {
+			if (mConversation == null && !getIntent().hasExtra(HikeConstants.Extras.GROUP_CHAT) && !getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE)) {
 				overridePendingTransition(R.anim.no_animation,
 						R.anim.slide_down_noalpha);
 			} else {
@@ -606,6 +615,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				msg = message.getMessage();
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
 			}
+			intent.putExtra(HikeConstants.Extras.PREV_ID, mContactId);
+			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
+			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 			startActivity(intent);
 			return true;
 		case R.id.delete:
@@ -974,6 +986,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mComposeView.setSelection(message.length());
 				SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText());
 			}
+			intent.removeExtra(HikeConstants.Extras.FORWARD_MESSAGE);
 		}
 		else
 		{
