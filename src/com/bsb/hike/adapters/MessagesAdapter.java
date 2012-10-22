@@ -354,6 +354,19 @@ public class MessagesAdapter extends BaseAdapter
 
 					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
 				}
+				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE)
+				{
+					String name = Utils.getFirstName(conversation.getLabel());
+					String message = context.getString(conversation.isOnhike() ? R.string.intro_hike_thread : R.string.intro_sms_thread, name);
+
+					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+					setTextAndIconForSystemMessages(
+							mainMessage, 
+							Utils.getFormattedParticipantInfo(message, name), 
+							conversation.isOnhike() ? R.drawable.ic_hike_user : R.drawable.ic_sms_user);
+
+					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+				}
 				else
 				{
 					MessageMetadata metadata = convMessage.getMetadata();

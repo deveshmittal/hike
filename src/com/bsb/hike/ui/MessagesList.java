@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
@@ -21,14 +22,18 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -58,9 +63,11 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -104,6 +111,8 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 	private boolean wasAlertCancelled = false;
 
 	private boolean deviceDetailsSent = false;
+
+	private boolean introMessageAdded = false;
 
 	private String[] pubSubListeners = {
 			HikePubSub.MESSAGE_RECEIVED, 
@@ -239,6 +248,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		isToolTipShowing = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		wasAlertCancelled = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
 		deviceDetailsSent = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
+		introMessageAdded = savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED);
 
 		int updateTypeAvailable = accountPrefs.getInt(HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
 		showUpdatePopup(updateTypeAvailable);
@@ -250,6 +260,18 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			if(!deviceDetailsSent)
 			{
 				sendDeviceDetails();
+			}
+			if(!introMessageAdded)
+			{
+				// Delaying the making of threads
+				(new Handler()).postDelayed(new Runnable() 
+				{
+					@Override
+					public void run() 
+					{
+						createNewConversationsForFirstTimeUser();
+					}
+				}, 500);
 			}
 		}
 
@@ -334,6 +356,66 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		deviceDetailsSent = true;
 	}
 
+	private void createNewConversationsForFirstTimeUser()
+	{
+		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+		vibrator.vibrate(400);
+
+		MediaPlayer mediaPlayer=MediaPlayer.create(this, R.raw.v1);
+		mediaPlayer.start();
+
+		String sortOrder = Phone.LAST_TIME_CONTACTED + " DESC LIMIT " + 10;
+		Cursor c = getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.NUMBER }, null, null, sortOrder);
+		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
+		List<String> recentlyContactedNumbers = new ArrayList<String>();
+		while(c.moveToNext())
+		{
+			recentlyContactedNumbers.add(c.getString(numberColIdx));
+		}
+
+		List<ContactInfo> recentNonHikeContacts = HikeUserDatabase.getInstance().getNonHikeContactsFromListOfNumbers(recentlyContactedNumbers);
+		List<ContactInfo> hikeContacts = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(3, -1, true);
+		Log.d(getClass().getSimpleName(), "Number of recent contacts: " + recentNonHikeContacts.size() + " HIKE CONTACT: " + hikeContacts.size());
+
+		int numRecentContactsToShow = HikeConstants.MAX_CONVERSATIONS - hikeContacts.size();
+		numRecentContactsToShow = recentNonHikeContacts.size() < numRecentContactsToShow ? recentNonHikeContacts.size() : numRecentContactsToShow;
+
+		for(int i = 0; i<numRecentContactsToShow; i++)
+		{
+			addIntroMessage(false, recentNonHikeContacts.get(i));
+		}
+		for(ContactInfo contactInfo : hikeContacts)
+		{
+			addIntroMessage(true, contactInfo);
+		}
+		introMessageAdded = true;
+	}
+
+	private void addIntroMessage(boolean onHike, ContactInfo contactInfo)
+	{
+		/*
+		 * Making a json to  be used as the metadata for the intro message
+		 */
+		JSONObject jsonObject = new JSONObject();
+		try 
+		{
+			jsonObject.put(HikeConstants.TYPE, HikeConstants.INTRO_MESSAGE);
+		} 
+		catch (JSONException e) 
+		{
+			e.printStackTrace();
+		}
+
+		String message = String.format(getString(onHike ? R.string.intro_hike_thread : R.string.intro_sms_thread), contactInfo.getFirstName());
+		ConvMessage convMessage = new  ConvMessage(message, contactInfo.getMsisdn(), System.currentTimeMillis()/1000, State.RECEIVED_UNREAD);
+		convMessage.setSMS(!onHike);
+		convMessage.setMetadata(jsonObject);
+
+		HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
+	}
+
 	private void showSMSNotificationAlert()
 	{
 		final Dialog smsNotificationAlert = new Dialog(MessagesList.this, R.style.Theme_CustomDialog);
@@ -394,6 +476,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING, mToolTip != null && mToolTip.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT, deviceDetailsSent);
 		outState.putBoolean(HikeConstants.Extras.ALERT_CANCELLED, wasAlertCancelled);
+		outState.putBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED, introMessageAdded);
 		super.onSaveInstanceState(outState);
 	}
 

@@ -700,4 +700,45 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[]{msisdn});
 	}
+
+	public List<ContactInfo> getNonHikeContactsFromListOfNumbers(List<String> numbersList)
+	{
+		String[] columns = new String[] { 
+											DBConstants.MSISDN, 
+											DBConstants.ID, 
+											DBConstants.NAME, 
+											DBConstants.ONHIKE,
+											DBConstants.PHONE, 
+											DBConstants.MSISDN_TYPE, 
+											DBConstants.LAST_MESSAGED, 
+											DBConstants.HAS_CUSTOM_PHOTO 
+										};
+
+		StringBuilder sb = new StringBuilder("(");
+		for(int i=0; i<numbersList.size(); i++)
+		{
+			sb.append("'" + numbersList.get(i) + "'");
+			if(i != numbersList.size() - 1)
+			{
+				sb.append(",");
+			}
+		}
+		sb.append(")");
+		String selection = DBConstants.PHONE + " IN " + sb.toString() + " AND " + DBConstants.ONHIKE + "=0";
+		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
+		Cursor c = null;
+		try
+		{
+			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection, null, null, null, null);
+			return extractContactInfo(c);
+		}
+		finally
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+		}
+		
+	}
 }

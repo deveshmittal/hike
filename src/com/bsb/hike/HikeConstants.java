@@ -153,6 +153,18 @@ public class HikeConstants
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
 
+	//Fiksu Prices
+	public static final int FACEBOOK_CONNECT = 100;
+	public static final int TWITTER_CONNECT = 100;
+	public static final int INVITE_SENT = 50;
+	public static final int FIRST_MSG_IN_DAY = 10;
+
+	/*Maximum number of conversations to be made automatically when the user signs up*/
+	public static final int MAX_CONVERSATIONS = 6;
+
+	/*Constant used as a type to signify that this message was added locally by the client when the user signed up*/
+	public static final String INTRO_MESSAGE = "im";
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
@@ -225,6 +237,7 @@ public class HikeConstants
 		public static final String GOING_BACK_TO_HOME = "goingBackToHome";
 		public static final String UPDATE_URL = "updateURL";
 		public static final String UPDATE_TO_IGNORE = "updateToIgnore";
+		public static final String INTRO_MESSAGE_ADDED = "introMessageAdded";
 	}
 
 	public static final class LogEvent

@@ -91,7 +91,8 @@ public class ConvMessage
 		USER_JOIN,
 		CHANGED_GROUP_NAME,
 		CHANGED_GROUP_IMAGE,
-		BLOCK_INTERNATIONAL_SMS;
+		BLOCK_INTERNATIONAL_SMS,
+		INTRO_MESSAGE;
 
 
 		public static ParticipantInfoState fromJSON(JSONObject obj)
@@ -133,7 +134,11 @@ public class ConvMessage
 			{
 				return BLOCK_INTERNATIONAL_SMS;
 			}
-			return ParticipantInfoState.NO_INFO;
+			else if (HikeConstants.INTRO_MESSAGE.equals(type))
+			{
+				return ParticipantInfoState.INTRO_MESSAGE;
+			}
+			return NO_INFO;
 		}
 	}
 
@@ -533,6 +538,11 @@ public class ConvMessage
 					Log.e("ConvMessage", "invalid json message", e);
 				}
 				return object;
+	}
+
+	public void setSMS(boolean isSMS)
+	{
+		this.mIsSMS = isSMS;
 	}
 
 	public boolean isSMS()

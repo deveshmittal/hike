@@ -142,6 +142,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 				}
 			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE)
+			{
+				markedUp = String.format(context.getString(conversation.isOnhike() ? R.string.intro_hike_thread : R.string.intro_sms_thread), Utils.getFirstName(conversation.getLabel()));
+			}
 			else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 			{
 				markedUp = TextUtils.isEmpty(message.getMessage()) ? 

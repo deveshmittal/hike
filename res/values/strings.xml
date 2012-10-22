@@ -154,4 +154,6 @@
 	<string name="add_multiple_to_group_message">Added %1$s friends to the group</string>
 	<string name="add_single_highlight">%1$s friend</string>
 	<string name="add_multiple_highlight">%1$s friends</string>
+	<string name="intro_hike_thread">%1$s is on hike</string>
+	<string name="intro_sms_thread">Send %1$s free SMS</string>
 </resources>
