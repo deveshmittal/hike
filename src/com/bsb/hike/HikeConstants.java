@@ -21,6 +21,7 @@ public class HikeConstants
 	public static final String DATA = "d";
 	public static final String TO = "to";
 	public static final String FROM = "f";
+	public static final String SUB_TYPE = "st";
 
 	public static final String HIKE_MESSAGE = "hm";
 	public static final String SMS_MESSAGE = "sm";

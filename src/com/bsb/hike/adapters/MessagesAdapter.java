@@ -281,7 +281,24 @@ public class MessagesAdapter extends BaseAdapter
 					CharSequence message;
 					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
 					{
-						String participantMsisdn = new JSONObject(convMessage.getMetadata().serialize()).optString(HikeConstants.DATA);
+						// Showing the block internation sms message if the user was booted because of that reason
+						JSONObject metadataJSON = new JSONObject(convMessage.getMetadata().serialize());
+						if(metadataJSON.has(HikeConstants.SUB_TYPE) && 
+								HikeConstants.MqttMessageTypes.BLOCK_INTERNATIONAL_SMS.equals(metadataJSON.optString(HikeConstants.SUB_TYPE)))
+						{
+							String info = convMessage.getMessage();
+							String textToHighlight = context.getString(R.string.block_internation_sms_bold_text);
+
+							TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+							setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(info, textToHighlight), R.drawable.ic_no_int_sms);
+
+							LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+							lp.setMargins(left, top, right, bottom);
+							mainMessage.setLayoutParams(lp);
+
+							((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+						}
+						String participantMsisdn = metadataJSON.optString(HikeConstants.DATA);
 						String name = ((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName();
 						message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.left_conversation), name), name);
 					}
