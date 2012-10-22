@@ -166,7 +166,7 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 		ssb.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.unread_message_blue)), startIndex, startIndex + textToColor.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		freeSms100.setText(ssb);
 
-		mTitleView.setText("Free SMS");
+		mTitleView.setText(R.string.free_sms_txt);
 
 		updateCredits();
 		setupSocialButtons();
