@@ -813,7 +813,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			shareItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
 
 			MenuItem forwardItem = menu.findItem(R.id.forward);
-			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
+			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()) && hikeFile.wasFileDownloaded());
 
 			MenuItem copyItem = menu.findItem(R.id.copy);
 			copyItem.setVisible(false);
