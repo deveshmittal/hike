@@ -49,8 +49,8 @@
                     android:paddingRight="5dp"
                     android:text="@string/hike_to_hike_free_always"
                     android:textColor="@color/lightblack"
-                    android:textStyle="bold"
-                    android:textSize="17sp" />
+                    android:textStyle="bold|italic"
+                    android:textSize="15sp" />
                 
                 <LinearLayout
                     android:id="@+id/rewards_info"
@@ -117,7 +117,7 @@
                     android:text="@string/help_info"
                     android:textColor="@color/black"
                     android:textSize="15sp"
-                    android:textStyle="bold"
+                    android:textStyle="bold|italic"
                     android:visibility="gone" />
                 
                 <LinearLayout
