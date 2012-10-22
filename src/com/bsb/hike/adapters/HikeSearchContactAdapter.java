@@ -291,6 +291,13 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 				toast.show();
 				return;
 			}
+			if(groupParticipants != null && groupParticipants.containsKey(contactInfo.getMsisdn()))
+			{
+				Toast toast = Toast.makeText(getContext(), R.string.contact_selected_already, Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.TOP, 0, (int) (50 * Utils.densityMultiplier));
+				toast.show();
+				return;
+			}
 			if(isUnknownNumber)
 			{
 				// Done to add unknown numbers to the already selected list
