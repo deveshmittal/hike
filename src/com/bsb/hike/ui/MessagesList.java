@@ -153,6 +153,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 	{
 		super.onResume();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
+		HikeMessengerApp.getFacebook().extendAccessTokenIfNeeded(this, null);
 	}
 	
 	private class DeleteConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]>
@@ -358,12 +359,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 
 	private void createNewConversationsForFirstTimeUser()
 	{
-		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		vibrator.vibrate(400);
-
-		MediaPlayer mediaPlayer=MediaPlayer.create(this, R.raw.v1);
-		mediaPlayer.start();
-
 		String sortOrder = Phone.LAST_TIME_CONTACTED + " DESC LIMIT " + 10;
 		Cursor c = getContentResolver().query(Phone.CONTENT_URI, new String[] { Phone.NUMBER }, null, null, sortOrder);
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);

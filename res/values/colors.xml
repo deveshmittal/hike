@@ -53,4 +53,5 @@
     <color name="emo_tab_unselected">#f1f1ee</color>
     <color name="emo_tab_selected">#e5e5e2</color>
     <color name="drawer_section">#cbc5b9</color>
+    <color name="social_btn_txt">#c8c7c2</color>
 </resources>

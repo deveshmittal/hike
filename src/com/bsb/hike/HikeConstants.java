@@ -5,6 +5,9 @@ import com.bsb.hike.utils.AccountUtils;
 public class HikeConstants
 {
 	public static final String APP_PUSH_ID = "768395314950";
+	public static final String APP_FACEBOOK_ID = "425850510764995";
+	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
+	public static final String APP_TWITTER_SECRET = "LhgJVQ9eAmbb3EGdXpLD8B4RHf9SGPrzSqaOjuKL5o4";
 
 	public static final String ANDROID = "android";
 

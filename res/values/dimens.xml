@@ -3,5 +3,11 @@
     <dimen name="top_bar_btn_height">47dp</dimen>
     <dimen name="tip_bottom_margin">33dp</dimen>
 	<dimen name="credits_num_height">45dp</dimen>
-	<dimen name="credits_num_width">35dp</dimen>    
+	<dimen name="credits_num_width">35dp</dimen>
+	<dimen name="credits_progress_layout_padding">20dp</dimen>
+	<dimen name="credits_num_container_margin">23dp</dimen>
+	<dimen name="credits_main_margin">10dp</dimen>
+	<dimen name="credits_num_view_width">30dp</dimen>
+	<dimen name="credits_progress_margin">30dp</dimen>
+	<dimen name="credits_progress_curve_width">2dp</dimen>
 </resources>

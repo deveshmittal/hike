@@ -40,6 +40,7 @@ import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.Utils;
+import com.facebook.android.Facebook;
 
 @ReportsCrashes(formKey = "",
 				customReportContent = {
@@ -125,6 +126,20 @@ public class HikeMessengerApp extends Application
 	public static final String PRODUCTION = "production";
 
 	public static final String COUNTRY_CODE = "countryCode";
+
+	/*Setting name for the day the was logged on fiksu for "First message sent in day"*/
+	public static final String DAY_RECORDED = "dayRecorded";
+
+	public static final String FACEBOOK_TOKEN = "facebookToken";
+	public static final String FACEBOOK_TOKEN_EXPIRES = "facebookTokenExpires";
+	public static final String FACEBOOK_USER_ID = "facebookUserId";
+	public static final String FACEBOOK_AUTH_COMPLETE = "facebookAuthComplete";
+
+	public static final String TWITTER_TOKEN = "twitterToken";
+	public static final String TWITTER_TOKEN_SECRET = "twitterTokenSecret";
+	public static final String TWITTER_AUTH_COMPLETE = "twitterAuthComplete";
+
+	private static Facebook facebook;
 
 	private static HikePubSub mPubSubInstance;
 
@@ -305,6 +320,11 @@ public class HikeMessengerApp extends Application
 		SmileyParser.init(this);
 		
 		IconCacheManager.init();
+
+		facebook = new Facebook(HikeConstants.APP_FACEBOOK_ID);
+		facebook.setAccessExpires(settings.getLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, 0));
+		facebook.setAccessToken(settings.getString(HikeMessengerApp.FACEBOOK_TOKEN, ""));
+
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
 
@@ -319,6 +339,11 @@ public class HikeMessengerApp extends Application
 		}
 		/*For logging the time each activity is seen by the user*/
 		new ActivityTimeLogger();
+	}
+
+	public static Facebook getFacebook()
+	{
+		return facebook;
 	}
 
 	public static HikePubSub getPubSub()
