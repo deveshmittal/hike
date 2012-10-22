@@ -177,7 +177,7 @@ public class DbConversationListener implements Listener
 		int today = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
 		if(today != dayRecorded)
 		{
-			FiksuTrackingManager.uploadPurchaseEvent(context, "", HikeConstants.FIRST_MSG_IN_DAY, "Rs");
+			FiksuTrackingManager.uploadPurchaseEvent(context, "", HikeConstants.FIRST_MSG_IN_DAY, HikeConstants.CURRENCY);
 			dayRecorded = today;
 			Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 			editor.putInt(HikeMessengerApp.DAY_RECORDED, dayRecorded);

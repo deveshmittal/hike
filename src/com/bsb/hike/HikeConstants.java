@@ -160,6 +160,9 @@ public class HikeConstants
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
 
+	//Fiksu Currency
+	public static final String CURRENCY = "INR";
+
 	//Fiksu Prices
 	public static final int FACEBOOK_CONNECT = 100;
 	public static final int TWITTER_CONNECT = 100;
