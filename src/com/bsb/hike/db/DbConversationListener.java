@@ -1,5 +1,6 @@
 package com.bsb.hike.db;
 
+import java.util.Calendar;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -8,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -16,8 +18,9 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.GroupParticipant;
+import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class DbConversationListener implements Listener
 {
@@ -31,6 +34,8 @@ public class DbConversationListener implements Listener
 
 	private Context context;
 
+	private int dayRecorded = 0;
+
 	public DbConversationListener(Context context)
 	{
 		this.context = context;
@@ -38,6 +43,9 @@ public class DbConversationListener implements Listener
 		mConversationDb = HikeConversationsDatabase.getInstance();
 		mUserDb = HikeUserDatabase.getInstance();
 		persistence = HikeMqttPersistence.getInstance();
+
+		dayRecorded = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.DAY_RECORDED, 0);
+
 		mPubSub.addListener(HikePubSub.MESSAGE_SENT, this);
 		mPubSub.addListener(HikePubSub.DELETE_MESSAGE, this);
 		mPubSub.addListener(HikePubSub.MESSAGE_FAILED, this);
@@ -63,6 +71,10 @@ public class DbConversationListener implements Listener
 				if(!convMessage.isFileTransferMessage())
 				{
 					mConversationDb.addConversationMessages(convMessage);
+					if(convMessage.isSent())
+					{
+						uploadFiksuPerDayMessageEvent();
+					}
 				}
 				// Recency was already updated when the ft message was added.
 				mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
@@ -154,6 +166,22 @@ public class DbConversationListener implements Listener
 			{
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
+		}
+	}
+
+	/*
+	 * Recording the event on fiksu if this was the first message of the day.
+	 */
+	private void uploadFiksuPerDayMessageEvent()
+	{
+		int today = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
+		if(today != dayRecorded)
+		{
+			FiksuTrackingManager.uploadPurchaseEvent(context, "", HikeConstants.FIRST_MSG_IN_DAY, "Rs");
+			dayRecorded = today;
+			Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			editor.putInt(HikeMessengerApp.DAY_RECORDED, dayRecorded);
+			editor.commit();
 		}
 	}
 
