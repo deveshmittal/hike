@@ -118,6 +118,7 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 		else if(o instanceof DeleteSocialCredentialsTask)
 		{
 			dialog = ProgressDialog.show(this, null, getString(R.string.social_unlinking));
+			((DeleteSocialCredentialsTask)o).setDialog(dialog);
 		}
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -217,6 +218,9 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 						JSONObject me = new JSONObject(facebook.request("me"));
 						userId = me.optString("id");
 						editor.putString(HikeMessengerApp.FACEBOOK_USER_ID, userId);
+						editor.commit();
+						sendCredentialsToServer(userId, facebook.getAccessToken(), true);
+						return;
 					} 
 	                catch (MalformedURLException e1) 
 	                {
@@ -230,15 +234,20 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 	                {
 	                	Log.e(getClass().getSimpleName(), "IOException", e3);
 					}
-	                editor.commit();
-	                sendCredentialsToServer(userId, facebook.getAccessToken(), true);
+	                Toast.makeText(CreditsActivity.this, R.string.social_failed, Toast.LENGTH_SHORT).show();
 	            }
 
 	            @Override
-	            public void onFacebookError(FacebookError error) {}
+	            public void onFacebookError(FacebookError error) 
+	            {
+	            	Toast.makeText(CreditsActivity.this, R.string.social_failed, Toast.LENGTH_SHORT).show();
+	            }
 
 	            @Override
-	            public void onError(DialogError e) {}
+	            public void onError(DialogError e) 
+	            {
+	            	Toast.makeText(CreditsActivity.this, R.string.social_failed, Toast.LENGTH_SHORT).show();
+	            }
 
 	            @Override
 	            public void onCancel() {}
@@ -275,7 +284,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 			{
 				deleteSocialCredentialsTask = new DeleteSocialCredentialsTask();
 				deleteSocialCredentialsTask.execute(facebook);
-				dialog = ProgressDialog.show(CreditsActivity.this, null, getString(R.string.social_unlinking));
 			}
 		});
 		builder.setNegativeButton(R.string.cancel, new OnClickListener() 
@@ -290,11 +298,11 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 
 	private void sendCredentialsToServer(String id, String token, final boolean facebook)
 	{
-		JSONObject fbAuthRequest = new JSONObject();
+		JSONObject request = new JSONObject();
         try 
         {
-        	fbAuthRequest.put("id", id);
-			fbAuthRequest.put("token", token);
+        	request.put("id", id);
+			request.put("token", token);
 		} 
         catch (JSONException e) 
         {
@@ -355,7 +363,7 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
     			hikeHTTPTask = null;
     		}
         });
-        hikeHttpRequest.setJSONData(fbAuthRequest);
+        hikeHttpRequest.setJSONData(request);
         hikeHTTPTask = new HikeHTTPTask(null, 0);
         hikeHTTPTask.execute(hikeHttpRequest);
 
@@ -478,6 +486,18 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 
 	private class DeleteSocialCredentialsTask extends AsyncTask<Boolean, Void, Boolean>
 	{
+		ProgressDialog taskDialog;
+
+		public void setDialog(ProgressDialog progressDialog)
+		{
+			taskDialog = progressDialog;
+		}
+
+		@Override
+		protected void onPreExecute() 
+		{
+			taskDialog = dialog = ProgressDialog.show(CreditsActivity.this, null, getString(R.string.social_unlinking));
+		}
 
 		@Override
 		protected Boolean doInBackground(Boolean... params) 
@@ -534,10 +554,10 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 		@Override
 		protected void onPostExecute(Boolean result) 
 		{
-			if(dialog != null)
+			if(taskDialog != null)
 			{
-				dialog.dismiss();
-				dialog = null;
+				taskDialog.dismiss();
+				taskDialog = null;
 			}
 			Toast.makeText(CreditsActivity.this, result ? R.string.social_unlink_success : R.string.unlink_account_failed, Toast.LENGTH_SHORT).show();
 			setupSocialButtons();
