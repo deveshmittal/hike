@@ -596,6 +596,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			{
 				infoTxt.setImageResource(R.drawable.wrong_pin);
 				loadingLayout.setVisibility(View.GONE);
+				callmeBtn.setVisibility(View.VISIBLE);
 				submitBtn.setVisibility(View.VISIBLE);
 				if (tapHereText != null) 
 				{
