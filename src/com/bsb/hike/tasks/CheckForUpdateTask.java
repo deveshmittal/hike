@@ -24,8 +24,10 @@ import com.bsb.hike.utils.Utils;
 
 public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean>
 	{
-		private static final String UPDATE_CHECK_URL = "http://get.hike.in/updates/android";
-
+		public static final String STAGING_URL = "http://staging.get.hike.in/updates/android";
+		public static final String PRODUCTION_URL = "http://get.hike.in/updates/android";
+		
+		public static String UPDATE_CHECK_URL = PRODUCTION_URL;
 		/*
 		 * Response JSON: {"latest":<string>, "critical":<string>, "url":<url>}
 		 */

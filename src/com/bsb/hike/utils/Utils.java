@@ -90,6 +90,7 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -1205,6 +1206,8 @@ public class Utils
 		}
 		AccountUtils.FILE_TRANSFER_HOST = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
 		AccountUtils.FILE_TRANSFER_BASE = "http://" + AccountUtils.FILE_TRANSFER_HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
+
+		CheckForUpdateTask.UPDATE_CHECK_URL = isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL;
     }
 
     public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)
