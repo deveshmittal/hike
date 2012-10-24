@@ -1526,7 +1526,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			ConvMessage adapterMessage = findMessageById(convMessage.getMsgID());
 			if (adapterMessage != null) 
 			{
-				adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
+				try 
+				{
+					adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
+				} 
+				catch (JSONException e) 
+				{
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
 			}
 			runOnUiThread(mUpdateAdapter);
 		}

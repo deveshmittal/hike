@@ -414,7 +414,14 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		String message = String.format(getString(onHike ? R.string.intro_hike_thread : R.string.intro_sms_thread), contactInfo.getFirstName());
 		ConvMessage convMessage = new  ConvMessage(message, contactInfo.getMsisdn(), System.currentTimeMillis()/1000, State.RECEIVED_UNREAD);
 		convMessage.setSMS(!onHike);
-		convMessage.setMetadata(jsonObject);
+		try 
+		{
+			convMessage.setMetadata(jsonObject);
+		} 
+		catch (JSONException e) 
+		{
+			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
 
 		HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
 

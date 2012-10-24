@@ -597,15 +597,15 @@ public class Utils
 		}
 	}
 
-	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, GroupConversation conversation) throws JSONException
+	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, GroupConversation conversation)
 	{
-		JSONObject participant = (JSONObject)participantInfoArray.get(0);
-		String highlight = ((GroupConversation) conversation).getGroupParticipant(participant.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
+		JSONObject participant = (JSONObject)participantInfoArray.opt(0);
+		String highlight = ((GroupConversation) conversation).getGroupParticipant(participant.optString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
 		
 		if(participantInfoArray.length() == 2)
 		{
-			JSONObject participant2 = (JSONObject)participantInfoArray.get(1);
-			String name2 = ((GroupConversation) conversation).getGroupParticipant(participant2.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
+			JSONObject participant2 = (JSONObject)participantInfoArray.opt(1);
+			String name2 = ((GroupConversation) conversation).getGroupParticipant(participant2.optString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
 
 			highlight += " and " + name2;
 		}
