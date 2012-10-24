@@ -53,7 +53,6 @@ public class HikeConstants
 	public static final String ON_HIKE = "onhike";
 	public static final String DND = "dnd";
 	public static final String DND_USERS = "dndUsers";
-	public static final String NON_DND_USERS = "nonDndUsers";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

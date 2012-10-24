@@ -133,7 +133,6 @@ public class DbConversationListener implements Listener
 
 			JSONObject dndJSON = new JSONObject();
 			JSONArray dndParticipants = new JSONArray();
-			JSONArray nonDndParticipants = new JSONArray();
 
 			for(Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants.entrySet())
 			{
@@ -143,18 +142,18 @@ public class DbConversationListener implements Listener
 				{
 					dndParticipants.put(msisdn);
 				}
-				else
-				{
-					nonDndParticipants.put(msisdn);
-				}
 			}
 
+			if(dndParticipants.length() == 0)
+			{
+				// No DND participants. Just return
+				return;
+			}
 			try 
 			{
 				dndJSON.put(HikeConstants.FROM, groupId);
 				dndJSON.put(HikeConstants.TYPE, HikeConstants.DND);
 				dndJSON.put(HikeConstants.DND_USERS, dndParticipants);
-				dndJSON.put(HikeConstants.NON_DND_USERS, nonDndParticipants);
 
 				ConvMessage convMessage = new ConvMessage(dndJSON, null, context, false);
 				mConversationDb.addConversationMessages(convMessage);
