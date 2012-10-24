@@ -439,7 +439,7 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 
 		int actualOffset = (int)((currentOffset * totalCredits)/100);
 
-		creditsMax.setText(totalCredits + "");
+		creditsMax.setText(totalCredits + "+");
 		creditsCurrent.setText(currentCredits + "");
 
 		creditsBar.setMax(totalCredits);
