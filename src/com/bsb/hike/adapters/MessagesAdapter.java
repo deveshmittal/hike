@@ -275,7 +275,7 @@ public class MessagesAdapter extends BaseAdapter
 					// Showing the block internation sms message if the user was booted because of that reason
 					if(metadata.isShowBIS())
 					{
-						String info = convMessage.getMessage();
+						String info = context.getString(R.string.block_internation_sms);
 						String textToHighlight = context.getString(R.string.block_internation_sms_bold_text);
 
 						TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
