@@ -162,6 +162,12 @@ public class HikeConstants
 	//Fiksu Currency
 	public static final String CURRENCY = "INR";
 
+	//Fiksu Usernames
+	public static final String FACEBOOK = "facebook";
+	public static final String TWITTER = "twitter";
+	public static final String INVITE = "invite";
+	public static final String FIRST_MESSAGE = "first_message";
+
 	//Fiksu Prices
 	public static final int FACEBOOK_CONNECT = 100;
 	public static final int TWITTER_CONNECT = 100;

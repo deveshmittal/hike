@@ -1853,7 +1853,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						HikeConstants.LogEvent.CHAT_INVITE_TOP_BUTTON);
 				inviteUser();
 				// Tracking the invite event for fiksu
-				FiksuTrackingManager.uploadPurchaseEvent(this, "", HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
+				FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE, HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
 			}
 			else
 			{

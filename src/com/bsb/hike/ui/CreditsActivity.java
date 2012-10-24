@@ -320,12 +320,12 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
     			// Fail the whole process if the request to our server fails.
     			if(facebook)
     			{
-    				FiksuTrackingManager.uploadPurchaseEvent(CreditsActivity.this, "", HikeConstants.FACEBOOK_CONNECT, HikeConstants.CURRENCY);
+    				FiksuTrackingManager.uploadPurchaseEvent(CreditsActivity.this, HikeConstants.FACEBOOK, HikeConstants.FACEBOOK_CONNECT, HikeConstants.CURRENCY);
     				editor.putBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, true);
     			}
     			else
     			{
-    				FiksuTrackingManager.uploadPurchaseEvent(CreditsActivity.this, "", HikeConstants.TWITTER_CONNECT, HikeConstants.CURRENCY);
+    				FiksuTrackingManager.uploadPurchaseEvent(CreditsActivity.this, HikeConstants.TWITTER, HikeConstants.TWITTER_CONNECT, HikeConstants.CURRENCY);
     				editor.putBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, true);
     			}
     			editor.commit();
