@@ -277,6 +277,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 						createNewConversationsForFirstTimeUser();
 					}
 				}, 500);
+				introMessageAdded = true;
 			}
 		}
 
@@ -393,7 +394,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		{
 			addIntroMessage(true, contactInfo);
 		}
-		introMessageAdded = true;
 	}
 
 	private void addIntroMessage(boolean onHike, ContactInfo contactInfo)
