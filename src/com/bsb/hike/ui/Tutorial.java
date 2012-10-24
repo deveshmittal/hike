@@ -214,6 +214,17 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				disclaimer.setText(isHelpPage ? getString(R.string.hike_to_sms_disclaimer) : "");
 				break;
 			}
+			if((int)(Utils.densityMultiplier*10) > (int)(1.5f * 10) && !isLandscape)
+			{
+				LayoutParams lp = (LayoutParams) imgLayout.getLayoutParams();
+				lp.weight+=2;
+				imgLayout.setPadding((int)(10*Utils.densityMultiplier), 0, (int)(10*Utils.densityMultiplier), 0);
+				imgLayout.setLayoutParams(lp);
+
+				lp = (LayoutParams) header.getLayoutParams();
+				lp.weight+=0.5f;
+				header.setLayoutParams(lp);
+			}
 			if(isLandscape)
 			{
 				imgLayout.setVisibility(View.GONE);
