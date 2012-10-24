@@ -149,11 +149,8 @@
 	<string name="call_me_pass">We will call you within a few seconds.</string>
 	<string name="call_me_fail">Unable to send request. Please try again.</string>
 	<string name="calling_you">Calling you now...</string>
-	<string name="new_group_message">Group Chat with %1$s friends</string>
-	<string name="add_single_to_group_message">Added %1$s friend to the group</string>
-	<string name="add_multiple_to_group_message">Added %1$s friends to the group</string>
-	<string name="add_single_highlight">%1$s friend</string>
-	<string name="add_multiple_highlight">%1$s friends</string>
+	<string name="new_group_message">Group Chat with %1$s</string>
+	<string name="add_to_group_message">Added %1$s to the group</string>
 	<string name="connect_and_get">Connect and get 100 free SMS instantly</string>
 	<string name="facebook">Facebook</string>
 	<string name="twitter">Twitter</string>

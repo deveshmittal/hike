@@ -84,6 +84,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -595,7 +596,26 @@ public class Utils
 			+ (groupParticipants.size() - 1) + " others";
 		}
 	}
-	
+
+	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, GroupConversation conversation) throws JSONException
+	{
+		JSONObject participant = (JSONObject)participantInfoArray.get(0);
+		String highlight = ((GroupConversation) conversation).getGroupParticipant(participant.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
+		
+		if(participantInfoArray.length() == 2)
+		{
+			JSONObject participant2 = (JSONObject)participantInfoArray.get(1);
+			String name2 = ((GroupConversation) conversation).getGroupParticipant(participant2.getString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
+
+			highlight += " and " + name2;
+		}
+		else if(participantInfoArray.length() > 2)
+		{
+			highlight += " and " + (participantInfoArray.length() - 1) + " others";
+		}
+		return highlight;
+	}
+
 	public static JSONObject getDeviceDetails(Context context)
 	{
 		try 

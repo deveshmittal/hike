@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -100,6 +101,29 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 					markedUp = Utils.addContactName(((GroupConversation)conversation).getGroupParticipant(message.getGroupParticipantMsisdn()).getContactInfo().getFirstName(), markedUp);
 				}
 				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()) ? View.GONE : View.VISIBLE);
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
+			{
+				try
+				{
+					JSONObject gcjPacket = new JSONObject(message.getMetadata().serialize());
+					JSONArray participantInfoArray = gcjPacket.getJSONArray(HikeConstants.DATA);
+
+					String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
+
+					if(gcjPacket.optBoolean(HikeConstants.NEW_GROUP))
+					{
+						markedUp = String.format(context.getString(R.string.new_group_message), highlight);
+					}
+					else
+					{
+						markedUp = String.format(context.getString(R.string.add_to_group_message), highlight);
+					}
+				}
+				catch (JSONException e)
+				{
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
 			}
 			else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
 			{

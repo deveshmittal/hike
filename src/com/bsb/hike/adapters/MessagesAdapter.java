@@ -254,20 +254,16 @@ public class MessagesAdapter extends BaseAdapter
 					TextView participantInfo = (TextView) inflater.inflate(
 							R.layout.participant_info, null);
 
-					int count = participantInfoArray.length();
-
 					String message;
-					String highlight;
+					String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
 
 					if(gcjPacket.optBoolean(HikeConstants.NEW_GROUP))
 					{
-						message = String.format(context.getString(R.string.new_group_message), count);
-						highlight = String.format(context.getString(R.string.add_multiple_highlight), count);
+						message = String.format(context.getString(R.string.new_group_message), highlight);
 					}
 					else
 					{
-						message = String.format(context.getString(count > 1 ? R.string.add_multiple_to_group_message : R.string.add_single_to_group_message), count);
-						highlight = String.format(context.getString(count > 1 ? R.string.add_multiple_highlight : R.string.add_single_highlight), count);
+						message = String.format(context.getString(R.string.add_to_group_message), highlight);
 					}
 
 					setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, highlight), R.drawable.ic_hike_user);
