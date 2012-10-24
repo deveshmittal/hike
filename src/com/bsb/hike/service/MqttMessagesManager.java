@@ -294,12 +294,12 @@ public class MqttMessagesManager {
 		}
 		else if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)) // Start Typing event received
 		{
-			String msisdn = jsonObj.optString(HikeConstants.FROM);
+			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
 		}
 		else if (HikeConstants.MqttMessageTypes.END_TYPING.equals(type)) // End Typing event received
 		{
-			String msisdn = jsonObj.optString(HikeConstants.FROM);
+			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
 		}
 		else if (HikeConstants.MqttMessageTypes.UPDATE_AVAILABLE.equals(type))
