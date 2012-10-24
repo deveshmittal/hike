@@ -20,6 +20,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -339,6 +340,14 @@ public class HikeMessengerApp extends Application
 		if (token != null)
 		{
 			AccountUtils.setToken(token);
+		}
+		try 
+		{
+			AccountUtils.setAppVersion(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+		} 
+		catch (NameNotFoundException e) 
+		{
+			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
 		/*For logging the time each activity is seen by the user*/
 		new ActivityTimeLogger();

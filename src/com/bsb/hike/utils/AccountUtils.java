@@ -36,6 +36,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -90,9 +91,16 @@ public class AccountUtils
 
 	private static String mToken = null;
 
+	private static String appVersion = null;
+
 	public static void setToken(String token)
 	{
 		mToken = token;
+	}
+
+	public static void setAppVersion(String version)
+	{
+		appVersion = version;
 	}
 
 	private static synchronized HttpClient getClient()
@@ -115,8 +123,7 @@ public class AccountUtils
 
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
 		mClient = new DefaultHttpClient(cm, params);
-
-		//mClient.
+		mClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + appVersion);
 		return mClient;
 	}
 
