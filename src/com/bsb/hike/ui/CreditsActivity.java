@@ -98,7 +98,15 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 	{
 		super.onCreate(savedInstanceState);
 
+		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		currentOffset = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? OFFSET_PORTRAIT : OFFSET_LANDSCAPE;
+
+		if(savedInstanceState != null && savedInstanceState.getBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE))
+		{
+			onTwitterClick(null);
+			return;
+		}
+
 		initalizeViews(savedInstanceState);
 
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED, this);
@@ -122,7 +130,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 			((DeleteSocialCredentialsTask)o).setDialog(dialog);
 		}
 
-		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		Editor editor = settings.edit();
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
 		editor.commit();
@@ -299,6 +306,15 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 		}
 	}
 
+	
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) 
+	{
+		outState.putBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE, twitterOAuthView != null);
+		super.onSaveInstanceState(outState);
+	}
+
 	private void showCredentialUnlinkAlert(final boolean facebook)
 	{
 		Builder builder = new Builder(CreditsActivity.this);
@@ -422,7 +438,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 	{
 		if(twitterOAuthView != null)
 		{
-			setContentView(R.layout.credits);
 			initalizeViews(null);
 			return;
 		}
