@@ -1100,6 +1100,11 @@ public class Utils
     			String imageOrientation = Utils.getImageOrientation(srcFilePath);
     			Bitmap tempBmp = Utils.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, false);
     			tempBmp = Utils.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
+    			//Temporary fix for when a user uploads a file through Picasa on ICS or higher.
+    			if(tempBmp == null)
+    			{
+    				return false;
+    			}
 				byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG);
 				tempBmp.recycle();
 				src = new ByteArrayInputStream(fileBytes);
