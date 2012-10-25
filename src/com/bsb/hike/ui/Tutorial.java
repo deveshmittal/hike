@@ -225,6 +225,13 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener
 				lp.weight+=0.5f;
 				header.setLayoutParams(lp);
 			}
+			else if((int)(Utils.densityMultiplier*100) <= (int)(0.75f * 100) && !isLandscape)
+			{
+				LayoutParams lp = (LayoutParams) imgLayout.getLayoutParams();
+				lp.weight--;
+				imgLayout.setPadding((int)(10*Utils.densityMultiplier), 0, (int)(10*Utils.densityMultiplier), 0);
+				imgLayout.setLayoutParams(lp);
+			}
 			if(isLandscape)
 			{
 				imgLayout.setVisibility(View.GONE);
