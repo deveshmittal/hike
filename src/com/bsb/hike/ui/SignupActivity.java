@@ -105,7 +105,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 	private ProgressDialog dialog;
 
-	private static HikeHTTPTask hikeHTTPTask;
+	private HikeHTTPTask hikeHTTPTask;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -122,8 +122,11 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
 		errorImage = (ImageView) findViewById(R.id.error_img);
 
-		if(hikeHTTPTask != null && !hikeHTTPTask.isFinished())
+		Object o = getLastNonConfigurationInstance();
+		if(o instanceof HikeHTTPTask)
 		{
+			hikeHTTPTask = (HikeHTTPTask) o;
+			hikeHTTPTask.setActivity(this);
 			dialog = ProgressDialog.show(this, null, getString(R.string.calling_you));
 		}
 
@@ -262,6 +265,16 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 			dialog = ProgressDialog.show(this, null, getResources().getString(R.string.calling_you));
 		}
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance() 
+	{
+		if(hikeHTTPTask != null && !hikeHTTPTask.isFinished())
+		{
+			return hikeHTTPTask;
+		}
+		return super.onRetainNonConfigurationInstance();
 	}
 
 	protected void onDestroy()
