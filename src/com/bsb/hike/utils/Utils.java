@@ -1205,9 +1205,12 @@ public class Utils
 			AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
 		}
 		AccountUtils.FILE_TRANSFER_HOST = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
-		AccountUtils.FILE_TRANSFER_BASE = "http://" + AccountUtils.FILE_TRANSFER_HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
+		AccountUtils.FILE_TRANSFER_UPLOAD_BASE = "http://" + AccountUtils.FILE_TRANSFER_HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
 
 		CheckForUpdateTask.UPDATE_CHECK_URL = isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL;
+
+		AccountUtils.FILE_TRANSFER_BASE_DOWNLOAD_URL = AccountUtils.BASE + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
+		AccountUtils.FILE_TRANSFER_BASE_VIEW_URL = isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING;
     }
 
     public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)

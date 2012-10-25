@@ -112,6 +112,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -591,7 +592,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			if(message.isFileTransferMessage())
 			{
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				clipboard.setText(HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey());
+				clipboard.setText(AccountUtils.FILE_TRANSFER_BASE_VIEW_URL + hikeFile.getFileKey());
 			}
 			else
 			{
@@ -647,7 +648,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return true;
 		case R.id.share:
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			Utils.startShareIntent(ChatThread.this, HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey());
+			Utils.startShareIntent(ChatThread.this, AccountUtils.FILE_TRANSFER_BASE_VIEW_URL + hikeFile.getFileKey());
 			return true;
 		default:
 			return super.onContextItemSelected(item);

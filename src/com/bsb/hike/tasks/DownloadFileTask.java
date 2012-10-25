@@ -19,6 +19,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Utils;
 
 public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
@@ -51,7 +52,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		InputStream is = null;
 		try 
 		{
-			URL url = new URL(HikeConstants.FILE_TRANSFER_BASE_URL + fileKey);
+			URL url = new URL(AccountUtils.FILE_TRANSFER_BASE_DOWNLOAD_URL + fileKey);
 			URLConnection urlConnection = url.openConnection();
 
 			int length = urlConnection.getContentLength();

@@ -83,7 +83,17 @@ public class AccountUtils
 
 	public static String FILE_TRANSFER_HOST = PRODUCTION_FT_HOST;
 
-	public static String FILE_TRANSFER_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static String FILE_TRANSFER_UPLOAD_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+
+	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
+
+	public static String FILE_TRANSFER_BASE_DOWNLOAD_URL = BASE + FILE_TRANSFER_DOWNLOAD_BASE;
+
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "http://hike.in/f/";
+
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = "http://staging.im.hike.in/f/";
+
+	public static String FILE_TRANSFER_BASE_VIEW_URL = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
@@ -618,7 +628,7 @@ public class AccountUtils
 		FileInputStream fileInputStream = new FileInputStream(file);
 
 		URL url;
-		url = new URL(FILE_TRANSFER_BASE + hikeHttpRequest.getPath());
+		url = new URL(FILE_TRANSFER_UPLOAD_BASE + hikeHttpRequest.getPath());
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
