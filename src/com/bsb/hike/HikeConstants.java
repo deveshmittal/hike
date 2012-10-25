@@ -1,6 +1,5 @@
 package com.bsb.hike;
 
-import com.bsb.hike.utils.AccountUtils;
 
 public class HikeConstants
 {
@@ -254,6 +253,7 @@ public class HikeConstants
 		public static final String UPDATE_URL = "updateURL";
 		public static final String UPDATE_TO_IGNORE = "updateToIgnore";
 		public static final String INTRO_MESSAGE_ADDED = "introMessageAdded";
+		public static final String TWITTER_VIEW_VISIBLE = "twitterViewVisible";
 	}
 
 	public static final class LogEvent

@@ -23,6 +23,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -265,6 +266,31 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener, Twi
 		{
 			twitterOAuthView = new TwitterOAuthView(this);
 			twitterOAuthView.start(HikeConstants.APP_TWITTER_ID, HikeConstants.APP_TWITTER_SECRET, CALLBACK_URL, true, this);
+
+			/*
+			 * Workaround for an android bug where the keyboard does not popup in the web view.
+			 * http://code.google.com/p/android/issues/detail?id=7189 
+			 */
+			twitterOAuthView.requestFocus(View.FOCUS_DOWN);
+			twitterOAuthView.setOnTouchListener(new View.OnTouchListener()
+			{
+			    @Override
+			    public boolean onTouch(View v, MotionEvent event)
+			    {
+			        switch (event.getAction())
+			        {
+			            case MotionEvent.ACTION_DOWN:
+			            case MotionEvent.ACTION_UP:
+			                if (!v.hasFocus())
+			                {
+			                    v.requestFocus();
+			                }
+			                break;
+			        }
+			        return false;
+			    }
+			});
+
 			setContentView(twitterOAuthView);
 		}
 		else
