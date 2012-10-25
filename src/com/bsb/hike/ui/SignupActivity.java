@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
@@ -55,7 +56,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.MSISDNView;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener, FinishableEvent
+public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener, FinishableEvent, OnCancelListener
 {
 
 	private SignupTask mTask;
@@ -128,6 +129,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			hikeHTTPTask = (HikeHTTPTask) o;
 			hikeHTTPTask.setActivity(this);
 			dialog = ProgressDialog.show(this, null, getString(R.string.calling_you));
+			dialog.setCancelable(true);
+			dialog.setOnCancelListener(this);
 		}
 
 		if(savedInstanceState != null)
@@ -264,6 +267,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			hikeHTTPTask.execute(hikeHttpRequest);
 
 			dialog = ProgressDialog.show(this, null, getResources().getString(R.string.calling_you));
+			dialog.setCancelable(true);
+			dialog.setOnCancelListener(this);
 		}
 	}
 
@@ -683,5 +688,16 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			submitClicked();
 		}
 		return true;
+	}
+
+	@Override
+	public void onCancel(DialogInterface dialog) 
+	{
+		Log.d(getClass().getSimpleName(), "Dialog cancelled");
+		if(hikeHTTPTask != null)
+		{
+			hikeHTTPTask.setActivity(null);
+			hikeHTTPTask = null;
+		}
 	}
 }
