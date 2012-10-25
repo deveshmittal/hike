@@ -648,7 +648,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return true;
 		case R.id.share:
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			Utils.startShareIntent(ChatThread.this, AccountUtils.FILE_TRANSFER_BASE_VIEW_URL + hikeFile.getFileKey());
+			Utils.startShareIntent(ChatThread.this, getString(R.string.share_file_message, AccountUtils.FILE_TRANSFER_BASE_VIEW_URL + hikeFile.getFileKey()));
 			return true;
 		default:
 			return super.onContextItemSelected(item);
