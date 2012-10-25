@@ -41,7 +41,7 @@ public class MessageMetadata
 
 	public MessageMetadata(JSONObject metadata) throws JSONException
 	{
-		this.participantInfoState = this.dndNumbers == null ? ParticipantInfoState.fromJSON(metadata) : ParticipantInfoState.DND_USER;
+		this.participantInfoState = metadata.has(HikeConstants.DND_USERS) || metadata.has(HikeConstants.DND_NUMBERS) ? ParticipantInfoState.DND_USER : ParticipantInfoState.fromJSON(metadata);
 		switch (this.participantInfoState) 
 		{
 		case CHANGED_GROUP_NAME:
