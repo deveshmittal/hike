@@ -449,7 +449,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
 		currentEmoticonCategorySelected = findViewById(savedInstanceState!= null ? 
-				savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY, R.id.emoji_btn) : R.id.emoji_btn);
+				savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY, R.id.hike_emoticons_btn) : R.id.hike_emoticons_btn);
 		currentEmoticonCategorySelected.setSelected(true);
 
 		/* register for long-press's */
