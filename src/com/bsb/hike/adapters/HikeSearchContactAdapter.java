@@ -342,7 +342,25 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 
 	private String normalizeNumber(String inputNumber)
 	{
-		return inputNumber.startsWith("+") ? inputNumber : inputNumber.startsWith("0") ? inputNumber.replaceFirst("0", countryCode) : (countryCode + inputNumber);
+		if(inputNumber.startsWith("+"))
+		{
+			return inputNumber;
+		}
+		else if(inputNumber.startsWith("00"))
+		{
+			/*
+			 * Doing for US numbers
+			 */
+			return inputNumber.replaceFirst("00", "+");
+		}
+		else if(inputNumber.startsWith("0"))
+		{
+			return inputNumber.replaceFirst("0", countryCode);
+		}
+		else
+		{
+			return countryCode + inputNumber;
+		}
 	}
 
 	@Override
