@@ -84,11 +84,13 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -595,12 +597,31 @@ public class Utils
 			+ (groupParticipants.size() - 1) + " others";
 		}
 	}
-	
+
+	public static String getGroupJoinHighlightText(JSONArray participantInfoArray, GroupConversation conversation)
+	{
+		JSONObject participant = (JSONObject)participantInfoArray.opt(0);
+		String highlight = ((GroupConversation) conversation).getGroupParticipant(participant.optString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
+		
+		if(participantInfoArray.length() == 2)
+		{
+			JSONObject participant2 = (JSONObject)participantInfoArray.opt(1);
+			String name2 = ((GroupConversation) conversation).getGroupParticipant(participant2.optString(HikeConstants.MSISDN)).getContactInfo().getFirstName();
+
+			highlight += " and " + name2;
+		}
+		else if(participantInfoArray.length() > 2)
+		{
+			highlight += " and " + (participantInfoArray.length() - 1) + " others";
+		}
+		return highlight;
+	}
+
 	public static JSONObject getDeviceDetails(Context context)
 	{
 		try 
 		{
-			//{"t": "le", "d"{"tag":"cbs", "device_id": "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device": "FFF","_resolution": "GGG","_carrier": "HHH", "appversion" : "x.x.x"}}
+			//{"t": "le", "d"{"tag":"cbs", "device_id": "54330bc905bcf18a","_os": "DDD","_os_version": "EEE","_device": "FFF","_resolution": "GGG","_carrier": "HHH", "_app_version" : "x.x.x"}}
 			int height;
 			int width;
 			JSONObject object = new JSONObject();
@@ -721,10 +742,10 @@ public class Utils
 		}
 	}
 
-	public static CharSequence getFormattedParticipantInfo(String info)
+	public static CharSequence getFormattedParticipantInfo(String info, String textToHighight)
 	{
 		SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-		ssb.setSpan(new ForegroundColorSpan(0xff666666), 0, info.indexOf(" "), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ssb.setSpan(new ForegroundColorSpan(0xff666666), info.indexOf(textToHighight), info.indexOf(textToHighight) + textToHighight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		return ssb;
 	}
 
@@ -1079,6 +1100,11 @@ public class Utils
     			String imageOrientation = Utils.getImageOrientation(srcFilePath);
     			Bitmap tempBmp = Utils.scaleDownImage(srcFilePath, HikeConstants.MAX_DIMENSION_FULL_SIZE_PX, false);
     			tempBmp = Utils.rotateBitmap(tempBmp, Utils.getRotatedAngle(imageOrientation));
+    			//Temporary fix for when a user uploads a file through Picasa on ICS or higher.
+    			if(tempBmp == null)
+    			{
+    				return false;
+    			}
 				byte[] fileBytes = Utils.bitmapToBytes(tempBmp, Bitmap.CompressFormat.JPEG);
 				tempBmp.recycle();
 				src = new ByteArrayInputStream(fileBytes);
@@ -1184,7 +1210,12 @@ public class Utils
 			AccountUtils.BASE = "http://" + AccountUtils.HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
 		}
 		AccountUtils.FILE_TRANSFER_HOST = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST : AccountUtils.STAGING_HOST;
-		AccountUtils.FILE_TRANSFER_BASE = "http://" + AccountUtils.FILE_TRANSFER_HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
+		AccountUtils.FILE_TRANSFER_UPLOAD_BASE = "http://" + AccountUtils.FILE_TRANSFER_HOST + ":" + Integer.toString(AccountUtils.PORT) + "/v1";
+
+		CheckForUpdateTask.UPDATE_CHECK_URL = isProductionServer ? CheckForUpdateTask.PRODUCTION_URL : CheckForUpdateTask.STAGING_URL;
+
+		AccountUtils.FILE_TRANSFER_BASE_DOWNLOAD_URL = AccountUtils.BASE + AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
+		AccountUtils.FILE_TRANSFER_BASE_VIEW_URL = isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION : AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING;
     }
 
     public static boolean shouldChangeMessageState(ConvMessage convMessage, int stateOrdinal)

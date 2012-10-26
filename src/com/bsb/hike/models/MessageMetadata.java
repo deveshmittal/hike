@@ -33,13 +33,44 @@ public class MessageMetadata
 	private JSONArray dndNumbers;
 	private ParticipantInfoState participantInfoState = ParticipantInfoState.NO_INFO;
 	private List<HikeFile> hikeFileList;
+	private JSONArray gcjParticipantInfo;
+	private boolean newGroup;
+	private String msisdn;
+	private boolean showBIS;
+	private int credits;
 
-	public MessageMetadata(JSONObject metadata)
+	public MessageMetadata(JSONObject metadata) throws JSONException
 	{
+		this.participantInfoState = metadata.has(HikeConstants.DND_USERS) || metadata.has(HikeConstants.DND_NUMBERS) ? ParticipantInfoState.DND_USER : ParticipantInfoState.fromJSON(metadata);
+		switch (this.participantInfoState) 
+		{
+		case CHANGED_GROUP_NAME:
+			this.msisdn = metadata.getString(HikeConstants.FROM);
+			break;
+
+		case DND_USER:
+			this.dndNumbers = metadata.has(HikeConstants.DND_USERS) ? 
+					metadata.getJSONArray(HikeConstants.DND_USERS) : metadata.getJSONArray(HikeConstants.DND_NUMBERS);
+			break;
+
+		case PARTICIPANT_JOINED:
+			this.gcjParticipantInfo = metadata.getJSONArray(HikeConstants.DATA);
+			this.newGroup = metadata.optBoolean(HikeConstants.NEW_GROUP);
+			break;
+
+		case PARTICIPANT_LEFT:
+			this.msisdn = metadata.getString(HikeConstants.DATA);
+			this.showBIS = HikeConstants.MqttMessageTypes.BLOCK_INTERNATIONAL_SMS.equals(metadata.optString(HikeConstants.SUB_TYPE));
+			break;
+
+		case USER_JOIN:
+		case USER_OPT_IN:
+			this.msisdn = metadata.getJSONObject(HikeConstants.DATA).getString(HikeConstants.MSISDN);
+			this.credits = metadata.getJSONObject(HikeConstants.DATA).optInt(HikeConstants.CREDITS, -1);
+			break;
+		}
 		this.newUser = metadata.optString(HikeConstants.NEW_USER).equals("true");
 		this.dndMissedCallNumber = metadata.optString(HikeConstants.METADATA_DND);
-		this.dndNumbers = metadata.optJSONArray(HikeConstants.DND_NUMBERS);
-		this.participantInfoState = this.dndNumbers == null ? ParticipantInfoState.fromJSON(metadata) : ParticipantInfoState.DND_USER;
 		this.hikeFileList = getHikeFileListFromJSONArray(metadata.optJSONArray(HikeConstants.FILES));
 		this.json = metadata;
 	}
@@ -56,6 +87,26 @@ public class MessageMetadata
 			hikeFileList.add(new HikeFile(fileList.optJSONObject(i)));
 		}
 		return hikeFileList;
+	}
+
+	public JSONArray getGcjParticipantInfo() {
+		return gcjParticipantInfo;
+	}
+
+	public boolean isNewGroup() {
+		return newGroup;
+	}
+
+	public String getMsisdn() {
+		return msisdn;
+	}
+
+	public boolean isShowBIS() {
+		return showBIS;
+	}
+
+	public int getCredits() {
+		return credits;
 	}
 
 	public JSONArray getDndNumbers()

@@ -1,10 +1,12 @@
 package com.bsb.hike;
 
-import com.bsb.hike.utils.AccountUtils;
 
 public class HikeConstants
 {
 	public static final String APP_PUSH_ID = "768395314950";
+	public static final String APP_FACEBOOK_ID = "425850510764995";
+	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
+	public static final String APP_TWITTER_SECRET = "LhgJVQ9eAmbb3EGdXpLD8B4RHf9SGPrzSqaOjuKL5o4";
 
 	public static final String ANDROID = "android";
 
@@ -18,6 +20,7 @@ public class HikeConstants
 	public static final String DATA = "d";
 	public static final String TO = "to";
 	public static final String FROM = "f";
+	public static final String SUB_TYPE = "st";
 
 	public static final String HIKE_MESSAGE = "hm";
 	public static final String SMS_MESSAGE = "sm";
@@ -49,7 +52,6 @@ public class HikeConstants
 	public static final String ON_HIKE = "onhike";
 	public static final String DND = "dnd";
 	public static final String DND_USERS = "dndUsers";
-	public static final String NON_DND_USERS = "nonDndUsers";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -132,8 +134,6 @@ public class HikeConstants
 	public static final int VIDEO_TRANSFER_CODE = 1189;
 	public static final int AUDIO_TRANSFER_CODE = 1190;
 	public static final int RECORD_AUDIO_TRANSFER_CODE = 1191;
-	public static final String FILE_TRANSFER_BASE_URL = AccountUtils.BASE + "/user/ft/";
-	public static final String FILE_TRANSFER_BASE_URL_TO_SHOW = "http://hike.in/f/";
 	public static final int MAX_DURATION_RECORDING_SEC = 120;
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180; 
@@ -156,17 +156,35 @@ public class HikeConstants
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 10;
 
+	//Fiksu Currency
+	public static final String CURRENCY = "INR";
+
+	//Fiksu Usernames
+	public static final String FACEBOOK = "facebook";
+	public static final String TWITTER = "twitter";
+	public static final String INVITE = "invite";
+	public static final String FIRST_MESSAGE = "first_message";
+
 	//Fiksu Prices
 	public static final int FACEBOOK_CONNECT = 100;
 	public static final int TWITTER_CONNECT = 100;
 	public static final int INVITE_SENT = 50;
-	public static final int FIRST_MSG_IN_DAY = 2;
+	public static final int FIRST_MSG_IN_DAY = 10;
+
+	/*Maximum number of conversations to be made automatically when the user signs up*/
+	public static final int MAX_CONVERSATIONS = 6;
+
+	/*Constant used as a type to signify that this message was added locally by the client when the user signed up*/
+	public static final String INTRO_MESSAGE = "im";
 
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
 		public static final String ID = "id";
 		public static final String NAME = "name";
+		public static final String PREV_MSISDN = "prevMsisdn";
+		public static final String PREV_ID = "prevId";
+		public static final String PREV_NAME = "prevName";
 		public static final String INVITE = "invite";
 		public static final String MSG = "msg";
 		public static final String PREF = "pref";
@@ -234,6 +252,8 @@ public class HikeConstants
 		public static final String GOING_BACK_TO_HOME = "goingBackToHome";
 		public static final String UPDATE_URL = "updateURL";
 		public static final String UPDATE_TO_IGNORE = "updateToIgnore";
+		public static final String INTRO_MESSAGE_ADDED = "introMessageAdded";
+		public static final String TWITTER_VIEW_VISIBLE = "twitterViewVisible";
 	}
 
 	public static final class LogEvent

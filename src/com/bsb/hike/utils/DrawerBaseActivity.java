@@ -55,8 +55,8 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 			}
 		}
 
-		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
-		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+//		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
+//		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}

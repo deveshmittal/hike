@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
@@ -55,7 +56,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.MSISDNView;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener, FinishableEvent
+public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener, FinishableEvent, OnCancelListener
 {
 
 	private SignupTask mTask;
@@ -100,12 +101,9 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 	private final String defaultCountryCode = "IN +91";
 
-	/*Used for the call me request*/
-	private String msisdnEntered;
-
 	private ProgressDialog dialog;
 
-	private static HikeHTTPTask hikeHTTPTask;
+	private HikeHTTPTask hikeHTTPTask;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -122,9 +120,14 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
 		errorImage = (ImageView) findViewById(R.id.error_img);
 
-		if(hikeHTTPTask != null && !hikeHTTPTask.isFinished())
+		Object o = getLastNonConfigurationInstance();
+		if(o instanceof HikeHTTPTask)
 		{
+			hikeHTTPTask = (HikeHTTPTask) o;
+			hikeHTTPTask.setActivity(this);
 			dialog = ProgressDialog.show(this, null, getString(R.string.calling_you));
+			dialog.setCancelable(true);
+			dialog.setOnCancelListener(this);
 		}
 
 		if(savedInstanceState != null)
@@ -249,7 +252,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			JSONObject request = new JSONObject();
 			try 
 			{
-				request.put("msisdn", msisdnEntered);
+				request.put("msisdn", getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_ENTERED, null));
 			} 
 			catch (JSONException e) 
 			{
@@ -261,7 +264,19 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			hikeHTTPTask.execute(hikeHttpRequest);
 
 			dialog = ProgressDialog.show(this, null, getResources().getString(R.string.calling_you));
+			dialog.setCancelable(true);
+			dialog.setOnCancelListener(this);
 		}
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance() 
+	{
+		if(hikeHTTPTask != null && !hikeHTTPTask.isFinished())
+		{
+			return hikeHTTPTask;
+		}
+		return super.onRetainNonConfigurationInstance();
 	}
 
 	protected void onDestroy()
@@ -319,8 +334,6 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
 					editor.commit();
-
-					msisdnEntered = input;
 				}
 				mTask.addUserInput(input);
 			}
@@ -596,6 +609,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			{
 				infoTxt.setImageResource(R.drawable.wrong_pin);
 				loadingLayout.setVisibility(View.GONE);
+				callmeBtn.setVisibility(View.VISIBLE);
 				submitBtn.setVisibility(View.VISIBLE);
 				if (tapHereText != null) 
 				{
@@ -669,5 +683,16 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			submitClicked();
 		}
 		return true;
+	}
+
+	@Override
+	public void onCancel(DialogInterface dialog) 
+	{
+		Log.d(getClass().getSimpleName(), "Dialog cancelled");
+		if(hikeHTTPTask != null)
+		{
+			hikeHTTPTask.setActivity(null);
+			hikeHTTPTask = null;
+		}
 	}
 }

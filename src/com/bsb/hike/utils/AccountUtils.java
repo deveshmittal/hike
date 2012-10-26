@@ -36,6 +36,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -82,7 +83,17 @@ public class AccountUtils
 
 	public static String FILE_TRANSFER_HOST = PRODUCTION_FT_HOST;
 
-	public static String FILE_TRANSFER_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static String FILE_TRANSFER_UPLOAD_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+
+	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
+
+	public static String FILE_TRANSFER_BASE_DOWNLOAD_URL = BASE + FILE_TRANSFER_DOWNLOAD_BASE;
+
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "http://hike.in/f/";
+
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = "http://staging.im.hike.in/f/";
+
+	public static String FILE_TRANSFER_BASE_VIEW_URL = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
@@ -90,9 +101,16 @@ public class AccountUtils
 
 	private static String mToken = null;
 
+	private static String appVersion = null;
+
 	public static void setToken(String token)
 	{
 		mToken = token;
+	}
+
+	public static void setAppVersion(String version)
+	{
+		appVersion = version;
 	}
 
 	private static synchronized HttpClient getClient()
@@ -115,8 +133,7 @@ public class AccountUtils
 
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
 		mClient = new DefaultHttpClient(cm, params);
-
-		//mClient.
+		mClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + appVersion);
 		return mClient;
 	}
 
@@ -611,7 +628,7 @@ public class AccountUtils
 		FileInputStream fileInputStream = new FileInputStream(file);
 
 		URL url;
-		url = new URL(FILE_TRANSFER_BASE + hikeHttpRequest.getPath());
+		url = new URL(FILE_TRANSFER_UPLOAD_BASE + hikeHttpRequest.getPath());
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -697,6 +714,18 @@ public class AccountUtils
 			throw new NetworkErrorException("Unable to perform request");
 		}
 		return response;
+	}
+
+	public static void deleteSocialCredentials(boolean facebook) throws NetworkErrorException
+	{
+		String url = facebook ? "/account/connect/fb" : "/account/connect/twitter";
+		HttpDelete delete = new HttpDelete(BASE + url);
+		addToken(delete);
+		JSONObject obj = executeRequest(delete);
+		if ((obj == null) || "fail".equals(obj.optString("stat")))
+		{
+			throw new NetworkErrorException("Could not delete account");
+		}
 	}
 
 	public static String getServerUrl()

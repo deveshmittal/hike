@@ -3,7 +3,6 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -15,13 +14,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
@@ -101,46 +99,51 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 				}
 				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null && ChatThread.fileTransferTaskMap.containsKey(message.getMsgID()) ? View.GONE : View.VISIBLE);
 			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED)
+			{
+				JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
+
+				String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
+
+				if(metadata.isNewGroup())
+				{
+					markedUp = String.format(context.getString(R.string.new_group_message), highlight);
+				}
+				else
+				{
+					markedUp = String.format(context.getString(R.string.add_to_group_message), highlight);
+				}
+			}
 			else if (message.getParticipantInfoState() == ParticipantInfoState.DND_USER)
 			{
-				try 
+				JSONArray dndNumbers = metadata.getDndNumbers();
+				if(dndNumbers != null && dndNumbers.length() > 0)
 				{
-					JSONArray dndNumbers = conversation instanceof GroupConversation ? message.getMetadata().getJSON().optJSONArray(HikeConstants.DND_USERS) : message.getMetadata().getDndNumbers();
-					if(dndNumbers != null && dndNumbers.length() > 0)
+					StringBuilder dndNames = new StringBuilder(); 
+					for(int i=0; i<dndNumbers.length(); i++)
 					{
-						StringBuilder dndNames = new StringBuilder(); 
-						for(int i=0; i<dndNumbers.length(); i++)
-						{
-							String dndName;
-							dndName = conversation instanceof GroupConversation ? 
-									((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
-									if(i < dndNumbers.length() - 2)
-									{
-										dndNames.append(dndName + ", ");
-									}
-									else if(i < dndNumbers.length() - 1)
-									{
-										dndNames.append(dndName + " and ");
-									}
-									else
-									{
-										dndNames.append(dndName);
-									}
-						}
-						markedUp = String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString());
+						String dndName;
+						dndName = conversation instanceof GroupConversation ? 
+								((GroupConversation)conversation).getGroupParticipant(dndNumbers.optString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
+								if(i < dndNumbers.length() - 2)
+								{
+									dndNames.append(dndName + ", ");
+								}
+								else if(i < dndNumbers.length() - 1)
+								{
+									dndNames.append(dndName + " and ");
+								}
+								else
+								{
+									dndNames.append(dndName);
+								}
 					}
-					else
-					{
-						// This scenario will only happen in case of group chats and when there is no one on DND
-						JSONArray nonDndNumbers = message.getMetadata().getJSON().optJSONArray(HikeConstants.NON_DND_USERS);
-						markedUp = nonDndNumbers != null && nonDndNumbers.length() > 0 ? 
-								String.format(context.getString(R.string.joined_conversation), ((GroupConversation)conversation).getGroupParticipant(nonDndNumbers.getString(nonDndNumbers.length() - 1)).getContactInfo().getFirstName()) : "";
-					}
-				} 
-				catch (JSONException e) 
-				{
-					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+					markedUp = String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames.toString());
 				}
+			}
+			else if (message.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE)
+			{
+				markedUp = String.format(context.getString(conversation.isOnhike() ? R.string.intro_hike_thread : R.string.intro_sms_thread), Utils.getFirstName(conversation.getLabel()));
 			}
 			else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 			{

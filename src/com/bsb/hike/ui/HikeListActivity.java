@@ -10,6 +10,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -17,6 +18,7 @@ import com.bsb.hike.adapters.HikeArrayAdapter;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.Utils;
+import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class HikeListActivity extends Activity
 {
@@ -66,13 +68,15 @@ public class HikeListActivity extends Activity
 			{
 				ContactInfo contactInfo = (ContactInfo) adapter.getItem(checkedItems.keyAt(i));
 				Log.d(getClass().getSimpleName(), "Inviting " + contactInfo.toString());
+				FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE, HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
 				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.makeHike2SMSInviteMessage(contactInfo.getMsisdn(), this).serialize());
 				noItemsChecked = false;
 			}
 		}
-		if(noItemsChecked)
+		Toast.makeText(getApplicationContext(), noItemsChecked ? "Select the contacts you want to invite" : "Invites sent", Toast.LENGTH_SHORT).show();
+		if(!noItemsChecked)
 		{
-			Toast.makeText(getApplicationContext(), "Select the contacts you want to invite", Toast.LENGTH_SHORT).show();
+			finish();
 		}
 	}
 }

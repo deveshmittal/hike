@@ -112,6 +112,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -353,7 +354,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
-		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(-1, -1, false);
+		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(-1, -1, false, false);
 		if(isForwardingMessage || isSharingFile)
 		{
 			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());
@@ -448,7 +449,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
 		currentEmoticonCategorySelected = findViewById(savedInstanceState!= null ? 
-				savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY, R.id.emoji_btn) : R.id.emoji_btn);
+				savedInstanceState.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY, R.id.hike_emoticons_btn) : R.id.hike_emoticons_btn);
 		currentEmoticonCategorySelected.setSelected(true);
 
 		/* register for long-press's */
@@ -525,15 +526,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (emoticonLayout == null || emoticonLayout.getVisibility() != View.VISIBLE) 
 		{
 			Intent intent = null;
-			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)) 
+			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT) && !getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE)) 
 			{
 				intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			}
-			
+			else if(getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE))
+			{
+				finish();
+				intent = new Intent(this, ChatThread.class);
+				intent.putExtra(HikeConstants.Extras.NAME, getIntent().getStringExtra(HikeConstants.Extras.PREV_NAME));
+				intent.putExtra(HikeConstants.Extras.ID, getIntent().getStringExtra(HikeConstants.Extras.PREV_ID));
+				intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN));
+				startActivity(intent);
+			}
+
 			/* slide down if we're still selecting a user, otherwise slide back */
-			if (mConversation == null && !getIntent().hasExtra(HikeConstants.Extras.GROUP_CHAT)) {
+			if (mConversation == null && !getIntent().hasExtra(HikeConstants.Extras.GROUP_CHAT) && !getIntent().hasExtra(HikeConstants.Extras.FORWARD_MESSAGE)) {
 				overridePendingTransition(R.anim.no_animation,
 						R.anim.slide_down_noalpha);
 			} else {
@@ -582,7 +592,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			if(message.isFileTransferMessage())
 			{
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				clipboard.setText(HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey());
+				clipboard.setText(AccountUtils.FILE_TRANSFER_BASE_VIEW_URL + hikeFile.getFileKey());
 			}
 			else
 			{
@@ -606,6 +616,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				msg = message.getMessage();
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
 			}
+			intent.putExtra(HikeConstants.Extras.PREV_ID, mContactId);
+			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
+			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 			startActivity(intent);
 			return true;
 		case R.id.delete:
@@ -635,7 +648,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return true;
 		case R.id.share:
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-			Utils.startShareIntent(ChatThread.this, HikeConstants.FILE_TRANSFER_BASE_URL_TO_SHOW + hikeFile.getFileKey());
+			Utils.startShareIntent(ChatThread.this, getString(R.string.share_file_message, AccountUtils.FILE_TRANSFER_BASE_VIEW_URL + hikeFile.getFileKey()));
 			return true;
 		default:
 			return super.onContextItemSelected(item);
@@ -813,7 +826,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			shareItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
 
 			MenuItem forwardItem = menu.findItem(R.id.forward);
-			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
+			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()) && hikeFile.wasFileDownloaded());
 
 			MenuItem copyItem = menu.findItem(R.id.copy);
 			copyItem.setVisible(false);
@@ -974,6 +987,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				mComposeView.setSelection(message.length());
 				SmileyParser.getInstance().addSmileyToEditable(mComposeView.getText());
 			}
+			intent.removeExtra(HikeConstants.Extras.FORWARD_MESSAGE);
 		}
 		else
 		{
@@ -1513,7 +1527,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			ConvMessage adapterMessage = findMessageById(convMessage.getMsgID());
 			if (adapterMessage != null) 
 			{
-				adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
+				try 
+				{
+					adapterMessage.setMetadata(convMessage.getMetadata().getJSON());
+				} 
+				catch (JSONException e) 
+				{
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
 			}
 			runOnUiThread(mUpdateAdapter);
 		}
@@ -1833,7 +1854,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 						HikeConstants.LogEvent.CHAT_INVITE_TOP_BUTTON);
 				inviteUser();
 				// Tracking the invite event for fiksu
-				FiksuTrackingManager.uploadPurchaseEvent(this, "", HikeConstants.INVITE_SENT, "Rs");
+				FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE, HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
 			}
 			else
 			{

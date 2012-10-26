@@ -133,7 +133,6 @@ public class DbConversationListener implements Listener
 
 			JSONObject dndJSON = new JSONObject();
 			JSONArray dndParticipants = new JSONArray();
-			JSONArray nonDndParticipants = new JSONArray();
 
 			for(Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants.entrySet())
 			{
@@ -143,18 +142,18 @@ public class DbConversationListener implements Listener
 				{
 					dndParticipants.put(msisdn);
 				}
-				else
-				{
-					nonDndParticipants.put(msisdn);
-				}
 			}
 
+			if(dndParticipants.length() == 0)
+			{
+				// No DND participants. Just return
+				return;
+			}
 			try 
 			{
 				dndJSON.put(HikeConstants.FROM, groupId);
 				dndJSON.put(HikeConstants.TYPE, HikeConstants.DND);
 				dndJSON.put(HikeConstants.DND_USERS, dndParticipants);
-				dndJSON.put(HikeConstants.NON_DND_USERS, nonDndParticipants);
 
 				ConvMessage convMessage = new ConvMessage(dndJSON, null, context, false);
 				mConversationDb.addConversationMessages(convMessage);
@@ -177,7 +176,7 @@ public class DbConversationListener implements Listener
 		int today = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
 		if(today != dayRecorded)
 		{
-			FiksuTrackingManager.uploadPurchaseEvent(context, "", HikeConstants.FIRST_MSG_IN_DAY, "Rs");
+			FiksuTrackingManager.uploadPurchaseEvent(context, HikeConstants.FIRST_MESSAGE, HikeConstants.FIRST_MSG_IN_DAY, HikeConstants.CURRENCY);
 			dayRecorded = today;
 			Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 			editor.putInt(HikeMessengerApp.DAY_RECORDED, dayRecorded);

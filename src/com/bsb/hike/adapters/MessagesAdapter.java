@@ -3,8 +3,6 @@ package com.bsb.hike.adapters;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -14,7 +12,6 @@ import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +31,6 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
-import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
@@ -239,240 +235,203 @@ public class MessagesAdapter extends BaseAdapter
 		if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO)
 		{
 			((ViewGroup)holder.participantInfoContainer).removeAllViews();
-			try 
+			int positiveMargin = (int) (8 * Utils.densityMultiplier);
+			int left = 0;
+			int top = 0;
+			int right = 0;
+			int bottom = positiveMargin;
+
+			MessageMetadata metadata = convMessage.getMetadata();
+			if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
 			{
-				int positiveMargin = (int) (8 * Utils.densityMultiplier);
-				int left = 0;
-				int top = 0;
-				int right = 0;
-				int bottom = positiveMargin;
+				JSONArray participantInfoArray = metadata.getGcjParticipantInfo();
 
-				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) 
+				TextView participantInfo = (TextView) inflater.inflate(
+						R.layout.participant_info, null);
+
+				String message;
+				String highlight = Utils.getGroupJoinHighlightText(participantInfoArray, (GroupConversation) conversation);
+
+				if(metadata.isNewGroup())
 				{
-					JSONObject gcjPacket = new JSONObject(convMessage.getMetadata().serialize());
-					JSONArray participantInfoArray = gcjPacket.getJSONArray(HikeConstants.DATA);
-
-					if(!gcjPacket.optBoolean(HikeConstants.NEW_GROUP))
-					{
-						for (int i = 0; i < participantInfoArray.length(); i++) 
-						{
-							JSONObject nameMsisdn = participantInfoArray.getJSONObject(i);
-							Log.d(getClass().getSimpleName(), "Joined: " + participantInfoArray.getString(i));
-
-							TextView participantInfo = (TextView) inflater.inflate(
-									R.layout.participant_info, null);
-
-							LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-
-							GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
-
-							String participantName = participant.getContactInfo().getFirstName();
-							String baseMessage = context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc);
-
-							setTextAndIconForSystemMessages(
-									participantInfo, 
-									Utils.getFormattedParticipantInfo(String.format(baseMessage, participantName)), 
-									participant.getContactInfo().isOnhike() ? 
-											R.drawable.ic_hike_user : R.drawable.ic_sms_user
-									);
-							if (i != participantInfoArray.length() - 1) 
-							{
-								lp.setMargins(left, top, right, bottom);
-							}
-							else
-							{
-								lp.setMargins(left, top, right, 0);
-							}
-							participantInfo.setLayoutParams(lp);
-
-							((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
-						}
-					}
-					else
-					{
-						TextView participantInfo = (TextView) inflater.inflate(
-								R.layout.participant_info, null);
-
-						int count = participantInfoArray.length();
-						String message = String.format(context.getString(R.string.new_group_message), count);
-
-						SpannableStringBuilder ssb = new SpannableStringBuilder(message);
-						ssb.setSpan(new ForegroundColorSpan(0xff666666), message.indexOf(""+count), message.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-						setTextAndIconForSystemMessages(participantInfo, ssb, R.drawable.ic_hike_user);
-
-						((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
-					}
-				} 
-				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT || convMessage.getParticipantInfoState() == ParticipantInfoState.GROUP_END)
-				{
-					TextView participantInfo = (TextView) inflater.inflate(R.layout.participant_info, null);
-
-					CharSequence message;
-					if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
-					{
-						String participantMsisdn = new JSONObject(convMessage.getMetadata().serialize()).optString(HikeConstants.DATA);
-						message = Utils.getFormattedParticipantInfo(
-										String.format(
-												context.getString(R.string.left_conversation), 
-												((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName()));
-					}
-					else
-					{
-						message = context.getString(R.string.group_chat_end);
-					}
-					setTextAndIconForSystemMessages(participantInfo, message, R.drawable.ic_left_chat);
-
-					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-					lp.setMargins(left, top, right, 0);
-					participantInfo.setLayoutParams(lp);
-
-					((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
-				}
-				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMessage.getParticipantInfoState() == ParticipantInfoState.USER_OPT_IN)
-				{
-					if(TextUtils.isEmpty(convMessage.getMessage()))
-					{
-						convMessage.setMessage(String.format(context.getString(R.string.joined_hike), Utils.getFirstName(conversation.getLabel())));
-					}
-					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-					setTextAndIconForSystemMessages(
-														mainMessage, 
-														convMessage.getMessage(), 
-														convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? 
-																R.drawable.ic_hike_user : R.drawable.ic_opt_in
-													);
-
-					TextView creditsMessage = null;
-					if(convMessage.getMetadata().getJSON().getJSONObject(HikeConstants.DATA).has(HikeConstants.CREDITS))
-					{
-						creditsMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-						int credits = convMessage.getMetadata().getJSON().optJSONObject(HikeConstants.DATA).optInt(HikeConstants.CREDITS);
-						setTextAndIconForSystemMessages(creditsMessage, String.format(context.getString(R.string.earned_credits), credits), R.drawable.ic_got_credits);
-
-						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-						lp.setMargins(left, top, right, 0);
-						creditsMessage.setLayoutParams(lp);
-					}
-					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-					lp.setMargins(left, top, right, creditsMessage != null ? bottom : 0);
-					mainMessage.setLayoutParams(lp);
-					
-					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
-					if(creditsMessage != null)
-					{
-						((ViewGroup) holder.participantInfoContainer).addView(creditsMessage);
-					}
-				}
-				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
-				{
-					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-					setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(convMessage.getMessage()), R.drawable.ic_group_info);
-
-					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
-				}
-				else if(convMessage.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
-				{
-					String info = convMessage.getMessage();
-					String textToHighlight = context.getString(R.string.block_internation_sms_bold_text);
-
-					SpannableStringBuilder ssb = new SpannableStringBuilder(info);
-					ssb.setSpan(new ForegroundColorSpan(0xff666666), info.indexOf(textToHighlight), info.indexOf(textToHighlight) + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-					TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-					setTextAndIconForSystemMessages(mainMessage, ssb, R.drawable.ic_no_int_sms);
-
-					((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+					message = String.format(context.getString(R.string.new_group_message), highlight);
 				}
 				else
 				{
-					MessageMetadata metadata = convMessage.getMetadata();
-					JSONArray dndNumbers = conversation instanceof GroupConversation ? metadata.getJSON().optJSONArray(HikeConstants.DND_USERS) : convMessage.getMetadata().getDndNumbers();
+					message = String.format(context.getString(R.string.add_to_group_message), highlight);
+				}
+
+				setTextAndIconForSystemMessages(participantInfo, Utils.getFormattedParticipantInfo(message, highlight), R.drawable.ic_hike_user);
+
+				((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+			} 
+			else if(convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT || convMessage.getParticipantInfoState() == ParticipantInfoState.GROUP_END)
+			{
+				TextView participantInfo = (TextView) inflater.inflate(R.layout.participant_info, null);
+
+				CharSequence message;
+				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) 
+				{
+					// Showing the block internation sms message if the user was booted because of that reason
+					if(metadata.isShowBIS())
+					{
+						String info = context.getString(R.string.block_internation_sms);
+						String textToHighlight = context.getString(R.string.block_internation_sms_bold_text);
+
+						TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+						setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(info, textToHighlight), R.drawable.ic_no_int_sms);
+
+						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+						lp.setMargins(left, top, right, bottom);
+						mainMessage.setLayoutParams(lp);
+
+						((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+					}
+					String participantMsisdn = metadata.getMsisdn();
+					String name = ((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName();
+					message = Utils.getFormattedParticipantInfo(String.format(context.getString(R.string.left_conversation), name), name);
+				}
+				else
+				{
+					message = context.getString(R.string.group_chat_end);
+				}
+				setTextAndIconForSystemMessages(participantInfo, message, R.drawable.ic_left_chat);
+
+				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+				lp.setMargins(left, top, right, 0);
+				participantInfo.setLayoutParams(lp);
+
+				((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
+			}
+			else if(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMessage.getParticipantInfoState() == ParticipantInfoState.USER_OPT_IN)
+			{
+				String name;
+				if(conversation instanceof GroupConversation)
+				{
+					String participantMsisdn = metadata.getMsisdn();
+					name = ((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName();
+				}
+				else
+				{
+					name = Utils.getFirstName(conversation.getLabel());
+				}
+				String message = String.format(context.getString(R.string.joined_hike), name);
+
+				TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+				setTextAndIconForSystemMessages(
+						mainMessage, 
+						Utils.getFormattedParticipantInfo(message, name), 
+						convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? 
+								R.drawable.ic_hike_user : R.drawable.ic_opt_in
+						);
+
+				TextView creditsMessageView = null;
+				if(metadata.getCredits() != -1)
+				{
+					int credits = metadata.getCredits();
+					String creditsMessage = String.format(context.getString(R.string.earned_credits, credits));
+					String highlight = String.format(context.getString(R.string.earned_credits_highlight, credits));
+
+					creditsMessageView = (TextView) inflater.inflate(R.layout.participant_info, null);
+					setTextAndIconForSystemMessages(creditsMessageView, Utils.getFormattedParticipantInfo(creditsMessage, highlight), R.drawable.ic_got_credits);
+
+					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+					lp.setMargins(left, top, right, 0);
+					creditsMessageView.setLayoutParams(lp);
+				}
+				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+				lp.setMargins(left, top, right, creditsMessageView != null ? bottom : 0);
+				mainMessage.setLayoutParams(lp);
+
+				((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+				if(creditsMessageView != null)
+				{
+					((ViewGroup) holder.participantInfoContainer).addView(creditsMessageView);
+				}
+			}
+			else if(convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+			{
+				String participantName = ((GroupConversation)conversation).getGroupParticipant(metadata.getMsisdn()).getContactInfo().getFirstName();
+				String message = String.format(context.getString(R.string.change_group_name), participantName);
+
+				TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(message, participantName), R.drawable.ic_group_info);
+
+				((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+			}
+			else if(convMessage.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS)
+			{
+				String info = convMessage.getMessage();
+				String textToHighlight = context.getString(R.string.block_internation_sms_bold_text);
+
+				TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+				setTextAndIconForSystemMessages(mainMessage, Utils.getFormattedParticipantInfo(info, textToHighlight), R.drawable.ic_no_int_sms);
+
+				((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+			}
+			else if(convMessage.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE)
+			{
+				String name = Utils.getFirstName(conversation.getLabel());
+				String message = context.getString(conversation.isOnhike() ? R.string.intro_hike_thread : R.string.intro_sms_thread, name);
+
+				TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+				setTextAndIconForSystemMessages(
+						mainMessage, 
+						Utils.getFormattedParticipantInfo(message, name), 
+						conversation.isOnhike() ? R.drawable.ic_hike_user : R.drawable.ic_sms_user);
+
+				((ViewGroup) holder.participantInfoContainer).addView(mainMessage);
+			}
+			else
+			{
+				JSONArray dndNumbers = metadata.getDndNumbers();
+
+				TextView dndMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
+
+				if(dndNumbers != null && dndNumbers.length()>0)
+				{
+					StringBuilder dndNamesSB = new StringBuilder(); 
+					for(int i=0; i<dndNumbers.length(); i++)
+					{
+						String name = conversation instanceof GroupConversation ? 
+								((GroupConversation)conversation).getGroupParticipant(dndNumbers.optString(i)).getContactInfo().getFirstName() : 
+									Utils.getFirstName(conversation.getLabel());
+								if(i < dndNumbers.length() - 2)
+								{
+									dndNamesSB.append(name + ", ");
+								}
+								else if(i < dndNumbers.length() - 1)
+								{
+									dndNamesSB.append(name + " and ");
+								}
+								else
+								{
+									dndNamesSB.append(name);
+								}
+					}
+					String dndNames = dndNamesSB.toString();
+					convMessage.setMessage(String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames));
+
+					SpannableStringBuilder ssb;
 					if(conversation instanceof GroupConversation)
 					{
-						JSONArray nonDndNumbers = metadata.getJSON().optJSONArray(HikeConstants.NON_DND_USERS);
-						if(nonDndNumbers != null && nonDndNumbers.length()>0)
-						{
-							for(int i = 0; i<nonDndNumbers.length(); i++)
-							{
-								TextView participantInfo = (TextView) inflater.inflate(
-										R.layout.participant_info, null);
-
-								GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nonDndNumbers.getString(i));
-								String participantName = participant.getContactInfo().getFirstName();
-
-								setTextAndIconForSystemMessages(
-																participantInfo, 
-																Utils.getFormattedParticipantInfo(
-																		String.format(context.getString(R.string.joined_conversation), participantName)), 
-																R.drawable.ic_opt_in);
-
-								LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-								if(i != nonDndNumbers.length() - 1)
-								{
-									lp.setMargins(left, top, right, bottom);
-								}
-								else if(dndNumbers == null || dndNumbers.length()==0)
-								{
-									lp.setMargins(left, top, right, 0);
-								}
-								participantInfo.setLayoutParams(lp);
-
-								((ViewGroup) holder.participantInfoContainer).addView(participantInfo);
-							}
-						}
-						
+						ssb = new SpannableStringBuilder(convMessage.getMessage());
+						ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().indexOf(dndNames), convMessage.getMessage().indexOf(dndNames) + dndNames.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					}
-					TextView dndMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
-
-					if(dndNumbers != null && dndNumbers.length()>0)
+					else
 					{
-						StringBuilder dndNamesSB = new StringBuilder(); 
-						for(int i=0; i<dndNumbers.length(); i++)
-						{
-							String name = conversation instanceof GroupConversation ? 
-									((GroupConversation)conversation).getGroupParticipant(dndNumbers.getString(i)).getContactInfo().getFirstName() : Utils.getFirstName(conversation.getLabel());
-									if(i < dndNumbers.length() - 2)
-									{
-										dndNamesSB.append(name + ", ");
-									}
-									else if(i < dndNumbers.length() - 1)
-									{
-										dndNamesSB.append(name + " and ");
-									}
-									else
-									{
-										dndNamesSB.append(name);
-									}
-						}
-						String dndNames = dndNamesSB.toString();
-						convMessage.setMessage(String.format(context.getString(conversation instanceof GroupConversation ? R.string.dnd_msg_gc : R.string.dnd_one_to_one), dndNames));
-
-						SpannableStringBuilder ssb;
-						if(conversation instanceof GroupConversation)
-						{
-							ssb = new SpannableStringBuilder(convMessage.getMessage());
-							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().indexOf(dndNames), convMessage.getMessage().indexOf(dndNames) + dndNames.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						}
-						else
-						{
-							ssb = new SpannableStringBuilder(convMessage.getMessage());
-							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().indexOf(dndNames), convMessage.getMessage().indexOf(dndNames) + dndNames.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-							ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().lastIndexOf(dndNames), convMessage.getMessage().lastIndexOf(dndNames) + dndNames.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						}
-
-						setTextAndIconForSystemMessages(dndMessage, ssb, R.drawable.ic_waiting_dnd);
-						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-						lp.setMargins(left, top, right, 0);
-						dndMessage.setLayoutParams(lp);
-
-						((ViewGroup) holder.participantInfoContainer).addView(dndMessage);
+						ssb = new SpannableStringBuilder(convMessage.getMessage());
+						ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().indexOf(dndNames), convMessage.getMessage().indexOf(dndNames) + dndNames.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+						ssb.setSpan(new ForegroundColorSpan(0xff666666), convMessage.getMessage().lastIndexOf(dndNames), convMessage.getMessage().lastIndexOf(dndNames) + dndNames.length() + 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					}
+
+					setTextAndIconForSystemMessages(dndMessage, ssb, R.drawable.ic_waiting_dnd);
+					LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+					lp.setMargins(left, top, right, 0);
+					dndMessage.setLayoutParams(lp);
+
+					((ViewGroup) holder.participantInfoContainer).addView(dndMessage);
 				}
-			} 
-			catch (JSONException e) 
-			{
-				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 			return v;
 		}

@@ -8,12 +8,6 @@
     android:paddingRight="10dp"
     android:paddingTop="10dp" >
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical" >
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -21,159 +15,150 @@
             android:gravity="center_horizontal"
             android:orientation="vertical" >
 
+            <ImageView
+                android:id="@+id/heading"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:scaleType="fitEnd"
+                android:src="@drawable/hike_to_hike_txt"
+                android:visibility="visible" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/info"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="0.8"
+                android:gravity="center_horizontal|top"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingTop="5dp"
+                android:text="@string/hike_to_hike_free_always"
+                android:textColor="@color/lightblack"
+                android:textSize="16sp"
+                android:textStyle="bold|italic" />
+
             <LinearLayout
+                android:id="@+id/rewards_info"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="4"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone" >
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/money_amt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="5dp"
+                    android:drawableTop="@drawable/ic_money_small"
+                    android:gravity="center_horizontal"
+                    android:text="@string/credit_to_balance"
+                    android:textColor="@color/black"
+                    android:textSize="13sp" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:src="@drawable/ic_rewards_plus" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="5dp"
+                    android:drawableTop="@drawable/ic_rewards_credits"
+                    android:gravity="center"
+                    android:text="@string/free_sms_month"
+                    android:textColor="@color/black"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/img_layout"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3.5"
                 android:gravity="center"
                 android:orientation="vertical" >
 
                 <ImageView
-                    android:id="@+id/heading"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_gravity="center"
-                    android:scaleType="fitEnd"
-                    android:layout_weight="1"
-                    android:src="@drawable/hike_to_hike_txt"
-                    android:visibility="visible" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/info"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.8"
-                    android:gravity="center_horizontal|top"
-                    android:paddingTop="5dp"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:text="@string/hike_to_hike_free_always"
-                    android:textColor="@color/lightblack"
-                    android:textStyle="bold"
-                    android:textSize="17sp" />
-                
-                <LinearLayout
-                    android:id="@+id/rewards_info"
+                    android:id="@+id/img"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="2"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:visibility="gone" >
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/money_amt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:drawablePadding="5dp"
-                        android:drawableTop="@drawable/ic_money_small"
-                        android:gravity="center_horizontal"
-                        android:text="@string/credit_to_balance"
-                        android:textColor="@color/black"
-                        android:textSize="13sp" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="20dp"
-                        android:src="@drawable/ic_rewards_plus" />
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:drawablePadding="5dp"
-                        android:drawableTop="@drawable/ic_rewards_credits"
-                        android:gravity="center"
-                        android:text="@string/free_sms_month"
-                        android:textColor="@color/black"
-                        android:textSize="13sp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/img_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="3.5"
-                    android:gravity="center"
-                    android:orientation="vertical" >
-
-                    <ImageView
-                        android:id="@+id/img"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:scaleType="fitCenter"
-                        android:layout_marginTop="5dp"
-                        android:src="@drawable/rewards_img" />
-                </LinearLayout>
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/help_info"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal|bottom"
-                    android:paddingTop="5dp"
-                    android:text="@string/help_info"
-                    android:textColor="@color/black"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:visibility="gone" />
-                
-                <LinearLayout
-                    android:id="@+id/help_button_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1.5"
-                    android:gravity="center_horizontal|top"
-                  	android:layout_marginTop="8dp"
-                    android:orientation="horizontal"
-                    android:visibility="gone" >
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="36dp"
-                        android:layout_marginLeft="20dp"
-                        android:layout_marginRight="20dp"
-                        android:background="@drawable/btn_help"
-                        android:orientation="horizontal" >
-
-                        <ImageButton
-                            android:id="@+id/btn_contact"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:background="@null"
-                            android:src="@drawable/txt_contact" />
-
-                        <View
-                            android:layout_width="1dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/ic_button_divider" />
-
-                        <ImageButton
-                            android:id="@+id/btn_faq"
-                            android:layout_width="0dp"
-                            android:layout_height="36dp"
-                            android:layout_weight="1"
-                            android:background="@null"
-                            android:src="@drawable/txt_faqs" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/india_only"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.5"
-                    android:gravity="center"
-                    android:padding="5dp"
-                    android:text=""
-                    android:textColor="@color/timestampcolor"
-                    android:textSize="12sp"
-                    android:visibility="visible" />
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="5dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/rewards_img" />
             </LinearLayout>
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/help_info"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_horizontal|bottom"
+                android:paddingTop="5dp"
+                android:text="@string/help_info"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                android:textStyle="bold|italic"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/help_button_container"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_weight="1.5"
+                android:gravity="center_horizontal|top"
+                android:orientation="horizontal"
+                android:visibility="gone" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:background="@drawable/btn_help"
+                    android:orientation="horizontal" >
+
+                    <ImageButton
+                        android:id="@+id/btn_contact"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:src="@drawable/txt_contact" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/ic_button_divider" />
+
+                    <ImageButton
+                        android:id="@+id/btn_faq"
+                        android:layout_width="0dp"
+                        android:layout_height="36dp"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:src="@drawable/txt_faqs" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/india_only"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:padding="5dp"
+                android:text=""
+                android:textColor="@color/timestampcolor"
+                android:textSize="12sp"
+                android:visibility="visible" />
         </LinearLayout>
-    </LinearLayout>
 
 </LinearLayout>
