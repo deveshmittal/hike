@@ -364,6 +364,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	private List<ContactInfo> extractContactInfo(Cursor c)
 	{
+		return extractContactInfo(c, false);
+	}
+
+	private List<ContactInfo> extractContactInfo(Cursor c, boolean distinct)
+	{
 		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>(c.getCount());
 		int idx = c.getColumnIndex(DBConstants.ID);
 		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
@@ -373,8 +378,24 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
 		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
 		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+
+		Set<String> msisdnSet = null;
+		
+		if(distinct)
+		{
+			msisdnSet = new HashSet<String>();
+		}
 		while (c.moveToNext())
 		{
+			String msisdn = c.getString(msisdnIdx);
+			if(distinct && msisdnSet.contains(msisdn))
+			{
+				continue;
+			}
+			else if(distinct)
+			{
+				msisdnSet.add(msisdn);
+			}
 			ContactInfo contactInfo = new ContactInfo(
 					c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getString(phoneNumIdx),
 					c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx), c.getInt(hasCustomPhotoIdx)==1);
@@ -446,7 +467,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	 * @param favorite Whether we only need the favorite contacts or non favorite. -1 if we want to ignore this
 	 * @return
 	 */
-	public List<ContactInfo> getContactsOrderedByLastMessaged(int limit, int favorite, boolean onHikeOnly)
+	public List<ContactInfo> getContactsOrderedByLastMessaged(int limit, int favorite, boolean onHikeOnly, boolean distinct)
 	{
 		String selection = DBConstants.MSISDN + " != 'null'"
 							+ (favorite != -1 ? " AND " + DBConstants.FAVORITE + "=" + favorite : "")
@@ -467,7 +488,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				DBConstants.HAS_CUSTOM_PHOTO
 				};
 		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection, null, null, null, orderBy);
-		List<ContactInfo> contactInfos = extractContactInfo(c);
+		List<ContactInfo> contactInfos = extractContactInfo(c, distinct);
 		c.close();
 		if (contactInfos.isEmpty())
 		{
@@ -730,7 +751,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		try
 		{
 			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection, null, null, null, null);
-			return extractContactInfo(c);
+			return extractContactInfo(c, true);
 		}
 		finally
 		{

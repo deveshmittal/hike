@@ -354,7 +354,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
-		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(-1, -1, false);
+		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(-1, -1, false, false);
 		if(isForwardingMessage || isSharingFile)
 		{
 			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());

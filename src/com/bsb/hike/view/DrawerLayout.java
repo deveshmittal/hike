@@ -180,8 +180,8 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 
 		List<ContactInfo> completeList = new ArrayList<ContactInfo>();
 
-		List<ContactInfo> favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1, 1, false);
-		List<ContactInfo> recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(HikeConstants.RECENT_COUNT_IN_FAVORITE, 0, true);
+		List<ContactInfo> favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1, 1, false, true);
+		List<ContactInfo> recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(HikeConstants.RECENT_COUNT_IN_FAVORITE, 0, true, true);
 	
 		//Contact for "Favorite Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.FAVORITES_SECTION_ID, null, HikeConstants.FAVORITES, null));
