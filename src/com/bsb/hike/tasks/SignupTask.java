@@ -199,6 +199,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean> 
 					publishProgress(new StateValue(State.ERROR, null));
 					return Boolean.FALSE;
 				}
+
+				/*
+				 * Saving this for the call me functionality
+				 */
+				Editor editor = settings.edit();
+				editor.putString(HikeMessengerApp.MSISDN_ENTERED, unauthedMSISDN);
+				editor.commit();
+
 				synchronized(this)
 				{
 					/* wait until we get an SMS from the server */

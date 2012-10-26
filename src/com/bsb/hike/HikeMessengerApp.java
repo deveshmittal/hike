@@ -141,6 +141,8 @@ public class HikeMessengerApp extends Application
 	public static final String TWITTER_TOKEN_SECRET = "twitterTokenSecret";
 	public static final String TWITTER_AUTH_COMPLETE = "twitterAuthComplete";
 
+	public static final String MSISDN_ENTERED = "msisdnEntered";
+
 	private static Facebook facebook;
 
 	private static HikePubSub mPubSubInstance;

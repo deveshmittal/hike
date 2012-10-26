@@ -101,9 +101,6 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 	private final String defaultCountryCode = "IN +91";
 
-	/*Used for the call me request*/
-	private String msisdnEntered;
-
 	private ProgressDialog dialog;
 
 	private HikeHTTPTask hikeHTTPTask;
@@ -255,7 +252,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			JSONObject request = new JSONObject();
 			try 
 			{
-				request.put("msisdn", msisdnEntered);
+				request.put("msisdn", getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_ENTERED, null));
 			} 
 			catch (JSONException e) 
 			{
@@ -337,8 +334,6 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
 					editor.commit();
-
-					msisdnEntered = input;
 				}
 				mTask.addUserInput(input);
 			}
