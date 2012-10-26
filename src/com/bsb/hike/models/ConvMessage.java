@@ -235,18 +235,7 @@ public class ConvMessage
 		{
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
-			if(metadata.isNewGroup())
-			{
-				JSONObject nameMsisdn = arr.getJSONObject(arr.length() - 1);
-
-				GroupParticipant participant = ((GroupConversation)conversation).getGroupParticipant(nameMsisdn.getString(HikeConstants.MSISDN));
-
-				this.mMessage = String.format(context.getString(participant.getContactInfo().isOnhike() ? R.string.joined_conversation : R.string.invited_to_gc), participant.getContactInfo().getFirstName()); 
-			}
-			else
-			{
-				this.mMessage = String.format(context.getString(R.string.new_group_message), arr.length());
-			}
+			this.mMessage = context.getString(metadata.isNewGroup() ? R.string.new_group_message : R.string.add_to_group_message, Utils.getGroupJoinHighlightText(arr, (GroupConversation) conversation)); 
 			break;
 		case PARTICIPANT_LEFT:
 			this.mMessage = String.format(context.getString(R.string.left_conversation), ((GroupConversation)conversation).getGroupParticipant(metadata.getMsisdn()).getContactInfo().getFirstName());
