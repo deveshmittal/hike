@@ -139,7 +139,10 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 	@Override
 	public void afterTextChanged(Editable editable)
 	{
-		onTextLastChanged();
+		if(!TextUtils.isEmpty(editable))
+		{
+			onTextLastChanged();
+		}
 		setBtnEnabled();
 		// For adding smileys as the user is typing.
 		SmileyParser.getInstance().addSmileyToEditable(editable);
