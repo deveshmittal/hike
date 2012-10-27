@@ -315,7 +315,8 @@ public class MessagesAdapter extends BaseAdapter
 				{
 					name = Utils.getFirstName(conversation.getLabel());
 				}
-				String message = String.format(context.getString(R.string.joined_hike), name);
+				String message = String.format(
+						context.getString(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? R.string.joined_hike : R.string.opt_in), name);
 
 				TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 				setTextAndIconForSystemMessages(
