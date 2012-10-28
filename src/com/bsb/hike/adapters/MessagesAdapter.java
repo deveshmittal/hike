@@ -306,17 +306,20 @@ public class MessagesAdapter extends BaseAdapter
 			else if(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN || convMessage.getParticipantInfoState() == ParticipantInfoState.USER_OPT_IN)
 			{
 				String name;
+				String message;
 				if(conversation instanceof GroupConversation)
 				{
 					String participantMsisdn = metadata.getMsisdn();
 					name = ((GroupConversation) conversation).getGroupParticipant(participantMsisdn).getContactInfo().getFirstName();
+					message = context.getString(
+							convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? R.string.joined_hike : R.string.joined_conversation, name);
 				}
 				else
 				{
 					name = Utils.getFirstName(conversation.getLabel());
+					message = context.getString(
+							convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? R.string.joined_hike : R.string.optin_one_to_one, name);
 				}
-				String message = String.format(
-						context.getString(convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? R.string.joined_hike : R.string.opt_in), name);
 
 				TextView mainMessage = (TextView) inflater.inflate(R.layout.participant_info, null);
 				setTextAndIconForSystemMessages(
