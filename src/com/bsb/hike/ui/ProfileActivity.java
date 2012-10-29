@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
@@ -272,6 +273,19 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 
 			participantNameContainer.addView(participantNameItem);
 		}
+		Button blockGroupOwner = (Button) findViewById(R.id.block_owner_btn);
+		if(groupOwner.equals(userInfo.getContactInfo().getMsisdn()))
+		{
+			blockGroupOwner.setVisibility(View.GONE);
+			findViewById(R.id.empty_horizontal_space).setVisibility(View.GONE);
+		}
+		else
+		{
+			blockGroupOwner.setVisibility(View.VISIBLE);
+			findViewById(R.id.empty_horizontal_space).setVisibility(View.VISIBLE);
+			blockGroupOwner.setText(HikeUserDatabase.getInstance().isBlocked(groupOwner) ? 
+					R.string.unblock_owner : R.string.block_owner);
+		}
 		// Disable the add participants item
 		if(activeParticipants.size() == HikeConstants.MAX_CONTACTS_IN_GROUP)
 		{
@@ -280,7 +294,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		}
 		participantList.remove(userInfo.getContactInfo().getMsisdn());
 
-		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.INVISIBLE);
+		findViewById(R.id.invite_all_btn).setVisibility(shouldShowInviteAllButton ? View.VISIBLE : View.GONE);
 
 		nameTxt = groupConversation.getLabel();
 
@@ -811,10 +825,23 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 				R.anim.slide_out_left_noalpha);
 	}
 
+	public void onLeaveGroupClicked(View v)
+	{
+		Intent intent = new Intent(this, MessagesList.class);
+		intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
+		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		startActivity(intent);
+		finish();
+		overridePendingTransition(R.anim.slide_in_left_noalpha,
+				R.anim.slide_out_right_noalpha);
+	}
+
 	public void onBlockGroupOwnerClicked(View v)
 	{
-		HikeMessengerApp.getPubSub().publish(v.isSelected() ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER, this.groupOwner);
-		v.setSelected(!v.isSelected());
+		Button blockBtn = (Button) v;
+		boolean isBlocked = HikeUserDatabase.getInstance().isBlocked(groupOwner);
+		HikeMessengerApp.getPubSub().publish(isBlocked ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER, this.groupOwner);
+		blockBtn.setText(isBlocked ? R.string.block_owner : R.string.unblock_owner);
 	}
 
 	public void onEditGroupNameClicked(View v)

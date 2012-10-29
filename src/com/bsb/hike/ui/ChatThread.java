@@ -671,6 +671,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		    return false;
 		}
 
+		// Opening the group info screen when the menu button is tapped
+		if(mConversation instanceof GroupConversation)
+		{
+			onTitleIconClick(findViewById(R.id.title_image_btn));
+			return true;
+		}
 		boolean amIGroupOwner = false;
 		if(mConversation instanceof GroupConversation)
 		{
@@ -687,9 +693,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				!(mConversation instanceof GroupConversation) && 
 				!mUserIsBlocked);
 
-		MenuItem item3 = menu.findItem(R.id.leave_menu);
-		item3.setVisible((mConversation != null) && (mConversation instanceof GroupConversation) && !mUserIsBlocked);
-
 		MenuItem item4 = menu.findItem(R.id.call);
 		item4.setVisible(!mUserIsBlocked && !(mConversation instanceof GroupConversation));
 
@@ -700,7 +703,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		/* only enable the options menu
-		 * after we've selected a conversation */
+		 * after we've selected a conversation
+		 * or the conversation is not a group conversation 
+		 */
 		if (mConversation == null)
 		{
 			return false;
@@ -735,21 +740,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
 			i.putExtra(Insert.PHONE, mConversation.getMsisdn());
 			startActivity(i);
-		}
-		else if(item.getItemId() == R.id.leave_menu)
-		{
-			/*
-			 * Fix for when the user opens the app from a notification of the group and leaves the group,
-			 * the user would not leave the group.
-			 */
-			Intent intent = new Intent(this, MessagesList.class);
-			intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mConversation.getMsisdn());
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
-			finish();
-			overridePendingTransition(R.anim.slide_in_left_noalpha,
-					R.anim.slide_out_right_noalpha);
-			
 		}
 		else if(item.getItemId() == R.id.call)
 		{
