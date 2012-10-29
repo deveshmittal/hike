@@ -80,6 +80,11 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		parentLayout.toggleSidebar(false, false);
 	}
 
+	public void onEmptySpaceClicked(View v)
+	{
+		parentLayout.closeLeftSidebar(false);
+	}
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE, this.parentLayout != null && this.parentLayout.isLeftOpening());
