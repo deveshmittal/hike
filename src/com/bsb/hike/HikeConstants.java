@@ -180,10 +180,8 @@ public class HikeConstants
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";
-		public static final String ID = "id";
 		public static final String NAME = "name";
 		public static final String PREV_MSISDN = "prevMsisdn";
-		public static final String PREV_ID = "prevId";
 		public static final String PREV_NAME = "prevName";
 		public static final String INVITE = "invite";
 		public static final String MSG = "msg";

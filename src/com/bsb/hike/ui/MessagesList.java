@@ -499,10 +499,6 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		{
 			intent.putExtra(HikeConstants.Extras.NAME, conversation.getContactName());
 		}
-		if (conversation.getContactId() != null)
-		{
-			intent.putExtra(HikeConstants.Extras.ID, conversation.getContactId());
-		}
 		intent.putExtra(HikeConstants.Extras.MSISDN, conversation.getMsisdn());
 		return intent;
 	}
@@ -697,7 +693,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 			}
 
 			final List<ConvMessage> messageList = HikeConversationsDatabase.getInstance().getConversationThread
-					(msisdn, conversation.getContactId(), conversation.getConvId(), 1, conversation);
+					(msisdn, conversation.getConvId(), 1, conversation);
 			runOnUiThread(new Runnable() 
 			{
 				@Override

@@ -22,16 +22,16 @@ public class GroupConversation extends Conversation {
 	private boolean isGroupAlive;
 	private Map<String, GroupParticipant> groupParticipantList;
 
-	public GroupConversation(String msisdn, long convId, String contactId, String contactName, String groupOwner, boolean isGroupAlive) 
+	public GroupConversation(String msisdn, long convId, String contactName, String groupOwner, boolean isGroupAlive) 
 	{
-		super(msisdn, convId, contactId, contactName, true);
+		super(msisdn, convId, contactName, true);
 		this.groupOwner = groupOwner;
 		this.isGroupAlive = isGroupAlive;
 	}
 
 	public GroupConversation(JSONObject jsonObject, Context context) throws JSONException
 	{
-		super(jsonObject.getString(HikeConstants.TO), 0, null, null, true);
+		super(jsonObject.getString(HikeConstants.TO), 0, null, true);
 		this.groupOwner = jsonObject.getString(HikeConstants.FROM);
 		this.groupParticipantList = new HashMap<String, GroupParticipant>();
 		JSONArray array = jsonObject.getJSONArray(HikeConstants.DATA);

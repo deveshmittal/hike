@@ -435,7 +435,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				Conversation conv;
 				if (Utils.isGroupConversation(msisdn)) 
 				{
-					conv = new GroupConversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null, groupOwner, true);
+					conv = new GroupConversation(msisdn, id, (contactInfo != null) ? contactInfo.getName() : null, groupOwner, true);
 					Log.d(getClass().getSimpleName(), "Adding a new group conversation: " + msisdn);
 					InsertHelper groupInfoIH = null;
 					try 
@@ -462,7 +462,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				}
 				else
 				{
-					conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.getId() : null, (contactInfo != null) ? contactInfo.getName() : null, onhike);
+					conv = new Conversation(msisdn, id, (contactInfo != null) ? contactInfo.getName() : null, onhike);
 				}
 				HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_CONVERSATION, conv);
 				return conv;
@@ -480,7 +480,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public List<ConvMessage> getConversationThread(String msisdn, String contactid, long convid, int limit, Conversation conversation)
+	public List<ConvMessage> getConversationThread(String msisdn, long convid, int limit, Conversation conversation)
 	{
 		String limitStr = new Integer(limit).toString();
 		/*TODO this should be ORDER BY timestamp */
@@ -556,12 +556,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			}
 
 			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
-			String contactid = c.getString(c.getColumnIndex(DBConstants.CONTACT_ID));
 			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
 
 			if(Utils.isGroupConversation(msisdn))
 			{
-				conv = getGroupConversation(msisdn, convid, contactid);
+				conv = getGroupConversation(msisdn, convid);
 			}
 			else
 			{
@@ -569,12 +568,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn, false);
 
 				onhike |= contactInfo.isOnhike();
-				conv = new Conversation(msisdn, convid, contactid, contactInfo.getName(), onhike);
+				conv = new Conversation(msisdn, convid, contactInfo.getName(), onhike);
 
 			}
 			if (limit > 0) 
 			{
-				List<ConvMessage> messages = getConversationThread(msisdn, contactid, convid, limit, conv);
+				List<ConvMessage> messages = getConversationThread(msisdn, convid, limit, conv);
 				conv.setMessages(messages);
 			}
 			return conv;
@@ -602,9 +601,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		List<Conversation> conversations = new ArrayList<Conversation>();
 		final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 		final int convIdx = c.getColumnIndex(DBConstants.CONV_ID);
-		final int contactIdx = c.getColumnIndex(DBConstants.CONTACT_ID);
 
 		HikeUserDatabase huDb = null;
+
 		try
 		{
 			huDb = HikeUserDatabase.getInstance();
@@ -614,20 +613,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				// TODO this can be expressed in a single sql query
 				String msisdn = c.getString(msisdnIdx);
 				long convid = c.getInt(convIdx);
-				String contactid = c.getString(contactIdx);
 				Log.d(getClass().getSimpleName(), "Fetching Converstaions: " + msisdn);
 				if(Utils.isGroupConversation(msisdn))
 				{
-					conv = getGroupConversation(msisdn, convid, contactid);
+					conv = getGroupConversation(msisdn, convid);
 				}
 				else
 				{
 					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn, false);
-					conv = new Conversation(msisdn, convid, contactid, contactInfo.getName(),
+					conv = new Conversation(msisdn, convid, contactInfo.getName(),
 							(contactInfo != null) ? contactInfo.isOnhike() : false);
 				}
 
-				conv.setMessages(getConversationThread(conv.getMsisdn(), conv.getContactId(), conv.getConvId(), 1, conv));
+				conv.setMessages(getConversationThread(conv.getMsisdn(), conv.getConvId(), 1, conv));
 
 				conversations.add(conv);
 			}
@@ -644,7 +642,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		return conversations;
 	}
 
-	private Conversation getGroupConversation(String msisdn, long convid, String contactid)
+	private Conversation getGroupConversation(String msisdn, long convid)
 	{
 		Cursor groupCursor = null;
 		try 
@@ -674,7 +672,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 
 			ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, groupName, msisdn);
 
-			GroupConversation conv = new GroupConversation(msisdn, convid, contactid, contactInfo.getName(), groupOwner, isGroupAlive);
+			GroupConversation conv = new GroupConversation(msisdn, convid, contactInfo.getName(), groupOwner, isGroupAlive);
 			conv.setGroupParticipantList(getGroupParticipants(msisdn, false, false));
 
 			return conv;

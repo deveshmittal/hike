@@ -108,10 +108,6 @@ public class HikeNotification
 		notificationIntent.putExtra(HikeConstants.Extras.MSISDN, msisdn);
 		if (contactInfo != null)
 		{
-			if (contactInfo.getId() != null)
-			{
-				notificationIntent.putExtra(HikeConstants.Extras.ID, contactInfo.getId());
-			}
 			if (contactInfo.getName() != null)
 			{
 				notificationIntent.putExtra(HikeConstants.Extras.NAME, contactInfo.getName());

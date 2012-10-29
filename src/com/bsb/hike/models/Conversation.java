@@ -46,20 +46,13 @@ public class Conversation implements Comparable<Conversation>
 	@Override
 	public String toString()
 	{
-		return "Conversation [msisdn=" + msisdn + ", convId=" + convId + ", contactId=" + contactId + ", messages=" + messages.size() + ", contactName=" + contactName
+		return "Conversation [msisdn=" + msisdn + ", convId=" + convId + ", messages=" + messages.size() + ", contactName=" + contactName
 				+ ", onhike=" + onhike + "]";
-	}
-
-	public String getContactId()
-	{
-		return contactId;
 	}
 
 	private String msisdn;
 
 	private long convId;
-
-	private String contactId;
 
 	private List<ConvMessage> messages;
 
@@ -84,11 +77,10 @@ public class Conversation implements Comparable<Conversation>
 		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
 	}
 
-	public Conversation(String msisdn, long convId, String contactId, String contactName, boolean onhike)
+	public Conversation(String msisdn, long convId, String contactName, boolean onhike)
 	{
 		this.msisdn = msisdn;
 		this.convId = convId;
-		this.contactId = contactId;
 		this.contactName = contactName;
 		this.onhike = onhike;
 		this.messages = new ArrayList<ConvMessage>();
@@ -142,8 +134,7 @@ public class Conversation implements Comparable<Conversation>
 			return (convId < rhs.convId) ? -1 : 1;
 		}
 
-		String cId = (contactId != null) ? contactId : "";
-		return cId.compareTo(rhs.contactId);
+		return 0;
 	}
 
 	public List<ConvMessage> getMessages()
@@ -156,7 +147,6 @@ public class Conversation implements Comparable<Conversation>
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((contactId == null) ? 0 : contactId.hashCode());
 		result = prime * result + ((contactName == null) ? 0 : contactName.hashCode());
 		result = prime * result + (int) (convId ^ (convId >>> 32));
 		result = prime * result + ((messages == null) ? 0 : messages.hashCode());
@@ -175,13 +165,6 @@ public class Conversation implements Comparable<Conversation>
 		if (getClass() != obj.getClass())
 			return false;
 		Conversation other = (Conversation) obj;
-		if (contactId == null)
-		{
-			if (other.contactId != null)
-				return false;
-		}
-		else if (!contactId.equals(other.contactId))
-			return false;
 		if (contactName == null)
 		{
 			if (other.contactName != null)

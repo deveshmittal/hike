@@ -127,8 +127,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private HikeConversationsDatabase mConversationDb;
 
-	private String mContactId;
-
 	private String mContactName;
 
 	private String mContactNumber;
@@ -537,7 +535,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				finish();
 				intent = new Intent(this, ChatThread.class);
 				intent.putExtra(HikeConstants.Extras.NAME, getIntent().getStringExtra(HikeConstants.Extras.PREV_NAME));
-				intent.putExtra(HikeConstants.Extras.ID, getIntent().getStringExtra(HikeConstants.Extras.PREV_ID));
 				intent.putExtra(HikeConstants.Extras.MSISDN, getIntent().getStringExtra(HikeConstants.Extras.PREV_MSISDN));
 				startActivity(intent);
 			}
@@ -616,7 +613,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				msg = message.getMessage();
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
 			}
-			intent.putExtra(HikeConstants.Extras.PREV_ID, mContactId);
 			intent.putExtra(HikeConstants.Extras.PREV_MSISDN, mContactNumber);
 			intent.putExtra(HikeConstants.Extras.PREV_NAME, mContactName);
 			startActivity(intent);
@@ -918,7 +914,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			 */
 			if (contactInfo != null)
 			{
-				mContactId = contactInfo.getId();
 				mContactName = contactInfo.getName();
 				prevContactNumber = mContactNumber;
 				mContactNumber = contactInfo.getMsisdn();
@@ -926,7 +921,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			else
 			{
-				mContactId = null;
 				prevContactNumber = mContactNumber;
 				mContactName = mContactNumber = phoneNumber;
 			}
@@ -939,7 +933,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			prevContactNumber = mContactNumber;
 			// selected chat from conversation list
 			mContactNumber = intent.getStringExtra(HikeConstants.Extras.MSISDN);
-			mContactId = intent.getStringExtra(HikeConstants.Extras.ID);
 			mContactName = intent.getStringExtra(HikeConstants.Extras.NAME);
 
 			createConversation();
@@ -1025,10 +1018,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mContactName != null)
 		{
 			intent.putExtra(HikeConstants.Extras.NAME, mContactName);
-		}
-		if (mContactId != null)
-		{
-			intent.putExtra(HikeConstants.Extras.ID, mContactId);
 		}
 
 		if (!TextUtils.isEmpty(mContactNumber))
@@ -1900,7 +1889,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			}
 			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs);
 
-			GroupConversation groupConversation= new GroupConversation(mContactNumber, 0, mContactNumber, null, userContactInfo.getMsisdn(), true);
+			GroupConversation groupConversation= new GroupConversation(mContactNumber, 0, null, userContactInfo.getMsisdn(), true);
 			groupConversation.setGroupParticipantList(participantList);
 
 			Log.d(getClass().getSimpleName(), "Creating group: " + mContactNumber);
@@ -1925,7 +1914,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			mComposeView.requestFocus();
 
 			mContactName = groupConversation.getLabel();
-			mContactId = groupConversation.getMsisdn();
 
 			// To prevent the Contact picker layout from being shown on orientation change
 			setIntentFromField();
