@@ -958,6 +958,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:" + fileType + " Path: " + filePath);
 				initialiseFileTransfer(filePath, hikeFileType, fileKey, fileType, false);
+
+				// Making sure the file does not get forwarded again on orientation change.
+				intent.removeExtra(HikeConstants.Extras.FILE_PATH);
 			}
 			/*
 			 *  Since the message was not forwarded, we check if we have any drafts saved for this conversation,
