@@ -352,6 +352,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			titleBtn.setVisibility(View.VISIBLE);
 			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		}
+		else
+		{
+			// Removing the attachment buttong that remains visible while forwarding files
+			findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
+			findViewById(R.id.button_bar3).setVisibility(View.GONE);
+		}
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(-1, -1, false, false);
 		if(isForwardingMessage || isSharingFile)
 		{
