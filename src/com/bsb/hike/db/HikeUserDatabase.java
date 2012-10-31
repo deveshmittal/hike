@@ -760,6 +760,39 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				c.close();
 			}
 		}
-		
+	}
+
+	public List<ContactInfo> getContactNamesFromMsisdnList(StringBuilder msisdns)
+	{
+		//select max(name), msisdn from users where msisdn in (...) group by msisdn;
+		Cursor c = mReadDb.rawQuery(
+				"SELECT max(" + DBConstants.NAME + ") AS " + DBConstants.NAME + ", " 
+						+ DBConstants.MSISDN + ", " 
+						+ DBConstants.ONHIKE + " from " 
+						+ DBConstants.USERS_TABLE + " WHERE "
+						+ DBConstants.MSISDN + " IN " + msisdns.toString()
+						+ "GROUP BY " + DBConstants.MSISDN, null);
+		try
+		{
+			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
+
+			final int nameIdx = c.getColumnIndex(DBConstants.NAME);
+			final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			final int onHikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+
+			while(c.moveToNext())
+			{
+				String msisdn = c.getString(msisdnIdx);
+				String name = c.getString(nameIdx);
+				boolean onHike = c.getInt(onHikeIdx) != 0;
+				Log.d(getClass().getSimpleName(), "Name: " + name);
+				contactList.add(new ContactInfo(null, msisdn, name, null, onHike));
+			}
+			return contactList;
+		}
+		finally
+		{
+			c.close();
+		}
 	}
 }

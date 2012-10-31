@@ -77,6 +77,11 @@ public class Conversation implements Comparable<Conversation>
 		return TextUtils.isEmpty(contactName) ? msisdn : contactName;
 	}
 
+	public Conversation(String msisdn, long convId)
+	{
+		this(msisdn, convId, null, false);
+	}
+
 	public Conversation(String msisdn, long convId, String contactName, boolean onhike)
 	{
 		this.msisdn = msisdn;
