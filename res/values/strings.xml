@@ -148,7 +148,7 @@
 	<string name="block_internation_sms_bold_text">India</string>
 	<string name="invite_via_sms">Invite via SMS</string>
 	<string name="call_me_pass">We will call you within a few seconds.</string>
-	<string name="call_me_fail">Unable to send request. Please try again.</string>
+	<string name="call_me_fail">Unable to call you. Please try again.</string>
 	<string name="calling_you">Calling you now...</string>
 	<string name="new_group_message">Group Chat with %1$s</string>
 	<string name="add_to_group_message">Added %1$s to the group</string>
