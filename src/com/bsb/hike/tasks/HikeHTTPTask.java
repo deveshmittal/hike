@@ -1,16 +1,10 @@
 package com.bsb.hike.tasks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
-import com.bsb.hike.R;
-import com.bsb.hike.http.HikeFileTransferHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.utils.AccountUtils;
 
@@ -20,8 +14,6 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 	private FinishableEvent finishableEvent;
 	private HikeHttpRequest[] requests;
 	private int errorStringId;
-	private int progressFileTransfer;
-	private AtomicBoolean cancelUpload = new AtomicBoolean();
 	private boolean addToken;
 
 	public HikeHTTPTask(FinishableEvent activity, int errorStringId)
@@ -34,11 +26,6 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 		this.finishableEvent = activity;
 		this.errorStringId = errorStringId;
 		this.addToken = addToken;
-	}
-
-	public void cancelUpload()
-	{
-		cancelUpload.set(true);
 	}
 
 	@Override
@@ -65,7 +52,6 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 			}
 
 			int duration = Toast.LENGTH_LONG;
-			errorStringId = cancelUpload.get() ? R.string.upload_cancelled : errorStringId;
 			if(finishableEvent != null)
 			{
 				Toast toast = Toast.makeText((Activity) finishableEvent, errorStringId, duration);
@@ -83,20 +69,7 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 			for (HikeHttpRequest hikeHttpRequest : requests)
 			{
 				Log.d("HikeHTTPTask", "About to perform request:" + hikeHttpRequest.getPath());
-				if(hikeHttpRequest instanceof HikeFileTransferHttpRequest)
-				{
-					hikeHttpRequest.setResponse(
-							AccountUtils.executeFileTransferRequest(
-									((HikeFileTransferHttpRequest)hikeHttpRequest), 
-									((HikeFileTransferHttpRequest)hikeHttpRequest).getFileName(), 
-									this, 
-									cancelUpload, 
-									((HikeFileTransferHttpRequest)hikeHttpRequest).getFileType()));
-				}
-				else
-				{
-					AccountUtils.performRequest(hikeHttpRequest, addToken);
-				}
+				AccountUtils.performRequest(hikeHttpRequest, addToken);
 				Log.d("HikeHTTPTask", "Finished performing request:" + hikeHttpRequest.getPath());
 			}
 		}
@@ -107,24 +80,6 @@ public class HikeHTTPTask extends AsyncTask<HikeHttpRequest, Integer, Boolean> i
 		}
 
 		return Boolean.TRUE;
-	}
-
-	public void updateProgress(int progress)
-	{
-		publishProgress(progress);
-	}
-	
-	@Override
-	protected void onProgressUpdate(Integer... values) 
-	{
-		progressFileTransfer = values[0];
-		Log.d(getClass().getSimpleName(), "Progress Percentage: " + progressFileTransfer);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
-	}
-
-	public int getProgressFileTransfer()
-	{
-		return progressFileTransfer;
 	}
 
 	@Override

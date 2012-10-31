@@ -409,4 +409,14 @@ public class HikeConstants
 		public static final String USER_OPT_IN = "uo";
 		public static final String BLOCK_INTERNATIONAL_SMS = "bis";
 	}
+
+	public static enum FTResult
+	{
+		SUCCESS,
+		UPLOAD_FAILED,
+		FILE_TOO_LARGE,
+		READ_FAIL,
+		DOWNLOAD_FAILED,
+		CANCELLED
+	}
 }

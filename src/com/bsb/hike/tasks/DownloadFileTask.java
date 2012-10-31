@@ -8,29 +8,28 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 
-public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
+public class DownloadFileTask extends FileTransferTaskBase
 {
 	private File destinationFile;
 	private String fileKey;
 	private Context context;
-	private int progressFileTransfer;
 	private long msgId;
-	private boolean freeSpaceError = false;
-	private boolean cancelDownload = false;
 
 	public DownloadFileTask(Context context, File destinationFile, String fileKey, long msgId) 
 	{
@@ -38,15 +37,11 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		this.fileKey = fileKey;
 		this.context = context;
 		this.msgId = msgId;
-	}
-
-	public void cancelDownload()
-	{
-		cancelDownload = true;
+		this.cancelTask = new AtomicBoolean(false);
 	}
 
 	@Override
-	protected Boolean doInBackground(Void... params) 
+	protected FTResult doInBackground(Void... params) 
 	{
 		FileOutputStream fos = null;
 		InputStream is = null;
@@ -59,8 +54,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 
 			if(length > Utils.getFreeSpace())
 			{
-				freeSpaceError = true;
-				return Boolean.FALSE;
+				return FTResult.FILE_TOO_LARGE;
 			}
 
 			is = new BufferedInputStream(url.openConnection().getInputStream());
@@ -78,7 +72,7 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 				fos.write(buffer, 0, len);
 				progress = (int) ((totProg*100/length));
 				publishProgress(progress);
-				if(cancelDownload)
+				if(cancelTask.get())
 				{
 					throw new IOException("Download cancelled by the user");
 				}
@@ -88,12 +82,12 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 		catch (MalformedURLException e)
 		{
 			Log.e(getClass().getSimpleName(), "Invalid URL", e);
-			return Boolean.FALSE;
+			return FTResult.DOWNLOAD_FAILED;
 		} 
 		catch (IOException e)
 		{
 			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
-			return Boolean.FALSE;
+			return FTResult.DOWNLOAD_FAILED;
 		}
 		finally
 		{
@@ -111,36 +105,31 @@ public class DownloadFileTask extends AsyncTask<Void, Integer, Boolean>
 			catch (IOException e) 
 			{
 				Log.e(getClass().getSimpleName(), "Error while closing file", e);
-				return Boolean.FALSE;
+				return FTResult.DOWNLOAD_FAILED;
 			}
 		}
-		return Boolean.TRUE;
+		return FTResult.SUCCESS;
 	}
 
 	@Override
 	protected void onProgressUpdate(Integer... values) 
 	{
-		progressFileTransfer = values[0];
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+		updateProgress(values[0]);
 	}
 
 	@Override
-	protected void onPostExecute(Boolean result) 
+	protected void onPostExecute(FTResult result) 
 	{
-		if(!result)
+		if(result != FTResult.SUCCESS)
 		{
-			int errorStringId = freeSpaceError ? R.string.not_enough_space : cancelDownload ? R.string.download_cancelled : R.string.download_failed;
+			int errorStringId = result == FTResult.FILE_TOO_LARGE ? 
+					R.string.not_enough_space : result == FTResult.CANCELLED ? 
+							R.string.download_cancelled : R.string.download_failed;
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
-			Log.d(getClass().getSimpleName(), "File not downloaded " + progressFileTransfer);
 			destinationFile.delete();
 		}
 
 		ChatThread.fileTransferTaskMap.remove(msgId);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
-	}
-
-	public int getProgressFileTransfer()
-	{
-		return progressFileTransfer;
 	}
 }

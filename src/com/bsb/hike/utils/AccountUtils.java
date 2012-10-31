@@ -57,11 +57,10 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.GzipByteArrayEntity;
-import com.bsb.hike.http.HikeFileTransferHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.tasks.UploadFileTask;
 
 public class AccountUtils
 {
@@ -618,17 +617,17 @@ public class AccountUtils
 		}
 	}
 
-	public static JSONObject executeFileTransferRequest(HikeFileTransferHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask, AtomicBoolean cancelUpload, String fileType) throws Exception
+	public static JSONObject executeFileTransferRequest(String filePath, String fileName, UploadFileTask uploadFileTask, AtomicBoolean cancelUpload, String fileType) throws Exception
 	{
 		// Always start download with some initial progress
 		int progress = HikeConstants.INITIAL_PROGRESS;
-		hikeHTTPTask.updateProgress(progress);
+		uploadFileTask.updateProgress(progress);
 
-		File file = new File(hikeHttpRequest.getFilePath());
+		File file = new File(filePath);
 		FileInputStream fileInputStream = new FileInputStream(file);
 
 		URL url;
-		url = new URL(FILE_TRANSFER_UPLOAD_BASE + hikeHttpRequest.getPath());
+		url = new URL(FILE_TRANSFER_UPLOAD_BASE + "/user/ft");
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -673,7 +672,7 @@ public class AccountUtils
 			totalBytesRead += bytesRead;
 
 			progress = HikeConstants.INITIAL_PROGRESS + (bytesRead > 0 ? (int) ((totalBytesRead * 75)/file.length()) : 75);
-			hikeHTTPTask.updateProgress(progress);
+			uploadFileTask.updateProgress(progress);
 
 			Thread.sleep(100);
 			if(cancelUpload.get())
@@ -685,7 +684,7 @@ public class AccountUtils
 		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
 		progress = 90;
-		hikeHTTPTask.updateProgress(progress);
+		uploadFileTask.updateProgress(progress);
 
 		StringBuilder builder = new StringBuilder();
 		CharBuffer target = CharBuffer.allocate(10000);
@@ -701,7 +700,7 @@ public class AccountUtils
 			}
 		}
 		progress = 100;
-		hikeHTTPTask.updateProgress(progress);
+		uploadFileTask.updateProgress(progress);
 
 		Log.d("HTTP", "request finished");
 		outputStream.flush();

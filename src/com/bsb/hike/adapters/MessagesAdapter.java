@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -35,9 +34,8 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.DownloadFileTask;
-import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.CircularProgress;
@@ -530,9 +528,9 @@ public class MessagesAdapter extends BaseAdapter
 
 		if(convMessage.isFileTransferMessage() && ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
 		{
-			AsyncTask<?, ?, ?> fileTransferTask = ChatThread.fileTransferTaskMap.get(convMessage.getMsgID());
+			FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap.get(convMessage.getMsgID());
 			holder.circularProgress.setVisibility(View.VISIBLE);
-			holder.circularProgress.setProgressAngle(fileTransferTask instanceof HikeHTTPTask ? ((HikeHTTPTask)fileTransferTask).getProgressFileTransfer() : ((DownloadFileTask)fileTransferTask).getProgressFileTransfer());
+			holder.circularProgress.setProgressAngle(fileTransferTask.getProgress());
 			if(convMessage.isSent())
 			{
 				holder.image.setVisibility(View.INVISIBLE);
