@@ -745,7 +745,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			}
 		}
 		sb.append(")");
-		String selection = DBConstants.PHONE + " IN " + sb.toString() + " AND " + DBConstants.ONHIKE + "=0";
+		String selection = DBConstants.PHONE + " IN " + sb.toString() + " AND " + DBConstants.ONHIKE + "=0 AND " + DBConstants.MSISDN + " LIKE '+91%'";
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
 		Cursor c = null;
 		try
