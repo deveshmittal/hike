@@ -205,6 +205,14 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 	@Override
 	public int compareTo(ContactInfo rhs)
 	{
+		if(this.name.startsWith("+") && !rhs.name.startsWith("+"))
+		{
+			return 1;
+		}
+		else if(!this.name.startsWith("+") && rhs.name.startsWith("+"))
+		{
+			return -1;
+		}
 		return (this.name.toLowerCase().compareTo( ((ContactInfo) rhs).name.toLowerCase()));
 	}
 }
