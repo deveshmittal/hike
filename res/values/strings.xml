@@ -174,4 +174,5 @@
 	<string name="unable_to_read">Unable to read file</string>
 	<string name="share_location">Share Location</string>
 	<string name="group_mute">This conversation is muted.</string>
+	<string name="poke_msg">Buzz!</string>
 </resources>

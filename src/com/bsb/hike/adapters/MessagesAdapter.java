@@ -8,7 +8,6 @@ import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
 import android.view.Gravity;
@@ -67,6 +66,8 @@ public class MessagesAdapter extends BaseAdapter
 		View marginView;
 		TextView participantNameFT;
 		View loadingThumb;
+		View poke;
+		View messageContainer;
 	}
 
 	private Conversation conversation;
@@ -171,6 +172,8 @@ public class MessagesAdapter extends BaseAdapter
 				holder.image = (ImageView) v.findViewById(R.id.msg_status_indicator);
 				holder.timestampContainer = (LinearLayout) v.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v.findViewById(R.id.timestamp);
+				holder.poke = v.findViewById(R.id.poke_sent);
+				holder.messageContainer = v.findViewById(R.id.sent_message_container);
 
 				holder.messageTextView = (TextView) v.findViewById(R.id.message_send);
 				/* label outgoing hike conversations in green */
@@ -203,6 +206,8 @@ public class MessagesAdapter extends BaseAdapter
 				{
 					holder.messageTextView = (TextView) v.findViewById(R.id.message_receive);
 				}
+				holder.poke = v.findViewById(R.id.poke_receive);
+				holder.messageContainer = v.findViewById(R.id.receive_message_container);
 				holder.timestampContainer = (LinearLayout) v.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v.findViewById(R.id.timestamp);
 				holder.participantInfoContainer = (ViewGroup) v.findViewById(R.id.participant_info_container);
@@ -522,19 +527,16 @@ public class MessagesAdapter extends BaseAdapter
 				holder.participantNameFT.setVisibility(View.VISIBLE);
 			}
 		}
-		else if (metadata != null)
+		else if (metadata != null && metadata.isPokeMessage())
 		{
-			Spannable spannable = metadata.getMessage(context, convMessage, true);
-			convMessage.setMessage(spannable.toString());
-			/*
-			 *  This is being done so that if the user chooses to forward or copy this message, 
-			 *  he see's the metadata message and not the original one sent from the server.
-			 */
-			holder.messageTextView.setText(spannable);
-			holder.messageTextView.setMovementMethod(LinkMovementMethod.getInstance());
+			holder.messageContainer.setVisibility(View.GONE);
+			holder.poke.setVisibility(View.VISIBLE);
 		}
 		else
 		{
+			holder.messageContainer.setVisibility(View.VISIBLE);
+			holder.poke.setVisibility(View.GONE);
+
 			CharSequence markedUp = convMessage.getMessage();
 			// Fix for bug where if a participant leaves the group chat, the participant's name is never shown 
 			if(convMessage.isGroupChat() && !convMessage.isSent() && convMessage.getGroupParticipantMsisdn() != null)

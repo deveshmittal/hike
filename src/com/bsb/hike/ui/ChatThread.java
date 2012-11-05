@@ -31,6 +31,7 @@ import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
@@ -114,10 +115,13 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
+import com.bsb.hike.view.NudgeLabel;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.bsb.hike.view.NudgeLabel.DoubleTapListener;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class ChatThread extends Activity implements HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnItemClickListener
+public class ChatThread extends Activity implements 
+				HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnItemClickListener, DoubleTapListener
 {
 	private HikePubSub mPubSub;
 
@@ -1088,6 +1092,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		mLabel = mConversation.getLabel();
 
 		mLabelView.setText(mLabel);
+		((NudgeLabel)mLabelView).setDoublTap(this);
 
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		mUserIsBlocked = db.isBlocked(getMsisdnMainUser());
@@ -2905,5 +2910,29 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			Log.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
 			Toast.makeText(ChatThread.this, "Unable to open file (Unknown format)", Toast.LENGTH_SHORT).show();
 		}
+	}
+
+	@Override
+	public void sendPoke() 
+	{
+		long time = (long) System.currentTimeMillis() / 1000;
+
+		ConvMessage convMessage = new ConvMessage(getString(R.string.poke_msg), mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+		convMessage.setConversation(mConversation);
+
+		JSONObject metadata = new JSONObject();
+		try 
+		{
+			metadata.put(HikeConstants.POKE, true);
+			convMessage.setMetadata(metadata);
+		} 
+		catch (JSONException e) 
+		{
+			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		sendMessage(convMessage);
+
+		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+		vibrator.vibrate(100);
 	}
 }

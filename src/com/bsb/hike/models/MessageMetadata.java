@@ -38,6 +38,7 @@ public class MessageMetadata
 	private String msisdn;
 	private boolean showBIS;
 	private int credits;
+	private boolean isPokeMessage;
 
 	public MessageMetadata(JSONObject metadata) throws JSONException
 	{
@@ -77,6 +78,7 @@ public class MessageMetadata
 			this.hikeFileList = new ArrayList<HikeFile>();
 			this.hikeFileList.add(new HikeFile(metadata));
 		}
+		this.isPokeMessage = metadata.optBoolean(HikeConstants.POKE);
 		this.json = metadata;
 	}
 
@@ -142,6 +144,11 @@ public class MessageMetadata
 	public boolean getNewUser()
 	{
 		return newUser;
+	}
+
+	public boolean isPokeMessage()
+	{
+		return isPokeMessage;
 	}
 
 	public JSONObject getJSON()

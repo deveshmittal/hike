@@ -59,6 +59,7 @@ public class HikeConstants
 	public static final String LONGITUDE = "long";
 	public static final String ZOOM_LEVEL = "zoom";
 	public static final String ADDRESS = "add";
+	public static final String POKE = "poke";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

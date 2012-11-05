@@ -424,7 +424,7 @@ public class ConvMessage
 		JSONObject md = null;
 		try
 		{
-			if(metadata != null && isFileTransferMessage)
+			if(metadata != null && (isFileTransferMessage || metadata.isPokeMessage()))
 			{
 				md = metadata.getJSON();
 				data.put(HikeConstants.METADATA, md);

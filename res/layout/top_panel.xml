@@ -36,7 +36,7 @@
         android:src="@drawable/ic_logoheader"
         android:visibility="gone" />
 
-    <com.bsb.hike.view.CustomFontTextView
+    <com.bsb.hike.view.NudgeLabel
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,6 +46,7 @@
         android:layout_marginRight="18dp"
         android:layout_toLeftOf="@+id/top_button_container"
         android:layout_toRightOf="@id/title_hikeicon"
+        android:clickable="true"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:shadowColor="#002147"
