@@ -86,11 +86,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation>
 			MessageMetadata metadata = message.getMetadata();
 
 			CharSequence markedUp = null;
-			if (metadata != null && message.getParticipantInfoState() == ParticipantInfoState.NO_INFO && metadata.getHikeFiles() == null)
-			{
-				markedUp = metadata.getMessage(context, message, false);
-			}
-			else if (message.isFileTransferMessage())
+			if (message.isFileTransferMessage())
 			{
 				markedUp = HikeFileType.toProperString(metadata.getHikeFiles().get(0).getHikeFileType());
 				if((conversation instanceof GroupConversation) && !message.isSent())

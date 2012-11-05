@@ -51,11 +51,9 @@ public class HikeNotification
 		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF, true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE : 0;
 
 		String msisdn = convMsg.getMsisdn();
-		String message = (convMsg.getMetadata() == null || convMsg.getParticipantInfoState() != ParticipantInfoState.NO_INFO) ?
+		String message = (!convMsg.isFileTransferMessage()) ?
 				convMsg.getMessage() : 
-					convMsg.isFileTransferMessage() ?
-						HikeFileType.toProperString(convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType()) : 
-							convMsg.getMetadata().getMessage(context, convMsg, false).toString();
+					HikeFileType.toProperString(convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType());
 		// Message will be empty for type 'uj' when the conversation does not exist
 		if(TextUtils.isEmpty(message) && convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN)
 		{
