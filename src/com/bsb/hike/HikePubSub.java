@@ -128,6 +128,8 @@ public class HikePubSub implements Runnable
 
 	public static final String FILE_MESSAGE_CREATED = "fileMessageCreated";
 
+	public static final String MUTE_CONVERSATION_TOGGLED = "mutedConversationToggled";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

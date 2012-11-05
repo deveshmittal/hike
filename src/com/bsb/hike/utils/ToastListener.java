@@ -22,6 +22,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
@@ -74,6 +75,12 @@ public class ToastListener implements Listener
 			if(message.getConversation() == null)
 			{
 				Log.w(getClass().getSimpleName(), "The client did not get a GCJ message for us to handle this message.");
+				return;
+			}
+			if((message.getConversation() instanceof GroupConversation) 
+					&& ((GroupConversation)message.getConversation()).isMuted())
+			{
+				Log.d(getClass().getSimpleName(), "Group has been muted");
 				return;
 			}
 			if (message.getParticipantInfoState() == ParticipantInfoState.NO_INFO || 

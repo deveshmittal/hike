@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +34,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -103,6 +105,8 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 			HikePubSub.PARTICIPANT_JOINED_GROUP, 
 			HikePubSub.PARTICIPANT_LEFT_GROUP
 	};
+	private GroupConversation groupConversation;
+	private ImageButton topBarBtn;
 
 	private static enum ProfileType
 	{
@@ -205,6 +209,10 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 	{
 		setContentView(R.layout.group_info);
 
+		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+		
+		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn2);
+
 		ViewGroup addParticipantsLayout = (ViewGroup) findViewById(R.id.add_participants_layout);
 		TextView mTitleView = (TextView) findViewById(R.id.title);
 		View groupOwnerItem = (View) findViewById(R.id.group_owner);
@@ -218,12 +226,15 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		HikeConversationsDatabase hCDB = HikeConversationsDatabase.getInstance();
-		GroupConversation groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
+		groupConversation = (GroupConversation) hCDB.getConversation(mLocalMSISDN, 0);
 
 		participantList = groupConversation.getGroupParticipantList();
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
 		participantNameContainer = (ViewGroup) findViewById(R.id.group_participant_container);
+
+		topBarBtn.setImageResource(groupConversation.isMuted() ? R.drawable.ic_group_muted : R.drawable.ic_group_not_muted);
+		topBarBtn.setVisibility(View.VISIBLE);
 
 		int left = (int) (0 * Utils.densityMultiplier);
 		int top = (int) (0 * Utils.densityMultiplier);
@@ -321,6 +332,19 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 
 		mNameEdit.setVisibility(View.GONE);
 		mNameDisplay.setVisibility(View.VISIBLE);
+	}
+
+	public void onTitleIconClick(View v)
+	{
+		if(v.getId() == R.id.title_image_btn2)
+		{
+			groupConversation.setIsMuted(!groupConversation.isMuted());
+			HikeConversationsDatabase.getInstance().toggleGroupMute(groupConversation.getMsisdn(), groupConversation.isMuted());
+			topBarBtn.setImageResource(groupConversation.isMuted() ? R.drawable.ic_group_muted : R.drawable.ic_group_not_muted);
+
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.MUTE_CONVERSATION_TOGGLED, new Pair<String, Boolean>(groupConversation.getMsisdn(), groupConversation.isMuted()));
+		}
 	}
 
 	private void setupEditScreen()

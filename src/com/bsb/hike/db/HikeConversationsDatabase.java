@@ -117,7 +117,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 				+ DBConstants.GROUP_ID +" STRING PRIMARY KEY, "
 				+ DBConstants.GROUP_NAME + " TEXT, "
 				+ DBConstants.GROUP_OWNER + " TEXT, "
-				+ DBConstants.GROUP_ALIVE + " INTEGER"
+				+ DBConstants.GROUP_ALIVE + " INTEGER, "
+				+ DBConstants.MUTE_GROUP + " INTEGER DEFAULT 0 "
 				+ " )";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_TABLE
@@ -209,6 +210,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			db.execSQL(createIndex);
 			db.execSQL(insert);
 			db.execSQL(drop);
+		}
+		// Add muteGroup column
+		if(oldVersion < 6)
+		{
+			String alter = "ALTER TABLE " + DBConstants.GROUP_INFO_TABLE + " ADD COLUMN " + DBConstants.MUTE_GROUP + " INTEGER DEFAULT 0";
+			db.execSQL(alter);
 		}
 	}
 
@@ -780,7 +787,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 							{ 
 					DBConstants.GROUP_NAME, 
 					DBConstants.GROUP_OWNER, 
-					DBConstants.GROUP_ALIVE
+					DBConstants.GROUP_ALIVE,
+					DBConstants.MUTE_GROUP
 							}, 
 							DBConstants.GROUP_ID + " = ? ", 
 							new String[] 
@@ -797,9 +805,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 			String groupName = groupCursor.getString(groupCursor.getColumnIndex(DBConstants.GROUP_NAME));
 			String groupOwner = groupCursor.getString(groupCursor.getColumnIndex(DBConstants.GROUP_OWNER));
 			boolean isGroupAlive = groupCursor.getInt(groupCursor.getColumnIndex(DBConstants.GROUP_ALIVE)) != 0;
+			boolean isMuted = groupCursor.getInt(groupCursor.getColumnIndex(DBConstants.MUTE_GROUP)) != 0;
 
 			GroupConversation conv = new GroupConversation(msisdn, convid, groupName, groupOwner, isGroupAlive);
 			conv.setGroupParticipantList(getGroupParticipants(msisdn, false, false));
+			conv.setIsMuted(isMuted);
 
 			return conv;
 		} 
@@ -1073,6 +1083,31 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper
 		{
 			c.close();
 		}
+	}
+
+	public boolean isGroupMuted(String groupId)
+	{
+		Cursor c = mDb.query(
+				DBConstants.GROUP_INFO_TABLE, 
+				new String[] {DBConstants.GROUP_ID}, 
+				DBConstants.GROUP_ID + " = ? AND " + DBConstants.MUTE_GROUP + " = 1", 
+				new String[] {groupId}, null, null, null);
+		try
+		{
+			return c.moveToFirst();
+		}
+		finally
+		{
+			c.close();
+		}
+	}
+
+	public void toggleGroupMute(String groupId, boolean isMuted)
+	{
+		ContentValues contentValues = new ContentValues(1);
+		contentValues.put(DBConstants.MUTE_GROUP, isMuted);
+
+		mDb.update(DBConstants.GROUP_INFO_TABLE, contentValues, DBConstants.GROUP_ID + "=?", new String[] {groupId});
 	}
 
 	public int setGroupName(String groupId, String groupname)

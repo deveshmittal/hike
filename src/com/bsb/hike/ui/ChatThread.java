@@ -246,7 +246,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			HikePubSub.CONTACT_ADDED, 
 			HikePubSub.UPLOAD_FINISHED, 
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED,
-			HikePubSub.FILE_MESSAGE_CREATED
+			HikePubSub.FILE_MESSAGE_CREATED,
+			HikePubSub.MUTE_CONVERSATION_TOGGLED
 	};
 
 	private View currentEmoticonCategorySelected;
@@ -1151,6 +1152,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		if (mConversation instanceof GroupConversation) 
 		{
 			myInfo = new GroupParticipant(Utils.getUserContactInfo(prefs));
+			toggleConversationMuteViewVisibility(((GroupConversation) mConversation).isMuted());
 		}
 	}
 
@@ -1550,6 +1552,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				{
 					addMessage(convMessage);
 					mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView.getText()));
+				}
+			});
+		}
+		else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
+		{
+			Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;
+			if(!groupMute.first.equals(this.mContactNumber))
+			{
+				return;
+			}
+			final Boolean isMuted = groupMute.second;
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					toggleConversationMuteViewVisibility(isMuted);
 				}
 			});
 		}
@@ -1954,6 +1973,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 		{
 			showFilePickerDialog(Utils.getExternalStorageState());
 		}
+	}
+
+	private void toggleConversationMuteViewVisibility(boolean isMuted)
+	{
+		findViewById(R.id.conversation_mute).setVisibility(isMuted ? View.VISIBLE : View.GONE);
 	}
 
 	private void showFilePickerDialog(final ExternalStorageState externalStorageState)

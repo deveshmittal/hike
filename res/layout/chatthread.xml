@@ -118,6 +118,23 @@
 
                 <include layout="@layout/emoticon_layout" />
             </RelativeLayout>
+            
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/conversation_mute"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_conversation_mute"
+                android:paddingLeft="18dp"
+                android:shadowColor="#66ffffff"
+                android:shadowDy="0.5"
+                android:shadowRadius="0.5"
+                android:gravity="center_vertical"
+                android:text="@string/group_mute"
+                android:textColor="#7c6e57"
+                android:textSize="15sp"
+                android:textStyle="bold|italic"
+                android:visibility="gone" />
+
         </RelativeLayout>
 
         <RelativeLayout

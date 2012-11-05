@@ -20,6 +20,7 @@ public class GroupConversation extends Conversation {
 
 	private String groupOwner;
 	private boolean isGroupAlive;
+	private boolean isMuted;
 	private Map<String, GroupParticipant> groupParticipantList;
 
 	public GroupConversation(String msisdn, long convId, String contactName, String groupOwner, boolean isGroupAlive) 
@@ -79,6 +80,16 @@ public class GroupConversation extends Conversation {
 	public String getLabel()
 	{
 		return !TextUtils.isEmpty(getContactName()) ? getContactName() : Utils.defaultGroupName(groupParticipantList);
+	}
+
+	public void setIsMuted(boolean isMuted)
+	{
+		this.isMuted = isMuted;
+	}
+
+	public boolean isMuted()
+	{
+		return isMuted;
 	}
 
 	public JSONObject serialize(String type)
