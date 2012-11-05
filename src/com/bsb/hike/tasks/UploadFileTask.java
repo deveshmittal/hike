@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -61,9 +62,10 @@ public class UploadFileTask extends FileTransferTaskBase
 		this.context = context;
 	}
 
-	public UploadFileTask(ConvMessage convMessage)
+	public UploadFileTask(ConvMessage convMessage, Context context)
 	{
 		this.convMessage = convMessage;
+		this.context = context;
 	}
 
 	public UploadFileTask(Uri picasaUri, HikeFileType hikeFileType, String msisdn, Context context)
@@ -138,6 +140,14 @@ public class UploadFileTask extends FileTransferTaskBase
 					{
 						fileName = selectedFile.getName();
 					}
+
+					JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, null, null);
+
+					convMessage = createConvMessage(msisdn, fileName, metadata);
+
+					// Called so that the UI in the Conversation lists screen is updated
+					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+
 					downloadPicasaFile(selectedFile, picasaUri);
 					filePath = selectedFile.getPath();
 				}
@@ -157,23 +167,27 @@ public class UploadFileTask extends FileTransferTaskBase
 					thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
 				}
 
-				long time = System.currentTimeMillis()/1000;
+				JSONObject metadata = getFileTransferMetadata(fileName, fileType, hikeFileType, thumbnailString, thumbnail);
 
-				JSONArray files = new JSONArray();
-				files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail).serialize());
-				JSONObject metadata = new JSONObject();
-				metadata.put(HikeConstants.FILES, files);
-
-				convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
-				convMessage.setMetadata(metadata);
-				HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
-
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED, convMessage);
-
-				if(TextUtils.isEmpty(fileKey))
+				if(convMessage == null)
 				{
-					// Called so that the UI in the Conversation lists screen is updated
-					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+					convMessage = createConvMessage(msisdn, fileName, metadata);
+
+					if(TextUtils.isEmpty(fileKey))
+					{
+						// Called so that the UI in the Conversation lists screen is updated
+						HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
+					}
+				}
+				else
+				{
+					/*
+					 * Only happens in case of Picasa files where we have already created a convMessage but did not initially have
+					 * a thumbnail.
+					 */
+					convMessage.setMetadata(metadata);
+					HikeConversationsDatabase.getInstance().updateMessageMetadata(convMessage.getMsgID(), convMessage.getMetadata());
+					HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 				}
 			}
 			else
@@ -189,13 +203,8 @@ public class UploadFileTask extends FileTransferTaskBase
 			{
 				fileWasAlreadyUploaded = false;
 
-				ChatThread.fileTransferTaskMap.put(convMessage.getMsgID(), this);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
-
 				JSONObject response = AccountUtils.executeFileTransferRequest(filePath, fileName, this, cancelTask, fileType);
 				
-				ChatThread.fileTransferTaskMap.remove(convMessage.getMsgID());
-
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
@@ -224,17 +233,36 @@ public class UploadFileTask extends FileTransferTaskBase
 		}
 		catch (Exception e)
 		{
-			if(convMessage != null)
-			{
-				ChatThread.fileTransferTaskMap.remove(convMessage.getMsgID());
-				HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
-			}
 			Log.e(getClass().getSimpleName(), "Exception", e);
 			return FTResult.UPLOAD_FAILED;
 		}
 		return FTResult.SUCCESS;
 	}
-	
+
+	private JSONObject getFileTransferMetadata(
+			String fileName, String fileType, HikeFileType hikeFileType, String thumbnailString, Bitmap thumbnail) throws JSONException
+	{
+		JSONArray files = new JSONArray();
+		files.put(new HikeFile(fileName, TextUtils.isEmpty(fileType) ? HikeFileType.toString(hikeFileType) : fileType, thumbnailString, thumbnail).serialize());
+		JSONObject metadata = new JSONObject();
+		metadata.put(HikeConstants.FILES, files);
+
+		return metadata;
+	}
+
+	private ConvMessage createConvMessage(String msisdn, String fileName, JSONObject metadata) throws JSONException
+	{
+		long time = System.currentTimeMillis()/1000;
+		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time, ConvMessage.State.SENT_UNCONFIRMED);
+		convMessage.setMetadata(metadata);
+		HikeConversationsDatabase.getInstance().addConversationMessages(convMessage);
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED, convMessage);
+
+		ChatThread.fileTransferTaskMap.put(convMessage.getMsgID(), this);
+		return convMessage;
+	}
+
 	private void downloadPicasaFile(File destFile, Uri url) throws Exception
 	{
 		InputStream is = null;
@@ -281,6 +309,12 @@ public class UploadFileTask extends FileTransferTaskBase
 	@Override
 	protected void onPostExecute(FTResult result) 
 	{
+		if(convMessage != null)
+		{
+			ChatThread.fileTransferTaskMap.remove(convMessage.getMsgID());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+		}
+
 		if(result != FTResult.SUCCESS)
 		{
 			int errorStringId = 0;

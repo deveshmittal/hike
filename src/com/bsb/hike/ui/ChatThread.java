@@ -2785,15 +2785,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					// If uploading failed then we try again.
 					if(TextUtils.isEmpty(hikeFile.getFileKey()) && !fileTransferTaskMap.containsKey(convMessage.getMsgID()))
 					{
-						UploadFileTask uploadFileTask = new UploadFileTask(convMessage);
-						uploadFileTask.execute();
+						FileTransferTaskBase uploadTask;
+							uploadTask = new UploadFileTask(convMessage, getApplicationContext());
+						uploadTask.execute();
 					}
 					// Else we open it for the use to see
 					else
 					{
 						Log.d(getClass().getSimpleName(), "Opening file");
 						Intent openFile = new Intent(Intent.ACTION_VIEW);
-						openFile.setDataAndType(Uri.fromFile(sentFile), hikeFile.getFileTypeString());
+							openFile.setDataAndType(Uri.fromFile(sentFile), hikeFile.getFileTypeString());
 						startActivity(openFile);
 					}
 				}

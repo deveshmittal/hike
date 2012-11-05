@@ -66,6 +66,7 @@ public class MessagesAdapter extends BaseAdapter
 		CircularProgress circularProgress;
 		View marginView;
 		TextView participantNameFT;
+		View loadingThumb;
 	}
 
 	private Conversation conversation;
@@ -157,6 +158,7 @@ public class MessagesAdapter extends BaseAdapter
 				holder.fileThumb = (ImageView) v.findViewById(R.id.file_thumb);
 				holder.circularProgress = (CircularProgress) v.findViewById(R.id.file_transfer_progress);
 				holder.marginView = v.findViewById(R.id.margin_view);
+				holder.loadingThumb = v.findViewById(R.id.loading_thumb);
 
 				showFileTransferElements(holder, v, true);
 			case SEND_HIKE:
@@ -452,13 +454,33 @@ public class MessagesAdapter extends BaseAdapter
 							!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))) && 
 							(hikeFile.getThumbnail() != null);
 
-			holder.fileThumb.setBackgroundDrawable(
-					showThumbnail ? 
-							hikeFile.getThumbnail() : 
-								context.getResources().getDrawable(
-										hikeFile.getHikeFileType() == HikeFileType.IMAGE ? 
-												R.drawable.ic_default_img : hikeFile.getHikeFileType() == HikeFileType.VIDEO ? 
-														R.drawable.ic_default_mov : R.drawable.ic_default_audio));
+			if(convMessage.isSent() && 
+					(hikeFile.getHikeFileType() == HikeFileType.IMAGE) && 
+					!showThumbnail)
+			{
+				/*
+				 *  This case should ideally only happen when downloading a picasa image. In that case we
+				 *  won't have a thumbnail initially while the image is being downloaded.
+				 */
+				holder.loadingThumb.setVisibility(View.VISIBLE);
+				holder.fileThumb.setVisibility(View.GONE);
+			}
+			else
+			{
+				if(holder.loadingThumb != null)
+				{
+					holder.loadingThumb.setVisibility(View.GONE);
+					holder.fileThumb.setVisibility(View.VISIBLE);
+				}
+
+				holder.fileThumb.setBackgroundDrawable(
+						showThumbnail ? 
+								hikeFile.getThumbnail() : 
+									context.getResources().getDrawable(
+											hikeFile.getHikeFileType() == HikeFileType.IMAGE ? 
+													R.drawable.ic_default_img : hikeFile.getHikeFileType() == HikeFileType.VIDEO ? 
+															R.drawable.ic_default_mov : R.drawable.ic_default_audio));
+			}
 
 			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb.getLayoutParams();
 			fileThumbParams.width = (int) (showThumbnail ? (100 * Utils.densityMultiplier) : LayoutParams.WRAP_CONTENT);
