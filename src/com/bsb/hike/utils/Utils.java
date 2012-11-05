@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
@@ -50,6 +51,8 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.media.ExifInterface;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -84,9 +87,9 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
-import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
@@ -94,6 +97,7 @@ import com.bsb.hike.tasks.CheckForUpdateTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
+import com.google.android.maps.GeoPoint;
 
 public class Utils
 {
@@ -1264,5 +1268,29 @@ public class Utils
 		convMessage.setInvite(true);
 
 		return convMessage;
+    }
+
+    public static String getAddressFromGeoPoint(GeoPoint geoPoint, Context context)
+    {
+    	try {
+    		Geocoder geoCoder = new Geocoder(context,
+    				Locale.getDefault());
+    		List<Address> addresses = geoCoder.getFromLocation(
+    				geoPoint.getLatitudeE6() / 1E6,
+    				geoPoint.getLongitudeE6() / 1E6, 1);
+
+    		final StringBuilder address = new StringBuilder();
+    		if (!addresses.isEmpty()) {
+    			for (int i = 0; i < addresses.get(0)
+    					.getMaxAddressLineIndex(); i++)
+    				address.append(addresses.get(0).getAddressLine(i)
+    						+ "\n");
+    		}
+
+    		return address.toString();
+    	} catch (IOException e) {
+    		Log.e("Utils", "IOException", e);
+    		return "";
+    	}
     }
 }

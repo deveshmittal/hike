@@ -8,6 +8,9 @@ public class HikeConstants
 	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
 	public static final String APP_TWITTER_SECRET = "LhgJVQ9eAmbb3EGdXpLD8B4RHf9SGPrzSqaOjuKL5o4";
 
+	public static final String MAP_API_KEY_DEBUG = "0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA";
+	public static final String MAP_API_KEY_PROD = "0Luu6V6IYSC3olBhRm5jHLKDIn5_CA3P17l_3Mw";
+
 	public static final String ANDROID = "android";
 
 	public static final String MESSAGE = "msg";
@@ -252,6 +255,8 @@ public class HikeConstants
 		public static final String UPDATE_TO_IGNORE = "updateToIgnore";
 		public static final String INTRO_MESSAGE_ADDED = "introMessageAdded";
 		public static final String TWITTER_VIEW_VISIBLE = "twitterViewVisible";
+		public static final String LATITUDE = "latitude";
+		public static final String LONGITUDE = "longitude";
 	}
 
 	public static final class LogEvent
