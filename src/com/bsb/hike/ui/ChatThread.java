@@ -2431,7 +2431,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 	private void initialiseFileTransfer(String filePath, HikeFileType hikeFileType, String fileKey, String fileType, boolean isRecording)
 	{
-		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber, filePath, fileKey, selectedFile, fileType, hikeFileType, isRecording, this);
+		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber, filePath, fileKey, selectedFile, fileType, hikeFileType, isRecording, getApplicationContext());
 		uploadFileTask.execute();
 	}
 
