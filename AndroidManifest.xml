@@ -18,6 +18,7 @@
 	<uses-permission android:name="android.permission.CALL_PHONE"/>
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 	<!-- C2DM -->
 	<permission android:name="com.bsb.hike.permission.C2D_MESSAGE" android:protectionLevel="signature" />
@@ -29,7 +30,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" 
         android:name="com.bsb.hike.HikeMessengerApp">
-
+		<uses-library android:name="com.google.android.maps" />
+		
         <service
             android:name=".service.HikeService"
             android:enabled="true">            
