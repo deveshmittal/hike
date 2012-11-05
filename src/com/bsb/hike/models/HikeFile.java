@@ -26,11 +26,11 @@ public class HikeFile
 		
 		public static HikeFileType fromString(String fileTypeString)
 		{
-			if(fileTypeString.startsWith("video"))
+			if("video".startsWith(fileTypeString))
 			{
 				return HikeFileType.VIDEO;
 			}
-			else if(fileTypeString.startsWith("audio"))
+			else if("audio".startsWith(fileTypeString))
 			{
 				return HikeFileType.AUDIO;
 			}
