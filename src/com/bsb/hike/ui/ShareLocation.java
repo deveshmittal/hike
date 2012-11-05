@@ -78,6 +78,7 @@ public class ShareLocation extends MapActivity {
 			return;
 		}
 		Intent result = new Intent();
+		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, myMap.getZoomLevel());
 		result.putExtra(HikeConstants.Extras.LATITUDE, selectedGeoPoint.getLatitudeE6());
 		result.putExtra(HikeConstants.Extras.LONGITUDE, selectedGeoPoint.getLongitudeE6());
 		setResult(RESULT_OK, result);

@@ -203,7 +203,7 @@ public class UploadFileTask extends FileTransferTaskBase
 			{
 				fileWasAlreadyUploaded = false;
 
-				JSONObject response = AccountUtils.executeFileTransferRequest(filePath, fileName, this, cancelTask, fileType);
+				JSONObject response = AccountUtils.executeFileTransferRequest(filePath, fileName, null, this, cancelTask, fileType);
 				
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);

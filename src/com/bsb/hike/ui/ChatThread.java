@@ -106,6 +106,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.UploadFileTask;
+import com.bsb.hike.tasks.UploadLocationTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
@@ -607,8 +608,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			{
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 				intent.putExtra(HikeConstants.Extras.FILE_KEY, hikeFile.getFileKey());
-				intent.putExtra(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
-				intent.putExtra(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+				if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
+				{
+					intent.putExtra(HikeConstants.Extras.FILE_PATH, hikeFile.getFilePath());
+					intent.putExtra(HikeConstants.Extras.FILE_TYPE, hikeFile.getFileTypeString());
+				}
+				else
+				{
+					intent.putExtra(HikeConstants.Extras.ZOOM_LEVEL, hikeFile.getZoomLevel());
+					intent.putExtra(HikeConstants.Extras.LATITUDE, hikeFile.getLatitude());
+					intent.putExtra(HikeConstants.Extras.LONGITUDE, hikeFile.getLongitude());
+				}
 			}
 			else
 			{
@@ -956,6 +966,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 
 				// Making sure the file does not get forwarded again on orientation change.
 				intent.removeExtra(HikeConstants.Extras.FILE_PATH);
+			}
+			else if(intent.hasExtra(HikeConstants.Extras.LATITUDE))
+			{
+				String fileKey = intent.getStringExtra(HikeConstants.Extras.FILE_KEY);
+				int latitude = intent.getIntExtra(HikeConstants.Extras.LATITUDE, 0);
+				int longitude = intent.getIntExtra(HikeConstants.Extras.LONGITUDE, 0);
+				int zoomLevel = intent.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
+
+				initialiseLocationTransfer(latitude, longitude, zoomLevel, fileKey);
 			}
 			/*
 			 *  Since the message was not forwarded, we check if we have any drafts saved for this conversation,
@@ -1945,7 +1964,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			return;
 		}
 		final CharSequence[] options = getResources().getStringArray(R.array.file_transfer_items);
-		final int[] optionIcons = {R.drawable.ic_image_item, R.drawable.ic_video_item, R.drawable.ic_music_item, R.drawable.ic_record_item};
+		final int[] optionIcons = {R.drawable.ic_share_location_item, R.drawable.ic_image_item, R.drawable.ic_video_item, R.drawable.ic_music_item, R.drawable.ic_record_item};
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
 
@@ -1980,27 +1999,35 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				Intent newMediaFileIntent = null;
 				switch (which) 
 				{
-				case 1:
+				case 0:
+					requestCode = HikeConstants.SHARE_LOCATION_CODE;
+					break;
+				case 2:
 					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
 					pickIntent.setType("video/*");
 					newMediaFileIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 					break;
 				
-				case 2:
+				case 3:
 					requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
 					pickIntent.setData(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
 					break;
-				case 3:
+				case 4:
 					requestCode = HikeConstants.RECORD_AUDIO_TRANSFER_CODE;
 					break;
 					
-				case 0:
+				case 1:
 				default:
 					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
 					pickIntent.setType("image/*");
 					newMediaFileIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE, null, null);
 					break;
+				}
+				if(requestCode == HikeConstants.SHARE_LOCATION_CODE)
+				{
+					startActivityForResult(new Intent(ChatThread.this, ShareLocation.class), requestCode);
+					return;
 				}
 				pickIntent.setAction(Intent.ACTION_PICK);
 
@@ -2427,12 +2454,27 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 			tempIntent = null;
 			initialiseFileTransfer(filePath, hikeFileType, null, null, false);
 		}
+		else if(requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
+		{
+			int latitude = data.getIntExtra(HikeConstants.Extras.LATITUDE, 0);
+			int longitude = data.getIntExtra(HikeConstants.Extras.LONGITUDE, 0);
+			int zoomLevel = data.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
+
+			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude + " long:" + longitude + " zoom: " + zoomLevel);
+			initialiseLocationTransfer(latitude, longitude, zoomLevel, null);
+		}
 	}
 
 	private void initialiseFileTransfer(String filePath, HikeFileType hikeFileType, String fileKey, String fileType, boolean isRecording)
 	{
 		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber, filePath, fileKey, selectedFile, fileType, hikeFileType, isRecording, getApplicationContext());
 		uploadFileTask.execute();
+	}
+
+	private void initialiseLocationTransfer(int latitude, int longitude, int zoomLevel, String fileKey)
+	{
+		UploadLocationTask uploadLocationTask = new UploadLocationTask(mContactNumber, latitude, longitude, zoomLevel, fileKey, getApplicationContext());
+		uploadLocationTask.execute();
 	}
 
 	@Override
@@ -2786,7 +2828,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					if(TextUtils.isEmpty(hikeFile.getFileKey()) && !fileTransferTaskMap.containsKey(convMessage.getMsgID()))
 					{
 						FileTransferTaskBase uploadTask;
+						if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
+						{
 							uploadTask = new UploadFileTask(convMessage, getApplicationContext());
+						}
+						else
+						{
+							uploadTask = new UploadLocationTask(convMessage, getApplicationContext());
+						}
 						uploadTask.execute();
 					}
 					// Else we open it for the use to see
@@ -2794,7 +2843,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 					{
 						Log.d(getClass().getSimpleName(), "Opening file");
 						Intent openFile = new Intent(Intent.ACTION_VIEW);
+						if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
+						{
 							openFile.setDataAndType(Uri.fromFile(sentFile), hikeFile.getFileTypeString());
+						}
+						else
+						{
+							String uri = String.format("geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude()/1E6, hikeFile.getLongitude()/1E6, hikeFile.getZoomLevel());
+							openFile.setData(Uri.parse(uri));
+						}
 						startActivity(openFile);
 					}
 				}

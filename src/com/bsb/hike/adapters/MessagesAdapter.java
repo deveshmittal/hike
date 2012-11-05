@@ -455,11 +455,11 @@ public class MessagesAdapter extends BaseAdapter
 							(hikeFile.getThumbnail() != null);
 
 			if(convMessage.isSent() && 
-					(hikeFile.getHikeFileType() == HikeFileType.IMAGE) && 
+					(hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile.getHikeFileType() == HikeFileType.LOCATION) && 
 					!showThumbnail)
 			{
 				/*
-				 *  This case should ideally only happen when downloading a picasa image. In that case we
+				 *  This case should ideally only happen when downloading a picasa image or the thumbnail for a location. In that case we
 				 *  won't have a thumbnail initially while the image is being downloaded.
 				 */
 				holder.loadingThumb.setVisibility(View.VISIBLE);

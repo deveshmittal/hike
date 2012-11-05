@@ -1,10 +1,12 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -617,20 +619,11 @@ public class AccountUtils
 		}
 	}
 
-	public static JSONObject executeFileTransferRequest(String filePath, String fileName, UploadFileTask uploadFileTask, AtomicBoolean cancelUpload, String fileType) throws Exception
+	private static HttpURLConnection getFileTransferURLConnection(String fileName, String fileType) throws Exception
 	{
-		// Always start download with some initial progress
-		int progress = HikeConstants.INITIAL_PROGRESS;
-		uploadFileTask.updateProgress(progress);
-
-		File file = new File(filePath);
-		FileInputStream fileInputStream = new FileInputStream(file);
-
-		URL url;
-		url = new URL(FILE_TRANSFER_UPLOAD_BASE + "/user/ft");
+		URL url = new URL(FILE_TRANSFER_UPLOAD_BASE + "/user/ft");
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 		connection.setUseCaches(false);
@@ -645,9 +638,64 @@ public class AccountUtils
 		connection.setRequestProperty("Cookie", "user=" + mToken);
 		connection.setRequestProperty("X-Thumbnail-Required", "0");
 
+		return connection;
+	}
+
+	private static JSONObject getFileTransferResponse(HttpURLConnection connection, FileTransferTaskBase uploadTask, AtomicBoolean cancelUpload) throws Exception
+	{
+		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+		int progress = 90;
+		uploadTask.updateProgress(progress);
+
+		StringBuilder builder = new StringBuilder();
+		CharBuffer target = CharBuffer.allocate(10000);
+		int read = reader.read(target);
+		while (read >= 0)
+		{
+			builder.append(target.array(), 0, read);
+			target.clear();
+			read = reader.read(target);
+			if(cancelUpload.get())
+			{
+				throw new Exception("Upload cancelled by user");
+			}
+		}
+		progress = 100;
+		uploadTask.updateProgress(progress);
+
+		Log.d("AccountUtils", "Response: " + builder.toString());
+		return new JSONObject(builder.toString());
+	}
+
+	public static JSONObject executeFileTransferRequest(String filePath, String fileName, JSONObject request, FileTransferTaskBase uploadFileTask, AtomicBoolean cancelUpload, String fileType) throws Exception
+	{
+		// Always start download with some initial progress
+		int progress = HikeConstants.INITIAL_PROGRESS;
+		uploadFileTask.updateProgress(progress);
+
+		InputStream fileInputStream;
+		int bytesAvailable;
+		int maxSize;
+
+		if(!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType))
+		{
+			File file = new File(filePath);
+			fileInputStream = new FileInputStream(file);
+			bytesAvailable = (int) file.length();
+		}
+		else
+		{
+			byte[] bytes = request.toString().getBytes();
+			fileInputStream = new ByteArrayInputStream(bytes);
+			bytesAvailable = bytes.length;
+		}
+		maxSize = bytesAvailable;
+
+		HttpURLConnection connection = getFileTransferURLConnection(fileName, fileType);
+
 		DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
 
-		int bytesAvailable = (int) file.length();
 		Log.d("Size",bytesAvailable+"");
 
 		int maxBufferSize = HikeConstants.MAX_BUFFER_SIZE_KB * 1024;
@@ -671,7 +719,7 @@ public class AccountUtils
 			gzippedBuffer = GzipByteArrayEntity.gzip(buffer, HTTP.DEFAULT_CONTENT_CHARSET);
 			totalBytesRead += bytesRead;
 
-			progress = HikeConstants.INITIAL_PROGRESS + (bytesRead > 0 ? (int) ((totalBytesRead * 75)/file.length()) : 75);
+			progress = HikeConstants.INITIAL_PROGRESS + (bytesRead > 0 ? (int) ((totalBytesRead * 75)/maxSize) : 75);
 			uploadFileTask.updateProgress(progress);
 
 			Thread.sleep(100);
@@ -681,33 +729,13 @@ public class AccountUtils
 			}
 		}
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-		progress = 90;
-		uploadFileTask.updateProgress(progress);
-
-		StringBuilder builder = new StringBuilder();
-		CharBuffer target = CharBuffer.allocate(10000);
-		int read = reader.read(target);
-		while (read >= 0)
-		{
-			builder.append(target.array(), 0, read);
-			target.clear();
-			read = reader.read(target);
-			if(cancelUpload.get())
-			{
-				throw new Exception("Upload cancelled by user");
-			}
-		}
-		progress = 100;
-		uploadFileTask.updateProgress(progress);
+		JSONObject response = getFileTransferResponse(connection, uploadFileTask, cancelUpload);
 
 		Log.d("HTTP", "request finished");
 		outputStream.flush();
 		outputStream.close();
+		fileInputStream.close();
 
-		Log.d("AccountUtils", "Response: " + builder.toString());
-		JSONObject response = new JSONObject(builder.toString());
 		if ((response == null) || (!"ok".equals(response.optString("stat"))))
 		{
 			throw new NetworkErrorException("Unable to perform request");

@@ -72,6 +72,11 @@ public class MessageMetadata
 		this.newUser = metadata.optString(HikeConstants.NEW_USER).equals("true");
 		this.dndMissedCallNumber = metadata.optString(HikeConstants.METADATA_DND);
 		this.hikeFileList = getHikeFileListFromJSONArray(metadata.optJSONArray(HikeConstants.FILES));
+		if(HikeConstants.LOCATION_CONTENT_TYPE.equals(metadata.optString(HikeConstants.CONTENT_TYPE)))
+		{
+			this.hikeFileList = new ArrayList<HikeFile>();
+			this.hikeFileList.add(new HikeFile(metadata));
+		}
 		this.json = metadata;
 	}
 

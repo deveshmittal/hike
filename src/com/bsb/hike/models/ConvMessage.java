@@ -295,9 +295,12 @@ public class ConvMessage
 		if (metadata != null)
 		{
 			Log.d(getClass().getSimpleName(), "Metadata: " + metadata.toString());
-			isFileTransferMessage = metadata.has(HikeConstants.FILES);
-			Log.d(getClass().getSimpleName(), "File Transfer: " + isFileTransferMessage);
+
 			this.metadata = new MessageMetadata(metadata);
+
+			isFileTransferMessage = this.metadata.getHikeFiles() != null;
+			Log.d(getClass().getSimpleName(), "File Transfer: " + isFileTransferMessage);
+
 			participantInfoState = this.metadata.getParticipantInfoState();
 		}
 	}

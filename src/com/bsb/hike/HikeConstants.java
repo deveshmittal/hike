@@ -55,6 +55,10 @@ public class HikeConstants
 	public static final String ON_HIKE = "onhike";
 	public static final String DND = "dnd";
 	public static final String DND_USERS = "dndUsers";
+	public static final String LATITUDE = "lat";
+	public static final String LONGITUDE = "long";
+	public static final String ZOOM_LEVEL = "zoom";
+	public static final String ADDRESS = "add";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -133,6 +137,7 @@ public class HikeConstants
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 	public static final int MAX_FILE_SIZE = 6*1024*1024;
+	public static final int SHARE_LOCATION_CODE = 1187;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
 	public static final int AUDIO_TRANSFER_CODE = 1190;
@@ -179,6 +184,11 @@ public class HikeConstants
 
 	/*Constant used as a type to signify that this message was added locally by the client when the user signed up*/
 	public static final String INTRO_MESSAGE = "im";
+
+	public static final String LOCATION_CONTENT_TYPE = "text/location";
+	public static final String LOCATION_FILE_NAME = "Location";
+
+	public static final int DEFAULT_ZOOM_LEVEL = 8;
 
 	public static final class Extras
 	{
@@ -257,6 +267,7 @@ public class HikeConstants
 		public static final String TWITTER_VIEW_VISIBLE = "twitterViewVisible";
 		public static final String LATITUDE = "latitude";
 		public static final String LONGITUDE = "longitude";
+		public static final String ZOOM_LEVEL = "zoomLevel";
 	}
 
 	public static final class LogEvent
