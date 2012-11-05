@@ -1,15 +1,22 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.provider.MediaStore;
+import android.provider.MediaStore.MediaColumns;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -40,6 +47,7 @@ public class UploadFileTask extends FileTransferTaskBase
 	private boolean wasFileSaved;
 	private Context context;
 	private ConvMessage convMessage;
+	private Uri picasaUri;
 
 	public UploadFileTask(String msisdn, String filePath, String fileKey, File selectedFile, String fileType, HikeFileType hikeFileType, boolean wasFileSaved, Context context) 
 	{
@@ -58,47 +66,80 @@ public class UploadFileTask extends FileTransferTaskBase
 		this.convMessage = convMessage;
 	}
 
+	public UploadFileTask(Uri picasaUri, HikeFileType hikeFileType, String msisdn, Context context)
+	{
+		this.picasaUri = picasaUri;
+		this.hikeFileType = hikeFileType;
+		this.msisdn = msisdn;
+		this.context = context;
+	}
+
 	@Override
 	protected FTResult doInBackground(Void... params) 
 	{
 		this.cancelTask = new AtomicBoolean(false);
 		try
 		{
-			String fileName;
+			String fileName = null;
 			if(convMessage == null)
 			{
-				Log.d(getClass().getSimpleName(), "File Path; " + filePath);
-				if(filePath == null)
+				if(picasaUri == null)
 				{
-					return FTResult.UPLOAD_FAILED;
-				}
-
-				File file = new File(filePath);
-				fileName = file.getName();
-
-				Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + fileName);
-
-				if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
-				{
-					return FTResult.FILE_TOO_LARGE;
-				}
-
-				// We don't need to save the file if its a recording since its already saved in the hike folder
-				if(TextUtils.isEmpty(fileKey) && !wasFileSaved)
-				{
-					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName, null);
-					Log.d(getClass().getSimpleName(), "Copying file: " + filePath + " to " + selectedFile.getPath());
-					// TODO Check performance on low end phones. If slow, should remove from UI thread.
-					// Saving the file to hike local folder
-					if(!Utils.copyFile(filePath, selectedFile.getPath(), hikeFileType))
+					Log.d(getClass().getSimpleName(), "File Path; " + filePath);
+					if(filePath == null)
 					{
-						return FTResult.READ_FAIL;
+						return FTResult.UPLOAD_FAILED;
 					}
-					filePath = selectedFile.getPath();
+
+					File file = new File(filePath);
+					fileName = file.getName();
+
+					Log.d(getClass().getSimpleName(), "File size: " + file.length() + " File name: " + fileName);
+
+					if(HikeConstants.MAX_FILE_SIZE != -1 && HikeConstants.MAX_FILE_SIZE < file.length())
+					{
+						return FTResult.FILE_TOO_LARGE;
+					}
+
+					// We don't need to save the file if its a recording since its already saved in the hike folder
+					if(TextUtils.isEmpty(fileKey) && !wasFileSaved)
+					{
+						selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName, null);
+						Log.d(getClass().getSimpleName(), "Copying file: " + filePath + " to " + selectedFile.getPath());
+						// TODO Check performance on low end phones. If slow, should remove from UI thread.
+						// Saving the file to hike local folder
+						if(!Utils.copyFile(filePath, selectedFile.getPath(), hikeFileType))
+						{
+							return FTResult.READ_FAIL;
+						}
+						filePath = selectedFile.getPath();
+					}
+					else
+					{
+						selectedFile = new File(filePath);
+					}
 				}
 				else
 				{
-					selectedFile = new File(filePath);
+					String[] filePathColumn = { MediaColumns.DATA, MediaColumns.DISPLAY_NAME };
+					Cursor cursor = context.getContentResolver().query(picasaUri, filePathColumn, null, null, null);
+					// if it is a picasa image on newer devices with OS 3.0 and up
+					if (cursor != null) 
+					{
+						cursor.moveToFirst();
+						int nameIdx = cursor.getColumnIndex(MediaColumns.DISPLAY_NAME);
+						if (nameIdx != -1) 
+						{
+							fileName = cursor.getString(nameIdx);
+						}
+					}
+					selectedFile = Utils.getOutputMediaFile(hikeFileType, fileName, null);
+					if(TextUtils.isEmpty(fileName))
+					{
+						fileName = selectedFile.getName();
+					}
+					downloadPicasaFile(selectedFile, picasaUri);
+					filePath = selectedFile.getPath();
 				}
 
 				Bitmap thumbnail = null;
@@ -192,6 +233,43 @@ public class UploadFileTask extends FileTransferTaskBase
 			return FTResult.UPLOAD_FAILED;
 		}
 		return FTResult.SUCCESS;
+	}
+	
+	private void downloadPicasaFile(File destFile, Uri url) throws Exception
+	{
+		InputStream is = null;
+		OutputStream os = null;
+		try
+		{
+			if (url.toString().startsWith("content://com.google.android.gallery3d")) 
+			{
+				is = context.getContentResolver().openInputStream(url);
+			} 
+			else 
+			{
+				is = new URL(url.toString()).openStream();
+			}
+			os = new FileOutputStream(destFile);
+
+			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+			int len;
+
+			while((len = is.read(buffer)) > 0)
+			{
+				os.write(buffer, 0, len);
+			}
+		}
+		finally
+		{
+			if(os != null)
+			{
+				os.close();
+			}
+			if(is != null)
+			{
+				is.close();
+			}
+		}
 	}
 
 	@Override

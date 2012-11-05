@@ -2391,12 +2391,38 @@ public class ChatThread extends Activity implements HikePubSub.Listener, TextWat
 				Toast.makeText(getApplicationContext(), "Error capturing image", Toast.LENGTH_SHORT).show();
 				return;
 			}
-			String filePath = (data == null || data.getData() == null) ? selectedFile.getAbsolutePath() : Utils.getRealPathFromUri(data.getData(), this);
 
 			HikeFileType hikeFileType = requestCode == HikeConstants.IMAGE_TRANSFER_CODE ? 
 					HikeFileType.IMAGE : 
 						requestCode ==HikeConstants.VIDEO_TRANSFER_CODE ? 
 								HikeFileType.VIDEO : HikeFileType.AUDIO;
+
+			String filePath = null;
+			if(data == null || data.getData() == null)
+			{
+				filePath = selectedFile.getAbsolutePath();
+			}
+			else
+			{
+				Uri selectedFileUri = data.getData();
+				if (selectedFileUri.toString().startsWith("content://com.android.gallery3d.provider"))  
+				{
+					// use the com.google provider, not the com.android provider.
+					selectedFileUri = Uri.parse(selectedFileUri.toString().replace("com.android.gallery3d","com.google.android.gallery3d"));
+				}
+				if (selectedFileUri.toString().startsWith("content://com.google.android.gallery3d"))
+				{
+					// Picasa image
+					UploadFileTask uploadFileTask = new UploadFileTask(selectedFileUri, hikeFileType, mContactNumber, getApplicationContext());
+					uploadFileTask.execute();
+					return;
+				}
+				else
+				{
+					// Local image
+					filePath = Utils.getRealPathFromUri(selectedFileUri, this);
+				}
+			}
 
 			tempIntent = null;
 			initialiseFileTransfer(filePath, hikeFileType, null, null, false);
