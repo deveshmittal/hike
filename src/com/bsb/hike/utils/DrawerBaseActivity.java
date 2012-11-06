@@ -3,12 +3,14 @@ package com.bsb.hike.utils;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.View;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.view.DrawerLayout;
 
@@ -22,7 +24,8 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 			HikePubSub.PROFILE_PIC_CHANGED,
 			HikePubSub.PROFILE_NAME_CHANGED,
 			HikePubSub.ICON_CHANGED,
-			HikePubSub.RECENT_CONTACTS_UPDATED
+			HikePubSub.RECENT_CONTACTS_UPDATED,
+			HikePubSub.FAVORITE_TOGGLED
 			};
 
 	@Override
@@ -187,6 +190,25 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 				@Override
 				public void run() {
 					parentLayout.updateRecentContacts((String) object);
+				}
+			});
+		}
+		else if (HikePubSub.FAVORITE_TOGGLED.equals(type))
+		{
+			final Pair<ContactInfo, Boolean> favoriteToggle = (Pair<ContactInfo, Boolean>) object;
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					if(favoriteToggle.second)
+					{
+						parentLayout.addToFavorite(favoriteToggle.first);
+					}
+					else
+					{
+						parentLayout.removeFromFavorite(favoriteToggle.first);
+					}
 				}
 			});
 		}

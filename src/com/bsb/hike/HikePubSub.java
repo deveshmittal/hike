@@ -130,6 +130,8 @@ public class HikePubSub implements Runnable
 
 	public static final String MUTE_CONVERSATION_TOGGLED = "mutedConversationToggled";
 
+	public static final String FAVORITE_TOGGLED = "favoriteToggled";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

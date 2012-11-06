@@ -68,6 +68,16 @@ public class DrawerFavoritesAdapter extends BaseAdapter
 		notifyDataSetChanged();
 	}
 
+	public void removeFavoriteItem(ContactInfo contactInfo)
+	{
+		contactList.remove(contactInfo);
+		if(contactList.isEmpty())
+		{
+			contactList.add(new ContactInfo(EMPTY_FAVORITES_ID, null, null, null));
+		}
+		notifyDataSetChanged();
+	}
+
 	public void updateRecentContactsList(ContactInfo contactInfo)
 	{
 		// Return if object is null or we have a non hike contact

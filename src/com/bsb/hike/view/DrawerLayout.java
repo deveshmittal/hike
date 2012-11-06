@@ -216,7 +216,7 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 		if(viewType == FavoriteAdapterViewType.RECENT)
 		{
 			ContactInfo contactInfo = drawerFavoritesAdapter.getItem(position);
-			HikeUserDatabase.getInstance().setContactAsFavorite(contactInfo.getMsisdn());
+			HikeUserDatabase.getInstance().toggleContactFavorite(contactInfo.getMsisdn(), true);
 			drawerFavoritesAdapter.addFavoriteItem(contactInfo);
 		}
 		else if(viewType ==  FavoriteAdapterViewType.FAVORITE)
@@ -225,6 +225,16 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 			intent.setClass(getContext(), ChatThread.class);
 			getContext().startActivity(intent);
 		}
+	}
+
+	public void removeFromFavorite(ContactInfo contactInfo)
+	{
+		drawerFavoritesAdapter.removeFavoriteItem(contactInfo);
+	}
+
+	public void addToFavorite(ContactInfo contactInfo)
+	{
+		drawerFavoritesAdapter.addFavoriteItem(contactInfo);
 	}
 
 	public void refreshFavoritesDrawer()

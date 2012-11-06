@@ -175,4 +175,8 @@
 	<string name="share_location">Share Location</string>
 	<string name="group_mute">This conversation is muted.</string>
 	<string name="poke_msg">Buzz!</string>
+	<string name="invite_to_hike">Invite to hike</string>
+	<string name="block_user">Block this user</string>
+	<string name="unblock_user">Unblock this user</string>
+	<string name="user_info">User Info</string>
 </resources>

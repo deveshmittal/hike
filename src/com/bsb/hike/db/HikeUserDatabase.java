@@ -714,12 +714,29 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void setContactAsFavorite(String msisdn)
+	public void toggleContactFavorite(String msisdn, boolean favorite)
 	{
 		ContentValues contentValues = new ContentValues(1);
-		contentValues.put(DBConstants.FAVORITE, 1);
+		contentValues.put(DBConstants.FAVORITE, favorite);
 
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[]{msisdn});
+	}
+
+	public boolean isContactFavorite(String msisdn)
+	{
+		Cursor c = null;
+		try
+		{
+			c = mDb.query(DBConstants.USERS_TABLE, new String[] {DBConstants.MSISDN}, DBConstants.MSISDN + "=? AND " + DBConstants.FAVORITE + "=1", new String[] {msisdn}, null, null, null);
+			return c.moveToFirst();
+		}
+		finally
+		{
+			if(c != null)
+			{
+				c.close();
+			}
+		}
 	}
 
 	public List<ContactInfo> getNonHikeContactsFromListOfNumbers(List<String> numbersList)

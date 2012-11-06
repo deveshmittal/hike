@@ -115,10 +115,9 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
-import com.bsb.hike.view.NudgeLabel;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.bsb.hike.view.NudgeLabel;
 import com.bsb.hike.view.NudgeLabel.DoubleTapListener;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class ChatThread extends Activity implements 
 				HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnItemClickListener, DoubleTapListener
@@ -679,31 +678,7 @@ public class ChatThread extends Activity implements
 		    return false;
 		}
 
-		// Opening the group info screen when the menu button is tapped
-		if(mConversation instanceof GroupConversation)
-		{
-			onTitleIconClick(findViewById(R.id.title_image_btn));
-			return true;
-		}
-		boolean amIGroupOwner = false;
-		if(mConversation instanceof GroupConversation)
-		{
-			amIGroupOwner = ((GroupConversation)mConversation).getGroupOwner().equals(myInfo.getContactInfo().getMsisdn());
-		}
-		/* don't show a menu item for unblock (since the overlay will be present */
-		MenuItem item = menu.findItem(R.id.block_menu);
-		item.setTitle(mConversation instanceof GroupConversation ? R.string.block_owner : R.string.block_title);
-		item.setVisible(!mUserIsBlocked && !amIGroupOwner);
-
-		MenuItem item2 = menu.findItem(R.id.add_contact_menu);
-		item2.setVisible(mConversation!= null && 
-				TextUtils.isEmpty(mConversation.getContactName()) && 
-				!(mConversation instanceof GroupConversation) && 
-				!mUserIsBlocked);
-
-		MenuItem item4 = menu.findItem(R.id.call);
-		item4.setVisible(!mUserIsBlocked && !(mConversation instanceof GroupConversation));
-
+		onTitleIconClick(findViewById(R.id.title_image_btn));
 		return true;
 	}
 
@@ -1103,6 +1078,13 @@ public class ChatThread extends Activity implements
 
 		mLabel = mConversation.getLabel();
 
+		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
+		titleIconView.setVisibility(View.VISIBLE);
+		titleIconView.setImageResource(R.drawable.ic_i);
+
+		View btnBar = findViewById(R.id.button_bar);
+		btnBar.setVisibility(View.VISIBLE);
+
 		mLabelView.setText(mLabel);
 		((NudgeLabel)mLabelView).setDoublTap(this);
 
@@ -1113,7 +1095,6 @@ public class ChatThread extends Activity implements
 			showOverlay(true);
 		}
 
-		changeInviteButtonVisibility();
 		if((mConversation instanceof GroupConversation) && !((GroupConversation)mConversation).getIsGroupAlive())
 		{
 			groupChatDead();
@@ -1476,7 +1457,6 @@ public class ChatThread extends Activity implements
 			{
 				public void run()
 				{
-					changeInviteButtonVisibility();
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
 				}
@@ -1923,11 +1903,11 @@ public class ChatThread extends Activity implements
 			dismissToolTip();
 			if (!(mConversation instanceof GroupConversation)) 
 			{
-				Utils.logEvent(ChatThread.this,
-						HikeConstants.LogEvent.CHAT_INVITE_TOP_BUTTON);
-				inviteUser();
-				// Tracking the invite event for fiksu
-				FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE, HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
+				Intent intent = new Intent();
+				intent.setClass(ChatThread.this, ProfileActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.putExtra(HikeConstants.Extras.CONTACT_INFO, mContactNumber);
+				startActivity(intent);
 			}
 			else
 			{

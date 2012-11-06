@@ -23,6 +23,8 @@ import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -62,6 +64,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
+import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class ProfileActivity extends DrawerBaseActivity implements FinishableEvent, android.content.DialogInterface.OnClickListener, Listener
 {
@@ -98,6 +101,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 	private ViewGroup participantNameContainer;
 	private ProfileItem[] items;
 	private int lastSavedGender;
+
 	private String[] groupInfoPubSubListeners = {
 			HikePubSub.ICON_CHANGED, 
 			HikePubSub.GROUP_NAME_CHANGED, 
@@ -105,14 +109,25 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 			HikePubSub.PARTICIPANT_JOINED_GROUP, 
 			HikePubSub.PARTICIPANT_LEFT_GROUP
 	};
+
+	private String[] contactInfoPubSubListeners = {
+			HikePubSub.ICON_CHANGED, 
+			HikePubSub.CONTACT_ADDED, 
+			HikePubSub.USER_JOINED, 
+			HikePubSub.USER_LEFT
+	};
 	private GroupConversation groupConversation;
 	private ImageButton topBarBtn;
+	private ContactInfo contactInfo;
+	private boolean isFavorite;
+	private boolean isBlocked;
 
 	private static enum ProfileType
 	{
 		USER_PROFILE, // The user profile screen
 		USER_PROFILE_EDIT, // The user profile edit screen
-		GROUP_INFO // The group info screen
+		GROUP_INFO, // The group info screen
+		CONTACT_INFO // Contact info screen
 	};
 
 	private class ActivityState
@@ -152,6 +167,10 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		{
 			HikeMessengerApp.getPubSub().removeListeners(this, groupInfoPubSubListeners);
 		}
+		else if(profileType == ProfileType.CONTACT_INFO)
+		{
+			HikeMessengerApp.getPubSub().removeListeners(this, contactInfoPubSubListeners);
+		}
 		mActivityState = null;
 	}
 
@@ -187,6 +206,12 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 			HikeMessengerApp.getPubSub().addListeners(this, groupInfoPubSubListeners);
 			setupGroupProfileScreen();
 		}
+		else if(getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO))
+		{
+			this.profileType = ProfileType.CONTACT_INFO;
+			HikeMessengerApp.getPubSub().addListeners(this, contactInfoPubSubListeners);
+			setupContactProfileScreen();
+		}
 		else
 		{
 			httpRequestURL = "/account";
@@ -203,6 +228,36 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 				setupProfileScreen(savedInstanceState);
 			}
 		}
+	}
+
+	private void setupContactProfileScreen()
+	{
+		setContentView(R.layout.contact_info);
+
+		this.mLocalMSISDN = getIntent().getStringExtra(HikeConstants.Extras.CONTACT_INFO);
+
+		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn2);
+
+		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(mLocalMSISDN, false);
+		isFavorite = HikeUserDatabase.getInstance().isContactFavorite(mLocalMSISDN);
+
+		topBarBtn.setImageResource(isFavorite ? R.drawable.ic_favorite : R.drawable.ic_not_favorite);
+		topBarBtn.setVisibility(View.VISIBLE);
+
+		findViewById(R.id.add_to_contacts).setVisibility(!TextUtils.isEmpty(contactInfo.getName()) ? View.GONE : View.VISIBLE);
+		findViewById(R.id.invite_to_hike_btn).setVisibility(contactInfo.isOnhike() ? View.GONE : View.VISIBLE);
+
+		TextView mTitleView = (TextView) findViewById(R.id.title);
+		mTitleView.setText(R.string.user_info);
+
+		mIconView = (ImageView) findViewById(R.id.profile);
+		mIconView.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(mLocalMSISDN));
+
+		isBlocked = HikeUserDatabase.getInstance().isBlocked(mLocalMSISDN);
+		((TextView) findViewById(R.id.block_user_btn)).setText(!isBlocked ? R.string.block_user : R.string.unblock_user);
+
+		((TextView) findViewById(R.id.name_current)).setText(TextUtils.isEmpty(contactInfo.getName()) ? mLocalMSISDN : contactInfo.getName());
 	}
 
 	private void setupGroupProfileScreen()
@@ -245,6 +300,8 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		participantList.put(userInfo.getContactInfo().getMsisdn(), userInfo);
 
 		groupOwner = groupConversation.getGroupOwner();
+
+		isBlocked = HikeUserDatabase.getInstance().isBlocked(groupOwner);
 
 		Set<String> activeParticipants = new HashSet<String>();
 		activeParticipants.add(groupOwner);
@@ -294,7 +351,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		{
 			blockGroupOwner.setVisibility(View.VISIBLE);
 			findViewById(R.id.empty_horizontal_space).setVisibility(View.VISIBLE);
-			blockGroupOwner.setText(HikeUserDatabase.getInstance().isBlocked(groupOwner) ? 
+			blockGroupOwner.setText(isBlocked ? 
 					R.string.unblock_owner : R.string.block_owner);
 		}
 		// Disable the add participants item
@@ -338,12 +395,23 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 	{
 		if(v.getId() == R.id.title_image_btn2)
 		{
+			if(profileType == ProfileType.GROUP_INFO)
+			{
 			groupConversation.setIsMuted(!groupConversation.isMuted());
 			HikeConversationsDatabase.getInstance().toggleGroupMute(groupConversation.getMsisdn(), groupConversation.isMuted());
 			topBarBtn.setImageResource(groupConversation.isMuted() ? R.drawable.ic_group_muted : R.drawable.ic_group_not_muted);
 
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.MUTE_CONVERSATION_TOGGLED, new Pair<String, Boolean>(groupConversation.getMsisdn(), groupConversation.isMuted()));
+			}
+			else if(profileType == ProfileType.CONTACT_INFO)
+			{
+				isFavorite = !isFavorite;
+				HikeUserDatabase.getInstance().toggleContactFavorite(contactInfo.getMsisdn(), isFavorite);
+				((ImageView) v).setImageResource(isFavorite ? R.drawable.ic_favorite : R.drawable.ic_not_favorite);
+				Pair<ContactInfo, Boolean> favoriteToggle = new Pair<ContactInfo, Boolean>(contactInfo, isFavorite);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			}
 		}
 	}
 
@@ -863,9 +931,9 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 	public void onBlockGroupOwnerClicked(View v)
 	{
 		Button blockBtn = (Button) v;
-		boolean isBlocked = HikeUserDatabase.getInstance().isBlocked(groupOwner);
 		HikeMessengerApp.getPubSub().publish(isBlocked ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER, this.groupOwner);
-		blockBtn.setText(isBlocked ? R.string.block_owner : R.string.unblock_owner);
+		isBlocked = !isBlocked;
+		blockBtn.setText(!isBlocked ? R.string.block_owner : R.string.unblock_owner);
 	}
 
 	public void onEditGroupNameClicked(View v)
@@ -879,6 +947,41 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		mNameEdit.requestFocus();
 	}
 
+	public void onAddToContactClicked(View v)
+	{
+		Utils.logEvent(this, HikeConstants.LogEvent.MENU_ADD_TO_CONTACTS);
+		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
+		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
+		i.putExtra(Insert.PHONE, mLocalMSISDN);
+		startActivity(i);
+	}
+
+	public void onInviteToHikeClicked(View v)
+	{
+		FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE, HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.makeHike2SMSInviteMessage(contactInfo.getMsisdn(), this).serialize());
+
+		Toast toast = Toast.makeText(ProfileActivity.this, R.string.invite_sent, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.BOTTOM, 0, 0);
+		toast.show();
+	}
+
+	public void onCallClicked(View v)
+	{
+		Utils.logEvent(this, HikeConstants.LogEvent.MENU_CALL);
+		Intent callIntent = new Intent(Intent.ACTION_CALL);
+        callIntent.setData(Uri.parse("tel:"+mLocalMSISDN));
+        startActivity(callIntent);
+	}
+	
+	public void onBlockUserClicked(View v)
+	{
+		Button blockBtn = (Button) v;
+		HikeMessengerApp.getPubSub().publish(isBlocked ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER, this.mLocalMSISDN);
+		isBlocked = !isBlocked;
+		blockBtn.setText(!isBlocked ? R.string.block_owner : R.string.unblock_owner);
+	}
+
 	@Override
 	public void onEventReceived(String type, Object object) {
 		// Only execute the super class method if we are in a drawer activity
@@ -886,7 +989,7 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		{
 			super.onEventReceived(type, object);
 		}
-		if(mLocalMSISDN == null || profileType != ProfileType.GROUP_INFO)
+		if(mLocalMSISDN == null || (profileType != ProfileType.GROUP_INFO && profileType != ProfileType.CONTACT_INFO))
 		{
 			Log.w(getClass().getSimpleName(), "The msisdn is null, we are doing something wrong.." + object);
 			return;
@@ -1004,6 +1107,39 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 					}
 				});
 			}
+		}
+		else if(HikePubSub.CONTACT_ADDED.equals(type))
+		{
+			final ContactInfo contactInfo = (ContactInfo) object;
+			if (!this.mLocalMSISDN.equals(contactInfo.getMsisdn())) 
+			{
+				return;
+			}
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					((TextView) findViewById(R.id.name_current)).setText(ProfileActivity.this.contactInfo.getName());
+					findViewById(R.id.add_to_contacts).setVisibility(View.GONE);
+				}
+			});
+		}
+		else if(HikePubSub.USER_JOINED.equals(type) || HikePubSub.USER_LEFT.equals(type))
+		{
+			if(!mLocalMSISDN.equals((String)object))
+			{
+				return;
+			}
+			final boolean userJoin = HikePubSub.USER_JOINED.equals(type);
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					findViewById(R.id.invite_to_hike_btn).setVisibility(userJoin ? View.GONE : View.VISIBLE);
+				}
+			});
 		}
 	}
 }
