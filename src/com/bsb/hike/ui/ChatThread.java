@@ -49,6 +49,8 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -116,11 +118,9 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
-import com.bsb.hike.view.NudgeLabel;
-import com.bsb.hike.view.NudgeLabel.DoubleTapListener;
 
 public class ChatThread extends Activity implements 
-				HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnItemClickListener, DoubleTapListener
+				HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnItemClickListener, OnTouchListener
 {
 	private HikePubSub mPubSub;
 
@@ -264,6 +264,8 @@ public class ChatThread extends Activity implements
 	private ViewGroup pageIndicatorContainer;
 
 	private boolean wasOrientationChanged = false;
+
+	private GestureDetector gestureDetector;
 
 	/*
 	 *  Required for saving the current intent if the user has the option "Do not keep background activities checked.
@@ -1085,8 +1087,9 @@ public class ChatThread extends Activity implements
 		View btnBar = findViewById(R.id.button_bar);
 		btnBar.setVisibility(View.VISIBLE);
 
+		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
 		mLabelView.setText(mLabel);
-		((NudgeLabel)mLabelView).setDoublTap(this);
+		mLabelView.setOnTouchListener(this);
 
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		mUserIsBlocked = db.isBlocked(getMsisdnMainUser());
@@ -2932,7 +2935,6 @@ public class ChatThread extends Activity implements
 		}
 	}
 
-	@Override
 	public void sendPoke() 
 	{
 		long time = (long) System.currentTimeMillis() / 1000;
@@ -2955,4 +2957,21 @@ public class ChatThread extends Activity implements
 		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 		vibrator.vibrate(100);
 	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		gestureDetector.onTouchEvent(event);
+		return true;
+	}
+
+	SimpleOnGestureListener simpleOnGestureListener = new SimpleOnGestureListener() {
+
+		@Override
+		public boolean onDoubleTap(MotionEvent e) {
+			Log.d(getClass().getSimpleName(), "Double Tap event");
+			sendPoke();
+			return true;
+		}
+		
+	};
 }
