@@ -251,7 +251,9 @@ public class ChatThread extends Activity implements
 			HikePubSub.UPLOAD_FINISHED, 
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED,
 			HikePubSub.FILE_MESSAGE_CREATED,
-			HikePubSub.MUTE_CONVERSATION_TOGGLED
+			HikePubSub.MUTE_CONVERSATION_TOGGLED,
+			HikePubSub.BLOCK_USER,
+			HikePubSub.UNBLOCK_USER
 	};
 
 	private View currentEmoticonCategorySelected;
@@ -734,10 +736,8 @@ public class ChatThread extends Activity implements
 
 		if (item.getItemId() == R.id.block_menu)
 		{
-				Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_BLOCK);
 				mPubSub.publish(HikePubSub.BLOCK_USER, getMsisdnMainUser());
-				mUserIsBlocked = true;
-				showOverlay(true);
+				blockUser();
 		}
 		else if(item.getItemId() == R.id.add_contact_menu)
 		{
@@ -758,15 +758,27 @@ public class ChatThread extends Activity implements
 		return true;
 	}
 
+	private void blockUser()
+	{
+		Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_BLOCK);
+		mUserIsBlocked = true;
+		showOverlay(true);
+	}
+
+	private void unblockUser()
+	{
+		mUserIsBlocked = false;
+		mComposeView.setEnabled(true);
+		hideOverlay();
+	}
+
 	public void onOverlayButtonClick(View v)
 	{
 		/* user clicked the unblock button in the chat-screen */
 		if (v.getId() != R.id.overlay_layout && blockOverlay) 
 		{
 			mPubSub.publish(HikePubSub.UNBLOCK_USER, getMsisdnMainUser());
-			mUserIsBlocked = false;
-			mComposeView.setEnabled(true);
-			hideOverlay();
+			unblockUser();
 		}
 		else if(v.getId() != R.id.overlay_layout)
 		{
@@ -1574,6 +1586,32 @@ public class ChatThread extends Activity implements
 				public void run() 
 				{
 					toggleConversationMuteViewVisibility(isMuted);
+				}
+			});
+		}
+		else if (HikePubSub.BLOCK_USER.equals(type) || HikePubSub.UNBLOCK_USER.equalsIgnoreCase(type))
+		{
+			String msisdn = (String) object;
+			final boolean blocked = HikePubSub.BLOCK_USER.equals(type);
+
+			if(!msisdn.equals(getMsisdnMainUser()))
+			{
+				return;
+			}
+
+			runOnUiThread(new Runnable() 
+			{
+				@Override
+				public void run() 
+				{
+					if(blocked)
+					{
+						blockUser();
+					}
+					else
+					{
+						unblockUser();
+					}
 				}
 			});
 		}
