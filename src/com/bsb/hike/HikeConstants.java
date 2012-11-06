@@ -191,6 +191,11 @@ public class HikeConstants
 
 	public static final int DEFAULT_ZOOM_LEVEL = 8;
 
+	// Picasa URI start for JB devices
+	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
+	// Picasa URI start for other devices
+	public static final String OTHER_PICASA_URI_START = "content://com.google.android.gallery3d";
+
 	public static final class Extras
 	{
 		public static final String MSISDN = "msisdn";

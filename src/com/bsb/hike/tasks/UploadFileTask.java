@@ -269,7 +269,8 @@ public class UploadFileTask extends FileTransferTaskBase
 		OutputStream os = null;
 		try
 		{
-			if (url.toString().startsWith("content://com.google.android.gallery3d")) 
+			if (url.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START)
+					|| url.toString().startsWith(HikeConstants.JB_PICASA_URI_START)) 
 			{
 				is = context.getContentResolver().openInputStream(url);
 			} 

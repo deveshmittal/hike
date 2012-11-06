@@ -2466,7 +2466,9 @@ public class ChatThread extends Activity implements
 					// use the com.google provider, not the com.android provider.
 					selectedFileUri = Uri.parse(selectedFileUri.toString().replace("com.android.gallery3d","com.google.android.gallery3d"));
 				}
-				if (selectedFileUri.toString().startsWith("content://com.google.android.gallery3d"))
+
+				if (selectedFileUri.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START) 
+						|| selectedFileUri.toString().startsWith(HikeConstants.JB_PICASA_URI_START))
 				{
 					// Picasa image
 					UploadFileTask uploadFileTask = new UploadFileTask(selectedFileUri, hikeFileType, mContactNumber, getApplicationContext());
