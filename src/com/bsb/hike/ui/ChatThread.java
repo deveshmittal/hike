@@ -15,7 +15,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -69,7 +68,6 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -106,7 +104,6 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
-import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.tasks.UploadLocationTask;
@@ -120,7 +117,7 @@ import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 public class ChatThread extends Activity implements 
-				HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnItemClickListener, OnTouchListener
+				HikePubSub.Listener, TextWatcher, OnEditorActionListener, OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent, OnTouchListener
 {
 	private HikePubSub mPubSub;
 
@@ -1089,7 +1086,6 @@ public class ChatThread extends Activity implements
 
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
 		mLabelView.setText(mLabel);
-		mLabelView.setOnTouchListener(this);
 
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		mUserIsBlocked = db.isBlocked(getMsisdnMainUser());
@@ -1107,7 +1103,7 @@ public class ChatThread extends Activity implements
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
-		mConversationsView.setOnItemClickListener(this);
+		mConversationsView.setOnTouchListener(this);
 
 		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE) 
 		{
@@ -2857,88 +2853,6 @@ public class ChatThread extends Activity implements
 	@Override
 	public void onFinish(boolean success) {}
 
-	@Override
-	public void onItemClick(AdapterView<?> adapterView, View v, int position, long id) 
-	{
-		try
-		{
-			ConvMessage convMessage = (ConvMessage) ((MessagesAdapter)adapterView.getAdapter()).getItem(position);
-			if(convMessage != null && convMessage.isFileTransferMessage())
-			{
-				if(Utils.getExternalStorageState() == ExternalStorageState.NONE)
-				{
-					Toast.makeText(getApplicationContext(), R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-					return;
-				}
-				Log.d(getClass().getSimpleName(), "Message: " + convMessage.getMessage());
-				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-				if(convMessage.isSent())
-				{
-					Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
-					File sentFile = hikeFile.getFile();
-					// If uploading failed then we try again.
-					if(TextUtils.isEmpty(hikeFile.getFileKey()) && !fileTransferTaskMap.containsKey(convMessage.getMsgID()))
-					{
-						FileTransferTaskBase uploadTask;
-						if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
-						{
-							uploadTask = new UploadFileTask(convMessage, getApplicationContext());
-						}
-						else
-						{
-							uploadTask = new UploadLocationTask(convMessage, getApplicationContext());
-						}
-						uploadTask.execute();
-					}
-					// Else we open it for the use to see
-					else
-					{
-						openFile(hikeFile, convMessage);
-					}
-				}
-				else
-				{
-					File receivedFile = hikeFile.getFile();
-					if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) 
-							&& (receivedFile.exists() || hikeFile.getHikeFileType() == HikeFileType.LOCATION))
-					{
-						openFile(hikeFile, convMessage);
-					}
-					else if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
-					{
-						Log.d(getClass().getSimpleName(), "HIKEFILE: NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey() + " TYPE: " + hikeFile.getFileTypeString());
-						DownloadFileTask downloadFile = new DownloadFileTask(getApplicationContext(), receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
-						downloadFile.execute();
-						fileTransferTaskMap.put(convMessage.getMsgID(), downloadFile);
-						mAdapter.notifyDataSetChanged();
-					}
-				}
-			}
-		}
-		catch(ActivityNotFoundException e)
-		{
-			Log.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
-			Toast.makeText(ChatThread.this, "Unable to open file (Unknown format)", Toast.LENGTH_SHORT).show();
-		}
-	}
-
-	private void openFile(HikeFile hikeFile, ConvMessage convMessage)
-	{
-		File receivedFile = hikeFile.getFile();
-		Log.d(getClass().getSimpleName(), "Opening file");
-		Intent openFile = new Intent(Intent.ACTION_VIEW);
-		if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
-		{
-			openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
-		}
-		else
-		{
-			String uri = String.format("geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude(), hikeFile.getLongitude(), hikeFile.getZoomLevel());
-			openFile.setData(Uri.parse(uri));
-		}
-		startActivity(openFile);
-	}
-
 	public void sendPoke() 
 	{
 		long time = (long) System.currentTimeMillis() / 1000;
@@ -2958,21 +2872,33 @@ public class ChatThread extends Activity implements
 		}
 		sendMessage(convMessage);
 
+		/*
+		 * Added to make sure we scroll to the end when we add the poke
+		 * message.
+		 */
+		new Handler().postDelayed(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				mConversationsView.smoothScrollBy(-1, 1);
+				mConversationsView.smoothScrollToPosition(mAdapter.getCount());
+			}
+		}, 10);
+
 		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 		vibrator.vibrate(100);
 	}
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		gestureDetector.onTouchEvent(event);
-		return true;
+		return gestureDetector.onTouchEvent(event);
 	}
 
 	SimpleOnGestureListener simpleOnGestureListener = new SimpleOnGestureListener() {
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
-			Log.d(getClass().getSimpleName(), "Double Tap event");
 			sendPoke();
 			return true;
 		}

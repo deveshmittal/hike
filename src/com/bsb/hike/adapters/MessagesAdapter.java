@@ -1,18 +1,24 @@
 package com.bsb.hike.adapters;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -21,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -33,13 +40,17 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadFileTask;
+import com.bsb.hike.tasks.UploadFileTask;
+import com.bsb.hike.tasks.UploadLocationTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CircularProgress;
 
-public class MessagesAdapter extends BaseAdapter
+public class MessagesAdapter extends BaseAdapter implements OnClickListener
 {
 
 	private enum ViewType
@@ -526,6 +537,8 @@ public class MessagesAdapter extends BaseAdapter
 						((GroupConversation) conversation).getGroupParticipant(convMessage.getGroupParticipantMsisdn()).getContactInfo().getFirstName() + HikeConstants.SEPARATOR);
 				holder.participantNameFT.setVisibility(View.VISIBLE);
 			}
+			holder.messageContainer.setTag(convMessage);
+			holder.messageContainer.setOnClickListener(this);
 		}
 		else if (metadata != null && metadata.isPokeMessage())
 		{
@@ -674,5 +687,87 @@ public class MessagesAdapter extends BaseAdapter
 	public boolean isEmpty()
 	{
 		return getCount() == 0;
+	}
+
+	@Override
+	public void onClick(View v) 
+	{
+		try
+		{
+			ConvMessage convMessage = (ConvMessage) v.getTag();
+			if(convMessage != null && convMessage.isFileTransferMessage())
+			{
+				if(Utils.getExternalStorageState() == ExternalStorageState.NONE)
+				{
+					Toast.makeText(context, R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+					return;
+				}
+				Log.d(getClass().getSimpleName(), "Message: " + convMessage.getMessage());
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+				if(convMessage.isSent())
+				{
+					Log.d(getClass().getSimpleName(), "Hike File name: " + hikeFile.getFileName() + " File key: " + hikeFile.getFileKey());
+					// If uploading failed then we try again.
+					if(TextUtils.isEmpty(hikeFile.getFileKey()) && !ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
+					{
+						FileTransferTaskBase uploadTask;
+						if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
+						{
+							uploadTask = new UploadFileTask(convMessage, context);
+						}
+						else
+						{
+							uploadTask = new UploadLocationTask(convMessage, context);
+						}
+						uploadTask.execute();
+					}
+					// Else we open it for the use to see
+					else
+					{
+						openFile(hikeFile, convMessage);
+					}
+				}
+				else
+				{
+					File receivedFile = hikeFile.getFile();
+					if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) 
+							&& (receivedFile.exists() || hikeFile.getHikeFileType() == HikeFileType.LOCATION))
+					{
+						openFile(hikeFile, convMessage);
+					}
+					else if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
+					{
+						Log.d(getClass().getSimpleName(), "HIKEFILE: NAME: " + hikeFile.getFileName() + " KEY: " + hikeFile.getFileKey() + " TYPE: " + hikeFile.getFileTypeString());
+						DownloadFileTask downloadFile = new DownloadFileTask(context, receivedFile, hikeFile.getFileKey(), convMessage.getMsgID());
+						downloadFile.execute();
+						ChatThread.fileTransferTaskMap.put(convMessage.getMsgID(), downloadFile);
+						notifyDataSetChanged();
+					}
+				}
+			}
+		}
+		catch(ActivityNotFoundException e)
+		{
+			Log.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
+			Toast.makeText(context, "Unable to open file (Unknown format)", Toast.LENGTH_SHORT).show();
+		}
+	
+	}
+	
+	private void openFile(HikeFile hikeFile, ConvMessage convMessage)
+	{
+		File receivedFile = hikeFile.getFile();
+		Log.d(getClass().getSimpleName(), "Opening file");
+		Intent openFile = new Intent(Intent.ACTION_VIEW);
+		if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
+		{
+			openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
+		}
+		else
+		{
+			String uri = String.format("geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude(), hikeFile.getLongitude(), hikeFile.getZoomLevel());
+			openFile.setData(Uri.parse(uri));
+		}
+		context.startActivity(openFile);
 	}
 }
