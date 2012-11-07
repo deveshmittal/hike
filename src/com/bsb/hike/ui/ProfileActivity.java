@@ -398,7 +398,6 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 			if(profileType == ProfileType.GROUP_INFO)
 			{
 			groupConversation.setIsMuted(!groupConversation.isMuted());
-			HikeConversationsDatabase.getInstance().toggleGroupMute(groupConversation.getMsisdn(), groupConversation.isMuted());
 			topBarBtn.setImageResource(groupConversation.isMuted() ? R.drawable.ic_group_muted : R.drawable.ic_group_not_muted);
 
 			HikeMessengerApp.getPubSub().publish(

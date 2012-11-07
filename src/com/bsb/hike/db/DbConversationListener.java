@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -53,6 +54,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.UNBLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		mPubSub.addListener(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, this);
+		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
 	}
 
 	@Override
@@ -166,6 +168,18 @@ public class DbConversationListener implements Listener
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 		}
+		else if(HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
+		{
+			Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;
+
+			String id = groupMute.first;
+			boolean mute = groupMute.second;
+
+			mConversationDb.toggleGroupMute(id, mute);
+
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH, serializeMsg(mute ? 
+					HikeConstants.MqttMessageTypes.MUTE : HikeConstants.MqttMessageTypes.UNMUTE, id));
+		}
 	}
 
 	/*
@@ -184,6 +198,22 @@ public class DbConversationListener implements Listener
 		}
 	}
 
+	private JSONObject serializeMsg(String type, String id)
+	{
+		JSONObject obj = new JSONObject();
+		JSONObject data = new JSONObject();
+		try
+		{
+			obj.put(HikeConstants.TYPE, type);
+			data.put(HikeConstants.ID, id);
+			obj.put(HikeConstants.DATA, data);
+		}
+		catch (JSONException e)
+		{
+			Log.e(getClass().getSimpleName(), "Invalid json", e);
+		}
+		return obj;
+	}
 	private JSONObject blockUnblockSerialize(String type, String msisdn) 
 	{
 		JSONObject obj = new JSONObject();

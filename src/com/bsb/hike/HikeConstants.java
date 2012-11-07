@@ -60,6 +60,7 @@ public class HikeConstants
 	public static final String ZOOM_LEVEL = "zoom";
 	public static final String ADDRESS = "add";
 	public static final String POKE = "poke";
+	public static final String ID = "id";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -431,6 +432,8 @@ public class HikeConstants
 		public static final String REQUEST_ACCOUNT_INFO = "rai";
 		public static final String USER_OPT_IN = "uo";
 		public static final String BLOCK_INTERNATIONAL_SMS = "bis";
+		public static final String MUTE = "mute";
+		public static final String UNMUTE = "unmute";
 	}
 
 	public static enum FTResult
