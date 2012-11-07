@@ -154,6 +154,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			Log.d(getClass().getSimpleName(), "contact already a favorite");
 			return;
 		}
+		// Remove the contact if it already exists
+		recentList.remove(contactInfo);
+
 		recentList.add(0, contactInfo);
 		/*
 		 * If we added a new contact then we delete the last item to maintain
