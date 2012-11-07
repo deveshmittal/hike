@@ -190,8 +190,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	@Override
 	public boolean isEnabled(int position) {
-		if (getItemViewType(position) == FavoriteAdapterViewType.SECTION
-				.ordinal()) {
+		FavoriteAdapterViewType viewType = FavoriteAdapterViewType.values()[getItemViewType(position)];
+		if (viewType == FavoriteAdapterViewType.EMPTY_FAVORITE
+				|| viewType == FavoriteAdapterViewType.SECTION) {
 			return false;
 		}
 		return true;
@@ -298,6 +299,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					text.indexOf(replace) + replace.length(),
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			viewHolder.name.setText(spannableString);
+			break;
+
 		case RECOMMENDED_FAVORITE:
 			String name = contactInfo.getFirstName();
 			String msg = context.getString(R.string.recommended_favorite, name);
@@ -316,6 +319,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 			viewHolder.notNow.setTag(contactInfo);
 			viewHolder.notNow.setOnClickListener(this);
+			break;
 		}
 		return convertView;
 	}
