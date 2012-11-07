@@ -488,14 +488,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ConvMessage> getConversationThread(String msisdn, long convid,
-			int limit, Conversation conversation) {
+			int limit, Conversation conversation, long maxMsgId) {
 		String limitStr = new Integer(limit).toString();
+		String selection = DBConstants.CONV_ID
+				+ " = ?"
+				+ (maxMsgId == -1 ? "" : " AND " + DBConstants.MESSAGE_ID + "<"
+						+ maxMsgId);
 		/* TODO this should be ORDER BY timestamp */
 		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] {
 				DBConstants.MESSAGE, DBConstants.MSG_STATUS,
 				DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
 				DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA,
-				DBConstants.GROUP_PARTICIPANT }, DBConstants.CONV_ID + " = ?",
+				DBConstants.GROUP_PARTICIPANT }, selection,
 				new String[] { Long.toString(convid) }, null, null,
 				DBConstants.MESSAGE_ID + " DESC", limitStr);
 
@@ -565,7 +569,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 			if (limit > 0) {
 				List<ConvMessage> messages = getConversationThread(msisdn,
-						convid, limit, conv);
+						convid, limit, conv, -1);
 				conv.setMessages(messages);
 			}
 			return conv;

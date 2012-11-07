@@ -698,7 +698,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 			final List<ConvMessage> messageList = HikeConversationsDatabase
 					.getInstance().getConversationThread(msisdn,
-							conversation.getConvId(), 1, conversation);
+							conversation.getConvId(), 1, conversation, -1);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

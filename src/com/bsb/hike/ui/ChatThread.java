@@ -66,6 +66,8 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
@@ -118,7 +120,7 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 public class ChatThread extends Activity implements HikePubSub.Listener,
 		TextWatcher, OnEditorActionListener, OnSoftKeyboardListener,
-		View.OnKeyListener, FinishableEvent, OnTouchListener {
+		View.OnKeyListener, FinishableEvent, OnTouchListener, OnScrollListener {
 	private HikePubSub mPubSub;
 
 	private HikeConversationsDatabase mConversationDb;
@@ -254,6 +256,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private GestureDetector gestureDetector;
 
+	private boolean loadingMoreMessages;
+
+	private boolean reachedEnd;
 	/*
 	 * Required for saving the current intent if the user has the option "Do not
 	 * keep background activities checked. Otherwise the current intent gets
@@ -1034,7 +1039,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 * strictly speaking we shouldn't be reading from the db in the UI
 		 * Thread
 		 */
-		mConversation = mConversationDb.getConversation(mContactNumber, 1000);
+		mConversation = mConversationDb.getConversation(mContactNumber,
+				HikeConstants.MAX_MESSAGES_TO_LOAD_INITIALLY);
 		if (mConversation == null) {
 			if (Utils.isGroupConversation(mContactNumber)) {
 				/* the user must have deleted the chat. */
@@ -1080,6 +1086,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnTouchListener(this);
+		mConversationsView.setOnScrollListener(this);
 
 		if (messages.isEmpty() && mBottomView.getVisibility() != View.VISIBLE) {
 			Animation alphaIn = AnimationUtils.loadAnimation(
@@ -1667,6 +1674,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				wasShowingTypingItem = true;
 			}
 			messages.add(convMessage);
+
+			// Reset this boolean to load more messages when the user scrolls to
+			// the top
+			reachedEnd = false;
+
 			if (convMessage != null && convMessage.isSent()
 					&& wasShowingTypingItem) {
 				messages.add(null);
@@ -2802,4 +2814,44 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 
 	};
+
+	@Override
+	public void onScroll(AbsListView view, int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		if (!reachedEnd
+				&& !loadingMoreMessages
+				&& messages != null
+				&& !messages.isEmpty()
+				&& firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES) {
+
+			loadingMoreMessages = true;
+
+			List<ConvMessage> olderMessages = mConversationDb
+					.getConversationThread(mContactNumber,
+							mConversation.getConvId(),
+							HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME,
+							mConversation, messages.get(0).getMsgID());
+
+			if (!olderMessages.isEmpty()) {
+				messages.addAll(0, olderMessages);
+				mAdapter.notifyDataSetChanged();
+				mConversationsView.setSelection(firstVisibleItem
+						+ olderMessages.size());
+			} else {
+				/*
+				 * This signifies that we've reached the end. No need to query
+				 * the db anymore unless we add a new message.
+				 */
+				reachedEnd = true;
+			}
+
+			loadingMoreMessages = false;
+		}
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+		// TODO Auto-generated method stub
+
+	}
 }
