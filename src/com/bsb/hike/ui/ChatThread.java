@@ -964,8 +964,8 @@ public class ChatThread extends Activity implements
 			else if(intent.hasExtra(HikeConstants.Extras.LATITUDE))
 			{
 				String fileKey = intent.getStringExtra(HikeConstants.Extras.FILE_KEY);
-				int latitude = intent.getIntExtra(HikeConstants.Extras.LATITUDE, 0);
-				int longitude = intent.getIntExtra(HikeConstants.Extras.LONGITUDE, 0);
+				double latitude = intent.getDoubleExtra(HikeConstants.Extras.LATITUDE, 0);
+				double longitude = intent.getDoubleExtra(HikeConstants.Extras.LONGITUDE, 0);
 				int zoomLevel = intent.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
 
 				initialiseLocationTransfer(latitude, longitude, zoomLevel, fileKey);
@@ -2508,8 +2508,8 @@ public class ChatThread extends Activity implements
 		}
 		else if(requestCode == HikeConstants.SHARE_LOCATION_CODE && resultCode == RESULT_OK)
 		{
-			int latitude = data.getIntExtra(HikeConstants.Extras.LATITUDE, 0);
-			int longitude = data.getIntExtra(HikeConstants.Extras.LONGITUDE, 0);
+			double latitude = data.getDoubleExtra(HikeConstants.Extras.LATITUDE, 0);
+			double longitude = data.getDoubleExtra(HikeConstants.Extras.LONGITUDE, 0);
 			int zoomLevel = data.getIntExtra(HikeConstants.Extras.ZOOM_LEVEL, 0);
 
 			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude + " long:" + longitude + " zoom: " + zoomLevel);
@@ -2523,7 +2523,7 @@ public class ChatThread extends Activity implements
 		uploadFileTask.execute();
 	}
 
-	private void initialiseLocationTransfer(int latitude, int longitude, int zoomLevel, String fileKey)
+	private void initialiseLocationTransfer(double latitude, double longitude, int zoomLevel, String fileKey)
 	{
 		UploadLocationTask uploadLocationTask = new UploadLocationTask(mContactNumber, latitude, longitude, zoomLevel, fileKey, getApplicationContext());
 		uploadLocationTask.execute();
@@ -2893,29 +2893,16 @@ public class ChatThread extends Activity implements
 					// Else we open it for the use to see
 					else
 					{
-						Log.d(getClass().getSimpleName(), "Opening file");
-						Intent openFile = new Intent(Intent.ACTION_VIEW);
-						if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
-						{
-							openFile.setDataAndType(Uri.fromFile(sentFile), hikeFile.getFileTypeString());
-						}
-						else
-						{
-							String uri = String.format("geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude()/1E6, hikeFile.getLongitude()/1E6, hikeFile.getZoomLevel());
-							openFile.setData(Uri.parse(uri));
-						}
-						startActivity(openFile);
+						openFile(hikeFile, convMessage);
 					}
 				}
 				else
 				{
 					File receivedFile = hikeFile.getFile();
-					if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) && receivedFile.exists())
+					if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()) 
+							&& (receivedFile.exists() || hikeFile.getHikeFileType() == HikeFileType.LOCATION))
 					{
-						Log.d(getClass().getSimpleName(), "Opening file");
-						Intent openFile = new Intent(Intent.ACTION_VIEW);
-						openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
-						startActivity(openFile);
+						openFile(hikeFile, convMessage);
 					}
 					else if(!ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID()))
 					{
@@ -2933,6 +2920,23 @@ public class ChatThread extends Activity implements
 			Log.w(getClass().getSimpleName(), "Trying to open an unknown format", e);
 			Toast.makeText(ChatThread.this, "Unable to open file (Unknown format)", Toast.LENGTH_SHORT).show();
 		}
+	}
+
+	private void openFile(HikeFile hikeFile, ConvMessage convMessage)
+	{
+		File receivedFile = hikeFile.getFile();
+		Log.d(getClass().getSimpleName(), "Opening file");
+		Intent openFile = new Intent(Intent.ACTION_VIEW);
+		if(hikeFile.getHikeFileType() != HikeFileType.LOCATION)
+		{
+			openFile.setDataAndType(Uri.fromFile(receivedFile), hikeFile.getFileTypeString());
+		}
+		else
+		{
+			String uri = String.format("geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude(), hikeFile.getLongitude(), hikeFile.getZoomLevel());
+			openFile.setData(Uri.parse(uri));
+		}
+		startActivity(openFile);
 	}
 
 	public void sendPoke() 

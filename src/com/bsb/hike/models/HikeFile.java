@@ -97,8 +97,8 @@ public class HikeFile
 	private String fileKey;
 	private HikeFileType hikeFileType;
 	private File file;
-	private int latitude;
-	private int longitude;
+	private double latitude;
+	private double longitude;
 	private int zoomLevel;
 	private String address;
 
@@ -110,8 +110,8 @@ public class HikeFile
 		this.thumbnail = thumbnail == null ? Utils.stringToDrawable(thumbnailString) : thumbnail;
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 		this.hikeFileType = HikeFileType.fromString(fileTypeString);
-		this.latitude = fileJSON.optInt(HikeConstants.LATITUDE);
-		this.longitude = fileJSON.optInt(HikeConstants.LONGITUDE);
+		this.latitude = fileJSON.optDouble(HikeConstants.LATITUDE);
+		this.longitude = fileJSON.optDouble(HikeConstants.LONGITUDE);
 		this.zoomLevel = fileJSON.optInt(HikeConstants.ZOOM_LEVEL, HikeConstants.DEFAULT_ZOOM_LEVEL);
 		this.address = fileJSON.optString(HikeConstants.ADDRESS);
 		this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils.getOutputMediaFile(hikeFileType, fileName, fileKey);
@@ -131,11 +131,13 @@ public class HikeFile
 		this.thumbnail = new BitmapDrawable(thumbnail);
 	}
 
-	public HikeFile(int latitude, int longitude, int zoomLevel, String address, String thumbnailString, Bitmap thumbnail)
+	public HikeFile(double latitude, double longitude, int zoomLevel, String address, String thumbnailString, Bitmap thumbnail)
 	{
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.zoomLevel = zoomLevel;
+		this.fileTypeString = HikeConstants.LOCATION_CONTENT_TYPE;
+		this.hikeFileType = HikeFileType.fromString(fileTypeString);
 		this.address = address;
 		this.thumbnailString = thumbnailString;
 		this.thumbnail = new BitmapDrawable(thumbnail);
@@ -219,12 +221,12 @@ public class HikeFile
 		return hikeFileType;
 	}
 
-	public int getLatitude() 
+	public double getLatitude() 
 	{
 		return latitude;
 	}
 
-	public int getLongitude() 
+	public double getLongitude() 
 	{
 		return longitude;
 	}

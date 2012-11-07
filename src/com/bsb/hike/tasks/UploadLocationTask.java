@@ -32,20 +32,19 @@ import com.google.android.maps.GeoPoint;
 
 public class UploadLocationTask extends FileTransferTaskBase
 {
-	// http://maps.googleapis.com/maps/api/staticmap?center=%1$,.6f,%2$,.6f&zoom=%3$d&size=%4$dx%4$d&markers=size:mid|color:red|%1$,.6f,%2$,.6f&sensor=false
 	private static final String STATIC_MAP_UNFORMATTED_URL = 
 			"http://maps.googleapis.com/maps/api/staticmap?center=%1$f,%2$f&zoom=%3$d&size=%4$dx%4$d&markers=size:mid|color:red|%1$f,%2$f&sensor=false"; 
 
 	private String msisdn;
-	private int latitude;
-	private int longitude;
+	private double latitude;
+	private double longitude;
 	private int zoomLevel;
 	private String address;
 	private ConvMessage convMessage;
 	private String fileKey;
 	private Context context;
 	
-	public UploadLocationTask(String msisdn, int latitude, int longitude, int zoomLevel, String fileKey, Context context) 
+	public UploadLocationTask(String msisdn, double latitude, double longitude, int zoomLevel, String fileKey, Context context) 
 	{
 		this.latitude = latitude;
 		this.longitude = longitude;
@@ -79,7 +78,7 @@ public class UploadLocationTask extends FileTransferTaskBase
 					HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT, convMessage);
 				}
 
-				address = Utils.getAddressFromGeoPoint(new GeoPoint(latitude, longitude), context);
+				address = Utils.getAddressFromGeoPoint(new GeoPoint((int) (latitude * 1E6), (int) (longitude * 1E6)), context);
 
 				fetchThumbnailAndUpdateConvMessage(latitude, longitude, zoomLevel, address, convMessage);
 			}
@@ -136,15 +135,12 @@ public class UploadLocationTask extends FileTransferTaskBase
 		return FTResult.SUCCESS;
 	}
 
-	private JSONObject getFileTransferMetadata(int latitude, int longitude, int zoomLevel, String address, String thumbnailString) throws JSONException
+	private JSONObject getFileTransferMetadata(double latitude, double longitude, int zoomLevel, String address, String thumbnailString) throws JSONException
 	{
+		JSONArray files = new JSONArray();
+		files.put(new HikeFile(latitude, longitude, zoomLevel, address, thumbnailString, null).serialize());
 		JSONObject metadata = new JSONObject();
-		metadata.put(HikeConstants.LATITUDE, latitude);
-		metadata.put(HikeConstants.LONGITUDE, longitude);
-		metadata.put(HikeConstants.ZOOM_LEVEL, zoomLevel);
-		metadata.put(HikeConstants.CONTENT_TYPE, HikeConstants.LOCATION_CONTENT_TYPE);
-		metadata.put(HikeConstants.ADDRESS, address);
-		metadata.put(HikeConstants.THUMBNAIL, thumbnailString);
+		metadata.put(HikeConstants.FILES, files);
 
 		return metadata;
 	}
@@ -162,12 +158,9 @@ public class UploadLocationTask extends FileTransferTaskBase
 		return convMessage;
 	}
 
-	private void fetchThumbnailAndUpdateConvMessage(int latitude, int longitude, int zoomLevel, String address, ConvMessage convMessage) throws Exception
+	private void fetchThumbnailAndUpdateConvMessage(double latitude, double longitude, int zoomLevel, String address, ConvMessage convMessage) throws Exception
 	{
-		double actualLatitude = latitude/1E6;
-		double actualLongitude = longitude/1E6;
-
-		String staticMapUrl = String.format(STATIC_MAP_UNFORMATTED_URL, actualLatitude, actualLongitude, zoomLevel, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+		String staticMapUrl = String.format(STATIC_MAP_UNFORMATTED_URL, latitude, longitude, zoomLevel, HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
 		Log.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
 
 		Bitmap thumbnail =  BitmapFactory.decodeStream((InputStream) new URL(staticMapUrl).getContent());
