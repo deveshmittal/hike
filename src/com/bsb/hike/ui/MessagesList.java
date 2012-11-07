@@ -380,7 +380,7 @@ public class MessagesList extends DrawerBaseActivity implements OnClickListener,
 		}
 
 		List<ContactInfo> recentNonHikeContacts = HikeUserDatabase.getInstance().getNonHikeContactsFromListOfNumbers(recentlyContactedNumbers);
-		List<ContactInfo> hikeContacts = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(3, -1, true, true);
+		List<ContactInfo> hikeContacts = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(3, null, true, true);
 		Log.d(getClass().getSimpleName(), "Number of recent contacts: " + recentNonHikeContacts.size() + " HIKE CONTACT: " + hikeContacts.size());
 
 		int numRecentContactsToShow = HikeConstants.MAX_CONVERSATIONS - hikeContacts.size();

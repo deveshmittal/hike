@@ -360,7 +360,7 @@ public class ChatThread extends Activity implements
 			findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
 			findViewById(R.id.button_bar3).setVisibility(View.GONE);
 		}
-		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(-1, -1, false, false);
+		List<ContactInfo> contactList = HikeUserDatabase.getInstance().getContactsOrderedByLastMessaged(-1, null, false, false);
 		if(isForwardingMessage || isSharingFile)
 		{
 			contactList.addAll(0, this.mConversationDb.getGroupNameAndParticipantsAsContacts());

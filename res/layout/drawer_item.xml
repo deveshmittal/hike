@@ -26,7 +26,8 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="12dp"
-            android:background="@drawable/ic_add_favorite"
+            android:src="@drawable/add_fav"
+            android:background="@null"
             android:visibility="gone" />
 
         <com.bsb.hike.view.CustomFontTextView
@@ -39,11 +40,11 @@
             android:layout_toLeftOf="@id/add_fav"
             android:ellipsize="end"
             android:shadowColor="#66000000"
-            android:shadowDy="0.3"
-            android:shadowRadius="0.5"
+            android:shadowDy="0.5"
+            android:shadowRadius="0.6"
             android:singleLine="true"
             android:text="Credits asjfdlkjsadlf lasdflasjfl asldfjlasjflk jaslflkasdfj lasfas df lasfdlasj dflas"
-            android:textColor="@color/white"
+            android:textColor="@color/offwhite"
             android:textSize="16sp"
             android:textStyle="bold|italic" />
         
@@ -64,7 +65,6 @@
             android:textColor="@color/offwhite"
             android:textStyle="bold"
             android:visibility="gone" />
-
 
     </RelativeLayout>
 

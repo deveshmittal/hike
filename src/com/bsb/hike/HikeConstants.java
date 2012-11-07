@@ -164,7 +164,7 @@ public class HikeConstants
 	public static final int LOCAL_CLEAR_TYPING_TIME = 20 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
-	public static final int RECENT_COUNT_IN_FAVORITE = 10;
+	public static final int RECENT_COUNT_IN_FAVORITE = 20;
 
 	//Fiksu Currency
 	public static final String CURRENCY = "INR";
@@ -432,6 +432,8 @@ public class HikeConstants
 		public static final String REQUEST_ACCOUNT_INFO = "rai";
 		public static final String USER_OPT_IN = "uo";
 		public static final String BLOCK_INTERNATIONAL_SMS = "bis";
+		public static final String ADD_FAVORITE = "af";
+		public static final String REMOVE_FAVORITE = "rf";
 		public static final String MUTE = "mute";
 		public static final String UNMUTE = "unmute";
 	}

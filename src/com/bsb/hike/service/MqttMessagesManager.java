@@ -19,8 +19,10 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
@@ -360,6 +362,17 @@ public class MqttMessagesManager {
 		{
 			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj.getString(HikeConstants.TO) : jsonObj.getString(HikeConstants.FROM);
 			saveStatusMsg(jsonObj, msisdn);
+		}
+		else if (HikeConstants.MqttMessageTypes.ADD_FAVORITE.equals(type))
+		{
+			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA).getString(HikeConstants.ID);
+			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn, true);
+			if(contactInfo == null)
+			{
+				return;
+			}
+			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, FavoriteType.RECOMMENDED_FAVORITE);
+			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 		}
 	}
 

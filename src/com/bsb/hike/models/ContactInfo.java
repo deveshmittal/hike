@@ -10,6 +10,13 @@ import com.bsb.hike.utils.Utils;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 {
+	public static enum FavoriteType
+	{
+		NOT_FAVORITE,
+		RECOMMENDED_FAVORITE,
+		FAVORITE
+	}
+
 	@Override
 	public String toString()
 	{
@@ -31,6 +38,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 	private long lastMessaged;
 
 	private String phoneNum;
+
+	private FavoriteType favoriteType;
 
 	public String getName()
 	{
@@ -118,6 +127,16 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo>
 	public void setLastMessaged(long lastMessaged)
 	{
 		this.lastMessaged = lastMessaged;
+	}
+
+	public FavoriteType getFavoriteType()
+	{
+		return favoriteType;
+	}
+
+	public void setFavoriteType(FavoriteType favoriteType)
+	{
+		this.favoriteType= favoriteType;
 	}
 
 	public ContactInfo(String id, String msisdn, String name,String phoneNum)

@@ -1,7 +1,6 @@
 package com.bsb.hike.view;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Calendar;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,17 +21,16 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.DrawerFavoritesAdapter;
-import com.bsb.hike.adapters.DrawerFavoritesAdapter.FavoriteAdapterViewType;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -100,6 +98,8 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 
 	private DrawerFavoritesAdapter drawerFavoritesAdapter;
 
+	private TimeOfDay time;
+
 	public enum LeftDrawerItems
 	{
 		HOME,
@@ -108,6 +108,13 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 		FREE_SMS,
 		PROFILE,
 		HELP
+	}
+
+	public enum TimeOfDay
+	{
+		MORNING,
+		DAY,
+		NIGHT
 	}
 
 	public DrawerLayout(Context context) {
@@ -175,61 +182,66 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 
 	public void setUpRightDrawerView()
 	{
-		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
 
-		List<ContactInfo> completeList = new ArrayList<ContactInfo>();
-
-		List<ContactInfo> favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1, 1, false, true);
-		List<ContactInfo> recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(HikeConstants.RECENT_COUNT_IN_FAVORITE, 0, false, true);
-	
-		//Contact for "Favorite Section"
-		completeList.add(new ContactInfo(DrawerFavoritesAdapter.FAVORITES_SECTION_ID, null, HikeConstants.FAVORITES, null));
-
-		/*
-		 * If favorite list is empty, we add an element to show the empty view in the listview.
-		 */
-		if(favoriteList.isEmpty())
-		{
-			completeList.add(new ContactInfo(DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null, null, null));
-		}
-		else
-		{
-			completeList.addAll(favoriteList);
-		}
-		
-		//Contact for "Recent Section"
-		completeList.add(new ContactInfo(DrawerFavoritesAdapter.RECENTS_SECTION_ID, null, HikeConstants.RECENT, null));
-		
-		completeList.addAll(recentList);
-
-		drawerFavoritesAdapter = new DrawerFavoritesAdapter(completeList, favoriteList.size(), getContext());
+		drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext());
 		favoriteListView.setAdapter(drawerFavoritesAdapter);
 
 		favoriteListView.setOnItemClickListener(this);
+
+		setStatus();
+	}
+
+	private void setStatus()
+	{
+		ViewGroup background = (ViewGroup) findViewById(R.id.time_base_status);
+
+		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+		if(hour >= 6 && hour < 12) // Morning
+		{
+			if(time == TimeOfDay.MORNING)
+			{
+				return;
+			}
+			time = TimeOfDay.MORNING;
+			background.setBackgroundResource(R.drawable.morning);
+		}
+		else if(hour >=12 && hour < 21) // Day
+		{
+			if(time == TimeOfDay.DAY)
+			{
+				return;
+			}
+			time = TimeOfDay.DAY;
+			background.setBackgroundResource(R.drawable.day);
+		}
+		else if(hour >=21 || hour < 6) // Night
+		{
+			if(time == TimeOfDay.NIGHT)
+			{
+				return;
+			}
+			time = TimeOfDay.NIGHT;
+			background.setBackgroundResource(R.drawable.night);
+		}
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View view, int position, long id) 
 	{
-		FavoriteAdapterViewType viewType = FavoriteAdapterViewType.values()[drawerFavoritesAdapter.getItemViewType(position)];
-		if(viewType == FavoriteAdapterViewType.RECENT)
-		{
-			ContactInfo contactInfo = drawerFavoritesAdapter.getItem(position);
-			HikeUserDatabase.getInstance().toggleContactFavorite(contactInfo.getMsisdn(), true);
-			drawerFavoritesAdapter.addFavoriteItem(contactInfo);
-		}
-		else if(viewType ==  FavoriteAdapterViewType.FAVORITE)
-		{
-			Intent intent = Utils.createIntentFromContactInfo(drawerFavoritesAdapter.getItem(position));
-			intent.setClass(getContext(), ChatThread.class);
-			getContext().startActivity(intent);
-		}
+		Intent intent = Utils.createIntentFromContactInfo(drawerFavoritesAdapter.getItem(position));
+		intent.setClass(getContext(), ChatThread.class);
+		getContext().startActivity(intent);
 	}
 
 	public void removeFromFavorite(ContactInfo contactInfo)
 	{
 		drawerFavoritesAdapter.removeFavoriteItem(contactInfo);
+	}
+
+	public void addToRecommended(ContactInfo contactInfo)
+	{
+		drawerFavoritesAdapter.addRecommendedFavoriteItem(contactInfo);
 	}
 
 	public void addToFavorite(ContactInfo contactInfo)
@@ -606,6 +618,7 @@ public class DrawerLayout extends RelativeLayout implements View.OnClickListener
 			}
 			else
 			{
+				setStatus();
 				animateLayouts(mRightSidebar, rightSidebarTranslateAnimationIn, contentAnimationRightOut, mRightOpenListener, noAnimation);
 			}
 		}

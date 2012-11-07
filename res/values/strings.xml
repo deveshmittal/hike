@@ -158,6 +158,9 @@
 	<string name="social_failed">Unable to save details.</string>
 	<string name="intro_hike_thread">%1$s is on hike</string>
 	<string name="intro_sms_thread">Send %1$s free SMS</string>
+	<string name="morning_message">Good morning, %1$s</string>
+	<string name="day_message">Have a great day!</string>
+	<string name="night_message">Good night. Sleep tight.</string>
 	<string name="saving_social">Saving credentials...</string>
 	<string name="hike_hike">hike to hike</string>
 	<string name="free_worldwide">Free, worldwide!</string>
@@ -179,4 +182,6 @@
 	<string name="block_user">Block this user</string>
 	<string name="unblock_user">Unblock this user</string>
 	<string name="user_info">User Info</string>
+	<string name="yes">Yes</string>
+	<string name="recommended_favorite">%1$s added you as a favorite. Would you like to do the same?</string>
 </resources>

@@ -14,41 +14,12 @@
         android:layout_height="64dp"
         android:background="@drawable/night" >
 
-        <LinearLayout
-            android:id="@+id/text_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical" >
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/time_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Good night. Sleep tight."
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold|italic" />
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/team_hike"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="- team hike"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:textStyle="bold|italic" />
-        </LinearLayout>
-
         <ImageView
             android:id="@+id/heart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@id/text_container"
-            android:src="@drawable/heart" />
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_hi_status" />
     </RelativeLayout>
 
     <ListView

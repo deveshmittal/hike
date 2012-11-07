@@ -53,6 +53,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -119,7 +120,6 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 	private GroupConversation groupConversation;
 	private ImageButton topBarBtn;
 	private ContactInfo contactInfo;
-	private boolean isFavorite;
 	private boolean isBlocked;
 
 	private static enum ProfileType
@@ -240,9 +240,8 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn2);
 
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(mLocalMSISDN, false);
-		isFavorite = HikeUserDatabase.getInstance().isContactFavorite(mLocalMSISDN);
 
-		topBarBtn.setImageResource(isFavorite ? R.drawable.ic_favorite : R.drawable.ic_not_favorite);
+		topBarBtn.setImageResource(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? R.drawable.ic_favorite : R.drawable.ic_not_favorite);
 		topBarBtn.setVisibility(View.VISIBLE);
 
 		findViewById(R.id.add_to_contacts).setVisibility(!TextUtils.isEmpty(contactInfo.getName()) ? View.GONE : View.VISIBLE);
@@ -405,10 +404,12 @@ public class ProfileActivity extends DrawerBaseActivity implements FinishableEve
 			}
 			else if(profileType == ProfileType.CONTACT_INFO)
 			{
-				isFavorite = !isFavorite;
-				HikeUserDatabase.getInstance().toggleContactFavorite(contactInfo.getMsisdn(), isFavorite);
-				((ImageView) v).setImageResource(isFavorite ? R.drawable.ic_favorite : R.drawable.ic_not_favorite);
-				Pair<ContactInfo, Boolean> favoriteToggle = new Pair<ContactInfo, Boolean>(contactInfo, isFavorite);
+				contactInfo.setFavoriteType(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? 
+						FavoriteType.NOT_FAVORITE : FavoriteType.FAVORITE);
+
+				((ImageView) v).setImageResource(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? 
+						R.drawable.ic_favorite : R.drawable.ic_not_favorite);
+				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(contactInfo, contactInfo.getFavoriteType());
 				HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 			}
 		}

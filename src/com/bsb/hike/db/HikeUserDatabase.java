@@ -26,6 +26,7 @@ import android.util.Log;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
 
@@ -66,7 +67,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 														+ DBConstants.OVERLAY_DISMISSED+" INTEGER, "
 														+ DBConstants.MSISDN_TYPE+" STRING, "
 														+ DBConstants.LAST_MESSAGED + " INTEGER, "
-														+ DBConstants.FAVORITE + " INTEGER DEFAULT 0"
+														+ DBConstants.FAVORITE + " INTEGER DEFAULT " + FavoriteType.NOT_FAVORITE
 												+ " )";
 
 		db.execSQL(create);
@@ -143,7 +144,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		// Add favorite column
 		if(oldVersion < 5)
 		{
-			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.FAVORITE + " INTEGER DEFAULT 0";
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE + " ADD COLUMN " + DBConstants.FAVORITE + " INTEGER DEFAULT " + FavoriteType.NOT_FAVORITE;
 			db.execSQL(alter);
 		}
 	}
@@ -350,7 +351,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 
 	public ContactInfo getContactInfoFromMSISDN(String msisdn, boolean ifNotFoundReturnNull)
 	{
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] { DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, DBConstants.MSISDN+"=?", new String[] { msisdn }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, 
+				new String[] { 
+								DBConstants.MSISDN, 
+								DBConstants.ID, 
+								DBConstants.NAME, 
+								DBConstants.ONHIKE, 
+								DBConstants.PHONE, 
+								DBConstants.MSISDN_TYPE, 
+								DBConstants.LAST_MESSAGED, 
+								DBConstants.HAS_CUSTOM_PHOTO,
+								DBConstants.FAVORITE
+							}, DBConstants.MSISDN+"=?", new String[] { msisdn }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty())
@@ -378,6 +390,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
 		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
 		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+		int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE);
 
 		Set<String> msisdnSet = null;
 		
@@ -399,6 +412,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 			ContactInfo contactInfo = new ContactInfo(
 					c.getString(idx), c.getString(msisdnIdx), c.getString(nameIdx), c.getString(phoneNumIdx),
 					c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx), c.getInt(hasCustomPhotoIdx)==1);
+			if(favoriteIdx != -1)
+			{
+				int favoriteTypeOrd = c.getInt(favoriteIdx);
+				contactInfo.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
+			}
 			contactInfos.add(contactInfo);
 		}
 		c.close();
@@ -467,10 +485,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 	 * @param favorite Whether we only need the favorite contacts or non favorite. -1 if we want to ignore this
 	 * @return
 	 */
-	public List<ContactInfo> getContactsOrderedByLastMessaged(int limit, int favorite, boolean onHikeOnly, boolean distinct)
+	public List<ContactInfo> getContactsOrderedByLastMessaged(int limit, FavoriteType favorite, boolean onHikeOnly, boolean distinct)
 	{
 		String selection = DBConstants.MSISDN + " != 'null'"
-							+ (favorite != -1 ? " AND " + DBConstants.FAVORITE + "=" + favorite : "")
+							+ (favorite != null ? " AND " + DBConstants.FAVORITE + "=" + favorite.ordinal() : "")
 							+ (onHikeOnly ? " AND " + DBConstants.ONHIKE + "=1":"");
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 		String orderBy = DBConstants.LAST_MESSAGED + " DESC, " 
@@ -485,7 +503,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 				DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE,
 				DBConstants.LAST_MESSAGED,
-				DBConstants.HAS_CUSTOM_PHOTO
+				DBConstants.HAS_CUSTOM_PHOTO,
+				DBConstants.FAVORITE
 				};
 		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection, null, null, null, orderBy);
 		List<ContactInfo> contactInfos = extractContactInfo(c, distinct);
@@ -714,10 +733,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		}
 	}
 
-	public void toggleContactFavorite(String msisdn, boolean favorite)
+	public void toggleContactFavorite(String msisdn, FavoriteType favoriteType)
 	{
 		ContentValues contentValues = new ContentValues(1);
-		contentValues.put(DBConstants.FAVORITE, favorite);
+		contentValues.put(DBConstants.FAVORITE, favoriteType.ordinal());
 
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN + "=?", new String[]{msisdn});
 	}
@@ -727,7 +746,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper
 		Cursor c = null;
 		try
 		{
-			c = mDb.query(DBConstants.USERS_TABLE, new String[] {DBConstants.MSISDN}, DBConstants.MSISDN + "=? AND " + DBConstants.FAVORITE + "=1", new String[] {msisdn}, null, null, null);
+			c = mDb.query(DBConstants.USERS_TABLE, 
+					new String[] {DBConstants.MSISDN}, 
+					DBConstants.MSISDN + "=? AND " + DBConstants.FAVORITE + "=" + FavoriteType.FAVORITE, 
+					new String[] {msisdn}, null, null, null);
 			return c.moveToFirst();
 		}
 		finally

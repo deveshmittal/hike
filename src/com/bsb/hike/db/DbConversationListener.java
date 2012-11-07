@@ -18,6 +18,8 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
@@ -54,6 +56,7 @@ public class DbConversationListener implements Listener
 		mPubSub.addListener(HikePubSub.UNBLOCK_USER, this);
 		mPubSub.addListener(HikePubSub.SERVER_RECEIVED_MSG, this);
 		mPubSub.addListener(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, this);
+		mPubSub.addListener(HikePubSub.FAVORITE_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
 	}
 
@@ -166,6 +169,22 @@ public class DbConversationListener implements Listener
 			catch (JSONException e) 
 			{
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+		}
+		else if(HikePubSub.FAVORITE_TOGGLED.equals(type))
+		{
+			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+
+			ContactInfo contactInfo = favoriteToggle.first;
+			FavoriteType favoriteType = favoriteToggle.second;
+			
+			mUserDb.toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
+
+			if(favoriteType != FavoriteType.RECOMMENDED_FAVORITE)
+			{
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, serializeMsg(
+						favoriteType == FavoriteType.FAVORITE ? HikeConstants.MqttMessageTypes.ADD_FAVORITE : HikeConstants.MqttMessageTypes.REMOVE_FAVORITE, 
+								contactInfo.getMsisdn()));
 			}
 		}
 		else if(HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))

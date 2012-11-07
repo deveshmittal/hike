@@ -11,6 +11,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.view.DrawerLayout;
 
@@ -195,19 +196,28 @@ public class DrawerBaseActivity extends Activity implements DrawerLayout.Listene
 		}
 		else if (HikePubSub.FAVORITE_TOGGLED.equals(type))
 		{
-			final Pair<ContactInfo, Boolean> favoriteToggle = (Pair<ContactInfo, Boolean>) object;
+			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			runOnUiThread(new Runnable() 
 			{
 				@Override
 				public void run() 
 				{
-					if(favoriteToggle.second)
+					FavoriteType favoriteType = favoriteToggle.second;
+					ContactInfo contactInfo = favoriteToggle.first;
+					if(favoriteType == FavoriteType.FAVORITE)
 					{
-						parentLayout.addToFavorite(favoriteToggle.first);
+						contactInfo.setFavoriteType(FavoriteType.FAVORITE);
+						parentLayout.addToFavorite(contactInfo);
 					}
-					else
+					else if(favoriteType == FavoriteType.NOT_FAVORITE)
 					{
-						parentLayout.removeFromFavorite(favoriteToggle.first);
+						contactInfo.setFavoriteType(FavoriteType.NOT_FAVORITE);
+						parentLayout.removeFromFavorite(contactInfo);
+					}
+					else if(favoriteType == FavoriteType.RECOMMENDED_FAVORITE)
+					{
+						contactInfo.setFavoriteType(FavoriteType.RECOMMENDED_FAVORITE);
+						parentLayout.addToRecommended(contactInfo);
 					}
 				}
 			});
