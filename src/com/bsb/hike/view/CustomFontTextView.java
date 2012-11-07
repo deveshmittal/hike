@@ -1,18 +1,17 @@
 package com.bsb.hike.view;
 
-import com.bsb.hike.utils.Utils;
-
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.bsb.hike.utils.Utils;
+
 public class CustomFontTextView extends TextView {
 
 	private String fontName;
 
-	private void setFont(AttributeSet attrs)
-	{
+	private void setFont(AttributeSet attrs) {
 		fontName = attrs.getAttributeValue(null, "font");
 	}
 
@@ -34,20 +33,19 @@ public class CustomFontTextView extends TextView {
 	public void setTypeface(Typeface tf, int style) {
 		if (!isInEditMode()) {
 			/*
-			 *  If we are dealing with LDPI phones, we use the default font,
-			 *  They have a rendering issue with the font that we're using
+			 * If we are dealing with LDPI phones, we use the default font, They
+			 * have a rendering issue with the font that we're using
 			 */
-			if (Utils.densityMultiplier <= 0.75f) 
-			{
-				if (style == Typeface.ITALIC || style == Typeface.BOLD_ITALIC) 
-				{
+			if (Utils.densityMultiplier <= 0.75f) {
+				if (style == Typeface.ITALIC || style == Typeface.BOLD_ITALIC) {
 					style = Typeface.NORMAL;
 				}
 				super.setTypeface(tf, style);
 				return;
 			}
 			if (CustomTypeFace.customTypeFace == null) {
-				CustomTypeFace.customTypeFace = new CustomTypeFace(getContext(), fontName);
+				CustomTypeFace.customTypeFace = new CustomTypeFace(
+						getContext(), fontName);
 			}
 
 			if (style == Typeface.BOLD) {

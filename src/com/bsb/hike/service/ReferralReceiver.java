@@ -19,42 +19,36 @@ import com.bsb.hike.utils.Utils;
 
 /**
  * 
- * @author Rishabh
- *	Triggered when the app is activated for the first time. Contains info on which channel
- *	promoted the download of this app.
+ * @author Rishabh Triggered when the app is activated for the first time.
+ *         Contains info on which channel promoted the download of this app.
  */
-public class ReferralReceiver extends BroadcastReceiver 
-{
+public class ReferralReceiver extends BroadcastReceiver {
 	@Override
-	public void onReceive(Context context, Intent intent) 
-	{
-		// Workaround for Android security issue: http://code.google.com/p/android/issues/detail?id=16006
-        try
-        {
-            Bundle extras = intent.getExtras();
-            if (extras != null) 
-            {
-                extras.containsKey(null);
-            }
-        }
-        catch (Exception e) 
-        {
-            return;
-        }
+	public void onReceive(Context context, Intent intent) {
+		// Workaround for Android security issue:
+		// http://code.google.com/p/android/issues/detail?id=16006
+		try {
+			Bundle extras = intent.getExtras();
+			if (extras != null) {
+				extras.containsKey(null);
+			}
+		} catch (Exception e) {
+			return;
+		}
 
-        List<NameValuePair> referralParams = new ArrayList<NameValuePair>();
+		List<NameValuePair> referralParams = new ArrayList<NameValuePair>();
 
-        String referrer = intent.getStringExtra("referrer");
-        if(TextUtils.isEmpty(referrer)) 
-        {
-        	Log.w(getClass().getSimpleName(), "No referrer");
-            return;
-        }
+		String referrer = intent.getStringExtra("referrer");
+		if (TextUtils.isEmpty(referrer)) {
+			Log.w(getClass().getSimpleName(), "No referrer");
+			return;
+		}
 
-        Log.d(getClass().getSimpleName(), "Referrer: " + referrer);
-        Scanner referrerScanner = new Scanner(referrer);
-		URLEncodedUtils.parse(referralParams, referrerScanner, Charset.defaultCharset().displayName());
+		Log.d(getClass().getSimpleName(), "Referrer: " + referrer);
+		Scanner referrerScanner = new Scanner(referrer);
+		URLEncodedUtils.parse(referralParams, referrerScanner, Charset
+				.defaultCharset().displayName());
 
-        Utils.storeReferralParams(context, referralParams);
-    }
+		Utils.storeReferralParams(context, referralParams);
+	}
 }

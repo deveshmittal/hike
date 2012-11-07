@@ -64,23 +64,24 @@ public class ShareLocation extends MapActivity {
 
 		titleBtn.setText(R.string.send);
 		titleBtn.setVisibility(View.VISIBLE);
-		
+
 		labelView.setText(R.string.share_location);
 
 		currentSelection.setSelected(true);
 	}
 
-	public void onTitleIconClick(View v)
-	{
-		if(selectedGeoPoint == null)
-		{
-			Toast.makeText(getApplicationContext(), "Select a location to share", Toast.LENGTH_SHORT).show();
+	public void onTitleIconClick(View v) {
+		if (selectedGeoPoint == null) {
+			Toast.makeText(getApplicationContext(),
+					"Select a location to share", Toast.LENGTH_SHORT).show();
 			return;
 		}
 		Intent result = new Intent();
 		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, myMap.getZoomLevel());
-		result.putExtra(HikeConstants.Extras.LATITUDE, selectedGeoPoint.getLatitudeE6()/1E6);
-		result.putExtra(HikeConstants.Extras.LONGITUDE, selectedGeoPoint.getLongitudeE6()/1E6);
+		result.putExtra(HikeConstants.Extras.LATITUDE,
+				selectedGeoPoint.getLatitudeE6() / 1E6);
+		result.putExtra(HikeConstants.Extras.LONGITUDE,
+				selectedGeoPoint.getLongitudeE6() / 1E6);
 		setResult(RESULT_OK, result);
 
 		finish();
@@ -124,13 +125,13 @@ public class ShareLocation extends MapActivity {
 				locListener);
 		locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0,
 				0, locListener);
-		if(locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null)
-		{
-			createAndShowMyItemizedOverlay(locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-		}
-		else if(locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null)
-		{
-			createAndShowMyItemizedOverlay(locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+		if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+			createAndShowMyItemizedOverlay(locManager
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+		} else if (locManager
+				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
+			createAndShowMyItemizedOverlay(locManager
+					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
 		}
 	}
 
@@ -261,11 +262,8 @@ public class ShareLocation extends MapActivity {
 			currentSelection.setSelected(false);
 			currentSelection = v;
 			currentSelection.setSelected(true);
-		}
-		else
-		{
-			if(selectedGeoPoint != null)
-			{
+		} else {
+			if (selectedGeoPoint != null) {
 				myMap.getController().animateTo(selectedGeoPoint);
 			}
 		}
@@ -314,11 +312,12 @@ public class ShareLocation extends MapActivity {
 
 			@Override
 			protected String doInBackground(Void... params) {
-				return Utils.getAddressFromGeoPoint(geoPoint, ShareLocation.this);
+				return Utils.getAddressFromGeoPoint(geoPoint,
+						ShareLocation.this);
 			}
 
 			@Override
-			protected void onPostExecute(String result){
+			protected void onPostExecute(String result) {
 				locationAddress.setText(result);
 			}
 		}).execute();

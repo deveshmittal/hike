@@ -24,15 +24,14 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 
-public class DownloadFileTask extends FileTransferTaskBase
-{
+public class DownloadFileTask extends FileTransferTaskBase {
 	private File destinationFile;
 	private String fileKey;
 	private Context context;
 	private long msgId;
 
-	public DownloadFileTask(Context context, File destinationFile, String fileKey, long msgId) 
-	{
+	public DownloadFileTask(Context context, File destinationFile,
+			String fileKey, long msgId) {
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
 		this.context = context;
@@ -41,19 +40,17 @@ public class DownloadFileTask extends FileTransferTaskBase
 	}
 
 	@Override
-	protected FTResult doInBackground(Void... params) 
-	{
+	protected FTResult doInBackground(Void... params) {
 		FileOutputStream fos = null;
 		InputStream is = null;
-		try 
-		{
-			URL url = new URL(AccountUtils.FILE_TRANSFER_BASE_DOWNLOAD_URL + fileKey);
+		try {
+			URL url = new URL(AccountUtils.FILE_TRANSFER_BASE_DOWNLOAD_URL
+					+ fileKey);
 			URLConnection urlConnection = url.openConnection();
 
 			int length = urlConnection.getContentLength();
 
-			if(length > Utils.getFreeSpace())
-			{
+			if (length > Utils.getFreeSpace()) {
 				return FTResult.FILE_TOO_LARGE;
 			}
 
@@ -66,44 +63,31 @@ public class DownloadFileTask extends FileTransferTaskBase
 			int totProg = 0;
 			int progress;
 
-			while((len = is.read(buffer)) != -1)
-			{
+			while ((len = is.read(buffer)) != -1) {
 				totProg += len;
 				fos.write(buffer, 0, len);
-				progress = (int) ((totProg*100/length));
+				progress = (int) ((totProg * 100 / length));
 				publishProgress(progress);
-				if(cancelTask.get())
-				{
+				if (cancelTask.get()) {
 					throw new IOException("Download cancelled by the user");
 				}
 			}
 			Log.d(getClass().getSimpleName(), "Done downloading file");
-		} 
-		catch (MalformedURLException e)
-		{
+		} catch (MalformedURLException e) {
 			Log.e(getClass().getSimpleName(), "Invalid URL", e);
 			return FTResult.DOWNLOAD_FAILED;
-		} 
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return FTResult.DOWNLOAD_FAILED;
-		}
-		finally
-		{
-			try 
-			{
-				if(fos != null)
-				{
+		} finally {
+			try {
+				if (fos != null) {
 					fos.close();
 				}
-				if(is != null)
-				{
+				if (is != null) {
 					is.close();
 				}
-			} 
-			catch (IOException e) 
-			{
+			} catch (IOException e) {
 				Log.e(getClass().getSimpleName(), "Error while closing file", e);
 				return FTResult.DOWNLOAD_FAILED;
 			}
@@ -112,24 +96,22 @@ public class DownloadFileTask extends FileTransferTaskBase
 	}
 
 	@Override
-	protected void onProgressUpdate(Integer... values) 
-	{
+	protected void onProgressUpdate(Integer... values) {
 		updateProgress(values[0]);
 	}
 
 	@Override
-	protected void onPostExecute(FTResult result) 
-	{
-		if(result != FTResult.SUCCESS)
-		{
-			int errorStringId = result == FTResult.FILE_TOO_LARGE ? 
-					R.string.not_enough_space : result == FTResult.CANCELLED ? 
-							R.string.download_cancelled : R.string.download_failed;
+	protected void onPostExecute(FTResult result) {
+		if (result != FTResult.SUCCESS) {
+			int errorStringId = result == FTResult.FILE_TOO_LARGE ? R.string.not_enough_space
+					: result == FTResult.CANCELLED ? R.string.download_cancelled
+							: R.string.download_failed;
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
 			destinationFile.delete();
 		}
 
 		ChatThread.fileTransferTaskMap.remove(msgId);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 	}
 }

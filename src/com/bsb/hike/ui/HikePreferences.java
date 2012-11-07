@@ -20,22 +20,20 @@ import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.utils.Utils;
 
-public class HikePreferences extends PreferenceActivity implements OnPreferenceClickListener
-{
+public class HikePreferences extends PreferenceActivity implements
+		OnPreferenceClickListener {
 
 	private ActivityCallableTask mTask;
 	ProgressDialog mDialog;
 	private boolean isDeleting;
 
 	@Override
-	public Object onRetainNonConfigurationInstance()
-	{
+	public Object onRetainNonConfigurationInstance() {
 		return ((mTask != null) && (!mTask.isFinished())) ? mTask : null;
 	}
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState)
-	{
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hikepreferences);
 
@@ -48,43 +46,43 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		titleView.setText(getTitle());
 
 		Object retained = getLastNonConfigurationInstance();
-		if (retained instanceof ActivityCallableTask)
-		{
-			isDeleting = savedInstanceState != null ? savedInstanceState.getBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT) : isDeleting; 
+		if (retained instanceof ActivityCallableTask) {
+			isDeleting = savedInstanceState != null ? savedInstanceState
+					.getBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT)
+					: isDeleting;
 			setBlockingTask((ActivityCallableTask) retained);
 			mTask.setActivity(this);
 		}
 
-		Preference deletePreference = getPreferenceScreen().findPreference(getString(R.string.delete_key));
-		if(deletePreference != null)
-		{
+		Preference deletePreference = getPreferenceScreen().findPreference(
+				getString(R.string.delete_key));
+		if (deletePreference != null) {
 			findViewById(R.id.sms_disclaimer).setVisibility(View.GONE);
-			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.PRIVACY_SCREEN);
+			Utils.logEvent(HikePreferences.this,
+					HikeConstants.LogEvent.PRIVACY_SCREEN);
 			deletePreference.setOnPreferenceClickListener(this);
+		} else {
+			Utils.logEvent(HikePreferences.this,
+					HikeConstants.LogEvent.NOTIFICATION_SCREEN);
 		}
-		else
-		{
-			Utils.logEvent(HikePreferences.this, HikeConstants.LogEvent.NOTIFICATION_SCREEN);
-		}
-		Preference unlinkPreference = getPreferenceScreen().findPreference(getString(R.string.unlink_key));
-		if (unlinkPreference != null)
-		{
+		Preference unlinkPreference = getPreferenceScreen().findPreference(
+				getString(R.string.unlink_key));
+		if (unlinkPreference != null) {
 			unlinkPreference.setOnPreferenceClickListener(this);
 		}
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT, isDeleting);
+		outState.putBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT,
+				isDeleting);
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
-	public void onDestroy()
-	{
+	public void onDestroy() {
 		super.onDestroy();
-		if (mDialog != null)
-		{
+		if (mDialog != null) {
 			mDialog.dismiss();
 			mDialog = null;
 		}
@@ -92,74 +90,61 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		mTask = null;
 	}
 
-	public void setBlockingTask(ActivityCallableTask task)
-	{
-		Log.d("HikePreferences", "setting task:"+task.isFinished());
-		if (!task.isFinished())
-		{
+	public void setBlockingTask(ActivityCallableTask task) {
+		Log.d("HikePreferences", "setting task:" + task.isFinished());
+		if (!task.isFinished()) {
 			mTask = task;
-			mDialog = ProgressDialog.show(this, "Account", isDeleting ? "Deleting Account" : "Unlinking Account");	
+			mDialog = ProgressDialog.show(this, "Account",
+					isDeleting ? "Deleting Account" : "Unlinking Account");
 		}
 	}
 
-	public void dismissProgressDialog()
-	{
-		if (mDialog != null)
-		{
+	public void dismissProgressDialog() {
+		if (mDialog != null) {
 			mDialog.dismiss();
 			mDialog = null;
 		}
 	}
 
 	@Override
-	public boolean onPreferenceClick(Preference preference)
-	{
-		Log.d("HikePreferences", "Preference clicked: "+preference.getKey());
-		if(preference.getKey().equals(getString(R.string.delete_key)))
-		{
+	public boolean onPreferenceClick(Preference preference) {
+		Log.d("HikePreferences", "Preference clicked: " + preference.getKey());
+		if (preference.getKey().equals(getString(R.string.delete_key))) {
 			Builder builder = new Builder(HikePreferences.this);
 			builder.setMessage(R.string.delete_confirmation);
-			builder.setPositiveButton(R.string.delete, new OnClickListener() 
-			{
+			builder.setPositiveButton(R.string.delete, new OnClickListener() {
 				@Override
-				public void onClick(DialogInterface dialog, int which) 
-				{
-					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, true);
+				public void onClick(DialogInterface dialog, int which) {
+					DeleteAccountTask task = new DeleteAccountTask(
+							HikePreferences.this, true);
 					isDeleting = true;
 					setBlockingTask(task);
 					task.execute();
 				}
 			});
-			builder.setNegativeButton(R.string.cancel, new OnClickListener() 
-			{
+			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
 				@Override
-				public void onClick(DialogInterface dialog, int which) 
-				{
+				public void onClick(DialogInterface dialog, int which) {
 				}
 			});
 			AlertDialog alertDialog = builder.create();
 			alertDialog.show();
-		}
-		else if (preference.getKey().equals(getString(R.string.unlink_key)))
-		{
+		} else if (preference.getKey().equals(getString(R.string.unlink_key))) {
 			Builder builder = new Builder(HikePreferences.this);
 			builder.setMessage(R.string.unlink_confirmation);
-			builder.setPositiveButton(R.string.unlink, new OnClickListener() 
-			{
+			builder.setPositiveButton(R.string.unlink, new OnClickListener() {
 				@Override
-				public void onClick(DialogInterface dialog, int which) 
-				{
-					DeleteAccountTask task = new DeleteAccountTask(HikePreferences.this, false);
+				public void onClick(DialogInterface dialog, int which) {
+					DeleteAccountTask task = new DeleteAccountTask(
+							HikePreferences.this, false);
 					isDeleting = false;
 					setBlockingTask(task);
 					task.execute();
 				}
 			});
-			builder.setNegativeButton(R.string.cancel, new OnClickListener() 
-			{
+			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
 				@Override
-				public void onClick(DialogInterface dialog, int which) 
-				{
+				public void onClick(DialogInterface dialog, int which) {
 				}
 			});
 			AlertDialog alertDialog = builder.create();
@@ -167,15 +152,15 @@ public class HikePreferences extends PreferenceActivity implements OnPreferenceC
 		}
 		return true;
 	}
-	
+
 	/**
 	 * For redirecting back to the Welcome Screen.
 	 */
-	public void accountDeleted()
-	{
+	public void accountDeleted() {
 		dismissProgressDialog();
 		/*
-		 * First we send the user to the Main Activity(MessagesList) from there we redirect him to the welcome screen.
+		 * First we send the user to the Main Activity(MessagesList) from there
+		 * we redirect him to the welcome screen.
 		 */
 		Intent dltIntent = new Intent(this, MessagesList.class);
 		dltIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

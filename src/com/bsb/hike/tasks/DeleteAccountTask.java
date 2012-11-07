@@ -19,32 +19,32 @@ import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
 import com.google.android.gcm.GCMRegistrar;
 
-public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements ActivityCallableTask
-{
+public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
+		ActivityCallableTask {
 
 	private HikePreferences activity;
 	private boolean finished;
 	private boolean delete;
 
-	public DeleteAccountTask(HikePreferences activity, boolean delete)
-	{
+	public DeleteAccountTask(HikePreferences activity, boolean delete) {
 		this.activity = activity;
 		this.delete = delete;
 	}
 
 	@Override
-	protected Boolean doInBackground(Void... unused)
-	{
+	protected Boolean doInBackground(Void... unused) {
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		HikeConversationsDatabase convDb = HikeConversationsDatabase.getInstance();
-		Editor editor = activity.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
+		HikeConversationsDatabase convDb = HikeConversationsDatabase
+				.getInstance();
+		Editor editor = activity.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 
-		try
-		{
+		try {
 			// Unregister from GCM service
 			GCMRegistrar.unregister(activity.getApplicationContext());
 
-			HikeMessengerApp app = (HikeMessengerApp) activity.getApplicationContext();
+			HikeMessengerApp app = (HikeMessengerApp) activity
+					.getApplicationContext();
 			app.disconnectFromService();
 			activity.stopService(new Intent(activity, HikeService.class));
 
@@ -56,50 +56,46 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			editor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
 			return true;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			Log.e("DeleteAccountTask", "error deleting account", e);
 			return false;
-		}
-		finally
-		{
+		} finally {
 			editor.commit();
 		}
 	}
 
 	@Override
-	protected void onPostExecute(Boolean result)
-	{
+	protected void onPostExecute(Boolean result) {
 		finished = true;
-		if (result.booleanValue())
-		{
+		if (result.booleanValue()) {
 			/* clear any toast notifications */
-			NotificationManager mgr = (NotificationManager) activity.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
+			NotificationManager mgr = (NotificationManager) activity
+					.getSystemService(android.content.Context.NOTIFICATION_SERVICE);
 			mgr.cancelAll();
-			
+
 			// redirect user to the welcome screen
 			activity.accountDeleted();
-		}
-		else
-		{
+		} else {
 			activity.dismissProgressDialog();
 			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText(activity, this.delete ? activity.getResources().getString(R.string.delete_account_failed) : activity.getResources().getString(R.string.unlink_account_failed), duration);
+			Toast toast = Toast.makeText(
+					activity,
+					this.delete ? activity.getResources().getString(
+							R.string.delete_account_failed) : activity
+							.getResources().getString(
+									R.string.unlink_account_failed), duration);
 			toast.show();
 		}
 	}
 
 	@Override
-	public void setActivity(Activity activity)
-	{
+	public void setActivity(Activity activity) {
 		this.activity = (HikePreferences) activity;
 	}
 
 	@Override
-	public boolean isFinished()
-	{
+	public boolean isFinished() {
 		return finished;
 	}
-
 
 }

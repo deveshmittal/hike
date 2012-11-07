@@ -20,8 +20,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.Utils;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class HikeListActivity extends Activity
-{
+public class HikeListActivity extends Activity {
 	private HikeArrayAdapter adapter;
 	private ListView listView;
 	private TextView labelView;
@@ -29,8 +28,7 @@ public class HikeListActivity extends Activity
 	private SparseBooleanArray checkedItems;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState)
-	{
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hikelistactivity);
 		labelView = (TextView) findViewById(R.id.title);
@@ -45,7 +43,7 @@ public class HikeListActivity extends Activity
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		checkedItems = listView.getCheckedItemPositions();
-		
+
 		adapter = new HikeInviteAdapter(this, -1, checkedItems);
 
 		labelView.setText(R.string.invite_via_sms);
@@ -54,28 +52,33 @@ public class HikeListActivity extends Activity
 	}
 
 	@Override
-	protected void onDestroy() 
-	{
+	protected void onDestroy() {
 		super.onDestroy();
 	}
 
-	public void onTitleIconClick(View v) 
-	{
+	public void onTitleIconClick(View v) {
 		boolean noItemsChecked = true;
-		for(int i=0; i<checkedItems.size(); i++)
-		{
-			if(checkedItems.valueAt(i))
-			{
-				ContactInfo contactInfo = (ContactInfo) adapter.getItem(checkedItems.keyAt(i));
-				Log.d(getClass().getSimpleName(), "Inviting " + contactInfo.toString());
-				FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE, HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, Utils.makeHike2SMSInviteMessage(contactInfo.getMsisdn(), this).serialize());
+		for (int i = 0; i < checkedItems.size(); i++) {
+			if (checkedItems.valueAt(i)) {
+				ContactInfo contactInfo = (ContactInfo) adapter
+						.getItem(checkedItems.keyAt(i));
+				Log.d(getClass().getSimpleName(),
+						"Inviting " + contactInfo.toString());
+				FiksuTrackingManager.uploadPurchaseEvent(this,
+						HikeConstants.INVITE, HikeConstants.INVITE_SENT,
+						HikeConstants.CURRENCY);
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH,
+						Utils.makeHike2SMSInviteMessage(
+								contactInfo.getMsisdn(), this).serialize());
 				noItemsChecked = false;
 			}
 		}
-		Toast.makeText(getApplicationContext(), noItemsChecked ? "Select the contacts you want to invite" : "Invites sent", Toast.LENGTH_SHORT).show();
-		if(!noItemsChecked)
-		{
+		Toast.makeText(
+				getApplicationContext(),
+				noItemsChecked ? "Select the contacts you want to invite"
+						: "Invites sent", Toast.LENGTH_SHORT).show();
+		if (!noItemsChecked) {
 			finish();
 		}
 	}

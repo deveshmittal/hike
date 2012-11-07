@@ -15,16 +15,14 @@ import com.bsb.hike.R;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 
-public class Rewards extends DrawerBaseActivity
-{
+public class Rewards extends DrawerBaseActivity {
 	private TextView currentAmount;
 	private TextView claimedAmount;
 
 	private ImageButton claimBtn;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) 
-	{
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.rewards);
 		afterSetContentView(savedInstanceState);
@@ -43,49 +41,50 @@ public class Rewards extends DrawerBaseActivity
 
 		TextView moneyAmt = (TextView) findViewById(R.id.money_amt);
 		String moneyAmtTxt = moneyAmt.getText().toString();
-		SpannableStringBuilder moneyAmtSsb = new SpannableStringBuilder(moneyAmtTxt);
+		SpannableStringBuilder moneyAmtSsb = new SpannableStringBuilder(
+				moneyAmtTxt);
 		moneyAmtSsb.setSpan(
-							new ImageSpan(this, R.drawable.ic_rupee_black_small), 
-							moneyAmtTxt.indexOf(textToBeReplaced), 
-							moneyAmtTxt.indexOf(textToBeReplaced) + textToBeReplaced.length(), 
-							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-							);
+				new ImageSpan(this, R.drawable.ic_rupee_black_small),
+				moneyAmtTxt.indexOf(textToBeReplaced),
+				moneyAmtTxt.indexOf(textToBeReplaced)
+						+ textToBeReplaced.length(),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		moneyAmt.setText(moneyAmtSsb);
 
 		TextView disclaimer = (TextView) findViewById(R.id.disclaimer);
 		String disclaimerTxt = disclaimer.getText().toString();
-		SpannableStringBuilder disclaimerSsb = new SpannableStringBuilder(disclaimerTxt);
+		SpannableStringBuilder disclaimerSsb = new SpannableStringBuilder(
+				disclaimerTxt);
 		disclaimerSsb.setSpan(
-							new ImageSpan(this, R.drawable.ic_rupee_disclaimer), 
-							disclaimerTxt.indexOf(textToBeReplaced), 
-							disclaimerTxt.indexOf(textToBeReplaced) + textToBeReplaced.length(), 
-							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-							);
+				new ImageSpan(this, R.drawable.ic_rupee_disclaimer),
+				disclaimerTxt.indexOf(textToBeReplaced),
+				disclaimerTxt.indexOf(textToBeReplaced)
+						+ textToBeReplaced.length(),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		disclaimerSsb.setSpan(
-							new ForegroundColorSpan(getResources().getColor(R.color.signup_blue)), 
-							disclaimerTxt.indexOf(textToBeReplaced2), 
-							disclaimerTxt.indexOf(textToBeReplaced2) + textToBeReplaced2.length(), 
-							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-							);
+				new ForegroundColorSpan(getResources().getColor(
+						R.color.signup_blue)),
+				disclaimerTxt.indexOf(textToBeReplaced2),
+				disclaimerTxt.indexOf(textToBeReplaced2)
+						+ textToBeReplaced2.length(),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		disclaimer.setText(disclaimerSsb);
 	}
 
-	public void onInviteClicked(View v)
-	{
+	public void onInviteClicked(View v) {
 		Utils.logEvent(this, HikeConstants.LogEvent.REWARDS_INVITE);
 		Utils.startShareIntent(this, Utils.getInviteMessage(this));
 	}
 
-	public void onClaimClicked(View v)
-	{
+	public void onClaimClicked(View v) {
 		Utils.logEvent(this, HikeConstants.LogEvent.REWARDS_CLAIM);
 	}
 
-	public void onFaqClicked(View v)
-	{
+	public void onFaqClicked(View v) {
 		Utils.logEvent(this, HikeConstants.LogEvent.REWARDS_FAQ);
 		Intent intent = new Intent(this, WebViewActivity.class);
-		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD, HikeConstants.HELP_URL);
+		intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
+				HikeConstants.HELP_URL);
 		intent.putExtra(HikeConstants.Extras.TITLE, "Help");
 		startActivity(intent);
 	}

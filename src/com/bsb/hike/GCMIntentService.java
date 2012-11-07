@@ -15,32 +15,30 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.android.gcm.GCMRegistrar;
 
-public class GCMIntentService extends GCMBaseIntentService 
-{
+public class GCMIntentService extends GCMBaseIntentService {
 	private static final String DEV_TYPE = "dev_type";
 	private static final String DEV_TOKEN = "dev_token";
 
 	private SharedPreferences prefs;
 
-	public GCMIntentService() 
-	{
+	public GCMIntentService() {
 		super(HikeConstants.APP_PUSH_ID);
 	}
 
 	@Override
-	protected void onError(Context context, String errorId)
-	{
+	protected void onError(Context context, String errorId) {
 		Log.d(getClass().getSimpleName(), "ERROR OCCURRED " + errorId);
 	}
 
 	@Override
-	protected void onMessage(Context context, Intent intent)
-	{
+	protected void onMessage(Context context, Intent intent) {
 		Log.d(getClass().getSimpleName(), "Message received: " + intent);
 
-		prefs = prefs == null ? context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0) : prefs;
-		if (!TextUtils.isEmpty(prefs.getString(HikeMessengerApp.TOKEN_SETTING, null)) && prefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL, false)) 
-		{
+		prefs = prefs == null ? context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0) : prefs;
+		if (!TextUtils.isEmpty(prefs.getString(HikeMessengerApp.TOKEN_SETTING,
+				null))
+				&& prefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL, false)) {
 			HikeMessengerApp app = (HikeMessengerApp) context
 					.getApplicationContext();
 			app.connectToService();
@@ -48,27 +46,24 @@ public class GCMIntentService extends GCMBaseIntentService
 	}
 
 	@Override
-	protected void onRegistered(final Context context, String regId)
-	{
+	protected void onRegistered(final Context context, String regId) {
 		Log.d(getClass().getSimpleName(), "REGISTERED ID: " + regId);
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/account/device", new HikeHttpCallback() 
-		{
-			public void onSuccess(JSONObject response) 
-			{}
-			public void onFailure() 
-			{
-				// Could not send our server the device token. Unregister from GCM
-				GCMRegistrar.unregister(context);
-			}
-		});
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+				"/account/device", new HikeHttpCallback() {
+					public void onSuccess(JSONObject response) {
+					}
+
+					public void onFailure() {
+						// Could not send our server the device token.
+						// Unregister from GCM
+						GCMRegistrar.unregister(context);
+					}
+				});
 		JSONObject request = new JSONObject();
-		try 
-		{
+		try {
 			request.put(DEV_TYPE, HikeConstants.ANDROID);
 			request.put(DEV_TOKEN, regId);
-		}
-		catch (JSONException e) 
-		{
+		} catch (JSONException e) {
 			Log.d(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 		hikeHttpRequest.setJSONData(request);
@@ -78,8 +73,7 @@ public class GCMIntentService extends GCMBaseIntentService
 	}
 
 	@Override
-	protected void onUnregistered(Context context, String regId)
-	{
+	protected void onUnregistered(Context context, String regId) {
 		Log.d(getClass().getSimpleName(), "UNREGISTERED ID: " + regId);
 	}
 }

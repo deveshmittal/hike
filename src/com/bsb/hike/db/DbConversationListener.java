@@ -25,8 +25,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class DbConversationListener implements Listener
-{
+public class DbConversationListener implements Listener {
 	HikeConversationsDatabase mConversationDb;
 
 	HikeUserDatabase mUserDb;
@@ -39,15 +38,16 @@ public class DbConversationListener implements Listener
 
 	private int dayRecorded = 0;
 
-	public DbConversationListener(Context context)
-	{
+	public DbConversationListener(Context context) {
 		this.context = context;
 		mPubSub = HikeMessengerApp.getPubSub();
 		mConversationDb = HikeConversationsDatabase.getInstance();
 		mUserDb = HikeUserDatabase.getInstance();
 		persistence = HikeMqttPersistence.getInstance();
 
-		dayRecorded = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(HikeMessengerApp.DAY_RECORDED, 0);
+		dayRecorded = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(
+				HikeMessengerApp.DAY_RECORDED, 0);
 
 		mPubSub.addListener(HikePubSub.MESSAGE_SENT, this);
 		mPubSub.addListener(HikePubSub.DELETE_MESSAGE, this);
@@ -61,134 +61,131 @@ public class DbConversationListener implements Listener
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object)
-	{
-		if (HikePubSub.MESSAGE_SENT.equals(type))
-		{
+	public void onEventReceived(String type, Object object) {
+		if (HikePubSub.MESSAGE_SENT.equals(type)) {
 			ConvMessage convMessage = (ConvMessage) object;
-			boolean shouldSendMessage = convMessage.isFileTransferMessage() && !TextUtils.isEmpty(convMessage.getMetadata().getHikeFiles().get(0).getFileKey());
-			if(shouldSendMessage)
-			{
-				mConversationDb.updateMessageMetadata(convMessage.getMsgID(), convMessage.getMetadata());
-			}
-			else
-			{
-				if(!convMessage.isFileTransferMessage())
-				{
+			boolean shouldSendMessage = convMessage.isFileTransferMessage()
+					&& !TextUtils.isEmpty(convMessage.getMetadata()
+							.getHikeFiles().get(0).getFileKey());
+			if (shouldSendMessage) {
+				mConversationDb.updateMessageMetadata(convMessage.getMsgID(),
+						convMessage.getMetadata());
+			} else {
+				if (!convMessage.isFileTransferMessage()) {
 					mConversationDb.addConversationMessages(convMessage);
-					if(convMessage.isSent())
-					{
+					if (convMessage.isSent()) {
 						uploadFiksuPerDayMessageEvent();
 					}
 				}
 				// Recency was already updated when the ft message was added.
-				mUserDb.updateContactRecency(convMessage.getMsisdn(), convMessage.getTimestamp());
-				mPubSub.publish(HikePubSub.RECENT_CONTACTS_UPDATED, convMessage.getMsisdn());
+				mUserDb.updateContactRecency(convMessage.getMsisdn(),
+						convMessage.getTimestamp());
+				mPubSub.publish(HikePubSub.RECENT_CONTACTS_UPDATED,
+						convMessage.getMsisdn());
 			}
 
-			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO && (!convMessage.isFileTransferMessage() || shouldSendMessage)) 
-			{
-				Log.d("DBCONVERSATION LISTENER","Sending Message : "+convMessage.getMessage()+"	;	to : "+convMessage.getMsisdn());
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, convMessage.serialize());
-				if(convMessage.isGroupChat())
-				{
-					mPubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, convMessage.getMsisdn());
+			if (convMessage.getParticipantInfoState() == ParticipantInfoState.NO_INFO
+					&& (!convMessage.isFileTransferMessage() || shouldSendMessage)) {
+				Log.d("DBCONVERSATION LISTENER",
+						"Sending Message : " + convMessage.getMessage()
+								+ "	;	to : " + convMessage.getMsisdn());
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH,
+						convMessage.serialize());
+				if (convMessage.isGroupChat()) {
+					mPubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE,
+							convMessage.getMsisdn());
 				}
 			}
-		}
-		else if (HikePubSub.DELETE_MESSAGE.equals(type))
-		{
+		} else if (HikePubSub.DELETE_MESSAGE.equals(type)) {
 			ConvMessage message = ((ConvMessage) object);
 			mConversationDb.deleteMessage(message);
 			persistence.removeMessage(message.getMsgID());
-		}
-		else if (HikePubSub.MESSAGE_FAILED.equals(type))  // server got msg from client 1 and sent back received msg receipt
+		} else if (HikePubSub.MESSAGE_FAILED.equals(type)) // server got msg
+															// from client 1 and
+															// sent back
+															// received msg
+															// receipt
 		{
-			updateDB(object,ConvMessage.State.SENT_FAILED.ordinal());
-		}
-		else if (HikePubSub.BLOCK_USER.equals(type))
-		{
+			updateDB(object, ConvMessage.State.SENT_FAILED.ordinal());
+		} else if (HikePubSub.BLOCK_USER.equals(type)) {
 			String msisdn = (String) object;
 			mUserDb.block(msisdn);
-			JSONObject blockObj = blockUnblockSerialize("b",msisdn);
+			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, blockObj);
-		}
-		else if (HikePubSub.UNBLOCK_USER.equals(type))
-		{
+		} else if (HikePubSub.UNBLOCK_USER.equals(type)) {
 			String msisdn = (String) object;
 			mUserDb.unblock(msisdn);
-			JSONObject unblockObj = blockUnblockSerialize("ub",msisdn);
+			JSONObject unblockObj = blockUnblockSerialize("ub", msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, unblockObj);
-		}
-		else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type))  // server got msg from client 1 and sent back received msg receipt
+		} else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type)) // server got
+																// msg from
+																// client 1 and
+																// sent back
+																// received msg
+																// receipt
 		{
-			Log.d("DBCONVERSATION LISTENER","(Sender) Message sent confirmed for msgID -> "+(Long)object);
-			updateDB(object,ConvMessage.State.SENT_CONFIRMED.ordinal());
-		}
-		else if (HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE.equals(type))
-		{
+			Log.d("DBCONVERSATION LISTENER",
+					"(Sender) Message sent confirmed for msgID -> "
+							+ (Long) object);
+			updateDB(object, ConvMessage.State.SENT_CONFIRMED.ordinal());
+		} else if (HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE.equals(type)) {
 			String groupId = (String) object;
 
-			Map<String, GroupParticipant> smsParticipants = mConversationDb.getGroupParticipants(groupId, true, true);
+			Map<String, GroupParticipant> smsParticipants = mConversationDb
+					.getGroupParticipants(groupId, true, true);
 
-			if(smsParticipants.isEmpty())
-			{
+			if (smsParticipants.isEmpty()) {
 				return;
 			}
 
 			JSONObject dndJSON = new JSONObject();
 			JSONArray dndParticipants = new JSONArray();
 
-			for(Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants.entrySet())
-			{
-				GroupParticipant smsParticipant = smsParticipantEntry.getValue();
+			for (Entry<String, GroupParticipant> smsParticipantEntry : smsParticipants
+					.entrySet()) {
+				GroupParticipant smsParticipant = smsParticipantEntry
+						.getValue();
 				String msisdn = smsParticipantEntry.getKey();
-				if(smsParticipant.onDnd())
-				{
+				if (smsParticipant.onDnd()) {
 					dndParticipants.put(msisdn);
 				}
 			}
 
-			if(dndParticipants.length() == 0)
-			{
+			if (dndParticipants.length() == 0) {
 				// No DND participants. Just return
 				return;
 			}
-			try 
-			{
+			try {
 				dndJSON.put(HikeConstants.FROM, groupId);
 				dndJSON.put(HikeConstants.TYPE, HikeConstants.DND);
 				dndJSON.put(HikeConstants.DND_USERS, dndParticipants);
 
-				ConvMessage convMessage = new ConvMessage(dndJSON, null, context, false);
+				ConvMessage convMessage = new ConvMessage(dndJSON, null,
+						context, false);
 				mConversationDb.addConversationMessages(convMessage);
 				mConversationDb.updateShownStatus(groupId);
 
 				mPubSub.publish(HikePubSub.MESSAGE_RECEIVED, convMessage);
-			}
-			catch (JSONException e) 
-			{
+			} catch (JSONException e) {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
-		}
-		else if(HikePubSub.FAVORITE_TOGGLED.equals(type))
-		{
+		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 
 			ContactInfo contactInfo = favoriteToggle.first;
 			FavoriteType favoriteType = favoriteToggle.second;
-			
+
 			mUserDb.toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
 
-			if(favoriteType != FavoriteType.RECOMMENDED_FAVORITE)
-			{
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH, serializeMsg(
-						favoriteType == FavoriteType.FAVORITE ? HikeConstants.MqttMessageTypes.ADD_FAVORITE : HikeConstants.MqttMessageTypes.REMOVE_FAVORITE, 
+			if (favoriteType != FavoriteType.RECOMMENDED_FAVORITE) {
+				mPubSub.publish(
+						HikePubSub.MQTT_PUBLISH,
+						serializeMsg(
+								favoriteType == FavoriteType.FAVORITE ? HikeConstants.MqttMessageTypes.ADD_FAVORITE
+										: HikeConstants.MqttMessageTypes.REMOVE_FAVORITE,
 								contactInfo.getMsisdn()));
 			}
-		}
-		else if(HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type))
-		{
+		} else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type)) {
 			Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;
 
 			String id = groupMute.first;
@@ -196,63 +193,61 @@ public class DbConversationListener implements Listener
 
 			mConversationDb.toggleGroupMute(id, mute);
 
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, serializeMsg(mute ? 
-					HikeConstants.MqttMessageTypes.MUTE : HikeConstants.MqttMessageTypes.UNMUTE, id));
+			mPubSub.publish(
+					HikePubSub.MQTT_PUBLISH,
+					serializeMsg(mute ? HikeConstants.MqttMessageTypes.MUTE
+							: HikeConstants.MqttMessageTypes.UNMUTE, id));
 		}
 	}
 
 	/*
 	 * Recording the event on fiksu if this was the first message of the day.
 	 */
-	private void uploadFiksuPerDayMessageEvent()
-	{
+	private void uploadFiksuPerDayMessageEvent() {
 		int today = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
-		if(today != dayRecorded)
-		{
-			FiksuTrackingManager.uploadPurchaseEvent(context, HikeConstants.FIRST_MESSAGE, HikeConstants.FIRST_MSG_IN_DAY, HikeConstants.CURRENCY);
+		if (today != dayRecorded) {
+			FiksuTrackingManager.uploadPurchaseEvent(context,
+					HikeConstants.FIRST_MESSAGE,
+					HikeConstants.FIRST_MSG_IN_DAY, HikeConstants.CURRENCY);
 			dayRecorded = today;
-			Editor editor = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+			Editor editor = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
 			editor.putInt(HikeMessengerApp.DAY_RECORDED, dayRecorded);
 			editor.commit();
 		}
 	}
 
-	private JSONObject serializeMsg(String type, String id)
-	{
+	private JSONObject serializeMsg(String type, String id) {
 		JSONObject obj = new JSONObject();
 		JSONObject data = new JSONObject();
-		try
-		{
+		try {
 			obj.put(HikeConstants.TYPE, type);
 			data.put(HikeConstants.ID, id);
 			obj.put(HikeConstants.DATA, data);
-		}
-		catch (JSONException e)
-		{
+		} catch (JSONException e) {
 			Log.e(getClass().getSimpleName(), "Invalid json", e);
 		}
 		return obj;
 	}
-	private JSONObject blockUnblockSerialize(String type, String msisdn) 
-	{
+
+	private JSONObject blockUnblockSerialize(String type, String msisdn) {
 		JSONObject obj = new JSONObject();
-		try 
-		{
+		try {
 			obj.put(HikeConstants.TYPE, type);
 			obj.put(HikeConstants.DATA, msisdn);
-		} 
-		catch (JSONException e) 
-		{
+		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return obj;
 	}
 
-	private void updateDB(Object object, int status)
-	{
-		long msgID = (Long)object;
-		/* TODO we should lookup the convid for this user, since otherwise one could set mess with the state for other conversations */
-		mConversationDb.updateMsgStatus(msgID,status, null);
+	private void updateDB(Object object, int status) {
+		long msgID = (Long) object;
+		/*
+		 * TODO we should lookup the convid for this user, since otherwise one
+		 * could set mess with the state for other conversations
+		 */
+		mConversationDb.updateMsgStatus(msgID, status, null);
 	}
 }

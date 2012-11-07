@@ -1,8 +1,6 @@
 package com.bsb.hike;
 
-
-public class HikeConstants
-{
+public class HikeConstants {
 	public static final String APP_PUSH_ID = "768395314950";
 	public static final String APP_FACEBOOK_ID = "425850510764995";
 	public static final String APP_TWITTER_ID = "7LFaGIe5QXj05WN1YDDVaA";
@@ -66,11 +64,11 @@ public class HikeConstants
 	public static final String VIBRATE_PREF = "vibratePref";
 	public static final String SMS_PREF = "smsPref";
 	public static final String HIKEBOT = "TD-HIKE";
-	
+
 	public static final String DONE = "Done";
 	public static final String PIN_ERROR = "PinError";
 	public static final String ADDRESS_BOOK_ERROR = "AddressBookError";
-	public static final String CHANGE_NUMBER = "ChangeNumber"; 
+	public static final String CHANGE_NUMBER = "ChangeNumber";
 
 	public static final String SEPARATOR = " - ";
 	public static final String GROUP_PARTICIPANT_SEPARATOR = ", ";
@@ -89,20 +87,23 @@ public class HikeConstants
 
 	public static final String NEW_GROUP = "new_group";
 
-	/* Constant used to name the preference file which saves the drafts*/
+	/* Constant used to name the preference file which saves the drafts */
 	public static final String DRAFT_SETTING = "draftSetting";
 
 	/* how long to wait between sending publish and receiving an acknowledgement */
-	public static final long MESSAGE_DELIVERY_TIMEOUT = 5*1000;
+	public static final long MESSAGE_DELIVERY_TIMEOUT = 5 * 1000;
 
 	/* how long to wait for a ping confirmation */
-	public static final long PING_TIMEOUT = 5*1000;
+	public static final long PING_TIMEOUT = 5 * 1000;
 
-	/* how long to wait to resend message. This should significantly greathr than PING_TIMEOUT */
-	public static final long MESSAGE_RETRY_INTERVAL = 15*1000;
+	/*
+	 * how long to wait to resend message. This should significantly greathr
+	 * than PING_TIMEOUT
+	 */
+	public static final long MESSAGE_RETRY_INTERVAL = 15 * 1000;
 
 	/* quiet period of no changes before actually updating the db */
-	public static final long CONTACT_UPDATE_TIMEOUT = 10*1000;
+	public static final long CONTACT_UPDATE_TIMEOUT = 10 * 1000;
 
 	/* how often to ping the server */
 	public static final short KEEP_ALIVE = 2 * 60; /* 10 minutes */
@@ -115,15 +116,15 @@ public class HikeConstants
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 	public static final String ADAPTER_NAME = "hikeadapter";
-	
-	/* constants for defining what to do after checking for updates*/
+
+	/* constants for defining what to do after checking for updates */
 	public static final int NORMAL_UPDATE = 2;
 	public static final int CRITICAL_UPDATE = 1;
 	public static final int NO_UPDATE = 0;
-	
+
 	// More explanation required?
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
-    public static final String APP_API_VERSION = "1";
+	public static final String APP_API_VERSION = "1";
 
 	public static int NUM_SMS_PER_FRIEND = 10;
 	public static int INITIAL_NUM_SMS = 100;
@@ -138,7 +139,7 @@ public class HikeConstants
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{8,15}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
-	public static final int MAX_FILE_SIZE = 6*1024*1024;
+	public static final int MAX_FILE_SIZE = 6 * 1024 * 1024;
 	public static final int SHARE_LOCATION_CODE = 1187;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
@@ -146,7 +147,7 @@ public class HikeConstants
 	public static final int RECORD_AUDIO_TRANSFER_CODE = 1191;
 	public static final int MAX_DURATION_RECORDING_SEC = 120;
 
-	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180; 
+	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180;
 
 	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
 
@@ -158,7 +159,8 @@ public class HikeConstants
 
 	public static final String MAIL = "support@hike.in";
 
-	// Had to add this constant since its only available in the android API for Honeycomb and higher.
+	// Had to add this constant since its only available in the android API for
+	// Honeycomb and higher.
 	public static final int FLAG_HARDWARE_ACCELERATED = 16777216;
 
 	public static final int LOCAL_CLEAR_TYPING_TIME = 20 * 1000;
@@ -166,25 +168,31 @@ public class HikeConstants
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 20;
 
-	//Fiksu Currency
+	// Fiksu Currency
 	public static final String CURRENCY = "INR";
 
-	//Fiksu Usernames
+	// Fiksu Usernames
 	public static final String FACEBOOK = "facebook";
 	public static final String TWITTER = "twitter";
 	public static final String INVITE = "invite";
 	public static final String FIRST_MESSAGE = "first_message";
 
-	//Fiksu Prices
+	// Fiksu Prices
 	public static final int FACEBOOK_CONNECT = 100;
 	public static final int TWITTER_CONNECT = 100;
 	public static final int INVITE_SENT = 50;
 	public static final int FIRST_MSG_IN_DAY = 10;
 
-	/*Maximum number of conversations to be made automatically when the user signs up*/
+	/*
+	 * Maximum number of conversations to be made automatically when the user
+	 * signs up
+	 */
 	public static final int MAX_CONVERSATIONS = 6;
 
-	/*Constant used as a type to signify that this message was added locally by the client when the user signed up*/
+	/*
+	 * Constant used as a type to signify that this message was added locally by
+	 * the client when the user signed up
+	 */
 	public static final String INTRO_MESSAGE = "im";
 
 	public static final String LOCATION_CONTENT_TYPE = "text/location";
@@ -197,8 +205,7 @@ public class HikeConstants
 	// Picasa URI start for other devices
 	public static final String OTHER_PICASA_URI_START = "content://com.google.android.gallery3d";
 
-	public static final class Extras
-	{
+	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
 		public static final String PREV_MSISDN = "prevMsisdn";
@@ -207,7 +214,7 @@ public class HikeConstants
 		public static final String MSG = "msg";
 		public static final String PREF = "pref";
 		public static final String EDIT = "edit";
-		public static final String IMAGE_PATH ="image-path";
+		public static final String IMAGE_PATH = "image-path";
 		public static final String SCALE = "scale";
 		public static final String OUTPUT_X = "outputX";
 		public static final String OUTPUT_Y = "outputY";
@@ -241,7 +248,7 @@ public class HikeConstants
 		public static final String APP_STARTED_FIRST_TIME = "appStartedFirstTime";
 		public static final String LATEST_VERSION = "latestVersion";
 		public static final String SHOW_UPDATE_OVERLAY = "showUpdateOverlay";
-		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip"; 
+		public static final String SHOW_UPDATE_TOOL_TIP = "showUpdateToolTip";
 		public static final String UPDATE_TOOL_TIP_SHOWING = "updateToolTipShowing";
 		public static final String UPDATE_MESSAGE = "updateMessage";
 		public static final String URL_TO_LOAD = "urlToLoad";
@@ -278,139 +285,122 @@ public class HikeConstants
 		public static final String CONTACT_INFO = "contactInfo";
 	}
 
-	public static final class LogEvent
-	{
+	public static final class LogEvent {
 		// Common tags for Countly. Don't change.
 
-	    public static final String TAG = "tag";
-	    public static final String DEVICE_ID = "device_id";
-	    public static final String OS = "_os";
-	    public static final String OS_VERSION = "_os_version";
-	    public static final String DEVICE = "_device";
-	    public static final String RESOLUTION = "_resolution";
-	    public static final String CARRIER = "_carrier";
-	    public static final String APP_VERSION = "_app_version";
+		public static final String TAG = "tag";
+		public static final String DEVICE_ID = "device_id";
+		public static final String OS = "_os";
+		public static final String OS_VERSION = "_os_version";
+		public static final String DEVICE = "_device";
+		public static final String RESOLUTION = "_resolution";
+		public static final String CARRIER = "_carrier";
+		public static final String APP_VERSION = "_app_version";
 
-	    /*
-	     *  Naming Convention - <screen><event><sub-event>
-	     */
-	    
-	    /* 
-	     * Home screen events
-	     * <screen> = hoS
-	     * <event> = profS, invS, feedS, delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY, upDOBD, upDOB, smSY, smSN, groupS, dRB
-	     */
-	    public static final String MENU = "hoS";
-	    public static final String DELETE_ALL_CONVERSATIONS_MENU = "hoSdelAC";
-	    public static final String DELETE_CONVERSATION = "hoSdelC";
-	    public static final String COMPOSE_BUTTON = "hoScompB";
-	    public static final String ADD_SHORTCUT = "hoSaddSC";
-	    public static final String HOME_TOOL_TIP_CLOSED = "hoScreDtiPN";
-	    public static final String HOME_TOOL_TIP_CLICKED = "hoScreDtiPY";
-	    public static final String HOME_UPDATE_TOOL_TIP_CLOSED = "hoSupDtiPN";
-	    public static final String HOME_UPDATE_TOOL_TIP_CLICKED = "hoSupDtiPY";
-	    public static final String HOME_UPDATE_OVERLAY_DISMISSED = "hoSupDOBD";
-	    public static final String HOME_UDPATE_OVERLAY_BUTTON_CLICKED = "hoSupDOB";
-	    public static final String DEFAULT_SMS_DIALOG_YES = "hoSsmSY";
-	    public static final String DEFAULT_SMS_DIALOG_NO = "hoSsmSN";
-	    public static final String DRAWER_BUTTON = "hoSdRB";
+		/*
+		 * Naming Convention - <screen><event><sub-event>
+		 */
 
-	    /* 
-	     * Profile screen events
-	     * <screen> = profS
-	     * <event> = proES, credS, notyS, privS, helpS
-	     */
-	    public static final String EDIT_PROFILE = "profSproES";
-	    public static final String NOTIFICATION_SCREEN = "profSnotyS";
-	    public static final String PRIVACY_SCREEN = "profSprivS";
+		/*
+		 * Home screen events <screen> = hoS <event> = profS, invS, feedS,
+		 * delAC, delC, compB, addSC, creDtiPN, creDtiPY, upDtiPN, upDtipY,
+		 * upDOBD, upDOB, smSY, smSN, groupS, dRB
+		 */
+		public static final String MENU = "hoS";
+		public static final String DELETE_ALL_CONVERSATIONS_MENU = "hoSdelAC";
+		public static final String DELETE_CONVERSATION = "hoSdelC";
+		public static final String COMPOSE_BUTTON = "hoScompB";
+		public static final String ADD_SHORTCUT = "hoSaddSC";
+		public static final String HOME_TOOL_TIP_CLOSED = "hoScreDtiPN";
+		public static final String HOME_TOOL_TIP_CLICKED = "hoScreDtiPY";
+		public static final String HOME_UPDATE_TOOL_TIP_CLOSED = "hoSupDtiPN";
+		public static final String HOME_UPDATE_TOOL_TIP_CLICKED = "hoSupDtiPY";
+		public static final String HOME_UPDATE_OVERLAY_DISMISSED = "hoSupDOBD";
+		public static final String HOME_UDPATE_OVERLAY_BUTTON_CLICKED = "hoSupDOB";
+		public static final String DEFAULT_SMS_DIALOG_YES = "hoSsmSY";
+		public static final String DEFAULT_SMS_DIALOG_NO = "hoSsmSN";
+		public static final String DRAWER_BUTTON = "hoSdRB";
 
-	    /* 
-	     * Invite screen events
-	     * <screen> = invS
-	     * <event> = credB, creDtiPN, creDtiPY
-	     */
-	    public static final String INVITE_TOOL_TIP_CLOSED = "invScreDtiPN";
-	    public static final String INVITE_TOOL_TIP_CLICKED = "invScreDtiPY";
-	    public static final String CREDIT_TOP_BUTTON = "invScredB";
-	    
-	    /* 
-	     * Chat thread screen events
-	     * <screen> = chatS
-	     * <event> = inVtiPN, inVtopB, blocK, forMsg, infoB, invOB, invOBD, opTiNtaP, calL, adD, grPinfO
-	     */
-	    public static final String CHAT_INVITE_TOOL_TIP_CLOSED = "chatSinVtiPN";
-	    public static final String CHAT_INVITE_TOP_BUTTON = "chatSinVtopB";
-	    public static final String MENU_BLOCK = "chatSblocK";
-	    public static final String FORWARD_MSG = "chatSforMSG";
-	    public static final String I_BUTTON = "chatSinfoB";
-	    public static final String INVITE_OVERLAY_BUTTON = "chatSinvOB";
-	    public static final String INVITE_OVERLAY_DISMISS = "chatSinvOBD";
-	    public static final String OPT_IN_TAP_HERE = "chatSopTiNtaP";
-	    public static final String MENU_CALL = "chatScalL";
-	    public static final String MENU_ADD_TO_CONTACTS = "chatSadD";
-	    public static final String GROUP_INFO_TOP_BUTTON = "chatSgrPinfO";
-	    
-	    /* 
-	     * Credits screen events
-	     * <screen> = credS
-	     * <event> = inVB
-	     */
-	    public static final String INVITE_BUTTON_CLICKED = "credSinVB";
+		/*
+		 * Profile screen events <screen> = profS <event> = proES, credS, notyS,
+		 * privS, helpS
+		 */
+		public static final String EDIT_PROFILE = "profSproES";
+		public static final String NOTIFICATION_SCREEN = "profSnotyS";
+		public static final String PRIVACY_SCREEN = "profSprivS";
 
-	    /*
-	     * User Preferences
-	     * <screen> = prefS
-	     * <event> = smS
-	     */
-	    public static final String DEFAULT_SMS_CLIENT = "prefSsmS";
+		/*
+		 * Invite screen events <screen> = invS <event> = credB, creDtiPN,
+		 * creDtiPY
+		 */
+		public static final String INVITE_TOOL_TIP_CLOSED = "invScreDtiPN";
+		public static final String INVITE_TOOL_TIP_CLICKED = "invScreDtiPY";
+		public static final String CREDIT_TOP_BUTTON = "invScredB";
 
-	    /*
-	     * Group Info screen
-	     * <screen> = groupS
-	     * <event> = adDparT
-	     */
+		/*
+		 * Chat thread screen events <screen> = chatS <event> = inVtiPN,
+		 * inVtopB, blocK, forMsg, infoB, invOB, invOBD, opTiNtaP, calL, adD,
+		 * grPinfO
+		 */
+		public static final String CHAT_INVITE_TOOL_TIP_CLOSED = "chatSinVtiPN";
+		public static final String CHAT_INVITE_TOP_BUTTON = "chatSinVtopB";
+		public static final String MENU_BLOCK = "chatSblocK";
+		public static final String FORWARD_MSG = "chatSforMSG";
+		public static final String I_BUTTON = "chatSinfoB";
+		public static final String INVITE_OVERLAY_BUTTON = "chatSinvOB";
+		public static final String INVITE_OVERLAY_DISMISS = "chatSinvOBD";
+		public static final String OPT_IN_TAP_HERE = "chatSopTiNtaP";
+		public static final String MENU_CALL = "chatScalL";
+		public static final String MENU_ADD_TO_CONTACTS = "chatSadD";
+		public static final String GROUP_INFO_TOP_BUTTON = "chatSgrPinfO";
+
+		/*
+		 * Credits screen events <screen> = credS <event> = inVB
+		 */
+		public static final String INVITE_BUTTON_CLICKED = "credSinVB";
+
+		/*
+		 * User Preferences <screen> = prefS <event> = smS
+		 */
+		public static final String DEFAULT_SMS_CLIENT = "prefSsmS";
+
+		/*
+		 * Group Info screen <screen> = groupS <event> = adDparT
+		 */
 		public static final String ADD_PARTICIPANT = "groupSadDparT";
-	    
-	    /*
-	     * SignUp screen
-	     * <screen> = signupS
-	     * <event> = erroR
-	     */
-	    public static final String SIGNUP_ERROR = "signupSerroR";
 
-	    /*
-	     * Drawer screen
-	     * <screen> = drS
-	     * <event> = homE, gC, inV, reW, creD, proF, helP
-	     */
-	    public static final String DRAWER_HOME = "drShomE";
-	    public static final String DRAWER_GROUP_CHAT = "drSgC";
-	    public static final String DRAWER_INVITE = "drSinV";
-	    public static final String DRAWER_REWARDS = "drSreW";
-	    public static final String DRAWER_CREDITS = "drScreD";
-	    public static final String DRAWER_PROFILE = "drSproF";
-	    public static final String DRAWER_HELP = "drShelP";
+		/*
+		 * SignUp screen <screen> = signupS <event> = erroR
+		 */
+		public static final String SIGNUP_ERROR = "signupSerroR";
 
-	    /*
-	     * Rewards screen
-	     * <screen> = rewS
-	     * <event> = inV, clM, faQ
-	     */
-	    public static final String REWARDS_INVITE = "rewSinV";
-	    public static final String REWARDS_CLAIM = "rewSclM";
-	    public static final String REWARDS_FAQ = "rewSfaQ";
+		/*
+		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD,
+		 * proF, helP
+		 */
+		public static final String DRAWER_HOME = "drShomE";
+		public static final String DRAWER_GROUP_CHAT = "drSgC";
+		public static final String DRAWER_INVITE = "drSinV";
+		public static final String DRAWER_REWARDS = "drSreW";
+		public static final String DRAWER_CREDITS = "drScreD";
+		public static final String DRAWER_PROFILE = "drSproF";
+		public static final String DRAWER_HELP = "drShelP";
 
-	    /*
-	     * Help screen
-	     * <screen> = helpS
-	     * <event> = conT, faQ
-	     */
-	    public static final String HELP_CONTACT = "helpSconT";
-	    public static final String HELP_FAQ = "helpSfaQ";
+		/*
+		 * Rewards screen <screen> = rewS <event> = inV, clM, faQ
+		 */
+		public static final String REWARDS_INVITE = "rewSinV";
+		public static final String REWARDS_CLAIM = "rewSclM";
+		public static final String REWARDS_FAQ = "rewSfaQ";
+
+		/*
+		 * Help screen <screen> = helpS <event> = conT, faQ
+		 */
+		public static final String HELP_CONTACT = "helpSconT";
+		public static final String HELP_FAQ = "helpSfaQ";
 	}
 
-	public static final class MqttMessageTypes
-	{
+	public static final class MqttMessageTypes {
 		public static final String MESSAGE_READ = "mr";
 		public static final String MESSAGE = "m";
 		public static final String SMS_CREDITS = "sc";
@@ -438,13 +428,7 @@ public class HikeConstants
 		public static final String UNMUTE = "unmute";
 	}
 
-	public static enum FTResult
-	{
-		SUCCESS,
-		UPLOAD_FAILED,
-		FILE_TOO_LARGE,
-		READ_FAIL,
-		DOWNLOAD_FAILED,
-		CANCELLED
+	public static enum FTResult {
+		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED
 	}
 }

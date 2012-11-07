@@ -56,8 +56,9 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.MSISDNView;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class SignupActivity extends Activity implements SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener, TextWatcher, OnClickListener, FinishableEvent, OnCancelListener
-{
+public class SignupActivity extends Activity implements
+		SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener,
+		TextWatcher, OnClickListener, FinishableEvent, OnCancelListener {
 
 	private SignupTask mTask;
 
@@ -106,12 +107,11 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	private HikeHTTPTask hikeHTTPTask;
 
 	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.signup);
-		
+
 		viewFlipper = (ViewFlipper) findViewById(R.id.signup_viewflipper);
 		numLayout = (ViewGroup) findViewById(R.id.num_layout);
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
@@ -121,25 +121,26 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		errorImage = (ImageView) findViewById(R.id.error_img);
 
 		Object o = getLastNonConfigurationInstance();
-		if(o instanceof HikeHTTPTask)
-		{
+		if (o instanceof HikeHTTPTask) {
 			hikeHTTPTask = (HikeHTTPTask) o;
 			hikeHTTPTask.setActivity(this);
-			dialog = ProgressDialog.show(this, null, getString(R.string.calling_you));
+			dialog = ProgressDialog.show(this, null,
+					getString(R.string.calling_you));
 			dialog.setCancelable(true);
 			dialog.setOnCancelListener(this);
 		}
 
-		if(savedInstanceState != null)
-		{
-			msisdnErrorDuringSignup = savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
-			int dispChild = savedInstanceState.getInt(HikeConstants.Extras.SIGNUP_PART);
+		if (savedInstanceState != null) {
+			msisdnErrorDuringSignup = savedInstanceState
+					.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
+			int dispChild = savedInstanceState
+					.getInt(HikeConstants.Extras.SIGNUP_PART);
 			removeAnimation();
 			viewFlipper.setDisplayedChild(dispChild);
-			switch(dispChild)
-			{
+			switch (dispChild) {
 			case NUMBER:
-				countryCode = savedInstanceState.getString(HikeConstants.Extras.COUNTRY_CODE);
+				countryCode = savedInstanceState
+						.getString(HikeConstants.Extras.COUNTRY_CODE);
 				prepareLayoutForFetchingNumber();
 				break;
 			case PIN:
@@ -149,28 +150,24 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 				prepareLayoutForGettingName();
 				break;
 			}
-			if(savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING))
-			{
+			if (savedInstanceState
+					.getBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING)) {
 				startLoading();
 			}
-			if(savedInstanceState.getBoolean(HikeConstants.Extras.SIGNUP_ERROR))
-			{
+			if (savedInstanceState
+					.getBoolean(HikeConstants.Extras.SIGNUP_ERROR)) {
 				showErrorMsg();
 			}
-			enterEditText.setText(savedInstanceState.getString(HikeConstants.Extras.SIGNUP_TEXT));
-		}
-		else
-		{
-			if(getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false))
-			{
+			enterEditText.setText(savedInstanceState
+					.getString(HikeConstants.Extras.SIGNUP_TEXT));
+		} else {
+			if (getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false)) {
 				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName();
-			}
-			else
-			{
+			} else {
 				prepareLayoutForFetchingNumber();
 			}
-			
+
 		}
 		setAnimation();
 		setListeners();
@@ -188,74 +185,64 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 	}
 
 	@Override
-	public void onFinish(boolean success)
-	{
-		if(dialog != null)
-		{
+	public void onFinish(boolean success) {
+		if (dialog != null) {
 			dialog.dismiss();
 			dialog = null;
 		}
-		if(hikeHTTPTask == null)
-		{
-			if (success)
-			{
+		if (hikeHTTPTask == null) {
+			if (success) {
 				// Tracking the registration event for Fiksu
 				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
-				// Added this code to prevent hike from pulling in sms by default.
-				Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+				// Added this code to prevent hike from pulling in sms by
+				// default.
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(
+						getApplicationContext()).edit();
 				editor.putBoolean(HikeConstants.SMS_PREF, false);
 				editor.commit();
-				mHandler.postDelayed(new Runnable() 
-				{
+				mHandler.postDelayed(new Runnable() {
 					@Override
-					public void run() 
-					{
-						Intent i = new Intent(SignupActivity.this, Tutorial.class);
+					public void run() {
+						Intent i = new Intent(SignupActivity.this,
+								Tutorial.class);
 						startActivity(i);
 						finish();
 					}
 				}, 2500);
-			}
-			else if(mCurrentState != null && mCurrentState.value != null && mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER))
-			{
+			} else if (mCurrentState != null && mCurrentState.value != null
+					&& mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER)) {
 				restartTask();
 			}
-		}
-		else
-		{
+		} else {
 			hikeHTTPTask = null;
 		}
 	}
 
-	public void onClick(View v)
-	{
-		if (v.getId() == submitBtn.getId()) 
-		{
+	public void onClick(View v) {
+		if (v.getId() == submitBtn.getId()) {
 			submitClicked();
-		}
-		else if(v.getId() == tryAgainBtn.getId())
-		{
+		} else if (v.getId() == tryAgainBtn.getId()) {
 			restartTask();
-		}
-		else if(tapHereText != null && v.getId() == tapHereText.getId())
-		{
+		} else if (tapHereText != null && v.getId() == tapHereText.getId()) {
 			mTask.addUserInput("");
-		}
-		else if(callmeBtn != null && v.getId() == callmeBtn.getId())
-		{
-			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/pin-call", new HikeHttpRequest.HikeHttpCallback() 
-			{
-				public void onFailure(){}
-				public void onSuccess(JSONObject response){}
-			});
+		} else if (callmeBtn != null && v.getId() == callmeBtn.getId()) {
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/pin-call",
+					new HikeHttpRequest.HikeHttpCallback() {
+						public void onFailure() {
+						}
+
+						public void onSuccess(JSONObject response) {
+						}
+					});
 			JSONObject request = new JSONObject();
-			try 
-			{
-				request.put("msisdn", getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_ENTERED, null));
-			} 
-			catch (JSONException e) 
-			{
+			try {
+				request.put(
+						"msisdn",
+						getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+								0).getString(HikeMessengerApp.MSISDN_ENTERED,
+								null));
+			} catch (JSONException e) {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
 			hikeHttpRequest.setJSONData(request);
@@ -263,92 +250,80 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			hikeHTTPTask = new HikeHTTPTask(this, R.string.call_me_fail, false);
 			hikeHTTPTask.execute(hikeHttpRequest);
 
-			dialog = ProgressDialog.show(this, null, getResources().getString(R.string.calling_you));
+			dialog = ProgressDialog.show(this, null,
+					getResources().getString(R.string.calling_you));
 			dialog.setCancelable(true);
 			dialog.setOnCancelListener(this);
 		}
 	}
 
 	@Override
-	public Object onRetainNonConfigurationInstance() 
-	{
-		if(hikeHTTPTask != null && !hikeHTTPTask.isFinished())
-		{
+	public Object onRetainNonConfigurationInstance() {
+		if (hikeHTTPTask != null && !hikeHTTPTask.isFinished()) {
 			return hikeHTTPTask;
 		}
 		return super.onRetainNonConfigurationInstance();
 	}
 
-	protected void onDestroy()
-	{
+	protected void onDestroy() {
 		super.onDestroy();
-		if(dialog != null)
-		{
+		if (dialog != null) {
 			dialog.dismiss();
 			dialog = null;
 		}
 	}
 
-	private void startLoading()
-	{
+	private void startLoading() {
 		loadingLayout.setVisibility(View.VISIBLE);
 		submitBtn.setVisibility(View.GONE);
-		if(invalidNum != null)
-		{
+		if (invalidNum != null) {
 			invalidNum.setVisibility(View.GONE);
 		}
 		if (tapHereText != null) {
 			tapHereText.setVisibility(View.GONE);
 		}
-		if(countryPicker != null)
-		{
+		if (countryPicker != null) {
 			countryPicker.setEnabled(false);
 		}
-		if(callmeBtn != null)
-		{
+		if (callmeBtn != null) {
 			callmeBtn.setVisibility(View.GONE);
 		}
 	}
 
-	private void submitClicked()
-	{
+	private void submitClicked() {
 		startLoading();
-		if (!addressBookError) 
-		{
-			if (viewFlipper.getDisplayedChild() == NUMBER && !enterEditText.getText().toString().matches(HikeConstants.VALID_MSISDN_REGEX)) 
-			{
+		if (!addressBookError) {
+			if (viewFlipper.getDisplayedChild() == NUMBER
+					&& !enterEditText.getText().toString()
+							.matches(HikeConstants.VALID_MSISDN_REGEX)) {
 				loadingLayout.setVisibility(View.GONE);
 				submitBtn.setVisibility(View.VISIBLE);
 				invalidNum.setVisibility(View.VISIBLE);
-			}
-			else
-			{
+			} else {
 				String input = enterEditText.getText().toString();
-				if(viewFlipper.getDisplayedChild() == NUMBER)
-				{
+				if (viewFlipper.getDisplayedChild() == NUMBER) {
 					String code = countryPicker.getText().toString();
 					code = code.substring(code.indexOf("+"), code.length());
 					input = code + input;
 
-					// Saving country code of the user. This will be used when the user tries to message an unknown number.
-					Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+					// Saving country code of the user. This will be used when
+					// the user tries to message an unknown number.
+					Editor editor = getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
+							.edit();
 					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
 					editor.commit();
 				}
 				mTask.addUserInput(input);
 			}
-		} 
-		else 
-		{
+		} else {
 			showErrorMsg();
 			addressBookError = false;
 		}
 	}
 
-	private void initializeViews(ViewGroup layout)
-	{
-		switch (layout.getId()) 
-		{
+	private void initializeViews(ViewGroup layout) {
+		switch (layout.getId()) {
 		case R.id.name_layout:
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_name);
 			break;
@@ -364,7 +339,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		loadingLayout = (ViewGroup) layout.findViewById(R.id.loading_layout);
 		tapHereText = (ImageButton) layout.findViewById(R.id.wrong_num);
 		submitBtn = (ImageButton) layout.findViewById(R.id.btn_continue);
-		numberContainer = (LinearLayout) layout.findViewById(R.id.msisdn_container);
+		numberContainer = (LinearLayout) layout
+				.findViewById(R.id.msisdn_container);
 		invalidNum = (ImageView) layout.findViewById(R.id.invalid_num);
 		countryPicker = (Button) layout.findViewById(R.id.country_picker);
 		callmeBtn = (ImageButton) layout.findViewById(R.id.btn_call_me);
@@ -373,83 +349,79 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		submitBtn.setVisibility(View.VISIBLE);
 	}
 
-	private void prepareLayoutForFetchingNumber()
-	{
+	private void prepareLayoutForFetchingNumber() {
 		initializeViews(numLayout);
 
 		countryPicker.setEnabled(true);
 
-	    countryNamesAndCodes = getResources().getStringArray(R.array.country_names_and_codes);
-	    countryISOAndCodes = getResources().getStringArray(R.array.country_iso_and_codes);
+		countryNamesAndCodes = getResources().getStringArray(
+				R.array.country_names_and_codes);
+		countryISOAndCodes = getResources().getStringArray(
+				R.array.country_iso_and_codes);
 
-	    if(TextUtils.isEmpty(countryCode))
-	    {
-	    	TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-	    	String countryIso = manager.getNetworkCountryIso().toUpperCase();
-	    	for(String s : countryISOAndCodes)
-	    	{
-	    		if(!TextUtils.isEmpty(countryIso) && s.contains(countryIso))
-	    		{
-	    			Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
-	    			countryCode = s;
-	    			break;
-	    		}
-	    	}
-	    	countryPicker.setText(TextUtils.isEmpty(countryCode) ? defaultCountryCode : countryCode);
-	    }
-	    else
-	    {
-	    	countryPicker.setText(countryCode);
-	    }
-	    formatCountryPickerText(countryPicker.getText().toString());
+		if (TextUtils.isEmpty(countryCode)) {
+			TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+			String countryIso = manager.getNetworkCountryIso().toUpperCase();
+			for (String s : countryISOAndCodes) {
+				if (!TextUtils.isEmpty(countryIso) && s.contains(countryIso)) {
+					Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
+					countryCode = s;
+					break;
+				}
+			}
+			countryPicker
+					.setText(TextUtils.isEmpty(countryCode) ? defaultCountryCode
+							: countryCode);
+		} else {
+			countryPicker.setText(countryCode);
+		}
+		formatCountryPickerText(countryPicker.getText().toString());
 
-		infoTxt.setImageResource(msisdnErrorDuringSignup ? R.drawable.enter_phone_again : R.drawable.enter_phone);
+		infoTxt.setImageResource(msisdnErrorDuringSignup ? R.drawable.enter_phone_again
+				: R.drawable.enter_phone);
 		invalidNum.setVisibility(View.INVISIBLE);
 	}
 
-	private void formatCountryPickerText(String code)
-	{
-		if(countryPicker == null)
-		{
+	private void formatCountryPickerText(String code) {
+		if (countryPicker == null) {
 			return;
 		}
 		SpannableStringBuilder ssb = new SpannableStringBuilder(code);
-		ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, code.indexOf("+"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, code.indexOf("+"),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		countryPicker.setText(ssb);
 	}
 
-	public void onCountryPickerClick(View v)
-	{
+	public void onCountryPickerClick(View v) {
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
+		AlertDialog.Builder builder = new AlertDialog.Builder(
+				SignupActivity.this);
 
 		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
-			    android.R.layout.select_dialog_item,
-			    android.R.id.text1,
-			    countryNamesAndCodes)
-			    {
+				android.R.layout.select_dialog_item, android.R.id.text1,
+				countryNamesAndCodes) {
 
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				TextView tv = (TextView) v.findViewById(android.R.id.text1);
+
+				String text = tv.getText().toString();
+				SpannableStringBuilder spannable = new SpannableStringBuilder(
+						text);
+				spannable.setSpan(new ForegroundColorSpan(getResources()
+						.getColor(R.color.country_code)), text.indexOf("+"),
+						text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				tv.setText(spannable);
+
+				return v;
+			}
+		};
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
 					@Override
-					public View getView(int position, View convertView,
-							ViewGroup parent) 
-					{
-						View v = super.getView(position, convertView, parent);
-						TextView tv = (TextView) v.findViewById(android.R.id.text1);
-
-						String text = tv.getText().toString();
-						SpannableStringBuilder spannable = new SpannableStringBuilder(text);
-						spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.country_code)), text.indexOf("+"), text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-						tv.setText(spannable);
-
-						return v;
-					}
-			    };
-
-				builder.setAdapter(dialogAdapter, new DialogInterface.OnClickListener() 
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which) 
-					{
+					public void onClick(DialogInterface dialog, int which) {
 						formatCountryPickerText(countryISOAndCodes[which]);
 					}
 				});
@@ -458,8 +430,7 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		dialog.show();
 	}
 
-	private void prepareLayoutForGettingPin()
-	{
+	private void prepareLayoutForGettingPin() {
 		initializeViews(pinLayout);
 		callmeBtn.setVisibility(View.VISIBLE);
 
@@ -468,16 +439,16 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		tapHereText.setOnClickListener(this);
 	}
 
-	private void prepareLayoutForGettingName()
-	{
+	private void prepareLayoutForGettingName() {
 		initializeViews(nameLayout);
 
-		if (msisdnView == null) 
-		{
-			String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.MSISDN_SETTING, null);
-			if(TextUtils.isEmpty(msisdn))
-			{
-				Utils.logEvent(SignupActivity.this, HikeConstants.LogEvent.SIGNUP_ERROR);
+		if (msisdnView == null) {
+			String msisdn = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+					HikeMessengerApp.MSISDN_SETTING, null);
+			if (TextUtils.isEmpty(msisdn)) {
+				Utils.logEvent(SignupActivity.this,
+						HikeConstants.LogEvent.SIGNUP_ERROR);
 				msisdnErrorDuringSignup = true;
 				resetViewFlipper();
 				restartTask();
@@ -487,9 +458,8 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			numberContainer.addView(msisdnView);
 		}
 	}
-	
-	private void resetViewFlipper()
-	{
+
+	private void resetViewFlipper() {
 		booBooLayout.setVisibility(View.GONE);
 		viewFlipper.setVisibility(View.VISIBLE);
 		removeAnimation();
@@ -498,14 +468,12 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 		setAnimation();
 	}
 
-	private void restartTask()
-	{
+	private void restartTask() {
 		resetViewFlipper();
 		mTask = SignupTask.restartTask(this);
 	}
 
-	private void showErrorMsg()
-	{
+	private void showErrorMsg() {
 		loadingLayout.setVisibility(View.GONE);
 		submitBtn.setVisibility(View.VISIBLE);
 		booBooLayout.setVisibility(View.VISIBLE);
@@ -515,89 +483,83 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 				InputMethodManager.HIDE_NOT_ALWAYS);
 	}
 
-	private void setListeners()
-	{
-		if (this.enterEditText.getText().length() == 0) 
-		{
+	private void setListeners() {
+		if (this.enterEditText.getText().length() == 0) {
 			submitBtn.setEnabled(false);
 		}
 		enterEditText.setOnEditorActionListener(this);
 		enterEditText.addTextChangedListener(this);
-		enterEditText.setOnKeyListener(new OnKeyListener()
-		{
+		enterEditText.setOnKeyListener(new OnKeyListener() {
 			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event) 
-			{
-				return loadingLayout.getVisibility() == View.VISIBLE && (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				return loadingLayout.getVisibility() == View.VISIBLE
+						&& (event == null || event.getKeyCode() != KeyEvent.KEYCODE_BACK);
 			}
 		});
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putInt(HikeConstants.Extras.SIGNUP_PART, viewFlipper.getDisplayedChild());
-		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING, loadingLayout.getVisibility() == View.VISIBLE);
-		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR, booBooLayout.getVisibility() == View.VISIBLE);
-		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText.getText().toString());
-		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR, msisdnErrorDuringSignup);
-		if(viewFlipper.getDisplayedChild() == NUMBER)
-		{
-			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker.getText().toString());
+		outState.putInt(HikeConstants.Extras.SIGNUP_PART,
+				viewFlipper.getDisplayedChild());
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_TASK_RUNNING,
+				loadingLayout.getVisibility() == View.VISIBLE);
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_ERROR,
+				booBooLayout.getVisibility() == View.VISIBLE);
+		outState.putString(HikeConstants.Extras.SIGNUP_TEXT, enterEditText
+				.getText().toString());
+		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR,
+				msisdnErrorDuringSignup);
+		if (viewFlipper.getDisplayedChild() == NUMBER) {
+			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker
+					.getText().toString());
 		}
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onBackPressed() {
-		if(mTask!=null)
-			{
-				mTask.cancelTask();
-				mTask = null;
-			}
+		if (mTask != null) {
+			mTask.cancelTask();
+			mTask = null;
+		}
 		SignupTask.isAlreadyFetchingNumber = false;
 		super.onBackPressed();
 	}
 
-	private void removeAnimation()
-	{
+	private void removeAnimation() {
 		viewFlipper.setInAnimation(null);
 		viewFlipper.setOutAnimation(null);
 	}
-	
-	private void setAnimation()
-	{
-		viewFlipper.setInAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_in_right));
-		viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_out_left));
+
+	private void setAnimation() {
+		viewFlipper.setInAnimation(AnimationUtils.loadAnimation(
+				getApplicationContext(), R.anim.slide_in_right));
+		viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(
+				getApplicationContext(), R.anim.slide_out_left));
 	}
-	
+
 	@Override
-	public void onProgressUpdate(StateValue stateValue)
-	{
+	public void onProgressUpdate(StateValue stateValue) {
 		String value = stateValue.value;
 		mCurrentState = stateValue;
-		Log.d("SignupActivity", "Current State " + mCurrentState.state.name() +" VALUE: "+value);
+		Log.d("SignupActivity", "Current State " + mCurrentState.state.name()
+				+ " VALUE: " + value);
 
-		if(mHandler == null)
-		{
+		if (mHandler == null) {
 			mHandler = new Handler();
 		}
-		
-		switch(stateValue.state)
-		{
+
+		switch (stateValue.state) {
 		case MSISDN:
-			if (TextUtils.isEmpty(value))
-			{
+			if (TextUtils.isEmpty(value)) {
 				prepareLayoutForFetchingNumber();
-			}
-			else if (value.equals(HikeConstants.DONE))
-			{
+			} else if (value.equals(HikeConstants.DONE)) {
 				removeAnimation();
 				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName();
 				setAnimation();
-			}
-			else
-			{
+			} else {
 				/* yay, got the actual MSISDN */
 				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName();
@@ -607,54 +569,43 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			viewFlipper.setDisplayedChild(PIN);
 			prepareLayoutForGettingPin();
 
-			//Wrong Pin
-			if(value != null && value.equals(HikeConstants.PIN_ERROR))
-			{
+			// Wrong Pin
+			if (value != null && value.equals(HikeConstants.PIN_ERROR)) {
 				infoTxt.setImageResource(R.drawable.wrong_pin);
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
 				submitBtn.setVisibility(View.VISIBLE);
-				if (tapHereText != null) 
-				{
+				if (tapHereText != null) {
 					tapHereText.setVisibility(View.VISIBLE);
 				}
 				enterEditText.setText("");
 			}
-			//Manual entry for pin
-			else
-			{
+			// Manual entry for pin
+			else {
 				setAnimation();
 			}
 			break;
 		case NAME:
-			if (TextUtils.isEmpty(value))
-			{
+			if (TextUtils.isEmpty(value)) {
 				prepareLayoutForGettingName();
-			}
-			else
-			{
-				mHandler.postDelayed(new Runnable() 
-				{
-					
+			} else {
+				mHandler.postDelayed(new Runnable() {
+
 					@Override
-					public void run() 
-					{
+					public void run() {
 						loadingText.setImageResource(R.drawable.getting_you_in);
 					}
 				}, 1000);
 			}
 			break;
 		case ERROR:
-			if (value != null && value.equals(HikeConstants.ADDRESS_BOOK_ERROR)) 
-			{
+			if (value != null && value.equals(HikeConstants.ADDRESS_BOOK_ERROR)) {
 				addressBookError = true;
-				if(loadingLayout.getVisibility() == View.VISIBLE)
-				{
+				if (loadingLayout.getVisibility() == View.VISIBLE) {
 					showErrorMsg();
 				}
-			}
-			else if (value == null || !value.equals(HikeConstants.CHANGE_NUMBER))
-			{
+			} else if (value == null
+					|| !value.equals(HikeConstants.CHANGE_NUMBER)) {
 				showErrorMsg();
 			}
 			break;
@@ -664,34 +615,34 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		submitBtn.setEnabled(!TextUtils.isEmpty(enterEditText.getText().toString().trim()));
+		submitBtn.setEnabled(!TextUtils.isEmpty(enterEditText.getText()
+				.toString().trim()));
 	}
 
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {}
+			int after) {
+	}
 
 	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count) {}
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+	}
 
 	@Override
 	public boolean onEditorAction(TextView arg0, int actionId, KeyEvent event) {
-		if((actionId == EditorInfo.IME_ACTION_DONE 
-				|| event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
-				&& !TextUtils.isEmpty(enterEditText.getText().toString().trim()) 
-				&& loadingLayout.getVisibility() != View.VISIBLE)
-		{
+		if ((actionId == EditorInfo.IME_ACTION_DONE || event.getKeyCode() == KeyEvent.KEYCODE_ENTER)
+				&& !TextUtils
+						.isEmpty(enterEditText.getText().toString().trim())
+				&& loadingLayout.getVisibility() != View.VISIBLE) {
 			submitClicked();
 		}
 		return true;
 	}
 
 	@Override
-	public void onCancel(DialogInterface dialog) 
-	{
+	public void onCancel(DialogInterface dialog) {
 		Log.d(getClass().getSimpleName(), "Dialog cancelled");
-		if(hikeHTTPTask != null)
-		{
+		if (hikeHTTPTask != null) {
 			hikeHTTPTask.setActivity(null);
 			hikeHTTPTask = null;
 		}
