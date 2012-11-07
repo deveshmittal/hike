@@ -582,10 +582,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public List<Conversation> getConversations() {
 		long startTime = System.currentTimeMillis();
-		// select max(msgid), messages.convid, message, (select msisdn from
-		// conversations where conversations.convid = messages.convid) from
-		// messages, conversations group by messages.convid
-		String sqlStatement = "SELECT msgid, messages.convid, message, msgStatus, max(timestamp) as timestamp, mappedMsgId, metadata, groupParticipant, msisdn from (SELECT * FROM messages ORDER BY msgid ASC) as messages, conversations where conversations.convid = messages.convid group by conversations.convid";
+		String sqlStatement = "SELECT msgid, messages.convid, message, msgStatus,"
+				+ " max(timestamp) as timestamp, mappedMsgId, metadata, groupParticipant,"
+				+ " msisdn from (SELECT * FROM messages ORDER BY msgid ASC) as messages,"
+				+ " conversations where conversations.convid = messages.convid group by conversations.convid";
 		Cursor mainCursor = mDb.rawQuery(sqlStatement, null);
 		Cursor groupInfoCursor = null;
 
