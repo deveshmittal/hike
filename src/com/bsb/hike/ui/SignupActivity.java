@@ -604,6 +604,9 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			}
 			break;
 		case PIN:
+			viewFlipper.setDisplayedChild(PIN);
+			prepareLayoutForGettingPin();
+
 			//Wrong Pin
 			if(value != null && value.equals(HikeConstants.PIN_ERROR))
 			{
@@ -620,8 +623,6 @@ public class SignupActivity extends Activity implements SignupTask.OnSignupTaskP
 			//Manual entry for pin
 			else
 			{
-				viewFlipper.setDisplayedChild(PIN);
-				prepareLayoutForGettingPin();
 				setAnimation();
 			}
 			break;
