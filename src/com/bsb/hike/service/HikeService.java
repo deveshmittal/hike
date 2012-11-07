@@ -89,30 +89,34 @@ public class HikeService extends Service {
 
 		@Override
 		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case MSG_APP_CONNECTED:
-				if (mMqttManager.isConnected()) {
-					mMqttManager.subscribeToUIEvents();
-				}
-				handleStart();
+			try {
+				switch (msg.what) {
+				case MSG_APP_CONNECTED:
+					if (mMqttManager.isConnected()) {
+						mMqttManager.subscribeToUIEvents();
+					}
+					handleStart();
 
-				mApp = msg.replyTo;
-				broadcastServiceStatus(mMqttManager.getConnectionStatus());
-				break;
-			case MSG_APP_DISCONNECTED:
-				mMqttManager.unsubscribeFromUIEvents();
-				mApp = null;
-				break;
-			case MSG_APP_TOKEN_CREATED:
-				Log.d("HikeService", "received MSG_APP_TOKEN_CREATED");
-				handleStart();
-				break;
-			case MSG_APP_PUBLISH:
-				Bundle bundle = msg.getData();
-				String message = bundle.getString(HikeConstants.MESSAGE);
-				long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
-				mMqttManager.send(new HikePacket(message.getBytes(), msgId,
-						System.currentTimeMillis()), msg.arg1);
+					mApp = msg.replyTo;
+					broadcastServiceStatus(mMqttManager.getConnectionStatus());
+					break;
+				case MSG_APP_DISCONNECTED:
+					mMqttManager.unsubscribeFromUIEvents();
+					mApp = null;
+					break;
+				case MSG_APP_TOKEN_CREATED:
+					Log.d("HikeService", "received MSG_APP_TOKEN_CREATED");
+					handleStart();
+					break;
+				case MSG_APP_PUBLISH:
+					Bundle bundle = msg.getData();
+					String message = bundle.getString(HikeConstants.MESSAGE);
+					long msgId = bundle.getLong(HikeConstants.MESSAGE_ID, -1);
+					mMqttManager.send(new HikePacket(message.getBytes(), msgId,
+							System.currentTimeMillis()), msg.arg1);
+				}
+			} catch (Exception e) {
+				Log.e(getClass().getSimpleName(), "Exception", e);
 			}
 		}
 	}
