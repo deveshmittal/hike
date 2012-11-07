@@ -57,6 +57,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		recommendedFavoriteList = hikeUserDatabase
 				.getContactsOrderedByLastMessaged(-1,
 						FavoriteType.RECOMMENDED_FAVORITE, false, true);
+		recommendedFavoriteList.addAll(hikeUserDatabase
+				.getContactsOrderedByLastMessaged(-1,
+						FavoriteType.AUTO_RECOMMENDED_FAVORITE, false, true));
 		favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
 				FavoriteType.FAVORITE, false, true);
 		recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(
@@ -177,7 +180,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
 		} else if (contactInfo.getFavoriteType() == FavoriteType.NOT_FAVORITE) {
 			return FavoriteAdapterViewType.RECENT.ordinal();
-		} else if (contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE) {
+		} else if (contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE
+				|| contactInfo.getFavoriteType() == FavoriteType.AUTO_RECOMMENDED_FAVORITE) {
 			return FavoriteAdapterViewType.RECOMMENDED_FAVORITE.ordinal();
 		}
 		return FavoriteAdapterViewType.FAVORITE.ordinal();
@@ -303,7 +307,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		case RECOMMENDED_FAVORITE:
 			String name = contactInfo.getFirstName();
-			String msg = context.getString(R.string.recommended_favorite, name);
+			String msg = context
+					.getString(
+							contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE ? R.string.recommended_favorite
+									: R.string.auto_recommended_favorite, name);
 			SpannableStringBuilder message = new SpannableStringBuilder(msg);
 			message.setSpan(new ForegroundColorSpan(context.getResources()
 					.getColor(R.color.drawer_text)),

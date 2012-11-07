@@ -10,7 +10,7 @@ import com.bsb.hike.utils.Utils;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	public static enum FavoriteType {
-		NOT_FAVORITE, RECOMMENDED_FAVORITE, FAVORITE
+		NOT_FAVORITE, RECOMMENDED_FAVORITE, FAVORITE, AUTO_RECOMMENDED_FAVORITE
 	}
 
 	@Override

@@ -167,6 +167,8 @@ public class HikeConstants {
 
 	// Number of recent contacts to show in the favorites drawer.
 	public static final int RECENT_COUNT_IN_FAVORITE = 20;
+	// Number of auto recommend contacts to show in favorites.
+	public static final int MAX_AUTO_RECOMMENDED_FAVORITE = 5;
 
 	// Fiksu Currency
 	public static final String CURRENCY = "INR";

@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
@@ -688,6 +689,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
 				+ "=?", new String[] { msisdn });
+	}
+
+	public void addAutoRecommendedFavorites() {
+		ContentValues contentValues = new ContentValues(1);
+		contentValues.put(DBConstants.FAVORITE,
+				FavoriteType.AUTO_RECOMMENDED_FAVORITE.ordinal());
+
+		int rows = mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
+				+ " IN (SELECT DISTINCT " + DBConstants.MSISDN + " FROM "
+				+ DBConstants.USERS_TABLE + " WHERE "
+				+ DBConstants.LAST_MESSAGED + ">0 ORDER BY "
+				+ DBConstants.LAST_MESSAGED + " DESC LIMIT "
+				+ HikeConstants.MAX_AUTO_RECOMMENDED_FAVORITE + ")", null);
+
+		Log.d(getClass().getSimpleName(), "Auto recommended favorites added: " + rows);
 	}
 
 	public boolean isContactFavorite(String msisdn) {

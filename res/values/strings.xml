@@ -184,4 +184,5 @@
 	<string name="user_info">User Info</string>
 	<string name="yes">Yes</string>
 	<string name="recommended_favorite">%1$s added you as a favorite. Would you like to do the same?</string>
+	<string name="auto_recommended_favorite">Would you like to add %1$s as a favorite?</string>
 </resources>

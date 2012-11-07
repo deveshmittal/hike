@@ -13,6 +13,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -59,6 +60,17 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				editor.remove(HikeConstants.Extras.UPDATE_TO_IGNORE);
 				editor.remove(HikeConstants.Extras.LATEST_VERSION);
 				editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+				editor.commit();
+			}
+			/*
+			 * Adding auto recommended favorites based on the recency of the contact. One time
+			 * thing only
+			 */
+			if(!prefs.getBoolean(HikeMessengerApp.AUTO_RECOMMENDED_FAVORITES_ADDED, false))
+			{
+				HikeUserDatabase.getInstance().addAutoRecommendedFavorites();
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeMessengerApp.AUTO_RECOMMENDED_FAVORITES_ADDED, true);
 				editor.commit();
 			}
 		}
