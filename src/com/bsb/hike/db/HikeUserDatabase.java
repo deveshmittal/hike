@@ -61,7 +61,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSISDN_TYPE + " STRING, "
 				+ DBConstants.LAST_MESSAGED + " INTEGER, "
 				+ DBConstants.FAVORITE + " INTEGER DEFAULT "
-				+ FavoriteType.NOT_FAVORITE + " )";
+				+ FavoriteType.NOT_FAVORITE.ordinal() + " )";
 
 		db.execSQL(create);
 
@@ -132,7 +132,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		if (oldVersion < 5) {
 			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
 					+ " ADD COLUMN " + DBConstants.FAVORITE
-					+ " INTEGER DEFAULT " + FavoriteType.NOT_FAVORITE;
+					+ " INTEGER DEFAULT " + FavoriteType.NOT_FAVORITE.ordinal();
 			db.execSQL(alter);
 		}
 	}
