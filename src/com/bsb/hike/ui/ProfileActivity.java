@@ -223,6 +223,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(
 				mLocalMSISDN, false);
+		if(!contactInfo.isOnhike())
+		{
+			contactInfo.setOnhike(getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, false));
+		}
 
 		topBarBtn
 				.setImageResource(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? R.drawable.ic_favorite

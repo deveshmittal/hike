@@ -1797,6 +1797,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
 						mContactNumber);
+				intent.putExtra(HikeConstants.Extras.ON_HIKE, mConversation.isOnhike());
 				startActivity(intent);
 			} else {
 				Utils.logEvent(ChatThread.this,
