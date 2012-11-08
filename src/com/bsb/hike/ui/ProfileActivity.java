@@ -986,8 +986,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				isBlocked ? HikePubSub.UNBLOCK_USER : HikePubSub.BLOCK_USER,
 				this.mLocalMSISDN);
 		isBlocked = !isBlocked;
-		blockBtn.setText(!isBlocked ? R.string.block_owner
-				: R.string.unblock_owner);
+		blockBtn.setText(!isBlocked ? R.string.block_user
+				: R.string.unblock_user);
 	}
 
 	@Override
