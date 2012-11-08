@@ -84,6 +84,7 @@ public class ShareLocation extends MapActivity {
 				selectedGeoPoint.getLongitudeE6() / 1E6);
 		setResult(RESULT_OK, result);
 
+		removeMyLocationListeners();
 		finish();
 	}
 
