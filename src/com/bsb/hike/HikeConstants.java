@@ -211,6 +211,8 @@ public class HikeConstants {
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 50;
 	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 15;
 
+	public static final int SHOW_CREDITS_AFTER_NUM = 10;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
