@@ -2825,6 +2825,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				&& !messages.isEmpty()
 				&& firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES) {
 
+			/*
+			 * This should only happen in the case where the user starts a new chat
+			 * and gets a typing notification.
+			 */
+			if (messages.get(0) == null) {
+				return;
+			}
+
 			loadingMoreMessages = true;
 
 			List<ConvMessage> olderMessages = mConversationDb
