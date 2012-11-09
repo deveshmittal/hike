@@ -403,6 +403,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onTitleIconClick(View v) {
+		if (profileType == ProfileType.USER_PROFILE)
+		{
+			super.onTitleIconClick(v);
+			return;
+		}
 		if (v.getId() == R.id.title_image_btn2) {
 			if (profileType == ProfileType.GROUP_INFO) {
 				groupConversation.setIsMuted(!groupConversation.isMuted());

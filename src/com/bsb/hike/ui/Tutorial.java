@@ -119,15 +119,19 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 	}
 
 	public void onTitleIconClick(View v) {
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE).edit();
-		editor.putBoolean(HikeMessengerApp.SHOWN_TUTORIAL, true);
-		editor.commit();
+		if (!isHelpPage) {
+			Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+					MODE_PRIVATE).edit();
+			editor.putBoolean(HikeMessengerApp.SHOWN_TUTORIAL, true);
+			editor.commit();
 
-		Intent i = new Intent(Tutorial.this, MessagesList.class);
-		i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
-		startActivity(i);
-		finish();
+			Intent i = new Intent(Tutorial.this, MessagesList.class);
+			i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
+			startActivity(i);
+			finish();
+		} else {
+			super.onTitleIconClick(v);
+		}
 	}
 
 	private class TutorialPagerAdapter extends PagerAdapter {
