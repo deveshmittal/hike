@@ -1235,7 +1235,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	@Override
 	public void onEventReceived(String type, Object object) {
-		if (mContactNumber == null) {
+		if (mContactNumber == null || mConversation == null) {
 			Log.w("ChatThread",
 					"received message when contactNumber is null type=" + type
 							+ " object=" + object);
