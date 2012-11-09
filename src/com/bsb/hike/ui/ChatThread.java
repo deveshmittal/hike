@@ -796,6 +796,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				item.setVisible(true);
 			}
 		}
+		if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
+		{
+			MenuItem forwardItem = menu.findItem(R.id.forward);
+			forwardItem.setVisible(false);
+
+			MenuItem copyItem = menu.findItem(R.id.copy);
+			copyItem.setVisible(false);
+		}
 	}
 
 	private void sendMessage(ConvMessage convMessage) {
