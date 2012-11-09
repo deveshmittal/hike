@@ -20,12 +20,12 @@ public class HikeFile {
 		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION;
 
 		public static HikeFileType fromString(String fileTypeString) {
-			if ("video".startsWith(fileTypeString)) {
+			if (fileTypeString.startsWith("video")) {
 				return HikeFileType.VIDEO;
-			} else if ("audio".startsWith(fileTypeString)) {
+			} else if (fileTypeString.startsWith("audio")) {
 				return HikeFileType.AUDIO;
-			} else if (HikeConstants.LOCATION_CONTENT_TYPE
-					.startsWith(fileTypeString)) {
+			} else if (fileTypeString
+					.startsWith(HikeConstants.LOCATION_CONTENT_TYPE)) {
 				return HikeFileType.LOCATION;
 			} else {
 				return HikeFileType.IMAGE;
