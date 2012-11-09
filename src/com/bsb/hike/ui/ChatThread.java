@@ -944,6 +944,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 				initialiseLocationTransfer(latitude, longitude, zoomLevel,
 						fileKey);
+				// Making sure the file does not get forwarded again on
+				// orientation change.
+				intent.removeExtra(HikeConstants.Extras.LATITUDE);
 			}
 			/*
 			 * Since the message was not forwarded, we check if we have any
