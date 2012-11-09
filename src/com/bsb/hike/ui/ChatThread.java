@@ -1094,7 +1094,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
-		mAdapter = new MessagesAdapter(this, messages, mConversation);
+		mAdapter = new MessagesAdapter(this, messages, mConversation, mConversationsView);
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);

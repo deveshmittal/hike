@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import org.json.JSONArray;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -19,12 +20,14 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,7 +53,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CircularProgress;
 
-public class MessagesAdapter extends BaseAdapter implements OnClickListener {
+public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener {
 
 	private enum ViewType {
 		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, TYPING
@@ -75,12 +78,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener {
 	private Conversation conversation;
 	private ArrayList<ConvMessage> convMessages;
 	private Context context;
+	private ListView listView;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
-			Conversation conversation) {
+			Conversation conversation, ListView listView) {
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
+		this.listView = listView;
 	}
 
 	/**
@@ -602,6 +607,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener {
 			}
 			holder.messageContainer.setTag(convMessage);
 			holder.messageContainer.setOnClickListener(this);
+			holder.messageContainer.setOnLongClickListener(this);
 		} else if (metadata != null && metadata.isPokeMessage()) {
 			holder.messageContainer.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.VISIBLE);
@@ -838,5 +844,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener {
 			openFile.setData(Uri.parse(uri));
 		}
 		context.startActivity(openFile);
+	}
+
+	@Override
+	public boolean onLongClick(View view) {
+		((Activity)context).openContextMenu(listView);
+		return true;
 	}
 }
