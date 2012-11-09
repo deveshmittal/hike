@@ -675,6 +675,7 @@ public class HikeMqttManager implements Listener {
 
 	@Override
 	public void onFailure(Throwable value) {
+		try {
 		Log.e("HikeMqttManager", "onFailure called.", value);
 		disconnectFromBroker(false);
 
@@ -688,5 +689,8 @@ public class HikeMqttManager implements Listener {
 				: reconnectTime;
 
 		this.mHikeService.scheduleNextPing(reconnectTime);
+		} catch (Exception e) {
+			Log.e(getClass().getSimpleName(), "Exception", e);
+		}
 	}
 }
