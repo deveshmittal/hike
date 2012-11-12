@@ -115,8 +115,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			completeList.remove(1);
 		}
 		// Remove from the other lists.
-		recentList.remove(contactInfo);
-		recommendedFavoriteList.remove(contactInfo);
+		removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
+		removeConctactFromListByMatchingMsisdn(recommendedFavoriteList,
+				contactInfo);
 
 		favoriteList.add(0, contactInfo);
 
@@ -132,15 +133,16 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			completeList.remove(1);
 		}
 		// Remove from the recents list.
-		recentList.remove(contactInfo);
+		removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
 		recommendedFavoriteList.add(0, contactInfo);
 
 		makeCompleteList();
 	}
 
 	public void removeFavoriteItem(ContactInfo contactInfo) {
-		recommendedFavoriteList.remove(contactInfo);
-		favoriteList.remove(contactInfo);
+		removeConctactFromListByMatchingMsisdn(recommendedFavoriteList,
+				contactInfo);
+		removeConctactFromListByMatchingMsisdn(favoriteList, contactInfo);
 
 		makeCompleteList();
 	}
@@ -157,7 +159,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			return;
 		}
 		// Remove the contact if it already exists
-		recentList.remove(contactInfo);
+		removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
 
 		recentList.add(0, contactInfo);
 		/*
@@ -168,6 +170,18 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			recentList.remove(recentList.size() - 1);
 		}
 		makeCompleteList();
+	}
+
+	private void removeConctactFromListByMatchingMsisdn(
+			List<ContactInfo> contactList, ContactInfo contactInfo) {
+
+		List<ContactInfo> deleteContactList = new ArrayList<ContactInfo>();
+		for (ContactInfo listContact : contactList) {
+			if (listContact.getMsisdn().equals(contactInfo.getMsisdn())) {
+				deleteContactList.add(listContact);
+			}
+		}
+		contactList.removeAll(deleteContactList);
 	}
 
 	@Override
