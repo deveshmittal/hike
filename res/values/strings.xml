@@ -92,7 +92,7 @@
 	<string name="earned_credits">You\'ve just earned %1$s free SMS</string>
 	<string name="earned_credits_highlight">%1$s free SMS</string>
 	<string name="no_external_storage">External storage not found</string>
-	<string name="share_file">Share file</string>
+	<string name="share_file">Share</string>
 	<string name="download_failed">Could not download file. Check network settings.</string>
 	<string name="not_enough_space">Your phone does not have enough space to download the file</string>
 	<string name="dnd_one_to_one">%1$s is on DND. Waiting for %1$s to reply.</string>
