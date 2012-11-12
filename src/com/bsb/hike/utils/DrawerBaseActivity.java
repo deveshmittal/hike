@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.View;
+import android.widget.ImageButton;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -51,7 +52,10 @@ public class DrawerBaseActivity extends Activity implements
 			}
 		}
 
-		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
+		ImageButton rightFavoriteBtn = (ImageButton) findViewById(R.id.title_image_btn2);
+		rightFavoriteBtn.setVisibility(View.VISIBLE);
+		rightFavoriteBtn.setImageResource(R.drawable.ic_favorites);
+
 		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
