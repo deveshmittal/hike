@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Pair;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 
 import com.bsb.hike.HikeConstants;
@@ -38,7 +42,7 @@ public class DrawerBaseActivity extends Activity implements
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		parentLayout.setListener(this);
 		parentLayout.setUpLeftDrawerView();
-		parentLayout.setUpRightDrawerView();
+		parentLayout.setUpRightDrawerView(this);
 
 		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
 		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
@@ -186,4 +190,23 @@ public class DrawerBaseActivity extends Activity implements
 		}
 	}
 
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		if(v.getId() != R.id.favorite_list)
+		{
+			return;
+		}
+
+		/* enable resend options on failed messages */
+		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+		parentLayout.onCreateFavoritesContextMenu(this, menu,
+				adapterInfo.position);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		return parentLayout.onFavoritesContextItemSelected(item);
+	}
 }

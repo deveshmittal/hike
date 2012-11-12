@@ -13,7 +13,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +25,7 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -29,10 +34,13 @@ import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.DrawerFavoritesAdapter;
+import com.bsb.hike.adapters.DrawerFavoritesAdapter.FavoriteAdapterViewType;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.CreditsActivity;
@@ -186,7 +194,7 @@ public class DrawerLayout extends RelativeLayout implements
 				mSidebarOffsetForAnimation, 0, 0, 0);
 	}
 
-	public void setUpRightDrawerView() {
+	public void setUpRightDrawerView(Activity activity) {
 		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
 
 		if (drawerFavoritesAdapter == null) {
@@ -196,6 +204,7 @@ public class DrawerLayout extends RelativeLayout implements
 		favoriteListView.setAdapter(drawerFavoritesAdapter);
 
 		favoriteListView.setOnItemClickListener(this);
+		activity.registerForContextMenu(favoriteListView);
 
 		setStatus();
 	}
@@ -261,6 +270,30 @@ public class DrawerLayout extends RelativeLayout implements
 		ContactInfo contactInfo = HikeUserDatabase.getInstance()
 				.getContactInfoFromMSISDN(msisdn, true);
 		drawerFavoritesAdapter.updateRecentContactsList(contactInfo);
+	}
+
+	public void onCreateFavoritesContextMenu(Activity activity, Menu menu,
+			int position) {
+		if (drawerFavoritesAdapter.getItemViewType(position) != FavoriteAdapterViewType.FAVORITE
+				.ordinal()) {
+			return;
+		}
+		MenuInflater menuInflater = activity.getMenuInflater();
+		menuInflater.inflate(R.menu.favorites_menu, menu);
+	}
+
+	public boolean onFavoritesContextItemSelected(MenuItem menuItem) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuItem
+				.getMenuInfo();
+		ContactInfo contactInfo = drawerFavoritesAdapter.getItem((int) info.id);
+		if (menuItem.getItemId() == R.id.remove_fav) {
+			Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
+					contactInfo, FavoriteType.NOT_FAVORITE);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
+					favoriteRemoved);
+			return true;
+		}
+		return false;
 	}
 
 	public void setUpLeftDrawerView() {

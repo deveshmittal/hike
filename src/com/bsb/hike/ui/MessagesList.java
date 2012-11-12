@@ -514,6 +514,9 @@ public class MessagesList extends DrawerBaseActivity implements
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
+		if (item.getItemId() == R.id.remove_fav) {
+			return super.onContextItemSelected(item);
+		}
 		Conversation conv = mAdapter.getItem((int) info.id);
 		switch (item.getItemId()) {
 		case R.id.shortcut:
@@ -552,6 +555,9 @@ public class MessagesList extends DrawerBaseActivity implements
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
+		if (v.getId() != R.id.conversations) {
+			return;
+		}
 		android.view.MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.conversation_menu, menu);
 
