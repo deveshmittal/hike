@@ -47,6 +47,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	public static final int IMAGE_BOUNDS = (int) (40 * Utils.densityMultiplier);
 
+	public static final int ITEM_HEIGHT = (int) (55 * Utils.densityMultiplier);
+
 	public static enum FavoriteAdapterViewType {
 		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, RECOMMENDED_FAVORITE
 	}
@@ -323,6 +325,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					.getLayoutParams();
 			lp.height = lp.width = IMAGE_BOUNDS;
 			viewHolder.avatarImg.setLayoutParams(lp);
+
+			android.widget.AbsListView.LayoutParams layoutParams = new android.widget.AbsListView.LayoutParams(
+					LayoutParams.MATCH_PARENT, ITEM_HEIGHT);
+			convertView.setLayoutParams(layoutParams);
 
 			break;
 
