@@ -345,7 +345,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			findViewById(R.id.button_bar3).setVisibility(View.GONE);
 		}
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
-				.getContactsOrderedByLastMessaged(-1, null, false, false, false);
+				.getContactsOrderedByLastMessaged(-1, null, HikeConstants.BOTH_VALUE, false, false);
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, this.mConversationDb
 					.getGroupNameAndParticipantsAsContacts());

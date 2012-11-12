@@ -454,12 +454,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	 * @return
 	 */
 	public List<ContactInfo> getContactsOrderedByLastMessaged(int limit,
-			FavoriteType favorite, boolean onHikeOnly, boolean distinct, boolean hikeFirst) {
+			FavoriteType favorite, int onHike, boolean distinct, boolean hikeFirst) {
 		String selection = DBConstants.MSISDN
 				+ " != 'null'"
 				+ (favorite != null ? " AND " + DBConstants.FAVORITE + "="
 						+ favorite.ordinal() : "")
-				+ (onHikeOnly ? " AND " + DBConstants.ONHIKE + "=1" : "");
+				+ (onHike != -1 ? " AND " + DBConstants.ONHIKE + "=" + onHike : "");
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 		String orderBy = (hikeFirst ? DBConstants.ONHIKE + " DESC, " : "") + DBConstants.LAST_MESSAGED + " DESC, "
 				+ DBConstants.NAME + " COLLATE NOCASE"

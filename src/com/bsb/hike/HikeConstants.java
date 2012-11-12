@@ -86,6 +86,7 @@ public class HikeConstants {
 
 	public static final String FAVORITES = "Favorites";
 	public static final String RECENT = "Recent";
+	public static final String FRIENDS_ON_HIKE = "Friends on hike";
 
 	public static final String NEW_GROUP = "new_group";
 
@@ -219,6 +220,13 @@ public class HikeConstants {
 			.getExternalStorageDirectory() + "/Hike/Media";
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
+
+	/*
+	 * Contact Type
+	 */
+	public static final int ON_HIKE_VALUE = 1;
+	public static final int NOT_ON_HIKE_VALUE = 0;
+	public static final int BOTH_VALUE = -1;
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";

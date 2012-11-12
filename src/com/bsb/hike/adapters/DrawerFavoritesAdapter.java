@@ -37,12 +37,12 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private LayoutInflater layoutInflater;
 	private Context context;
 
-	private List<ContactInfo> favoriteList;
 	private List<ContactInfo> recommendedFavoriteList;
+	private List<ContactInfo> favoriteList;
+	private List<ContactInfo> onHikeList;
 	private List<ContactInfo> recentList;
 
-	public static final String FAVORITES_SECTION_ID = "-911";
-	public static final String RECENTS_SECTION_ID = "-912";
+	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
 
 	public static final int IMAGE_BOUNDS = (int) (40 * Utils.densityMultiplier);
@@ -56,15 +56,24 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		recommendedFavoriteList = hikeUserDatabase
 				.getContactsOrderedByLastMessaged(-1,
-						FavoriteType.RECOMMENDED_FAVORITE, false, true, false);
+						FavoriteType.RECOMMENDED_FAVORITE,
+						HikeConstants.BOTH_VALUE, true, false);
+
 		recommendedFavoriteList.addAll(hikeUserDatabase
 				.getContactsOrderedByLastMessaged(-1,
-						FavoriteType.AUTO_RECOMMENDED_FAVORITE, false, true,
-						false));
+						FavoriteType.AUTO_RECOMMENDED_FAVORITE,
+						HikeConstants.BOTH_VALUE, true, false));
+
 		favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
-				FavoriteType.FAVORITE, false, true, false);
+				FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE, true, false);
+
+		onHikeList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
+				FavoriteType.NOT_FAVORITE, HikeConstants.ON_HIKE_VALUE, true,
+				false);
+
 		recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
-				FavoriteType.NOT_FAVORITE, false, true, true);
+				FavoriteType.NOT_FAVORITE, HikeConstants.NOT_ON_HIKE_VALUE,
+				true, true);
 
 		completeList = new ArrayList<ContactInfo>();
 		makeCompleteList();
@@ -77,9 +86,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		completeList.clear();
 
 		// Contact for "Favorite Section"
-		completeList.add(new ContactInfo(
-				DrawerFavoritesAdapter.FAVORITES_SECTION_ID, null,
-				HikeConstants.FAVORITES, null));
+		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				null, HikeConstants.FAVORITES, null));
 
 		/*
 		 * If favorite list is empty, we add an element to show the empty view
@@ -95,10 +103,14 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			completeList.addAll(favoriteList);
 		}
 
+		// Contact for "On Hike Section"
+		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				null, HikeConstants.FRIENDS_ON_HIKE, null));
+		completeList.addAll(onHikeList);
+
 		// Contact for "Recent Section"
-		completeList.add(new ContactInfo(
-				DrawerFavoritesAdapter.RECENTS_SECTION_ID, null,
-				HikeConstants.RECENT, null));
+		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				null, HikeConstants.RECENT, null));
 
 		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
 				: recentList.size();
@@ -118,6 +130,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
 		removeConctactFromListByMatchingMsisdn(recommendedFavoriteList,
 				contactInfo);
+		removeConctactFromListByMatchingMsisdn(onHikeList, contactInfo);
 
 		favoriteList.add(0, contactInfo);
 
@@ -148,26 +161,31 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	}
 
 	public void updateRecentContactsList(ContactInfo contactInfo) {
-		// Return if object is null
-		if (contactInfo == null) {
+		// Return if object is null or its a favorite contact
+		if (contactInfo == null
+				|| (contactInfo.getFavoriteType() == FavoriteType.FAVORITE)) {
 			Log.d(getClass().getSimpleName(), "Null contact");
 			return;
 		}
 
-		if (contactInfo.getFavoriteType() == FavoriteType.FAVORITE) {
-			Log.d(getClass().getSimpleName(), "contact already a favorite");
-			return;
-		}
-		// Remove the contact if it already exists
-		removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
+		if (contactInfo.isOnhike()) {
+			// Remove the contact if it already exists
+			removeConctactFromListByMatchingMsisdn(onHikeList, contactInfo);
 
-		recentList.add(0, contactInfo);
-		/*
-		 * If we added a new contact then we delete the last item to maintain
-		 * uniformity in size.
-		 */
-		if (recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE) {
-			recentList.remove(recentList.size() - 1);
+			onHikeList.add(0, contactInfo);
+
+		} else {
+			// Remove the contact if it already exists
+			removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
+
+			recentList.add(0, contactInfo);
+			/*
+			 * If we added a new contact then we delete the last item to
+			 * maintain uniformity in size.
+			 */
+			if (recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE) {
+				recentList.remove(recentList.size() - 1);
+			}
 		}
 		makeCompleteList();
 	}
@@ -192,8 +210,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	@Override
 	public int getItemViewType(int position) {
 		ContactInfo contactInfo = getItem(position);
-		if (FAVORITES_SECTION_ID.equals(contactInfo.getId())
-				|| RECENTS_SECTION_ID.equals(contactInfo.getId())) {
+		if (SECTION_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.SECTION.ordinal();
 		} else if (EMPTY_FAVORITES_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
