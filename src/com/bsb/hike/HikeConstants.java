@@ -1,5 +1,7 @@
 package com.bsb.hike;
 
+import android.os.Environment;
+
 public class HikeConstants {
 	public static final String APP_PUSH_ID = "768395314950";
 	public static final String APP_FACEBOOK_ID = "425850510764995";
@@ -212,6 +214,11 @@ public class HikeConstants {
 	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 15;
 
 	public static final int SHOW_CREDITS_AFTER_NUM = 10;
+
+	public static final String HIKE_MEDIA_DIRECTORY_ROOT = Environment
+			.getExternalStorageDirectory() + "/Hike/Media";
+
+	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";

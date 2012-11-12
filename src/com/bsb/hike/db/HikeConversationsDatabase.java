@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -105,10 +106,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " TEXT, " + DBConstants.GROUP_ALIVE + " INTEGER, "
 				+ DBConstants.MUTE_GROUP + " INTEGER DEFAULT 0 " + " )";
 		db.execSQL(sql);
-		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_TABLE + " ( "
-				+ DBConstants.FILE_KEY + " STRING PRIMARY KEY, "
-				+ DBConstants.FILE_NAME + " STRING UNIQUE" + " )";
-		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.EMOTICON_TABLE
 				+ " ( " + DBConstants.EMOTICON_NUM + " INTEGER PRIMARY KEY, "
 				+ DBConstants.LAST_USED + " INTEGER" + " )";
@@ -191,6 +188,36 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ " ADD COLUMN " + DBConstants.MUTE_GROUP
 					+ " INTEGER DEFAULT 0";
 			db.execSQL(alter);
+		}
+		/*
+		 * We won't use the DB to manage the file name and key anymore. Instead
+		 * we write this data to a file. So we write all the current data in the
+		 * db to the file.
+		 */
+		if (oldVersion < 7) {
+			Cursor c = db.query(DBConstants.FILE_TABLE, null, null, null, null,
+					null, null);
+
+			int fileNameIdx = c.getColumnIndex(DBConstants.FILE_NAME);
+			int fileKeyIdx = c.getColumnIndex(DBConstants.FILE_KEY);
+
+			JSONObject data = new JSONObject();
+
+			while (c.moveToNext()) {
+				String fileName = c.getString(fileNameIdx);
+				String fileKey = c.getString(fileKeyIdx);
+
+				try {
+					data.put(fileName, fileKey);
+				} catch (JSONException e) {
+					Log.e(getClass().getSimpleName(), "Invalid values");
+				}
+			}
+			Log.d(getClass().getSimpleName(), "DB data: " + data.toString());
+			Utils.makeNewFileWithExistingData(data);
+
+			String drop = "DROP TABLE " + DBConstants.FILE_TABLE;
+			db.execSQL(drop);
 		}
 	}
 
@@ -1154,42 +1181,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			return ids;
 		} finally {
 			cursor.close();
-		}
-	}
-
-	public void addFile(String fileKey, String fileName) {
-		Log.d(getClass().getSimpleName(), "Adding file with File Key: "
-				+ fileKey + " File Name: " + fileName);
-		InsertHelper ih = null;
-		try {
-			ih = new InsertHelper(mDb, DBConstants.FILE_TABLE);
-			ih.prepareForInsert();
-			ih.bind(ih.getColumnIndex(DBConstants.FILE_KEY), fileKey);
-			ih.bind(ih.getColumnIndex(DBConstants.FILE_NAME), fileName);
-			ih.execute();
-		} finally {
-			if (ih != null) {
-				ih.close();
-			}
-		}
-	}
-
-	public String getFileKey(String fileName) {
-		Cursor cursor = null;
-		try {
-			cursor = mDb.query(DBConstants.FILE_TABLE,
-					new String[] { DBConstants.FILE_KEY },
-					DBConstants.FILE_NAME + " =?", new String[] { fileName },
-					null, null, null);
-			if (cursor.moveToFirst()) {
-				return cursor.getString(cursor
-						.getColumnIndex(DBConstants.FILE_KEY));
-			}
-			return null;
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
 		}
 	}
 

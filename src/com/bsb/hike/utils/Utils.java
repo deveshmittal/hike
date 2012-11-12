@@ -1,5 +1,6 @@
 package com.bsb.hike.utils;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -8,7 +9,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.CharBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,7 +88,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.State;
@@ -289,7 +292,7 @@ public class Utils {
 		// using Environment.getExternalStorageState() before doing this.
 
 		StringBuilder path = new StringBuilder(
-				Environment.getExternalStorageDirectory() + "/Hike/Media");
+				HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
 		switch (type) {
 		case PROFILE:
 			path.append("/hike Profile Images");
@@ -319,7 +322,6 @@ public class Utils {
 		// Create a media file name
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
 				.format(new Date());
-		boolean uniqueFileName = false;
 
 		// File name should only be blank in case of profile images or while
 		// capturing new media.
@@ -336,31 +338,9 @@ public class Utils {
 			}
 		}
 
-		String fileExtension = orgFileName.contains(".") ? orgFileName
-				.substring(orgFileName.lastIndexOf("."), orgFileName.length())
-				: "";
-		String orgFileNameWithoutExtension = !TextUtils.isEmpty(fileExtension) ? orgFileName
-				.substring(0, orgFileName.indexOf(fileExtension)) : orgFileName;
-		StringBuilder newFileName = new StringBuilder(
-				orgFileNameWithoutExtension);
+		String fileName = getUniqueFileName(orgFileName, fileKey);
 
-		int i = 1;
-		Log.d("Utils", "File name: " + newFileName.toString() + " Extension: "
-				+ fileExtension);
-		while (!uniqueFileName) {
-			String existingFileKey = HikeConversationsDatabase.getInstance()
-					.getFileKey(newFileName.toString() + fileExtension);
-			if (TextUtils.isEmpty(existingFileKey)
-					|| existingFileKey.equals(fileKey)) {
-				break;
-			} else {
-				newFileName = new StringBuilder(orgFileNameWithoutExtension
-						+ "_" + i++);
-			}
-		}
-		newFileName.append(fileExtension);
-
-		return new File(mediaStorageDir, newFileName.toString());
+		return new File(mediaStorageDir, fileName);
 	}
 
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
@@ -1246,5 +1226,170 @@ public class Utils {
 			Log.e("Utils", "IOException", e);
 			return "";
 		}
+	}
+
+	public static void addFileName(String fileName, String fileKey) {
+		File hikeFileList = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT,
+				HikeConstants.HIKE_FILE_LIST_NAME);
+
+		JSONObject currentFiles = getHikeFileListData(hikeFileList);
+
+		if (currentFiles == null) {
+			Log.d("Utils", "File did not exist. Will create a new one");
+			currentFiles = new JSONObject();
+		}
+		FileOutputStream fileOutputStream = null;
+		ByteArrayInputStream byteArrayInputStream = null;
+		try {
+			Log.d("Utils", "Adding data : " + "File Name: " + fileName
+					+ " File Key: " + fileKey);
+			currentFiles.put(fileName, fileKey);
+			fileOutputStream = new FileOutputStream(hikeFileList);
+			byteArrayInputStream = new ByteArrayInputStream(currentFiles
+					.toString().getBytes("UTF-8"));
+
+			int b;
+			byte[] data = new byte[8];
+			while ((b = byteArrayInputStream.read(data)) != -1) {
+				fileOutputStream.write(data, 0, b);
+			}
+		} catch (FileNotFoundException e) {
+			Log.e("Utils", "File not found", e);
+		} catch (JSONException e) {
+			Log.e("Utils", "Invalid JSON", e);
+		} catch (UnsupportedEncodingException e) {
+			Log.e("Utils", "Unsupported Encoding Exception", e);
+		} catch (IOException e) {
+			Log.e("Utils", "IOException", e);
+		} finally {
+			if (fileOutputStream != null) {
+				try {
+					fileOutputStream.close();
+				} catch (IOException e) {
+					Log.e("Utils", "Exception while closing the output stream",
+							e);
+				}
+			}
+		}
+	}
+
+	public static String getUniqueFileName(String orgFileName, String fileKey) {
+		File hikeFileList = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT,
+				HikeConstants.HIKE_FILE_LIST_NAME);
+		JSONObject currentFiles = getHikeFileListData(hikeFileList);
+		if(currentFiles == null || !currentFiles.has(orgFileName)) {
+			Log.d("Utils", "File with this name does not exist");
+			return orgFileName;
+		}
+
+		String fileExtension = orgFileName.contains(".") ? orgFileName
+				.substring(orgFileName.lastIndexOf("."), orgFileName.length())
+				: "";
+		String orgFileNameWithoutExtension = !TextUtils.isEmpty(fileExtension) ? orgFileName
+				.substring(0, orgFileName.indexOf(fileExtension)) : orgFileName;
+		StringBuilder newFileName = new StringBuilder(
+				orgFileNameWithoutExtension);
+
+		String currentNameToCheck = orgFileName;
+		int i = 1;
+		Log.d("Utils", "File name: " + newFileName.toString() + " Extension: "
+				+ fileExtension);
+		while (true) {
+			String existingFileKey = currentFiles.optString(currentNameToCheck);
+			if (TextUtils.isEmpty(existingFileKey)
+					|| existingFileKey.equals(fileKey)) {
+				break;
+			} else {
+				newFileName = new StringBuilder(orgFileNameWithoutExtension
+						+ "_" + i++);
+				currentNameToCheck = newFileName + fileExtension;
+			}
+		}
+		Log.d("Utils", "NewFile name: " + newFileName.toString() + " Extension: "
+				+ fileExtension);
+		newFileName.append(fileExtension);
+		return newFileName.toString();
+	}
+
+	public static void makeNewFileWithExistingData(JSONObject data) {
+		File hikeFileList = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT,
+				HikeConstants.HIKE_FILE_LIST_NAME);
+
+		Log.d("Utils", "Writing data: " + data.toString());
+
+		FileOutputStream fileOutputStream = null;
+		ByteArrayInputStream byteArrayInputStream = null;
+		try {
+			fileOutputStream = new FileOutputStream(hikeFileList);
+			byteArrayInputStream = new ByteArrayInputStream(data
+					.toString().getBytes("UTF-8"));
+
+			int b;
+			byte[] d = new byte[8];
+			while ((b = byteArrayInputStream.read(d)) != -1) {
+				fileOutputStream.write(d, 0, b);
+			}
+		} catch (FileNotFoundException e) {
+			Log.e("Utils", "File not found", e);
+		} catch (UnsupportedEncodingException e) {
+			Log.e("Utils", "Unsupported Encoding Exception", e);
+		} catch (IOException e) {
+			Log.e("Utils", "IOException", e);
+		} finally {
+			if (fileOutputStream != null) {
+				try {
+					fileOutputStream.close();
+				} catch (IOException e) {
+					Log.e("Utils", "Exception while closing the output stream",
+							e);
+				}
+			}
+		}
+	}
+
+	private static JSONObject getHikeFileListData(File hikeFileList) {
+		if(!hikeFileList.exists()) {
+			return null;
+		}
+		FileInputStream fileInputStream = null;
+		JSONObject currentFiles = null;
+		try {
+			fileInputStream = new FileInputStream(hikeFileList);
+			BufferedReader reader = new BufferedReader(
+					new InputStreamReader(fileInputStream));
+
+			StringBuilder builder = new StringBuilder();
+			CharBuffer target = CharBuffer.allocate(10000);
+			int read = reader.read(target);
+
+			while (read >= 0) {
+				builder.append(target.array(), 0, read);
+				target.clear();
+				read = reader.read(target);
+			}
+
+			currentFiles = new JSONObject(builder.toString());
+			Log.d("Utils",
+					"File found: Current data: " + builder.toString());
+		} catch (FileNotFoundException e) {
+			Log.e("Utils", "File not found", e);
+			hikeFileList.delete();
+		} catch (IOException e) {
+			Log.e("Utils", "IOException", e);
+			hikeFileList.delete();
+		} catch (JSONException e) {
+			Log.e("Utils", "Invalid JSON", e);
+			hikeFileList.delete();
+		} finally {
+			if (fileInputStream != null) {
+				try {
+					fileInputStream.close();
+				} catch (IOException e) {
+					Log.e("Utils",
+							"Exception while closing the input stream", e);
+				}
+			}
+		}
+		return currentFiles;
 	}
 }

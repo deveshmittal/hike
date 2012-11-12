@@ -117,6 +117,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 					} else {
 						selectedFile = new File(filePath);
 					}
+					fileName = selectedFile.getName();
 				} else {
 					String[] filePathColumn = { MediaColumns.DATA,
 							MediaColumns.DISPLAY_NAME };
@@ -232,8 +233,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 						HikePubSub.UPLOAD_FINISHED, convMessage);
 			}
 
-			HikeConversationsDatabase.getInstance().addFile(
-					hikeFile.getFileKey(), hikeFile.getFileName());
+			Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT,
 					convMessage);
 		} catch (Exception e) {

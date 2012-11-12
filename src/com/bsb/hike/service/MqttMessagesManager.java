@@ -251,8 +251,7 @@ public class MqttMessagesManager {
 				Log.d(getClass().getSimpleName(),
 						"FT MESSAGE: " + " NAME: " + hikeFile.getFileName()
 								+ " KEY: " + hikeFile.getFileKey());
-				HikeConversationsDatabase.getInstance().addFile(
-						hikeFile.getFileKey(), hikeFile.getFileName());
+				Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 			}
 
 			Log.d(getClass().getSimpleName(), "Receiver received Message : "
