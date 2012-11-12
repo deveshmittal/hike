@@ -56,15 +56,15 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		recommendedFavoriteList = hikeUserDatabase
 				.getContactsOrderedByLastMessaged(-1,
-						FavoriteType.RECOMMENDED_FAVORITE, false, true);
+						FavoriteType.RECOMMENDED_FAVORITE, false, true, false);
 		recommendedFavoriteList.addAll(hikeUserDatabase
 				.getContactsOrderedByLastMessaged(-1,
-						FavoriteType.AUTO_RECOMMENDED_FAVORITE, false, true));
+						FavoriteType.AUTO_RECOMMENDED_FAVORITE, false, true, false));
 		favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
-				FavoriteType.FAVORITE, false, true);
+				FavoriteType.FAVORITE, false, true, false);
 		recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(
 				HikeConstants.RECENT_COUNT_IN_FAVORITE,
-				FavoriteType.NOT_FAVORITE, false, true);
+				FavoriteType.NOT_FAVORITE, false, true, true);
 
 		completeList = new ArrayList<ContactInfo>();
 		makeCompleteList();
