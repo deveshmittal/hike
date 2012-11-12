@@ -197,7 +197,7 @@ public class HikeConstants {
 	 */
 	public static final String INTRO_MESSAGE = "im";
 
-	public static final String LOCATION_CONTENT_TYPE = "text/location";
+	public static final String LOCATION_CONTENT_TYPE = "hikemap/location";
 	public static final String LOCATION_FILE_NAME = "Location";
 
 	public static final int DEFAULT_ZOOM_LEVEL = 8;
