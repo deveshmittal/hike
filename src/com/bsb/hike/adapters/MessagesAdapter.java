@@ -53,10 +53,13 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CircularProgress;
 
-public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnLongClickListener {
+public class MessagesAdapter extends BaseAdapter implements OnClickListener,
+		OnLongClickListener {
+
+	public static final int LAST_READ_CONV_MESSAGE_ID = -911;
 
 	private enum ViewType {
-		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, TYPING
+		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, TYPING, LAST_READ
 	};
 
 	private class ViewHolder {
@@ -98,6 +101,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ViewType type;
 		if (convMessage == null) {
 			type = ViewType.TYPING;
+		} else if (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID) {
+			type = ViewType.LAST_READ;
 		} else if (convMessage.isFileTransferMessage()) {
 			type = convMessage.isSent() ? ViewType.FILE_TRANSFER_SEND
 					: ViewType.FILE_TRANSFER_RECEIVE;
@@ -138,6 +143,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			switch (ViewType.values()[getItemViewType(position)]) {
 			case TYPING:
 				v = inflater.inflate(R.layout.typing_layout, null);
+				break;
+			case LAST_READ:
+				v = inflater.inflate(R.layout.last_read_line, null);
 				break;
 			case PARTICIPANT_INFO:
 				v = inflater.inflate(R.layout.message_item_receive, null);
@@ -240,7 +248,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 			holder = (ViewHolder) v.getTag();
 		}
 
-		if (convMessage == null) {
+		if (convMessage == null
+				|| (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID)) {
 			return v;
 		}
 		if (shouldDisplayTimestamp(position)) {
@@ -738,6 +747,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener, OnL
 		ConvMessage previous = position > 0 ? getItem(position - 1) : null;
 		if (previous == null) {
 			return true;
+		} else if (previous.getMsgID() == LAST_READ_CONV_MESSAGE_ID) {
+			return false;
 		}
 		return (current.getTimestamp() - previous.getTimestamp() > 60 * 5);
 	}

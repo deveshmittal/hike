@@ -101,6 +101,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -1200,8 +1201,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			 * group chats
 			 */
 			if (ids != null) {
+				int lastReadIndex = messages.size() - ids.length();
+				if (lastReadIndex < messages.size()) {
+					messages.add(lastReadIndex, new ConvMessage(null, null, 0,
+							State.SENT_DELIVERED_READ,
+							MessagesAdapter.LAST_READ_CONV_MESSAGE_ID, 0));
+					mAdapter.notifyDataSetChanged();
+				}
 				// Scroll to the last unread message
-				mConversationsView.setSelection(messages.size() - ids.length());
+				mConversationsView.setSelection(lastReadIndex - 1);
 
 				mPubSub.publish(HikePubSub.MSG_READ, mConversation.getMsisdn());
 
