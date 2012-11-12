@@ -265,6 +265,7 @@ public class ShareLocation extends MapActivity {
 				initMyLocationManager();
 			} else {
 				removeMyLocationListeners();
+				Toast.makeText(this, R.string.tap_to_place, Toast.LENGTH_SHORT).show();
 			}
 			currentSelection.setSelected(false);
 			currentSelection = v;
