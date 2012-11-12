@@ -59,11 +59,11 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						FavoriteType.RECOMMENDED_FAVORITE, false, true, false);
 		recommendedFavoriteList.addAll(hikeUserDatabase
 				.getContactsOrderedByLastMessaged(-1,
-						FavoriteType.AUTO_RECOMMENDED_FAVORITE, false, true, false));
+						FavoriteType.AUTO_RECOMMENDED_FAVORITE, false, true,
+						false));
 		favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
 				FavoriteType.FAVORITE, false, true, false);
-		recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(
-				HikeConstants.RECENT_COUNT_IN_FAVORITE,
+		recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
 				FavoriteType.NOT_FAVORITE, false, true, true);
 
 		completeList = new ArrayList<ContactInfo>();
@@ -100,7 +100,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				DrawerFavoritesAdapter.RECENTS_SECTION_ID, null,
 				HikeConstants.RECENT, null));
 
-		completeList.addAll(recentList);
+		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
+				: recentList.size();
+		completeList.addAll(recentList.subList(0, recentListLastElement));
 		notifyDataSetChanged();
 	}
 
