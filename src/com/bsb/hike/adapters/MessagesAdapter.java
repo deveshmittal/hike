@@ -859,7 +859,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	@Override
 	public boolean onLongClick(View view) {
-		((Activity)context).openContextMenu(listView);
+		((Activity) context).openContextMenu(listView);
 		return true;
 	}
 }

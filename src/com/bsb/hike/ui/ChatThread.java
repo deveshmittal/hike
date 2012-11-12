@@ -797,8 +797,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				item.setVisible(true);
 			}
 		}
-		if (message.getMetadata() != null && message.getMetadata().isPokeMessage())
-		{
+		if (message.getMetadata() != null
+				&& message.getMetadata().isPokeMessage()) {
 			MenuItem forwardItem = menu.findItem(R.id.forward);
 			forwardItem.setVisible(false);
 
@@ -1095,7 +1095,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
-		mAdapter = new MessagesAdapter(this, messages, mConversation, mConversationsView);
+		mAdapter = new MessagesAdapter(this, messages, mConversation,
+				mConversationsView);
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
@@ -2846,8 +2847,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				&& firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES) {
 
 			/*
-			 * This should only happen in the case where the user starts a new chat
-			 * and gets a typing notification.
+			 * This should only happen in the case where the user starts a new
+			 * chat and gets a typing notification.
 			 */
 			if (messages.get(0) == null) {
 				return;
