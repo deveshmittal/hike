@@ -516,6 +516,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 		if (emoticonLayout == null
 				|| emoticonLayout.getVisibility() != View.VISIBLE) {
+
+			selectedFile = null;
+
 			Intent intent = null;
 			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)
 					&& !getIntent().hasExtra(
