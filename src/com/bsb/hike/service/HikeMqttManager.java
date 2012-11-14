@@ -421,17 +421,28 @@ public class HikeMqttManager implements Listener {
 		}
 
 		Log.d("HikeMqttManager", "connection is " + mqttConnection);
-		mqttConnection.subscribe(topics, new Callback<byte[]>() {
-			public void onSuccess(byte[] qoses) {
-				Log.d("HikeMqttManager", "subscribe succeeded");
-			}
+		try {
+			mqttConnection.subscribe(topics, new Callback<byte[]>() {
+				public void onSuccess(byte[] qoses) {
+					Log.d("HikeMqttManager", "subscribe succeeded");
+				}
 
-			public void onFailure(Throwable value) {
-				Log.e("HikeMqttManager", "subscribe failed.", value);
-				disconnectFromBroker(false);
-				mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
-			}
-		});
+				public void onFailure(Throwable value) {
+					Log.e("HikeMqttManager", "subscribe failed.", value);
+					disconnectFromBroker(false);
+					mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
+				}
+			});
+		} catch (IllegalStateException e) {
+			/*
+			 * We get this exception if for some reason we are not connected to
+			 * the server at this time but the state is in connected state so
+			 * we'll try reconnecting.
+			 */
+			Log.e(getClass().getSimpleName(),
+					"Not connected even thought the state thinks its connected");
+			disconnectFromBroker(true);
+		}
 	}
 
 	/*
