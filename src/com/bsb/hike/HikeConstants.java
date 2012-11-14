@@ -142,7 +142,7 @@ public class HikeConstants {
 
 	public static int PROFILE_IMAGE_DIMENSIONS = 80;
 
-	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{8,15}";
+	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 	public static final int MAX_FILE_SIZE = 6 * 1024 * 1024;
