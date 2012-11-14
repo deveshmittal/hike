@@ -128,6 +128,8 @@ public class HikeMessengerApp extends Application {
 	 */
 	public static final String DAY_RECORDED = "dayRecorded";
 
+	public static final String LAST_BACK_OFF_TIME = "lastBackOffTime";
+
 	public static final String FACEBOOK_TOKEN = "facebookToken";
 	public static final String FACEBOOK_TOKEN_EXPIRES = "facebookTokenExpires";
 	public static final String FACEBOOK_USER_ID = "facebookUserId";

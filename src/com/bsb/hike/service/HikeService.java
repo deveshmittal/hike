@@ -137,6 +137,8 @@ public class HikeService extends Service {
 
 	// constant used internally to check for updates
 	public static final String UPDATE_CHECK_ACTION = "com.bsb.hike.UPDATE_CHECK";
+	// used to register to GCM
+	public static final String REGISTER_TO_GCM_ACTION = "com.bsb.hike.REGISTER_GCM";
 
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
@@ -166,8 +168,9 @@ public class HikeService extends Service {
 	// receiver that triggers a check for updates
 	private UpdateCheckTrigger updateCheckTrigger;
 
+	private RegisterToGCMTrigger registerToGCMTrigger;
+
 	private HikeMqttManager mMqttManager;
-	private String mToken;
 	private ContactListChangeIntentReceiver contactsReceived;
 	private Handler mHandler;
 
@@ -190,13 +193,11 @@ public class HikeService extends Service {
 	public void onCreate() {
 		super.onCreate();
 
-		GCMRegistrar.checkDevice(this);
-		GCMRegistrar.checkManifest(this);
-		final String regId = GCMRegistrar.getRegistrationId(this);
-		if (regId.equals("")) {
-			GCMRegistrar.register(this, HikeConstants.APP_PUSH_ID);
-		} else {
-			Log.d(getClass().getSimpleName(), "Already registered");
+		if (registerToGCMTrigger == null) {
+			registerToGCMTrigger = new RegisterToGCMTrigger();
+			registerReceiver(registerToGCMTrigger, new IntentFilter(
+					REGISTER_TO_GCM_ACTION));
+			sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
 		}
 
 		Log.d("HikeService", "onCreate called");
@@ -328,7 +329,7 @@ public class HikeService extends Service {
 		Log.d("HikeService", "handlestart called");
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 		if (cm.getBackgroundDataSetting() == false) // respect the user's
-													// request not to use data!
+		// request not to use data!
 		{
 			// user has disabled background data
 			mMqttManager
@@ -613,7 +614,7 @@ public class HikeService extends Service {
 		// it means we're pinging slightly more frequently than necessary
 		Calendar wakeUpTime = Calendar.getInstance();
 		wakeUpTime.add(Calendar.SECOND, timeout); // comes from
-													// PushMqttManager.KEEPALIVE
+		// PushMqttManager.KEEPALIVE
 
 		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
 		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(),
@@ -651,6 +652,23 @@ public class HikeService extends Service {
 		public void onReceive(Context context, Intent intent) {
 			getContentResolver().notifyChange(
 					ContactsContract.Contacts.CONTENT_URI, null);
+		}
+	}
+
+	private class RegisterToGCMTrigger extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(getClass().getSimpleName(), "Registering for GCM");
+			GCMRegistrar.checkDevice(HikeService.this);
+			GCMRegistrar.checkManifest(HikeService.this);
+			final String regId = GCMRegistrar
+					.getRegistrationId(HikeService.this);
+			if ("".equals(regId)) {
+				GCMRegistrar.register(HikeService.this,
+						HikeConstants.APP_PUSH_ID);
+			} else {
+				Log.d(getClass().getSimpleName(), "Already registered");
+			}
 		}
 	}
 
