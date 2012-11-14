@@ -171,14 +171,6 @@
                 android:name="forward.1"
                 android:value="com.bsb.hike.service.ReferralReceiver" />
         </receiver>
-        <receiver
-		    android:name=".service.KeepAliveService" >
-		    <intent-filter>
-		        <action android:name="android.intent.action.USER_PRESENT"/>
-		        <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
-		        <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
-		    </intent-filter>
-		</receiver>
         <receiver 
             android:name=".service.SMSBroadcastReceiver"
             android:enabled="true"
