@@ -365,6 +365,11 @@ public class HikeMqttManager implements Listener {
 
 				@Override
 				public void onSuccess(Void value) {
+					/*
+					 * We would want to start listening for network changes now
+					 * that we have connected again.
+					 */
+					mHikeService.registerDataChangeReceivers();
 					Log.d("HikeMqttManager", "Hike Connected");
 					// inform the app that the app has successfully connected
 					setConnectionStatus(MQTTConnectionStatus.CONNECTED);
@@ -373,6 +378,12 @@ public class HikeMqttManager implements Listener {
 					// keep alive messages can be sent
 					// we schedule the first one of these now
 					mHikeService.scheduleNextPing();
+
+					/*
+					 * Since we are now connected, we schedule the next
+					 * disconnect.
+					 */
+					mHikeService.scheduleNextDisconnect();
 				}
 			});
 		} catch (Exception e) {
@@ -434,6 +445,11 @@ public class HikeMqttManager implements Listener {
 			}
 
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
+			/*
+			 * Since we have disconnected from the server we don't need to
+			 * listen to changes in the data anymore.
+			 */
+			mHikeService.unregisterDataChangeReceivers();
 		} catch (Exception e) {
 			Log.e("HikeMqttManager", "Caught exception while disconnecting", e);
 		}
@@ -601,6 +617,12 @@ public class HikeMqttManager implements Listener {
 				+ HikeConstants.PUBLISH_TOPIC),
 				new Buffer(packet.getMessage()), qos == 0 ? QoS.AT_MOST_ONCE
 						: QoS.AT_LEAST_ONCE, false, pbCB);
+
+		/*
+		 * Schedule/Update the next disconnect alarm since we've just sent a
+		 * message.
+		 */
+		mHikeService.scheduleNextDisconnect();
 	}
 
 	public void unsubscribeFromUIEvents() {
@@ -639,6 +661,12 @@ public class HikeMqttManager implements Listener {
 		try {
 			wl.acquire();
 
+			/*
+			 * Schedule/Update the next disconnect alarm since we've just
+			 * received a message.
+			 */
+			mHikeService.scheduleNextDisconnect();
+
 			String messageBody = new String(body.toByteArray());
 
 			Log.d("HikeMqttManager", "onPublish called " + messageBody);
@@ -676,19 +704,19 @@ public class HikeMqttManager implements Listener {
 	@Override
 	public void onFailure(Throwable value) {
 		try {
-		Log.e("HikeMqttManager", "onFailure called.", value);
-		disconnectFromBroker(false);
+			Log.e("HikeMqttManager", "onFailure called.", value);
+			disconnectFromBroker(false);
 
-		if (reconnectTime == 0) {
-			Random random = new Random();
-			reconnectTime = random.nextInt(HikeConstants.RECONNECT_TIME) + 1;
-		} else {
-			reconnectTime *= 2;
-		}
-		reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
-				: reconnectTime;
+			if (reconnectTime == 0) {
+				Random random = new Random();
+				reconnectTime = random.nextInt(HikeConstants.RECONNECT_TIME) + 1;
+			} else {
+				reconnectTime *= 2;
+			}
+			reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
+					: reconnectTime;
 
-		this.mHikeService.scheduleNextPing(reconnectTime);
+			this.mHikeService.scheduleNextPing(reconnectTime);
 		} catch (Exception e) {
 			Log.e(getClass().getSimpleName(), "Exception", e);
 		}

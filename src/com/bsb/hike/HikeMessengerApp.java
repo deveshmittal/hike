@@ -226,6 +226,10 @@ public class HikeMessengerApp extends Application {
 							.createConnection(this, mMessenger);
 				}
 			}
+		} else {
+			Log.d(getClass().getSimpleName(),
+					"Already connected. Just making a ping");
+			this.sendBroadcast(new Intent(HikeService.CONNECT_TO_SERVER_ACTION));
 		}
 	}
 

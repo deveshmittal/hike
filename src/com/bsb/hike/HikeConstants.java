@@ -117,6 +117,9 @@ public class HikeConstants {
 	/* the max amount (in seconds) the reconnect time can be */
 	public static final int MAX_RECONNECT_TIME = 120;
 
+	/* the max amount of time we allow the service to run in case of no activity */
+	public static final int DISCONNECT_TIME = 2 * 60;
+
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 	public static final String ADAPTER_NAME = "hikeadapter";
 
