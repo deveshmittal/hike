@@ -2,12 +2,14 @@ package com.bsb.hike.adapters;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.text.Spannable;
@@ -24,15 +26,18 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -47,6 +52,7 @@ import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.tasks.UploadLocationTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -81,14 +87,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private Conversation conversation;
 	private ArrayList<ConvMessage> convMessages;
 	private Context context;
-	private ListView listView;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
-			Conversation conversation, ListView listView) {
+			Conversation conversation) {
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
-		this.listView = listView;
 	}
 
 	/**
@@ -859,7 +863,97 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	@Override
 	public boolean onLongClick(View view) {
-		((Activity) context).openContextMenu(listView);
+
+		final ConvMessage message = (ConvMessage) view.getTag();
+
+		final HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+		final List<String> items = new ArrayList<String>(4);
+
+		if (!TextUtils.isEmpty(hikeFile.getFileKey())) {
+			items.add(context.getString(R.string.forward));
+			items.add(context.getString(R.string.share));
+		}
+		items.add(context.getString(R.string.delete));
+
+		if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID())) {
+			items.add(context.getString(message.isSent() ? R.string.cancel_upload
+					: R.string.cancel_download));
+		}
+
+		ListAdapter dialogAdapter = new ArrayAdapter<String>(context,
+				android.R.layout.select_dialog_item, android.R.id.text1, items);
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String optionSelected = items.get(which);
+						if (context.getString(R.string.forward).equals(
+								optionSelected)) {
+
+							Utils.logEvent(context,
+									HikeConstants.LogEvent.FORWARD_MSG);
+							Intent intent = new Intent(context,
+									ChatThread.class);
+							intent.putExtra(
+									HikeConstants.Extras.FORWARD_MESSAGE, true);
+							intent.putExtra(HikeConstants.Extras.FILE_KEY,
+									hikeFile.getFileKey());
+							if (hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
+								intent.putExtra(HikeConstants.Extras.FILE_PATH,
+										hikeFile.getFilePath());
+								intent.putExtra(HikeConstants.Extras.FILE_TYPE,
+										hikeFile.getFileTypeString());
+							} else {
+								intent.putExtra(
+										HikeConstants.Extras.ZOOM_LEVEL,
+										hikeFile.getZoomLevel());
+								intent.putExtra(HikeConstants.Extras.LATITUDE,
+										hikeFile.getLatitude());
+								intent.putExtra(HikeConstants.Extras.LONGITUDE,
+										hikeFile.getLongitude());
+							}
+							intent.putExtra(HikeConstants.Extras.PREV_MSISDN,
+									message.getMsisdn());
+							intent.putExtra(HikeConstants.Extras.PREV_NAME,
+									conversation.getContactName());
+							context.startActivity(intent);
+
+						} else if (context.getString(R.string.share).equals(
+								optionSelected)) {
+
+							Utils.startShareIntent(context, context.getString(
+									R.string.share_file_message,
+									AccountUtils.FILE_TRANSFER_BASE_VIEW_URL
+											+ hikeFile.getFileKey()));
+
+						} else if (context.getString(R.string.delete).equals(
+								optionSelected)) {
+
+							HikeMessengerApp.getPubSub().publish(
+									HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD,
+									message);
+
+						} else if (context.getString(R.string.cancel_upload)
+								.equals(optionSelected)
+								|| context.getString(R.string.cancel_download)
+										.equals(optionSelected)) {
+
+							FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
+									.get(message.getMsgID());
+							if (fileTransferTask != null) {
+								fileTransferTask.cancelTask();
+							}
+
+						}
+					}
+				});
+
+		AlertDialog dialog = builder.create();
+		dialog.show();
 		return true;
 	}
 }

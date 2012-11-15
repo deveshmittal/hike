@@ -243,7 +243,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED,
 			HikePubSub.FILE_MESSAGE_CREATED,
 			HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER,
-			HikePubSub.UNBLOCK_USER };
+			HikePubSub.UNBLOCK_USER, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
 
 	private View currentEmoticonCategorySelected;
 
@@ -621,7 +621,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			startActivity(intent);
 			return true;
 		case R.id.delete:
-			mPubSub.publish(HikePubSub.DELETE_MESSAGE, message);
 			removeMessage(message);
 			return true;
 		case R.id.cancel_file_transfer:
@@ -1083,8 +1082,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
-		mAdapter = new MessagesAdapter(this, messages, mConversation,
-				mConversationsView);
+		mAdapter = new MessagesAdapter(this, messages, mConversation);
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
@@ -1517,6 +1515,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					}
 				}
 			});
+		} else if (HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD.equals(type)) {
+			final ConvMessage convMessage = (ConvMessage) object;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					removeMessage(convMessage);
+				}
+			});
 		}
 	}
 
@@ -1706,6 +1713,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void removeMessage(ConvMessage convMessage) {
+		mPubSub.publish(HikePubSub.DELETE_MESSAGE, convMessage);
 		messages.remove(convMessage);
 		mAdapter.notifyDataSetChanged();
 	}

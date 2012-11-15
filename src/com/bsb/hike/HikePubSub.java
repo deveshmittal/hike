@@ -166,6 +166,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String AUTO_RECOMMENDED_FAVORITES_ADDED = "autoRecommendedFavoritesAdded";
 
+	public static final String REMOVE_MESSAGE_FROM_CHAT_THREAD = "removeMessageFromChatThread";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
