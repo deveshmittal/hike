@@ -103,6 +103,7 @@ public class HikeFile {
 
 	public HikeFile(double latitude, double longitude, int zoomLevel,
 			String address, String thumbnailString, Bitmap thumbnail) {
+		this.fileName = HikeConstants.LOCATION_FILE_NAME;
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.zoomLevel = zoomLevel;
@@ -117,8 +118,8 @@ public class HikeFile {
 		try {
 			JSONObject fileJSON = new JSONObject();
 			fileJSON.putOpt(HikeConstants.CONTENT_TYPE, fileTypeString);
+			fileJSON.putOpt(HikeConstants.FILE_NAME, fileName);
 			if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileTypeString)) {
-				fileJSON.putOpt(HikeConstants.FILE_NAME, fileName);
 				fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
 				fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
 			} else {
