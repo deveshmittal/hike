@@ -169,7 +169,7 @@ public class HikeConstants {
 	public static final int LOCAL_CLEAR_TYPING_TIME = 20 * 1000;
 
 	// Number of recent contacts to show in the favorites drawer.
-	public static final int RECENT_COUNT_IN_FAVORITE = 20;
+	public static final int RECENT_COUNT_IN_FAVORITE = 10;
 	// Number of auto recommend contacts to show in favorites.
 	public static final int MAX_AUTO_RECOMMENDED_FAVORITE = 5;
 
