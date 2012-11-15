@@ -29,10 +29,13 @@ public class DrawerBaseActivity extends Activity implements
 
 	private DrawerLayout parentLayout;
 
-	private String[] pubSubListeners = { HikePubSub.SMS_CREDIT_CHANGED,
-			HikePubSub.PROFILE_PIC_CHANGED, HikePubSub.PROFILE_NAME_CHANGED,
-			HikePubSub.ICON_CHANGED, HikePubSub.RECENT_CONTACTS_UPDATED,
-			HikePubSub.FAVORITE_TOGGLED };
+	private String[] leftDrawerPubSubListeners = {
+			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.PROFILE_PIC_CHANGED,
+			HikePubSub.PROFILE_NAME_CHANGED };
+
+	private String[] rightDrawerPubSubListeners = { HikePubSub.ICON_CHANGED,
+			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
+			HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,13 +69,34 @@ public class DrawerBaseActivity extends Activity implements
 
 		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		HikeMessengerApp.getPubSub().addListeners(this,
+				leftDrawerPubSubListeners);
+
+		/*
+		 * Since we have a static adapter for the right drawer, we should only
+		 * add its listeners once. MessagesList activity is the entry point for
+		 * accessing favorites so we only add the listeners when we come to this
+		 * activity
+		 */
+		if (this instanceof MessagesList) {
+			HikeMessengerApp.getPubSub().addListeners(this,
+					rightDrawerPubSubListeners);
+		}
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+		HikeMessengerApp.getPubSub().removeListeners(this,
+				leftDrawerPubSubListeners);
+		/*
+		 * Only remove the listeners if the MessagesList activity is being
+		 * destroyed.
+		 */
+		if (this instanceof MessagesList) {
+			HikeMessengerApp.getPubSub().removeListeners(this,
+					rightDrawerPubSubListeners);
+		}
 	}
 
 	public void onToggleLeftSideBarClicked(View v) {
