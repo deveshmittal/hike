@@ -1,8 +1,11 @@
 package com.bsb.hike.utils;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -15,6 +18,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.MessagesList;
@@ -185,6 +189,17 @@ public class DrawerBaseActivity extends Activity implements
 								.setFavoriteType(FavoriteType.RECOMMENDED_FAVORITE);
 						parentLayout.addToRecommended(contactInfo);
 					}
+				}
+			});
+		} else if (HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED.equals(type)) {
+			final List<ContactInfo> autoRecommendedFavorites = HikeUserDatabase
+					.getInstance().getContactsOrderedByLastMessaged(-1,
+							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
+							HikeConstants.BOTH_VALUE, true, false);
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					parentLayout.addAutoRecommendedFavoritesList(autoRecommendedFavorites);
 				}
 			});
 		}

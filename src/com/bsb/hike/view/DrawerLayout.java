@@ -1,6 +1,7 @@
 package com.bsb.hike.view;
 
 import java.util.Calendar;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
@@ -262,6 +263,12 @@ public class DrawerLayout extends RelativeLayout implements
 	public void refreshFavoritesDrawer() {
 		if (drawerFavoritesAdapter != null) {
 			drawerFavoritesAdapter.notifyDataSetChanged();
+		}
+	}
+
+	public void addAutoRecommendedFavoritesList(List<ContactInfo> contactInfoList) {
+		if(drawerFavoritesAdapter != null) {
+			drawerFavoritesAdapter.addAutoRecommendedFavorites(contactInfoList);
 		}
 	}
 

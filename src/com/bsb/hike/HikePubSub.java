@@ -164,6 +164,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String FAVORITE_TOGGLED = "favoriteToggled";
 
+	public static final String AUTO_RECOMMENDED_FAVORITES_ADDED = "autoRecommendedFavoritesAdded";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

@@ -63,11 +63,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						FavoriteType.RECOMMENDED_FAVORITE,
 						HikeConstants.BOTH_VALUE, true, false);
 
-		recommendedFavoriteList.addAll(hikeUserDatabase
-				.getContactsOrderedByLastMessaged(-1,
-						FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-						HikeConstants.BOTH_VALUE, true, false));
-
 		favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
 				FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE, true, false);
 
@@ -152,6 +147,15 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		// Remove from the recents list.
 		removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
 		recommendedFavoriteList.add(0, contactInfo);
+
+		makeCompleteList();
+	}
+
+	public void addAutoRecommendedFavorites(List<ContactInfo> contactInfoList) {
+		recommendedFavoriteList.addAll(contactInfoList);
+
+		recentList.removeAll(contactInfoList);
+		onHikeList.removeAll(contactInfoList);
 
 		makeCompleteList();
 	}

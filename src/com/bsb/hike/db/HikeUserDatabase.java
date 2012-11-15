@@ -704,6 +704,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ HikeConstants.MAX_AUTO_RECOMMENDED_FAVORITE + ")", null);
 
 		Log.d(getClass().getSimpleName(), "Auto recommended favorites added: " + rows);
+
+		HikeMessengerApp.getPubSub().publish(HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
 	}
 
 	public boolean isContactFavorite(String msisdn) {
