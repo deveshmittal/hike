@@ -29,6 +29,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 
 public class HikeUserDatabase extends SQLiteOpenHelper {
@@ -753,6 +754,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				c.close();
 			}
 		}
+	}
+
+	public List<ContactInfo> getNonHikeRecentContacts(int limit) {
+		List<String> numbers = ContactUtils.getRecentNumbers(mContext, limit);
+		return getNonHikeContactsFromListOfNumbers(numbers);
 	}
 
 	public List<ContactInfo> getContactNamesFromMsisdnList(StringBuilder msisdns) {

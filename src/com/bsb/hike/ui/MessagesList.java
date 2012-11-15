@@ -22,7 +22,6 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -33,7 +32,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -368,20 +366,11 @@ public class MessagesList extends DrawerBaseActivity implements
 		MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.v1);
 		mediaPlayer.start();
 
-		String sortOrder = Phone.LAST_TIME_CONTACTED + " DESC LIMIT " + 10;
-		Cursor c = getContentResolver().query(Phone.CONTENT_URI,
-				new String[] { Phone.NUMBER }, null, null, sortOrder);
-		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
-		List<String> recentlyContactedNumbers = new ArrayList<String>();
-		while (c.moveToNext()) {
-			recentlyContactedNumbers.add(c.getString(numberColIdx));
-		}
-
 		List<ContactInfo> recentNonHikeContacts = HikeUserDatabase
-				.getInstance().getNonHikeContactsFromListOfNumbers(
-						recentlyContactedNumbers);
+				.getInstance().getNonHikeRecentContacts(10);
 		List<ContactInfo> hikeContacts = HikeUserDatabase.getInstance()
-				.getContactsOrderedByLastMessaged(3, null, HikeConstants.ON_HIKE_VALUE, true, false);
+				.getContactsOrderedByLastMessaged(3, null,
+						HikeConstants.ON_HIKE_VALUE, true, false);
 		Log.d(getClass().getSimpleName(), "Number of recent contacts: "
 				+ recentNonHikeContacts.size() + " HIKE CONTACT: "
 				+ hikeContacts.size());
