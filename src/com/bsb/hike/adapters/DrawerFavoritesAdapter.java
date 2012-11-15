@@ -1,6 +1,8 @@
 package com.bsb.hike.adapters;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.content.Context;
@@ -158,6 +160,30 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		removeConctactFromListByMatchingMsisdn(recommendedFavoriteList,
 				contactInfo);
 		removeConctactFromListByMatchingMsisdn(favoriteList, contactInfo);
+
+		/*
+		 * Adding the contact back to the recents list based on whether the
+		 * contact is on hike or not since the contact was removed from the
+		 * favorites list.
+		 */
+		List<ContactInfo> listToSort;
+		if (contactInfo.isOnhike()) {
+			(listToSort = onHikeList).add(contactInfo);
+		} else {
+			(listToSort = recentList).add(contactInfo);
+		}
+		Collections.sort(listToSort, new Comparator<ContactInfo>() {
+			@Override
+			public int compare(ContactInfo lhs, ContactInfo rhs) {
+				if (lhs.getLastMessaged() != rhs.getLastMessaged()) {
+					return -((Long) lhs.getLastMessaged()).compareTo(rhs
+							.getLastMessaged());
+				} else {
+					return (lhs.getName().toLowerCase()).compareTo(rhs
+							.getName().toLowerCase());
+				}
+			}
+		});
 
 		makeCompleteList();
 	}
