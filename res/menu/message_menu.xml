@@ -14,10 +14,6 @@
         android:id="@+id/delete"
         android:title="@string/delete"/>
     <item
-        android:id="@+id/resend"
-        android:title="@string/resend"
-        android:visible="false"/>
-    <item
         android:id="@+id/cancel_file_transfer"
         android:visible="false"/>
 </menu>
