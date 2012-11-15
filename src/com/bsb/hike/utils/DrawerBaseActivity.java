@@ -233,8 +233,7 @@ public class DrawerBaseActivity extends Activity implements
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
-		if(v.getId() != R.id.favorite_list)
-		{
+		if (v.getId() != R.id.favorite_list) {
 			return;
 		}
 
