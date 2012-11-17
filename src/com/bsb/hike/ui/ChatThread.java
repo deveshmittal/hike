@@ -344,9 +344,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
 			findViewById(R.id.button_bar3).setVisibility(View.GONE);
 		}
+		/*
+		 * Show hike contacts first for non-indian users
+		 */
+		boolean hikeFirst = !prefs.getString(HikeMessengerApp.COUNTRY_CODE, "")
+				.equals("+91");
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
 				.getContactsOrderedByLastMessaged(-1, null,
-						HikeConstants.BOTH_VALUE, false, false);
+						HikeConstants.BOTH_VALUE, false, hikeFirst);
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, this.mConversationDb
 					.getGroupNameAndParticipantsAsContacts());
