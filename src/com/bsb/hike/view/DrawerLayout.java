@@ -304,6 +304,8 @@ public class DrawerLayout extends RelativeLayout implements
 	}
 
 	public void setUpLeftDrawerView() {
+		int itemHeight = (int) (48 * Utils.densityMultiplier);
+
 		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 
 		profileImg = (ImageView) findViewById(R.id.profile_image);
@@ -391,6 +393,11 @@ public class DrawerLayout extends RelativeLayout implements
 					}
 					break;
 				}
+
+				LayoutParams layoutParams = new LayoutParams(
+						LayoutParams.MATCH_PARENT, itemHeight);
+				itemView.setLayoutParams(layoutParams);
+
 				itemView.setId(id);
 				itemView.setOnClickListener(this);
 				parentView.addView(itemView);
