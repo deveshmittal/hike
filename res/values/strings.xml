@@ -187,4 +187,15 @@
 	<string name="auto_recommended_favorite">Would you like to add %1$s as a favorite?</string>
 	<string name="remove_fav">Remove from favorites</string>
 	<string name="tap_to_place">Tap a place on the map</string>
+	<string name="invite_earn">Invite Friends, Earn Rewards</string>
+	<string name="earn_sms_friend_join">For every friend who joins via SMS\nyou get 50 Free SMS</string>
+	<string name="email">Email</string>
+	<string name="share_via_other">Share via Other</string>
+	<string name="fb_subtext">Post to my wall</string>
+	<string name="twitter_subtext">Post to my timeline</string>
+	<string name="sms_subtext">Invite friends via SMS</string>
+	<string name="email_subtext">Invite via Email</string>
+	<string name="other_subtext">Get an invite URL</string>
+	<string name="email_subject">hike. Fun, free messaging for life</string>
+	<string name="email_body">Hi! I’ve started using hike, an awesome new free messaging app. You can message friends on hike and also those who aren’t for free! Messaging has never been simpler. Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
 </resources>

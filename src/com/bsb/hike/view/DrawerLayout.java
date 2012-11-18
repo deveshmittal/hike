@@ -47,6 +47,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.utils.Utils;
 
@@ -392,6 +393,11 @@ public class DrawerLayout extends RelativeLayout implements
 						itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
 					}
 					break;
+				case TELL_A_FRIEND:
+					if (activity instanceof TellAFriend) {
+						itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
+					}
+					break;
 				}
 
 				LayoutParams layoutParams = new LayoutParams(
@@ -429,8 +435,8 @@ public class DrawerLayout extends RelativeLayout implements
 			break;
 		case TELL_A_FRIEND:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_INVITE);
-			Utils.startShareIntent(getContext(),
-					Utils.getInviteMessage(getContext()));
+			intent = activity instanceof TellAFriend ? null : new Intent(
+					getContext(), TellAFriend.class);
 			break;
 		case FREE_SMS:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_CREDITS);
