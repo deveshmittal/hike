@@ -73,7 +73,8 @@ public class Rewards extends DrawerBaseActivity {
 
 	public void onInviteClicked(View v) {
 		Utils.logEvent(this, HikeConstants.LogEvent.REWARDS_INVITE);
-		Utils.startShareIntent(this, Utils.getInviteMessage(this));
+		Utils.startShareIntent(this,
+				Utils.getInviteMessage(this, R.string.invite_share_message));
 	}
 
 	public void onClaimClicked(View v) {

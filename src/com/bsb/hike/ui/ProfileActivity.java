@@ -900,14 +900,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.entrySet()) {
 			if (!participant.getValue().getContactInfo().isOnhike()
 					&& !participant.getValue().hasLeft()) {
-				long time = (long) System.currentTimeMillis() / 1000;
-				ConvMessage convMessage = new ConvMessage(getResources()
-						.getString(R.string.invite_message),
-						participant.getKey(), time,
-						ConvMessage.State.SENT_UNCONFIRMED);
-				convMessage.setInvite(true);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-						convMessage.serialize());
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH,
+						Utils.makeHike2SMSInviteMessage(participant.getKey(),
+								this).serialize());
 			}
 		}
 		Toast toast = Toast.makeText(ProfileActivity.this,

@@ -872,17 +872,14 @@ public class Utils {
 				.substring(0, HikeConstants.MAX_CHAR_IN_NAME - 3) + "...");
 	}
 
-	public static String getInviteMessage(Context context) {
-		String inviteUrlWithToken = context
-				.getString(R.string.default_invite_url)
-				+ context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-						HikeConstants.INVITE_TOKEN, "");
+	public static String getInviteMessage(Context context, int messageResId) {
+		String inviteToken = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+				HikeConstants.INVITE_TOKEN, "");
 		// Adding the user's invite token to the invite url
-		String inviteMessage = context.getString(R.string.invite_share_message);
-		String defaultInviteURL = context
-				.getString(R.string.default_invite_url);
-		return inviteMessage.replace(defaultInviteURL, inviteUrlWithToken);
+		String inviteMessage = context.getString(messageResId, inviteToken);
+
+		return inviteMessage;
 	}
 
 	public static void startShareIntent(Context context, String message) {
@@ -1190,17 +1187,8 @@ public class Utils {
 			Context context) {
 		long time = (long) System.currentTimeMillis() / 1000;
 
-		// Adding the user's invite token to the invite url
-		String inviteMessage = context.getString(R.string.invite_message);
-		String defaultInviteURL = context
-				.getString(R.string.default_invite_url);
-		String inviteToken = context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-				HikeConstants.INVITE_TOKEN, "");
-		inviteMessage = inviteMessage.replace(defaultInviteURL,
-				defaultInviteURL + inviteToken);
-
-		ConvMessage convMessage = new ConvMessage(inviteMessage, msisdn, time,
+		ConvMessage convMessage = new ConvMessage(getInviteMessage(context,
+				R.string.invite_message), msisdn, time,
 				ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setInvite(true);
 
