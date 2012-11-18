@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -132,6 +134,32 @@ public class ShareLocation extends MapActivity {
 				locListener);
 		locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0,
 				0, locListener);
+
+		if (!locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+					this);
+			alertDialogBuilder
+					.setMessage(R.string.gps_disabled)
+					.setCancelable(false)
+					.setPositiveButton(android.R.string.ok,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									Intent callGPSSettingIntent = new Intent(
+											android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+									startActivity(callGPSSettingIntent);
+								}
+							});
+			alertDialogBuilder.setNegativeButton(R.string.cancel,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});
+			AlertDialog alert = alertDialogBuilder.create();
+			alert.show();
+		}
+
 		if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
 			createAndShowMyItemizedOverlay(locManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER));
@@ -265,7 +293,8 @@ public class ShareLocation extends MapActivity {
 				initMyLocationManager();
 			} else {
 				removeMyLocationListeners();
-				Toast.makeText(this, R.string.tap_to_place, Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, R.string.tap_to_place, Toast.LENGTH_SHORT)
+						.show();
 			}
 			currentSelection.setSelected(false);
 			currentSelection = v;
