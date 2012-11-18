@@ -1198,7 +1198,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				/*
 				 * Showing an indicator as to which are the unread messages.
 				 */
-				if (lastReadIndex < messages.size() && messages.size() > 1) {
+				if ((mConversation instanceof GroupConversation)
+						&& lastReadIndex < messages.size() && lastReadIndex > 0) {
 					messages.add(lastReadIndex, new ConvMessage(null, null, 0,
 							State.SENT_DELIVERED_READ,
 							MessagesAdapter.LAST_READ_CONV_MESSAGE_ID, 0));
