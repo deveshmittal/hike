@@ -1265,7 +1265,7 @@ public class Utils {
 		File hikeFileList = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT,
 				HikeConstants.HIKE_FILE_LIST_NAME);
 		JSONObject currentFiles = getHikeFileListData(hikeFileList);
-		if(currentFiles == null || !currentFiles.has(orgFileName)) {
+		if (currentFiles == null || !currentFiles.has(orgFileName)) {
 			Log.d("Utils", "File with this name does not exist");
 			return orgFileName;
 		}
@@ -1293,8 +1293,8 @@ public class Utils {
 				currentNameToCheck = newFileName + fileExtension;
 			}
 		}
-		Log.d("Utils", "NewFile name: " + newFileName.toString() + " Extension: "
-				+ fileExtension);
+		Log.d("Utils", "NewFile name: " + newFileName.toString()
+				+ " Extension: " + fileExtension);
 		newFileName.append(fileExtension);
 		return newFileName.toString();
 	}
@@ -1309,8 +1309,8 @@ public class Utils {
 		ByteArrayInputStream byteArrayInputStream = null;
 		try {
 			fileOutputStream = new FileOutputStream(hikeFileList);
-			byteArrayInputStream = new ByteArrayInputStream(data
-					.toString().getBytes("UTF-8"));
+			byteArrayInputStream = new ByteArrayInputStream(data.toString()
+					.getBytes("UTF-8"));
 
 			int b;
 			byte[] d = new byte[8];
@@ -1336,15 +1336,15 @@ public class Utils {
 	}
 
 	private static JSONObject getHikeFileListData(File hikeFileList) {
-		if(!hikeFileList.exists()) {
+		if (!hikeFileList.exists()) {
 			return null;
 		}
 		FileInputStream fileInputStream = null;
 		JSONObject currentFiles = null;
 		try {
 			fileInputStream = new FileInputStream(hikeFileList);
-			BufferedReader reader = new BufferedReader(
-					new InputStreamReader(fileInputStream));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					fileInputStream));
 
 			StringBuilder builder = new StringBuilder();
 			CharBuffer target = CharBuffer.allocate(10000);
@@ -1357,8 +1357,7 @@ public class Utils {
 			}
 
 			currentFiles = new JSONObject(builder.toString());
-			Log.d("Utils",
-					"File found: Current data: " + builder.toString());
+			Log.d("Utils", "File found: Current data: " + builder.toString());
 		} catch (FileNotFoundException e) {
 			Log.e("Utils", "File not found", e);
 			hikeFileList.delete();
@@ -1373,8 +1372,8 @@ public class Utils {
 				try {
 					fileInputStream.close();
 				} catch (IOException e) {
-					Log.e("Utils",
-							"Exception while closing the input stream", e);
+					Log.e("Utils", "Exception while closing the input stream",
+							e);
 				}
 			}
 		}

@@ -223,9 +223,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(
 				mLocalMSISDN, false);
-		if(!contactInfo.isOnhike())
-		{
-			contactInfo.setOnhike(getIntent().getBooleanExtra(HikeConstants.Extras.ON_HIKE, false));
+		if (!contactInfo.isOnhike()) {
+			contactInfo.setOnhike(getIntent().getBooleanExtra(
+					HikeConstants.Extras.ON_HIKE, false));
 		}
 
 		topBarBtn
@@ -403,8 +403,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onTitleIconClick(View v) {
-		if (profileType == ProfileType.USER_PROFILE)
-		{
+		if (profileType == ProfileType.USER_PROFILE) {
 			super.onTitleIconClick(v);
 			return;
 		}
