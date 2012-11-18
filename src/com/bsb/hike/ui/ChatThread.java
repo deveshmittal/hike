@@ -2830,6 +2830,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		if (mConversation instanceof GroupConversation) {
+			return false;
+		}
 		return gestureDetector.onTouchEvent(event);
 	}
 
