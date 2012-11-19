@@ -120,6 +120,9 @@ public class HikeConstants {
 	/* the max amount of time we allow the service to run in case of no activity */
 	public static final int DISCONNECT_TIME = 2 * 60;
 
+	/* the max amount of time we wait for the PIN */
+	public static final int PIN_CAPTURE_TIME = 60 * 1000;
+
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 	public static final String ADAPTER_NAME = "hikeadapter";
 
@@ -310,6 +313,7 @@ public class HikeConstants {
 		public static final String ZOOM_LEVEL = "zoomLevel";
 		public static final String CONTACT_INFO = "contactInfo";
 		public static final String ON_HIKE = "onHike";
+		public static final String SHOWING_SECOND_LOADING_TXT = "showingSecondLoadingTxt";
 	}
 
 	public static final class LogEvent {

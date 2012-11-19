@@ -106,6 +106,8 @@ public class SignupActivity extends Activity implements
 
 	private HikeHTTPTask hikeHTTPTask;
 
+	private boolean showingSecondLoadingTxt = false;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -135,6 +137,8 @@ public class SignupActivity extends Activity implements
 					.getBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR);
 			int dispChild = savedInstanceState
 					.getInt(HikeConstants.Extras.SIGNUP_PART);
+			showingSecondLoadingTxt = savedInstanceState
+					.getBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT);
 			removeAnimation();
 			viewFlipper.setDisplayedChild(dispChild);
 			switch (dispChild) {
@@ -142,6 +146,10 @@ public class SignupActivity extends Activity implements
 				countryCode = savedInstanceState
 						.getString(HikeConstants.Extras.COUNTRY_CODE);
 				prepareLayoutForFetchingNumber();
+				if (showingSecondLoadingTxt) {
+					loadingText.setImageResource(R.drawable.txt_almost);
+					showingSecondLoadingTxt = false;
+				}
 				break;
 			case PIN:
 				prepareLayoutForGettingPin();
@@ -380,6 +388,7 @@ public class SignupActivity extends Activity implements
 		infoTxt.setImageResource(msisdnErrorDuringSignup ? R.drawable.enter_phone_again
 				: R.drawable.enter_phone);
 		invalidNum.setVisibility(View.INVISIBLE);
+		loadingText.setImageResource(R.drawable.verifying_num);
 	}
 
 	private void formatCountryPickerText(String code) {
@@ -510,6 +519,8 @@ public class SignupActivity extends Activity implements
 				.getText().toString());
 		outState.putBoolean(HikeConstants.Extras.SIGNUP_MSISDN_ERROR,
 				msisdnErrorDuringSignup);
+		outState.putBoolean(HikeConstants.Extras.SHOWING_SECOND_LOADING_TXT,
+				showingSecondLoadingTxt);
 		if (viewFlipper.getDisplayedChild() == NUMBER) {
 			outState.putString(HikeConstants.Extras.COUNTRY_CODE, countryPicker
 					.getText().toString());
@@ -550,6 +561,7 @@ public class SignupActivity extends Activity implements
 			mHandler = new Handler();
 		}
 
+		showingSecondLoadingTxt = false;
 		switch (stateValue.state) {
 		case MSISDN:
 			if (TextUtils.isEmpty(value)) {
@@ -563,6 +575,18 @@ public class SignupActivity extends Activity implements
 				/* yay, got the actual MSISDN */
 				viewFlipper.setDisplayedChild(NAME);
 				prepareLayoutForGettingName();
+			}
+			break;
+		case PULLING_PIN:
+			if (viewFlipper.getDisplayedChild() == NUMBER) {
+				mHandler.postDelayed(new Runnable() {
+
+					@Override
+					public void run() {
+						showingSecondLoadingTxt = true;
+						loadingText.setImageResource(R.drawable.txt_almost);
+					}
+				}, HikeConstants.PIN_CAPTURE_TIME / 2);
 			}
 			break;
 		case PIN:

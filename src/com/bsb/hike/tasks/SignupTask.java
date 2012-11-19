@@ -58,7 +58,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	}
 
 	public enum State {
-		MSISDN, ADDRESSBOOK, NAME, PIN, ERROR
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR
 	};
 
 	public class StateValue {
@@ -191,11 +191,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				editor.putString(HikeMessengerApp.MSISDN_ENTERED,
 						unauthedMSISDN);
 				editor.commit();
+				publishProgress(new StateValue(State.PULLING_PIN, null));
 
 				synchronized (this) {
 					/* wait until we get an SMS from the server */
 					try {
-						this.wait(10 * 1000);
+						this.wait(HikeConstants.PIN_CAPTURE_TIME);
 					} catch (InterruptedException e) {
 						Log.e("SignupTask", "Task was interrupted", e);
 					}
