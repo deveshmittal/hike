@@ -148,7 +148,6 @@ public class SignupActivity extends Activity implements
 				prepareLayoutForFetchingNumber();
 				if (showingSecondLoadingTxt) {
 					loadingText.setImageResource(R.drawable.txt_almost);
-					showingSecondLoadingTxt = false;
 				}
 				break;
 			case PIN:
