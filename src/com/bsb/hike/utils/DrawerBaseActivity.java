@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -41,8 +42,10 @@ public class DrawerBaseActivity extends Activity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// This does not apply to pre-Honeycomb devices,
-		getWindow().setFlags(HikeConstants.FLAG_HARDWARE_ACCELERATED,
-				HikeConstants.FLAG_HARDWARE_ACCELERATED);
+		if (Build.VERSION.SDK_INT >= 11) {
+			getWindow().setFlags(HikeConstants.FLAG_HARDWARE_ACCELERATED,
+					HikeConstants.FLAG_HARDWARE_ACCELERATED);
+		}
 	}
 
 	public void afterSetContentView(Bundle savedInstanceState) {
