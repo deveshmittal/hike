@@ -206,7 +206,8 @@ public class SignupActivity extends Activity implements
 					@Override
 					public void run() {
 						Intent i = new Intent(SignupActivity.this,
-								Tutorial.class);
+								MessagesList.class);
+						i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
 						startActivity(i);
 						finish();
 					}

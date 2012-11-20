@@ -33,7 +33,8 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 	private boolean isLandscape;
 	private TextView titleBtn;
 
-	private static final int PAGE_NUM_HELP = 3;
+	private static final int PAGE_NUM_HELP_INDIAN = 3;
+	private static final int PAGE_NUM_HELP_NON_INDIAN = 3;
 	private static final int PAGE_NUM_INTRO = 3;
 
 	private int pageNum = 0;
@@ -57,7 +58,8 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 		} else {
 			afterSetContentView(savedInstanceState);
 
-			pageNum = PAGE_NUM_HELP;
+			pageNum = HikeMessengerApp.isIndianUser() ? PAGE_NUM_HELP_INDIAN
+					: PAGE_NUM_HELP_NON_INDIAN;
 		}
 
 		TextView mTitleView = (TextView) findViewById(isHelpPage ? R.id.title_centered

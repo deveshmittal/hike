@@ -18,7 +18,6 @@ import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -31,7 +30,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -218,7 +216,9 @@ public class MessagesList extends DrawerBaseActivity implements
 		String token = accountPrefs.getString(HikeMessengerApp.TOKEN_SETTING,
 				null);
 
-		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL, false)) {
+		if (HikeMessengerApp.isIndianUser()
+				&& !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL,
+						false)) {
 			Intent i = new Intent(MessagesList.this, Tutorial.class);
 			startActivity(i);
 			finish();
