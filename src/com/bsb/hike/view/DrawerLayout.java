@@ -111,7 +111,7 @@ public class DrawerLayout extends RelativeLayout implements
 	 * Making this static in order to prevent having multiple lists of contacts
 	 * since we show favorites in multiple screens.
 	 */
-	private static DrawerFavoritesAdapter drawerFavoritesAdapter;
+	public static DrawerFavoritesAdapter drawerFavoritesAdapter;
 
 	private TimeOfDay time;
 

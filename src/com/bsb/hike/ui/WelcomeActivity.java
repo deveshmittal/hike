@@ -26,6 +26,7 @@ import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.DrawerLayout;
 
 public class WelcomeActivity extends Activity implements
 		SignupTask.OnSignupTaskProgressUpdate {
@@ -45,6 +46,12 @@ public class WelcomeActivity extends Activity implements
 	public void onCreate(Bundle savedState) {
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
+
+		/*
+		 * Making the static variable null so that its reinitialized
+		 * once the user signs up.
+		 */
+		DrawerLayout.drawerFavoritesAdapter = null;
 
 		mAcceptButton = (ImageButton) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
