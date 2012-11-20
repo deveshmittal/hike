@@ -254,9 +254,17 @@ public class DrawerLayout extends RelativeLayout implements
 		// Accounting for the header view
 		position = position - 1;
 
-		Intent intent = Utils
-				.createIntentFromContactInfo(drawerFavoritesAdapter
-						.getItem(position));
+		ContactInfo contactInfo = drawerFavoritesAdapter.getItem(position);
+
+		/*
+		 * If the user taps on a non hike contact and is not an Indian user, we
+		 * do nothing.
+		 */
+		if (!HikeMessengerApp.isIndianUser() && !contactInfo.isOnhike()) {
+			return;
+		}
+
+		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 		intent.setClass(getContext(), ChatThread.class);
 		getContext().startActivity(intent);
 	}

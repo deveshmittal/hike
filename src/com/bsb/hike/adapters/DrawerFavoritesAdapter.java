@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
@@ -109,7 +110,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		// Contact for "Recent Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, HikeConstants.RECENT, null));
+				null, HikeMessengerApp.isIndianUser() ? HikeConstants.RECENT
+						: HikeConstants.INVITE_FRIENDS, null));
 
 		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
 				: recentList.size();
@@ -415,10 +417,19 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	public void onClick(View v) {
 		ContactInfo contactInfo = (ContactInfo) v.getTag();
 		if (v.getId() == R.id.add_fav) {
-			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
-					contactInfo, FavoriteType.FAVORITE);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
-					favoriteAdded);
+			if (!contactInfo.isOnhike() && !HikeMessengerApp.isIndianUser()) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH,
+						Utils.makeHike2SMSInviteMessage(
+								contactInfo.getMsisdn(), context).serialize());
+				Toast.makeText(context, "Invite sent", Toast.LENGTH_SHORT)
+						.show();
+			} else {
+				Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+						contactInfo, FavoriteType.FAVORITE);
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+			}
 		} else if (v.getId() == R.id.add) {
 			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, FavoriteType.FAVORITE);
