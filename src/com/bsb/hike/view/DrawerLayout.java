@@ -517,7 +517,9 @@ public class DrawerLayout extends RelativeLayout implements
 	};
 
 	public void updateCredits(int credits) {
-		creditsNum.setText(Integer.toString(credits));
+		if(creditsNum != null) {
+			creditsNum.setText(Integer.toString(credits));
+		}
 	}
 
 	public void setProfileImage() {
