@@ -347,8 +347,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		/*
 		 * Show hike contacts first for non-indian users
 		 */
-		boolean hikeFirst = !prefs.getString(HikeMessengerApp.COUNTRY_CODE, "")
-				.equals("+91");
+		boolean hikeFirst = !HikeMessengerApp.isIndianUser();
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
 				.getContactsOrderedByLastMessaged(-1, null,
 						HikeConstants.BOTH_VALUE, false, hikeFirst);

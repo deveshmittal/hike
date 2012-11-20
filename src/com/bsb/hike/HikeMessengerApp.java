@@ -145,6 +145,8 @@ public class HikeMessengerApp extends Application {
 
 	private static HikePubSub mPubSubInstance;
 
+	private static boolean isIndianUser;
+
 	private static Messenger mMessenger;
 
 	private Messenger mService;
@@ -326,6 +328,8 @@ public class HikeMessengerApp extends Application {
 		facebook.setAccessToken(settings.getString(
 				HikeMessengerApp.FACEBOOK_TOKEN, ""));
 
+		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE);
+
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
 
@@ -362,4 +366,11 @@ public class HikeMessengerApp extends Application {
 		this.mService = service;
 	}
 
+	public static void setIndianUser(boolean isIndianUser) {
+		HikeMessengerApp.isIndianUser = isIndianUser;
+	}
+
+	public static boolean isIndianUser() {
+		return isIndianUser;
+	}
 }

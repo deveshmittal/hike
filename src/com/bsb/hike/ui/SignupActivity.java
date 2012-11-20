@@ -314,6 +314,9 @@ public class SignupActivity extends Activity implements
 							.edit();
 					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
 					editor.commit();
+
+					HikeMessengerApp.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE.equals(code));
+
 				}
 				mTask.addUserInput(input);
 			}
