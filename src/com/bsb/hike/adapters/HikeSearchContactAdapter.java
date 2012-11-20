@@ -76,8 +76,9 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 		this.groupId = groupId;
 		this.presentIntent = presentIntent;
 		this.countryCode = context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-				HikeMessengerApp.COUNTRY_CODE, "+91");
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+				.getString(HikeMessengerApp.COUNTRY_CODE,
+						HikeConstants.INDIA_COUNTRY_CODE);
 		if (!TextUtils.isEmpty(groupId)) {
 			groupParticipants = HikeConversationsDatabase.getInstance()
 					.getGroupParticipants(groupId, true, false);

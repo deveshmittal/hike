@@ -233,6 +233,8 @@ public class HikeConstants {
 	public static final int NOT_ON_HIKE_VALUE = 0;
 	public static final int BOTH_VALUE = -1;
 
+	public static final String INDIA_COUNTRY_CODE = "+91";
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
