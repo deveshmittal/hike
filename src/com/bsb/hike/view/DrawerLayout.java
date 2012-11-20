@@ -115,6 +115,8 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private TimeOfDay time;
 
+	private View headerView;
+
 	public enum LeftDrawerItems {
 		HOME, GROUP_CHAT, TELL_A_FRIEND, FREE_SMS, PROFILE, HELP
 	}
@@ -198,7 +200,10 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public void setUpRightDrawerView(Activity activity) {
 		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
+		headerView = ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.status_header, null);
 
+		favoriteListView.addHeaderView(headerView, null, false);
+		favoriteListView.setHeaderDividersEnabled(false);
 		if (drawerFavoritesAdapter == null) {
 			Log.d(getClass().getSimpleName(), "Initialising favorites adapter");
 			drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext());
@@ -212,7 +217,7 @@ public class DrawerLayout extends RelativeLayout implements
 	}
 
 	private void setStatus() {
-		ViewGroup background = (ViewGroup) findViewById(R.id.time_base_status);
+		ViewGroup background = (ViewGroup) headerView.findViewById(R.id.time_base_status);
 
 		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
 		if (hour >= 6 && hour < 12) // Morning
@@ -242,6 +247,9 @@ public class DrawerLayout extends RelativeLayout implements
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View view, int position,
 			long id) {
+		// Accounting for the header view
+		position = position - 1;
+
 		Intent intent = Utils
 				.createIntentFromContactInfo(drawerFavoritesAdapter
 						.getItem(position));
