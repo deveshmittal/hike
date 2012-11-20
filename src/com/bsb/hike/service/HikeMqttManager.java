@@ -340,6 +340,7 @@ public class HikeMqttManager implements Listener {
 								.edit();
 						editor.clear();
 						editor.commit();
+						mHikeService.sendInvalidToken();
 					}
 
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
