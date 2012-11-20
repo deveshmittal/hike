@@ -40,7 +40,6 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.DrawerFavoritesAdapter;
 import com.bsb.hike.adapters.DrawerFavoritesAdapter.FavoriteAdapterViewType;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -294,10 +293,8 @@ public class DrawerLayout extends RelativeLayout implements
 		}
 	}
 
-	public void updateRecentContacts(String msisdn) {
+	public void updateRecentContacts(ContactInfo contactInfo) {
 		Log.d(getClass().getSimpleName(), "Update Recent List");
-		ContactInfo contactInfo = HikeUserDatabase.getInstance()
-				.getContactInfoFromMSISDN(msisdn, true);
 		drawerFavoritesAdapter.updateRecentContactsList(contactInfo);
 	}
 

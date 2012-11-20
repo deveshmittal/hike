@@ -202,16 +202,13 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			return;
 		}
 
+		// Remove the contact if it already exists
+		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
+		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
+
 		if (contactInfo.isOnhike()) {
-			// Remove the contact if it already exists
-			removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
-
 			onHikeList.add(0, contactInfo);
-
 		} else {
-			// Remove the contact if it already exists
-			removeContactFromListByMatchingMsisdn(recentList, contactInfo);
-
 			recentList.add(0, contactInfo);
 			/*
 			 * If we added a new contact then we delete the last item to

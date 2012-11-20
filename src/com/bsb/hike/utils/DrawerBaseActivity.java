@@ -35,7 +35,8 @@ public class DrawerBaseActivity extends Activity implements
 
 	private String[] rightDrawerPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
-			HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED };
+			HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED,
+			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -198,12 +199,23 @@ public class DrawerBaseActivity extends Activity implements
 					parentLayout.refreshFavoritesDrawer();
 				}
 			});
-		} else if (HikePubSub.RECENT_CONTACTS_UPDATED.equals(type)) {
+		} else if (HikePubSub.RECENT_CONTACTS_UPDATED.equals(type)
+				|| HikePubSub.USER_JOINED.equals(type)
+				|| HikePubSub.USER_LEFT.equals(type)) {
+			final ContactInfo contactInfo = HikeUserDatabase.getInstance()
+					.getContactInfoFromMSISDN((String) object, true);
+			/*
+			 * If the contact is already a part of the favorites list, we don't
+			 * need to do anything.
+			 */
+			if(contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
+				return;
+			}
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
-					parentLayout.updateRecentContacts((String) object);
+					parentLayout.updateRecentContacts(contactInfo);
 				}
 			});
 		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
