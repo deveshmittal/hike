@@ -128,10 +128,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			completeList.remove(1);
 		}
 		// Remove from the other lists.
-		removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
-		removeConctactFromListByMatchingMsisdn(recommendedFavoriteList,
+		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
+		removeContactFromListByMatchingMsisdn(recommendedFavoriteList,
 				contactInfo);
-		removeConctactFromListByMatchingMsisdn(onHikeList, contactInfo);
+		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
 
 		favoriteList.add(0, contactInfo);
 
@@ -147,7 +147,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			completeList.remove(1);
 		}
 		// Remove from the recents list.
-		removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
+		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
 		recommendedFavoriteList.add(0, contactInfo);
 
 		makeCompleteList();
@@ -163,9 +163,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	}
 
 	public void removeFavoriteItem(ContactInfo contactInfo) {
-		removeConctactFromListByMatchingMsisdn(recommendedFavoriteList,
+		removeContactFromListByMatchingMsisdn(recommendedFavoriteList,
 				contactInfo);
-		removeConctactFromListByMatchingMsisdn(favoriteList, contactInfo);
+		removeContactFromListByMatchingMsisdn(favoriteList, contactInfo);
 
 		/*
 		 * Adding the contact back to the recents list based on whether the
@@ -204,13 +204,13 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		if (contactInfo.isOnhike()) {
 			// Remove the contact if it already exists
-			removeConctactFromListByMatchingMsisdn(onHikeList, contactInfo);
+			removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
 
 			onHikeList.add(0, contactInfo);
 
 		} else {
 			// Remove the contact if it already exists
-			removeConctactFromListByMatchingMsisdn(recentList, contactInfo);
+			removeContactFromListByMatchingMsisdn(recentList, contactInfo);
 
 			recentList.add(0, contactInfo);
 			/*
@@ -224,7 +224,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		makeCompleteList();
 	}
 
-	private void removeConctactFromListByMatchingMsisdn(
+	private void removeContactFromListByMatchingMsisdn(
 			List<ContactInfo> contactList, ContactInfo contactInfo) {
 
 		List<ContactInfo> deleteContactList = new ArrayList<ContactInfo>();
