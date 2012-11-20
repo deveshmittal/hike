@@ -122,8 +122,8 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 
 	public void onTitleIconClick(View v) {
 		if (!isHelpPage) {
-			Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-					MODE_PRIVATE).edit();
+			Editor editor = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
 			editor.putBoolean(HikeMessengerApp.SHOWN_TUTORIAL, true);
 			editor.commit();
 

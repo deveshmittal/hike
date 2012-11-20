@@ -723,16 +723,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		contentValues.put(DBConstants.FAVORITE,
 				FavoriteType.AUTO_RECOMMENDED_FAVORITE.ordinal());
 
-		int rows = mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
-				+ " IN (SELECT DISTINCT " + DBConstants.MSISDN + " FROM "
-				+ DBConstants.USERS_TABLE + " WHERE "
-				+ DBConstants.LAST_MESSAGED + ">0 ORDER BY "
-				+ DBConstants.LAST_MESSAGED + " DESC LIMIT "
-				+ HikeConstants.MAX_AUTO_RECOMMENDED_FAVORITE + ")", null);
+		int rows = mDb.update(DBConstants.USERS_TABLE, contentValues,
+				DBConstants.MSISDN + " IN (SELECT DISTINCT "
+						+ DBConstants.MSISDN + " FROM "
+						+ DBConstants.USERS_TABLE + " WHERE "
+						+ DBConstants.LAST_MESSAGED + ">0 ORDER BY "
+						+ DBConstants.LAST_MESSAGED + " DESC LIMIT "
+						+ HikeConstants.MAX_AUTO_RECOMMENDED_FAVORITE + ")",
+				null);
 
-		Log.d(getClass().getSimpleName(), "Auto recommended favorites added: " + rows);
+		Log.d(getClass().getSimpleName(), "Auto recommended favorites added: "
+				+ rows);
 
-		HikeMessengerApp.getPubSub().publish(HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
 	}
 
 	public boolean isContactFavorite(String msisdn) {

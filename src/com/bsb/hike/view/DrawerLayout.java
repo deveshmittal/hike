@@ -201,7 +201,9 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public void setUpRightDrawerView(Activity activity) {
 		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
-		headerView = ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.status_header, null);
+		headerView = ((LayoutInflater) getContext().getSystemService(
+				Context.LAYOUT_INFLATER_SERVICE)).inflate(
+				R.layout.status_header, null);
 
 		favoriteListView.addHeaderView(headerView, null, false);
 		favoriteListView.setHeaderDividersEnabled(false);
@@ -218,7 +220,8 @@ public class DrawerLayout extends RelativeLayout implements
 	}
 
 	private void setStatus() {
-		ViewGroup background = (ViewGroup) headerView.findViewById(R.id.time_base_status);
+		ViewGroup background = (ViewGroup) headerView
+				.findViewById(R.id.time_base_status);
 
 		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
 		if (hour >= 6 && hour < 12) // Morning
@@ -276,8 +279,9 @@ public class DrawerLayout extends RelativeLayout implements
 		}
 	}
 
-	public void addAutoRecommendedFavoritesList(List<ContactInfo> contactInfoList) {
-		if(drawerFavoritesAdapter != null) {
+	public void addAutoRecommendedFavoritesList(
+			List<ContactInfo> contactInfoList) {
+		if (drawerFavoritesAdapter != null) {
 			drawerFavoritesAdapter.addAutoRecommendedFavorites(contactInfoList);
 		}
 	}
