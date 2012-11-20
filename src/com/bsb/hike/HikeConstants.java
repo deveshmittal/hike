@@ -64,7 +64,6 @@ public class HikeConstants {
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
-	public static final String SMS_PREF = "smsPref";
 	public static final String HIKEBOT = "TD-HIKE";
 
 	public static final String DONE = "Done";
@@ -389,11 +388,6 @@ public class HikeConstants {
 		 * Credits screen events <screen> = credS <event> = inVB
 		 */
 		public static final String INVITE_BUTTON_CLICKED = "credSinVB";
-
-		/*
-		 * User Preferences <screen> = prefS <event> = smS
-		 */
-		public static final String DEFAULT_SMS_CLIENT = "prefSsmS";
 
 		/*
 		 * Group Info screen <screen> = groupS <event> = adDparT

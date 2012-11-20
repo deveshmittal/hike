@@ -63,7 +63,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
-import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -679,9 +678,6 @@ public class Utils {
 				}
 				editor.commit();
 				data.put(HikeConstants.LogEvent.TAG, "mob");
-				data.put(HikeConstants.LogEvent.DEFAULT_SMS_CLIENT,
-						PreferenceManager.getDefaultSharedPreferences(context)
-								.getBoolean(HikeConstants.SMS_PREF, false));
 
 				obj.put(HikeConstants.TYPE,
 						HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);

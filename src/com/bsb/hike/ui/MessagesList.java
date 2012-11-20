@@ -420,62 +420,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				convMessage);
 	}
 
-	private void showSMSNotificationAlert() {
-		final Dialog smsNotificationAlert = new Dialog(MessagesList.this,
-				R.style.Theme_CustomDialog);
-		smsNotificationAlert.setContentView(R.layout.alert_box);
-
-		((TextView) smsNotificationAlert.findViewById(R.id.alert_title))
-				.setText(R.string.sms);
-		((TextView) smsNotificationAlert.findViewById(R.id.alert_text))
-				.setText(R.string.sms_alert_text);
-		Button okBtn = (Button) smsNotificationAlert
-				.findViewById(R.id.alert_ok_btn);
-		Button cancelBtn = (Button) smsNotificationAlert
-				.findViewById(R.id.alert_cancel_btn);
-		okBtn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Editor editor = PreferenceManager.getDefaultSharedPreferences(
-						MessagesList.this).edit();
-				editor.putBoolean(HikeConstants.SMS_PREF, true);
-				editor.commit();
-				Utils.logEvent(MessagesList.this,
-						HikeConstants.LogEvent.DEFAULT_SMS_DIALOG_YES);
-				smsNotificationAlert.dismiss();
-			}
-		});
-		cancelBtn.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Editor editor = PreferenceManager.getDefaultSharedPreferences(
-						MessagesList.this).edit();
-				editor.putBoolean(HikeConstants.SMS_PREF, false);
-				editor.commit();
-				Utils.logEvent(MessagesList.this,
-						HikeConstants.LogEvent.DEFAULT_SMS_DIALOG_NO);
-				smsNotificationAlert.dismiss();
-			}
-		});
-
-		smsNotificationAlert.setOnCancelListener(new OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				Utils.logEvent(MessagesList.this,
-						HikeConstants.LogEvent.DEFAULT_SMS_DIALOG_NO);
-				wasAlertCancelled = true;
-			}
-		});
-		smsNotificationAlert.setOnDismissListener(new OnDismissListener() {
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				wasAlertCancelled = true;
-			}
-		});
-
-		smsNotificationAlert.show();
-	}
-
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING,

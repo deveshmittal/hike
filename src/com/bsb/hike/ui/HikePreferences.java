@@ -11,7 +11,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -57,7 +56,6 @@ public class HikePreferences extends PreferenceActivity implements
 		Preference deletePreference = getPreferenceScreen().findPreference(
 				getString(R.string.delete_key));
 		if (deletePreference != null) {
-			findViewById(R.id.sms_disclaimer).setVisibility(View.GONE);
 			Utils.logEvent(HikePreferences.this,
 					HikeConstants.LogEvent.PRIVACY_SCREEN);
 			deletePreference.setOnPreferenceClickListener(this);

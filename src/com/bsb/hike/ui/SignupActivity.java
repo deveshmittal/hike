@@ -202,12 +202,6 @@ public class SignupActivity extends Activity implements
 				// Tracking the registration event for Fiksu
 				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
-				// Added this code to prevent hike from pulling in sms by
-				// default.
-				Editor editor = PreferenceManager.getDefaultSharedPreferences(
-						getApplicationContext()).edit();
-				editor.putBoolean(HikeConstants.SMS_PREF, false);
-				editor.commit();
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {
