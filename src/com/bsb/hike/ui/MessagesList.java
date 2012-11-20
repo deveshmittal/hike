@@ -366,8 +366,9 @@ public class MessagesList extends DrawerBaseActivity implements
 		MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.v1);
 		mediaPlayer.start();
 
-		List<ContactInfo> recentNonHikeContacts = HikeUserDatabase
-				.getInstance().getNonHikeRecentContacts(10);
+		List<ContactInfo> recentNonHikeContacts = new ArrayList<ContactInfo>(0);
+			recentNonHikeContacts = HikeUserDatabase
+					.getInstance().getNonHikeRecentContacts(10, true, null);
 		List<ContactInfo> hikeContacts = HikeUserDatabase.getInstance()
 				.getContactsOrderedByLastMessaged(3, null,
 						HikeConstants.ON_HIKE_VALUE, true, false, -1);

@@ -71,9 +71,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				FavoriteType.NOT_FAVORITE, HikeConstants.ON_HIKE_VALUE, true,
 				false, -1);
 
-		recentList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
-				FavoriteType.NOT_FAVORITE, HikeConstants.NOT_ON_HIKE_VALUE,
-				true, false);
+		recentList = hikeUserDatabase.getNonHikeRecentContacts(-1, true,
+				FavoriteType.NOT_FAVORITE);
 
 		completeList = new ArrayList<ContactInfo>();
 		makeCompleteList();

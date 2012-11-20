@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -271,15 +272,49 @@ public class ContactUtils {
 		db.updateHikeContact(msisdn, onhike);
 	}
 
-	public static List<String> getRecentNumbers(Context context, int limit) {
-		String sortOrder = Phone.LAST_TIME_CONTACTED + " DESC LIMIT " + limit;
+	/**
+	 * Used to get the recent contacts where we get the recency from the android
+	 * contacts table. This method also returns a string which can be used as
+	 * the argument to a SELECT IN query
+	 * 
+	 * @param context
+	 * @param limit
+	 * @return
+	 */
+	public static Pair<String, Map<String, Long>> getRecentNumbers(
+			Context context, int limit) {
+		String sortBy = limit > -1 ? Phone.LAST_TIME_CONTACTED + " DESC LIMIT "
+				+ limit : null;
 		Cursor c = context.getContentResolver().query(Phone.CONTENT_URI,
-				new String[] { Phone.NUMBER }, null, null, sortOrder);
+				new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED }, null,
+				null, sortBy);
+
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
-		List<String> recentlyContactedNumbers = new ArrayList<String>();
+		int lastTimeContactedIdx = c.getColumnIndex(Phone.LAST_TIME_CONTACTED);
+
+		Map<String, Long> recentlyContactedNumbers = new HashMap<String, Long>();
+		StringBuilder sb = new StringBuilder("(");
+
 		while (c.moveToNext()) {
-			recentlyContactedNumbers.add(c.getString(numberColIdx));
+			String number = c.getString(numberColIdx);
+			long lastTimeContacted = c.getLong(lastTimeContactedIdx);
+
+			/*
+			 * Checking if we already have this number and whether the last time
+			 * contacted was sooner than the newer value.
+			 */
+			if (recentlyContactedNumbers.containsKey(number)
+					&& recentlyContactedNumbers.get(number) > lastTimeContacted) {
+				continue;
+			}
+			recentlyContactedNumbers.put(number,
+					c.getLong(lastTimeContactedIdx));
+
+			sb.append("'" + number + "',");
 		}
-		return recentlyContactedNumbers;
+		sb.replace(sb.length() - 1, sb.length(), ")");
+
+		return new Pair<String, Map<String, Long>>(sb.toString(),
+				recentlyContactedNumbers);
 	}
 }

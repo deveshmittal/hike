@@ -2,6 +2,8 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,6 +24,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -749,29 +752,90 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ContactInfo> getNonHikeContactsFromListOfNumbers(
-			List<String> numbersList) {
+			String selectionNumbers, Map<String, Long> recentValues,
+			boolean indiaOnly, FavoriteType favoriteType) {
+
 		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
-				DBConstants.HAS_CUSTOM_PHOTO };
+				DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE };
 
-		StringBuilder sb = new StringBuilder("(");
-		for (int i = 0; i < numbersList.size(); i++) {
-			sb.append("'" + numbersList.get(i) + "'");
-			if (i != numbersList.size() - 1) {
-				sb.append(",");
-			}
-		}
-		sb.append(")");
-		String selection = DBConstants.PHONE + " IN " + sb.toString() + " AND "
-				+ DBConstants.ONHIKE + "=0 AND " + DBConstants.MSISDN
-				+ " LIKE '+91%'";
+		String selection = DBConstants.PHONE
+				+ " IN "
+				+ selectionNumbers
+				+ " AND "
+				+ DBConstants.ONHIKE
+				+ "=0"
+				+ (indiaOnly ? " AND " + DBConstants.MSISDN + " LIKE '+91%'"
+						: "")
+				+ (favoriteType != null ? " AND " + DBConstants.FAVORITE
+						+ " = " + favoriteType.ordinal() : "");
+
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
+
 		Cursor c = null;
 		try {
 			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
 					null, null, null, null);
-			return extractContactInfo(c, true);
+			int idx = c.getColumnIndex(DBConstants.ID);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int nameIdx = c.getColumnIndex(DBConstants.NAME);
+			int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+			int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+			int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+			int hasCustomPhotoIdx = c
+					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+			int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE);
+
+			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
+
+			Set<String> nameSet = new HashSet<String>();
+
+			while (c.moveToNext()) {
+				String number = c.getString(phoneNumIdx);
+				String name = c.getString(nameIdx);
+
+				if (nameSet.contains(name)) {
+					continue;
+				}
+
+				nameSet.add(name);
+
+				/*
+				 * All our timestamps are in seconds.
+				 */
+				Long lastMessagedDB = recentValues.get(number) / 1000;
+				long lastMessagedCurrent = c.getLong(lastMessagedIdx);
+
+				if ((lastMessagedDB != null)
+						&& (lastMessagedDB > lastMessagedCurrent)) {
+					lastMessagedCurrent = lastMessagedDB;
+				}
+
+				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+						c.getString(msisdnIdx), name, c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
+				int favoriteTypeOrd = c.getInt(favoriteIdx);
+				contactInfo
+						.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
+				contactList.add(contactInfo);
+			}
+
+			Collections.sort(contactList, new Comparator<ContactInfo>() {
+				@Override
+				public int compare(ContactInfo lhs, ContactInfo rhs) {
+					if (lhs.getLastMessaged() != rhs.getLastMessaged()) {
+						return -((Long) lhs.getLastMessaged()).compareTo(rhs
+								.getLastMessaged());
+					}
+					return lhs.getName().toLowerCase()
+							.compareTo(rhs.getName().toLowerCase());
+				}
+			});
+
+			return contactList;
 		} finally {
 			if (c != null) {
 				c.close();
@@ -779,9 +843,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public List<ContactInfo> getNonHikeRecentContacts(int limit) {
-		List<String> numbers = ContactUtils.getRecentNumbers(mContext, limit);
-		return getNonHikeContactsFromListOfNumbers(numbers);
+	public List<ContactInfo> getNonHikeRecentContacts(int limit,
+			boolean indiaOnly, FavoriteType favoriteType) {
+		Pair<String, Map<String, Long>> data = ContactUtils.getRecentNumbers(
+				mContext, limit);
+		return getNonHikeContactsFromListOfNumbers(data.first, data.second,
+				indiaOnly, favoriteType);
 	}
 
 	public List<ContactInfo> getContactNamesFromMsisdnList(StringBuilder msisdns) {
