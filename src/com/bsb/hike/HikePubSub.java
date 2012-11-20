@@ -168,6 +168,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String REMOVE_MESSAGE_FROM_CHAT_THREAD = "removeMessageFromChatThread";
 
+	public static final String FREE_SMS_TOGGLED = "freeSMSToggled";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

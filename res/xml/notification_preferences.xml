@@ -18,4 +18,14 @@
         android:summary="Play a sound on new message"
         android:title="Sound"
         android:widgetLayout="@layout/checkbox_widget" />
+
+	<com.bsb.hike.view.IconCheckBoxPreference
+        icon="preference_sms"
+        android:defaultValue="true"
+        android:key="freeSmsPref"
+        android:layout="@layout/icon_preference"
+        android:summary="Turn on to send free SMS to India"
+        android:title="Send free SMS to India"
+        android:widgetLayout="@layout/checkbox_widget" />    
+
 </PreferenceScreen>

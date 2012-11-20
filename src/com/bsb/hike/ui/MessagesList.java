@@ -370,7 +370,7 @@ public class MessagesList extends DrawerBaseActivity implements
 				.getInstance().getNonHikeRecentContacts(10);
 		List<ContactInfo> hikeContacts = HikeUserDatabase.getInstance()
 				.getContactsOrderedByLastMessaged(3, null,
-						HikeConstants.ON_HIKE_VALUE, true, false);
+						HikeConstants.ON_HIKE_VALUE, true, false, -1);
 		Log.d(getClass().getSimpleName(), "Number of recent contacts: "
 				+ recentNonHikeContacts.size() + " HIKE CONTACT: "
 				+ hikeContacts.size());

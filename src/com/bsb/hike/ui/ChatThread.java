@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.MediaStore;
@@ -348,9 +349,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 * Show hike contacts first for non-indian users
 		 */
 		boolean hikeFirst = !HikeMessengerApp.isIndianUser();
+		int freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
+				getApplicationContext()).getBoolean(
+				HikeConstants.FREE_SMS_PREF, true) ? 1 : 0;
+
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
 				.getContactsOrderedByLastMessaged(-1, null,
-						HikeConstants.BOTH_VALUE, false, hikeFirst);
+						HikeConstants.BOTH_VALUE, false, hikeFirst, freeSMSOn);
+
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, this.mConversationDb
 					.getGroupNameAndParticipantsAsContacts());

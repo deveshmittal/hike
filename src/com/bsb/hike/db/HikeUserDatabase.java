@@ -452,18 +452,35 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	 * @param favorite
 	 *            Whether we only need the favorite contacts or non favorite. -1
 	 *            if we want to ignore this
+	 * @param onHike
+	 *            1/0 for hike/non-hike contacts. -1 for both.
+	 * @param distinct
+	 *            true if no repetition in msisdn is needed.
+	 * @param hikeFirst
+	 *            true if all hike contacts should be before non-hike contacts.
+	 * @param freeSMSOn
+	 *            1/0 if free SMS is on/off. When the free SMS is switched on,
+	 *            we show the non hike Indian contacts. -1 if the value is to be
+	 *            ignored
 	 * @return
 	 */
 	public List<ContactInfo> getContactsOrderedByLastMessaged(int limit,
 			FavoriteType favorite, int onHike, boolean distinct,
-			boolean hikeFirst) {
+			boolean hikeFirst, int freeSMSOn) {
 		String selection = DBConstants.MSISDN
 				+ " != 'null'"
 				+ (favorite != null ? " AND " + DBConstants.FAVORITE + "="
 						+ favorite.ordinal() : "")
 				+ (onHike != -1 ? " AND " + DBConstants.ONHIKE + "=" + onHike
-						: "");
+						: "")
+				+ (freeSMSOn == 1 ? " AND " + " ((" + DBConstants.ONHIKE
+						+ "=0 AND " + DBConstants.MSISDN + " LIKE '+91%') OR ("
+						+ DBConstants.ONHIKE + "=1" + "))"
+						: freeSMSOn == 0 ? " AND " + DBConstants.ONHIKE + "=1"
+								: "");
+
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
+
 		String orderBy = (hikeFirst ? DBConstants.ONHIKE + " DESC, "
 				+ DBConstants.LAST_MESSAGED + " DESC, "
 				: DBConstants.LAST_MESSAGED + " DESC, " + DBConstants.ONHIKE

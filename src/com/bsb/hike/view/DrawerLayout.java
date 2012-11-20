@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -313,16 +314,20 @@ public class DrawerLayout extends RelativeLayout implements
 	}
 
 	public void setUpLeftDrawerView() {
-		int itemHeight = (int) (48 * Utils.densityMultiplier);
-
-		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 
 		profileImg = (ImageView) findViewById(R.id.profile_image);
 		profileName = (TextView) findViewById(R.id.name);
 
 		setProfileName();
 		setProfileImage();
+		renderLeftDrawerItems(PreferenceManager.getDefaultSharedPreferences(
+				getContext()).getBoolean(HikeConstants.FREE_SMS_PREF, true));
+	}
 
+	public void renderLeftDrawerItems(boolean freeSMSOn) {
+
+		int itemHeight = (int) (48 * Utils.densityMultiplier);
+		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 		int[] parentIds = { R.id.top_half_items_container,
 				R.id.bottom_half_items_container };
 		int itemNumber = 0;
@@ -337,8 +342,19 @@ public class DrawerLayout extends RelativeLayout implements
 					R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help };
 
 			ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
+			parentView.removeAllViews();
 
 			for (int j = 0; j < itemTexts.length; j++) {
+				LeftDrawerItems leftDrawerItem = LeftDrawerItems.values()[itemNumber++];
+
+				/*
+				 * No need to show the free SMS screen if the option has been
+				 * turned off
+				 */
+				if (leftDrawerItem == LeftDrawerItems.FREE_SMS && !freeSMSOn) {
+					continue;
+				}
+
 				View itemView = layoutInflater.inflate(R.layout.drawer_item,
 						null);
 				itemView.setFocusable(true);
@@ -374,7 +390,7 @@ public class DrawerLayout extends RelativeLayout implements
 					itemView.setBackgroundResource(R.drawable.drawer_center_item_selector);
 				}
 				itemView.setFocusable(true);
-				int id = LeftDrawerItems.values()[itemNumber++].ordinal();
+				int id = leftDrawerItem.ordinal();
 				switch (LeftDrawerItems.values()[id]) {
 				case HOME:
 					if (activity instanceof MessagesList) {

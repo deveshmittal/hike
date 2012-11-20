@@ -31,7 +31,7 @@ public class DrawerBaseActivity extends Activity implements
 
 	private String[] leftDrawerPubSubListeners = {
 			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.PROFILE_PIC_CHANGED,
-			HikePubSub.PROFILE_NAME_CHANGED };
+			HikePubSub.PROFILE_NAME_CHANGED, HikePubSub.FREE_SMS_TOGGLED };
 
 	private String[] rightDrawerPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
@@ -181,6 +181,15 @@ public class DrawerBaseActivity extends Activity implements
 					parentLayout.setProfileName();
 				}
 			});
+		} else if (HikePubSub.FREE_SMS_TOGGLED.equals(type)) {
+			final boolean freeSMSOn = (Boolean) object;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					parentLayout.renderLeftDrawerItems(freeSMSOn);
+				}
+			});
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {
 			runOnUiThread(new Runnable() {
 
@@ -221,11 +230,12 @@ public class DrawerBaseActivity extends Activity implements
 			final List<ContactInfo> autoRecommendedFavorites = HikeUserDatabase
 					.getInstance().getContactsOrderedByLastMessaged(-1,
 							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE, true, false);
+							HikeConstants.BOTH_VALUE, true, false, -1);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					parentLayout.addAutoRecommendedFavoritesList(autoRecommendedFavorites);
+					parentLayout
+							.addAutoRecommendedFavoritesList(autoRecommendedFavorites);
 				}
 			});
 		}
