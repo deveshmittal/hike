@@ -132,12 +132,6 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	}
 
 	public ContactInfo(String id, String msisdn, String name, String phoneNum,
-			boolean onHike, String msisdnType, long lastMessaged) {
-		this(id, msisdn, name, phoneNum, onHike, msisdnType, lastMessaged,
-				false);
-	}
-
-	public ContactInfo(String id, String msisdn, String name, String phoneNum,
 			boolean onhike, String msisdnType, long lastMessaged,
 			boolean hasCustomPhoto) {
 		this.id = id;
