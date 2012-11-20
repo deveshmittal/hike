@@ -4,10 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import twitter4j.auth.AccessToken;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
@@ -23,7 +19,6 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
@@ -35,24 +30,15 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.http.HikeHttpRequest;
-import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.DrawerBaseActivity;
+import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.TwitterOAuthView;
-import com.bsb.hike.view.TwitterOAuthView.Result;
-import com.bsb.hike.view.TwitterOAuthView.TwitterAuthListener;
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.AsyncFacebookRunner.RequestListener;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class CreditsActivity extends DrawerBaseActivity implements Listener,
-		TwitterAuthListener {
+public class CreditsActivity extends AuthSocialAccountBaseActivity implements
+		Listener {
 	static final String CALLBACK_URL = "http://get.hike.in/";
 
 	static final String IEXTRA_OAUTH_VERIFIER = "oauth_verifier";
@@ -75,11 +61,7 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener,
 	/* Width of the view that shows the current credit number */
 	private int creditNumWidth;
 
-	private HikeHTTPTask hikeHTTPTask;
-
 	private ProgressDialog dialog;
-
-	private TwitterOAuthView twitterOAuthView;
 
 	/*
 	 * Offset for the number of credits/(100 total credits) will come in the
@@ -95,6 +77,10 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener,
 	private AlertDialog alertDialog;
 
 	private DeleteSocialCredentialsTask deleteSocialCredentialsTask;
+
+	private String[] pubSubListeners = { HikePubSub.SMS_CREDIT_CHANGED,
+			HikePubSub.INVITEE_NUM_CHANGED, HikePubSub.REMOVE_TWITTER_VIEW,
+			HikePubSub.SOCIAL_AUTH_COMPLETED };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,22 +99,15 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener,
 
 		initalizeViews(savedInstanceState);
 
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.SMS_CREDIT_CHANGED,
-				this);
-		HikeMessengerApp.getPubSub().addListener(
-				HikePubSub.INVITEE_NUM_CHANGED, this);
+		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
 	private void initalizeViews(Bundle savedInstanceState) {
-		twitterOAuthView = null;
 		setContentView(R.layout.credits);
 		afterSetContentView(savedInstanceState);
 
 		Object o = getLastNonConfigurationInstance();
-		if (o instanceof HikeHTTPTask) {
-			dialog = ProgressDialog.show(this, null,
-					getString(R.string.saving_social));
-		} else if (o instanceof DeleteSocialCredentialsTask) {
+		if (o instanceof DeleteSocialCredentialsTask) {
 			dialog = ProgressDialog.show(this, null,
 					getString(R.string.social_unlinking));
 			((DeleteSocialCredentialsTask) o).setDialog(dialog);
@@ -237,69 +216,9 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener,
 	}
 
 	public void onFacebookClick(View v) {
-		final Facebook facebook = HikeMessengerApp.getFacebook();
-
 		if (!settings
 				.getBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false)) {
-			facebook.authorize(CreditsActivity.this,
-					new String[] { "publish_stream" }, new DialogListener() {
-						@Override
-						public void onComplete(Bundle values) {
-							final Editor editor = CreditsActivity.this
-									.getSharedPreferences(
-											HikeMessengerApp.ACCOUNT_SETTINGS,
-											0).edit();
-							editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,
-									facebook.getAccessToken());
-							editor.putLong(
-									HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
-									facebook.getAccessExpires());
-
-							String userId = null;
-							try {
-								JSONObject me = new JSONObject(facebook
-										.request("me"));
-								userId = me.optString("id");
-								editor.putString(
-										HikeMessengerApp.FACEBOOK_USER_ID,
-										userId);
-								editor.commit();
-								sendCredentialsToServer(userId,
-										facebook.getAccessToken(), true);
-								return;
-							} catch (MalformedURLException e1) {
-								Log.e(getClass().getSimpleName(),
-										"Malformed URL", e1);
-							} catch (JSONException e2) {
-								Log.e(getClass().getSimpleName(),
-										"Invalid JSON", e2);
-							} catch (IOException e3) {
-								Log.e(getClass().getSimpleName(),
-										"IOException", e3);
-							}
-							Toast.makeText(CreditsActivity.this,
-									R.string.social_failed, Toast.LENGTH_SHORT)
-									.show();
-						}
-
-						@Override
-						public void onFacebookError(FacebookError error) {
-							Toast.makeText(CreditsActivity.this,
-									R.string.social_failed, Toast.LENGTH_SHORT)
-									.show();
-						}
-
-						@Override
-						public void onError(DialogError e) {
-							Toast.makeText(CreditsActivity.this,
-									R.string.social_failed, Toast.LENGTH_SHORT)
-									.show();
-						}
-
-						@Override
-						public void onCancel() {
-						}
-					});
+			startFBAuth();
 		} else {
 			showCredentialUnlinkAlert(true);
 		}
@@ -307,42 +226,10 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener,
 
 	public void onTwitterClick(View v) {
 		if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
-			twitterOAuthView = new TwitterOAuthView(this);
-			twitterOAuthView.start(HikeConstants.APP_TWITTER_ID,
-					HikeConstants.APP_TWITTER_SECRET, CALLBACK_URL, true, this);
-
-			/*
-			 * Workaround for an android bug where the keyboard does not popup
-			 * in the web view.
-			 * http://code.google.com/p/android/issues/detail?id=7189
-			 */
-			twitterOAuthView.requestFocus(View.FOCUS_DOWN);
-			twitterOAuthView.setOnTouchListener(new View.OnTouchListener() {
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					switch (event.getAction()) {
-					case MotionEvent.ACTION_DOWN:
-					case MotionEvent.ACTION_UP:
-						if (!v.hasFocus()) {
-							v.requestFocus();
-						}
-						break;
-					}
-					return false;
-				}
-			});
-
-			setContentView(twitterOAuthView);
+			startTwitterAuth();
 		} else {
 			showCredentialUnlinkAlert(false);
 		}
-	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE,
-				twitterOAuthView != null);
-		super.onSaveInstanceState(outState);
 	}
 
 	private void showCredentialUnlinkAlert(final boolean facebook) {
@@ -365,95 +252,8 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener,
 		alertDialog.show();
 	}
 
-	private void sendCredentialsToServer(String id, String token,
-			final boolean facebook) {
-		JSONObject request = new JSONObject();
-		try {
-			request.put("id", id);
-			request.put("token", token);
-		} catch (JSONException e) {
-			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-		}
-		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
-				facebook ? "/account/connect/fb" : "/account/connect/twitter",
-				new HikeHttpRequest.HikeHttpCallback() {
-					public void onSuccess(JSONObject response) {
-						if (dialog != null) {
-							dialog.dismiss();
-							dialog = null;
-						}
-						Editor editor = getSharedPreferences(
-								HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
-								.edit();
-						// Fail the whole process if the request to our server
-						// fails.
-						if (facebook) {
-							FiksuTrackingManager.uploadPurchaseEvent(
-									CreditsActivity.this,
-									HikeConstants.FACEBOOK,
-									HikeConstants.FACEBOOK_CONNECT,
-									HikeConstants.CURRENCY);
-							editor.putBoolean(
-									HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
-									true);
-						} else {
-							FiksuTrackingManager.uploadPurchaseEvent(
-									CreditsActivity.this,
-									HikeConstants.TWITTER,
-									HikeConstants.TWITTER_CONNECT,
-									HikeConstants.CURRENCY);
-							editor.putBoolean(
-									HikeMessengerApp.TWITTER_AUTH_COMPLETE,
-									true);
-						}
-						editor.commit();
-						setupSocialButtons();
-						hikeHTTPTask = null;
-					}
-
-					public void onFailure() {
-						if (dialog != null) {
-							dialog.dismiss();
-							dialog = null;
-						}
-						Toast.makeText(CreditsActivity.this,
-								R.string.social_failed, Toast.LENGTH_SHORT)
-								.show();
-						Editor editor = getSharedPreferences(
-								HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
-								.edit();
-						// Fail the whole process if the request to our server
-						// fails.
-						if (facebook) {
-							HikeMessengerApp.getFacebook().setAccessExpires(0);
-							HikeMessengerApp.getFacebook().setAccessToken("");
-
-							editor.remove(HikeMessengerApp.FACEBOOK_TOKEN);
-							editor.remove(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES);
-							editor.remove(HikeMessengerApp.FACEBOOK_USER_ID);
-							editor.remove(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE);
-						} else {
-							editor.remove(HikeMessengerApp.TWITTER_TOKEN);
-							editor.remove(HikeMessengerApp.TWITTER_TOKEN_SECRET);
-							editor.remove(HikeMessengerApp.TWITTER_AUTH_COMPLETE);
-						}
-						editor.commit();
-						hikeHTTPTask = null;
-					}
-				});
-		hikeHttpRequest.setJSONData(request);
-		hikeHTTPTask = new HikeHTTPTask(null, 0);
-		hikeHTTPTask.execute(hikeHttpRequest);
-
-		dialog = ProgressDialog.show(this, null,
-				getString(R.string.saving_social));
-	}
-
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		if (hikeHTTPTask != null) {
-			return hikeHTTPTask;
-		}
 		if (deleteSocialCredentialsTask != null) {
 			return deleteSocialCredentialsTask;
 		}
@@ -469,43 +269,47 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener,
 	}
 
 	@Override
-	public void onBackPressed() {
-		if (twitterOAuthView != null) {
-			initalizeViews(null);
-			return;
-		}
-		super.onBackPressed();
-	}
-
-	@Override
 	protected void onDestroy() {
 		if (dialog != null) {
 			dialog.dismiss();
 			dialog = null;
 		}
-		hikeHTTPTask = null;
 		deleteSocialCredentialsTask = null;
-		HikeMessengerApp.getPubSub().removeListener(
-				HikePubSub.SMS_CREDIT_CHANGED, this);
-		HikeMessengerApp.getPubSub().removeListener(
-				HikePubSub.INVITEE_NUM_CHANGED, this);
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		super.onDestroy();
 	}
 
 	@Override
 	public void onEventReceived(String type, Object object) {
-		// If we are currently showing a webview, we don't need to make any
-		// changes in these UI.
-		if (twitterOAuthView != null) {
-			return;
-		}
 		super.onEventReceived(type, object);
-		if (HikePubSub.SMS_CREDIT_CHANGED.equals(type)
-				|| HikePubSub.INVITEE_NUM_CHANGED.equals(type)) {
+		/*
+		 * Here we check if we are already showing the twitter webview. If we
+		 * are, we dont do any other UI changes.
+		 */
+		if ((twitterOAuthView == null)
+				&& (HikePubSub.SMS_CREDIT_CHANGED.equals(type) || HikePubSub.INVITEE_NUM_CHANGED
+						.equals(type))) {
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					updateCredits();
+				}
+			});
+		} else if (HikePubSub.REMOVE_TWITTER_VIEW.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					initalizeViews(null);
+					twitterOAuthView = null;
+				}
+			});
+		} else if (HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setupSocialButtons();
 				}
 			});
 		}
@@ -534,20 +338,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener,
 			paddingLeft = (int) ((creditsForContainer * creditProgressBarWidth) / totalCredits);
 		}
 		creditsContainer.setPadding(paddingLeft, 0, 0, 0);
-	}
-
-	@Override
-	public void onSuccess(TwitterOAuthView view, AccessToken accessToken) {
-		initalizeViews(null);
-		Log.d(getClass().getSimpleName(), "TOKEN:  " + accessToken.getToken()
-				+ " SECRET: " + accessToken.getTokenSecret());
-		sendCredentialsToServer(accessToken.getToken(),
-				accessToken.getTokenSecret(), false);
-	}
-
-	@Override
-	public void onFailure(TwitterOAuthView view, Result result) {
-		initalizeViews(null);
 	}
 
 	private class DeleteSocialCredentialsTask extends
