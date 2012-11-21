@@ -19,6 +19,8 @@ package com.bsb.hike.cropimage;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 
@@ -30,6 +32,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
@@ -101,7 +104,28 @@ public class CropImage extends MonitoredActivity {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.cropimage);
 
+		/*
+		 * Added to fix a Android issue for devices that support hardware
+		 * acceleration.
+		 * http://android-developers.blogspot.in/2011/03/android-30
+		 * -hardware-acceleration.html
+		 */
 		mImageView = (CropImageView) findViewById(R.id.image);
+		try {
+			Method method = mImageView.getClass().getMethod("setLayerType",
+					Integer.TYPE, Paint.class);
+			method.invoke(mImageView, 1, null);
+		} catch (IllegalArgumentException e) {
+			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+		} catch (IllegalAccessException e) {
+			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+		} catch (InvocationTargetException e) {
+			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+		} catch (SecurityException e) {
+			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+		} catch (NoSuchMethodException e) {
+			Log.e(getClass().getSimpleName(), "Exception during reflection", e);
+		}
 
 		showStorageToast(this);
 
