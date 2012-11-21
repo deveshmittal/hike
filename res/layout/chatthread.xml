@@ -232,10 +232,9 @@
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/sms_chat_metadata_num_chars"
-                    android:layout_width="wrap_content"
+                    android:layout_width="47dp"
                     android:layout_height="wrap_content"
                     android:layout_alignLeft="@id/send_message"
-                    android:layout_alignRight="@id/send_message"
                     android:layout_marginTop="3dp"
                     android:gravity="center_horizontal"
                     android:visibility="invisible" />
