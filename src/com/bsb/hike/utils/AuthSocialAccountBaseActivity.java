@@ -227,7 +227,7 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 						}
 						editor.commit();
 						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.SOCIAL_AUTH_COMPLETED, null);
+								HikePubSub.SOCIAL_AUTH_COMPLETED, facebook);
 						hikeHTTPTask = null;
 					}
 

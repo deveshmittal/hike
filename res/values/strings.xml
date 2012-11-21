@@ -59,7 +59,7 @@
 	<string name="invite_all_to_hike">Invite members on SMS to hike</string>
 	<string name="friend_joined_hike_no_creds">%1$s just joined hike because of you. Great job!</string>
 	<string name="friend_joined_hike_with_creds">%1$s just joined hike because of you. Great job! As promised, here are your additional 50 free SMS for bringing a friend. To see your total free SMS, tap here.</string>
-	<string name="default_invite_url">http://get.hike.in/</string>
+	<string name="default_invite_url">http://get.hike.in/%1$s</string>
 	<string name="tap_share">Tap to share your unique invite URL:</string>
 	<string name="done">Done</string>
 	<string name="group_chat">Group Chat</string>
@@ -198,5 +198,12 @@
 	<string name="other_subtext">Get an invite URL</string>
 	<string name="email_subject">hike. Fun, free messaging for life</string>
 	<string name="email_body">Hi! I’ve started using hike, an awesome new free messaging app. You can message friends on hike and also those who aren’t for free! Messaging has never been simpler. Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
+	<string name="twitter_msg">I’m using @hikeapp, an awesome new free messaging app! Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
+	<string name="facebook_msg">I’ve started using hike, an awesome new free messaging app. You can message friends on hike and also those who aren’t for free! Messaging has never been simpler. Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
 	<string name="gps_disabled">For better accuracy to your location, enable the GPS.</string>
+	<string name="twitter_post_success">Posted to your timeline!</string>
+	<string name="twitter_post_fail">Could not post to your timeline.</string>
+	<string name="fb_post_success">Message posted to your wall!</string>
+	<string name="fb_post_fail">Could not post to your wall.</string>
+	<string name="facebook_description">With hike, messaging has never been simpler. Message friends on hike free globally and also message those friends who don\'t have hike installed. All for free :)</string>
 </resources>
