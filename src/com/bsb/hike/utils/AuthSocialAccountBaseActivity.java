@@ -167,7 +167,6 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 		} catch (IOException e3) {
 			Log.e(getClass().getSimpleName(), "IOException", e3);
 		}
-		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
