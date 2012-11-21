@@ -38,8 +38,10 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 	private HikeHTTPTask hikeHTTPTask;
 	private ProgressDialog dialog;
 	protected TwitterOAuthView twitterOAuthView;
+	protected boolean facebookAuthPopupShowing;
 
 	public void startFBAuth() {
+		facebookAuthPopupShowing = true;
 		HikeMessengerApp.getFacebook().authorize(this,
 				new String[] { "publish_stream" }, this);
 	}
@@ -96,6 +98,8 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE,
 				twitterOAuthView != null);
+		outState.putBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING,
+				facebookAuthPopupShowing);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -143,6 +147,7 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 
 	@Override
 	public void onComplete(Bundle values) {
+		facebookAuthPopupShowing = false;
 		Facebook facebook = HikeMessengerApp.getFacebook();
 
 		final Editor editor = getSharedPreferences(
@@ -171,16 +176,19 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 
 	@Override
 	public void onFacebookError(FacebookError error) {
+		facebookAuthPopupShowing = false;
 		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	public void onError(DialogError e) {
+		facebookAuthPopupShowing = false;
 		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
 	public void onCancel() {
+		facebookAuthPopupShowing = false;
 	}
 
 	private void sendCredentialsToServer(String id, String token,

@@ -317,6 +317,8 @@ public class HikeConstants {
 		public static final String CONTACT_INFO = "contactInfo";
 		public static final String ON_HIKE = "onHike";
 		public static final String SHOWING_SECOND_LOADING_TXT = "showingSecondLoadingTxt";
+		public static final String FACEBOOK_AUTH_POPUP_SHOWING = "facebookAuthPopupShowing";
+		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
 	}
 
 	public static final class LogEvent {

@@ -180,6 +180,12 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 
 		updateCredits();
 		setupSocialButtons();
+
+		if (savedInstanceState != null
+				&& savedInstanceState
+						.getBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING)) {
+			onFacebookClick(null);
+		}
 	}
 
 	private void setupSocialButtons() {

@@ -37,6 +37,8 @@ import com.facebook.android.FacebookError;
 public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		OnClickListener {
 
+	private boolean facebookPostPopupShowing = false;
+
 	private enum ItemTypes {
 		FACEBOOK, TWITTER, SMS, EMAIL, OTHER
 	}
@@ -50,6 +52,13 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		if (savedInstanceState != null
+				&& savedInstanceState
+						.getBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE)) {
+			startTwitterAuth();
+			return;
+		}
 		setContentView(R.layout.tell_a_friend);
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
@@ -125,6 +134,23 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 			itemContainer.addView(itemView);
 		}
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+
+		if (savedInstanceState != null) {
+			if (savedInstanceState
+					.getBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING)) {
+				startFBAuth();
+			} else if (savedInstanceState
+					.getBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING)) {
+				onClick(findViewById(ItemTypes.FACEBOOK.ordinal()));
+			}
+		}
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING,
+				facebookPostPopupShowing);
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -141,6 +167,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 					false)) {
 				startFBAuth();
 			} else {
+				facebookPostPopupShowing = true;
 				Facebook facebook = HikeMessengerApp.getFacebook();
 				Bundle parameters = new Bundle();
 				String inviteToken = settings.getString(
@@ -156,6 +183,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 							@Override
 							public void onFacebookError(FacebookError e) {
+								facebookPostPopupShowing = false;
 								Toast.makeText(TellAFriend.this,
 										R.string.fb_post_fail,
 										Toast.LENGTH_SHORT).show();
@@ -165,6 +193,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 							@Override
 							public void onError(DialogError e) {
+								facebookPostPopupShowing = false;
 								Toast.makeText(TellAFriend.this,
 										R.string.fb_post_fail,
 										Toast.LENGTH_SHORT).show();
@@ -174,11 +203,12 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 							@Override
 							public void onComplete(Bundle values) {
+								facebookPostPopupShowing = false;
 							}
 
 							@Override
 							public void onCancel() {
-
+								facebookPostPopupShowing = false;
 							}
 						});
 			}
