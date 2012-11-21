@@ -203,8 +203,6 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 						Editor editor = getSharedPreferences(
 								HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
 								.edit();
-						// Fail the whole process if the request to our server
-						// fails.
 						if (facebook) {
 							FiksuTrackingManager.uploadPurchaseEvent(
 									AuthSocialAccountBaseActivity.this,
