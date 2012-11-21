@@ -74,8 +74,8 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		String textToBold = "via SMS";
 		SpannableStringBuilder ssb = new SpannableStringBuilder(text);
 		ssb.setSpan(
-				new ForegroundColorSpan(getResources().getColor(
-						R.color.subtext)), text.indexOf(textToBold),
+				new ForegroundColorSpan(getResources()
+						.getColor(R.color.subtext)), text.indexOf(textToBold),
 				text.indexOf(textToBold) + textToBold.length(),
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
