@@ -152,7 +152,13 @@
 	                    android:visibility="gone" />
 	            </LinearLayout>
 	        </LinearLayout>
-	        
+	        <ImageView
+	            android:id="@+id/poke_receive"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:gravity="center_vertical"
+	            android:visibility="gone"
+	            android:src="@drawable/ic_nudge_hike_received" />
 	    </RelativeLayout>
 
 	</RelativeLayout>

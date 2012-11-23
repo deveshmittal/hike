@@ -21,7 +21,8 @@ public class WebViewActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.webview_activity);
 
-		String urlToLoad = getIntent().getStringExtra(HikeConstants.Extras.URL_TO_LOAD);
+		String urlToLoad = getIntent().getStringExtra(
+				HikeConstants.Extras.URL_TO_LOAD);
 		String title = getIntent().getStringExtra(HikeConstants.Extras.TITLE);
 
 		TextView titleTV = (TextView) findViewById(R.id.title);
@@ -29,34 +30,28 @@ public class WebViewActivity extends Activity {
 
 		WebView webView = (WebView) findViewById(R.id.t_and_c_page);
 
-		WebViewClient client = new WebViewClient()
-		{
+		WebViewClient client = new WebViewClient() {
 			@Override
-			public void onPageFinished(WebView view, String url) 
-			{
+			public void onPageFinished(WebView view, String url) {
 				findViewById(R.id.loading_layout).setVisibility(View.INVISIBLE);
 				super.onPageFinished(view, url);
 			}
 
 			@Override
-			public void onPageStarted(WebView view, String url, Bitmap favicon) 
-			{
+			public void onPageStarted(WebView view, String url, Bitmap favicon) {
 				findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
 				super.onPageStarted(view, url, favicon);
 			}
 
 			@Override
-			public boolean shouldOverrideUrlLoading(WebView view, String url) 
-			{
-				if(url.startsWith("mailto:"))
-				{
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				if (url.startsWith("mailto:")) {
 					MailTo mt = MailTo.parse(url);
-					Intent i = newEmailIntent(WebViewActivity.this, mt.getTo(), mt.getSubject(), mt.getBody(), mt.getCc());
+					Intent i = newEmailIntent(WebViewActivity.this, mt.getTo(),
+							mt.getSubject(), mt.getBody(), mt.getCc());
 					startActivity(i);
 					view.reload();
-				}
-				else
-				{
+				} else {
 					view.loadUrl(url);
 				}
 				return true;
@@ -68,14 +63,14 @@ public class WebViewActivity extends Activity {
 		webView.setWebViewClient(client);
 	}
 
-	public Intent newEmailIntent(Context context, String address, String subject, String body, String cc) 
-	{
-	      Intent intent = new Intent(Intent.ACTION_SEND);
-	      intent.putExtra(Intent.EXTRA_EMAIL, new String[] {address});
-	      intent.putExtra(Intent.EXTRA_TEXT, body);
-	      intent.putExtra(Intent.EXTRA_SUBJECT, subject);
-	      intent.putExtra(Intent.EXTRA_CC, cc);
-	      intent.setType("message/rfc822");
-	      return intent;
+	public Intent newEmailIntent(Context context, String address,
+			String subject, String body, String cc) {
+		Intent intent = new Intent(Intent.ACTION_SEND);
+		intent.putExtra(Intent.EXTRA_EMAIL, new String[] { address });
+		intent.putExtra(Intent.EXTRA_TEXT, body);
+		intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+		intent.putExtra(Intent.EXTRA_CC, cc);
+		intent.setType("message/rfc822");
+		return intent;
 	}
 }

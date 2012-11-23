@@ -169,10 +169,11 @@
     </string-array>
     
     <string-array name="file_transfer_items">
+        <item>Location</item>
         <item>Image</item>
         <item>Video</item>
         <item>Audio</item>
-        <item>Voice message</item>
+        <item>Voice Message</item>
     </string-array>
     
     <string-array name="top_half_drawer_text">

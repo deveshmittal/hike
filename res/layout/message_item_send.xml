@@ -3,102 +3,122 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/thatch_repeat"
-	android:paddingLeft="18dp"
-	android:paddingRight="18dp"
-    android:paddingBottom="5dp">
+    android:paddingBottom="5dp"
+    android:paddingLeft="18dp"
+    android:paddingRight="18dp" >
 
-	<LinearLayout
-	    android:orientation="horizontal"
-	    android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_marginBottom="5dp"
-		android:id="@+id/timestamp_container"
-		android:layout_marginTop="10dp">
+    <LinearLayout
+        android:id="@+id/timestamp_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal" >
 
-		<View 
-		    android:layout_height="1dp"
-		    android:layout_width="0dp"
-		    android:layout_weight="10"
-		    android:layout_gravity="center"
-		    android:background="@drawable/ic_chatthread_divider"/>
-		    
-	    <com.bsb.hike.view.CustomFontTextView
-	        android:id="@+id/timestamp"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:layout_marginLeft="7dp"
-        	android:layout_marginRight="7dp"
-        	android:layout_alignParentTop="true"
-        	android:layout_centerHorizontal="true"
-        	android:text="This is the timestamp"
-        	android:textSize="13sp"
-        	android:textColor="@color/timestampcolor"
-        	android:shadowColor="#80FFFFFF"
-        	android:shadowDy="0.4"
-        	android:shadowRadius="0.3" />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center"
+            android:layout_weight="10"
+            android:background="@drawable/ic_chatthread_divider" />
 
-	    <View 
-		    android:layout_height="1dp"
-		    android:layout_width="0dp"
-		    android:layout_weight="10"
-		    android:layout_gravity="center"
-		    android:background="@drawable/ic_chatthread_divider"/>
-	</LinearLayout>
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="7dp"
+            android:layout_marginRight="7dp"
+            android:shadowColor="#80FFFFFF"
+            android:shadowDy="0.4"
+            android:shadowRadius="0.3"
+            android:text="This is the timestamp"
+            android:textColor="@color/timestampcolor"
+            android:textSize="13sp" />
 
-	<RelativeLayout
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_alignParentRight="true"
-	    android:layout_below="@id/timestamp_container" >
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center"
+            android:layout_weight="10"
+            android:background="@drawable/ic_chatthread_divider" />
+    </LinearLayout>
 
-	<ImageView
-	    android:layout_centerVertical="true"
-	    android:layout_marginRight="7dp"
-        android:id="@+id/msg_status_indicator"
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_blank" />
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/timestamp_container" >
 
-	<com.bsb.hike.view.CircularProgress
-	    android:id="@+id/file_transfer_progress"
-	    android:layout_width="22dp"
-	    android:layout_height="22dp"
-	    android:layout_alignLeft="@id/msg_status_indicator"
-	    android:layout_centerVertical="true"
-	    android:visibility="invisible" />	
+        <ImageView
+            android:id="@+id/msg_status_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="7dp"
+            android:src="@drawable/ic_blank" />
 
-	<LinearLayout
-	    android:id="@+id/sent_message_container"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_toRightOf="@id/msg_status_indicator"
-	    android:background="@drawable/ic_bubble_green_selector"
-	    android:gravity="center_vertical"
-	    android:orientation="horizontal" >
+        <com.bsb.hike.view.CircularProgress
+            android:id="@+id/file_transfer_progress"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_alignLeft="@id/msg_status_indicator"
+            android:layout_centerVertical="true"
+            android:visibility="invisible" />
 
-	    <ImageView
-	        android:id="@+id/file_thumb"
-	        android:layout_width="100dp"
-	        android:layout_height="100dp"
-	        android:visibility="gone"
-	        android:layout_gravity="center"
-	        android:scaleType="centerInside"
-	        android:background="@drawable/ic_default_img" />
+        <LinearLayout
+            android:id="@+id/sent_message_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/msg_status_indicator"
+            android:background="@drawable/ic_bubble_green_selector"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
 
-		<View android:id="@+id/margin_view"
-		    android:layout_width="5dp"
-		    android:layout_height="1dp"
-		    android:visibility="gone"/>	    
+            <ImageView
+                android:id="@+id/file_thumb"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:background="@drawable/ic_default_img"
+                android:scaleType="centerInside"
+                android:visibility="gone" />
+            
+            <ImageView
+                android:id="@+id/loading_thumb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_loading_img"
+                android:scaleType="centerInside"
+                android:visibility="gone" />
+            
+            <View
+                android:id="@+id/margin_view"
+                android:layout_width="5dp"
+                android:layout_height="1dp"
+                android:visibility="gone" />
 
-	    <com.bsb.hike.view.CustomFontTextView
-	        android:id="@+id/message_send"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:gravity="left"
-	        android:text="This is the message a much"
-	        android:textColor="@color/chat_color"
-	        android:textSize="16sp" />
-	</LinearLayout>
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/message_send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:text="This is the message a much"
+                android:textColor="@color/chat_color"
+                android:textSize="16sp" />
+        </LinearLayout>
+        
+        <ImageView
+            android:id="@+id/poke_sent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/msg_status_indicator"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:src="@drawable/ic_nudge_hike_sent" />
+    </RelativeLayout>
 
-	</RelativeLayout>
 </RelativeLayout>

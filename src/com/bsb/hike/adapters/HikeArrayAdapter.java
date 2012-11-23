@@ -17,38 +17,37 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 
-public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements SectionIndexer
-{
+public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements
+		SectionIndexer {
 	private static final int SECTION_TYPE = 0;
 	private static final int ITEM_TYPE = 1;
 	public boolean isFiltering = false;
 
-	static public class Section
-	{
+	static public class Section {
 		public String title;
-		public Section(String c)
-		{
+
+		public Section(String c) {
 			this.title = c;
 		}
 
-		public String toString()
-		{
+		public String toString() {
 			return title;
 		}
 	}
 
 	protected Activity activity;
-	private HashMap<String, Integer> alphaIndexer; /* keeps track of Section to location */
+	private HashMap<String, Integer> alphaIndexer; /*
+													 * keeps track of Section to
+													 * location
+													 */
 	private String[] sections;
 
 	@Override
-	public boolean areAllItemsEnabled()
-	{
+	public boolean areAllItemsEnabled() {
 		return false;
 	}
 
-	public <T> HikeArrayAdapter(Activity context, int viewItemId, List<T> items)
-	{
+	public <T> HikeArrayAdapter(Activity context, int viewItemId, List<T> items) {
 		super(context, viewItemId);
 		this.activity = context;
 
@@ -57,11 +56,9 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 		String lastChar = null;
 		int i = 0;
 
-		for(T item : items)
-		{
-			String c = item.toString().substring(0,1).toUpperCase();
-			if (!c.equals(lastChar))
-			{
+		for (T item : items) {
+			String c = item.toString().substring(0, 1).toUpperCase();
+			if (!c.equals(lastChar)) {
 				/* add a new entry */
 				alphaIndexer.put(c, i);
 				add(new Section(c));
@@ -74,7 +71,7 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 
 		Set<String> sectionLetters = alphaIndexer.keySet();
 
-		ArrayList<String> sectionList = new ArrayList<String>(sectionLetters); 
+		ArrayList<String> sectionList = new ArrayList<String>(sectionLetters);
 
 		Collections.sort(sectionList);
 
@@ -85,66 +82,62 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 
 	/**
 	 * Inflate the actual item view
-	 * @param position which positino in the array
-	 * @param convertView existing convertView
+	 * 
+	 * @param position
+	 *            which positino in the array
+	 * @param convertView
+	 *            existing convertView
 	 * @param parent
 	 * @return inflated View
 	 */
-	protected abstract android.view.View getItemView(int position, android.view.View convertView, android.view.ViewGroup parent);
+	protected abstract android.view.View getItemView(int position,
+			android.view.View convertView, android.view.ViewGroup parent);
 
 	/**
 	 * Get the title for the activity
+	 * 
 	 * @return String title of this activity
 	 */
 	public abstract String getTitle();
 
-	public android.view.View getView(int position, android.view.View convertView, android.view.ViewGroup parent)
-	{
-		if (getItemViewType(position) == SECTION_TYPE)
-		{
+	public android.view.View getView(int position,
+			android.view.View convertView, android.view.ViewGroup parent) {
+		if (getItemViewType(position) == SECTION_TYPE) {
 			return getHeaderView(position, convertView, parent);
-		}
-		else
-		{
+		} else {
 			return getItemView(position, convertView, parent);
 		}
 	};
 
 	@Override
-	public boolean isEnabled(int position)
-	{
+	public boolean isEnabled(int position) {
 		return !(getItem(position) instanceof Section);
 	}
 
-	private View getHeaderView(int position, View convertView, ViewGroup parent)
-	{
+	private View getHeaderView(int position, View convertView, ViewGroup parent) {
 		Section section = (Section) getItem(position);
-		LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) activity
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
-		if (v == null)
-		{
+		if (v == null) {
 			v = inflater.inflate(R.layout.section, parent, false);
 		}
 
 		TextView tv = (TextView) v.findViewById(R.id.section_txt);
 		tv.setText(section.title);
 
-		if(isFiltering)
-		{
+		if (isFiltering) {
 			v.setVisibility(View.GONE);
-		}
-		else
-		{
+		} else {
 			v.setVisibility(View.VISIBLE);
 		}
 
 		return v;
 	}
 
-	public String idForPosition(int position)
-	{
+	public String idForPosition(int position) {
 		Object o = getItem(position);
-		return o.toString().substring(0,1).toUpperCase();
+		return o.toString().substring(0, 1).toUpperCase();
 	}
 
 	public int getPositionForSection(int section) {
@@ -160,23 +153,19 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements S
 	}
 
 	@Override
-	public long getItemId(int position)
-	{
+	public long getItemId(int position) {
 		return position;
 	}
 
 	@Override
-	public int getViewTypeCount()
-	{
+	public int getViewTypeCount() {
 		return 2;/* section headers plus items */
 	}
 
 	@Override
-	public int getItemViewType(int position)
-	{
+	public int getItemViewType(int position) {
 		Object o = getItem(position);
-		if (o instanceof Section)
-		{
+		if (o instanceof Section) {
 			return SECTION_TYPE;
 		}
 

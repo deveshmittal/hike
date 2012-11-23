@@ -13,45 +13,46 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.Utils;
 
 /**
- * @author Rishabh
- *	This receiver is used to notify that the app has been updated.
+ * @author Rishabh This receiver is used to notify that the app has been
+ *         updated.
  */
 public class AppUpdatedReceiver extends BroadcastReceiver {
 
 	@Override
-	public void onReceive(final Context context, Intent intent) 
-	{
-		if(context.getPackageName().equals(intent.getData().getSchemeSpecificPart()))
-		{
+	public void onReceive(final Context context, Intent intent) {
+		if (context.getPackageName().equals(
+				intent.getData().getSchemeSpecificPart())) {
 			Log.d(getClass().getSimpleName(), "App has been updated");
 			/*
 			 * Have to add the delay since the service is null initially.
 			 */
-			new Handler().postDelayed(new Runnable() 
-			{
+			new Handler().postDelayed(new Runnable() {
 				@Override
-				public void run() 
-				{
-					// Send the device details again which includes the new app version
+				public void run() {
+					// Send the device details again which includes the new app
+					// version
 					JSONObject obj = Utils.getDeviceDetails(context);
-					if (obj != null) 
-					{
-						HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+					if (obj != null) {
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.MQTT_PUBLISH, obj);
 					}
 					Utils.requestAccountInfo();
 				}
-			}, 5*1000);
+			}, 5 * 1000);
 
 			/*
-			 *  Checking if the current version is the latest version. If it is we reset the preference which
-			 *  prompts the user to update the app.
+			 * Checking if the current version is the latest version. If it is
+			 * we reset the preference which prompts the user to update the app.
 			 */
-			SharedPreferences prefs = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			if(!Utils.isUpdateRequired(prefs.getString(HikeConstants.Extras.LATEST_VERSION, ""), context))
-			{
+			SharedPreferences prefs = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+			if (!Utils.isUpdateRequired(
+					prefs.getString(HikeConstants.Extras.LATEST_VERSION, ""),
+					context)) {
 				Editor editor = prefs.edit();
 				editor.remove(HikeConstants.Extras.UPDATE_AVAILABLE);
 				editor.remove(HikeConstants.Extras.SHOW_UPDATE_OVERLAY);
@@ -59,6 +60,17 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				editor.remove(HikeConstants.Extras.UPDATE_TO_IGNORE);
 				editor.remove(HikeConstants.Extras.LATEST_VERSION);
 				editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+				editor.commit();
+			}
+			/*
+			 * Adding auto recommended favorites based on the recency of the contact. One time
+			 * thing only
+			 */
+			if(!prefs.getBoolean(HikeMessengerApp.AUTO_RECOMMENDED_FAVORITES_ADDED, false))
+			{
+				HikeUserDatabase.getInstance().addAutoRecommendedFavorites();
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeMessengerApp.AUTO_RECOMMENDED_FAVORITES_ADDED, true);
 				editor.commit();
 			}
 		}

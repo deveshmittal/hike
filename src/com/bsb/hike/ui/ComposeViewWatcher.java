@@ -15,8 +15,7 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.SmileyParser;
 
-public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
-{
+public class ComposeViewWatcher implements Runnable, TextWatcher, Listener {
 	private Conversation mConversation;
 
 	private long mTextLastChanged = 0;
@@ -33,8 +32,8 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 
 	private int mCredits;
 
-	public ComposeViewWatcher(Conversation conversation, EditText composeView, Button sendButton, int initialCredits)
-	{
+	public ComposeViewWatcher(Conversation conversation, EditText composeView,
+			Button sendButton, int initialCredits) {
 		this.mConversation = conversation;
 		this.mUIThreadHandler = new Handler();
 		this.mPubSub = HikeMessengerApp.getPubSub();
@@ -44,10 +43,8 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 		setBtnEnabled();
 	}
 
-	public void init()
-	{
-		if (mInitialized)
-		{
+	public void init() {
+		if (mInitialized) {
 			return;
 		}
 
@@ -56,41 +53,41 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 		mComposeView.addTextChangedListener(this);
 	}
 
-	public void uninit()
-	{
+	public void uninit() {
 		mPubSub.removeListener(HikePubSub.SMS_CREDIT_CHANGED, this);
 		mUIThreadHandler.removeCallbacks(this);
 		mComposeView.removeTextChangedListener(this);
 		mInitialized = false;
 	}
 
-	public void setBtnEnabled()
-	{
+	public void setBtnEnabled() {
 		CharSequence seq = mComposeView.getText();
-		/* the button is enabled iff there is text AND (this is an IP conversation or we have credits available) */
-		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation.isOnhike() || mCredits > 0)));
+		/*
+		 * the button is enabled iff there is text AND (this is an IP
+		 * conversation or we have credits available)
+		 */
+		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation
+				.isOnhike() || mCredits > 0)));
 		mButton.setEnabled(canSend);
 	}
 
-	public void onTextLastChanged()
-	{
-		if (!mInitialized)
-		{
+	public void onTextLastChanged() {
+		if (!mInitialized) {
 			Log.d("ComposeViewWatcher", "not initialized");
 			return;
 		}
 
 		long lastChanged = System.currentTimeMillis();
-		if (mTextLastChanged == 0)
-		{
+		if (mTextLastChanged == 0) {
 			// we're currently not in 'typing' mode
 			mTextLastChanged = lastChanged;
 
 			// fire an event
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(HikeConstants.MqttMessageTypes.START_TYPING));
+			mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation
+					.serialize(HikeConstants.MqttMessageTypes.START_TYPING));
 
 			// create a timer to clear the event
-			mUIThreadHandler.removeCallbacks(this); 
+			mUIThreadHandler.removeCallbacks(this);
 
 			mUIThreadHandler.postDelayed(this, 10 * 1000);
 		}
@@ -98,49 +95,41 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 		mTextLastChanged = lastChanged;
 	}
 
-	public void onMessageSent()
-	{
-		/* a message was sent, so
-		 * reset the typing notifications so
-		 * they're sent for any subsequent typing
+	public void onMessageSent() {
+		/*
+		 * a message was sent, so reset the typing notifications so they're sent
+		 * for any subsequent typing
 		 */
 		mTextLastChanged = 0;
 		mUIThreadHandler.removeCallbacks(this);
 	}
 
 	@Override
-	public void run()
-	{
+	public void run() {
 		long current = System.currentTimeMillis();
-		if (current - mTextLastChanged >= 5 * 1000)
-		{
+		if (current - mTextLastChanged >= 5 * 1000) {
 			/* text hasn't changed in 10 seconds, send an event */
 			sendEndTyping();
-		}
-		else
-		{
+		} else {
 			/* text has changed, fire a new event */
 			long delta = 10 * 1000 - (current - mTextLastChanged);
 			mUIThreadHandler.postDelayed(this, delta);
 		}
 	}
 
-	public boolean wasEndTypingSent()
-	{
+	public boolean wasEndTypingSent() {
 		return mTextLastChanged == 0;
 	}
 
-	public void sendEndTyping()
-	{
-		mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation.serialize(HikeConstants.MqttMessageTypes.END_TYPING));
+	public void sendEndTyping() {
+		mPubSub.publish(HikePubSub.MQTT_PUBLISH_LOW, mConversation
+				.serialize(HikeConstants.MqttMessageTypes.END_TYPING));
 		mTextLastChanged = 0;
 	}
 
 	@Override
-	public void afterTextChanged(Editable editable)
-	{
-		if(!TextUtils.isEmpty(editable))
-		{
+	public void afterTextChanged(Editable editable) {
+		if (!TextUtils.isEmpty(editable)) {
 			onTextLastChanged();
 		}
 		setBtnEnabled();
@@ -149,20 +138,17 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener
 	}
 
 	@Override
-	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-	{
+	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+			int arg3) {
 	}
 
 	@Override
-	public void onTextChanged(CharSequence s, int arg1, int arg2, int arg3)
-	{
+	public void onTextChanged(CharSequence s, int arg1, int arg2, int arg3) {
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object)
-	{
-		if (HikePubSub.SMS_CREDIT_CHANGED.equals(type))
-		{
+	public void onEventReceived(String type, Object object) {
+		if (HikePubSub.SMS_CREDIT_CHANGED.equals(type)) {
 			mCredits = ((Integer) object).intValue();
 		}
 	}

@@ -44,8 +44,8 @@ import com.bsb.hike.utils.MyDrawable;
 import com.bsb.hike.utils.Utils;
 
 @SuppressWarnings("unchecked")
-public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implements TextWatcher, OnItemClickListener
-{
+public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
+		implements TextWatcher, OnItemClickListener {
 	private Context context;
 	private List<ContactInfo> filteredList;
 	private List<ContactInfo> completeList;
@@ -60,11 +60,10 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	private Map<String, GroupParticipant> groupParticipants;
 	private String countryCode;
 
-	public HikeSearchContactAdapter(
-			Activity context, List<ContactInfo> contactList, 
-			EditText inputNumber, boolean isGroupChat, 
-			Button topBarBtn, String groupId, Intent presentIntent)
-	{
+	public HikeSearchContactAdapter(Activity context,
+			List<ContactInfo> contactList, EditText inputNumber,
+			boolean isGroupChat, Button topBarBtn, String groupId,
+			Intent presentIntent) {
 		super(context, -1, contactList);
 		this.filteredList = contactList;
 		this.completeList = new ArrayList<ContactInfo>();
@@ -76,90 +75,103 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		this.topBarBtn = topBarBtn;
 		this.groupId = groupId;
 		this.presentIntent = presentIntent;
-		this.countryCode = context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(HikeMessengerApp.COUNTRY_CODE, "+91");
-		if(!TextUtils.isEmpty(groupId))
-		{
-			groupParticipants = HikeConversationsDatabase.getInstance().getGroupParticipants(groupId, true, false);
+		this.countryCode = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+				.getString(HikeMessengerApp.COUNTRY_CODE,
+						HikeConstants.INDIA_COUNTRY_CODE);
+		if (!TextUtils.isEmpty(groupId)) {
+			groupParticipants = HikeConversationsDatabase.getInstance()
+					.getGroupParticipants(groupId, true, false);
 		}
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
-	{
+	public View getView(int position, View convertView, ViewGroup parent) {
 		ContactInfo contactInfo = (ContactInfo) getItem(position);
-		LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
-		if (v == null)
-		{
+		if (v == null) {
 			v = inflater.inflate(R.layout.name_item, parent, false);
 		}
 
 		v.setTag(contactInfo);
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
-		textView.setText(contactInfo != null ? contactInfo.getName() : getNumber(inputNumber.getText().toString()));
+		textView.setText(contactInfo != null ? contactInfo.getName()
+				: getNumber(inputNumber.getText().toString()));
 
 		TextView numberTextView = (TextView) v.findViewById(R.id.number);
-		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn() : isGroupChat ? context.getString(R.string.tap_to_add) : context.getString(R.string.tap_to_message));
-		if(contactInfo != null && !TextUtils.isEmpty(contactInfo.getMsisdnType()))
-		{
+		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn()
+				: isGroupChat ? context.getString(R.string.tap_to_add)
+						: context.getString(R.string.tap_to_message));
+		if (contactInfo != null
+				&& !TextUtils.isEmpty(contactInfo.getMsisdnType())) {
 			numberTextView.append(" (" + contactInfo.getMsisdnType() + ")");
 		}
 
 		ImageView onhike = (ImageView) v.findViewById(R.id.onhike);
-		onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike() ? R.drawable.ic_hike_user : R.drawable.ic_sms_user) : 0);
+		onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike() ? R.drawable.ic_hike_user
+				: R.drawable.ic_sms_user)
+				: 0);
 
 		ImageView avatar = (ImageView) v.findViewById(R.id.user_img);
-		avatar.setImageDrawable(contactInfo != null ? IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()) : context.getResources().getDrawable(R.drawable.ic_avatar0));
+		avatar.setImageDrawable(contactInfo != null ? IconCacheManager
+				.getInstance().getIconForMSISDN(contactInfo.getMsisdn())
+				: context.getResources().getDrawable(R.drawable.ic_avatar0));
 
-		numberTextView.setVisibility(isEnabled(position) ? View.VISIBLE : View.INVISIBLE);
+		numberTextView.setVisibility(isEnabled(position) ? View.VISIBLE
+				: View.INVISIBLE);
 		onhike.setVisibility(isEnabled(position) ? View.VISIBLE : View.GONE);
 		return v;
 	}
 
 	@Override
-	public void afterTextChanged(Editable editable)
-	{
+	public void afterTextChanged(Editable editable) {
 		this.contactFilter.filter(editable.toString());
 	}
 
 	@Override
-	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-	{}
+	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+			int arg3) {
+	}
 
 	@Override
-	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3)
-	{}
+	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+	}
 
-	private class ContactFilter extends Filter
-	{
+	private class ContactFilter extends Filter {
 		@Override
-		protected FilterResults performFiltering(CharSequence constraint) 
-		{
+		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults results = new FilterResults();
 
-			String textInEditText = TextUtils.isEmpty(constraint) ? "" : constraint.toString().toLowerCase();
-			int indexTextToBeFiltered = textInEditText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2;
-			String textToBeFiltered = (!textInEditText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ?
-							textInEditText : textInEditText.substring(indexTextToBeFiltered));
+			String textInEditText = TextUtils.isEmpty(constraint) ? ""
+					: constraint.toString().toLowerCase();
+			int indexTextToBeFiltered = textInEditText
+					.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2;
+			String textToBeFiltered = (!textInEditText
+					.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? textInEditText
+					: textInEditText.substring(indexTextToBeFiltered));
 
-			if(!TextUtils.isEmpty(textToBeFiltered) || !TextUtils.isEmpty(textInEditText) || !TextUtils.isEmpty(groupId))
-			{
-				final List<String> currentSelectionsInTextBox = Utils.splitSelectedContacts(textInEditText);
+			if (!TextUtils.isEmpty(textToBeFiltered)
+					|| !TextUtils.isEmpty(textInEditText)
+					|| !TextUtils.isEmpty(groupId)) {
+				final List<String> currentSelectionsInTextBox = Utils
+						.splitSelectedContacts(textInEditText);
 				final Set<String> currentSelectionSet = new HashSet<String>();
 				/*
-				 * Making a set of all the currently selected contacts. Only used in case of group chat.
+				 * Making a set of all the currently selected contacts. Only
+				 * used in case of group chat.
 				 */
 				currentSelectionSet.addAll(currentSelectionsInTextBox);
 				Set<String> selectedSMSContacts = new HashSet<String>();
-				if(!TextUtils.isEmpty(groupId))
-				{
+				if (!TextUtils.isEmpty(groupId)) {
 					currentSelectionSet.addAll(groupParticipants.keySet());
 					// Done to add unknown numbers to the already selected list
-					for(Entry<String, GroupParticipant> participantEntry : groupParticipants.entrySet())
-					{
-						if(!participantEntry.getValue().getContactInfo().isOnhike())
-						{
+					for (Entry<String, GroupParticipant> participantEntry : groupParticipants
+							.entrySet()) {
+						if (!participantEntry.getValue().getContactInfo()
+								.isOnhike()) {
 							selectedSMSContacts.add(participantEntry.getKey());
 						}
 					}
@@ -167,44 +179,40 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 
 				List<ContactInfo> filteredContacts = new ArrayList<ContactInfo>();
 
-				if (topBarBtn != null) 
-				{
-					((Activity) context).runOnUiThread(new Runnable() 
-					{
+				if (topBarBtn != null) {
+					((Activity) context).runOnUiThread(new Runnable() {
 						@Override
-						public void run() 
-						{
+						public void run() {
 							/*
-							 *  We only enable this if the user has selected more than one participant OR if we are adding participants in an
-							 *  existing group the user should have selected at least one participant 
+							 * We only enable this if the user has selected more
+							 * than one participant OR if we are adding
+							 * participants in an existing group the user should
+							 * have selected at least one participant
 							 */
-							topBarBtn.setEnabled((currentSelectionSet.size() > 1 && currentSelectionsInTextBox.size() > 0) || (currentSelectionsInTextBox.size() > 1));
+							topBarBtn.setEnabled((currentSelectionSet.size() > 1 && currentSelectionsInTextBox
+									.size() > 0)
+									|| (currentSelectionsInTextBox.size() > 1));
 						}
 					});
 				}
-				for (ContactInfo info : HikeSearchContactAdapter.this.completeList)
-				{
-					if(info != null)
-					{
-						if(!currentSelectionSet.isEmpty())
-						{
-							if(currentSelectionSet.contains(info.getMsisdn()))
-							{
-								if(!info.isOnhike())
-								{
+				for (ContactInfo info : HikeSearchContactAdapter.this.completeList) {
+					if (info != null) {
+						if (!currentSelectionSet.isEmpty()) {
+							if (currentSelectionSet.contains(info.getMsisdn())) {
+								if (!info.isOnhike()) {
 									selectedSMSContacts.add(info.getMsisdn());
 								}
 								continue;
 							}
 						}
-						if(info.getName().toLowerCase().contains(textToBeFiltered) || info.getMsisdn().contains(textToBeFiltered))
-						{
+						if (info.getName().toLowerCase()
+								.contains(textToBeFiltered)
+								|| info.getMsisdn().contains(textToBeFiltered)) {
 							filteredContacts.add(info);
 						}
 					}
 				}
-				if(shouldShowExtraElement(textToBeFiltered))
-				{
+				if (shouldShowExtraElement(textToBeFiltered)) {
 					filteredContacts.add(null);
 				}
 				results.count = filteredContacts.size();
@@ -212,10 +220,9 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 
 				numContactsSelected = currentSelectionSet.size();
 				numSMSContactsSelected = selectedSMSContacts.size();
-			}
-			else
-			{
-				results.count = HikeSearchContactAdapter.this.completeList.size();
+			} else {
+				results.count = HikeSearchContactAdapter.this.completeList
+						.size();
 				results.values = HikeSearchContactAdapter.this.completeList;
 
 				numContactsSelected = 0;
@@ -225,13 +232,12 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 		}
 
 		@Override
-		protected void publishResults(CharSequence constraint, FilterResults results) 
-		{
+		protected void publishResults(CharSequence constraint,
+				FilterResults results) {
 			filteredList = (ArrayList<ContactInfo>) results.values;
 			notifyDataSetChanged();
 			clear();
-			for(ContactInfo contactInfo : filteredList)
-			{
+			for (ContactInfo contactInfo : filteredList) {
 				add(contactInfo);
 			}
 			notifyDataSetInvalidated();
@@ -239,126 +245,126 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) 
-	{
+	public void onItemClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
 		ContactInfo contactInfo = (ContactInfo) view.getTag();
-		boolean isUnknownNumber = false; 
-		if(contactInfo == null)
-		{
-			String number = normalizeNumber(getNumber(inputNumber.getText().toString()));
+		boolean isUnknownNumber = false;
+		if (contactInfo == null) {
+			String number = normalizeNumber(getNumber(inputNumber.getText()
+					.toString()));
 			Log.d(getClass().getSimpleName(), "Formatted number: " + number);
 			contactInfo = new ContactInfo(number, number, number, number);
 			isUnknownNumber = true;
 		}
-		if (!isGroupChat) 
-		{
+		if (!isGroupChat) {
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 			intent.setClass(context, ChatThread.class);
 			String type = presentIntent.getType();
-			if("text/plain".equals(type) || presentIntent.hasExtra(HikeConstants.Extras.MSG))
-			{
-				String msg = presentIntent.getStringExtra(presentIntent.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG : Intent.EXTRA_TEXT);
+			if ("text/plain".equals(type)
+					|| presentIntent.hasExtra(HikeConstants.Extras.MSG)) {
+				String msg = presentIntent
+						.getStringExtra(presentIntent
+								.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG
+								: Intent.EXTRA_TEXT);
 				Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
-			}
-			else if(presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY))
-			{
+			} else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY)) {
 				intent.putExtras(presentIntent);
-			}
-			else if(type != null && (type.startsWith("image") || type.startsWith("audio") || type.startsWith("video")))
-			{
-				Uri fileUri = presentIntent.getParcelableExtra(Intent.EXTRA_STREAM);
-				String filePath = Utils.getRealPathFromUri(fileUri, (Activity)context);
+			} else if (type != null
+					&& (type.startsWith("image") || type.startsWith("audio") || type
+							.startsWith("video"))) {
+				Uri fileUri = presentIntent
+						.getParcelableExtra(Intent.EXTRA_STREAM);
+				String filePath = Utils.getRealPathFromUri(fileUri,
+						(Activity) context);
 				intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
 				intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 			}
 			context.startActivity(intent);
-		}
-		else
-		{
+		} else {
 			/*
 			 * Checking if the number of participants has crossed the set limit.
 			 * We have two limits - SMS contacts and total contacts.
 			 */
-			if (numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1 || 
-					(numSMSContactsSelected >= HikeConstants.MAX_SMS_CONTACTS_IN_GROUP && !contactInfo.isOnhike()))
-			{
-				Toast toast = Toast.makeText(
-						getContext(), 
-						((numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1) ? R.string.max_contact : R.string.max_sms), 
-						Toast.LENGTH_SHORT);
-				toast.setGravity(Gravity.TOP, 0, (int) (50 * Utils.densityMultiplier));
+			if (numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1
+					|| (numSMSContactsSelected >= HikeConstants.MAX_SMS_CONTACTS_IN_GROUP && !contactInfo
+							.isOnhike())) {
+				Toast toast = Toast
+						.makeText(
+								getContext(),
+								((numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1) ? R.string.max_contact
+										: R.string.max_sms), Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.TOP, 0,
+						(int) (50 * Utils.densityMultiplier));
 				toast.show();
 				return;
 			}
-			if(groupParticipants != null && groupParticipants.containsKey(contactInfo.getMsisdn()))
-			{
-				Toast toast = Toast.makeText(getContext(), R.string.contact_selected_already, Toast.LENGTH_SHORT);
-				toast.setGravity(Gravity.TOP, 0, (int) (50 * Utils.densityMultiplier));
+			if (groupParticipants != null
+					&& groupParticipants.containsKey(contactInfo.getMsisdn())) {
+				Toast toast = Toast.makeText(getContext(),
+						R.string.contact_selected_already, Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.TOP, 0,
+						(int) (50 * Utils.densityMultiplier));
 				toast.show();
 				return;
 			}
-			if(isUnknownNumber)
-			{
+			if (isUnknownNumber) {
 				// Done to add unknown numbers to the already selected list
 				completeList.add(contactInfo);
 			}
 			inputNumber.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 			inputNumber.setSingleLine(false);
 			String currentText = inputNumber.getText().toString();
-			int insertIndex = currentText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? currentText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2 : 0;
+			int insertIndex = currentText
+					.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? currentText
+					.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2
+					: 0;
 
-			String textToBeShown = contactInfo.getName() + "[" + contactInfo.getMsisdn() + "]" + HikeConstants.GROUP_PARTICIPANT_SEPARATOR;
+			String textToBeShown = contactInfo.getName() + "["
+					+ contactInfo.getMsisdn() + "]"
+					+ HikeConstants.GROUP_PARTICIPANT_SEPARATOR;
 			String nameToBeShown = Utils.ellipsizeName(contactInfo.getName());
 
-			MyDrawable myDrawable = new MyDrawable(nameToBeShown, context, contactInfo.isOnhike());
-			myDrawable.setBounds(
-					(int) (0 * Utils.densityMultiplier), 
-					(int) (0 * Utils.densityMultiplier), 
-					(int) (myDrawable.getPaint().measureText(nameToBeShown) + ((int)18 * Utils.densityMultiplier)),
-					(int) (28 * Utils.densityMultiplier));
+			MyDrawable myDrawable = new MyDrawable(nameToBeShown, context,
+					contactInfo.isOnhike());
+			myDrawable
+					.setBounds(
+							(int) (0 * Utils.densityMultiplier),
+							(int) (0 * Utils.densityMultiplier),
+							(int) (myDrawable.getPaint().measureText(
+									nameToBeShown) + ((int) 18 * Utils.densityMultiplier)),
+							(int) (28 * Utils.densityMultiplier));
 
 			ImageSpan imageSpan = new ImageSpan(myDrawable);
 
 			Editable editable = inputNumber.getText();
 			editable.replace(insertIndex, currentText.length(), textToBeShown);
-			editable.setSpan(
-					imageSpan,
-					insertIndex, 
-					insertIndex + textToBeShown.length(),
+			editable.setSpan(imageSpan, insertIndex, insertIndex
+					+ textToBeShown.length(),
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			inputNumber.setSelection(inputNumber.length());
 		}
 	}
-	
-	private boolean shouldShowExtraElement(String s)
-	{
-	    String pattern= "(\\+?\\d*)";
-	        if(s.matches(pattern)){
-	            return true;
-	        }
-	        return false;   
+
+	private boolean shouldShowExtraElement(String s) {
+		String pattern = "(\\+?\\d*)";
+		if (s.matches(pattern)) {
+			return true;
+		}
+		return false;
 	}
 
-	private String normalizeNumber(String inputNumber)
-	{
-		if(inputNumber.startsWith("+"))
-		{
+	private String normalizeNumber(String inputNumber) {
+		if (inputNumber.startsWith("+")) {
 			return inputNumber;
-		}
-		else if(inputNumber.startsWith("00"))
-		{
+		} else if (inputNumber.startsWith("00")) {
 			/*
 			 * Doing for US numbers
 			 */
 			return inputNumber.replaceFirst("00", "+");
-		}
-		else if(inputNumber.startsWith("0"))
-		{
+		} else if (inputNumber.startsWith("0")) {
 			return inputNumber.replaceFirst("0", countryCode);
-		}
-		else
-		{
+		} else {
 			return countryCode + inputNumber;
 		}
 	}
@@ -370,18 +376,19 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo> implemen
 
 	@Override
 	public boolean isEnabled(int position) {
-		if(filteredList.get(position) == null)
-		{
-			return getNumber(inputNumber.getText().toString()).matches(HikeConstants.VALID_MSISDN_REGEX);
+		if (filteredList.get(position) == null) {
+			return getNumber(inputNumber.getText().toString()).matches(
+					HikeConstants.VALID_MSISDN_REGEX);
 		}
 		return super.isEnabled(position);
 	}
 
-	private String getNumber(String textInEditText)
-	{
-		int indexTextToBeFiltered = textInEditText.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2;
+	private String getNumber(String textInEditText) {
+		int indexTextToBeFiltered = textInEditText
+				.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2;
 
-		return !textInEditText.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ?
-				textInEditText : textInEditText.substring(indexTextToBeFiltered);
+		return !textInEditText
+				.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? textInEditText
+				: textInEditText.substring(indexTextToBeFiltered);
 	}
 }

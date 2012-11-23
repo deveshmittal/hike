@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#eeeeeb" >
+
+    <include
+        android:id="@+id/top_panel"
+        layout="@layout/top_panel" />
+
+    <com.google.android.maps.MapView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_panel"
+        android:apiKey="0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA"
+        android:clickable="true" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_panel"
+        android:background="@drawable/bg_location_address"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:singleLine="true"
+        android:textColor="@color/lightblack"
+        android:textSize="16sp" />
+
+    <ImageButton
+        android:id="@+id/my_position"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="5dp"
+        android:background="@null"
+        android:onClick="onChangeMarkerClicked"
+        android:src="@drawable/ic_locate"
+        android:visibility="visible" />
+
+    <ImageButton
+        android:id="@+id/custom_position"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@null"
+        android:onClick="onChangeMarkerClicked"
+        android:src="@drawable/ic_droppin"
+        android:visibility="visible" />
+    
+    <ImageView
+        android:id="@+id/screenshot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible" />
+
+</RelativeLayout>

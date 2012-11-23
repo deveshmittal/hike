@@ -43,132 +43,112 @@ import com.bsb.hike.utils.Utils;
  * @author vr
  * 
  */
-public class HikeMqttManager implements Listener
-{
+public class HikeMqttManager implements Listener {
 	private final class RetryFailedMessages implements Runnable {
-        public void run(){
-        	final List<HikePacket> packets = persistence.getAllSentMessages();
-            HikeMqttManager.this.haveUnsentMessages = false;
-        	for (HikePacket hikePacket : packets)
-        	{
-        		Log.d("HikeMqttManager", "resending message " + new String(hikePacket.getMessage()));
-        		send(hikePacket, 1);
-        	}
-        }
-    }
+		public void run() {
+			final List<HikePacket> packets = persistence.getAllSentMessages();
+			HikeMqttManager.this.haveUnsentMessages = false;
+			for (HikePacket hikePacket : packets) {
+				Log.d("HikeMqttManager", "resending message "
+						+ new String(hikePacket.getMessage()));
+				send(hikePacket, 1);
+			}
+		}
+	}
 
-    public class DisconnectCB implements Callback<Void>
-	{
+	public class DisconnectCB implements Callback<Void> {
 
 		private boolean reconnect;
 
-		public DisconnectCB(boolean reconnect)
-		{
+		public DisconnectCB(boolean reconnect) {
 			this.reconnect = reconnect;
 		}
 
 		@Override
-		public void onSuccess(Void value)
-		{
-			Log.d("HikeMqttManager", "Sucessfully disconnected : "+reconnect);
-			if (mqttConnection != null)
-			{
+		public void onSuccess(Void value) {
+			Log.d("HikeMqttManager", "Sucessfully disconnected : " + reconnect);
+			if (mqttConnection != null) {
 				mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 			}
 
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-			if (reconnect)
-			{
+			if (reconnect) {
 				connectToBroker();
 			}
 		}
 
 		@Override
-		public void onFailure(Throwable value)
-		{
-			Log.d("HikeMqttManager", "Error disconnecting from server : "+reconnect);
+		public void onFailure(Throwable value) {
+			Log.d("HikeMqttManager", "Error disconnecting from server : "
+					+ reconnect);
 			setConnectionStatus(HikeMqttManager.MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-			if (mqttConnection != null)
-			{
+			if (mqttConnection != null) {
 				mqttConnection.listener(CallbackConnection.DEFAULT_LISTENER);
 			}
 
-			if (reconnect)
-			{
+			if (reconnect) {
 				connectToBroker();
 			}
 		}
 
 	}
 
-	public class ConnectTimeoutHandler implements Runnable
-	{
-		public void run()
-		{
+	public class ConnectTimeoutHandler implements Runnable {
+		public void run() {
 			disconnectFromBroker(true);
 		}
 	}
 
-	public class PublishCB implements Callback<Void>, Runnable
-	{
+	public class PublishCB implements Callback<Void>, Runnable {
 		private HikePacket packet;
 		boolean called;
-		public PublishCB(HikePacket packet)
-		{
+
+		public PublishCB(HikePacket packet) {
 			this.packet = packet;
 			this.called = false;
 		}
 
 		@Override
-		public void onSuccess(Void value)
-		{
-			if (called)
-			{
-				Log.w("HikeMqttManager", "Received 'success' for message that's already been triggered");
+		public void onSuccess(Void value) {
+			if (called) {
+				Log.w("HikeMqttManager",
+						"Received 'success' for message that's already been triggered");
 			}
 
 			called = true;
 			handler.removeCallbacks(this);
-			if (packet.getMsgId() > 0)
-			{
+			if (packet.getMsgId() > 0) {
 				mHikeService.sendMessageStatus(packet.getMsgId(), true);
 			}
 
-			if (HikeMqttManager.this.haveUnsentMessages)
-			{
-			    handler.post(new RetryFailedMessages());
+			if (HikeMqttManager.this.haveUnsentMessages) {
+				handler.post(new RetryFailedMessages());
 			}
 		}
 
 		@Override
-		public void onFailure(Throwable value)
-		{
+		public void onFailure(Throwable value) {
 			handler.post(this);
 		}
 
 		@Override
-		public void run()
-		{
+		public void run() {
 			called = true;
 			handler.removeCallbacks(this);
 			Log.d("HikeMqttManager", "unable to send packet");
 			ping();
-			try
-			{
-			    HikeMqttManager.this.haveUnsentMessages = true;
+			try {
+				HikeMqttManager.this.haveUnsentMessages = true;
 				persistence.addSentMessage(packet);
-			}
-			catch (MqttPersistenceException e)
-			{
-				Log.e("HikeMqttManager", "Unable to persist message" + packet.toString(), e);
+			} catch (MqttPersistenceException e) {
+				Log.e("HikeMqttManager",
+						"Unable to persist message" + packet.toString(), e);
 			}
 		}
 	}
 
-
 	// constants used to define MQTT connection status
-	public enum MQTTConnectionStatus
-	{
+	public enum MQTTConnectionStatus {
 		INITIAL, // initial status
 		CONNECTING, // attempting to connect
 		CONNECTED, // connected
@@ -209,10 +189,14 @@ public class HikeMqttManager implements Listener
 	/*
 	 * how often should the app ping the server to keep the connection alive?
 	 * 
-	 * too frequently - and you waste battery life too infrequently - and you wont notice if you lose your connection until the next unsuccessfull attempt to ping // // it's a
-	 * trade-off between how time-sensitive the data is that your // app is handling, vs the acceptable impact on battery life // // it is perhaps also worth bearing in mind the
-	 * network's support for // long running, idle connections. Ideally, to keep a connection open // you want to use a keep alive value that is less than the period of // time
-	 * after which a network operator will kill an idle connection
+	 * too frequently - and you waste battery life too infrequently - and you
+	 * wont notice if you lose your connection until the next unsuccessfull
+	 * attempt to ping // // it's a trade-off between how time-sensitive the
+	 * data is that your // app is handling, vs the acceptable impact on battery
+	 * life // // it is perhaps also worth bearing in mind the network's support
+	 * for // long running, idle connections. Ideally, to keep a connection open
+	 * // you want to use a keep alive value that is less than the period of //
+	 * time after which a network operator will kill an idle connection
 	 */
 	private short keepAliveSeconds = HikeConstants.KEEP_ALIVE;
 
@@ -244,49 +228,52 @@ public class HikeMqttManager implements Listener
 
 	private MqttMessagesManager mqttMessageManager;
 
-    private boolean haveUnsentMessages;
+	private boolean haveUnsentMessages;
 
-	public HikeMqttManager(HikeService hikeService, Handler handler)
-	{
+	public HikeMqttManager(HikeService hikeService, Handler handler) {
 		this.mHikeService = hikeService;
 		this.convDb = HikeConversationsDatabase.getInstance();
 		this.userDb = HikeUserDatabase.getInstance();
-		mqttIdToPacket = Collections.synchronizedMap(new HashMap<Integer, HikePacket>());
+		mqttIdToPacket = Collections
+				.synchronizedMap(new HashMap<Integer, HikePacket>());
 		this.handler = handler;
 		persistence = HikeMqttPersistence.getInstance();
 		mConnectTimeoutHandler = new ConnectTimeoutHandler();
 		setConnectionStatus(MQTTConnectionStatus.INITIAL);
 		this.mqttMessageManager = MqttMessagesManager.getInstance(mHikeService);
 
-		settings = this.mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION, true);
-		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME : STAGING_BROKER_HOST_NAME;
-		brokerPortNumber = production ? PRODUCTION_BROKER_PORT_NUMBER : STAGING_BROKER_PORT_NUMBER;
+		settings = this.mHikeService.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION,
+				true);
+		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME
+				: STAGING_BROKER_HOST_NAME;
+		brokerPortNumber = production ? PRODUCTION_BROKER_PORT_NUMBER
+				: STAGING_BROKER_PORT_NUMBER;
 	}
 
-	public HikePacket getPacketIfUnsent(int mqttId)
-	{
+	public HikePacket getPacketIfUnsent(int mqttId) {
 		HikePacket packet = mqttIdToPacket.remove(mqttId);
 		return packet;
 	}
 
-	private boolean init()
-	{
+	private boolean init() {
 		password = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		topic = uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
-		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null) + ":" + HikeConstants.APP_API_VERSION;
+		clientId = settings.getString(HikeMessengerApp.MSISDN_SETTING, null)
+				+ ":" + HikeConstants.APP_API_VERSION;
 		Log.d("HikeMqttManager", "clientId is " + clientId);
-		return !TextUtils.isEmpty(topic) && !TextUtils.isEmpty(clientId) && !TextUtils.isEmpty(password);
+		return !TextUtils.isEmpty(topic) && !TextUtils.isEmpty(clientId)
+				&& !TextUtils.isEmpty(password);
 	}
 
 	/*
-	 * Create a client connection object that defines our connection to a message broker server
+	 * Create a client connection object that defines our connection to a
+	 * message broker server
 	 */
-	private void create()
-	{
+	private void create() {
 		init();
-		try
-		{
+		try {
 			mqtt = new MQTT();
 			mqtt.setHost(brokerHostName, brokerPortNumber);
 			mqtt.setClientId(clientId);
@@ -294,9 +281,7 @@ public class HikeMqttManager implements Listener
 			mqtt.setCleanSession(false);
 			mqtt.setUserName(uid);
 			mqtt.setPassword(password);
-		}
-		catch (URISyntaxException e)
-		{
+		} catch (URISyntaxException e) {
 			// something went wrong!
 			mqtt = null;
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
@@ -304,34 +289,31 @@ public class HikeMqttManager implements Listener
 			//
 			// inform the user (for times when the Activity UI isn't running)
 			// that we failed to connect
-			this.mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect");
+			this.mHikeService.notifyUser("Unable to connect", "MQTT",
+					"Unable to connect");
 		}
 	}
 
-	public void finish()
-	{
+	public void finish() {
 		this.mqttMessageManager.close();
 	}
 
 	/*
 	 * (Re-)connect to the message broker
 	 */
-	private synchronized void connectToBroker()
-	{
-		Log.d("HikeMqttManager", "calling connectToBroker "+connectionStatus);
-		if (connectionStatus == MQTTConnectionStatus.CONNECTING)
-		{
-			Log.d("HikeMqttManager", "called connectToBroker but already in CONNECTING state");
+	private synchronized void connectToBroker() {
+		Log.d("HikeMqttManager", "calling connectToBroker " + connectionStatus);
+		if (connectionStatus == MQTTConnectionStatus.CONNECTING) {
+			Log.d("HikeMqttManager",
+					"called connectToBroker but already in CONNECTING state");
 			return;
 		}
 
-		if (mqtt == null)
-		{
+		if (mqtt == null) {
 			create();
 		}
 
-		if (mqttConnection == null)
-		{
+		if (mqttConnection == null) {
 			mqttConnection = mqtt.callbackConnection();
 			mqttConnection.listener(this);
 		}
@@ -340,83 +322,99 @@ public class HikeMqttManager implements Listener
 			// try to connect
 			Log.e("HikeMqttManager", "Trying to connect");
 			setConnectionStatus(MQTTConnectionStatus.CONNECTING);
-			handler.postDelayed(mConnectTimeoutHandler, 60*1000);
+			handler.postDelayed(mConnectTimeoutHandler, 60 * 1000);
 			mqttConnection.connect(new Callback<Void>() {
-				public void onFailure(Throwable value)
-				{
+				public void onFailure(Throwable value) {
 					Log.e("HikeMqttManager", "Hike Unable to connect", value);
-					if (value instanceof ConnectionException && ((ConnectionException) value).getCode().equals(ConnectionStatus.BAD_USERNAME_OR_PASSWORD))
-					{
+					if (value instanceof ConnectionException
+							&& ((ConnectionException) value).getCode().equals(
+									ConnectionStatus.BAD_USERNAME_OR_PASSWORD)) {
 						Log.e("HikeMqttManager", "Invalid account credentials");
-						/* delete the token and send a message to the app to send the user back to the main screen */
-						SharedPreferences.Editor editor = mHikeService.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+						/*
+						 * delete the token and send a message to the app to
+						 * send the user back to the main screen
+						 */
+						SharedPreferences.Editor editor = mHikeService
+								.getSharedPreferences(
+										HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+								.edit();
 						editor.clear();
 						editor.commit();
+						mHikeService.sendInvalidToken();
 					}
 
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 
-					mHikeService.notifyUser("Unable to connect", "MQTT", "Unable to connect - will retry later");
+					mHikeService.notifyUser("Unable to connect", "MQTT",
+							"Unable to connect - will retry later");
 
-					mqttConnection = null; /* set the connection to null since it's no longer valid */
-					/* if something has failed, we wait for one keep-alive period before
-					 * trying again
-					 * in a real implementation, you would probably want to keep count
-					 * of how many times you attempt this, and stop trying after a
-					 * certain number, or length of time - rather than keep trying
-					 * forever.
-					 * a failure is often an intermittent network issue, however, so
-					 * some limited retry is a good idea */
+					mqttConnection = null; /*
+											 * set the connection to null since
+											 * it's no longer valid
+											 */
+					/*
+					 * if something has failed, we wait for one keep-alive
+					 * period before trying again in a real implementation, you
+					 * would probably want to keep count of how many times you
+					 * attempt this, and stop trying after a certain number, or
+					 * length of time - rather than keep trying forever. a
+					 * failure is often an intermittent network issue, however,
+					 * so some limited retry is a good idea
+					 */
 					mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 				}
 
 				@Override
-				public void onSuccess(Void value)
-				{
+				public void onSuccess(Void value) {
+					/*
+					 * We would want to start listening for network changes now
+					 * that we have connected again.
+					 */
+					mHikeService.registerDataChangeReceivers();
 					Log.d("HikeMqttManager", "Hike Connected");
 					// inform the app that the app has successfully connected
 					setConnectionStatus(MQTTConnectionStatus.CONNECTED);
-					// we need to wake up the phone's CPU frequently enough so that the
+					// we need to wake up the phone's CPU frequently enough so
+					// that the
 					// keep alive messages can be sent
 					// we schedule the first one of these now
 					mHikeService.scheduleNextPing();
+
+					/*
+					 * Since we are now connected, we schedule the next
+					 * disconnect.
+					 */
+					mHikeService.scheduleNextDisconnect();
 				}
 			});
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			/* couldn't connect, schedule a ping even earlier? */
 			mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
 			Log.e("HikeMqttManager", "Exception Unable to connect", e);
 		}
 	}
 
-	private void unsubscribeFromTopics(UTF8Buffer[] topics)
-	{
-		if (!isConnected())
-		{
-			Log.e("HikeMqttManager", "Unable to unsubscribe since we're not connected");
+	private void unsubscribeFromTopics(UTF8Buffer[] topics) {
+		if (!isConnected()) {
+			Log.e("HikeMqttManager",
+					"Unable to unsubscribe since we're not connected");
 			return;
 		}
 
-		try
-		{
+		try {
 			mqttConnection.unsubscribe(topics, null);
-		}
-		catch (IllegalArgumentException e)
-		{
+		} catch (IllegalArgumentException e) {
 			Log.e("HikeMqttManager", "IllegalArgument trying to unsubscribe", e);
 		}
 	}
 
 	/*
-	 * Send a request to the message broker to be sent messages published with the specified topic name. Wildcards are allowed.
+	 * Send a request to the message broker to be sent messages published with
+	 * the specified topic name. Wildcards are allowed.
 	 */
-	private void subscribeToTopics(Topic[] topics)
-	{
+	private void subscribeToTopics(Topic[] topics) {
 
-		if (isConnected() == false)
-		{
+		if (isConnected() == false) {
 			// quick sanity check - don't try and subscribe if we
 			// don't have a connection
 			Log.e("mqtt", "Unable to subscribe as we are not connected");
@@ -424,37 +422,47 @@ public class HikeMqttManager implements Listener
 		}
 
 		Log.d("HikeMqttManager", "connection is " + mqttConnection);
-		mqttConnection.subscribe(topics, new Callback<byte[]>() {
-			public void onSuccess(byte[] qoses)
-			{
-				Log.d("HikeMqttManager", "subscribe succeeded");
-			}
-			public void onFailure(Throwable value)
-			{
-				Log.e("HikeMqttManager", "subscribe failed.", value);
-				disconnectFromBroker(false);
-				mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
-			}
-		});
+		try {
+			mqttConnection.subscribe(topics, new Callback<byte[]>() {
+				public void onSuccess(byte[] qoses) {
+					Log.d("HikeMqttManager", "subscribe succeeded");
+				}
+
+				public void onFailure(Throwable value) {
+					Log.e("HikeMqttManager", "subscribe failed.", value);
+					disconnectFromBroker(false);
+					mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
+				}
+			});
+		} catch (IllegalStateException e) {
+			/*
+			 * We get this exception if for some reason we are not connected to
+			 * the server at this time but the state is in connected state so
+			 * we'll try reconnecting.
+			 */
+			Log.e(getClass().getSimpleName(),
+					"Not connected even thought the state thinks its connected");
+			disconnectFromBroker(true);
+		}
 	}
 
 	/*
 	 * Terminates a connection to the message broker.
 	 */
-	public synchronized void disconnectFromBroker(boolean reconnect)
-	{
-		try
-		{
-			if (mqttConnection != null)
-			{
+	public synchronized void disconnectFromBroker(boolean reconnect) {
+		try {
+			if (mqttConnection != null) {
 				mqttConnection.disconnect(new DisconnectCB(reconnect));
 				mqttConnection = null;
 			}
 
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-		}
-		catch(Exception e)
-		{
+			/*
+			 * Since we have disconnected from the server we don't need to
+			 * listen to changes in the data anymore.
+			 */
+			mHikeService.unregisterDataChangeReceivers();
+		} catch (Exception e) {
 			Log.e("HikeMqttManager", "Caught exception while disconnecting", e);
 		}
 	}
@@ -462,19 +470,17 @@ public class HikeMqttManager implements Listener
 	/*
 	 * Checks if the MQTT client thinks it has an active connection
 	 */
-	public boolean isConnected()
-	{
+	public boolean isConnected() {
 		Log.d("HikeMqttManager", "in isConnected status " + connectionStatus);
-		return (mqttConnection != null) && (MQTTConnectionStatus.CONNECTED == connectionStatus);
+		return (mqttConnection != null)
+				&& (MQTTConnectionStatus.CONNECTED == connectionStatus);
 	}
 
-	public MQTTConnectionStatus getConnectionStatus()
-	{
+	public MQTTConnectionStatus getConnectionStatus() {
 		return connectionStatus;
 	}
 
-	public void setConnectionStatus(MQTTConnectionStatus connectionStatus)
-	{
+	public void setConnectionStatus(MQTTConnectionStatus connectionStatus) {
 		mHikeService.broadcastServiceStatus(connectionStatus);
 		handler.removeCallbacks(mConnectTimeoutHandler);
 		this.connectionStatus = connectionStatus;
@@ -485,39 +491,40 @@ public class HikeMqttManager implements Listener
 	/************************************************************************/
 
 	/*
-	 * callback - method called when we no longer have a connection to the message broker server
+	 * callback - method called when we no longer have a connection to the
+	 * message broker server
 	 */
 	@Override
-	public void onDisconnected()
-	{
+	public void onDisconnected() {
 		// we protect against the phone switching off while we're doing this
 		// by requesting a wake lock - we request the minimum possible wake
 		// lock - just enough to keep the CPU running until we've finished
-		PowerManager pm = (PowerManager) this.mHikeService.getSystemService(Context.POWER_SERVICE);
+		PowerManager pm = (PowerManager) this.mHikeService
+				.getSystemService(Context.POWER_SERVICE);
 		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
-		try
-		{
+		try {
 			wl.acquire();
 
 			//
 			// have we lost our data connection?
 			//
-			if (!Utils.isUserOnline(mHikeService))
-			{
+			if (!Utils.isUserOnline(mHikeService)) {
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
 
 				//
-				// inform the user (for times when the Activity UI isn't running)
+				// inform the user (for times when the Activity UI isn't
+				// running)
 				// that we are no longer able to receive messages
-				this.mHikeService.notifyUser("Connection lost - no network connection", "MQTT", "Connection lost - no network connection");
+				this.mHikeService.notifyUser(
+						"Connection lost - no network connection", "MQTT",
+						"Connection lost - no network connection");
 
 				//
 				// wait until the phone has a network connection again, when we
-				// the network connection receiver will fire, and attempt another
+				// the network connection receiver will fire, and attempt
+				// another
 				// connection to the broker
-			}
-			else
-			{
+			} else {
 				//
 				// we are still online
 				// the most likely reason for this connectionLost is that we've
@@ -527,53 +534,49 @@ public class HikeMqttManager implements Listener
 
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 			}
-		}
-		finally
-		{
-			// we're finished - if the phone is switched off, it's okay for the CPU
+		} finally {
+			// we're finished - if the phone is switched off, it's okay for the
+			// CPU
 			// to sleep now
 			wl.release();
 
 		}
 	}
 
-	private Topic[] getTopics()
-	{
+	private Topic[] getTopics() {
 		boolean appConnected = mHikeService.appIsConnected();
-		ArrayList<Topic> topics = new ArrayList<Topic>(2 + (appConnected ? 0 : 1));
-		topics.add(new Topic(this.topic + HikeConstants.APP_TOPIC, QoS.AT_LEAST_ONCE));
-		topics.add(new Topic(this.topic + HikeConstants.SERVICE_TOPIC, QoS.AT_LEAST_ONCE));
+		ArrayList<Topic> topics = new ArrayList<Topic>(2 + (appConnected ? 0
+				: 1));
+		topics.add(new Topic(this.topic + HikeConstants.APP_TOPIC,
+				QoS.AT_LEAST_ONCE));
+		topics.add(new Topic(this.topic + HikeConstants.SERVICE_TOPIC,
+				QoS.AT_LEAST_ONCE));
 
 		/* only subscribe to UI events if the app is currently connected */
-		if (appConnected)
-		{
-			topics.add(new Topic(this.topic + HikeConstants.UI_TOPIC, QoS.AT_LEAST_ONCE));
+		if (appConnected) {
+			topics.add(new Topic(this.topic + HikeConstants.UI_TOPIC,
+					QoS.AT_LEAST_ONCE));
 		}
 
 		return (Topic[]) topics.toArray(new Topic[0]);
 	}
 
-	public void ping()
-	{
+	public void ping() {
 		Log.d("HikeMqttManager", "calling ping");
-		if (!isConnected() || 
-				!mqttConnection.ping())
-		{
+		if (!isConnected() || !mqttConnection.ping()) {
 			Log.d("HikeMqttManager", "App isn't connected, reconnecting");
-			if (connectionStatus == MQTTConnectionStatus.CONNECTED)
-			{
+			if (connectionStatus == MQTTConnectionStatus.CONNECTED) {
 				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
 			}
 			connect();
 		}
 	}
-	
-	public void reconnect(){
-		if(this.connectionStatus == MQTTConnectionStatus.CONNECTING)
+
+	public void reconnect() {
+		if (this.connectionStatus == MQTTConnectionStatus.CONNECTING)
 			return;
-		
-		if (mqttConnection != null)
-		{
+
+		if (mqttConnection != null) {
 			mqttConnection.disconnect(new DisconnectCB(true));
 			mqttConnection = null;
 		}
@@ -581,43 +584,35 @@ public class HikeMqttManager implements Listener
 		connect();
 	}
 
-	public void connect()
-	{
-		if (isConnected())
-		{
+	public void connect() {
+		if (isConnected()) {
 			Log.d("HikeMqttManager", "already connected");
 			return;
 		}
 
-		if (Utils.isUserOnline(mHikeService))
-		{
+		if (Utils.isUserOnline(mHikeService)) {
 			Log.d("HikeMqttManager", "netconnection valid, try to connect");
 			// set the status to show we're trying to connect
 			connectToBroker();
-		}
-		else
-		{
+		} else {
 			// we can't do anything now because we don't have a working
 			// data connection
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
 		}
 	}
 
-	public void send(HikePacket packet, int qos)
-	{
-		if (!isConnected())
-		{
-			Log.d("HikeMqttManager", "trying to send " + new String(packet.getMessage()) + " but not connected. Try to connect but fail this message");
+	public void send(HikePacket packet, int qos) {
+		if (!isConnected()) {
+			Log.d("HikeMqttManager",
+					"trying to send "
+							+ new String(packet.getMessage())
+							+ " but not connected. Try to connect but fail this message");
 
 			/* only care about failures for messages we care about. */
-			if (qos > 0)
-			{
-				try
-				{
+			if (qos > 0) {
+				try {
 					persistence.addSentMessage(packet);
-				}
-				catch (MqttPersistenceException e)
-				{
+				} catch (MqttPersistenceException e) {
 					Log.e("HikeMqttManager", "Unable to persist message");
 				}
 			}
@@ -626,28 +621,35 @@ public class HikeMqttManager implements Listener
 			return;
 		}
 
-		Log.d("HikeMqttManager", "About to send message " + new String(packet.getMessage()));
+		Log.d("HikeMqttManager",
+				"About to send message " + new String(packet.getMessage()));
 		PublishCB pbCB = new PublishCB(packet);
 
-		mqttConnection.publish(new UTF8Buffer(this.topic + HikeConstants.PUBLISH_TOPIC),
-				new Buffer(packet.getMessage()), qos == 0 ? QoS.AT_MOST_ONCE : QoS.AT_LEAST_ONCE,
-				false, pbCB);
+		mqttConnection.publish(new UTF8Buffer(this.topic
+				+ HikeConstants.PUBLISH_TOPIC),
+				new Buffer(packet.getMessage()), qos == 0 ? QoS.AT_MOST_ONCE
+						: QoS.AT_LEAST_ONCE, false, pbCB);
+
+		/*
+		 * Schedule/Update the next disconnect alarm since we've just sent a
+		 * message.
+		 */
+		mHikeService.scheduleNextDisconnect();
 	}
 
-	public void unsubscribeFromUIEvents()
-	{
-		unsubscribeFromTopics(new UTF8Buffer[] { new UTF8Buffer(this.topic + HikeConstants.UI_TOPIC) });
+	public void unsubscribeFromUIEvents() {
+		unsubscribeFromTopics(new UTF8Buffer[] { new UTF8Buffer(this.topic
+				+ HikeConstants.UI_TOPIC) });
 	}
 
-	public void subscribeToUIEvents()
-	{
-		subscribeToTopics(new Topic[]{ new Topic(this.topic + HikeConstants.UI_TOPIC, QoS.AT_MOST_ONCE)});
+	public void subscribeToUIEvents() {
+		subscribeToTopics(new Topic[] { new Topic(this.topic
+				+ HikeConstants.UI_TOPIC, QoS.AT_MOST_ONCE) });
 	}
 
 	@Override
-	public void onConnected()
-	{
-		//Resetting the reconnect time
+	public void onConnected() {
+		// Resetting the reconnect time
 		reconnectTime = 0;
 
 		Log.d("HikeMqttManager", "mqtt connected");
@@ -660,47 +662,50 @@ public class HikeMqttManager implements Listener
 	}
 
 	@Override
-	public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack)
-	{
+	public void onPublish(UTF8Buffer topic, Buffer body, Runnable ack) {
 		// we protect against the phone switching off while we're doing this
 		// by requesting a wake lock - we request the minimum possible wake
 		// lock - just enough to keep the CPU running until we've finished
 
-		PowerManager pm = (PowerManager) this.mHikeService.getSystemService(Context.POWER_SERVICE);
+		PowerManager pm = (PowerManager) this.mHikeService
+				.getSystemService(Context.POWER_SERVICE);
 		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
-		try
-		{
+		try {
 			wl.acquire();
+
+			/*
+			 * Schedule/Update the next disconnect alarm since we've just
+			 * received a message.
+			 */
+			mHikeService.scheduleNextDisconnect();
 
 			String messageBody = new String(body.toByteArray());
 
 			Log.d("HikeMqttManager", "onPublish called " + messageBody);
 			JSONObject jsonObj = new JSONObject(messageBody);
 
-			/* handle saving of messages here so we don't risk losing them when the app is not open.
+			/*
+			 * handle saving of messages here so we don't risk losing them when
+			 * the app is not open.
 			 */
 			mqttMessageManager.saveMqttMessage(jsonObj);
 
 			/* don't bother saving messages for the UI topic */
-			if ((topic != null) &&
-				(topic.getString().endsWith(("/u"))))
-			{
+			if ((topic != null) && (topic.getString().endsWith(("/u")))) {
 				return;
-			}			
+			}
 
-			// receiving this message will have kept the connection alive for us, so
+			// receiving this message will have kept the connection alive for
+			// us, so
 			// we take advantage of this to postpone the next scheduled ping
 			this.mHikeService.scheduleNextPing();
 
-			// we're finished - if the phone is switched off, it's okay for the CPU
+			// we're finished - if the phone is switched off, it's okay for the
+			// CPU
 			// to sleep now
-		}
-		catch (JSONException e)
-		{
+		} catch (JSONException e) {
 			Log.e("HikeMqttManager", "invalid JSON message", e);
-		}
-		finally
-		{
+		} finally {
 			Log.d("HikeMqttManager", "About to call ack");
 			ack.run();
 			wl.release();
@@ -709,22 +714,23 @@ public class HikeMqttManager implements Listener
 	}
 
 	@Override
-	public void onFailure(Throwable value)
-	{
-		Log.e("HikeMqttManager", "onFailure called.", value);
-		disconnectFromBroker(false);
+	public void onFailure(Throwable value) {
+		try {
+			Log.e("HikeMqttManager", "onFailure called.", value);
+			disconnectFromBroker(false);
 
-		if(reconnectTime == 0)
-		{
-			Random random = new Random();
-			reconnectTime = random.nextInt(HikeConstants.RECONNECT_TIME) + 1;
-		}
-		else
-		{
-			reconnectTime *= 2;
-		}
-		reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME : reconnectTime;
+			if (reconnectTime == 0) {
+				Random random = new Random();
+				reconnectTime = random.nextInt(HikeConstants.RECONNECT_TIME) + 1;
+			} else {
+				reconnectTime *= 2;
+			}
+			reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
+					: reconnectTime;
 
-		this.mHikeService.scheduleNextPing(reconnectTime);
+			this.mHikeService.scheduleNextPing(reconnectTime);
+		} catch (Exception e) {
+			Log.e(getClass().getSimpleName(), "Exception", e);
+		}
 	}
 }

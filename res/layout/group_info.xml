@@ -219,17 +219,47 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="15dp" />
+
             <com.bsb.hike.view.CustomFontButton
+                style="@style/ProfileButtons"
                 android:id="@+id/invite_all_btn"
+                android:layout_marginBottom="10dp"
+                android:onClick="onInviteAllClicked"
+                android:text="@string/invite_all_to_hike" />
+            
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp"
-                android:background="@drawable/invite_chatthread_button"
-                android:onClick="onInviteAllClicked"
-                android:text="@string/invite_all_to_hike"
-                android:textColor="@color/invite_all"
-                android:textSize="15dp" />
+                android:orientation="horizontal" >
+
+                <com.bsb.hike.view.CustomFontButton
+                    style="@style/ProfileButtons"
+                    android:id="@+id/leave_group_btn"
+                    android:layout_weight="1"
+                    android:onClick="onLeaveGroupClicked"
+                    android:text="@string/leave_group" />
+
+                <View
+                    android:id="@+id/empty_horizontal_space"
+                    android:layout_width="3dp"
+                    android:layout_height="1dp" />
+
+                <com.bsb.hike.view.CustomFontButton
+                    style="@style/ProfileButtons"
+                    android:id="@+id/block_owner_btn"
+                    android:layout_weight="1"
+                    android:onClick="onBlockGroupOwnerClicked"
+                    android:text="@string/block_owner" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="15dp" />
         </LinearLayout>
     </ScrollView>
 

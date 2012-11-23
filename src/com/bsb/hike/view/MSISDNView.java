@@ -26,9 +26,9 @@ public class MSISDNView extends View {
 	@Override
 	public void draw(Canvas canvas) {
 		int prevWidth = 0;
-		for(int i = 0; i < msisdnRes.length; i++)
-		{
-			Bitmap bmp = BitmapFactory.decodeResource(getResources(), msisdnRes[i]);
+		for (int i = 0; i < msisdnRes.length; i++) {
+			Bitmap bmp = BitmapFactory.decodeResource(getResources(),
+					msisdnRes[i]);
 			canvas.drawBitmap(bmp, prevWidth, 0, null);
 			prevWidth += bmp.getWidth();
 		}

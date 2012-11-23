@@ -17,19 +17,17 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 
-public class HikeInviteAdapter extends HikeArrayAdapter
-{
+public class HikeInviteAdapter extends HikeArrayAdapter {
 	SparseBooleanArray checkedItems;
 
-	public HikeInviteAdapter(Activity activity, int viewItemId, SparseBooleanArray checkedItems)
-	{
+	public HikeInviteAdapter(Activity activity, int viewItemId,
+			SparseBooleanArray checkedItems) {
 		super(activity, viewItemId, getItems(activity));
 		this.activity = activity;
 		this.checkedItems = checkedItems;
 	}
 
-	private static List<ContactInfo> getItems(Activity activity)
-	{
+	private static List<ContactInfo> getItems(Activity activity) {
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		List<ContactInfo> contacts = db.getNonHikeContacts();
 		Collections.sort(contacts);
@@ -37,34 +35,32 @@ public class HikeInviteAdapter extends HikeArrayAdapter
 	}
 
 	@Override
-	protected View getItemView(int position, View convertView, ViewGroup parent)
-	{
+	protected View getItemView(int position, View convertView, ViewGroup parent) {
 		ContactInfo contactInfo = (ContactInfo) getItem(position);
-		LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) activity
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
-		if (v == null)
-		{
+		if (v == null) {
 			v = inflater.inflate(R.layout.invite_item, parent, false);
 		}
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
-		
+
 		TextView numView = (TextView) v.findViewById(R.id.number);
 		numView.setText(contactInfo.getPhoneNum());
-		if(!TextUtils.isEmpty(contactInfo.getMsisdnType()))
-		{
+		if (!TextUtils.isEmpty(contactInfo.getMsisdnType())) {
 			numView.append(" (" + contactInfo.getMsisdnType() + ")");
 		}
 
-		((CheckBox)v.findViewById(R.id.checkbox)).setChecked(checkedItems.get(position));
+		((CheckBox) v.findViewById(R.id.checkbox)).setChecked(checkedItems
+				.get(position));
 		v.setTag(contactInfo);
 		return v;
 	}
 
 	@Override
-	public String getTitle()
-	{
+	public String getTitle() {
 		return activity.getResources().getString(R.string.invite);
 	}
 

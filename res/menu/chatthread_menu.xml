@@ -7,10 +7,6 @@
 	    android:title="@string/call"
 	    android:icon="@drawable/ic_call"
 	    android:visible="true"/>    
-	<item
-        android:id="@+id/leave_menu"
-        android:title="@string/leave_group"
-        android:icon="@drawable/ic_group_leave"/>
     <item
         android:id="@+id/block_menu"
         android:title="@string/block_title"

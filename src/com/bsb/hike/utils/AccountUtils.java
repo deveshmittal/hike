@@ -1,10 +1,12 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -57,14 +59,11 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.http.GzipByteArrayEntity;
-import com.bsb.hike.http.HikeFileTransferHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.tasks.HikeHTTPTask;
 
-public class AccountUtils
-{
+public class AccountUtils {
 	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
 	public static final String STAGING_HOST = "staging.im.hike.in";
@@ -74,7 +73,7 @@ public class AccountUtils
 	public static final int STAGING_PORT = 8080;
 
 	public static String HOST = PRODUCTION_HOST;
-	
+
 	public static int PORT = PRODUCTION_PORT;
 
 	public static String BASE = "http://" + HOST + "/v1";
@@ -83,11 +82,13 @@ public class AccountUtils
 
 	public static String FILE_TRANSFER_HOST = PRODUCTION_FT_HOST;
 
-	public static String FILE_TRANSFER_UPLOAD_BASE = "http://" + FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static String FILE_TRANSFER_UPLOAD_BASE = "http://"
+			+ FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
 
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
-	public static String FILE_TRANSFER_BASE_DOWNLOAD_URL = BASE + FILE_TRANSFER_DOWNLOAD_BASE;
+	public static String FILE_TRANSFER_BASE_DOWNLOAD_URL = BASE
+			+ FILE_TRANSFER_DOWNLOAD_BASE;
 
 	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "http://hike.in/f/";
 
@@ -103,20 +104,16 @@ public class AccountUtils
 
 	private static String appVersion = null;
 
-	public static void setToken(String token)
-	{
+	public static void setToken(String token) {
 		mToken = token;
 	}
 
-	public static void setAppVersion(String version)
-	{
+	public static void setAppVersion(String version) {
 		appVersion = version;
 	}
 
-	private static synchronized HttpClient getClient()
-	{
-		if (mClient != null)
-		{
+	private static synchronized HttpClient getClient() {
+		if (mClient != null) {
 			return mClient;
 
 		}
@@ -124,89 +121,80 @@ public class AccountUtils
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 
-		/* set the connection timeout to 6 seconds, and the waiting for data timeout to 30 seconds */
+		/*
+		 * set the connection timeout to 6 seconds, and the waiting for data
+		 * timeout to 30 seconds
+		 */
 		HttpConnectionParams.setConnectionTimeout(params, 6000);
 		HttpConnectionParams.setSoTimeout(params, 30 * 1000);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), PORT));
+		schemeRegistry.register(new Scheme("http", PlainSocketFactory
+				.getSocketFactory(), PORT));
 
-		ClientConnectionManager cm = new ThreadSafeClientConnManager(params, schemeRegistry);
+		ClientConnectionManager cm = new ThreadSafeClientConnManager(params,
+				schemeRegistry);
 		mClient = new DefaultHttpClient(cm, params);
-		mClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, "android-" + appVersion);
+		mClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
+				"android-" + appVersion);
 		return mClient;
 	}
 
-	public static JSONObject executeRequest(HttpRequestBase request)
-	{
+	public static JSONObject executeRequest(HttpRequestBase request) {
 		HttpClient client = getClient();
 		HttpResponse response;
-		try
-		{
+		try {
 			Log.d("HTTP", "Performing HTTP Request " + request.getRequestLine());
 			Log.d("HTTP", "to host" + request);
 			response = client.execute(request);
 			Log.d("HTTP", "finished request");
-			if (response.getStatusLine().getStatusCode() != 200)
-			{
+			if (response.getStatusLine().getStatusCode() != 200) {
 				Log.w("HTTP", "Request Failed: " + response.getStatusLine());
 				return null;
 			}
 
 			HttpEntity entity = response.getEntity();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(entity.getContent()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					entity.getContent()));
 			StringBuilder builder = new StringBuilder();
 			CharBuffer target = CharBuffer.allocate(10000);
 			int read = reader.read(target);
-			while (read >= 0)
-			{
+			while (read >= 0) {
 				builder.append(target.array(), 0, read);
 				target.clear();
 				read = reader.read(target);
 			}
 			Log.d("HTTP", "request finished");
-			try
-			{
+			try {
 				return new JSONObject(builder.toString());
-			}
-			catch (JSONException e)
-			{
+			} catch (JSONException e) {
 				Log.e("HTTP", "Invalid JSON Response", e);
 			}
-		}
-		catch (ClientProtocolException e)
-		{
+		} catch (ClientProtocolException e) {
 			Log.e("HTTP", "Invalid Response", e);
 			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			Log.e("HTTP", "Unable to perform request", e);
 		}
 		return null;
 	}
 
-	public static int sendMessage(String phone_no, String message)
-	{
+	public static int sendMessage(String phone_no, String message) {
 		HttpPost httppost = new HttpPost(BASE + "/user/msg");
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(2);
 		pairs.add(new BasicNameValuePair("to", phone_no));
 		pairs.add(new BasicNameValuePair("body", message));
 		HttpEntity entity;
-		try
-		{
+		try {
 			entity = new UrlEncodedFormEntity(pairs);
 			httppost.setEntity(entity);
-		}
-		catch (UnsupportedEncodingException e)
-		{
+		} catch (UnsupportedEncodingException e) {
 			Log.wtf("URL", "Unable to send message " + message);
 			return -1;
 		}
 
 		JSONObject obj = executeRequest(httppost);
-		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
-		{
+		if ((obj == null) || ("fail".equals(obj.optString("stat")))) {
 			Log.w("HTTP", "Unable to send message");
 			return -1;
 		}
@@ -215,40 +203,32 @@ public class AccountUtils
 		return count;
 	}
 
-	public static void invite(String phone_no) throws UserError
-	{
+	public static void invite(String phone_no) throws UserError {
 		HttpPost httppost = new HttpPost(BASE + "/user/invite");
 		addToken(httppost);
-		try
-		{
+		try {
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>(1);
 			pairs.add(new BasicNameValuePair("to", phone_no));
 			HttpEntity entity = new UrlEncodedFormEntity(pairs);
 			httppost.setEntity(entity);
-		}
-		catch (UnsupportedEncodingException e)
-		{
+		} catch (UnsupportedEncodingException e) {
 			Log.wtf("AccountUtils", "encoding exception", e);
 			throw new UserError("Invalid PhoneNumber", -2);
 		}
 
 		JSONObject obj = executeRequest(httppost);
-		if (((obj == null) || ("fail".equals(obj.optString("stat")))))
-		{
+		if (((obj == null) || ("fail".equals(obj.optString("stat"))))) {
 			Log.i("Invite", "Couldn't invite friend: " + obj);
-			if (obj == null)
-			{
+			if (obj == null) {
 				throw new UserError("Unable to invite", -1);
-			}
-			else
-			{
-				throw new UserError(obj.optString("errorMsg"), obj.optInt("error"));
+			} else {
+				throw new UserError(obj.optString("errorMsg"),
+						obj.optInt("error"));
 			}
 		}
 	}
 
-	public static class AccountInfo
-	{
+	public static class AccountInfo {
 		public String token;
 
 		public String msisdn;
@@ -261,8 +241,8 @@ public class AccountUtils
 
 		public int all_invitee_joined;
 
-		public AccountInfo(String token, String msisdn, String uid, int smsCredits, int all_invitee, int all_invitee_joined)
-		{
+		public AccountInfo(String token, String msisdn, String uid,
+				int smsCredits, int all_invitee, int all_invitee_joined) {
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
@@ -272,27 +252,26 @@ public class AccountUtils
 		}
 	}
 
-	public static AccountInfo registerAccount(Context context, String pin, String unAuthMSISDN)
-	{
+	public static AccountInfo registerAccount(Context context, String pin,
+			String unAuthMSISDN) {
 		HttpPost httppost = new HttpPost(BASE + "/account");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
-		try
-		{
-			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		try {
+			TelephonyManager manager = (TelephonyManager) context
+					.getSystemService(Context.TELEPHONY_SERVICE);
 
 			String osVersion = Build.VERSION.RELEASE;
-			String deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
+			String deviceId = Secure.getString(context.getContentResolver(),
+					Secure.ANDROID_ID);
 			String os = HikeConstants.ANDROID;
 			String carrier = manager.getNetworkOperatorName();
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
 			String appVersion = "";
-			try
-			{
-				appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0 ).versionName;
-			}
-			catch (NameNotFoundException e)
-			{
+			try {
+				appVersion = context.getPackageManager().getPackageInfo(
+						context.getPackageName(), 0).versionName;
+			} catch (NameNotFoundException e) {
 				Log.e("AccountUtils", "Unable to get app version");
 			}
 
@@ -302,42 +281,44 @@ public class AccountUtils
 			data.put("devicetoken", deviceId);
 			data.put("deviceversion", device);
 			data.put("appversion", appVersion);
-			data.put("invite_token", context.getSharedPreferences(HikeMessengerApp.REFERRAL, Context.MODE_PRIVATE).getString("utm_source", ""));
+			data.put(
+					"invite_token",
+					context.getSharedPreferences(HikeMessengerApp.REFERRAL,
+							Context.MODE_PRIVATE).getString("utm_source", ""));
 
-			if (pin != null)
-			{
+			if (pin != null) {
 				data.put("msisdn", unAuthMSISDN);
 				data.put("pin", pin);
 			}
 			Log.d("AccountUtils", "Creating Account " + data.toString());
-			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity = new GzipByteArrayEntity(data.toString().getBytes(),
+					HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");
 			httppost.setEntity(entity);
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
-		}
-		catch (JSONException e)
-		{
-			Log.wtf("AccountUtils", "creating a string entity from an entry string threw!", e);
+		} catch (UnsupportedEncodingException e) {
+			Log.wtf("AccountUtils",
+					"creating a string entity from an entry string threw!", e);
+		} catch (JSONException e) {
+			Log.wtf("AccountUtils",
+					"creating a string entity from an entry string threw!", e);
 		}
 		httppost.setEntity(entity);
 
 		JSONObject obj = executeRequest(httppost);
-		if ((obj == null))
-		{
+		if ((obj == null)) {
 			Log.w("HTTP", "Unable to create account");
 			// raise an exception?
 			return null;
 		}
 
 		Log.d("AccountUtils", "AccountCreation " + obj.toString());
-		if("fail".equals(obj.optString("stat")))
-		{
-			if(pin != null)
+		if ("fail".equals(obj.optString("stat"))) {
+			if (pin != null)
 				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
-			/* represents normal account creation , when user is on wifi and account creation failed */
+			/*
+			 * represents normal account creation , when user is on wifi and
+			 * account creation failed
+			 */
 			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
 		}
 		String token = obj.optString("token");
@@ -347,101 +328,90 @@ public class AccountUtils
 		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
 		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
 
-		Log.d("HTTP", "Successfully created account token:" + token + "msisdn: " + msisdn + " uid: " + uid);
-		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits, all_invitee, all_invitee_joined);
+		Log.d("HTTP", "Successfully created account token:" + token
+				+ "msisdn: " + msisdn + " uid: " + uid);
+		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits,
+				all_invitee, all_invitee_joined);
 	}
 
-	public static String validateNumber(String number)
-	{
+	public static String validateNumber(String number) {
 		HttpPost httppost = new HttpPost(BASE + "/account/validate");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
-		try
-		{
+		try {
 			data.put("phone_no", number);
-			entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			entity = new GzipByteArrayEntity(data.toString().getBytes(),
+					HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");
 			httppost.setEntity(entity);
-		}
-		catch (UnsupportedEncodingException e)
-		{
+		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		catch (JSONException e)
-		{
-			Log.e("AccountUtils", "creating a string entity from an entry string threw!", e);
+		} catch (JSONException e) {
+			Log.e("AccountUtils",
+					"creating a string entity from an entry string threw!", e);
 		}
 
 		JSONObject obj = executeRequest(httppost);
-		if (obj == null)
-		{
+		if (obj == null) {
 			Log.w("HTTP", "Unable to Validate Phone Number.");
 			// raise an exception?
 			return null;
 		}
-		
+
 		String msisdn = obj.optString("msisdn");
 		Log.d("HTTP", "Successfully validated phone number.");
 		return msisdn;
 	}
 
-	private static void addToken(HttpRequestBase req)
-	{
+	private static void addToken(HttpRequestBase req) {
 		req.addHeader("Cookie", "user=" + mToken);
 		throwExceptionIfTokenIsEmpty();
 	}
 
-	private static void throwExceptionIfTokenIsEmpty()
-	{
-		if(TextUtils.isEmpty(mToken))
-		{
+	private static void throwExceptionIfTokenIsEmpty() {
+		if (TextUtils.isEmpty(mToken)) {
 			throw new IllegalStateException("Token is null");
 		}
 	}
 
-	public static void setName(String name) throws NetworkErrorException
-	{
+	public static void setName(String name) throws NetworkErrorException {
 		HttpPost httppost = new HttpPost(BASE + "/account/name");
 		addToken(httppost);
 		JSONObject data = new JSONObject();
 
-		try
-		{
+		try {
 			data.put("name", name);
-			AbstractHttpEntity entity = new GzipByteArrayEntity(data.toString().getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+			AbstractHttpEntity entity = new GzipByteArrayEntity(data.toString()
+					.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType("application/json");
 			httppost.setEntity(entity);
 			JSONObject obj = executeRequest(httppost);
-			if ((obj == null) || (!"ok".equals(obj.optString("stat"))))
-			{
+			if ((obj == null) || (!"ok".equals(obj.optString("stat")))) {
 				throw new NetworkErrorException("Unable to set name");
 			}
-		}
-		catch (JSONException e)
-		{
+		} catch (JSONException e) {
 			Log.wtf("AccountUtils", "Unable to encode name as JSON");
-		}
-		catch (UnsupportedEncodingException e)
-		{
+		} catch (UnsupportedEncodingException e) {
 			Log.wtf("AccountUtils", "Unable to encode name");
 		}
 	}
 
-	public static JSONObject postAddressBook(String token, Map<String, List<ContactInfo>> contactsMap) throws IllegalStateException, IOException
-	{
+	public static JSONObject postAddressBook(String token,
+			Map<String, List<ContactInfo>> contactsMap)
+			throws IllegalStateException, IOException {
 		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
 		addToken(httppost);
 		JSONObject data;
 		data = getJsonContactList(contactsMap);
-		if (data == null)
-		{
+		if (data == null) {
 			return null;
 		}
 		String encoded = data.toString();
 
-		Log.d("ACCOUNT UTILS","Json data is : "+encoded);
-		AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(), HTTP.DEFAULT_CONTENT_CHARSET);
+		Log.d("ACCOUNT UTILS", "Json data is : " + encoded);
+		AbstractHttpEntity entity = new GzipByteArrayEntity(encoded.getBytes(),
+				HTTP.DEFAULT_CONTENT_CHARSET);
 		entity.setContentType("application/json");
 		httppost.setEntity(entity);
 		JSONObject obj = executeRequest(httppost);
@@ -451,24 +421,24 @@ public class AccountUtils
 	/**
 	 * 
 	 * @param new_contacts_by_id
-	 *            new entries to update with. These will replace contact IDs on the server
+	 *            new entries to update with. These will replace contact IDs on
+	 *            the server
 	 * @param ids_json
-	 *            , these are ids that are no longer present and should be removed
+	 *            , these are ids that are no longer present and should be
+	 *            removed
 	 * @return
 	 */
-	public static List<ContactInfo> updateAddressBook(Map<String, List<ContactInfo>> new_contacts_by_id, JSONArray ids_json)
-	{
+	public static List<ContactInfo> updateAddressBook(
+			Map<String, List<ContactInfo>> new_contacts_by_id,
+			JSONArray ids_json) {
 		HttpPatch request = new HttpPatch(BASE + "/account/addressbook");
 		addToken(request);
 		JSONObject data = new JSONObject();
 
-		try
-		{
+		try {
 			data.put("remove", ids_json);
 			data.put("update", getJsonContactList(new_contacts_by_id));
-		}
-		catch (JSONException e)
-		{
+		} catch (JSONException e) {
 			Log.e("AccountUtils", "Invalid JSON put", e);
 			return null;
 		}
@@ -483,98 +453,81 @@ public class AccountUtils
 		return getContactList(obj, new_contacts_by_id);
 	}
 
-	private static JSONObject getJsonContactList(Map<String, List<ContactInfo>> contactsMap)
-	{
+	private static JSONObject getJsonContactList(
+			Map<String, List<ContactInfo>> contactsMap) {
 		JSONObject updateContacts = new JSONObject();
-		for (String id : contactsMap.keySet())
-		{
-			try
-			{
+		for (String id : contactsMap.keySet()) {
+			try {
 				List<ContactInfo> list = contactsMap.get(id);
 				JSONArray contactInfoList = new JSONArray();
-				for (ContactInfo cInfo : list)
-				{
+				for (ContactInfo cInfo : list) {
 					JSONObject contactInfo = new JSONObject();
 					contactInfo.put("name", cInfo.getName());
 					contactInfo.put("phone_no", cInfo.getPhoneNum());
 					contactInfoList.put(contactInfo);
 				}
 				updateContacts.put(id, contactInfoList);
-			}
-			catch (JSONException e)
-			{
-				Log.d("ACCOUNT UTILS", "Json exception while getting contact list.");
+			} catch (JSONException e) {
+				Log.d("ACCOUNT UTILS",
+						"Json exception while getting contact list.");
 				e.printStackTrace();
 			}
 		}
 		return updateContacts;
 	}
 
-	public static List<ContactInfo> getContactList(JSONObject obj, Map<String, List<ContactInfo>> new_contacts_by_id)
-	{
+	public static List<ContactInfo> getContactList(JSONObject obj,
+			Map<String, List<ContactInfo>> new_contacts_by_id) {
 		List<ContactInfo> server_contacts = new ArrayList<ContactInfo>();
 		JSONObject addressbook;
-		try
-		{
-			if ((obj == null) || ("fail".equals(obj.optString("stat"))))
-			{
+		try {
+			if ((obj == null) || ("fail".equals(obj.optString("stat")))) {
 				Log.w("HTTP", "Unable to upload address book");
 				// TODO raise a real exception here
 				return null;
 			}
 			Log.d("AccountUtils", "Reply from addressbook:" + obj.toString());
 			addressbook = obj.getJSONObject("addressbook");
-		}
-		catch (JSONException e)
-		{
+		} catch (JSONException e) {
 			Log.e("AccountUtils", "Invalid json object", e);
 			return null;
 		}
 
-		for (Iterator<?> it = addressbook.keys(); it.hasNext();)
-		{
+		for (Iterator<?> it = addressbook.keys(); it.hasNext();) {
 			String id = (String) it.next();
 			JSONArray entries = addressbook.optJSONArray(id);
 			List<ContactInfo> cList = new_contacts_by_id.get(id);
-			for (int i = 0; i < entries.length(); ++i)
-			{
+			for (int i = 0; i < entries.length(); ++i) {
 				JSONObject entry = entries.optJSONObject(i);
 				String msisdn = entry.optString("msisdn");
 				boolean onhike = entry.optBoolean("onhike");
-				ContactInfo info = new ContactInfo(id, msisdn, cList.get(i).getName(), cList.get(i).getPhoneNum(), onhike);
+				ContactInfo info = new ContactInfo(id, msisdn, cList.get(i)
+						.getName(), cList.get(i).getPhoneNum(), onhike);
 				server_contacts.add(info);
 			}
 		}
 		return server_contacts;
 	}
-	
-	
-	public static List<String> getBlockList(JSONObject obj)
-	{
+
+	public static List<String> getBlockList(JSONObject obj) {
 		JSONArray blocklist;
 		List<String> blockListMsisdns = new ArrayList<String>();
-		if ((obj == null) || ("fail".equals(obj.optString("stat"))))
-		{
+		if ((obj == null) || ("fail".equals(obj.optString("stat")))) {
 			Log.w("HTTP", "Unable to upload address book");
 			// TODO raise a real exception here
 			return null;
 		}
 		Log.d("AccountUtils", "Reply from addressbook:" + obj.toString());
 		blocklist = obj.optJSONArray("blocklist");
-		if(blocklist==null)
-		{
+		if (blocklist == null) {
 			Log.e("AccountUtils", "Received blocklist as null");
 			return null;
-		}	
+		}
 
-		for(int i=0; i<blocklist.length(); i++)
-		{
-			try
-			{
+		for (int i = 0; i < blocklist.length(); i++) {
+			try {
 				blockListMsisdns.add(blocklist.getString(i));
-			}
-			catch (JSONException e)
-			{
+			} catch (JSONException e) {
 				Log.e("AccountUtils", "Invalid json object", e);
 				return null;
 			}
@@ -582,56 +535,43 @@ public class AccountUtils
 		return blockListMsisdns;
 	}
 
-	public static void deleteOrUnlinkAccount(boolean deleteAccount) throws NetworkErrorException
-	{
-		HttpRequestBase request = deleteAccount ? new HttpDelete(BASE + "/account") : new HttpPost(BASE + "/account/unlink");
+	public static void deleteOrUnlinkAccount(boolean deleteAccount)
+			throws NetworkErrorException {
+		HttpRequestBase request = deleteAccount ? new HttpDelete(BASE
+				+ "/account") : new HttpPost(BASE + "/account/unlink");
 		addToken(request);
 		JSONObject obj = executeRequest(request);
-		if ((obj == null) || "fail".equals(obj.optString("stat")))
-		{
+		if ((obj == null) || "fail".equals(obj.optString("stat"))) {
 			throw new NetworkErrorException("Could not delete account");
 		}
 	}
 
-	public static void performRequest(HikeHttpRequest hikeHttpRequest, boolean addToken) throws NetworkErrorException
-	{
+	public static void performRequest(HikeHttpRequest hikeHttpRequest,
+			boolean addToken) throws NetworkErrorException {
 		HttpPost post = new HttpPost(BASE + hikeHttpRequest.getPath());
-		if(addToken)
-		{
+		if (addToken) {
 			addToken(post);
 		}
-		try
-		{
-			AbstractHttpEntity entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
+		try {
+			AbstractHttpEntity entity = new GzipByteArrayEntity(
+					hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
 			entity.setContentType(hikeHttpRequest.getContentType());
 			post.setEntity(entity);
 			JSONObject obj = executeRequest(post);
 			Log.d("AccountUtils", "Response: " + obj);
-			if ((obj == null) || (!"ok".equals(obj.optString("stat"))))
-			{
+			if ((obj == null) || (!"ok".equals(obj.optString("stat")))) {
 				throw new NetworkErrorException("Unable to perform request");
 			}
-		}
-		catch (UnsupportedEncodingException e)
-		{
+		} catch (UnsupportedEncodingException e) {
 			Log.wtf("AccountUtils", "Unable to encode name");
 		}
 	}
 
-	public static JSONObject executeFileTransferRequest(HikeFileTransferHttpRequest hikeHttpRequest, String fileName, HikeHTTPTask hikeHTTPTask, AtomicBoolean cancelUpload, String fileType) throws Exception
-	{
-		// Always start download with some initial progress
-		int progress = HikeConstants.INITIAL_PROGRESS;
-		hikeHTTPTask.updateProgress(progress);
-
-		File file = new File(hikeHttpRequest.getFilePath());
-		FileInputStream fileInputStream = new FileInputStream(file);
-
-		URL url;
-		url = new URL(FILE_TRANSFER_UPLOAD_BASE + hikeHttpRequest.getPath());
+	private static HttpURLConnection getFileTransferURLConnection(
+			String fileName, String fileType) throws Exception {
+		URL url = new URL(FILE_TRANSFER_UPLOAD_BASE + "/user/ft");
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 		connection.setUseCaches(false);
@@ -641,15 +581,72 @@ public class AccountUtils
 		connection.setConnectTimeout(150 * 1000);
 		connection.setRequestProperty("Connection", "Keep-Alive");
 		connection.setRequestProperty("Content-Name", fileName);
-		connection.setRequestProperty("Content-Type", TextUtils.isEmpty(fileType) ? "" : fileType);
+		connection.setRequestProperty("Content-Type",
+				TextUtils.isEmpty(fileType) ? "" : fileType);
 		connection.setRequestProperty("Content-Encoding", "gzip");
 		connection.setRequestProperty("Cookie", "user=" + mToken);
 		connection.setRequestProperty("X-Thumbnail-Required", "0");
 
-		DataOutputStream outputStream = new DataOutputStream(connection.getOutputStream());
+		return connection;
+	}
 
-		int bytesAvailable = (int) file.length();
-		Log.d("Size",bytesAvailable+"");
+	private static JSONObject getFileTransferResponse(
+			HttpURLConnection connection, FileTransferTaskBase uploadTask,
+			AtomicBoolean cancelUpload) throws Exception {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+
+		int progress = 90;
+		uploadTask.updateProgress(progress);
+
+		StringBuilder builder = new StringBuilder();
+		CharBuffer target = CharBuffer.allocate(10000);
+		int read = reader.read(target);
+		while (read >= 0) {
+			builder.append(target.array(), 0, read);
+			target.clear();
+			read = reader.read(target);
+			if (cancelUpload.get()) {
+				throw new Exception("Upload cancelled by user");
+			}
+		}
+		progress = 100;
+		uploadTask.updateProgress(progress);
+
+		Log.d("AccountUtils", "Response: " + builder.toString());
+		return new JSONObject(builder.toString());
+	}
+
+	public static JSONObject executeFileTransferRequest(String filePath,
+			String fileName, JSONObject request,
+			FileTransferTaskBase uploadFileTask, AtomicBoolean cancelUpload,
+			String fileType) throws Exception {
+		// Always start download with some initial progress
+		int progress = HikeConstants.INITIAL_PROGRESS;
+		uploadFileTask.updateProgress(progress);
+
+		InputStream fileInputStream;
+		int bytesAvailable;
+		int maxSize;
+
+		if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType)) {
+			File file = new File(filePath);
+			fileInputStream = new FileInputStream(file);
+			bytesAvailable = (int) file.length();
+		} else {
+			byte[] bytes = request.toString().getBytes();
+			fileInputStream = new ByteArrayInputStream(bytes);
+			bytesAvailable = bytes.length;
+		}
+		maxSize = bytesAvailable;
+
+		HttpURLConnection connection = getFileTransferURLConnection(fileName,
+				fileType);
+
+		DataOutputStream outputStream = new DataOutputStream(
+				connection.getOutputStream());
+
+		Log.d("Size", bytesAvailable + "");
 
 		int maxBufferSize = HikeConstants.MAX_BUFFER_SIZE_KB * 1024;
 		int bufferSize = Math.min(bytesAvailable, maxBufferSize);
@@ -657,79 +654,60 @@ public class AccountUtils
 
 		// Read file
 		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-		byte[] gzippedBuffer = GzipByteArrayEntity.gzip(buffer, HTTP.DEFAULT_CONTENT_CHARSET);
+		byte[] gzippedBuffer = GzipByteArrayEntity.gzip(buffer,
+				HTTP.DEFAULT_CONTENT_CHARSET);
 		int totalBytesRead = bytesRead;
 
-		while (bytesRead > 0)
-		{
+		while (bytesRead > 0) {
 			outputStream.write(gzippedBuffer, 0, gzippedBuffer.length);
 
 			bytesAvailable = fileInputStream.available();
-			Log.d("Available",bytesAvailable+"");
+			Log.d("Available", bytesAvailable + "");
 
 			bufferSize = Math.min(bytesAvailable, maxBufferSize);
 			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-			gzippedBuffer = GzipByteArrayEntity.gzip(buffer, HTTP.DEFAULT_CONTENT_CHARSET);
+			gzippedBuffer = GzipByteArrayEntity.gzip(buffer,
+					HTTP.DEFAULT_CONTENT_CHARSET);
 			totalBytesRead += bytesRead;
 
-			progress = HikeConstants.INITIAL_PROGRESS + (bytesRead > 0 ? (int) ((totalBytesRead * 75)/file.length()) : 75);
-			hikeHTTPTask.updateProgress(progress);
+			progress = HikeConstants.INITIAL_PROGRESS
+					+ (bytesRead > 0 ? (int) ((totalBytesRead * 75) / maxSize)
+							: 75);
+			uploadFileTask.updateProgress(progress);
 
 			Thread.sleep(100);
-			if(cancelUpload.get())
-			{
+			if (cancelUpload.get()) {
 				throw new Exception("Upload cancelled by user");
 			}
 		}
 
-		BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-
-		progress = 90;
-		hikeHTTPTask.updateProgress(progress);
-
-		StringBuilder builder = new StringBuilder();
-		CharBuffer target = CharBuffer.allocate(10000);
-		int read = reader.read(target);
-		while (read >= 0)
-		{
-			builder.append(target.array(), 0, read);
-			target.clear();
-			read = reader.read(target);
-			if(cancelUpload.get())
-			{
-				throw new Exception("Upload cancelled by user");
-			}
-		}
-		progress = 100;
-		hikeHTTPTask.updateProgress(progress);
+		JSONObject response = getFileTransferResponse(connection,
+				uploadFileTask, cancelUpload);
 
 		Log.d("HTTP", "request finished");
 		outputStream.flush();
 		outputStream.close();
+		fileInputStream.close();
 
-		Log.d("AccountUtils", "Response: " + builder.toString());
-		JSONObject response = new JSONObject(builder.toString());
-		if ((response == null) || (!"ok".equals(response.optString("stat"))))
-		{
+		if ((response == null) || (!"ok".equals(response.optString("stat")))) {
 			throw new NetworkErrorException("Unable to perform request");
 		}
 		return response;
 	}
 
-	public static void deleteSocialCredentials(boolean facebook) throws NetworkErrorException
-	{
-		String url = facebook ? "/account/connect/fb" : "/account/connect/twitter";
+	public static void deleteSocialCredentials(boolean facebook)
+			throws NetworkErrorException {
+		String url = facebook ? "/account/connect/fb"
+				: "/account/connect/twitter";
 		HttpDelete delete = new HttpDelete(BASE + url);
 		addToken(delete);
 		JSONObject obj = executeRequest(delete);
-		if ((obj == null) || "fail".equals(obj.optString("stat")))
-		{
+		if ((obj == null) || "fail".equals(obj.optString("stat"))) {
 			throw new NetworkErrorException("Could not delete account");
 		}
 	}
 
-	public static String getServerUrl()
-	{
+	public static String getServerUrl() {
 		return BASE;
 	}
 }

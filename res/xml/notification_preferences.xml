@@ -21,11 +21,11 @@
 
 	<com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_sms"
-        android:defaultValue="false"
-        android:key="smsPref"
+        android:defaultValue="true"
+        android:key="freeSmsPref"
         android:layout="@layout/icon_preference"
-        android:summary="All SMS received will be shown in hike*"
-        android:title="Default SMS client"
+        android:summary="Turn on to send free SMS to India"
+        android:title="Send free SMS to India"
         android:widgetLayout="@layout/checkbox_widget" />    
 
 </PreferenceScreen>

@@ -1,251 +1,442 @@
 package com.bsb.hike.adapters;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import android.content.Context;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
 
-public class DrawerFavoritesAdapter extends BaseAdapter 
-{
-	private List<ContactInfo> contactList;
+public class DrawerFavoritesAdapter extends BaseAdapter implements
+		OnClickListener {
+	private List<ContactInfo> completeList;
 	private LayoutInflater layoutInflater;
 	private Context context;
 
-	private int favoriteCount;
+	private List<ContactInfo> recommendedFavoriteList;
+	private List<ContactInfo> favoriteList;
+	private List<ContactInfo> onHikeList;
+	private List<ContactInfo> recentList;
 
-	public static final String FAVORITES_SECTION_ID = "-911";
-	public static final String RECENTS_SECTION_ID = "-912";
+	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
 
-	public static final int IMAGE_BOUNDS = (int) (30 * Utils.densityMultiplier);
+	public static final int IMAGE_BOUNDS = (int) (40 * Utils.densityMultiplier);
 
-	public static enum FavoriteAdapterViewType
-	{
-		SECTION,
-		FAVORITE,
-		EMPTY_FAVORITE,
-		RECENT
+	public static final int ITEM_HEIGHT = (int) (55 * Utils.densityMultiplier);
+
+	public static enum FavoriteAdapterViewType {
+		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, RECOMMENDED_FAVORITE
 	}
 
-	public DrawerFavoritesAdapter(List<ContactInfo> contactList, int favoriteCount, Context context)
-	{
-		this.contactList = contactList;
-		this.favoriteCount = favoriteCount;
+	public DrawerFavoritesAdapter(Context context) {
+		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
+
+		recommendedFavoriteList = hikeUserDatabase
+				.getContactsOrderedByLastMessaged(-1,
+						FavoriteType.RECOMMENDED_FAVORITE,
+						HikeConstants.BOTH_VALUE, true, false, -1);
+
+		favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
+				FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE, true, false,
+				-1);
+
+		onHikeList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
+				FavoriteType.NOT_FAVORITE, HikeConstants.ON_HIKE_VALUE, true,
+				false, -1);
+
+		recentList = hikeUserDatabase.getNonHikeRecentContacts(-1, true,
+				FavoriteType.NOT_FAVORITE);
+
+		completeList = new ArrayList<ContactInfo>();
+		makeCompleteList();
+
 		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
 	}
 
-	public void addFavoriteItem(ContactInfo contactInfo)
-	{
-		/*
-		 *  We first check if we are showing the empty favorites item.
-		 *  If we are, we remove it before adding the new favorite.
-		 */
-		if(EMPTY_FAVORITES_ID.equals(getItem(1).getId()))
-		{
-			contactList.remove(1);
-		}
-		// Remove from the recents list.
-		contactList.remove(contactInfo);
-		contactList.add(1, contactInfo);
-		favoriteCount++;
+	private void makeCompleteList() {
+		completeList.clear();
 
+		// Contact for "Favorite Section"
+		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				null, HikeConstants.FAVORITES, null));
+
+		/*
+		 * If favorite list is empty, we add an element to show the empty view
+		 * in the listview.
+		 */
+		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
+			completeList
+					.add(new ContactInfo(
+							DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null,
+							null, null));
+		} else {
+			completeList.addAll(recommendedFavoriteList);
+			completeList.addAll(favoriteList);
+		}
+
+		// Contact for "On Hike Section"
+		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				null, HikeConstants.FRIENDS_ON_HIKE, null));
+		completeList.addAll(onHikeList);
+
+		// Contact for "Recent Section"
+		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				null, HikeMessengerApp.isIndianUser() ? HikeConstants.RECENT
+						: HikeConstants.INVITE_FRIENDS, null));
+
+		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
+				: recentList.size();
+		completeList.addAll(recentList.subList(0, recentListLastElement));
 		notifyDataSetChanged();
 	}
 
-	public void updateRecentContactsList(ContactInfo contactInfo)
-	{
-		// Return if object is null or we have a non hike contact
-		if(contactInfo == null || !contactInfo.isOnhike())
-		{
-			Log.d(getClass().getSimpleName(), "Null contact or SMS contact");
+	public void addFavoriteItem(ContactInfo contactInfo) {
+		/*
+		 * We first check if we are showing the empty favorites item. If we are,
+		 * we remove it before adding the new favorite.
+		 */
+		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
+			completeList.remove(1);
+		}
+		// Remove from the other lists.
+		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
+		removeContactFromListByMatchingMsisdn(recommendedFavoriteList,
+				contactInfo);
+		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
+
+		favoriteList.add(0, contactInfo);
+
+		makeCompleteList();
+	}
+
+	public void addRecommendedFavoriteItem(ContactInfo contactInfo) {
+		/*
+		 * We first check if we are showing the empty favorites item. If we are,
+		 * we remove it before adding the new favorite.
+		 */
+		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
+			completeList.remove(1);
+		}
+		// Remove from the recents list.
+		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
+		recommendedFavoriteList.add(0, contactInfo);
+
+		makeCompleteList();
+	}
+
+	public void addAutoRecommendedFavorites(List<ContactInfo> contactInfoList) {
+		recommendedFavoriteList.addAll(contactInfoList);
+
+		recentList.removeAll(contactInfoList);
+		onHikeList.removeAll(contactInfoList);
+
+		makeCompleteList();
+	}
+
+	public void removeFavoriteItem(ContactInfo contactInfo) {
+		removeContactFromListByMatchingMsisdn(recommendedFavoriteList,
+				contactInfo);
+		removeContactFromListByMatchingMsisdn(favoriteList, contactInfo);
+
+		/*
+		 * Adding the contact back to the recents list based on whether the
+		 * contact is on hike or not since the contact was removed from the
+		 * favorites list.
+		 */
+		List<ContactInfo> listToSort;
+		if (contactInfo.isOnhike()) {
+			(listToSort = onHikeList).add(contactInfo);
+		} else {
+			(listToSort = recentList).add(contactInfo);
+		}
+		Collections.sort(listToSort, new Comparator<ContactInfo>() {
+			@Override
+			public int compare(ContactInfo lhs, ContactInfo rhs) {
+				if (lhs.getLastMessaged() != rhs.getLastMessaged()) {
+					return -((Long) lhs.getLastMessaged()).compareTo(rhs
+							.getLastMessaged());
+				} else {
+					return (lhs.getName().toLowerCase()).compareTo(rhs
+							.getName().toLowerCase());
+				}
+			}
+		});
+
+		makeCompleteList();
+	}
+
+	public void updateRecentContactsList(ContactInfo contactInfo) {
+		// Return if object is null or its a favorite contact
+		if (contactInfo == null
+				|| (contactInfo.getFavoriteType() == FavoriteType.FAVORITE)) {
+			Log.d(getClass().getSimpleName(), "Null contact");
 			return;
 		}
 
-		int presentIndex = contactList.indexOf(contactInfo);
-		/*
-		 * Calculating the index at which the contact need to be inserted.
-		 * We need to consider the favorites list and the two sections.
-		 */
-		int indexToInsertAt = Math.max(1, favoriteCount) + 2;
+		// Remove the contact if it already exists
+		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
+		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
 
-		if(presentIndex != -1 && (presentIndex < indexToInsertAt))
-		{
-			Log.d(getClass().getSimpleName(), "contact alread a favortie");
-			// This would be true if the contact is currently a favorite.
-			return;
+		if (contactInfo.isOnhike()) {
+			onHikeList.add(0, contactInfo);
+		} else {
+			recentList.add(0, contactInfo);
+			/*
+			 * If we added a new contact then we delete the last item to
+			 * maintain uniformity in size.
+			 */
+			if (recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE) {
+				recentList.remove(recentList.size() - 1);
+			}
 		}
-		/*
-		 * Remove the contact if it already exists in the list.
-		 */
-		boolean newContact = !contactList.remove(contactInfo);
+		makeCompleteList();
+	}
 
-		contactList.add(indexToInsertAt, contactInfo);
-		/*
-		 * If we added a new contact then we delete the last item to maintain uniformity in size.
-		 */
-		if(newContact)
-		{
-			contactList.remove(contactList.size() - 1);
+	private void removeContactFromListByMatchingMsisdn(
+			List<ContactInfo> contactList, ContactInfo contactInfo) {
+
+		List<ContactInfo> deleteContactList = new ArrayList<ContactInfo>();
+		for (ContactInfo listContact : contactList) {
+			if (listContact.getMsisdn().equals(contactInfo.getMsisdn())) {
+				deleteContactList.add(listContact);
+			}
 		}
-		notifyDataSetChanged();
+		contactList.removeAll(deleteContactList);
 	}
 
 	@Override
-	public boolean areAllItemsEnabled() 
-	{
+	public boolean areAllItemsEnabled() {
 		return false;
 	}
 
 	@Override
-	public int getItemViewType(int position) 
-	{
+	public int getItemViewType(int position) {
 		ContactInfo contactInfo = getItem(position);
-		if(FAVORITES_SECTION_ID.equals(contactInfo.getId()) || RECENTS_SECTION_ID.equals(contactInfo.getId()))
-		{
+		if (SECTION_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.SECTION.ordinal();
-		}
-		else if(EMPTY_FAVORITES_ID.equals(contactInfo.getId()))
-		{
+		} else if (EMPTY_FAVORITES_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
-		}
-		/*
-		 *  Recent items will be the last ones in the list so their position will start after favorites. We add the
-		 *  two to include the 2 sections as well. If we have no favorites, we still add a 1 since we are showing an
-		 *  extra item even if there are no favorites.
-		 */
-		else if(position > Math.max(1, favoriteCount) + 1)
-		{
+		} else if (contactInfo.getFavoriteType() == FavoriteType.NOT_FAVORITE) {
 			return FavoriteAdapterViewType.RECENT.ordinal();
+		} else if (contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE
+				|| contactInfo.getFavoriteType() == FavoriteType.AUTO_RECOMMENDED_FAVORITE) {
+			return FavoriteAdapterViewType.RECOMMENDED_FAVORITE.ordinal();
 		}
 		return FavoriteAdapterViewType.FAVORITE.ordinal();
 	}
 
 	@Override
-	public int getViewTypeCount() 
-	{
+	public int getViewTypeCount() {
 		return FavoriteAdapterViewType.values().length;
 	}
 
 	@Override
-	public boolean isEnabled(int position) 
-	{
-		if(getItemViewType(position) == FavoriteAdapterViewType.SECTION.ordinal())
-		{
+	public boolean isEnabled(int position) {
+		FavoriteAdapterViewType viewType = FavoriteAdapterViewType.values()[getItemViewType(position)];
+		if (viewType == FavoriteAdapterViewType.EMPTY_FAVORITE
+				|| viewType == FavoriteAdapterViewType.SECTION) {
 			return false;
 		}
 		return true;
 	}
 
 	@Override
-	public int getCount() 
-	{
-		return contactList.size();
+	public int getCount() {
+		return completeList.size();
 	}
 
 	@Override
-	public ContactInfo getItem(int position) 
-	{
-		return contactList.get(position);
+	public ContactInfo getItem(int position) {
+		return completeList.get(position);
 	}
 
 	@Override
-	public long getItemId(int position) 
-	{
+	public long getItemId(int position) {
 		return position;
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) 
-	{
+	public View getView(int position, View convertView, ViewGroup parent) {
 		ContactInfo contactInfo = getItem(position);
 		FavoriteAdapterViewType viewType = FavoriteAdapterViewType.values()[getItemViewType(position)];
 
 		ViewHolder viewHolder;
 
-		if(convertView == null)
-		{
+		if (convertView == null) {
 			viewHolder = new ViewHolder();
 
-			switch (viewType) 
-			{
+			switch (viewType) {
 			case RECENT:
 			case FAVORITE:
-				convertView = layoutInflater.inflate(R.layout.drawer_item, null);
+				convertView = layoutInflater
+						.inflate(R.layout.drawer_item, null);
 
-				viewHolder.addImg = (ImageView) convertView.findViewById(R.id.add_fav);
-				viewHolder.avatarImg = (ImageView) convertView.findViewById(R.id.item_icon);
-				viewHolder.name = (TextView) convertView.findViewById(R.id.item_name);
+				viewHolder.addImg = (ImageView) convertView
+						.findViewById(R.id.add_fav);
+				viewHolder.avatarImg = (ImageView) convertView
+						.findViewById(R.id.item_icon);
+				viewHolder.name = (TextView) convertView
+						.findViewById(R.id.item_name);
 				break;
 
 			case SECTION:
-				convertView = (TextView) layoutInflater.inflate(R.layout.drawer_section, null);
+				convertView = (TextView) layoutInflater.inflate(
+						R.layout.drawer_section, null);
 				break;
 
 			case EMPTY_FAVORITE:
-				convertView = layoutInflater.inflate(R.layout.empty_favorites, null);
+				convertView = layoutInflater.inflate(R.layout.empty_favorites,
+						null);
 
-				viewHolder.name = (TextView) convertView.findViewById(R.id.item_txt);
+				viewHolder.name = (TextView) convertView
+						.findViewById(R.id.item_txt);
+				break;
+
+			case RECOMMENDED_FAVORITE:
+				convertView = layoutInflater.inflate(
+						R.layout.recommended_favorite_item, null);
+
+				viewHolder.avatarImg = (ImageView) convertView
+						.findViewById(R.id.item_icon);
+				viewHolder.name = (TextView) convertView
+						.findViewById(R.id.item_msg);
+				viewHolder.addToFav = (Button) convertView
+						.findViewById(R.id.add);
+				viewHolder.notNow = (Button) convertView
+						.findViewById(R.id.not_now);
+				break;
 			}
 			convertView.setTag(viewHolder);
-		}
-		else
-		{
+		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
-		
-		switch (viewType) 
-		{
+
+		switch (viewType) {
 		case RECENT:
 			viewHolder.addImg.setVisibility(View.VISIBLE);
+			viewHolder.addImg.setTag(contactInfo);
+			viewHolder.addImg.setOnClickListener(this);
 		case FAVORITE:
-			viewHolder.avatarImg.setImageDrawable(IconCacheManager.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
+			viewHolder.avatarImg.setImageDrawable(IconCacheManager
+					.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
 			viewHolder.name.setText(contactInfo.getName());
 
-			LayoutParams lp = (LayoutParams) viewHolder.avatarImg.getLayoutParams();
+			LayoutParams lp = (LayoutParams) viewHolder.avatarImg
+					.getLayoutParams();
 			lp.height = lp.width = IMAGE_BOUNDS;
 			viewHolder.avatarImg.setLayoutParams(lp);
+
+			android.widget.AbsListView.LayoutParams layoutParams = new android.widget.AbsListView.LayoutParams(
+					LayoutParams.MATCH_PARENT, ITEM_HEIGHT);
+			convertView.setLayoutParams(layoutParams);
 
 			break;
 
 		case SECTION:
-			((TextView)convertView).setText(contactInfo.getName());
+			((TextView) convertView).setText(contactInfo.getName());
 			break;
 
 		case EMPTY_FAVORITE:
 			String text = viewHolder.name.getText().toString();
 			String replace = "plus";
 			SpannableString spannableString = new SpannableString(text);
-			spannableString.setSpan(
-					new ImageSpan(context, R.drawable.ic_add_favorite),
-					text.indexOf(replace),
+			spannableString.setSpan(new ImageSpan(context,
+					R.drawable.ic_add_favorite), text.indexOf(replace),
 					text.indexOf(replace) + replace.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-									);
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			viewHolder.name.setText(spannableString);
+			break;
+
+		case RECOMMENDED_FAVORITE:
+			String name = contactInfo.getFirstName();
+			String msg = context
+					.getString(
+							contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE ? R.string.recommended_favorite
+									: R.string.auto_recommended_favorite, name);
+			SpannableStringBuilder message = new SpannableStringBuilder(msg);
+			message.setSpan(new ForegroundColorSpan(context.getResources()
+					.getColor(R.color.drawer_text)),
+					msg.indexOf(name) + name.length(), msg.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+			viewHolder.avatarImg.setImageDrawable(IconCacheManager
+					.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
+			viewHolder.name.setText(message);
+
+			viewHolder.addToFav.setTag(contactInfo);
+			viewHolder.addToFav.setOnClickListener(this);
+
+			viewHolder.notNow.setTag(contactInfo);
+			viewHolder.notNow.setOnClickListener(this);
+			break;
 		}
 		return convertView;
 	}
 
-	private class ViewHolder
-	{
+	private class ViewHolder {
 		ImageView avatarImg;
 		TextView name;
 		ImageView addImg;
+		Button addToFav;
+		Button notNow;
+	}
+
+	@Override
+	public void onClick(View v) {
+		ContactInfo contactInfo = (ContactInfo) v.getTag();
+		if (v.getId() == R.id.add_fav) {
+			if (!contactInfo.isOnhike() && !HikeMessengerApp.isIndianUser()) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH,
+						Utils.makeHike2SMSInviteMessage(
+								contactInfo.getMsisdn(), context).serialize());
+				Toast.makeText(context, "Invite sent", Toast.LENGTH_SHORT)
+						.show();
+			} else {
+				Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+						contactInfo, FavoriteType.FAVORITE);
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+			}
+		} else if (v.getId() == R.id.add) {
+			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+					contactInfo, FavoriteType.FAVORITE);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
+					favoriteAdded);
+		} else if (v.getId() == R.id.not_now) {
+			Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
+					contactInfo, FavoriteType.NOT_FAVORITE);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
+					favoriteRemoved);
+		}
 	}
 }
