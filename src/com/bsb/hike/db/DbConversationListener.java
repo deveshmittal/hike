@@ -221,6 +221,9 @@ public class DbConversationListener implements Listener {
 		JSONObject obj = new JSONObject();
 		JSONObject data = new JSONObject();
 		try {
+			if (HikeConstants.MqttMessageTypes.ADD_FAVORITE.equals(type)) {
+				obj.put(HikeConstants.TO, id);
+			}
 			obj.put(HikeConstants.TYPE, type);
 			data.put(HikeConstants.ID, id);
 			obj.put(HikeConstants.DATA, data);

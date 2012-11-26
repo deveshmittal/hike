@@ -391,8 +391,7 @@ public class MqttMessagesManager {
 					.getString(HikeConstants.FROM);
 			saveStatusMsg(jsonObj, msisdn);
 		} else if (HikeConstants.MqttMessageTypes.ADD_FAVORITE.equals(type)) {
-			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
-					.getString(HikeConstants.ID);
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					true);
 			if (contactInfo == null) {
