@@ -6,7 +6,6 @@ import org.json.JSONArray;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +54,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		String name = conversation.getLabel();
 
 		contactView.setText(name);
-		Log.d(getClass().getSimpleName(), "Contact Name = " + name);
 		List<ConvMessage> messages = conversation.getMessages();
 		if (!messages.isEmpty()) {
 			ConvMessage message = messages.get(messages.size() - 1);
