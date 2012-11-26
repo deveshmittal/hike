@@ -425,6 +425,11 @@ public class HikeService extends Service {
 			unregisterReceiver(updateCheckTrigger);
 			updateCheckTrigger = null;
 		}
+
+		if(registerToGCMTrigger != null) {
+			unregisterReceiver(registerToGCMTrigger);
+			registerToGCMTrigger = null;
+		}
 	}
 
 	public void unregisterDataChangeReceivers() {
