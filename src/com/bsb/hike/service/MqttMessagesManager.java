@@ -29,6 +29,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
+import com.facebook.android.Facebook;
 
 /**
  * 
@@ -354,20 +355,50 @@ public class MqttMessagesManager {
 			}
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_INFO.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-			JSONArray keys = data.names();
 			Editor editor = settings.edit();
-			for (int i = 0; i < keys.length(); i++) {
-				String key = keys.getString(i);
-				String value = data.optString(key);
-				editor.putString(key, value);
-			}
-			editor.commit();
 			if (data.has(HikeConstants.INVITE_TOKEN)) {
+				editor.putString(HikeConstants.INVITE_TOKEN,
+						data.getString(HikeConstants.INVITE_TOKEN));
 				this.pubSub.publish(HikePubSub.INVITE_TOKEN_ADDED, null);
 			}
 			if (data.has(HikeConstants.TOTAL_CREDITS_PER_MONTH)) {
+				editor.putString(HikeConstants.TOTAL_CREDITS_PER_MONTH,
+						data.getString(HikeConstants.TOTAL_CREDITS_PER_MONTH));
 				this.pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
 			}
+			if (data.has(HikeConstants.ACCOUNT)) {
+				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
+				if (account.has(HikeConstants.ACCOUNTS)) {
+					JSONObject accounts = account
+							.getJSONObject(HikeConstants.ACCOUNTS);
+					if (accounts.has(HikeConstants.TWITTER)) {
+						JSONObject twitter = accounts
+								.getJSONObject(HikeConstants.TWITTER);
+						String token = twitter.getString(HikeConstants.ID);
+						String tokenSecret = twitter
+								.getString(HikeConstants.TOKEN);
+						HikeMessengerApp
+								.makeTwitterInstance(token, tokenSecret);
+
+						editor.putString(HikeMessengerApp.TWITTER_TOKEN, token);
+						editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET,
+								tokenSecret);
+						editor.putBoolean(
+								HikeMessengerApp.TWITTER_AUTH_COMPLETE, true);
+					}
+					if (accounts.has(HikeConstants.FACEBOOK)) {
+						JSONObject facebookJSON = accounts
+								.getJSONObject(HikeConstants.FACEBOOK);
+						Facebook facebook = HikeMessengerApp.getFacebook();
+						facebook.setAccessToken(facebookJSON
+								.getString(HikeConstants.TOKEN));
+						editor.putBoolean(
+								HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
+								facebook.isSessionValid());
+					}
+				}
+			}
+			editor.commit();
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
 					.getString(HikeConstants.MSISDN);
