@@ -79,21 +79,21 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	public static final Object COMPOSE = "compose";
 
+	public static ConversationsAdapter mAdapter;
+
+	public static Map<String, Conversation> mConversationsByMSISDN;
+
+	public static Set<String> mConversationsAdded;
+
 	private ListView mConversationsView;
 
 	private View mSearchIconView;
 
 	private View mEditMessageIconView;
 
-	private ConversationsAdapter mAdapter;
-
 	private View mEmptyView;
 
 	private Comparator<? super Conversation> mConversationsComparator;
-
-	private Map<String, Conversation> mConversationsByMSISDN;
-
-	private Set<String> mConversationsAdded;
 
 	private View mToolTip;
 
@@ -292,56 +292,80 @@ public class MessagesList extends DrawerBaseActivity implements
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-		List<Conversation> conversations = db.getConversations();
+		new AsyncTask<Void, Void, ConversationsAdapter>() {
 
-		mConversationsByMSISDN = new HashMap<String, Conversation>(
-				conversations.size());
-		mConversationsAdded = new HashSet<String>();
+			boolean reinitialized = false;
 
-		/*
-		 * Use an iterator so we can remove conversations w/ no messages from
-		 * our list
-		 */
-		for (Iterator<Conversation> iter = conversations.iterator(); iter
-				.hasNext();) {
-			Conversation conv = (Conversation) iter.next();
-			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-			if (conv.getMessages().isEmpty()
-					&& !(conv instanceof GroupConversation)) {
-				iter.remove();
-			} else {
-				mConversationsAdded.add(conv.getMsisdn());
+			@Override
+			protected ConversationsAdapter doInBackground(Void... params) {
+				if (mAdapter == null || mConversationsByMSISDN == null
+						|| mConversationsAdded == null) {
+					HikeConversationsDatabase db = HikeConversationsDatabase
+							.getInstance();
+					List<Conversation> conversations = db.getConversations();
+
+					mConversationsByMSISDN = new HashMap<String, Conversation>(
+							conversations.size());
+					mConversationsAdded = new HashSet<String>();
+
+					/*
+					 * Use an iterator so we can remove conversations w/ no
+					 * messages from our list
+					 */
+					for (Iterator<Conversation> iter = conversations.iterator(); iter
+							.hasNext();) {
+						Conversation conv = (Conversation) iter.next();
+						mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+						if (conv.getMessages().isEmpty()
+								&& !(conv instanceof GroupConversation)) {
+							iter.remove();
+						} else {
+							mConversationsAdded.add(conv.getMsisdn());
+						}
+					}
+
+					mAdapter = new ConversationsAdapter(MessagesList.this,
+							R.layout.conversation_item, conversations);
+
+					reinitialized = true;
+				}
+				/*
+				 * we need this object every time a message comes in, seems
+				 * simplest to just create it once
+				 */
+				mConversationsComparator = new Conversation.ConversationComparator();
+
+				/*
+				 * because notifyOnChange gets re-enabled whenever we call
+				 * notifyDataSetChanged it's simpler to assume it's set to false
+				 * and always notifyOnChange by hand
+				 */
+				mAdapter.setNotifyOnChange(false);
+
+				return mAdapter;
 			}
-		}
 
-		mAdapter = new ConversationsAdapter(this, R.layout.conversation_item,
-				conversations);
-		/*
-		 * we need this object every time a message comes in, seems simplest to
-		 * just create it once
-		 */
-		mConversationsComparator = new Conversation.ConversationComparator();
+			@Override
+			protected void onPostExecute(ConversationsAdapter mAdapter) {
+				mConversationsView.setAdapter(mAdapter);
 
-		/*
-		 * because notifyOnChange gets re-enabled whenever we call
-		 * notifyDataSetChanged it's simpler to assume it's set to false and
-		 * always notifyOnChange by hand
-		 */
-		mAdapter.setNotifyOnChange(false);
-		mConversationsView.setAdapter(mAdapter);
+				if(reinitialized) {
+					HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
+							pubSubListeners);
+				}
 
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+				/* register for long-press's */
+				registerForContextMenu(mConversationsView);
 
-		/* register for long-press's */
-		registerForContextMenu(mConversationsView);
+				/*
+				 * Calling this manually since this method is not called when
+				 * the activity is created. Need to call this to check if the
+				 * user left the group.
+				 */
+				onNewIntent(getIntent());
+			}
 
-		/*
-		 * Calling this manually since this method is not called when the
-		 * activity is created. Need to call this to check if the user left the
-		 * group.
-		 */
-		onNewIntent(getIntent());
+		}.execute();
 	}
 
 	private void sendDeviceDetails() {
@@ -554,7 +578,6 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 		super.onDestroy();
 		Log.d(getClass().getSimpleName(), "onDestroy " + this);
-		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 	}
 
 	@Override
@@ -570,9 +593,37 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 	}
 
+	public static void clearCache() {
+		if (mAdapter != null) {
+			mAdapter.clear();
+			mAdapter = null;
+		}
+		if (mConversationsAdded != null) {
+			mConversationsAdded.clear();
+			mConversationsAdded = null;
+		}
+		if (mConversationsByMSISDN != null) {
+			mConversationsByMSISDN.clear();
+			mConversationsByMSISDN = null;
+		}
+	}
+
 	@Override
 	public void onEventReceived(String type, Object object) {
 		super.onEventReceived(type, object);
+		Log.d(getClass().getSimpleName(), "Event received: " + type);
+		if (mAdapter == null || mConversationsAdded == null
+				|| mConversationsByMSISDN == null) {
+			/*
+			 * If either one of these static variables is null, we stop
+			 * listening for the events and clear the current cache so that it
+			 * may be refreshed the next time the app is opened
+			 */
+			HikeMessengerApp.getPubSub().removeListeners(MessagesList.this,
+					pubSubListeners);
+			clearCache();
+			return;
+		}
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type))
 				|| (HikePubSub.MESSAGE_SENT.equals(type))) {
 			Log.d("MESSAGE LIST", "New msg event sent or received.");
@@ -888,6 +939,9 @@ public class MessagesList extends DrawerBaseActivity implements
 	}
 
 	public void run() {
+		if (mAdapter == null) {
+			return;
+		}
 		mAdapter.notifyDataSetChanged();
 		// notifyDataSetChanged sets notifyonChange to true but we want it to
 		// always be false
