@@ -53,7 +53,6 @@ public class DrawerBaseActivity extends Activity implements
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		parentLayout.setListener(this);
 		parentLayout.setUpLeftDrawerView();
-		parentLayout.setUpRightDrawerView(this);
 
 		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
 		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
@@ -67,22 +66,20 @@ public class DrawerBaseActivity extends Activity implements
 			}
 		}
 
-		ImageButton rightFavoriteBtn = (ImageButton) findViewById(R.id.title_image_btn2);
-		rightFavoriteBtn.setVisibility(View.VISIBLE);
-		rightFavoriteBtn.setImageResource(R.drawable.ic_favorites);
-
-		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
-
 		HikeMessengerApp.getPubSub().addListeners(this,
 				leftDrawerPubSubListeners);
 
 		/*
-		 * Since we have a static adapter for the right drawer, we should only
-		 * add its listeners once. MessagesList activity is the entry point for
-		 * accessing favorites so we only add the listeners when we come to this
-		 * activity
+		 * Only show the favorites drawer in the Messages list screen
 		 */
-		if (this instanceof MessagesList) {
+		if ((this instanceof MessagesList)) {
+			parentLayout.setUpRightDrawerView(this);
+
+			ImageButton rightFavoriteBtn = (ImageButton) findViewById(R.id.title_image_btn2);
+			rightFavoriteBtn.setVisibility(View.VISIBLE);
+			rightFavoriteBtn.setImageResource(R.drawable.ic_favorites);
+
+			findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 			HikeMessengerApp.getPubSub().addListeners(this,
 					rightDrawerPubSubListeners);
 		}
@@ -93,11 +90,7 @@ public class DrawerBaseActivity extends Activity implements
 		super.onDestroy();
 		HikeMessengerApp.getPubSub().removeListeners(this,
 				leftDrawerPubSubListeners);
-		/*
-		 * Only remove the listeners if the MessagesList activity is being
-		 * destroyed.
-		 */
-		if (this instanceof MessagesList) {
+		if ((this instanceof MessagesList)) {
 			HikeMessengerApp.getPubSub().removeListeners(this,
 					rightDrawerPubSubListeners);
 		}
