@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -342,10 +344,17 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		switch (viewType) {
 		case RECENT:
+		case FAVORITE:
 			viewHolder.addImg.setVisibility(View.VISIBLE);
 			viewHolder.addImg.setTag(contactInfo);
 			viewHolder.addImg.setOnClickListener(this);
-		case FAVORITE:
+			if (viewType == FavoriteAdapterViewType.RECENT) {
+				viewHolder.addImg.setImageResource(R.drawable.add_fav);
+			} else {
+				viewHolder.addImg.setImageResource(R.drawable.call_fav);
+				viewHolder.addImg.setBackgroundDrawable(null);
+				viewHolder.addImg.setPadding(0, 0, 0, 0);
+			}
 			viewHolder.avatarImg.setImageDrawable(IconCacheManager
 					.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
 			viewHolder.name.setText(contactInfo.getName());
@@ -414,18 +423,25 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	public void onClick(View v) {
 		ContactInfo contactInfo = (ContactInfo) v.getTag();
 		if (v.getId() == R.id.add_fav) {
-			if (!contactInfo.isOnhike() && !HikeMessengerApp.isIndianUser()) {
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH,
-						Utils.makeHike2SMSInviteMessage(
-								contactInfo.getMsisdn(), context).serialize());
-				Toast.makeText(context, "Invite sent", Toast.LENGTH_SHORT)
-						.show();
+			if (contactInfo.getFavoriteType() == FavoriteType.FAVORITE) {
+				Intent callIntent = new Intent(Intent.ACTION_CALL);
+				callIntent.setData(Uri.parse("tel:" + contactInfo.getMsisdn()));
+				context.startActivity(callIntent);
 			} else {
-				Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
-						contactInfo, FavoriteType.FAVORITE);
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+				if (!contactInfo.isOnhike() && !HikeMessengerApp.isIndianUser()) {
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.MQTT_PUBLISH,
+							Utils.makeHike2SMSInviteMessage(
+									contactInfo.getMsisdn(), context)
+									.serialize());
+					Toast.makeText(context, "Invite sent", Toast.LENGTH_SHORT)
+							.show();
+				} else {
+					Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+							contactInfo, FavoriteType.FAVORITE);
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
+				}
 			}
 		} else if (v.getId() == R.id.add) {
 			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(

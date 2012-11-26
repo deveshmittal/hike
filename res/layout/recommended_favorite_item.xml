@@ -51,6 +51,8 @@
                 android:id="@+id/add"
                 style="@style/FavoriteButtons"
                 android:layout_below="@id/item_name"
+                android:textColor="#43423e"
+                android:shadowColor="@color/white"
                 android:layout_weight="1"
                 android:background="@drawable/bg_fav_yes_selector"
                 android:text="@string/yes" />

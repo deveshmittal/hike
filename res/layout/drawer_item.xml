@@ -26,8 +26,12 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="12dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="9dp"
             android:src="@drawable/add_fav"
-            android:background="@null"
+            android:background="@drawable/bg_fav_no_selector"
             android:visibility="gone" />
 
         <com.bsb.hike.view.CustomFontTextView

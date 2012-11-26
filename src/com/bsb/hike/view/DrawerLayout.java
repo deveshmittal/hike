@@ -105,13 +105,15 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private ContactInfo me;
 
-	private BitmapDrawable sideBarBackground;
+	private BitmapDrawable leftDrawerBg;
 
 	/*
 	 * Making this static in order to prevent having multiple lists of contacts
 	 * since we show favorites in multiple screens.
 	 */
 	public static DrawerFavoritesAdapter drawerFavoritesAdapter;
+	private BitmapDrawable rightDrawerBg;
+
 
 	private TimeOfDay time;
 
@@ -155,9 +157,13 @@ public class DrawerLayout extends RelativeLayout implements
 		 * http://stackoverflow.com/questions/7586209/xml-drawable-bitmap
 		 * -tilemode-bug
 		 */
-		sideBarBackground = new BitmapDrawable(BitmapFactory.decodeResource(
+		leftDrawerBg = new BitmapDrawable(BitmapFactory.decodeResource(
 				getResources(), R.drawable.bg_drawer));
-		sideBarBackground.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+		leftDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+
+		rightDrawerBg = new BitmapDrawable(BitmapFactory.decodeResource(
+				getResources(), R.drawable.bg_right_drawer));
+		rightDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 	}
 
 	private void initializeLeftDrawerAnimations() {
@@ -561,8 +567,8 @@ public class DrawerLayout extends RelativeLayout implements
 		rightLp.width = mSidebarWidth;
 		mRightSidebar.setLayoutParams(rightLp);
 
-		mLeftSidebar.setBackgroundDrawable(sideBarBackground);
-		mRightSidebar.setBackgroundDrawable(sideBarBackground);
+		mLeftSidebar.setBackgroundDrawable(leftDrawerBg);
+		mRightSidebar.setBackgroundDrawable(rightDrawerBg);
 
 		mLeftOpenListener = new OpenListener(mLeftSidebar, mContent, true);
 		mLeftCloseListener = new CloseListener(mLeftSidebar, mContent, true);
