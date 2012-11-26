@@ -34,7 +34,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 	private TextView titleBtn;
 
 	private static final int PAGE_NUM_HELP_INDIAN = 3;
-	private static final int PAGE_NUM_HELP_NON_INDIAN = 3;
+	private static final int PAGE_NUM_HELP_NON_INDIAN = 1;
 	private static final int PAGE_NUM_INTRO = 3;
 
 	private int pageNum = 0;
