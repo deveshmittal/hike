@@ -108,13 +108,9 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private BitmapDrawable leftDrawerBg;
 
-	/*
-	 * Making this static in order to prevent having multiple lists of contacts
-	 * since we show favorites in multiple screens.
-	 */
-	public static DrawerFavoritesAdapter drawerFavoritesAdapter;
 	private BitmapDrawable rightDrawerBg;
 
+	private DrawerFavoritesAdapter drawerFavoritesAdapter;
 
 	private TimeOfDay time;
 
@@ -213,10 +209,8 @@ public class DrawerLayout extends RelativeLayout implements
 
 		favoriteListView.addHeaderView(headerView, null, false);
 		favoriteListView.setHeaderDividersEnabled(false);
-		if (drawerFavoritesAdapter == null) {
-			Log.d(getClass().getSimpleName(), "Initialising favorites adapter");
-			drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext());
-		}
+
+		drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext());
 		favoriteListView.setAdapter(drawerFavoritesAdapter);
 
 		favoriteListView.setOnItemClickListener(this);
