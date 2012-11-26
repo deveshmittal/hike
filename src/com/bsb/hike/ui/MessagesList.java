@@ -712,7 +712,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				}
 			}
 
-			mAdapter.setNotifyOnChange(false);
 			runOnUiThread(this);
 		} else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type)) {
 			long msgId = ((Long) object).longValue();
