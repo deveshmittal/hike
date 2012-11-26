@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import twitter4j.auth.AccessToken;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
@@ -128,12 +129,16 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 		Log.d(getClass().getSimpleName(), "TOKEN:  " + accessToken.getToken()
 				+ " SECRET: " + accessToken.getTokenSecret());
 
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				0).edit();
+		SharedPreferences settings = getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		Editor editor = settings.edit();
 		editor.putString(HikeMessengerApp.TWITTER_TOKEN, accessToken.getToken());
 		editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET,
 				accessToken.getTokenSecret());
 		editor.commit();
+
+		HikeMessengerApp.makeTwitterInstance(accessToken.getToken(),
+				accessToken.getTokenSecret());
 
 		sendCredentialsToServer(accessToken.getToken(),
 				accessToken.getTokenSecret(), false);
