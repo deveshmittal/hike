@@ -11,6 +11,7 @@ import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
@@ -339,115 +340,136 @@ public class DrawerLayout extends RelativeLayout implements
 				getContext()).getBoolean(HikeConstants.FREE_SMS_PREF, true));
 	}
 
-	public void renderLeftDrawerItems(boolean freeSMSOn) {
+	public void renderLeftDrawerItems(final boolean freeSMSOn) {
 
-		int itemHeight = (int) (48 * Utils.densityMultiplier);
-		LayoutInflater layoutInflater = LayoutInflater.from(getContext());
+		final int itemHeight = (int) (48 * Utils.densityMultiplier);
+		final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
 		int[] parentIds = { R.id.top_half_items_container,
 				R.id.bottom_half_items_container };
-		int itemNumber = 0;
 		for (int i = 0; i < parentIds.length; i++) {
-			String[] itemTexts = i == 0 ? getResources().getStringArray(
+			final String[] itemTexts = i == 0 ? getResources().getStringArray(
 					R.array.top_half_drawer_text) : getResources()
 					.getStringArray(R.array.bottom_half_drawer_text);
-			int[] itemIcons = i == 0 ? new int[] { R.drawable.ic_drawer_home,
-					R.drawable.ic_drawer_group_chat,
+			final int[] itemIcons = i == 0 ? new int[] {
+					R.drawable.ic_drawer_home, R.drawable.ic_drawer_group_chat,
 					R.drawable.ic_drawer_invite } : new int[] {
 					R.drawable.ic_drawer_free_sms,
 					R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help };
 
-			ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
-			parentView.removeAllViews();
+			final int offset = i == 0 ? 0 : itemTexts.length;
+			final ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
 
-			for (int j = 0; j < itemTexts.length; j++) {
-				LeftDrawerItems leftDrawerItem = LeftDrawerItems.values()[itemNumber++];
+			new AsyncTask<Void, View, Void>() {
 
-				/*
-				 * No need to show the free SMS screen if the option has been
-				 * turned off
-				 */
-				if (leftDrawerItem == LeftDrawerItems.FREE_SMS && !freeSMSOn) {
-					continue;
+				@Override
+				protected Void doInBackground(Void... params) {
+					for (int j = 0; j < itemTexts.length; j++) {
+						Log.e(getClass().getSimpleName(), "Offset: " + offset
+								+ " INDEX: " + (offset + j));
+						LeftDrawerItems leftDrawerItem = LeftDrawerItems
+								.values()[offset + j];
+
+						/*
+						 * No need to show the free SMS screen if the option has
+						 * been turned off
+						 */
+						if (leftDrawerItem == LeftDrawerItems.FREE_SMS
+								&& !freeSMSOn) {
+							continue;
+						}
+
+						View itemView = layoutInflater.inflate(
+								R.layout.drawer_item, null);
+						itemView.setFocusable(true);
+						itemView.setClickable(true);
+
+						TextView itemTxt = (TextView) itemView
+								.findViewById(R.id.item_name);
+						ImageView itemImg = (ImageView) itemView
+								.findViewById(R.id.item_icon);
+
+						itemTxt.setText(itemTexts[j]);
+						itemImg.setImageResource(itemIcons[j]);
+
+						if (itemTexts[j].equals(getContext().getString(
+								R.string.free_sms_txt))) {
+							creditsNum = (TextView) itemView
+									.findViewById(R.id.credit_num);
+							creditsNum.setVisibility(View.VISIBLE);
+							creditsNum.setText(Integer.toString(accountPrefs
+									.getInt(HikeMessengerApp.SMS_SETTING, 0)));
+						}
+						if (j == 0) {
+							itemView.findViewById(R.id.divider).setVisibility(
+									View.VISIBLE);
+							itemView.setBackgroundResource(R.drawable.drawer_top_item_selector);
+						} else if (j == itemTexts.length - 1) {
+							itemView.findViewById(R.id.divider).setVisibility(
+									View.GONE);
+							itemView.setBackgroundResource(R.drawable.drawer_bottom_item_selector);
+						} else {
+							itemView.findViewById(R.id.divider).setVisibility(
+									View.VISIBLE);
+							itemView.setBackgroundResource(R.drawable.drawer_center_item_selector);
+						}
+						itemView.setFocusable(true);
+						int id = leftDrawerItem.ordinal();
+						switch (LeftDrawerItems.values()[id]) {
+						case HOME:
+							if (activity instanceof MessagesList) {
+								itemView.setBackgroundResource(R.drawable.drawer_top_item_pressed);
+							}
+							break;
+						case GROUP_CHAT:
+							if (activity instanceof ChatThread) {
+								itemView.setBackgroundResource(R.drawable.drawer_center_item_pressed);
+							}
+							break;
+						case FREE_SMS:
+							if (activity instanceof CreditsActivity) {
+								itemView.setBackgroundResource(R.drawable.drawer_top_item_pressed);
+							}
+							break;
+						case PROFILE:
+							if (activity instanceof ProfileActivity) {
+								itemView.setBackgroundResource(R.drawable.drawer_center_item_pressed);
+							}
+							break;
+						case HELP:
+							if (activity instanceof Tutorial) {
+								itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
+							}
+							break;
+						case TELL_A_FRIEND:
+							if (activity instanceof TellAFriend) {
+								itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
+							}
+							break;
+						}
+
+						LayoutParams layoutParams = new LayoutParams(
+								LayoutParams.MATCH_PARENT, itemHeight);
+						itemView.setLayoutParams(layoutParams);
+
+						itemView.setId(id);
+						itemView.setOnClickListener(DrawerLayout.this);
+						publishProgress(itemView);
+					}
+					return null;
 				}
 
-				View itemView = layoutInflater.inflate(R.layout.drawer_item,
-						null);
-				itemView.setFocusable(true);
-				itemView.setClickable(true);
-
-				TextView itemTxt = (TextView) itemView
-						.findViewById(R.id.item_name);
-				ImageView itemImg = (ImageView) itemView
-						.findViewById(R.id.item_icon);
-
-				itemTxt.setText(itemTexts[j]);
-				itemImg.setImageResource(itemIcons[j]);
-
-				if (itemTexts[j].equals(getContext().getString(
-						R.string.free_sms_txt))) {
-					creditsNum = (TextView) itemView
-							.findViewById(R.id.credit_num);
-					creditsNum.setVisibility(View.VISIBLE);
-					creditsNum.setText(Integer.toString(accountPrefs.getInt(
-							HikeMessengerApp.SMS_SETTING, 0)));
-				}
-				if (j == 0) {
-					itemView.findViewById(R.id.divider).setVisibility(
-							View.VISIBLE);
-					itemView.setBackgroundResource(R.drawable.drawer_top_item_selector);
-				} else if (j == itemTexts.length - 1) {
-					itemView.findViewById(R.id.divider)
-							.setVisibility(View.GONE);
-					itemView.setBackgroundResource(R.drawable.drawer_bottom_item_selector);
-				} else {
-					itemView.findViewById(R.id.divider).setVisibility(
-							View.VISIBLE);
-					itemView.setBackgroundResource(R.drawable.drawer_center_item_selector);
-				}
-				itemView.setFocusable(true);
-				int id = leftDrawerItem.ordinal();
-				switch (LeftDrawerItems.values()[id]) {
-				case HOME:
-					if (activity instanceof MessagesList) {
-						itemView.setBackgroundResource(R.drawable.drawer_top_item_pressed);
+				@Override
+				protected void onProgressUpdate(View... values) {
+					if (values == null) {
+						parentView.removeAllViews();
+						return;
 					}
-					break;
-				case GROUP_CHAT:
-					if (activity instanceof ChatThread) {
-						itemView.setBackgroundResource(R.drawable.drawer_center_item_pressed);
-					}
-					break;
-				case FREE_SMS:
-					if (activity instanceof CreditsActivity) {
-						itemView.setBackgroundResource(R.drawable.drawer_top_item_pressed);
-					}
-					break;
-				case PROFILE:
-					if (activity instanceof ProfileActivity) {
-						itemView.setBackgroundResource(R.drawable.drawer_center_item_pressed);
-					}
-					break;
-				case HELP:
-					if (activity instanceof Tutorial) {
-						itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
-					}
-					break;
-				case TELL_A_FRIEND:
-					if (activity instanceof TellAFriend) {
-						itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
-					}
-					break;
+					parentView.addView(values[0]);
+					parentView.setFocusable(true);
 				}
 
-				LayoutParams layoutParams = new LayoutParams(
-						LayoutParams.MATCH_PARENT, itemHeight);
-				itemView.setLayoutParams(layoutParams);
+			}.execute();
 
-				itemView.setId(id);
-				itemView.setOnClickListener(this);
-				parentView.addView(itemView);
-			}
-			parentView.setFocusable(true);
 		}
 	}
 
