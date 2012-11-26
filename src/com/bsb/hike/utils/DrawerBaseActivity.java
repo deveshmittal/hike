@@ -36,7 +36,8 @@ public class DrawerBaseActivity extends Activity implements
 	private String[] rightDrawerPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED,
-			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT };
+			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
+			HikePubSub.CONTACT_ADDED };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -248,6 +249,22 @@ public class DrawerBaseActivity extends Activity implements
 				public void run() {
 					parentLayout
 							.addAutoRecommendedFavoritesList(autoRecommendedFavorites);
+				}
+			});
+		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
+			final ContactInfo contactInfo = (ContactInfo) object;
+			/*
+			 * If the contact is already a part of the favorites list, we don't
+			 * need to do anything.
+			 */
+			if (contactInfo == null) {
+				return;
+			}
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					parentLayout.updateRecentContacts(contactInfo);
 				}
 			});
 		}
