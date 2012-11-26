@@ -752,13 +752,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void hideOverlay() {
-		if (mOverlayLayout.getVisibility() == View.VISIBLE) {
+		if (mOverlayLayout.getVisibility() == View.VISIBLE && hasWindowFocus()) {
 			Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this,
 					android.R.anim.fade_out);
 			mOverlayLayout.setAnimation(fadeOut);
-			mOverlayLayout.setVisibility(View.INVISIBLE);
-			isOverlayShowing = false;
 		}
+		mOverlayLayout.setVisibility(View.INVISIBLE);
+		isOverlayShowing = false;
 	}
 
 	@Override
@@ -1763,7 +1763,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(),
 				InputMethodManager.HIDE_NOT_ALWAYS);
 
-		if (mOverlayLayout.getVisibility() != View.VISIBLE && !isOverlayShowing) {
+		if (mOverlayLayout.getVisibility() != View.VISIBLE && !isOverlayShowing
+				&& hasWindowFocus()) {
 			Animation fadeIn = AnimationUtils.loadAnimation(ChatThread.this,
 					android.R.anim.fade_in);
 			mOverlayLayout.setAnimation(fadeIn);
