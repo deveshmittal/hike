@@ -883,4 +883,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			c.close();
 		}
 	}
+
+	public void setMultipleContactsToFavorites(String selections) {
+		ContentValues contentValues = new ContentValues(1);
+		contentValues
+				.put(DBConstants.FAVORITE, FavoriteType.FAVORITE.ordinal());
+
+		int rows = mDb.update(DBConstants.USERS_TABLE, contentValues,
+				DBConstants.MSISDN + " IN " + selections, null);
+		Log.d(getClass().getSimpleName(), rows + "updated");
+		if (rows > 0) {
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_FAVORITES,
+					null);
+		}
+	}
 }

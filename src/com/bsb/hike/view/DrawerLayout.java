@@ -299,6 +299,10 @@ public class DrawerLayout extends RelativeLayout implements
 		drawerFavoritesAdapter.updateRecentContactsList(contactInfo);
 	}
 
+	public void refreshFavorites(List<ContactInfo> favoriteList) {
+		drawerFavoritesAdapter.refreshFavoritesList(favoriteList);
+	}
+
 	public void onCreateFavoritesContextMenu(Activity activity, Menu menu,
 			int position) {
 		if (drawerFavoritesAdapter.getItemViewType(position) != FavoriteAdapterViewType.FAVORITE

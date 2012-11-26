@@ -397,6 +397,20 @@ public class MqttMessagesManager {
 								facebook.isSessionValid());
 					}
 				}
+				if (account.has(HikeConstants.FAVORITES)) {
+					JSONObject favorites = account
+							.getJSONObject(HikeConstants.FAVORITES);
+					JSONArray msisdns = favorites.names();
+					StringBuilder sb = new StringBuilder("(");
+					for (int i = 0; i < msisdns.length(); i++) {
+						sb.append("'" + msisdns.getString(i) + "'");
+						if (i < (msisdns.length() - 1)) {
+							sb.append(",");
+						}
+					}
+					sb.append(")");
+					userDb.setMultipleContactsToFavorites(sb.toString());
+				}
 			}
 			editor.commit();
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {

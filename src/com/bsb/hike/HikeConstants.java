@@ -64,6 +64,7 @@ public class HikeConstants {
 	public static final String TOKEN = "token";
 	public static final String ACCOUNT = "account";
 	public static final String ACCOUNTS = "accounts";
+	public static final String FAVORITES = "favorites";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

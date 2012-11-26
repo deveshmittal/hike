@@ -255,6 +255,15 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		contactList.removeAll(deleteContactList);
 	}
 
+	public void refreshFavoritesList(List<ContactInfo> favoriteList) {
+		this.favoriteList = favoriteList;
+		recommendedFavoriteList.removeAll(favoriteList);
+		onHikeList.removeAll(favoriteList);
+		recentList.removeAll(favoriteList);
+
+		makeCompleteList();
+	}
+
 	@Override
 	public boolean areAllItemsEnabled() {
 		return false;
