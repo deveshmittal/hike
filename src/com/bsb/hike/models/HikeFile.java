@@ -74,7 +74,7 @@ public class HikeFile {
 	public HikeFile(JSONObject fileJSON) {
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
 		this.fileTypeString = fileJSON.optString(HikeConstants.CONTENT_TYPE);
-		this.thumbnailString = fileJSON.optString(HikeConstants.THUMBNAIL);
+		this.thumbnailString = Utils.getSquareThumbnail(fileJSON);
 		this.thumbnail = thumbnail == null ? Utils
 				.stringToDrawable(thumbnailString) : thumbnail;
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);

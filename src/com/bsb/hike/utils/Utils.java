@@ -957,28 +957,41 @@ public class Utils {
 
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
 		if (makeSquareThumbnail) {
-			dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail
-					.getWidth() : thumbnail.getHeight();
-
-			int startX = thumbnail.getWidth() > dimensionLimit ? (int) ((thumbnail
-					.getWidth() - dimensionLimit) / 2) : 0;
-			int startY = thumbnail.getHeight() > dimensionLimit ? (int) ((thumbnail
-					.getHeight() - dimensionLimit) / 2) : 0;
-
-			Log.d("Utils", "StartX: " + startX + " StartY: " + startY
-					+ " WIDTH: " + thumbnail.getWidth() + " Height: "
-					+ thumbnail.getHeight());
-			Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX,
-					startY, dimensionLimit, dimensionLimit);
-
-			if (squareThumbnail != thumbnail) {
-				thumbnail.recycle();
-			}
-			thumbnail = null;
-			return squareThumbnail;
+			return makeSquareThumbnail(thumbnail, dimensionLimit);
 		}
 
 		return thumbnail;
+	}
+
+	public static Bitmap makeSquareThumbnail(Bitmap thumbnail,
+			int dimensionLimit) {
+		dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail
+				.getWidth() : thumbnail.getHeight();
+
+		int startX = thumbnail.getWidth() > dimensionLimit ? (int) ((thumbnail
+				.getWidth() - dimensionLimit) / 2) : 0;
+		int startY = thumbnail.getHeight() > dimensionLimit ? (int) ((thumbnail
+				.getHeight() - dimensionLimit) / 2) : 0;
+
+		Log.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: "
+				+ thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
+		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY,
+				dimensionLimit, dimensionLimit);
+
+		if (squareThumbnail != thumbnail) {
+			thumbnail.recycle();
+		}
+		thumbnail = null;
+		return squareThumbnail;
+	}
+
+	public static Bitmap stringToBitmap(String thumbnailString) {
+		byte[] encodeByte = Base64.decode(thumbnailString, Base64.DEFAULT);
+		return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+	}
+
+	public static boolean isThumbnailSquare(Bitmap thumbnail) {
+		return (thumbnail.getWidth() == thumbnail.getHeight());
 	}
 
 	public static byte[] bitmapToBytes(Bitmap bitmap,
@@ -1374,5 +1387,29 @@ public class Utils {
 			}
 		}
 		return currentFiles;
+	}
+
+	public static String getSquareThumbnail(JSONObject obj) {
+		String thumbnailString = obj.optString(HikeConstants.THUMBNAIL);
+		if(TextUtils.isEmpty(thumbnailString)) {
+			return thumbnailString;
+		}
+
+		Bitmap thumbnailBmp = Utils.stringToBitmap(thumbnailString);
+		if (!Utils.isThumbnailSquare(thumbnailBmp)) {
+			Bitmap squareThumbnail = Utils.makeSquareThumbnail(thumbnailBmp,
+					HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+			thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(
+					squareThumbnail, Bitmap.CompressFormat.JPEG),
+					Base64.DEFAULT);
+			squareThumbnail.recycle();
+			squareThumbnail = null;
+		}
+		if (!thumbnailBmp.isRecycled()) {
+			thumbnailBmp.recycle();
+			thumbnailBmp = null;
+		}
+
+		return thumbnailString;
 	}
 }
