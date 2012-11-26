@@ -16,6 +16,11 @@ import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.acra.util.HttpRequest;
 
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.OAuthAuthorization;
+import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -142,6 +147,8 @@ public class HikeMessengerApp extends Application {
 	public static final String MSISDN_ENTERED = "msisdnEntered";
 
 	private static Facebook facebook;
+
+	private static Twitter twitter;
 
 	private static HikePubSub mPubSubInstance;
 
@@ -319,12 +326,16 @@ public class HikeMessengerApp extends Application {
 		IconCacheManager.init();
 
 		facebook = new Facebook(HikeConstants.APP_FACEBOOK_ID);
-		facebook.setAccessExpires(settings.getLong(
-				HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, 0));
-		facebook.setAccessToken(settings.getString(
-				HikeMessengerApp.FACEBOOK_TOKEN, ""));
+		makeFacebookInstance(settings);
 
-		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE);
+		String twitterToken = settings.getString(
+				HikeMessengerApp.TWITTER_TOKEN, "");
+		String twitterTokenSecret = settings.getString(
+				HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
+		makeTwitterInstance(twitterToken, twitterTokenSecret);
+
+		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
+				HikeConstants.INDIA_COUNTRY_CODE);
 
 		/* add the db write listener */
 		new DbConversationListener(getApplicationContext());
@@ -368,5 +379,30 @@ public class HikeMessengerApp extends Application {
 
 	public static boolean isIndianUser() {
 		return isIndianUser;
+	}
+
+	public static void makeFacebookInstance(SharedPreferences settings) {
+		facebook.setAccessExpires(settings.getLong(
+				HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, 0));
+		facebook.setAccessToken(settings.getString(
+				HikeMessengerApp.FACEBOOK_TOKEN, ""));
+	}
+
+	public static void makeTwitterInstance(String token, String tokenSecret) {
+		AccessToken accessToken = null;
+		try {
+			accessToken = new AccessToken(token, tokenSecret);
+		} catch (IllegalArgumentException e) {
+			Log.e("HikeMessengerApp", "Invalid format", e);
+			return;
+		}
+
+		OAuthAuthorization authorization = new OAuthAuthorization(
+				ConfigurationContext.getInstance());
+		authorization.setOAuthAccessToken(accessToken);
+		authorization.setOAuthConsumer(HikeConstants.APP_TWITTER_ID,
+				HikeConstants.APP_TWITTER_SECRET);
+
+		twitter = new TwitterFactory().getInstance(authorization);
 	}
 }
