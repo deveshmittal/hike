@@ -244,6 +244,7 @@ public class WelcomeActivity extends Activity implements
 	 * Used for clearing all the static fields that were used for caching.
 	 */
 	private void clearCache() {
+		HikeMessengerApp.getPubSub().clearListeners();
 		MessagesList.clearCache();
 	}
 }

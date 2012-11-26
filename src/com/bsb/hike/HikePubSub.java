@@ -226,6 +226,10 @@ public class HikePubSub implements Runnable {
 		}
 	}
 
+	public void clearListeners() {
+		listeners.clear();
+	}
+
 	@Override
 	public void run() {
 		Operation op;
