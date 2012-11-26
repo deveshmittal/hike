@@ -202,7 +202,8 @@ public class DrawerBaseActivity extends Activity implements
 			 * If the contact is already a part of the favorites list, we don't
 			 * need to do anything.
 			 */
-			if(contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
+			if (contactInfo == null
+					|| contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
 				return;
 			}
 			runOnUiThread(new Runnable() {
