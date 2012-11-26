@@ -53,7 +53,7 @@
                 android:shadowDx="1"
                 android:shadowDy="1"
                 android:shadowRadius="0.5"
-                android:text="Done"
+                android:text="@string/done"
                 android:textSize="18sp"
                 android:textColor="@color/white"
                 android:textStyle="bold"

@@ -108,7 +108,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		// Contact for "Favorite Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, HikeConstants.FAVORITES, null));
+				null, context.getString(R.string.favorites), null));
 
 		/*
 		 * If favorite list is empty, we add an element to show the empty view
@@ -126,13 +126,14 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		// Contact for "On Hike Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, HikeConstants.FRIENDS_ON_HIKE, null));
+				null, context.getString(R.string.friends_on_hike), null));
 		completeList.addAll(onHikeList);
 
 		// Contact for "Recent Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, HikeMessengerApp.isIndianUser() ? HikeConstants.RECENT
-						: HikeConstants.INVITE_FRIENDS, null));
+				null, HikeMessengerApp.isIndianUser() ? context
+						.getString(R.string.recent) : context
+						.getString(R.string.invite_friends), null));
 
 		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
 				: recentList.size();

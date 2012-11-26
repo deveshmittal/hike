@@ -54,7 +54,6 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -454,13 +453,16 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		mNameEdit = (EditText) name.findViewById(R.id.name_input);
 		mEmailEdit = (EditText) email.findViewById(R.id.email_input);
 
-		((TextView) name.findViewById(R.id.name_edit_field)).setText("Name");
-		((TextView) phone.findViewById(R.id.phone_edit_field)).setText("Phone");
-		((TextView) email.findViewById(R.id.email_edit_field)).setText("Email");
+		((TextView) name.findViewById(R.id.name_edit_field))
+				.setText(R.string.name);
+		((TextView) phone.findViewById(R.id.phone_edit_field))
+				.setText(R.string.phone_num);
+		((TextView) email.findViewById(R.id.email_edit_field))
+				.setText(R.string.email);
 		((TextView) gender.findViewById(R.id.gender_edit_field))
-				.setText("Gender");
+				.setText(R.string.gender);
 		((TextView) picture.findViewById(R.id.photo_edit_field))
-				.setText("Edit Picture");
+				.setText(R.string.edit_picture);
 
 		picture.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 		picture.setFocusable(true);

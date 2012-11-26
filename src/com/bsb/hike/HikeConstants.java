@@ -84,11 +84,6 @@ public class HikeConstants {
 
 	public static final String IS_TYPING = "is typing...";
 
-	public static final String FAVORITES = "Favorites";
-	public static final String RECENT = "Recent";
-	public static final String FRIENDS_ON_HIKE = "Friends on hike";
-	public static final String INVITE_FRIENDS = "Invite friends";
-
 	public static final String NEW_GROUP = "new_group";
 
 	/* Constant used to name the preference file which saves the drafts */

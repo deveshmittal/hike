@@ -1645,7 +1645,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 		smsCount.setAnimation(slideUp);
 		smsCount.setVisibility(View.VISIBLE);
-		smsCount.setText(mCredits + " SMS left");
+		smsCount.setText(mCredits + " " + getString(R.string.sms_left));
 
 		slideUp.setAnimationListener(new AnimationListener() {
 			@Override

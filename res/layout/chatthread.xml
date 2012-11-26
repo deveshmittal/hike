@@ -30,7 +30,7 @@
             <TextView 
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
-                android:text="To"
+                android:text="@string/to"
                 android:textColor="#818181"
                 android:paddingLeft="10dp"
                 android:textSize="16sp"
@@ -43,7 +43,7 @@
                 android:minHeight="48dp"
                 android:background="@color/white"
                 android:gravity="center_vertical"
-                android:hint="Start typing a name..."
+                android:hint="@string/start_typing"
                 android:imeOptions="actionNone"
                 android:paddingLeft="10dp"
                 android:paddingRight="18dp"
