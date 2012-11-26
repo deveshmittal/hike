@@ -128,6 +128,8 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	private Map<String, ClearTypingNotification> pendingClearTypingNotifications;
 
+	private Handler messageRefreshHandler;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -609,12 +611,16 @@ public class MessagesList extends DrawerBaseActivity implements
 					conv.addMessage(message);
 					Log.d("MessagesList", "new message is " + message);
 					mAdapter.sort(mConversationsComparator);
-					mAdapter.notifyDataSetChanged();
-					// notifyDataSetChanged sets notifyonChange to true but we
-					// want it to always be false
-					mAdapter.setNotifyOnChange(false);
+
+					if (messageRefreshHandler == null) {
+						messageRefreshHandler = new Handler();
+					}
+
+					messageRefreshHandler.removeCallbacks(MessagesList.this);
+					messageRefreshHandler.postDelayed(MessagesList.this, 100);
 				}
 			});
+
 		} else if (HikePubSub.MESSAGE_DELETED.equals(type)) {
 			Log.d(getClass().getSimpleName(), "Message Deleted");
 			final ConvMessage message = (ConvMessage) object;
