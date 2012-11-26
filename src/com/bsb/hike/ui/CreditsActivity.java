@@ -39,10 +39,6 @@ import com.facebook.android.FacebookError;
 
 public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		Listener {
-	static final String CALLBACK_URL = "http://get.hike.in/";
-
-	static final String IEXTRA_OAUTH_VERIFIER = "oauth_verifier";
-
 	private TextView mTitleView;
 	private ViewGroup creditsContainer;
 	private SharedPreferences settings;
