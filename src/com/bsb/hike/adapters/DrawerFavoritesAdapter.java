@@ -8,6 +8,7 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -59,26 +60,44 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	}
 
 	public DrawerFavoritesAdapter(Context context) {
-		HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
-
-		recommendedFavoriteList = hikeUserDatabase
-				.getContactsOrderedByLastMessaged(-1,
-						FavoriteType.RECOMMENDED_FAVORITE,
-						HikeConstants.BOTH_VALUE, true, false, -1);
-
-		favoriteList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
-				FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE, true, false,
-				-1);
-
-		onHikeList = hikeUserDatabase.getContactsOrderedByLastMessaged(-1,
-				FavoriteType.NOT_FAVORITE, HikeConstants.ON_HIKE_VALUE, true,
-				false, -1);
-
-		recentList = hikeUserDatabase.getNonHikeRecentContacts(-1, true,
-				FavoriteType.NOT_FAVORITE);
-
 		completeList = new ArrayList<ContactInfo>();
-		makeCompleteList();
+		recommendedFavoriteList = new ArrayList<ContactInfo>(0);
+		favoriteList = new ArrayList<ContactInfo>(0);
+		onHikeList = new ArrayList<ContactInfo>(0);
+		recentList = new ArrayList<ContactInfo>(0);
+		new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				HikeUserDatabase hikeUserDatabase = HikeUserDatabase
+						.getInstance();
+
+				recommendedFavoriteList = hikeUserDatabase
+						.getContactsOrderedByLastMessaged(-1,
+								FavoriteType.RECOMMENDED_FAVORITE,
+								HikeConstants.BOTH_VALUE, true, false, -1);
+
+				favoriteList = hikeUserDatabase
+						.getContactsOrderedByLastMessaged(-1,
+								FavoriteType.FAVORITE,
+								HikeConstants.BOTH_VALUE, true, false, -1);
+
+				onHikeList = hikeUserDatabase.getContactsOrderedByLastMessaged(
+						-1, FavoriteType.NOT_FAVORITE,
+						HikeConstants.ON_HIKE_VALUE, true, false, -1);
+
+				recentList = hikeUserDatabase.getNonHikeRecentContacts(-1,
+						true, FavoriteType.NOT_FAVORITE);
+
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				makeCompleteList();
+			}
+
+		}.execute();
 
 		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
