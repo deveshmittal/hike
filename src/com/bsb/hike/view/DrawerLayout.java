@@ -539,7 +539,7 @@ public class DrawerLayout extends RelativeLayout implements
 	};
 
 	public void updateCredits(int credits) {
-		if(creditsNum != null) {
+		if (creditsNum != null) {
 			creditsNum.setText(Integer.toString(credits));
 		}
 	}

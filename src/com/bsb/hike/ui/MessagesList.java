@@ -394,8 +394,8 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		List<ContactInfo> recentNonHikeContacts = new ArrayList<ContactInfo>(0);
 		if (HikeMessengerApp.isIndianUser()) {
-			recentNonHikeContacts = HikeUserDatabase
-					.getInstance().getNonHikeRecentContacts(10, true, null);
+			recentNonHikeContacts = HikeUserDatabase.getInstance()
+					.getNonHikeRecentContacts(10, true, null);
 		}
 		List<ContactInfo> hikeContacts = HikeUserDatabase.getInstance()
 				.getContactsOrderedByLastMessaged(3, null,

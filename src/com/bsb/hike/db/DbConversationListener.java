@@ -101,10 +101,10 @@ public class DbConversationListener implements Listener {
 			mConversationDb.deleteMessage(message);
 			persistence.removeMessage(message.getMsgID());
 		} else if (HikePubSub.MESSAGE_FAILED.equals(type)) // server got msg
-															// from client 1 and
-															// sent back
-															// received msg
-															// receipt
+		// from client 1 and
+		// sent back
+		// received msg
+		// receipt
 		{
 			updateDB(object, ConvMessage.State.SENT_FAILED.ordinal());
 		} else if (HikePubSub.BLOCK_USER.equals(type)) {
@@ -118,11 +118,11 @@ public class DbConversationListener implements Listener {
 			JSONObject unblockObj = blockUnblockSerialize("ub", msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, unblockObj);
 		} else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type)) // server got
-																// msg from
-																// client 1 and
-																// sent back
-																// received msg
-																// receipt
+		// msg from
+		// client 1 and
+		// sent back
+		// received msg
+		// receipt
 		{
 			Log.d("DBCONVERSATION LISTENER",
 					"(Sender) Message sent confirmed for msgID -> "
