@@ -200,8 +200,8 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 			final boolean facebook) {
 		JSONObject request = new JSONObject();
 		try {
-			request.put("id", id);
-			request.put("token", token);
+			request.put(HikeConstants.ID, id);
+			request.put(HikeConstants.TOKEN, token);
 		} catch (JSONException e) {
 			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
