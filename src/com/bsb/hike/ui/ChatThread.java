@@ -921,7 +921,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				mComposeView.setText(msg);
 				mComposeView.setSelection(msg.length());
 				SmileyParser.getInstance().addSmileyToEditable(
-						mComposeView.getText());
+						mComposeView.getText(), false);
 			} else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH)) {
 				String fileKey = intent
 						.getStringExtra(HikeConstants.Extras.FILE_KEY);
@@ -967,7 +967,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				mComposeView.setText(message);
 				mComposeView.setSelection(message.length());
 				SmileyParser.getInstance().addSmileyToEditable(
-						mComposeView.getText());
+						mComposeView.getText(), false);
 			}
 			intent.removeExtra(HikeConstants.Extras.FORWARD_MESSAGE);
 		} else {
