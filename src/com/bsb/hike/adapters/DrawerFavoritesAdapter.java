@@ -76,11 +76,13 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						.getContactsOrderedByLastMessaged(-1,
 								FavoriteType.RECOMMENDED_FAVORITE,
 								HikeConstants.BOTH_VALUE, true, false, -1);
+				Collections.sort(recommendedFavoriteList);
 
 				favoriteList = hikeUserDatabase
 						.getContactsOrderedByLastMessaged(-1,
 								FavoriteType.FAVORITE,
 								HikeConstants.BOTH_VALUE, true, false, -1);
+				Collections.sort(favoriteList);
 
 				onHikeList = hikeUserDatabase.getContactsOrderedByLastMessaged(
 						-1, FavoriteType.NOT_FAVORITE,
@@ -156,6 +158,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
 
 		favoriteList.add(0, contactInfo);
+		Collections.sort(favoriteList);
 
 		makeCompleteList();
 	}
@@ -171,12 +174,14 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		// Remove from the recents list.
 		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
 		recommendedFavoriteList.add(0, contactInfo);
+		Collections.sort(recommendedFavoriteList);
 
 		makeCompleteList();
 	}
 
 	public void addAutoRecommendedFavorites(List<ContactInfo> contactInfoList) {
 		recommendedFavoriteList.addAll(contactInfoList);
+		Collections.sort(recommendedFavoriteList);
 
 		recentList.removeAll(contactInfoList);
 		onHikeList.removeAll(contactInfoList);
@@ -257,6 +262,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	public void refreshFavoritesList(List<ContactInfo> favoriteList) {
 		this.favoriteList = favoriteList;
+		Collections.sort(favoriteList);
+
 		recommendedFavoriteList.removeAll(favoriteList);
 		onHikeList.removeAll(favoriteList);
 		recentList.removeAll(favoriteList);
