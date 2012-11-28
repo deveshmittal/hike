@@ -1896,8 +1896,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					+ mContactNumber);
 			mConversationDb.addGroupParticipants(mContactNumber,
 					groupConversation.getGroupParticipantList());
-			mConversationDb.addConversation(groupConversation.getMsisdn(),
-					false, "", groupConversation.getGroupOwner());
+			if (newGroup) {
+				mConversationDb.addConversation(groupConversation.getMsisdn(),
+						false, "", groupConversation.getGroupOwner());
+			}
 
 			try {
 				// Adding this boolean value to show a different system message
