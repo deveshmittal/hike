@@ -5,6 +5,7 @@ import java.io.File;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -12,6 +13,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
@@ -45,15 +47,16 @@ public class HikeFile {
 			return null;
 		}
 
-		public static String toProperString(HikeFileType hikeFileType) {
+		public static String getFileTypeMessage(Context context,
+				HikeFileType hikeFileType) {
 			if (hikeFileType == PROFILE || hikeFileType == IMAGE) {
-				return HikeConstants.IMAGE;
+				return context.getString(R.string.image_msg);
 			} else if (hikeFileType == VIDEO) {
-				return HikeConstants.VIDEO;
+				return context.getString(R.string.video_msg);
 			} else if (hikeFileType == AUDIO) {
-				return HikeConstants.AUDIO;
+				return context.getString(R.string.audio_msg);
 			} else if (hikeFileType == LOCATION) {
-				return HikeConstants.LOCATION_FILE_NAME;
+				return context.getString(R.string.location_msg);
 			}
 			return null;
 		}

@@ -55,8 +55,8 @@ public class HikeNotification {
 
 		String msisdn = convMsg.getMsisdn();
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg
-				.getMessage() : HikeFileType.toProperString(convMsg
-				.getMetadata().getHikeFiles().get(0).getHikeFileType());
+				.getMessage() : HikeFileType.getFileTypeMessage(context,
+				convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType());
 		// Message will be empty for type 'uj' when the conversation does not
 		// exist
 		if (TextUtils.isEmpty(message)

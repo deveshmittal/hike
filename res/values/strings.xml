@@ -238,5 +238,9 @@
 	<string name="gender">Gender</string>
 	<string name="edit_picture">Edit Picture</string>
 	<string name="settings">Settings</string>
-	<string name="sms_left">SMS left</string>	
+	<string name="sms_left">SMS left</string>
+	<string name="image_msg">Sent you a photo</string>
+	<string name="video_msg">Sent you a video</string>
+	<string name="audio_msg">Sent you an audio file</string>
+	<string name="location_msg">Shared a location</string>	
 </resources>

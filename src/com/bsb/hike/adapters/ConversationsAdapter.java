@@ -79,8 +79,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 			CharSequence markedUp = null;
 			if (message.isFileTransferMessage()) {
-				markedUp = HikeFileType.toProperString(metadata.getHikeFiles()
-						.get(0).getHikeFileType());
+				markedUp = HikeFileType.getFileTypeMessage(context, metadata
+						.getHikeFiles().get(0).getHikeFileType());
 				if ((conversation instanceof GroupConversation)
 						&& !message.isSent()) {
 					markedUp = Utils

@@ -82,10 +82,6 @@ public class HikeConstants {
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms";
 
-	public static final String IMAGE = "Image";
-	public static final String VIDEO = "Video";
-	public static final String AUDIO = "Audio";
-
 	public static final String IS_TYPING = "is typing...";
 
 	public static final String NEW_GROUP = "new_group";
