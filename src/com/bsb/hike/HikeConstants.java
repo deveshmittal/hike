@@ -131,15 +131,15 @@ public class HikeConstants {
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
 	public static final String APP_API_VERSION = "1";
 
-	public static int NUM_SMS_PER_FRIEND = 10;
-	public static int INITIAL_NUM_SMS = 100;
+	public static final int NUM_SMS_PER_FRIEND = 10;
+	public static final int INITIAL_NUM_SMS = 100;
 
-	public static int MAX_CHAR_IN_NAME = 20;
+	public static final int MAX_CHAR_IN_NAME = 20;
 
 	public static final int MAX_CONTACTS_IN_GROUP = 20;
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
-	public static int PROFILE_IMAGE_DIMENSIONS = 80;
+	public static final int PROFILE_IMAGE_DIMENSIONS = 80;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
