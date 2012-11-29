@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -2421,8 +2422,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					uploadFileTask.execute();
 					return;
 				} else {
-					// Local image
-					filePath = Utils.getRealPathFromUri(selectedFileUri, this);
+					String fileUriStart = "file://";
+					String fileUriString = selectedFileUri.toString();
+					if (fileUriString.startsWith(fileUriStart)) {
+						selectedFile = new File(URI.create(fileUriString));
+						/*
+						 * Done to fix the issue in a few Sony devices.
+						 */
+						filePath = selectedFile.getAbsolutePath();
+					} else {
+						filePath = Utils.getRealPathFromUri(selectedFileUri,
+								this);
+					}
+					Log.d(getClass().getSimpleName(), "File path: " + filePath);
 				}
 			}
 
