@@ -250,8 +250,8 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 		ContactInfo contactInfo = (ContactInfo) view.getTag();
 		boolean isUnknownNumber = false;
 		if (contactInfo == null) {
-			String number = normalizeNumber(getNumber(inputNumber.getText()
-					.toString()));
+			String number = Utils.normalizeNumber(getNumber(inputNumber
+					.getText().toString()), countryCode);
 			Log.d(getClass().getSimpleName(), "Formatted number: " + number);
 			contactInfo = new ContactInfo(number, number, number, number);
 			isUnknownNumber = true;
@@ -349,21 +349,6 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			return true;
 		}
 		return false;
-	}
-
-	private String normalizeNumber(String inputNumber) {
-		if (inputNumber.startsWith("+")) {
-			return inputNumber;
-		} else if (inputNumber.startsWith("00")) {
-			/*
-			 * Doing for US numbers
-			 */
-			return inputNumber.replaceFirst("00", "+");
-		} else if (inputNumber.startsWith("0")) {
-			return inputNumber.replaceFirst("0", countryCode);
-		} else {
-			return countryCode + inputNumber;
-		}
 	}
 
 	@Override

@@ -1412,4 +1412,19 @@ public class Utils {
 
 		return thumbnailString;
 	}
+
+	public static String normalizeNumber(String inputNumber, String countryCode) {
+		if (inputNumber.startsWith("+")) {
+			return inputNumber;
+		} else if (inputNumber.startsWith("00")) {
+			/*
+			 * Doing for US numbers
+			 */
+			return inputNumber.replaceFirst("00", "+");
+		} else if (inputNumber.startsWith("0")) {
+			return inputNumber.replaceFirst("0", countryCode);
+		} else {
+			return countryCode + inputNumber;
+		}
+	}
 }
