@@ -16,6 +16,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
+import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.AccountUtils;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -55,6 +56,18 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
+
+			/*
+			 * Used for clearing all the static fields that were used for
+			 * caching.
+			 */
+			HikeMessengerApp.getPubSub().clearListeners();
+			MessagesList.clearCache();
+			/*
+			 * Don't need these listeners anymore. Making them null so that they
+			 * can be initialized again on sign up.
+			 */
+			((HikeMessengerApp) activity.getApplication()).makeListenersNull();
 			return true;
 		} catch (Exception e) {
 			Log.e("DeleteAccountTask", "error deleting account", e);

@@ -166,6 +166,12 @@ public class HikeMessengerApp extends Application {
 
 	private String msisdn;
 
+	private DbConversationListener dbConversationListener;
+
+	private ToastListener toastListener;
+
+	private ActivityTimeLogger activityTimeLogger;
+
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
@@ -218,6 +224,7 @@ public class HikeMessengerApp extends Application {
 				if (mInitialized) {
 					mInitialized = false;
 					unbindService(mServiceConnection);
+					HikeServiceConnection.disconnectConnection();
 					mServiceConnection = null;
 				}
 			}
@@ -337,14 +344,7 @@ public class HikeMessengerApp extends Application {
 		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
 				HikeConstants.INDIA_COUNTRY_CODE);
 
-		/* add the db write listener */
-		new DbConversationListener(getApplicationContext());
-
-		/*
-		 * add a handler to handle toasts. The object initializes itself it it's
-		 * constructor
-		 */
-		new ToastListener(getApplicationContext());
+		initialiseListeners();
 
 		mMessenger = new Messenger(new IncomingHandler());
 
@@ -357,8 +357,6 @@ public class HikeMessengerApp extends Application {
 		} catch (NameNotFoundException e) {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
-		/* For logging the time each activity is seen by the user */
-		new ActivityTimeLogger();
 	}
 
 	public static Facebook getFacebook() {
@@ -404,5 +402,24 @@ public class HikeMessengerApp extends Application {
 				HikeConstants.APP_TWITTER_SECRET);
 
 		twitter = new TwitterFactory().getInstance(authorization);
+	}
+
+	public void makeListenersNull() {
+		dbConversationListener = null;
+		toastListener = null;
+		activityTimeLogger = null;
+	}
+
+	public void initialiseListeners() {
+		if (dbConversationListener == null) {
+			dbConversationListener = new DbConversationListener(
+					getApplicationContext());
+		}
+		if (toastListener == null) {
+			toastListener = new ToastListener(getApplicationContext());
+		}
+		if (activityTimeLogger == null) {
+			activityTimeLogger = new ActivityTimeLogger();
+		}
 	}
 }

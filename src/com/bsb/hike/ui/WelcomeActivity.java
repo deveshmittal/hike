@@ -46,8 +46,6 @@ public class WelcomeActivity extends Activity implements
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 
-		clearCache();
-
 		mAcceptButton = (ImageButton) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
@@ -238,13 +236,5 @@ public class WelcomeActivity extends Activity implements
 			mTask = null;
 		}
 		super.onBackPressed();
-	}
-
-	/**
-	 * Used for clearing all the static fields that were used for caching.
-	 */
-	private void clearCache() {
-		HikeMessengerApp.getPubSub().clearListeners();
-		MessagesList.clearCache();
 	}
 }
