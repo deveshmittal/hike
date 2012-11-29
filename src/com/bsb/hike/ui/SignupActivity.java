@@ -316,10 +316,12 @@ public class SignupActivity extends Activity implements
 					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
 					editor.commit();
 
-					HikeMessengerApp.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE.equals(code));
+					HikeMessengerApp
+							.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE
+									.equals(code));
 
-					editor = PreferenceManager
-							.getDefaultSharedPreferences(SignupActivity.this).edit();
+					editor = PreferenceManager.getDefaultSharedPreferences(
+							SignupActivity.this).edit();
 					editor.putBoolean(HikeConstants.FREE_SMS_PREF,
 							HikeMessengerApp.isIndianUser());
 					editor.commit();
