@@ -541,7 +541,14 @@ public class Utils {
 	}
 
 	public static boolean isGroupConversation(String msisdn) {
-		return !msisdn.startsWith("+");
+		if(msisdn.contains("::")) {
+			/*
+			 * We store the larger icon for the user with this
+			 * msisdn.
+			 */
+			return false;
+		}
+		return msisdn.contains(":");
 	}
 
 	public static String defaultGroupName(

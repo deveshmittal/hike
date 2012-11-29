@@ -899,7 +899,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				setIntentFromField();
 			} else {
 				prevContactNumber = mContactNumber;
-				mContactName = mContactNumber = phoneNumber;
+				mContactName = mContactNumber = Utils.normalizeNumber(
+						phoneNumber, prefs.getString(
+								HikeMessengerApp.COUNTRY_CODE,
+								HikeConstants.INDIA_COUNTRY_CODE));
 			}
 
 			createConversation();
