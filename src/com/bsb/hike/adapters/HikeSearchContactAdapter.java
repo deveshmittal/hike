@@ -289,11 +289,8 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			if (numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1
 					|| (numSMSContactsSelected >= HikeConstants.MAX_SMS_CONTACTS_IN_GROUP && !contactInfo
 							.isOnhike())) {
-				Toast toast = Toast
-						.makeText(
-								getContext(),
-								((numContactsSelected >= HikeConstants.MAX_CONTACTS_IN_GROUP - 1) ? R.string.max_contact
-										: R.string.max_sms), Toast.LENGTH_SHORT);
+				Toast toast = Toast.makeText(getContext(),
+						R.string.max_contact, Toast.LENGTH_SHORT);
 				toast.setGravity(Gravity.TOP, 0,
 						(int) (50 * Utils.densityMultiplier));
 				toast.show();
