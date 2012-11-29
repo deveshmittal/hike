@@ -364,6 +364,9 @@ public class SignupActivity extends Activity implements
 
 		countryPicker.setEnabled(true);
 
+		String prevCode = getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(
+				HikeMessengerApp.COUNTRY_CODE, "");
 		countryNamesAndCodes = getResources().getStringArray(
 				R.array.country_names_and_codes);
 		countryISOAndCodes = getResources().getStringArray(
@@ -371,7 +374,8 @@ public class SignupActivity extends Activity implements
 
 		if (TextUtils.isEmpty(countryCode)) {
 			TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-			String countryIso = manager.getNetworkCountryIso().toUpperCase();
+			String countryIso = TextUtils.isEmpty(prevCode) ? manager
+					.getNetworkCountryIso().toUpperCase() : prevCode;
 			for (String s : countryISOAndCodes) {
 				if (!TextUtils.isEmpty(countryIso) && s.contains(countryIso)) {
 					Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
