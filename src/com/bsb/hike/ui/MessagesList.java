@@ -876,6 +876,9 @@ public class MessagesList extends DrawerBaseActivity implements
 	};
 
 	private void toggleTypingNotification(boolean isTyping, String msisdn) {
+		if(mConversationsByMSISDN == null) {
+			return;
+		}
 		Conversation conversation = mConversationsByMSISDN.get(msisdn);
 		if (conversation == null) {
 			Log.d(getClass().getSimpleName(), "Conversation Does not exist");
