@@ -56,15 +56,6 @@ public class DrawerBaseActivity extends Activity implements
 
 		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
 		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
-		if (savedInstanceState != null) {
-			if (savedInstanceState
-					.getBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE)) {
-				parentLayout.toggleSidebar(true, true);
-			} else if (savedInstanceState
-					.getBoolean(HikeConstants.Extras.IS_RIGHT_DRAWER_VISIBLE)) {
-				parentLayout.toggleSidebar(true, false);
-			}
-		}
 
 		HikeMessengerApp.getPubSub().addListeners(this,
 				leftDrawerPubSubListeners);
@@ -82,6 +73,16 @@ public class DrawerBaseActivity extends Activity implements
 			findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 			HikeMessengerApp.getPubSub().addListeners(this,
 					rightDrawerPubSubListeners);
+		}
+
+		if (savedInstanceState != null) {
+			if (savedInstanceState
+					.getBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE)) {
+				parentLayout.toggleSidebar(true, true);
+			} else if (savedInstanceState
+					.getBoolean(HikeConstants.Extras.IS_RIGHT_DRAWER_VISIBLE)) {
+				parentLayout.toggleSidebar(true, false);
+			}
 		}
 	}
 
