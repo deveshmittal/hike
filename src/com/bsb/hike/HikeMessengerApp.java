@@ -389,19 +389,18 @@ public class HikeMessengerApp extends Application {
 		AccessToken accessToken = null;
 		try {
 			accessToken = new AccessToken(token, tokenSecret);
+
+			OAuthAuthorization authorization = new OAuthAuthorization(
+					ConfigurationContext.getInstance());
+			authorization.setOAuthAccessToken(accessToken);
+			authorization.setOAuthConsumer(HikeConstants.APP_TWITTER_ID,
+					HikeConstants.APP_TWITTER_SECRET);
+
+			twitter = new TwitterFactory().getInstance(authorization);
 		} catch (IllegalArgumentException e) {
 			Log.e("HikeMessengerApp", "Invalid format", e);
 			return;
 		}
-
-		OAuthAuthorization authorization = new OAuthAuthorization(
-				ConfigurationContext.getInstance());
-		authorization.setOAuthAccessToken(accessToken);
-		authorization.setOAuthConsumer(HikeConstants.APP_TWITTER_ID,
-				HikeConstants.APP_TWITTER_SECRET);
-
-		twitter = new TwitterFactory().getInstance(authorization);
-	}
 	}
 
 	public void initialiseListeners() {
