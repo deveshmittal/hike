@@ -169,7 +169,7 @@ public class UploadLocationTask extends FileTransferTaskBase {
 			ConvMessage convMessage) throws Exception {
 		String staticMapUrl = String.format(STATIC_MAP_UNFORMATTED_URL,
 				latitude, longitude, zoomLevel,
-				HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+				HikeConstants.MAX_DIMENSION_LOCATION_THUMBNAIL_PX);
 		Log.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
 
 		Bitmap thumbnail = BitmapFactory.decodeStream((InputStream) new URL(

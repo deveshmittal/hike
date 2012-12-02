@@ -154,6 +154,8 @@ public class HikeConstants {
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180;
 
+	public static final int MAX_DIMENSION_LOCATION_THUMBNAIL_PX = 220;
+
 	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
 
 	public static final int INITIAL_PROGRESS = 5;
