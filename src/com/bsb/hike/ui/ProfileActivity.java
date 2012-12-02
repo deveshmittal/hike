@@ -103,6 +103,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private ProfileItem[] items;
 	private int lastSavedGender;
 
+	private SharedPreferences preferences;
+
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END,
 			HikePubSub.PARTICIPANT_JOINED_GROUP,
@@ -172,6 +174,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (Utils.requireAuth(this)) {
 			return;
 		}
+
+		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				MODE_PRIVATE);
 
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof ActivityState) {
@@ -302,8 +307,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		int bottom = (int) (6 * Utils.densityMultiplier);
 
 		GroupParticipant userInfo = new GroupParticipant(
-				Utils.getUserContactInfo(getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0)));
+				Utils.getUserContactInfo(preferences));
 		participantList.put(userInfo.getContactInfo().getMsisdn(), userInfo);
 
 		groupOwner = groupConversation.getGroupOwner();
@@ -538,13 +542,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	private void fetchPersistentData() {
-		SharedPreferences settings = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		nameTxt = settings.getString(HikeMessengerApp.NAME, "Set a name!");
-		mLocalMSISDN = settings
-				.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		emailTxt = settings.getString(HikeConstants.Extras.EMAIL, "");
-		lastSavedGender = settings.getInt(HikeConstants.Extras.GENDER, 0);
+		nameTxt = preferences.getString(HikeMessengerApp.NAME, "Set a name!");
+		mLocalMSISDN = preferences.getString(HikeMessengerApp.MSISDN_SETTING,
+				null);
+		emailTxt = preferences.getString(HikeConstants.Extras.EMAIL, "");
+		lastSavedGender = preferences.getInt(HikeConstants.Extras.GENDER, 0);
 		mActivityState.genderType = mActivityState.genderType == 0 ? lastSavedGender
 				: mActivityState.genderType;
 	}
@@ -604,8 +606,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						 * preferences and the UI
 						 */
 						String name = mNameEdit.getText().toString();
-						Editor editor = getSharedPreferences(
-								HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+						Editor editor = preferences.edit();
 						editor.putString(HikeMessengerApp.NAME_SETTING, name);
 						editor.commit();
 						HikeMessengerApp.getPubSub().publish(
@@ -697,9 +698,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				}
 
 				public void onSuccess(JSONObject response) {
-					SharedPreferences prefs = getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-					Editor editor = prefs.edit();
+					Editor editor = preferences.edit();
 					if (Utils.isValidEmail(mEmailEdit.getText())) {
 						editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
 								.getText().toString());
