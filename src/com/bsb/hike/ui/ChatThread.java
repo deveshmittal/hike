@@ -1987,6 +1987,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							pickIntent.setType("video/*");
 							newMediaFileIntent = new Intent(
 									MediaStore.ACTION_VIDEO_CAPTURE);
+							newMediaFileIntent.putExtra(
+									MediaStore.EXTRA_SIZE_LIMIT,
+									(long) HikeConstants.MAX_FILE_SIZE);
 							break;
 
 						case 3:
