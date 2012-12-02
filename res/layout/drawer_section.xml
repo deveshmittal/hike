@@ -6,7 +6,7 @@
     android:gravity="center_vertical"
     android:paddingLeft="10dp"
     android:shadowColor="@color/black"
-    android:shadowDy="0.7"
+    android:shadowDy="-0.7"
     android:shadowRadius="0.7"
     android:text="Text"
     android:textColor="@color/drawer_section"
