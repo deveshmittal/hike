@@ -19,7 +19,7 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class HikeFile {
 	public static enum HikeFileType {
-		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION;
+		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION, UNKNOWN;
 
 		public static HikeFileType fromString(String fileTypeString) {
 			if (fileTypeString.startsWith("video")) {
@@ -29,9 +29,10 @@ public class HikeFile {
 			} else if (fileTypeString
 					.startsWith(HikeConstants.LOCATION_CONTENT_TYPE)) {
 				return HikeFileType.LOCATION;
-			} else {
+			} else if (fileTypeString.startsWith("image")){
 				return HikeFileType.IMAGE;
 			}
+			return HikeFileType.UNKNOWN;
 		}
 
 		public static String toString(HikeFileType hikeFileType) {
@@ -58,7 +59,7 @@ public class HikeFile {
 			} else if (hikeFileType == LOCATION) {
 				return context.getString(R.string.location_msg);
 			}
-			return null;
+			return context.getString(R.string.unknown_msg);
 		}
 	}
 

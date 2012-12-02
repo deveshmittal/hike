@@ -535,7 +535,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					|| (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
 					.wasFileDownloaded() && !ChatThread.fileTransferTaskMap
 					.containsKey(convMessage.getMsgID())))
-					&& (hikeFile.getThumbnail() != null);
+					&& (hikeFile.getThumbnail() != null)
+					&& (hikeFile.getHikeFileType() != HikeFileType.UNKNOWN);
 
 			if (convMessage.isSent()
 					&& (hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile
@@ -556,16 +557,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.fileThumb.setVisibility(View.VISIBLE);
 				}
 
-				holder.fileThumb
-						.setBackgroundDrawable(showThumbnail ? hikeFile
-								.getThumbnail()
-								: context
-										.getResources()
-										.getDrawable(
-												hikeFile.getHikeFileType() == HikeFileType.IMAGE ? R.drawable.ic_default_img
-														: hikeFile
-																.getHikeFileType() == HikeFileType.VIDEO ? R.drawable.ic_default_mov
-																: R.drawable.ic_default_audio));
+				if (showThumbnail) {
+					holder.fileThumb.setBackgroundDrawable(hikeFile
+							.getThumbnail());
+				} else {
+					switch (hikeFile.getHikeFileType()) {
+					case IMAGE:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_default_img);
+						break;
+					case VIDEO:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_default_mov);
+						break;
+					case AUDIO:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_default_audio);
+						break;
+					case UNKNOWN:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_unknown_file);
+						break;
+					}
+				}
 			}
 
 			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb
@@ -582,7 +596,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			holder.messageTextView.setVisibility(!showThumbnail ? View.VISIBLE
 					: View.GONE);
-			holder.messageTextView.setText(hikeFile.getFileName());
+			holder.messageTextView
+					.setText(hikeFile.getHikeFileType() == HikeFileType.UNKNOWN ? context
+							.getString(R.string.unknown_msg) : hikeFile
+							.getFileName());
 
 			if (holder.showFileBtn != null) {
 				if (hikeFile.wasFileDownloaded()
@@ -815,6 +832,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					}
 				} else {
 					File receivedFile = hikeFile.getFile();
+					if (hikeFile.getHikeFileType() == HikeFileType.UNKNOWN) {
+						Toast.makeText(context, R.string.unknown_msg,
+								Toast.LENGTH_SHORT).show();
+						return;
+					}
 					if (!ChatThread.fileTransferTaskMap.containsKey(convMessage
 							.getMsgID())
 							&& (receivedFile.exists() || hikeFile
