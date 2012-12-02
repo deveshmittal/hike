@@ -2474,6 +2474,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude
 					+ " long:" + longitude + " zoom: " + zoomLevel);
 			initialiseLocationTransfer(latitude, longitude, zoomLevel, null);
+		} else if (resultCode == RESULT_CANCELED) {
+			Log.d(getClass().getSimpleName(), "File transfer Cancelled");
+			selectedFile = null;
 		}
 	}
 
