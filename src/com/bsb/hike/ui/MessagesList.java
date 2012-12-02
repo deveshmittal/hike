@@ -862,7 +862,7 @@ public class MessagesList extends DrawerBaseActivity implements
 	};
 
 	private void toggleTypingNotification(boolean isTyping, String msisdn) {
-		if(mConversationsByMSISDN == null) {
+		if (mConversationsByMSISDN == null) {
 			return;
 		}
 		Conversation conversation = mConversationsByMSISDN.get(msisdn);
