@@ -15,6 +15,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -27,6 +28,7 @@ import com.bsb.hike.utils.Utils;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
@@ -254,13 +256,20 @@ public class ShareLocation extends MapActivity {
 		int initialPosY;
 		int initialPosX;
 
-		@Override
-		public boolean onTouchEvent(MotionEvent e, MapView mapView) {
-			switch (e.getAction()) {
-			case MotionEvent.ACTION_UP:
-				int deltaX = (int) Math.abs(initialPosX - e.getX());
-				int deltaY = (int) Math.abs(initialPosY - e.getY());
+		int deltaX;
+		int deltaY;
 
+		int actX;
+		int actY;
+
+		long firstTapTime;
+		long secondTapTime;
+
+		Handler markerHandler = new Handler();
+		Runnable placeMarkerRunnable = new Runnable() {
+
+			@Override
+			public void run() {
 				/*
 				 * We are accounting for movement of the finger by a small
 				 * amount.
@@ -269,13 +278,38 @@ public class ShareLocation extends MapActivity {
 						&& (deltaY < MAX_DISTANCE);
 				if (currentSelection.getId() == R.id.custom_position
 						&& showShowMarker) {
-					final GeoPoint geoPoint = ((MapView) mapView)
-							.getProjection().fromPixels((int) e.getX(),
-									(int) e.getY());
+					final GeoPoint geoPoint = myMap.getProjection().fromPixels(
+							actX, actY);
 
 					placeMarker(geoPoint);
 				}
-				return true;
+			}
+		};
+
+		@Override
+		public boolean onTouchEvent(MotionEvent e, MapView mapView) {
+			switch (e.getAction()) {
+			case MotionEvent.ACTION_UP:
+				firstTapTime = System.currentTimeMillis();
+
+				actX = (int) e.getX();
+				actY = (int) e.getY();
+
+				if (Math.abs(firstTapTime - secondTapTime) > 200L) {
+					deltaX = (int) Math.abs(initialPosX - e.getX());
+
+					deltaY = (int) Math.abs(initialPosY - e.getY());
+
+					markerHandler.postDelayed(placeMarkerRunnable, 250);
+				} else {
+					markerHandler.removeCallbacks(placeMarkerRunnable);
+					MapController mapController = myMap.getController();
+					mapController.animateTo(myMap.getProjection().fromPixels(
+							actX, actY));
+					mapController.zoomIn();
+				}
+				secondTapTime = firstTapTime;
+				return false;
 			case MotionEvent.ACTION_DOWN:
 				initialPosX = (int) e.getX();
 				initialPosY = (int) e.getY();
