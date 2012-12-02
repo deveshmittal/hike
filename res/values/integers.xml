@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<integer name="max_length_message">500</integer>
 	<integer name="max_length_name">20</integer>
 	<integer name="max_length_group_name">30</integer>    
 </resources>

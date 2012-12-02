@@ -207,8 +207,7 @@
                         android:paddingTop="2dp"
                         android:textColor="@color/chat_color"
                         android:textColorHint="#cdcdc8"
-                        android:textSize="15sp"
-                        android:maxLength="@integer/max_length_message" />
+                        android:textSize="15sp" />
                 </RelativeLayout>
 
                 <LinearLayout

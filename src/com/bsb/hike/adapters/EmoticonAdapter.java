@@ -223,12 +223,6 @@ public class EmoticonAdapter extends PagerAdapter implements
 		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(
 				emoticonIndex, System.currentTimeMillis());
 		((ChatThread) context).onEmoticonBtnClicked(null, 0);
-		// We don't add an emoticon if the compose box is near its maximum
-		// length of characters
-		if (composeBox.length() >= context.getResources().getInteger(
-				R.integer.max_length_message) - 20) {
-			return;
-		}
 		SmileyParser.getInstance().addSmiley(composeBox, emoticonIndex);
 	}
 }
