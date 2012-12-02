@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
@@ -127,6 +129,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
+		public DownloadPicasaImageTask downloadPicasaImageTask; /*
+																 * the task to
+																 * download the
+																 * picasa image
+																 */
 
 		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
 		public int genderType;
@@ -182,6 +189,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				mActivityState.task.setActivity(this);
 				mDialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.updating_profile));
+			} else if (mActivityState.downloadPicasaImageTask != null) {
+				mDialog = ProgressDialog.show(this, null, getResources()
+						.getString(R.string.downloading_image));
 			}
 		} else {
 			mActivityState = new ActivityState();
@@ -796,23 +806,42 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						"Error capturing image", Toast.LENGTH_SHORT).show();
 				return;
 			}
-			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon
-					.getAbsolutePath() : Utils.getRealPathFromUri(
-					data.getData(), this);
+			boolean isPicasaImage = false;
+			Uri selectedFileUri = null;
+			if (requestCode == CAMERA_RESULT) {
+				path = selectedFileIcon.getAbsolutePath();
+			} else {
+				selectedFileUri = data.getData();
+				if (Utils.isPicasaUri(selectedFileUri.toString())) {
+					isPicasaImage = true;
+					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null,
+							null).getAbsolutePath();
+				} else {
+					String fileUriStart = "file://";
+					String fileUriString = selectedFileUri.toString();
+					if (fileUriString.startsWith(fileUriStart)) {
+						selectedFileIcon = new File(URI.create(fileUriString));
+						/*
+						 * Done to fix the issue in a few Sony devices.
+						 */
+						path = selectedFileIcon.getAbsolutePath();
+					} else {
+						path = Utils.getRealPathFromUri(selectedFileUri, this);
+					}
+				}
+			}
 			if (TextUtils.isEmpty(path)) {
 				Toast.makeText(getApplicationContext(), "Error getting image",
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			/* Crop the image */
-			Intent intent = new Intent(this, CropImage.class);
-			intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
-			intent.putExtra(HikeConstants.Extras.SCALE, true);
-			intent.putExtra(HikeConstants.Extras.OUTPUT_X, 80);
-			intent.putExtra(HikeConstants.Extras.OUTPUT_Y, 80);
-			intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
-			intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
-			startActivityForResult(intent, CROP_RESULT);
+			if (!isPicasaImage) {
+				startCropActivity(path);
+			} else {
+				mActivityState.downloadPicasaImageTask = new DownloadPicasaImageTask(
+						new File(path), selectedFileUri);
+				mActivityState.downloadPicasaImageTask.execute();
+			}
 			break;
 		case CROP_RESULT:
 			mActivityState.newBitmap = data
@@ -825,6 +854,18 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 			break;
 		}
+	}
+
+	private void startCropActivity(String path) {
+		/* Crop the image */
+		Intent intent = new Intent(this, CropImage.class);
+		intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
+		intent.putExtra(HikeConstants.Extras.SCALE, true);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_X, 80);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_Y, 80);
+		intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
+		intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
+		startActivityForResult(intent, CROP_RESULT);
 	}
 
 	@Override
@@ -1184,5 +1225,45 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				}
 			});
 		}
+	}
+
+	private class DownloadPicasaImageTask extends
+			AsyncTask<Void, Void, Boolean> {
+		private File destFile;
+		private Uri picasaUri;
+
+		public DownloadPicasaImageTask(File destFile, Uri picasaUri) {
+			this.destFile = destFile;
+			this.picasaUri = picasaUri;
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			try {
+				Utils.downloadPicasaFile(ProfileActivity.this, destFile,
+						picasaUri);
+				return Boolean.TRUE;
+			} catch (Exception e) {
+				Log.e(getClass().getSimpleName(), "Error while fetching image",
+						e);
+				return Boolean.FALSE;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (mDialog != null) {
+				mDialog.dismiss();
+				mDialog = null;
+			}
+			mActivityState = new ActivityState();
+			if (!result) {
+				Toast.makeText(getApplicationContext(),
+						R.string.error_download, Toast.LENGTH_SHORT).show();
+			} else {
+				startCropActivity(destFile.getAbsolutePath());
+			}
+		}
+
 	}
 }

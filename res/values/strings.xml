@@ -242,5 +242,7 @@
 	<string name="image_msg">Sent you a photo</string>
 	<string name="video_msg">Sent you a video</string>
 	<string name="audio_msg">Sent you an audio file</string>
-	<string name="location_msg">Shared a location</string>	
+	<string name="location_msg">Shared a location</string>
+	<string name="error_download">Error while downloading image</string>
+	<string name="downloading_image">Downloading image...</string>	
 </resources>
