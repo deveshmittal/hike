@@ -132,14 +132,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		public int genderType;
 	}
 
-	/*
-	 * super hacky, but the Activity can get destroyed between
-	 * startActivityForResult and the onResult so store it in a static field.
-	 */
-	public static File selectedFileIcon; /*
-										 * the selected file that we'll store
-										 * the profile camera picture
-										 */
+	public File selectedFileIcon; /*
+								 * the selected file that we'll store the
+								 * profile camera picture
+								 */
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -783,7 +779,19 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
 			Log.d("ProfileActivity", "The activity is " + this);
-			if (requestCode == CAMERA_RESULT && selectedFileIcon == null) {
+			if (requestCode == CAMERA_RESULT) {
+				String filePath = preferences.getString(
+						HikeMessengerApp.FILE_PATH, "");
+				selectedFileIcon = new File(filePath);
+
+				/*
+				 * Removing this key. We no longer need this.
+				 */
+				Editor editor = preferences.edit();
+				editor.remove(HikeMessengerApp.FILE_PATH);
+				editor.commit();
+			}
+			if (requestCode == CAMERA_RESULT && !selectedFileIcon.exists()) {
 				Toast.makeText(getApplicationContext(),
 						"Error capturing image", Toast.LENGTH_SHORT).show();
 				return;
@@ -836,6 +844,16 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			if (selectedFileIcon != null) {
 				intent.putExtra(MediaStore.EXTRA_OUTPUT,
 						Uri.fromFile(selectedFileIcon));
+
+				/*
+				 * Saving the file path. Will use this to get the file once the
+				 * image has been captured.
+				 */
+				Editor editor = preferences.edit();
+				editor.putString(HikeMessengerApp.FILE_PATH,
+						selectedFileIcon.getAbsolutePath());
+				editor.commit();
+
 				startActivityForResult(intent, CAMERA_RESULT);
 				overridePendingTransition(R.anim.slide_in_right_noalpha,
 						R.anim.slide_out_left_noalpha);

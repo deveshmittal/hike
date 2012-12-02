@@ -127,6 +127,8 @@ public class HikeMessengerApp extends Application {
 
 	public static final String AUTO_RECOMMENDED_FAVORITES_ADDED = "autoRecommendedFavoritesAdded";
 
+	public static final String FILE_PATH = "filePath";
+
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"

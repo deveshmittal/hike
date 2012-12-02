@@ -2006,6 +2006,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 									MediaStore.ACTION_IMAGE_CAPTURE);
 							selectedFile = Utils.getOutputMediaFile(
 									HikeFileType.IMAGE, null, null);
+
+							/*
+							 * For images, save the file path as a preferences
+							 * since in some devices the reference to the file
+							 * becomes null.
+							 */
+							Editor editor = prefs.edit();
+							editor.putString(HikeMessengerApp.FILE_PATH,
+									selectedFile.getAbsolutePath());
+							editor.commit();
 							break;
 						}
 						if (requestCode == HikeConstants.SHARE_LOCATION_CODE) {
@@ -2390,7 +2400,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if ((requestCode == HikeConstants.IMAGE_TRANSFER_CODE
 				|| requestCode == HikeConstants.VIDEO_TRANSFER_CODE || requestCode == HikeConstants.AUDIO_TRANSFER_CODE)
 				&& resultCode == RESULT_OK) {
-			if (data == null && selectedFile == null) {
+			if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE) {
+				selectedFile = new File(prefs.getString(
+						HikeMessengerApp.FILE_PATH, ""));
+
+				Editor editor = prefs.edit();
+				editor.remove(HikeMessengerApp.FILE_PATH);
+				editor.commit();
+			}
+			if (data == null
+					&& (selectedFile == null || !selectedFile.exists())) {
 				Toast.makeText(getApplicationContext(),
 						"Error capturing image", Toast.LENGTH_SHORT).show();
 				return;
