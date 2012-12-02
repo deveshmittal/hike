@@ -224,7 +224,6 @@ public class HikeMessengerApp extends Application {
 				if (mInitialized) {
 					mInitialized = false;
 					unbindService(mServiceConnection);
-					HikeServiceConnection.disconnectConnection();
 					mServiceConnection = null;
 				}
 			}
@@ -403,11 +402,6 @@ public class HikeMessengerApp extends Application {
 
 		twitter = new TwitterFactory().getInstance(authorization);
 	}
-
-	public void makeListenersNull() {
-		dbConversationListener = null;
-		toastListener = null;
-		activityTimeLogger = null;
 	}
 
 	public void initialiseListeners() {

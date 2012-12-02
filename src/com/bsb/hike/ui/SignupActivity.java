@@ -199,12 +199,6 @@ public class SignupActivity extends Activity implements
 		}
 		if (hikeHTTPTask == null) {
 			if (success) {
-				/*
-				 * Initializing the listeners that were stopped when the user
-				 * signed out.
-				 */
-				((HikeMessengerApp) getApplication()).initialiseListeners();
-
 				// Tracking the registration event for Fiksu
 				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 

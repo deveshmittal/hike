@@ -176,6 +176,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String REFRESH_FAVORITES = "refreshFavorites";
 
+	public static final String CLEAR_LISTENERS = "clearListeners";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
@@ -224,10 +226,6 @@ public class HikePubSub implements Runnable {
 				l.remove(listener);
 			}
 		}
-	}
-
-	public void clearListeners() {
-		listeners.clear();
 	}
 
 	@Override

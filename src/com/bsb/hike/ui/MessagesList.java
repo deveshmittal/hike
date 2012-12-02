@@ -118,7 +118,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED,
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.UPDATE_AVAILABLE,
 			HikePubSub.CONTACT_ADDED, HikePubSub.MESSAGE_DELETED,
-			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION };
+			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
+			HikePubSub.CLEAR_LISTENERS };
 
 	private Dialog updateAlert;
 
@@ -859,6 +860,9 @@ public class MessagesList extends DrawerBaseActivity implements
 					HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
 			toggleTypingNotification(false, (String) object);
+		} else if (HikePubSub.CLEAR_LISTENERS.equals(type)) {
+			HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
+			clearCache();
 		}
 	}
 

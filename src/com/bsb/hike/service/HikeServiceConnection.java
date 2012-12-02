@@ -88,10 +88,6 @@ public class HikeServiceConnection implements HikePubSub.Listener,
 		return mConnection;
 	}
 
-	public static void disconnectConnection() {
-		mConnection = null;
-	}
-
 	@Override
 	public void onEventReceived(String type, Object object) {
 		if (mService == null) {

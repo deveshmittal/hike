@@ -10,13 +10,13 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
-import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.AccountUtils;
 import com.google.android.gcm.GCMRegistrar;
 
@@ -57,17 +57,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			editor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
 
-			/*
-			 * Used for clearing all the static fields that were used for
-			 * caching.
-			 */
-			HikeMessengerApp.getPubSub().clearListeners();
-			MessagesList.clearCache();
-			/*
-			 * Don't need these listeners anymore. Making them null so that they
-			 * can be initialized again on sign up.
-			 */
-			((HikeMessengerApp) activity.getApplication()).makeListenersNull();
+			HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_LISTENERS, null);
+
 			return true;
 		} catch (Exception e) {
 			Log.e("DeleteAccountTask", "error deleting account", e);
