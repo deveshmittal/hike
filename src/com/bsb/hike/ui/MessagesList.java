@@ -293,80 +293,62 @@ public class MessagesList extends DrawerBaseActivity implements
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		new AsyncTask<Void, Void, ConversationsAdapter>() {
+		if (mAdapter == null || mConversationsByMSISDN == null
+				|| mConversationsAdded == null) {
+			HikeConversationsDatabase db = HikeConversationsDatabase
+					.getInstance();
+			List<Conversation> conversations = db.getConversations();
 
-			boolean reinitialized = false;
+			mConversationsByMSISDN = new HashMap<String, Conversation>(
+					conversations.size());
+			mConversationsAdded = new HashSet<String>();
 
-			@Override
-			protected ConversationsAdapter doInBackground(Void... params) {
-				if (mAdapter == null || mConversationsByMSISDN == null
-						|| mConversationsAdded == null) {
-					HikeConversationsDatabase db = HikeConversationsDatabase
-							.getInstance();
-					List<Conversation> conversations = db.getConversations();
-
-					mConversationsByMSISDN = new HashMap<String, Conversation>(
-							conversations.size());
-					mConversationsAdded = new HashSet<String>();
-
-					/*
-					 * Use an iterator so we can remove conversations w/ no
-					 * messages from our list
-					 */
-					for (Iterator<Conversation> iter = conversations.iterator(); iter
-							.hasNext();) {
-						Conversation conv = (Conversation) iter.next();
-						mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-						if (conv.getMessages().isEmpty()
-								&& !(conv instanceof GroupConversation)) {
-							iter.remove();
-						} else {
-							mConversationsAdded.add(conv.getMsisdn());
-						}
-					}
-
-					mAdapter = new ConversationsAdapter(MessagesList.this,
-							R.layout.conversation_item, conversations);
-
-					reinitialized = true;
+			/*
+			 * Use an iterator so we can remove conversations w/ no messages
+			 * from our list
+			 */
+			for (Iterator<Conversation> iter = conversations.iterator(); iter
+					.hasNext();) {
+				Conversation conv = (Conversation) iter.next();
+				mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+				if (conv.getMessages().isEmpty()
+						&& !(conv instanceof GroupConversation)) {
+					iter.remove();
+				} else {
+					mConversationsAdded.add(conv.getMsisdn());
 				}
-				/*
-				 * we need this object every time a message comes in, seems
-				 * simplest to just create it once
-				 */
-				mConversationsComparator = new Conversation.ConversationComparator();
-
-				/*
-				 * because notifyOnChange gets re-enabled whenever we call
-				 * notifyDataSetChanged it's simpler to assume it's set to false
-				 * and always notifyOnChange by hand
-				 */
-				mAdapter.setNotifyOnChange(false);
-
-				return mAdapter;
 			}
 
-			@Override
-			protected void onPostExecute(ConversationsAdapter mAdapter) {
-				mConversationsView.setAdapter(mAdapter);
+			mAdapter = new ConversationsAdapter(MessagesList.this,
+					R.layout.conversation_item, conversations);
 
-				if(reinitialized) {
-					HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
-							pubSubListeners);
-				}
+			HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
+					pubSubListeners);
+		}
+		/*
+		 * we need this object every time a message comes in, seems simplest to
+		 * just create it once
+		 */
+		mConversationsComparator = new Conversation.ConversationComparator();
 
-				/* register for long-press's */
-				registerForContextMenu(mConversationsView);
+		/*
+		 * because notifyOnChange gets re-enabled whenever we call
+		 * notifyDataSetChanged it's simpler to assume it's set to false and
+		 * always notifyOnChange by hand
+		 */
+		mAdapter.setNotifyOnChange(false);
 
-				/*
-				 * Calling this manually since this method is not called when
-				 * the activity is created. Need to call this to check if the
-				 * user left the group.
-				 */
-				onNewIntent(getIntent());
-			}
+		mConversationsView.setAdapter(mAdapter);
 
-		}.execute();
+		/* register for long-press's */
+		registerForContextMenu(mConversationsView);
+
+		/*
+		 * Calling this manually since this method is not called when the
+		 * activity is created. Need to call this to check if the user left the
+		 * group.
+		 */
+		onNewIntent(getIntent());
 	}
 
 	private void sendDeviceDetails() {
