@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -70,16 +71,22 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 		TextView viaSms = (TextView) findViewById(R.id.via_sms);
 
-		String text = getString(R.string.earn_sms_friend_join);
-		String textToBold = "via SMS";
-		SpannableStringBuilder ssb = new SpannableStringBuilder(text);
-		ssb.setSpan(
-				new ForegroundColorSpan(getResources()
-						.getColor(R.color.subtext)), text.indexOf(textToBold),
-				text.indexOf(textToBold) + textToBold.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				HikeConstants.FREE_SMS_PREF, true)) {
+			String text = getString(R.string.earn_sms_friend_join);
+			String textToBold = "via SMS";
+			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
+			ssb.setSpan(
+					new ForegroundColorSpan(getResources().getColor(
+							R.color.subtext)), text.indexOf(textToBold),
+					text.indexOf(textToBold) + textToBold.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-		viaSms.setText(ssb);
+			viaSms.setText(ssb);
+			viaSms.setVisibility(View.VISIBLE);
+		} else {
+			viaSms.setVisibility(View.GONE);
+		}
 
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 		mTitleView.setText(R.string.invite);
