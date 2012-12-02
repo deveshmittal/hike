@@ -18,6 +18,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -80,6 +81,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	private boolean isPinError = false;
 	public static boolean isAlreadyFetchingNumber = false;
 
+	private String[] autoAuthOperators = {"airtel", "idea"};
+
 	public boolean isRunning() {
 		return isRunning;
 	}
@@ -134,9 +137,20 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 					.getSystemService(Activity.CONNECTIVITY_SERVICE);
 			NetworkInfo wifi = connManager
 					.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+			String operator = ((TelephonyManager) context
+					.getSystemService(Context.TELEPHONY_SERVICE))
+					.getNetworkOperatorName().toLowerCase();
+
+			boolean shouldTryAutoAuth = false;
+			for(String autoAuthOperator : autoAuthOperators) {
+				if (operator.contains(autoAuthOperator)) {
+					shouldTryAutoAuth = true;
+					break;
+				}
+			}
 
 			AccountUtils.AccountInfo accountInfo = null;
-			if (!SignupTask.isAlreadyFetchingNumber && !wifi.isConnected()) {
+			if (!SignupTask.isAlreadyFetchingNumber && shouldTryAutoAuth && !wifi.isConnected()) {
 				accountInfo = AccountUtils.registerAccount(context, null, null);
 				if (accountInfo == null) {
 					/* network error, signal a failure */
