@@ -2484,8 +2484,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikeFileType hikeFileType, String fileKey, String fileType,
 			boolean isRecording) {
 		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber,
-				filePath, fileKey, selectedFile, fileType, hikeFileType,
-				isRecording, getApplicationContext());
+				filePath, fileKey, fileType, hikeFileType, isRecording,
+				getApplicationContext());
 		uploadFileTask.execute();
 	}
 

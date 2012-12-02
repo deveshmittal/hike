@@ -50,12 +50,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 	private Uri picasaUri;
 
 	public UploadFileTask(String msisdn, String filePath, String fileKey,
-			File selectedFile, String fileType, HikeFileType hikeFileType,
-			boolean wasFileSaved, Context context) {
+			String fileType, HikeFileType hikeFileType, boolean wasFileSaved,
+			Context context) {
 		this.msisdn = msisdn;
 		this.filePath = filePath;
 		this.fileKey = fileKey;
-		this.selectedFile = selectedFile;
 		this.fileType = fileType;
 		this.hikeFileType = hikeFileType;
 		this.wasFileSaved = wasFileSaved;
