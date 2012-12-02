@@ -356,6 +356,7 @@ public class DrawerLayout extends RelativeLayout implements
 
 			final int offset = i == 0 ? 0 : itemTexts.length;
 			final ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
+			parentView.removeAllViews();
 
 			new AsyncTask<Void, View, Void>() {
 
