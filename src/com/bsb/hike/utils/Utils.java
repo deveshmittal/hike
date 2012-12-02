@@ -542,10 +542,9 @@ public class Utils {
 	}
 
 	public static boolean isGroupConversation(String msisdn) {
-		if(msisdn.contains("::")) {
+		if (msisdn.contains("::")) {
 			/*
-			 * We store the larger icon for the user with this
-			 * msisdn.
+			 * We store the larger icon for the user with this msisdn.
 			 */
 			return false;
 		}
@@ -1399,7 +1398,7 @@ public class Utils {
 
 	public static String getSquareThumbnail(JSONObject obj) {
 		String thumbnailString = obj.optString(HikeConstants.THUMBNAIL);
-		if(TextUtils.isEmpty(thumbnailString)) {
+		if (TextUtils.isEmpty(thumbnailString)) {
 			return thumbnailString;
 		}
 
