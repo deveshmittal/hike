@@ -44,7 +44,8 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 	public void startFBAuth() {
 		facebookAuthPopupShowing = true;
 		HikeMessengerApp.getFacebook().authorize(this,
-				new String[] { "publish_stream" }, this);
+				new String[] { "publish_stream" }, Facebook.FORCE_DIALOG_AUTH,
+				this);
 	}
 
 	public void startTwitterAuth() {
