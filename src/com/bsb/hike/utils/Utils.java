@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.CharBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1433,5 +1434,50 @@ public class Utils {
 		} else {
 			return countryCode + inputNumber;
 		}
+	}
+
+	public static void downloadPicasaFile(Context context, File destFile,
+			Uri picasaUri) throws Exception {
+		InputStream is = null;
+		OutputStream os = null;
+		try {
+			if (isPicasaUri(picasaUri.toString())) {
+				is = context.getContentResolver().openInputStream(picasaUri);
+			} else {
+				is = new URL(picasaUri.toString()).openStream();
+			}
+			os = new FileOutputStream(destFile);
+
+			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+			int len;
+
+			while ((len = is.read(buffer)) > 0) {
+				os.write(buffer, 0, len);
+			}
+		} finally {
+			if (os != null) {
+				os.close();
+			}
+			if (is != null) {
+				is.close();
+			}
+		}
+	}
+
+	public static boolean isPicasaUri(String picasaUriString) {
+		return (picasaUriString.toString().startsWith(
+				HikeConstants.OTHER_PICASA_URI_START) || picasaUriString
+				.toString().startsWith(HikeConstants.JB_PICASA_URI_START));
+	}
+
+	public static Uri makePicasaUri(Uri uri) {
+		if (uri.toString().startsWith(
+				"content://com.android.gallery3d.provider")) {
+			// use the com.google provider, not the com.android
+			// provider.
+			return Uri.parse(uri.toString().replace("com.android.gallery3d",
+					"com.google.android.gallery3d"));
+		}
+		return uri;
 	}
 }

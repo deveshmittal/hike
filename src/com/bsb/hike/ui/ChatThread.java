@@ -2423,20 +2423,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			if (data == null || data.getData() == null) {
 				filePath = selectedFile.getAbsolutePath();
 			} else {
-				Uri selectedFileUri = data.getData();
-				if (selectedFileUri.toString().startsWith(
-						"content://com.android.gallery3d.provider")) {
-					// use the com.google provider, not the com.android
-					// provider.
-					selectedFileUri = Uri.parse(selectedFileUri.toString()
-							.replace("com.android.gallery3d",
-									"com.google.android.gallery3d"));
-				}
+				Uri selectedFileUri = Utils.makePicasaUri(data.getData());
 
-				if (selectedFileUri.toString().startsWith(
-						HikeConstants.OTHER_PICASA_URI_START)
-						|| selectedFileUri.toString().startsWith(
-								HikeConstants.JB_PICASA_URI_START)) {
+				if (Utils.isPicasaUri(selectedFileUri.toString())) {
 					// Picasa image
 					UploadFileTask uploadFileTask = new UploadFileTask(
 							selectedFileUri, hikeFileType, mContactNumber,
