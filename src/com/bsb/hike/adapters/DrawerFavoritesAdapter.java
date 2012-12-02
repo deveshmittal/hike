@@ -23,9 +23,10 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -344,6 +345,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						.findViewById(R.id.item_icon);
 				viewHolder.name = (TextView) convertView
 						.findViewById(R.id.item_name);
+				viewHolder.hikeImg = (ImageView) convertView
+						.findViewById(R.id.hike_icon);
+				viewHolder.invite = (Button) convertView
+						.findViewById(R.id.invite_fav);
 				break;
 
 			case SECTION:
@@ -380,12 +385,28 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		switch (viewType) {
 		case RECENT:
+			viewHolder.hikeImg
+					.setVisibility(contactInfo.isOnhike() ? View.VISIBLE
+							: View.GONE);
 		case FAVORITE:
 			viewHolder.addImg.setVisibility(View.VISIBLE);
 			viewHolder.addImg.setTag(contactInfo);
 			viewHolder.addImg.setOnClickListener(this);
 			if (viewType == FavoriteAdapterViewType.RECENT) {
-				viewHolder.addImg.setImageResource(R.drawable.add_fav);
+				if (!HikeMessengerApp.isIndianUser() && !contactInfo.isOnhike()) {
+					viewHolder.addImg.setVisibility(View.GONE);
+					viewHolder.invite.setVisibility(View.VISIBLE);
+					viewHolder.invite.setOnClickListener(this);
+					viewHolder.invite.setTag(contactInfo);
+
+					LayoutParams lp = (LayoutParams) viewHolder.name
+							.getLayoutParams();
+					lp.addRule(RelativeLayout.LEFT_OF, R.id.invite_fav);
+				} else {
+					viewHolder.addImg.setVisibility(View.VISIBLE);
+					viewHolder.invite.setVisibility(View.GONE);
+					viewHolder.addImg.setImageResource(R.drawable.add_fav);
+				}
 			} else {
 				viewHolder.addImg.setImageResource(R.drawable.call_fav);
 				viewHolder.addImg.setBackgroundDrawable(null);
@@ -449,6 +470,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	private class ViewHolder {
 		ImageView avatarImg;
+		ImageView hikeImg;
+		Button invite;
 		TextView name;
 		ImageView addImg;
 		Button addToFav;
@@ -464,21 +487,17 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				callIntent.setData(Uri.parse("tel:" + contactInfo.getMsisdn()));
 				context.startActivity(callIntent);
 			} else {
-				if (!contactInfo.isOnhike() && !HikeMessengerApp.isIndianUser()) {
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.MQTT_PUBLISH,
-							Utils.makeHike2SMSInviteMessage(
-									contactInfo.getMsisdn(), context)
-									.serialize());
-					Toast.makeText(context, "Invite sent", Toast.LENGTH_SHORT)
-							.show();
-				} else {
-					Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
-							contactInfo, FavoriteType.FAVORITE);
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
-				}
+				Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+						contactInfo, FavoriteType.FAVORITE);
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 			}
+		} else if (v.getId() == R.id.invite_fav) {
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.MQTT_PUBLISH,
+					Utils.makeHike2SMSInviteMessage(contactInfo.getMsisdn(),
+							context).serialize());
+			Toast.makeText(context, "Invite sent", Toast.LENGTH_SHORT).show();
 		} else if (v.getId() == R.id.add) {
 			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, FavoriteType.FAVORITE);

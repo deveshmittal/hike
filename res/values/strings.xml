@@ -244,5 +244,6 @@
 	<string name="audio_msg">Sent you an audio file</string>
 	<string name="location_msg">Shared a location</string>
 	<string name="error_download">Error while downloading image</string>
-	<string name="downloading_image">Downloading image...</string>	
+	<string name="downloading_image">Downloading image...</string>
+	<string name="invite_1">Invite</string>	
 </resources>

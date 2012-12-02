@@ -16,8 +16,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="7dp"
             android:src="@drawable/ic_drawer_home" />
+        
+        <ImageView
+            android:id="@+id/hike_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="7dp"
+            android:layout_toRightOf="@id/item_icon"
+            android:visibility="gone"
+            android:src="@drawable/ic_fav_hike" />
 
         <ImageView
             android:id="@+id/add_fav"
@@ -25,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="12dp"
+            android:layout_marginRight="7dp"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
             android:paddingTop="8dp"
@@ -33,14 +43,35 @@
             android:src="@drawable/add_fav"
             android:background="@drawable/bg_fav_no_selector"
             android:visibility="gone" />
+        
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/invite_fav"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="7dp"
+            android:background="@drawable/bg_fav_no_selector"
+            android:paddingBottom="9dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="8dp"
+            android:shadowColor="@color/black"
+            android:shadowDy="-0.7"
+            android:shadowRadius="0.7"
+            android:text="@string/invite_1"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold|italic"
+            android:visibility="gone" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/item_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@id/item_icon"
+            android:layout_marginLeft="7dp"
+            android:layout_toRightOf="@id/hike_icon"
             android:layout_toLeftOf="@id/add_fav"
             android:ellipsize="end"
             android:shadowColor="#000000"
