@@ -622,9 +622,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 			}
 			if (holder.marginView != null) {
-				holder.marginView
-						.setVisibility(hikeFile.getThumbnail() == null && !showThumbnail ? View.VISIBLE
-								: View.GONE);
+				holder.marginView.setVisibility(hikeFile.getThumbnail() == null
+						&& !showThumbnail ? View.VISIBLE : View.GONE);
 			}
 			if (!convMessage.isSent()
 					&& (conversation instanceof GroupConversation)) {
