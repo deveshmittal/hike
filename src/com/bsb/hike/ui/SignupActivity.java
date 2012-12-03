@@ -588,11 +588,13 @@ public class SignupActivity extends Activity implements
 		case PULLING_PIN:
 			if (viewFlipper.getDisplayedChild() == NUMBER) {
 				mHandler.postDelayed(new Runnable() {
-
 					@Override
 					public void run() {
-						showingSecondLoadingTxt = true;
-						loadingText.setImageResource(R.drawable.txt_almost);
+						if (viewFlipper != null
+								&& viewFlipper.getDisplayedChild() == NUMBER) {
+							showingSecondLoadingTxt = true;
+							loadingText.setImageResource(R.drawable.txt_almost);
+						}
 					}
 				}, HikeConstants.PIN_CAPTURE_TIME / 2);
 			}
