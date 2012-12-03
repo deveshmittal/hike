@@ -81,7 +81,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	private boolean isPinError = false;
 	public static boolean isAlreadyFetchingNumber = false;
 
-	private String[] autoAuthOperators = {"airtel", "idea"};
+	private static final String INDIA_ISO = "IN";
 
 	public boolean isRunning() {
 		return isRunning;
@@ -137,20 +137,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 					.getSystemService(Activity.CONNECTIVITY_SERVICE);
 			NetworkInfo wifi = connManager
 					.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-			String operator = ((TelephonyManager) context
-					.getSystemService(Context.TELEPHONY_SERVICE))
-					.getNetworkOperatorName().toLowerCase();
 
-			boolean shouldTryAutoAuth = false;
-			for(String autoAuthOperator : autoAuthOperators) {
-				if (operator.contains(autoAuthOperator)) {
-					shouldTryAutoAuth = true;
-					break;
-				}
-			}
+			TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+	    	String countryIso = manager.getNetworkCountryIso().toUpperCase();
 
 			AccountUtils.AccountInfo accountInfo = null;
-			if (!SignupTask.isAlreadyFetchingNumber && shouldTryAutoAuth && !wifi.isConnected()) {
+			if (!SignupTask.isAlreadyFetchingNumber && INDIA_ISO.equals(countryIso) && !wifi.isConnected()) {
 				accountInfo = AccountUtils.registerAccount(context, null, null);
 				if (accountInfo == null) {
 					/* network error, signal a failure */
