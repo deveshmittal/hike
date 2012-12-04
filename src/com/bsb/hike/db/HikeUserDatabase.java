@@ -862,7 +862,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.NAME + ", " + DBConstants.MSISDN + ", "
 				+ DBConstants.ONHIKE + " from " + DBConstants.USERS_TABLE
 				+ " WHERE " + DBConstants.MSISDN + " IN " + msisdns.toString()
-				+ "GROUP BY " + DBConstants.MSISDN, null);
+				+ " GROUP BY " + DBConstants.MSISDN, null);
 		try {
 			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
 

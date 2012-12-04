@@ -636,9 +636,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 		StringBuilder oneToOneSelections = new StringBuilder("(");
 		try {
-			for (String string : mainCursor.getColumnNames()) {
-				Log.d(getClass().getSimpleName(), string);
-			}
+			int count = 0;
 			while (mainCursor.moveToNext()) {
 				String msisdn = mainCursor.getString(msisdnIdx);
 				long convId = mainCursor.getInt(convIdx);
@@ -647,6 +645,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				Log.d(getClass().getSimpleName(),
 						"Message: " + mainCursor.getString(messageIdx));
 				if (!Utils.isGroupConversation(msisdn)) {
+					count++;
 					oneToOneSelections.append("'" + msisdn + "',");
 				}
 				/*
@@ -668,8 +667,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				conversation.addMessage(convMessage);
 				msisdnConversationMap.put(msisdn, conversation);
 			}
-			oneToOneSelections.replace(oneToOneSelections.length() - 1,
-					oneToOneSelections.length(), ")");
+			if (count > 0) {
+				oneToOneSelections.replace(oneToOneSelections.length() - 1,
+						oneToOneSelections.length(), ")");
+			} else {
+				oneToOneSelections.append(")");
+			}
 
 			/*
 			 * Getting the name for one to one conversations
