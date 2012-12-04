@@ -522,6 +522,13 @@ public class DrawerLayout extends RelativeLayout implements
 					goingBackToHome);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			activity.startActivity(intent);
+			/*
+			 * We don't need this activity in the stack if it not the messages
+			 * list screen.
+			 */
+			if (!(activity instanceof MessagesList)) {
+				activity.finish();
+			}
 			if (!goingBackToHome) {
 				activity.overridePendingTransition(
 						R.anim.slide_in_right_noalpha, R.anim.alpha_out);
