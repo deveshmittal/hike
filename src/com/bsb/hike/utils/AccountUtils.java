@@ -583,7 +583,6 @@ public class AccountUtils {
 		connection.setRequestProperty("Content-Name", fileName);
 		connection.setRequestProperty("Content-Type",
 				TextUtils.isEmpty(fileType) ? "" : fileType);
-		connection.setRequestProperty("Content-Encoding", "gzip");
 		connection.setRequestProperty("Cookie", "user=" + mToken);
 		connection.setRequestProperty("X-Thumbnail-Required", "0");
 
@@ -654,20 +653,16 @@ public class AccountUtils {
 
 		// Read file
 		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-		byte[] gzippedBuffer = GzipByteArrayEntity.gzip(buffer,
-				HTTP.DEFAULT_CONTENT_CHARSET);
 		int totalBytesRead = bytesRead;
 
 		while (bytesRead > 0) {
-			outputStream.write(gzippedBuffer, 0, gzippedBuffer.length);
+			outputStream.write(buffer, 0, buffer.length);
 
 			bytesAvailable = fileInputStream.available();
 			Log.d("Available", bytesAvailable + "");
 
 			bufferSize = Math.min(bytesAvailable, maxBufferSize);
 			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-			gzippedBuffer = GzipByteArrayEntity.gzip(buffer,
-					HTTP.DEFAULT_CONTENT_CHARSET);
 			totalBytesRead += bytesRead;
 
 			progress = HikeConstants.INITIAL_PROGRESS
@@ -675,11 +670,14 @@ public class AccountUtils {
 							: 75);
 			uploadFileTask.updateProgress(progress);
 
+			System.gc();
 			Thread.sleep(100);
 			if (cancelUpload.get()) {
 				throw new Exception("Upload cancelled by user");
 			}
 		}
+
+		buffer = null;
 
 		JSONObject response = getFileTransferResponse(connection,
 				uploadFileTask, cancelUpload);
