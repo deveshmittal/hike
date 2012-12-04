@@ -175,14 +175,12 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		// Remove from the recents list.
 		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
 		recommendedFavoriteList.add(0, contactInfo);
-		Collections.sort(recommendedFavoriteList);
 
 		makeCompleteList();
 	}
 
 	public void addAutoRecommendedFavorites(List<ContactInfo> contactInfoList) {
 		recommendedFavoriteList.addAll(contactInfoList);
-		Collections.sort(recommendedFavoriteList);
 
 		recentList.removeAll(contactInfoList);
 		onHikeList.removeAll(contactInfoList);
