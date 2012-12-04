@@ -253,4 +253,8 @@
 	<string name="select_invite_contacts">Select the contacts you want to invite</string>
 	<string name="invites_sent">Invites sent</string>
 	<string name="select_location">Select a location to share</string>
+	<string name="hike_version">hike Version:</string>
+	<string name="device_name">Device name:</string>
+	<string name="android_version">Android version:</string>
+	<string name="msisdn">Phone No:</string>
 </resources>
