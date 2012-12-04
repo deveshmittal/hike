@@ -244,6 +244,18 @@ public class HikeMqttManager implements Listener {
 
 		settings = this.mHikeService.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		String brokerHost = settings.getString(HikeMessengerApp.BROKER_HOST, "");
+
+		/*
+		 * If we set a custom broker host we set those values.
+		 */
+		if(!TextUtils.isEmpty(brokerHost)) {
+			brokerHostName = brokerHost;
+			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT, 8080);
+			return;
+		}
+
 		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION,
 				true);
 		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME

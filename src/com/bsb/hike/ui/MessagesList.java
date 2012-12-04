@@ -48,10 +48,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -277,6 +279,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		View view = findViewById(R.id.title_hikeicon);
 		view.setVisibility(View.VISIBLE);
+		view.setOnClickListener(this);
 
 		/*
 		 * mSearchIconView = findViewById(R.id.search);
@@ -573,7 +576,54 @@ public class MessagesList extends DrawerBaseActivity implements
 			startActivity(intent);
 			overridePendingTransition(R.anim.slide_up_noalpha,
 					R.anim.no_animation);
+		} else if (v.getId() == R.id.title_hikeicon) {
+			changeMqttBroker();
 		}
+	}
+
+	private void changeMqttBroker() {
+		final Dialog mqttDialog = new Dialog(this);
+		mqttDialog.setContentView(R.layout.mqtt_broker_dialog);
+
+		final EditText mqttHost = (EditText) mqttDialog.findViewById(R.id.host);
+		final EditText mqttPort = (EditText) mqttDialog.findViewById(R.id.port);
+		Button done = (Button) mqttDialog.findViewById(R.id.done);
+
+		done.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				String mqttHostString = mqttHost.getText().toString();
+				int mqttPortInt = 0;
+				try {
+					mqttPortInt = Integer.parseInt(mqttPort.getText()
+							.toString());
+				} catch (NumberFormatException e) {
+					Toast.makeText(getApplicationContext(),
+							"Port can only be an integer", Toast.LENGTH_SHORT)
+							.show();
+					return;
+				}
+
+				if (TextUtils.isEmpty(mqttHostString)) {
+					Toast.makeText(getApplicationContext(),
+							"Enter all details", Toast.LENGTH_SHORT).show();
+					return;
+				}
+				Editor editor = accountPrefs.edit();
+				editor.putString(HikeMessengerApp.BROKER_HOST, mqttHostString);
+				editor.putInt(HikeMessengerApp.BROKER_PORT, mqttPortInt);
+				editor.commit();
+
+				mqttDialog.dismiss();
+				Toast.makeText(
+						getApplicationContext(),
+						"Force stop and start the app again for the changes to take effect",
+						Toast.LENGTH_SHORT).show();
+			}
+		});
+
+		mqttDialog.show();
 	}
 
 	public static void clearCache() {

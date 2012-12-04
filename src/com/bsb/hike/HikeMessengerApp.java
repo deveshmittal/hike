@@ -148,6 +148,9 @@ public class HikeMessengerApp extends Application {
 
 	public static final String MSISDN_ENTERED = "msisdnEntered";
 
+	public static final String BROKER_HOST = "brokerHost";
+	public static final String BROKER_PORT = "brokerPort";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
