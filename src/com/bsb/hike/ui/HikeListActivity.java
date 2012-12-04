@@ -76,8 +76,8 @@ public class HikeListActivity extends Activity {
 		}
 		Toast.makeText(
 				getApplicationContext(),
-				noItemsChecked ? "Select the contacts you want to invite"
-						: "Invites sent", Toast.LENGTH_SHORT).show();
+				noItemsChecked ? R.string.select_invite_contacts
+						: R.string.invites_sent, Toast.LENGTH_SHORT).show();
 		if (!noItemsChecked) {
 			finish();
 		}

@@ -498,7 +498,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					HikePubSub.MQTT_PUBLISH,
 					Utils.makeHike2SMSInviteMessage(contactInfo.getMsisdn(),
 							context).serialize());
-			Toast.makeText(context, "Invite sent", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT).show();
 		} else if (v.getId() == R.id.add) {
 			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, FavoriteType.FAVORITE);

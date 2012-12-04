@@ -803,7 +803,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 			if (requestCode == CAMERA_RESULT && !selectedFileIcon.exists()) {
 				Toast.makeText(getApplicationContext(),
-						"Error capturing image", Toast.LENGTH_SHORT).show();
+						R.string.error_capture, Toast.LENGTH_SHORT).show();
 				return;
 			}
 			boolean isPicasaImage = false;

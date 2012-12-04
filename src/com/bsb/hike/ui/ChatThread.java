@@ -1059,7 +1059,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			if (Utils.isGroupConversation(mContactNumber)) {
 				/* the user must have deleted the chat. */
 				Toast toast = Toast.makeText(this,
-						"Group chat no longer exists", Toast.LENGTH_LONG);
+						R.string.invalid_group_chat, Toast.LENGTH_LONG);
 				toast.show();
 				onBackPressed();
 				return;
@@ -2175,7 +2175,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						Log.e(getClass().getSimpleName(),
 								"Error while playing the recording", e);
 						Toast.makeText(getApplicationContext(),
-								"Error while playing the recording",
+								R.string.error_play_recording,
 								Toast.LENGTH_SHORT).show();
 						setUpPreviewRecordingLayout(recordBtn, recordInfo,
 								duration, sendBtn);
@@ -2414,7 +2414,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			if (data == null
 					&& (selectedFile == null || !selectedFile.exists())) {
 				Toast.makeText(getApplicationContext(),
-						"Error capturing image", Toast.LENGTH_SHORT).show();
+						R.string.error_capture, Toast.LENGTH_SHORT).show();
 				return;
 			}
 

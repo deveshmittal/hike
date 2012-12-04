@@ -77,7 +77,7 @@ public class ShareLocation extends MapActivity {
 	public void onTitleIconClick(View v) {
 		if (selectedGeoPoint == null) {
 			Toast.makeText(getApplicationContext(),
-					"Select a location to share", Toast.LENGTH_SHORT).show();
+					R.string.select_location, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		Intent result = new Intent();

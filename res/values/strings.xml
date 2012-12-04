@@ -246,5 +246,11 @@
 	<string name="unknown_msg">Unsupported file</string>
 	<string name="error_download">Error while downloading image</string>
 	<string name="downloading_image">Downloading image...</string>
-	<string name="invite_1">Invite</string>	
+	<string name="invite_1">Invite</string>
+	<string name="invalid_group_chat">Group chat no longer exists</string>
+	<string name="error_capture">Error capturing image</string>
+	<string name="error_play_recording">Error while playing the recording</string>
+	<string name="select_invite_contacts">Select the contacts you want to invite</string>
+	<string name="invites_sent">Invites sent</string>
+	<string name="select_location">Select a location to share</string>
 </resources>
