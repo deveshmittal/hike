@@ -885,6 +885,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			// We were getting msisdns with spaces in them. Replacing all spaces
 			// so that lookup is correct
 			phoneNumber = phoneNumber.replaceAll(" ", "");
+			/*
+			 * Replacing all '-' that we get in the number
+			 */
+			phoneNumber = phoneNumber.replaceAll("-", "");
 			Log.d(getClass().getSimpleName(), "SMS To: " + phoneNumber);
 			ContactInfo contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromPhoneNo(phoneNumber);
