@@ -105,7 +105,7 @@ public class HikeConstants {
 	public static final long CONTACT_UPDATE_TIMEOUT = 10 * 1000;
 
 	/* how often to ping the server */
-	public static final short KEEP_ALIVE = 2 * 60; /* 10 minutes */
+	public static final short KEEP_ALIVE = 5 * 60; /* 10 minutes */
 
 	/* how often to ping after a failure */
 	public static final int RECONNECT_TIME = 10; /* 10 seconds */
