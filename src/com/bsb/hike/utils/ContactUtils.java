@@ -293,26 +293,31 @@ public class ContactUtils {
 		int lastTimeContactedIdx = c.getColumnIndex(Phone.LAST_TIME_CONTACTED);
 
 		Map<String, Long> recentlyContactedNumbers = new HashMap<String, Long>();
-		StringBuilder sb = new StringBuilder("(");
+		StringBuilder sb = null;
 
-		while (c.moveToNext()) {
-			String number = c.getString(numberColIdx);
-			long lastTimeContacted = c.getLong(lastTimeContactedIdx);
+		if (c.getCount() > 0) {
+			sb = new StringBuilder("(");
+			while (c.moveToNext()) {
+				String number = c.getString(numberColIdx);
+				long lastTimeContacted = c.getLong(lastTimeContactedIdx);
 
-			/*
-			 * Checking if we already have this number and whether the last time
-			 * contacted was sooner than the newer value.
-			 */
-			if (recentlyContactedNumbers.containsKey(number)
-					&& recentlyContactedNumbers.get(number) > lastTimeContacted) {
-				continue;
+				/*
+				 * Checking if we already have this number and whether the last
+				 * time contacted was sooner than the newer value.
+				 */
+				if (recentlyContactedNumbers.containsKey(number)
+						&& recentlyContactedNumbers.get(number) > lastTimeContacted) {
+					continue;
+				}
+				recentlyContactedNumbers.put(number,
+						c.getLong(lastTimeContactedIdx));
+
+				sb.append("'" + number + "',");
 			}
-			recentlyContactedNumbers.put(number,
-					c.getLong(lastTimeContactedIdx));
-
-			sb.append("'" + number + "',");
+			sb.replace(sb.length() - 1, sb.length(), ")");
+		} else {
+			sb = new StringBuilder("()");
 		}
-		sb.replace(sb.length() - 1, sb.length(), ")");
 
 		return new Pair<String, Map<String, Long>>(sb.toString(),
 				recentlyContactedNumbers);
