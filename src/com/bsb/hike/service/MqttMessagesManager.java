@@ -401,15 +401,17 @@ public class MqttMessagesManager {
 					JSONObject favorites = account
 							.getJSONObject(HikeConstants.FAVORITES);
 					JSONArray msisdns = favorites.names();
-					StringBuilder sb = new StringBuilder("(");
-					for (int i = 0; i < msisdns.length(); i++) {
-						sb.append("'" + msisdns.getString(i) + "'");
-						if (i < (msisdns.length() - 1)) {
-							sb.append(",");
+					if (msisdns != null) {
+						StringBuilder sb = new StringBuilder("(");
+						for (int i = 0; i < msisdns.length(); i++) {
+							sb.append("'" + msisdns.getString(i) + "'");
+							if (i < (msisdns.length() - 1)) {
+								sb.append(",");
+							}
 						}
+						sb.append(")");
+						userDb.setMultipleContactsToFavorites(sb.toString());
 					}
-					sb.append(")");
-					userDb.setMultipleContactsToFavorites(sb.toString());
 				}
 			}
 			editor.commit();
