@@ -409,9 +409,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					viewHolder.addImg.setImageResource(R.drawable.add_fav);
 				}
 			} else {
-				viewHolder.addImg.setImageResource(R.drawable.call_fav);
-				viewHolder.addImg.setBackgroundDrawable(null);
-				viewHolder.addImg.setPadding(0, 0, 0, 0);
+				viewHolder.addImg.setVisibility(View.GONE);
 			}
 			viewHolder.avatarImg.setImageDrawable(IconCacheManager
 					.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
