@@ -210,4 +210,9 @@ public class SmileyParser {
 					matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 	}
+
+	public boolean containsEmoticon(String message) {
+		Matcher matcher = mPattern.matcher(message);
+		return matcher.find();
+	}
 }
