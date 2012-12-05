@@ -11,7 +11,6 @@ import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.AttributeSet;
@@ -53,7 +52,7 @@ import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.utils.Utils;
 
 public class DrawerLayout extends RelativeLayout implements
-		View.OnClickListener, OnItemClickListener {
+		OnItemClickListener, View.OnClickListener {
 
 	public final static int DURATION = 250;
 
@@ -116,6 +115,8 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private View headerView;
 
+	private boolean freeSMS;
+
 	public enum LeftDrawerItems {
 		HOME, GROUP_CHAT, TELL_A_FRIEND, FREE_SMS, PROFILE, HELP
 	}
@@ -161,6 +162,9 @@ public class DrawerLayout extends RelativeLayout implements
 		rightDrawerBg = new BitmapDrawable(BitmapFactory.decodeResource(
 				getResources(), R.drawable.bg_right_drawer));
 		rightDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+
+		freeSMS = PreferenceManager.getDefaultSharedPreferences(getContext())
+				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
 	}
 
 	private void initializeLeftDrawerAnimations() {
@@ -340,150 +344,37 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public void renderLeftDrawerItems(final boolean freeSMSOn) {
 
-		final int itemHeight = (int) (48 * Utils.densityMultiplier);
-		final LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-		int[] parentIds = { R.id.top_half_items_container,
-				R.id.bottom_half_items_container };
-		for (int i = 0; i < parentIds.length; i++) {
-			final String[] itemTexts = i == 0 ? getResources().getStringArray(
-					R.array.top_half_drawer_text) : getResources()
-					.getStringArray(R.array.bottom_half_drawer_text);
-			final int[] itemIcons = i == 0 ? new int[] {
-					R.drawable.ic_drawer_home, R.drawable.ic_drawer_group_chat,
-					R.drawable.ic_drawer_invite } : new int[] {
-					R.drawable.ic_drawer_free_sms,
-					R.drawable.ic_drawer_profile, R.drawable.ic_drawer_help };
+		int[] ids = { R.id.left_drawer_home, R.id.left_drawer_group_chat,
+				R.id.left_drawer_tell_a_friend, R.id.left_drawer_free_sms,
+				R.id.left_drawer_profile, R.id.left_drawer_help };
 
-			final int offset = i == 0 ? 0 : itemTexts.length;
-			final ViewGroup parentView = (ViewGroup) findViewById(parentIds[i]);
-			parentView.removeAllViews();
-
-			new AsyncTask<Void, View, Void>() {
-
-				@Override
-				protected Void doInBackground(Void... params) {
-					for (int j = 0; j < itemTexts.length; j++) {
-						Log.e(getClass().getSimpleName(), "Offset: " + offset
-								+ " INDEX: " + (offset + j));
-						LeftDrawerItems leftDrawerItem = LeftDrawerItems
-								.values()[offset + j];
-
-						/*
-						 * No need to show the free SMS screen if the option has
-						 * been turned off
-						 */
-						if (leftDrawerItem == LeftDrawerItems.FREE_SMS
-								&& !freeSMSOn) {
-							continue;
-						}
-
-						View itemView = layoutInflater.inflate(
-								R.layout.drawer_item, null);
-						itemView.setFocusable(true);
-						itemView.setClickable(true);
-
-						TextView itemTxt = (TextView) itemView
-								.findViewById(R.id.item_name);
-						ImageView itemImg = (ImageView) itemView
-								.findViewById(R.id.item_icon);
-
-						itemTxt.setText(itemTexts[j]);
-						itemImg.setImageResource(itemIcons[j]);
-
-						if (itemTexts[j].equals(getContext().getString(
-								R.string.free_sms_txt))) {
-							creditsNum = (TextView) itemView
-									.findViewById(R.id.credit_num);
-							creditsNum.setVisibility(View.VISIBLE);
-							creditsNum.setText(Integer.toString(accountPrefs
-									.getInt(HikeMessengerApp.SMS_SETTING, 0)));
-						}
-						if (j == 0) {
-							itemView.findViewById(R.id.divider).setVisibility(
-									View.VISIBLE);
-							itemView.setBackgroundResource(R.drawable.drawer_top_item_selector);
-						} else if (j == itemTexts.length - 1) {
-							itemView.findViewById(R.id.divider).setVisibility(
-									View.GONE);
-							itemView.setBackgroundResource(R.drawable.drawer_bottom_item_selector);
-						} else {
-							itemView.findViewById(R.id.divider).setVisibility(
-									View.VISIBLE);
-							itemView.setBackgroundResource(R.drawable.drawer_center_item_selector);
-						}
-						itemView.setFocusable(true);
-						int id = leftDrawerItem.ordinal();
-						switch (LeftDrawerItems.values()[id]) {
-						case HOME:
-							if (activity instanceof MessagesList) {
-								itemView.setBackgroundResource(R.drawable.drawer_top_item_pressed);
-							}
-							break;
-						case GROUP_CHAT:
-							if (activity instanceof ChatThread) {
-								itemView.setBackgroundResource(R.drawable.drawer_center_item_pressed);
-							}
-							break;
-						case FREE_SMS:
-							if (activity instanceof CreditsActivity) {
-								itemView.setBackgroundResource(R.drawable.drawer_top_item_pressed);
-							}
-							break;
-						case PROFILE:
-							if (activity instanceof ProfileActivity) {
-								itemView.setBackgroundResource(R.drawable.drawer_center_item_pressed);
-							}
-							break;
-						case HELP:
-							if (activity instanceof Tutorial) {
-								itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
-							}
-							break;
-						case TELL_A_FRIEND:
-							if (activity instanceof TellAFriend) {
-								itemView.setBackgroundResource(R.drawable.drawer_bottom_item_pressed);
-							}
-							break;
-						}
-
-						LayoutParams layoutParams = new LayoutParams(
-								LayoutParams.MATCH_PARENT, itemHeight);
-						itemView.setLayoutParams(layoutParams);
-
-						itemView.setId(id);
-						itemView.setOnClickListener(DrawerLayout.this);
-						publishProgress(itemView);
-					}
-					return null;
-				}
-
-				@Override
-				protected void onProgressUpdate(View... values) {
-					if (values == null) {
-						parentView.removeAllViews();
-						return;
-					}
-					parentView.addView(values[0]);
-					parentView.setFocusable(true);
-				}
-
-			}.execute();
-
+		for (int i = 0; i < ids.length; i++) {
+			findViewById(ids[i]).setOnClickListener(this);
 		}
+		findViewById(R.id.left_drawer_free_sms).setVisibility(
+				freeSMSOn ? VISIBLE : GONE);
+		findViewById(R.id.left_drawer_free_sms).setBackgroundResource(
+				freeSMSOn ? R.drawable.drawer_center_item_selector
+						: R.drawable.drawer_top_item_selector);
+		findViewById(R.id.left_credits_divider).setVisibility(
+				freeSMSOn ? VISIBLE : GONE);
+		creditsNum = (TextView) findViewById(R.id.credit_num);
+		updateCredits(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0));
 	}
 
+	@Override
 	public void onClick(View v) {
 		Log.d(getClass().getSimpleName(), "Drawer item clicked: " + v.getId());
 		intent = null;
 		boolean goingBackToHome = false;
-		switch (LeftDrawerItems.values()[v.getId()]) {
-		case HOME:
+		switch (v.getId()) {
+		case R.id.left_drawer_home:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HOME);
 			intent = activity instanceof MessagesList ? null : new Intent(
 					getContext(), MessagesList.class);
 			goingBackToHome = true;
 			break;
-		case GROUP_CHAT:
+		case R.id.left_drawer_group_chat:
 			Utils.logEvent(getContext(),
 					HikeConstants.LogEvent.DRAWER_GROUP_CHAT);
 			intent = activity instanceof ChatThread ? null : new Intent(
@@ -493,22 +384,22 @@ public class DrawerLayout extends RelativeLayout implements
 			}
 			handler.postDelayed(resetSidebar, 400);
 			break;
-		case TELL_A_FRIEND:
+		case R.id.left_drawer_tell_a_friend:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_INVITE);
 			intent = activity instanceof TellAFriend ? null : new Intent(
 					getContext(), TellAFriend.class);
 			break;
-		case FREE_SMS:
+		case R.id.left_drawer_free_sms:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_CREDITS);
 			intent = activity instanceof CreditsActivity ? null : new Intent(
 					getContext(), CreditsActivity.class);
 			break;
-		case PROFILE:
+		case R.id.left_drawer_profile:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_PROFILE);
 			intent = activity instanceof ProfileActivity ? null : new Intent(
 					getContext(), ProfileActivity.class);
 			break;
-		case HELP:
+		case R.id.left_drawer_help:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HELP);
 			intent = activity instanceof Tutorial ? null : new Intent(
 					getContext(), Tutorial.class);
