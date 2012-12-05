@@ -455,7 +455,8 @@ public class MqttMessagesManager {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					true);
-			if (contactInfo == null) {
+			if (contactInfo == null
+					|| contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
 				return;
 			}
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
