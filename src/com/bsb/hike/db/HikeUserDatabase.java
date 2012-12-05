@@ -437,7 +437,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN
 				+ " NOT IN (SELECT " + DBConstants.MSISDN + " FROM "
 				+ DBConstants.BLOCK_TABLE + ") AND " + DBConstants.USERS_TABLE
-				+ "." + DBConstants.ONHIKE + " =0 ", null);
+				+ "." + DBConstants.ONHIKE + " =0 AND " + DBConstants.USERS_TABLE
+				+ "." + DBConstants.MSISDN + " !='null'", null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty()) {
