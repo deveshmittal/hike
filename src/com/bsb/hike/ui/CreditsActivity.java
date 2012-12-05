@@ -226,7 +226,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 	public void onFacebookClick(View v) {
 		if (!settings
 				.getBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false)) {
-			startFBAuth();
+			startFBAuth(true);
 		} else {
 			showCredentialUnlinkAlert(true);
 		}
@@ -234,7 +234,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 
 	public void onTwitterClick(View v) {
 		if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
-			startTwitterAuth();
+			startTwitterAuth(true);
 		} else {
 			showCredentialUnlinkAlert(false);
 		}

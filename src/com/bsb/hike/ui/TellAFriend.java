@@ -57,7 +57,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		if (savedInstanceState != null
 				&& savedInstanceState
 						.getBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE)) {
-			startTwitterAuth();
+			startTwitterAuth(false);
 			return;
 		}
 		setContentView(R.layout.tell_a_friend);
@@ -145,7 +145,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		if (savedInstanceState != null) {
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING)) {
-				startFBAuth();
+				startFBAuth(false);
 			} else if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING)) {
 				onClick(findViewById(ItemTypes.FACEBOOK.ordinal()));
@@ -172,7 +172,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		case FACEBOOK:
 			if (!settings.getBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
 					false)) {
-				startFBAuth();
+				startFBAuth(false);
 			} else {
 				facebookPostPopupShowing = true;
 				Facebook facebook = HikeMessengerApp.getFacebook();
@@ -224,7 +224,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		case TWITTER:
 			if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE,
 					false)) {
-				startTwitterAuth();
+				startTwitterAuth(false);
 			} else {
 				new AsyncTask<Void, Void, Boolean>() {
 

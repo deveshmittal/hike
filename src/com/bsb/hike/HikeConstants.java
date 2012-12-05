@@ -62,6 +62,8 @@ public class HikeConstants {
 	public static final String POKE = "poke";
 	public static final String ID = "id";
 	public static final String TOKEN = "token";
+	public static final String EXPIRES = "expires";
+	public static final String POST = "post";
 	public static final String ACCOUNT = "account";
 	public static final String ACCOUNTS = "accounts";
 	public static final String FAVORITES = "favorites";
