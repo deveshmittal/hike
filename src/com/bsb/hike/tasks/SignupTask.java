@@ -356,6 +356,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				Log.e("SignupTask", "Unable to set name", e);
 				publishProgress(new StateValue(State.ERROR, null));
 				return Boolean.FALSE;
+			} catch (IllegalStateException e) {
+				Log.e(getClass().getSimpleName(), "Null Token", e);
+				return Boolean.FALSE;
 			}
 
 			this.data = null;

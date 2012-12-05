@@ -371,18 +371,16 @@ public class AccountUtils {
 		return msisdn;
 	}
 
-	private static void addToken(HttpRequestBase req) {
-		req.addHeader("Cookie", "user=" + mToken);
-		throwExceptionIfTokenIsEmpty();
-	}
-
-	private static void throwExceptionIfTokenIsEmpty() {
+	private static void addToken(HttpRequestBase req)
+			throws IllegalStateException {
 		if (TextUtils.isEmpty(mToken)) {
 			throw new IllegalStateException("Token is null");
 		}
+		req.addHeader("Cookie", "user=" + mToken);
 	}
 
-	public static void setName(String name) throws NetworkErrorException {
+	public static void setName(String name) throws NetworkErrorException,
+			IllegalStateException {
 		HttpPost httppost = new HttpPost(BASE + "/account/name");
 		addToken(httppost);
 		JSONObject data = new JSONObject();
@@ -437,7 +435,7 @@ public class AccountUtils {
 	 */
 	public static List<ContactInfo> updateAddressBook(
 			Map<String, List<ContactInfo>> new_contacts_by_id,
-			JSONArray ids_json) {
+			JSONArray ids_json) throws IllegalStateException {
 		HttpPatch request = new HttpPatch(BASE + "/account/addressbook");
 		addToken(request);
 		JSONObject data = new JSONObject();
@@ -543,7 +541,7 @@ public class AccountUtils {
 	}
 
 	public static void deleteOrUnlinkAccount(boolean deleteAccount)
-			throws NetworkErrorException {
+			throws NetworkErrorException, IllegalStateException {
 		HttpRequestBase request = deleteAccount ? new HttpDelete(BASE
 				+ "/account") : new HttpPost(BASE + "/account/unlink");
 		addToken(request);
@@ -554,7 +552,8 @@ public class AccountUtils {
 	}
 
 	public static void performRequest(HikeHttpRequest hikeHttpRequest,
-			boolean addToken) throws NetworkErrorException {
+			boolean addToken) throws NetworkErrorException,
+			IllegalStateException {
 		HttpPost post = new HttpPost(BASE + hikeHttpRequest.getPath());
 		if (addToken) {
 			addToken(post);
@@ -701,7 +700,7 @@ public class AccountUtils {
 	}
 
 	public static void deleteSocialCredentials(boolean facebook)
-			throws NetworkErrorException {
+			throws NetworkErrorException, IllegalStateException {
 		String url = facebook ? "/account/connect/fb"
 				: "/account/connect/twitter";
 		HttpDelete delete = new HttpDelete(BASE + url);
