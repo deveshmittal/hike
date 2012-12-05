@@ -841,6 +841,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				mActivityState.downloadPicasaImageTask = new DownloadPicasaImageTask(
 						new File(path), selectedFileUri);
 				mActivityState.downloadPicasaImageTask.execute();
+				mDialog = ProgressDialog.show(this, null, getResources()
+						.getString(R.string.downloading_image));
 			}
 			break;
 		case CROP_RESULT:
