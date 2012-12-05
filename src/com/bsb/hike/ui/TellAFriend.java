@@ -74,7 +74,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
 				HikeConstants.FREE_SMS_PREF, true)) {
 			String text = getString(R.string.earn_sms_friend_join);
-			String textToBold = "via SMS";
+			String textToBold = getString(R.string.via_sms);
 			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
 			ssb.setSpan(
 					new ForegroundColorSpan(getResources().getColor(

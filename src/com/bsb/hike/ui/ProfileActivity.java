@@ -802,8 +802,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				editor.commit();
 			}
 			if (requestCode == CAMERA_RESULT && !selectedFileIcon.exists()) {
-				Toast.makeText(getApplicationContext(),
-						R.string.error_capture, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.error_capture,
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			boolean isPicasaImage = false;
@@ -831,7 +831,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				}
 			}
 			if (TextUtils.isEmpty(path)) {
-				Toast.makeText(getApplicationContext(), "Error getting image",
+				Toast.makeText(getApplicationContext(), R.string.error_capture,
 						Toast.LENGTH_SHORT).show();
 				return;
 			}

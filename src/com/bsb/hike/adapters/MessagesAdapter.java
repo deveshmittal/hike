@@ -864,8 +864,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} catch (ActivityNotFoundException e) {
 			Log.w(getClass().getSimpleName(),
 					"Trying to open an unknown format", e);
-			Toast.makeText(context, "Unable to open file (Unknown format)",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, R.string.unknown_msg, Toast.LENGTH_SHORT)
+					.show();
 		}
 
 	}

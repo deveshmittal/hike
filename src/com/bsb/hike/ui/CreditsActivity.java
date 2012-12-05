@@ -149,7 +149,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 				- (2 * totalCreditNumContainerMargin);
 
 		String freeSmsString = getString(R.string.invite_friend_free_sms);
-		String textToColor = "50 free SMS";
+		String textToColor = getString(R.string.free_sms_50);
 		int startIndex = freeSmsString.indexOf(textToColor);
 
 		SpannableStringBuilder ssb = new SpannableStringBuilder(freeSmsString);
@@ -161,7 +161,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		freeSms50.setText(ssb);
 
 		freeSmsString = getString(R.string.connect_and_get);
-		textToColor = "100 free SMS";
+		textToColor = getString(R.string.free_sms_100);
 		startIndex = freeSmsString.indexOf(textToColor);
 
 		ssb = new SpannableStringBuilder(freeSmsString);

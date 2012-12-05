@@ -432,7 +432,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		case EMPTY_FAVORITE:
 			String text = viewHolder.name.getText().toString();
-			String replace = "plus";
+			String replace = context.getString(R.string.plus);
 			SpannableString spannableString = new SpannableString(text);
 			spannableString.setSpan(new ImageSpan(context,
 					R.drawable.ic_add_favorite), text.indexOf(replace),

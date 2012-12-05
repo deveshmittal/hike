@@ -73,6 +73,7 @@
 	<string name="invite_sent">Invite sent.</string>
 	<string name="sms_renew">Refills 1st of every month</string>
 	<string name="invite_friend_free_sms">Earn an extra 50 free SMS per month for\nevery friend that joins hike because of you.</string>
+	<string name="free_sms_50">50 free SMS</string>
 	<string name="group_chat_free">Group chat is free till 31st Dec.\nCredits don\'t apply.</string>
 	<string name="sms_disclaimer">*SMSs that are received and shown in hike are\nstored locally and never uploaded to our servers.\n\nWe promise.</string>
 	<string name="sms_alert_text">You can now receive all your SMSs in hike. Tap below to turn this feature on.</string>
@@ -143,6 +144,7 @@
 	<string name="unlink_confirmation">Are you sure you want to unlink your account from this phone?</string>
 	<string name="unlink">Unlink</string>
 	<string name="no_favorite">You have no favorites.\nTap plus below to add.</string>
+	<string name="plus">plus</string>
 	<string name="change_group_name">%1$s changed the group name.</string>
 	<string name="block_internation_sms">SMS can only be sent to India</string>
 	<string name="block_internation_sms_bold_text">India</string>
@@ -153,6 +155,7 @@
 	<string name="new_group_message">Group Chat with %1$s</string>
 	<string name="add_to_group_message">Added %1$s to the group</string>
 	<string name="connect_and_get">Connect and get 100 free SMS instantly</string>
+	<string name="free_sms_100">100 free SMS</string>
 	<string name="facebook">Facebook</string>
 	<string name="twitter">Twitter</string>
 	<string name="social_failed">Unable to save details.</string>
@@ -189,6 +192,7 @@
 	<string name="tap_to_place">Tap a place on the map</string>
 	<string name="invite_earn">Invite Friends, Earn Rewards</string>
 	<string name="earn_sms_friend_join">For every friend who joins via SMS\nyou get 50 Free SMS</string>
+	<string name="via_sms">via SMS</string>
 	<string name="email">Email</string>
 	<string name="share_via_other">Share via Other</string>
 	<string name="fb_subtext">Post to my wall</string>

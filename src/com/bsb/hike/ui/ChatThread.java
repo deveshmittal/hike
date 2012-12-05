@@ -2127,7 +2127,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				Log.e(getClass().getSimpleName(),
 						"Error while playing the recording", e);
 				Toast.makeText(getApplicationContext(),
-						"Error while playing the recording", Toast.LENGTH_SHORT)
+						R.string.error_play_recording, Toast.LENGTH_SHORT)
 						.show();
 				setUpPreviewRecordingLayout(recordBtn, recordInfo, duration,
 						sendBtn);

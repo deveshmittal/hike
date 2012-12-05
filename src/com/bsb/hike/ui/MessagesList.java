@@ -547,7 +547,7 @@ public class MessagesList extends DrawerBaseActivity implements
 						HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setMessage(R.string.delete_all_question)
-						.setPositiveButton("Delete", this)
+						.setPositiveButton(R.string.delete, this)
 						.setNegativeButton(R.string.cancel, this).show();
 			}
 			return true;
