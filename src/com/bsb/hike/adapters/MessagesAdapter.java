@@ -824,6 +824,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 									context);
 						}
 						uploadTask.execute();
+						ChatThread.fileTransferTaskMap.put(
+								convMessage.getMsgID(), uploadTask);
+						notifyDataSetChanged();
 					}
 					// Else we open it for the use to see
 					else {
