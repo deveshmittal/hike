@@ -375,6 +375,8 @@ public class Utils {
 		editor.putInt(HikeMessengerApp.INVITED, accountInfo.all_invitee);
 		editor.putInt(HikeMessengerApp.INVITED_JOINED,
 				accountInfo.all_invitee_joined);
+		editor.putString(HikeMessengerApp.COUNTRY_CODE,
+				accountInfo.country_code);
 		editor.commit();
 	}
 

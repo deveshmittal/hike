@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
@@ -199,6 +200,23 @@ public class SignupActivity extends Activity implements
 		}
 		if (hikeHTTPTask == null) {
 			if (success) {
+				SharedPreferences prefs = getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+
+				/*
+				 * Setting the app value as to if the user is Indian or not.
+				 */
+				String countryCode = prefs.getString(
+						HikeMessengerApp.COUNTRY_CODE, "");
+				HikeMessengerApp.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE
+						.equals(countryCode));
+
+				prefs = PreferenceManager.getDefaultSharedPreferences(this);
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeConstants.FREE_SMS_PREF,
+						HikeMessengerApp.isIndianUser());
+				editor.commit();
+
 				// Tracking the registration event for Fiksu
 				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
@@ -307,24 +325,6 @@ public class SignupActivity extends Activity implements
 					String code = countryPicker.getText().toString();
 					code = code.substring(code.indexOf("+"), code.length());
 					input = code + input;
-
-					// Saving country code of the user. This will be used when
-					// the user tries to message an unknown number.
-					Editor editor = getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
-							.edit();
-					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
-					editor.commit();
-
-					HikeMessengerApp
-							.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE
-									.equals(code));
-
-					editor = PreferenceManager.getDefaultSharedPreferences(
-							SignupActivity.this).edit();
-					editor.putBoolean(HikeConstants.FREE_SMS_PREF,
-							HikeMessengerApp.isIndianUser());
-					editor.commit();
 				}
 				mTask.addUserInput(input);
 			}

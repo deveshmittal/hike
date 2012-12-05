@@ -241,14 +241,18 @@ public class AccountUtils {
 
 		public int all_invitee_joined;
 
+		public String country_code;
+
 		public AccountInfo(String token, String msisdn, String uid,
-				int smsCredits, int all_invitee, int all_invitee_joined) {
+				int smsCredits, int all_invitee, int all_invitee_joined,
+				String country_code) {
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
 			this.smsCredits = smsCredits;
 			this.all_invitee = all_invitee;
 			this.all_invitee_joined = all_invitee_joined;
+			this.country_code = country_code;
 		}
 	}
 
@@ -314,12 +318,14 @@ public class AccountUtils {
 		Log.d("AccountUtils", "AccountCreation " + obj.toString());
 		if ("fail".equals(obj.optString("stat"))) {
 			if (pin != null)
-				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
+				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0,
+						null);
 			/*
 			 * represents normal account creation , when user is on wifi and
 			 * account creation failed
 			 */
-			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
+			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0,
+					null);
 		}
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
@@ -327,11 +333,12 @@ public class AccountUtils {
 		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
 		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
 		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
+		String country_code = obj.optString("country_code");
 
 		Log.d("HTTP", "Successfully created account token:" + token
 				+ "msisdn: " + msisdn + " uid: " + uid);
 		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits,
-				all_invitee, all_invitee_joined);
+				all_invitee, all_invitee_joined, country_code);
 	}
 
 	public static String validateNumber(String number) {
