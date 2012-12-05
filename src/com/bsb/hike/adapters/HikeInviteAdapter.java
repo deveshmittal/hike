@@ -48,7 +48,7 @@ public class HikeInviteAdapter extends HikeArrayAdapter {
 		textView.setText(contactInfo.getName());
 
 		TextView numView = (TextView) v.findViewById(R.id.number);
-		numView.setText(contactInfo.getPhoneNum());
+		numView.setText(contactInfo.getMsisdn());
 		if (!TextUtils.isEmpty(contactInfo.getMsisdnType())) {
 			numView.append(" (" + contactInfo.getMsisdnType() + ")");
 		}
