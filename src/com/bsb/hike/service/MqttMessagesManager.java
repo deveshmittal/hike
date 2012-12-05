@@ -389,12 +389,26 @@ public class MqttMessagesManager {
 					if (accounts.has(HikeConstants.FACEBOOK)) {
 						JSONObject facebookJSON = accounts
 								.getJSONObject(HikeConstants.FACEBOOK);
+						String userId = facebookJSON
+								.getString(HikeConstants.ID);
+						String userToken = facebookJSON
+								.getString(HikeConstants.TOKEN);
+						long expires = facebookJSON
+								.getLong(HikeConstants.EXPIRES);
 						Facebook facebook = HikeMessengerApp.getFacebook();
-						facebook.setAccessToken(facebookJSON
-								.getString(HikeConstants.TOKEN));
+
+						facebook.setAccessToken(userToken);
+						facebook.setAccessExpires(expires);
+
 						editor.putBoolean(
 								HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
 								facebook.isSessionValid());
+						editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
+								facebook.getAccessExpires());
+						editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,
+								facebook.getAccessToken());
+						editor.putString(HikeMessengerApp.FACEBOOK_USER_ID,
+								userId);
 					}
 				}
 				if (account.has(HikeConstants.FAVORITES)) {
