@@ -264,7 +264,8 @@ public class DrawerLayout extends RelativeLayout implements
 		 * If the user taps on a non hike contact and is not an Indian user, we
 		 * do nothing.
 		 */
-		if (!HikeMessengerApp.isIndianUser() && !contactInfo.isOnhike()) {
+		if (!contactInfo.isOnhike()
+				&& (!HikeMessengerApp.isIndianUser() || !freeSMS)) {
 			return;
 		}
 
@@ -295,6 +296,13 @@ public class DrawerLayout extends RelativeLayout implements
 			List<ContactInfo> contactInfoList) {
 		if (drawerFavoritesAdapter != null) {
 			drawerFavoritesAdapter.addAutoRecommendedFavorites(contactInfoList);
+		}
+	}
+
+	public void freeSMSToggled(boolean freeSMS) {
+		if (drawerFavoritesAdapter != null) {
+			this.freeSMS = freeSMS;
+			drawerFavoritesAdapter.freeSMSToggled(freeSMS);
 		}
 	}
 

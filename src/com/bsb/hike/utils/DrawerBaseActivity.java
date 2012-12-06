@@ -184,6 +184,7 @@ public class DrawerBaseActivity extends Activity implements
 				@Override
 				public void run() {
 					parentLayout.renderLeftDrawerItems(freeSMSOn);
+					parentLayout.freeSMSToggled(freeSMSOn);
 				}
 			});
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -48,6 +49,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private List<ContactInfo> favoriteList;
 	private List<ContactInfo> onHikeList;
 	private List<ContactInfo> recentList;
+
+	private boolean freeSMSOn;
 
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
@@ -107,6 +110,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
+		freeSMSOn = PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
 	}
 
 	private void makeCompleteList() {
@@ -175,6 +180,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
 			completeList.remove(1);
 		}
+		// Remove from the hike list.
+		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
 		// Remove from the recents list.
 		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
 		recommendedFavoriteList.add(0, contactInfo);
@@ -271,6 +278,11 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		recentList.removeAll(favoriteList);
 
 		makeCompleteList();
+	}
+
+	public void freeSMSToggled(boolean freeSMS) {
+		this.freeSMSOn = freeSMS;
+		notifyDataSetChanged();
 	}
 
 	@Override
@@ -394,7 +406,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			viewHolder.addImg.setTag(contactInfo);
 			viewHolder.addImg.setOnClickListener(this);
 			if (viewType == FavoriteAdapterViewType.RECENT) {
-				if (!HikeMessengerApp.isIndianUser() && !contactInfo.isOnhike()) {
+				if ((!HikeMessengerApp.isIndianUser() && !contactInfo
+						.isOnhike())
+						|| (HikeMessengerApp.isIndianUser()
+								&& !contactInfo.isOnhike() && !freeSMSOn)) {
 					viewHolder.addImg.setVisibility(View.GONE);
 					viewHolder.invite.setVisibility(View.VISIBLE);
 					viewHolder.invite.setOnClickListener(this);
@@ -496,7 +511,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					HikePubSub.MQTT_PUBLISH,
 					Utils.makeHike2SMSInviteMessage(contactInfo.getMsisdn(),
 							context).serialize());
-			Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT)
+					.show();
 		} else if (v.getId() == R.id.add) {
 			Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, FavoriteType.FAVORITE);
