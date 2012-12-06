@@ -19,6 +19,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
@@ -225,6 +226,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private void setupContactProfileScreen() {
 		setContentView(R.layout.contact_info);
 
+		boolean canCall = getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_TELEPHONY);
+
 		this.mLocalMSISDN = getIntent().getStringExtra(
 				HikeConstants.Extras.CONTACT_INFO);
 
@@ -253,6 +257,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						: View.VISIBLE);
 		findViewById(R.id.invite_to_hike_btn).setVisibility(
 				contactInfo.isOnhike() ? View.GONE : View.VISIBLE);
+		findViewById(R.id.call_btn).setVisibility(
+				canCall ? View.VISIBLE : View.GONE);
 
 		TextView mTitleView = (TextView) findViewById(R.id.title);
 		mTitleView.setText(R.string.user_info);
