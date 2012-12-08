@@ -27,7 +27,6 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_toRightOf="@id/item_icon"
-            android:ellipsize="end"
             android:shadowColor="#66000000"
             android:shadowDy="0.5"
             android:shadowRadius="0.6"
