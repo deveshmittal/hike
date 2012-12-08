@@ -422,6 +422,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					viewHolder.addImg.setVisibility(View.VISIBLE);
 					viewHolder.invite.setVisibility(View.GONE);
 					viewHolder.addImg.setImageResource(R.drawable.add_fav);
+
+					LayoutParams lp = (LayoutParams) viewHolder.name
+							.getLayoutParams();
+					lp.addRule(RelativeLayout.LEFT_OF, R.id.add_fav);
 				}
 			} else {
 				viewHolder.addImg.setVisibility(View.GONE);
