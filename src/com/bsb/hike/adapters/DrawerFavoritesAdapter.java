@@ -402,9 +402,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					.setVisibility(contactInfo.isOnhike() ? View.VISIBLE
 							: View.GONE);
 		case FAVORITE:
-			viewHolder.addImg.setVisibility(View.VISIBLE);
-			viewHolder.addImg.setTag(contactInfo);
-			viewHolder.addImg.setOnClickListener(this);
 			if (viewType == FavoriteAdapterViewType.RECENT) {
 				if ((!HikeMessengerApp.isIndianUser() && !contactInfo
 						.isOnhike())
@@ -419,6 +416,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 							.getLayoutParams();
 					lp.addRule(RelativeLayout.LEFT_OF, R.id.invite_fav);
 				} else {
+					viewHolder.addImg.setOnClickListener(this);
+					viewHolder.addImg.setTag(contactInfo);
 					viewHolder.addImg.setVisibility(View.VISIBLE);
 					viewHolder.invite.setVisibility(View.GONE);
 					viewHolder.addImg.setImageResource(R.drawable.add_fav);
