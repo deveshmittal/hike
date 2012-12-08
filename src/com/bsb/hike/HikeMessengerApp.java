@@ -129,6 +129,10 @@ public class HikeMessengerApp extends Application {
 
 	public static final String FILE_PATH = "filePath";
 
+	public static final String TEMP_NAME = "tempName";
+
+	public static final String TEMP_NUM = "tempNum";
+
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"

@@ -262,12 +262,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private boolean loadingMoreMessages;
 
 	private boolean reachedEnd;
-	/*
-	 * Required for saving the current intent if the user has the option "Do not
-	 * keep background activities checked. Otherwise the current intent gets
-	 * reset to default and the app throws an NPE (observed during FT).
-	 */
-	private static Intent tempIntent;
 
 	@Override
 	protected void onPause() {
@@ -293,8 +287,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			mgr.cancel((int) mConversation.getConvId());
 		}
-
-		tempIntent = null;
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
@@ -488,10 +480,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
-		Object o = getLastNonConfigurationInstance();
-		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
-		intent = tempIntent != null ? tempIntent : intent;
-		onNewIntent(intent);
+		if(prefs.contains(HikeMessengerApp.TEMP_NUM)){
+			mContactName = prefs.getString(HikeMessengerApp.TEMP_NAME, null);
+			mContactNumber = prefs.getString(HikeMessengerApp.TEMP_NUM, null);
+			clearTempData();
+			setIntentFromField();
+			onNewIntent(getIntent());
+		} else {
+			Object o = getLastNonConfigurationInstance();
+			Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
+			onNewIntent(intent);
+		}
 
 		if (savedInstanceState != null) {
 			if (savedInstanceState
@@ -512,6 +511,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+	}
+
+	private void clearTempData() {
+		Editor editor = prefs.edit();
+		editor.remove(HikeMessengerApp.TEMP_NAME);
+		editor.remove(HikeMessengerApp.TEMP_NUM);
+		editor.commit();
 	}
 
 	@Override
@@ -2066,7 +2072,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							}
 						}
 						if (requestCode != HikeConstants.RECORD_AUDIO_TRANSFER_CODE) {
-							tempIntent = getIntent();
+							Editor editor = prefs.edit();
+							editor.putString(HikeMessengerApp.TEMP_NUM, mContactNumber);
+							editor.putString(HikeMessengerApp.TEMP_NAME, mContactName);
+							editor.commit();
 							startActivityForResult(chooserIntent, requestCode);
 						} else {
 							showRecordingDialog(0);
@@ -2456,7 +2465,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				}
 			}
 
-			tempIntent = null;
 			initialiseFileTransfer(filePath, hikeFileType, null, null, false);
 		} else if (requestCode == HikeConstants.SHARE_LOCATION_CODE
 				&& resultCode == RESULT_OK) {
@@ -2471,6 +2479,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					+ " long:" + longitude + " zoom: " + zoomLevel);
 			initialiseLocationTransfer(latitude, longitude, zoomLevel, null);
 		} else if (resultCode == RESULT_CANCELED) {
+			clearTempData();
 			Log.d(getClass().getSimpleName(), "File transfer Cancelled");
 			selectedFile = null;
 		}
@@ -2479,6 +2488,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void initialiseFileTransfer(String filePath,
 			HikeFileType hikeFileType, String fileKey, String fileType,
 			boolean isRecording) {
+		clearTempData();
 		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber,
 				filePath, fileKey, fileType, hikeFileType, isRecording,
 				getApplicationContext());
@@ -2487,6 +2497,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private void initialiseLocationTransfer(double latitude, double longitude,
 			int zoomLevel, String fileKey) {
+		clearTempData();
 		UploadLocationTask uploadLocationTask = new UploadLocationTask(
 				mContactNumber, latitude, longitude, zoomLevel, fileKey,
 				getApplicationContext());
