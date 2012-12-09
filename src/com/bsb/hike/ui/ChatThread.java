@@ -1846,7 +1846,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 				Intent intent = new Intent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 				intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT,
 						this.mConversation.getMsisdn());
