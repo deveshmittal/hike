@@ -14,6 +14,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -22,7 +23,10 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
@@ -1998,8 +2002,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 						case 3:
 							requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
-							pickIntent
-									.setData(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
 							break;
 						case 4:
 							requestCode = HikeConstants.RECORD_AUDIO_TRANSFER_CODE;
@@ -2028,6 +2030,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						if (requestCode == HikeConstants.SHARE_LOCATION_CODE) {
 							startActivityForResult(new Intent(ChatThread.this,
 									ShareLocation.class), requestCode);
+							return;
+						} else if (requestCode == HikeConstants.AUDIO_TRANSFER_CODE) {
+							showAudioDialog();
 							return;
 						}
 						pickIntent.setAction(Intent.ACTION_PICK);
@@ -2081,6 +2086,71 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		filePickerDialog = builder.create();
 		filePickerDialog.show();
+	}
+
+	private class AudioActivityInfo {
+		CharSequence label;
+		Drawable icon;
+		String packageName;
+		String activityName;
+
+		public AudioActivityInfo(CharSequence label, Drawable icon,
+				String packageName, String activityName) {
+			this.label = label;
+			this.icon = icon;
+			this.packageName = packageName;
+			this.activityName = activityName;
+		}
+	}
+
+	private void showAudioDialog() {
+		final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+		intent.setType("audio/*");
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities(
+				intent, 0);
+		final List<AudioActivityInfo> audioActivityList = new ArrayList<AudioActivityInfo>();
+		int maxSize = Math.min(list.size(), 2);
+		for (int i = 0; i < maxSize; i++) {
+			ActivityInfo activityInfo = list.get(i).activityInfo;
+			audioActivityList.add(new AudioActivityInfo(getPackageManager()
+					.getApplicationLabel(activityInfo.applicationInfo),
+					getPackageManager().getApplicationIcon(
+							activityInfo.applicationInfo),
+					activityInfo.packageName, activityInfo.name));
+		}
+		Builder builder = new Builder(this);
+
+		ListAdapter dialogAdapter = new ArrayAdapter<AudioActivityInfo>(this,
+				android.R.layout.select_dialog_item, android.R.id.text1,
+				audioActivityList) {
+
+			public View getView(int position, View convertView, ViewGroup parent) {
+				AudioActivityInfo audioActivityInfo = getItem(position);
+				View v = super.getView(position, convertView, parent);
+				TextView tv = (TextView) v.findViewById(android.R.id.text1);
+				tv.setText(audioActivityInfo.label);
+				tv.setCompoundDrawablesWithIntrinsicBounds(
+						audioActivityInfo.icon, null, null, null);
+				tv.setCompoundDrawablePadding((int) (15 * Utils.densityMultiplier));
+				return v;
+			}
+		};
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						AudioActivityInfo audioActivityInfo = audioActivityList
+								.get(which);
+						intent.setClassName(audioActivityInfo.packageName,
+								audioActivityInfo.activityName);
+						startActivityForResult(intent,
+								HikeConstants.AUDIO_TRANSFER_CODE);
+					}
+				});
+
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
 	}
 
 	private enum RecorderState {
