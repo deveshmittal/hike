@@ -51,6 +51,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private List<ContactInfo> recentList;
 
 	private boolean freeSMSOn;
+	private ContactInfo recentSection;
 
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
@@ -69,6 +70,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		favoriteList = new ArrayList<ContactInfo>(0);
 		onHikeList = new ArrayList<ContactInfo>(0);
 		recentList = new ArrayList<ContactInfo>(0);
+		freeSMSOn = PreferenceManager.getDefaultSharedPreferences(context)
+				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
 		new AsyncTask<Void, Void, Void>() {
 
 			@Override
@@ -110,8 +113,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		this.context = context;
 		this.layoutInflater = LayoutInflater.from(context);
-		freeSMSOn = PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
 	}
 
 	private void makeCompleteList() {
@@ -141,10 +142,12 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		completeList.addAll(onHikeList);
 
 		// Contact for "Recent Section"
-		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, HikeMessengerApp.isIndianUser() ? context
+		recentSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				null,
+				(freeSMSOn && HikeMessengerApp.isIndianUser()) ? context
 						.getString(R.string.recent) : context
-						.getString(R.string.invite_friends), null));
+						.getString(R.string.invite_friends), null);
+		completeList.add(recentSection);
 
 		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
 				: recentList.size();
@@ -282,6 +285,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	public void freeSMSToggled(boolean freeSMS) {
 		this.freeSMSOn = freeSMS;
+		recentSection
+				.setName((freeSMSOn && HikeMessengerApp.isIndianUser()) ? context
+						.getString(R.string.recent) : context
+						.getString(R.string.invite_friends));
 		notifyDataSetChanged();
 	}
 
