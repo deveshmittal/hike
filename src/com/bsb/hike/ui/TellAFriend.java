@@ -16,11 +16,8 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,12 +37,6 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 	private boolean facebookPostPopupShowing = false;
 
-	private enum ItemTypes {
-		FACEBOOK, TWITTER, SMS, EMAIL, OTHER
-	}
-
-	private ViewGroup itemContainer;
-	private int itemHeight = (int) (48 * Utils.densityMultiplier);
 	private SharedPreferences settings;
 
 	private String[] pubSubListeners = { HikePubSub.REMOVE_TWITTER_VIEW,
@@ -64,8 +55,6 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
-
-		itemContainer = (ViewGroup) findViewById(R.id.items_container);
 
 		afterSetContentView(savedInstanceState);
 
@@ -105,7 +94,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 				startFBAuth(false);
 			} else if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING)) {
-				onClick(findViewById(ItemTypes.FACEBOOK.ordinal()));
+				onClick(findViewById(R.id.facebook));
 			}
 		}
 	}
@@ -274,8 +263,8 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 				@Override
 				public void run() {
-					onClick(findViewById(facebook ? ItemTypes.FACEBOOK
-							.ordinal() : ItemTypes.TWITTER.ordinal()));
+					onClick(findViewById(facebook ? R.id.facebook
+							: R.id.twitter));
 				}
 			});
 		}
