@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -71,6 +72,12 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				HikeUserDatabase.getInstance().addAutoRecommendedFavorites();
 				Editor editor = prefs.edit();
 				editor.putBoolean(HikeMessengerApp.AUTO_RECOMMENDED_FAVORITES_ADDED, true);
+				editor.commit();
+			}
+			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+			if (!appPrefs.contains(HikeConstants.FREE_SMS_PREF)) {
+				Editor editor = appPrefs.edit();
+				editor.putBoolean(HikeConstants.FREE_SMS_PREF, HikeMessengerApp.isIndianUser());
 				editor.commit();
 			}
 		}
