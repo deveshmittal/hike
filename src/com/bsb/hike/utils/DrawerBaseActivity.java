@@ -200,12 +200,8 @@ public class DrawerBaseActivity extends Activity implements
 				|| HikePubSub.USER_LEFT.equals(type)) {
 			final ContactInfo contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN((String) object, true);
-			/*
-			 * If the contact is already a part of the favorites list, we don't
-			 * need to do anything.
-			 */
-			if (contactInfo == null
-					|| contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
+
+			if (contactInfo == null) {
 				return;
 			}
 			runOnUiThread(new Runnable() {
@@ -249,13 +245,11 @@ public class DrawerBaseActivity extends Activity implements
 			});
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
 			final ContactInfo contactInfo = (ContactInfo) object;
-			/*
-			 * If the contact is already a part of the favorites list, we don't
-			 * need to do anything.
-			 */
+
 			if (contactInfo == null) {
 				return;
 			}
+
 			runOnUiThread(new Runnable() {
 
 				@Override

@@ -234,9 +234,16 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	}
 
 	public void updateRecentContactsList(ContactInfo contactInfo) {
-		// Return if object is null or its a favorite contact
+		/*
+		 * Return if object is null or its a favorite contact or if the contact
+		 * is a non hike non Indian contact and the user is Indian.
+		 */
+
 		if (contactInfo == null
-				|| (contactInfo.getFavoriteType() == FavoriteType.FAVORITE)) {
+				|| (contactInfo.getFavoriteType() == FavoriteType.FAVORITE)
+				|| (HikeMessengerApp.isIndianUser() && !contactInfo.isOnhike() && !contactInfo
+						.getMsisdn().startsWith(
+								HikeConstants.INDIA_COUNTRY_CODE))) {
 			Log.d(getClass().getSimpleName(), "Null contact");
 			return;
 		}
