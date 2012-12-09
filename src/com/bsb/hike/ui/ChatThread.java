@@ -475,7 +475,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
-		if(prefs.contains(HikeMessengerApp.TEMP_NUM)){
+		if (prefs.contains(HikeMessengerApp.TEMP_NUM)) {
 			mContactName = prefs.getString(HikeMessengerApp.TEMP_NAME, null);
 			mContactNumber = prefs.getString(HikeMessengerApp.TEMP_NUM, null);
 			clearTempData();
@@ -1063,8 +1063,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (mConversation == null) {
 			if (Utils.isGroupConversation(mContactNumber)) {
 				/* the user must have deleted the chat. */
-				Toast toast = Toast.makeText(this,
-						R.string.invalid_group_chat, Toast.LENGTH_LONG);
+				Toast toast = Toast.makeText(this, R.string.invalid_group_chat,
+						Toast.LENGTH_LONG);
 				toast.show();
 				onBackPressed();
 				return;
@@ -2068,8 +2068,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						}
 						if (requestCode != HikeConstants.RECORD_AUDIO_TRANSFER_CODE) {
 							Editor editor = prefs.edit();
-							editor.putString(HikeMessengerApp.TEMP_NUM, mContactNumber);
-							editor.putString(HikeMessengerApp.TEMP_NAME, mContactName);
+							editor.putString(HikeMessengerApp.TEMP_NUM,
+									mContactNumber);
+							editor.putString(HikeMessengerApp.TEMP_NAME,
+									mContactName);
 							editor.commit();
 							startActivityForResult(chooserIntent, requestCode);
 						} else {
@@ -2421,8 +2423,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 			if (data == null
 					&& (selectedFile == null || !selectedFile.exists())) {
-				Toast.makeText(getApplicationContext(),
-						R.string.error_capture, Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), R.string.error_capture,
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 
