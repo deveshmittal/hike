@@ -49,15 +49,19 @@ public class HikeFile {
 		}
 
 		public static String getFileTypeMessage(Context context,
-				HikeFileType hikeFileType) {
+				HikeFileType hikeFileType, boolean isSent) {
 			if (hikeFileType == PROFILE || hikeFileType == IMAGE) {
-				return context.getString(R.string.image_msg);
+				return isSent ? context.getString(R.string.image_msg_sent)
+						: context.getString(R.string.image_msg_received);
 			} else if (hikeFileType == VIDEO) {
-				return context.getString(R.string.video_msg);
+				return isSent ? context.getString(R.string.video_msg_sent)
+						: context.getString(R.string.video_msg_received);
 			} else if (hikeFileType == AUDIO) {
-				return context.getString(R.string.audio_msg);
+				return isSent ? context.getString(R.string.audio_msg_sent)
+						: context.getString(R.string.audio_msg_received);
 			} else if (hikeFileType == LOCATION) {
-				return context.getString(R.string.location_msg);
+				return isSent ? context.getString(R.string.location_msg_sent)
+						: context.getString(R.string.location_msg_received);
 			}
 			return context.getString(R.string.unknown_msg);
 		}

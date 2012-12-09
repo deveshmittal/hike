@@ -80,7 +80,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 			CharSequence markedUp = null;
 			if (message.isFileTransferMessage()) {
 				markedUp = HikeFileType.getFileTypeMessage(context, metadata
-						.getHikeFiles().get(0).getHikeFileType());
+						.getHikeFiles().get(0).getHikeFileType(),
+						message.isSent());
 				if ((conversation instanceof GroupConversation)
 						&& !message.isSent()) {
 					markedUp = Utils
