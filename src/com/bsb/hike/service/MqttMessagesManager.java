@@ -401,8 +401,7 @@ public class MqttMessagesManager {
 						facebook.setAccessExpires(expires);
 
 						editor.putBoolean(
-								HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
-								facebook.isSessionValid());
+								HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, true);
 						editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
 								facebook.getAccessExpires());
 						editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,

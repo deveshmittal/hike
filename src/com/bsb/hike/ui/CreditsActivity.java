@@ -186,9 +186,8 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 
 	private void setupSocialButtons() {
 		Editor editor = settings.edit();
-		if (!HikeMessengerApp.getFacebook().isSessionValid()) {
-			editor.putBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false);
-		}
+		editor.putBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
+				HikeMessengerApp.getFacebook().isSessionValid());
 		editor.commit();
 
 		facebookTxt
