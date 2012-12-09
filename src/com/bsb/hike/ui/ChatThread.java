@@ -338,17 +338,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
 			findViewById(R.id.button_bar3).setVisibility(View.GONE);
 		}
-		/*
-		 * Show hike contacts first for non-indian users
-		 */
-		boolean hikeFirst = !HikeMessengerApp.isIndianUser();
-		int freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
+		boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
 				getApplicationContext()).getBoolean(
-				HikeConstants.FREE_SMS_PREF, true) ? 1 : 0;
+				HikeConstants.FREE_SMS_PREF, true);
 
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
-				.getContactsOrderedByLastMessaged(-1, null,
-						HikeConstants.BOTH_VALUE, false, hikeFirst, freeSMSOn);
+				.getContactsForComposeScreen(freeSMSOn, isGroupChat);
 
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, this.mConversationDb
@@ -357,7 +352,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		mInputNumberView.setText("");
 		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this,
 				contactList, mInputNumberView, isGroupChat, titleBtn,
-				existingGroupId, getIntent());
+				existingGroupId, getIntent(), freeSMSOn);
 		mContactSearchView.setAdapter(adapter);
 		mContactSearchView.setOnItemClickListener(adapter);
 		mInputNumberView.addTextChangedListener(adapter);

@@ -511,6 +511,63 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		return contactInfos;
 	}
 
+	public List<ContactInfo> getContactsForComposeScreen(boolean freeSMSOn,
+			boolean groupChat) {
+		String selection = DBConstants.MSISDN
+				+ " != 'null'"
+				+ ((freeSMSOn && groupChat) ? " AND (" + DBConstants.ONHIKE
+						+ " = 0 AND " + DBConstants.MSISDN + " LIKE '91%') OR "
+						+ DBConstants.ONHIKE + "=1" : (groupChat ? " AND "
+						+ DBConstants.ONHIKE + " != 0" : ""));
+
+		Log.d(getClass().getSimpleName(), "Selection: " + selection);
+
+		boolean shouldSortInDB = !freeSMSOn || groupChat;
+
+		String orderBy = (shouldSortInDB) ? DBConstants.ONHIKE + " DESC, "
+				+ DBConstants.NAME + " COLLATE NOCASE" : "";
+
+		String[] columns = { DBConstants.MSISDN, DBConstants.ID,
+				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
+				DBConstants.HAS_CUSTOM_PHOTO, DBConstants.FAVORITE };
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
+				null, null, null, orderBy);
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		c.close();
+
+		if (!shouldSortInDB) {
+			Collections.sort(contactInfos, new Comparator<ContactInfo>() {
+
+				@Override
+				public int compare(ContactInfo lhs, ContactInfo rhs) {
+					if (lhs.isOnhike() != rhs.isOnhike()) {
+						return (lhs.isOnhike()) ? -1 : 1;
+					} else {
+						if (lhs.isOnhike()) {
+							return lhs.compareTo(rhs);
+						} else {
+							if ((lhs.getMsisdn().startsWith(
+									HikeConstants.INDIA_COUNTRY_CODE) && rhs
+									.getMsisdn().startsWith(
+											HikeConstants.INDIA_COUNTRY_CODE))
+									|| (!lhs.getMsisdn().startsWith(
+											HikeConstants.INDIA_COUNTRY_CODE) && !rhs
+											.getMsisdn()
+											.startsWith(
+													HikeConstants.INDIA_COUNTRY_CODE))) {
+								return lhs.compareTo(rhs);
+							}
+							return lhs.getMsisdn().startsWith(
+									HikeConstants.INDIA_COUNTRY_CODE) ? -1 : 1;
+						}
+					}
+				}
+			});
+		}
+		return contactInfos;
+	}
+
 	public List<ContactInfo> getContacts(boolean ignoreEmpty) {
 		String selection = ignoreEmpty ? DBConstants.MSISDN + " != 'null'"
 				: null;

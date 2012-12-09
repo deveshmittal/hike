@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -42,6 +43,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.MyDrawable;
 import com.bsb.hike.utils.Utils;
+import com.fiksu.asotracking.FiksuTrackingManager;
 
 @SuppressWarnings("unchecked")
 public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
@@ -59,11 +61,12 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 	private int numSMSContactsSelected = 0;
 	private Map<String, GroupParticipant> groupParticipants;
 	private String countryCode;
+	private boolean freeSMSOn;
 
 	public HikeSearchContactAdapter(Activity context,
 			List<ContactInfo> contactList, EditText inputNumber,
 			boolean isGroupChat, Button topBarBtn, String groupId,
-			Intent presentIntent) {
+			Intent presentIntent, boolean freeSMSOn) {
 		super(context, -1, contactList);
 		this.filteredList = contactList;
 		this.completeList = new ArrayList<ContactInfo>();
@@ -79,6 +82,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0)
 				.getString(HikeMessengerApp.COUNTRY_CODE,
 						HikeConstants.INDIA_COUNTRY_CODE);
+		this.freeSMSOn = freeSMSOn;
 		if (!TextUtils.isEmpty(groupId)) {
 			groupParticipants = HikeConversationsDatabase.getInstance()
 					.getGroupParticipants(groupId, true, false);
@@ -97,6 +101,11 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 
 		v.setTag(contactInfo);
 
+		boolean inviteOnly = contactInfo != null
+				&& ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn && !contactInfo
+						.getMsisdn().startsWith(
+								HikeConstants.INDIA_COUNTRY_CODE)));
+
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo != null ? contactInfo.getName()
 				: getNumber(inputNumber.getText().toString()));
@@ -105,14 +114,20 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 		numberTextView.setText(contactInfo != null ? contactInfo.getMsisdn()
 				: isGroupChat ? context.getString(R.string.tap_to_add)
 						: context.getString(R.string.tap_to_message));
-		if (contactInfo != null
-				&& !TextUtils.isEmpty(contactInfo.getMsisdnType())) {
-			numberTextView.append(" (" + contactInfo.getMsisdnType() + ")");
+
+		if (contactInfo != null) {
+			if (inviteOnly) {
+				numberTextView.append(" ("
+						+ context.getString(R.string.tap_to_invite) + ")");
+			} else if (!TextUtils.isEmpty(contactInfo.getMsisdnType())) {
+				numberTextView.append(" (" + contactInfo.getMsisdnType() + ")");
+			}
 		}
 
 		ImageView onhike = (ImageView) v.findViewById(R.id.onhike);
 		onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike() ? R.drawable.ic_hike_user
-				: R.drawable.ic_sms_user)
+				: inviteOnly ? R.drawable.ic_invite_user
+						: R.drawable.ic_sms_user)
 				: 0);
 
 		ImageView avatar = (ImageView) v.findViewById(R.id.user_img);
@@ -257,6 +272,23 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			isUnknownNumber = true;
 		}
 		if (!isGroupChat) {
+			boolean inviteOnly = (!freeSMSOn && !contactInfo.isOnhike())
+					|| (freeSMSOn && !contactInfo.getMsisdn().startsWith(
+							HikeConstants.INDIA_COUNTRY_CODE));
+			if (inviteOnly) {
+				Log.d(getClass().getSimpleName(),
+						"Inviting " + contactInfo.toString());
+				FiksuTrackingManager.uploadPurchaseEvent(context,
+						HikeConstants.INVITE, HikeConstants.INVITE_SENT,
+						HikeConstants.CURRENCY);
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH,
+						Utils.makeHike2SMSInviteMessage(
+								contactInfo.getMsisdn(), context).serialize());
+				Toast.makeText(context, R.string.invite_sent,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 			intent.setClass(context, ChatThread.class);
 			String type = presentIntent.getType();
