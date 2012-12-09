@@ -29,7 +29,7 @@ public class HikeFile {
 			} else if (fileTypeString
 					.startsWith(HikeConstants.LOCATION_CONTENT_TYPE)) {
 				return HikeFileType.LOCATION;
-			} else if (fileTypeString.startsWith("image")){
+			} else if (fileTypeString.startsWith("image")) {
 				return HikeFileType.IMAGE;
 			}
 			return HikeFileType.UNKNOWN;
