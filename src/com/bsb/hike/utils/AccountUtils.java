@@ -377,6 +377,12 @@ public class AccountUtils {
 			throw new IllegalStateException("Token is null");
 		}
 		req.addHeader("Cookie", "user=" + mToken);
+
+		assertIfTokenNull();
+	}
+
+	private static void assertIfTokenNull() {
+		assert mToken != null : "TOKEN IS NULL";
 	}
 
 	public static void setName(String name) throws NetworkErrorException,
