@@ -176,8 +176,6 @@ public class HikePubSub implements Runnable {
 
 	public static final String REFRESH_FAVORITES = "refreshFavorites";
 
-	public static final String CLEAR_LISTENERS = "clearListeners";
-
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

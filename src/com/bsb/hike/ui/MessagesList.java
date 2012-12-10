@@ -81,11 +81,11 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	public static final Object COMPOSE = "compose";
 
-	public static ConversationsAdapter mAdapter;
+	private ConversationsAdapter mAdapter;
 
-	public static Map<String, Conversation> mConversationsByMSISDN;
+	private Map<String, Conversation> mConversationsByMSISDN;
 
-	public static Set<String> mConversationsAdded;
+	private Set<String> mConversationsAdded;
 
 	private ListView mConversationsView;
 
@@ -120,8 +120,7 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED,
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.UPDATE_AVAILABLE,
 			HikePubSub.CONTACT_ADDED, HikePubSub.MESSAGE_DELETED,
-			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
-			HikePubSub.CLEAR_LISTENERS };
+			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION };
 
 	private Dialog updateAlert;
 
@@ -562,6 +561,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			Utils.incrementNumTimesScreenOpen(accountPrefs,
 					HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
 		}
+		HikeMessengerApp.getPubSub().removeListeners(MessagesList.this,
+				pubSubListeners);
 		super.onDestroy();
 		Log.d(getClass().getSimpleName(), "onDestroy " + this);
 	}
@@ -626,37 +627,10 @@ public class MessagesList extends DrawerBaseActivity implements
 		mqttDialog.show();
 	}
 
-	public static void clearCache() {
-		if (mAdapter != null) {
-			mAdapter.clear();
-			mAdapter = null;
-		}
-		if (mConversationsAdded != null) {
-			mConversationsAdded.clear();
-			mConversationsAdded = null;
-		}
-		if (mConversationsByMSISDN != null) {
-			mConversationsByMSISDN.clear();
-			mConversationsByMSISDN = null;
-		}
-	}
-
 	@Override
 	public void onEventReceived(String type, Object object) {
 		super.onEventReceived(type, object);
 		Log.d(getClass().getSimpleName(), "Event received: " + type);
-		if (mAdapter == null || mConversationsAdded == null
-				|| mConversationsByMSISDN == null) {
-			/*
-			 * If either one of these static variables is null, we stop
-			 * listening for the events and clear the current cache so that it
-			 * may be refreshed the next time the app is opened
-			 */
-			HikeMessengerApp.getPubSub().removeListeners(MessagesList.this,
-					pubSubListeners);
-			clearCache();
-			return;
-		}
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type))
 				|| (HikePubSub.MESSAGE_SENT.equals(type))) {
 			Log.d("MESSAGE LIST", "New msg event sent or received.");
@@ -892,9 +866,6 @@ public class MessagesList extends DrawerBaseActivity implements
 					HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
 			toggleTypingNotification(false, (String) object);
-		} else if (HikePubSub.CLEAR_LISTENERS.equals(type)) {
-			HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
-			clearCache();
 		}
 	}
 

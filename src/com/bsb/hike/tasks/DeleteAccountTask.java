@@ -57,8 +57,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			editor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
 
-			HikeMessengerApp.getPubSub().publish(HikePubSub.CLEAR_LISTENERS, null);
-
 			return true;
 		} catch (Exception e) {
 			Log.e("DeleteAccountTask", "error deleting account", e);
