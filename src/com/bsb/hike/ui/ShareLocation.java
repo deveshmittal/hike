@@ -7,6 +7,7 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -50,6 +51,8 @@ public class ShareLocation extends MapActivity {
 	 */
 	private static final int MAX_DISTANCE = 20;
 
+	private boolean gpsDialogShown = false;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +61,47 @@ public class ShareLocation extends MapActivity {
 
 		initMap();
 		initMyLocationManager();
+
+		gpsDialogShown = savedInstanceState != null
+				&& savedInstanceState
+						.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
+		/*
+		 * Don't show this on orientation changes
+		 */
+		if (!gpsDialogShown
+				&& !locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+					this);
+			alertDialogBuilder
+					.setMessage(R.string.gps_disabled)
+					.setCancelable(false)
+					.setPositiveButton(android.R.string.ok,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									gpsDialogShown = true;
+									Intent callGPSSettingIntent = new Intent(
+											android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+									startActivity(callGPSSettingIntent);
+								}
+							});
+			alertDialogBuilder.setNegativeButton(R.string.cancel,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});
+			alertDialogBuilder.setCancelable(true);
+			alertDialogBuilder.setOnCancelListener(new OnCancelListener() {
+
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					gpsDialogShown = true;
+				}
+			});
+			AlertDialog alert = alertDialogBuilder.create();
+			alert.show();
+		}
 
 		locationAddress = (TextView) findViewById(R.id.address);
 		currentSelection = findViewById(R.id.my_position);
@@ -74,10 +118,17 @@ public class ShareLocation extends MapActivity {
 		currentSelection.setSelected(true);
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN,
+				gpsDialogShown);
+		super.onSaveInstanceState(outState);
+	}
+
 	public void onTitleIconClick(View v) {
 		if (selectedGeoPoint == null) {
-			Toast.makeText(getApplicationContext(),
-					R.string.select_location, Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), R.string.select_location,
+					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		Intent result = new Intent();
@@ -136,31 +187,6 @@ public class ShareLocation extends MapActivity {
 				locListener);
 		locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0,
 				0, locListener);
-
-		if (!locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-					this);
-			alertDialogBuilder
-					.setMessage(R.string.gps_disabled)
-					.setCancelable(false)
-					.setPositiveButton(android.R.string.ok,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									Intent callGPSSettingIntent = new Intent(
-											android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-									startActivity(callGPSSettingIntent);
-								}
-							});
-			alertDialogBuilder.setNegativeButton(R.string.cancel,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							dialog.cancel();
-						}
-					});
-			AlertDialog alert = alertDialogBuilder.create();
-			alert.show();
-		}
 
 		if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
 			createAndShowMyItemizedOverlay(locManager

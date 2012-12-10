@@ -325,6 +325,7 @@ public class HikeConstants {
 		public static final String SHOWING_SECOND_LOADING_TXT = "showingSecondLoadingTxt";
 		public static final String FACEBOOK_AUTH_POPUP_SHOWING = "facebookAuthPopupShowing";
 		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
+		public static final String GPS_DIALOG_SHOWN = "gpsDialogShown";
 	}
 
 	public static final class LogEvent {
