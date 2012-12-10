@@ -267,4 +267,6 @@
 	<string name="msisdn">Phone No:</string>
 	<string name="tap_to_invite">Invite to hike</string>
 	<string name="file_transferring">Please wait while the file is being transferred.</string>
+	<string name="unobfuscated_map_api">0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA</string>
+	<string name="production_map_api">0Luu6V6IYSC3olBhRm5jHLKDIn5_CA3P17l_3Mw</string>
 </resources>
