@@ -413,17 +413,9 @@ public class MqttMessagesManager {
 				if (account.has(HikeConstants.FAVORITES)) {
 					JSONObject favorites = account
 							.getJSONObject(HikeConstants.FAVORITES);
-					JSONArray msisdns = favorites.names();
-					if (msisdns != null) {
-						StringBuilder sb = new StringBuilder("(");
-						for (int i = 0; i < msisdns.length(); i++) {
-							sb.append("'" + msisdns.getString(i) + "'");
-							if (i < (msisdns.length() - 1)) {
-								sb.append(",");
-							}
-						}
-						sb.append(")");
-						userDb.setMultipleContactsToFavorites(sb.toString());
+
+					if (favorites.length() > 0) {
+						userDb.setMultipleContactsToFavorites(favorites);
 					}
 				}
 			}
@@ -453,7 +445,7 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.ADD_FAVORITE.equals(type)) {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
-					true);
+					false);
 			if (contactInfo == null
 					|| contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
 				return;

@@ -235,9 +235,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(
 				mLocalMSISDN, false);
 
-		findViewById(R.id.button_bar3).setVisibility(
-				TextUtils.isEmpty(contactInfo.getName()) ? View.GONE
-						: View.VISIBLE);
+		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn2);
 
 		if (!contactInfo.isOnhike()) {
@@ -248,9 +246,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		topBarBtn
 				.setImageResource(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? R.drawable.ic_favorite
 						: R.drawable.ic_not_favorite);
-		topBarBtn
-				.setVisibility(TextUtils.isEmpty(contactInfo.getName()) ? View.GONE
-						: View.VISIBLE);
+		topBarBtn.setVisibility(View.VISIBLE);
 
 		findViewById(R.id.add_to_contacts).setVisibility(
 				!TextUtils.isEmpty(contactInfo.getName()) ? View.GONE
@@ -1211,12 +1207,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 							.setText(ProfileActivity.this.contactInfo.getName());
 					findViewById(R.id.add_to_contacts).setVisibility(View.GONE);
 
-					findViewById(R.id.button_bar3)
-							.setVisibility(
-									TextUtils.isEmpty(contactInfo.getName()) ? View.GONE
-											: View.VISIBLE);
-					topBarBtn.setVisibility(TextUtils.isEmpty(contactInfo
-							.getName()) ? View.GONE : View.VISIBLE);
+					findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+					topBarBtn.setVisibility(View.VISIBLE);
 				}
 			});
 		} else if (HikePubSub.USER_JOINED.equals(type)

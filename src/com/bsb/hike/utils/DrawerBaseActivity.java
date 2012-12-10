@@ -201,7 +201,9 @@ public class DrawerBaseActivity extends Activity implements
 			final ContactInfo contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN((String) object, true);
 
-			if (contactInfo == null) {
+			if (contactInfo == null
+					|| (HikePubSub.RECENT_CONTACTS_UPDATED.equals(type) && contactInfo
+							.isOnhike())) {
 				return;
 			}
 			runOnUiThread(new Runnable() {
@@ -233,9 +235,9 @@ public class DrawerBaseActivity extends Activity implements
 			});
 		} else if (HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED.equals(type)) {
 			final List<ContactInfo> autoRecommendedFavorites = HikeUserDatabase
-					.getInstance().getContactsOrderedByLastMessaged(-1,
+					.getInstance().getContactsOfFavoriteType(
 							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE, true, false, -1);
+							HikeConstants.BOTH_VALUE);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -259,9 +261,8 @@ public class DrawerBaseActivity extends Activity implements
 			});
 		} else if (HikePubSub.REFRESH_FAVORITES.equals(type)) {
 			final List<ContactInfo> favoriteList = HikeUserDatabase
-					.getInstance().getContactsOrderedByLastMessaged(-1,
-							FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE,
-							true, false, -1);
+					.getInstance().getContactsOfFavoriteType(
+							FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE);
 			runOnUiThread(new Runnable() {
 
 				@Override

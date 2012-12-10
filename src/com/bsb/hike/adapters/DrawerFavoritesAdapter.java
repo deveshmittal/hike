@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Log;
@@ -80,23 +81,20 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						.getInstance();
 
 				recommendedFavoriteList = HikeUserDatabase.getInstance()
-						.getContactsOrderedByLastMessaged(-1,
+						.getContactsOfFavoriteType(
 								FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-								HikeConstants.BOTH_VALUE, true, false, -1);
+								HikeConstants.BOTH_VALUE);
 				recommendedFavoriteList.addAll(hikeUserDatabase
-						.getContactsOrderedByLastMessaged(-1,
+						.getContactsOfFavoriteType(
 								FavoriteType.RECOMMENDED_FAVORITE,
-								HikeConstants.BOTH_VALUE, true, false, -1));
+								HikeConstants.BOTH_VALUE));
 
-				favoriteList = hikeUserDatabase
-						.getContactsOrderedByLastMessaged(-1,
-								FavoriteType.FAVORITE,
-								HikeConstants.BOTH_VALUE, true, false, -1);
+				favoriteList = hikeUserDatabase.getContactsOfFavoriteType(
+						FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE);
 				Collections.sort(favoriteList);
 
-				onHikeList = hikeUserDatabase.getContactsOrderedByLastMessaged(
-						-1, FavoriteType.NOT_FAVORITE,
-						HikeConstants.ON_HIKE_VALUE, true, false, -1);
+				onHikeList = hikeUserDatabase.getContactsOfFavoriteType(
+						FavoriteType.NOT_FAVORITE, HikeConstants.ON_HIKE_VALUE);
 
 				recentList = hikeUserDatabase.getNonHikeRecentContacts(-1,
 						true, FavoriteType.NOT_FAVORITE);
@@ -206,29 +204,33 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				contactInfo);
 		removeContactFromListByMatchingMsisdn(favoriteList, contactInfo);
 
+		if (TextUtils.isEmpty(contactInfo.getName())) {
+			makeCompleteList();
+			return;
+		}
 		/*
 		 * Adding the contact back to the recents list based on whether the
 		 * contact is on hike or not since the contact was removed from the
 		 * favorites list.
 		 */
-		List<ContactInfo> listToSort;
 		if (contactInfo.isOnhike()) {
-			(listToSort = onHikeList).add(contactInfo);
+			onHikeList.add(contactInfo);
+			Collections.sort(onHikeList);
 		} else {
-			(listToSort = recentList).add(contactInfo);
-		}
-		Collections.sort(listToSort, new Comparator<ContactInfo>() {
-			@Override
-			public int compare(ContactInfo lhs, ContactInfo rhs) {
-				if (lhs.getLastMessaged() != rhs.getLastMessaged()) {
-					return -((Long) lhs.getLastMessaged()).compareTo(rhs
-							.getLastMessaged());
-				} else {
-					return (lhs.getName().toLowerCase()).compareTo(rhs
-							.getName().toLowerCase());
+			recentList.add(contactInfo);
+			Collections.sort(recentList, new Comparator<ContactInfo>() {
+				@Override
+				public int compare(ContactInfo lhs, ContactInfo rhs) {
+					if (lhs.getLastMessaged() != rhs.getLastMessaged()) {
+						return -((Long) lhs.getLastMessaged()).compareTo(rhs
+								.getLastMessaged());
+					} else {
+						return (lhs.getName().toLowerCase()).compareTo(rhs
+								.getName().toLowerCase());
+					}
 				}
-			}
-		});
+			});
+		}
 
 		makeCompleteList();
 	}
@@ -254,6 +256,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		if (contactInfo.isOnhike()) {
 			onHikeList.add(0, contactInfo);
+			Collections.sort(onHikeList);
 		} else {
 			recentList.add(0, contactInfo);
 			/*
@@ -445,7 +448,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			}
 			viewHolder.avatarImg.setImageDrawable(IconCacheManager
 					.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
-			viewHolder.name.setText(contactInfo.getName());
+			viewHolder.name
+					.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
+							.getMsisdn() : contactInfo.getName());
 
 			LayoutParams lp = (LayoutParams) viewHolder.avatarImg
 					.getLayoutParams();

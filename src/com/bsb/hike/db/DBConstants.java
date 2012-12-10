@@ -1,10 +1,12 @@
 package com.bsb.hike.db;
 
+import com.bsb.hike.models.ContactInfo.FavoriteType;
+
 public class DBConstants {
 
 	public static final int CONVERSATIONS_DATABASE_VERSION = 7;
 
-	public static final int USERS_DATABASE_VERSION = 5;
+	public static final int USERS_DATABASE_VERSION = 6;
 
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 
@@ -96,7 +98,15 @@ public class DBConstants {
 
 	public static final String EMOTICON_INDEX = "emoticonIdx";
 
-	public static final String FAVORITE = "favorite";
-
 	public static final String MUTE_GROUP = "muteGroup";
+
+	public static final String FAVORITES_TABLE = "favoritesTable";
+
+	public static final String FAVORITE_TYPE = "favoriteType";
+
+	public static final String FAVORITE_TYPE_SELECTION = "COALESCE((SELECT "
+			+ FAVORITE_TYPE + " FROM " + FAVORITES_TABLE + " WHERE "
+			+ FAVORITES_TABLE + "." + MSISDN + " = " + USERS_TABLE + "."
+			+ MSISDN + "), + " + FavoriteType.NOT_FAVORITE.ordinal()
+			+ ") AS " + FAVORITE_TYPE;
 }
