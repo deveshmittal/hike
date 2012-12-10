@@ -266,4 +266,5 @@
 	<string name="android_version">Android version:</string>
 	<string name="msisdn">Phone No:</string>
 	<string name="tap_to_invite">Invite to hike</string>
+	<string name="file_transferring">Please wait while the file is being transferred.</string>
 </resources>

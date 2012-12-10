@@ -1953,6 +1953,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 			return;
 		}
+		/*
+		 * Don't allow uploading more files if an upload/download is in progress
+		 */
+		if (!ChatThread.fileTransferTaskMap.isEmpty()
+				&& ((int) (Utils.densityMultiplier * 10) <= HikeConstants.MDPI_TIMES_10)) {
+			Toast.makeText(getApplicationContext(), R.string.file_transferring,
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
 		final CharSequence[] options = getResources().getStringArray(
 				R.array.file_transfer_items);
 		final int[] optionIcons = { R.drawable.ic_share_location_item,
