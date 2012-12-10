@@ -269,4 +269,5 @@
 	<string name="file_transferring">Please wait while the file is being transferred.</string>
 	<string name="unobfuscated_map_api">0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA</string>
 	<string name="production_map_api">0Luu6V6IYSC3olBhRm5jHLKDIn5_CA3P17l_3Mw</string>
+	<string name="enter_some_text">Please enter some text.</string>
 </resources>

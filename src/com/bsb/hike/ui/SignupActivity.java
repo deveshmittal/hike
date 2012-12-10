@@ -18,14 +18,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -43,6 +42,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.bsb.hike.HikeConstants;
@@ -59,7 +59,7 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class SignupActivity extends Activity implements
 		SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener,
-		TextWatcher, OnClickListener, FinishableEvent, OnCancelListener {
+		OnClickListener, FinishableEvent, OnCancelListener {
 
 	private SignupTask mTask;
 
@@ -311,6 +311,13 @@ public class SignupActivity extends Activity implements
 	}
 
 	private void submitClicked() {
+		if (TextUtils.isEmpty(enterEditText.getText())) {
+			Toast toast = Toast.makeText(this, R.string.enter_some_text,
+					Toast.LENGTH_SHORT);
+			toast.setGravity(Gravity.CENTER, 0, 0);
+			toast.show();
+			return;
+		}
 		startLoading();
 		if (!addressBookError) {
 			if (viewFlipper.getDisplayedChild() == NUMBER
@@ -501,11 +508,7 @@ public class SignupActivity extends Activity implements
 	}
 
 	private void setListeners() {
-		if (this.enterEditText.getText().length() == 0) {
-			submitBtn.setEnabled(false);
-		}
 		enterEditText.setOnEditorActionListener(this);
-		enterEditText.addTextChangedListener(this);
 		enterEditText.setOnKeyListener(new OnKeyListener() {
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -645,21 +648,6 @@ public class SignupActivity extends Activity implements
 			break;
 		}
 		setListeners();
-	}
-
-	@Override
-	public void afterTextChanged(Editable s) {
-		submitBtn.setEnabled(!TextUtils.isEmpty(enterEditText.getText()
-				.toString().trim()));
-	}
-
-	@Override
-	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {
-	}
-
-	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
 
 	@Override
