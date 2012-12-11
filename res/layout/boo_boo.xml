@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
     android:id="@+id/boo_boo_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -52,35 +53,23 @@
         android:gravity="center_horizontal|top"
         android:orientation="vertical" >
 
-        <ImageView
+        <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/welcome_1"
+            style="@style/SignupButton.Text.Info"
+            android:textStyle="bold"
+            android:textSize="17sp"
             android:layout_marginTop="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/error_txt" />
+            android:text="@string/network_issue_signup"
+            hike:font="omnes" />
 
-        <!--
-             <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/welcome_1"
-            style="@style/Text.Shadow.White.Bold"
-            android:layout_below="@+id/ic_hike_logo"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
-            android:layout_marginTop="10dp"
-            android:text="@string/boo_boo"
-            android:textSize="18dp"
-            back
-            android:layout_marginLeft="40dp"
-            android:layout_marginRight="40dp" />
-        -->
-
-        <ImageButton
+        <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_try_again"
-            style="@style/SignupButton"
+            style="@style/SignupButton.Text.Bold.Button"
             android:layout_marginTop="30dp"
             android:background="@drawable/signup_button"
-            android:src="@drawable/try_again"
-            android:onClick="onClick" />
+            android:onClick="onClick"
+            android:text="@string/try_again_signup"
+            hike:font="omnes" />
     </LinearLayout>
 
 </LinearLayout>

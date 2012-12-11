@@ -243,6 +243,10 @@ public class HikeConstants {
 
 	public static final int MDPI_TIMES_10 = 11;
 
+	public static final String NAMESPACE = "http://schemas.android.com/apk/res/com.bsb.hike";
+
+	public static final String FONT = "font";
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

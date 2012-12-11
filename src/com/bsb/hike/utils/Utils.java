@@ -454,56 +454,6 @@ public class Utils {
 		activity.stopService(new Intent(activity, HikeService.class));
 	}
 
-	public static int[] getNumberImage(String msisdn) {
-		int[] msisdnRes = new int[msisdn.length()];
-
-		for (int i = 0; i < msisdnRes.length; i++) {
-			char c = msisdn.charAt(i);
-			switch (c) {
-			case '+':
-				msisdnRes[i] = R.drawable.no_plus;
-				break;
-			case '0':
-				msisdnRes[i] = R.drawable.no0;
-				break;
-			case '1':
-				msisdnRes[i] = R.drawable.no1;
-				break;
-			case '2':
-				msisdnRes[i] = R.drawable.no2;
-				break;
-			case '3':
-				msisdnRes[i] = R.drawable.no3;
-				break;
-			case '4':
-				msisdnRes[i] = R.drawable.no4;
-				break;
-			case '5':
-				msisdnRes[i] = R.drawable.no5;
-				break;
-			case '6':
-				msisdnRes[i] = R.drawable.no6;
-				break;
-			case '7':
-				msisdnRes[i] = R.drawable.no7;
-				break;
-			case '8':
-				msisdnRes[i] = R.drawable.no8;
-				break;
-			case '9':
-				msisdnRes[i] = R.drawable.no9;
-				break;
-			case '-':
-				msisdnRes[i] = R.drawable.no_dash;
-				break;
-			default:
-				msisdnRes[i] = R.drawable.no0;
-				break;
-			}
-		}
-		return msisdnRes;
-	}
-
 	public static String formatNo(String msisdn) {
 		StringBuilder sb = new StringBuilder(msisdn);
 		sb.insert(msisdn.length() - 4, '-');

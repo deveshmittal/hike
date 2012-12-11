@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -29,13 +28,13 @@ import com.bsb.hike.utils.Utils;
 
 public class WelcomeActivity extends Activity implements
 		SignupTask.OnSignupTaskProgressUpdate {
-	private ImageButton mAcceptButton;
+	private Button mAcceptButton;
 	private ViewGroup loadingLayout;
 	private Button tcText;
 
 	private ViewGroup tcContinueLayout;
 	private ViewGroup booBooLayout;
-	private ImageButton tryAgainBtn;
+	private Button tryAgainBtn;
 	private View hiLogoView;
 	private ImageView hikeWelcomeView;
 	private ViewGroup headerLayout;
@@ -46,7 +45,7 @@ public class WelcomeActivity extends Activity implements
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 
-		mAcceptButton = (ImageButton) findViewById(R.id.btn_continue);
+		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
 		hiLogoView = findViewById(R.id.ic_hi_logo);
@@ -54,7 +53,7 @@ public class WelcomeActivity extends Activity implements
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
-		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
+		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
 		errorImage = (ImageView) findViewById(R.id.error_img);
 
 		headerLayout = (ViewGroup) booBooLayout

@@ -1,43 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/welcome_bckg" >
 
     <RelativeLayout
-        android:visibility="invisible"
         android:id="@+id/tc_continue_layout"
+        style="@style/T_C_Message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:gravity="center"
-        style="@style/T_C_Message">
+        android:visibility="invisible" >
 
         <Button
             android:id="@+id/terms_and_conditions"
-            android:background="@drawable/t_c_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-         	android:layout_width="wrap_content"
-         	android:layout_height="wrap_content"
-         	android:layout_marginBottom="15dp"/>
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/t_c_btn" />
 
-        <ImageButton
+        <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_continue"
+            style="@style/SignupButton.Text.Bold.Button"
             android:layout_below="@id/terms_and_conditions"
             android:background="@drawable/signup_button"
             android:onClick="onClick"
-            android:src="@drawable/get_started_txt"
-            style="@style/SignupButton" />
+            android:text="@string/a_and_c_signup"
+            hike:font="omnes" />
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/loading_layout"
             style="@style/SignupButton"
             android:layout_below="@id/terms_and_conditions"
             android:background="@drawable/signup_btn_loading"
+            android:gravity="center"
             android:orientation="horizontal"
-            android:visibility="invisible"
-            android:gravity="center_horizontal" >
+            android:visibility="invisible" >
 
             <ProgressBar
                 android:id="@+id/loading_progress"
@@ -46,38 +48,40 @@
                 android:layout_centerVertical="true"
                 android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
-            <ImageView
+            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/txt_loading"
-                style="@style/Text"
+                style="@style/SignupButton.Text.Bold.Loading"
+                android:layout_width="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_toRightOf="@id/loading_progress"
-                android:src="@drawable/pulling_digits" />
-        </RelativeLayout>
-
+                android:layout_marginLeft="3dp"
+                android:singleLine="true"
+                android:text="@string/pulling_digits_signup"
+                hike:font="omnes" />
+        </LinearLayout>
     </RelativeLayout>
 
-	<ImageView
-		android:id="@+id/ic_hi_logo"
+    <ImageView
+        android:id="@+id/ic_hi_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="20dp"
-		android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:paddingBottom="20dp"
         android:src="@drawable/hi_logo_big" />
 
-	<ImageView
-	    android:id="@+id/ic_hike_welcome_image"
+    <ImageView
+        android:id="@+id/ic_hike_welcome_image"
+        style="@style/WelcomeHikeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="invisible"
-		style="@style/WelcomeHikeMessage"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:onClick="onHikeIconClicked"
         android:src="@drawable/hike_welcome_image"
-        android:onClick="onHikeIconClicked"/>
+        android:visibility="invisible" />
 
-	<include
-	    android:layout_below="@id/header_dropshadow"
+    <include
+        android:layout_below="@id/header_dropshadow"
         layout="@layout/boo_boo" />
+
 </RelativeLayout>
