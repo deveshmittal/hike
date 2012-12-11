@@ -207,56 +207,17 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public void setUpRightDrawerView(Activity activity) {
 		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
-		headerView = ((LayoutInflater) getContext().getSystemService(
-				Context.LAYOUT_INFLATER_SERVICE)).inflate(
-				R.layout.status_header, null);
-
-		favoriteListView.addHeaderView(headerView, null, false);
-		favoriteListView.setHeaderDividersEnabled(false);
 
 		drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext());
 		favoriteListView.setAdapter(drawerFavoritesAdapter);
 
 		favoriteListView.setOnItemClickListener(this);
 		activity.registerForContextMenu(favoriteListView);
-
-		setStatus();
-	}
-
-	private void setStatus() {
-		ViewGroup background = (ViewGroup) headerView
-				.findViewById(R.id.time_base_status);
-
-		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-		if (hour >= 6 && hour < 12) // Morning
-		{
-			if (time == TimeOfDay.MORNING) {
-				return;
-			}
-			time = TimeOfDay.MORNING;
-			background.setBackgroundResource(R.drawable.morning);
-		} else if (hour >= 12 && hour < 21) // Day
-		{
-			if (time == TimeOfDay.DAY) {
-				return;
-			}
-			time = TimeOfDay.DAY;
-			background.setBackgroundResource(R.drawable.day);
-		} else if (hour >= 21 || hour < 6) // Night
-		{
-			if (time == TimeOfDay.NIGHT) {
-				return;
-			}
-			time = TimeOfDay.NIGHT;
-			background.setBackgroundResource(R.drawable.night);
-		}
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View view, int position,
 			long id) {
-		// Accounting for the header view
-		position = position - 1;
 
 		ContactInfo contactInfo = drawerFavoritesAdapter.getItem(position);
 
@@ -618,7 +579,6 @@ public class DrawerLayout extends RelativeLayout implements
 						contentAnimationLeftIn, mRightCloseListener,
 						noAnimation);
 			} else {
-				setStatus();
 				animateLayouts(mRightSidebar, rightSidebarTranslateAnimationIn,
 						contentAnimationRightOut, mRightOpenListener,
 						noAnimation);

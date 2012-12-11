@@ -283,11 +283,8 @@ public class DrawerBaseActivity extends Activity implements
 
 		/* enable resend options on failed messages */
 		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		/*
-		 * Accounting for the header view.
-		 */
-		int pos = adapterInfo.position - 1;
-		parentLayout.onCreateFavoritesContextMenu(this, menu, pos);
+		parentLayout.onCreateFavoritesContextMenu(this, menu,
+				adapterInfo.position);
 	}
 
 	@Override
