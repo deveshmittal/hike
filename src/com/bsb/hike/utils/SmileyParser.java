@@ -27,6 +27,7 @@ public class SmileyParser {
 
 	public static final int CATEGORIES = 2;
 
+	public static final int MAX_EMOTICON_TEXT_LENGTH = 17;
 	// Singleton stuff
 	private static SmileyParser sInstance = null;
 

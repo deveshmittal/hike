@@ -149,7 +149,10 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener {
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		mod = s.subSequence(start, start + count).toString();
+		String initial = s.subSequence(0, start).toString();
+		int startOffset = Math.min(initial.length(),
+				SmileyParser.MAX_EMOTICON_TEXT_LENGTH);
+		mod = s.subSequence(start - startOffset, start + count).toString();
 	}
 
 	@Override
