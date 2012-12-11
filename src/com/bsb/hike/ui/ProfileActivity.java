@@ -247,6 +247,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.setImageResource(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? R.drawable.ic_favorite
 						: R.drawable.ic_not_favorite);
 		topBarBtn.setVisibility(View.VISIBLE);
+		findViewById(R.id.title_image_btn2_container).setVisibility(
+				View.VISIBLE);
 
 		findViewById(R.id.add_to_contacts).setVisibility(
 				!TextUtils.isEmpty(contactInfo.getName()) ? View.GONE
@@ -308,6 +310,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.setImageResource(groupConversation.isMuted() ? R.drawable.ic_group_muted
 						: R.drawable.ic_group_not_muted);
 		topBarBtn.setVisibility(View.VISIBLE);
+		findViewById(R.id.title_image_btn2_container).setVisibility(
+				View.VISIBLE);
 
 		int left = (int) (0 * Utils.densityMultiplier);
 		int top = (int) (0 * Utils.densityMultiplier);

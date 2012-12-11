@@ -340,6 +340,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			// Removing the attachment buttong that remains visible while
 			// forwarding files
 			findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
+			findViewById(R.id.title_image_btn2_container).setVisibility(
+					View.GONE);
 			findViewById(R.id.button_bar3).setVisibility(View.GONE);
 		}
 		boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
@@ -1048,6 +1050,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		findViewById(R.id.title_icon).setVisibility(View.GONE);
 		findViewById(R.id.button_bar_2).setVisibility(View.GONE);
 		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
+		findViewById(R.id.title_image_btn2_container).setVisibility(
+				View.VISIBLE);
 		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
 		mComposeView.setFocusable(true);

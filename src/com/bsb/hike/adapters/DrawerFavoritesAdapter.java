@@ -39,6 +39,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.DrawerLayout;
 
 public class DrawerFavoritesAdapter extends BaseAdapter implements
 		OnClickListener {
@@ -65,7 +66,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, RECOMMENDED_FAVORITE
 	}
 
-	public DrawerFavoritesAdapter(Context context) {
+	public DrawerFavoritesAdapter(Context context,
+			final DrawerLayout drawerLayout) {
 		completeList = new ArrayList<ContactInfo>();
 		recommendedFavoriteList = new ArrayList<ContactInfo>(0);
 		favoriteList = new ArrayList<ContactInfo>(0);
@@ -105,6 +107,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			@Override
 			protected void onPostExecute(Void result) {
 				makeCompleteList();
+				drawerLayout.updatePendingRequests();
 			}
 
 		}.execute();
@@ -300,6 +303,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						.getString(R.string.recent) : context
 						.getString(R.string.invite_friends));
 		notifyDataSetChanged();
+	}
+
+	public int getPendingRequests() {
+		return recommendedFavoriteList.size();
 	}
 
 	@Override

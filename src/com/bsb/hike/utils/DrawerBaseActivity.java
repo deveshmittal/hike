@@ -70,6 +70,9 @@ public class DrawerBaseActivity extends Activity implements
 			rightFavoriteBtn.setVisibility(View.VISIBLE);
 			rightFavoriteBtn.setImageResource(R.drawable.ic_favorites);
 
+			findViewById(R.id.title_image_btn2_container).setVisibility(
+					View.VISIBLE);
+
 			findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 			HikeMessengerApp.getPubSub().addListeners(this,
 					rightDrawerPubSubListeners);
