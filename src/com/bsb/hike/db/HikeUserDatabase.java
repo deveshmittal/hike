@@ -652,10 +652,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			boolean groupChat) {
 		String selection = DBConstants.MSISDN
 				+ " != 'null'"
-				+ ((freeSMSOn && groupChat) ? " AND (" + DBConstants.ONHIKE
-						+ " = 0 AND " + DBConstants.MSISDN + " LIKE '91%') OR "
-						+ DBConstants.ONHIKE + "=1" : (groupChat ? " AND "
-						+ DBConstants.ONHIKE + " != 0" : ""));
+				+ ((freeSMSOn && groupChat) ? " AND ((" + DBConstants.ONHIKE
+						+ " = 0 AND " + DBConstants.MSISDN
+						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))"
+						: (groupChat ? " AND " + DBConstants.ONHIKE + " != 0"
+								: ""));
 
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 
