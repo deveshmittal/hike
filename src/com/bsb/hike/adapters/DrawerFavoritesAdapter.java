@@ -99,7 +99,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						FavoriteType.NOT_FAVORITE, HikeConstants.ON_HIKE_VALUE);
 
 				recentList = hikeUserDatabase.getNonHikeRecentContacts(-1,
-						true, FavoriteType.NOT_FAVORITE);
+						HikeMessengerApp.isIndianUser(),
+						FavoriteType.NOT_FAVORITE);
 
 				return null;
 			}
