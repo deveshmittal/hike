@@ -82,7 +82,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				HikeUserDatabase hikeUserDatabase = HikeUserDatabase
 						.getInstance();
 
-				recommendedFavoriteList = HikeUserDatabase.getInstance()
+				recommendedFavoriteList = hikeUserDatabase
 						.getContactsOfFavoriteType(
 								FavoriteType.AUTO_RECOMMENDED_FAVORITE,
 								HikeConstants.BOTH_VALUE);
