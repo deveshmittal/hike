@@ -260,11 +260,25 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					additionalInfo.close();
 
 					ih.bind(msisdnTypeColumn, contact.getMsisdnType());
+
 					/*
 					 * We add to favorites this reference. So should set the
 					 * favorite type here.
 					 */
-					contact.setFavoriteType(FavoriteType.NOT_FAVORITE);
+					Cursor favoriteCursor = mDb.query(
+							DBConstants.FAVORITES_TABLE,
+							new String[] { DBConstants.FAVORITE_TYPE },
+							DBConstants.MSISDN + "=?",
+							new String[] { contact.getMsisdn() }, null, null,
+							null);
+					if (favoriteCursor.moveToFirst()) {
+						int favoriteTypeOrdinal = favoriteCursor
+								.getInt(favoriteCursor
+										.getColumnIndex(DBConstants.FAVORITE_TYPE));
+						contact.setFavoriteType(FavoriteType.values()[favoriteTypeOrdinal]);
+					} else {
+						contact.setFavoriteType(FavoriteType.NOT_FAVORITE);
+					}
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.CONTACT_ADDED, contact);
 				} else {

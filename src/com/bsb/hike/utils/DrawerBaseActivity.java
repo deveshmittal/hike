@@ -259,7 +259,11 @@ public class DrawerBaseActivity extends Activity implements
 
 				@Override
 				public void run() {
-					parentLayout.updateRecentContacts(contactInfo);
+					if (contactInfo.getFavoriteType() != FavoriteType.FAVORITE) {
+						parentLayout.updateRecentContacts(contactInfo);
+					} else {
+						parentLayout.addToFavorite(contactInfo);
+					}
 				}
 			});
 		} else if (HikePubSub.REFRESH_FAVORITES.equals(type)) {
