@@ -268,7 +268,7 @@ public class Utils {
 
 	public static Drawable getDefaultIconForUser(Context context, String msisdn) {
 		if (isGroupConversation(msisdn)) {
-			int count = 2;
+			int count = 7;
 			int id;
 			switch (iconHash(msisdn) % count) {
 			case 0:
@@ -276,6 +276,21 @@ public class Utils {
 				break;
 			case 1:
 				id = R.drawable.ic_group_avatar2;
+				break;
+			case 2:
+				id = R.drawable.ic_group_avatar3;
+				break;
+			case 3:
+				id = R.drawable.ic_group_avatar4;
+				break;
+			case 4:
+				id = R.drawable.ic_group_avatar5;
+				break;
+			case 5:
+				id = R.drawable.ic_group_avatar6;
+				break;
+			case 6:
+				id = R.drawable.ic_group_avatar7;
 				break;
 			default:
 				id = R.drawable.ic_group_avatar1;
