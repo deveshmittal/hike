@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Spanned;
@@ -90,9 +91,15 @@ public class HikeNotification {
 
 		int icon = R.drawable.ic_contact_logo;
 
-		// Replace emojis with a '*'
-		message = SmileyParser.getInstance().replaceEmojiWithCharacter(message,
-				"*");
+		/*
+		 * Jellybean has added support for emojis so we don't need to add a '*'
+		 * to replace them
+		 */
+		if (Build.VERSION.SDK_INT < 16) {
+			// Replace emojis with a '*'
+			message = SmileyParser.getInstance().replaceEmojiWithCharacter(
+					message, "*");
+		}
 
 		// TODO this doesn't turn the text bold :(
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
