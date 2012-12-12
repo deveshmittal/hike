@@ -598,7 +598,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return false;
 		}
 
-		switch (item.getItemId()) {
+		return performContextBasedOperationOnMessage(message, item.getItemId());
+	}
+
+	public boolean performContextBasedOperationOnMessage(ConvMessage message, int id) {
+		switch (id) {
 		case R.id.copy:
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			if (message.isFileTransferMessage()) {
@@ -641,12 +645,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return true;
 		case R.id.delete:
 			removeMessage(message);
+			if (message.isFileTransferMessage()) {
+				FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
+						.get(message.getMsgID());
+				if (fileTransferTask != null) {
+					fileTransferTask.cancelTask();
+					ChatThread.fileTransferTaskMap.remove(message.getMsgID());
+					mAdapter.notifyDataSetChanged();
+				}
+			}
 			return true;
 		case R.id.cancel_file_transfer:
 			FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
 					.get(message.getMsgID());
 			if (fileTransferTask != null) {
 				fileTransferTask.cancelTask();
+				ChatThread.fileTransferTaskMap.remove(message.getMsgID());
+				mAdapter.notifyDataSetChanged();
 			}
 			return true;
 		case R.id.share:
@@ -659,10 +674,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 									+ hikeFile.getFileKey()));
 			return true;
 		default:
-			return super.onContextItemSelected(item);
+			return false;
 		}
 	}
-
 	@Override
 	/*
 	 * this function is called right before the options menu is shown. Disable
