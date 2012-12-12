@@ -20,7 +20,7 @@
         android:widgetLayout="@layout/checkbox_widget" />
 
 	<com.bsb.hike.view.IconCheckBoxPreference
-        icon="preference_sms"
+        icon="preference_free_sms"
         android:defaultValue="true"
         android:key="freeSmsPref"
         android:layout="@layout/icon_preference"
