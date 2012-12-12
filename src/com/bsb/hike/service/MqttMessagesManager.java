@@ -474,6 +474,13 @@ public class MqttMessagesManager {
 			throws JSONException {
 		Conversation conversation = convDb.getConversation(msisdn, 0);
 
+		boolean isUJMsg = HikeConstants.MqttMessageTypes.USER_JOINED
+				.equals(jsonObj.getString(HikeConstants.TYPE));
+		boolean isGettingCredits = false;
+		if (isUJMsg) {
+			isGettingCredits = jsonObj.getJSONObject(HikeConstants.DATA)
+					.optInt(HikeConstants.CREDITS, -1) > 0;
+		}
 		/*
 		 * If the message is of type 'uj' we want to show it for all known
 		 * contacts regardless of if the user currently has an existing
@@ -481,12 +488,10 @@ public class MqttMessagesManager {
 		 * chats with that participant. Otherwise for other types, we only show
 		 * the message if the user already has an existing conversation.
 		 */
-		if ((conversation == null && !HikeConstants.MqttMessageTypes.USER_JOINED
-				.equals(jsonObj.getString(HikeConstants.TYPE)))
+		if ((conversation == null && !isUJMsg)
 				|| (conversation != null
 						&& TextUtils.isEmpty(conversation.getContactName())
-						&& HikeConstants.MqttMessageTypes.USER_JOINED
-								.equals(jsonObj.getString(HikeConstants.TYPE)) && !(conversation instanceof GroupConversation))) {
+						&& isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation))) {
 			return;
 		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation,
