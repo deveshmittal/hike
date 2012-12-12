@@ -10,5 +10,5 @@
     android:shadowRadius="0.7"
     android:text="Text"
     android:textColor="@color/drawer_section"
-    android:textSize="16sp"
-    android:textStyle="bold|italic" />
+    android:textSize="15sp"
+    android:textStyle="bold" />
