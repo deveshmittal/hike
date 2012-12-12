@@ -169,6 +169,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		removeContactFromListByMatchingMsisdn(recommendedFavoriteList,
 				contactInfo);
 		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
+		removeContactFromListByMatchingMsisdn(favoriteList, contactInfo);
 
 		favoriteList.add(0, contactInfo);
 		Collections.sort(favoriteList);
