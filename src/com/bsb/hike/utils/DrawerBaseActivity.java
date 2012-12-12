@@ -263,14 +263,26 @@ public class DrawerBaseActivity extends Activity implements
 				}
 			});
 		} else if (HikePubSub.REFRESH_FAVORITES.equals(type)) {
-			final List<ContactInfo> favoriteList = HikeUserDatabase
-					.getInstance().getContactsOfFavoriteType(
-							FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE);
+			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
+
+			final List<ContactInfo> favoriteList = hikeUserDatabase
+					.getContactsOfFavoriteType(FavoriteType.FAVORITE,
+							HikeConstants.BOTH_VALUE);
+			final List<ContactInfo> recommendedFavoriteList = hikeUserDatabase
+					.getContactsOfFavoriteType(
+							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
+							HikeConstants.BOTH_VALUE);
+			recommendedFavoriteList.addAll(hikeUserDatabase
+					.getContactsOfFavoriteType(
+							FavoriteType.RECOMMENDED_FAVORITE,
+							HikeConstants.BOTH_VALUE));
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
 					parentLayout.refreshFavorites(favoriteList);
+					parentLayout
+							.refreshRecommendedFavorites(recommendedFavoriteList);
 				}
 			});
 		}

@@ -292,6 +292,13 @@ public class DrawerLayout extends RelativeLayout implements
 		updatePendingRequests();
 	}
 
+	public void refreshRecommendedFavorites(
+			List<ContactInfo> recommendedFavoriteList) {
+		drawerFavoritesAdapter
+				.refreshRecommendedFavorites(recommendedFavoriteList);
+		updatePendingRequests();
+	}
+
 	public void onCreateFavoritesContextMenu(Activity activity, Menu menu,
 			int position) {
 		if (drawerFavoritesAdapter.getItemViewType(position) != FavoriteAdapterViewType.FAVORITE

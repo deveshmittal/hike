@@ -297,6 +297,18 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		makeCompleteList();
 	}
 
+	public void refreshRecommendedFavorites(
+			List<ContactInfo> recommendedFavoriteList) {
+		this.recommendedFavoriteList = recommendedFavoriteList;
+		Collections.sort(recommendedFavoriteList);
+
+		favoriteList.removeAll(recommendedFavoriteList);
+		onHikeList.removeAll(recommendedFavoriteList);
+		recentList.removeAll(recommendedFavoriteList);
+
+		makeCompleteList();
+	}
+
 	public void freeSMSToggled(boolean freeSMS) {
 		this.freeSMSOn = freeSMS;
 		recentSection
