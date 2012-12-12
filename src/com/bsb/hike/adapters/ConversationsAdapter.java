@@ -145,6 +145,31 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						.format(context.getString(R.string.joined_hike),
 								Utils.getFirstName(conversation.getLabel()))
 						: message.getMessage();
+			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
+					|| message.getParticipantInfoState() == ParticipantInfoState.GROUP_END) {
+
+				if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) {
+					// Showing the block internation sms message if the user was
+					// booted because of that reason
+					String participantMsisdn = metadata.getMsisdn();
+					String participantName = ((GroupConversation) conversation)
+							.getGroupParticipant(participantMsisdn)
+							.getContactInfo().getFirstName();
+					markedUp = String.format(
+							context.getString(R.string.left_conversation),
+							participantName);
+				} else {
+					markedUp = context.getString(R.string.group_chat_end);
+				}
+			} else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME) {
+				String participantName = ((GroupConversation) conversation)
+						.getGroupParticipant(metadata.getMsisdn())
+						.getContactInfo().getFirstName();
+				markedUp = String.format(
+						context.getString(R.string.change_group_name),
+						participantName);
+			} else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
+				markedUp = context.getString(R.string.block_internation_sms);
 			} else {
 				markedUp = message.getMessage();
 				// For showing the name of the contact that sent the message in

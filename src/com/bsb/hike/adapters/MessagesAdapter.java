@@ -431,7 +431,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				((ViewGroup) holder.participantInfoContainer)
 						.addView(mainMessage);
 			} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
-				String info = convMessage.getMessage();
+				String info = context
+						.getString(R.string.block_internation_sms);
 				String textToHighlight = context
 						.getString(R.string.block_internation_sms_bold_text);
 
