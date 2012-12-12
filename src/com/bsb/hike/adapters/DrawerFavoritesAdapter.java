@@ -54,6 +54,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	private boolean freeSMSOn;
 	private ContactInfo recentSection;
+	private ContactInfo emptyFavorites;
 
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
@@ -129,10 +130,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		 * in the listview.
 		 */
 		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
-			completeList
-					.add(new ContactInfo(
-							DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null,
-							null, null));
+			emptyFavorites = new ContactInfo(
+					DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null, null, null);
+			completeList.add(emptyFavorites);
 		} else {
 			completeList.addAll(recommendedFavoriteList);
 			completeList.addAll(favoriteList);
@@ -163,7 +163,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		 * we remove it before adding the new favorite.
 		 */
 		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
-			completeList.remove(1);
+			completeList.remove(emptyFavorites);
 		}
 		// Remove from the other lists.
 		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
@@ -184,7 +184,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		 * we remove it before adding the new favorite.
 		 */
 		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
-			completeList.remove(1);
+			completeList.remove(emptyFavorites);
 		}
 		// Remove from the hike list.
 		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
