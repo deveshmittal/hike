@@ -133,7 +133,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 		ImageView avatar = (ImageView) v.findViewById(R.id.user_img);
 		avatar.setImageDrawable(contactInfo != null ? IconCacheManager
 				.getInstance().getIconForMSISDN(contactInfo.getMsisdn())
-				: context.getResources().getDrawable(R.drawable.ic_avatar0));
+				: context.getResources().getDrawable(R.drawable.ic_avatar1));
 
 		numberTextView.setVisibility(isEnabled(position) ? View.VISIBLE
 				: View.INVISIBLE);

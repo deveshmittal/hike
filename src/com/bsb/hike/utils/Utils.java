@@ -278,7 +278,7 @@ public class Utils {
 				id = R.drawable.ic_group_avatar2;
 				break;
 			default:
-				id = R.drawable.ic_group_avatar;
+				id = R.drawable.ic_group_avatar1;
 				break;
 			}
 			return context.getResources().getDrawable(id);
@@ -308,7 +308,7 @@ public class Utils {
 			id = R.drawable.ic_avatar7;
 			break;
 		default:
-			id = R.drawable.ic_avatar0;
+			id = R.drawable.ic_avatar1;
 			break;
 		}
 
