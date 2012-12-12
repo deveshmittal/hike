@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -53,6 +54,8 @@ public class HikeNotification {
 		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
 				true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE
 				: 0;
+		boolean led = preferenceManager
+				.getBoolean(HikeConstants.LED_PREF, true);
 
 		String msisdn = convMsg.getMsisdn();
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg
@@ -107,7 +110,14 @@ public class HikeNotification {
 		Notification notification = new Notification(icon, text,
 				timestamp * 1000);
 
-		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+		if (led) {
+			notification.ledARGB = Color.BLUE;
+			notification.ledOnMS = 300;
+			notification.ledOffMS = 1000;
+
+			notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+		}
+		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
 		notification.defaults |= 0 | vibrate;
 		if (playSound != 0) {

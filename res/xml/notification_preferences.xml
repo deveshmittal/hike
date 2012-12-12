@@ -28,4 +28,13 @@
         android:title="@string/free_sms"
         android:widgetLayout="@layout/checkbox_widget" />    
 
+	<com.bsb.hike.view.IconCheckBoxPreference
+        icon="preference_led"
+        android:defaultValue="true"
+        android:key="ledPref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/led_notification_info"
+        android:title="@string/led_notification"
+        android:widgetLayout="@layout/checkbox_widget" />
+	
 </PreferenceScreen>
