@@ -36,8 +36,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -52,7 +50,6 @@ import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.tasks.UploadLocationTask;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -87,12 +84,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private Conversation conversation;
 	private ArrayList<ConvMessage> convMessages;
 	private Context context;
+	private ChatThread chatThread;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation) {
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
+		this.chatThread = (ChatThread) context;
 	}
 
 	/**
@@ -431,8 +430,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				((ViewGroup) holder.participantInfoContainer)
 						.addView(mainMessage);
 			} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
-				String info = context
-						.getString(R.string.block_internation_sms);
+				String info = context.getString(R.string.block_internation_sms);
 				String textToHighlight = context
 						.getString(R.string.block_internation_sms_bold_text);
 
@@ -940,61 +938,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						String optionSelected = items.get(which);
 						if (context.getString(R.string.forward).equals(
 								optionSelected)) {
-
-							Utils.logEvent(context,
-									HikeConstants.LogEvent.FORWARD_MSG);
-							Intent intent = new Intent(context,
-									ChatThread.class);
-							intent.putExtra(
-									HikeConstants.Extras.FORWARD_MESSAGE, true);
-							intent.putExtra(HikeConstants.Extras.FILE_KEY,
-									hikeFile.getFileKey());
-							if (hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
-								intent.putExtra(HikeConstants.Extras.FILE_PATH,
-										hikeFile.getFilePath());
-								intent.putExtra(HikeConstants.Extras.FILE_TYPE,
-										hikeFile.getFileTypeString());
-							} else {
-								intent.putExtra(
-										HikeConstants.Extras.ZOOM_LEVEL,
-										hikeFile.getZoomLevel());
-								intent.putExtra(HikeConstants.Extras.LATITUDE,
-										hikeFile.getLatitude());
-								intent.putExtra(HikeConstants.Extras.LONGITUDE,
-										hikeFile.getLongitude());
-							}
-							intent.putExtra(HikeConstants.Extras.PREV_MSISDN,
-									message.getMsisdn());
-							intent.putExtra(HikeConstants.Extras.PREV_NAME,
-									conversation.getContactName());
-							context.startActivity(intent);
-
+							chatThread.performContextBasedOperationOnMessage(
+									message, R.id.forward);
 						} else if (context.getString(R.string.share).equals(
 								optionSelected)) {
-
-							Utils.startShareIntent(context, context.getString(
-									R.string.share_file_message,
-									AccountUtils.FILE_TRANSFER_BASE_VIEW_URL
-											+ hikeFile.getFileKey()));
-
+							chatThread.performContextBasedOperationOnMessage(
+									message, R.id.share);
 						} else if (context.getString(R.string.delete).equals(
 								optionSelected)) {
-
-							HikeMessengerApp.getPubSub().publish(
-									HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD,
-									message);
-
+							chatThread.performContextBasedOperationOnMessage(
+									message, R.id.delete);
 						} else if (context.getString(R.string.cancel_upload)
 								.equals(optionSelected)
 								|| context.getString(R.string.cancel_download)
 										.equals(optionSelected)) {
-
-							FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
-									.get(message.getMsgID());
-							if (fileTransferTask != null) {
-								fileTransferTask.cancelTask();
-							}
-
+							chatThread.performContextBasedOperationOnMessage(
+									message, R.id.cancel_file_transfer);
 						}
 					}
 				});
