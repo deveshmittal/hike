@@ -21,6 +21,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -30,7 +31,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
@@ -41,6 +48,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -51,6 +59,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -351,6 +360,115 @@ public class MessagesList extends DrawerBaseActivity implements
 		 * group.
 		 */
 		onNewIntent(getIntent());
+
+		if (!accountPrefs.getBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN,
+				false)
+				&& getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+			showFavoritesIntroOverlay();
+		}
+	}
+
+	private static final int TUTORIAL_PAGE_COUNT = 2;
+
+	private void showFavoritesIntroOverlay() {
+		findViewById(R.id.favorite_intro).setVisibility(View.VISIBLE);
+		ViewPager tutorialPager = (ViewPager) findViewById(R.id.tutorial_pager);
+		final TextView favInfo = (TextView) findViewById(R.id.fav_info);
+
+		ViewGroup pageIndicatorContainer = (ViewGroup) findViewById(R.id.page_indicator_container);
+
+		int rightMargin = (int) (10 * Utils.densityMultiplier);
+		final ImageView[] pageIndicators = new ImageView[TUTORIAL_PAGE_COUNT];
+		for (int i = 0; i < TUTORIAL_PAGE_COUNT; i++) {
+			pageIndicators[i] = new ImageView(this);
+			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT);
+			if (i != TUTORIAL_PAGE_COUNT - 1) {
+				lp.setMargins(0, 0, rightMargin, 0);
+			}
+			pageIndicators[i]
+					.setImageResource(i == 0 ? R.drawable.ic_page_selected
+							: R.drawable.ic_page_not_selected);
+			pageIndicators[i].setLayoutParams(lp);
+			pageIndicatorContainer.addView(pageIndicators[i]);
+		}
+		pageIndicatorContainer.requestLayout();
+
+		tutorialPager.setAdapter(new TutorialPagerAdapter());
+
+		tutorialPager.setOnPageChangeListener(new OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				for (ImageView pageIndicator : pageIndicators) {
+					pageIndicator
+							.setImageResource(R.drawable.page_indicator_unselected);
+				}
+				pageIndicators[position]
+						.setImageResource(R.drawable.page_indicator_selected);
+				favInfo.setText(position == 0 ? R.string.fav_info1
+						: R.string.fav_info2);
+				if (position == 1) {
+					String plus = getString(R.string.plus);
+					String favInfoString = getString(R.string.fav_info2);
+
+					SpannableStringBuilder ssb = new SpannableStringBuilder(
+							favInfoString);
+					ssb.setSpan(new ImageSpan(MessagesList.this,
+							R.drawable.ic_small_add), favInfoString
+							.indexOf(plus),
+							favInfoString.indexOf(plus) + plus.length(),
+							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+					favInfo.setText(ssb);
+				}
+			}
+
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+			}
+		});
+	}
+
+	public void onFavoriteIntroClick(View v) {
+		findViewById(R.id.favorite_intro).setVisibility(View.GONE);
+
+		Editor editor = accountPrefs.edit();
+		editor.putBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN, true);
+		editor.commit();
+	}
+
+	private class TutorialPagerAdapter extends PagerAdapter {
+
+		@Override
+		public int getCount() {
+			return TUTORIAL_PAGE_COUNT;
+		}
+
+		@Override
+		public boolean isViewFromObject(View view, Object object) {
+			return view == object;
+		}
+
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object) {
+			((ViewPager) container).removeView((View) object);
+		}
+
+		@Override
+		public Object instantiateItem(ViewGroup container, int position) {
+			ImageView tutorialPage = new ImageView(MessagesList.this);
+			tutorialPage
+					.setImageResource(position == 0 ? R.drawable.intro_fav_1
+							: R.drawable.intro_fav_2);
+
+			((ViewPager) container).addView(tutorialPage);
+			return tutorialPage;
+		}
+
 	}
 
 	private void sendDeviceDetails() {
@@ -1195,22 +1313,6 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (updateAlertOkBtn != null) {
 			updateAlertOkBtn.setText(R.string.update_app);
 			updateAlertOkBtn.setEnabled(true);
-		}
-	}
-
-	public void onOverlayButtonClick(View v) {
-		if (v.getId() != R.id.overlay_layout) {
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.HOME_UDPATE_OVERLAY_BUTTON_CLICKED);
-		} else {
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.HOME_UPDATE_OVERLAY_DISMISSED);
-			Editor editor = accountPrefs.edit();
-			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_OVERLAY, false);
-			editor.commit();
-
-			findViewById(R.id.overlay_layout).setVisibility(View.GONE);
-			showUpdateToolTip(HikeConstants.CRITICAL_UPDATE);
 		}
 	}
 

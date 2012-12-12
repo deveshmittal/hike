@@ -120,7 +120,7 @@
             <include layout="@layout/tool_tip" />
         </LinearLayout>
 
-        <include layout="@layout/dark_overlay" />
+        <include layout="@layout/favorites_intro_overlay" />
     </RelativeLayout>
 
 </com.bsb.hike.view.DrawerLayout>
