@@ -1161,6 +1161,32 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			toggleConversationMuteViewVisibility(((GroupConversation) mConversation)
 					.isMuted());
 		}
+
+		if (!(mConversation instanceof GroupConversation)
+				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
+			showNudgeDialog();
+		}
+	}
+
+	private void showNudgeDialog() {
+
+		final Dialog nudgeAlert = new Dialog(this, R.style.Theme_CustomDialog);
+		nudgeAlert.setContentView(R.layout.nudge_dialog);
+
+		nudgeAlert.setCancelable(false);
+
+		Button okBtn = (Button) nudgeAlert.findViewById(R.id.ok_btn);
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				nudgeAlert.cancel();
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, true);
+				editor.commit();
+			}
+		});
+		nudgeAlert.show();
 	}
 
 	/*

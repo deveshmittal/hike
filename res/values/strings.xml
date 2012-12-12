@@ -295,4 +295,6 @@
 	<string name="intro_fav">Introducing Favorites</string>
 	<string name="fav_info1">A permanent place for all your\nfavorite friends. Conversation\nwith them is just a tap away.</string>
 	<string name="fav_info2">Access your friends on hike.\nTap plus to add them to\nyour favorite list.</string>
+	<string name="nudge">Nudge</string>
+	<string name="nudge_info">Double tap anywhere on the\nchat to nudge your friend.</string>
 </resources>

@@ -156,6 +156,7 @@ public class HikeMessengerApp extends Application {
 	public static final String BROKER_PORT = "brokerPort";
 
 	public static final String FAVORITES_INTRO_SHOWN = "favoritesIntroShown";
+	public static final String NUDGE_INTRO_SHOWN = "nudgeIntroShown";
 
 	private static Facebook facebook;
 
