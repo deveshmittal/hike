@@ -272,9 +272,9 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			isUnknownNumber = true;
 		}
 		if (!isGroupChat) {
-			boolean inviteOnly = (!freeSMSOn && !contactInfo.isOnhike())
-					|| (freeSMSOn && !contactInfo.getMsisdn().startsWith(
-							HikeConstants.INDIA_COUNTRY_CODE));
+			boolean inviteOnly = ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn && !contactInfo
+					.getMsisdn().startsWith(HikeConstants.INDIA_COUNTRY_CODE)))
+					&& !isUnknownNumber;
 			if (inviteOnly) {
 				Log.d(getClass().getSimpleName(),
 						"Inviting " + contactInfo.toString());
