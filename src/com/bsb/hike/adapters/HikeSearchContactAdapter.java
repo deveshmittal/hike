@@ -1,5 +1,7 @@
 package com.bsb.hike.adapters;
 
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -307,8 +309,21 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 							.startsWith("video"))) {
 				Uri fileUri = presentIntent
 						.getParcelableExtra(Intent.EXTRA_STREAM);
-				String filePath = Utils.getRealPathFromUri(fileUri,
-						(Activity) context);
+				Log.d(getClass().getSimpleName(),
+						"File path uri: " + fileUri.toString());
+				String fileUriStart = "file://";
+				String fileUriString = fileUri.toString();
+				String filePath;
+				if (fileUriString.startsWith(fileUriStart)) {
+					File selectedFile = new File(URI.create(fileUriString));
+					/*
+					 * Done to fix the issue in a few Sony devices.
+					 */
+					filePath = selectedFile.getAbsolutePath();
+				} else {
+					filePath = Utils.getRealPathFromUri(fileUri,
+							(Activity) context);
+				}
 				intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
 				intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
 			}
