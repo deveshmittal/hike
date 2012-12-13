@@ -663,18 +663,18 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ContactInfo> getContactsForComposeScreen(boolean freeSMSOn,
-			boolean groupChat) {
+			boolean fwdOrgroupChat) {
 		String selection = DBConstants.MSISDN
 				+ " != 'null'"
-				+ ((freeSMSOn && groupChat) ? " AND ((" + DBConstants.ONHIKE
+				+ ((freeSMSOn && fwdOrgroupChat) ? " AND ((" + DBConstants.ONHIKE
 						+ " = 0 AND " + DBConstants.MSISDN
 						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))"
-						: (groupChat ? " AND " + DBConstants.ONHIKE + " != 0"
+						: (fwdOrgroupChat ? " AND " + DBConstants.ONHIKE + " != 0"
 								: ""));
 
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 
-		boolean shouldSortInDB = !freeSMSOn || groupChat;
+		boolean shouldSortInDB = !freeSMSOn || fwdOrgroupChat;
 
 		String orderBy = (shouldSortInDB) ? DBConstants.ONHIKE + " DESC, "
 				+ DBConstants.NAME + " COLLATE NOCASE" : "";
