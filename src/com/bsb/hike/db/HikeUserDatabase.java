@@ -1166,6 +1166,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			mDb.beginTransaction();
 
 			JSONArray msisdns = favorites.names();
+			if(msisdns == null) {
+				return;
+			}
 			for (int i = 0; i < msisdns.length(); i++) {
 				String msisdn = msisdns.optString(i);
 				JSONObject msisdnInfo = favorites.optJSONObject(msisdn);
