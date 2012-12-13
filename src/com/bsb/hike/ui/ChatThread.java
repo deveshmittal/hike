@@ -602,7 +602,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		return performContextBasedOperationOnMessage(message, item.getItemId());
 	}
 
-	public boolean performContextBasedOperationOnMessage(ConvMessage message, int id) {
+	public boolean performContextBasedOperationOnMessage(ConvMessage message,
+			int id) {
 		switch (id) {
 		case R.id.copy:
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
