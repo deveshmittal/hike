@@ -1175,6 +1175,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			myInfo = new GroupParticipant(Utils.getUserContactInfo(prefs));
 			toggleConversationMuteViewVisibility(((GroupConversation) mConversation)
 					.isMuted());
+		} else {
+			toggleConversationMuteViewVisibility(false);
 		}
 
 		if (!(mConversation instanceof GroupConversation)
