@@ -876,6 +876,7 @@ public class Utils {
 		String inviteToken = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 				HikeConstants.INVITE_TOKEN, "");
+		inviteToken = "";
 		// Adding the user's invite token to the invite url
 		String inviteMessage = context.getString(messageResId, inviteToken);
 
