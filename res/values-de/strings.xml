@@ -179,7 +179,7 @@
 	<string name="unable_to_read">Datei nicht lesbar</string>
 	<string name="share_location">Standort teilen</string>
 	<string name="group_mute">Diese Unterhaltung ist stumm geschaltet.</string>
-	<string name="poke_msg">Grüßen!</string>
+	<string name="poke_msg">Nudge!</string>
 	<string name="invite_to_hike">Zu hike einladen</string>
 	<string name="block_user">Diesen Benutzer sperren</string>
 	<string name="unblock_user">Diesen Benutzer entsperren</string>
