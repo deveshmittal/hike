@@ -349,7 +349,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				HikeConstants.FREE_SMS_PREF, true);
 
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
-				.getContactsForComposeScreen(freeSMSOn, isGroupChat);
+				.getContactsForComposeScreen(freeSMSOn,
+						(isGroupChat || isForwardingMessage || isSharingFile));
 
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, this.mConversationDb
