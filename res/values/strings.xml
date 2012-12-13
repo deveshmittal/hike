@@ -72,7 +72,7 @@
 	<string name="max_contact">Max 20 contacts in a group.</string>
 	<string name="invite_sent">Invite sent.</string>
 	<string name="sms_renew">Refills 1st of every month</string>
-	<string name="invite_friend_free_sms">Earn an extra 50 free SMS per month for\nevery friend that joins hike because of you.</string>
+	<string name="invite_friend_free_sms">Earn an extra 50 free SMS per month for every friend that joins hike because of you.</string>
 	<string name="free_sms_50">50 free SMS</string>
 	<string name="group_chat_free">Group chat is free till 31st Dec.\nCredits don\'t apply.</string>
 	<string name="sms_disclaimer">*SMSs that are received and shown in hike are\nstored locally and never uploaded to our servers.\n\nWe promise.</string>

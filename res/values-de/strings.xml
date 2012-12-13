@@ -72,7 +72,7 @@
 	<string name="max_contact">Maximal 20 Kontakte pro Gruppe erlaubt.</string>
 	<string name="invite_sent">Einladung gesendet.</string>
 	<string name="sms_renew">Wird jeweils am 1. des Monats nachgeladen</string>
-	<string name="invite_friend_free_sms">Du bekommst monatlich 50 Frei-SMS für jeden\nFreund, der wegen dir bei hike Mitglied wird.</string>
+	<string name="invite_friend_free_sms">Du bekommst monatlich 50 Frei-SMS für jeden Freund, der wegen dir bei hike Mitglied wird.</string>
 	<string name="free_sms_50">50 Frei-SMS</string>
 	<string name="group_chat_free">Bis zum 31. Dez. ist der Gruppenchat gratis.\nGuthaben wird nicht belastet.</string>
 	<string name="sms_disclaimer">*SMS die mit hike empfangen und angezeigt werden, sind nur\nauf deinem Gerät gespeichert und werden nie auf unsere Server übertragen.\n\nEhrenwort.</string>
