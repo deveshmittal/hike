@@ -7,6 +7,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
@@ -492,8 +493,15 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			String text = viewHolder.name.getText().toString();
 			String replace = context.getString(R.string.plus);
 			SpannableString spannableString = new SpannableString(text);
-			spannableString.setSpan(new ImageSpan(context,
-					R.drawable.ic_add_favorite), text.indexOf(replace),
+
+			Drawable drawable = context.getResources().getDrawable(
+					R.drawable.ic_add_favorite);
+			int height = (int) ((7 * drawable.getIntrinsicHeight()) / 10);
+			int width = (int) ((7 * drawable.getIntrinsicWidth()) / 10);
+			drawable.setBounds(0, 0, width, height);
+
+			spannableString.setSpan(new ImageSpan(drawable),
+					text.indexOf(replace),
 					text.indexOf(replace) + replace.length(),
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			viewHolder.name.setText(spannableString);
