@@ -293,7 +293,7 @@
 	<string name="wrong_pin_signup">Looks like you entered a wrong PIN.\nTry again.</string>
 	<string name="tap_here_signup">Tap here</string>
 	<string name="intro_fav">Introducing Favorites</string>
-	<string name="fav_info1">A permanent place for all your\nfavorite friends. Conversation\nwith them is just a tap away.</string>
+	<string name="fav_info1">A permanent place for all your favorite friends. Conversation with them is just a tap away.</string>
 	<string name="fav_info2">Access your friends on hike.\nTap plus to add them to\nyour favorite list.</string>
 	<string name="nudge">Nudge</string>
 	<string name="nudge_info">Double tap anywhere on the\nchat to nudge your friend.</string>

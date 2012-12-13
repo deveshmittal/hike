@@ -21,7 +21,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -43,6 +42,7 @@ import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -362,8 +362,7 @@ public class MessagesList extends DrawerBaseActivity implements
 		onNewIntent(getIntent());
 
 		if (!accountPrefs.getBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN,
-				false)
-				&& getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+				false)) {
 			showFavoritesIntroOverlay();
 		}
 	}
@@ -373,7 +372,6 @@ public class MessagesList extends DrawerBaseActivity implements
 	private void showFavoritesIntroOverlay() {
 		findViewById(R.id.favorite_intro).setVisibility(View.VISIBLE);
 		ViewPager tutorialPager = (ViewPager) findViewById(R.id.tutorial_pager);
-		final TextView favInfo = (TextView) findViewById(R.id.fav_info);
 
 		ViewGroup pageIndicatorContainer = (ViewGroup) findViewById(R.id.page_indicator_container);
 
@@ -405,22 +403,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				}
 				pageIndicators[position]
 						.setImageResource(R.drawable.page_indicator_selected);
-				favInfo.setText(position == 0 ? R.string.fav_info1
-						: R.string.fav_info2);
-				if (position == 1) {
-					String plus = getString(R.string.plus);
-					String favInfoString = getString(R.string.fav_info2);
-
-					SpannableStringBuilder ssb = new SpannableStringBuilder(
-							favInfoString);
-					ssb.setSpan(new ImageSpan(MessagesList.this,
-							R.drawable.ic_small_add), favInfoString
-							.indexOf(plus),
-							favInfoString.indexOf(plus) + plus.length(),
-							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-					favInfo.setText(ssb);
-				}
 			}
 
 			@Override
@@ -443,6 +425,12 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	private class TutorialPagerAdapter extends PagerAdapter {
 
+		LayoutInflater layoutInflater;
+
+		public TutorialPagerAdapter() {
+			layoutInflater = LayoutInflater.from(MessagesList.this);
+		}
+
 		@Override
 		public int getCount() {
 			return TUTORIAL_PAGE_COUNT;
@@ -460,13 +448,35 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
-			ImageView tutorialPage = new ImageView(MessagesList.this);
-			tutorialPage
+			View parent = layoutInflater.inflate(
+					R.layout.favorite_tutorial_item, null);
+
+			ImageView tutorialImage = (ImageView) parent
+					.findViewById(R.id.favorite_img);
+			tutorialImage
 					.setImageResource(position == 0 ? R.drawable.intro_fav_1
 							: R.drawable.intro_fav_2);
 
-			((ViewPager) container).addView(tutorialPage);
-			return tutorialPage;
+			TextView tutorialInfo = (TextView) parent
+					.findViewById(R.id.fav_info);
+			tutorialInfo.setText(position == 0 ? R.string.fav_info1
+					: R.string.fav_info2);
+			if (position == 1) {
+				String plus = getString(R.string.plus);
+				String favInfoString = getString(R.string.fav_info2);
+
+				SpannableStringBuilder ssb = new SpannableStringBuilder(
+						favInfoString);
+				ssb.setSpan(new ImageSpan(MessagesList.this,
+						R.drawable.ic_small_add), favInfoString.indexOf(plus),
+						favInfoString.indexOf(plus) + plus.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+				tutorialInfo.setText(ssb);
+			}
+
+			((ViewPager) container).addView(parent);
+			return parent;
 		}
 
 	}
