@@ -10,8 +10,12 @@ import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -102,15 +106,9 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private ContactInfo me;
 
-	private BitmapDrawable leftDrawerBg;
-
 	private BitmapDrawable rightDrawerBg;
 
 	private DrawerFavoritesAdapter drawerFavoritesAdapter;
-
-	private TimeOfDay time;
-
-	private View headerView;
 
 	private boolean freeSMS;
 
@@ -154,10 +152,6 @@ public class DrawerLayout extends RelativeLayout implements
 		 * http://stackoverflow.com/questions/7586209/xml-drawable-bitmap
 		 * -tilemode-bug
 		 */
-		leftDrawerBg = new BitmapDrawable(BitmapFactory.decodeResource(
-				getResources(), R.drawable.bg_drawer));
-		leftDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
-
 		rightDrawerBg = new BitmapDrawable(BitmapFactory.decodeResource(
 				getResources(), R.drawable.bg_right_drawer));
 		rightDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
@@ -345,13 +339,27 @@ public class DrawerLayout extends RelativeLayout implements
 		}
 		findViewById(R.id.left_drawer_free_sms).setVisibility(
 				freeSMSOn ? VISIBLE : GONE);
-		findViewById(R.id.left_drawer_free_sms).setBackgroundResource(
-				freeSMSOn ? R.drawable.drawer_center_item_selector
-						: R.drawable.drawer_top_item_selector);
 		findViewById(R.id.left_credits_divider).setVisibility(
 				freeSMSOn ? VISIBLE : GONE);
 		creditsNum = (TextView) findViewById(R.id.credit_num);
 		updateCredits(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0));
+
+		TextView withLoveTextView = (TextView) findViewById(R.id.made_with_love);
+
+		String love = getContext().getString(R.string.love);
+		String withLove = getContext().getString(R.string.with_love);
+
+		Drawable drawable = getContext().getResources().getDrawable(
+				R.drawable.ic_left_drawer_heart);
+		drawable.setBounds(0, -10, drawable.getIntrinsicWidth(),
+				drawable.getIntrinsicHeight() - 10);
+
+		SpannableStringBuilder ssb = new SpannableStringBuilder(withLove);
+		ssb.setSpan(new ImageSpan(drawable), withLove.indexOf(love),
+				withLove.indexOf(love) + love.length(),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+		withLoveTextView.setText(ssb);
 	}
 
 	@Override
@@ -478,7 +486,7 @@ public class DrawerLayout extends RelativeLayout implements
 		rightLp.width = mSidebarWidth;
 		mRightSidebar.setLayoutParams(rightLp);
 
-		mLeftSidebar.setBackgroundDrawable(leftDrawerBg);
+		mLeftSidebar.setBackgroundDrawable(rightDrawerBg);
 		mRightSidebar.setBackgroundDrawable(rightDrawerBg);
 
 		mLeftOpenListener = new OpenListener(mLeftSidebar, mContent, true);

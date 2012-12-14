@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -10,332 +11,190 @@
         android:background="@drawable/shadow" />
 
     <ScrollView
+        android:id="@+id/left_drawer_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fadingEdge="none"
         android:orientation="vertical"
-        android:paddingLeft="15dp"
-        android:paddingRight="15dp"
         android:scrollbars="none" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:clickable="true"
-            android:onClick="onEmptySpaceClicked" >
+            android:onClick="onEmptySpaceClicked"
+            android:orientation="vertical" >
 
             <LinearLayout
+                android:id="@+id/left_drawer_profile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="25dp"
+                android:background="@drawable/bg_drawer_profile"
+                android:clickable="true"
                 android:gravity="center_vertical"
-                android:orientation="horizontal" >
+                android:orientation="horizontal"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp" >
 
                 <ImageView
                     android:id="@+id/profile_image"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
                     android:layout_marginRight="10dp"
                     android:src="@drawable/ic_avatar1" />
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:shadowColor="#66dcdbd5"
-                    android:shadowDy="0.5"
+                    android:drawableRight="@drawable/ic_drawer_arrow"
+                    android:shadowColor="#66000000"
+                    android:shadowDy="-0.7"
                     android:shadowRadius="0.5"
                     android:text="Rishabh Sharma"
-                    android:textColor="#66625b"
-                    android:textSize="16sp"
+                    android:textColor="#cbc5b9"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/top_half_items_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/bg_drawer_list"
-                android:orientation="vertical" >
+            <View
+                android:id="@+id/divider"
+                style="@style/LeftDrawerDivider" />
 
-                <RelativeLayout
-                    android:id="@+id/left_drawer_home"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:clickable="true"
-                    android:background="@drawable/drawer_top_item_selector" >
+            <RelativeLayout
+                android:id="@+id/left_drawer_home"
+                style="@style/LeftDrawerItem" >
 
-                    <ImageView
-                        android:id="@+id/item_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:src="@drawable/ic_drawer_home" />
+                <ImageView
+                    android:id="@+id/item_icon"
+                    style="@style/LeftDrawerItemIcon"
+                    android:src="@drawable/ic_drawer_home" />
 
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/item_name"
-                        android:layout_width="@dimen/drawer_text_width"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:layout_toRightOf="@id/item_icon"
-                        android:ellipsize="end"
-                        android:shadowColor="#000000"
-                        android:shadowDy="0.7"
-                        android:shadowRadius="0.7"
-                        android:singleLine="true"
-                        android:text="@string/home"
-                        android:textColor="@color/offwhite"
-                        android:textSize="16sp"
-                        android:textStyle="bold|italic" />
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/item_name"
+                    style="@style/LeftDrawerItemText"
+                    android:text="@string/home" />
+            </RelativeLayout>
 
-                </RelativeLayout>
+            <View
+                android:id="@+id/divider"
+                style="@style/LeftDrawerDivider" />
 
-                <View
-                    android:id="@+id/divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/ic_drawer_divider"
+            <RelativeLayout
+                android:id="@+id/left_drawer_group_chat"
+                style="@style/LeftDrawerItem" >
+
+                <ImageView
+                    android:id="@+id/item_icon"
+                    style="@style/LeftDrawerItemIcon"
+                    android:src="@drawable/ic_drawer_group_chat" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/item_name"
+                    style="@style/LeftDrawerItemText"
+                    android:text="@string/group_chat" />
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/divider"
+                style="@style/LeftDrawerDivider" />
+
+            <RelativeLayout
+                android:id="@+id/left_drawer_tell_a_friend"
+                style="@style/LeftDrawerItem" >
+
+                <ImageView
+                    android:id="@+id/item_icon"
+                    style="@style/LeftDrawerItemIcon"
+                    android:src="@drawable/ic_drawer_invite" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/item_name"
+                    style="@style/LeftDrawerItemText"
+                    android:text="@string/invite" />
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/left_credits_divider"
+                style="@style/LeftDrawerDivider" />
+
+            <RelativeLayout
+                android:id="@+id/left_drawer_free_sms"
+                style="@style/LeftDrawerItem" >
+
+                <ImageView
+                    android:id="@+id/item_icon"
+                    style="@style/LeftDrawerItemIcon"
+                    android:src="@drawable/ic_drawer_free_sms" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/item_name"
+                    style="@style/LeftDrawerItemText"
+                    android:text="@string/free_sms_txt" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/credit_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/bg_credit_num"
+                    android:gravity="center"
+                    android:shadowColor="#3d000000"
+                    android:shadowDx="0.5"
+                    android:shadowDy="0.5"
+                    android:shadowRadius="0.2"
+                    android:text="25"
+                    android:textColor="@color/offwhite"
+                    android:textStyle="bold"
                     android:visibility="visible" />
+            </RelativeLayout>
 
-                <RelativeLayout
-                    android:id="@+id/left_drawer_group_chat"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:clickable="true"
-                    android:background="@drawable/drawer_center_item_selector" >
+            <View
+                android:id="@+id/divider"
+                style="@style/LeftDrawerDivider" />
 
-                    <ImageView
-                        android:id="@+id/item_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:src="@drawable/ic_drawer_group_chat" />
+            <RelativeLayout
+                android:id="@+id/left_drawer_help"
+                style="@style/LeftDrawerItem" >
 
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/item_name"
-                        android:layout_width="@dimen/drawer_text_width"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:layout_toRightOf="@id/item_icon"
-                        android:ellipsize="end"
-                        android:shadowColor="#000000"
-                        android:shadowDy="0.7"
-                        android:shadowRadius="0.7"
-                        android:singleLine="true"
-                        android:text="@string/group_chat"
-                        android:textColor="@color/offwhite"
-                        android:textSize="16sp"
-                        android:textStyle="bold|italic" />
+                <ImageView
+                    android:id="@+id/item_icon"
+                    style="@style/LeftDrawerItemIcon"
+                    android:src="@drawable/ic_drawer_help" />
 
-                </RelativeLayout>
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/item_name"
+                    style="@style/LeftDrawerItemText"
+                    android:text="@string/help" />
+            </RelativeLayout>
 
-                <View
-                    android:id="@+id/divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/ic_drawer_divider"
-                    android:visibility="visible" />
-
-                <RelativeLayout
-                    android:id="@+id/left_drawer_tell_a_friend"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:clickable="true"
-                    android:background="@drawable/drawer_bottom_item_selector" >
-
-                    <ImageView
-                        android:id="@+id/item_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:src="@drawable/ic_drawer_invite" />
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/item_name"
-                        android:layout_width="@dimen/drawer_text_width"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:layout_toRightOf="@id/item_icon"
-                        android:ellipsize="end"
-                        android:shadowColor="#000000"
-                        android:shadowDy="0.7"
-                        android:shadowRadius="0.7"
-                        android:singleLine="true"
-                        android:text="@string/invite"
-                        android:textColor="@color/offwhite"
-                        android:textSize="16sp"
-                        android:textStyle="bold|italic" />
-
-                </RelativeLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/bottom_half_items_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/bg_drawer_list"
-                android:orientation="vertical" >
-                
-                <RelativeLayout
-                    android:id="@+id/left_drawer_free_sms"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:clickable="true"
-                    android:background="@drawable/drawer_top_item_selector" >
-
-                    <ImageView
-                        android:id="@+id/item_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:src="@drawable/ic_drawer_free_sms" />
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/item_name"
-                        android:layout_width="@dimen/drawer_text_width"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:layout_toRightOf="@id/item_icon"
-                        android:ellipsize="end"
-                        android:shadowColor="#000000"
-                        android:shadowDy="0.7"
-                        android:shadowRadius="0.7"
-                        android:text="@string/free_sms_txt"
-                        android:textColor="@color/offwhite"
-                        android:textSize="16sp"
-                        android:textStyle="bold|italic" />
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/credit_num"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginRight="8dp"
-                        android:background="@drawable/bg_credit_num"
-                        android:gravity="center"
-                        android:shadowColor="#3d000000"
-                        android:shadowDx="0.5"
-                        android:shadowDy="0.5"
-                        android:shadowRadius="0.2"
-                        android:text="25"
-                        android:textColor="@color/offwhite"
-                        android:textStyle="bold"
-                        android:visibility="visible" />
-                </RelativeLayout>
-                
-                <View
-                    android:id="@+id/left_credits_divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/ic_drawer_divider"
-                    android:visibility="visible" />
-				
-                <RelativeLayout
-                    android:id="@+id/left_drawer_profile"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:clickable="true"
-                    android:background="@drawable/drawer_center_item_selector" >
-
-                    <ImageView
-                        android:id="@+id/item_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:src="@drawable/ic_drawer_profile" />
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/item_name"
-                        android:layout_width="@dimen/drawer_text_width"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:layout_toRightOf="@id/item_icon"
-                        android:ellipsize="end"
-                        android:shadowColor="#000000"
-                        android:shadowDy="0.7"
-                        android:shadowRadius="0.7"
-                        android:singleLine="true"
-                        android:text="@string/profile_title"
-                        android:textColor="@color/offwhite"
-                        android:textSize="16sp"
-                        android:textStyle="bold|italic" />
-
-                </RelativeLayout>
-                
-                <View
-                    android:id="@+id/divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/ic_drawer_divider"
-                    android:visibility="visible" />
-                
-                <RelativeLayout
-                    android:id="@+id/left_drawer_help"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:clickable="true"
-                    android:background="@drawable/drawer_bottom_item_selector" >
-
-                    <ImageView
-                        android:id="@+id/item_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:src="@drawable/ic_drawer_help" />
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/item_name"
-                        android:layout_width="@dimen/drawer_text_width"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="7dp"
-                        android:layout_toRightOf="@id/item_icon"
-                        android:ellipsize="end"
-                        android:shadowColor="#000000"
-                        android:shadowDy="0.7"
-                        android:shadowRadius="0.7"
-                        android:singleLine="true"
-                        android:text="@string/help"
-                        android:textColor="@color/offwhite"
-                        android:textSize="16sp"
-                        android:textStyle="bold|italic" />
-
-                </RelativeLayout>
-                
-            </LinearLayout>
+            <View
+                android:id="@+id/divider"
+                style="@style/LeftDrawerDivider" />
 
             <RelativeLayout
                 android:id="@+id/with_love_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="25dp"
+                android:layout_marginBottom="35dp"
                 android:layout_marginTop="20dp" >
 
-                <ImageView
+                <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/made_with_love"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="20dp"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/with_love" />
+                    android:shadowColor="#36FFFFFF"
+                    android:shadowDy="0.6"
+                    android:shadowRadius="0.6"
+                    android:src="@drawable/with_love"
+                    android:text="@string/with_love"
+                    android:textColor="#53514e"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    hike:font="omnes" />
+
             </RelativeLayout>
         </LinearLayout>
     </ScrollView>
