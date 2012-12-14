@@ -91,6 +91,7 @@
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/txt_loading"
                 style="@style/SignupButton.Text.Bold.Loading"
+                android:textSize="16sp"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="3dp"
                 android:layout_toRightOf="@id/loading_progress"
