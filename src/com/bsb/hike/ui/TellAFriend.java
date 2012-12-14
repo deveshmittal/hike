@@ -125,6 +125,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 				Bundle parameters = new Bundle();
 				String inviteToken = settings.getString(
 						HikeConstants.INVITE_TOKEN, "");
+				inviteToken = "";
 				parameters.putString("link",
 						getString(R.string.default_invite_url, inviteToken));
 				parameters.putString("description",
