@@ -438,8 +438,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		switch (viewType) {
 		case RECENT:
 			viewHolder.hikeImg
-					.setVisibility(contactInfo.isOnhike() ? View.VISIBLE
-							: View.GONE);
+					.setVisibility(View.GONE);
 		case FAVORITE:
 			if (viewType == FavoriteAdapterViewType.RECENT) {
 				if ((!HikeMessengerApp.isIndianUser() && !contactInfo
