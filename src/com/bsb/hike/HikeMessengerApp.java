@@ -16,6 +16,11 @@ import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.acra.util.HttpRequest;
 
+import twitter4j.Twitter;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.OAuthAuthorization;
+import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -122,6 +127,12 @@ public class HikeMessengerApp extends Application {
 
 	public static final String AUTO_RECOMMENDED_FAVORITES_ADDED = "autoRecommendedFavoritesAdded";
 
+	public static final String FILE_PATH = "filePath";
+
+	public static final String TEMP_NAME = "tempName";
+
+	public static final String TEMP_NUM = "tempNum";
+
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"
@@ -141,7 +152,15 @@ public class HikeMessengerApp extends Application {
 
 	public static final String MSISDN_ENTERED = "msisdnEntered";
 
+	public static final String BROKER_HOST = "brokerHost";
+	public static final String BROKER_PORT = "brokerPort";
+
+	public static final String FAVORITES_INTRO_SHOWN = "favoritesIntroShown";
+	public static final String NUDGE_INTRO_SHOWN = "nudgeIntroShown";
+
 	private static Facebook facebook;
+
+	private static Twitter twitter;
 
 	private static HikePubSub mPubSubInstance;
 
@@ -158,6 +177,12 @@ public class HikeMessengerApp extends Application {
 	private String token;
 
 	private String msisdn;
+
+	private DbConversationListener dbConversationListener;
+
+	private ToastListener toastListener;
+
+	private ActivityTimeLogger activityTimeLogger;
 
 	class IncomingHandler extends Handler {
 		@Override
@@ -228,10 +253,6 @@ public class HikeMessengerApp extends Application {
 							.createConnection(this, mMessenger);
 				}
 			}
-		} else {
-			Log.d(getClass().getSimpleName(),
-					"Already connected. Just making a ping");
-			this.sendBroadcast(new Intent(HikeService.CONNECT_TO_SERVER_ACTION));
 		}
 	}
 
@@ -323,21 +344,18 @@ public class HikeMessengerApp extends Application {
 		IconCacheManager.init();
 
 		facebook = new Facebook(HikeConstants.APP_FACEBOOK_ID);
-		facebook.setAccessExpires(settings.getLong(
-				HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, 0));
-		facebook.setAccessToken(settings.getString(
-				HikeMessengerApp.FACEBOOK_TOKEN, ""));
+		makeFacebookInstance(settings);
 
-		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(HikeConstants.INDIA_COUNTRY_CODE);
+		String twitterToken = settings.getString(
+				HikeMessengerApp.TWITTER_TOKEN, "");
+		String twitterTokenSecret = settings.getString(
+				HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
+		makeTwitterInstance(twitterToken, twitterTokenSecret);
 
-		/* add the db write listener */
-		new DbConversationListener(getApplicationContext());
+		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
+				HikeConstants.INDIA_COUNTRY_CODE);
 
-		/*
-		 * add a handler to handle toasts. The object initializes itself it it's
-		 * constructor
-		 */
-		new ToastListener(getApplicationContext());
+		initialiseListeners();
 
 		mMessenger = new Messenger(new IncomingHandler());
 
@@ -350,8 +368,6 @@ public class HikeMessengerApp extends Application {
 		} catch (NameNotFoundException e) {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
-		/* For logging the time each activity is seen by the user */
-		new ActivityTimeLogger();
 	}
 
 	public static Facebook getFacebook() {
@@ -372,5 +388,43 @@ public class HikeMessengerApp extends Application {
 
 	public static boolean isIndianUser() {
 		return isIndianUser;
+	}
+
+	public static void makeFacebookInstance(SharedPreferences settings) {
+		facebook.setAccessExpires(settings.getLong(
+				HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES, 0));
+		facebook.setAccessToken(settings.getString(
+				HikeMessengerApp.FACEBOOK_TOKEN, ""));
+	}
+
+	public static void makeTwitterInstance(String token, String tokenSecret) {
+		AccessToken accessToken = null;
+		try {
+			accessToken = new AccessToken(token, tokenSecret);
+
+			OAuthAuthorization authorization = new OAuthAuthorization(
+					ConfigurationContext.getInstance());
+			authorization.setOAuthAccessToken(accessToken);
+			authorization.setOAuthConsumer(HikeConstants.APP_TWITTER_ID,
+					HikeConstants.APP_TWITTER_SECRET);
+
+			twitter = new TwitterFactory().getInstance(authorization);
+		} catch (IllegalArgumentException e) {
+			Log.e("HikeMessengerApp", "Invalid format", e);
+			return;
+		}
+	}
+
+	public void initialiseListeners() {
+		if (dbConversationListener == null) {
+			dbConversationListener = new DbConversationListener(
+					getApplicationContext());
+		}
+		if (toastListener == null) {
+			toastListener = new ToastListener(getApplicationContext());
+		}
+		if (activityTimeLogger == null) {
+			activityTimeLogger = new ActivityTimeLogger();
+		}
 	}
 }

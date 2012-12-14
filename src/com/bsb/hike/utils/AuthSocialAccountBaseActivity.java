@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import twitter4j.auth.AccessToken;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,16 +38,20 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 
 	private HikeHTTPTask hikeHTTPTask;
 	private ProgressDialog dialog;
+	private boolean shouldPost;
 	protected TwitterOAuthView twitterOAuthView;
 	protected boolean facebookAuthPopupShowing;
 
-	public void startFBAuth() {
+	public void startFBAuth(boolean post) {
+		shouldPost = post;
 		facebookAuthPopupShowing = true;
 		HikeMessengerApp.getFacebook().authorize(this,
-				new String[] { "publish_stream" }, this);
+				new String[] { "publish_stream" }, Facebook.FORCE_DIALOG_AUTH,
+				this);
 	}
 
-	public void startTwitterAuth() {
+	public void startTwitterAuth(boolean post) {
+		shouldPost = post;
 		twitterOAuthView = new TwitterOAuthView(this);
 		twitterOAuthView.start(HikeConstants.APP_TWITTER_ID,
 				HikeConstants.APP_TWITTER_SECRET, CALLBACK_URL, true, this);
@@ -128,15 +133,19 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 		Log.d(getClass().getSimpleName(), "TOKEN:  " + accessToken.getToken()
 				+ " SECRET: " + accessToken.getTokenSecret());
 
-		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				0).edit();
+		SharedPreferences settings = getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		Editor editor = settings.edit();
 		editor.putString(HikeMessengerApp.TWITTER_TOKEN, accessToken.getToken());
 		editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET,
 				accessToken.getTokenSecret());
 		editor.commit();
 
+		HikeMessengerApp.makeTwitterInstance(accessToken.getToken(),
+				accessToken.getTokenSecret());
+
 		sendCredentialsToServer(accessToken.getToken(),
-				accessToken.getTokenSecret(), false);
+				accessToken.getTokenSecret(), -1, false);
 	}
 
 	@Override
@@ -163,7 +172,8 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 			userId = me.optString("id");
 			editor.putString(HikeMessengerApp.FACEBOOK_USER_ID, userId);
 			editor.commit();
-			sendCredentialsToServer(userId, facebook.getAccessToken(), true);
+			sendCredentialsToServer(userId, facebook.getAccessToken(),
+					facebook.getAccessExpires(), true);
 			return;
 		} catch (MalformedURLException e1) {
 			Log.e(getClass().getSimpleName(), "Malformed URL", e1);
@@ -191,15 +201,20 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 		facebookAuthPopupShowing = false;
 	}
 
-	private void sendCredentialsToServer(String id, String token,
+	private void sendCredentialsToServer(String id, String token, long expires,
 			final boolean facebook) {
 		JSONObject request = new JSONObject();
 		try {
-			request.put("id", id);
-			request.put("token", token);
+			request.put(HikeConstants.ID, id);
+			request.put(HikeConstants.TOKEN, token);
+			if (expires != -1) {
+				request.put(HikeConstants.EXPIRES, expires);
+			}
+			request.put(HikeConstants.POST, shouldPost);
 		} catch (JSONException e) {
 			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 		}
+		Log.d(getClass().getSimpleName(), "Request: " + request.toString());
 		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
 				facebook ? "/account/connect/fb" : "/account/connect/twitter",
 				new HikeHttpRequest.HikeHttpCallback() {

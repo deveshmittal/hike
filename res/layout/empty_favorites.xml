@@ -19,6 +19,7 @@
         android:shadowDy="0.3"
         android:layout_marginTop="5dp"
         android:shadowRadius="0.5"
+        android:gravity="center"
         android:text="@string/no_favorite"
         android:textColor="@color/white"
         android:textSize="16sp"

@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.CharBuffer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -267,17 +268,62 @@ public class Utils {
 
 	public static Drawable getDefaultIconForUser(Context context, String msisdn) {
 		if (isGroupConversation(msisdn)) {
-			return context.getResources().getDrawable(
-					R.drawable.ic_group_avatar);
+			int count = 7;
+			int id;
+			switch (iconHash(msisdn) % count) {
+			case 0:
+				id = R.drawable.ic_group_avatar1;
+				break;
+			case 1:
+				id = R.drawable.ic_group_avatar2;
+				break;
+			case 2:
+				id = R.drawable.ic_group_avatar3;
+				break;
+			case 3:
+				id = R.drawable.ic_group_avatar4;
+				break;
+			case 4:
+				id = R.drawable.ic_group_avatar5;
+				break;
+			case 5:
+				id = R.drawable.ic_group_avatar6;
+				break;
+			case 6:
+				id = R.drawable.ic_group_avatar7;
+				break;
+			default:
+				id = R.drawable.ic_group_avatar1;
+				break;
+			}
+			return context.getResources().getDrawable(id);
 		}
-		int count = 1;
+		int count = 7;
 		int id;
 		switch (iconHash(msisdn) % count) {
 		case 0:
-			id = R.drawable.ic_avatar0;
+			id = R.drawable.ic_avatar1;
+			break;
+		case 1:
+			id = R.drawable.ic_avatar2;
+			break;
+		case 2:
+			id = R.drawable.ic_avatar3;
+			break;
+		case 3:
+			id = R.drawable.ic_avatar4;
+			break;
+		case 4:
+			id = R.drawable.ic_avatar5;
+			break;
+		case 5:
+			id = R.drawable.ic_avatar6;
+			break;
+		case 6:
+			id = R.drawable.ic_avatar7;
 			break;
 		default:
-			id = R.drawable.ic_avatar0;
+			id = R.drawable.ic_avatar1;
 			break;
 		}
 
@@ -374,6 +420,8 @@ public class Utils {
 		editor.putInt(HikeMessengerApp.INVITED, accountInfo.all_invitee);
 		editor.putInt(HikeMessengerApp.INVITED_JOINED,
 				accountInfo.all_invitee_joined);
+		editor.putString(HikeMessengerApp.COUNTRY_CODE,
+				accountInfo.country_code);
 		editor.commit();
 	}
 
@@ -419,56 +467,6 @@ public class Utils {
 				.getApplicationContext();
 		app.disconnectFromService();
 		activity.stopService(new Intent(activity, HikeService.class));
-	}
-
-	public static int[] getNumberImage(String msisdn) {
-		int[] msisdnRes = new int[msisdn.length()];
-
-		for (int i = 0; i < msisdnRes.length; i++) {
-			char c = msisdn.charAt(i);
-			switch (c) {
-			case '+':
-				msisdnRes[i] = R.drawable.no_plus;
-				break;
-			case '0':
-				msisdnRes[i] = R.drawable.no0;
-				break;
-			case '1':
-				msisdnRes[i] = R.drawable.no1;
-				break;
-			case '2':
-				msisdnRes[i] = R.drawable.no2;
-				break;
-			case '3':
-				msisdnRes[i] = R.drawable.no3;
-				break;
-			case '4':
-				msisdnRes[i] = R.drawable.no4;
-				break;
-			case '5':
-				msisdnRes[i] = R.drawable.no5;
-				break;
-			case '6':
-				msisdnRes[i] = R.drawable.no6;
-				break;
-			case '7':
-				msisdnRes[i] = R.drawable.no7;
-				break;
-			case '8':
-				msisdnRes[i] = R.drawable.no8;
-				break;
-			case '9':
-				msisdnRes[i] = R.drawable.no9;
-				break;
-			case '-':
-				msisdnRes[i] = R.drawable.no_dash;
-				break;
-			default:
-				msisdnRes[i] = R.drawable.no0;
-				break;
-			}
-		}
-		return msisdnRes;
 	}
 
 	public static String formatNo(String msisdn) {
@@ -872,6 +870,7 @@ public class Utils {
 		String inviteToken = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 				HikeConstants.INVITE_TOKEN, "");
+		inviteToken = "";
 		// Adding the user's invite token to the invite url
 		String inviteMessage = context.getString(messageResId, inviteToken);
 
@@ -957,28 +956,41 @@ public class Utils {
 
 		thumbnail = BitmapFactory.decodeFile(filePath, options);
 		if (makeSquareThumbnail) {
-			dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail
-					.getWidth() : thumbnail.getHeight();
-
-			int startX = thumbnail.getWidth() > dimensionLimit ? (int) ((thumbnail
-					.getWidth() - dimensionLimit) / 2) : 0;
-			int startY = thumbnail.getHeight() > dimensionLimit ? (int) ((thumbnail
-					.getHeight() - dimensionLimit) / 2) : 0;
-
-			Log.d("Utils", "StartX: " + startX + " StartY: " + startY
-					+ " WIDTH: " + thumbnail.getWidth() + " Height: "
-					+ thumbnail.getHeight());
-			Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX,
-					startY, dimensionLimit, dimensionLimit);
-
-			if (squareThumbnail != thumbnail) {
-				thumbnail.recycle();
-			}
-			thumbnail = null;
-			return squareThumbnail;
+			return makeSquareThumbnail(thumbnail, dimensionLimit);
 		}
 
 		return thumbnail;
+	}
+
+	public static Bitmap makeSquareThumbnail(Bitmap thumbnail,
+			int dimensionLimit) {
+		dimensionLimit = thumbnail.getWidth() < thumbnail.getHeight() ? thumbnail
+				.getWidth() : thumbnail.getHeight();
+
+		int startX = thumbnail.getWidth() > dimensionLimit ? (int) ((thumbnail
+				.getWidth() - dimensionLimit) / 2) : 0;
+		int startY = thumbnail.getHeight() > dimensionLimit ? (int) ((thumbnail
+				.getHeight() - dimensionLimit) / 2) : 0;
+
+		Log.d("Utils", "StartX: " + startX + " StartY: " + startY + " WIDTH: "
+				+ thumbnail.getWidth() + " Height: " + thumbnail.getHeight());
+		Bitmap squareThumbnail = Bitmap.createBitmap(thumbnail, startX, startY,
+				dimensionLimit, dimensionLimit);
+
+		if (squareThumbnail != thumbnail) {
+			thumbnail.recycle();
+		}
+		thumbnail = null;
+		return squareThumbnail;
+	}
+
+	public static Bitmap stringToBitmap(String thumbnailString) {
+		byte[] encodeByte = Base64.decode(thumbnailString, Base64.DEFAULT);
+		return BitmapFactory.decodeByteArray(encodeByte, 0, encodeByte.length);
+	}
+
+	public static boolean isThumbnailSquare(Bitmap thumbnail) {
+		return (thumbnail.getWidth() == thumbnail.getHeight());
 	}
 
 	public static byte[] bitmapToBytes(Bitmap bitmap,
@@ -1374,5 +1386,93 @@ public class Utils {
 			}
 		}
 		return currentFiles;
+	}
+
+	public static String getSquareThumbnail(JSONObject obj) {
+		String thumbnailString = obj.optString(HikeConstants.THUMBNAIL);
+		if (TextUtils.isEmpty(thumbnailString)) {
+			return thumbnailString;
+		}
+
+		Bitmap thumbnailBmp = Utils.stringToBitmap(thumbnailString);
+		if (!Utils.isThumbnailSquare(thumbnailBmp)) {
+			Bitmap squareThumbnail = Utils.makeSquareThumbnail(thumbnailBmp,
+					HikeConstants.MAX_DIMENSION_THUMBNAIL_PX);
+			thumbnailString = Base64.encodeToString(Utils.bitmapToBytes(
+					squareThumbnail, Bitmap.CompressFormat.JPEG),
+					Base64.DEFAULT);
+			squareThumbnail.recycle();
+			squareThumbnail = null;
+		}
+		if (!thumbnailBmp.isRecycled()) {
+			thumbnailBmp.recycle();
+			thumbnailBmp = null;
+		}
+
+		return thumbnailString;
+	}
+
+	public static String normalizeNumber(String inputNumber, String countryCode) {
+		if (inputNumber.startsWith("+")) {
+			return inputNumber;
+		} else if (inputNumber.startsWith("00")) {
+			/*
+			 * Doing for US numbers
+			 */
+			return inputNumber.replaceFirst("00", "+");
+		} else if (inputNumber.startsWith("0")) {
+			return inputNumber.replaceFirst("0", countryCode);
+		} else {
+			return countryCode + inputNumber;
+		}
+	}
+
+	public static void downloadPicasaFile(Context context, File destFile,
+			Uri picasaUri) throws Exception {
+		InputStream is = null;
+		OutputStream os = null;
+		try {
+
+			if (isPicasaUri(picasaUri.toString())
+					&& !picasaUri.toString().startsWith("http")) {
+				is = context.getContentResolver().openInputStream(picasaUri);
+			} else {
+				is = new URL(picasaUri.toString()).openStream();
+			}
+			os = new FileOutputStream(destFile);
+
+			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+			int len;
+
+			while ((len = is.read(buffer)) > 0) {
+				os.write(buffer, 0, len);
+			}
+		} finally {
+			if (os != null) {
+				os.close();
+			}
+			if (is != null) {
+				is.close();
+			}
+		}
+	}
+
+	public static boolean isPicasaUri(String picasaUriString) {
+		return (picasaUriString.toString().startsWith(
+				HikeConstants.OTHER_PICASA_URI_START)
+				|| picasaUriString.toString().startsWith(
+						HikeConstants.JB_PICASA_URI_START) || picasaUriString
+				.toString().startsWith("http"));
+	}
+
+	public static Uri makePicasaUri(Uri uri) {
+		if (uri.toString().startsWith(
+				"content://com.android.gallery3d.provider")) {
+			// use the com.google provider, not the com.android
+			// provider.
+			return Uri.parse(uri.toString().replace("com.android.gallery3d",
+					"com.google.android.gallery3d"));
+		}
+		return uri;
 	}
 }

@@ -5,6 +5,7 @@ import java.io.File;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -12,12 +13,13 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class HikeFile {
 	public static enum HikeFileType {
-		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION;
+		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION, UNKNOWN;
 
 		public static HikeFileType fromString(String fileTypeString) {
 			if (fileTypeString.startsWith("video")) {
@@ -27,9 +29,10 @@ public class HikeFile {
 			} else if (fileTypeString
 					.startsWith(HikeConstants.LOCATION_CONTENT_TYPE)) {
 				return HikeFileType.LOCATION;
-			} else {
+			} else if (fileTypeString.startsWith("image")) {
 				return HikeFileType.IMAGE;
 			}
+			return HikeFileType.UNKNOWN;
 		}
 
 		public static String toString(HikeFileType hikeFileType) {
@@ -45,17 +48,22 @@ public class HikeFile {
 			return null;
 		}
 
-		public static String toProperString(HikeFileType hikeFileType) {
+		public static String getFileTypeMessage(Context context,
+				HikeFileType hikeFileType, boolean isSent) {
 			if (hikeFileType == PROFILE || hikeFileType == IMAGE) {
-				return HikeConstants.IMAGE;
+				return isSent ? context.getString(R.string.image_msg_sent)
+						: context.getString(R.string.image_msg_received);
 			} else if (hikeFileType == VIDEO) {
-				return HikeConstants.VIDEO;
+				return isSent ? context.getString(R.string.video_msg_sent)
+						: context.getString(R.string.video_msg_received);
 			} else if (hikeFileType == AUDIO) {
-				return HikeConstants.AUDIO;
+				return isSent ? context.getString(R.string.audio_msg_sent)
+						: context.getString(R.string.audio_msg_received);
 			} else if (hikeFileType == LOCATION) {
-				return HikeConstants.LOCATION_FILE_NAME;
+				return isSent ? context.getString(R.string.location_msg_sent)
+						: context.getString(R.string.location_msg_received);
 			}
-			return null;
+			return context.getString(R.string.unknown_msg);
 		}
 	}
 
@@ -74,7 +82,7 @@ public class HikeFile {
 	public HikeFile(JSONObject fileJSON) {
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
 		this.fileTypeString = fileJSON.optString(HikeConstants.CONTENT_TYPE);
-		this.thumbnailString = fileJSON.optString(HikeConstants.THUMBNAIL);
+		this.thumbnailString = Utils.getSquareThumbnail(fileJSON);
 		this.thumbnail = thumbnail == null ? Utils
 				.stringToDrawable(thumbnailString) : thumbnail;
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);

@@ -42,7 +42,7 @@
                     android:shadowColor="#FFFFFFFF"
                     android:shadowDy="1.0"
                     android:shadowRadius="1.0"
-                    android:text="hike"
+                    android:text="@string/hike"
                     android:textSize="15sp"
                     android:textColor="@drawable/tab_text_selector"
                     android:textStyle="bold|italic" />
@@ -57,7 +57,7 @@
                     android:shadowColor="#FFFFFFFF"
                     android:shadowDy="1.0"
                     android:shadowRadius="1.0"
-                    android:text="Emoji"
+                    android:text="@string/emoji"
                     android:textSize="15sp"
                     android:textColor="@drawable/tab_text_selector"
                     android:textStyle="bold|italic" />

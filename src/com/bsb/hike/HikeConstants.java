@@ -61,10 +61,18 @@ public class HikeConstants {
 	public static final String ADDRESS = "add";
 	public static final String POKE = "poke";
 	public static final String ID = "id";
+	public static final String TOKEN = "token";
+	public static final String EXPIRES = "expires";
+	public static final String POST = "post";
+	public static final String ACCOUNT = "account";
+	public static final String ACCOUNTS = "accounts";
+	public static final String FAVORITES = "favorites";
+	public static final String PENDING = "pending";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
 	public static final String FREE_SMS_PREF = "freeSmsPref";
+	public static final String LED_PREF = "ledPref";
 	public static final String HIKEBOT = "TD-HIKE";
 
 	public static final String DONE = "Done";
@@ -78,16 +86,7 @@ public class HikeConstants {
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms";
 
-	public static final String IMAGE = "Image";
-	public static final String VIDEO = "Video";
-	public static final String AUDIO = "Audio";
-
 	public static final String IS_TYPING = "is typing...";
-
-	public static final String FAVORITES = "Favorites";
-	public static final String RECENT = "Recent";
-	public static final String FRIENDS_ON_HIKE = "Friends on hike";
-	public static final String INVITE_FRIENDS = "Invite friends";
 
 	public static final String NEW_GROUP = "new_group";
 
@@ -110,7 +109,7 @@ public class HikeConstants {
 	public static final long CONTACT_UPDATE_TIMEOUT = 10 * 1000;
 
 	/* how often to ping the server */
-	public static final short KEEP_ALIVE = 2 * 60; /* 10 minutes */
+	public static final short KEEP_ALIVE = 5 * 60; /* 10 minutes */
 
 	/* how often to ping after a failure */
 	public static final int RECONNECT_TIME = 10; /* 10 seconds */
@@ -123,6 +122,10 @@ public class HikeConstants {
 
 	/* the max amount of time we wait for the PIN */
 	public static final int PIN_CAPTURE_TIME = 60 * 1000;
+	/*
+	 * the amount to wait before showing the PIN screen on non sim devices.
+	 */
+	public static final int NON_SIM_WAIT_TIME = 30 * 1000;
 
 	public static final int HIKE_SYSTEM_NOTIFICATION = 0;
 	public static final String ADAPTER_NAME = "hikeadapter";
@@ -136,15 +139,15 @@ public class HikeConstants {
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
 	public static final String APP_API_VERSION = "1";
 
-	public static int NUM_SMS_PER_FRIEND = 10;
-	public static int INITIAL_NUM_SMS = 100;
+	public static final int NUM_SMS_PER_FRIEND = 10;
+	public static final int INITIAL_NUM_SMS = 100;
 
-	public static int MAX_CHAR_IN_NAME = 20;
+	public static final int MAX_CHAR_IN_NAME = 20;
 
-	public static int MAX_SMS_CONTACTS_IN_GROUP = 5;
-	public static int MAX_CONTACTS_IN_GROUP = 10;
+	public static final int MAX_CONTACTS_IN_GROUP = 20;
+	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
-	public static int PROFILE_IMAGE_DIMENSIONS = 80;
+	public static final int PROFILE_IMAGE_DIMENSIONS = 80;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
@@ -158,6 +161,8 @@ public class HikeConstants {
 	public static final int MAX_DURATION_RECORDING_SEC = 120;
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180;
+
+	public static final int MAX_DIMENSION_LOCATION_THUMBNAIL_PX = 220;
 
 	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
 
@@ -236,6 +241,12 @@ public class HikeConstants {
 	public static final int BOTH_VALUE = -1;
 
 	public static final String INDIA_COUNTRY_CODE = "+91";
+
+	public static final int MDPI_TIMES_10 = 11;
+
+	public static final String NAMESPACE = "http://schemas.android.com/apk/res/com.bsb.hike";
+
+	public static final String FONT = "font";
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
@@ -319,6 +330,7 @@ public class HikeConstants {
 		public static final String SHOWING_SECOND_LOADING_TXT = "showingSecondLoadingTxt";
 		public static final String FACEBOOK_AUTH_POPUP_SHOWING = "facebookAuthPopupShowing";
 		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
+		public static final String GPS_DIALOG_SHOWN = "gpsDialogShown";
 	}
 
 	public static final class LogEvent {

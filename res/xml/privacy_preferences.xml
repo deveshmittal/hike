@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="Privacy">
+    android:title="@string/privacy">
 
     <com.bsb.hike.view.IconPreference
 		icon="ic_delete_priv"
 		android:layout="@layout/icon_preference"
         android:key="@string/delete_key"
-        android:summary="Permanently delete your account"
-        android:title="Delete Account" />
+        android:summary="@string/delete_account_msg"
+        android:title="@string/delete_account" />
 
 	<com.bsb.hike.view.IconPreference
 		icon="ic_unlink_priv"
 		android:layout="@layout/icon_preference"
 		android:key="@string/unlink_key"
-		android:summary="Unlink your account from this phone"
-		android:title="Unlink Account" />
+		android:summary="@string/unlink_account_msg"
+		android:title="@string/unlink_account" />
 
 </PreferenceScreen>

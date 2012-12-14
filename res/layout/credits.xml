@@ -128,7 +128,7 @@
                             android:textStyle="bold" />
 
                         <com.bsb.hike.view.CustomFontTextView
-                            android:layout_width="wrap_content"
+                            android:layout_width="130dp"
                             android:layout_height="wrap_content"
                             android:layout_toRightOf="@id/free_sms_txt"
                             android:layout_alignBottom="@id/free_sms_txt"
@@ -289,6 +289,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="5dp"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
                             android:gravity="center"
                             android:text="@string/invite_friend_free_sms"
                             android:textColor="@color/credits_text"
@@ -313,6 +315,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginLeft="10dp"
                     android:drawableLeft="@drawable/ic_india"
                     android:drawablePadding="3dp"
                     android:gravity="center"

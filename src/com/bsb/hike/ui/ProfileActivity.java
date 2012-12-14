@@ -1,6 +1,7 @@
 package com.bsb.hike.ui;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,10 +19,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
@@ -54,7 +57,6 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -104,6 +106,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private ProfileItem[] items;
 	private int lastSavedGender;
 
+	private SharedPreferences preferences;
+
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END,
 			HikePubSub.PARTICIPANT_JOINED_GROUP,
@@ -126,19 +130,20 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
+		public DownloadPicasaImageTask downloadPicasaImageTask; /*
+																 * the task to
+																 * download the
+																 * picasa image
+																 */
 
 		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
 		public int genderType;
 	}
 
-	/*
-	 * super hacky, but the Activity can get destroyed between
-	 * startActivityForResult and the onResult so store it in a static field.
-	 */
-	public static File selectedFileIcon; /*
-										 * the selected file that we'll store
-										 * the profile camera picture
-										 */
+	public File selectedFileIcon; /*
+								 * the selected file that we'll store the
+								 * profile camera picture
+								 */
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -174,6 +179,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			return;
 		}
 
+		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				MODE_PRIVATE);
+
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof ActivityState) {
 			mActivityState = (ActivityState) o;
@@ -182,6 +190,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				mActivityState.task.setActivity(this);
 				mDialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.updating_profile));
+			} else if (mActivityState.downloadPicasaImageTask != null) {
+				mDialog = ProgressDialog.show(this, null, getResources()
+						.getString(R.string.downloading_image));
 			}
 		} else {
 			mActivityState = new ActivityState();
@@ -215,14 +226,18 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private void setupContactProfileScreen() {
 		setContentView(R.layout.contact_info);
 
+		boolean canCall = getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_TELEPHONY);
+
 		this.mLocalMSISDN = getIntent().getStringExtra(
 				HikeConstants.Extras.CONTACT_INFO);
+
+		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(
+				mLocalMSISDN, false);
 
 		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn2);
 
-		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(
-				mLocalMSISDN, false);
 		if (!contactInfo.isOnhike()) {
 			contactInfo.setOnhike(getIntent().getBooleanExtra(
 					HikeConstants.Extras.ON_HIKE, false));
@@ -232,12 +247,16 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.setImageResource(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? R.drawable.ic_favorite
 						: R.drawable.ic_not_favorite);
 		topBarBtn.setVisibility(View.VISIBLE);
+		findViewById(R.id.title_image_btn2_container).setVisibility(
+				View.VISIBLE);
 
 		findViewById(R.id.add_to_contacts).setVisibility(
 				!TextUtils.isEmpty(contactInfo.getName()) ? View.GONE
 						: View.VISIBLE);
 		findViewById(R.id.invite_to_hike_btn).setVisibility(
 				contactInfo.isOnhike() ? View.GONE : View.VISIBLE);
+		findViewById(R.id.call_btn).setVisibility(
+				canCall ? View.VISIBLE : View.GONE);
 
 		TextView mTitleView = (TextView) findViewById(R.id.title);
 		mTitleView.setText(R.string.user_info);
@@ -291,6 +310,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.setImageResource(groupConversation.isMuted() ? R.drawable.ic_group_muted
 						: R.drawable.ic_group_not_muted);
 		topBarBtn.setVisibility(View.VISIBLE);
+		findViewById(R.id.title_image_btn2_container).setVisibility(
+				View.VISIBLE);
 
 		int left = (int) (0 * Utils.densityMultiplier);
 		int top = (int) (0 * Utils.densityMultiplier);
@@ -298,8 +319,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		int bottom = (int) (6 * Utils.densityMultiplier);
 
 		GroupParticipant userInfo = new GroupParticipant(
-				Utils.getUserContactInfo(getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0)));
+				Utils.getUserContactInfo(preferences));
 		participantList.put(userInfo.getContactInfo().getMsisdn(), userInfo);
 
 		groupOwner = groupConversation.getGroupOwner();
@@ -449,13 +469,16 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		mNameEdit = (EditText) name.findViewById(R.id.name_input);
 		mEmailEdit = (EditText) email.findViewById(R.id.email_input);
 
-		((TextView) name.findViewById(R.id.name_edit_field)).setText("Name");
-		((TextView) phone.findViewById(R.id.phone_edit_field)).setText("Phone");
-		((TextView) email.findViewById(R.id.email_edit_field)).setText("Email");
+		((TextView) name.findViewById(R.id.name_edit_field))
+				.setText(R.string.name);
+		((TextView) phone.findViewById(R.id.phone_edit_field))
+				.setText(R.string.phone_num);
+		((TextView) email.findViewById(R.id.email_edit_field))
+				.setText(R.string.email);
 		((TextView) gender.findViewById(R.id.gender_edit_field))
-				.setText("Gender");
+				.setText(R.string.gender);
 		((TextView) picture.findViewById(R.id.photo_edit_field))
-				.setText("Edit Picture");
+				.setText(R.string.edit_picture);
 
 		picture.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 		picture.setFocusable(true);
@@ -531,13 +554,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	private void fetchPersistentData() {
-		SharedPreferences settings = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		nameTxt = settings.getString(HikeMessengerApp.NAME, "Set a name!");
-		mLocalMSISDN = settings
-				.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		emailTxt = settings.getString(HikeConstants.Extras.EMAIL, "");
-		lastSavedGender = settings.getInt(HikeConstants.Extras.GENDER, 0);
+		nameTxt = preferences.getString(HikeMessengerApp.NAME, "Set a name!");
+		mLocalMSISDN = preferences.getString(HikeMessengerApp.MSISDN_SETTING,
+				null);
+		emailTxt = preferences.getString(HikeConstants.Extras.EMAIL, "");
+		lastSavedGender = preferences.getInt(HikeConstants.Extras.GENDER, 0);
 		mActivityState.genderType = mActivityState.genderType == 0 ? lastSavedGender
 				: mActivityState.genderType;
 	}
@@ -597,8 +618,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						 * preferences and the UI
 						 */
 						String name = mNameEdit.getText().toString();
-						Editor editor = getSharedPreferences(
-								HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+						Editor editor = preferences.edit();
 						editor.putString(HikeMessengerApp.NAME_SETTING, name);
 						editor.commit();
 						HikeMessengerApp.getPubSub().publish(
@@ -690,9 +710,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				}
 
 				public void onSuccess(JSONObject response) {
-					SharedPreferences prefs = getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-					Editor editor = prefs.edit();
+					Editor editor = preferences.edit();
 					if (Utils.isValidEmail(mEmailEdit.getText())) {
 						editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
 								.getText().toString());
@@ -777,28 +795,61 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			/* fall-through on purpose */
 		case GALLERY_RESULT:
 			Log.d("ProfileActivity", "The activity is " + this);
-			if (requestCode == CAMERA_RESULT && selectedFileIcon == null) {
-				Toast.makeText(getApplicationContext(),
-						"Error capturing image", Toast.LENGTH_SHORT).show();
-				return;
+			if (requestCode == CAMERA_RESULT) {
+				String filePath = preferences.getString(
+						HikeMessengerApp.FILE_PATH, "");
+				selectedFileIcon = new File(filePath);
+
+				/*
+				 * Removing this key. We no longer need this.
+				 */
+				Editor editor = preferences.edit();
+				editor.remove(HikeMessengerApp.FILE_PATH);
+				editor.commit();
 			}
-			path = (requestCode == CAMERA_RESULT) ? selectedFileIcon
-					.getAbsolutePath() : Utils.getRealPathFromUri(
-					data.getData(), this);
-			if (TextUtils.isEmpty(path)) {
-				Toast.makeText(getApplicationContext(), "Error getting image",
+			if (requestCode == CAMERA_RESULT && !selectedFileIcon.exists()) {
+				Toast.makeText(getApplicationContext(), R.string.error_capture,
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			/* Crop the image */
-			Intent intent = new Intent(this, CropImage.class);
-			intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
-			intent.putExtra(HikeConstants.Extras.SCALE, true);
-			intent.putExtra(HikeConstants.Extras.OUTPUT_X, 80);
-			intent.putExtra(HikeConstants.Extras.OUTPUT_Y, 80);
-			intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
-			intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
-			startActivityForResult(intent, CROP_RESULT);
+			boolean isPicasaImage = false;
+			Uri selectedFileUri = null;
+			if (requestCode == CAMERA_RESULT) {
+				path = selectedFileIcon.getAbsolutePath();
+			} else {
+				selectedFileUri = data.getData();
+				if (Utils.isPicasaUri(selectedFileUri.toString())) {
+					isPicasaImage = true;
+					path = Utils.getOutputMediaFile(HikeFileType.PROFILE, null,
+							null).getAbsolutePath();
+				} else {
+					String fileUriStart = "file://";
+					String fileUriString = selectedFileUri.toString();
+					if (fileUriString.startsWith(fileUriStart)) {
+						selectedFileIcon = new File(URI.create(fileUriString));
+						/*
+						 * Done to fix the issue in a few Sony devices.
+						 */
+						path = selectedFileIcon.getAbsolutePath();
+					} else {
+						path = Utils.getRealPathFromUri(selectedFileUri, this);
+					}
+				}
+			}
+			if (TextUtils.isEmpty(path)) {
+				Toast.makeText(getApplicationContext(), R.string.error_capture,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if (!isPicasaImage) {
+				startCropActivity(path);
+			} else {
+				mActivityState.downloadPicasaImageTask = new DownloadPicasaImageTask(
+						new File(path), selectedFileUri);
+				mActivityState.downloadPicasaImageTask.execute();
+				mDialog = ProgressDialog.show(this, null, getResources()
+						.getString(R.string.downloading_image));
+			}
 			break;
 		case CROP_RESULT:
 			mActivityState.newBitmap = data
@@ -811,6 +862,18 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 			break;
 		}
+	}
+
+	private void startCropActivity(String path) {
+		/* Crop the image */
+		Intent intent = new Intent(this, CropImage.class);
+		intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
+		intent.putExtra(HikeConstants.Extras.SCALE, true);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_X, 80);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_Y, 80);
+		intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
+		intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
+		startActivityForResult(intent, CROP_RESULT);
 	}
 
 	@Override
@@ -830,6 +893,16 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			if (selectedFileIcon != null) {
 				intent.putExtra(MediaStore.EXTRA_OUTPUT,
 						Uri.fromFile(selectedFileIcon));
+
+				/*
+				 * Saving the file path. Will use this to get the file once the
+				 * image has been captured.
+				 */
+				Editor editor = preferences.edit();
+				editor.putString(HikeMessengerApp.FILE_PATH,
+						selectedFileIcon.getAbsolutePath());
+				editor.commit();
+
 				startActivityForResult(intent, CAMERA_RESULT);
 				overridePendingTransition(R.anim.slide_in_right_noalpha,
 						R.anim.slide_out_left_noalpha);
@@ -1126,16 +1199,20 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				});
 			}
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
-			final ContactInfo contactInfo = (ContactInfo) object;
-			if (!this.mLocalMSISDN.equals(contactInfo.getMsisdn())) {
+			final ContactInfo contact = (ContactInfo) object;
+			if (!this.mLocalMSISDN.equals(contact.getMsisdn())) {
 				return;
 			}
+			this.contactInfo = contact;
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					((TextView) findViewById(R.id.name_current))
 							.setText(ProfileActivity.this.contactInfo.getName());
 					findViewById(R.id.add_to_contacts).setVisibility(View.GONE);
+
+					findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+					topBarBtn.setVisibility(View.VISIBLE);
 				}
 			});
 		} else if (HikePubSub.USER_JOINED.equals(type)
@@ -1152,5 +1229,45 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				}
 			});
 		}
+	}
+
+	private class DownloadPicasaImageTask extends
+			AsyncTask<Void, Void, Boolean> {
+		private File destFile;
+		private Uri picasaUri;
+
+		public DownloadPicasaImageTask(File destFile, Uri picasaUri) {
+			this.destFile = destFile;
+			this.picasaUri = picasaUri;
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
+			try {
+				Utils.downloadPicasaFile(ProfileActivity.this, destFile,
+						picasaUri);
+				return Boolean.TRUE;
+			} catch (Exception e) {
+				Log.e(getClass().getSimpleName(), "Error while fetching image",
+						e);
+				return Boolean.FALSE;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (mDialog != null) {
+				mDialog.dismiss();
+				mDialog = null;
+			}
+			mActivityState = new ActivityState();
+			if (!result) {
+				Toast.makeText(getApplicationContext(),
+						R.string.error_download, Toast.LENGTH_SHORT).show();
+			} else {
+				startCropActivity(destFile.getAbsolutePath());
+			}
+		}
+
 	}
 }

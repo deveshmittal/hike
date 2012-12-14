@@ -39,10 +39,6 @@ import com.facebook.android.FacebookError;
 
 public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		Listener {
-	static final String CALLBACK_URL = "http://get.hike.in/";
-
-	static final String IEXTRA_OAUTH_VERIFIER = "oauth_verifier";
-
 	private TextView mTitleView;
 	private ViewGroup creditsContainer;
 	private SharedPreferences settings;
@@ -153,7 +149,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 				- (2 * totalCreditNumContainerMargin);
 
 		String freeSmsString = getString(R.string.invite_friend_free_sms);
-		String textToColor = "50 free SMS";
+		String textToColor = getString(R.string.free_sms_50);
 		int startIndex = freeSmsString.indexOf(textToColor);
 
 		SpannableStringBuilder ssb = new SpannableStringBuilder(freeSmsString);
@@ -165,7 +161,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		freeSms50.setText(ssb);
 
 		freeSmsString = getString(R.string.connect_and_get);
-		textToColor = "100 free SMS";
+		textToColor = getString(R.string.free_sms_100);
 		startIndex = freeSmsString.indexOf(textToColor);
 
 		ssb = new SpannableStringBuilder(freeSmsString);
@@ -189,6 +185,13 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void setupSocialButtons() {
+		if (settings.contains(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE)) {
+			Editor editor = settings.edit();
+			editor.putBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
+					HikeMessengerApp.getFacebook().isSessionValid());
+			editor.commit();
+		}
+
 		facebookTxt
 				.setText(settings.getBoolean(
 						HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false) ? R.string.connected
@@ -224,7 +227,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 	public void onFacebookClick(View v) {
 		if (!settings
 				.getBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false)) {
-			startFBAuth();
+			startFBAuth(true);
 		} else {
 			showCredentialUnlinkAlert(true);
 		}
@@ -232,7 +235,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 
 	public void onTwitterClick(View v) {
 		if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
-			startTwitterAuth();
+			startTwitterAuth(true);
 		} else {
 			showCredentialUnlinkAlert(false);
 		}

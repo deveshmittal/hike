@@ -7,6 +7,7 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -15,6 +16,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -27,6 +29,7 @@ import com.bsb.hike.utils.Utils;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
 import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
@@ -48,6 +51,8 @@ public class ShareLocation extends MapActivity {
 	 */
 	private static final int MAX_DISTANCE = 20;
 
+	private boolean gpsDialogShown = false;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +61,47 @@ public class ShareLocation extends MapActivity {
 
 		initMap();
 		initMyLocationManager();
+
+		gpsDialogShown = savedInstanceState != null
+				&& savedInstanceState
+						.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
+		/*
+		 * Don't show this on orientation changes
+		 */
+		if (!gpsDialogShown
+				&& !locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+					this);
+			alertDialogBuilder
+					.setMessage(R.string.gps_disabled)
+					.setCancelable(false)
+					.setPositiveButton(android.R.string.ok,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									gpsDialogShown = true;
+									Intent callGPSSettingIntent = new Intent(
+											android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+									startActivity(callGPSSettingIntent);
+								}
+							});
+			alertDialogBuilder.setNegativeButton(R.string.cancel,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							dialog.cancel();
+						}
+					});
+			alertDialogBuilder.setCancelable(true);
+			alertDialogBuilder.setOnCancelListener(new OnCancelListener() {
+
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					gpsDialogShown = true;
+				}
+			});
+			AlertDialog alert = alertDialogBuilder.create();
+			alert.show();
+		}
 
 		locationAddress = (TextView) findViewById(R.id.address);
 		currentSelection = findViewById(R.id.my_position);
@@ -72,10 +118,17 @@ public class ShareLocation extends MapActivity {
 		currentSelection.setSelected(true);
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN,
+				gpsDialogShown);
+		super.onSaveInstanceState(outState);
+	}
+
 	public void onTitleIconClick(View v) {
 		if (selectedGeoPoint == null) {
-			Toast.makeText(getApplicationContext(),
-					"Select a location to share", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), R.string.select_location,
+					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		Intent result = new Intent();
@@ -134,31 +187,6 @@ public class ShareLocation extends MapActivity {
 				locListener);
 		locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0,
 				0, locListener);
-
-		if (!locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-					this);
-			alertDialogBuilder
-					.setMessage(R.string.gps_disabled)
-					.setCancelable(false)
-					.setPositiveButton(android.R.string.ok,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									Intent callGPSSettingIntent = new Intent(
-											android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-									startActivity(callGPSSettingIntent);
-								}
-							});
-			alertDialogBuilder.setNegativeButton(R.string.cancel,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							dialog.cancel();
-						}
-					});
-			AlertDialog alert = alertDialogBuilder.create();
-			alert.show();
-		}
 
 		if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
 			createAndShowMyItemizedOverlay(locManager
@@ -254,13 +282,20 @@ public class ShareLocation extends MapActivity {
 		int initialPosY;
 		int initialPosX;
 
-		@Override
-		public boolean onTouchEvent(MotionEvent e, MapView mapView) {
-			switch (e.getAction()) {
-			case MotionEvent.ACTION_UP:
-				int deltaX = (int) Math.abs(initialPosX - e.getX());
-				int deltaY = (int) Math.abs(initialPosY - e.getY());
+		int deltaX;
+		int deltaY;
 
+		int actX;
+		int actY;
+
+		long firstTapTime;
+		long secondTapTime;
+
+		Handler markerHandler = new Handler();
+		Runnable placeMarkerRunnable = new Runnable() {
+
+			@Override
+			public void run() {
 				/*
 				 * We are accounting for movement of the finger by a small
 				 * amount.
@@ -269,13 +304,38 @@ public class ShareLocation extends MapActivity {
 						&& (deltaY < MAX_DISTANCE);
 				if (currentSelection.getId() == R.id.custom_position
 						&& showShowMarker) {
-					final GeoPoint geoPoint = ((MapView) mapView)
-							.getProjection().fromPixels((int) e.getX(),
-									(int) e.getY());
+					final GeoPoint geoPoint = myMap.getProjection().fromPixels(
+							actX, actY);
 
 					placeMarker(geoPoint);
 				}
-				return true;
+			}
+		};
+
+		@Override
+		public boolean onTouchEvent(MotionEvent e, MapView mapView) {
+			switch (e.getAction()) {
+			case MotionEvent.ACTION_UP:
+				firstTapTime = System.currentTimeMillis();
+
+				actX = (int) e.getX();
+				actY = (int) e.getY();
+
+				if (Math.abs(firstTapTime - secondTapTime) > 200L) {
+					deltaX = (int) Math.abs(initialPosX - e.getX());
+
+					deltaY = (int) Math.abs(initialPosY - e.getY());
+
+					markerHandler.postDelayed(placeMarkerRunnable, 250);
+				} else {
+					markerHandler.removeCallbacks(placeMarkerRunnable);
+					MapController mapController = myMap.getController();
+					mapController.animateTo(myMap.getProjection().fromPixels(
+							actX, actY));
+					mapController.zoomIn();
+				}
+				secondTapTime = firstTapTime;
+				return false;
 			case MotionEvent.ACTION_DOWN:
 				initialPosX = (int) e.getX();
 				initialPosY = (int) e.getY();

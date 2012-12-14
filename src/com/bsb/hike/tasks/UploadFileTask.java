@@ -1,10 +1,6 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
@@ -50,12 +46,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 	private Uri picasaUri;
 
 	public UploadFileTask(String msisdn, String filePath, String fileKey,
-			File selectedFile, String fileType, HikeFileType hikeFileType,
-			boolean wasFileSaved, Context context) {
+			String fileType, HikeFileType hikeFileType, boolean wasFileSaved,
+			Context context) {
 		this.msisdn = msisdn;
 		this.filePath = filePath;
 		this.fileKey = fileKey;
-		this.selectedFile = selectedFile;
 		this.fileType = fileType;
 		this.hikeFileType = hikeFileType;
 		this.wasFileSaved = wasFileSaved;
@@ -149,7 +144,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.MESSAGE_SENT, convMessage);
 
-					downloadPicasaFile(selectedFile, picasaUri);
+					Utils.downloadPicasaFile(context, selectedFile, picasaUri);
 					filePath = selectedFile.getPath();
 				}
 
@@ -271,35 +266,6 @@ public class UploadFileTask extends FileTransferTaskBase {
 
 		ChatThread.fileTransferTaskMap.put(convMessage.getMsgID(), this);
 		return convMessage;
-	}
-
-	private void downloadPicasaFile(File destFile, Uri url) throws Exception {
-		InputStream is = null;
-		OutputStream os = null;
-		try {
-			if (url.toString().startsWith(HikeConstants.OTHER_PICASA_URI_START)
-					|| url.toString().startsWith(
-							HikeConstants.JB_PICASA_URI_START)) {
-				is = context.getContentResolver().openInputStream(url);
-			} else {
-				is = new URL(url.toString()).openStream();
-			}
-			os = new FileOutputStream(destFile);
-
-			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
-			int len;
-
-			while ((len = is.read(buffer)) > 0) {
-				os.write(buffer, 0, len);
-			}
-		} finally {
-			if (os != null) {
-				os.close();
-			}
-			if (is != null) {
-				is.close();
-			}
-		}
 	}
 
 	@Override

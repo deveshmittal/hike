@@ -184,6 +184,12 @@ public class ConvMessage {
 			throw new JSONException("Problem in JSON while parsing msgID.");
 		}
 		this.participantInfoState = ParticipantInfoState.NO_INFO;
+		if (data.optBoolean(HikeConstants.POKE)) {
+			JSONObject md = data.has(HikeConstants.METADATA) ? data
+					.getJSONObject(HikeConstants.METADATA) : new JSONObject();
+			md.put(HikeConstants.POKE, true);
+			data.put(HikeConstants.METADATA, md);
+		}
 		if (data.has(HikeConstants.METADATA)) {
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
@@ -396,10 +402,13 @@ public class ConvMessage {
 		JSONObject data = new JSONObject();
 		JSONObject md = null;
 		try {
-			if (metadata != null
-					&& (isFileTransferMessage || metadata.isPokeMessage())) {
-				md = metadata.getJSON();
-				data.put(HikeConstants.METADATA, md);
+			if (metadata != null) {
+				if (isFileTransferMessage) {
+					md = metadata.getJSON();
+					data.put(HikeConstants.METADATA, md);
+				} else if (metadata.isPokeMessage()) {
+					data.put(HikeConstants.POKE, true);
+				}
 			}
 			data.put(
 					mConversation != null && mConversation.isOnhike() ? HikeConstants.HIKE_MESSAGE

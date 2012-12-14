@@ -112,7 +112,7 @@
         <ImageButton
             android:id="@+id/title_image_btn"
             android:layout_marginLeft="-1dp"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginTop="-2dp"
             android:background="@drawable/top_bar_btn_selector"
@@ -128,16 +128,41 @@
             android:background="@drawable/button_separator_inv"
             android:visibility="gone" />
 
-        <ImageButton
-            android:id="@+id/title_image_btn2"
-            android:layout_marginLeft="-1dp"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/title_image_btn2_container"
+            android:layout_width="48dp"
             android:layout_height="@dimen/top_bar_btn_height"
-            android:layout_marginTop="-2dp"
-            android:background="@drawable/top_bar_btn_selector"
-            android:onClick="onTitleIconClick"
-            android:src="@drawable/ic_attachment"
-            android:visibility="gone" />
+            android:visibility="gone" >
+
+            <ImageButton
+                android:id="@+id/title_image_btn2"
+                android:layout_width="48dp"
+                android:layout_height="@dimen/top_bar_btn_height"
+                android:layout_marginLeft="-1dp"
+                android:layout_marginTop="-2dp"
+                android:background="@drawable/top_bar_btn_selector"
+                android:onClick="onTitleIconClick"
+                android:src="@drawable/ic_attachment"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/fav_requests"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/ic_fav_req_notif"
+                android:gravity="center"
+                android:paddingBottom="1dp"
+                android:text="99"
+                android:clickable="false"
+                android:textColor="@color/offwhite"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </RelativeLayout>
+
     </LinearLayout>
 
 </RelativeLayout>

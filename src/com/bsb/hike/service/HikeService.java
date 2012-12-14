@@ -138,12 +138,6 @@ public class HikeService extends Service {
 	// constant used internally to check for updates
 	public static final String UPDATE_CHECK_ACTION = "com.bsb.hike.UPDATE_CHECK";
 
-	// used to disconnect from server
-	public static final String DISCONNECT_FROM_SERVER_ACTION = "com.bsb.hike.DISCONNECT";
-
-	// used to connect to server
-	public static final String CONNECT_TO_SERVER_ACTION = "com.bsb.hike.CONNECT";
-
 	// used to register to GCM
 	public static final String REGISTER_TO_GCM_ACTION = "com.bsb.hike.REGISTER_GCM";
 
@@ -174,10 +168,6 @@ public class HikeService extends Service {
 
 	// receiver that triggers a check for updates
 	private UpdateCheckTrigger updateCheckTrigger;
-
-	private DisconnectTrigger disconnectTrigger;
-
-	private ConnectTrigger connectTrigger;
 
 	private RegisterToGCMTrigger registerToGCMTrigger;
 
@@ -267,19 +257,6 @@ public class HikeService extends Service {
 			registerReceiver(updateCheckTrigger, new IntentFilter(
 					UPDATE_CHECK_ACTION));
 			scheduleNextUpdateCheck();
-		}
-
-		if (disconnectTrigger == null) {
-			disconnectTrigger = new DisconnectTrigger();
-			registerReceiver(disconnectTrigger, new IntentFilter(
-					DISCONNECT_FROM_SERVER_ACTION));
-			scheduleNextDisconnect();
-		}
-
-		if (connectTrigger == null) {
-			connectTrigger = new ConnectTrigger();
-			registerReceiver(connectTrigger, new IntentFilter(
-					CONNECT_TO_SERVER_ACTION));
 		}
 
 		/*
@@ -449,14 +426,9 @@ public class HikeService extends Service {
 			updateCheckTrigger = null;
 		}
 
-		if (disconnectTrigger != null) {
-			unregisterReceiver(disconnectTrigger);
-			disconnectTrigger = null;
-		}
-
-		if (connectTrigger != null) {
-			unregisterReceiver(connectTrigger);
-			connectTrigger = null;
+		if(registerToGCMTrigger != null) {
+			unregisterReceiver(registerToGCMTrigger);
+			registerToGCMTrigger = null;
 		}
 	}
 
@@ -468,19 +440,6 @@ public class HikeService extends Service {
 		if (dataEnabledReceiver != null) {
 			unregisterReceiver(dataEnabledReceiver);
 			dataEnabledReceiver = null;
-		}
-	}
-
-	public void registerDataChangeReceivers() {
-		if (netConnReceiver == null) {
-			netConnReceiver = new NetworkConnectionIntentReceiver();
-			registerReceiver(netConnReceiver, new IntentFilter(
-					ConnectivityManager.CONNECTIVITY_ACTION));
-		}
-		if (dataEnabledReceiver == null) {
-			dataEnabledReceiver = new BackgroundDataChangeIntentReceiver();
-			registerReceiver(dataEnabledReceiver, new IntentFilter(
-					ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED));
 		}
 	}
 
@@ -705,15 +664,6 @@ public class HikeService extends Service {
 		}
 	}
 
-	private class DisconnectTrigger extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			Log.d(HikeService.this.getClass().getSimpleName(),
-					"Disconnecting....");
-			mMqttManager.disconnectFromBroker(false);
-		}
-	}
-
 	private class RegisterToGCMTrigger extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -728,31 +678,6 @@ public class HikeService extends Service {
 			} else {
 				Log.d(getClass().getSimpleName(), "Already registered");
 			}
-		}
-	}
-
-	public void scheduleNextDisconnect() {
-		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
-				new Intent(DISCONNECT_FROM_SERVER_ACTION),
-				PendingIntent.FLAG_UPDATE_CURRENT);
-
-		Calendar wakeUpTime = Calendar.getInstance();
-		wakeUpTime.add(Calendar.SECOND, HikeConstants.DISCONNECT_TIME);
-
-		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-		// Cancel any pending alarms with this pending intent
-		aMgr.cancel(pendingIntent);
-		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(),
-				pendingIntent);
-	}
-
-	private class ConnectTrigger extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			Log.d(HikeService.this.getClass().getSimpleName(),
-					"Disconnecting....");
-			mMqttManager.connect();
 		}
 	}
 

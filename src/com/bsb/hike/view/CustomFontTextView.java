@@ -5,14 +5,19 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.Utils;
 
 public class CustomFontTextView extends TextView {
 
 	private String fontName;
+	private CustomTypeFace customTypeFace;
+	private int style;
 
 	private void setFont(AttributeSet attrs) {
-		fontName = attrs.getAttributeValue(null, "font");
+		fontName = attrs.getAttributeValue(HikeConstants.NAMESPACE,
+				HikeConstants.FONT);
+		setTypeface(getTypeface(), style);
 	}
 
 	public CustomFontTextView(Context context, AttributeSet attrs, int defStyle) {
@@ -32,6 +37,7 @@ public class CustomFontTextView extends TextView {
 	@Override
 	public void setTypeface(Typeface tf, int style) {
 		if (!isInEditMode()) {
+			this.style = style;
 			/*
 			 * If we are dealing with LDPI phones, we use the default font, They
 			 * have a rendering issue with the font that we're using
@@ -43,19 +49,24 @@ public class CustomFontTextView extends TextView {
 				super.setTypeface(tf, style);
 				return;
 			}
-			if (CustomTypeFace.customTypeFace == null) {
-				CustomTypeFace.customTypeFace = new CustomTypeFace(
-						getContext(), fontName);
+
+			if (fontName == null) {
+				fontName = "roboto";
+			}
+			customTypeFace = CustomTypeFace.getTypeFace(fontName);
+			if (customTypeFace == null) {
+				customTypeFace = new CustomTypeFace(getContext(), fontName);
+				CustomTypeFace.customTypeFaceList.add(customTypeFace);
 			}
 
 			if (style == Typeface.BOLD) {
-				super.setTypeface(CustomTypeFace.customTypeFace.bold);
+				super.setTypeface(customTypeFace.bold);
 			} else if (style == Typeface.ITALIC) {
-				super.setTypeface(CustomTypeFace.customTypeFace.thin);
+				super.setTypeface(customTypeFace.thin);
 			} else if (style == Typeface.BOLD_ITALIC) {
-				super.setTypeface(CustomTypeFace.customTypeFace.medium);
+				super.setTypeface(customTypeFace.medium);
 			} else {
-				super.setTypeface(CustomTypeFace.customTypeFace.normal);
+				super.setTypeface(customTypeFace.normal);
 			}
 		}
 	}

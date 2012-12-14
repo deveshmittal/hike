@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,7 +23,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.Utils;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class HikeListActivity extends Activity {
+public class HikeListActivity extends Activity implements OnItemClickListener {
 	private HikeArrayAdapter adapter;
 	private ListView listView;
 	private TextView labelView;
@@ -42,6 +45,7 @@ public class HikeListActivity extends Activity {
 
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+		listView.setOnItemClickListener(this);
 		checkedItems = listView.getCheckedItemPositions();
 
 		adapter = new HikeInviteAdapter(this, -1, checkedItems);
@@ -76,10 +80,20 @@ public class HikeListActivity extends Activity {
 		}
 		Toast.makeText(
 				getApplicationContext(),
-				noItemsChecked ? "Select the contacts you want to invite"
-						: "Invites sent", Toast.LENGTH_SHORT).show();
+				noItemsChecked ? R.string.select_invite_contacts
+						: R.string.invites_sent, Toast.LENGTH_SHORT).show();
 		if (!noItemsChecked) {
 			finish();
 		}
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View view, int arg2, long arg3) {
+		/*
+		 * Had to add this because of a JB specific issue:
+		 * http://code.google.com/p/android/issues/detail?id=35885
+		 */
+		CheckBox ctv = (CheckBox) view.findViewById(R.id.checkbox);
+		ctv.setChecked(!ctv.isChecked());
 	}
 }

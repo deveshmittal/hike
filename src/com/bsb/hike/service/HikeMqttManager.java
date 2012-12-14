@@ -244,6 +244,18 @@ public class HikeMqttManager implements Listener {
 
 		settings = this.mHikeService.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		String brokerHost = settings.getString(HikeMessengerApp.BROKER_HOST, "");
+
+		/*
+		 * If we set a custom broker host we set those values.
+		 */
+		if(!TextUtils.isEmpty(brokerHost)) {
+			brokerHostName = brokerHost;
+			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT, 8080);
+			return;
+		}
+
 		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION,
 				true);
 		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME
@@ -340,7 +352,6 @@ public class HikeMqttManager implements Listener {
 								.edit();
 						editor.clear();
 						editor.commit();
-						mHikeService.sendInvalidToken();
 					}
 
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
@@ -366,11 +377,6 @@ public class HikeMqttManager implements Listener {
 
 				@Override
 				public void onSuccess(Void value) {
-					/*
-					 * We would want to start listening for network changes now
-					 * that we have connected again.
-					 */
-					mHikeService.registerDataChangeReceivers();
 					Log.d("HikeMqttManager", "Hike Connected");
 					// inform the app that the app has successfully connected
 					setConnectionStatus(MQTTConnectionStatus.CONNECTED);
@@ -379,12 +385,6 @@ public class HikeMqttManager implements Listener {
 					// keep alive messages can be sent
 					// we schedule the first one of these now
 					mHikeService.scheduleNextPing();
-
-					/*
-					 * Since we are now connected, we schedule the next
-					 * disconnect.
-					 */
-					mHikeService.scheduleNextDisconnect();
 				}
 			});
 		} catch (Exception e) {
@@ -457,11 +457,6 @@ public class HikeMqttManager implements Listener {
 			}
 
 			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
-			/*
-			 * Since we have disconnected from the server we don't need to
-			 * listen to changes in the data anymore.
-			 */
-			mHikeService.unregisterDataChangeReceivers();
 		} catch (Exception e) {
 			Log.e("HikeMqttManager", "Caught exception while disconnecting", e);
 		}
@@ -629,12 +624,6 @@ public class HikeMqttManager implements Listener {
 				+ HikeConstants.PUBLISH_TOPIC),
 				new Buffer(packet.getMessage()), qos == 0 ? QoS.AT_MOST_ONCE
 						: QoS.AT_LEAST_ONCE, false, pbCB);
-
-		/*
-		 * Schedule/Update the next disconnect alarm since we've just sent a
-		 * message.
-		 */
-		mHikeService.scheduleNextDisconnect();
 	}
 
 	public void unsubscribeFromUIEvents() {
@@ -672,12 +661,6 @@ public class HikeMqttManager implements Listener {
 		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
 		try {
 			wl.acquire();
-
-			/*
-			 * Schedule/Update the next disconnect alarm since we've just
-			 * received a message.
-			 */
-			mHikeService.scheduleNextDisconnect();
 
 			String messageBody = new String(body.toByteArray());
 

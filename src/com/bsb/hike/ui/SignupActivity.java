@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
@@ -17,14 +18,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,12 +36,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.bsb.hike.HikeConstants;
@@ -53,12 +52,11 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.MSISDNView;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class SignupActivity extends Activity implements
 		SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener,
-		TextWatcher, OnClickListener, FinishableEvent, OnCancelListener {
+		OnClickListener, FinishableEvent, OnCancelListener {
 
 	private SignupTask mTask;
 
@@ -69,20 +67,19 @@ public class SignupActivity extends Activity implements
 	private ViewGroup pinLayout;
 	private ViewGroup nameLayout;
 	private ViewGroup booBooLayout;
-	private ViewGroup numberContainer;
 
-	private ImageView infoTxt;
-	private ImageView loadingText;
+	private TextView infoTxt;
+	private TextView loadingText;
 	private ViewGroup loadingLayout;
 	private EditText enterEditText;
-	private ImageButton tapHereText;
-	private ImageButton submitBtn;
-	private ImageView invalidNum;
+	private Button tapHereText;
+	private Button submitBtn;
+	private TextView invalidNum;
 	private ImageView errorImage;
 	private Button countryPicker;
-	private ImageButton callmeBtn;
+	private Button callmeBtn;
 
-	private ImageButton tryAgainBtn;
+	private Button tryAgainBtn;
 	private Handler mHandler;
 
 	private boolean addressBookError = false;
@@ -91,8 +88,6 @@ public class SignupActivity extends Activity implements
 	private final int NAME = 2;
 	private final int PIN = 1;
 	private final int NUMBER = 0;
-
-	private MSISDNView msisdnView;
 
 	private String[] countryNamesAndCodes;
 
@@ -119,7 +114,7 @@ public class SignupActivity extends Activity implements
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
 		nameLayout = (ViewGroup) findViewById(R.id.name_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
-		tryAgainBtn = (ImageButton) findViewById(R.id.btn_try_again);
+		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
 		errorImage = (ImageView) findViewById(R.id.error_img);
 
 		Object o = getLastNonConfigurationInstance();
@@ -147,7 +142,7 @@ public class SignupActivity extends Activity implements
 						.getString(HikeConstants.Extras.COUNTRY_CODE);
 				prepareLayoutForFetchingNumber();
 				if (showingSecondLoadingTxt) {
-					loadingText.setImageResource(R.drawable.txt_almost);
+					loadingText.setText(R.string.almost_there_signup);
 				}
 				break;
 			case PIN:
@@ -199,6 +194,23 @@ public class SignupActivity extends Activity implements
 		}
 		if (hikeHTTPTask == null) {
 			if (success) {
+				SharedPreferences prefs = getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+
+				/*
+				 * Setting the app value as to if the user is Indian or not.
+				 */
+				String countryCode = prefs.getString(
+						HikeMessengerApp.COUNTRY_CODE, "");
+				HikeMessengerApp.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE
+						.equals(countryCode));
+
+				prefs = PreferenceManager.getDefaultSharedPreferences(this);
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeConstants.FREE_SMS_PREF,
+						HikeMessengerApp.isIndianUser());
+				editor.commit();
+
 				// Tracking the registration event for Fiksu
 				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
@@ -293,6 +305,13 @@ public class SignupActivity extends Activity implements
 	}
 
 	private void submitClicked() {
+		if (TextUtils.isEmpty(enterEditText.getText())) {
+			Toast toast = Toast.makeText(this, R.string.enter_some_text,
+					Toast.LENGTH_SHORT);
+			toast.setGravity(Gravity.CENTER, 0, 0);
+			toast.show();
+			return;
+		}
 		startLoading();
 		if (!addressBookError) {
 			if (viewFlipper.getDisplayedChild() == NUMBER
@@ -307,22 +326,6 @@ public class SignupActivity extends Activity implements
 					String code = countryPicker.getText().toString();
 					code = code.substring(code.indexOf("+"), code.length());
 					input = code + input;
-
-					// Saving country code of the user. This will be used when
-					// the user tries to message an unknown number.
-					Editor editor = getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
-							.edit();
-					editor.putString(HikeMessengerApp.COUNTRY_CODE, code);
-					editor.commit();
-
-					HikeMessengerApp.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE.equals(code));
-
-					editor = PreferenceManager
-							.getDefaultSharedPreferences(SignupActivity.this).edit();
-					editor.putBoolean(HikeConstants.FREE_SMS_PREF,
-							HikeMessengerApp.isIndianUser());
-					editor.commit();
 				}
 				mTask.addUserInput(input);
 			}
@@ -344,16 +347,14 @@ public class SignupActivity extends Activity implements
 			enterEditText = (EditText) layout.findViewById(R.id.et_enter_pin);
 			break;
 		}
-		infoTxt = (ImageView) layout.findViewById(R.id.txt_img1);
-		loadingText = (ImageView) layout.findViewById(R.id.txt_loading);
+		infoTxt = (TextView) layout.findViewById(R.id.txt_img1);
+		loadingText = (TextView) layout.findViewById(R.id.txt_loading);
 		loadingLayout = (ViewGroup) layout.findViewById(R.id.loading_layout);
-		tapHereText = (ImageButton) layout.findViewById(R.id.wrong_num);
-		submitBtn = (ImageButton) layout.findViewById(R.id.btn_continue);
-		numberContainer = (LinearLayout) layout
-				.findViewById(R.id.msisdn_container);
-		invalidNum = (ImageView) layout.findViewById(R.id.invalid_num);
+		tapHereText = (Button) layout.findViewById(R.id.wrong_num);
+		submitBtn = (Button) layout.findViewById(R.id.btn_continue);
+		invalidNum = (TextView) layout.findViewById(R.id.invalid_num);
 		countryPicker = (Button) layout.findViewById(R.id.country_picker);
-		callmeBtn = (ImageButton) layout.findViewById(R.id.btn_call_me);
+		callmeBtn = (Button) layout.findViewById(R.id.btn_call_me);
 
 		loadingLayout.setVisibility(View.GONE);
 		submitBtn.setVisibility(View.VISIBLE);
@@ -364,6 +365,9 @@ public class SignupActivity extends Activity implements
 
 		countryPicker.setEnabled(true);
 
+		String prevCode = getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(
+				HikeMessengerApp.COUNTRY_CODE, "");
 		countryNamesAndCodes = getResources().getStringArray(
 				R.array.country_names_and_codes);
 		countryISOAndCodes = getResources().getStringArray(
@@ -371,7 +375,8 @@ public class SignupActivity extends Activity implements
 
 		if (TextUtils.isEmpty(countryCode)) {
 			TelephonyManager manager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-			String countryIso = manager.getNetworkCountryIso().toUpperCase();
+			String countryIso = TextUtils.isEmpty(prevCode) ? manager
+					.getNetworkCountryIso().toUpperCase() : prevCode;
 			for (String s : countryISOAndCodes) {
 				if (!TextUtils.isEmpty(countryIso) && s.contains(countryIso)) {
 					Log.d(getClass().getSimpleName(), "COUNTRY CODE: " + s);
@@ -387,10 +392,10 @@ public class SignupActivity extends Activity implements
 		}
 		formatCountryPickerText(countryPicker.getText().toString());
 
-		infoTxt.setImageResource(msisdnErrorDuringSignup ? R.drawable.enter_phone_again
-				: R.drawable.enter_phone);
+		infoTxt.setText(msisdnErrorDuringSignup ? R.string.enter_phone_again_signup
+				: R.string.enter_num_signup);
 		invalidNum.setVisibility(View.INVISIBLE);
-		loadingText.setImageResource(R.drawable.verifying_num);
+		loadingText.setText(R.string.verifying_num_signup);
 	}
 
 	private void formatCountryPickerText(String code) {
@@ -446,28 +451,40 @@ public class SignupActivity extends Activity implements
 		callmeBtn.setVisibility(View.VISIBLE);
 
 		enterEditText.setText("");
-		infoTxt.setImageResource(R.drawable.enter_pin);
+		infoTxt.setText(R.string.enter_pin_signup);
 		tapHereText.setOnClickListener(this);
+
+		String tapHere = getString(R.string.tap_here_signup);
+		String tapHereString = getString(R.string.wrong_num_signup);
+
+		SpannableStringBuilder ssb = new SpannableStringBuilder(tapHereString);
+		ssb.setSpan(new ForegroundColorSpan(0xff6edcff),
+				tapHereString.indexOf(tapHere), tapHereString.indexOf(tapHere)
+						+ tapHere.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+		tapHereText.setText(ssb);
 	}
 
 	private void prepareLayoutForGettingName() {
 		initializeViews(nameLayout);
 
-		if (msisdnView == null) {
-			String msisdn = getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-					HikeMessengerApp.MSISDN_SETTING, null);
-			if (TextUtils.isEmpty(msisdn)) {
-				Utils.logEvent(SignupActivity.this,
-						HikeConstants.LogEvent.SIGNUP_ERROR);
-				msisdnErrorDuringSignup = true;
-				resetViewFlipper();
-				restartTask();
-				return;
-			}
-			msisdnView = new MSISDNView(SignupActivity.this, msisdn);
-			numberContainer.addView(msisdnView);
+		String msisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				0).getString(HikeMessengerApp.MSISDN_SETTING, null);
+		if (TextUtils.isEmpty(msisdn)) {
+			Utils.logEvent(SignupActivity.this,
+					HikeConstants.LogEvent.SIGNUP_ERROR);
+			msisdnErrorDuringSignup = true;
+			resetViewFlipper();
+			restartTask();
+			return;
 		}
+		String nameText = getString(R.string.all_set_signup, msisdn);
+		SpannableStringBuilder ssb = new SpannableStringBuilder(nameText);
+		ssb.setSpan(new StyleSpan(Typeface.BOLD), nameText.indexOf(msisdn),
+				nameText.indexOf(msisdn) + msisdn.length(),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+		infoTxt.setText(ssb);
 	}
 
 	private void resetViewFlipper() {
@@ -495,11 +512,7 @@ public class SignupActivity extends Activity implements
 	}
 
 	private void setListeners() {
-		if (this.enterEditText.getText().length() == 0) {
-			submitBtn.setEnabled(false);
-		}
 		enterEditText.setOnEditorActionListener(this);
-		enterEditText.addTextChangedListener(this);
 		enterEditText.setOnKeyListener(new OnKeyListener() {
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -582,11 +595,13 @@ public class SignupActivity extends Activity implements
 		case PULLING_PIN:
 			if (viewFlipper.getDisplayedChild() == NUMBER) {
 				mHandler.postDelayed(new Runnable() {
-
 					@Override
 					public void run() {
-						showingSecondLoadingTxt = true;
-						loadingText.setImageResource(R.drawable.txt_almost);
+						if (viewFlipper != null
+								&& viewFlipper.getDisplayedChild() == NUMBER) {
+							showingSecondLoadingTxt = true;
+							loadingText.setText(R.string.almost_there_signup);
+						}
 					}
 				}, HikeConstants.PIN_CAPTURE_TIME / 2);
 			}
@@ -597,7 +612,7 @@ public class SignupActivity extends Activity implements
 
 			// Wrong Pin
 			if (value != null && value.equals(HikeConstants.PIN_ERROR)) {
-				infoTxt.setImageResource(R.drawable.wrong_pin);
+				infoTxt.setText(R.string.wrong_pin_signup);
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
 				submitBtn.setVisibility(View.VISIBLE);
@@ -619,7 +634,7 @@ public class SignupActivity extends Activity implements
 
 					@Override
 					public void run() {
-						loadingText.setImageResource(R.drawable.getting_you_in);
+						loadingText.setText(R.string.getting_in_signup);
 					}
 				}, 1000);
 			}
@@ -637,21 +652,6 @@ public class SignupActivity extends Activity implements
 			break;
 		}
 		setListeners();
-	}
-
-	@Override
-	public void afterTextChanged(Editable s) {
-		submitBtn.setEnabled(!TextUtils.isEmpty(enterEditText.getText()
-				.toString().trim()));
-	}
-
-	@Override
-	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {
-	}
-
-	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -55,6 +56,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
+
 			return true;
 		} catch (Exception e) {
 			Log.e("DeleteAccountTask", "error deleting account", e);

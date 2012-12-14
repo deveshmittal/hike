@@ -11,11 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.utils.IconCacheManager;
 
 public class HikeInviteAdapter extends HikeArrayAdapter {
 	SparseBooleanArray checkedItems;
@@ -43,12 +45,15 @@ public class HikeInviteAdapter extends HikeArrayAdapter {
 		if (v == null) {
 			v = inflater.inflate(R.layout.invite_item, parent, false);
 		}
+		ImageView imageView = (ImageView) v.findViewById(R.id.avatar);
+		imageView.setImageDrawable(IconCacheManager.getInstance()
+				.getIconForMSISDN(contactInfo.getMsisdn()));
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
 
 		TextView numView = (TextView) v.findViewById(R.id.number);
-		numView.setText(contactInfo.getPhoneNum());
+		numView.setText(contactInfo.getMsisdn());
 		if (!TextUtils.isEmpty(contactInfo.getMsisdnType())) {
 			numView.append(" (" + contactInfo.getMsisdnType() + ")");
 		}

@@ -36,7 +36,8 @@ public class DrawerBaseActivity extends Activity implements
 	private String[] rightDrawerPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED,
-			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT };
+			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
+			HikePubSub.CONTACT_ADDED, HikePubSub.REFRESH_FAVORITES };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +53,31 @@ public class DrawerBaseActivity extends Activity implements
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		parentLayout.setListener(this);
 		parentLayout.setUpLeftDrawerView();
-		parentLayout.setUpRightDrawerView(this);
 
 		findViewById(R.id.topbar_menu).setVisibility(View.VISIBLE);
 		findViewById(R.id.menu_bar).setVisibility(View.VISIBLE);
+
+		HikeMessengerApp.getPubSub().addListeners(this,
+				leftDrawerPubSubListeners);
+
+		/*
+		 * Only show the favorites drawer in the Messages list screen
+		 */
+		if ((this instanceof MessagesList)) {
+			parentLayout.setUpRightDrawerView(this);
+
+			ImageButton rightFavoriteBtn = (ImageButton) findViewById(R.id.title_image_btn2);
+			rightFavoriteBtn.setVisibility(View.VISIBLE);
+			rightFavoriteBtn.setImageResource(R.drawable.ic_favorites);
+
+			findViewById(R.id.title_image_btn2_container).setVisibility(
+					View.VISIBLE);
+
+			findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+			HikeMessengerApp.getPubSub().addListeners(this,
+					rightDrawerPubSubListeners);
+		}
+
 		if (savedInstanceState != null) {
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE)) {
@@ -65,26 +87,6 @@ public class DrawerBaseActivity extends Activity implements
 				parentLayout.toggleSidebar(true, false);
 			}
 		}
-
-		ImageButton rightFavoriteBtn = (ImageButton) findViewById(R.id.title_image_btn2);
-		rightFavoriteBtn.setVisibility(View.VISIBLE);
-		rightFavoriteBtn.setImageResource(R.drawable.ic_favorites);
-
-		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
-
-		HikeMessengerApp.getPubSub().addListeners(this,
-				leftDrawerPubSubListeners);
-
-		/*
-		 * Since we have a static adapter for the right drawer, we should only
-		 * add its listeners once. MessagesList activity is the entry point for
-		 * accessing favorites so we only add the listeners when we come to this
-		 * activity
-		 */
-		if (this instanceof MessagesList) {
-			HikeMessengerApp.getPubSub().addListeners(this,
-					rightDrawerPubSubListeners);
-		}
 	}
 
 	@Override
@@ -92,11 +94,7 @@ public class DrawerBaseActivity extends Activity implements
 		super.onDestroy();
 		HikeMessengerApp.getPubSub().removeListeners(this,
 				leftDrawerPubSubListeners);
-		/*
-		 * Only remove the listeners if the MessagesList activity is being
-		 * destroyed.
-		 */
-		if (this instanceof MessagesList) {
+		if ((this instanceof MessagesList)) {
 			HikeMessengerApp.getPubSub().removeListeners(this,
 					rightDrawerPubSubListeners);
 		}
@@ -189,6 +187,7 @@ public class DrawerBaseActivity extends Activity implements
 				@Override
 				public void run() {
 					parentLayout.renderLeftDrawerItems(freeSMSOn);
+					parentLayout.freeSMSToggled(freeSMSOn);
 				}
 			});
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {
@@ -204,11 +203,10 @@ public class DrawerBaseActivity extends Activity implements
 				|| HikePubSub.USER_LEFT.equals(type)) {
 			final ContactInfo contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN((String) object, true);
-			/*
-			 * If the contact is already a part of the favorites list, we don't
-			 * need to do anything.
-			 */
-			if(contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
+
+			if (contactInfo == null
+					|| (HikePubSub.RECENT_CONTACTS_UPDATED.equals(type) && contactInfo
+							.isOnhike())) {
 				return;
 			}
 			runOnUiThread(new Runnable() {
@@ -240,14 +238,55 @@ public class DrawerBaseActivity extends Activity implements
 			});
 		} else if (HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED.equals(type)) {
 			final List<ContactInfo> autoRecommendedFavorites = HikeUserDatabase
-					.getInstance().getContactsOrderedByLastMessaged(-1,
+					.getInstance().getContactsOfFavoriteType(
 							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE, true, false, -1);
+							HikeConstants.BOTH_VALUE);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					parentLayout
 							.addAutoRecommendedFavoritesList(autoRecommendedFavorites);
+				}
+			});
+		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
+			final ContactInfo contactInfo = (ContactInfo) object;
+
+			if (contactInfo == null) {
+				return;
+			}
+
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (contactInfo.getFavoriteType() != FavoriteType.FAVORITE) {
+						parentLayout.updateRecentContacts(contactInfo);
+					} else {
+						parentLayout.addToFavorite(contactInfo);
+					}
+				}
+			});
+		} else if (HikePubSub.REFRESH_FAVORITES.equals(type)) {
+			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
+
+			final List<ContactInfo> favoriteList = hikeUserDatabase
+					.getContactsOfFavoriteType(FavoriteType.FAVORITE,
+							HikeConstants.BOTH_VALUE);
+			final List<ContactInfo> recommendedFavoriteList = hikeUserDatabase
+					.getContactsOfFavoriteType(
+							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
+							HikeConstants.BOTH_VALUE);
+			recommendedFavoriteList.addAll(hikeUserDatabase
+					.getContactsOfFavoriteType(
+							FavoriteType.RECOMMENDED_FAVORITE,
+							HikeConstants.BOTH_VALUE));
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					parentLayout.refreshFavorites(favoriteList);
+					parentLayout
+							.refreshRecommendedFavorites(recommendedFavoriteList);
 				}
 			});
 		}
@@ -263,11 +302,8 @@ public class DrawerBaseActivity extends Activity implements
 
 		/* enable resend options on failed messages */
 		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		/*
-		 * Accounting for the header view.
-		 */
-		int pos = adapterInfo.position - 1;
-		parentLayout.onCreateFavoritesContextMenu(this, menu, pos);
+		parentLayout.onCreateFavoritesContextMenu(this, menu,
+				adapterInfo.position);
 	}
 
 	@Override

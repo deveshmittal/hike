@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
     android:id="@+id/pin_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical" >
 
-    <ImageView
+    <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_img1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/enter_pin" />
+        style="@style/SignupButton.Text.Info"
+        android:text="@string/enter_pin_signup"
+        hike:font="omnes" />
 
     <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/et_enter_pin"
@@ -33,38 +34,45 @@
             style="@style/SignupButton"
             android:layout_marginTop="10dp" >
 
-            <ImageButton
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/btn_call_me"
+                style="@style/SignupButton.Text.Bold.Button"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
                 android:layout_weight="1"
                 android:background="@drawable/signup_button"
+                android:drawableLeft="@drawable/ic_call_me"
                 android:onClick="onClick"
-                android:src="@drawable/txt_call_me" />
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:text="@string/call_me_signup"
+                hike:font="omnes" />
 
-            <View 
+            <View
                 android:layout_width="5dp"
-                android:layout_height="1dp"/>
-            
-            <ImageButton
+                android:layout_height="1dp" />
+
+            <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/btn_continue"
+                style="@style/SignupButton.Text.Bold.Button"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
                 android:layout_weight="1"
                 android:background="@drawable/signup_button"
                 android:onClick="onClick"
-                android:src="@drawable/next_btn_selector" />
+                android:text="@string/next_signup"
+                hike:font="omnes" />
         </LinearLayout>
 
         <RelativeLayout
             android:id="@+id/loading_layout"
+            style="@style/SignupButton"
+            android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
             android:background="@drawable/signup_loading_bckg"
+            android:gravity="center_horizontal"
             android:orientation="horizontal"
-            android:visibility="invisible" 
-           	style="@style/SignupButton"
-           	android:layout_centerHorizontal="true"
-           	android:gravity="center_horizontal" >
+            android:visibility="invisible" >
 
             <ProgressBar
                 android:id="@+id/loading_progress"
@@ -73,21 +81,24 @@
                 android:layout_centerVertical="true"
                 android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
 
-            <ImageView
+            <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/txt_loading"
-                style="@style/Text.Shadow.Loading"
+                style="@style/SignupButton.Text.Bold.Loading"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="3dp"
                 android:layout_toRightOf="@id/loading_progress"
-                android:src="@drawable/verify_pin" />
+                android:text="@string/verify_pin_signup"
+                hike:font="omnes" />
         </RelativeLayout>
     </RelativeLayout>
 
-    <ImageButton android:id="@+id/wrong_num"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/wrong_num"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:background="@null"/>
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/wrong_num"
+        style="@style/SignupButton.Text.Info"
+        android:layout_marginTop="10dp"
+        android:background="@null"
+        android:text="@string/wrong_num_signup"
+        android:textSize="14sp"
+        hike:font="omnes" />
+
 </LinearLayout>

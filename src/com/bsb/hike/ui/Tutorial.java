@@ -2,8 +2,10 @@ package com.bsb.hike.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -34,7 +36,7 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 	private TextView titleBtn;
 
 	private static final int PAGE_NUM_HELP_INDIAN = 3;
-	private static final int PAGE_NUM_HELP_NON_INDIAN = 3;
+	private static final int PAGE_NUM_HELP_NON_INDIAN = 1;
 	private static final int PAGE_NUM_INTRO = 3;
 
 	private int pageNum = 0;
@@ -270,6 +272,31 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 			Utils.logEvent(this, HikeConstants.LogEvent.HELP_CONTACT);
 			intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
+
+			StringBuilder message = new StringBuilder("\n\n");
+
+			try {
+				message.append(getString(R.string.hike_version)
+						+ " "
+						+ getPackageManager().getPackageInfo(getPackageName(),
+								0).versionName + "\n");
+			} catch (NameNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			message.append(getString(R.string.device_name) + " "
+					+ Build.MANUFACTURER + " " + Build.MODEL + "\n");
+
+			message.append(getString(R.string.android_version) + " "
+					+ Build.VERSION.RELEASE + "\n");
+
+			String msisdn = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+			message.append(getString(R.string.msisdn) + " " + msisdn);
+
+			intent.putExtra(Intent.EXTRA_TEXT, message.toString());
 		}
 		if (intent != null) {
 			startActivity(intent);

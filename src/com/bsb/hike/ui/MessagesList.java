@@ -30,17 +30,25 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -48,10 +56,13 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -79,21 +90,21 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	public static final Object COMPOSE = "compose";
 
+	private ConversationsAdapter mAdapter;
+
+	private Map<String, Conversation> mConversationsByMSISDN;
+
+	private Set<String> mConversationsAdded;
+
 	private ListView mConversationsView;
 
 	private View mSearchIconView;
 
 	private View mEditMessageIconView;
 
-	private ConversationsAdapter mAdapter;
-
 	private View mEmptyView;
 
 	private Comparator<? super Conversation> mConversationsComparator;
-
-	private Map<String, Conversation> mConversationsByMSISDN;
-
-	private Set<String> mConversationsAdded;
 
 	private View mToolTip;
 
@@ -127,6 +138,8 @@ public class MessagesList extends DrawerBaseActivity implements
 	private Handler clearTypingNotificationHandler;
 
 	private Map<String, ClearTypingNotification> pendingClearTypingNotifications;
+
+	private Handler messageRefreshHandler;
 
 	@Override
 	protected void onPause() {
@@ -274,6 +287,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		View view = findViewById(R.id.title_hikeicon);
 		view.setVisibility(View.VISIBLE);
+		view.setOnClickListener(this);
 
 		/*
 		 * mSearchIconView = findViewById(R.id.search);
@@ -290,31 +304,38 @@ public class MessagesList extends DrawerBaseActivity implements
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
-		List<Conversation> conversations = db.getConversations();
+		if (mAdapter == null || mConversationsByMSISDN == null
+				|| mConversationsAdded == null) {
+			HikeConversationsDatabase db = HikeConversationsDatabase
+					.getInstance();
+			List<Conversation> conversations = db.getConversations();
 
-		mConversationsByMSISDN = new HashMap<String, Conversation>(
-				conversations.size());
-		mConversationsAdded = new HashSet<String>();
+			mConversationsByMSISDN = new HashMap<String, Conversation>(
+					conversations.size());
+			mConversationsAdded = new HashSet<String>();
 
-		/*
-		 * Use an iterator so we can remove conversations w/ no messages from
-		 * our list
-		 */
-		for (Iterator<Conversation> iter = conversations.iterator(); iter
-				.hasNext();) {
-			Conversation conv = (Conversation) iter.next();
-			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-			if (conv.getMessages().isEmpty()
-					&& !(conv instanceof GroupConversation)) {
-				iter.remove();
-			} else {
-				mConversationsAdded.add(conv.getMsisdn());
+			/*
+			 * Use an iterator so we can remove conversations w/ no messages
+			 * from our list
+			 */
+			for (Iterator<Conversation> iter = conversations.iterator(); iter
+					.hasNext();) {
+				Conversation conv = (Conversation) iter.next();
+				mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+				if (conv.getMessages().isEmpty()
+						&& !(conv instanceof GroupConversation)) {
+					iter.remove();
+				} else {
+					mConversationsAdded.add(conv.getMsisdn());
+				}
 			}
-		}
 
-		mAdapter = new ConversationsAdapter(this, R.layout.conversation_item,
-				conversations);
+			mAdapter = new ConversationsAdapter(MessagesList.this,
+					R.layout.conversation_item, conversations);
+
+			HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
+					pubSubListeners);
+		}
 		/*
 		 * we need this object every time a message comes in, seems simplest to
 		 * just create it once
@@ -327,9 +348,8 @@ public class MessagesList extends DrawerBaseActivity implements
 		 * always notifyOnChange by hand
 		 */
 		mAdapter.setNotifyOnChange(false);
-		mConversationsView.setAdapter(mAdapter);
 
-		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		mConversationsView.setAdapter(mAdapter);
 
 		/* register for long-press's */
 		registerForContextMenu(mConversationsView);
@@ -340,6 +360,125 @@ public class MessagesList extends DrawerBaseActivity implements
 		 * group.
 		 */
 		onNewIntent(getIntent());
+
+		if (!accountPrefs.getBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN,
+				false)) {
+			showFavoritesIntroOverlay();
+		}
+	}
+
+	private static final int TUTORIAL_PAGE_COUNT = 2;
+
+	private void showFavoritesIntroOverlay() {
+		findViewById(R.id.favorite_intro).setVisibility(View.VISIBLE);
+		ViewPager tutorialPager = (ViewPager) findViewById(R.id.tutorial_pager);
+
+		ViewGroup pageIndicatorContainer = (ViewGroup) findViewById(R.id.page_indicator_container);
+
+		int rightMargin = (int) (10 * Utils.densityMultiplier);
+		final ImageView[] pageIndicators = new ImageView[TUTORIAL_PAGE_COUNT];
+		for (int i = 0; i < TUTORIAL_PAGE_COUNT; i++) {
+			pageIndicators[i] = new ImageView(this);
+			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT);
+			if (i != TUTORIAL_PAGE_COUNT - 1) {
+				lp.setMargins(0, 0, rightMargin, 0);
+			}
+			pageIndicators[i]
+					.setImageResource(i == 0 ? R.drawable.ic_page_selected
+							: R.drawable.ic_page_not_selected);
+			pageIndicators[i].setLayoutParams(lp);
+			pageIndicatorContainer.addView(pageIndicators[i]);
+		}
+		pageIndicatorContainer.requestLayout();
+
+		tutorialPager.setAdapter(new TutorialPagerAdapter());
+
+		tutorialPager.setOnPageChangeListener(new OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int position) {
+				for (ImageView pageIndicator : pageIndicators) {
+					pageIndicator
+							.setImageResource(R.drawable.page_indicator_unselected);
+				}
+				pageIndicators[position]
+						.setImageResource(R.drawable.page_indicator_selected);
+			}
+
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+			}
+		});
+	}
+
+	public void onFavoriteIntroClick(View v) {
+		findViewById(R.id.favorite_intro).setVisibility(View.GONE);
+
+		Editor editor = accountPrefs.edit();
+		editor.putBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN, true);
+		editor.commit();
+	}
+
+	private class TutorialPagerAdapter extends PagerAdapter {
+
+		LayoutInflater layoutInflater;
+
+		public TutorialPagerAdapter() {
+			layoutInflater = LayoutInflater.from(MessagesList.this);
+		}
+
+		@Override
+		public int getCount() {
+			return TUTORIAL_PAGE_COUNT;
+		}
+
+		@Override
+		public boolean isViewFromObject(View view, Object object) {
+			return view == object;
+		}
+
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object) {
+			((ViewPager) container).removeView((View) object);
+		}
+
+		@Override
+		public Object instantiateItem(ViewGroup container, int position) {
+			View parent = layoutInflater.inflate(
+					R.layout.favorite_tutorial_item, null);
+
+			ImageView tutorialImage = (ImageView) parent
+					.findViewById(R.id.favorite_img);
+			tutorialImage
+					.setImageResource(position == 0 ? R.drawable.intro_fav_1
+							: R.drawable.intro_fav_2);
+
+			TextView tutorialInfo = (TextView) parent
+					.findViewById(R.id.fav_info);
+			tutorialInfo.setText(position == 0 ? R.string.fav_info1
+					: R.string.fav_info2);
+			if (position == 1) {
+				String plus = getString(R.string.plus);
+				String favInfoString = getString(R.string.fav_info2);
+
+				SpannableStringBuilder ssb = new SpannableStringBuilder(
+						favInfoString);
+				ssb.setSpan(new ImageSpan(MessagesList.this,
+						R.drawable.ic_small_add), favInfoString.indexOf(plus),
+						favInfoString.indexOf(plus) + plus.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+				tutorialInfo.setText(ssb);
+			}
+
+			((ViewPager) container).addView(parent);
+			return parent;
+		}
+
 	}
 
 	private void sendDeviceDetails() {
@@ -368,12 +507,12 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		List<ContactInfo> recentNonHikeContacts = new ArrayList<ContactInfo>(0);
 		if (HikeMessengerApp.isIndianUser()) {
-			recentNonHikeContacts = HikeUserDatabase
-					.getInstance().getNonHikeRecentContacts(10, true, null);
+			recentNonHikeContacts = HikeUserDatabase.getInstance()
+					.getNonHikeRecentContacts(10, true, null);
 		}
 		List<ContactInfo> hikeContacts = HikeUserDatabase.getInstance()
-				.getContactsOrderedByLastMessaged(3, null,
-						HikeConstants.ON_HIKE_VALUE, true, false, -1);
+				.getContactsOrderedByLastMessaged(3,
+						HikeConstants.ON_HIKE_VALUE);
 		Log.d(getClass().getSimpleName(), "Number of recent contacts: "
 				+ recentNonHikeContacts.size() + " HIKE CONTACT: "
 				+ hikeContacts.size());
@@ -535,7 +674,7 @@ public class MessagesList extends DrawerBaseActivity implements
 						HikeConstants.LogEvent.DELETE_ALL_CONVERSATIONS_MENU);
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setMessage(R.string.delete_all_question)
-						.setPositiveButton("Delete", this)
+						.setPositiveButton(R.string.delete, this)
 						.setNegativeButton(R.string.cancel, this).show();
 			}
 			return true;
@@ -550,9 +689,10 @@ public class MessagesList extends DrawerBaseActivity implements
 			Utils.incrementNumTimesScreenOpen(accountPrefs,
 					HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
 		}
+		HikeMessengerApp.getPubSub().removeListeners(MessagesList.this,
+				pubSubListeners);
 		super.onDestroy();
 		Log.d(getClass().getSimpleName(), "onDestroy " + this);
-		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 	}
 
 	@Override
@@ -565,12 +705,60 @@ public class MessagesList extends DrawerBaseActivity implements
 			startActivity(intent);
 			overridePendingTransition(R.anim.slide_up_noalpha,
 					R.anim.no_animation);
+		} else if (v.getId() == R.id.title_hikeicon) {
+			changeMqttBroker();
 		}
+	}
+
+	private void changeMqttBroker() {
+		final Dialog mqttDialog = new Dialog(this);
+		mqttDialog.setContentView(R.layout.mqtt_broker_dialog);
+
+		final EditText mqttHost = (EditText) mqttDialog.findViewById(R.id.host);
+		final EditText mqttPort = (EditText) mqttDialog.findViewById(R.id.port);
+		Button done = (Button) mqttDialog.findViewById(R.id.done);
+
+		done.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				String mqttHostString = mqttHost.getText().toString();
+				int mqttPortInt = 0;
+				try {
+					mqttPortInt = Integer.parseInt(mqttPort.getText()
+							.toString());
+				} catch (NumberFormatException e) {
+					Toast.makeText(getApplicationContext(),
+							"Port can only be an integer", Toast.LENGTH_SHORT)
+							.show();
+					return;
+				}
+
+				if (TextUtils.isEmpty(mqttHostString)) {
+					Toast.makeText(getApplicationContext(),
+							"Enter all details", Toast.LENGTH_SHORT).show();
+					return;
+				}
+				Editor editor = accountPrefs.edit();
+				editor.putString(HikeMessengerApp.BROKER_HOST, mqttHostString);
+				editor.putInt(HikeMessengerApp.BROKER_PORT, mqttPortInt);
+				editor.commit();
+
+				mqttDialog.dismiss();
+				Toast.makeText(
+						getApplicationContext(),
+						"Force stop and start the app again for the changes to take effect",
+						Toast.LENGTH_SHORT).show();
+			}
+		});
+
+		mqttDialog.show();
 	}
 
 	@Override
 	public void onEventReceived(String type, Object object) {
 		super.onEventReceived(type, object);
+		Log.d(getClass().getSimpleName(), "Event received: " + type);
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type))
 				|| (HikePubSub.MESSAGE_SENT.equals(type))) {
 			Log.d("MESSAGE LIST", "New msg event sent or received.");
@@ -609,12 +797,16 @@ public class MessagesList extends DrawerBaseActivity implements
 					conv.addMessage(message);
 					Log.d("MessagesList", "new message is " + message);
 					mAdapter.sort(mConversationsComparator);
-					mAdapter.notifyDataSetChanged();
-					// notifyDataSetChanged sets notifyonChange to true but we
-					// want it to always be false
-					mAdapter.setNotifyOnChange(false);
+
+					if (messageRefreshHandler == null) {
+						messageRefreshHandler = new Handler();
+					}
+
+					messageRefreshHandler.removeCallbacks(MessagesList.this);
+					messageRefreshHandler.postDelayed(MessagesList.this, 100);
 				}
 			});
+
 		} else if (HikePubSub.MESSAGE_DELETED.equals(type)) {
 			Log.d(getClass().getSimpleName(), "Message Deleted");
 			final ConvMessage message = (ConvMessage) object;
@@ -706,7 +898,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				}
 			}
 
-			mAdapter.setNotifyOnChange(false);
 			runOnUiThread(this);
 		} else if (HikePubSub.SERVER_RECEIVED_MSG.equals(type)) {
 			long msgId = ((Long) object).longValue();
@@ -820,6 +1011,9 @@ public class MessagesList extends DrawerBaseActivity implements
 	};
 
 	private void toggleTypingNotification(boolean isTyping, String msisdn) {
+		if (mConversationsByMSISDN == null) {
+			return;
+		}
 		Conversation conversation = mConversationsByMSISDN.get(msisdn);
 		if (conversation == null) {
 			Log.d(getClass().getSimpleName(), "Conversation Does not exist");
@@ -883,6 +1077,9 @@ public class MessagesList extends DrawerBaseActivity implements
 	}
 
 	public void run() {
+		if (mAdapter == null) {
+			return;
+		}
 		mAdapter.notifyDataSetChanged();
 		// notifyDataSetChanged sets notifyonChange to true but we want it to
 		// always be false
@@ -1126,22 +1323,6 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (updateAlertOkBtn != null) {
 			updateAlertOkBtn.setText(R.string.update_app);
 			updateAlertOkBtn.setEnabled(true);
-		}
-	}
-
-	public void onOverlayButtonClick(View v) {
-		if (v.getId() != R.id.overlay_layout) {
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.HOME_UDPATE_OVERLAY_BUTTON_CLICKED);
-		} else {
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.HOME_UPDATE_OVERLAY_DISMISSED);
-			Editor editor = accountPrefs.edit();
-			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_OVERLAY, false);
-			editor.commit();
-
-			findViewById(R.id.overlay_layout).setVisibility(View.GONE);
-			showUpdateToolTip(HikeConstants.CRITICAL_UPDATE);
 		}
 	}
 

@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.text.Html;
@@ -52,11 +53,14 @@ public class HikeNotification {
 		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
 				true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE
 				: 0;
+		boolean led = preferenceManager
+				.getBoolean(HikeConstants.LED_PREF, true);
 
 		String msisdn = convMsg.getMsisdn();
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg
-				.getMessage() : HikeFileType.toProperString(convMsg
-				.getMetadata().getHikeFiles().get(0).getHikeFileType());
+				.getMessage() : HikeFileType.getFileTypeMessage(context,
+				convMsg.getMetadata().getHikeFiles().get(0).getHikeFileType(),
+				convMsg.isSent());
 		// Message will be empty for type 'uj' when the conversation does not
 		// exist
 		if (TextUtils.isEmpty(message)
@@ -89,9 +93,15 @@ public class HikeNotification {
 
 		int icon = R.drawable.ic_contact_logo;
 
-		// Replace emojis with a '*'
-		message = SmileyParser.getInstance().replaceEmojiWithCharacter(message,
-				"*");
+		/*
+		 * Jellybean has added support for emojis so we don't need to add a '*'
+		 * to replace them
+		 */
+//		if (Build.VERSION.SDK_INT < 16) {
+			// Replace emojis with a '*'
+			message = SmileyParser.getInstance().replaceEmojiWithCharacter(
+					message, "*");
+//		}
 
 		// TODO this doesn't turn the text bold :(
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
@@ -99,7 +109,14 @@ public class HikeNotification {
 		Notification notification = new Notification(icon, text,
 				timestamp * 1000);
 
-		notification.flags = notification.flags | Notification.FLAG_AUTO_CANCEL;
+		if (led) {
+			notification.ledARGB = Color.BLUE;
+			notification.ledOnMS = 300;
+			notification.ledOffMS = 1000;
+
+			notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+		}
+		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
 		notification.defaults |= 0 | vibrate;
 		if (playSound != 0) {

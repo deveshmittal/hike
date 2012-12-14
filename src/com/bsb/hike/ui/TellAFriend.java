@@ -11,15 +11,13 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,12 +37,6 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 	private boolean facebookPostPopupShowing = false;
 
-	private enum ItemTypes {
-		FACEBOOK, TWITTER, SMS, EMAIL, OTHER
-	}
-
-	private ViewGroup itemContainer;
-	private int itemHeight = (int) (48 * Utils.densityMultiplier);
 	private SharedPreferences settings;
 
 	private String[] pubSubListeners = { HikePubSub.REMOVE_TWITTER_VIEW,
@@ -56,7 +48,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		if (savedInstanceState != null
 				&& savedInstanceState
 						.getBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE)) {
-			startTwitterAuth();
+			startTwitterAuth(false);
 			return;
 		}
 		setContentView(R.layout.tell_a_friend);
@@ -64,84 +56,45 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
 
-		itemContainer = (ViewGroup) findViewById(R.id.items_container);
-
 		afterSetContentView(savedInstanceState);
 
 		TextView viaSms = (TextView) findViewById(R.id.via_sms);
 
-		String text = getString(R.string.earn_sms_friend_join);
-		String textToBold = "via SMS";
-		SpannableStringBuilder ssb = new SpannableStringBuilder(text);
-		ssb.setSpan(
-				new ForegroundColorSpan(getResources()
-						.getColor(R.color.subtext)), text.indexOf(textToBold),
-				text.indexOf(textToBold) + textToBold.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(
+				HikeConstants.FREE_SMS_PREF, true)) {
+			String text = getString(R.string.earn_sms_friend_join);
+			String textToBold = getString(R.string.via_sms);
+			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
+			ssb.setSpan(
+					new ForegroundColorSpan(getResources().getColor(
+							R.color.subtext)), text.indexOf(textToBold),
+					text.indexOf(textToBold) + textToBold.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-		viaSms.setText(ssb);
+			viaSms.setText(ssb);
+			viaSms.setVisibility(View.VISIBLE);
+		} else {
+			viaSms.setVisibility(View.GONE);
+		}
 
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 		mTitleView.setText(R.string.invite);
 
-		int[] textResIds = { R.string.facebook, R.string.twitter, R.string.sms,
-				R.string.email, R.string.share_via_other };
-		int[] textImgResIds = { R.drawable.ic_invite_fb,
-				R.drawable.ic_invite_twitter, R.drawable.ic_invite_sms,
-				R.drawable.ic_invite_email, R.drawable.ic_invite_other };
-
-		int[] subtextResIds = { R.string.fb_subtext, R.string.twitter_subtext,
-				R.string.sms_subtext, R.string.email_subtext,
-				R.string.other_subtext };
-
-		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-
-		for (int i = 0; i < textResIds.length; i++) {
-			View itemView = layoutInflater.inflate(R.layout.tell_a_friend_item,
-					null);
-			itemView.setFocusable(true);
-			itemView.setClickable(true);
-
-			TextView itemTxt = (TextView) itemView.findViewById(R.id.item_txt);
-			TextView itemSubTxt = (TextView) itemView
-					.findViewById(R.id.item_subtxt);
-
-			itemTxt.setText(textResIds[i]);
-			itemTxt.setCompoundDrawablesWithIntrinsicBounds(textImgResIds[i],
-					0, 0, 0);
-
-			itemSubTxt.setText(subtextResIds[i]);
-
-			if (i == 0) {
-				itemView.findViewById(R.id.divider).setVisibility(View.VISIBLE);
-				itemView.setBackgroundResource(R.drawable.profile_top_item_selector);
-			} else if (i == textResIds.length - 1) {
-				itemView.findViewById(R.id.divider).setVisibility(View.GONE);
-				itemView.setBackgroundResource(R.drawable.profile_bottom_item_selector);
-			} else {
-				itemView.findViewById(R.id.divider).setVisibility(View.VISIBLE);
-				itemView.setBackgroundResource(R.drawable.profile_center_item_selector);
-			}
-			int id = ItemTypes.values()[i].ordinal();
-
-			itemView.setId(id);
-
-			LayoutParams layoutParams = new LayoutParams(
-					LayoutParams.MATCH_PARENT, itemHeight);
-			itemView.setLayoutParams(layoutParams);
-
-			itemView.setOnClickListener(this);
-			itemContainer.addView(itemView);
+		int ids[] = { R.id.facebook, R.id.twitter, R.id.sms, R.id.email,
+				R.id.other };
+		for (int i = 0; i < ids.length; i++) {
+			findViewById(ids[i]).setOnClickListener(this);
 		}
+
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 
 		if (savedInstanceState != null) {
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING)) {
-				startFBAuth();
+				startFBAuth(false);
 			} else if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING)) {
-				onClick(findViewById(ItemTypes.FACEBOOK.ordinal()));
+				onClick(findViewById(R.id.facebook));
 			}
 		}
 	}
@@ -161,17 +114,18 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 	@Override
 	public void onClick(View v) {
-		switch (ItemTypes.values()[v.getId()]) {
-		case FACEBOOK:
+		switch (v.getId()) {
+		case R.id.facebook:
 			if (!settings.getBoolean(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
 					false)) {
-				startFBAuth();
+				startFBAuth(false);
 			} else {
 				facebookPostPopupShowing = true;
 				Facebook facebook = HikeMessengerApp.getFacebook();
 				Bundle parameters = new Bundle();
 				String inviteToken = settings.getString(
 						HikeConstants.INVITE_TOKEN, "");
+				inviteToken = "";
 				parameters.putString("link",
 						getString(R.string.default_invite_url, inviteToken));
 				parameters.putString("description",
@@ -214,10 +168,10 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 			}
 			break;
 
-		case TWITTER:
+		case R.id.twitter:
 			if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE,
 					false)) {
-				startTwitterAuth();
+				startTwitterAuth(false);
 			} else {
 				new AsyncTask<Void, Void, Boolean>() {
 
@@ -267,12 +221,12 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 			}
 			break;
 
-		case SMS:
+		case R.id.sms:
 			Utils.logEvent(this, HikeConstants.LogEvent.INVITE_BUTTON_CLICKED);
 			startActivity(new Intent(this, HikeListActivity.class));
 			break;
 
-		case EMAIL:
+		case R.id.email:
 			Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
 
 			mailIntent.setData(Uri.parse("mailto:"));
@@ -284,7 +238,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 			startActivity(mailIntent);
 			break;
 
-		case OTHER:
+		case R.id.other:
 			Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_INVITE);
 			Utils.startShareIntent(this,
 					Utils.getInviteMessage(this, R.string.invite_share_message));
@@ -310,8 +264,8 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 
 				@Override
 				public void run() {
-					onClick(findViewById(facebook ? ItemTypes.FACEBOOK
-							.ordinal() : ItemTypes.TWITTER.ordinal()));
+					onClick(findViewById(facebook ? R.id.facebook
+							: R.id.twitter));
 				}
 			});
 		}

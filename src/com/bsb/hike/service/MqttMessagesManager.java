@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -29,6 +30,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
+import com.facebook.android.Facebook;
 
 /**
  * 
@@ -254,6 +256,12 @@ public class MqttMessagesManager {
 				Utils.addFileName(hikeFile.getFileName(), hikeFile.getFileKey());
 			}
 
+			if (convMessage.getMetadata() != null) {
+				if (convMessage.getMetadata().isPokeMessage()) {
+					Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+					vibrator.vibrate(100);
+				}
+			}
 			Log.d(getClass().getSimpleName(), "Receiver received Message : "
 					+ convMessage.getMessage() + "		;	Receiver Msg ID : "
 					+ convMessage.getMsgID() + "	; Mapped msgID : "
@@ -354,20 +362,71 @@ public class MqttMessagesManager {
 			}
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_INFO.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-			JSONArray keys = data.names();
 			Editor editor = settings.edit();
-			for (int i = 0; i < keys.length(); i++) {
-				String key = keys.getString(i);
-				String value = data.optString(key);
-				editor.putString(key, value);
-			}
-			editor.commit();
 			if (data.has(HikeConstants.INVITE_TOKEN)) {
+				editor.putString(HikeConstants.INVITE_TOKEN,
+						data.getString(HikeConstants.INVITE_TOKEN));
 				this.pubSub.publish(HikePubSub.INVITE_TOKEN_ADDED, null);
 			}
 			if (data.has(HikeConstants.TOTAL_CREDITS_PER_MONTH)) {
+				editor.putString(HikeConstants.TOTAL_CREDITS_PER_MONTH,
+						data.getString(HikeConstants.TOTAL_CREDITS_PER_MONTH));
 				this.pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
 			}
+			if (data.has(HikeConstants.ACCOUNT)) {
+				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
+				if (account.has(HikeConstants.ACCOUNTS)) {
+					JSONObject accounts = account
+							.getJSONObject(HikeConstants.ACCOUNTS);
+					if (accounts.has(HikeConstants.TWITTER)) {
+						JSONObject twitter = accounts
+								.getJSONObject(HikeConstants.TWITTER);
+						String token = twitter.getString(HikeConstants.ID);
+						String tokenSecret = twitter
+								.getString(HikeConstants.TOKEN);
+						HikeMessengerApp
+								.makeTwitterInstance(token, tokenSecret);
+
+						editor.putString(HikeMessengerApp.TWITTER_TOKEN, token);
+						editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET,
+								tokenSecret);
+						editor.putBoolean(
+								HikeMessengerApp.TWITTER_AUTH_COMPLETE, true);
+					}
+					if (accounts.has(HikeConstants.FACEBOOK)) {
+						JSONObject facebookJSON = accounts
+								.getJSONObject(HikeConstants.FACEBOOK);
+						String userId = facebookJSON
+								.getString(HikeConstants.ID);
+						String userToken = facebookJSON
+								.getString(HikeConstants.TOKEN);
+						long expires = facebookJSON
+								.getLong(HikeConstants.EXPIRES);
+						Facebook facebook = HikeMessengerApp.getFacebook();
+
+						facebook.setAccessToken(userToken);
+						facebook.setAccessExpires(expires);
+
+						editor.putBoolean(
+								HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, true);
+						editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
+								facebook.getAccessExpires());
+						editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,
+								facebook.getAccessToken());
+						editor.putString(HikeMessengerApp.FACEBOOK_USER_ID,
+								userId);
+					}
+				}
+				if (account.has(HikeConstants.FAVORITES)) {
+					JSONObject favorites = account
+							.getJSONObject(HikeConstants.FAVORITES);
+
+					if (favorites.length() > 0) {
+						userDb.setMultipleContactsToFavorites(favorites);
+					}
+				}
+			}
+			editor.commit();
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
 					.getString(HikeConstants.MSISDN);
@@ -391,11 +450,11 @@ public class MqttMessagesManager {
 					.getString(HikeConstants.FROM);
 			saveStatusMsg(jsonObj, msisdn);
 		} else if (HikeConstants.MqttMessageTypes.ADD_FAVORITE.equals(type)) {
-			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
-					.getString(HikeConstants.ID);
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
-					true);
-			if (contactInfo == null) {
+					false);
+			if (contactInfo == null
+					|| contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
 				return;
 			}
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
@@ -422,6 +481,13 @@ public class MqttMessagesManager {
 			throws JSONException {
 		Conversation conversation = convDb.getConversation(msisdn, 0);
 
+		boolean isUJMsg = HikeConstants.MqttMessageTypes.USER_JOINED
+				.equals(jsonObj.getString(HikeConstants.TYPE));
+		boolean isGettingCredits = false;
+		if (isUJMsg) {
+			isGettingCredits = jsonObj.getJSONObject(HikeConstants.DATA)
+					.optInt(HikeConstants.CREDITS, -1) > 0;
+		}
 		/*
 		 * If the message is of type 'uj' we want to show it for all known
 		 * contacts regardless of if the user currently has an existing
@@ -429,12 +495,10 @@ public class MqttMessagesManager {
 		 * chats with that participant. Otherwise for other types, we only show
 		 * the message if the user already has an existing conversation.
 		 */
-		if ((conversation == null && !HikeConstants.MqttMessageTypes.USER_JOINED
-				.equals(jsonObj.getString(HikeConstants.TYPE)))
+		if ((conversation == null && !isUJMsg)
 				|| (conversation != null
 						&& TextUtils.isEmpty(conversation.getContactName())
-						&& HikeConstants.MqttMessageTypes.USER_JOINED
-								.equals(jsonObj.getString(HikeConstants.TYPE)) && !(conversation instanceof GroupConversation))) {
+						&& isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation))) {
 			return;
 		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation,

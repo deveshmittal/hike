@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="fav_tut_arrow_marginTop">0dp</dimen>
+    <dimen name="fav_tut_heading_marginTop">5dp</dimen>
+    <dimen name="fav_tut_pager_height">235dp</dimen>
+    <dimen name="fav_tut_pager_marginTop">10dp</dimen>
+</resources>

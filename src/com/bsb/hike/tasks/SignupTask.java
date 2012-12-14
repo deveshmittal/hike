@@ -13,11 +13,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -80,6 +82,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	private boolean isPinError = false;
 	public static boolean isAlreadyFetchingNumber = false;
 
+	private static final String INDIA_ISO = "IN";
+
 	public boolean isRunning() {
 		return isRunning;
 	}
@@ -116,6 +120,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				null);
 		boolean ab_scanned = settings.getBoolean(
 				HikeMessengerApp.ADDRESS_BOOK_SCANNED, false);
+		boolean canPullInSms = context.getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_TELEPHONY);
 		String name = settings.getString(HikeMessengerApp.NAME_SETTING, null);
 
 		if (isCancelled()) {
@@ -135,8 +141,13 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 			NetworkInfo wifi = connManager
 					.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
+			TelephonyManager manager = (TelephonyManager) context
+					.getSystemService(Context.TELEPHONY_SERVICE);
+			String countryIso = manager.getNetworkCountryIso().toUpperCase();
+
 			AccountUtils.AccountInfo accountInfo = null;
-			if (!SignupTask.isAlreadyFetchingNumber && !wifi.isConnected()) {
+			if (!SignupTask.isAlreadyFetchingNumber
+					&& INDIA_ISO.equals(countryIso) && !wifi.isConnected()) {
 				accountInfo = AccountUtils.registerAccount(context, null, null);
 				if (accountInfo == null) {
 					/* network error, signal a failure */
@@ -165,17 +176,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				String number = this.data;
 				this.data = null;
 				Log.d("SignupTask", "NUMBER RECEIVED: " + number);
-				/*
-				 * register broadcast receiver to get the actual PIN code, and
-				 * pass it to us
-				 */
-				IntentFilter intentFilter = new IntentFilter(
-						"android.provider.Telephony.SMS_RECEIVED");
-				intentFilter.setPriority(999);
-				receiver = new SMSReceiver();
-
-				this.context.getApplicationContext().registerReceiver(receiver,
-						new IntentFilter(intentFilter));
 				String unauthedMSISDN = AccountUtils.validateNumber(number);
 
 				if (unauthedMSISDN == null) {
@@ -191,21 +191,46 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				editor.putString(HikeMessengerApp.MSISDN_ENTERED,
 						unauthedMSISDN);
 				editor.commit();
-				publishProgress(new StateValue(State.PULLING_PIN, null));
 
-				synchronized (this) {
-					/* wait until we get an SMS from the server */
-					try {
-						this.wait(HikeConstants.PIN_CAPTURE_TIME);
-					} catch (InterruptedException e) {
-						Log.e("SignupTask", "Task was interrupted", e);
+				/*
+				 * If the device can't pull in SMS no point waiting for the PIN.
+				 */
+				if (canPullInSms) {
+					/*
+					 * register broadcast receiver to get the actual PIN code,
+					 * and pass it to us
+					 */
+					IntentFilter intentFilter = new IntentFilter(
+							"android.provider.Telephony.SMS_RECEIVED");
+					intentFilter.setPriority(999);
+					receiver = new SMSReceiver();
+
+					this.context.getApplicationContext().registerReceiver(
+							receiver, new IntentFilter(intentFilter));
+
+					publishProgress(new StateValue(State.PULLING_PIN, null));
+
+					synchronized (this) {
+						/* wait until we get an SMS from the server */
+						try {
+							this.wait(HikeConstants.PIN_CAPTURE_TIME);
+						} catch (InterruptedException e) {
+							Log.e("SignupTask", "Task was interrupted", e);
+						}
+					}
+
+					this.context.getApplicationContext().unregisterReceiver(
+							receiver);
+					receiver = null;
+				} else {
+					synchronized (this) {
+						try {
+							this.wait(HikeConstants.NON_SIM_WAIT_TIME);
+						} catch (InterruptedException e) {
+							Log.e("SignupTask", "Task was interrupted", e);
+						}
 					}
 				}
-
-				this.context.getApplicationContext().unregisterReceiver(
-						receiver);
-				receiver = null;
-
 				accountInfo = null;
 				do {
 					if (this.data == null) {
@@ -349,6 +374,9 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 			} catch (NetworkErrorException e) {
 				Log.e("SignupTask", "Unable to set name", e);
 				publishProgress(new StateValue(State.ERROR, null));
+				return Boolean.FALSE;
+			} catch (IllegalStateException e) {
+				Log.e(getClass().getSimpleName(), "Null Token", e);
 				return Boolean.FALSE;
 			}
 

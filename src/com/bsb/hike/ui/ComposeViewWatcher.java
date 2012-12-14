@@ -127,23 +127,32 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener {
 		mTextLastChanged = 0;
 	}
 
+	private String mod;
+
 	@Override
 	public void afterTextChanged(Editable editable) {
 		if (!TextUtils.isEmpty(editable)) {
 			onTextLastChanged();
 		}
 		setBtnEnabled();
-		// For adding smileys as the user is typing.
-		SmileyParser.getInstance().addSmileyToEditable(editable);
+		if (!TextUtils.isEmpty(mod)
+				&& SmileyParser.getInstance().containsEmoticon(mod)) {
+			// For adding smileys as the user is typing.
+			SmileyParser.getInstance().addSmileyToEditable(editable, false);
+		}
 	}
 
 	@Override
-	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
-			int arg3) {
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
 	}
 
 	@Override
-	public void onTextChanged(CharSequence s, int arg1, int arg2, int arg3) {
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		String initial = s.subSequence(0, start).toString();
+		int startOffset = Math.min(initial.length(),
+				SmileyParser.MAX_EMOTICON_TEXT_LENGTH);
+		mod = s.subSequence(start - startOffset, start + count).toString();
 	}
 
 	@Override

@@ -27,8 +27,11 @@ public class SmileyParser {
 
 	public static final int CATEGORIES = 2;
 
+	public static final int MAX_EMOTICON_TEXT_LENGTH = 17;
 	// Singleton stuff
 	private static SmileyParser sInstance = null;
+
+	private static final float SCALE_FACTOR = 0.8f;
 
 	public static SmileyParser getInstance() {
 		return sInstance;
@@ -142,22 +145,7 @@ public class SmileyParser {
 	 */
 	public CharSequence addSmileySpans(CharSequence text, boolean showSmallIcon) {
 		SpannableStringBuilder builder = new SpannableStringBuilder(text);
-
-		Matcher matcher = mPattern.matcher(text);
-		int count = 0;
-		while (matcher.find() && (count < MAX_EMOTICONS)) {
-			count++;
-			int resId = mSmileyToRes.get(matcher.group());
-			Drawable smiley = mContext.getResources().getDrawable(resId);
-			smiley.setBounds(0, 0,
-					showSmallIcon ? smiley.getIntrinsicWidth() / 2
-							: (9 * smiley.getIntrinsicWidth()) / 10,
-					showSmallIcon ? smiley.getIntrinsicHeight() / 2
-							: (9 * smiley.getIntrinsicHeight()) / 10);
-			builder.setSpan(new ImageSpan(smiley), matcher.start(),
-					matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
-
+		addSmileyToEditable(builder, showSmallIcon);
 		return builder;
 	}
 
@@ -205,15 +193,27 @@ public class SmileyParser {
 	 *            : this should be the same editable passed to us in the
 	 *            afterTextChanged method of the TextWatcher.
 	 */
-	public void addSmileyToEditable(Editable editable) {
+	public void addSmileyToEditable(Editable editable, boolean showSmallIcon) {
 		Matcher matcher = mPattern.matcher(editable);
 		int count = 0;
 		while (matcher.find() && (count < MAX_EMOTICONS)) {
 			count++;
 			int resId = mSmileyToRes.get(matcher.group());
-			editable.setSpan(new ImageSpan(mContext, resId), matcher.start(),
+			Drawable smiley = mContext.getResources().getDrawable(resId);
+			smiley.setBounds(
+					0,
+					0,
+					showSmallIcon ? smiley.getIntrinsicWidth() / 2
+							: (int) (SCALE_FACTOR * smiley.getIntrinsicWidth()),
+					showSmallIcon ? smiley.getIntrinsicHeight() / 2
+							: (int) (SCALE_FACTOR * smiley.getIntrinsicHeight()));
+			editable.setSpan(new ImageSpan(smiley), matcher.start(),
 					matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
+	}
 
+	public boolean containsEmoticon(String message) {
+		Matcher matcher = mPattern.matcher(message);
+		return matcher.find();
 	}
 }

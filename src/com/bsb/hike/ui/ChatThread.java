@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -21,7 +23,10 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
@@ -261,12 +266,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private boolean loadingMoreMessages;
 
 	private boolean reachedEnd;
-	/*
-	 * Required for saving the current intent if the user has the option "Do not
-	 * keep background activities checked. Otherwise the current intent gets
-	 * reset to default and the app throws an NPE (observed during FT).
-	 */
-	private static Intent tempIntent;
 
 	@Override
 	protected void onPause() {
@@ -292,8 +291,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 			mgr.cancel((int) mConversation.getConvId());
 		}
-
-		tempIntent = null;
 
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 
@@ -343,19 +340,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			// Removing the attachment buttong that remains visible while
 			// forwarding files
 			findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
+			findViewById(R.id.title_image_btn2_container).setVisibility(
+					View.GONE);
 			findViewById(R.id.button_bar3).setVisibility(View.GONE);
 		}
-		/*
-		 * Show hike contacts first for non-indian users
-		 */
-		boolean hikeFirst = !HikeMessengerApp.isIndianUser();
-		int freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
+		boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
 				getApplicationContext()).getBoolean(
-				HikeConstants.FREE_SMS_PREF, true) ? 1 : 0;
+				HikeConstants.FREE_SMS_PREF, true);
 
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
-				.getContactsOrderedByLastMessaged(-1, null,
-						HikeConstants.BOTH_VALUE, false, hikeFirst, freeSMSOn);
+				.getContactsForComposeScreen(freeSMSOn,
+						(isGroupChat || isForwardingMessage || isSharingFile));
 
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, this.mConversationDb
@@ -364,7 +359,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		mInputNumberView.setText("");
 		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this,
 				contactList, mInputNumberView, isGroupChat, titleBtn,
-				existingGroupId, getIntent());
+				existingGroupId, getIntent(), freeSMSOn);
 		mContactSearchView.setAdapter(adapter);
 		mContactSearchView.setOnItemClickListener(adapter);
 		mInputNumberView.addTextChangedListener(adapter);
@@ -487,10 +482,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		chatLayout.setOnSoftKeyboardListener(this);
 		mPubSub = HikeMessengerApp.getPubSub();
-		Object o = getLastNonConfigurationInstance();
-		Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
-		intent = tempIntent != null ? tempIntent : intent;
-		onNewIntent(intent);
+		if (prefs.contains(HikeMessengerApp.TEMP_NUM)) {
+			mContactName = prefs.getString(HikeMessengerApp.TEMP_NAME, null);
+			mContactNumber = prefs.getString(HikeMessengerApp.TEMP_NUM, null);
+			clearTempData();
+			setIntentFromField();
+			onNewIntent(getIntent());
+		} else {
+			Object o = getLastNonConfigurationInstance();
+			Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
+			onNewIntent(intent);
+		}
 
 		if (savedInstanceState != null) {
 			if (savedInstanceState
@@ -511,6 +513,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		/* register listeners */
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+	}
+
+	private void clearTempData() {
+		Editor editor = prefs.edit();
+		editor.remove(HikeMessengerApp.TEMP_NAME);
+		editor.remove(HikeMessengerApp.TEMP_NUM);
+		editor.commit();
 	}
 
 	@Override
@@ -590,7 +599,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return false;
 		}
 
-		switch (item.getItemId()) {
+		return performContextBasedOperationOnMessage(message, item.getItemId());
+	}
+
+	public boolean performContextBasedOperationOnMessage(ConvMessage message,
+			int id) {
+		switch (id) {
 		case R.id.copy:
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			if (message.isFileTransferMessage()) {
@@ -633,12 +647,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return true;
 		case R.id.delete:
 			removeMessage(message);
+			if (message.isFileTransferMessage()) {
+				FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
+						.get(message.getMsgID());
+				if (fileTransferTask != null) {
+					fileTransferTask.cancelTask();
+					ChatThread.fileTransferTaskMap.remove(message.getMsgID());
+					mAdapter.notifyDataSetChanged();
+				}
+			}
 			return true;
 		case R.id.cancel_file_transfer:
 			FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
 					.get(message.getMsgID());
 			if (fileTransferTask != null) {
 				fileTransferTask.cancelTask();
+				ChatThread.fileTransferTaskMap.remove(message.getMsgID());
+				mAdapter.notifyDataSetChanged();
 			}
 			return true;
 		case R.id.share:
@@ -651,10 +676,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 									+ hikeFile.getFileKey()));
 			return true;
 		default:
-			return super.onContextItemSelected(item);
+			return false;
 		}
 	}
-
 	@Override
 	/*
 	 * this function is called right before the options menu is shown. Disable
@@ -752,13 +776,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void hideOverlay() {
-		if (mOverlayLayout.getVisibility() == View.VISIBLE) {
+		if (mOverlayLayout.getVisibility() == View.VISIBLE && hasWindowFocus()) {
 			Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this,
 					android.R.anim.fade_out);
 			mOverlayLayout.setAnimation(fadeOut);
-			mOverlayLayout.setVisibility(View.INVISIBLE);
-			isOverlayShowing = false;
 		}
+		mOverlayLayout.setVisibility(View.INVISIBLE);
+		isOverlayShowing = false;
 	}
 
 	@Override
@@ -884,6 +908,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			// We were getting msisdns with spaces in them. Replacing all spaces
 			// so that lookup is correct
 			phoneNumber = phoneNumber.replaceAll(" ", "");
+			/*
+			 * Replacing all '-' that we get in the number
+			 */
+			phoneNumber = phoneNumber.replaceAll("-", "");
 			Log.d(getClass().getSimpleName(), "SMS To: " + phoneNumber);
 			ContactInfo contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromPhoneNo(phoneNumber);
@@ -898,7 +926,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				setIntentFromField();
 			} else {
 				prevContactNumber = mContactNumber;
-				mContactName = mContactNumber = phoneNumber;
+				mContactName = mContactNumber = Utils.normalizeNumber(
+						phoneNumber, prefs.getString(
+								HikeMessengerApp.COUNTRY_CODE,
+								HikeConstants.INDIA_COUNTRY_CODE));
 			}
 
 			createConversation();
@@ -921,7 +952,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				mComposeView.setText(msg);
 				mComposeView.setSelection(msg.length());
 				SmileyParser.getInstance().addSmileyToEditable(
-						mComposeView.getText());
+						mComposeView.getText(), false);
 			} else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH)) {
 				String fileKey = intent
 						.getStringExtra(HikeConstants.Extras.FILE_KEY);
@@ -967,7 +998,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				mComposeView.setText(message);
 				mComposeView.setSelection(message.length());
 				SmileyParser.getInstance().addSmileyToEditable(
-						mComposeView.getText());
+						mComposeView.getText(), false);
 			}
 			intent.removeExtra(HikeConstants.Extras.FORWARD_MESSAGE);
 		} else {
@@ -1035,6 +1066,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		findViewById(R.id.title_icon).setVisibility(View.GONE);
 		findViewById(R.id.button_bar_2).setVisibility(View.GONE);
 		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
+		findViewById(R.id.title_image_btn2_container).setVisibility(
+				View.VISIBLE);
 		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
 
 		mComposeView.setFocusable(true);
@@ -1054,8 +1087,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (mConversation == null) {
 			if (Utils.isGroupConversation(mContactNumber)) {
 				/* the user must have deleted the chat. */
-				Toast toast = Toast.makeText(this,
-						"Group chat no longer exists", Toast.LENGTH_LONG);
+				Toast toast = Toast.makeText(this, R.string.invalid_group_chat,
+						Toast.LENGTH_LONG);
 				toast.show();
 				onBackPressed();
 				return;
@@ -1143,7 +1176,35 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			myInfo = new GroupParticipant(Utils.getUserContactInfo(prefs));
 			toggleConversationMuteViewVisibility(((GroupConversation) mConversation)
 					.isMuted());
+		} else {
+			toggleConversationMuteViewVisibility(false);
 		}
+
+		if (!(mConversation instanceof GroupConversation)
+				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
+			showNudgeDialog();
+		}
+	}
+
+	private void showNudgeDialog() {
+
+		final Dialog nudgeAlert = new Dialog(this, R.style.Theme_CustomDialog);
+		nudgeAlert.setContentView(R.layout.nudge_dialog);
+
+		nudgeAlert.setCancelable(false);
+
+		Button okBtn = (Button) nudgeAlert.findViewById(R.id.ok_btn);
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				nudgeAlert.cancel();
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, true);
+				editor.commit();
+			}
+		});
+		nudgeAlert.show();
 	}
 
 	/*
@@ -1645,7 +1706,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 		smsCount.setAnimation(slideUp);
 		smsCount.setVisibility(View.VISIBLE);
-		smsCount.setText(mCredits + " SMS left");
+		smsCount.setText(mCredits + " " + getString(R.string.sms_left));
 
 		slideUp.setAnimationListener(new AnimationListener() {
 			@Override
@@ -1763,7 +1824,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(),
 				InputMethodManager.HIDE_NOT_ALWAYS);
 
-		if (mOverlayLayout.getVisibility() != View.VISIBLE && !isOverlayShowing) {
+		if (mOverlayLayout.getVisibility() != View.VISIBLE && !isOverlayShowing
+				&& hasWindowFocus()) {
 			Animation fadeIn = AnimationUtils.loadAnimation(ChatThread.this,
 					android.R.anim.fade_in);
 			mOverlayLayout.setAnimation(fadeIn);
@@ -1836,7 +1898,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 				Intent intent = new Intent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
 				intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT,
 						this.mConversation.getMsisdn());
@@ -1895,8 +1956,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					+ mContactNumber);
 			mConversationDb.addGroupParticipants(mContactNumber,
 					groupConversation.getGroupParticipantList());
-			mConversationDb.addConversation(groupConversation.getMsisdn(),
-					false, "", groupConversation.getGroupOwner());
+			if (newGroup) {
+				mConversationDb.addConversation(groupConversation.getMsisdn(),
+						false, "", groupConversation.getGroupOwner());
+			}
 
 			try {
 				// Adding this boolean value to show a different system message
@@ -1936,6 +1999,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (externalStorageState == ExternalStorageState.NONE) {
 			Toast.makeText(getApplicationContext(),
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		/*
+		 * Don't allow uploading more files if an upload/download is in progress
+		 */
+		if (!ChatThread.fileTransferTaskMap.isEmpty()
+				&& ((int) (Utils.densityMultiplier * 10) <= HikeConstants.MDPI_TIMES_10)) {
+			Toast.makeText(getApplicationContext(), R.string.file_transferring,
+					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		final CharSequence[] options = getResources().getStringArray(
@@ -1980,12 +2052,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							pickIntent.setType("video/*");
 							newMediaFileIntent = new Intent(
 									MediaStore.ACTION_VIDEO_CAPTURE);
+							newMediaFileIntent.putExtra(
+									MediaStore.EXTRA_SIZE_LIMIT,
+									(long) HikeConstants.MAX_FILE_SIZE);
 							break;
 
 						case 3:
 							requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
-							pickIntent
-									.setData(android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
 							break;
 						case 4:
 							requestCode = HikeConstants.RECORD_AUDIO_TRANSFER_CODE;
@@ -1999,11 +2072,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 									MediaStore.ACTION_IMAGE_CAPTURE);
 							selectedFile = Utils.getOutputMediaFile(
 									HikeFileType.IMAGE, null, null);
+
+							/*
+							 * For images, save the file path as a preferences
+							 * since in some devices the reference to the file
+							 * becomes null.
+							 */
+							Editor editor = prefs.edit();
+							editor.putString(HikeMessengerApp.FILE_PATH,
+									selectedFile.getAbsolutePath());
+							editor.commit();
 							break;
 						}
 						if (requestCode == HikeConstants.SHARE_LOCATION_CODE) {
 							startActivityForResult(new Intent(ChatThread.this,
 									ShareLocation.class), requestCode);
+							return;
+						} else if (requestCode == HikeConstants.AUDIO_TRANSFER_CODE) {
+							showAudioDialog();
 							return;
 						}
 						pickIntent.setAction(Intent.ACTION_PICK);
@@ -2042,7 +2128,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							}
 						}
 						if (requestCode != HikeConstants.RECORD_AUDIO_TRANSFER_CODE) {
-							tempIntent = getIntent();
+							Editor editor = prefs.edit();
+							editor.putString(HikeMessengerApp.TEMP_NUM,
+									mContactNumber);
+							editor.putString(HikeMessengerApp.TEMP_NAME,
+									mContactName);
+							editor.commit();
 							startActivityForResult(chooserIntent, requestCode);
 						} else {
 							showRecordingDialog(0);
@@ -2052,6 +2143,71 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		filePickerDialog = builder.create();
 		filePickerDialog.show();
+	}
+
+	private class AudioActivityInfo {
+		CharSequence label;
+		Drawable icon;
+		String packageName;
+		String activityName;
+
+		public AudioActivityInfo(CharSequence label, Drawable icon,
+				String packageName, String activityName) {
+			this.label = label;
+			this.icon = icon;
+			this.packageName = packageName;
+			this.activityName = activityName;
+		}
+	}
+
+	private void showAudioDialog() {
+		final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+		intent.setType("audio/*");
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities(
+				intent, 0);
+		final List<AudioActivityInfo> audioActivityList = new ArrayList<AudioActivityInfo>();
+		int maxSize = Math.min(list.size(), 2);
+		for (int i = 0; i < maxSize; i++) {
+			ActivityInfo activityInfo = list.get(i).activityInfo;
+			audioActivityList.add(new AudioActivityInfo(getPackageManager()
+					.getApplicationLabel(activityInfo.applicationInfo),
+					getPackageManager().getApplicationIcon(
+							activityInfo.applicationInfo),
+					activityInfo.packageName, activityInfo.name));
+		}
+		Builder builder = new Builder(this);
+
+		ListAdapter dialogAdapter = new ArrayAdapter<AudioActivityInfo>(this,
+				android.R.layout.select_dialog_item, android.R.id.text1,
+				audioActivityList) {
+
+			public View getView(int position, View convertView, ViewGroup parent) {
+				AudioActivityInfo audioActivityInfo = getItem(position);
+				View v = super.getView(position, convertView, parent);
+				TextView tv = (TextView) v.findViewById(android.R.id.text1);
+				tv.setText(audioActivityInfo.label);
+				tv.setCompoundDrawablesWithIntrinsicBounds(
+						audioActivityInfo.icon, null, null, null);
+				tv.setCompoundDrawablePadding((int) (15 * Utils.densityMultiplier));
+				return v;
+			}
+		};
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						AudioActivityInfo audioActivityInfo = audioActivityList
+								.get(which);
+						intent.setClassName(audioActivityInfo.packageName,
+								audioActivityInfo.activityName);
+						startActivityForResult(intent,
+								HikeConstants.AUDIO_TRANSFER_CODE);
+					}
+				});
+
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
 	}
 
 	private enum RecorderState {
@@ -2103,7 +2259,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				Log.e(getClass().getSimpleName(),
 						"Error while playing the recording", e);
 				Toast.makeText(getApplicationContext(),
-						"Error while playing the recording", Toast.LENGTH_SHORT)
+						R.string.error_play_recording, Toast.LENGTH_SHORT)
 						.show();
 				setUpPreviewRecordingLayout(recordBtn, recordInfo, duration,
 						sendBtn);
@@ -2155,7 +2311,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						Log.e(getClass().getSimpleName(),
 								"Error while playing the recording", e);
 						Toast.makeText(getApplicationContext(),
-								"Error while playing the recording",
+								R.string.error_play_recording,
 								Toast.LENGTH_SHORT).show();
 						setUpPreviewRecordingLayout(recordBtn, recordInfo,
 								duration, sendBtn);
@@ -2383,9 +2539,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if ((requestCode == HikeConstants.IMAGE_TRANSFER_CODE
 				|| requestCode == HikeConstants.VIDEO_TRANSFER_CODE || requestCode == HikeConstants.AUDIO_TRANSFER_CODE)
 				&& resultCode == RESULT_OK) {
-			if (data == null && selectedFile == null) {
-				Toast.makeText(getApplicationContext(),
-						"Error capturing image", Toast.LENGTH_SHORT).show();
+			if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE) {
+				selectedFile = new File(prefs.getString(
+						HikeMessengerApp.FILE_PATH, ""));
+
+				Editor editor = prefs.edit();
+				editor.remove(HikeMessengerApp.FILE_PATH);
+				editor.commit();
+			}
+			if (data == null
+					&& (selectedFile == null || !selectedFile.exists())) {
+				Toast.makeText(getApplicationContext(), R.string.error_capture,
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 
@@ -2397,20 +2562,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			if (data == null || data.getData() == null) {
 				filePath = selectedFile.getAbsolutePath();
 			} else {
-				Uri selectedFileUri = data.getData();
-				if (selectedFileUri.toString().startsWith(
-						"content://com.android.gallery3d.provider")) {
-					// use the com.google provider, not the com.android
-					// provider.
-					selectedFileUri = Uri.parse(selectedFileUri.toString()
-							.replace("com.android.gallery3d",
-									"com.google.android.gallery3d"));
-				}
+				Uri selectedFileUri = Utils.makePicasaUri(data.getData());
 
-				if (selectedFileUri.toString().startsWith(
-						HikeConstants.OTHER_PICASA_URI_START)
-						|| selectedFileUri.toString().startsWith(
-								HikeConstants.JB_PICASA_URI_START)) {
+				if (Utils.isPicasaUri(selectedFileUri.toString())) {
 					// Picasa image
 					UploadFileTask uploadFileTask = new UploadFileTask(
 							selectedFileUri, hikeFileType, mContactNumber,
@@ -2418,12 +2572,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					uploadFileTask.execute();
 					return;
 				} else {
-					// Local image
-					filePath = Utils.getRealPathFromUri(selectedFileUri, this);
+					String fileUriStart = "file://";
+					String fileUriString = selectedFileUri.toString();
+					if (fileUriString.startsWith(fileUriStart)) {
+						selectedFile = new File(URI.create(fileUriString));
+						/*
+						 * Done to fix the issue in a few Sony devices.
+						 */
+						filePath = selectedFile.getAbsolutePath();
+					} else {
+						filePath = Utils.getRealPathFromUri(selectedFileUri,
+								this);
+					}
+					Log.d(getClass().getSimpleName(), "File path: " + filePath);
 				}
 			}
 
-			tempIntent = null;
 			initialiseFileTransfer(filePath, hikeFileType, null, null, false);
 		} else if (requestCode == HikeConstants.SHARE_LOCATION_CODE
 				&& resultCode == RESULT_OK) {
@@ -2437,20 +2601,26 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude
 					+ " long:" + longitude + " zoom: " + zoomLevel);
 			initialiseLocationTransfer(latitude, longitude, zoomLevel, null);
+		} else if (resultCode == RESULT_CANCELED) {
+			clearTempData();
+			Log.d(getClass().getSimpleName(), "File transfer Cancelled");
+			selectedFile = null;
 		}
 	}
 
 	private void initialiseFileTransfer(String filePath,
 			HikeFileType hikeFileType, String fileKey, String fileType,
 			boolean isRecording) {
+		clearTempData();
 		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber,
-				filePath, fileKey, selectedFile, fileType, hikeFileType,
-				isRecording, getApplicationContext());
+				filePath, fileKey, fileType, hikeFileType, isRecording,
+				getApplicationContext());
 		uploadFileTask.execute();
 	}
 
 	private void initialiseLocationTransfer(double latitude, double longitude,
 			int zoomLevel, String fileKey) {
+		clearTempData();
 		UploadLocationTask uploadLocationTask = new UploadLocationTask(
 				mContactNumber, latitude, longitude, zoomLevel, fileKey,
 				getApplicationContext());

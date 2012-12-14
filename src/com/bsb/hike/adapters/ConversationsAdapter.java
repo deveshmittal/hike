@@ -6,7 +6,6 @@ import org.json.JSONArray;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +54,6 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		String name = conversation.getLabel();
 
 		contactView.setText(name);
-		Log.d(getClass().getSimpleName(), "Contact Name = " + name);
 		List<ConvMessage> messages = conversation.getMessages();
 		if (!messages.isEmpty()) {
 			ConvMessage message = messages.get(messages.size() - 1);
@@ -81,8 +79,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 			CharSequence markedUp = null;
 			if (message.isFileTransferMessage()) {
-				markedUp = HikeFileType.toProperString(metadata.getHikeFiles()
-						.get(0).getHikeFileType());
+				markedUp = HikeFileType.getFileTypeMessage(context, metadata
+						.getHikeFiles().get(0).getHikeFileType(),
+						message.isSent());
 				if ((conversation instanceof GroupConversation)
 						&& !message.isSent()) {
 					markedUp = Utils
@@ -146,6 +145,31 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						.format(context.getString(R.string.joined_hike),
 								Utils.getFirstName(conversation.getLabel()))
 						: message.getMessage();
+			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
+					|| message.getParticipantInfoState() == ParticipantInfoState.GROUP_END) {
+
+				if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) {
+					// Showing the block internation sms message if the user was
+					// booted because of that reason
+					String participantMsisdn = metadata.getMsisdn();
+					String participantName = ((GroupConversation) conversation)
+							.getGroupParticipant(participantMsisdn)
+							.getContactInfo().getFirstName();
+					markedUp = String.format(
+							context.getString(R.string.left_conversation),
+							participantName);
+				} else {
+					markedUp = context.getString(R.string.group_chat_end);
+				}
+			} else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME) {
+				String participantName = ((GroupConversation) conversation)
+						.getGroupParticipant(metadata.getMsisdn())
+						.getContactInfo().getFirstName();
+				markedUp = String.format(
+						context.getString(R.string.change_group_name),
+						participantName);
+			} else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
+				markedUp = context.getString(R.string.block_internation_sms);
 			} else {
 				markedUp = message.getMessage();
 				// For showing the name of the contact that sent the message in

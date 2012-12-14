@@ -241,14 +241,18 @@ public class AccountUtils {
 
 		public int all_invitee_joined;
 
+		public String country_code;
+
 		public AccountInfo(String token, String msisdn, String uid,
-				int smsCredits, int all_invitee, int all_invitee_joined) {
+				int smsCredits, int all_invitee, int all_invitee_joined,
+				String country_code) {
 			this.token = token;
 			this.msisdn = msisdn;
 			this.uid = uid;
 			this.smsCredits = smsCredits;
 			this.all_invitee = all_invitee;
 			this.all_invitee_joined = all_invitee_joined;
+			this.country_code = country_code;
 		}
 	}
 
@@ -314,12 +318,14 @@ public class AccountUtils {
 		Log.d("AccountUtils", "AccountCreation " + obj.toString());
 		if ("fail".equals(obj.optString("stat"))) {
 			if (pin != null)
-				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
+				return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0,
+						null);
 			/*
 			 * represents normal account creation , when user is on wifi and
 			 * account creation failed
 			 */
-			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0);
+			return new AccountUtils.AccountInfo(null, null, null, -1, 0, 0,
+					null);
 		}
 		String token = obj.optString("token");
 		String msisdn = obj.optString("msisdn");
@@ -327,11 +333,12 @@ public class AccountUtils {
 		int smsCredits = obj.optInt(HikeConstants.MqttMessageTypes.SMS_CREDITS);
 		int all_invitee = obj.optInt(HikeConstants.ALL_INVITEE_2);
 		int all_invitee_joined = obj.optInt(HikeConstants.ALL_INVITEE_JOINED_2);
+		String country_code = obj.optString("country_code");
 
 		Log.d("HTTP", "Successfully created account token:" + token
 				+ "msisdn: " + msisdn + " uid: " + uid);
 		return new AccountUtils.AccountInfo(token, msisdn, uid, smsCredits,
-				all_invitee, all_invitee_joined);
+				all_invitee, all_invitee_joined, country_code);
 	}
 
 	public static String validateNumber(String number) {
@@ -364,18 +371,22 @@ public class AccountUtils {
 		return msisdn;
 	}
 
-	private static void addToken(HttpRequestBase req) {
-		req.addHeader("Cookie", "user=" + mToken);
-		throwExceptionIfTokenIsEmpty();
-	}
-
-	private static void throwExceptionIfTokenIsEmpty() {
+	private static void addToken(HttpRequestBase req)
+			throws IllegalStateException {
 		if (TextUtils.isEmpty(mToken)) {
 			throw new IllegalStateException("Token is null");
 		}
+		req.addHeader("Cookie", "user=" + mToken);
+
+		assertIfTokenNull();
 	}
 
-	public static void setName(String name) throws NetworkErrorException {
+	private static void assertIfTokenNull() {
+		assert mToken != null : "TOKEN IS NULL";
+	}
+
+	public static void setName(String name) throws NetworkErrorException,
+			IllegalStateException {
 		HttpPost httppost = new HttpPost(BASE + "/account/name");
 		addToken(httppost);
 		JSONObject data = new JSONObject();
@@ -430,7 +441,7 @@ public class AccountUtils {
 	 */
 	public static List<ContactInfo> updateAddressBook(
 			Map<String, List<ContactInfo>> new_contacts_by_id,
-			JSONArray ids_json) {
+			JSONArray ids_json) throws IllegalStateException {
 		HttpPatch request = new HttpPatch(BASE + "/account/addressbook");
 		addToken(request);
 		JSONObject data = new JSONObject();
@@ -536,7 +547,7 @@ public class AccountUtils {
 	}
 
 	public static void deleteOrUnlinkAccount(boolean deleteAccount)
-			throws NetworkErrorException {
+			throws NetworkErrorException, IllegalStateException {
 		HttpRequestBase request = deleteAccount ? new HttpDelete(BASE
 				+ "/account") : new HttpPost(BASE + "/account/unlink");
 		addToken(request);
@@ -547,7 +558,8 @@ public class AccountUtils {
 	}
 
 	public static void performRequest(HikeHttpRequest hikeHttpRequest,
-			boolean addToken) throws NetworkErrorException {
+			boolean addToken) throws NetworkErrorException,
+			IllegalStateException {
 		HttpPost post = new HttpPost(BASE + hikeHttpRequest.getPath());
 		if (addToken) {
 			addToken(post);
@@ -583,7 +595,6 @@ public class AccountUtils {
 		connection.setRequestProperty("Content-Name", fileName);
 		connection.setRequestProperty("Content-Type",
 				TextUtils.isEmpty(fileType) ? "" : fileType);
-		connection.setRequestProperty("Content-Encoding", "gzip");
 		connection.setRequestProperty("Cookie", "user=" + mToken);
 		connection.setRequestProperty("X-Thumbnail-Required", "0");
 
@@ -654,20 +665,16 @@ public class AccountUtils {
 
 		// Read file
 		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-		byte[] gzippedBuffer = GzipByteArrayEntity.gzip(buffer,
-				HTTP.DEFAULT_CONTENT_CHARSET);
 		int totalBytesRead = bytesRead;
 
 		while (bytesRead > 0) {
-			outputStream.write(gzippedBuffer, 0, gzippedBuffer.length);
+			outputStream.write(buffer, 0, buffer.length);
 
 			bytesAvailable = fileInputStream.available();
 			Log.d("Available", bytesAvailable + "");
 
 			bufferSize = Math.min(bytesAvailable, maxBufferSize);
 			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-			gzippedBuffer = GzipByteArrayEntity.gzip(buffer,
-					HTTP.DEFAULT_CONTENT_CHARSET);
 			totalBytesRead += bytesRead;
 
 			progress = HikeConstants.INITIAL_PROGRESS
@@ -675,11 +682,14 @@ public class AccountUtils {
 							: 75);
 			uploadFileTask.updateProgress(progress);
 
+			System.gc();
 			Thread.sleep(100);
 			if (cancelUpload.get()) {
 				throw new Exception("Upload cancelled by user");
 			}
 		}
+
+		buffer = null;
 
 		JSONObject response = getFileTransferResponse(connection,
 				uploadFileTask, cancelUpload);
@@ -696,7 +706,7 @@ public class AccountUtils {
 	}
 
 	public static void deleteSocialCredentials(boolean facebook)
-			throws NetworkErrorException {
+			throws NetworkErrorException, IllegalStateException {
 		String url = facebook ? "/account/connect/fb"
 				: "/account/connect/twitter";
 		HttpDelete delete = new HttpDelete(BASE + url);

@@ -10,4 +10,6 @@
 	<dimen name="credits_num_view_width">40dp</dimen>
 	<dimen name="credits_progress_margin">30dp</dimen>
 	<dimen name="credits_progress_curve_width">4dp</dimen>
+	<dimen name="tell_a_friend_subtext_width">150dp</dimen>
+	<dimen name="drawer_text_width">150dp</dimen>
 </resources>

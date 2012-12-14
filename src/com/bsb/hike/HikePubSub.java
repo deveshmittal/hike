@@ -174,6 +174,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String FREE_SMS_TOGGLED = "freeSMSToggled";
 
+	public static final String REFRESH_FAVORITES = "refreshFavorites";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
