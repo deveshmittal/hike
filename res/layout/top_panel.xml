@@ -132,14 +132,14 @@
             android:id="@+id/title_image_btn2_container"
             android:layout_width="48dp"
             android:layout_height="@dimen/top_bar_btn_height"
+            android:layout_marginLeft="-1dp"
+            android:layout_marginTop="-2dp"
             android:visibility="gone" >
 
             <ImageButton
                 android:id="@+id/title_image_btn2"
                 android:layout_width="48dp"
                 android:layout_height="@dimen/top_bar_btn_height"
-                android:layout_marginLeft="-1dp"
-                android:layout_marginTop="-2dp"
                 android:background="@drawable/top_bar_btn_selector"
                 android:onClick="onTitleIconClick"
                 android:src="@drawable/ic_attachment"
@@ -153,10 +153,10 @@
                 android:layout_marginRight="@dimen/fav_indicator_marginRight"
                 android:layout_marginTop="@dimen/fav_indicator_marginTop"
                 android:background="@drawable/ic_fav_req_notif"
+                android:clickable="false"
                 android:gravity="center"
                 android:paddingBottom="@dimen/fav_indicator_paddingBottom"
                 android:text="99"
-                android:clickable="false"
                 android:textColor="@color/offwhite"
                 android:textSize="10sp"
                 android:textStyle="bold"
