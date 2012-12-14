@@ -5,4 +5,7 @@
     <dimen name="fav_tut_heading_marginTop">10dp</dimen>
     <dimen name="fav_tut_pager_height">250dp</dimen>
     <dimen name="fav_tut_pager_marginTop">20dp</dimen>
+    <dimen name="fav_indicator_paddingBottom">1dp</dimen>
+    <dimen name="fav_indicator_marginRight">5dp</dimen>
+    <dimen name="fav_indicator_marginTop">5dp</dimen>
 </resources>

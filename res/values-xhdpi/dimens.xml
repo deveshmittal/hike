@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="top_bar_btn_height">53dp</dimen>
+    <dimen name="fav_indicator_paddingBottom">2dp</dimen>
+    <dimen name="fav_indicator_marginRight">7dp</dimen>
+    <dimen name="fav_indicator_marginTop">7dp</dimen>
 </resources>
