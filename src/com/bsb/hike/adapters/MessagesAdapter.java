@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONArray;
 
@@ -898,7 +899,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			openFile.setDataAndType(Uri.fromFile(receivedFile),
 					hikeFile.getFileTypeString());
 		} else {
-			String uri = String.format("geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f",
+			String uri = String.format(Locale.US, "geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f",
 					hikeFile.getLatitude(), hikeFile.getLongitude(),
 					hikeFile.getZoomLevel());
 			openFile.setData(Uri.parse(uri));

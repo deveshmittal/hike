@@ -2,6 +2,7 @@ package com.bsb.hike.tasks;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
@@ -167,7 +168,7 @@ public class UploadLocationTask extends FileTransferTaskBase {
 	private void fetchThumbnailAndUpdateConvMessage(double latitude,
 			double longitude, int zoomLevel, String address,
 			ConvMessage convMessage) throws Exception {
-		String staticMapUrl = String.format(STATIC_MAP_UNFORMATTED_URL,
+		String staticMapUrl = String.format(Locale.US, STATIC_MAP_UNFORMATTED_URL,
 				latitude, longitude, zoomLevel,
 				HikeConstants.MAX_DIMENSION_LOCATION_THUMBNAIL_PX);
 		Log.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
