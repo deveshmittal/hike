@@ -874,7 +874,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 										+ hikeFile.getFileTypeString());
 						DownloadFileTask downloadFile = new DownloadFileTask(
 								context, receivedFile, hikeFile.getFileKey(),
-								convMessage.getMsgID());
+								convMessage.getMsgID(),
+								hikeFile.getHikeFileType());
 						downloadFile.execute();
 						ChatThread.fileTransferTaskMap.put(
 								convMessage.getMsgID(), downloadFile);
