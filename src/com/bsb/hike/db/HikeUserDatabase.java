@@ -358,38 +358,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		addBlockList(blockedMsisdns);
 	}
 
-	public Cursor findUsers(String partialName, String selectedContacts) {
-		List<String> contacts = Utils.splitSelectedContacts(selectedContacts);
-		StringBuilder selectedNumbers = new StringBuilder("");
-
-		if (contacts.size() > 0) {
-			for (String contact : contacts) {
-				selectedNumbers.append("'" + contact + "',");
-			}
-			selectedNumbers.delete(selectedNumbers.length() - 1,
-					selectedNumbers.length());
-		}
-
-		String[] columns = new String[] { DBConstants.NAME,
-				DBConstants.ID + " AS _id", DBConstants.MSISDN,
-				DBConstants.ONHIKE, DBConstants.ONHIKE + "=0 AS NotOnHike",
-				DBConstants.PHONE, DBConstants.LAST_MESSAGED,
-				DBConstants.MSISDN_TYPE, DBConstants.HAS_CUSTOM_PHOTO };
-
-		String selection = "((" + DBConstants.NAME + " LIKE ? OR "
-				+ DBConstants.MSISDN + " LIKE ?) AND " + DBConstants.MSISDN
-				+ " NOT IN (" + selectedNumbers + ")) AND "
-				+ DBConstants.MSISDN + " != 'null'";
-
-		String[] selectionArgs = new String[] { partialName, partialName };
-
-		String orderBy = "NotOnHike";
-
-		Cursor cursor = mDb.query(DBConstants.USERS_TABLE, columns, selection,
-				selectionArgs, null, null, orderBy);
-		return cursor;
-	}
-
 	public ContactInfo getContactInfoFromMSISDN(String msisdn,
 			boolean ifNotFoundReturnNull) {
 		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
