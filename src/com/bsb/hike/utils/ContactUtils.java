@@ -12,6 +12,7 @@ import org.json.JSONArray;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
@@ -312,7 +313,8 @@ public class ContactUtils {
 				recentlyContactedNumbers.put(number,
 						c.getLong(lastTimeContactedIdx));
 
-				sb.append("'" + number + "',");
+				number = DatabaseUtils.sqlEscapeString(number);
+				sb.append(number + ",");
 			}
 			sb.replace(sb.length() - 1, sb.length(), ")");
 		} else {
