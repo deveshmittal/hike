@@ -115,13 +115,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 			destinationFile.delete();
 		}
 
-		/*
-		 * Forcing a media scan for images.
-		 */
-		if (hikeFileType == HikeFileType.IMAGE) {
-			context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri
-					.fromFile(destinationFile)));
-		}
+		context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri
+				.fromFile(destinationFile)));
 
 		ChatThread.fileTransferTaskMap.remove(msgId);
 		HikeMessengerApp.getPubSub().publish(
