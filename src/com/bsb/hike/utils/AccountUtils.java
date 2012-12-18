@@ -74,27 +74,29 @@ public class AccountUtils {
 
 	public static String HOST = PRODUCTION_HOST;
 
-	public static int PORT = PRODUCTION_PORT;
+	public static String host = PRODUCTION_HOST;
 
-	public static String BASE = "http://" + HOST + "/v1";
+	public static int port = PRODUCTION_PORT;
+
+	public static String base = "http://" + host + "/v1";
 
 	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 
-	public static String FILE_TRANSFER_HOST = PRODUCTION_FT_HOST;
+	public static String fileTransferHost = PRODUCTION_FT_HOST;
 
-	public static String FILE_TRANSFER_UPLOAD_BASE = "http://"
-			+ FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static String fileTransferUploadBase = "http://"
+			+ fileTransferHost + ":" + Integer.toString(port) + "/v1";
 
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
-	public static String FILE_TRANSFER_BASE_DOWNLOAD_URL = BASE
+	public static String fileTranferBaseDownloadUrl = base
 			+ FILE_TRANSFER_DOWNLOAD_BASE;
 
 	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "http://hike.in/f/";
 
 	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = "http://staging.im.hike.in/f/";
 
-	public static String FILE_TRANSFER_BASE_VIEW_URL = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
+	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
@@ -180,7 +182,7 @@ public class AccountUtils {
 	}
 
 	public static int sendMessage(String phone_no, String message) {
-		HttpPost httppost = new HttpPost(BASE + "/user/msg");
+		HttpPost httppost = new HttpPost(base + "/user/msg");
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(2);
 		pairs.add(new BasicNameValuePair("to", phone_no));
 		pairs.add(new BasicNameValuePair("body", message));
@@ -204,7 +206,7 @@ public class AccountUtils {
 	}
 
 	public static void invite(String phone_no) throws UserError {
-		HttpPost httppost = new HttpPost(BASE + "/user/invite");
+		HttpPost httppost = new HttpPost(base + "/user/invite");
 		addToken(httppost);
 		try {
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>(1);
@@ -258,7 +260,7 @@ public class AccountUtils {
 
 	public static AccountInfo registerAccount(Context context, String pin,
 			String unAuthMSISDN) {
-		HttpPost httppost = new HttpPost(BASE + "/account");
+		HttpPost httppost = new HttpPost(base + "/account");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try {
@@ -342,7 +344,7 @@ public class AccountUtils {
 	}
 
 	public static String validateNumber(String number) {
-		HttpPost httppost = new HttpPost(BASE + "/account/validate");
+		HttpPost httppost = new HttpPost(base + "/account/validate");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try {
@@ -387,7 +389,7 @@ public class AccountUtils {
 
 	public static void setName(String name) throws NetworkErrorException,
 			IllegalStateException {
-		HttpPost httppost = new HttpPost(BASE + "/account/name");
+		HttpPost httppost = new HttpPost(base + "/account/name");
 		addToken(httppost);
 		JSONObject data = new JSONObject();
 
@@ -411,7 +413,7 @@ public class AccountUtils {
 	public static JSONObject postAddressBook(String token,
 			Map<String, List<ContactInfo>> contactsMap)
 			throws IllegalStateException, IOException {
-		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
+		HttpPost httppost = new HttpPost(base + "/account/addressbook");
 		addToken(httppost);
 		JSONObject data;
 		data = getJsonContactList(contactsMap);
@@ -442,7 +444,7 @@ public class AccountUtils {
 	public static List<ContactInfo> updateAddressBook(
 			Map<String, List<ContactInfo>> new_contacts_by_id,
 			JSONArray ids_json) throws IllegalStateException {
-		HttpPatch request = new HttpPatch(BASE + "/account/addressbook");
+		HttpPatch request = new HttpPatch(base + "/account/addressbook");
 		addToken(request);
 		JSONObject data = new JSONObject();
 
@@ -548,8 +550,8 @@ public class AccountUtils {
 
 	public static void deleteOrUnlinkAccount(boolean deleteAccount)
 			throws NetworkErrorException, IllegalStateException {
-		HttpRequestBase request = deleteAccount ? new HttpDelete(BASE
-				+ "/account") : new HttpPost(BASE + "/account/unlink");
+		HttpRequestBase request = deleteAccount ? new HttpDelete(base
+				+ "/account") : new HttpPost(base + "/account/unlink");
 		addToken(request);
 		JSONObject obj = executeRequest(request);
 		if ((obj == null) || "fail".equals(obj.optString("stat"))) {
@@ -560,7 +562,7 @@ public class AccountUtils {
 	public static void performRequest(HikeHttpRequest hikeHttpRequest,
 			boolean addToken) throws NetworkErrorException,
 			IllegalStateException {
-		HttpPost post = new HttpPost(BASE + hikeHttpRequest.getPath());
+		HttpPost post = new HttpPost(base + hikeHttpRequest.getPath());
 		if (addToken) {
 			addToken(post);
 		}
@@ -581,7 +583,7 @@ public class AccountUtils {
 
 	private static HttpURLConnection getFileTransferURLConnection(
 			String fileName, String fileType) throws Exception {
-		URL url = new URL(FILE_TRANSFER_UPLOAD_BASE + "/user/ft");
+		URL url = new URL(fileTransferUploadBase + "/user/ft");
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setDoInput(true);
@@ -709,7 +711,7 @@ public class AccountUtils {
 			throws NetworkErrorException, IllegalStateException {
 		String url = facebook ? "/account/connect/fb"
 				: "/account/connect/twitter";
-		HttpDelete delete = new HttpDelete(BASE + url);
+		HttpDelete delete = new HttpDelete(base + url);
 		addToken(delete);
 		JSONObject obj = executeRequest(delete);
 		if ((obj == null) || "fail".equals(obj.optString("stat"))) {
@@ -718,6 +720,6 @@ public class AccountUtils {
 	}
 
 	public static String getServerUrl() {
-		return BASE;
+		return base;
 	}
 }

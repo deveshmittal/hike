@@ -1136,28 +1136,29 @@ public class Utils {
 	}
 
 	public static void setupServerURL(boolean isProductionServer) {
-		AccountUtils.HOST = isProductionServer ? AccountUtils.PRODUCTION_HOST
+		AccountUtils.host = isProductionServer ? AccountUtils.PRODUCTION_HOST
 				: AccountUtils.STAGING_HOST;
-		AccountUtils.PORT = isProductionServer ? AccountUtils.PRODUCTION_PORT
+		AccountUtils.port = isProductionServer ? AccountUtils.PRODUCTION_PORT
 				: AccountUtils.STAGING_PORT;
 		if (isProductionServer) {
-			AccountUtils.BASE = "http://" + AccountUtils.HOST + "/v1";
+			AccountUtils.base = "http://" + AccountUtils.host
+					+ "/v1";
 		} else {
-			AccountUtils.BASE = "http://" + AccountUtils.HOST + ":"
-					+ Integer.toString(AccountUtils.PORT) + "/v1";
+			AccountUtils.base = "http://" + AccountUtils.host
+					+ ":" + Integer.toString(AccountUtils.port) + "/v1";
 		}
-		AccountUtils.FILE_TRANSFER_HOST = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST
+		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST
 				: AccountUtils.STAGING_HOST;
-		AccountUtils.FILE_TRANSFER_UPLOAD_BASE = "http://"
-				+ AccountUtils.FILE_TRANSFER_HOST + ":"
-				+ Integer.toString(AccountUtils.PORT) + "/v1";
+		AccountUtils.fileTransferUploadBase = "http://"
+				+ AccountUtils.fileTransferHost + ":"
+				+ Integer.toString(AccountUtils.port) + "/v1";
 
 		CheckForUpdateTask.UPDATE_CHECK_URL = isProductionServer ? CheckForUpdateTask.PRODUCTION_URL
 				: CheckForUpdateTask.STAGING_URL;
 
-		AccountUtils.FILE_TRANSFER_BASE_DOWNLOAD_URL = AccountUtils.BASE
+		AccountUtils.fileTranferBaseDownloadUrl = AccountUtils.base
 				+ AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
-		AccountUtils.FILE_TRANSFER_BASE_VIEW_URL = isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION
+		AccountUtils.fileTransferBaseViewUrl = isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION
 				: AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING;
 	}
 

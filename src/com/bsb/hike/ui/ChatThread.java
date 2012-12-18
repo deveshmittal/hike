@@ -609,7 +609,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			if (message.isFileTransferMessage()) {
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				clipboard.setText(AccountUtils.FILE_TRANSFER_BASE_VIEW_URL
+				clipboard.setText(AccountUtils.fileTransferBaseViewUrl
 						+ hikeFile.getFileKey());
 			} else {
 				clipboard.setText(message.getMessage());
@@ -672,7 +672,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					ChatThread.this,
 					getString(
 							R.string.share_file_message,
-							AccountUtils.FILE_TRANSFER_BASE_VIEW_URL
+							AccountUtils.fileTransferBaseViewUrl
 									+ hikeFile.getFileKey()));
 			return true;
 		default:
