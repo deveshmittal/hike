@@ -75,11 +75,32 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 						HikeMessengerApp.AUTO_RECOMMENDED_FAVORITES_ADDED, true);
 				editor.commit();
 			}
-			SharedPreferences appPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+			/*
+			 * This will happen for builds older than 1.1.15
+			 */
+			if (!prefs.contains(HikeMessengerApp.COUNTRY_CODE)
+					&& prefs.getString(HikeMessengerApp.MSISDN_SETTING, "")
+							.startsWith(HikeConstants.INDIA_COUNTRY_CODE)) {
+				Editor editor = prefs.edit();
+				editor.putString(HikeMessengerApp.COUNTRY_CODE,
+						HikeConstants.INDIA_COUNTRY_CODE);
+				editor.commit();
+				HikeMessengerApp.setIndianUser(true);
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.REFRESH_RECENTS, null);
+			}
+
+			SharedPreferences appPrefs = PreferenceManager
+					.getDefaultSharedPreferences(context);
 			if (!appPrefs.contains(HikeConstants.FREE_SMS_PREF)) {
 				Editor editor = appPrefs.edit();
-				editor.putBoolean(HikeConstants.FREE_SMS_PREF, HikeMessengerApp.isIndianUser());
+				boolean freeSMSOn = prefs.getString(
+						HikeMessengerApp.COUNTRY_CODE, "").equals(
+						HikeConstants.INDIA_COUNTRY_CODE);
+				editor.putBoolean(HikeConstants.FREE_SMS_PREF, freeSMSOn);
 				editor.commit();
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.FREE_SMS_TOGGLED, freeSMSOn);
 			}
 		}
 	}

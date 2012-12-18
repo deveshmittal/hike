@@ -320,6 +320,11 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		notifyDataSetChanged();
 	}
 
+	public void refreshRecents(List<ContactInfo> recents) {
+		recentList = recents;
+		makeCompleteList();
+	}
+
 	public int getPendingRequests() {
 		return recommendedFavoriteList.size();
 	}
