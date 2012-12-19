@@ -16,6 +16,7 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -287,8 +288,8 @@ public class ContactUtils {
 		String sortBy = limit > -1 ? Phone.LAST_TIME_CONTACTED + " DESC LIMIT "
 				+ limit : null;
 		Cursor c = context.getContentResolver().query(Phone.CONTENT_URI,
-				new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED }, null,
-				null, sortBy);
+				new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED },
+				null, null, sortBy);
 
 		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
 		int lastTimeContactedIdx = c.getColumnIndex(Phone.LAST_TIME_CONTACTED);
@@ -300,6 +301,11 @@ public class ContactUtils {
 			sb = new StringBuilder("(");
 			while (c.moveToNext()) {
 				String number = c.getString(numberColIdx);
+
+				if (TextUtils.isEmpty(number)) {
+					continue;
+				}
+
 				long lastTimeContacted = c.getLong(lastTimeContactedIdx);
 
 				/*
