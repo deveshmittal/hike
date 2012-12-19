@@ -150,7 +150,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		// + " INTEGER DEFAULT " + FavoriteType.NOT_FAVORITE.ordinal();
 		// db.execSQL(alter);
 		// }
-		if (oldVersion == 5) {
+		if (oldVersion < 7) {
 			// Create the favorites table.
 			onCreate(db);
 
