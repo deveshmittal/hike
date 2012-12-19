@@ -41,6 +41,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 				HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
 
 		try {
+			AccountUtils.deleteOrUnlinkAccount(this.delete);
+
 			// Unregister from GCM service
 			GCMRegistrar.unregister(activity.getApplicationContext());
 
@@ -48,8 +50,6 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 					.getApplicationContext();
 			app.disconnectFromService();
 			activity.stopService(new Intent(activity, HikeService.class));
-
-			AccountUtils.deleteOrUnlinkAccount(this.delete);
 
 			db.deleteAll();
 			convDb.deleteAll();
