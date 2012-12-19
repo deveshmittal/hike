@@ -1891,6 +1891,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						mConversation.isOnhike());
 				startActivity(intent);
 			} else {
+				if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+					return;
+				}
+
 				Utils.logEvent(ChatThread.this,
 						HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 				Intent intent = new Intent();
@@ -2954,6 +2958,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void groupChatDead() {
+		((GroupConversation)mConversation).setGroupAlive(false);
 		this.mComposeView.setVisibility(View.INVISIBLE);
 		this.titleIconView.setEnabled(false);
 		findViewById(R.id.emo_btn).setEnabled(false);
