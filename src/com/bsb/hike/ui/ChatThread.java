@@ -950,7 +950,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			if (intent.hasExtra(HikeConstants.Extras.MSG)) {
 				String msg = intent.getStringExtra(HikeConstants.Extras.MSG);
 				mComposeView.setText(msg);
-				mComposeView.setSelection(msg.length());
+				mComposeView.setSelection(mComposeView.length());
 				SmileyParser.getInstance().addSmileyToEditable(
 						mComposeView.getText(), false);
 			} else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH)) {
@@ -996,7 +996,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(
 						mContactNumber, "");
 				mComposeView.setText(message);
-				mComposeView.setSelection(message.length());
+				mComposeView.setSelection(mComposeView.length());
 				SmileyParser.getInstance().addSmileyToEditable(
 						mComposeView.getText(), false);
 			}
