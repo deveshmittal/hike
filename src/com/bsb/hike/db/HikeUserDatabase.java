@@ -848,6 +848,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
+	public void removeIcon(String msisdn) {
+		mDb.delete(DBConstants.THUMBNAILS_TABLE, DBConstants.MSISDN + "=?",
+				new String[] { msisdn });
+	}
+
 	public void updateContactRecency(String msisdn, long timeStamp) {
 		ContentValues updatedTime = new ContentValues(1);
 		updatedTime.put(DBConstants.LAST_MESSAGED, timeStamp);

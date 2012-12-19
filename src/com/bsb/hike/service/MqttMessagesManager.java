@@ -119,6 +119,8 @@ public class MqttMessagesManager {
 				for (String groupId : groupConversations) {
 					saveStatusMsg(jsonObj, groupId);
 				}
+			} else {
+				IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			}
 			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			this.convDb.updateOnHikeStatus(msisdn, joined);
