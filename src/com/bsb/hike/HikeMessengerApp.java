@@ -32,6 +32,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
@@ -54,7 +55,7 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 		ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE,
 		ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
-public class HikeMessengerApp extends Application {
+public class HikeMessengerApp extends Application implements Listener {
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
 
 	public static final String MSISDN_SETTING = "msisdn";
@@ -270,7 +271,7 @@ public class HikeMessengerApp extends Application {
 			}
 
 			try {
-				final String reportUrl = AccountUtils.BASE + "/logs/android";
+				final String reportUrl = AccountUtils.base + "/logs/android";
 				Log.d(LOG_TAG, "Connect to " + reportUrl.toString());
 
 				final String login = msisdn;
@@ -326,8 +327,9 @@ public class HikeMessengerApp extends Application {
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 
-		Utils.setupServerURL(settings.getBoolean(HikeMessengerApp.PRODUCTION,
-				true));
+		Utils.setupServerURL(
+				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
+				Utils.isWifiOn(getApplicationContext()));
 
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
@@ -368,6 +370,8 @@ public class HikeMessengerApp extends Application {
 		} catch (NameNotFoundException e) {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
+		HikeMessengerApp.getPubSub().addListener(
+				HikePubSub.SWITCHED_DATA_CONNECTION, this);
 	}
 
 	public static Facebook getFacebook() {
@@ -425,6 +429,18 @@ public class HikeMessengerApp extends Application {
 		}
 		if (activityTimeLogger == null) {
 			activityTimeLogger = new ActivityTimeLogger();
+		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) {
+		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type)) {
+			SharedPreferences settings = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+			boolean isWifiConnection = (Boolean) object;
+			Utils.setupServerURL(
+					settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
+					isWifiConnection);
 		}
 	}
 }

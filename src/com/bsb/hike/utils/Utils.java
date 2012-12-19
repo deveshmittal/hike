@@ -1135,31 +1135,51 @@ public class Utils {
 		return b;
 	}
 
-	public static void setupServerURL(boolean isProductionServer) {
+	public static void setupServerURL(boolean isProductionServer, boolean ssl) {
+		Log.d("SSL", "Switching SSL on? " + ssl);
+
+		AccountUtils.ssl = ssl;
+		AccountUtils.mClient = null;
+
+		String httpString = ssl ? AccountUtils.HTTPS_STRING
+				: AccountUtils.HTTP_STRING;
+
 		AccountUtils.host = isProductionServer ? AccountUtils.PRODUCTION_HOST
 				: AccountUtils.STAGING_HOST;
-		AccountUtils.port = isProductionServer ? AccountUtils.PRODUCTION_PORT
-				: AccountUtils.STAGING_PORT;
+		AccountUtils.port = isProductionServer ? (ssl ? AccountUtils.PRODUCTION_PORT_SSL
+				: AccountUtils.PRODUCTION_PORT)
+				: (ssl ? AccountUtils.STAGING_PORT_SSL
+						: AccountUtils.STAGING_PORT);
+
 		if (isProductionServer) {
-			AccountUtils.base = "http://" + AccountUtils.host
-					+ "/v1";
+			AccountUtils.base = httpString + AccountUtils.host + "/v1";
 		} else {
-			AccountUtils.base = "http://" + AccountUtils.host
-					+ ":" + Integer.toString(AccountUtils.port) + "/v1";
+			AccountUtils.base = httpString + AccountUtils.host + ":"
+					+ Integer.toString(AccountUtils.port) + "/v1";
 		}
+
 		AccountUtils.fileTransferHost = isProductionServer ? AccountUtils.PRODUCTION_FT_HOST
 				: AccountUtils.STAGING_HOST;
-		AccountUtils.fileTransferUploadBase = "http://"
+		AccountUtils.fileTransferUploadBase = httpString
 				+ AccountUtils.fileTransferHost + ":"
 				+ Integer.toString(AccountUtils.port) + "/v1";
 
-		CheckForUpdateTask.UPDATE_CHECK_URL = isProductionServer ? CheckForUpdateTask.PRODUCTION_URL
-				: CheckForUpdateTask.STAGING_URL;
+		CheckForUpdateTask.UPDATE_CHECK_URL = (ssl ? AccountUtils.HTTPS_STRING
+				: AccountUtils.HTTP_STRING)
+				+ (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL
+						: CheckForUpdateTask.STAGING_URL);
 
-		AccountUtils.fileTranferBaseDownloadUrl = AccountUtils.base
+		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base
 				+ AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
 		AccountUtils.fileTransferBaseViewUrl = isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION
 				: AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING;
+
+		Log.d("SSL", "Base: " + AccountUtils.base);
+		Log.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
+		Log.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
+		Log.d("SSL", "UpdateCheck: " + CheckForUpdateTask.UPDATE_CHECK_URL);
+		Log.d("SSL", "FTDloadBase: " + AccountUtils.fileTransferBaseDownloadUrl);
+		Log.d("SSL", "FTViewBase: " + AccountUtils.fileTransferBaseViewUrl);
 	}
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage,
@@ -1475,5 +1495,12 @@ public class Utils {
 					"com.google.android.gallery3d"));
 		}
 		return uri;
+	}
+
+	public static boolean isWifiOn(Context context) {
+		ConnectivityManager cm = (ConnectivityManager) context
+				.getSystemService(Context.CONNECTIVITY_SERVICE);
+		return (cm != null && cm.getActiveNetworkInfo() != null && (cm
+				.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
 	}
 }

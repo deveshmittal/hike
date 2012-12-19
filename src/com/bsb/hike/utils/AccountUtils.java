@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.CharBuffer;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -58,53 +60,66 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils {
+
+	public static final String HTTP_STRING = "http://";
+
+	public static final String HTTPS_STRING = "https://";
+
 	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
 	public static final String STAGING_HOST = "staging.im.hike.in";
 
 	public static final int PRODUCTION_PORT = 80;
 
+	public static final int PRODUCTION_PORT_SSL = 443;
+
 	public static final int STAGING_PORT = 8080;
 
-	public static String HOST = PRODUCTION_HOST;
+	public static final int STAGING_PORT_SSL = 443;
 
 	public static String host = PRODUCTION_HOST;
 
 	public static int port = PRODUCTION_PORT;
 
-	public static String base = "http://" + host + "/v1";
+	public static String base = HTTP_STRING + host + "/v1";
 
 	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 
 	public static String fileTransferHost = PRODUCTION_FT_HOST;
 
-	public static String fileTransferUploadBase = "http://"
+	public static String fileTransferUploadBase = HTTP_STRING
 			+ fileTransferHost + ":" + Integer.toString(port) + "/v1";
 
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
-	public static String fileTranferBaseDownloadUrl = base
+	public static String fileTransferBaseDownloadUrl = base
 			+ FILE_TRANSFER_DOWNLOAD_BASE;
 
-	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "http://hike.in/f/";
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = HTTP_STRING
+			+ "hike.in/f/";
 
-	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = "http://staging.im.hike.in/f/";
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = HTTP_STRING
+			+ "staging.im.hike.in/f/";
 
 	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
+	public static boolean ssl = false;
+
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
-	private static HttpClient mClient = null;
+	public static HttpClient mClient = null;
 
 	private static String mToken = null;
 
 	private static String appVersion = null;
+
 
 	public static void setToken(String token) {
 		mToken = token;
@@ -117,8 +132,8 @@ public class AccountUtils {
 	private static synchronized HttpClient getClient() {
 		if (mClient != null) {
 			return mClient;
-
 		}
+		Log.d("SSL", "Initialising the HTTP CLIENT");
 
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
@@ -131,8 +146,24 @@ public class AccountUtils {
 		HttpConnectionParams.setSoTimeout(params, 30 * 1000);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", PlainSocketFactory
-				.getSocketFactory(), PORT));
+
+		if (ssl) {
+			try {
+				KeyStore dummyTrustStore = KeyStore.getInstance(KeyStore
+						.getDefaultType());
+				dummyTrustStore.load(null, null);
+				SSLSocketFactory sf = new CustomSSLSocketFactory(
+						dummyTrustStore);
+				sf.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+				schemeRegistry.register(new Scheme("https", sf, port));
+			} catch (Exception e) {
+				schemeRegistry.register(new Scheme("http", PlainSocketFactory
+						.getSocketFactory(), port));
+			}
+		} else {
+			schemeRegistry.register(new Scheme("http", PlainSocketFactory
+					.getSocketFactory(), port));
+		}
 
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(params,
 				schemeRegistry);

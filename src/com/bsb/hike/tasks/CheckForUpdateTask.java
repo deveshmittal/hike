@@ -20,13 +20,15 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Utils;
 
 public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean> {
-	public static final String STAGING_URL = "http://staging.get.hike.in/updates/android";
-	public static final String PRODUCTION_URL = "http://get.hike.in/updates/android";
+	public static final String STAGING_URL = "staging.get.hike.in/updates/android";
+	public static final String PRODUCTION_URL = "get.hike.in/updates/android";
 
-	public static String UPDATE_CHECK_URL = PRODUCTION_URL;
+	public static String UPDATE_CHECK_URL = AccountUtils.HTTP_STRING
+			+ PRODUCTION_URL;
 	/*
 	 * Response JSON: {"latest":<string>, "critical":<string>, "url":<url>}
 	 */

@@ -49,7 +49,7 @@ public class DownloadFileTask extends FileTransferTaskBase {
 		FileOutputStream fos = null;
 		InputStream is = null;
 		try {
-			URL url = new URL(AccountUtils.fileTranferBaseDownloadUrl
+			URL url = new URL(AccountUtils.fileTransferBaseDownloadUrl
 					+ fileKey);
 			URLConnection urlConnection = url.openConnection();
 

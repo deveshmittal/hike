@@ -178,6 +178,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String REFRESH_RECENTS = "refreshRecents";
 
+	public static final String SWITCHED_DATA_CONNECTION = "switchedDataConnection";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
