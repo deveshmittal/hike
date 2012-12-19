@@ -711,9 +711,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return false;
 		}
 
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.chatthread_menu, menu);
-
 		return true;
 	}
 
