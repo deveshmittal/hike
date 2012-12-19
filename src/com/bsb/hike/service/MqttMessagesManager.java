@@ -260,7 +260,8 @@ public class MqttMessagesManager {
 
 			if (convMessage.getMetadata() != null) {
 				if (convMessage.getMetadata().isPokeMessage()) {
-					Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+					Vibrator vibrator = (Vibrator) context
+							.getSystemService(Context.VIBRATOR_SERVICE);
 					vibrator.vibrate(100);
 				}
 			}

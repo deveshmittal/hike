@@ -634,11 +634,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			boolean fwdOrgroupChat) {
 		String selection = DBConstants.MSISDN
 				+ " != 'null'"
-				+ ((freeSMSOn && fwdOrgroupChat) ? " AND ((" + DBConstants.ONHIKE
-						+ " = 0 AND " + DBConstants.MSISDN
+				+ ((freeSMSOn && fwdOrgroupChat) ? " AND (("
+						+ DBConstants.ONHIKE + " = 0 AND " + DBConstants.MSISDN
 						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))"
-						: (fwdOrgroupChat ? " AND " + DBConstants.ONHIKE + " != 0"
-								: ""));
+						: (fwdOrgroupChat ? " AND " + DBConstants.ONHIKE
+								+ " != 0" : ""));
 
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 
@@ -1140,7 +1140,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			mDb.beginTransaction();
 
 			JSONArray msisdns = favorites.names();
-			if(msisdns == null) {
+			if (msisdns == null) {
 				return;
 			}
 			for (int i = 0; i < msisdns.length(); i++) {
