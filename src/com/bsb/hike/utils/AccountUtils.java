@@ -701,7 +701,7 @@ public class AccountUtils {
 		int totalBytesRead = bytesRead;
 
 		while (bytesRead > 0) {
-			outputStream.write(buffer, 0, buffer.length);
+			outputStream.write(buffer, 0, bytesRead);
 
 			bytesAvailable = fileInputStream.available();
 			Log.d("Available", bytesAvailable + "");
