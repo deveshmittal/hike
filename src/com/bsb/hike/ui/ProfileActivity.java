@@ -1046,9 +1046,13 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	public void onAddToContactClicked(View v) {
 		Utils.logEvent(this, HikeConstants.LogEvent.MENU_ADD_TO_CONTACTS);
+		addToContacts(mLocalMSISDN);
+	}
+
+	private void addToContacts(String msisdn) {
 		Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
 		i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-		i.putExtra(Insert.PHONE, mLocalMSISDN);
+		i.putExtra(Insert.PHONE, msisdn);
 		startActivity(i);
 	}
 
