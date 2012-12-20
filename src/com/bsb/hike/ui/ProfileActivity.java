@@ -284,7 +284,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		ViewGroup addParticipantsLayout = (ViewGroup) findViewById(R.id.add_participants_layout);
 		TextView mTitleView = (TextView) findViewById(R.id.title);
-		View groupOwnerItem = (View) findViewById(R.id.group_owner);
 		mNameEdit = (EditText) findViewById(R.id.name_input);
 		mNameDisplay = (TextView) findViewById(R.id.name_display);
 		mIconView = (ImageView) findViewById(R.id.profile);
@@ -313,6 +312,66 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		findViewById(R.id.title_image_btn2_container).setVisibility(
 				View.VISIBLE);
 
+		groupOwner = groupConversation.getGroupOwner();
+
+		GroupParticipant userInfo = new GroupParticipant(
+				Utils.getUserContactInfo(preferences));
+
+		isBlocked = HikeUserDatabase.getInstance().isBlocked(groupOwner);
+
+		Button blockGroupOwner = (Button) findViewById(R.id.block_owner_btn);
+		if (groupOwner.equals(userInfo.getContactInfo().getMsisdn())) {
+			blockGroupOwner.setVisibility(View.GONE);
+			findViewById(R.id.empty_horizontal_space).setVisibility(View.GONE);
+		} else {
+			blockGroupOwner.setVisibility(View.VISIBLE);
+			findViewById(R.id.empty_horizontal_space).setVisibility(
+					View.VISIBLE);
+			blockGroupOwner.setText(isBlocked ? R.string.unblock_owner
+					: R.string.block_owner);
+		}
+
+		int activeParticipants = setupParticipantView();
+
+		// Disable the add participants item
+		if (activeParticipants == HikeConstants.MAX_CONTACTS_IN_GROUP) {
+			addParticipantsLayout.setEnabled(false);
+			((TextView) findViewById(R.id.add_participants_txt))
+					.setTextColor(getResources().getColor(R.color.lightgrey));
+		}
+
+		findViewById(R.id.invite_all_btn).setVisibility(
+				shouldShowInviteAllButton ? View.VISIBLE : View.GONE);
+
+		nameTxt = groupConversation.getLabel();
+
+		// Make sure that the group name text does not exceed the permitted
+		// length
+		int maxLength = getResources().getInteger(
+				R.integer.max_length_group_name);
+		if (nameTxt.length() > maxLength) {
+			nameTxt = nameTxt.substring(0, maxLength);
+		}
+
+		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(
+				groupConversation.getMsisdn());
+
+		if (mActivityState.newBitmap == null) {
+			mIconView.setImageDrawable(drawable);
+		} else {
+			mIconView.setImageBitmap(mActivityState.newBitmap);
+		}
+		mNameEdit.setText(nameTxt);
+		mNameDisplay.setText(nameTxt);
+		mTitleView.setText(R.string.group_info);
+
+		mNameEdit.setVisibility(View.GONE);
+		mNameDisplay.setVisibility(View.VISIBLE);
+	}
+
+	private int setupParticipantView() {
+		View groupOwnerItem = (View) findViewById(R.id.group_owner);
+
 		int left = (int) (0 * Utils.densityMultiplier);
 		int top = (int) (0 * Utils.densityMultiplier);
 		int right = (int) (0 * Utils.densityMultiplier);
@@ -322,12 +381,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				Utils.getUserContactInfo(preferences));
 		participantList.put(userInfo.getContactInfo().getMsisdn(), userInfo);
 
-		groupOwner = groupConversation.getGroupOwner();
-
-		isBlocked = HikeUserDatabase.getInstance().isBlocked(groupOwner);
-
 		Set<String> activeParticipants = new HashSet<String>();
 		activeParticipants.add(groupOwner);
+
 		for (Entry<String, GroupParticipant> participant : participantList
 				.entrySet()) {
 			ContactInfo contactInfo = participant.getValue().getContactInfo();
@@ -372,54 +428,14 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			participantNameItem.setLayoutParams(lp);
 			participantNameItem.setId(participant.getKey().hashCode());
 
+			participantNameItem.setTag(contactInfo);
+			participantNameItem.setOnLongClickListener(this);
+
 			participantNameContainer.addView(participantNameItem);
-		}
-		Button blockGroupOwner = (Button) findViewById(R.id.block_owner_btn);
-		if (groupOwner.equals(userInfo.getContactInfo().getMsisdn())) {
-			blockGroupOwner.setVisibility(View.GONE);
-			findViewById(R.id.empty_horizontal_space).setVisibility(View.GONE);
-		} else {
-			blockGroupOwner.setVisibility(View.VISIBLE);
-			findViewById(R.id.empty_horizontal_space).setVisibility(
-					View.VISIBLE);
-			blockGroupOwner.setText(isBlocked ? R.string.unblock_owner
-					: R.string.block_owner);
-		}
-		// Disable the add participants item
-		if (activeParticipants.size() == HikeConstants.MAX_CONTACTS_IN_GROUP) {
-			addParticipantsLayout.setEnabled(false);
-			((TextView) findViewById(R.id.add_participants_txt))
-					.setTextColor(getResources().getColor(R.color.lightgrey));
 		}
 		participantList.remove(userInfo.getContactInfo().getMsisdn());
 
-		findViewById(R.id.invite_all_btn).setVisibility(
-				shouldShowInviteAllButton ? View.VISIBLE : View.GONE);
-
-		nameTxt = groupConversation.getLabel();
-
-		// Make sure that the group name text does not exceed the permitted
-		// length
-		int maxLength = getResources().getInteger(
-				R.integer.max_length_group_name);
-		if (nameTxt.length() > maxLength) {
-			nameTxt = nameTxt.substring(0, maxLength);
-		}
-
-		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(
-				groupConversation.getMsisdn());
-
-		if (mActivityState.newBitmap == null) {
-			mIconView.setImageDrawable(drawable);
-		} else {
-			mIconView.setImageBitmap(mActivityState.newBitmap);
-		}
-		mNameEdit.setText(nameTxt);
-		mNameDisplay.setText(nameTxt);
-		mTitleView.setText(R.string.group_info);
-
-		mNameEdit.setVisibility(View.GONE);
-		mNameDisplay.setVisibility(View.VISIBLE);
+		return activeParticipants.size();
 	}
 
 	public void onTitleIconClick(View v) {
@@ -1110,16 +1126,14 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (HikePubSub.PARTICIPANT_LEFT_GROUP.equals(type)) {
 			if (mLocalMSISDN.equals(((JSONObject) object)
 					.optString(HikeConstants.TO))) {
-				final JSONObject obj = (JSONObject) object;
-				this.participantList.remove(object);
+				String msisdn = ((JSONObject) object)
+						.optString(HikeConstants.DATA);
+				this.participantList.remove(msisdn);
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						participantNameContainer
-								.removeView(participantNameContainer
-										.findViewById(obj.optString(
-												HikeConstants.DATA).hashCode()));
-						participantNameContainer.requestLayout();
+						participantNameContainer.removeAllViews();
+						setupParticipantView();
 					}
 				});
 			}
