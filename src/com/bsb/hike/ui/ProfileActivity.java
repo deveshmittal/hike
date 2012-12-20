@@ -35,6 +35,7 @@ import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -71,7 +72,7 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class ProfileActivity extends DrawerBaseActivity implements
 		FinishableEvent, android.content.DialogInterface.OnClickListener,
-		Listener {
+		Listener, OnLongClickListener {
 	/* dialog IDs */
 	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
 	private static final int PROFILE_PICTURE_FROM_GALLERY = 1;
@@ -1287,5 +1288,80 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		}
 
+	}
+
+	@Override
+	public boolean onLongClick(View view) {
+
+		final ContactInfo contactInfo = (ContactInfo) view.getTag();
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+		ArrayList<String> itemList = new ArrayList<String>(2);
+
+		String myMsisdn = Utils.getUserContactInfo(preferences).getMsisdn();
+
+		/*
+		 * If the user long pressed his/her own contact simply return.
+		 */
+		if (myMsisdn.equals(contactInfo.getMsisdn())) {
+			return false;
+		}
+		/*
+		 * This should only be true in case of unknown contacts.
+		 */
+		if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+			itemList.add(getString(R.string.add_to_contacts));
+		}
+
+		if (myMsisdn.equals(groupConversation.getGroupOwner())) {
+			itemList.add(getString(R.string.remove_from_group));
+		}
+
+		/*
+		 * If no item could be added we should just return.
+		 */
+		if (itemList.isEmpty()) {
+			return false;
+		}
+
+		final String[] items = new String[itemList.size()];
+		itemList.toArray(items);
+
+		builder.setItems(items, new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface arg0, int position) {
+				if (getString(R.string.add_to_contacts).equals(items[position])) {
+					addToContacts(contactInfo.getMsisdn());
+				} else if (getString(R.string.remove_from_group).equals(
+						items[position])) {
+					JSONObject object = new JSONObject();
+					try {
+						object.put(HikeConstants.TO,
+								groupConversation.getMsisdn());
+						object.put(HikeConstants.TYPE,
+								HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
+
+						JSONObject data = new JSONObject();
+
+						JSONArray msisdns = new JSONArray();
+						msisdns.put(contactInfo.getMsisdn());
+
+						data.put(HikeConstants.MSISDNS, msisdns);
+
+						object.put(HikeConstants.DATA, data);
+					} catch (JSONException e) {
+						Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+					}
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.MQTT_PUBLISH, object);
+				}
+			}
+		});
+
+		AlertDialog dialog = builder.create();
+		dialog.show();
+		return true;
 	}
 }

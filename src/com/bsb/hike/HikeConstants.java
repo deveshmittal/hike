@@ -68,6 +68,7 @@ public class HikeConstants {
 	public static final String ACCOUNTS = "accounts";
 	public static final String FAVORITES = "favorites";
 	public static final String PENDING = "pending";
+	public static final String MSISDNS = "msisdns";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -469,6 +470,7 @@ public class HikeConstants {
 		public static final String REMOVE_FAVORITE = "rf";
 		public static final String MUTE = "mute";
 		public static final String UNMUTE = "unmute";
+		public static final String GROUP_CHAT_KICK = "gck";
 	}
 
 	public static enum FTResult {

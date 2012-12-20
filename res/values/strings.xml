@@ -301,4 +301,5 @@
 	<string name="led_notification_info">Flash the LED on new message</string>
 	<string name="with_love">made with love in New Delhi</string>
 	<string name="love">love</string>
+	<string name="remove_from_group">Remove from group</string>	
 </resources>
