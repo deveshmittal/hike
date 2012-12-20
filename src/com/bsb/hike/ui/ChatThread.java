@@ -249,7 +249,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED,
 			HikePubSub.FILE_MESSAGE_CREATED,
 			HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER,
-			HikePubSub.UNBLOCK_USER, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
+			HikePubSub.UNBLOCK_USER,
+			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD,
+			HikePubSub.GROUP_REVIVED };
 
 	private View currentEmoticonCategorySelected;
 
@@ -1115,7 +1117,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		if ((mConversation instanceof GroupConversation)
 				&& !((GroupConversation) mConversation).getIsGroupAlive()) {
-			groupChatDead();
+			toggleGroupLife(false);
 		}
 		/*
 		 * make a copy of the message list since it's used internally by the
@@ -1511,7 +1513,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						groupChatDead();
+						toggleGroupLife(false);
 					}
 				});
 			}
@@ -1597,6 +1599,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					removeMessage(convMessage);
 				}
 			});
+		} else if (HikePubSub.GROUP_REVIVED.equals(type)) {
+			String groupId = (String) object;
+			if (mContactNumber.equals(groupId)) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						toggleGroupLife(true);
+					}
+				});
+			}
 		}
 	}
 
@@ -2054,8 +2066,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							newMediaFileIntent = new Intent(
 									MediaStore.ACTION_VIDEO_CAPTURE);
 							newMediaFileIntent.putExtra(
-									MediaStore.EXTRA_SIZE_LIMIT, (long) (0.9
-											* HikeConstants.MAX_FILE_SIZE));
+									MediaStore.EXTRA_SIZE_LIMIT,
+									(long) (0.9 * HikeConstants.MAX_FILE_SIZE));
 							break;
 
 						case 3:
@@ -2957,12 +2969,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	}
 
-	private void groupChatDead() {
-		((GroupConversation)mConversation).setGroupAlive(false);
-		this.mComposeView.setVisibility(View.INVISIBLE);
-		this.titleIconView.setEnabled(false);
-		findViewById(R.id.emo_btn).setEnabled(false);
-		findViewById(R.id.title_image_btn2).setEnabled(false);
+	private void toggleGroupLife(boolean alive) {
+		((GroupConversation) mConversation).setGroupAlive(alive);
+		this.mComposeView.setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
+		this.titleIconView.setEnabled(alive ? true : false);
+		findViewById(R.id.emo_btn).setEnabled(alive ? true : false);
+		findViewById(R.id.title_image_btn2).setEnabled(alive ? true : false);
 	}
 
 	private String getMsisdnMainUser() {

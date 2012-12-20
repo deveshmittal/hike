@@ -155,16 +155,35 @@ public class MqttMessagesManager {
 			GroupConversation groupConversation = new GroupConversation(
 					jsonObj, this.context);
 
-			if (this.convDb.addGroupParticipants(groupConversation.getMsisdn(),
+			boolean groupRevived = false;
+
+			if (!this.convDb.isGroupAlive(groupConversation.getMsisdn())) {
+
+				Log.d(getClass().getSimpleName(), "Group is not alive");
+				int updated = this.convDb.toggleGroupDeadOrAlive(
+						groupConversation.getMsisdn(), true);
+				Log.d(getClass().getSimpleName(), "Group revived? " + updated);
+				groupRevived = updated > 0;
+
+				if (groupRevived) {
+					jsonObj.put(HikeConstants.NEW_GROUP, true);
+					pubSub.publish(HikePubSub.GROUP_REVIVED,
+							groupConversation.getMsisdn());
+				}
+
+			}
+			if (!groupRevived && this.convDb.addGroupParticipants(groupConversation.getMsisdn(),
 					groupConversation.getGroupParticipantList()) != HikeConstants.NEW_PARTICIPANT) {
+
 				Log.d(getClass().getSimpleName(),
 						"GCJ Message was already received");
 				return;
 			}
 			Log.d(getClass().getSimpleName(), "GCJ Message is new");
 
-			if (!this.convDb.doesConversationExist(groupConversation
-					.getMsisdn())) {
+			if (!groupRevived
+					&& !this.convDb.doesConversationExist(groupConversation
+							.getMsisdn())) {
 				Log.d(getClass().getSimpleName(),
 						"The group conversation does not exists");
 				groupConversation = (GroupConversation) this.convDb
@@ -201,7 +220,7 @@ public class MqttMessagesManager {
 																				// end
 		{
 			String groupId = jsonObj.optString(HikeConstants.TO);
-			if (this.convDb.setGroupDead(groupId) > 0) {
+			if (this.convDb.toggleGroupDeadOrAlive(groupId, false) > 0) {
 				saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 			}
 		} else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) // Message

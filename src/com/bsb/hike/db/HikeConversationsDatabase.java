@@ -647,7 +647,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						"Message: " + mainCursor.getString(messageIdx));
 				if (!Utils.isGroupConversation(msisdn)) {
 					count++;
-					String sqlEscapeMsisdn = DatabaseUtils.sqlEscapeString(msisdn);
+					String sqlEscapeMsisdn = DatabaseUtils
+							.sqlEscapeString(msisdn);
 					oneToOneSelections.append(sqlEscapeMsisdn + ",");
 				}
 				/*
@@ -1108,6 +1109,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
+	public boolean isGroupAlive(String groupId) {
+		Cursor c = mDb.query(DBConstants.GROUP_INFO_TABLE,
+				new String[] { DBConstants.GROUP_ALIVE }, DBConstants.GROUP_ID
+						+ "=?", new String[] { groupId }, null, null, null);
+		if (!c.moveToFirst()) {
+			return false;
+		}
+		return c.getInt(c.getColumnIndex(DBConstants.GROUP_ALIVE)) == 1;
+	}
+
 	public boolean isGroupMuted(String groupId) {
 		Cursor c = mDb.query(DBConstants.GROUP_INFO_TABLE,
 				new String[] { DBConstants.GROUP_ID }, DBConstants.GROUP_ID
@@ -1151,12 +1162,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		return name;
 	}
 
-	public int setGroupDead(String groupId) {
+	public int toggleGroupDeadOrAlive(String groupId, boolean alive) {
 		if (!doesConversationExist(groupId)) {
 			return 0;
 		}
 		ContentValues values = new ContentValues(1);
-		values.put(DBConstants.GROUP_ALIVE, 0);
+		values.put(DBConstants.GROUP_ALIVE, alive);
 		return mDb.update(DBConstants.GROUP_INFO_TABLE, values,
 				DBConstants.GROUP_ID + " = ?", new String[] { groupId });
 	}

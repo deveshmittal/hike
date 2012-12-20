@@ -180,6 +180,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String SWITCHED_DATA_CONNECTION = "switchedDataConnection";
 
+	public static final String GROUP_REVIVED = "groupRevived";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
