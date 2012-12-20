@@ -37,7 +37,8 @@ public class DrawerBaseActivity extends Activity implements
 			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED,
 			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
-			HikePubSub.CONTACT_ADDED, HikePubSub.REFRESH_FAVORITES };
+			HikePubSub.CONTACT_ADDED, HikePubSub.REFRESH_FAVORITES,
+			HikePubSub.REFRESH_RECENTS };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -287,6 +288,18 @@ public class DrawerBaseActivity extends Activity implements
 					parentLayout.refreshFavorites(favoriteList);
 					parentLayout
 							.refreshRecommendedFavorites(recommendedFavoriteList);
+				}
+			});
+		} else if (HikePubSub.REFRESH_RECENTS.equals(type)) {
+			final List<ContactInfo> recentList = HikeUserDatabase.getInstance()
+					.getNonHikeRecentContacts(-1,
+							HikeMessengerApp.isIndianUser(),
+							FavoriteType.NOT_FAVORITE);
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					parentLayout.refreshRecents(recentList);
 				}
 			});
 		}

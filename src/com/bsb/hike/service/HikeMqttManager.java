@@ -21,6 +21,7 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -43,7 +44,7 @@ import com.bsb.hike.utils.Utils;
  * @author vr
  * 
  */
-public class HikeMqttManager implements Listener {
+public class HikeMqttManager implements Listener, HikePubSub.Listener {
 	private final class RetryFailedMessages implements Runnable {
 		public void run() {
 			final List<HikePacket> packets = persistence.getAllSentMessages();
@@ -172,15 +173,17 @@ public class HikeMqttManager implements Listener {
 	private static final String STAGING_BROKER_HOST_NAME = AccountUtils.STAGING_HOST;
 
 	private static final int PRODUCTION_BROKER_PORT_NUMBER = 8080;
+	private static final int PRODUCTION_BROKER_PORT_NUMBER_SSL = 443;
 	private static final int STAGING_BROKER_PORT_NUMBER = 1883;
+	private static final int STAGING_BROKER_PORT_NUMBER_SSL = 8883;
 
 	// taken from preferences
 	// host name of the server we're receiving push notifications from
-	private final String brokerHostName;
+	private String brokerHostName;
 
 	// defaults - this sample uses very basic defaults for it's interactions
 	// with message brokers
-	private final int brokerPortNumber;
+	private int brokerPortNumber;
 
 	private int reconnectTime = 0;
 
@@ -245,23 +248,10 @@ public class HikeMqttManager implements Listener {
 		settings = this.mHikeService.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		String brokerHost = settings.getString(HikeMessengerApp.BROKER_HOST, "");
+		setBrokerHostPort(Utils.isWifiOn(mHikeService));
 
-		/*
-		 * If we set a custom broker host we set those values.
-		 */
-		if(!TextUtils.isEmpty(brokerHost)) {
-			brokerHostName = brokerHost;
-			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT, 8080);
-			return;
-		}
-
-		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION,
-				true);
-		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME
-				: STAGING_BROKER_HOST_NAME;
-		brokerPortNumber = production ? PRODUCTION_BROKER_PORT_NUMBER
-				: STAGING_BROKER_PORT_NUMBER;
+		HikeMessengerApp.getPubSub().addListener(
+				HikePubSub.SWITCHED_DATA_CONNECTION, this);
 	}
 
 	public HikePacket getPacketIfUnsent(int mqttId) {
@@ -293,6 +283,7 @@ public class HikeMqttManager implements Listener {
 			mqtt.setCleanSession(false);
 			mqtt.setUserName(uid);
 			mqtt.setPassword(password);
+			mqtt.setSSL(Utils.isWifiOn(mHikeService));
 		} catch (URISyntaxException e) {
 			// something went wrong!
 			mqtt = null;
@@ -307,6 +298,8 @@ public class HikeMqttManager implements Listener {
 	}
 
 	public void finish() {
+		HikeMessengerApp.getPubSub().removeListener(
+				HikePubSub.SWITCHED_DATA_CONNECTION, this);
 		this.mqttMessageManager.close();
 	}
 
@@ -715,5 +708,46 @@ public class HikeMqttManager implements Listener {
 		} catch (Exception e) {
 			Log.e(getClass().getSimpleName(), "Exception", e);
 		}
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) {
+		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type)) {
+			boolean isWifiConnection = (Boolean) object;
+			setBrokerHostPort(isWifiConnection);
+		}
+	}
+
+	private void setBrokerHostPort(boolean ssl) {
+		Log.d("SSL", "Switching broker port/host. SSL? " + ssl);
+		String brokerHost = settings
+				.getString(HikeMessengerApp.BROKER_HOST, "");
+
+		/*
+		 * If we set a custom broker host we set those values.
+		 */
+		if (!TextUtils.isEmpty(brokerHost)) {
+			brokerHostName = brokerHost;
+			brokerPortNumber = settings.getInt(HikeMessengerApp.BROKER_PORT,
+					8080);
+			return;
+		}
+
+		boolean production = settings.getBoolean(HikeMessengerApp.PRODUCTION,
+				true);
+
+		brokerHostName = production ? PRODUCTION_BROKER_HOST_NAME
+				: STAGING_BROKER_HOST_NAME;
+
+		brokerPortNumber = production ? (ssl ? PRODUCTION_BROKER_PORT_NUMBER_SSL
+				: PRODUCTION_BROKER_PORT_NUMBER)
+				: (ssl ? STAGING_BROKER_PORT_NUMBER_SSL
+						: STAGING_BROKER_PORT_NUMBER);
+
+		mqtt = null;
+		disconnectFromBroker(true);
+
+		Log.d("SSL", "Broker host name: " + brokerHostName);
+		Log.d("SSL", "Broker port: " + brokerPortNumber);
 	}
 }

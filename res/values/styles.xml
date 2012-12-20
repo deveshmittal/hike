@@ -12,17 +12,17 @@
         <item name="android:shadowDy">1</item>
         <item name="android:shadowRadius">2</item>
     </style>
-	
+
     <style name="Text.Shadow.Loading">
         <item name="android:textColor">@color/loading</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
     </style>
-    
+
     <style name="Text.Shadow.White.Bold">
         <item name="android:textStyle">bold</item>
     </style>
-    
+
     <style name="Text.Shadow.White">
         <item name="android:textColor">@color/white</item>
         <item name="android:textSize">16sp</item>
@@ -39,38 +39,38 @@
         <item name="android:shadowDy">0.5</item>
         <item name="android:shadowRadius">0.27</item>
     </style>
-	
+
     <style name="Text">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
 
     <!-- just defines top layer "Animation" -->
-	<style name="Animation" />
+    <style name="Animation" />
 
-	<!-- the animations must have been defined in your "anim" folder, of course -->
-	<style name="Animation.ActivityTransitions">
-	    <item name="android:activityOpenEnterAnimation">@anim/slide_in_right_noalpha</item>
-	    <item name="android:activityOpenExitAnimation">@anim/slide_out_left_noalpha</item>
-	    <item name="android:activityCloseEnterAnimation">@anim/slide_in_left_noalpha</item>
-	    <item name="android:activityCloseExitAnimation">@anim/slide_out_right_noalpha</item>
-	</style>
-
-	<style name="NoTitleBar" parent="@android:style/Theme.NoTitleBar">
-		<item name="android:windowAnimationStyle">@style/Animation.ActivityTransitions</item>
-	    <item name="android:windowNoTitle">true</item>
+    <!-- the animations must have been defined in your "anim" folder, of course -->
+    <style name="Animation.ActivityTransitions">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right_noalpha</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left_noalpha</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left_noalpha</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right_noalpha</item>
     </style>
 
-	<style name="WelcomeHikeMessage">
-		<item name="android:layout_marginTop">90dp</item>
+    <style name="NoTitleBar" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:windowAnimationStyle">@style/Animation.ActivityTransitions</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
-	<style name="T_C_Message">
-		<item name="android:paddingBottom">75dp</item>        
+    <style name="WelcomeHikeMessage">
+        <item name="android:layout_marginTop">90dp</item>
     </style>
 
-	<style name="SignupButton">
-	    <item name="android:layout_width">match_parent</item>
+    <style name="T_C_Message">
+        <item name="android:paddingBottom">75dp</item>
+    </style>
+
+    <style name="SignupButton">
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
 	    <item name="android:layout_marginLeft">45dp</item>
 	    <item name="android:layout_marginRight">45dp</item>
@@ -187,4 +187,139 @@
 	    <item name="android:paddingLeft">30dp</item>
 	    <item name="android:paddingRight">30dp</item>
 	</style>
+
+    <style name="SignupButton.Text"></style>
+
+    <style name="SignupButton.Text.Info">
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:layout_marginRight">0dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowDy">0.5</item>
+        <item name="android:shadowRadius">0.5</item>
+        <item name="android:textColor">@color/offwhite</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="SignupButton.Text.Bold">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SignupButton.Text.Bold.Button">
+        <item name="android:shadowColor">#0f3a56</item>
+        <item name="android:shadowDy">-0.5</item>
+        <item name="android:shadowRadius">0.5</item>
+        <item name="android:textColor">@color/offwhite</item>
+    </style>
+
+    <style name="SignupButton.Text.Bold.Loading">
+        <item name="android:layout_marginLeft">0dp</item>
+        <item name="android:layout_marginRight">0dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">#0f3a56</item>
+        <item name="android:shadowDy">0.5</item>
+        <item name="android:shadowRadius">0.5</item>
+        <item name="android:textColor">#51a8dd</item>
+    </style>
+
+    <style name="Theme.CustomDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <style name="Text.Credits">
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:background">@drawable/bg_credits</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minWidth">26dp</item>
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:paddingRight">5dp</item>
+        <item name="android:shadowColor">#33000000</item>
+        <item name="android:shadowDy">0.5</item>
+        <item name="android:shadowRadius">0.5</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SocialButtons">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">@null</item>
+        <item name="android:drawableLeft">@drawable/ic_twitter</item>
+        <item name="android:drawablePadding">5dp</item>
+        <item name="android:textColor">@color/social_btn_txt</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@color/white</item>
+        <item name="android:shadowDy">1.0</item>
+        <item name="android:shadowRadius">1.0</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="ProfileButtons">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/invite_chatthread_button</item>
+        <item name="android:textColor">@color/invite_all</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:shadowColor">@color/white</item>
+        <item name="android:shadowDy">-1.0</item>
+        <item name="android:shadowRadius">1.0</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="FavoriteButtons">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowDy">-1.0</item>
+        <item name="android:shadowRadius">1.0</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="LeftDrawerDivider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">2dp</item>
+        <item name="android:background">@drawable/right_drawer_divider</item>
+        <item name="android:visibility">visible</item>
+    </style>
+    
+    <style name="LeftDrawerItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/drawer_top_item_selector</item>
+        <item name="android:clickable">true</item>
+        <item name="android:paddingLeft">15dp</item>
+        <item name="android:paddingRight">15dp</item>
+    </style>
+
+    <style name="LeftDrawerItemIcon">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerVertical">true</item>
+    </style>
+    
+    <style name="LeftDrawerItemText">
+        <item name="android:layout_width">@dimen/drawer_text_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_toRightOf">@id/item_icon</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:shadowDy">0.9</item>
+        <item name="android:shadowRadius">0.5</item>
+        <item name="android:shadowColor">#000000</item>
+        <item name="android:textColor">@color/offwhite</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold|italic</item>
+    </style>
+
 </resources>

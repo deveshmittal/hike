@@ -150,7 +150,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		// + " INTEGER DEFAULT " + FavoriteType.NOT_FAVORITE.ordinal();
 		// db.execSQL(alter);
 		// }
-		if (oldVersion == 5) {
+		if (oldVersion < 7) {
 			// Create the favorites table.
 			onCreate(db);
 
@@ -356,38 +356,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		addContacts(contacts, true);
 		addBlockList(blockedMsisdns);
-	}
-
-	public Cursor findUsers(String partialName, String selectedContacts) {
-		List<String> contacts = Utils.splitSelectedContacts(selectedContacts);
-		StringBuilder selectedNumbers = new StringBuilder("");
-
-		if (contacts.size() > 0) {
-			for (String contact : contacts) {
-				selectedNumbers.append("'" + contact + "',");
-			}
-			selectedNumbers.delete(selectedNumbers.length() - 1,
-					selectedNumbers.length());
-		}
-
-		String[] columns = new String[] { DBConstants.NAME,
-				DBConstants.ID + " AS _id", DBConstants.MSISDN,
-				DBConstants.ONHIKE, DBConstants.ONHIKE + "=0 AS NotOnHike",
-				DBConstants.PHONE, DBConstants.LAST_MESSAGED,
-				DBConstants.MSISDN_TYPE, DBConstants.HAS_CUSTOM_PHOTO };
-
-		String selection = "((" + DBConstants.NAME + " LIKE ? OR "
-				+ DBConstants.MSISDN + " LIKE ?) AND " + DBConstants.MSISDN
-				+ " NOT IN (" + selectedNumbers + ")) AND "
-				+ DBConstants.MSISDN + " != 'null'";
-
-		String[] selectionArgs = new String[] { partialName, partialName };
-
-		String orderBy = "NotOnHike";
-
-		Cursor cursor = mDb.query(DBConstants.USERS_TABLE, columns, selection,
-				selectionArgs, null, null, orderBy);
-		return cursor;
 	}
 
 	public ContactInfo getContactInfoFromMSISDN(String msisdn,
@@ -666,11 +634,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			boolean fwdOrgroupChat) {
 		String selection = DBConstants.MSISDN
 				+ " != 'null'"
-				+ ((freeSMSOn && fwdOrgroupChat) ? " AND ((" + DBConstants.ONHIKE
-						+ " = 0 AND " + DBConstants.MSISDN
+				+ ((freeSMSOn && fwdOrgroupChat) ? " AND (("
+						+ DBConstants.ONHIKE + " = 0 AND " + DBConstants.MSISDN
 						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))"
-						: (fwdOrgroupChat ? " AND " + DBConstants.ONHIKE + " != 0"
-								: ""));
+						: (fwdOrgroupChat ? " AND " + DBConstants.ONHIKE
+								+ " != 0" : ""));
 
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 
@@ -878,6 +846,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		} finally {
 			c.close();
 		}
+	}
+
+	public void removeIcon(String msisdn) {
+		mDb.delete(DBConstants.THUMBNAILS_TABLE, DBConstants.MSISDN + "=?",
+				new String[] { msisdn });
 	}
 
 	public void updateContactRecency(String msisdn, long timeStamp) {
@@ -1167,7 +1140,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			mDb.beginTransaction();
 
 			JSONArray msisdns = favorites.names();
-			if(msisdns == null) {
+			if (msisdns == null) {
 				return;
 			}
 			for (int i = 0; i < msisdns.length(); i++) {

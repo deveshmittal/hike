@@ -106,8 +106,8 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 		boolean inviteOnly = contactInfo != null
 				&& ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
 						&& (!contactInfo.getMsisdn().startsWith(
-								HikeConstants.INDIA_COUNTRY_CODE)) && !(Utils
-							.isGroupConversation(contactInfo.getId()))));
+								HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
+							.isOnhike()));
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo != null ? contactInfo.getName()
@@ -277,9 +277,8 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 		if (!isGroupChat) {
 			boolean inviteOnly = ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
 					&& (!contactInfo.getMsisdn().startsWith(
-							HikeConstants.INDIA_COUNTRY_CODE)) && !(Utils
-						.isGroupConversation(contactInfo.getId()))))
-					&& !isUnknownNumber;
+							HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
+						.isOnhike())) && !isUnknownNumber;
 
 			if (inviteOnly) {
 				Log.d(getClass().getSimpleName(),

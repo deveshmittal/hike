@@ -119,6 +119,8 @@ public class MqttMessagesManager {
 				for (String groupId : groupConversations) {
 					saveStatusMsg(jsonObj, groupId);
 				}
+			} else {
+				IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			}
 			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			this.convDb.updateOnHikeStatus(msisdn, joined);
@@ -258,7 +260,8 @@ public class MqttMessagesManager {
 
 			if (convMessage.getMetadata() != null) {
 				if (convMessage.getMetadata().isPokeMessage()) {
-					Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+					Vibrator vibrator = (Vibrator) context
+							.getSystemService(Context.VIBRATOR_SERVICE);
 					vibrator.vibrate(100);
 				}
 			}

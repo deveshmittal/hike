@@ -299,4 +299,6 @@
 	<string name="nudge_info">Double tap anywhere on the\nchat to nudge your friend.</string>
 	<string name="led_notification">LED notification</string>
 	<string name="led_notification_info">Flash the LED on new message</string>
+	<string name="with_love">made with love in New Delhi</string>
+	<string name="love">love</string>
 </resources>

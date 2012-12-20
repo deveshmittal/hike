@@ -150,6 +150,9 @@ public class HikeService extends Service {
 	/* VARIABLES - other local variables */
 	/************************************************************************/
 
+	// receiver that notifies change in network type.
+	private NetworkTypeChangeIntentReceiver networkTypeChangeIntentReceiver;
+
 	// receiver that notifies the Service when the phone gets data connection
 	private NetworkConnectionIntentReceiver netConnReceiver;
 
@@ -218,6 +221,9 @@ public class HikeService extends Service {
 		registerReceiver(dataEnabledReceiver, new IntentFilter(
 				ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED));
 
+		networkTypeChangeIntentReceiver = new NetworkTypeChangeIntentReceiver();
+		registerReceiver(networkTypeChangeIntentReceiver, new IntentFilter(
+				ConnectivityManager.CONNECTIVITY_ACTION));
 		/*
 		 * notify android that our service represents a user visible action, so
 		 * it should not be killable. In order to do so, we need to show a
@@ -426,7 +432,7 @@ public class HikeService extends Service {
 			updateCheckTrigger = null;
 		}
 
-		if(registerToGCMTrigger != null) {
+		if (registerToGCMTrigger != null) {
 			unregisterReceiver(registerToGCMTrigger);
 			registerToGCMTrigger = null;
 		}
@@ -440,6 +446,10 @@ public class HikeService extends Service {
 		if (dataEnabledReceiver != null) {
 			unregisterReceiver(dataEnabledReceiver);
 			dataEnabledReceiver = null;
+		}
+		if (networkTypeChangeIntentReceiver != null) {
+			unregisterReceiver(networkTypeChangeIntentReceiver);
+			networkTypeChangeIntentReceiver = null;
 		}
 	}
 
@@ -584,6 +594,25 @@ public class HikeService extends Service {
 			// CPU
 			// to sleep now
 			wl.release();
+		}
+	}
+
+	private class NetworkTypeChangeIntentReceiver extends BroadcastReceiver {
+
+		boolean wasWifiOnLastTime = false;
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			boolean isWifiOn = Utils.isWifiOn(getApplicationContext());
+			if (wasWifiOnLastTime == isWifiOn) {
+				Log.d("SSL", "Same connection type as before. Wifi? "
+						+ isWifiOn);
+				return;
+			}
+			Log.d("SSL", "Different connection type. Wifi? " + isWifiOn);
+			wasWifiOnLastTime = isWifiOn;
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.SWITCHED_DATA_CONNECTION, isWifiOn);
 		}
 	}
 

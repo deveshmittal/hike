@@ -609,7 +609,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 			if (message.isFileTransferMessage()) {
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-				clipboard.setText(AccountUtils.FILE_TRANSFER_BASE_VIEW_URL
+				clipboard.setText(AccountUtils.fileTransferBaseViewUrl
 						+ hikeFile.getFileKey());
 			} else {
 				clipboard.setText(message.getMessage());
@@ -672,7 +672,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					ChatThread.this,
 					getString(
 							R.string.share_file_message,
-							AccountUtils.FILE_TRANSFER_BASE_VIEW_URL
+							AccountUtils.fileTransferBaseViewUrl
 									+ hikeFile.getFileKey()));
 			return true;
 		default:
@@ -710,9 +710,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (mConversation == null) {
 			return false;
 		}
-
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.chatthread_menu, menu);
 
 		return true;
 	}
@@ -950,7 +947,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			if (intent.hasExtra(HikeConstants.Extras.MSG)) {
 				String msg = intent.getStringExtra(HikeConstants.Extras.MSG);
 				mComposeView.setText(msg);
-				mComposeView.setSelection(msg.length());
+				mComposeView.setSelection(mComposeView.length());
 				SmileyParser.getInstance().addSmileyToEditable(
 						mComposeView.getText(), false);
 			} else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH)) {
@@ -996,7 +993,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(
 						mContactNumber, "");
 				mComposeView.setText(message);
-				mComposeView.setSelection(message.length());
+				mComposeView.setSelection(mComposeView.length());
 				SmileyParser.getInstance().addSmileyToEditable(
 						mComposeView.getText(), false);
 			}
@@ -1894,6 +1891,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						mConversation.isOnhike());
 				startActivity(intent);
 			} else {
+				if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+					return;
+				}
+
 				Utils.logEvent(ChatThread.this,
 						HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
 				Intent intent = new Intent();
@@ -2053,8 +2054,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							newMediaFileIntent = new Intent(
 									MediaStore.ACTION_VIDEO_CAPTURE);
 							newMediaFileIntent.putExtra(
-									MediaStore.EXTRA_SIZE_LIMIT,
-									(long) HikeConstants.MAX_FILE_SIZE);
+									MediaStore.EXTRA_SIZE_LIMIT, (long) (0.9
+											* HikeConstants.MAX_FILE_SIZE));
 							break;
 
 						case 3:
@@ -2957,6 +2958,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void groupChatDead() {
+		((GroupConversation)mConversation).setGroupAlive(false);
 		this.mComposeView.setVisibility(View.INVISIBLE);
 		this.titleIconView.setEnabled(false);
 		findViewById(R.id.emo_btn).setEnabled(false);

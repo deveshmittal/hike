@@ -11,6 +11,8 @@ import java.net.URLConnection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,6 +21,7 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferTaskBase;
@@ -29,14 +32,16 @@ public class DownloadFileTask extends FileTransferTaskBase {
 	private String fileKey;
 	private Context context;
 	private long msgId;
+	private HikeFileType hikeFileType;
 
 	public DownloadFileTask(Context context, File destinationFile,
-			String fileKey, long msgId) {
+			String fileKey, long msgId, HikeFileType hikeFileType) {
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
 		this.context = context;
 		this.msgId = msgId;
 		this.cancelTask = new AtomicBoolean(false);
+		this.hikeFileType = hikeFileType;
 	}
 
 	@Override
@@ -44,7 +49,7 @@ public class DownloadFileTask extends FileTransferTaskBase {
 		FileOutputStream fos = null;
 		InputStream is = null;
 		try {
-			URL url = new URL(AccountUtils.FILE_TRANSFER_BASE_DOWNLOAD_URL
+			URL url = new URL(AccountUtils.fileTransferBaseDownloadUrl
 					+ fileKey);
 			URLConnection urlConnection = url.openConnection();
 
@@ -109,6 +114,9 @@ public class DownloadFileTask extends FileTransferTaskBase {
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
 			destinationFile.delete();
 		}
+
+		context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri
+				.fromFile(destinationFile)));
 
 		ChatThread.fileTransferTaskMap.remove(msgId);
 		HikeMessengerApp.getPubSub().publish(

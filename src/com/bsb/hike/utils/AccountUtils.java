@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.CharBuffer;
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +33,7 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -58,51 +60,66 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
 public class AccountUtils {
+
+	public static final String HTTP_STRING = "http://";
+
+	public static final String HTTPS_STRING = "https://";
+
 	public static final String PRODUCTION_HOST = "api.im.hike.in";
 
 	public static final String STAGING_HOST = "staging.im.hike.in";
 
 	public static final int PRODUCTION_PORT = 80;
 
+	public static final int PRODUCTION_PORT_SSL = 443;
+
 	public static final int STAGING_PORT = 8080;
 
-	public static String HOST = PRODUCTION_HOST;
+	public static final int STAGING_PORT_SSL = 443;
 
-	public static int PORT = PRODUCTION_PORT;
+	public static String host = PRODUCTION_HOST;
 
-	public static String BASE = "http://" + HOST + "/v1";
+	public static int port = PRODUCTION_PORT;
+
+	public static String base = HTTP_STRING + host + "/v1";
 
 	public static final String PRODUCTION_FT_HOST = "ft.im.hike.in";
 
-	public static String FILE_TRANSFER_HOST = PRODUCTION_FT_HOST;
+	public static String fileTransferHost = PRODUCTION_FT_HOST;
 
-	public static String FILE_TRANSFER_UPLOAD_BASE = "http://"
-			+ FILE_TRANSFER_HOST + ":" + Integer.toString(PORT) + "/v1";
+	public static String fileTransferUploadBase = HTTP_STRING
+			+ fileTransferHost + ":" + Integer.toString(port) + "/v1";
 
 	public static final String FILE_TRANSFER_DOWNLOAD_BASE = "/user/ft/";
 
-	public static String FILE_TRANSFER_BASE_DOWNLOAD_URL = BASE
+	public static String fileTransferBaseDownloadUrl = base
 			+ FILE_TRANSFER_DOWNLOAD_BASE;
 
-	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "http://hike.in/f/";
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = HTTP_STRING
+			+ "hike.in/f/";
 
-	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = "http://staging.im.hike.in/f/";
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = HTTP_STRING
+			+ "staging.im.hike.in/f/";
 
-	public static String FILE_TRANSFER_BASE_VIEW_URL = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
+	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
+
+	public static boolean ssl = false;
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
 
-	private static HttpClient mClient = null;
+	public static HttpClient mClient = null;
 
 	private static String mToken = null;
 
 	private static String appVersion = null;
+
 
 	public static void setToken(String token) {
 		mToken = token;
@@ -115,8 +132,8 @@ public class AccountUtils {
 	private static synchronized HttpClient getClient() {
 		if (mClient != null) {
 			return mClient;
-
 		}
+		Log.d("SSL", "Initialising the HTTP CLIENT");
 
 		HttpParams params = new BasicHttpParams();
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
@@ -129,8 +146,24 @@ public class AccountUtils {
 		HttpConnectionParams.setSoTimeout(params, 30 * 1000);
 
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", PlainSocketFactory
-				.getSocketFactory(), PORT));
+
+		if (ssl) {
+			try {
+				KeyStore dummyTrustStore = KeyStore.getInstance(KeyStore
+						.getDefaultType());
+				dummyTrustStore.load(null, null);
+				SSLSocketFactory sf = new CustomSSLSocketFactory(
+						dummyTrustStore);
+				sf.setHostnameVerifier(SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+				schemeRegistry.register(new Scheme("https", sf, port));
+			} catch (Exception e) {
+				schemeRegistry.register(new Scheme("http", PlainSocketFactory
+						.getSocketFactory(), port));
+			}
+		} else {
+			schemeRegistry.register(new Scheme("http", PlainSocketFactory
+					.getSocketFactory(), port));
+		}
 
 		ClientConnectionManager cm = new ThreadSafeClientConnManager(params,
 				schemeRegistry);
@@ -180,7 +213,7 @@ public class AccountUtils {
 	}
 
 	public static int sendMessage(String phone_no, String message) {
-		HttpPost httppost = new HttpPost(BASE + "/user/msg");
+		HttpPost httppost = new HttpPost(base + "/user/msg");
 		List<NameValuePair> pairs = new ArrayList<NameValuePair>(2);
 		pairs.add(new BasicNameValuePair("to", phone_no));
 		pairs.add(new BasicNameValuePair("body", message));
@@ -204,7 +237,7 @@ public class AccountUtils {
 	}
 
 	public static void invite(String phone_no) throws UserError {
-		HttpPost httppost = new HttpPost(BASE + "/user/invite");
+		HttpPost httppost = new HttpPost(base + "/user/invite");
 		addToken(httppost);
 		try {
 			List<NameValuePair> pairs = new ArrayList<NameValuePair>(1);
@@ -258,7 +291,7 @@ public class AccountUtils {
 
 	public static AccountInfo registerAccount(Context context, String pin,
 			String unAuthMSISDN) {
-		HttpPost httppost = new HttpPost(BASE + "/account");
+		HttpPost httppost = new HttpPost(base + "/account");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try {
@@ -342,7 +375,7 @@ public class AccountUtils {
 	}
 
 	public static String validateNumber(String number) {
-		HttpPost httppost = new HttpPost(BASE + "/account/validate");
+		HttpPost httppost = new HttpPost(base + "/account/validate");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try {
@@ -387,7 +420,7 @@ public class AccountUtils {
 
 	public static void setName(String name) throws NetworkErrorException,
 			IllegalStateException {
-		HttpPost httppost = new HttpPost(BASE + "/account/name");
+		HttpPost httppost = new HttpPost(base + "/account/name");
 		addToken(httppost);
 		JSONObject data = new JSONObject();
 
@@ -411,7 +444,7 @@ public class AccountUtils {
 	public static JSONObject postAddressBook(String token,
 			Map<String, List<ContactInfo>> contactsMap)
 			throws IllegalStateException, IOException {
-		HttpPost httppost = new HttpPost(BASE + "/account/addressbook");
+		HttpPost httppost = new HttpPost(base + "/account/addressbook");
 		addToken(httppost);
 		JSONObject data;
 		data = getJsonContactList(contactsMap);
@@ -442,7 +475,7 @@ public class AccountUtils {
 	public static List<ContactInfo> updateAddressBook(
 			Map<String, List<ContactInfo>> new_contacts_by_id,
 			JSONArray ids_json) throws IllegalStateException {
-		HttpPatch request = new HttpPatch(BASE + "/account/addressbook");
+		HttpPatch request = new HttpPatch(base + "/account/addressbook");
 		addToken(request);
 		JSONObject data = new JSONObject();
 
@@ -548,8 +581,8 @@ public class AccountUtils {
 
 	public static void deleteOrUnlinkAccount(boolean deleteAccount)
 			throws NetworkErrorException, IllegalStateException {
-		HttpRequestBase request = deleteAccount ? new HttpDelete(BASE
-				+ "/account") : new HttpPost(BASE + "/account/unlink");
+		HttpRequestBase request = deleteAccount ? new HttpDelete(base
+				+ "/account") : new HttpPost(base + "/account/unlink");
 		addToken(request);
 		JSONObject obj = executeRequest(request);
 		if ((obj == null) || "fail".equals(obj.optString("stat"))) {
@@ -560,7 +593,7 @@ public class AccountUtils {
 	public static void performRequest(HikeHttpRequest hikeHttpRequest,
 			boolean addToken) throws NetworkErrorException,
 			IllegalStateException {
-		HttpPost post = new HttpPost(BASE + hikeHttpRequest.getPath());
+		HttpPost post = new HttpPost(base + hikeHttpRequest.getPath());
 		if (addToken) {
 			addToken(post);
 		}
@@ -581,7 +614,7 @@ public class AccountUtils {
 
 	private static HttpURLConnection getFileTransferURLConnection(
 			String fileName, String fileType) throws Exception {
-		URL url = new URL(FILE_TRANSFER_UPLOAD_BASE + "/user/ft");
+		URL url = new URL(fileTransferUploadBase + "/user/ft");
 
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setDoInput(true);
@@ -668,7 +701,7 @@ public class AccountUtils {
 		int totalBytesRead = bytesRead;
 
 		while (bytesRead > 0) {
-			outputStream.write(buffer, 0, buffer.length);
+			outputStream.write(buffer, 0, bytesRead);
 
 			bytesAvailable = fileInputStream.available();
 			Log.d("Available", bytesAvailable + "");
@@ -709,7 +742,7 @@ public class AccountUtils {
 			throws NetworkErrorException, IllegalStateException {
 		String url = facebook ? "/account/connect/fb"
 				: "/account/connect/twitter";
-		HttpDelete delete = new HttpDelete(BASE + url);
+		HttpDelete delete = new HttpDelete(base + url);
 		addToken(delete);
 		JSONObject obj = executeRequest(delete);
 		if ((obj == null) || "fail".equals(obj.optString("stat"))) {
@@ -718,6 +751,6 @@ public class AccountUtils {
 	}
 
 	public static String getServerUrl() {
-		return BASE;
+		return base;
 	}
 }

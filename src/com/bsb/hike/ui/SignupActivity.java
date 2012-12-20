@@ -214,6 +214,9 @@ public class SignupActivity extends Activity implements
 				// Tracking the registration event for Fiksu
 				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
+				if(mHandler == null) {
+					mHandler = new Handler();
+				}
 				mHandler.postDelayed(new Runnable() {
 					@Override
 					public void run() {

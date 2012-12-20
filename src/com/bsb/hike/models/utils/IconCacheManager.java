@@ -93,6 +93,11 @@ public class IconCacheManager {
 		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
 	}
 
+	public synchronized void deleteIconForMSISDN(String msisdn) {
+		mDb.removeIcon(msisdn);
+		clearIconForMSISDN(msisdn);
+	}
+
 	public synchronized void clearIconCache() {
 		mIcons.clear();
 	}

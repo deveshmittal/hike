@@ -63,6 +63,10 @@ public class GroupConversation extends Conversation {
 		return isGroupAlive;
 	}
 
+	public void setGroupAlive(boolean isAlive) {
+		this.isGroupAlive = isAlive;
+	}
+
 	public void setGroupParticipantList(
 			Map<String, GroupParticipant> groupParticipantList) {
 		this.groupParticipantList = groupParticipantList;

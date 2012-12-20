@@ -320,6 +320,11 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		notifyDataSetChanged();
 	}
 
+	public void refreshRecents(List<ContactInfo> recents) {
+		recentList = recents;
+		makeCompleteList();
+	}
+
 	public int getPendingRequests() {
 		return recommendedFavoriteList.size();
 	}
@@ -437,9 +442,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		switch (viewType) {
 		case RECENT:
-			viewHolder.hikeImg
-					.setVisibility(contactInfo.isOnhike() ? View.VISIBLE
-							: View.GONE);
+			viewHolder.hikeImg.setVisibility(View.GONE);
 		case FAVORITE:
 			if (viewType == FavoriteAdapterViewType.RECENT) {
 				if ((!HikeMessengerApp.isIndianUser() && !contactInfo

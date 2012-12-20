@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -646,7 +647,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						"Message: " + mainCursor.getString(messageIdx));
 				if (!Utils.isGroupConversation(msisdn)) {
 					count++;
-					oneToOneSelections.append("'" + msisdn + "',");
+					String sqlEscapeMsisdn = DatabaseUtils.sqlEscapeString(msisdn);
+					oneToOneSelections.append(sqlEscapeMsisdn + ",");
 				}
 				/*
 				 * Making conversation with just the msisdn and convid. We will

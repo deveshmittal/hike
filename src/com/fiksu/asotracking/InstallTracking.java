@@ -162,16 +162,23 @@ public class InstallTracking extends BroadcastReceiver {
 			Log.e(FiksuTrackingManager.FIKSU_LOG_TAG, "THE FIKSU INSTALL TRACKING CODE ISN'T INSTALLED CORRECTLY!");
 			Log.e(FiksuTrackingManager.FIKSU_LOG_TAG, "Unexpected receiver: " + receiver);
 
-			throw new FiksuIntegrationError("The Fiksu BroadcastReceiver must be installed as the only receiver for the " +
-											"INSTALL_REFERRER Intent in AndroidManifest.xml.");
+			try{
+				throw new FiksuIntegrationError("The Fiksu BroadcastReceiver must be installed as the only receiver for the " +
+						"INSTALL_REFERRER Intent in AndroidManifest.xml.");
+			} catch (FiksuIntegrationError e) {
+				Log.w("Fiksu", "Fiksu exception", e);
+			}
 		}
 
 		if (receivers.size() > 1) {
 			Log.e(FiksuTrackingManager.FIKSU_LOG_TAG, "THE FIKSU INSTALL TRACKING CODE ISN'T INSTALLED CORRECTLY!");
 			final String msg = "Multiple receivers declared for: " + INTENT_NAME;
 			Log.e(FiksuTrackingManager.FIKSU_LOG_TAG, msg);
-			
-			throw new FiksuIntegrationError(msg);
+			try {
+				throw new FiksuIntegrationError(msg);
+			} catch (FiksuIntegrationError e) {
+				Log.w("Fiksu", "Fiksu exception", e);
+			}
 		}
 	}
 }
