@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -2023,11 +2024,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
+
+		final boolean canShareLocation = getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_LOCATION);
+
 		final CharSequence[] options = getResources().getStringArray(
-				R.array.file_transfer_items);
-		final int[] optionIcons = { R.drawable.ic_share_location_item,
-				R.drawable.ic_image_item, R.drawable.ic_video_item,
-				R.drawable.ic_music_item, R.drawable.ic_record_item };
+				canShareLocation ? R.array.file_transfer_items
+						: R.array.file_transfer_items_no_loc);
+
+		final int[] optionIcons;
+		if (canShareLocation) {
+			optionIcons = new int[] { R.drawable.ic_share_location_item,
+					R.drawable.ic_image_item, R.drawable.ic_video_item,
+					R.drawable.ic_music_item, R.drawable.ic_record_item };
+		} else {
+			optionIcons = new int[] { R.drawable.ic_image_item,
+					R.drawable.ic_video_item, R.drawable.ic_music_item,
+					R.drawable.ic_record_item };
+		}
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
 
@@ -2056,6 +2070,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						int requestCode;
 						Intent pickIntent = new Intent();
 						Intent newMediaFileIntent = null;
+						if (!canShareLocation) {
+							which++;
+						}
 						switch (which) {
 						case 0:
 							requestCode = HikeConstants.SHARE_LOCATION_CODE;

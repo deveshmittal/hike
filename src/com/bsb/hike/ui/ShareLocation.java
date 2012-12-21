@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -65,10 +66,13 @@ public class ShareLocation extends MapActivity {
 		gpsDialogShown = savedInstanceState != null
 				&& savedInstanceState
 						.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
+
+		boolean hasGps = getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_LOCATION_GPS);
 		/*
 		 * Don't show this on orientation changes
 		 */
-		if (!gpsDialogShown
+		if (hasGps && !gpsDialogShown
 				&& !locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
 					this);
