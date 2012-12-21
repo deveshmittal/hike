@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikePubSub.Listener;
@@ -320,7 +321,6 @@ public class HikeMessengerApp extends Application implements Listener {
 	}
 
 	public void onCreate() {
-		FiksuTrackingManager.initialize(this);
 
 		SharedPreferences settings = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -356,6 +356,10 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
 				HikeConstants.INDIA_COUNTRY_CODE);
+
+		if (!TextUtils.isEmpty(msisdn) && !isIndianUser) {
+			FiksuTrackingManager.initialize(this);
+		}
 
 		initialiseListeners();
 

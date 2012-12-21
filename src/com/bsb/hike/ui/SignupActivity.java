@@ -211,10 +211,13 @@ public class SignupActivity extends Activity implements
 						HikeMessengerApp.isIndianUser());
 				editor.commit();
 
+				if (!HikeMessengerApp.isIndianUser()) {
+					FiksuTrackingManager.initialize(getApplication());
+				}
 				// Tracking the registration event for Fiksu
 				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
-				if(mHandler == null) {
+				if (mHandler == null) {
 					mHandler = new Handler();
 				}
 				mHandler.postDelayed(new Runnable() {

@@ -11,7 +11,6 @@
 package com.fiksu.asotracking;
 
 import java.net.URLDecoder;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -25,8 +24,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
-
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 public class InstallTracking extends BroadcastReceiver {
@@ -40,6 +39,11 @@ public class InstallTracking extends BroadcastReceiver {
 	}
 
 	protected void uploadConversionEvent(Context context, Intent intent) {
+		TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+		String countryIso = manager.getNetworkCountryIso().toUpperCase();
+		if ("IN".equalsIgnoreCase(countryIso)) {
+			return;
+		}
 		try {
 			String referrer = intent.getStringExtra("referrer");
 			if (referrer != null) {
