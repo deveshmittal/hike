@@ -1015,13 +1015,34 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onLeaveGroupClicked(View v) {
-		Intent intent = new Intent(this, MessagesList.class);
-		intent.putExtra(HikeConstants.Extras.GROUP_LEFT, mLocalMSISDN);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		startActivity(intent);
-		finish();
-		overridePendingTransition(R.anim.slide_in_left_noalpha,
-				R.anim.slide_out_right_noalpha);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.leave_group_confirm);
+		builder.setPositiveButton(R.string.yes,
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Intent intent = new Intent(ProfileActivity.this,
+								MessagesList.class);
+						intent.putExtra(HikeConstants.Extras.GROUP_LEFT,
+								mLocalMSISDN);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
+						finish();
+						overridePendingTransition(R.anim.slide_in_left_noalpha,
+								R.anim.slide_out_right_noalpha);
+					}
+				});
+		builder.setNegativeButton(R.string.no,
+				new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+					}
+				});
+		builder.setCancelable(true);
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
 	}
 
 	public void onBlockGroupOwnerClicked(View v) {
