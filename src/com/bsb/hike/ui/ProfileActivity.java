@@ -1357,26 +1357,54 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					addToContacts(contactInfo.getMsisdn());
 				} else if (getString(R.string.remove_from_group).equals(
 						items[position])) {
-					JSONObject object = new JSONObject();
-					try {
-						object.put(HikeConstants.TO,
-								groupConversation.getMsisdn());
-						object.put(HikeConstants.TYPE,
-								HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
+					AlertDialog.Builder builder = new AlertDialog.Builder(
+							ProfileActivity.this);
 
-						JSONObject data = new JSONObject();
+					String message = getString(R.string.remove_confirm,
+							contactInfo.getFirstName());
 
-						JSONArray msisdns = new JSONArray();
-						msisdns.put(contactInfo.getMsisdn());
+					builder.setMessage(message);
+					builder.setPositiveButton(R.string.yes,
+							new DialogInterface.OnClickListener() {
 
-						data.put(HikeConstants.MSISDNS, msisdns);
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									JSONObject object = new JSONObject();
+									try {
+										object.put(HikeConstants.TO,
+												groupConversation.getMsisdn());
+										object.put(
+												HikeConstants.TYPE,
+												HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
 
-						object.put(HikeConstants.DATA, data);
-					} catch (JSONException e) {
-						Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-					}
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.MQTT_PUBLISH, object);
+										JSONObject data = new JSONObject();
+
+										JSONArray msisdns = new JSONArray();
+										msisdns.put(contactInfo.getMsisdn());
+
+										data.put(HikeConstants.MSISDNS, msisdns);
+
+										object.put(HikeConstants.DATA, data);
+									} catch (JSONException e) {
+										Log.e(getClass().getSimpleName(),
+												"Invalid JSON", e);
+									}
+									HikeMessengerApp.getPubSub().publish(
+											HikePubSub.MQTT_PUBLISH, object);
+								}
+							});
+					builder.setNegativeButton(R.string.no,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+								}
+							});
+					builder.setCancelable(true);
+					AlertDialog alertDialog = builder.create();
+					alertDialog.show();
 				}
 			}
 		});
