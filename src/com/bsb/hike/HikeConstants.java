@@ -249,6 +249,8 @@ public class HikeConstants {
 
 	public static final String FONT = "font";
 
+	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 40;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
