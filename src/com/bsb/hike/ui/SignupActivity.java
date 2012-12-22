@@ -449,6 +449,7 @@ public class SignupActivity extends Activity implements
 				});
 
 		AlertDialog dialog = builder.create();
+		dialog.getListView().setFastScrollEnabled(true);
 		dialog.show();
 	}
 

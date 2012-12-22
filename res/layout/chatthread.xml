@@ -65,6 +65,7 @@
             android:background="@color/offwhite"
             android:layout_marginTop="1px"
             android:divider="@null"
+            android:fastScrollEnabled="true"
             android:fadingEdge="none" />
 
         <View
