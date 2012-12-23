@@ -340,16 +340,16 @@ public class Utils {
 				HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
 		switch (type) {
 		case PROFILE:
-			path.append("/hike Profile Images");
+			path.append(HikeConstants.PROFILE_ROOT);
 			break;
 		case IMAGE:
-			path.append("/hike Images");
+			path.append(HikeConstants.IMAGE_ROOT);
 			break;
 		case VIDEO:
-			path.append("/hike Videos");
+			path.append(HikeConstants.VIDEO_ROOT);
 			break;
 		case AUDIO:
-			path.append("/hike Audios");
+			path.append(HikeConstants.AUDIO_ROOT);
 		}
 
 		File mediaStorageDir = new File(path.toString());
