@@ -2010,11 +2010,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private void showFilePickerDialog(
 			final ExternalStorageState externalStorageState) {
-		if (externalStorageState == ExternalStorageState.NONE) {
-			Toast.makeText(getApplicationContext(),
-					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-			return;
-		}
 		/*
 		 * Don't allow uploading more files if an upload/download is in progress
 		 */
@@ -2072,6 +2067,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						Intent newMediaFileIntent = null;
 						if (!canShareLocation) {
 							which++;
+						}
+						if (which != 0) {
+							if (externalStorageState == ExternalStorageState.NONE) {
+								Toast.makeText(getApplicationContext(),
+										R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+								return;
+							}
 						}
 						switch (which) {
 						case 0:
