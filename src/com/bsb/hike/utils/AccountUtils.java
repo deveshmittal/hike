@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -65,6 +68,7 @@ import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.mqtt.client.HikeSSLUtil;
 
 public class AccountUtils {
 
@@ -102,11 +106,9 @@ public class AccountUtils {
 	public static String fileTransferBaseDownloadUrl = base
 			+ FILE_TRANSFER_DOWNLOAD_BASE;
 
-	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = HTTP_STRING
-			+ "hike.in/f/";
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "hike.in/f/";
 
-	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = HTTP_STRING
-			+ "staging.im.hike.in/f/";
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = "staging.im.hike.in/f/";
 
 	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
@@ -119,7 +121,6 @@ public class AccountUtils {
 	private static String mToken = null;
 
 	private static String appVersion = null;
-
 
 	public static void setToken(String token) {
 		mToken = token;
@@ -612,16 +613,21 @@ public class AccountUtils {
 		}
 	}
 
-	private static HttpURLConnection getFileTransferURLConnection(
-			String fileName, String fileType) throws Exception {
+	private static URLConnection getFileTransferURLConnection(String fileName,
+			String fileType) throws Exception {
 		URL url = new URL(fileTransferUploadBase + "/user/ft");
 
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		URLConnection connection = url.openConnection();
+		if (ssl) {
+			((HttpsURLConnection) connection).setRequestMethod("PUT");
+			((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil
+					.getSSLSocketFactory());
+		} else {
+			((HttpURLConnection) connection).setRequestMethod("PUT");
+		}
 		connection.setDoInput(true);
 		connection.setDoOutput(true);
 		connection.setUseCaches(false);
-
-		connection.setRequestMethod("PUT");
 
 		connection.setConnectTimeout(150 * 1000);
 		connection.setRequestProperty("Connection", "Keep-Alive");
@@ -634,9 +640,9 @@ public class AccountUtils {
 		return connection;
 	}
 
-	private static JSONObject getFileTransferResponse(
-			HttpURLConnection connection, FileTransferTaskBase uploadTask,
-			AtomicBoolean cancelUpload) throws Exception {
+	private static JSONObject getFileTransferResponse(URLConnection connection,
+			FileTransferTaskBase uploadTask, AtomicBoolean cancelUpload)
+			throws Exception {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				connection.getInputStream()));
 
@@ -684,7 +690,7 @@ public class AccountUtils {
 		}
 		maxSize = bytesAvailable;
 
-		HttpURLConnection connection = getFileTransferURLConnection(fileName,
+		URLConnection connection = getFileTransferURLConnection(fileName,
 				fileType);
 
 		DataOutputStream outputStream = new DataOutputStream(
@@ -753,4 +759,5 @@ public class AccountUtils {
 	public static String getServerUrl() {
 		return base;
 	}
+
 }

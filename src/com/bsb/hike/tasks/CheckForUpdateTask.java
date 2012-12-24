@@ -7,6 +7,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLConnection;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +22,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Utils;
@@ -46,11 +50,19 @@ public class CheckForUpdateTask extends AsyncTask<Void, Void, Boolean> {
 	protected Boolean doInBackground(Void... params) {
 		try {
 			URL url = new URL(UPDATE_CHECK_URL);
-			HttpURLConnection httpURLConnection = (HttpURLConnection) url
-					.openConnection();
-			httpURLConnection.setConnectTimeout(0);
+
+			URLConnection uRLConnection;
+			if (AccountUtils.ssl) {
+				uRLConnection = (HttpsURLConnection) url.openConnection();
+				((HttpsURLConnection) uRLConnection)
+						.setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
+			} else {
+				uRLConnection = (HttpURLConnection) url.openConnection();
+			}
+
+			uRLConnection.setConnectTimeout(0);
 			BufferedReader br = new BufferedReader(new InputStreamReader(
-					httpURLConnection.getInputStream()));
+					uRLConnection.getInputStream()));
 			StringBuilder responseSB = new StringBuilder();
 			String line = "";
 			while ((line = br.readLine()) != null) {

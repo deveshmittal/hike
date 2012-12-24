@@ -1164,15 +1164,15 @@ public class Utils {
 				+ AccountUtils.fileTransferHost + ":"
 				+ Integer.toString(AccountUtils.port) + "/v1";
 
-		CheckForUpdateTask.UPDATE_CHECK_URL = (ssl ? AccountUtils.HTTPS_STRING
-				: AccountUtils.HTTP_STRING)
+		CheckForUpdateTask.UPDATE_CHECK_URL = httpString
 				+ (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL
 						: CheckForUpdateTask.STAGING_URL);
 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base
 				+ AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
-		AccountUtils.fileTransferBaseViewUrl = isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION
-				: AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING;
+		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
+				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION
+						: AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
 		Log.d("SSL", "Base: " + AccountUtils.base);
 		Log.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);

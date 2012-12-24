@@ -10,6 +10,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,6 +24,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferTaskBase;
@@ -52,6 +55,10 @@ public class DownloadFileTask extends FileTransferTaskBase {
 			URL url = new URL(AccountUtils.fileTransferBaseDownloadUrl
 					+ fileKey);
 			URLConnection urlConnection = url.openConnection();
+			if (AccountUtils.ssl) {
+				((HttpsURLConnection) urlConnection).setSSLSocketFactory(HikeSSLUtil
+						.getSSLSocketFactory());
+			}
 
 			int length = urlConnection.getContentLength();
 
@@ -59,7 +66,7 @@ public class DownloadFileTask extends FileTransferTaskBase {
 				return FTResult.FILE_TOO_LARGE;
 			}
 
-			is = new BufferedInputStream(url.openConnection().getInputStream());
+			is = new BufferedInputStream(urlConnection.getInputStream());
 
 			fos = new FileOutputStream(destinationFile);
 
