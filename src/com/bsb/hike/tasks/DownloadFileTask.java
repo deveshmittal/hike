@@ -23,7 +23,6 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
@@ -35,16 +34,14 @@ public class DownloadFileTask extends FileTransferTaskBase {
 	private String fileKey;
 	private Context context;
 	private long msgId;
-	private HikeFileType hikeFileType;
 
 	public DownloadFileTask(Context context, File destinationFile,
-			String fileKey, long msgId, HikeFileType hikeFileType) {
+			String fileKey, long msgId) {
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
 		this.context = context;
 		this.msgId = msgId;
 		this.cancelTask = new AtomicBoolean(false);
-		this.hikeFileType = hikeFileType;
 	}
 
 	@Override
