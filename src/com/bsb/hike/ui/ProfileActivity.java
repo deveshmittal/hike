@@ -1322,6 +1322,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 									(int) (6 * Utils.densityMultiplier));
 							participantNameItem.setLayoutParams(lp);
 
+							participantNameItem.setTag(participant);
+							participantNameItem.setOnLongClickListener(ProfileActivity.this);
+
 							participantNameItem.setId(msisdn.hashCode());
 							participantNameContainer
 									.addView(participantNameItem);
