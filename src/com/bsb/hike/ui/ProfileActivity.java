@@ -432,6 +432,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					.findViewById(R.id.participant_name);
 			participantName.setText(Utils.ellipsizeName(contactInfo
 					.getFirstName()));
+			if (contactInfo.getMsisdn().equals(
+					userInfo.getContactInfo().getMsisdn())) {
+				participantName.append("(Me)");
+			} else if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+				participantName.append("(" + contactInfo.getMsisdn() + ")");
+			}
 			participantName.setTextColor(getResources().getColor(
 					contactInfo.isOnhike() ? R.color.contact_blue
 							: R.color.contact_green));
@@ -1323,7 +1329,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 							participantNameItem.setLayoutParams(lp);
 
 							participantNameItem.setTag(participant);
-							participantNameItem.setOnLongClickListener(ProfileActivity.this);
+							participantNameItem
+									.setOnLongClickListener(ProfileActivity.this);
 
 							participantNameItem.setId(msisdn.hashCode());
 							participantNameContainer
