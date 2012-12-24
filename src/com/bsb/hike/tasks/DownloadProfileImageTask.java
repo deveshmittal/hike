@@ -30,6 +30,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	private String msisdn;
 	private String id;
 	private String urlString;
+	private String fileName;
 	private String filePath;
 
 	public DownloadProfileImageTask(Context context, String msisdn,
@@ -51,7 +52,8 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 					+ AccountUtils.port + "/static/avatars/" + fileName;
 		}
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
-				+ HikeConstants.PROFILE_ROOT + "/" + fileName;
+				+ HikeConstants.PROFILE_ROOT;
+		this.fileName = filePath + "/" + fileName;
 	}
 
 	@Override
@@ -59,6 +61,13 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 		FileOutputStream fos = null;
 		InputStream is = null;
 		try {
+			File dir = new File(filePath);
+			if (!dir.exists()) {
+				if (!dir.mkdirs()) {
+					return Boolean.FALSE;
+				}
+			}
+
 			Log.d(getClass().getSimpleName(), "Downloading profile image: "
 					+ urlString);
 			URL url = new URL(urlString);
@@ -70,7 +79,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 
 			is = new BufferedInputStream(connection.getInputStream());
 
-			fos = new FileOutputStream(filePath);
+			fos = new FileOutputStream(fileName);
 
 			byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
 			int len = 0;
@@ -106,7 +115,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 		if (result == false) {
 			Toast.makeText(context, R.string.download_failed,
 					Toast.LENGTH_SHORT).show();
-			File file = new File(filePath);
+			File file = new File(fileName);
 			file.delete();
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED, msisdn);
