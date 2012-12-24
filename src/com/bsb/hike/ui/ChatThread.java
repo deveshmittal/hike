@@ -1219,6 +1219,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					R.color.send_hike));
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
 			mComposeView.setHint("Free Message...");
+			findViewById(R.id.title_image_btn2).setEnabled(true);
 		} else {
 			updateChatMetadata();
 			((ImageButton) findViewById(R.id.emo_btn))
@@ -1659,6 +1660,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mComposeView.setHint("0 Free SMS left...");
 			mComposeView.setEnabled(false);
 			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+			findViewById(R.id.title_image_btn2).setEnabled(false);
 
 			boolean show = mConversationDb.wasOverlayDismissed(mConversation
 					.getMsisdn());
@@ -1673,6 +1675,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				mComposeView.setHint(R.string.type_to_compose);
 				mComposeView.setEnabled(true);
 			}
+			findViewById(R.id.title_image_btn2).setEnabled(true);
 			findViewById(R.id.info_layout).setVisibility(View.GONE);
 
 			if (!blockOverlay) {
