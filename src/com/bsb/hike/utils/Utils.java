@@ -330,6 +330,69 @@ public class Utils {
 		return context.getResources().getDrawable(id);
 	}
 
+	public static String getDefaultAvatarServerName(Context context,
+			String msisdn) {
+		String name;
+		int count = 7;
+		int id = iconHash(msisdn) % count;
+		if (isGroupConversation(msisdn)) {
+			switch (id) {
+			case 0:
+				name = "GreenPeople";
+				break;
+			case 1:
+				name = "RedPeople";
+				break;
+			case 2:
+				name = "BluePeople";
+				break;
+			case 3:
+				name = "CoffeePeople";
+				break;
+			case 4:
+				name = "EarthyPeople";
+				break;
+			case 5:
+				name = "PinkPeople";
+				break;
+			case 6:
+				name = "TealPeople";
+				break;
+			default:
+				name = "GreenPeople";
+				break;
+			}
+		} else {
+			switch (id) {
+			case 0:
+				name = "Beach";
+				break;
+			case 1:
+				name = "Candy";
+				break;
+			case 2:
+				name = "Cocktail";
+				break;
+			case 3:
+				name = "Coffee";
+				break;
+			case 4:
+				name = "Digital";
+				break;
+			case 5:
+				name = "Sneakers";
+				break;
+			case 6:
+				name = "Space";
+				break;
+			default:
+				name = "Beach";
+				break;
+			}
+		}
+		return name + ".png";
+	}
+
 	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(HikeFileType type,
 			String orgFileName, String fileKey) {
@@ -995,8 +1058,13 @@ public class Utils {
 
 	public static byte[] bitmapToBytes(Bitmap bitmap,
 			Bitmap.CompressFormat format) {
+		return bitmapToBytes(bitmap, format, 50);
+	}
+
+	public static byte[] bitmapToBytes(Bitmap bitmap,
+			Bitmap.CompressFormat format, int quality) {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		bitmap.compress(format, 50, bao);
+		bitmap.compress(format, quality, bao);
 		return bao.toByteArray();
 	}
 
@@ -1502,5 +1570,20 @@ public class Utils {
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return (cm != null && cm.getActiveNetworkInfo() != null && (cm
 				.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+	}
+
+	public static String getProfileImageFileName(String msisdn) {
+		return getValidFileNameForMsisdn(msisdn) + ".jpg";
+	}
+
+	public static String getValidFileNameForMsisdn(String msisdn) {
+		return msisdn.replaceAll(":", "-");
+	}
+
+	public static void removeLargerProfileImageForMsisdn(String msisdn) {
+		String path = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		String fileName = Utils.getProfileImageFileName(msisdn);
+		(new File(path, fileName)).delete();
 	}
 }

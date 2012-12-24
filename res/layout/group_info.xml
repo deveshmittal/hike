@@ -1,266 +1,272 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/group_parent_layout"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/thatch_repeat"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
-    <include
-        android:id="@+id/top_panel_ref"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        layout="@layout/top_panel" />
-
-    <ScrollView
+    <LinearLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp" >
+        android:background="@drawable/thatch_repeat"
+        android:orientation="vertical" >
 
-        <LinearLayout
+        <include
+            android:id="@+id/top_panel_ref"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            layout="@layout/top_panel" />
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="5dp"
-                android:text="@string/group_profile"
-                android:textColor="@color/timestampcolor"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <RelativeLayout
-                    android:id="@+id/group_avatar_border"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:onClick="onChangeImageClicked" >
-
-                    <ImageView
-                        android:id="@+id/profile"
-                        android:layout_width="42dp"
-                        android:layout_height="42dp"
-                        android:layout_centerInParent="true"
-                        android:src="@drawable/ic_group_avatar1" />
-
-                    <ImageView
-                        android:id="@+id/profile_border"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/square" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignBottom="@id/profile_border"
-                        android:layout_alignRight="@id/profile_border"
-                        android:padding="3dp"
-                        android:src="@drawable/ic_edit_profile" />
-                </RelativeLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_toRightOf="@id/group_avatar_border"
-                    android:background="@drawable/profile_bckg"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal" >
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/name_edit_field"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="4"
-                        android:paddingLeft="10dp"
-                        android:text="@string/group_name"
-                        android:textColor="@color/lightblack"
-                        android:textSize="16sp" />
-					
-                    <com.bsb.hike.view.CustomFontEditText
-                        android:id="@+id/name_input"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="5"
-                        android:background="@null"
-                        android:inputType="text"
-                        android:textColor="@color/subtext"
-                        android:textSize="16sp"
-                        android:textStyle="italic"
-                        android:visibility="gone"
-						android:paddingRight="1dp"
-						android:maxLength="@integer/max_length_group_name" />
-                    
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/name_display"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="5"
-                        android:onClick="onEditGroupNameClicked"
-                        android:background="@null"
-                        android:ellipsize="end"
-                        android:singleLine="true"
-                        android:clickable="true"
-                        android:textColor="@color/subtext"
-                        android:textSize="16sp"
-                        android:textStyle="italic"
-                        android:visibility="visible"
-                        android:paddingRight="1dp" />
-                </LinearLayout>
-            </RelativeLayout>
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/participants"
-                android:textColor="@color/timestampcolor"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp" >
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/profile_bckg"
                 android:orientation="vertical" >
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal" >
+                <com.bsb.hike.view.CustomFontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/group_profile"
+                    android:textColor="@color/timestampcolor"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="4"
-                        android:paddingLeft="10dp"
-                        android:text="@string/group_owner"
-                        android:textColor="@color/lightblack"
-                        android:textSize="16sp" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
 
                     <RelativeLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="5" >
+                        android:id="@+id/group_avatar_border"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" >
 
-                        <include
-                            android:id="@+id/group_owner"
-                            layout="@layout/participant_name_item" />
+                        <ImageView
+                            android:id="@+id/profile"
+                            android:layout_width="42dp"
+                            android:layout_height="42dp"
+                            android:layout_centerInParent="true"
+                            android:src="@drawable/ic_group_avatar1"
+                            android:onClick="onViewImageClicked" />
 
+                        <ImageView
+                            android:id="@+id/profile_border"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/square" />
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBottom="@id/profile_border"
+                            android:layout_alignRight="@id/profile_border"
+                            android:padding="3dp"
+                            android:src="@drawable/ic_edit_profile"
+                            android:onClick="onChangeImageClicked" />
                     </RelativeLayout>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@drawable/ic_thread_divider_profile" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:orientation="horizontal" >
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:layout_weight="4"
-                        android:paddingLeft="10dp"
-                        android:text="@string/members"
-                        android:textColor="@color/lightblack"
-                        android:textSize="16sp" />
 
                     <LinearLayout
-                        android:id="@+id/group_participant_container"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:layout_marginBottom="8dp"
-                        android:layout_weight="5"
-                        android:orientation="vertical" />
-                </LinearLayout>
-                
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@drawable/ic_thread_divider_profile" />
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_toRightOf="@id/group_avatar_border"
+                        android:background="@drawable/profile_bckg"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:id="@+id/name_edit_field"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="4"
+                            android:paddingLeft="10dp"
+                            android:text="@string/group_name"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+
+                        <com.bsb.hike.view.CustomFontEditText
+                            android:id="@+id/name_input"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="5"
+                            android:background="@null"
+                            android:inputType="text"
+                            android:maxLength="@integer/max_length_group_name"
+                            android:paddingRight="1dp"
+                            android:textColor="@color/subtext"
+                            android:textSize="16sp"
+                            android:textStyle="italic"
+                            android:visibility="gone" />
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:id="@+id/name_display"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="5"
+                            android:background="@null"
+                            android:clickable="true"
+                            android:ellipsize="end"
+                            android:onClick="onEditGroupNameClicked"
+                            android:paddingRight="1dp"
+                            android:singleLine="true"
+                            android:textColor="@color/subtext"
+                            android:textSize="16sp"
+                            android:textStyle="italic"
+                            android:visibility="visible" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/participants"
+                    android:textColor="@color/timestampcolor"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
                 <LinearLayout
-                    android:id="@+id/add_participants_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:orientation="horizontal"
-                    android:onClick="onAddNewParticipantsClicked" >
+                    android:background="@drawable/profile_bckg"
+                    android:orientation="vertical" >
 
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/add_participants_txt"
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="4"
+                            android:paddingLeft="10dp"
+                            android:text="@string/group_owner"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+
+                        <RelativeLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="5" >
+
+                            <include
+                                android:id="@+id/group_owner"
+                                layout="@layout/participant_name_item" />
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/ic_thread_divider_profile" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="14dp"
-                        android:layout_weight="4"
-                        android:paddingLeft="10dp"
-                        android:text="@string/add_participants"
-                        android:textColor="@color/lightblack"
-                        android:textSize="16sp" />
+                        android:minHeight="48dp"
+                        android:orientation="horizontal" >
 
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:layout_weight="4"
+                            android:paddingLeft="10dp"
+                            android:text="@string/members"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+
+                        <LinearLayout
+                            android:id="@+id/group_participant_container"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginTop="14dp"
+                            android:layout_weight="5"
+                            android:orientation="vertical" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@drawable/ic_thread_divider_profile" />
+
+                    <LinearLayout
+                        android:id="@+id/add_participants_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:onClick="onAddNewParticipantsClicked"
+                        android:orientation="horizontal" >
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:id="@+id/add_participants_txt"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:layout_weight="4"
+                            android:paddingLeft="10dp"
+                            android:text="@string/add_participants"
+                            android:textColor="@color/lightblack"
+                            android:textSize="16sp" />
+                    </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="15dp" />
-
-            <com.bsb.hike.view.CustomFontButton
-                style="@style/ProfileButtons"
-                android:id="@+id/invite_all_btn"
-                android:layout_marginBottom="10dp"
-                android:onClick="onInviteAllClicked"
-                android:text="@string/invite_all_to_hike" />
-            
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" >
-
-                <com.bsb.hike.view.CustomFontButton
-                    style="@style/ProfileButtons"
-                    android:id="@+id/leave_group_btn"
-                    android:layout_weight="1"
-                    android:onClick="onLeaveGroupClicked"
-                    android:text="@string/leave_group" />
 
                 <View
-                    android:id="@+id/empty_horizontal_space"
-                    android:layout_width="3dp"
-                    android:layout_height="1dp" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="15dp" />
 
                 <com.bsb.hike.view.CustomFontButton
+                    android:id="@+id/invite_all_btn"
                     style="@style/ProfileButtons"
-                    android:id="@+id/block_owner_btn"
-                    android:layout_weight="1"
-                    android:onClick="onBlockGroupOwnerClicked"
-                    android:text="@string/block_owner" />
+                    android:layout_marginBottom="10dp"
+                    android:onClick="onInviteAllClicked"
+                    android:text="@string/invite_all_to_hike" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <com.bsb.hike.view.CustomFontButton
+                        android:id="@+id/leave_group_btn"
+                        style="@style/ProfileButtons"
+                        android:layout_weight="1"
+                        android:onClick="onLeaveGroupClicked"
+                        android:text="@string/leave_group" />
+
+                    <View
+                        android:id="@+id/empty_horizontal_space"
+                        android:layout_width="3dp"
+                        android:layout_height="1dp" />
+
+                    <com.bsb.hike.view.CustomFontButton
+                        android:id="@+id/block_owner_btn"
+                        style="@style/ProfileButtons"
+                        android:layout_weight="1"
+                        android:onClick="onBlockGroupOwnerClicked"
+                        android:text="@string/block_owner" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="15dp" />
             </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginBottom="15dp" />
-        </LinearLayout>
-    </ScrollView>
+    <include layout="@layout/profile_image" />
 
-</LinearLayout>
+</RelativeLayout>

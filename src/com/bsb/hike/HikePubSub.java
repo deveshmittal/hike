@@ -182,6 +182,10 @@ public class HikePubSub implements Runnable {
 
 	public static final String GROUP_REVIVED = "groupRevived";
 
+	public static final String PROFILE_IMAGE_DOWNLOADED = "profileImageDownloaded";
+
+	public static final String PROFILE_IMAGE_NOT_DOWNLOADED = "profileImageNotDownloaded";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

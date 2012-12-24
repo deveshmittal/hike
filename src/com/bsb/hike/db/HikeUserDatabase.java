@@ -809,6 +809,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public void setIcon(String msisdn, byte[] data, boolean isProfileImage) {
 		if (!isProfileImage) {
+			/*
+			 * We delete the older file that contained the larger avatar image
+			 * for this msisdn.
+			 */
+			Utils.removeLargerProfileImageForMsisdn(msisdn);
+
 			Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0,
 					data.length);
 			Bitmap roundedBitmap = Utils.getRoundedCornerBitmap(tempBitmap);
@@ -849,7 +855,19 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public void removeIcon(String msisdn) {
+		/*
+		 * We delete the older file that contained the larger avatar image for
+		 * this msisdn.
+		 */
+		Utils.removeLargerProfileImageForMsisdn(msisdn);
+
 		mDb.delete(DBConstants.THUMBNAILS_TABLE, DBConstants.MSISDN + "=?",
+				new String[] { msisdn });
+
+		String whereClause = DBConstants.MSISDN + "=?"; // msisdn;
+		ContentValues customPhotoFlag = new ContentValues(1);
+		customPhotoFlag.put(DBConstants.HAS_CUSTOM_PHOTO, 0);
+		mDb.update(DBConstants.USERS_TABLE, customPhotoFlag, whereClause,
 				new String[] { msisdn });
 	}
 
@@ -1173,6 +1191,17 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.REFRESH_FAVORITES, null);
 			}
+		}
+	}
+
+	public boolean hasIcon(String msisdn) {
+		Cursor c = mDb.query(DBConstants.THUMBNAILS_TABLE,
+				new String[] { DBConstants.MSISDN }, DBConstants.MSISDN + "=?",
+				new String[] { msisdn }, null, null, null);
+		try {
+			return c.moveToFirst();
+		} finally {
+			c.close();
 		}
 	}
 }

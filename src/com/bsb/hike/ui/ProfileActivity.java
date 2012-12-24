@@ -1,6 +1,12 @@
 package com.bsb.hike.ui;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -16,12 +22,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -63,6 +71,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
@@ -112,11 +121,14 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private String[] groupInfoPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.GROUP_END,
 			HikePubSub.PARTICIPANT_JOINED_GROUP,
-			HikePubSub.PARTICIPANT_LEFT_GROUP };
+			HikePubSub.PARTICIPANT_LEFT_GROUP,
+			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED,
-			HikePubSub.USER_LEFT };
+			HikePubSub.USER_LEFT, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
 	private GroupConversation groupConversation;
 	private ImageButton topBarBtn;
 	private ContactInfo contactInfo;
@@ -136,9 +148,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 																 * download the
 																 * picasa image
 																 */
+		public DownloadProfileImageTask downloadProfileImageTask;
 
 		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
 		public int genderType;
+		public boolean viewingProfileImage = false;
 	}
 
 	public File selectedFileIcon; /*
@@ -191,9 +205,14 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				mActivityState.task.setActivity(this);
 				mDialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.updating_profile));
-			} else if (mActivityState.downloadPicasaImageTask != null) {
+			} else if (mActivityState.downloadPicasaImageTask != null
+					|| mActivityState.downloadProfileImageTask != null) {
 				mDialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
+				if (mActivityState.downloadProfileImageTask != null) {
+					mDialog.setCancelable(true);
+					setDialogOnCancelListener();
+				}
 			}
 		} else {
 			mActivityState = new ActivityState();
@@ -221,6 +240,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				this.profileType = ProfileType.USER_PROFILE;
 				setupProfileScreen(savedInstanceState);
 			}
+		}
+		if (mActivityState.viewingProfileImage) {
+			onViewImageClicked(null);
 		}
 	}
 
@@ -562,7 +584,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		mTitleView.setText(getResources().getString(R.string.profile_title));
 		mNameView.setText(nameTxt);
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(
-				getLargerIconId());
+				mLocalMSISDN);
 		mIconView.setImageDrawable(drawable);
 
 		myInfo.setFocusable(true);
@@ -581,6 +603,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onBackPressed() {
+		if (mActivityState.viewingProfileImage) {
+			findViewById(R.id.drawer_layout).setVisibility(View.VISIBLE);
+			findViewById(R.id.profile_image_container).setVisibility(View.GONE);
+			mActivityState.viewingProfileImage = false;
+			return;
+		}
 		if (this.profileType == ProfileType.USER_PROFILE_EDIT
 				|| this.profileType == ProfileType.GROUP_INFO) {
 			isBackPressed = true;
@@ -672,12 +700,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					Bitmap.CompressFormat.JPEG);
 
 			final byte[] larger_bytes;
-			if (this.profileType != ProfileType.GROUP_INFO) {
-				larger_bytes = Utils.bitmapToBytes(mActivityState.newBitmap,
-						Bitmap.CompressFormat.JPEG);
-			} else {
-				larger_bytes = null;
-			}
+			larger_bytes = Utils.bitmapToBytes(mActivityState.newBitmap,
+					Bitmap.CompressFormat.JPEG, 100);
 
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
 					+ "/avatar", new HikeHttpRequest.HikeHttpCallback() {
@@ -686,12 +710,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					mActivityState.newBitmap = null;
 					if (mIconView != null) {
 						/* reset the image */
-						mIconView
-								.setImageDrawable(IconCacheManager
-										.getInstance()
-										.getIconForMSISDN(
-												ProfileActivity.this.profileType != ProfileType.GROUP_INFO ? getLargerIconId()
-														: mLocalMSISDN));
+						mIconView.setImageDrawable(IconCacheManager
+								.getInstance().getIconForMSISDN(mLocalMSISDN));
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -705,6 +725,35 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						db.setIcon(getLargerIconId(), larger_bytes, true);
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.PROFILE_PIC_CHANGED, null);
+					} else {
+						Log.d(getClass().getSimpleName(),
+								"Setting group profile image");
+						try {
+							InputStream src = new ByteArrayInputStream(
+									larger_bytes);
+							OutputStream dest;
+							String path = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+									+ HikeConstants.PROFILE_ROOT;
+							String fileName = Utils
+									.getProfileImageFileName(mLocalMSISDN);
+							dest = new FileOutputStream(
+									new File(path, fileName));
+
+							byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+							int len;
+
+							while ((len = src.read(buffer)) > 0) {
+								dest.write(buffer, 0, len);
+							}
+
+							src.close();
+							dest.close();
+						} catch (FileNotFoundException e) {
+							Log.e(getClass().getSimpleName(), "File not found",
+									e);
+						} catch (IOException e) {
+							Log.e(getClass().getSimpleName(), "IO Exception", e);
+						}
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -712,7 +761,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				}
 			});
 
-			request.setPostData(bytes);
+			request.setPostData(larger_bytes);
 			requests.add(request);
 		}
 
@@ -886,8 +935,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		Intent intent = new Intent(this, CropImage.class);
 		intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
 		intent.putExtra(HikeConstants.Extras.SCALE, true);
-		intent.putExtra(HikeConstants.Extras.OUTPUT_X, 80);
-		intent.putExtra(HikeConstants.Extras.OUTPUT_Y, 80);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_X, 500);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_Y, 500);
 		intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
 		intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
 		startActivityForResult(intent, CROP_RESULT);
@@ -958,6 +1007,63 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 			mActivityState.genderType = 0;
 		}
+	}
+
+	public void onViewImageClicked(View v) {
+		if (profileType == ProfileType.USER_PROFILE) {
+			showLargerImage(IconCacheManager.getInstance().getIconForMSISDN(
+					getLargerIconId()));
+		} else {
+			String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+					+ HikeConstants.PROFILE_ROOT;
+
+			boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(
+					mLocalMSISDN);
+
+			String fileName = hasCustomImage ? Utils
+					.getProfileImageFileName(mLocalMSISDN) : Utils
+					.getDefaultAvatarServerName(this, mLocalMSISDN);
+
+			File file = new File(basePath, fileName);
+
+			if (file.exists()) {
+				showLargerImage(BitmapDrawable.createFromPath(basePath + "/"
+						+ fileName));
+			} else {
+				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
+						getApplicationContext(), mLocalMSISDN, fileName,
+						hasCustomImage);
+				mActivityState.downloadProfileImageTask.execute();
+
+				mDialog = ProgressDialog.show(this, null, getResources()
+						.getString(R.string.downloading_image));
+				mDialog.setCancelable(true);
+				setDialogOnCancelListener();
+			}
+		}
+	}
+
+	private void setDialogOnCancelListener() {
+		mDialog.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				if (mActivityState.downloadProfileImageTask != null) {
+					mActivityState.downloadProfileImageTask.cancel(true);
+				}
+				mActivityState = new ActivityState();
+			}
+		});
+	}
+
+	public void showLargerImage(Drawable image) {
+		mActivityState.viewingProfileImage = true;
+
+		findViewById(R.id.drawer_layout).setVisibility(View.GONE);
+		findViewById(R.id.profile_image_container).setVisibility(View.VISIBLE);
+
+		((ImageView) findViewById(R.id.profile_image_large))
+				.setImageDrawable(image);
 	}
 
 	public void onChangeImageClicked(View v) {
@@ -1110,7 +1216,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
+	public void onEventReceived(final String type, Object object) {
 		// Only execute the super class method if we are in a drawer activity
 		if (profileType == ProfileType.USER_PROFILE) {
 			super.onEventReceived(type, object);
@@ -1266,6 +1372,26 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				public void run() {
 					findViewById(R.id.invite_to_hike_btn).setVisibility(
 							userJoin ? View.GONE : View.VISIBLE);
+				}
+			});
+		} else if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type)
+				|| HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED.equals(type)) {
+			String msisdn = (String) object;
+			if (!mLocalMSISDN.equals(msisdn)) {
+				return;
+			}
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					mActivityState = new ActivityState();
+					if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type)) {
+						onViewImageClicked(null);
+					}
+
+					if (mDialog != null) {
+						mDialog.dismiss();
+						mDialog = null;
+					}
 				}
 			});
 		}
