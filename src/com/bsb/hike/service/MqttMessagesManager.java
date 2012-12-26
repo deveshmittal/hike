@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -281,9 +280,7 @@ public class MqttMessagesManager {
 
 			if (convMessage.getMetadata() != null) {
 				if (convMessage.getMetadata().isPokeMessage()) {
-					Vibrator vibrator = (Vibrator) context
-							.getSystemService(Context.VIBRATOR_SERVICE);
-					vibrator.vibrate(100);
+					Utils.vibrateNudgeReceived(context);
 				}
 			}
 			Log.d(getClass().getSimpleName(), "Receiver received Message : "

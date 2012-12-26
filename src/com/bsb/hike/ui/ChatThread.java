@@ -36,7 +36,6 @@ import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
@@ -682,6 +681,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return false;
 		}
 	}
+
 	@Override
 	/*
 	 * this function is called right before the options menu is shown. Disable
@@ -3035,8 +3035,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 		}, 10);
 
-		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		vibrator.vibrate(100);
+		Utils.vibrateNudgeReceived(this);
 	}
 
 	@Override

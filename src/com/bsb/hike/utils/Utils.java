@@ -64,6 +64,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -1589,5 +1591,15 @@ public class Utils {
 				+ HikeConstants.PROFILE_ROOT;
 		String fileName = Utils.getProfileImageFileName(msisdn);
 		(new File(path, fileName)).delete();
+	}
+
+	public static void vibrateNudgeReceived(Context context) {
+		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+				HikeConstants.VIBRATE_PREF, true)) {
+			return;
+		}
+		Vibrator vibrator = (Vibrator) context
+				.getSystemService(Context.VIBRATOR_SERVICE);
+		vibrator.vibrate(100);
 	}
 }
