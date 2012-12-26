@@ -727,39 +727,28 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				public void onSuccess(JSONObject response) {
 					HikeUserDatabase db = HikeUserDatabase.getInstance();
 					db.setIcon(mLocalMSISDN, bytes, false);
-					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO) {
-						db.setIcon(getLargerIconId(), larger_bytes, true);
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.PROFILE_PIC_CHANGED, null);
-					} else {
-						Log.d(getClass().getSimpleName(),
-								"Setting group profile image");
-						try {
-							InputStream src = new ByteArrayInputStream(
-									larger_bytes);
-							OutputStream dest;
-							String path = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
-									+ HikeConstants.PROFILE_ROOT;
-							String fileName = Utils
-									.getProfileImageFileName(mLocalMSISDN);
-							dest = new FileOutputStream(
-									new File(path, fileName));
+					try {
+						InputStream src = new ByteArrayInputStream(larger_bytes);
+						OutputStream dest;
+						String path = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+								+ HikeConstants.PROFILE_ROOT;
+						String fileName = Utils
+								.getProfileImageFileName(mLocalMSISDN);
+						dest = new FileOutputStream(new File(path, fileName));
 
-							byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
-							int len;
+						byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
+						int len;
 
-							while ((len = src.read(buffer)) > 0) {
-								dest.write(buffer, 0, len);
-							}
-
-							src.close();
-							dest.close();
-						} catch (FileNotFoundException e) {
-							Log.e(getClass().getSimpleName(), "File not found",
-									e);
-						} catch (IOException e) {
-							Log.e(getClass().getSimpleName(), "IO Exception", e);
+						while ((len = src.read(buffer)) > 0) {
+							dest.write(buffer, 0, len);
 						}
+
+						src.close();
+						dest.close();
+					} catch (FileNotFoundException e) {
+						Log.e(getClass().getSimpleName(), "File not found", e);
+					} catch (IOException e) {
+						Log.e(getClass().getSimpleName(), "IO Exception", e);
 					}
 					if (isBackPressed) {
 						finishEditing();
@@ -1016,36 +1005,31 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onViewImageClicked(View v) {
-		if (profileType == ProfileType.USER_PROFILE) {
-			showLargerImage(IconCacheManager.getInstance().getIconForMSISDN(
-					getLargerIconId()));
+		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+
+		boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(
+				mLocalMSISDN);
+
+		String fileName = hasCustomImage ? Utils
+				.getProfileImageFileName(mLocalMSISDN) : Utils
+				.getDefaultAvatarServerName(this, mLocalMSISDN);
+
+		File file = new File(basePath, fileName);
+
+		if (file.exists()) {
+			showLargerImage(BitmapDrawable.createFromPath(basePath + "/"
+					+ fileName));
 		} else {
-			String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
-					+ HikeConstants.PROFILE_ROOT;
+			mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
+					getApplicationContext(), mLocalMSISDN, fileName,
+					hasCustomImage);
+			mActivityState.downloadProfileImageTask.execute();
 
-			boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(
-					mLocalMSISDN);
-
-			String fileName = hasCustomImage ? Utils
-					.getProfileImageFileName(mLocalMSISDN) : Utils
-					.getDefaultAvatarServerName(this, mLocalMSISDN);
-
-			File file = new File(basePath, fileName);
-
-			if (file.exists()) {
-				showLargerImage(BitmapDrawable.createFromPath(basePath + "/"
-						+ fileName));
-			} else {
-				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
-						getApplicationContext(), mLocalMSISDN, fileName,
-						hasCustomImage);
-				mActivityState.downloadProfileImageTask.execute();
-
-				mDialog = ProgressDialog.show(this, null, getResources()
-						.getString(R.string.downloading_image));
-				mDialog.setCancelable(true);
-				setDialogOnCancelListener();
-			}
+			mDialog = ProgressDialog.show(this, null,
+					getResources().getString(R.string.downloading_image));
+			mDialog.setCancelable(true);
+			setDialogOnCancelListener();
 		}
 	}
 
