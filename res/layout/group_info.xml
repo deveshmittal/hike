@@ -84,7 +84,7 @@
                             android:id="@+id/name_edit_field"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4"
+                            android:layout_weight="4.5"
                             android:paddingLeft="10dp"
                             android:text="@string/group_name"
                             android:textColor="@color/lightblack"
