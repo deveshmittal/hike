@@ -172,8 +172,10 @@ public class MqttMessagesManager {
 				}
 
 			}
-			if (!groupRevived && this.convDb.addGroupParticipants(groupConversation.getMsisdn(),
-					groupConversation.getGroupParticipantList()) != HikeConstants.NEW_PARTICIPANT) {
+			if (!groupRevived
+					&& this.convDb.addGroupParticipants(
+							groupConversation.getMsisdn(),
+							groupConversation.getGroupParticipantList()) != HikeConstants.NEW_PARTICIPANT) {
 
 				Log.d(getClass().getSimpleName(),
 						"GCJ Message was already received");
