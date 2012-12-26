@@ -135,6 +135,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String TEMP_NUM = "tempNum";
 
+	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
+
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"

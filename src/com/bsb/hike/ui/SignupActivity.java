@@ -209,6 +209,7 @@ public class SignupActivity extends Activity implements
 				Editor editor = prefs.edit();
 				editor.putBoolean(HikeConstants.FREE_SMS_PREF,
 						HikeMessengerApp.isIndianUser());
+				editor.remove(HikeMessengerApp.TEMP_COUNTRY_CODE);
 				editor.commit();
 
 				if (!HikeMessengerApp.isIndianUser()) {
@@ -332,6 +333,11 @@ public class SignupActivity extends Activity implements
 					String code = countryPicker.getText().toString();
 					code = code.substring(code.indexOf("+"), code.length());
 					input = code + input;
+					Editor editor = getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
+							.edit();
+					editor.putString(HikeMessengerApp.TEMP_COUNTRY_CODE, code);
+					editor.commit();
 				}
 				mTask.addUserInput(input);
 			}
@@ -373,7 +379,7 @@ public class SignupActivity extends Activity implements
 
 		String prevCode = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(
-				HikeMessengerApp.COUNTRY_CODE, "");
+				HikeMessengerApp.TEMP_COUNTRY_CODE, "");
 		countryNamesAndCodes = getResources().getStringArray(
 				R.array.country_names_and_codes);
 		countryISOAndCodes = getResources().getStringArray(
@@ -412,6 +418,7 @@ public class SignupActivity extends Activity implements
 		ssb.setSpan(new StyleSpan(Typeface.BOLD), 0, code.indexOf("+"),
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		countryPicker.setText(ssb);
+		countryCode = code;
 	}
 
 	public void onCountryPickerClick(View v) {
