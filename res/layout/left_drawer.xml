@@ -111,7 +111,7 @@
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
-                    android:text="@string/invite" />
+                    android:text="@string/invite_friends" />
             </RelativeLayout>
 
             <View

@@ -58,10 +58,53 @@
                     android:orientation="vertical" >
 
                     <RelativeLayout
-                        android:id="@+id/facebook"
+                        android:id="@+id/sms"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:background="@drawable/profile_top_item_selector"
+                        android:clickable="true" >
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:id="@+id/item_txt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:drawableLeft="@drawable/ic_invite_sms"
+                            android:drawablePadding="5dp"
+                            android:paddingLeft="10dp"
+                            android:text="@string/sms"
+                            android:textColor="@color/lightblack"
+                            android:textSize="15sp"
+                            android:textStyle="bold|italic" />
+
+                        <com.bsb.hike.view.CustomFontTextView
+                            android:id="@+id/item_subtxt"
+                            android:layout_width="@dimen/tell_a_friend_subtext_width"
+                            android:layout_height="wrap_content"
+                            android:gravity="right"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:drawablePadding="5dp"
+                            android:drawableRight="@drawable/ic_arrow"
+                            android:paddingRight="10dp"
+                            android:text="@string/sms_subtext"
+                            android:textColor="#a4a49a"
+                            android:textSize="13sp"
+                            android:textStyle="italic" />
+                    </RelativeLayout>
+
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_alignParentBottom="true"
+                        android:background="@drawable/ic_thread_divider_profile" />
+
+                    <RelativeLayout
+                        android:id="@+id/facebook"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/profile_center_item_selector"
                         android:clickable="true" >
 
                         <com.bsb.hike.view.CustomFontTextView
@@ -131,49 +174,6 @@
                             android:drawableRight="@drawable/ic_arrow"
                             android:paddingRight="10dp"
                             android:text="@string/twitter_subtext"
-                            android:textColor="#a4a49a"
-                            android:textSize="13sp"
-                            android:textStyle="italic" />
-                    </RelativeLayout>
-
-                    <View
-                        android:id="@+id/divider"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_alignParentBottom="true"
-                        android:background="@drawable/ic_thread_divider_profile" />
-
-                    <RelativeLayout
-                        android:id="@+id/sms"
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:background="@drawable/profile_center_item_selector"
-                        android:clickable="true" >
-
-                        <com.bsb.hike.view.CustomFontTextView
-                            android:id="@+id/item_txt"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:drawableLeft="@drawable/ic_invite_sms"
-                            android:drawablePadding="5dp"
-                            android:paddingLeft="10dp"
-                            android:text="@string/sms"
-                            android:textColor="@color/lightblack"
-                            android:textSize="15sp"
-                            android:textStyle="bold|italic" />
-
-                        <com.bsb.hike.view.CustomFontTextView
-                            android:id="@+id/item_subtxt"
-                            android:layout_width="@dimen/tell_a_friend_subtext_width"
-                            android:layout_height="wrap_content"
-                            android:gravity="right"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:drawablePadding="5dp"
-                            android:drawableRight="@drawable/ic_arrow"
-                            android:paddingRight="10dp"
-                            android:text="@string/sms_subtext"
                             android:textColor="#a4a49a"
                             android:textSize="13sp"
                             android:textStyle="italic" />
