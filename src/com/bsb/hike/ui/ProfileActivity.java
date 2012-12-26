@@ -45,11 +45,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -157,6 +162,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
 		public int genderType;
 		public boolean viewingProfileImage = false;
+		public boolean animatedProfileImage = false;
 	}
 
 	public File selectedFileIcon; /*
@@ -619,9 +625,15 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	public void onBackPressed() {
 		if (mActivityState.viewingProfileImage) {
-			findViewById(R.id.drawer_layout).setVisibility(View.VISIBLE);
-			findViewById(R.id.profile_image_container).setVisibility(View.GONE);
+			View profileContainer = findViewById(R.id.profile_image_container);
+
+			AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
+			alphaAnimation.setDuration(200);
+			profileContainer.startAnimation(alphaAnimation);
+			profileContainer.setVisibility(View.GONE);
+			
 			mActivityState.viewingProfileImage = false;
+			mActivityState.animatedProfileImage = false;
 			return;
 		}
 		if (this.profileType == ProfileType.USER_PROFILE_EDIT
@@ -1058,8 +1070,75 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	public void showLargerImage(Drawable image) {
 		mActivityState.viewingProfileImage = true;
 
-		findViewById(R.id.drawer_layout).setVisibility(View.GONE);
-		findViewById(R.id.profile_image_container).setVisibility(View.VISIBLE);
+		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
+		profileImageContainer.setVisibility(View.VISIBLE);
+
+		ImageView profileImageLarge = (ImageView) findViewById(R.id.profile_image_large);
+
+		if (!mActivityState.animatedProfileImage) {
+			((LinearLayout) profileImageContainer)
+					.setGravity(Gravity.NO_GRAVITY);
+
+			mActivityState.animatedProfileImage = true;
+
+			ImageView profileImageSmall = (ImageView) findViewById(R.id.profile);
+
+			int screenWidth = getResources().getDisplayMetrics().widthPixels;
+			int screenHeight = getResources().getDisplayMetrics().heightPixels;
+
+			int startWidth = profileImageSmall.getWidth();
+			int startHeight = profileImageSmall.getHeight();
+
+			int[] startLocations = new int[2];
+			profileImageSmall.getLocationInWindow(startLocations);
+
+			int statusBarHeight = screenHeight
+					- profileImageContainer.getHeight();
+
+			int startLocX = startLocations[0];
+			int startLocY = startLocations[1] - statusBarHeight;
+
+			LayoutParams startLp = new LayoutParams(startWidth, startHeight);
+			startLp.setMargins(startLocX, startLocY, 0, 0);
+
+			profileImageLarge.setLayoutParams(startLp);
+
+			float multiplier;
+			if (screenWidth > screenHeight) {
+				multiplier = screenHeight / startHeight;
+			} else {
+				multiplier = screenWidth / startWidth;
+			}
+
+			ScaleAnimation scaleAnimation = new ScaleAnimation(1.0f,
+					multiplier, 1.0f, multiplier);
+
+			int xDest = screenWidth / 2;
+			xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
+			int yDest = screenHeight / 2;
+			yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
+
+			TranslateAnimation translateAnimation = new TranslateAnimation(0,
+					xDest, 0, yDest);
+
+			AnimationSet animationSet = new AnimationSet(true);
+			animationSet.addAnimation(scaleAnimation);
+			animationSet.addAnimation(translateAnimation);
+			animationSet.setFillAfter(true);
+			animationSet.setDuration(350);
+			animationSet.setStartOffset(150);
+
+			AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
+			alphaAnimation.setDuration(200);
+			profileImageContainer.startAnimation(alphaAnimation);
+			profileImageLarge.startAnimation(animationSet);
+
+		} else {
+			((LinearLayout) profileImageContainer).setGravity(Gravity.CENTER);
+			LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
+					LayoutParams.MATCH_PARENT);
+			profileImageLarge.setLayoutParams(lp);
+		}
 
 		((ImageView) findViewById(R.id.profile_image_large))
 				.setImageDrawable(image);
