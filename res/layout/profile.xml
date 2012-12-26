@@ -80,8 +80,8 @@
 
                             <RelativeLayout
                                 android:id="@+id/avatar_border"
-                                android:layout_width="80dp"
-                                android:layout_height="80dp"
+                                android:layout_width="90dp"
+                                android:layout_height="90dp"
                                 android:layout_centerVertical="true"
                                 android:layout_marginBottom="24dp"
                                 android:layout_marginLeft="14dp"
@@ -91,8 +91,8 @@
 
                                 <ImageView
                                     android:id="@+id/profile"
-                                    android:layout_width="70dp"
-                                    android:layout_height="70dp"
+                                    android:layout_width="80dp"
+                                    android:layout_height="80dp"
                                     android:layout_centerInParent="true"
                                     android:src="@drawable/ic_avatar1"
                                     android:onClick="onViewImageClicked" />
