@@ -434,9 +434,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					.getFirstName()));
 			if (contactInfo.getMsisdn().equals(
 					userInfo.getContactInfo().getMsisdn())) {
-				participantName.append("(Me)");
+				participantName.append(" (Me)");
 			} else if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
-				participantName.append("(" + contactInfo.getMsisdn() + ")");
+				participantName.append(" (" + contactInfo.getMsisdn() + ")");
 			}
 			participantName.setTextColor(getResources().getColor(
 					contactInfo.isOnhike() ? R.color.contact_blue

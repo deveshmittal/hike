@@ -11,6 +11,9 @@
         android:gravity="center"
         android:textColor="@color/contact_blue"
         android:textSize="14sp"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:layout_marginRight="5dp"
         android:layout_centerVertical="true" />
 
     <ImageView
