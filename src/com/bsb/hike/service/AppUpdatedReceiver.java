@@ -16,7 +16,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.Utils;
-import com.google.android.gcm.GCMRegistrar;
 
 /**
  * @author Rishabh This receiver is used to notify that the app has been
@@ -103,14 +102,6 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FREE_SMS_TOGGLED, freeSMSOn);
 			}
-
-			/*
-			 * Unregister and ask for a new GCM token
-			 */
-			Log.d(getClass().getSimpleName(),
-					"Unregistering from GCM since the app was updated");
-			GCMRegistrar.unregister(context);
-			context.sendBroadcast(new Intent(HikeService.REGISTER_TO_GCM_ACTION));
 		}
 	}
 }
