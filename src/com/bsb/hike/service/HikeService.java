@@ -15,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -31,12 +32,16 @@ import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.bsb.hike.GCMIntentService;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.tasks.CheckForUpdateTask;
+import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SyncContactExtraInfo;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -141,6 +146,9 @@ public class HikeService extends Service {
 	// used to register to GCM
 	public static final String REGISTER_TO_GCM_ACTION = "com.bsb.hike.REGISTER_GCM";
 
+	// used to send GCM registeration id to server
+	public static final String SEND_TO_SERVER_ACTION = "com.bsb.hike.SEND_TO_SERVER";
+
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
 
@@ -174,6 +182,8 @@ public class HikeService extends Service {
 
 	private RegisterToGCMTrigger registerToGCMTrigger;
 
+	private SendGCMIdToServerTrigger sendGCMIdToServerTrigger;
+
 	private HikeMqttManager mMqttManager;
 	private ContactListChangeIntentReceiver contactsReceived;
 	private Handler mHandler;
@@ -202,6 +212,11 @@ public class HikeService extends Service {
 			registerReceiver(registerToGCMTrigger, new IntentFilter(
 					REGISTER_TO_GCM_ACTION));
 			sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
+		}
+		if (sendGCMIdToServerTrigger == null) {
+			sendGCMIdToServerTrigger = new SendGCMIdToServerTrigger();
+			registerReceiver(sendGCMIdToServerTrigger, new IntentFilter(
+					SEND_TO_SERVER_ACTION));
 		}
 
 		Log.d("HikeService", "onCreate called");
@@ -704,9 +719,92 @@ public class HikeService extends Service {
 				GCMRegistrar.register(HikeService.this,
 						HikeConstants.APP_PUSH_ID);
 			} else {
-				Log.d(getClass().getSimpleName(), "Already registered");
+				sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
 			}
 		}
+	}
+
+	private class SendGCMIdToServerTrigger extends BroadcastReceiver {
+		@Override
+		public void onReceive(final Context context, Intent intent) {
+			Log.d(getClass().getSimpleName(), "Sending GCM ID");
+			final String regId = GCMRegistrar.getRegistrationId(context);
+			if ("".equals(regId)) {
+				sendBroadcast(new Intent(REGISTER_TO_GCM_ACTION));
+				Log.d(getClass().getSimpleName(), "GCM id not found");
+				return;
+			}
+
+			final SharedPreferences prefs = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+			if (prefs.getBoolean(HikeMessengerApp.GCM_ID_SENT, false)) {
+				Log.d(getClass().getSimpleName(), "GCM id sent");
+				return;
+			}
+
+			Log.d(getClass().getSimpleName(),
+					"GCM id was not sent. Sending now");
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+					"/account/device", new HikeHttpCallback() {
+						public void onSuccess(JSONObject response) {
+							Log.d(SendGCMIdToServerTrigger.this.getClass()
+									.getSimpleName(), "Send successful");
+							Editor editor = prefs.edit();
+							editor.putBoolean(HikeMessengerApp.GCM_ID_SENT,
+									true);
+							editor.commit();
+						}
+
+						public void onFailure() {
+							Log.d(SendGCMIdToServerTrigger.this.getClass()
+									.getSimpleName(), "Send unsuccessful");
+							scheduleNextSendToServerAction();
+						}
+					});
+			JSONObject request = new JSONObject();
+			try {
+				request.put(GCMIntentService.DEV_TYPE, HikeConstants.ANDROID);
+				request.put(GCMIntentService.DEV_TOKEN, regId);
+			} catch (JSONException e) {
+				Log.d(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+			hikeHttpRequest.setJSONData(request);
+
+			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
+			hikeHTTPTask.execute(hikeHttpRequest);
+		}
+	}
+
+	private void scheduleNextSendToServerAction() {
+		Log.d(getClass().getSimpleName(), "Scheduling next GCM registration");
+
+		SharedPreferences preferences = getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+		int lastBackOffTime = preferences.getInt(
+				HikeMessengerApp.LAST_BACK_OFF_TIME, 0);
+
+		lastBackOffTime = lastBackOffTime == 0 ? HikeConstants.RECONNECT_TIME
+				: (lastBackOffTime * 2);
+		lastBackOffTime = Math.min(HikeConstants.MAX_RECONNECT_TIME,
+				lastBackOffTime);
+
+		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
+		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
+				new Intent(HikeService.SEND_TO_SERVER_ACTION),
+				PendingIntent.FLAG_UPDATE_CURRENT);
+
+		Calendar wakeUpTime = Calendar.getInstance();
+		wakeUpTime.add(Calendar.SECOND, lastBackOffTime);
+
+		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
+		// Cancel any pending alarms with this pending intent
+		aMgr.cancel(pendingIntent);
+		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(),
+				pendingIntent);
+
+		Editor editor = preferences.edit();
+		editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME, lastBackOffTime);
+		editor.commit();
 	}
 
 	private void scheduleNextManualContactSync() {
