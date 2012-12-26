@@ -155,7 +155,7 @@ public class HikeConstants {
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
-	public static final int MAX_FILE_SIZE = 6 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 15 * 1024 * 1024;
 	public static final int SHARE_LOCATION_CODE = 1187;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
