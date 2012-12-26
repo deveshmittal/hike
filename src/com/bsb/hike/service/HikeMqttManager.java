@@ -460,6 +460,12 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 	 */
 	public boolean isConnected() {
 		Log.d("HikeMqttManager", "in isConnected status " + connectionStatus);
+		if (mqttConnection == null) {
+			Log.d(getClass().getSimpleName(),
+					"Mqtt Connection was null so connecting");
+			connectToBroker();
+		}
+
 		return (mqttConnection != null)
 				&& (MQTTConnectionStatus.CONNECTED == connectionStatus);
 	}
