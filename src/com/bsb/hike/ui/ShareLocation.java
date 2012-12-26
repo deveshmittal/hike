@@ -5,11 +5,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.pm.PackageManager;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -37,6 +38,11 @@ import com.google.android.maps.OverlayItem;
 
 public class ShareLocation extends MapActivity {
 
+	private static final int NO_LOCATION_DEVICE_ENABLED = 0;
+	private static final int GPS_DISABLED = 1;
+	private static final int GPS_ENABLED = 2;
+
+	private int currentLocationDevice = NO_LOCATION_DEVICE_ENABLED;
 	private MapView myMap;
 	private LocationManager locManager;
 	private LocationListener locListener;
@@ -47,12 +53,12 @@ public class ShareLocation extends MapActivity {
 	private TextView labelView;
 
 	private GeoPoint selectedGeoPoint;
+	private boolean gpsDialogShown = false;
+	private Dialog alert;
 	/*
 	 * The max distance the finger can move while placing a pointer
 	 */
 	private static final int MAX_DISTANCE = 20;
-
-	private boolean gpsDialogShown = false;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -65,6 +71,10 @@ public class ShareLocation extends MapActivity {
 				HikeConstants.DEFAULT_ZOOM_LEVEL)
 				: HikeConstants.DEFAULT_ZOOM_LEVEL;
 		initMap(zoomLevel);
+
+		gpsDialogShown = savedInstanceState != null
+				&& savedInstanceState
+						.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
 
 		locationAddress = (TextView) findViewById(R.id.address);
 
@@ -84,55 +94,10 @@ public class ShareLocation extends MapActivity {
 			}
 			currentSelection = findViewById(R.id.custom_position);
 		} else {
+
 			initMyLocationManager();
 
-			gpsDialogShown = savedInstanceState != null
-					&& savedInstanceState
-							.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
-
 			currentSelection = findViewById(R.id.my_position);
-
-			boolean hasGps = getPackageManager().hasSystemFeature(
-					PackageManager.FEATURE_LOCATION_GPS);
-			/*
-			 * Don't show this on orientation changes
-			 */
-			if (hasGps
-					&& !gpsDialogShown
-					&& !locManager
-							.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-						this);
-				alertDialogBuilder
-						.setMessage(R.string.gps_disabled)
-						.setCancelable(false)
-						.setPositiveButton(android.R.string.ok,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int id) {
-										gpsDialogShown = true;
-										Intent callGPSSettingIntent = new Intent(
-												android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-										startActivity(callGPSSettingIntent);
-									}
-								});
-				alertDialogBuilder.setNegativeButton(R.string.cancel,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						});
-				alertDialogBuilder.setCancelable(true);
-				alertDialogBuilder.setOnCancelListener(new OnCancelListener() {
-
-					@Override
-					public void onCancel(DialogInterface dialog) {
-						gpsDialogShown = true;
-					}
-				});
-				AlertDialog alert = alertDialogBuilder.create();
-				alert.show();
-			}
 		}
 
 		titleBtn = (Button) findViewById(R.id.title_icon);
@@ -149,9 +114,79 @@ public class ShareLocation extends MapActivity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		if (currentSelection.getId() == R.id.my_position) {
+			showLocationDialog();
+		}
+	}
+
+	private void showLocationDialog() {
+		if(alert != null && alert.isShowing()) {
+			return;
+		}
+		boolean hasGps = getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_LOCATION_GPS);
+
+		if (locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			currentLocationDevice = GPS_ENABLED;
+		} else if (locManager
+				.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+			currentLocationDevice = GPS_DISABLED;
+		} else {
+			currentLocationDevice = NO_LOCATION_DEVICE_ENABLED;
+		}
+
+		/*
+		 * Don't show anything if the GPS is already enabled or the device does
+		 * not have gps and the network is enabled or the the GPS dialog was
+		 * shown once.
+		 */
+		if (currentLocationDevice == GPS_ENABLED) {
+			return;
+		} else if (currentLocationDevice == GPS_DISABLED
+				&& (!hasGps || gpsDialogShown)) {
+			return;
+		}
+
+		int messageId = currentLocationDevice == GPS_DISABLED ? R.string.gps_disabled
+				: R.string.location_disabled;
+
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+		alertDialogBuilder
+				.setMessage(messageId)
+				.setCancelable(false)
+				.setPositiveButton(android.R.string.ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								Intent callGPSSettingIntent = new Intent(
+										android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+								startActivity(callGPSSettingIntent);
+							}
+						});
+		alertDialogBuilder.setNegativeButton(R.string.cancel,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						if (currentLocationDevice == NO_LOCATION_DEVICE_ENABLED) {
+							onChangeMarkerClicked(findViewById(R.id.custom_position));
+						}
+						dialog.cancel();
+					}
+				});
+		alertDialogBuilder.setCancelable(true);
+		alertDialogBuilder.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				gpsDialogShown = currentLocationDevice == GPS_DISABLED;
+			}
+		});
+		alert = alertDialogBuilder.create();
+		alert.show();
+	}
+
+	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN,
-				gpsDialogShown);
 		outState.putBoolean(HikeConstants.Extras.CUSTOM_LOCATION_SELECTED,
 				currentSelection.getId() == R.id.custom_position);
 		if (currentSelection.getId() == R.id.custom_position
@@ -162,6 +197,8 @@ public class ShareLocation extends MapActivity {
 					selectedGeoPoint.getLongitudeE6());
 		}
 		outState.putInt(HikeConstants.Extras.ZOOM_LEVEL, myMap.getZoomLevel());
+		outState.putBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN,
+				gpsDialogShown);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -393,6 +430,7 @@ public class ShareLocation extends MapActivity {
 			removeOlderOverlays();
 			if (v.getId() == R.id.my_position) {
 				initMyLocationManager();
+				showLocationDialog();
 			} else {
 				removeMyLocationListeners();
 				Toast.makeText(this, R.string.tap_to_place, Toast.LENGTH_SHORT)
