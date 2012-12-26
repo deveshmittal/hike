@@ -447,6 +447,13 @@ public class MqttMessagesManager {
 						userDb.setMultipleContactsToFavorites(favorites);
 					}
 				}
+				editor.putString(HikeMessengerApp.REWARDS_TOKEN,
+						account.optString(HikeConstants.REWARDS_TOKEN));
+				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS,
+						account.optBoolean(HikeConstants.SHOW_REWARDS));
+				if (account.optBoolean(HikeConstants.SHOW_REWARDS)) {
+					this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
+				}
 			}
 			editor.commit();
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
@@ -482,6 +489,18 @@ public class MqttMessagesManager {
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, FavoriteType.RECOMMENDED_FAVORITE);
 			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG.equals(type)) {
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+
+			String rewardToken = data.getString(HikeConstants.REWARDS_TOKEN);
+			boolean showRewards = data.getBoolean(HikeConstants.SHOW_REWARDS);
+
+			Editor editor = settings.edit();
+			editor.putString(HikeMessengerApp.REWARDS_TOKEN, rewardToken);
+			editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, showRewards);
+			editor.commit();
+
+			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
 		}
 	}
 

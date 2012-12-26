@@ -1242,6 +1242,10 @@ public class Utils {
 				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION
 						: AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
 
+		AccountUtils.rewardsUrl = httpString
+				+ (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE
+						: AccountUtils.REWARDS_STAGING_BASE);
+
 		Log.d("SSL", "Base: " + AccountUtils.base);
 		Log.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
 		Log.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);

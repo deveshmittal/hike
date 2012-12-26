@@ -186,6 +186,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String PROFILE_IMAGE_NOT_DOWNLOADED = "profileImageNotDownloaded";
 
+	public static final String TOGGLE_REWARDS = "toggleRewards"; 
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

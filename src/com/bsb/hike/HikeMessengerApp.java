@@ -160,6 +160,9 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String FAVORITES_INTRO_SHOWN = "favoritesIntroShown";
 	public static final String NUDGE_INTRO_SHOWN = "nudgeIntroShown";
 
+	public static final String REWARDS_TOKEN = "rewardsToken";
+	public static final String SHOW_REWARDS = "showRewards";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;

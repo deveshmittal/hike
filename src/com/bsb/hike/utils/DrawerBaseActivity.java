@@ -31,7 +31,8 @@ public class DrawerBaseActivity extends Activity implements
 
 	private String[] leftDrawerPubSubListeners = {
 			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.PROFILE_PIC_CHANGED,
-			HikePubSub.PROFILE_NAME_CHANGED, HikePubSub.FREE_SMS_TOGGLED };
+			HikePubSub.PROFILE_NAME_CHANGED, HikePubSub.FREE_SMS_TOGGLED,
+			HikePubSub.TOGGLE_REWARDS };
 
 	private String[] rightDrawerPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
@@ -191,7 +192,15 @@ public class DrawerBaseActivity extends Activity implements
 					parentLayout.freeSMSToggled(freeSMSOn);
 				}
 			});
-		} else if (HikePubSub.ICON_CHANGED.equals(type)) {
+		} else if (HikePubSub.TOGGLE_REWARDS.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					parentLayout.setUpLeftDrawerView();
+				}
+			});
+		}  else if (HikePubSub.ICON_CHANGED.equals(type)) {
 			runOnUiThread(new Runnable() {
 
 				@Override

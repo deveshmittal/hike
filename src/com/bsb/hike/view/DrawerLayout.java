@@ -50,6 +50,8 @@ import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.ui.Tutorial;
+import com.bsb.hike.ui.WebViewActivity;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.Utils;
 
 public class DrawerLayout extends RelativeLayout implements
@@ -332,11 +334,15 @@ public class DrawerLayout extends RelativeLayout implements
 				getContext()).getBoolean(HikeConstants.FREE_SMS_PREF, true));
 	}
 
-	public void renderLeftDrawerItems(final boolean freeSMSOn) {
+	public void renderLeftDrawerItems(boolean freeSMSOn) {
+
+		boolean rewardsOn = accountPrefs.getBoolean(
+				HikeMessengerApp.SHOW_REWARDS, false);
 
 		int[] ids = { R.id.left_drawer_home, R.id.left_drawer_group_chat,
 				R.id.left_drawer_tell_a_friend, R.id.left_drawer_free_sms,
-				R.id.left_drawer_profile, R.id.left_drawer_help };
+				R.id.left_drawer_profile, R.id.left_drawer_rewards,
+				R.id.left_drawer_help };
 
 		for (int i = 0; i < ids.length; i++) {
 			findViewById(ids[i]).setOnClickListener(this);
@@ -345,6 +351,12 @@ public class DrawerLayout extends RelativeLayout implements
 				freeSMSOn ? VISIBLE : GONE);
 		findViewById(R.id.left_credits_divider).setVisibility(
 				freeSMSOn ? VISIBLE : GONE);
+
+		findViewById(R.id.left_drawer_rewards).setVisibility(
+				rewardsOn ? VISIBLE : GONE);
+		findViewById(R.id.divider_rewards).setVisibility(
+				rewardsOn ? VISIBLE : GONE);
+
 		creditsNum = (TextView) findViewById(R.id.credit_num);
 		updateCredits(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0));
 
@@ -409,6 +421,20 @@ public class DrawerLayout extends RelativeLayout implements
 					getContext(), Tutorial.class);
 			if (intent != null) {
 				intent.putExtra(HikeConstants.Extras.HELP_PAGE, true);
+			}
+			break;
+		case R.id.left_drawer_rewards:
+			intent = activity instanceof WebViewActivity ? null : new Intent(
+					getContext(), WebViewActivity.class);
+			if (intent != null) {
+				intent.putExtra(HikeConstants.Extras.REWARDS_PAGE, true);
+				intent.putExtra(
+						HikeConstants.Extras.URL_TO_LOAD,
+						AccountUtils.rewardsUrl
+								+ accountPrefs.getString(
+										HikeMessengerApp.REWARDS_TOKEN, ""));
+				intent.putExtra(HikeConstants.Extras.TITLE, getContext()
+						.getString(R.string.rewards));
 			}
 			break;
 		}

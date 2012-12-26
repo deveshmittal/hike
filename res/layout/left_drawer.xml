@@ -151,6 +151,25 @@
             </RelativeLayout>
 
             <View
+                android:id="@+id/divider_rewards"
+                style="@style/LeftDrawerDivider" />
+
+            <RelativeLayout
+                android:id="@+id/left_drawer_rewards"
+                style="@style/LeftDrawerItem" >
+
+                <ImageView
+                    android:id="@+id/item_icon"
+                    style="@style/LeftDrawerItemIcon"
+                    android:src="@drawable/ic_drawer_rewards" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/item_name"
+                    style="@style/LeftDrawerItemText"
+                    android:text="@string/rewards" />
+            </RelativeLayout>
+
+            <View
                 android:id="@+id/divider"
                 style="@style/LeftDrawerDivider" />
 
@@ -194,7 +213,6 @@
                     android:textSize="15sp"
                     android:textStyle="bold"
                     hike:font="omnes" />
-
             </RelativeLayout>
         </LinearLayout>
     </ScrollView>

@@ -112,6 +112,12 @@ public class AccountUtils {
 
 	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
 
+	public static final String REWARDS_PRODUCTION_BASE = "hike.in/rewards/android/";
+
+	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/android/";
+
+	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
+
 	public static boolean ssl = false;
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
