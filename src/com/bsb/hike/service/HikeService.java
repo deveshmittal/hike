@@ -521,7 +521,6 @@ public class HikeService extends Service {
 					.removeCallbacks(mContactsChanged);
 			HikeService.this.mContactsChangedHandler.postDelayed(
 					mContactsChanged, HikeConstants.CONTACT_UPDATE_TIMEOUT);
-			Log.d("ContactListChangeIntentReceiver", "onChange called");
 			// Schedule the next manual sync to happed 24 hours from now.
 			scheduleNextManualContactSync();
 		}
