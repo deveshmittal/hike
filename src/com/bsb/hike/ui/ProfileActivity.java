@@ -129,6 +129,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED,
 			HikePubSub.USER_LEFT, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
 			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
+
+	private String[] profilePubSubListeners = {
+			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
 	private GroupConversation groupConversation;
 	private ImageButton topBarBtn;
 	private ContactInfo contactInfo;
@@ -182,6 +186,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		} else if (profileType == ProfileType.CONTACT_INFO) {
 			HikeMessengerApp.getPubSub().removeListeners(this,
 					contactInfoPubSubListeners);
+		} else if (profileType == ProfileType.USER_PROFILE) {
+			HikeMessengerApp.getPubSub().removeListeners(this,
+					profilePubSubListeners);
 		}
 		mActivityState = null;
 	}
@@ -238,6 +245,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				setupEditScreen();
 			} else {
 				this.profileType = ProfileType.USER_PROFILE;
+				HikeMessengerApp.getPubSub().addListeners(this,
+						profilePubSubListeners);
 				setupProfileScreen(savedInstanceState);
 			}
 		}
@@ -1211,8 +1220,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (profileType == ProfileType.USER_PROFILE) {
 			super.onEventReceived(type, object);
 		}
-		if (mLocalMSISDN == null
-				|| (profileType != ProfileType.GROUP_INFO && profileType != ProfileType.CONTACT_INFO)) {
+		if (mLocalMSISDN == null) {
 			Log.w(getClass().getSimpleName(),
 					"The msisdn is null, we are doing something wrong.."
 							+ object);
