@@ -1116,10 +1116,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			showOverlay(true);
 		}
 
-		if ((mConversation instanceof GroupConversation)
-				&& !((GroupConversation) mConversation).getIsGroupAlive()) {
-			toggleGroupLife(false);
-		}
 		/*
 		 * make a copy of the message list since it's used internally by the
 		 * adapter
@@ -1183,6 +1179,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (!(mConversation instanceof GroupConversation)
 				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
 			showNudgeDialog();
+		}
+		if ((mConversation instanceof GroupConversation)
+				&& !((GroupConversation) mConversation).getIsGroupAlive()) {
+			toggleGroupLife(false);
 		}
 	}
 
