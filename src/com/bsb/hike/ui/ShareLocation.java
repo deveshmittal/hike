@@ -60,55 +60,81 @@ public class ShareLocation extends MapActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.share_location);
 
-		initMap();
-		initMyLocationManager();
-
-		gpsDialogShown = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
-
-		boolean hasGps = getPackageManager().hasSystemFeature(
-				PackageManager.FEATURE_LOCATION_GPS);
-		/*
-		 * Don't show this on orientation changes
-		 */
-		if (hasGps && !gpsDialogShown
-				&& !locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-					this);
-			alertDialogBuilder
-					.setMessage(R.string.gps_disabled)
-					.setCancelable(false)
-					.setPositiveButton(android.R.string.ok,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									gpsDialogShown = true;
-									Intent callGPSSettingIntent = new Intent(
-											android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-									startActivity(callGPSSettingIntent);
-								}
-							});
-			alertDialogBuilder.setNegativeButton(R.string.cancel,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							dialog.cancel();
-						}
-					});
-			alertDialogBuilder.setCancelable(true);
-			alertDialogBuilder.setOnCancelListener(new OnCancelListener() {
-
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					gpsDialogShown = true;
-				}
-			});
-			AlertDialog alert = alertDialogBuilder.create();
-			alert.show();
-		}
+		int zoomLevel = savedInstanceState != null ? savedInstanceState.getInt(
+				HikeConstants.Extras.ZOOM_LEVEL,
+				HikeConstants.DEFAULT_ZOOM_LEVEL)
+				: HikeConstants.DEFAULT_ZOOM_LEVEL;
+		initMap(zoomLevel);
 
 		locationAddress = (TextView) findViewById(R.id.address);
-		currentSelection = findViewById(R.id.my_position);
+
+		boolean isCustomLocation = savedInstanceState != null
+				&& savedInstanceState
+						.getBoolean(HikeConstants.Extras.CUSTOM_LOCATION_SELECTED);
+
+		if (isCustomLocation) {
+			if (savedInstanceState
+					.containsKey(HikeConstants.Extras.CUSTOM_LOCATION_LAT)) {
+				int lat = savedInstanceState
+						.getInt(HikeConstants.Extras.CUSTOM_LOCATION_LAT);
+				int longi = savedInstanceState
+						.getInt(HikeConstants.Extras.CUSTOM_LOCATION_LONG);
+				selectedGeoPoint = new GeoPoint(lat, longi);
+				placeMarker(selectedGeoPoint);
+			}
+			currentSelection = findViewById(R.id.custom_position);
+		} else {
+			initMyLocationManager();
+
+			gpsDialogShown = savedInstanceState != null
+					&& savedInstanceState
+							.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
+
+			currentSelection = findViewById(R.id.my_position);
+
+			boolean hasGps = getPackageManager().hasSystemFeature(
+					PackageManager.FEATURE_LOCATION_GPS);
+			/*
+			 * Don't show this on orientation changes
+			 */
+			if (hasGps
+					&& !gpsDialogShown
+					&& !locManager
+							.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+						this);
+				alertDialogBuilder
+						.setMessage(R.string.gps_disabled)
+						.setCancelable(false)
+						.setPositiveButton(android.R.string.ok,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										gpsDialogShown = true;
+										Intent callGPSSettingIntent = new Intent(
+												android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+										startActivity(callGPSSettingIntent);
+									}
+								});
+				alertDialogBuilder.setNegativeButton(R.string.cancel,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+				alertDialogBuilder.setCancelable(true);
+				alertDialogBuilder.setOnCancelListener(new OnCancelListener() {
+
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						gpsDialogShown = true;
+					}
+				});
+				AlertDialog alert = alertDialogBuilder.create();
+				alert.show();
+			}
+		}
+
 		titleBtn = (Button) findViewById(R.id.title_icon);
 		labelView = (TextView) findViewById(R.id.title);
 
@@ -126,6 +152,16 @@ public class ShareLocation extends MapActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN,
 				gpsDialogShown);
+		outState.putBoolean(HikeConstants.Extras.CUSTOM_LOCATION_SELECTED,
+				currentSelection.getId() == R.id.custom_position);
+		if (currentSelection.getId() == R.id.custom_position
+				&& selectedGeoPoint != null) {
+			outState.putInt(HikeConstants.Extras.CUSTOM_LOCATION_LAT,
+					selectedGeoPoint.getLatitudeE6());
+			outState.putInt(HikeConstants.Extras.CUSTOM_LOCATION_LONG,
+					selectedGeoPoint.getLongitudeE6());
+		}
+		outState.putInt(HikeConstants.Extras.ZOOM_LEVEL, myMap.getZoomLevel());
 		super.onSaveInstanceState(outState);
 	}
 
@@ -156,10 +192,10 @@ public class ShareLocation extends MapActivity {
 	/**
 	 * Initialize the map.
 	 */
-	private void initMap() {
+	private void initMap(int zoomLevel) {
 		myMap = (MapView) findViewById(R.id.map);
 		myMap.setBuiltInZoomControls(true);
-		myMap.getController().setZoom(12);
+		myMap.getController().setZoom(zoomLevel);
 		/*
 		 * Adding this overlay to listen for touch events. Required when placing
 		 * custom pointers.
@@ -206,7 +242,9 @@ public class ShareLocation extends MapActivity {
 	 * Removes the listener that updates us with the current location.
 	 */
 	private void removeMyLocationListeners() {
-		locManager.removeUpdates(locListener);
+		if (locManager != null) {
+			locManager.removeUpdates(locListener);
+		}
 	}
 
 	/**

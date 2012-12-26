@@ -218,7 +218,7 @@ public class HikeConstants {
 	public static final String LOCATION_CONTENT_TYPE = "hikemap/location";
 	public static final String LOCATION_FILE_NAME = "Location";
 
-	public static final int DEFAULT_ZOOM_LEVEL = 8;
+	public static final int DEFAULT_ZOOM_LEVEL = 12;
 
 	// Picasa URI start for JB devices
 	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
@@ -341,6 +341,9 @@ public class HikeConstants {
 		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
 		public static final String GPS_DIALOG_SHOWN = "gpsDialogShown";
 		public static final String REWARDS_PAGE = "rewardsPage";
+		public static final String CUSTOM_LOCATION_SELECTED = "customLocationSelected";
+		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
+		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
 	}
 
 	public static final class LogEvent {
