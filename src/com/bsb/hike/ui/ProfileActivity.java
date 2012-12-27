@@ -627,13 +627,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (mActivityState.viewingProfileImage) {
 			View profileContainer = findViewById(R.id.profile_image_container);
 
-			AlphaAnimation alphaAnimation = new AlphaAnimation(1.0f, 0.0f);
-			alphaAnimation.setDuration(200);
-			profileContainer.startAnimation(alphaAnimation);
+			animateProfileImage(false);
 			profileContainer.setVisibility(View.GONE);
-			
+
 			mActivityState.viewingProfileImage = false;
 			mActivityState.animatedProfileImage = false;
+			expandedWithoutAnimation = false;
 			return;
 		}
 		if (this.profileType == ProfileType.USER_PROFILE_EDIT
@@ -1071,6 +1070,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		});
 	}
 
+	private boolean expandedWithoutAnimation = false;
+
 	public void showLargerImage(Drawable image) {
 		mActivityState.viewingProfileImage = true;
 
@@ -1080,64 +1081,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		ImageView profileImageLarge = (ImageView) findViewById(R.id.profile_image_large);
 
 		if (!mActivityState.animatedProfileImage) {
-			((LinearLayout) profileImageContainer)
-					.setGravity(Gravity.NO_GRAVITY);
-
 			mActivityState.animatedProfileImage = true;
-
-			ImageView profileImageSmall = (ImageView) findViewById(R.id.profile);
-
-			int screenWidth = getResources().getDisplayMetrics().widthPixels;
-			int screenHeight = getResources().getDisplayMetrics().heightPixels;
-
-			int startWidth = profileImageSmall.getWidth();
-			int startHeight = profileImageSmall.getHeight();
-
-			int[] startLocations = new int[2];
-			profileImageSmall.getLocationInWindow(startLocations);
-
-			int statusBarHeight = screenHeight
-					- profileImageContainer.getHeight();
-
-			int startLocX = startLocations[0];
-			int startLocY = startLocations[1] - statusBarHeight;
-
-			LayoutParams startLp = new LayoutParams(startWidth, startHeight);
-			startLp.setMargins(startLocX, startLocY, 0, 0);
-
-			profileImageLarge.setLayoutParams(startLp);
-
-			float multiplier;
-			if (screenWidth > screenHeight) {
-				multiplier = screenHeight / startHeight;
-			} else {
-				multiplier = screenWidth / startWidth;
-			}
-
-			ScaleAnimation scaleAnimation = new ScaleAnimation(1.0f,
-					multiplier, 1.0f, multiplier);
-
-			int xDest = screenWidth / 2;
-			xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
-			int yDest = screenHeight / 2;
-			yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
-
-			TranslateAnimation translateAnimation = new TranslateAnimation(0,
-					xDest, 0, yDest);
-
-			AnimationSet animationSet = new AnimationSet(true);
-			animationSet.addAnimation(scaleAnimation);
-			animationSet.addAnimation(translateAnimation);
-			animationSet.setFillAfter(true);
-			animationSet.setDuration(350);
-			animationSet.setStartOffset(150);
-
-			AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);
-			alphaAnimation.setDuration(200);
-			profileImageContainer.startAnimation(alphaAnimation);
-			profileImageLarge.startAnimation(animationSet);
-
+			animateProfileImage(true);
 		} else {
+			expandedWithoutAnimation = true;
 			((LinearLayout) profileImageContainer).setGravity(Gravity.CENTER);
 			LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
 					LayoutParams.MATCH_PARENT);
@@ -1146,6 +1093,87 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		((ImageView) findViewById(R.id.profile_image_large))
 				.setImageDrawable(image);
+	}
+
+	private void animateProfileImage(boolean expand) {
+		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
+		((LinearLayout) profileImageContainer).setGravity(Gravity.NO_GRAVITY);
+		ImageView profileImageLarge = (ImageView) findViewById(R.id.profile_image_large);
+		ImageView profileImageSmall = (ImageView) findViewById(R.id.profile);
+
+		int maxWidth = (expand || !expandedWithoutAnimation) ? getResources()
+				.getDisplayMetrics().widthPixels : profileImageSmall
+				.getMeasuredHeight();
+		int maxHeight = (expand || !expandedWithoutAnimation) ? getResources()
+				.getDisplayMetrics().heightPixels : profileImageSmall
+				.getMeasuredHeight();
+
+		int screenHeight = getResources().getDisplayMetrics().heightPixels;
+
+		int startWidth = (expand || !expandedWithoutAnimation) ? profileImageSmall
+				.getWidth() : profileImageLarge.getWidth();
+		int startHeight = (expand || !expandedWithoutAnimation) ? profileImageSmall
+				.getHeight() : profileImageLarge.getHeight();
+
+		int[] startLocations = new int[2];
+		if (expand || mActivityState.animatedProfileImage) {
+			profileImageSmall.getLocationOnScreen(startLocations);
+		} else {
+			profileImageLarge.getLocationOnScreen(startLocations);
+		}
+
+		int statusBarHeight = screenHeight - profileImageContainer.getHeight();
+
+		int startLocX = startLocations[0];
+		int startLocY = startLocations[1] - statusBarHeight;
+
+		LayoutParams startLp = new LayoutParams(startWidth, startHeight);
+		startLp.setMargins(startLocX, startLocY, 0, 0);
+
+		profileImageLarge.setLayoutParams(startLp);
+
+		float multiplier;
+		if (maxWidth > maxHeight) {
+			multiplier = maxHeight / startHeight;
+		} else {
+			multiplier = maxWidth / startWidth;
+		}
+
+		ScaleAnimation scaleAnimation = (expand || expandedWithoutAnimation) ? new ScaleAnimation(
+				1.0f, multiplier, 1.0f, multiplier) : new ScaleAnimation(
+				multiplier, 1.0f, multiplier, 1.0f);
+
+		int xDest;
+		int yDest;
+		if (expand || !expandedWithoutAnimation) {
+			xDest = maxWidth / 2;
+			xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
+			yDest = maxHeight / 2;
+			yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
+		} else {
+			int[] endLocations = new int[2];
+			profileImageSmall.getLocationInWindow(endLocations);
+			xDest = endLocations[0];
+			yDest = endLocations[1];
+		}
+
+		TranslateAnimation translateAnimation = (expand || expandedWithoutAnimation) ? new TranslateAnimation(
+				0, xDest, 0, yDest)
+				: new TranslateAnimation(xDest, 0, yDest, 0);
+
+		AnimationSet animationSet = new AnimationSet(true);
+		animationSet.addAnimation(scaleAnimation);
+		animationSet.addAnimation(translateAnimation);
+		animationSet.setFillAfter(true);
+		animationSet.setDuration(350);
+		animationSet.setStartOffset(expand ? 150 : 0);
+
+		AlphaAnimation alphaAnimation = expand ? new AlphaAnimation(0.0f, 1.0f)
+				: new AlphaAnimation(1.0f, 0.0f);
+		alphaAnimation.setDuration(200);
+		alphaAnimation.setStartOffset(expand ? 0 : 200);
+		profileImageContainer.startAnimation(alphaAnimation);
+		profileImageLarge.startAnimation(animationSet);
 	}
 
 	public void onChangeImageClicked(View v) {
