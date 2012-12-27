@@ -179,6 +179,9 @@ public class ShareLocation extends MapActivity {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				gpsDialogShown = currentLocationDevice == GPS_DISABLED;
+				if (currentLocationDevice == NO_LOCATION_DEVICE_ENABLED) {
+					onChangeMarkerClicked(findViewById(R.id.custom_position));
+				}
 			}
 		});
 		alert = alertDialogBuilder.create();
