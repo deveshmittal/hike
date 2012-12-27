@@ -1,12 +1,8 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -32,6 +28,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -48,7 +45,10 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,6 +64,8 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.http.CustomByteArrayEntity;
+import com.bsb.hike.http.CustomFileEntity;
 import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -681,81 +683,62 @@ public class AccountUtils {
 		return new JSONObject(builder.toString());
 	}
 
+	static float maxSize;
+
 	public static JSONObject executeFileTransferRequest(String filePath,
 			String fileName, JSONObject request,
-			FileTransferTaskBase uploadFileTask, AtomicBoolean cancelUpload,
-			String fileType) throws Exception {
-		// Always start download with some initial progress
-		int progress = HikeConstants.INITIAL_PROGRESS;
-		uploadFileTask.updateProgress(progress);
+			final FileTransferTaskBase uploadFileTask,
+			AtomicBoolean cancelUpload, String fileType) throws Exception {
 
-		InputStream fileInputStream;
-		int bytesAvailable;
-		int maxSize;
+		HttpClient httpClient = getClient();
 
+		HttpContext httpContext = new BasicHttpContext();
+
+		HttpPut httpPut = new HttpPut(fileTransferUploadBase + "/user/ft");
+
+		addToken(httpPut);
+		httpPut.addHeader("Connection", "Keep-Alive");
+		httpPut.addHeader("Content-Name", fileName);
+		Log.d("Upload", "Content type: " + fileType);
+		httpPut.addHeader("Content-Type", TextUtils.isEmpty(fileType) ? ""
+				: fileType);
+		httpPut.addHeader("X-Thumbnail-Required", "0");
+
+		final AbstractHttpEntity entity;
 		if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType)) {
-			File file = new File(filePath);
-			fileInputStream = new FileInputStream(file);
-			bytesAvailable = (int) file.length();
+			entity = new CustomFileEntity(new File(filePath), "",
+					new ProgressListener() {
+						@Override
+						public void transferred(long num) {
+							uploadFileTask
+									.updateProgress((int) ((num / (float) maxSize) * 100));
+						}
+					});
 		} else {
-			byte[] bytes = request.toString().getBytes();
-			fileInputStream = new ByteArrayInputStream(bytes);
-			bytesAvailable = bytes.length;
-		}
-		maxSize = bytesAvailable;
-
-		URLConnection connection = getFileTransferURLConnection(fileName,
-				fileType);
-
-		DataOutputStream outputStream = new DataOutputStream(
-				connection.getOutputStream());
-
-		Log.d("Size", bytesAvailable + "");
-
-		int maxBufferSize = HikeConstants.MAX_BUFFER_SIZE_KB * 1024;
-		int bufferSize = Math.min(bytesAvailable, maxBufferSize);
-		byte[] buffer = new byte[bufferSize];
-
-		// Read file
-		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-		int totalBytesRead = bytesRead;
-
-		while (bytesRead > 0) {
-			outputStream.write(buffer, 0, bytesRead);
-
-			bytesAvailable = fileInputStream.available();
-			Log.d("Available", bytesAvailable + "");
-
-			bufferSize = Math.min(bytesAvailable, maxBufferSize);
-			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-			totalBytesRead += bytesRead;
-
-			progress = HikeConstants.INITIAL_PROGRESS
-					+ (bytesRead > 0 ? (int) ((totalBytesRead * 75) / maxSize)
-							: 75);
-			uploadFileTask.updateProgress(progress);
-
-			System.gc();
-			Thread.sleep(100);
-			if (cancelUpload.get()) {
-				throw new Exception("Upload cancelled by user");
-			}
+			entity = new CustomByteArrayEntity(request.toString().getBytes(),
+					new ProgressListener() {
+						@Override
+						public void transferred(long num) {
+							uploadFileTask
+									.updateProgress((int) ((num / (float) maxSize) * 100));
+						}
+					});
 		}
 
-		buffer = null;
+		uploadFileTask.setEntity(entity);
 
-		JSONObject response = getFileTransferResponse(connection,
-				uploadFileTask, cancelUpload);
+		maxSize = entity.getContentLength();
 
-		Log.d("HTTP", "request finished");
-		outputStream.flush();
-		outputStream.close();
-		fileInputStream.close();
+		httpPut.setEntity(entity);
+		HttpResponse response = httpClient.execute(httpPut, httpContext);
+		String serverResponse = EntityUtils.toString(response.getEntity());
 
-		if ((response == null) || (!"ok".equals(response.optString("stat")))) {
+		JSONObject responseJSON = new JSONObject(serverResponse);
+		if ((responseJSON == null)
+				|| (!"ok".equals(responseJSON.optString("stat")))) {
 			throw new NetworkErrorException("Unable to perform request");
 		}
-		return response;
+		return responseJSON;
 	}
 
 	public static void deleteSocialCredentials(boolean facebook)
