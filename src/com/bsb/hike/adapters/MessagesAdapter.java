@@ -808,16 +808,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					if (TextUtils.isEmpty(hikeFile.getFileKey())
 							&& !ChatThread.fileTransferTaskMap
 									.containsKey(convMessage.getMsgID())) {
-						/*
-						 * Don't allow uploading more files if an
-						 * upload/download is in progress
-						 */
-						if (!ChatThread.fileTransferTaskMap.isEmpty()
-								&& ((Utils.densityMultiplier * 10) <= HikeConstants.MDPI_TIMES_10)) {
-							Toast.makeText(context, R.string.file_transferring,
-									Toast.LENGTH_SHORT).show();
-							return;
-						}
 
 						FileTransferTaskBase uploadTask;
 						if (hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
@@ -850,16 +840,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						openFile(hikeFile, convMessage);
 					} else if (!ChatThread.fileTransferTaskMap
 							.containsKey(convMessage.getMsgID())) {
-						/*
-						 * Don't allow downloading more files if an
-						 * upload/download is in progress
-						 */
-						if (!ChatThread.fileTransferTaskMap.isEmpty()
-								&& ((Utils.densityMultiplier * 10) <= HikeConstants.MDPI_TIMES_10)) {
-							Toast.makeText(context, R.string.file_transferring,
-									Toast.LENGTH_SHORT).show();
-							return;
-						}
 						Log.d(getClass().getSimpleName(),
 								"HIKEFILE: NAME: " + hikeFile.getFileName()
 										+ " KEY: " + hikeFile.getFileKey()

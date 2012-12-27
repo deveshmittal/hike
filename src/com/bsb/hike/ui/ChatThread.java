@@ -2013,15 +2013,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private void showFilePickerDialog(
 			final ExternalStorageState externalStorageState) {
-		/*
-		 * Don't allow uploading more files if an upload/download is in progress
-		 */
-		if (!ChatThread.fileTransferTaskMap.isEmpty()
-				&& ((int) (Utils.densityMultiplier * 10) <= HikeConstants.MDPI_TIMES_10)) {
-			Toast.makeText(getApplicationContext(), R.string.file_transferring,
-					Toast.LENGTH_SHORT).show();
-			return;
-		}
 
 		final boolean canShareLocation = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_LOCATION);
