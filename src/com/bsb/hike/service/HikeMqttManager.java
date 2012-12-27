@@ -619,6 +619,15 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 				"About to send message " + new String(packet.getMessage()));
 		PublishCB pbCB = new PublishCB(packet);
 
+		/*
+		 * The mqtt connection would be null for some reason when retrying
+		 * failed messages. So we simply call the onFailure of the callback to
+		 * save these messages again and retry later.
+		 */
+		if (mqttConnection == null) {
+			pbCB.onFailure(null);
+		}
+
 		mqttConnection.publish(new UTF8Buffer(this.topic
 				+ HikeConstants.PUBLISH_TOPIC),
 				new Buffer(packet.getMessage()), qos == 0 ? QoS.AT_MOST_ONCE
