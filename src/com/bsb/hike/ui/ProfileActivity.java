@@ -748,6 +748,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				public void onSuccess(JSONObject response) {
 					HikeUserDatabase db = HikeUserDatabase.getInstance();
 					db.setIcon(mLocalMSISDN, bytes, false);
+					if (profileType == ProfileType.USER_PROFILE) {
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.PROFILE_PIC_CHANGED, null);
+					}
 					try {
 						InputStream src = new ByteArrayInputStream(larger_bytes);
 						OutputStream dest;
