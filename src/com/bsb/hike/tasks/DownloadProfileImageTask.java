@@ -28,7 +28,6 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 
 	private Context context;
 	private String msisdn;
-	private String id;
 	private String urlString;
 	private String fileName;
 	private String filePath;
@@ -36,14 +35,14 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	public DownloadProfileImageTask(Context context, String msisdn,
 			String fileName, boolean hasCustomIcon) {
 		this.context = context;
-		/*
-		 * Accounting for the ':' in group ids.
-		 */
 		this.msisdn = msisdn;
-		this.id = Utils.getValidFileNameForMsisdn(msisdn);
+
+		boolean isGroupConversation = Utils.isGroupConversation(msisdn);
+
 		if (hasCustomIcon) {
-			this.urlString = AccountUtils.base + "/account/avatar/" + id
-					+ "?fullsize=1";
+			this.urlString = AccountUtils.base
+					+ (isGroupConversation ? "/group/" + msisdn + "/avatar"
+							: "/account/avatar/" + msisdn) + "?fullsize=1";
 		} else {
 			this.urlString = (AccountUtils.ssl ? AccountUtils.HTTPS_STRING
 					: AccountUtils.HTTP_STRING)
@@ -51,6 +50,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 					+ ":"
 					+ AccountUtils.port + "/static/avatars/" + fileName;
 		}
+
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 		this.fileName = filePath + "/" + fileName;
