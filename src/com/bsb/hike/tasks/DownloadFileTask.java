@@ -26,6 +26,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 
@@ -78,7 +79,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 				progress = (int) ((totProg * 100 / length));
 				publishProgress(progress);
 				if (cancelTask.get()) {
-					throw new IOException("Download cancelled by the user");
+					throw new FileTransferCancelledException(
+							"Download cancelled by the user");
 				}
 			}
 			Log.d(getClass().getSimpleName(), "Done downloading file");
@@ -88,6 +90,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 		} catch (IOException e) {
 			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return FTResult.DOWNLOAD_FAILED;
+		} catch (FileTransferCancelledException e) {
+			return FTResult.CANCELLED;
 		} finally {
 			try {
 				if (fos != null) {
