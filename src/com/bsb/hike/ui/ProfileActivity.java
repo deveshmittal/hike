@@ -1070,6 +1070,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		});
 	}
 
+	public void hideLargerImage(View v) {
+		onBackPressed();
+	}
+
 	private boolean expandedWithoutAnimation = false;
 
 	public void showLargerImage(Drawable image) {
