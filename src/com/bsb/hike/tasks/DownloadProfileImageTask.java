@@ -71,7 +71,11 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 			Log.d(getClass().getSimpleName(), "Downloading profile image: "
 					+ urlString);
 			URL url = new URL(urlString);
+
 			URLConnection connection = url.openConnection();
+			connection.addRequestProperty("Cookie", "user="
+					+ AccountUtils.mToken);
+
 			if (AccountUtils.ssl) {
 				((HttpsURLConnection) connection)
 						.setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());

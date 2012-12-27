@@ -124,7 +124,7 @@ public class AccountUtils {
 
 	public static HttpClient mClient = null;
 
-	private static String mToken = null;
+	public static String mToken = null;
 
 	private static String appVersion = null;
 
