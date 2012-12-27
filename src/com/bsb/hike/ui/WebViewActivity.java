@@ -79,6 +79,15 @@ public class WebViewActivity extends DrawerBaseActivity {
 		webView.setWebViewClient(client);
 	}
 
+	@Override
+	public void onBackPressed() {
+		if (rewardsPage) {
+			super.onBackPressed();
+		} else {
+			finish();
+		}
+	}
+
 	public Intent newEmailIntent(Context context, String address,
 			String subject, String body, String cc) {
 		Intent intent = new Intent(Intent.ACTION_SEND);
