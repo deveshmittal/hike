@@ -117,7 +117,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		if (result == false) {
-			Toast.makeText(context, R.string.download_failed,
+			Toast.makeText(context, R.string.error_download,
 					Toast.LENGTH_SHORT).show();
 			File file = new File(fileName);
 			file.delete();
