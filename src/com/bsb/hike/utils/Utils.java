@@ -394,7 +394,7 @@ public class Utils {
 				break;
 			}
 		}
-		return name + ".png";
+		return name + ".jpg";
 	}
 
 	/** Create a File for saving an image or video */
