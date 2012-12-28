@@ -43,7 +43,7 @@
                 android:minHeight="48dp"
                 android:background="@color/white"
                 android:gravity="center_vertical"
-                android:hint="@string/start_typing"
+                android:hint="@string/start_typing_new"
                 android:imeOptions="actionNone"
                 android:paddingLeft="10dp"
                 android:paddingRight="18dp"

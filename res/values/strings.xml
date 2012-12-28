@@ -307,5 +307,6 @@
 	<string name="no">No</string>
 	<string name="location_disabled">Cannot fetch your location. Please check your settings.</string>
 	<string name="added_favorite">I added you as a favorite</string>
-	<string name="tap_here_invite">Tap here to invite this person</string>	
+	<string name="tap_here_invite">Tap here to invite this person</string>
+	<string name="start_typing_new">Start typing a name or number...</string>
 </resources>
