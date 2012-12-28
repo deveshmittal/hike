@@ -12,7 +12,6 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
@@ -40,21 +39,8 @@ public class HikeNotification {
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 	}
 
-	public void notify(ContactInfo contactInfo, ConvMessage convMsg) {
+	public void notifyMessage(ContactInfo contactInfo, ConvMessage convMsg) {
 		int notificationId = (int) convMsg.getConversation().getConvId();
-
-		boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
-
-		SharedPreferences preferenceManager = PreferenceManager
-				.getDefaultSharedPreferences(this.context);
-		int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF,
-				true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
-				: 0;
-		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
-				true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE
-				: 0;
-		boolean led = preferenceManager
-				.getBoolean(HikeConstants.LED_PREF, true);
 
 		String msisdn = convMsg.getMsisdn();
 		String message = (!convMsg.isFileTransferMessage()) ? convMsg
@@ -69,6 +55,7 @@ public class HikeNotification {
 					contactInfo.getFirstName());
 		}
 		long timestamp = convMsg.getTimestamp();
+
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
 				.getName())) ? contactInfo.getName() : msisdn;
 
@@ -97,32 +84,15 @@ public class HikeNotification {
 		 * Jellybean has added support for emojis so we don't need to add a '*'
 		 * to replace them
 		 */
-//		if (Build.VERSION.SDK_INT < 16) {
-			// Replace emojis with a '*'
-			message = SmileyParser.getInstance().replaceEmojiWithCharacter(
-					message, "*");
-//		}
+		// if (Build.VERSION.SDK_INT < 16) {
+		// Replace emojis with a '*'
+		message = SmileyParser.getInstance().replaceEmojiWithCharacter(message,
+				"*");
+		// }
 
 		// TODO this doesn't turn the text bold :(
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
 				key, message));
-		Notification notification = new Notification(icon, text,
-				timestamp * 1000);
-
-		if (led) {
-			notification.ledARGB = Color.BLUE;
-			notification.ledOnMS = 300;
-			notification.ledOffMS = 1000;
-
-			notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-		}
-		notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-		notification.defaults |= 0 | vibrate;
-		if (playSound != 0) {
-			notification.sound = Uri.parse("android.resource://"
-					+ context.getPackageName() + "/" + R.raw.v1);
-		}
 
 		Intent notificationIntent = new Intent(context, ChatThread.class);
 
@@ -145,11 +115,52 @@ public class HikeNotification {
 			}
 		}
 
+		showNotification(notificationIntent, icon, timestamp, notificationId,
+				text, msisdn, contactInfo.getName(), key, message);
+	}
+
+	private void showNotification(Intent notificationIntent, int icon,
+			long timestamp, int notificationId, CharSequence text,
+			String msisdn, String name, String key, String message) {
+
+		boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
+
+		SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this.context);
+
+		int playSound = preferenceManager.getBoolean(HikeConstants.SOUND_PREF,
+				true) && !shouldNotPlayNotification ? Notification.DEFAULT_SOUND
+				: 0;
+
+		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
+				true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE
+				: 0;
+
+		boolean led = preferenceManager
+				.getBoolean(HikeConstants.LED_PREF, true);
+
+		Notification notification = new Notification(icon, text,
+				timestamp * 1000);
+
+		if (led) {
+			notification.ledARGB = Color.BLUE;
+			notification.ledOnMS = 300;
+			notification.ledOffMS = 1000;
+
+			notification.flags |= Notification.FLAG_SHOW_LIGHTS;
+		}
+		notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+		notification.defaults |= 0 | vibrate;
+		if (playSound != 0) {
+			notification.sound = Uri.parse("android.resource://"
+					+ context.getPackageName() + "/" + R.raw.v1);
+		}
+
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
 				notificationIntent, 0);
 		notification.setLatestEventInfo(context, key, message, contentIntent);
 
-		Log.d("HikeNotification", "CONVERSATION ID : " + notificationId);
 		notificationManager.notify(notificationId, notification);
 
 		// If the notification was played this time, we should reset the value.

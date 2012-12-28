@@ -109,7 +109,7 @@ public class ToastListener implements Listener {
 							message.getMsisdn(), false);
 				}
 
-				this.toaster.notify(contactInfo, message);
+				this.toaster.notifyMessage(contactInfo, message);
 			}
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
