@@ -27,7 +27,7 @@ import com.bsb.hike.view.DrawerLayout;
 public class DrawerBaseActivity extends Activity implements
 		DrawerLayout.Listener, HikePubSub.Listener {
 
-	private DrawerLayout parentLayout;
+	public DrawerLayout parentLayout;
 
 	private String[] leftDrawerPubSubListeners = {
 			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.PROFILE_PIC_CHANGED,

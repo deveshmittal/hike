@@ -22,6 +22,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.MessagesList;
 
 public class HikeNotification {
 	public static final int HIKE_NOTIFICATION = 0;
@@ -90,7 +91,6 @@ public class HikeNotification {
 				"*");
 		// }
 
-		// TODO this doesn't turn the text bold :(
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
 				key, message));
 
@@ -116,12 +116,37 @@ public class HikeNotification {
 		}
 
 		showNotification(notificationIntent, icon, timestamp, notificationId,
-				text, msisdn, contactInfo.getName(), key, message);
+				text, msisdn, key, message);
+	}
+
+	public void notifyFavorite(ContactInfo contactInfo) {
+		int notificationId = contactInfo.getMsisdn().hashCode();
+
+		String msisdn = contactInfo.getMsisdn();
+
+		long timeStamp = System.currentTimeMillis() / 1000;
+
+		Intent notificationIntent = new Intent(context, MessagesList.class);
+		notificationIntent.putExtra(HikeConstants.Extras.OPEN_FAVORITES, true);
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+
+		int icon = R.drawable.ic_contact_logo;
+
+		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
+				.getName())) ? contactInfo.getName() : msisdn;
+
+		String message = context.getString(R.string.added_favorite);
+
+		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
+				key, message));
+
+		showNotification(notificationIntent, icon, timeStamp, notificationId,
+				text, msisdn, key, message);
 	}
 
 	private void showNotification(Intent notificationIntent, int icon,
 			long timestamp, int notificationId, CharSequence text,
-			String msisdn, String name, String key, String message) {
+			String msisdn, String key, String message) {
 
 		boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 

@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -21,6 +22,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.service.HikeMqttManager;
@@ -44,6 +46,8 @@ public class ToastListener implements Listener {
 				this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTION_STATUS,
+				this);
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.FAVORITE_TOGGLED,
 				this);
 		this.toaster = new HikeNotification(context);
 		this.db = HikeUserDatabase.getInstance();
@@ -115,6 +119,19 @@ public class ToastListener implements Listener {
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
 			mCurrentUnnotifiedStatus = status;
 			notifyConnStatus(status);
+		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
+			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+
+			ContactInfo contactInfo = favoriteToggle.first;
+			FavoriteType favoriteType = favoriteToggle.second;
+
+			/*
+			 * Only notify when someone has added the user as a favorite.
+			 */
+			if (favoriteType != FavoriteType.RECOMMENDED_FAVORITE) {
+				return;
+			}
+			toaster.notifyFavorite(contactInfo);
 		}
 	}
 

@@ -344,6 +344,7 @@ public class HikeConstants {
 		public static final String CUSTOM_LOCATION_SELECTED = "customLocationSelected";
 		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
 		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
+		public static final String OPEN_FAVORITES = "openFavorites";
 	}
 
 	public static final class LogEvent {
