@@ -269,7 +269,7 @@
 	<string name="verifying_num_signup">Deine Nummer wird überprüft...</string>	
 	<string name="invalid_num_signup">Das ist eine ungültige Telefonnummer. Versuche es erneut.</string>	
 	<string name="enter_pin_signup">Vielen Dank! Hast du die SMS PIN nicht bekommen?\nTippe auf \'Ruf Mich An\' um sie zu erhalten.</string>
-	<string name="call_me_signup">Ruf Mich</string>	
+	<string name="call_me_signup">Ruf Mich An</string>	
 	<string name="verify_pin_signup">PIN wird überprüft...</string>
 	<string name="wrong_num_signup">Eine falsche Zahl eingegeben? Hier tippen</string>
 	<string name="all_set_signup">Alles eingerichtet für %1$s</string>
