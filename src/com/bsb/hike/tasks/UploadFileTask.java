@@ -1,7 +1,6 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,7 +71,6 @@ public class UploadFileTask extends FileTransferTaskBase {
 
 	@Override
 	protected FTResult doInBackground(Void... params) {
-		this.cancelTask = new AtomicBoolean(false);
 		try {
 			String fileName = null;
 			if (convMessage == null) {

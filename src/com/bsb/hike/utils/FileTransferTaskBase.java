@@ -15,7 +15,7 @@ import com.bsb.hike.http.CustomFileEntity;
 public abstract class FileTransferTaskBase extends
 		AsyncTask<Void, Integer, FTResult> {
 	private int progress;
-	public AtomicBoolean cancelTask;
+	public AtomicBoolean cancelTask = new AtomicBoolean(false);
 	public AbstractHttpEntity entity;
 
 	public void updateProgress(int progress) {
@@ -29,7 +29,7 @@ public abstract class FileTransferTaskBase extends
 	}
 
 	public void cancelTask() {
-		this.cancelTask.set(true);
+		cancelTask.set(true);
 		if (entity != null) {
 			if (entity instanceof CustomFileEntity) {
 				((CustomFileEntity) entity).cancelDownload();

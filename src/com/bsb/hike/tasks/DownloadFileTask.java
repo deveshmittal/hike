@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -42,7 +41,6 @@ public class DownloadFileTask extends FileTransferTaskBase {
 		this.fileKey = fileKey;
 		this.context = context;
 		this.msgId = msgId;
-		this.cancelTask = new AtomicBoolean(false);
 	}
 
 	@Override

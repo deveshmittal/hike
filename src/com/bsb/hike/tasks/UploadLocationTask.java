@@ -3,7 +3,6 @@ package com.bsb.hike.tasks;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,7 +59,6 @@ public class UploadLocationTask extends FileTransferTaskBase {
 
 	@Override
 	protected FTResult doInBackground(Void... params) {
-		this.cancelTask = new AtomicBoolean(false);
 		try {
 			if (convMessage == null) {
 				JSONObject metadata = getFileTransferMetadata(latitude,
