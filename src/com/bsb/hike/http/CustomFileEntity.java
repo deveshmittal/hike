@@ -12,6 +12,7 @@ public class CustomFileEntity extends FileEntity {
 
 	private final ProgressListener listener;
 	private CountingOutputStream countingOutputStream;
+	private boolean cancel = false;
 
 	public CustomFileEntity(File file, String contentType) {
 		super(file, contentType);
@@ -27,12 +28,16 @@ public class CustomFileEntity extends FileEntity {
 
 	@Override
 	public void writeTo(final OutputStream outstream) throws IOException {
+		if (cancel) {
+			return;
+		}
 		countingOutputStream = new CountingOutputStream(outstream,
 				this.listener);
 		super.writeTo(countingOutputStream);
 	}
 
 	public void cancelDownload() {
+		cancel = true;
 		if (countingOutputStream != null) {
 			countingOutputStream.cancel();
 		}

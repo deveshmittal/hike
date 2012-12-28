@@ -11,6 +11,7 @@ public class CustomByteArrayEntity extends ByteArrayEntity {
 
 	private final ProgressListener listener;
 	private CountingOutputStream countingOutputStream;
+	private boolean cancel = false;
 
 	public CustomByteArrayEntity(byte[] b) {
 		super(b);
@@ -24,12 +25,16 @@ public class CustomByteArrayEntity extends ByteArrayEntity {
 
 	@Override
 	public void writeTo(final OutputStream outstream) throws IOException {
+		if (cancel) {
+			return;
+		}
 		countingOutputStream = new CountingOutputStream(outstream,
 				this.listener);
 		super.writeTo(countingOutputStream);
 	}
 
 	public void cancelDownload() {
+		cancel = true;
 		if (countingOutputStream != null) {
 			countingOutputStream.cancel();
 		}

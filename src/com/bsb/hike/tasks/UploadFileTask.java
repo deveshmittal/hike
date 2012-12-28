@@ -29,6 +29,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 
@@ -146,6 +147,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 					filePath = selectedFile.getPath();
 				}
 
+				if (cancelTask.get()) {
+					throw new FileTransferCancelledException(
+							"User cancelled file tranfer");
+				}
+
 				Bitmap thumbnail = null;
 				String thumbnailString = null;
 				if (hikeFileType == HikeFileType.IMAGE) {
@@ -194,6 +200,12 @@ public class UploadFileTask extends FileTransferTaskBase {
 				fileType = hikeFile.getFileTypeString();
 			}
 			boolean fileWasAlreadyUploaded = true;
+
+			if (cancelTask.get()) {
+				throw new FileTransferCancelledException(
+						"User cancelled file tranfer");
+			}
+
 			// If we don't have a file key, that means we haven't uploaded the
 			// file to the server yet
 			if (TextUtils.isEmpty(fileKey)) {
@@ -205,6 +217,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
+			}
+
+			if (cancelTask.get()) {
+				throw new FileTransferCancelledException(
+						"User cancelled file tranfer");
 			}
 
 			JSONObject metadata = new JSONObject();

@@ -26,6 +26,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 import com.google.android.maps.GeoPoint;
@@ -91,6 +92,12 @@ public class UploadLocationTask extends FileTransferTaskBase {
 							zoomLevel, address, convMessage);
 				}
 			}
+
+			if (cancelTask.get()) {
+				throw new FileTransferCancelledException(
+						"User cancelled file tranfer");
+			}
+
 			boolean fileWasAlreadyUploaded = true;
 			// If we don't have a file key, that means we haven't uploaded the
 			// file to the server yet
@@ -104,6 +111,11 @@ public class UploadLocationTask extends FileTransferTaskBase {
 
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
+			}
+
+			if (cancelTask.get()) {
+				throw new FileTransferCancelledException(
+						"User cancelled file tranfer");
 			}
 
 			JSONObject metadata = new JSONObject();
@@ -166,8 +178,8 @@ public class UploadLocationTask extends FileTransferTaskBase {
 	private void fetchThumbnailAndUpdateConvMessage(double latitude,
 			double longitude, int zoomLevel, String address,
 			ConvMessage convMessage) throws Exception {
-		String staticMapUrl = String.format(Locale.US, STATIC_MAP_UNFORMATTED_URL,
-				latitude, longitude, zoomLevel,
+		String staticMapUrl = String.format(Locale.US,
+				STATIC_MAP_UNFORMATTED_URL, latitude, longitude, zoomLevel,
 				HikeConstants.MAX_DIMENSION_LOCATION_THUMBNAIL_PX);
 		Log.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
 

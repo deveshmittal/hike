@@ -52,8 +52,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 					+ fileKey);
 			URLConnection urlConnection = url.openConnection();
 			if (AccountUtils.ssl) {
-				((HttpsURLConnection) urlConnection).setSSLSocketFactory(HikeSSLUtil
-						.getSSLSocketFactory());
+				((HttpsURLConnection) urlConnection)
+						.setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
 
 			int length = urlConnection.getContentLength();
