@@ -671,49 +671,52 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		}
 
-		if (mNameEdit != null && !TextUtils.isEmpty(mNameEdit.getText())
-				&& !nameTxt.equals(mNameEdit.getText().toString())) {
-			/* user edited the text, so update the profile */
-			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
-					+ "/name", new HikeHttpRequest.HikeHttpCallback() {
-				public void onFailure() {
-					if (isBackPressed) {
-						finishEditing();
+		if (mNameEdit != null) {
+			final String newName = mNameEdit.getText().toString().trim();
+			if (!TextUtils.isEmpty(newName) && !nameTxt.equals(newName)) {
+				/* user edited the text, so update the profile */
+				HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
+						+ "/name", new HikeHttpRequest.HikeHttpCallback() {
+					public void onFailure() {
+						if (isBackPressed) {
+							finishEditing();
+						}
 					}
-				}
 
-				public void onSuccess(JSONObject response) {
-					if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO) {
-						/*
-						 * if the request was successful, update the shared
-						 * preferences and the UI
-						 */
-						String name = mNameEdit.getText().toString();
-						Editor editor = preferences.edit();
-						editor.putString(HikeMessengerApp.NAME_SETTING, name);
-						editor.commit();
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.PROFILE_NAME_CHANGED, null);
-					} else {
-						HikeConversationsDatabase hCDB = HikeConversationsDatabase
-								.getInstance();
-						hCDB.setGroupName(ProfileActivity.this.mLocalMSISDN,
-								mNameEdit.getText().toString());
+					public void onSuccess(JSONObject response) {
+						if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO) {
+							/*
+							 * if the request was successful, update the shared
+							 * preferences and the UI
+							 */
+							String name = newName;
+							Editor editor = preferences.edit();
+							editor.putString(HikeMessengerApp.NAME_SETTING,
+									name);
+							editor.commit();
+							HikeMessengerApp.getPubSub().publish(
+									HikePubSub.PROFILE_NAME_CHANGED, null);
+						} else {
+							HikeConversationsDatabase hCDB = HikeConversationsDatabase
+									.getInstance();
+							hCDB.setGroupName(
+									ProfileActivity.this.mLocalMSISDN, newName);
+						}
+						if (isBackPressed) {
+							finishEditing();
+						}
 					}
-					if (isBackPressed) {
-						finishEditing();
-					}
-				}
-			});
+				});
 
-			JSONObject json = new JSONObject();
-			try {
-				json.put("name", mNameEdit.getText().toString());
-				request.setJSONData(json);
-			} catch (JSONException e) {
-				Log.e("ProfileActivity", "Could not set name", e);
+				JSONObject json = new JSONObject();
+				try {
+					json.put("name", newName);
+					request.setJSONData(json);
+				} catch (JSONException e) {
+					Log.e("ProfileActivity", "Could not set name", e);
+				}
+				requests.add(request);
 			}
-			requests.add(request);
 		}
 
 		if (mActivityState.newBitmap != null) {
