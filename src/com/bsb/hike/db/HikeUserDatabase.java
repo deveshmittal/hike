@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -474,7 +475,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		addContacts(l, false);
 	}
 
-	public List<ContactInfo> getNonHikeContacts() {
+	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeContacts() {
 		Cursor c = mReadDb.rawQuery("SELECT " + DBConstants.USERS_TABLE + "."
 				+ DBConstants.MSISDN + ", " + DBConstants.USERS_TABLE + "."
 				+ DBConstants.ID + ", " + DBConstants.USERS_TABLE + "."
@@ -490,12 +491,38 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.BLOCK_TABLE + ") AND " + DBConstants.USERS_TABLE
 				+ "." + DBConstants.ONHIKE + " =0 AND "
 				+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN
-				+ " !='null'", null);
-		List<ContactInfo> contactInfos = extractContactInfo(c);
-		c.close();
-		if (contactInfos.isEmpty()) {
-			return contactInfos;
+				+ " !='null'" + " ORDER BY " + DBConstants.USERS_TABLE + "."
+				+ DBConstants.NAME + " COLLATE NOCASE", null);
+
+		List<Pair<AtomicBoolean, ContactInfo>> contactInfos = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(
+				c.getCount());
+		int idx = c.getColumnIndex(DBConstants.ID);
+		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		int nameIdx = c.getColumnIndex(DBConstants.NAME);
+		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+		int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+		int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+		int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
+
+		while (c.moveToNext()) {
+			ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+					c.getString(msisdnIdx), c.getString(nameIdx),
+					c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
+					c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx),
+					c.getInt(hasCustomPhotoIdx) == 1);
+			if (favoriteIdx != -1) {
+				int favoriteTypeOrd = c.getInt(favoriteIdx);
+				contactInfo
+						.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
+			} else {
+				contactInfo.setFavoriteType(FavoriteType.NOT_FAVORITE);
+			}
+			contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(
+					new AtomicBoolean(false), contactInfo));
 		}
+		c.close();
 
 		return contactInfos;
 	}

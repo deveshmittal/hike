@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#eeeeeb"
+    android:background="@drawable/thatch_repeat"
     android:orientation="vertical" >
 
     <include
@@ -12,10 +12,50 @@
         android:layout_alignParentTop="true"
         layout="@layout/top_panel" />
 
+    <LinearLayout
+        android:id="@+id/input_number_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:minHeight="48dp"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:text="@string/to"
+            android:textColor="#818181"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/input_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:gravity="center_vertical"
+            android:hint="@string/start_typing"
+            android:imeOptions="actionNone"
+            android:minHeight="48dp"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="18dp"
+            android:paddingTop="5dp"
+            android:singleLine="true"
+            android:textColor="@color/lightblack"
+            android:textColorHint="#cdcdc8"
+            android:textSize="16sp"
+            android:visibility="visible" >
+        </EditText>
+    </LinearLayout>
+
     <ListView
         android:id="@+id/contact_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1px"
         android:background="@color/offwhite"
         android:cacheColorHint="#00000000"
         android:divider="@drawable/ic_thread_divider_other"
@@ -26,5 +66,11 @@
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"
         android:textFilterEnabled="true" />
+
+    <View
+        android:id="@+id/bottom_nav_bar_dropshadow"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/dropshadow" />
 
 </LinearLayout>
