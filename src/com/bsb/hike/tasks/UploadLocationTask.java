@@ -101,7 +101,7 @@ public class UploadLocationTask extends FileTransferTaskBase {
 
 				JSONObject response = AccountUtils.executeFileTransferRequest(
 						null, HikeConstants.LOCATION_FILE_NAME, convMessage
-								.getMetadata().getJSON(), this, cancelTask,
+								.getMetadata().getJSON(), this,
 						HikeConstants.LOCATION_CONTENT_TYPE);
 
 				JSONObject fileJSON = response.getJSONObject("data");

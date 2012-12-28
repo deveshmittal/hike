@@ -5,9 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
@@ -16,8 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -71,7 +66,6 @@ import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.mqtt.client.HikeSSLUtil;
 
 public class AccountUtils {
 
@@ -629,66 +623,12 @@ public class AccountUtils {
 		}
 	}
 
-	private static URLConnection getFileTransferURLConnection(String fileName,
-			String fileType) throws Exception {
-		URL url = new URL(fileTransferUploadBase + "/user/ft");
-
-		URLConnection connection = url.openConnection();
-		if (ssl) {
-			((HttpsURLConnection) connection).setRequestMethod("PUT");
-			((HttpsURLConnection) connection).setSSLSocketFactory(HikeSSLUtil
-					.getSSLSocketFactory());
-		} else {
-			((HttpURLConnection) connection).setRequestMethod("PUT");
-		}
-		connection.setDoInput(true);
-		connection.setDoOutput(true);
-		connection.setUseCaches(false);
-
-		connection.setConnectTimeout(150 * 1000);
-		connection.setRequestProperty("Connection", "Keep-Alive");
-		connection.setRequestProperty("Content-Name", fileName);
-		connection.setRequestProperty("Content-Type",
-				TextUtils.isEmpty(fileType) ? "" : fileType);
-		connection.setRequestProperty("Cookie", "user=" + mToken);
-		connection.setRequestProperty("X-Thumbnail-Required", "0");
-
-		return connection;
-	}
-
-	private static JSONObject getFileTransferResponse(URLConnection connection,
-			FileTransferTaskBase uploadTask, AtomicBoolean cancelUpload)
-			throws Exception {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				connection.getInputStream()));
-
-		int progress = 90;
-		uploadTask.updateProgress(progress);
-
-		StringBuilder builder = new StringBuilder();
-		CharBuffer target = CharBuffer.allocate(10000);
-		int read = reader.read(target);
-		while (read >= 0) {
-			builder.append(target.array(), 0, read);
-			target.clear();
-			read = reader.read(target);
-			if (cancelUpload.get()) {
-				throw new Exception("Upload cancelled by user");
-			}
-		}
-		progress = 100;
-		uploadTask.updateProgress(progress);
-
-		Log.d("AccountUtils", "Response: " + builder.toString());
-		return new JSONObject(builder.toString());
-	}
-
 	static float maxSize;
 
 	public static JSONObject executeFileTransferRequest(String filePath,
 			String fileName, JSONObject request,
-			final FileTransferTaskBase uploadFileTask,
-			AtomicBoolean cancelUpload, String fileType) throws Exception {
+			final FileTransferTaskBase uploadFileTask, String fileType)
+			throws Exception {
 
 		HttpClient httpClient = getClient();
 
