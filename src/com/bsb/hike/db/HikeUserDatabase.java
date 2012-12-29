@@ -381,19 +381,23 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						new String[] { DBConstants.FAVORITE_TYPE },
 						DBConstants.MSISDN + " =? ", new String[] { msisdn },
 						null, null, null);
-				/*
-				 * Setting the favorite type for unknown contacts
-				 */
-				FavoriteType favoriteType = FavoriteType.NOT_FAVORITE;
-				if (favoriteCursor.moveToFirst()) {
-					favoriteType = FavoriteType.values()[favoriteCursor
-							.getInt(favoriteCursor
-									.getColumnIndex(DBConstants.FAVORITE_TYPE))];
+				try {
+					/*
+					 * Setting the favorite type for unknown contacts
+					 */
+					FavoriteType favoriteType = FavoriteType.NOT_FAVORITE;
+					if (favoriteCursor.moveToFirst()) {
+						favoriteType = FavoriteType.values()[favoriteCursor
+								.getInt(favoriteCursor
+										.getColumnIndex(DBConstants.FAVORITE_TYPE))];
+					}
+					ContactInfo contactInfo = new ContactInfo(msisdn, msisdn,
+							null, msisdn, false);
+					contactInfo.setFavoriteType(favoriteType);
+					return contactInfo;
+				} finally {
+					favoriteCursor.close();
 				}
-				ContactInfo contactInfo = new ContactInfo(msisdn, msisdn, null,
-						msisdn, false);
-				contactInfo.setFavoriteType(favoriteType);
-				return contactInfo;
 			}
 		}
 
