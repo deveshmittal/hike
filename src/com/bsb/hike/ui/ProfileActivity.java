@@ -1032,6 +1032,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onViewImageClicked(View v) {
+		if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
+			Toast.makeText(getApplicationContext(),
+					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
+
 		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 
