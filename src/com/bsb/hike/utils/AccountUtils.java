@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+
+import junit.framework.Assert;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -417,16 +418,15 @@ public class AccountUtils {
 
 	private static void addToken(HttpRequestBase req)
 			throws IllegalStateException {
+		assertIfTokenNull();
 		if (TextUtils.isEmpty(mToken)) {
 			throw new IllegalStateException("Token is null");
 		}
 		req.addHeader("Cookie", "user=" + mToken);
-
-		assertIfTokenNull();
 	}
 
 	private static void assertIfTokenNull() {
-		assert mToken != null : "TOKEN IS NULL";
+		Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
 	public static void setName(String name) throws NetworkErrorException,
