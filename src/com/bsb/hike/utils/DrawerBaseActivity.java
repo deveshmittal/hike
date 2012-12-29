@@ -207,7 +207,7 @@ public class DrawerBaseActivity extends Activity implements
 					parentLayout.setUpLeftDrawerView();
 				}
 			});
-		}  else if (HikePubSub.ICON_CHANGED.equals(type)) {
+		} else if (HikePubSub.ICON_CHANGED.equals(type)) {
 			runOnUiThread(new Runnable() {
 
 				@Override
@@ -339,4 +339,5 @@ public class DrawerBaseActivity extends Activity implements
 	public boolean onContextItemSelected(MenuItem item) {
 		return parentLayout.onFavoritesContextItemSelected(item);
 	}
+
 }
