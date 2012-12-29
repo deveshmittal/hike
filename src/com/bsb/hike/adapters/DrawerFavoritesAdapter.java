@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -327,6 +328,14 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	public int getPendingRequests() {
 		return recommendedFavoriteList.size();
+	}
+
+	public void cancelFavoriteNotifications(NotificationManager manager) {
+		for (ContactInfo contactInfo : recommendedFavoriteList) {
+			if (contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE) {
+				manager.cancel(contactInfo.getMsisdn().hashCode());
+			}
+		}
 	}
 
 	@Override

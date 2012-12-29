@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -154,6 +155,12 @@ public class DrawerBaseActivity extends Activity implements
 	public boolean onContentTouchedWhenOpeningRightSidebar() {
 		parentLayout.closeRightSidebar(false);
 		return true;
+	}
+
+	@Override
+	public void rightSidebarOpened() {
+		parentLayout
+				.cancelFavoriteNotifications((NotificationManager) getSystemService(NOTIFICATION_SERVICE));
 	}
 
 	@Override

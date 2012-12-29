@@ -28,6 +28,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.MessagesList;
 
 public class ToastListener implements Listener {
 
@@ -130,6 +131,13 @@ public class ToastListener implements Listener {
 			 */
 			if (favoriteType != FavoriteType.RECOMMENDED_FAVORITE) {
 				return;
+			}
+			Activity activity = (currentActivity != null) ? currentActivity
+					.get() : null;
+			if (activity instanceof MessagesList) {
+				if (((MessagesList) activity).parentLayout.isRightOpening()) {
+					return;
+				}
 			}
 			toaster.notifyFavorite(contactInfo);
 		}

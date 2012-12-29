@@ -3,6 +3,7 @@ package com.bsb.hike.view;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -297,6 +298,11 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public void refreshRecents(List<ContactInfo> recents) {
 		drawerFavoritesAdapter.refreshRecents(recents);
+	}
+
+	public void cancelFavoriteNotifications(
+			NotificationManager notificationManager) {
+		drawerFavoritesAdapter.cancelFavoriteNotifications(notificationManager);
 	}
 
 	public void onCreateFavoritesContextMenu(Activity activity, Menu menu,
@@ -707,6 +713,9 @@ public class DrawerLayout extends RelativeLayout implements
 				mLeftOpened = !mLeftOpened;
 			} else {
 				mRightOpened = !mRightOpened;
+				if (mRightOpened && mListener != null) {
+					mListener.rightSidebarOpened();
+				}
 			}
 			requestLayout();
 		}
@@ -746,5 +755,7 @@ public class DrawerLayout extends RelativeLayout implements
 		public boolean onContentTouchedWhenOpeningLeftSidebar();
 
 		public boolean onContentTouchedWhenOpeningRightSidebar();
+
+		public void rightSidebarOpened();
 	}
 }
