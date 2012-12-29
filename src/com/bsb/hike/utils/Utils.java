@@ -521,10 +521,6 @@ public class Utils {
 			return true;
 		}
 
-		Log.d("Utils",
-				"auth token is "
-						+ settings.getString(HikeMessengerApp.TOKEN_SETTING,
-								null));
 		return false;
 	}
 
