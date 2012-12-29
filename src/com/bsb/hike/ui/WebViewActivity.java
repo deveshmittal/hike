@@ -61,12 +61,19 @@ public class WebViewActivity extends DrawerBaseActivity {
 
 			@Override
 			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				if (url == null) {
+					return false;
+				}
 				if (url.startsWith("mailto:")) {
 					MailTo mt = MailTo.parse(url);
 					Intent i = newEmailIntent(WebViewActivity.this, mt.getTo(),
 							mt.getSubject(), mt.getBody(), mt.getCc());
 					startActivity(i);
 					view.reload();
+				} else if (url.toLowerCase().endsWith("hike.in/rewards/invite")) {
+					Intent i = new Intent(WebViewActivity.this,
+							HikeListActivity.class);
+					startActivity(i);
 				} else {
 					view.loadUrl(url);
 				}
