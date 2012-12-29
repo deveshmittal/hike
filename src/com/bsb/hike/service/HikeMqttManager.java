@@ -583,6 +583,10 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			Log.d("HikeMqttManager", "already connected");
 			return;
 		}
+		if (TextUtils.isEmpty(settings.getString(
+				HikeMessengerApp.TOKEN_SETTING, null))) {
+			return;
+		}
 
 		if (Utils.isUserOnline(mHikeService)) {
 			Log.d("HikeMqttManager", "netconnection valid, try to connect");
