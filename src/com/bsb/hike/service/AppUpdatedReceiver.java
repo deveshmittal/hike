@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -28,6 +29,16 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 		if (context.getPackageName().equals(
 				intent.getData().getSchemeSpecificPart())) {
 			Log.d(getClass().getSimpleName(), "App has been updated");
+			SharedPreferences prefs = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+			/*
+			 * If the user has not signed up yet, don't do anything.
+			 */
+			if (TextUtils.isEmpty(prefs.getString(
+					HikeMessengerApp.TOKEN_SETTING, null))) {
+				return;
+			}
 			/*
 			 * Have to add the delay since the service is null initially.
 			 */
@@ -49,8 +60,6 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 			 * Checking if the current version is the latest version. If it is
 			 * we reset the preference which prompts the user to update the app.
 			 */
-			SharedPreferences prefs = context.getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 			if (!Utils.isUpdateRequired(
 					prefs.getString(HikeConstants.Extras.LATEST_VERSION, ""),
 					context)) {
