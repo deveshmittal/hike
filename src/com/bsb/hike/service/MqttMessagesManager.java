@@ -383,16 +383,21 @@ public class MqttMessagesManager {
 			}
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_INFO.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+
+			boolean inviteTokenAdded = false;
+			boolean inviteeNumChanged = false;
+			boolean toggleRewards = false;
+
 			Editor editor = settings.edit();
 			if (data.has(HikeConstants.INVITE_TOKEN)) {
 				editor.putString(HikeConstants.INVITE_TOKEN,
 						data.getString(HikeConstants.INVITE_TOKEN));
-				this.pubSub.publish(HikePubSub.INVITE_TOKEN_ADDED, null);
+				inviteTokenAdded = true;
 			}
 			if (data.has(HikeConstants.TOTAL_CREDITS_PER_MONTH)) {
 				editor.putString(HikeConstants.TOTAL_CREDITS_PER_MONTH,
 						data.getString(HikeConstants.TOTAL_CREDITS_PER_MONTH));
-				this.pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
+				inviteeNumChanged = true;
 			}
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
@@ -451,10 +456,19 @@ public class MqttMessagesManager {
 				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS,
 						account.optBoolean(HikeConstants.SHOW_REWARDS));
 				if (account.optBoolean(HikeConstants.SHOW_REWARDS)) {
-					this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
+					toggleRewards = true;
 				}
 			}
 			editor.commit();
+			if (inviteTokenAdded) {
+				pubSub.publish(HikePubSub.INVITE_TOKEN_ADDED, null);
+			}
+			if (inviteeNumChanged) {
+				pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
+			}
+			if (toggleRewards) {
+				pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
+			}
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
 					.getString(HikeConstants.MSISDN);
