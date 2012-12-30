@@ -166,6 +166,7 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String REWARDS_TOKEN = "rewardsToken";
 	public static final String SHOW_REWARDS = "showRewards";
+	public static final String TALK_TIME = "talkTime";
 
 	private static Facebook facebook;
 

@@ -387,6 +387,8 @@ public class MqttMessagesManager {
 			boolean inviteTokenAdded = false;
 			boolean inviteeNumChanged = false;
 			boolean toggleRewards = false;
+			boolean talkTimeChanged = false;
+			int newTalkTime = 0;
 
 			Editor editor = settings.edit();
 			if (data.has(HikeConstants.INVITE_TOKEN)) {
@@ -458,6 +460,17 @@ public class MqttMessagesManager {
 				if (account.optBoolean(HikeConstants.SHOW_REWARDS)) {
 					toggleRewards = true;
 				}
+				if (account.has(HikeConstants.REWARDS)) {
+					JSONObject rewards = account
+							.getJSONObject(HikeConstants.REWARDS);
+
+					int talkTime = rewards.optInt(HikeConstants.TALK_TIME, -1);
+					if (talkTime > -1) {
+						editor.putInt(HikeMessengerApp.TALK_TIME, talkTime);
+						talkTimeChanged = true;
+						newTalkTime = talkTime;
+					}
+				}
 			}
 			editor.commit();
 			if (inviteTokenAdded) {
@@ -468,6 +481,9 @@ public class MqttMessagesManager {
 			}
 			if (toggleRewards) {
 				pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
+			}
+			if (talkTimeChanged) {
+				pubSub.publish(HikePubSub.TALK_TIME_CHANGED, newTalkTime);
 			}
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
@@ -514,6 +530,16 @@ public class MqttMessagesManager {
 			editor.commit();
 
 			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
+		} else if (HikeConstants.MqttMessageTypes.REWARDS.equals(type)) {
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+
+			int talkTime = data.getInt(HikeConstants.TALK_TIME);
+
+			Editor editor = settings.edit();
+			editor.putInt(HikeMessengerApp.TALK_TIME, talkTime);
+			editor.commit();
+
+			this.pubSub.publish(HikePubSub.TALK_TIME_CHANGED, talkTime);
 		}
 	}
 

@@ -33,7 +33,7 @@ public class DrawerBaseActivity extends Activity implements
 	private String[] leftDrawerPubSubListeners = {
 			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.PROFILE_PIC_CHANGED,
 			HikePubSub.PROFILE_NAME_CHANGED, HikePubSub.FREE_SMS_TOGGLED,
-			HikePubSub.TOGGLE_REWARDS };
+			HikePubSub.TOGGLE_REWARDS, HikePubSub.TALK_TIME_CHANGED };
 
 	private String[] rightDrawerPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
@@ -205,6 +205,15 @@ public class DrawerBaseActivity extends Activity implements
 				@Override
 				public void run() {
 					parentLayout.setUpLeftDrawerView();
+				}
+			});
+		} else if (HikePubSub.TALK_TIME_CHANGED.equals(type)) {
+			final int talkTime = (Integer) object;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					parentLayout.updateTalkTime(talkTime);
 				}
 			});
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {

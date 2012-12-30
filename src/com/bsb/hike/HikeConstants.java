@@ -71,6 +71,8 @@ public class HikeConstants {
 	public static final String MSISDNS = "msisdns";
 	public static final String REWARDS_TOKEN = "reward_token";
 	public static final String SHOW_REWARDS = "show_rewards";
+	public static final String REWARDS = "rewards";
+	public static final String TALK_TIME = "tt";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -485,6 +487,7 @@ public class HikeConstants {
 		public static final String UNMUTE = "unmute";
 		public static final String GROUP_CHAT_KICK = "gck";
 		public static final String ACCOUNT_CONFIG = "ac";
+		public static final String REWARDS = "rewards";
 	}
 
 	public static enum FTResult {

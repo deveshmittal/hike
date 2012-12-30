@@ -95,6 +95,8 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private TextView creditsNum;
 
+	private TextView talkTimeNum;
+
 	private SharedPreferences accountPrefs;
 
 	private Intent intent;
@@ -366,6 +368,9 @@ public class DrawerLayout extends RelativeLayout implements
 		creditsNum = (TextView) findViewById(R.id.credit_num);
 		updateCredits(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0));
 
+		talkTimeNum = (TextView) findViewById(R.id.talk_time_num);
+		updateTalkTime(accountPrefs.getInt(HikeMessengerApp.TALK_TIME, 0));
+
 		TextView withLoveTextView = (TextView) findViewById(R.id.made_with_love);
 
 		String love = getContext().getString(R.string.love);
@@ -480,6 +485,14 @@ public class DrawerLayout extends RelativeLayout implements
 	public void updateCredits(int credits) {
 		if (creditsNum != null) {
 			creditsNum.setText(Integer.toString(credits));
+		}
+	}
+
+	public void updateTalkTime(int talkTime) {
+		if (talkTimeNum != null) {
+			talkTimeNum.setVisibility(talkTime > 0 ? View.VISIBLE
+					: View.INVISIBLE);
+			talkTimeNum.setText(Integer.toString(talkTime));
 		}
 	}
 
