@@ -72,7 +72,6 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 	}
 
 	public void onTitleIconClick(View v) {
-		boolean noItemsChecked = true;
 		Iterator<String> iterator = selectedContacts.iterator();
 		while (iterator.hasNext()) {
 			String msisdn = iterator.next();
@@ -82,14 +81,12 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 					HikeConstants.CURRENCY);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 					Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
-			noItemsChecked = false;
 		}
-		if (selectedContacts.isEmpty()) {
-			Toast.makeText(
-					getApplicationContext(),
-					noItemsChecked ? R.string.select_invite_contacts
-							: R.string.invites_sent, Toast.LENGTH_SHORT).show();
-		} else {
+		Toast.makeText(
+				getApplicationContext(),
+				selectedContacts.isEmpty() ? R.string.select_invite_contacts
+						: R.string.invites_sent, Toast.LENGTH_SHORT).show();
+		if (!selectedContacts.isEmpty()) {
 			finish();
 		}
 	}
