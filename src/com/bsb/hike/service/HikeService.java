@@ -451,6 +451,11 @@ public class HikeService extends Service {
 			unregisterReceiver(registerToGCMTrigger);
 			registerToGCMTrigger = null;
 		}
+
+		if (sendGCMIdToServerTrigger != null) {
+			unregisterReceiver(sendGCMIdToServerTrigger);
+			sendGCMIdToServerTrigger = null;
+		}
 	}
 
 	public void unregisterDataChangeReceivers() {
