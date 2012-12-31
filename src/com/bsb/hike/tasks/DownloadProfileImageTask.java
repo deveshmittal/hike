@@ -115,10 +115,16 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	}
 
 	@Override
+	protected void onCancelled() {
+		File file = new File(fileName);
+		file.delete();
+	}
+
+	@Override
 	protected void onPostExecute(Boolean result) {
 		if (result == false) {
-			Toast.makeText(context, R.string.error_download,
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, R.string.error_download, Toast.LENGTH_SHORT)
+					.show();
 			File file = new File(fileName);
 			file.delete();
 			HikeMessengerApp.getPubSub().publish(

@@ -257,7 +257,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		}
 		if (mActivityState.viewingProfileImage) {
-			onViewImageClicked(null);
+			downloadOrShowProfileImage(false, false);
 		}
 	}
 
@@ -1033,6 +1033,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onViewImageClicked(View v) {
+		downloadOrShowProfileImage(true, false);
+	}
+
+	private void downloadOrShowProfileImage(boolean startNewDownload,
+			boolean justDownloaded) {
 		if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 			Toast.makeText(getApplicationContext(),
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
@@ -1052,18 +1057,24 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		File file = new File(basePath, fileName);
 
 		if (file.exists()) {
-			showLargerImage(BitmapDrawable.createFromPath(basePath + "/"
-					+ fileName));
+			showLargerImage(
+					BitmapDrawable.createFromPath(basePath + "/" + fileName),
+					justDownloaded);
 		} else {
-			mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
-					getApplicationContext(), mLocalMSISDN, fileName,
-					hasCustomImage);
-			mActivityState.downloadProfileImageTask.execute();
+			showLargerImage(
+					IconCacheManager.getInstance().getIconForMSISDN(
+							mLocalMSISDN), justDownloaded);
+			if (startNewDownload) {
+				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
+						getApplicationContext(), mLocalMSISDN, fileName,
+						hasCustomImage);
+				mActivityState.downloadProfileImageTask.execute();
 
-			mDialog = ProgressDialog.show(this, null,
-					getResources().getString(R.string.downloading_image));
-			mDialog.setCancelable(true);
-			setDialogOnCancelListener();
+				mDialog = ProgressDialog.show(this, null, getResources()
+						.getString(R.string.downloading_image));
+				mDialog.setCancelable(true);
+				setDialogOnCancelListener();
+			}
 		}
 	}
 
@@ -1086,7 +1097,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	private boolean expandedWithoutAnimation = false;
 
-	public void showLargerImage(Drawable image) {
+	private void showLargerImage(Drawable image, boolean justDownloaded) {
 		mActivityState.viewingProfileImage = true;
 
 		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
@@ -1094,15 +1105,18 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		ImageView profileImageLarge = (ImageView) findViewById(R.id.profile_image_large);
 
-		if (!mActivityState.animatedProfileImage) {
-			mActivityState.animatedProfileImage = true;
-			animateProfileImage(true);
-		} else {
-			expandedWithoutAnimation = true;
-			((LinearLayout) profileImageContainer).setGravity(Gravity.CENTER);
-			LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
-					LayoutParams.MATCH_PARENT);
-			profileImageLarge.setLayoutParams(lp);
+		if (!justDownloaded) {
+			if (!mActivityState.animatedProfileImage) {
+				mActivityState.animatedProfileImage = true;
+				animateProfileImage(true);
+			} else {
+				expandedWithoutAnimation = true;
+				((LinearLayout) profileImageContainer)
+						.setGravity(Gravity.CENTER);
+				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
+						LayoutParams.MATCH_PARENT);
+				profileImageLarge.setLayoutParams(lp);
+			}
 		}
 
 		((ImageView) findViewById(R.id.profile_image_large))
@@ -1511,9 +1525,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				@Override
 				public void run() {
 					mActivityState = new ActivityState();
-					if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type)) {
-						onViewImageClicked(null);
-					}
+					mActivityState.animatedProfileImage = true;
+					downloadOrShowProfileImage(false, true);
 
 					if (mDialog != null) {
 						mDialog.dismiss();
