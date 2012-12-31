@@ -300,4 +300,5 @@
 	<string name="added_favorite">Ich habe dich als Favoriten hinzugefügt</string>
 	<string name="tap_here_invite">Hier tippen um diese Person einzuladen</string>
 	<string name="start_typing_new">Gib einen Namen oder eine Nummer...</string>
+	<string name="gck_help">Teilnehmer antippen und festhalten, um ihn aus der Gruppe zu entfernen</string>
 </resources>

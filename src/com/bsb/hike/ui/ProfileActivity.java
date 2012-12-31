@@ -357,10 +357,13 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		isBlocked = HikeUserDatabase.getInstance().isBlocked(groupOwner);
 
+		boolean isUserGroupOwner = false;
+
 		Button blockGroupOwner = (Button) findViewById(R.id.block_owner_btn);
 		if (groupOwner.equals(userInfo.getContactInfo().getMsisdn())) {
 			blockGroupOwner.setVisibility(View.GONE);
 			findViewById(R.id.empty_horizontal_space).setVisibility(View.GONE);
+			isUserGroupOwner = true;
 		} else {
 			blockGroupOwner.setVisibility(View.VISIBLE);
 			findViewById(R.id.empty_horizontal_space).setVisibility(
@@ -405,6 +408,15 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		mNameEdit.setVisibility(View.GONE);
 		mNameDisplay.setVisibility(View.VISIBLE);
+
+		if (isUserGroupOwner
+				&& !preferences.getBoolean(HikeMessengerApp.GCK_SHOWN, false)) {
+			Toast.makeText(this, R.string.gck_help, Toast.LENGTH_LONG).show();
+
+			Editor editor = preferences.edit();
+			editor.putBoolean(HikeMessengerApp.GCK_SHOWN, true);
+			editor.commit();
+		}
 	}
 
 	private int setupParticipantView() {

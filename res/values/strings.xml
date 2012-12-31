@@ -309,4 +309,5 @@
 	<string name="added_favorite">I added you as a favorite</string>
 	<string name="tap_here_invite">Tap here to invite this person</string>
 	<string name="start_typing_new">Start typing a name or number...</string>
+	<string name="gck_help">Tap and hold a participant to remove them from the group</string>
 </resources>
