@@ -601,11 +601,13 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		ViewGroup[] itemLayouts = new ViewGroup[] { notifications, privacy };
 
 		items = new ProfileItem[] {
-				new ProfileItem.ProfilePreferenceItem(getString(R.string.notifications),
+				new ProfileItem.ProfilePreferenceItem(
+						getString(R.string.notifications),
 						R.drawable.ic_notifications,
 						R.xml.notification_preferences),
-				new ProfileItem.ProfilePreferenceItem(getString(R.string.privacy),
-						R.drawable.ic_privacy, R.xml.privacy_preferences) };
+				new ProfileItem.ProfilePreferenceItem(
+						getString(R.string.privacy), R.drawable.ic_privacy,
+						R.xml.privacy_preferences) };
 
 		for (int i = 0; i < items.length; i++) {
 			items[i].createViewHolder(itemLayouts[i], items[i]);
