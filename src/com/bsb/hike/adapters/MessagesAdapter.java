@@ -407,13 +407,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					((ViewGroup) holder.participantInfoContainer)
 							.addView(creditsMessageView);
 				}
-			} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME) {
+			} else if ((convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+					|| (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_IMAGE)) {
 				String participantName = ((GroupConversation) conversation)
 						.getGroupParticipant(metadata.getMsisdn())
 						.getContactInfo().getFirstName();
-				String message = String.format(
-						context.getString(R.string.change_group_name),
-						participantName);
+				String message = String
+						.format(context.getString(convMessage
+								.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
+								: R.string.change_group_image), participantName);
 
 				TextView mainMessage = (TextView) inflater.inflate(
 						R.layout.participant_info, null);

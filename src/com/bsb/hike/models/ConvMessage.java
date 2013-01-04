@@ -101,7 +101,7 @@ public class ConvMessage {
 			} else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_NAME
 					.equals(type)) {
 				return CHANGED_GROUP_NAME;
-			} else if (HikeConstants.MqttMessageTypes.ICON.equals(type)) {
+			} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 				return CHANGED_GROUP_IMAGE;
 			} else if (HikeConstants.MqttMessageTypes.BLOCK_INTERNATIONAL_SMS
 					.equals(type)) {
@@ -266,12 +266,15 @@ public class ConvMessage {
 			this.mMessage = "";
 			break;
 		case CHANGED_GROUP_NAME:
+		case CHANGED_GROUP_IMAGE:
 			String participantName = ((GroupConversation) conversation)
 					.getGroupParticipant(metadata.getMsisdn()).getContactInfo()
 					.getFirstName();
-			this.mMessage = String.format(
-					context.getString(R.string.change_group_name),
-					participantName);
+			this.mMessage = String
+					.format(context
+							.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
+									: R.string.change_group_image),
+							participantName);
 			break;
 		case BLOCK_INTERNATIONAL_SMS:
 			this.mMessage = context.getString(R.string.block_internation_sms);

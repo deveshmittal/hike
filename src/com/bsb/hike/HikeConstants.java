@@ -488,6 +488,7 @@ public class HikeConstants {
 		public static final String GROUP_CHAT_KICK = "gck";
 		public static final String ACCOUNT_CONFIG = "ac";
 		public static final String REWARDS = "rewards";
+		public static final String DISPLAY_PIC = "dp";
 	}
 
 	public static enum FTResult {

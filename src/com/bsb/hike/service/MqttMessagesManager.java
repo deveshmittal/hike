@@ -82,11 +82,22 @@ public class MqttMessagesManager {
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			if (Utils.isGroupConversation(msisdn)) {
+				return;
+			}
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
 			this.userDb.setIcon(msisdn,
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
+			String groupId = jsonObj.getString(HikeConstants.TO);
+			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
+			this.userDb.setIcon(groupId,
+					Base64.decode(iconBase64, Base64.DEFAULT), false);
+
+			IconCacheManager.getInstance().clearIconForMSISDN(groupId);
+			saveStatusMsg(jsonObj, groupId);
 		} else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
 																			// changed
 		{
@@ -215,6 +226,7 @@ public class MqttMessagesManager {
 
 			if (this.convDb.setGroupName(groupId, groupname) > 0) {
 				this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
+				saveStatusMsg(jsonObj, groupId);
 			}
 		} else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type)) // Group
 																				// chat
