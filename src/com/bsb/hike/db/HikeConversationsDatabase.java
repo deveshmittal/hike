@@ -610,16 +610,81 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public List<Conversation> getConversations() {
 		long startTime = System.currentTimeMillis();
-		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE,
-				new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID,
-						DBConstants.MSISDN }, null, null, null, null, null);
 
-		List<Conversation> conversations = new ArrayList<Conversation>();
-		final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-		final int convIdx = c.getColumnIndex(DBConstants.CONV_ID);
+		String query = "SELECT "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MESSAGE
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MSG_STATUS
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.TIMESTAMP
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MESSAGE_ID
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MAPPED_MSG_ID
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MESSAGE_METADATA
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.GROUP_PARTICIPANT
+				+ ", "
+				+ DBConstants.CONVERSATIONS_TABLE
+				+ "."
+				+ DBConstants.CONV_ID
+				+ ", "
+				+ DBConstants.CONVERSATIONS_TABLE
+				+ "."
+				+ DBConstants.MSISDN
+				+ " FROM conversations, messages LEFT OUTER JOIN messages "
+				+ "AS max ON messages.convid = max.convid AND max.msgid > messages.msgid"
+				+ " WHERE max.msgid IS NULL AND messages.convid = conversations.convid";
+
+		Cursor groupInfoCursor = null;
+		Cursor c = mDb.rawQuery(query, null);
+
+		Map<String, Conversation> conversationMap = new HashMap<String, Conversation>(
+				c.getCount());
+
+		List<Conversation> conversations = new ArrayList<Conversation>(
+				c.getCount());
+
+		final int msisdnIdx = c.getColumnIndex(DBConstants.CONVERSATIONS_TABLE
+				+ "." + DBConstants.MSISDN);
+		final int convIdx = c.getColumnIndex(DBConstants.CONVERSATIONS_TABLE
+				+ "." + DBConstants.CONV_ID);
+
+		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+				+ DBConstants.MESSAGE);
+		final int msgStatusColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
+				+ "." + DBConstants.MSG_STATUS);
+		final int tsColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+				+ DBConstants.TIMESTAMP);
+		final int mappedMsgIdColumn = c
+				.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+						+ DBConstants.MAPPED_MSG_ID);
+		final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
+				+ "." + DBConstants.MESSAGE_ID);
+		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
+				+ "." + DBConstants.MESSAGE_METADATA);
+		final int groupParticipantColumn = c
+				.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+						+ DBConstants.GROUP_PARTICIPANT);
 
 		HikeUserDatabase huDb = null;
 
+		StringBuilder msisdns = new StringBuilder("(");
 		try {
 			huDb = HikeUserDatabase.getInstance();
 			while (c.moveToNext()) {
@@ -627,31 +692,91 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				// TODO this can be expressed in a single sql query
 				String msisdn = c.getString(msisdnIdx);
 				long convid = c.getInt(convIdx);
-				Log.d(getClass().getSimpleName(), "Fetching Converstaions: "
-						+ msisdn);
-				if (Utils.isGroupConversation(msisdn)) {
-					conv = getGroupConversation(msisdn, convid);
-				} else {
-					ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(
-							msisdn, false);
-					conv = new Conversation(msisdn, convid,
-							contactInfo.getName(),
-							(contactInfo != null) ? contactInfo.isOnhike()
-									: false);
+
+				if (!Utils.isGroupConversation(msisdn)) {
+					msisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				}
+				conv = new Conversation(msisdn, convid);
 
-				conv.setMessages(getConversationThread(conv.getMsisdn(),
-						conv.getConvId(), 1, conv, -1));
-
-				conversations.add(conv);
+				ConvMessage message = new ConvMessage(c.getString(msgColumn),
+						msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c
+								.getInt(msgStatusColumn)),
+						c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn),
+						c.getString(groupParticipantColumn));
+				String metadata = c.getString(metadataColumn);
+				try {
+					message.setMetadata(metadata);
+				} catch (JSONException e) {
+					Log.e(HikeConversationsDatabase.class.getName(),
+							"Invalid JSON metadata", e);
+				}
+				conv.addMessage(message);
+				conversationMap.put(msisdn, conv);
 			}
+			msisdns.replace(msisdns.lastIndexOf(","), msisdns.length(), ")");
+
+			List<ContactInfo> contactList = huDb
+					.getContactNamesFromMsisdnList(msisdns.toString());
+
+			for (ContactInfo contactInfo : contactList) {
+				Conversation conversation = conversationMap.get(contactInfo
+						.getMsisdn());
+				conversation.setContactName(contactInfo.getName());
+				conversation.setOnhike(contactInfo.isOnhike());
+			}
+
+			/*
+			 * Getting the info for group conversations
+			 */
+			groupInfoCursor = mDb.query(DBConstants.GROUP_INFO_TABLE,
+					new String[] { DBConstants.GROUP_ID,
+							DBConstants.GROUP_NAME, DBConstants.GROUP_OWNER,
+							DBConstants.GROUP_ALIVE }, null, null, null, null,
+					null);
+
+			final int groupIdIdx = groupInfoCursor
+					.getColumnIndex(DBConstants.GROUP_ID);
+			final int groupNameIdx = groupInfoCursor
+					.getColumnIndex(DBConstants.GROUP_NAME);
+			final int groupOwnerIdx = groupInfoCursor
+					.getColumnIndex(DBConstants.GROUP_OWNER);
+			final int groupAliveIdx = groupInfoCursor
+					.getColumnIndex(DBConstants.GROUP_ALIVE);
+
+			Map<String, Map<String, GroupParticipant>> groupIdParticipantsMap = getAllGroupParticipants();
+
+			while (groupInfoCursor.moveToNext()) {
+				String groupId = groupInfoCursor.getString(groupIdIdx);
+				String groupName = groupInfoCursor.getString(groupNameIdx);
+				String groupOwner = groupInfoCursor.getString(groupOwnerIdx);
+				boolean isGroupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
+
+				Conversation conversation = conversationMap.get(groupId);
+				Map<String, GroupParticipant> groupParticipants = groupIdParticipantsMap
+						.get(groupId);
+
+				GroupConversation groupConversation = new GroupConversation(
+						groupId, conversation.getConvId(), groupName,
+						groupOwner, isGroupAlive);
+				groupConversation.setGroupParticipantList(groupParticipants);
+				groupConversation.setMessages(conversation.getMessages());
+
+				conversationMap.remove(groupId);
+				conversationMap.put(groupId, groupConversation);
+			}
+
 		} catch (Exception e) {
 			Log.e("HikeConversationsDatabase",
 					"Unable to retrieve conversations", e);
 		} finally {
 			c.close();
+			if (groupInfoCursor != null) {
+				groupInfoCursor.close();
+			}
 		}
-		Log.d(getClass().getSimpleName(), "Query time: " + (System.currentTimeMillis() - startTime));
+		conversations.addAll(conversationMap.values());
+		Log.d(getClass().getSimpleName(),
+				"Query time: " + (System.currentTimeMillis() - startTime));
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
 	}
