@@ -609,6 +609,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<Conversation> getConversations() {
+		long startTime = System.currentTimeMillis();
 		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE,
 				new String[] { DBConstants.CONV_ID, DBConstants.CONTACT_ID,
 						DBConstants.MSISDN }, null, null, null, null, null);
@@ -650,6 +651,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		} finally {
 			c.close();
 		}
+		Log.d(getClass().getSimpleName(), "Query time: " + (System.currentTimeMillis() - startTime));
 		Collections.sort(conversations, Collections.reverseOrder());
 		return conversations;
 	}
