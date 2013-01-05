@@ -1148,13 +1148,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				indiaOnly, favoriteType);
 	}
 
-	public List<ContactInfo> getContactNamesFromMsisdnList(StringBuilder msisdns) {
+	public List<ContactInfo> getContactNamesFromMsisdnList(String msisdns) {
 		// select max(name), msisdn from users where msisdn in (...) group by
 		// msisdn;
 		Cursor c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS "
 				+ DBConstants.NAME + ", " + DBConstants.MSISDN + ", "
 				+ DBConstants.ONHIKE + " from " + DBConstants.USERS_TABLE
-				+ " WHERE " + DBConstants.MSISDN + " IN " + msisdns.toString()
+				+ " WHERE " + DBConstants.MSISDN + " IN " + msisdns
 				+ " GROUP BY " + DBConstants.MSISDN, null);
 		try {
 			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
