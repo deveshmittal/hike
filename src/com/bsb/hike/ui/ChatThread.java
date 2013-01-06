@@ -140,11 +140,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private Conversation mConversation;
 
-	private SetTypingText mClearTypingCallback;
-
 	private ComposeViewWatcher mComposeViewWatcher;
-
-	private Handler mUiThreadHandler;
 
 	/* View element */
 	private Button mSendBtn;
@@ -401,8 +397,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Utils.setDensityMultiplier(ChatThread.this);
-		/* add a handler on the UI thread so we can post delayed messages */
-		mUiThreadHandler = new Handler();
 
 		/* force the user into the reg-flow process if the token isn't set */
 		if (Utils.requireAuth(this)) {
@@ -875,13 +869,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		btnBar.setVisibility(View.GONE);
 
 		String prevContactNumber = null;
-		/*
-		 * prevent any callbacks from previous instances of this activity from
-		 * being fired now
-		 */
-		if (mClearTypingCallback != null) {
-			mUiThreadHandler.removeCallbacks(mClearTypingCallback);
-		}
 
 		if (mComposeViewWatcher != null) {
 			mComposeViewWatcher.uninit();
@@ -1184,6 +1171,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				&& !((GroupConversation) mConversation).getIsGroupAlive()) {
 			toggleGroupLife(false);
 		}
+		/*
+		 * Check whether we have an existing typing notification for this
+		 * conversation
+		 */
+		if (HikeMessengerApp.getTypingNotificationSet().containsKey(
+				mContactNumber)) {
+			runOnUiThread(new SetTypingText(true));
+		}
 	}
 
 	private void showNudgeDialog() {
@@ -1378,26 +1373,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
 			if (mContactNumber.equals(object)) {
-				if (mClearTypingCallback != null) {
-					// we can assume that if we don't have the callback, then
-					// the UI should be in the right state already
-					runOnUiThread(mClearTypingCallback);
-					mUiThreadHandler.removeCallbacks(mClearTypingCallback);
-				}
+				runOnUiThread(new SetTypingText(false));
 			}
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
 			if (mContactNumber.equals(object)) {
 				runOnUiThread(new SetTypingText(true));
-				// Lazily create the callback to reset the label
-				if (mClearTypingCallback == null) {
-					mClearTypingCallback = new SetTypingText(false);
-				} else {
-					// we've got another typing notification, so we want to
-					// clear it a while from now
-					mUiThreadHandler.removeCallbacks(mClearTypingCallback);
-				}
-				mUiThreadHandler.postDelayed(mClearTypingCallback,
-						HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 			}
 		}
 		// We only consider this case if there is a valid conversation in the
@@ -2065,7 +2045,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						if (which != 0) {
 							if (externalStorageState == ExternalStorageState.NONE) {
 								Toast.makeText(getApplicationContext(),
-										R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+										R.string.no_external_storage,
+										Toast.LENGTH_SHORT).show();
 								return;
 							}
 						}

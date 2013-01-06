@@ -1,6 +1,7 @@
 package com.bsb.hike.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -9,6 +10,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -27,6 +29,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
 import com.facebook.android.Facebook;
@@ -51,6 +54,10 @@ public class MqttMessagesManager {
 
 	private HikePubSub pubSub;
 
+	private Map<String, ClearTypingNotification> typingNotificationMap;
+
+	private Handler clearTypingNotificationHandler;
+
 	private static MqttMessagesManager instance;
 
 	private MqttMessagesManager(Context context) {
@@ -60,6 +67,9 @@ public class MqttMessagesManager {
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		this.context = context;
 		this.pubSub = HikeMessengerApp.getPubSub();
+		this.typingNotificationMap = HikeMessengerApp
+				.getTypingNotificationSet();
+		this.clearTypingNotificationHandler = new Handler();
 	}
 
 	public static MqttMessagesManager getInstance(Context context) {
@@ -308,6 +318,8 @@ public class MqttMessagesManager {
 				this.pubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE,
 						convMessage.getMsisdn());
 			}
+
+			removeTypingNotification(convMessage.getMsisdn());
 		} else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) // Message
 																				// delivered
 																				// to
@@ -368,7 +380,8 @@ public class MqttMessagesManager {
 			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
 					.getString(HikeConstants.TO) : jsonObj
 					.getString(HikeConstants.FROM);
-			this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
+			addTypingNotification(msisdn);
+
 		} else if (HikeConstants.MqttMessageTypes.END_TYPING.equals(type)) // End
 																			// Typing
 																			// event
@@ -377,7 +390,8 @@ public class MqttMessagesManager {
 			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
 					.getString(HikeConstants.TO) : jsonObj
 					.getString(HikeConstants.FROM);
-			this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
+			removeTypingNotification(msisdn);
+
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_AVAILABLE.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
 			String version = data.optString(HikeConstants.VERSION);
@@ -606,6 +620,33 @@ public class MqttMessagesManager {
 							convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED ? HikePubSub.PARTICIPANT_JOINED_GROUP
 									: convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT ? HikePubSub.PARTICIPANT_LEFT_GROUP
 											: HikePubSub.GROUP_END, jsonObj);
+		}
+	}
+
+	private void addTypingNotification(String msisdn) {
+		this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
+
+		ClearTypingNotification clearTypingNotification;
+		if (!typingNotificationMap.containsKey(msisdn)) {
+			clearTypingNotification = new ClearTypingNotification(msisdn);
+			typingNotificationMap.put(msisdn, clearTypingNotification);
+		} else {
+			clearTypingNotification = typingNotificationMap.get(msisdn);
+			clearTypingNotificationHandler
+					.removeCallbacks(clearTypingNotification);
+		}
+		clearTypingNotificationHandler.postDelayed(clearTypingNotification,
+				HikeConstants.LOCAL_CLEAR_TYPING_TIME);
+	}
+
+	private void removeTypingNotification(String msisdn) {
+		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
+
+		ClearTypingNotification clearTypingNotification = typingNotificationMap
+				.remove(msisdn);
+		if (clearTypingNotification != null) {
+			clearTypingNotificationHandler
+					.removeCallbacks(clearTypingNotification);
 		}
 	}
 }

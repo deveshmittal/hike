@@ -135,10 +135,6 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	private Button updateAlertOkBtn;
 
-	private Handler clearTypingNotificationHandler;
-
-	private Map<String, ClearTypingNotification> pendingClearTypingNotifications;
-
 	private Handler messageRefreshHandler;
 
 	@Override
@@ -249,9 +245,6 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		setContentView(R.layout.main);
 		afterSetContentView(savedInstanceState);
-
-		clearTypingNotificationHandler = new Handler();
-		pendingClearTypingNotifications = new HashMap<String, MessagesList.ClearTypingNotification>();
 
 		isToolTipShowing = savedInstanceState != null
 				&& savedInstanceState
@@ -368,6 +361,17 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (!accountPrefs.getBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN,
 				false)) {
 			showFavoritesIntroOverlay();
+		}
+
+		/*
+		 * Check whether we have an existing typing notification for any
+		 * conversations
+		 */
+		Iterator<String> iterator = HikeMessengerApp.getTypingNotificationSet()
+				.keySet().iterator();
+		while (iterator.hasNext()) {
+			String msisdn = iterator.next();
+			toggleTypingNotification(true, msisdn);
 		}
 	}
 
@@ -982,37 +986,10 @@ public class MessagesList extends DrawerBaseActivity implements
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
 			String msisdn = (String) object;
 			toggleTypingNotification(true, msisdn);
-
-			ClearTypingNotification clearTypingNotification;
-			if (!pendingClearTypingNotifications.containsKey(msisdn)) {
-				clearTypingNotification = new ClearTypingNotification(msisdn);
-				pendingClearTypingNotifications.put(msisdn,
-						clearTypingNotification);
-			} else {
-				clearTypingNotification = pendingClearTypingNotifications
-						.get(msisdn);
-				clearTypingNotificationHandler
-						.removeCallbacks(clearTypingNotification);
-			}
-			clearTypingNotificationHandler.postDelayed(clearTypingNotification,
-					HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
 			toggleTypingNotification(false, (String) object);
 		}
 	}
-
-	private class ClearTypingNotification implements Runnable {
-		String msisdn;
-
-		public ClearTypingNotification(String msisdn) {
-			this.msisdn = msisdn;
-		}
-
-		@Override
-		public void run() {
-			toggleTypingNotification(false, msisdn);
-		}
-	};
 
 	private void toggleTypingNotification(boolean isTyping, String msisdn) {
 		if (mConversationsByMSISDN == null) {
@@ -1042,13 +1019,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				messageList.add(convMessage);
 			}
 		} else {
-			ClearTypingNotification clearTypingNotification = pendingClearTypingNotifications
-					.remove(msisdn);
-			if (clearTypingNotification != null) {
-				clearTypingNotificationHandler
-						.removeCallbacks(clearTypingNotification);
-			}
-
 			ConvMessage message = messageList.get(messageList.size() - 1);
 			if (HikeConstants.IS_TYPING.equals(message.getMessage())
 					&& message.getMsgID() == -1

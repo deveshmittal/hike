@@ -5,6 +5,7 @@ import static org.acra.ACRA.LOG_TAG;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.acra.ACRA;
@@ -45,6 +46,7 @@ import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.Utils;
@@ -136,7 +138,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String TEMP_NUM = "tempNum";
 
 	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
-	
+
 	public static final String GCM_ID_SENT = "gcmIdSent";
 
 	/*
@@ -180,6 +182,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	private static boolean isIndianUser;
 
 	private static Messenger mMessenger;
+
+	private static Map<String, ClearTypingNotification> typingNotificationMap;
 
 	private Messenger mService;
 
@@ -368,6 +372,8 @@ public class HikeMessengerApp extends Application implements Listener {
 		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
 				HikeConstants.INDIA_COUNTRY_CODE);
 
+		typingNotificationMap = new HashMap<String, ClearTypingNotification>();
+
 		if (!TextUtils.isEmpty(msisdn) && !isIndianUser) {
 			FiksuTrackingManager.initialize(this);
 		}
@@ -432,6 +438,10 @@ public class HikeMessengerApp extends Application implements Listener {
 			Log.e("HikeMessengerApp", "Invalid format", e);
 			return;
 		}
+	}
+
+	public static Map<String, ClearTypingNotification> getTypingNotificationSet() {
+		return typingNotificationMap;
 	}
 
 	public void initialiseListeners() {
