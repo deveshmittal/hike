@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
@@ -35,7 +36,6 @@ import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
@@ -249,7 +249,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED,
 			HikePubSub.FILE_MESSAGE_CREATED,
 			HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER,
-			HikePubSub.UNBLOCK_USER, HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD };
+			HikePubSub.UNBLOCK_USER,
+			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD,
+			HikePubSub.GROUP_REVIVED };
 
 	private View currentEmoticonCategorySelected;
 
@@ -679,6 +681,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return false;
 		}
 	}
+
 	@Override
 	/*
 	 * this function is called right before the options menu is shown. Disable
@@ -1113,10 +1116,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			showOverlay(true);
 		}
 
-		if ((mConversation instanceof GroupConversation)
-				&& !((GroupConversation) mConversation).getIsGroupAlive()) {
-			groupChatDead();
-		}
 		/*
 		 * make a copy of the message list since it's used internally by the
 		 * adapter
@@ -1181,6 +1180,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
 			showNudgeDialog();
 		}
+		if ((mConversation instanceof GroupConversation)
+				&& !((GroupConversation) mConversation).getIsGroupAlive()) {
+			toggleGroupLife(false);
+		}
 	}
 
 	private void showNudgeDialog() {
@@ -1216,6 +1219,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					R.color.send_hike));
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
 			mComposeView.setHint("Free Message...");
+			findViewById(R.id.title_image_btn2).setEnabled(true);
 		} else {
 			updateChatMetadata();
 			((ImageButton) findViewById(R.id.emo_btn))
@@ -1511,7 +1515,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						groupChatDead();
+						toggleGroupLife(false);
 					}
 				});
 			}
@@ -1597,6 +1601,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					removeMessage(convMessage);
 				}
 			});
+		} else if (HikePubSub.GROUP_REVIVED.equals(type)) {
+			String groupId = (String) object;
+			if (mContactNumber.equals(groupId)) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						toggleGroupLife(true);
+					}
+				});
+			}
 		}
 	}
 
@@ -1646,6 +1660,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mComposeView.setHint("0 Free SMS left...");
 			mComposeView.setEnabled(false);
 			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+			findViewById(R.id.title_image_btn2).setEnabled(false);
 
 			boolean show = mConversationDb.wasOverlayDismissed(mConversation
 					.getMsisdn());
@@ -1660,6 +1675,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				mComposeView.setHint(R.string.type_to_compose);
 				mComposeView.setEnabled(true);
 			}
+			findViewById(R.id.title_image_btn2).setEnabled(true);
 			findViewById(R.id.info_layout).setVisibility(View.GONE);
 
 			if (!blockOverlay) {
@@ -1997,25 +2013,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private void showFilePickerDialog(
 			final ExternalStorageState externalStorageState) {
-		if (externalStorageState == ExternalStorageState.NONE) {
-			Toast.makeText(getApplicationContext(),
-					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
-			return;
-		}
-		/*
-		 * Don't allow uploading more files if an upload/download is in progress
-		 */
-		if (!ChatThread.fileTransferTaskMap.isEmpty()
-				&& ((int) (Utils.densityMultiplier * 10) <= HikeConstants.MDPI_TIMES_10)) {
-			Toast.makeText(getApplicationContext(), R.string.file_transferring,
-					Toast.LENGTH_SHORT).show();
-			return;
-		}
+
+		final boolean canShareLocation = getPackageManager().hasSystemFeature(
+				PackageManager.FEATURE_LOCATION);
+
 		final CharSequence[] options = getResources().getStringArray(
-				R.array.file_transfer_items);
-		final int[] optionIcons = { R.drawable.ic_share_location_item,
-				R.drawable.ic_image_item, R.drawable.ic_video_item,
-				R.drawable.ic_music_item, R.drawable.ic_record_item };
+				canShareLocation ? R.array.file_transfer_items
+						: R.array.file_transfer_items_no_loc);
+
+		final int[] optionIcons;
+		if (canShareLocation) {
+			optionIcons = new int[] { R.drawable.ic_share_location_item,
+					R.drawable.ic_image_item, R.drawable.ic_video_item,
+					R.drawable.ic_music_item, R.drawable.ic_record_item };
+		} else {
+			optionIcons = new int[] { R.drawable.ic_image_item,
+					R.drawable.ic_video_item, R.drawable.ic_music_item,
+					R.drawable.ic_record_item };
+		}
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
 
@@ -2044,6 +2059,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						int requestCode;
 						Intent pickIntent = new Intent();
 						Intent newMediaFileIntent = null;
+						if (!canShareLocation) {
+							which++;
+						}
+						if (which != 0) {
+							if (externalStorageState == ExternalStorageState.NONE) {
+								Toast.makeText(getApplicationContext(),
+										R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+								return;
+							}
+						}
 						switch (which) {
 						case 0:
 							requestCode = HikeConstants.SHARE_LOCATION_CODE;
@@ -2054,8 +2079,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							newMediaFileIntent = new Intent(
 									MediaStore.ACTION_VIDEO_CAPTURE);
 							newMediaFileIntent.putExtra(
-									MediaStore.EXTRA_SIZE_LIMIT, (long) (0.9
-											* HikeConstants.MAX_FILE_SIZE));
+									MediaStore.EXTRA_SIZE_LIMIT,
+									(long) (0.9 * HikeConstants.MAX_FILE_SIZE));
 							break;
 
 						case 3:
@@ -2957,12 +2982,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	}
 
-	private void groupChatDead() {
-		((GroupConversation)mConversation).setGroupAlive(false);
-		this.mComposeView.setVisibility(View.INVISIBLE);
-		this.titleIconView.setEnabled(false);
-		findViewById(R.id.emo_btn).setEnabled(false);
-		findViewById(R.id.title_image_btn2).setEnabled(false);
+	private void toggleGroupLife(boolean alive) {
+		((GroupConversation) mConversation).setGroupAlive(alive);
+		this.mComposeView.setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
+		this.titleIconView.setEnabled(alive ? true : false);
+		findViewById(R.id.emo_btn).setEnabled(alive ? true : false);
+		findViewById(R.id.title_image_btn2).setEnabled(alive ? true : false);
 	}
 
 	private String getMsisdnMainUser() {
@@ -3001,8 +3026,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 		}, 10);
 
-		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		vibrator.vibrate(100);
+		Utils.vibrateNudgeReceived(this);
 	}
 
 	@Override

@@ -78,7 +78,7 @@ public class TellAFriend extends AuthSocialAccountBaseActivity implements
 		}
 
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
-		mTitleView.setText(R.string.invite);
+		mTitleView.setText(R.string.invite_friends);
 
 		int ids[] = { R.id.facebook, R.id.twitter, R.id.sms, R.id.email,
 				R.id.other };

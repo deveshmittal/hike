@@ -1,7 +1,6 @@
 package com.bsb.hike.tasks;
 
 import java.io.File;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +29,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 
@@ -72,7 +72,6 @@ public class UploadFileTask extends FileTransferTaskBase {
 
 	@Override
 	protected FTResult doInBackground(Void... params) {
-		this.cancelTask = new AtomicBoolean(false);
 		try {
 			String fileName = null;
 			if (convMessage == null) {
@@ -148,6 +147,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 					filePath = selectedFile.getPath();
 				}
 
+				if (cancelTask.get()) {
+					throw new FileTransferCancelledException(
+							"User cancelled file tranfer");
+				}
+
 				Bitmap thumbnail = null;
 				String thumbnailString = null;
 				if (hikeFileType == HikeFileType.IMAGE) {
@@ -196,17 +200,28 @@ public class UploadFileTask extends FileTransferTaskBase {
 				fileType = hikeFile.getFileTypeString();
 			}
 			boolean fileWasAlreadyUploaded = true;
+
+			if (cancelTask.get()) {
+				throw new FileTransferCancelledException(
+						"User cancelled file tranfer");
+			}
+
 			// If we don't have a file key, that means we haven't uploaded the
 			// file to the server yet
 			if (TextUtils.isEmpty(fileKey)) {
 				fileWasAlreadyUploaded = false;
 
 				JSONObject response = AccountUtils.executeFileTransferRequest(
-						filePath, fileName, null, this, cancelTask, fileType);
+						filePath, fileName, null, this, fileType);
 
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
 				fileType = fileJSON.optString(HikeConstants.CONTENT_TYPE);
+			}
+
+			if (cancelTask.get()) {
+				throw new FileTransferCancelledException(
+						"User cancelled file tranfer");
 			}
 
 			JSONObject metadata = new JSONObject();

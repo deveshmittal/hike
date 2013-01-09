@@ -2,15 +2,12 @@ package com.bsb.hike.adapters;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import org.json.JSONArray;
 
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.text.Spannable;
@@ -27,12 +24,10 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -85,14 +80,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private Conversation conversation;
 	private ArrayList<ConvMessage> convMessages;
 	private Context context;
-	private ChatThread chatThread;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation) {
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
-		this.chatThread = (ChatThread) context;
 	}
 
 	/**
@@ -414,13 +407,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					((ViewGroup) holder.participantInfoContainer)
 							.addView(creditsMessageView);
 				}
-			} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME) {
+			} else if ((convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
+					|| (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_IMAGE)) {
 				String participantName = ((GroupConversation) conversation)
 						.getGroupParticipant(metadata.getMsisdn())
 						.getContactInfo().getFirstName();
-				String message = String.format(
-						context.getString(R.string.change_group_name),
-						participantName);
+				String message = String
+						.format(context.getString(convMessage
+								.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
+								: R.string.change_group_image), participantName);
 
 				TextView mainMessage = (TextView) inflater.inflate(
 						R.layout.participant_info, null);
@@ -815,16 +810,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					if (TextUtils.isEmpty(hikeFile.getFileKey())
 							&& !ChatThread.fileTransferTaskMap
 									.containsKey(convMessage.getMsgID())) {
-						/*
-						 * Don't allow uploading more files if an
-						 * upload/download is in progress
-						 */
-						if (!ChatThread.fileTransferTaskMap.isEmpty()
-								&& ((Utils.densityMultiplier * 10) <= HikeConstants.MDPI_TIMES_10)) {
-							Toast.makeText(context, R.string.file_transferring,
-									Toast.LENGTH_SHORT).show();
-							return;
-						}
 
 						FileTransferTaskBase uploadTask;
 						if (hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
@@ -857,16 +842,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						openFile(hikeFile, convMessage);
 					} else if (!ChatThread.fileTransferTaskMap
 							.containsKey(convMessage.getMsgID())) {
-						/*
-						 * Don't allow downloading more files if an
-						 * upload/download is in progress
-						 */
-						if (!ChatThread.fileTransferTaskMap.isEmpty()
-								&& ((Utils.densityMultiplier * 10) <= HikeConstants.MDPI_TIMES_10)) {
-							Toast.makeText(context, R.string.file_transferring,
-									Toast.LENGTH_SHORT).show();
-							return;
-						}
 						Log.d(getClass().getSimpleName(),
 								"HIKEFILE: NAME: " + hikeFile.getFileName()
 										+ " KEY: " + hikeFile.getFileKey()
@@ -874,8 +849,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 										+ hikeFile.getFileTypeString());
 						DownloadFileTask downloadFile = new DownloadFileTask(
 								context, receivedFile, hikeFile.getFileKey(),
-								convMessage.getMsgID(),
-								hikeFile.getHikeFileType());
+								convMessage.getMsgID());
 						downloadFile.execute();
 						ChatThread.fileTransferTaskMap.put(
 								convMessage.getMsgID(), downloadFile);
@@ -900,9 +874,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			openFile.setDataAndType(Uri.fromFile(receivedFile),
 					hikeFile.getFileTypeString());
 		} else {
-			String uri = String.format(Locale.US, "geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f",
-					hikeFile.getLatitude(), hikeFile.getLongitude(),
-					hikeFile.getZoomLevel());
+			String uri = String.format(Locale.US,
+					"geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude(),
+					hikeFile.getLongitude(), hikeFile.getZoomLevel());
 			openFile.setData(Uri.parse(uri));
 		}
 		context.startActivity(openFile);
@@ -910,58 +884,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	@Override
 	public boolean onLongClick(View view) {
-
-		final ConvMessage message = (ConvMessage) view.getTag();
-
-		final HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-
-		final List<String> items = new ArrayList<String>(4);
-
-		if (!TextUtils.isEmpty(hikeFile.getFileKey())) {
-			items.add(context.getString(R.string.forward));
-			items.add(context.getString(R.string.share));
-		}
-		items.add(context.getString(R.string.delete));
-
-		if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID())) {
-			items.add(context.getString(message.isSent() ? R.string.cancel_upload
-					: R.string.cancel_download));
-		}
-
-		ListAdapter dialogAdapter = new ArrayAdapter<String>(context,
-				android.R.layout.select_dialog_item, android.R.id.text1, items);
-
-		builder.setAdapter(dialogAdapter,
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						String optionSelected = items.get(which);
-						if (context.getString(R.string.forward).equals(
-								optionSelected)) {
-							chatThread.performContextBasedOperationOnMessage(
-									message, R.id.forward);
-						} else if (context.getString(R.string.share).equals(
-								optionSelected)) {
-							chatThread.performContextBasedOperationOnMessage(
-									message, R.id.share);
-						} else if (context.getString(R.string.delete).equals(
-								optionSelected)) {
-							chatThread.performContextBasedOperationOnMessage(
-									message, R.id.delete);
-						} else if (context.getString(R.string.cancel_upload)
-								.equals(optionSelected)
-								|| context.getString(R.string.cancel_download)
-										.equals(optionSelected)) {
-							chatThread.performContextBasedOperationOnMessage(
-									message, R.id.cancel_file_transfer);
-						}
-					}
-				});
-
-		AlertDialog dialog = builder.create();
-		dialog.show();
-		return true;
+		return false;
 	}
 }

@@ -2,16 +2,21 @@ package com.bsb.hike.utils;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.http.entity.AbstractHttpEntity;
+
 import android.os.AsyncTask;
 
 import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.http.CustomByteArrayEntity;
+import com.bsb.hike.http.CustomFileEntity;
 
 public abstract class FileTransferTaskBase extends
 		AsyncTask<Void, Integer, FTResult> {
 	private int progress;
-	public AtomicBoolean cancelTask;
+	public AtomicBoolean cancelTask = new AtomicBoolean(false);
+	public AbstractHttpEntity entity;
 
 	public void updateProgress(int progress) {
 		this.progress = progress;
@@ -24,6 +29,17 @@ public abstract class FileTransferTaskBase extends
 	}
 
 	public void cancelTask() {
-		this.cancelTask.set(true);
+		cancelTask.set(true);
+		if (entity != null) {
+			if (entity instanceof CustomFileEntity) {
+				((CustomFileEntity) entity).cancelDownload();
+			} else if (entity instanceof CustomByteArrayEntity) {
+				((CustomByteArrayEntity) entity).cancelDownload();
+			}
+		}
+	}
+
+	public void setEntity(AbstractHttpEntity entity) {
+		this.entity = entity;
 	}
 }

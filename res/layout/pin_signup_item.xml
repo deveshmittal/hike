@@ -32,7 +32,8 @@
         <LinearLayout
             android:id="@+id/pin_btn_container"
             style="@style/SignupButton"
-            android:layout_marginTop="10dp" >
+            android:layout_marginTop="10dp"
+            android:gravity="center" >
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/btn_call_me"

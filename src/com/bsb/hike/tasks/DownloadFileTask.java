@@ -8,7 +8,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,9 +22,10 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 
@@ -32,16 +34,13 @@ public class DownloadFileTask extends FileTransferTaskBase {
 	private String fileKey;
 	private Context context;
 	private long msgId;
-	private HikeFileType hikeFileType;
 
 	public DownloadFileTask(Context context, File destinationFile,
-			String fileKey, long msgId, HikeFileType hikeFileType) {
+			String fileKey, long msgId) {
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
 		this.context = context;
 		this.msgId = msgId;
-		this.cancelTask = new AtomicBoolean(false);
-		this.hikeFileType = hikeFileType;
 	}
 
 	@Override
@@ -52,6 +51,10 @@ public class DownloadFileTask extends FileTransferTaskBase {
 			URL url = new URL(AccountUtils.fileTransferBaseDownloadUrl
 					+ fileKey);
 			URLConnection urlConnection = url.openConnection();
+			if (AccountUtils.ssl) {
+				((HttpsURLConnection) urlConnection)
+						.setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
+			}
 
 			int length = urlConnection.getContentLength();
 
@@ -59,7 +62,7 @@ public class DownloadFileTask extends FileTransferTaskBase {
 				return FTResult.FILE_TOO_LARGE;
 			}
 
-			is = new BufferedInputStream(url.openConnection().getInputStream());
+			is = new BufferedInputStream(urlConnection.getInputStream());
 
 			fos = new FileOutputStream(destinationFile);
 
@@ -74,7 +77,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 				progress = (int) ((totProg * 100 / length));
 				publishProgress(progress);
 				if (cancelTask.get()) {
-					throw new IOException("Download cancelled by the user");
+					throw new FileTransferCancelledException(
+							"Download cancelled by the user");
 				}
 			}
 			Log.d(getClass().getSimpleName(), "Done downloading file");
@@ -84,6 +88,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 		} catch (IOException e) {
 			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return FTResult.DOWNLOAD_FAILED;
+		} catch (FileTransferCancelledException e) {
+			return FTResult.CANCELLED;
 		} finally {
 			try {
 				if (fos != null) {

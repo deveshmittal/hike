@@ -460,6 +460,12 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 	 */
 	public boolean isConnected() {
 		Log.d("HikeMqttManager", "in isConnected status " + connectionStatus);
+		if (mqttConnection == null) {
+			Log.d(getClass().getSimpleName(),
+					"Mqtt Connection was null so connecting");
+			connectToBroker();
+		}
+
 		return (mqttConnection != null)
 				&& (MQTTConnectionStatus.CONNECTED == connectionStatus);
 	}
@@ -577,6 +583,10 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			Log.d("HikeMqttManager", "already connected");
 			return;
 		}
+		if (TextUtils.isEmpty(settings.getString(
+				HikeMessengerApp.TOKEN_SETTING, null))) {
+			return;
+		}
 
 		if (Utils.isUserOnline(mHikeService)) {
 			Log.d("HikeMqttManager", "netconnection valid, try to connect");
@@ -612,6 +622,15 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 		Log.d("HikeMqttManager",
 				"About to send message " + new String(packet.getMessage()));
 		PublishCB pbCB = new PublishCB(packet);
+
+		/*
+		 * The mqtt connection would be null for some reason when retrying
+		 * failed messages. So we simply call the onFailure of the callback to
+		 * save these messages again and retry later.
+		 */
+		if (mqttConnection == null) {
+			pbCB.onFailure(null);
+		}
 
 		mqttConnection.publish(new UTF8Buffer(this.topic
 				+ HikeConstants.PUBLISH_TOPIC),

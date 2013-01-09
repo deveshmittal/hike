@@ -1,151 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/thatch_repeat"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
-    <include
-        android:id="@+id/top_panel_ref"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        layout="@layout/top_panel" />
-
-    <ScrollView
-        android:id="@+id/profile_sv"
+    <LinearLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:fadingEdge="none" >
+        android:background="@drawable/thatch_repeat"
+        android:orientation="vertical" >
 
-        <LinearLayout
+        <include
+            android:id="@+id/top_panel_ref"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            layout="@layout/top_panel" />
+
+        <ScrollView
+            android:id="@+id/profile_sv"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical" >
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="5dp"
-                android:text="@string/profile_title"
-                android:textColor="@color/timestampcolor"
-                android:textSize="14sp"
-                android:textStyle="bold" />
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:fadingEdge="none" >
 
             <LinearLayout
-                android:id="@+id/contact_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/profile_bckg"
+                android:layout_height="match_parent"
                 android:orientation="vertical" >
 
-                <RelativeLayout
-                    android:id="@+id/contact_info"
+                <com.bsb.hike.view.CustomFontTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/profile_title"
+                    android:textColor="@color/timestampcolor"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/contact_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" >
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/profile_bckg"
+                    android:orientation="vertical" >
 
                     <RelativeLayout
-                        android:id="@+id/avatar_border"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:layout_centerVertical="true"
-                        android:layout_marginBottom="24dp"
-                        android:layout_marginLeft="14dp"
-                        android:layout_marginRight="14dp"
-                        android:layout_marginTop="24dp" >
+                        android:id="@+id/contact_info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" >
 
-                        <ImageView
-                            android:id="@+id/profile"
-                            android:layout_width="70dp"
-                            android:layout_height="70dp"
-                            android:layout_centerInParent="true"
-                            android:src="@drawable/ic_avatar1" />
+                        <RelativeLayout
+                            android:id="@+id/avatar_border"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginBottom="24dp"
+                            android:layout_marginLeft="14dp"
+                            android:layout_marginRight="14dp"
+                            android:layout_marginTop="24dp" >
 
-                        <ImageView
-                            android:id="@+id/profile_border"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/square" />
-                    </RelativeLayout>
+                            <ImageView
+                                android:id="@+id/profile"
+                                android:layout_width="70dp"
+                                android:layout_height="70dp"
+                                android:layout_centerInParent="true"
+                                android:onClick="onViewImageClicked"
+                                android:src="@drawable/ic_avatar1" />
 
-                    <LinearLayout
-                        android:id="@+id/info_layout"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_toRightOf="@id/avatar_border"
-                        android:orientation="vertical" >
+                            <ImageView
+                                android:id="@+id/profile_border"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/square" />
+                        </RelativeLayout>
 
-                        <com.bsb.hike.view.CustomFontTextView
-                            android:id="@+id/name_current"
+                        <LinearLayout
+                            android:id="@+id/info_layout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="10dp"
-                            android:ellipsize="end"
-                            android:singleLine="true"
-                            android:text="Kavin Bharti Mittal"
-                            android:textColor="@color/lightblack"
-                            android:textSize="18dp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </RelativeLayout>
-            </LinearLayout>
+                            android:layout_centerVertical="true"
+                            android:layout_toRightOf="@id/avatar_border"
+                            android:orientation="vertical" >
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="15dp" />
-
-            <com.bsb.hike.view.CustomFontButton
-                android:id="@+id/add_to_contacts"
-                style="@style/ProfileButtons"
-                android:layout_marginBottom="10dp"
-                android:onClick="onAddToContactClicked"
-                android:text="@string/add_to_contacts" />
-            
-            <com.bsb.hike.view.CustomFontButton
-                android:id="@+id/invite_to_hike_btn"
-                style="@style/ProfileButtons"
-                android:layout_marginBottom="10dp"
-                android:onClick="onInviteToHikeClicked"
-                android:text="@string/invite_to_hike" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal" >
-
-                <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/call_btn"
-                    style="@style/ProfileButtons"
-                    android:layout_weight="1"
-                    android:onClick="onCallClicked"
-                    android:text="@string/call" />
+                            <com.bsb.hike.view.CustomFontTextView
+                                android:id="@+id/name_current"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="10dp"
+                                android:ellipsize="end"
+                                android:singleLine="true"
+                                android:text="Kavin Bharti Mittal"
+                                android:textColor="@color/lightblack"
+                                android:textSize="18dp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </RelativeLayout>
+                </LinearLayout>
 
                 <View
-                    android:id="@+id/empty_horizontal_space"
-                    android:layout_width="3dp"
-                    android:layout_height="1dp" />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="15dp" />
 
                 <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/block_user_btn"
+                    android:id="@+id/add_to_contacts"
                     style="@style/ProfileButtons"
-                    android:layout_weight="1"
-                    android:onClick="onBlockUserClicked"
-                    android:text="@string/block_user" />
-            </LinearLayout>
-            
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginBottom="15dp" />
-            
-        </LinearLayout>
-    </ScrollView>
+                    android:layout_marginBottom="10dp"
+                    android:onClick="onAddToContactClicked"
+                    android:text="@string/add_to_contacts" />
 
-</LinearLayout>
+                <com.bsb.hike.view.CustomFontButton
+                    android:id="@+id/invite_to_hike_btn"
+                    style="@style/ProfileButtons"
+                    android:layout_marginBottom="10dp"
+                    android:onClick="onInviteToHikeClicked"
+                    android:text="@string/invite_to_hike" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" >
+
+                    <com.bsb.hike.view.CustomFontButton
+                        android:id="@+id/call_btn"
+                        style="@style/ProfileButtons"
+                        android:layout_weight="1"
+                        android:onClick="onCallClicked"
+                        android:text="@string/call" />
+
+                    <View
+                        android:id="@+id/empty_horizontal_space"
+                        android:layout_width="3dp"
+                        android:layout_height="1dp" />
+
+                    <com.bsb.hike.view.CustomFontButton
+                        android:id="@+id/block_user_btn"
+                        style="@style/ProfileButtons"
+                        android:layout_weight="1"
+                        android:onClick="onBlockUserClicked"
+                        android:text="@string/block_user" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginBottom="15dp" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <include layout="@layout/profile_image"/>
+    
+</RelativeLayout>

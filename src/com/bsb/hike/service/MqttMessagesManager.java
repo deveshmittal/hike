@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -83,11 +82,22 @@ public class MqttMessagesManager {
 		if (HikeConstants.MqttMessageTypes.ICON.equals(type)) // Icon changed
 		{
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			if (Utils.isGroupConversation(msisdn)) {
+				return;
+			}
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
 			this.userDb.setIcon(msisdn,
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
+			String groupId = jsonObj.getString(HikeConstants.TO);
+			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
+			this.userDb.setIcon(groupId,
+					Base64.decode(iconBase64, Base64.DEFAULT), false);
+
+			IconCacheManager.getInstance().clearIconForMSISDN(groupId);
+			saveStatusMsg(jsonObj, groupId);
 		} else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
 																			// changed
 		{
@@ -155,16 +165,37 @@ public class MqttMessagesManager {
 			GroupConversation groupConversation = new GroupConversation(
 					jsonObj, this.context);
 
-			if (this.convDb.addGroupParticipants(groupConversation.getMsisdn(),
-					groupConversation.getGroupParticipantList()) != HikeConstants.NEW_PARTICIPANT) {
+			boolean groupRevived = false;
+
+			if (!this.convDb.isGroupAlive(groupConversation.getMsisdn())) {
+
+				Log.d(getClass().getSimpleName(), "Group is not alive");
+				int updated = this.convDb.toggleGroupDeadOrAlive(
+						groupConversation.getMsisdn(), true);
+				Log.d(getClass().getSimpleName(), "Group revived? " + updated);
+				groupRevived = updated > 0;
+
+				if (groupRevived) {
+					jsonObj.put(HikeConstants.NEW_GROUP, true);
+					pubSub.publish(HikePubSub.GROUP_REVIVED,
+							groupConversation.getMsisdn());
+				}
+
+			}
+			if (!groupRevived
+					&& this.convDb.addGroupParticipants(
+							groupConversation.getMsisdn(),
+							groupConversation.getGroupParticipantList()) != HikeConstants.NEW_PARTICIPANT) {
+
 				Log.d(getClass().getSimpleName(),
 						"GCJ Message was already received");
 				return;
 			}
 			Log.d(getClass().getSimpleName(), "GCJ Message is new");
 
-			if (!this.convDb.doesConversationExist(groupConversation
-					.getMsisdn())) {
+			if (!groupRevived
+					&& !this.convDb.doesConversationExist(groupConversation
+							.getMsisdn())) {
 				Log.d(getClass().getSimpleName(),
 						"The group conversation does not exists");
 				groupConversation = (GroupConversation) this.convDb
@@ -195,13 +226,14 @@ public class MqttMessagesManager {
 
 			if (this.convDb.setGroupName(groupId, groupname) > 0) {
 				this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
+				saveStatusMsg(jsonObj, groupId);
 			}
 		} else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type)) // Group
 																				// chat
 																				// end
 		{
 			String groupId = jsonObj.optString(HikeConstants.TO);
-			if (this.convDb.setGroupDead(groupId) > 0) {
+			if (this.convDb.toggleGroupDeadOrAlive(groupId, false) > 0) {
 				saveStatusMsg(jsonObj, jsonObj.getString(HikeConstants.TO));
 			}
 		} else if (HikeConstants.MqttMessageTypes.MESSAGE.equals(type)) // Message
@@ -260,9 +292,7 @@ public class MqttMessagesManager {
 
 			if (convMessage.getMetadata() != null) {
 				if (convMessage.getMetadata().isPokeMessage()) {
-					Vibrator vibrator = (Vibrator) context
-							.getSystemService(Context.VIBRATOR_SERVICE);
-					vibrator.vibrate(100);
+					Utils.vibrateNudgeReceived(context);
 				}
 			}
 			Log.d(getClass().getSimpleName(), "Receiver received Message : "
@@ -365,16 +395,23 @@ public class MqttMessagesManager {
 			}
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_INFO.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+
+			boolean inviteTokenAdded = false;
+			boolean inviteeNumChanged = false;
+			boolean toggleRewards = false;
+			boolean talkTimeChanged = false;
+			int newTalkTime = 0;
+
 			Editor editor = settings.edit();
 			if (data.has(HikeConstants.INVITE_TOKEN)) {
 				editor.putString(HikeConstants.INVITE_TOKEN,
 						data.getString(HikeConstants.INVITE_TOKEN));
-				this.pubSub.publish(HikePubSub.INVITE_TOKEN_ADDED, null);
+				inviteTokenAdded = true;
 			}
 			if (data.has(HikeConstants.TOTAL_CREDITS_PER_MONTH)) {
 				editor.putString(HikeConstants.TOTAL_CREDITS_PER_MONTH,
 						data.getString(HikeConstants.TOTAL_CREDITS_PER_MONTH));
-				this.pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
+				inviteeNumChanged = true;
 			}
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
@@ -428,8 +465,38 @@ public class MqttMessagesManager {
 						userDb.setMultipleContactsToFavorites(favorites);
 					}
 				}
+				editor.putString(HikeMessengerApp.REWARDS_TOKEN,
+						account.optString(HikeConstants.REWARDS_TOKEN));
+				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS,
+						account.optBoolean(HikeConstants.SHOW_REWARDS));
+				if (account.optBoolean(HikeConstants.SHOW_REWARDS)) {
+					toggleRewards = true;
+				}
+				if (account.has(HikeConstants.REWARDS)) {
+					JSONObject rewards = account
+							.getJSONObject(HikeConstants.REWARDS);
+
+					int talkTime = rewards.optInt(HikeConstants.TALK_TIME, -1);
+					if (talkTime > -1) {
+						editor.putInt(HikeMessengerApp.TALK_TIME, talkTime);
+						talkTimeChanged = true;
+						newTalkTime = talkTime;
+					}
+				}
 			}
 			editor.commit();
+			if (inviteTokenAdded) {
+				pubSub.publish(HikePubSub.INVITE_TOKEN_ADDED, null);
+			}
+			if (inviteeNumChanged) {
+				pubSub.publish(HikePubSub.INVITEE_NUM_CHANGED, null);
+			}
+			if (toggleRewards) {
+				pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
+			}
+			if (talkTimeChanged) {
+				pubSub.publish(HikePubSub.TALK_TIME_CHANGED, newTalkTime);
+			}
 		} else if (HikeConstants.MqttMessageTypes.USER_OPT_IN.equals(type)) {
 			String msisdn = jsonObj.getJSONObject(HikeConstants.DATA)
 					.getString(HikeConstants.MSISDN);
@@ -463,6 +530,28 @@ public class MqttMessagesManager {
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, FavoriteType.RECOMMENDED_FAVORITE);
 			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG.equals(type)) {
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+
+			String rewardToken = data.getString(HikeConstants.REWARDS_TOKEN);
+			boolean showRewards = data.getBoolean(HikeConstants.SHOW_REWARDS);
+
+			Editor editor = settings.edit();
+			editor.putString(HikeMessengerApp.REWARDS_TOKEN, rewardToken);
+			editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, showRewards);
+			editor.commit();
+
+			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
+		} else if (HikeConstants.MqttMessageTypes.REWARDS.equals(type)) {
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+
+			int talkTime = data.getInt(HikeConstants.TALK_TIME);
+
+			Editor editor = settings.edit();
+			editor.putInt(HikeMessengerApp.TALK_TIME, talkTime);
+			editor.commit();
+
+			this.pubSub.publish(HikePubSub.TALK_TIME_CHANGED, talkTime);
 		}
 	}
 

@@ -14,6 +14,8 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.CharBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,6 +66,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -330,6 +334,69 @@ public class Utils {
 		return context.getResources().getDrawable(id);
 	}
 
+	public static String getDefaultAvatarServerName(Context context,
+			String msisdn) {
+		String name;
+		int count = 7;
+		int id = iconHash(msisdn) % count;
+		if (isGroupConversation(msisdn)) {
+			switch (id) {
+			case 0:
+				name = "GreenPeople";
+				break;
+			case 1:
+				name = "RedPeople";
+				break;
+			case 2:
+				name = "BluePeople";
+				break;
+			case 3:
+				name = "CoffeePeople";
+				break;
+			case 4:
+				name = "EarthyPeople";
+				break;
+			case 5:
+				name = "PinkPeople";
+				break;
+			case 6:
+				name = "TealPeople";
+				break;
+			default:
+				name = "GreenPeople";
+				break;
+			}
+		} else {
+			switch (id) {
+			case 0:
+				name = "Beach";
+				break;
+			case 1:
+				name = "Candy";
+				break;
+			case 2:
+				name = "Cocktail";
+				break;
+			case 3:
+				name = "Coffee";
+				break;
+			case 4:
+				name = "Digital";
+				break;
+			case 5:
+				name = "Sneakers";
+				break;
+			case 6:
+				name = "Space";
+				break;
+			default:
+				name = "Beach";
+				break;
+			}
+		}
+		return name + ".jpg";
+	}
+
 	/** Create a File for saving an image or video */
 	public static File getOutputMediaFile(HikeFileType type,
 			String orgFileName, String fileKey) {
@@ -340,16 +407,16 @@ public class Utils {
 				HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
 		switch (type) {
 		case PROFILE:
-			path.append("/hike Profile Images");
+			path.append(HikeConstants.PROFILE_ROOT);
 			break;
 		case IMAGE:
-			path.append("/hike Images");
+			path.append(HikeConstants.IMAGE_ROOT);
 			break;
 		case VIDEO:
-			path.append("/hike Videos");
+			path.append(HikeConstants.VIDEO_ROOT);
 			break;
 		case AUDIO:
-			path.append("/hike Audios");
+			path.append(HikeConstants.AUDIO_ROOT);
 		}
 
 		File mediaStorageDir = new File(path.toString());
@@ -454,10 +521,6 @@ public class Utils {
 			return true;
 		}
 
-		Log.d("Utils",
-				"auth token is "
-						+ settings.getString(HikeMessengerApp.TOKEN_SETTING,
-								null));
 		return false;
 	}
 
@@ -620,8 +683,17 @@ public class Utils {
 					.getSystemService(Context.TELEPHONY_SERVICE);
 
 			String osVersion = Build.VERSION.RELEASE;
-			String deviceId = Secure.getString(context.getContentResolver(),
-					Secure.ANDROID_ID);
+			String deviceId = null;
+			try {
+				deviceId = getHashedDeviceId(Secure.getString(
+						context.getContentResolver(), Secure.ANDROID_ID));
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			String os = "Android";
 			String carrier = manager.getNetworkOperatorName();
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
@@ -995,8 +1067,13 @@ public class Utils {
 
 	public static byte[] bitmapToBytes(Bitmap bitmap,
 			Bitmap.CompressFormat format) {
+		return bitmapToBytes(bitmap, format, 50);
+	}
+
+	public static byte[] bitmapToBytes(Bitmap bitmap,
+			Bitmap.CompressFormat format, int quality) {
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
-		bitmap.compress(format, 50, bao);
+		bitmap.compress(format, quality, bao);
 		return bao.toByteArray();
 	}
 
@@ -1164,15 +1241,19 @@ public class Utils {
 				+ AccountUtils.fileTransferHost + ":"
 				+ Integer.toString(AccountUtils.port) + "/v1";
 
-		CheckForUpdateTask.UPDATE_CHECK_URL = (ssl ? AccountUtils.HTTPS_STRING
-				: AccountUtils.HTTP_STRING)
+		CheckForUpdateTask.UPDATE_CHECK_URL = httpString
 				+ (isProductionServer ? CheckForUpdateTask.PRODUCTION_URL
 						: CheckForUpdateTask.STAGING_URL);
 
 		AccountUtils.fileTransferBaseDownloadUrl = AccountUtils.base
 				+ AccountUtils.FILE_TRANSFER_DOWNLOAD_BASE;
-		AccountUtils.fileTransferBaseViewUrl = isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION
-				: AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING;
+		AccountUtils.fileTransferBaseViewUrl = AccountUtils.HTTP_STRING
+				+ (isProductionServer ? AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION
+						: AccountUtils.FILE_TRANSFER_BASE_VIEW_URL_STAGING);
+
+		AccountUtils.rewardsUrl = httpString
+				+ (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE
+						: AccountUtils.REWARDS_STAGING_BASE);
 
 		Log.d("SSL", "Base: " + AccountUtils.base);
 		Log.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
@@ -1502,5 +1583,57 @@ public class Utils {
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return (cm != null && cm.getActiveNetworkInfo() != null && (cm
 				.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+	}
+
+	public static String getProfileImageFileName(String msisdn) {
+		return getValidFileNameForMsisdn(msisdn) + ".jpg";
+	}
+
+	public static String getValidFileNameForMsisdn(String msisdn) {
+		return msisdn.replaceAll(":", "-");
+	}
+
+	public static void removeLargerProfileImageForMsisdn(String msisdn) {
+		String path = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		String fileName = Utils.getProfileImageFileName(msisdn);
+		(new File(path, fileName)).delete();
+	}
+
+	public static void vibrateNudgeReceived(Context context) {
+		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+				HikeConstants.VIBRATE_PREF, true)) {
+			return;
+		}
+		Vibrator vibrator = (Vibrator) context
+				.getSystemService(Context.VIBRATOR_SERVICE);
+		vibrator.vibrate(100);
+	}
+
+	private static String convertToHex(byte[] data) {
+		StringBuilder buf = new StringBuilder();
+		for (byte b : data) {
+			int halfbyte = (b >>> 4) & 0x0F;
+			int two_halfs = 0;
+			do {
+				buf.append((0 <= halfbyte) && (halfbyte <= 9) ? (char) ('0' + halfbyte)
+						: (char) ('a' + (halfbyte - 10)));
+				halfbyte = b & 0x0F;
+			} while (two_halfs++ < 1);
+		}
+		return buf.toString();
+	}
+
+	public static String SHA1(String text) throws NoSuchAlgorithmException,
+			UnsupportedEncodingException {
+		MessageDigest md = MessageDigest.getInstance("SHA-1");
+		md.update(text.getBytes("iso-8859-1"), 0, text.length());
+		byte[] sha1hash = md.digest();
+		return convertToHex(sha1hash);
+	}
+
+	public static String getHashedDeviceId(String deviceId)
+			throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		return "and:" + SHA1(deviceId);
 	}
 }

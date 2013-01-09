@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -171,7 +172,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
 				markedUp = context.getString(R.string.block_internation_sms);
 			} else {
-				markedUp = message.getMessage();
+				String msg = message.getMessage();
+				markedUp = msg.substring(0, Math.min(msg.length(),
+						HikeConstants.MAX_MESSAGE_PREVIEW_LENGTH));
 				// For showing the name of the contact that sent the message in
 				// a group chat
 				if (conversation instanceof GroupConversation

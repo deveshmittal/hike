@@ -176,7 +176,7 @@
 	<string name="social_unlinking">Unlinking account...</string>
 	<string name="contact_selected_already">This number is already in the group.</string>
 	<string name="share_file_message">Hey! I just sent you a file through hike: %1$s</string>
-	<string name="max_file_size">Max file size can be 6 MB</string>
+	<string name="max_file_size">Max file size can be 15 MB</string>
 	<string name="unable_to_read">Unable to read file</string>
 	<string name="share_location">Share Location</string>
 	<string name="group_mute">This conversation is muted.</string>
@@ -301,4 +301,16 @@
 	<string name="led_notification_info">Flash the LED on new message</string>
 	<string name="with_love">made with love in New Delhi</string>
 	<string name="love">love</string>
+	<string name="remove_from_group">Remove from group</string>
+	<string name="leave_group_confirm">Are you sure you want to leave the group?</string>
+	<string name="remove_confirm">Are you sure you want to remove %1$s from the group?</string>
+	<string name="no">No</string>
+	<string name="location_disabled">Cannot fetch your location. Please check your settings.</string>
+	<string name="added_favorite">I added you as a favorite</string>
+	<string name="tap_here_invite">Tap here to invite this person</string>
+	<string name="start_typing_new">Start typing a name or number...</string>
+	<string name="gck_help">Tap and hold a participant to remove them from the group</string>
+	<string name="change_group_image">%1$s changed the group image.</string>
+	<string name="contact">Contact</string>
+	<string name="faq">FAQs</string>
 </resources>

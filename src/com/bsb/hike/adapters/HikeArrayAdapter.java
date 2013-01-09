@@ -1,10 +1,7 @@
 package com.bsb.hike.adapters;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,11 +14,11 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 
-public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements
+public abstract class HikeArrayAdapter<T> extends ArrayAdapter<T> implements
 		SectionIndexer {
 	private static final int SECTION_TYPE = 0;
 	private static final int ITEM_TYPE = 1;
-	public boolean isFiltering = false;
+	public boolean isFiltering = true;
 
 	static public class Section {
 		public String title;
@@ -47,37 +44,9 @@ public abstract class HikeArrayAdapter extends ArrayAdapter<Object> implements
 		return false;
 	}
 
-	public <T> HikeArrayAdapter(Activity context, int viewItemId, List<T> items) {
-		super(context, viewItemId);
+	public HikeArrayAdapter(Activity context, int viewItemId, List<T> items) {
+		super(context, viewItemId, items);
 		this.activity = context;
-
-		alphaIndexer = new HashMap<String, Integer>(items.size());
-
-		String lastChar = null;
-		int i = 0;
-
-		for (T item : items) {
-			String c = item.toString().substring(0, 1).toUpperCase();
-			if (!c.equals(lastChar)) {
-				/* add a new entry */
-				alphaIndexer.put(c, i);
-				add(new Section(c));
-				lastChar = c;
-			}
-
-			add(item);
-			i++;
-		}
-
-		Set<String> sectionLetters = alphaIndexer.keySet();
-
-		ArrayList<String> sectionList = new ArrayList<String>(sectionLetters);
-
-		Collections.sort(sectionList);
-
-		sections = new String[sectionList.size()];
-
-		sectionList.toArray(sections);
 	}
 
 	/**

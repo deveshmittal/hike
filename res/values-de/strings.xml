@@ -175,7 +175,7 @@
 	<string name="social_unlinking">Trenne Account...</string>
 	<string name="contact_selected_already">Diese Nummer befindet sich bereits in der Gruppe.</string>
 	<string name="share_file_message">Hey! Ich habe dir gerade bei hike eine Datei geschickt: %1$s</string>
-	<string name="max_file_size">Maximale Dateigröße beträgt 6 MB</string>
+	<string name="max_file_size">Maximale Dateigröße beträgt 15 MB</string>
 	<string name="unable_to_read">Datei nicht lesbar</string>
 	<string name="share_location">Standort teilen</string>
 	<string name="group_mute">Diese Unterhaltung ist stumm geschaltet.</string>
@@ -269,7 +269,7 @@
 	<string name="verifying_num_signup">Deine Nummer wird überprüft...</string>	
 	<string name="invalid_num_signup">Das ist eine ungültige Telefonnummer. Versuche es erneut.</string>	
 	<string name="enter_pin_signup">Vielen Dank! Hast du die SMS PIN nicht bekommen?\nTippe auf \'Ruf Mich An\' um sie zu erhalten.</string>
-	<string name="call_me_signup">Ruf Mich</string>	
+	<string name="call_me_signup">Ruf Mich An</string>	
 	<string name="verify_pin_signup">PIN wird überprüft...</string>
 	<string name="wrong_num_signup">Eine falsche Zahl eingegeben? Hier tippen</string>
 	<string name="all_set_signup">Alles eingerichtet für %1$s</string>
@@ -290,4 +290,15 @@
 	<string name="nudge_info">Mit einem Doppeltippen irgendwo im\nChat kannst du deinen Freund grüßen.</string>
 	<string name="led_notification">LED Benachrichtigung</string>
 	<string name="led_notification_info">Bei neuer Nachricht die LED aufleuchten lassen</string>
+	<string name="with_love">made with love in New Delhi</string>
+	<string name="love">love</string>
+	<string name="remove_from_group">Aus Gruppe entfernen</string>
+	<string name="leave_group_confirm">Bist du sicher, dass du die Gruppe verlassen willst?</string>
+	<string name="remove_confirm">Bist du sicher, dass du %1$s aus der Gruppe entfernen willst?</string>
+	<string name="no">Nein</string>
+	<string name="location_disabled">Dein Standort konnte nicht ermittelt werden. Überprüfe bitte deine Einstellungen.</string>
+	<string name="added_favorite">Ich habe dich als Favoriten hinzugefügt</string>
+	<string name="tap_here_invite">Hier tippen um diese Person einzuladen</string>
+	<string name="start_typing_new">Gib einen Namen oder eine Nummer...</string>
+	<string name="gck_help">Teilnehmer antippen und festhalten, um ihn aus der Gruppe zu entfernen</string>
 </resources>

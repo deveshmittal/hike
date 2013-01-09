@@ -3,7 +3,6 @@ package com.bsb.hike.tasks;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +26,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 import com.google.android.maps.GeoPoint;
@@ -60,7 +60,6 @@ public class UploadLocationTask extends FileTransferTaskBase {
 
 	@Override
 	protected FTResult doInBackground(Void... params) {
-		this.cancelTask = new AtomicBoolean(false);
 		try {
 			if (convMessage == null) {
 				JSONObject metadata = getFileTransferMetadata(latitude,
@@ -93,6 +92,12 @@ public class UploadLocationTask extends FileTransferTaskBase {
 							zoomLevel, address, convMessage);
 				}
 			}
+
+			if (cancelTask.get()) {
+				throw new FileTransferCancelledException(
+						"User cancelled file tranfer");
+			}
+
 			boolean fileWasAlreadyUploaded = true;
 			// If we don't have a file key, that means we haven't uploaded the
 			// file to the server yet
@@ -101,11 +106,16 @@ public class UploadLocationTask extends FileTransferTaskBase {
 
 				JSONObject response = AccountUtils.executeFileTransferRequest(
 						null, HikeConstants.LOCATION_FILE_NAME, convMessage
-								.getMetadata().getJSON(), this, cancelTask,
+								.getMetadata().getJSON(), this,
 						HikeConstants.LOCATION_CONTENT_TYPE);
 
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
+			}
+
+			if (cancelTask.get()) {
+				throw new FileTransferCancelledException(
+						"User cancelled file tranfer");
 			}
 
 			JSONObject metadata = new JSONObject();
@@ -168,8 +178,8 @@ public class UploadLocationTask extends FileTransferTaskBase {
 	private void fetchThumbnailAndUpdateConvMessage(double latitude,
 			double longitude, int zoomLevel, String address,
 			ConvMessage convMessage) throws Exception {
-		String staticMapUrl = String.format(Locale.US, STATIC_MAP_UNFORMATTED_URL,
-				latitude, longitude, zoomLevel,
+		String staticMapUrl = String.format(Locale.US,
+				STATIC_MAP_UNFORMATTED_URL, latitude, longitude, zoomLevel,
 				HikeConstants.MAX_DIMENSION_LOCATION_THUMBNAIL_PX);
 		Log.d(getClass().getSimpleName(), "Static map url: " + staticMapUrl);
 

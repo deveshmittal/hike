@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -174,9 +173,9 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 					.findViewById(R.id.help_button_container);
 			TextView disclaimer = (TextView) tutorialPage
 					.findViewById(R.id.india_only);
-			ImageButton btnContact = (ImageButton) tutorialPage
+			TextView btnContact = (TextView) tutorialPage
 					.findViewById(R.id.btn_contact);
-			ImageButton btnFaq = (ImageButton) tutorialPage
+			TextView btnFaq = (TextView) tutorialPage
 					.findViewById(R.id.btn_faq);
 			ViewGroup imgLayout = (ViewGroup) tutorialPage
 					.findViewById(R.id.img_layout);

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:clickable="true"
     android:onClick="onFavoriteIntroClick"
-    android:background="#B3000000"
+    android:background="#D3000000"
     android:visibility="gone" >
 
     <ImageView

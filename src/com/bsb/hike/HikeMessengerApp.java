@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikePubSub.Listener;
@@ -134,6 +135,10 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String TEMP_NUM = "tempNum";
 
+	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
+	
+	public static final String GCM_ID_SENT = "gcmIdSent";
+
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"
@@ -158,6 +163,13 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String FAVORITES_INTRO_SHOWN = "favoritesIntroShown";
 	public static final String NUDGE_INTRO_SHOWN = "nudgeIntroShown";
+
+	public static final String REWARDS_TOKEN = "rewardsToken";
+	public static final String SHOW_REWARDS = "showRewards";
+	public static final String TALK_TIME = "talkTime";
+
+	public static final String GCK_SHOWN = "gckShown";
+	public static final String ADD_CONTACT_SHOWN = "addContactShown";
 
 	private static Facebook facebook;
 
@@ -320,7 +332,6 @@ public class HikeMessengerApp extends Application implements Listener {
 	}
 
 	public void onCreate() {
-		FiksuTrackingManager.initialize(this);
 
 		SharedPreferences settings = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
@@ -356,6 +367,10 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
 				HikeConstants.INDIA_COUNTRY_CODE);
+
+		if (!TextUtils.isEmpty(msisdn) && !isIndianUser) {
+			FiksuTrackingManager.initialize(this);
+		}
 
 		initialiseListeners();
 

@@ -72,6 +72,9 @@ public class MessageMetadata {
 			this.credits = metadata.getJSONObject(HikeConstants.DATA).optInt(
 					HikeConstants.CREDITS, -1);
 			break;
+
+		case CHANGED_GROUP_IMAGE:
+			this.msisdn = metadata.getString(HikeConstants.FROM);
 		}
 		this.newUser = metadata.optString(HikeConstants.NEW_USER)
 				.equals("true");

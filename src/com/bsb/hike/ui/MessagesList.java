@@ -214,6 +214,10 @@ public class MessagesList extends DrawerBaseActivity implements
 					.getStringExtra(HikeConstants.Extras.GROUP_LEFT)));
 			intent.removeExtra(HikeConstants.Extras.GROUP_LEFT);
 		}
+
+		if (intent.getBooleanExtra(HikeConstants.Extras.OPEN_FAVORITES, false)) {
+			parentLayout.toggleSidebar(true, false);
+		}
 	}
 
 	@Override

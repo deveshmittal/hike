@@ -1,23 +1,19 @@
 package com.bsb.hike.utils;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+
+import junit.framework.Assert;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -28,6 +24,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -44,7 +41,10 @@ import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +60,8 @@ import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.http.CustomByteArrayEntity;
+import com.bsb.hike.http.CustomFileEntity;
 import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -102,13 +104,17 @@ public class AccountUtils {
 	public static String fileTransferBaseDownloadUrl = base
 			+ FILE_TRANSFER_DOWNLOAD_BASE;
 
-	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = HTTP_STRING
-			+ "hike.in/f/";
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION = "hike.in/f/";
 
-	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = HTTP_STRING
-			+ "staging.im.hike.in/f/";
+	public static final String FILE_TRANSFER_BASE_VIEW_URL_STAGING = "staging.im.hike.in/f/";
 
 	public static String fileTransferBaseViewUrl = FILE_TRANSFER_BASE_VIEW_URL_PRODUCTION;
+
+	public static final String REWARDS_PRODUCTION_BASE = "hike.in/rewards/android/";
+
+	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/android/";
+
+	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
 
 	public static boolean ssl = false;
 
@@ -116,10 +122,9 @@ public class AccountUtils {
 
 	public static HttpClient mClient = null;
 
-	private static String mToken = null;
+	public static String mToken = null;
 
 	private static String appVersion = null;
-
 
 	public static void setToken(String token) {
 		mToken = token;
@@ -299,8 +304,15 @@ public class AccountUtils {
 					.getSystemService(Context.TELEPHONY_SERVICE);
 
 			String osVersion = Build.VERSION.RELEASE;
-			String deviceId = Secure.getString(context.getContentResolver(),
-					Secure.ANDROID_ID);
+			String deviceId = "";
+
+			try {
+				deviceId = Utils.getHashedDeviceId(Secure.getString(
+						context.getContentResolver(), Secure.ANDROID_ID));
+			} catch (NoSuchAlgorithmException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			String os = HikeConstants.ANDROID;
 			String carrier = manager.getNetworkOperatorName();
 			String device = Build.MANUFACTURER + " " + Build.MODEL;
@@ -406,16 +418,15 @@ public class AccountUtils {
 
 	private static void addToken(HttpRequestBase req)
 			throws IllegalStateException {
+		assertIfTokenNull();
 		if (TextUtils.isEmpty(mToken)) {
 			throw new IllegalStateException("Token is null");
 		}
 		req.addHeader("Cookie", "user=" + mToken);
-
-		assertIfTokenNull();
 	}
 
 	private static void assertIfTokenNull() {
-		assert mToken != null : "TOKEN IS NULL";
+		Assert.assertTrue("Token is empty", !TextUtils.isEmpty(mToken));
 	}
 
 	public static void setName(String name) throws NetworkErrorException,
@@ -612,130 +623,62 @@ public class AccountUtils {
 		}
 	}
 
-	private static HttpURLConnection getFileTransferURLConnection(
-			String fileName, String fileType) throws Exception {
-		URL url = new URL(fileTransferUploadBase + "/user/ft");
-
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.setDoInput(true);
-		connection.setDoOutput(true);
-		connection.setUseCaches(false);
-
-		connection.setRequestMethod("PUT");
-
-		connection.setConnectTimeout(150 * 1000);
-		connection.setRequestProperty("Connection", "Keep-Alive");
-		connection.setRequestProperty("Content-Name", fileName);
-		connection.setRequestProperty("Content-Type",
-				TextUtils.isEmpty(fileType) ? "" : fileType);
-		connection.setRequestProperty("Cookie", "user=" + mToken);
-		connection.setRequestProperty("X-Thumbnail-Required", "0");
-
-		return connection;
-	}
-
-	private static JSONObject getFileTransferResponse(
-			HttpURLConnection connection, FileTransferTaskBase uploadTask,
-			AtomicBoolean cancelUpload) throws Exception {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				connection.getInputStream()));
-
-		int progress = 90;
-		uploadTask.updateProgress(progress);
-
-		StringBuilder builder = new StringBuilder();
-		CharBuffer target = CharBuffer.allocate(10000);
-		int read = reader.read(target);
-		while (read >= 0) {
-			builder.append(target.array(), 0, read);
-			target.clear();
-			read = reader.read(target);
-			if (cancelUpload.get()) {
-				throw new Exception("Upload cancelled by user");
-			}
-		}
-		progress = 100;
-		uploadTask.updateProgress(progress);
-
-		Log.d("AccountUtils", "Response: " + builder.toString());
-		return new JSONObject(builder.toString());
-	}
+	static float maxSize;
 
 	public static JSONObject executeFileTransferRequest(String filePath,
 			String fileName, JSONObject request,
-			FileTransferTaskBase uploadFileTask, AtomicBoolean cancelUpload,
-			String fileType) throws Exception {
-		// Always start download with some initial progress
-		int progress = HikeConstants.INITIAL_PROGRESS;
-		uploadFileTask.updateProgress(progress);
+			final FileTransferTaskBase uploadFileTask, String fileType)
+			throws Exception {
 
-		InputStream fileInputStream;
-		int bytesAvailable;
-		int maxSize;
+		HttpClient httpClient = getClient();
 
+		HttpContext httpContext = new BasicHttpContext();
+
+		HttpPut httpPut = new HttpPut(fileTransferUploadBase + "/user/ft");
+
+		addToken(httpPut);
+		httpPut.addHeader("Connection", "Keep-Alive");
+		httpPut.addHeader("Content-Name", fileName);
+		Log.d("Upload", "Content type: " + fileType);
+		httpPut.addHeader("Content-Type", TextUtils.isEmpty(fileType) ? ""
+				: fileType);
+		httpPut.addHeader("X-Thumbnail-Required", "0");
+
+		final AbstractHttpEntity entity;
 		if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType)) {
-			File file = new File(filePath);
-			fileInputStream = new FileInputStream(file);
-			bytesAvailable = (int) file.length();
+			entity = new CustomFileEntity(new File(filePath), "",
+					new ProgressListener() {
+						@Override
+						public void transferred(long num) {
+							uploadFileTask
+									.updateProgress((int) ((num / (float) maxSize) * 100));
+						}
+					});
 		} else {
-			byte[] bytes = request.toString().getBytes();
-			fileInputStream = new ByteArrayInputStream(bytes);
-			bytesAvailable = bytes.length;
-		}
-		maxSize = bytesAvailable;
-
-		HttpURLConnection connection = getFileTransferURLConnection(fileName,
-				fileType);
-
-		DataOutputStream outputStream = new DataOutputStream(
-				connection.getOutputStream());
-
-		Log.d("Size", bytesAvailable + "");
-
-		int maxBufferSize = HikeConstants.MAX_BUFFER_SIZE_KB * 1024;
-		int bufferSize = Math.min(bytesAvailable, maxBufferSize);
-		byte[] buffer = new byte[bufferSize];
-
-		// Read file
-		int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-		int totalBytesRead = bytesRead;
-
-		while (bytesRead > 0) {
-			outputStream.write(buffer, 0, bytesRead);
-
-			bytesAvailable = fileInputStream.available();
-			Log.d("Available", bytesAvailable + "");
-
-			bufferSize = Math.min(bytesAvailable, maxBufferSize);
-			bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-			totalBytesRead += bytesRead;
-
-			progress = HikeConstants.INITIAL_PROGRESS
-					+ (bytesRead > 0 ? (int) ((totalBytesRead * 75) / maxSize)
-							: 75);
-			uploadFileTask.updateProgress(progress);
-
-			System.gc();
-			Thread.sleep(100);
-			if (cancelUpload.get()) {
-				throw new Exception("Upload cancelled by user");
-			}
+			entity = new CustomByteArrayEntity(request.toString().getBytes(),
+					new ProgressListener() {
+						@Override
+						public void transferred(long num) {
+							uploadFileTask
+									.updateProgress((int) ((num / (float) maxSize) * 100));
+						}
+					});
 		}
 
-		buffer = null;
+		uploadFileTask.setEntity(entity);
 
-		JSONObject response = getFileTransferResponse(connection,
-				uploadFileTask, cancelUpload);
+		maxSize = entity.getContentLength();
 
-		Log.d("HTTP", "request finished");
-		outputStream.flush();
-		outputStream.close();
-		fileInputStream.close();
+		httpPut.setEntity(entity);
+		HttpResponse response = httpClient.execute(httpPut, httpContext);
+		String serverResponse = EntityUtils.toString(response.getEntity());
 
-		if ((response == null) || (!"ok".equals(response.optString("stat")))) {
+		JSONObject responseJSON = new JSONObject(serverResponse);
+		if ((responseJSON == null)
+				|| (!"ok".equals(responseJSON.optString("stat")))) {
 			throw new NetworkErrorException("Unable to perform request");
 		}
-		return response;
+		return responseJSON;
 	}
 
 	public static void deleteSocialCredentials(boolean facebook)
@@ -753,4 +696,5 @@ public class AccountUtils {
 	public static String getServerUrl() {
 		return base;
 	}
+
 }

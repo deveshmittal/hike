@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.bsb.hike"
-    android:versionCode="127"
+    android:versionCode="137"
     android:installLocation="auto"
-    android:versionName="1.1.29">
+    android:versionName="1.7.1">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -19,6 +19,7 @@
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
 	<!-- C2DM -->
 	<permission android:name="com.bsb.hike.permission.C2D_MESSAGE" android:protectionLevel="signature" />
@@ -27,6 +28,8 @@
 	<uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
 	<uses-feature android:name="android.hardware.telephony" android:required="false"/>
+	<uses-feature android:name="android.hardware.location" android:required="false"/>
+
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" 

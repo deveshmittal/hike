@@ -1,44 +1,63 @@
 package com.bsb.hike.adapters;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.Editable;
 import android.text.TextUtils;
-import android.util.SparseBooleanArray;
+import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.Filter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.utils.IconCacheManager;
 
-public class HikeInviteAdapter extends HikeArrayAdapter {
-	SparseBooleanArray checkedItems;
+public class HikeInviteAdapter extends
+		HikeArrayAdapter<Pair<AtomicBoolean, ContactInfo>> implements
+		TextWatcher {
+
+	private List<Pair<AtomicBoolean, ContactInfo>> completeList;
+	private List<Pair<AtomicBoolean, ContactInfo>> filteredList;
+	private ContactFilter filter;
+	private String unknownNumber;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId,
-			SparseBooleanArray checkedItems) {
-		super(activity, viewItemId, getItems(activity));
-		this.activity = activity;
-		this.checkedItems = checkedItems;
-	}
+			List<Pair<AtomicBoolean, ContactInfo>> completeList) {
 
-	private static List<ContactInfo> getItems(Activity activity) {
-		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		List<ContactInfo> contacts = db.getNonHikeContacts();
-		Collections.sort(contacts);
-		return contacts;
+		super(activity, viewItemId, completeList);
+		this.activity = activity;
+		this.filteredList = completeList;
+		this.completeList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(
+				completeList.size());
+		this.completeList.addAll(completeList);
+		this.filter = new ContactFilter();
 	}
 
 	@Override
 	protected View getItemView(int position, View convertView, ViewGroup parent) {
-		ContactInfo contactInfo = (ContactInfo) getItem(position);
+		Pair<AtomicBoolean, ContactInfo> pair = getItem(position);
+
+		AtomicBoolean isChecked = null;
+		ContactInfo contactInfo = null;
+		if (pair != null) {
+			isChecked = pair.first;
+			contactInfo = pair.second;
+		} else {
+			contactInfo = new ContactInfo(unknownNumber, unknownNumber,
+					unknownNumber, unknownNumber);
+		}
+
 		LayoutInflater inflater = (LayoutInflater) activity
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View v = convertView;
@@ -46,21 +65,35 @@ public class HikeInviteAdapter extends HikeArrayAdapter {
 			v = inflater.inflate(R.layout.invite_item, parent, false);
 		}
 		ImageView imageView = (ImageView) v.findViewById(R.id.avatar);
-		imageView.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(contactInfo.getMsisdn()));
+		imageView.setImageDrawable(pair != null ? IconCacheManager
+				.getInstance().getIconForMSISDN(contactInfo.getMsisdn())
+				: getContext().getResources()
+						.getDrawable(R.drawable.ic_avatar1));
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo.getName());
 
 		TextView numView = (TextView) v.findViewById(R.id.number);
-		numView.setText(contactInfo.getMsisdn());
-		if (!TextUtils.isEmpty(contactInfo.getMsisdnType())) {
-			numView.append(" (" + contactInfo.getMsisdnType() + ")");
+		if (pair != null) {
+			numView.setText(contactInfo.getMsisdn());
+			if (!TextUtils.isEmpty(contactInfo.getMsisdnType())) {
+				numView.append(" (" + contactInfo.getMsisdnType() + ")");
+			}
+		} else {
+			numView.setText(R.string.tap_here_invite);
 		}
+		numView.setVisibility(isEnabled(position) ? View.VISIBLE
+				: View.INVISIBLE);
 
-		((CheckBox) v.findViewById(R.id.checkbox)).setChecked(checkedItems
-				.get(position));
-		v.setTag(contactInfo);
+		CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkbox);
+		checkBox.setVisibility(pair != null ? View.VISIBLE : View.GONE);
+
+		if (pair != null) {
+			checkBox.setChecked(isChecked.get());
+			v.setTag(pair);
+		} else {
+			v.setTag(contactInfo);
+		}
 		return v;
 	}
 
@@ -69,4 +102,89 @@ public class HikeInviteAdapter extends HikeArrayAdapter {
 		return activity.getResources().getString(R.string.invite);
 	}
 
+	@Override
+	public void afterTextChanged(Editable s) {
+		filter.filter(s);
+		unknownNumber = s.toString();
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+	}
+
+	private class ContactFilter extends Filter {
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) {
+			FilterResults results = new FilterResults();
+
+			String textToBeFiltered = TextUtils.isEmpty(constraint) ? ""
+					: constraint.toString().toLowerCase();
+
+			if (!TextUtils.isEmpty(textToBeFiltered)) {
+
+				List<Pair<AtomicBoolean, ContactInfo>> filteredContacts = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+
+				for (Pair<AtomicBoolean, ContactInfo> info : HikeInviteAdapter.this.completeList) {
+					if (info != null) {
+						ContactInfo contactInfo = info.second;
+						if (contactInfo.getName().toLowerCase()
+								.contains(textToBeFiltered)
+								|| contactInfo.getMsisdn().contains(
+										textToBeFiltered)) {
+							filteredContacts.add(info);
+						}
+					}
+				}
+				if (shouldShowExtraElement(textToBeFiltered)) {
+					filteredContacts.add(null);
+				}
+				results.count = filteredContacts.size();
+				results.values = filteredContacts;
+
+			} else {
+				results.count = HikeInviteAdapter.this.completeList.size();
+				results.values = HikeInviteAdapter.this.completeList;
+			}
+			return results;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void publishResults(CharSequence constraint,
+				FilterResults results) {
+			filteredList = (ArrayList<Pair<AtomicBoolean, ContactInfo>>) results.values;
+			notifyDataSetChanged();
+			clear();
+			for (Pair<AtomicBoolean, ContactInfo> pair : filteredList) {
+				add(pair);
+			}
+			notifyDataSetInvalidated();
+		}
+	}
+
+	private boolean shouldShowExtraElement(String s) {
+		String pattern = "(\\+?\\d*)";
+		if (s.matches(pattern)) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean areAllItemsEnabled() {
+		return false;
+	}
+
+	@Override
+	public boolean isEnabled(int position) {
+		if (filteredList.get(position) == null) {
+			return unknownNumber.matches(HikeConstants.VALID_MSISDN_REGEX);
+		}
+		return super.isEnabled(position);
+	}
 }

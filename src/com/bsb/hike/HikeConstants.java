@@ -68,6 +68,11 @@ public class HikeConstants {
 	public static final String ACCOUNTS = "accounts";
 	public static final String FAVORITES = "favorites";
 	public static final String PENDING = "pending";
+	public static final String MSISDNS = "msisdns";
+	public static final String REWARDS_TOKEN = "reward_token";
+	public static final String SHOW_REWARDS = "show_rewards";
+	public static final String REWARDS = "rewards";
+	public static final String TALK_TIME = "tt";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -147,12 +152,12 @@ public class HikeConstants {
 	public static final int MAX_CONTACTS_IN_GROUP = 20;
 	public static final int MAX_SMS_CONTACTS_IN_GROUP = MAX_CONTACTS_IN_GROUP;
 
-	public static final int PROFILE_IMAGE_DIMENSIONS = 80;
+	public static final int PROFILE_IMAGE_DIMENSIONS = 120;
 
 	public static final String VALID_MSISDN_REGEX = "\\+?[0-9]{1,15}";
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
-	public static final int MAX_FILE_SIZE = 6 * 1024 * 1024;
+	public static final int MAX_FILE_SIZE = 15 * 1024 * 1024;
 	public static final int SHARE_LOCATION_CODE = 1187;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
@@ -215,7 +220,7 @@ public class HikeConstants {
 	public static final String LOCATION_CONTENT_TYPE = "hikemap/location";
 	public static final String LOCATION_FILE_NAME = "Location";
 
-	public static final int DEFAULT_ZOOM_LEVEL = 8;
+	public static final int DEFAULT_ZOOM_LEVEL = 12;
 
 	// Picasa URI start for JB devices
 	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
@@ -230,6 +235,10 @@ public class HikeConstants {
 
 	public static final String HIKE_MEDIA_DIRECTORY_ROOT = Environment
 			.getExternalStorageDirectory() + "/Hike/Media";
+	public static final String PROFILE_ROOT = "/hike Profile Images";
+	public static final String IMAGE_ROOT = "/hike Images";
+	public static final String VIDEO_ROOT = "/hike Videos";
+	public static final String AUDIO_ROOT = "/hike Audios";
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
@@ -247,6 +256,8 @@ public class HikeConstants {
 	public static final String NAMESPACE = "http://schemas.android.com/apk/res/com.bsb.hike";
 
 	public static final String FONT = "font";
+
+	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 40;
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
@@ -331,6 +342,11 @@ public class HikeConstants {
 		public static final String FACEBOOK_AUTH_POPUP_SHOWING = "facebookAuthPopupShowing";
 		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
 		public static final String GPS_DIALOG_SHOWN = "gpsDialogShown";
+		public static final String REWARDS_PAGE = "rewardsPage";
+		public static final String CUSTOM_LOCATION_SELECTED = "customLocationSelected";
+		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
+		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
+		public static final String OPEN_FAVORITES = "openFavorites";
 	}
 
 	public static final class LogEvent {
@@ -469,6 +485,10 @@ public class HikeConstants {
 		public static final String REMOVE_FAVORITE = "rf";
 		public static final String MUTE = "mute";
 		public static final String UNMUTE = "unmute";
+		public static final String GROUP_CHAT_KICK = "gck";
+		public static final String ACCOUNT_CONFIG = "ac";
+		public static final String REWARDS = "rewards";
+		public static final String DISPLAY_PIC = "dp";
 	}
 
 	public static enum FTResult {

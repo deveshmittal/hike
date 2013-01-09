@@ -1,5 +1,6 @@
 package com.bsb.hike.tasks;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -394,7 +395,21 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 		/* tell the service to start listening for new messages */
 		HikeMessengerApp.getPubSub().publish(HikePubSub.TOKEN_CREATED, null);
 		isAlreadyFetchingNumber = false;
+
+		deletePreviouslySavedProfileImages();
 		return Boolean.TRUE;
+	}
+
+	private void deletePreviouslySavedProfileImages() {
+		String dirPath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		File dir = new File(dirPath);
+		if (!dir.exists()) {
+			return;
+		}
+		for (File file : dir.listFiles()) {
+			file.delete();
+		}
 	}
 
 	@Override
