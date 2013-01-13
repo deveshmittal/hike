@@ -22,11 +22,9 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
@@ -58,8 +56,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.cropimage.CropImage;
-import com.bsb.hike.cropimage.Util;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -147,7 +143,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 																 */
 		public DownloadProfileImageTask downloadProfileImageTask;
 
-		public Bitmap newBitmap = null; /* the bitmap before the user saves it */
+		public String destFilePath = null; /*
+											 * the bitmap before the user saves
+											 * it
+											 */
 		public int genderType;
 		public boolean viewingProfileImage = false;
 		public boolean animatedProfileImage = false;
@@ -385,11 +384,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(
 				groupConversation.getMsisdn());
 
-		if (mActivityState.newBitmap == null) {
-			mIconView.setImageDrawable(drawable);
-		} else {
-			mIconView.setImageBitmap(mActivityState.newBitmap);
-		}
+		mIconView.setImageDrawable(drawable);
+
 		mNameEdit.setText(nameTxt);
 		mNameDisplay.setText(nameTxt);
 		mTitleView.setText(R.string.group_info);
@@ -721,24 +717,24 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		}
 
-		if (mActivityState.newBitmap != null) {
+		if (mActivityState.destFilePath != null) {
 			/* the server only needs a smaller version */
-			final Bitmap smallerBitmap = Util.transform(new Matrix(),
-					mActivityState.newBitmap,
-					HikeConstants.PROFILE_IMAGE_DIMENSIONS,
-					HikeConstants.PROFILE_IMAGE_DIMENSIONS, false);
-			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap,
-					Bitmap.CompressFormat.JPEG);
+			final Bitmap smallerBitmap = Utils.scaleDownImage(
+					mActivityState.destFilePath,
+					HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
 
-			final byte[] larger_bytes;
-			larger_bytes = Utils.bitmapToBytes(mActivityState.newBitmap,
+			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap,
 					Bitmap.CompressFormat.JPEG, 100);
+
+			if (mIconView != null) {
+				mIconView.setImageBitmap(smallerBitmap);
+			}
 
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
 					+ "/avatar", new HikeHttpRequest.HikeHttpCallback() {
 				public void onFailure() {
 					Log.d("ProfileActivity", "resetting image");
-					mActivityState.newBitmap = null;
+					mActivityState.destFilePath = null;
 					if (mIconView != null) {
 						/* reset the image */
 						mIconView.setImageDrawable(IconCacheManager
@@ -757,36 +753,13 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.PROFILE_PIC_CHANGED, null);
 					}
-					try {
-						InputStream src = new ByteArrayInputStream(larger_bytes);
-						OutputStream dest;
-						String path = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
-								+ HikeConstants.PROFILE_ROOT;
-						String fileName = Utils
-								.getProfileImageFileName(mLocalMSISDN);
-						dest = new FileOutputStream(new File(path, fileName));
-
-						byte[] buffer = new byte[HikeConstants.MAX_BUFFER_SIZE_KB * 1024];
-						int len;
-
-						while ((len = src.read(buffer)) > 0) {
-							dest.write(buffer, 0, len);
-						}
-
-						src.close();
-						dest.close();
-					} catch (FileNotFoundException e) {
-						Log.e(getClass().getSimpleName(), "File not found", e);
-					} catch (IOException e) {
-						Log.e(getClass().getSimpleName(), "IO Exception", e);
-					}
 					if (isBackPressed) {
 						finishEditing();
 					}
 				}
 			});
 
-			request.setPostData(larger_bytes);
+			request.setFilePath(mActivityState.destFilePath);
 			requests.add(request);
 		}
 
@@ -881,6 +854,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			return;
 		}
 
+		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		String fileName = Utils.getProfileImageFileName(mLocalMSISDN);
+		final String destFilePath = directory + "/" + fileName;
+
 		switch (requestCode) {
 		case HikeConstants.CAMERA_RESULT:
 			/* fall-through on purpose */
@@ -934,8 +912,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				return;
 			}
 			if (!isPicasaImage) {
-				startCropActivity(path);
+				Utils.startCropActivity(this, path, destFilePath);
 			} else {
+				final File destFile = new File(path);
 				mActivityState.downloadPicasaImageTask = new DownloadPicasaImageTask(
 						getApplicationContext(), destFile, selectedFileUri,
 						new PicasaDownloadResult() {
@@ -952,10 +931,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 											R.string.error_download,
 											Toast.LENGTH_SHORT).show();
 								} else {
-									startCropActivity(
+									Utils.startCropActivity(
 											ProfileActivity.this,
-											destFile.getAbsolutePath()
-											);
+											destFile.getAbsolutePath(),
+											destFilePath);
 								}
 							}
 						});
@@ -965,28 +944,14 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 			break;
 		case HikeConstants.CROP_RESULT:
-			mActivityState.newBitmap = data
-					.getParcelableExtra(HikeConstants.Extras.BITMAP);
-			if (mIconView != null) {
-				mIconView.setImageBitmap(mActivityState.newBitmap);
-			}
-			if (this.profileType == ProfileType.USER_PROFILE) {
+			mActivityState.destFilePath = data
+					.getStringExtra(MediaStore.EXTRA_OUTPUT);
+			if ((this.profileType == ProfileType.USER_PROFILE)
+					|| (this.profileType == ProfileType.GROUP_INFO)) {
 				saveChanges();
 			}
 			break;
 		}
-	}
-
-	private void startCropActivity(String path) {
-		/* Crop the image */
-		Intent intent = new Intent(this, CropImage.class);
-		intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
-		intent.putExtra(HikeConstants.Extras.SCALE, true);
-		intent.putExtra(HikeConstants.Extras.OUTPUT_X, 500);
-		intent.putExtra(HikeConstants.Extras.OUTPUT_Y, 500);
-		intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
-		intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
-		startActivityForResult(intent, CROP_RESULT);
 	}
 
 	@Override

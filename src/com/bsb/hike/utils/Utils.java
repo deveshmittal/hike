@@ -92,6 +92,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.State;
@@ -1635,5 +1636,21 @@ public class Utils {
 	public static String getHashedDeviceId(String deviceId)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		return "and:" + SHA1(deviceId);
+	}
+
+	public static void startCropActivity(Activity activity, String path,
+			String destPath) {
+		/* Crop the image */
+		Intent intent = new Intent(activity, CropImage.class);
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, destPath);
+		intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
+		intent.putExtra(HikeConstants.Extras.SCALE, true);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_X,
+				HikeConstants.MAX_DIMENSION_FULL_SIZE_PROFILE_PX);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_Y,
+				HikeConstants.MAX_DIMENSION_FULL_SIZE_PROFILE_PX);
+		intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
+		intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
+		activity.startActivityForResult(intent, HikeConstants.CROP_RESULT);
 	}
 }

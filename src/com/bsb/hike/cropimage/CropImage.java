@@ -365,7 +365,7 @@ public class CropImage extends MonitoredActivity {
 			try {
 				outputStream = mContentResolver.openOutputStream(mSaveUri);
 				if (outputStream != null) {
-					croppedImage.compress(mOutputFormat, 75, outputStream);
+					croppedImage.compress(mOutputFormat, 100, outputStream);
 				}
 			} catch (IOException ex) {
 				// TODO: report error to caller
@@ -374,6 +374,7 @@ public class CropImage extends MonitoredActivity {
 				Util.closeSilently(outputStream);
 			}
 			Bundle extras = new Bundle();
+			extras.putString(MediaStore.EXTRA_OUTPUT, mSaveUri.getPath());
 			setResult(RESULT_OK,
 					new Intent(mSaveUri.toString()).putExtras(extras));
 		} else {
