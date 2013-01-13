@@ -169,6 +169,8 @@ public class HikeConstants {
 
 	public static final int MAX_DIMENSION_LOCATION_THUMBNAIL_PX = 220;
 
+	public static final int MAX_DIMENSION_FULL_SIZE_PROFILE_PX = 500;
+
 	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
 
 	public static final int INITIAL_PROGRESS = 5;
@@ -258,6 +260,20 @@ public class HikeConstants {
 	public static final String FONT = "font";
 
 	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 40;
+
+	public static final String FACEBOOK_PROFILEPIC_URL_FORMAT = "https://graph.facebook.com/%1$s/picture?height=%2$d&width=%2$d";
+
+	/*
+	 * Constants for Profile Pic
+	 */
+	/* dialog IDs */
+	public static final int PROFILE_PICTURE_FROM_CAMERA = 0;
+	public static final int PROFILE_PICTURE_FROM_GALLERY = 1;
+
+	/* activityForResult IDs */
+	public static final int CAMERA_RESULT = 0;
+	public static final int GALLERY_RESULT = 1;
+	public static final int CROP_RESULT = 2;
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";

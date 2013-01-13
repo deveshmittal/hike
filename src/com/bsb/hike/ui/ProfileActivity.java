@@ -1,12 +1,6 @@
 package com.bsb.hike.ui;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -87,14 +81,6 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 public class ProfileActivity extends DrawerBaseActivity implements
 		FinishableEvent, android.content.DialogInterface.OnClickListener,
 		Listener, OnLongClickListener {
-	/* dialog IDs */
-	private static final int PROFILE_PICTURE_FROM_CAMERA = 0;
-	private static final int PROFILE_PICTURE_FROM_GALLERY = 1;
-
-	/* activityForResult IDs */
-	private static final int CAMERA_RESULT = 0;
-	private static final int GALLERY_RESULT = 1;
-	private static final int CROP_RESULT = 2;
 
 	private ImageView mIconView;
 	private EditText mNameEdit;
@@ -894,11 +880,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		}
 
 		switch (requestCode) {
-		case CAMERA_RESULT:
+		case HikeConstants.CAMERA_RESULT:
 			/* fall-through on purpose */
-		case GALLERY_RESULT:
+		case HikeConstants.GALLERY_RESULT:
 			Log.d("ProfileActivity", "The activity is " + this);
-			if (requestCode == CAMERA_RESULT) {
+			if (requestCode == HikeConstants.CAMERA_RESULT) {
 				String filePath = preferences.getString(
 						HikeMessengerApp.FILE_PATH, "");
 				selectedFileIcon = new File(filePath);
@@ -910,14 +896,15 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				editor.remove(HikeMessengerApp.FILE_PATH);
 				editor.commit();
 			}
-			if (requestCode == CAMERA_RESULT && !selectedFileIcon.exists()) {
+			if (requestCode == HikeConstants.CAMERA_RESULT
+					&& !selectedFileIcon.exists()) {
 				Toast.makeText(getApplicationContext(), R.string.error_capture,
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			boolean isPicasaImage = false;
 			Uri selectedFileUri = null;
-			if (requestCode == CAMERA_RESULT) {
+			if (requestCode == HikeConstants.CAMERA_RESULT) {
 				path = selectedFileIcon.getAbsolutePath();
 			} else {
 				selectedFileUri = data.getData();
@@ -954,7 +941,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						.getString(R.string.downloading_image));
 			}
 			break;
-		case CROP_RESULT:
+		case HikeConstants.CROP_RESULT:
 			mActivityState.newBitmap = data
 					.getParcelableExtra(HikeConstants.Extras.BITMAP);
 			if (mIconView != null) {
@@ -983,7 +970,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	public void onClick(DialogInterface dialog, int item) {
 		Intent intent = null;
 		switch (item) {
-		case PROFILE_PICTURE_FROM_CAMERA:
+		case HikeConstants.PROFILE_PICTURE_FROM_CAMERA:
 			if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE) {
 				Toast.makeText(getApplicationContext(),
 						R.string.no_external_storage, Toast.LENGTH_SHORT)
@@ -1006,7 +993,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						selectedFileIcon.getAbsolutePath());
 				editor.commit();
 
-				startActivityForResult(intent, CAMERA_RESULT);
+				startActivityForResult(intent, HikeConstants.CAMERA_RESULT);
 				overridePendingTransition(R.anim.slide_in_right_noalpha,
 						R.anim.slide_out_left_noalpha);
 			} else {
@@ -1014,7 +1001,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						Toast.LENGTH_LONG).show();
 			}
 			break;
-		case PROFILE_PICTURE_FROM_GALLERY:
+		case HikeConstants.PROFILE_PICTURE_FROM_GALLERY:
 			if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 				Toast.makeText(getApplicationContext(),
 						R.string.no_external_storage, Toast.LENGTH_SHORT)
@@ -1023,7 +1010,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 			intent = new Intent(Intent.ACTION_PICK);
 			intent.setType("image/*");
-			startActivityForResult(intent, GALLERY_RESULT);
+			startActivityForResult(intent, HikeConstants.GALLERY_RESULT);
 			overridePendingTransition(R.anim.slide_in_right_noalpha,
 					R.anim.slide_out_left_noalpha);
 			break;
