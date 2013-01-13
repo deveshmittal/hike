@@ -22,10 +22,19 @@ public class HikeHttpRequest {
 	private HikeHttpCallback mCompletionRunnable;
 	private byte[] mPostData;
 	private JSONObject response;
+	private String filePath;
 
 	public HikeHttpRequest(String path, HikeHttpCallback completionRunnable) {
 		this.mPath = path;
 		this.mCompletionRunnable = completionRunnable;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+
+	public String getFilePath() {
+		return filePath;
 	}
 
 	public JSONObject getJSONData() {

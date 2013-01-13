@@ -33,6 +33,7 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
@@ -609,8 +610,16 @@ public class AccountUtils {
 			addToken(post);
 		}
 		try {
-			AbstractHttpEntity entity = new GzipByteArrayEntity(
-					hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
+			AbstractHttpEntity entity;
+
+			if (!TextUtils.isEmpty(hikeHttpRequest.getFilePath())) {
+				entity = new FileEntity(
+						new File(hikeHttpRequest.getFilePath()), "");
+			} else {
+				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
+						HTTP.DEFAULT_CONTENT_CHARSET);
+			}
+
 			entity.setContentType(hikeHttpRequest.getContentType());
 			post.setEntity(entity);
 			JSONObject obj = executeRequest(post);
