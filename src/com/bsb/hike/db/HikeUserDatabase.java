@@ -272,13 +272,17 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 							DBConstants.MSISDN + "=?",
 							new String[] { contact.getMsisdn() }, null, null,
 							null);
-					if (favoriteCursor.moveToFirst()) {
-						int favoriteTypeOrdinal = favoriteCursor
-								.getInt(favoriteCursor
-										.getColumnIndex(DBConstants.FAVORITE_TYPE));
-						contact.setFavoriteType(FavoriteType.values()[favoriteTypeOrdinal]);
-					} else {
-						contact.setFavoriteType(FavoriteType.NOT_FAVORITE);
+					try {
+						if (favoriteCursor.moveToFirst()) {
+							int favoriteTypeOrdinal = favoriteCursor
+									.getInt(favoriteCursor
+											.getColumnIndex(DBConstants.FAVORITE_TYPE));
+							contact.setFavoriteType(FavoriteType.values()[favoriteTypeOrdinal]);
+						} else {
+							contact.setFavoriteType(FavoriteType.NOT_FAVORITE);
+						}
+					} finally {
+						favoriteCursor.close();
 					}
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.CONTACT_ADDED, contact);
