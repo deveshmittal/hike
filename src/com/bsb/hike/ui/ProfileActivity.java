@@ -70,6 +70,8 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadPicasaImageTask;
+import com.bsb.hike.tasks.DownloadPicasaImageTask.PicasaDownloadResult;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -935,7 +937,28 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				startCropActivity(path);
 			} else {
 				mActivityState.downloadPicasaImageTask = new DownloadPicasaImageTask(
-						new File(path), selectedFileUri);
+						getApplicationContext(), destFile, selectedFileUri,
+						new PicasaDownloadResult() {
+
+							@Override
+							public void downloadFinished(boolean result) {
+								if (mDialog != null) {
+									mDialog.dismiss();
+									mDialog = null;
+								}
+								mActivityState = new ActivityState();
+								if (!result) {
+									Toast.makeText(getApplicationContext(),
+											R.string.error_download,
+											Toast.LENGTH_SHORT).show();
+								} else {
+									startCropActivity(
+											ProfileActivity.this,
+											destFile.getAbsolutePath()
+											);
+								}
+							}
+						});
 				mActivityState.downloadPicasaImageTask.execute();
 				mDialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
@@ -1534,46 +1557,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				}
 			});
 		}
-	}
-
-	private class DownloadPicasaImageTask extends
-			AsyncTask<Void, Void, Boolean> {
-		private File destFile;
-		private Uri picasaUri;
-
-		public DownloadPicasaImageTask(File destFile, Uri picasaUri) {
-			this.destFile = destFile;
-			this.picasaUri = picasaUri;
-		}
-
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			try {
-				Utils.downloadPicasaFile(ProfileActivity.this, destFile,
-						picasaUri);
-				return Boolean.TRUE;
-			} catch (Exception e) {
-				Log.e(getClass().getSimpleName(), "Error while fetching image",
-						e);
-				return Boolean.FALSE;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			if (mDialog != null) {
-				mDialog.dismiss();
-				mDialog = null;
-			}
-			mActivityState = new ActivityState();
-			if (!result) {
-				Toast.makeText(getApplicationContext(),
-						R.string.error_download, Toast.LENGTH_SHORT).show();
-			} else {
-				startCropActivity(destFile.getAbsolutePath());
-			}
-		}
-
 	}
 
 	@Override
