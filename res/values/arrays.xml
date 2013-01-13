@@ -666,5 +666,9 @@
 	    <item>ZM +260</item>
 	    <item>ZW +263</item>
 	</string-array>
-	
+
+	<string-array name="profile_pic_dialog">
+	    <item>@string/camera</item>
+	    <item>@string/gallery</item>
+	</string-array>	
 </resources>

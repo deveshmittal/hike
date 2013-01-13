@@ -313,4 +313,7 @@
 	<string name="change_group_image">%1$s changed the group image.</string>
 	<string name="contact">Contact</string>
 	<string name="faq">FAQs</string>
+	<string name="camera">Camera</string>
+	<string name="gallery">Gallery</string>
+	<string name="choose_picture">Choose a picture</string>
 </resources>
