@@ -1529,17 +1529,17 @@ public class Utils {
 		}
 	}
 
-	public static void downloadPicasaFile(Context context, File destFile,
-			Uri picasaUri) throws Exception {
+	public static void downloadAndSaveFile(Context context, File destFile,
+			Uri uri) throws Exception {
 		InputStream is = null;
 		OutputStream os = null;
 		try {
 
-			if (isPicasaUri(picasaUri.toString())
-					&& !picasaUri.toString().startsWith("http")) {
-				is = context.getContentResolver().openInputStream(picasaUri);
+			if (isPicasaUri(uri.toString())
+					&& !uri.toString().startsWith("http")) {
+				is = context.getContentResolver().openInputStream(uri);
 			} else {
-				is = new URL(picasaUri.toString()).openStream();
+				is = new URL(uri.toString()).openStream();
 			}
 			os = new FileOutputStream(destFile);
 

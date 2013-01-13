@@ -143,7 +143,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.MESSAGE_SENT, convMessage);
 
-					Utils.downloadPicasaFile(context, selectedFile, picasaUri);
+					Utils.downloadAndSaveFile(context, selectedFile, picasaUri);
 					filePath = selectedFile.getPath();
 				}
 
