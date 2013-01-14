@@ -285,49 +285,57 @@ public class ContactUtils {
 	 */
 	public static Pair<String, Map<String, Long>> getRecentNumbers(
 			Context context, int limit) {
-		String sortBy = limit > -1 ? Phone.LAST_TIME_CONTACTED + " DESC LIMIT "
-				+ limit : null;
-		Cursor c = context.getContentResolver().query(Phone.CONTENT_URI,
-				new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED },
-				null, null, sortBy);
+		Cursor c = null;
+		try {
+			String sortBy = limit > -1 ? Phone.LAST_TIME_CONTACTED
+					+ " DESC LIMIT " + limit : null;
+			c = context.getContentResolver().query(Phone.CONTENT_URI,
+					new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED },
+					null, null, sortBy);
 
-		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
-		int lastTimeContactedIdx = c.getColumnIndex(Phone.LAST_TIME_CONTACTED);
+			int numberColIdx = c.getColumnIndex(Phone.NUMBER);
+			int lastTimeContactedIdx = c
+					.getColumnIndex(Phone.LAST_TIME_CONTACTED);
 
-		Map<String, Long> recentlyContactedNumbers = new HashMap<String, Long>();
-		StringBuilder sb = null;
+			Map<String, Long> recentlyContactedNumbers = new HashMap<String, Long>();
+			StringBuilder sb = null;
 
-		if (c.getCount() > 0) {
-			sb = new StringBuilder("(");
-			while (c.moveToNext()) {
-				String number = c.getString(numberColIdx);
+			if (c.getCount() > 0) {
+				sb = new StringBuilder("(");
+				while (c.moveToNext()) {
+					String number = c.getString(numberColIdx);
 
-				if (TextUtils.isEmpty(number)) {
-					continue;
+					if (TextUtils.isEmpty(number)) {
+						continue;
+					}
+
+					long lastTimeContacted = c.getLong(lastTimeContactedIdx);
+
+					/*
+					 * Checking if we already have this number and whether the
+					 * last time contacted was sooner than the newer value.
+					 */
+					if (recentlyContactedNumbers.containsKey(number)
+							&& recentlyContactedNumbers.get(number) > lastTimeContacted) {
+						continue;
+					}
+					recentlyContactedNumbers.put(number,
+							c.getLong(lastTimeContactedIdx));
+
+					number = DatabaseUtils.sqlEscapeString(number);
+					sb.append(number + ",");
 				}
-
-				long lastTimeContacted = c.getLong(lastTimeContactedIdx);
-
-				/*
-				 * Checking if we already have this number and whether the last
-				 * time contacted was sooner than the newer value.
-				 */
-				if (recentlyContactedNumbers.containsKey(number)
-						&& recentlyContactedNumbers.get(number) > lastTimeContacted) {
-					continue;
-				}
-				recentlyContactedNumbers.put(number,
-						c.getLong(lastTimeContactedIdx));
-
-				number = DatabaseUtils.sqlEscapeString(number);
-				sb.append(number + ",");
+				sb.replace(sb.length() - 1, sb.length(), ")");
+			} else {
+				sb = new StringBuilder("()");
 			}
-			sb.replace(sb.length() - 1, sb.length(), ")");
-		} else {
-			sb = new StringBuilder("()");
-		}
 
-		return new Pair<String, Map<String, Long>>(sb.toString(),
-				recentlyContactedNumbers);
+			return new Pair<String, Map<String, Long>>(sb.toString(),
+					recentlyContactedNumbers);
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
 	}
 }
