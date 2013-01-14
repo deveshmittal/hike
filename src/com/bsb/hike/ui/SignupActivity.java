@@ -361,7 +361,9 @@ public class SignupActivity extends Activity implements
 			toast.show();
 			return;
 		}
-		startLoading();
+		if (viewFlipper.getDisplayedChild() != NUMBER) {
+			startLoading();
+		}
 		if (!addressBookError) {
 			if (viewFlipper.getDisplayedChild() == NUMBER
 					&& !enterEditText.getText().toString()
@@ -370,20 +372,50 @@ public class SignupActivity extends Activity implements
 				submitBtn.setVisibility(View.VISIBLE);
 				invalidNum.setVisibility(View.VISIBLE);
 			} else {
-				String input = enterEditText.getText().toString();
+				final String input = enterEditText.getText().toString();
 				if (viewFlipper.getDisplayedChild() == NUMBER) {
-					String code = countryPicker.getText().toString();
-					code = code.substring(code.indexOf("+"), code.length());
-					input = code + input;
-					Editor editor = accountPrefs.edit();
-					editor.putString(HikeMessengerApp.TEMP_COUNTRY_CODE, code);
-					editor.commit();
+					AlertDialog.Builder builder = new AlertDialog.Builder(this);
+					builder.setTitle(R.string.number_confirm_title);
+					builder.setMessage(input);
+					builder.setPositiveButton(R.string.yes,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									String code = countryPicker.getText()
+											.toString();
+									code = code.substring(code.indexOf("+"),
+											code.length());
+									String number = code + input;
+									Editor editor = accountPrefs.edit();
+									editor.putString(
+											HikeMessengerApp.TEMP_COUNTRY_CODE,
+											code);
+									editor.commit();
+
+									mTask.addUserInput(number);
+
+									startLoading();
+								}
+							});
+					builder.setNegativeButton(R.string.no,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									dialog.dismiss();
+								}
+							});
+					builder.show();
+				} else {
+					if (!TextUtils.isEmpty(mActivityState.destFilePath)) {
+						mTask.addProfilePicPath(mActivityState.destFilePath,
+								mActivityState.profileBitmap);
+					}
+					mTask.addUserInput(input);
 				}
-				if (!TextUtils.isEmpty(mActivityState.destFilePath)) {
-					mTask.addProfilePicPath(mActivityState.destFilePath,
-							mActivityState.profileBitmap);
-				}
-				mTask.addUserInput(input);
 			}
 		} else {
 			showErrorMsg();
