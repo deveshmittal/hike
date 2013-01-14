@@ -1586,6 +1586,29 @@ public class Utils {
 				.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
 	}
 
+	public static boolean renameTempProfileImage(String msisdn) {
+		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		String tempFileName = Utils.getTempProfileImageFileName(msisdn);
+		String newFileName = Utils.getProfileImageFileName(msisdn);
+
+		File tempFile = new File(directory, tempFileName);
+		File newFile = new File(directory, newFileName);
+		return tempFile.renameTo(newFile);
+	}
+
+	public static boolean removeTempProfileImage(String msisdn) {
+		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		String tempFileName = Utils.getTempProfileImageFileName(msisdn);
+
+		return (new File(directory, tempFileName)).delete();
+	}
+
+	public static String getTempProfileImageFileName(String msisdn) {
+		return getValidFileNameForMsisdn(msisdn) + "_tmp.jpg";
+	}
+
 	public static String getProfileImageFileName(String msisdn) {
 		return getValidFileNameForMsisdn(msisdn) + ".jpg";
 	}

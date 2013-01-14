@@ -734,6 +734,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					+ "/avatar", new HikeHttpRequest.HikeHttpCallback() {
 				public void onFailure() {
 					Log.d("ProfileActivity", "resetting image");
+					Utils.removeTempProfileImage(mLocalMSISDN);
 					mActivityState.destFilePath = null;
 					if (mIconView != null) {
 						/* reset the image */
@@ -748,6 +749,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				public void onSuccess(JSONObject response) {
 					HikeUserDatabase db = HikeUserDatabase.getInstance();
 					db.setIcon(mLocalMSISDN, bytes, false);
+
+					Utils.renameTempProfileImage(mLocalMSISDN);
+
 					if (profileType == ProfileType.USER_PROFILE
 							|| profileType == ProfileType.USER_PROFILE_EDIT) {
 						HikeMessengerApp.getPubSub().publish(
@@ -856,7 +860,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
-		String fileName = Utils.getProfileImageFileName(mLocalMSISDN);
+		String fileName = Utils.getTempProfileImageFileName(mLocalMSISDN);
 		final String destFilePath = directory + "/" + fileName;
 
 		switch (requestCode) {
