@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
     android:id="@+id/name_layout"
     android:layout_width="match_parent"
@@ -16,12 +16,46 @@
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_img2"
         style="@style/SignupButton.Text.Info"
+        android:layout_below="@id/txt_img1"
         android:text="@string/enter_name_signup"
         hike:font="omnes" />
+
+    <RelativeLayout
+        android:id="@+id/avatar_border"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:onClick="onChangeImageClicked"
+        android:layout_below="@id/txt_img2" >
+
+        <ImageView
+            android:id="@+id/profile"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_avatar1" />
+
+        <ImageView
+            android:id="@+id/profile_border"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/square" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/ic_edit_profile" />
+    </RelativeLayout>
 
     <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/et_enter_name"
         style="@style/SignupButton"
+        android:layout_below="@id/avatar_border"
         android:layout_marginTop="10dp"
         android:background="@drawable/tb_name"
         android:hint="@string/name"
@@ -34,7 +68,8 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_below="@id/et_enter_name" >
 
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_continue"
@@ -72,4 +107,25 @@
         </RelativeLayout>
     </RelativeLayout>
 
-</LinearLayout>
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/connect_fb"
+        style="@style/SignupButton.Text.Bold.Button"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="40dp"
+        android:layout_marginLeft="55dp"
+        android:layout_marginRight="55dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/connect_fb_btn"
+        android:text="@string/connect_fb"
+        android:textSize="14sp"
+        android:onClick="onFacebookConnectClick"
+        hike:font="omnes" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/txt_other"
+        style="@style/SignupButton.Text.Info"
+        android:layout_above="@id/connect_fb"
+        android:text="@string/feeling_lazy"
+        hike:font="omnes" />
+    
+</RelativeLayout>

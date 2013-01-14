@@ -15,6 +15,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -28,6 +29,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
@@ -61,7 +63,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	}
 
 	public enum State {
-		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR
+		MSISDN, ADDRESSBOOK, NAME, PULLING_PIN, PIN, ERROR, PROFILE_IMAGE
 	};
 
 	public class StateValue {
@@ -81,9 +83,15 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	private OnSignupTaskProgressUpdate onSignupTaskProgressUpdate;
 	private boolean isRunning = false;
 	private boolean isPinError = false;
+	private HikeHttpRequest profilePicRequest;
+	private Bitmap profilePicSmall;
 	public static boolean isAlreadyFetchingNumber = false;
 
 	private static final String INDIA_ISO = "IN";
+
+	public static final String START_UPLOAD_PROFILE = "start";
+
+	public static final String FINISHED_UPLOAD_PROFILE = "finish";
 
 	public boolean isRunning() {
 		return isRunning;
@@ -108,6 +116,12 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 		synchronized (this) {
 			this.notify();
 		}
+	}
+
+	public void addProfilePicPath(String path, Bitmap profilePic) {
+		profilePicRequest = new HikeHttpRequest("/account/avatar", null);
+		profilePicRequest.setFilePath(path);
+		this.profilePicSmall = profilePic;
 	}
 
 	@Override
@@ -177,6 +191,21 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				String number = this.data;
 				this.data = null;
 				Log.d("SignupTask", "NUMBER RECEIVED: " + number);
+
+				if (canPullInSms) {
+					/*
+					 * register broadcast receiver to get the actual PIN code,
+					 * and pass it to us
+					 */
+					IntentFilter intentFilter = new IntentFilter(
+							"android.provider.Telephony.SMS_RECEIVED");
+					intentFilter.setPriority(999);
+					receiver = new SMSReceiver();
+
+					this.context.getApplicationContext().registerReceiver(
+							receiver, new IntentFilter(intentFilter));
+				}
+
 				String unauthedMSISDN = AccountUtils.validateNumber(number);
 
 				if (unauthedMSISDN == null) {
@@ -197,17 +226,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 				 * If the device can't pull in SMS no point waiting for the PIN.
 				 */
 				if (canPullInSms) {
-					/*
-					 * register broadcast receiver to get the actual PIN code,
-					 * and pass it to us
-					 */
-					IntentFilter intentFilter = new IntentFilter(
-							"android.provider.Telephony.SMS_RECEIVED");
-					intentFilter.setPriority(999);
-					receiver = new SMSReceiver();
-
-					this.context.getApplicationContext().registerReceiver(
-							receiver, new IntentFilter(intentFilter));
 
 					publishProgress(new StateValue(State.PULLING_PIN, null));
 
@@ -258,7 +276,6 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 					if (TextUtils.isEmpty(pin)) {
 						publishProgress(new StateValue(State.ERROR,
 								HikeConstants.CHANGE_NUMBER));
-						signupTask = null;
 						return Boolean.FALSE;
 					}
 					accountInfo = AccountUtils.registerAccount(context, pin,
@@ -389,6 +406,35 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 
 		/* set the name */
 		publishProgress(new StateValue(State.NAME, name));
+
+		if (this.profilePicRequest != null) {
+			try {
+				publishProgress(new StateValue(State.PROFILE_IMAGE,
+						START_UPLOAD_PROFILE));
+				AccountUtils.performRequest(profilePicRequest, true);
+
+				byte[] bytes = Utils.bitmapToBytes(profilePicSmall,
+						Bitmap.CompressFormat.JPEG, 100);
+				HikeUserDatabase db = HikeUserDatabase.getInstance();
+				db.setIcon(msisdn, bytes, false);
+
+				Utils.renameTempProfileImage(msisdn);
+
+			} catch (NetworkErrorException e) {
+				Log.e("SignupTask", "Unable to set profile pic", e);
+				Utils.removeTempProfileImage(msisdn);
+				publishProgress(new StateValue(State.ERROR, null));
+				return Boolean.FALSE;
+			} catch (IllegalStateException e) {
+				Log.e("SignupTask", "Null token", e);
+				Utils.removeTempProfileImage(msisdn);
+				publishProgress(new StateValue(State.ERROR, null));
+				return Boolean.FALSE;
+			}
+		}
+
+		publishProgress(new StateValue(State.PROFILE_IMAGE,
+				FINISHED_UPLOAD_PROFILE));
 
 		Log.d("SignupTask", "Publishing Token_Created");
 
