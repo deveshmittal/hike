@@ -161,6 +161,9 @@ public class HikeNotification {
 				true) && !shouldNotPlayNotification ? Notification.DEFAULT_VIBRATE
 				: 0;
 
+		boolean playNativeJingle = preferenceManager.getBoolean(
+				HikeConstants.NATIVE_JINGLE_PREF, true);
+
 		boolean led = preferenceManager
 				.getBoolean(HikeConstants.LED_PREF, true);
 
@@ -177,9 +180,11 @@ public class HikeNotification {
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
 		notification.defaults |= 0 | vibrate;
-		if (playSound != 0) {
+		if (playNativeJingle) {
 			notification.sound = Uri.parse("android.resource://"
 					+ context.getPackageName() + "/" + R.raw.v1);
+		} else if (playSound != 0) {
+			notification.defaults |= playSound | vibrate;
 		}
 
 		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,

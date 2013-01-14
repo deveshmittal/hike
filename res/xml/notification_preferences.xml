@@ -36,5 +36,14 @@
         android:summary="@string/led_notification_info"
         android:title="@string/led_notification"
         android:widgetLayout="@layout/checkbox_widget" />
+
+	<com.bsb.hike.view.IconCheckBoxPreference
+        icon="preference_sound"
+        android:defaultValue="true"
+        android:key="jinglePref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/native_jingle_info"
+        android:title="@string/native_jingle"
+        android:widgetLayout="@layout/checkbox_widget" />	
 	
 </PreferenceScreen>
