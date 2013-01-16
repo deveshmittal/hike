@@ -28,7 +28,10 @@ import com.bsb.hike.view.DrawerLayout;
 public class DrawerBaseActivity extends Activity implements
 		DrawerLayout.Listener, HikePubSub.Listener {
 
+	private static final long DELAY_BEFORE_ENABLE_ANIMATION = 1000;
+
 	public DrawerLayout parentLayout;
+	private long waitTime;
 
 	private String[] leftDrawerPubSubListeners = {
 			HikePubSub.SMS_CREDIT_CHANGED, HikePubSub.PROFILE_PIC_CHANGED,
@@ -50,6 +53,12 @@ public class DrawerBaseActivity extends Activity implements
 			getWindow().setFlags(HikeConstants.FLAG_HARDWARE_ACCELERATED,
 					HikeConstants.FLAG_HARDWARE_ACCELERATED);
 		}
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		waitTime = System.currentTimeMillis();
 	}
 
 	public void afterSetContentView(Bundle savedInstanceState) {
@@ -104,11 +113,25 @@ public class DrawerBaseActivity extends Activity implements
 	}
 
 	public void onToggleLeftSideBarClicked(View v) {
+		/*
+		 * Adding a delay before we enable the animation. Otherwise the animation would
+		 * randomly over-shoot or under-shoot
+		 */
+		if (System.currentTimeMillis() - waitTime <= DELAY_BEFORE_ENABLE_ANIMATION) {
+			return;
+		}
 		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
 		parentLayout.toggleSidebar(false, true);
 	}
 
 	public void onTitleIconClick(View v) {
+		/*
+		 * Adding a delay before we enable the animation. Otherwise the animation would
+		 * randomly over-shoot or under-shoot
+		 */
+		if (System.currentTimeMillis() - waitTime <= DELAY_BEFORE_ENABLE_ANIMATION) {
+			return;
+		}
 		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
 		parentLayout.toggleSidebar(false, false);
 	}

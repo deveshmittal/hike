@@ -25,9 +25,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -53,12 +50,15 @@ import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.CustomInterpolator;
 import com.bsb.hike.utils.Utils;
 
 public class DrawerLayout extends RelativeLayout implements
 		OnItemClickListener, View.OnClickListener {
 
-	public final static int DURATION = 250;
+	private final static int ANIMATION_STEPS = (int) (7 * Utils.densityMultiplier);
+
+	private final static int DURATION_BETWEEN_EACH_STEP = 5;
 
 	private boolean mLeftOpened;
 	private boolean mRightOpened;
@@ -70,24 +70,6 @@ public class DrawerLayout extends RelativeLayout implements
 	private int mSidebarWidth;
 	private int mSidebarOffsetForAnimation;
 	private int topBarButtonWidth;
-
-	// Left drawer animations
-	private Animation contentAnimationLeftOut;
-	private Animation leftSidebarTranslateAnimationIn;
-	private Animation contentAnimationRightIn;
-	private Animation leftSidebarTranslateAnimationOut;
-
-	// Right drawer animations
-	private Animation contentAnimationRightOut;
-	private Animation rightSidebarTranslateAnimationIn;
-	private Animation contentAnimationLeftIn;
-	private Animation rightSidebarTranslateAnimationOut;
-
-	private OpenListener mLeftOpenListener;
-	private CloseListener mLeftCloseListener;
-
-	private OpenListener mRightOpenListener;
-	private CloseListener mRightCloseListener;
 
 	private Listener mListener;
 
@@ -119,6 +101,10 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private TextView pendingRequests;
 
+	private boolean isAnimating = false;
+
+	private CustomInterpolator interpolator;
+
 	public enum LeftDrawerItems {
 		HOME, GROUP_CHAT, TELL_A_FRIEND, FREE_SMS, PROFILE, HELP
 	}
@@ -147,9 +133,6 @@ public class DrawerLayout extends RelativeLayout implements
 				.getDisplayMetrics().heightPixels) - topBarButtonWidth);
 		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
 
-		initializeLeftDrawerAnimations();
-		initializeRightDrawerAnimations();
-
 		/*
 		 * Fix for android v2.3 and below specific bug where the bitmap is not
 		 * tiled and gets stretched instead if we use the xml. So we're creating
@@ -163,44 +146,8 @@ public class DrawerLayout extends RelativeLayout implements
 
 		freeSMS = PreferenceManager.getDefaultSharedPreferences(getContext())
 				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
-	}
 
-	private void initializeLeftDrawerAnimations() {
-		/* Close Animations */
-		contentAnimationRightIn = new TranslateAnimation(0, -mSidebarWidth, 0,
-				0);
-		contentAnimationRightIn.setFillAfter(true);
-		contentAnimationRightIn.setFillEnabled(true);
-
-		leftSidebarTranslateAnimationOut = new TranslateAnimation(0,
-				-mSidebarOffsetForAnimation, 0, 0);
-
-		/* Open Animations */
-		contentAnimationLeftOut = new TranslateAnimation(0, mSidebarWidth, 0, 0);
-		contentAnimationLeftOut.setFillAfter(true);
-		contentAnimationLeftOut.setFillEnabled(true);
-
-		leftSidebarTranslateAnimationIn = new TranslateAnimation(
-				-mSidebarOffsetForAnimation, 0, 0, 0);
-	}
-
-	private void initializeRightDrawerAnimations() {
-		/* Close Animations */
-		contentAnimationLeftIn = new TranslateAnimation(0, mSidebarWidth, 0, 0);
-		contentAnimationLeftIn.setFillAfter(true);
-		contentAnimationLeftIn.setFillEnabled(true);
-
-		rightSidebarTranslateAnimationOut = new TranslateAnimation(0,
-				mSidebarOffsetForAnimation, 0, 0);
-
-		/* Open Animations */
-		contentAnimationRightOut = new TranslateAnimation(0, -mSidebarWidth, 0,
-				0);
-		contentAnimationRightOut.setFillAfter(true);
-		contentAnimationRightOut.setFillEnabled(true);
-
-		rightSidebarTranslateAnimationIn = new TranslateAnimation(
-				mSidebarOffsetForAnimation, 0, 0, 0);
+		interpolator = new CustomInterpolator();
 	}
 
 	public void setUpRightDrawerView(Activity activity) {
@@ -537,12 +484,6 @@ public class DrawerLayout extends RelativeLayout implements
 
 		mLeftSidebar.setBackgroundDrawable(rightDrawerBg);
 		mRightSidebar.setBackgroundDrawable(rightDrawerBg);
-
-		mLeftOpenListener = new OpenListener(mLeftSidebar, mContent, true);
-		mLeftCloseListener = new CloseListener(mLeftSidebar, mContent, true);
-
-		mRightOpenListener = new OpenListener(mRightSidebar, mContent, false);
-		mRightCloseListener = new CloseListener(mRightSidebar, mContent, false);
 	}
 
 	@Override
@@ -638,43 +579,28 @@ public class DrawerLayout extends RelativeLayout implements
 	}
 
 	public void toggleSidebar(boolean noAnimation, boolean leftSidebar) {
-		if (mContent.getAnimation() != null) {
+		if (isAnimating) {
 			return;
 		}
+		isAnimating = true;
 
 		if (leftSidebar) {
 			if (mLeftOpened) {
-				/* opened, make close animation */
-				animateLayouts(mLeftSidebar, leftSidebarTranslateAnimationOut,
-						contentAnimationRightIn, mLeftCloseListener,
-						noAnimation);
+				handler.post(new CloseDrawerAnimation(mLeftSidebar, mContent,
+						noAnimation, true));
 			} else {
-				animateLayouts(mLeftSidebar, leftSidebarTranslateAnimationIn,
-						contentAnimationLeftOut, mLeftOpenListener, noAnimation);
+				handler.post(new OpenDrawerAnimation(mLeftSidebar, mContent,
+						noAnimation, true));
 			}
 		} else {
 			if (mRightOpened) {
-				animateLayouts(mRightSidebar,
-						rightSidebarTranslateAnimationOut,
-						contentAnimationLeftIn, mRightCloseListener,
-						noAnimation);
+				handler.post(new CloseDrawerAnimation(mRightSidebar, mContent,
+						noAnimation, false));
 			} else {
-				animateLayouts(mRightSidebar, rightSidebarTranslateAnimationIn,
-						contentAnimationRightOut, mRightOpenListener,
-						noAnimation);
+				handler.post(new OpenDrawerAnimation(mRightSidebar, mContent,
+						noAnimation, false));
 			}
 		}
-	}
-
-	private void animateLayouts(View sidebar, Animation sidebarAnim,
-			Animation contentAnim, AnimationListener listener,
-			boolean noAnimation) {
-		contentAnim.setDuration(noAnimation ? 0 : DURATION);
-		sidebarAnim.setDuration(noAnimation ? 0 : DURATION);
-		/* opened, make close animation */
-		sidebar.startAnimation(sidebarAnim);
-		mContent.startAnimation(contentAnim);
-		contentAnim.setAnimationListener(listener);
 	}
 
 	public void openLeftSidebar() {
@@ -701,74 +627,210 @@ public class DrawerLayout extends RelativeLayout implements
 		}
 	}
 
-	class OpenListener implements Animation.AnimationListener {
-		View iSidebar;
-		View iContent;
-		boolean iLeftSidebar;
-
-		OpenListener(View sidebar, View content, boolean leftSidebar) {
-			iSidebar = sidebar;
-			iContent = content;
-			iLeftSidebar = leftSidebar;
-		}
-
-		public void onAnimationRepeat(Animation animation) {
-		}
-
-		public void onAnimationStart(Animation animation) {
-			iSidebar.setVisibility(View.VISIBLE);
-		}
-
-		public void onAnimationEnd(Animation animation) {
-			iContent.clearAnimation();
-			iSidebar.clearAnimation();
-			if (iLeftSidebar) {
-				mLeftOpened = !mLeftOpened;
-			} else {
-				mRightOpened = !mRightOpened;
-				if (mRightOpened && mListener != null) {
-					mListener.rightSidebarOpened();
-				}
-			}
-			requestLayout();
-		}
-	}
-
-	class CloseListener implements Animation.AnimationListener {
-		View iSidebar;
-		View iContent;
-		boolean iLeftSidebar;
-
-		CloseListener(View sidebar, View content, boolean leftSidebar) {
-			iSidebar = sidebar;
-			iContent = content;
-			iLeftSidebar = leftSidebar;
-		}
-
-		public void onAnimationRepeat(Animation animation) {
-		}
-
-		public void onAnimationStart(Animation animation) {
-		}
-
-		public void onAnimationEnd(Animation animation) {
-			iContent.clearAnimation();
-			iSidebar.clearAnimation();
-			iSidebar.setVisibility(View.INVISIBLE);
-			if (iLeftSidebar) {
-				mLeftOpened = !mLeftOpened;
-			} else {
-				mRightOpened = !mRightOpened;
-			}
-			requestLayout();
-		}
-	}
-
 	public interface Listener {
 		public boolean onContentTouchedWhenOpeningLeftSidebar();
 
 		public boolean onContentTouchedWhenOpeningRightSidebar();
 
 		public void rightSidebarOpened();
+	}
+
+	class OpenDrawerAnimation implements Runnable {
+
+		View sidebar;
+		View content;
+		int contentPosition;
+		int sidebarPosition;
+		boolean noAnim;
+		boolean leftDrawer;
+
+		public OpenDrawerAnimation(View sidebar, View content, boolean noAnim,
+				boolean leftDrawer) {
+			this.contentPosition = 0;
+			this.sidebarPosition = 0;
+
+			this.content = content;
+
+			this.sidebar = sidebar;
+			this.sidebar.setVisibility(View.VISIBLE);
+			this.sidebar
+					.offsetLeftAndRight(leftDrawer ? -mSidebarOffsetForAnimation
+							: mSidebarOffsetForAnimation);
+			invalidate();
+
+			this.noAnim = noAnim;
+			this.leftDrawer = leftDrawer;
+		}
+
+		@Override
+		public void run() {
+
+			if (!noAnim) {
+				float contentFactor = Math
+						.max(0.1f,
+								((float) (Math.abs(contentPosition) * 100 / mSidebarWidth) / 100));
+
+				float sidebarFactor = Math
+						.max(0.1f,
+								((float) (Math.abs(sidebarPosition) * 100 / mSidebarOffsetForAnimation) / 100));
+
+				int sidebarIncrements = (int) (((int) mSidebarOffsetForAnimation / ANIMATION_STEPS) * interpolator
+						.getInterpolation(sidebarFactor));
+				int contentIncrements = (int) (((int) mSidebarWidth / ANIMATION_STEPS) * interpolator
+						.getInterpolation(contentFactor));
+
+				sidebarIncrements = Math.min(sidebarIncrements,
+						mSidebarOffsetForAnimation - Math.abs(sidebarPosition));
+				contentIncrements = Math.min(contentIncrements, mSidebarWidth
+						- Math.abs(contentPosition));
+
+				sidebarIncrements = Math.max(sidebarIncrements, 1);
+				contentIncrements = Math.max(contentIncrements, 1);
+
+				if (!leftDrawer) {
+					sidebarIncrements = -sidebarIncrements;
+					contentIncrements = -contentIncrements;
+				}
+
+				if ((Math.abs(contentPosition) < mSidebarWidth)
+						|| (Math.abs(sidebarPosition) < mSidebarOffsetForAnimation)) {
+					if (Math.abs(contentPosition) < mSidebarWidth) {
+						contentPosition += contentIncrements;
+						content.offsetLeftAndRight(contentIncrements);
+					}
+
+					if (Math.abs(sidebarPosition) < mSidebarOffsetForAnimation) {
+						sidebarPosition += sidebarIncrements;
+						sidebar.offsetLeftAndRight(sidebarIncrements);
+					} else {
+						int offset = mSidebarOffsetForAnimation
+								- (leftDrawer ? sidebarPosition
+										: -sidebarPosition);
+						sidebarPosition = leftDrawer ? mSidebarOffsetForAnimation
+								: -mSidebarOffsetForAnimation;
+						sidebar.offsetLeftAndRight(offset);
+					}
+
+					handler.postDelayed(this, DURATION_BETWEEN_EACH_STEP);
+				} else {
+					finishAnim();
+				}
+			} else {
+				finishAnim();
+			}
+			invalidate();
+		}
+
+		private void finishAnim() {
+			isAnimating = false;
+			if (leftDrawer) {
+				mLeftOpened = true;
+			} else {
+				mListener.rightSidebarOpened();
+				mRightOpened = true;
+			}
+		}
+	}
+
+	class CloseDrawerAnimation implements Runnable {
+
+		View sidebar;
+		View content;
+		int contentPosition;
+		int sidebarPosition;
+		boolean noAnim;
+		boolean leftDrawer;
+
+		public CloseDrawerAnimation(View sidebar, View content, boolean noAnim,
+				boolean leftDrawer) {
+			this.contentPosition = leftDrawer ? mSidebarWidth : -mSidebarWidth;
+			this.sidebarPosition = leftDrawer ? mSidebarOffsetForAnimation
+					: -mSidebarOffsetForAnimation;
+
+			this.content = content;
+			this.sidebar = sidebar;
+
+			this.leftDrawer = leftDrawer;
+			this.noAnim = noAnim;
+		}
+
+		@Override
+		public void run() {
+
+			if (!noAnim) {
+				float contentFactor = Math
+						.max(0.1f,
+								((float) ((mSidebarWidth - Math
+										.abs(contentPosition)) * 100 / mSidebarWidth) / 100));
+
+				float sidebarFactor = Math
+						.max(0.1f,
+								((float) ((mSidebarOffsetForAnimation - Math
+										.abs(sidebarPosition)) * 100 / mSidebarWidth) / 100));
+
+				int sidebarIncrements = (int) (((int) mSidebarOffsetForAnimation / ANIMATION_STEPS) * interpolator
+						.getInterpolation(sidebarFactor));
+				int contentIncrements = (int) (((int) mSidebarWidth / ANIMATION_STEPS) * interpolator
+						.getInterpolation(contentFactor));
+
+				sidebarIncrements = Math.min(sidebarIncrements,
+						mSidebarOffsetForAnimation + Math.abs(sidebarPosition));
+				contentIncrements = Math.min(contentIncrements, mSidebarWidth
+						+ Math.abs(contentPosition));
+
+				sidebarIncrements = Math.max(sidebarIncrements, 1);
+				contentIncrements = Math.max(contentIncrements, 1);
+
+				if (leftDrawer) {
+					sidebarIncrements = -sidebarIncrements;
+					contentIncrements = -contentIncrements;
+				}
+
+				if ((Math.abs(contentPosition) > 0)
+						|| (Math.abs(sidebarPosition) > 0)) {
+					if (Math.abs(contentPosition) > 0) {
+						contentPosition += contentIncrements;
+						content.offsetLeftAndRight(contentIncrements);
+					}
+
+					if ((leftDrawer && sidebarPosition > 0)
+							|| (!leftDrawer && sidebarPosition < 0)) {
+						sidebarPosition += sidebarIncrements;
+						sidebar.offsetLeftAndRight(sidebarIncrements);
+					} else {
+						int offset = -sidebarPosition;
+						sidebarPosition = 0;
+						sidebar.offsetLeftAndRight(offset);
+					}
+
+					handler.postDelayed(this, DURATION_BETWEEN_EACH_STEP);
+				} else {
+					finishAnim();
+				}
+			} else {
+				finishAnim();
+			}
+			invalidate();
+		}
+
+		private void finishAnim() {
+			isAnimating = false;
+			sidebar.setVisibility(View.INVISIBLE);
+			if (leftDrawer) {
+				mLeftOpened = false;
+				if (!noAnim) {
+					sidebar.offsetLeftAndRight(mSidebarOffsetForAnimation);
+				} else {
+					content.offsetLeftAndRight(-mSidebarWidth);
+				}
+			} else {
+				mRightOpened = false;
+				if (!noAnim) {
+					sidebar.offsetLeftAndRight(-mSidebarOffsetForAnimation);
+				} else {
+					content.offsetLeftAndRight(mSidebarWidth);
+				}
+			}
+		}
 	}
 }
