@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -851,9 +852,9 @@ public class SignupActivity extends Activity implements
 		if (session.isOpened()) {
 			Request.executeMeRequestAsync(session, new GraphUserCallback() {
 				@Override
-				public void onCompleted(GraphUser user, Response response) {
+				public void onCompleted(final GraphUser user, Response response) {
 					if (user != null) {
-						String fbProfileUrl = String
+						final String fbProfileUrl = String
 								.format(HikeConstants.FACEBOOK_PROFILEPIC_URL_FORMAT,
 										user.getId(),
 										HikeConstants.MAX_DIMENSION_FULL_SIZE_PROFILE_PX);
@@ -863,21 +864,40 @@ public class SignupActivity extends Activity implements
 						String fileName = Utils.getTempProfileImageFileName(accountPrefs
 								.getString(HikeMessengerApp.MSISDN_SETTING, ""));
 
-						File destFile = new File(directory, fileName);
-						try {
-							Utils.downloadAndSaveFile(getApplicationContext(),
-									destFile, Uri.parse(fbProfileUrl));
+						final File destFile = new File(directory, fileName);
+						new AsyncTask<Void, Void, Boolean>() {
 
-							mActivityState.destFilePath = destFile.getPath();
-							setProfileImage();
+							@Override
+							protected Boolean doInBackground(Void... params) {
+								try {
+									Utils.downloadAndSaveFile(
+											getApplicationContext(), destFile,
+											Uri.parse(fbProfileUrl));
 
-							String name = user.getName();
-							enterEditText.setText(name);
-							enterEditText.setSelection(name.length());
-						} catch (Exception e) {
-							Log.e(getClass().getSimpleName(),
-									"Error while downloading image", e);
-						}
+									return true;
+								} catch (Exception e) {
+									return false;
+								}
+							}
+
+							@Override
+							protected void onPostExecute(Boolean result) {
+								if (!result) {
+									Toast.makeText(getApplicationContext(),
+											R.string.fb_fetch_image_error,
+											Toast.LENGTH_SHORT).show();
+									return;
+								}
+								mActivityState.destFilePath = destFile
+										.getPath();
+								setProfileImage();
+
+								String name = user.getName();
+								enterEditText.setText(name);
+								enterEditText.setSelection(name.length());
+							}
+
+						}.execute();
 					}
 				}
 			});

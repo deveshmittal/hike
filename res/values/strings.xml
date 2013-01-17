@@ -335,4 +335,5 @@
 	<string name="other">Other</string>
 	<string name="target_account">Target Account</string>
 	<string name="save">Save</string>
+	<string name="fb_fetch_image_error">Could not pull data from Facebook</string>
 </resources>
