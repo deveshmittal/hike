@@ -196,29 +196,52 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * db to the file.
 		 */
 		if (oldVersion < 7) {
-			Cursor c = db.query(DBConstants.FILE_TABLE, null, null, null, null,
-					null, null);
+			Cursor table = null;
+			Cursor c = null;
+			try {
+				/*
+				 * Check if the table exists first.
+				 */
+				table = db
+						.rawQuery(
+								"SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+								new String[] { DBConstants.FILE_TABLE });
+				if (!table.moveToFirst()) {
+					// no table exists
+					return;
+				}
 
-			int fileNameIdx = c.getColumnIndex(DBConstants.FILE_NAME);
-			int fileKeyIdx = c.getColumnIndex(DBConstants.FILE_KEY);
+				c = db.query(DBConstants.FILE_TABLE, null, null, null, null,
+						null, null);
 
-			JSONObject data = new JSONObject();
+				int fileNameIdx = c.getColumnIndex(DBConstants.FILE_NAME);
+				int fileKeyIdx = c.getColumnIndex(DBConstants.FILE_KEY);
 
-			while (c.moveToNext()) {
-				String fileName = c.getString(fileNameIdx);
-				String fileKey = c.getString(fileKeyIdx);
+				JSONObject data = new JSONObject();
 
-				try {
-					data.put(fileName, fileKey);
-				} catch (JSONException e) {
-					Log.e(getClass().getSimpleName(), "Invalid values");
+				while (c.moveToNext()) {
+					String fileName = c.getString(fileNameIdx);
+					String fileKey = c.getString(fileKeyIdx);
+
+					try {
+						data.put(fileName, fileKey);
+					} catch (JSONException e) {
+						Log.e(getClass().getSimpleName(), "Invalid values");
+					}
+				}
+				Log.d(getClass().getSimpleName(), "DB data: " + data.toString());
+				Utils.makeNewFileWithExistingData(data);
+
+				String drop = "DROP TABLE " + DBConstants.FILE_TABLE;
+				db.execSQL(drop);
+			} finally {
+				if (table != null) {
+					table.close();
+				}
+				if (c != null) {
+					c.close();
 				}
 			}
-			Log.d(getClass().getSimpleName(), "DB data: " + data.toString());
-			Utils.makeNewFileWithExistingData(data);
-
-			String drop = "DROP TABLE " + DBConstants.FILE_TABLE;
-			db.execSQL(drop);
 		}
 	}
 
