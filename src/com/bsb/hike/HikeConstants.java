@@ -73,6 +73,10 @@ public class HikeConstants {
 	public static final String SHOW_REWARDS = "show_rewards";
 	public static final String REWARDS = "rewards";
 	public static final String TALK_TIME = "tt";
+	public static final String PHONE_NUMBERS = "phone_numbers";
+	public static final String EMAILS = "emails";
+	public static final String ADDRESSES = "addresses";
+	public static final String EVENTS = "events"; 
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -159,11 +163,15 @@ public class HikeConstants {
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 	public static final int MAX_FILE_SIZE = 15 * 1024 * 1024;
-	public static final int SHARE_LOCATION_CODE = 1187;
+
+	public static final int IMAGE_CAPTURE_CODE = 1187;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
 	public static final int AUDIO_TRANSFER_CODE = 1190;
 	public static final int RECORD_AUDIO_TRANSFER_CODE = 1191;
+	public static final int SHARE_LOCATION_CODE = 1192;
+	public static final int SHARE_CONTACT_CODE = 1193;
+
 	public static final int MAX_DURATION_RECORDING_SEC = 120;
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180;
@@ -222,6 +230,9 @@ public class HikeConstants {
 
 	public static final String LOCATION_CONTENT_TYPE = "hikemap/location";
 	public static final String LOCATION_FILE_NAME = "Location";
+
+	public static final String CONTACT_CONTENT_TYPE = "contact/share";
+	public static final String CONTACT_FILE_NAME = "Contact";
 
 	public static final int DEFAULT_ZOOM_LEVEL = 12;
 
@@ -364,6 +375,8 @@ public class HikeConstants {
 		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
 		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
 		public static final String OPEN_FAVORITES = "openFavorites";
+		public static final String SHOW_MOST_CONTACTED = "showMostContacted";
+		public static final String CONTACT_METADATA = "contactMetadata";
 	}
 
 	public static final class LogEvent {

@@ -31,7 +31,7 @@ import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.Utils;
 import com.google.android.maps.GeoPoint;
 
-public class UploadLocationTask extends FileTransferTaskBase {
+public class UploadContactOrLocationTask extends FileTransferTaskBase {
 	private static final String STATIC_MAP_UNFORMATTED_URL = "http://maps.googleapis.com/maps/api/staticmap?center=%1$f,%2$f&zoom=%3$d&size=%4$dx%4$d&markers=size:mid|color:red|%1$f,%2$f&sensor=false";
 
 	private String msisdn;
@@ -42,28 +42,46 @@ public class UploadLocationTask extends FileTransferTaskBase {
 	private ConvMessage convMessage;
 	private String fileKey;
 	private Context context;
+	private JSONObject contactJson;
+	private boolean uploadingContact;
 
-	public UploadLocationTask(String msisdn, double latitude, double longitude,
-			int zoomLevel, String fileKey, Context context) {
+	public UploadContactOrLocationTask(String msisdn, double latitude,
+			double longitude, int zoomLevel, String fileKey, Context context) {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.zoomLevel = zoomLevel;
 		this.fileKey = fileKey;
 		this.msisdn = msisdn;
 		this.context = context;
+		this.uploadingContact = false;
 	}
 
-	public UploadLocationTask(ConvMessage convMessage, Context context) {
+	public UploadContactOrLocationTask(String msisdn, JSONObject contactJson,
+			Context context) {
+		this.msisdn = msisdn;
+		this.contactJson = contactJson;
+		this.context = context;
+		this.uploadingContact = true;
+	}
+
+	public UploadContactOrLocationTask(ConvMessage convMessage,
+			Context context, boolean uploadingContact) {
 		this.convMessage = convMessage;
 		this.context = context;
+		this.uploadingContact = uploadingContact;
 	}
 
 	@Override
 	protected FTResult doInBackground(Void... params) {
 		try {
 			if (convMessage == null) {
-				JSONObject metadata = getFileTransferMetadata(latitude,
-						longitude, zoomLevel, null, null);
+				JSONObject metadata;
+				if (!uploadingContact) {
+					metadata = getFileTransferMetadataForLocation(latitude,
+							longitude, zoomLevel, null, null);
+				} else {
+					metadata = getFileTransferMetadataForContact(contactJson);
+				}
 
 				convMessage = createConvMessage(msisdn, metadata);
 
@@ -74,13 +92,15 @@ public class UploadLocationTask extends FileTransferTaskBase {
 							HikePubSub.MESSAGE_SENT, convMessage);
 				}
 
-				address = Utils.getAddressFromGeoPoint(new GeoPoint(
-						(int) (latitude * 1E6), (int) (longitude * 1E6)),
-						context);
+				if (!uploadingContact) {
+					address = Utils.getAddressFromGeoPoint(new GeoPoint(
+							(int) (latitude * 1E6), (int) (longitude * 1E6)),
+							context);
 
-				fetchThumbnailAndUpdateConvMessage(latitude, longitude,
-						zoomLevel, address, convMessage);
-			} else {
+					fetchThumbnailAndUpdateConvMessage(latitude, longitude,
+							zoomLevel, address, convMessage);
+				}
+			} else if (!uploadingContact) {
 				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
 						.get(0);
 				latitude = hikeFile.getLatitude();
@@ -105,9 +125,12 @@ public class UploadLocationTask extends FileTransferTaskBase {
 				fileWasAlreadyUploaded = false;
 
 				JSONObject response = AccountUtils.executeFileTransferRequest(
-						null, HikeConstants.LOCATION_FILE_NAME, convMessage
+						null,
+						uploadingContact ? HikeConstants.CONTACT_FILE_NAME
+								: HikeConstants.LOCATION_FILE_NAME, convMessage
 								.getMetadata().getJSON(), this,
-						HikeConstants.LOCATION_CONTENT_TYPE);
+						uploadingContact ? HikeConstants.CONTACT_CONTENT_TYPE
+								: HikeConstants.LOCATION_CONTENT_TYPE);
 
 				JSONObject fileJSON = response.getJSONObject("data");
 				fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
@@ -123,9 +146,11 @@ public class UploadLocationTask extends FileTransferTaskBase {
 
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			hikeFile.setFileKey(fileKey);
-			hikeFile.setFileTypeString(HikeConstants.LOCATION_CONTENT_TYPE);
+			hikeFile.setFileTypeString(uploadingContact ? HikeConstants.CONTACT_CONTENT_TYPE
+					: HikeConstants.LOCATION_CONTENT_TYPE);
 
 			filesArray.put(hikeFile.serialize());
+			Log.d(getClass().getSimpleName(), "JSON FINAL: " + hikeFile.serialize());
 			metadata.put(HikeConstants.FILES, filesArray);
 
 			convMessage.setMetadata(metadata);
@@ -146,12 +171,26 @@ public class UploadLocationTask extends FileTransferTaskBase {
 		return FTResult.SUCCESS;
 	}
 
-	private JSONObject getFileTransferMetadata(double latitude,
+	private JSONObject getFileTransferMetadataForLocation(double latitude,
 			double longitude, int zoomLevel, String address,
 			String thumbnailString) throws JSONException {
 		JSONArray files = new JSONArray();
 		files.put(new HikeFile(latitude, longitude, zoomLevel, address,
 				thumbnailString, null).serialize());
+		JSONObject metadata = new JSONObject();
+		metadata.put(HikeConstants.FILES, files);
+
+		return metadata;
+	}
+
+	private JSONObject getFileTransferMetadataForContact(JSONObject contactJson)
+			throws JSONException {
+		contactJson.put(HikeConstants.FILE_NAME, contactJson.optString(
+				HikeConstants.NAME, HikeConstants.CONTACT_FILE_NAME));
+		contactJson.put(HikeConstants.CONTENT_TYPE,
+				HikeConstants.CONTACT_CONTENT_TYPE);
+		JSONArray files = new JSONArray();
+		files.put(contactJson);
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 
@@ -189,8 +228,8 @@ public class UploadLocationTask extends FileTransferTaskBase {
 				Utils.bitmapToBytes(thumbnail, Bitmap.CompressFormat.JPEG),
 				Base64.DEFAULT);
 
-		JSONObject metadata = getFileTransferMetadata(latitude, longitude,
-				zoomLevel, address, thumbnailString);
+		JSONObject metadata = getFileTransferMetadataForLocation(latitude,
+				longitude, zoomLevel, address, thumbnailString);
 
 		convMessage.setMetadata(metadata);
 		HikeConversationsDatabase.getInstance().updateMessageMetadata(

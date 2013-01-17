@@ -247,10 +247,12 @@
 	<string name="video_msg_received">Sent you a video</string>
 	<string name="audio_msg_received">Sent you an audio file</string>
 	<string name="location_msg_received">Shared a location</string>
+	<string name="contact_msg_received">Shared a contact</string>
 	<string name="image_msg_sent">Photo</string>
 	<string name="video_msg_sent">Video</string>
 	<string name="audio_msg_sent">Audio</string>
 	<string name="location_msg_sent">Location</string>
+	<string name="contact_msg_sent">Contact</string>
 	<string name="unknown_msg">Unsupported file</string>
 	<string name="error_download">Error while downloading image</string>
 	<string name="downloading_image">Downloading image...</string>
@@ -323,4 +325,14 @@
 	<string name="number_confirm_title">Is this your number?</string>
 	<string name="native_jingle_info">Play hike\'s jingle on notifications</string>
 	<string name="native_jingle">hike\'s jingle</string>
+	<string name="choose_photo">Choose Photo</string>
+	<string name="choose_video">Choose Video</string>
+	<string name="choose_audio">Choose Audio</string>
+	<string name="audio_note">Audio Note</string>
+	<string name="contact_info">Contact Information</string>
+	<string name="birthday">Birthday</string>
+	<string name="anniversary">Anniversary</string>
+	<string name="other">Other</string>
+	<string name="target_account">Target Account</string>
+	<string name="save">Save</string>
 </resources>

@@ -2,6 +2,7 @@ package com.bsb.hike.adapters;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import org.json.JSONArray;
@@ -33,6 +34,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -43,8 +45,8 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
+import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
-import com.bsb.hike.tasks.UploadLocationTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
@@ -80,12 +82,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private Conversation conversation;
 	private ArrayList<ConvMessage> convMessages;
 	private Context context;
+	private ChatThread chatThread;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
-			Conversation conversation) {
+			Conversation conversation, ChatThread chatThread) {
 		this.context = context;
 		this.convMessages = objects;
 		this.conversation = conversation;
+		this.chatThread = chatThread;
 	}
 
 	/**
@@ -569,6 +573,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						holder.fileThumb
 								.setBackgroundResource(R.drawable.ic_default_audio);
 						break;
+					case CONTACT:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_default_contact);
+						break;
 					case UNKNOWN:
 						holder.fileThumb
 								.setBackgroundResource(R.drawable.ic_unknown_file);
@@ -812,12 +820,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 									.containsKey(convMessage.getMsgID())) {
 
 						FileTransferTaskBase uploadTask;
-						if (hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
+						if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION)
+								&& (hikeFile.getHikeFileType() != HikeFileType.CONTACT)) {
 							uploadTask = new UploadFileTask(convMessage,
 									context);
 						} else {
-							uploadTask = new UploadLocationTask(convMessage,
-									context);
+							uploadTask = new UploadContactOrLocationTask(
+									convMessage,
+									context,
+									(hikeFile.getHikeFileType() == HikeFileType.CONTACT));
 						}
 						uploadTask.execute();
 						ChatThread.fileTransferTaskMap.put(
@@ -837,8 +848,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					}
 					if (!ChatThread.fileTransferTaskMap.containsKey(convMessage
 							.getMsgID())
-							&& (receivedFile.exists() || hikeFile
-									.getHikeFileType() == HikeFileType.LOCATION)) {
+							&& ((hikeFile.getHikeFileType() == HikeFileType.LOCATION))
+							|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
+							|| receivedFile.exists()) {
 						openFile(hikeFile, convMessage);
 					} else if (!ChatThread.fileTransferTaskMap
 							.containsKey(convMessage.getMsgID())) {
@@ -870,16 +882,29 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		File receivedFile = hikeFile.getFile();
 		Log.d(getClass().getSimpleName(), "Opening file");
 		Intent openFile = new Intent(Intent.ACTION_VIEW);
-		if (hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
-			openFile.setDataAndType(Uri.fromFile(receivedFile),
-					hikeFile.getFileTypeString());
-		} else {
+		if (hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
 			String uri = String.format(Locale.US,
 					"geo:%1$f,%2$f?z=%3$d&q=%1$f,%2$f", hikeFile.getLatitude(),
 					hikeFile.getLongitude(), hikeFile.getZoomLevel());
 			openFile.setData(Uri.parse(uri));
+		} else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT) {
+			saveContact(hikeFile);
+			return;
+		} else {
+			openFile.setDataAndType(Uri.fromFile(receivedFile),
+					hikeFile.getFileTypeString());
 		}
 		context.startActivity(openFile);
+	}
+
+	private void saveContact(HikeFile hikeFile) {
+
+		String name = hikeFile.getDisplayName();
+
+		List<ContactInfoData> items = Utils
+				.getContactDataFromHikeFile(hikeFile);
+
+		chatThread.showContactDetails(items, name, null, true);
 	}
 
 	@Override

@@ -12,21 +12,28 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorDescription;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.NotificationManager;
+import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -36,9 +43,18 @@ import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Event;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Intents.Insert;
+import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -85,6 +101,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabContentFactory;
@@ -97,6 +114,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.HikeSearchContactAdapter;
@@ -104,7 +122,10 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -114,8 +135,8 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.FinishableEvent;
+import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
-import com.bsb.hike.tasks.UploadLocationTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
@@ -620,18 +641,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 				intent.putExtra(HikeConstants.Extras.FILE_KEY,
 						hikeFile.getFileKey());
-				if (hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
-					intent.putExtra(HikeConstants.Extras.FILE_PATH,
-							hikeFile.getFilePath());
-					intent.putExtra(HikeConstants.Extras.FILE_TYPE,
-							hikeFile.getFileTypeString());
-				} else {
+				if (hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
 					intent.putExtra(HikeConstants.Extras.ZOOM_LEVEL,
 							hikeFile.getZoomLevel());
 					intent.putExtra(HikeConstants.Extras.LATITUDE,
 							hikeFile.getLatitude());
 					intent.putExtra(HikeConstants.Extras.LONGITUDE,
 							hikeFile.getLongitude());
+				} else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT) {
+					intent.putExtra(HikeConstants.Extras.CONTACT_METADATA,
+							hikeFile.serialize().toString());
+				} else {
+					intent.putExtra(HikeConstants.Extras.FILE_PATH,
+							hikeFile.getFilePath());
+					intent.putExtra(HikeConstants.Extras.FILE_TYPE,
+							hikeFile.getFileTypeString());
 				}
 			} else {
 				msg = message.getMessage();
@@ -972,6 +996,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				// Making sure the file does not get forwarded again on
 				// orientation change.
 				intent.removeExtra(HikeConstants.Extras.LATITUDE);
+			} else if (intent.hasExtra(HikeConstants.Extras.CONTACT_METADATA)) {
+				try {
+					JSONObject contactJson = new JSONObject(
+							intent.getStringExtra(HikeConstants.Extras.CONTACT_METADATA));
+					HikeFile hikeFile = new HikeFile(contactJson);
+					showContactDetails(
+							Utils.getContactDataFromHikeFile(hikeFile),
+							hikeFile.getDisplayName(), contactJson, false);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
 			/*
 			 * Since the message was not forwarded, we check if we have any
@@ -1109,7 +1144,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
-		mAdapter = new MessagesAdapter(this, messages, mConversation);
+		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
@@ -1997,20 +2032,39 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		final boolean canShareLocation = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_LOCATION);
 
-		final CharSequence[] options = getResources().getStringArray(
-				canShareLocation ? R.array.file_transfer_items
-						: R.array.file_transfer_items_no_loc);
+		final boolean canShareContacts = mConversation.isOnhike();
 
-		final int[] optionIcons;
+		ArrayList<String> optionsList = new ArrayList<String>();
+
+		optionsList.add(getString(R.string.camera));
+		optionsList.add(getString(R.string.choose_photo));
+		optionsList.add(getString(R.string.choose_video));
+		optionsList.add(getString(R.string.choose_audio));
+		optionsList.add(getString(R.string.audio_note));
 		if (canShareLocation) {
-			optionIcons = new int[] { R.drawable.ic_share_location_item,
-					R.drawable.ic_image_item, R.drawable.ic_video_item,
-					R.drawable.ic_music_item, R.drawable.ic_record_item };
-		} else {
-			optionIcons = new int[] { R.drawable.ic_image_item,
-					R.drawable.ic_video_item, R.drawable.ic_music_item,
-					R.drawable.ic_record_item };
+			optionsList.add(getString(R.string.share_location));
 		}
+		if (canShareContacts) {
+			optionsList.add(getString(R.string.contact_info));
+		}
+
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
+
+		ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
+		optionImagesList.add(R.drawable.ic_image_capture_item);
+		optionImagesList.add(R.drawable.ic_image_item);
+		optionImagesList.add(R.drawable.ic_video_item);
+		optionImagesList.add(R.drawable.ic_music_item);
+		optionImagesList.add(R.drawable.ic_record_item);
+		if (canShareLocation) {
+			optionImagesList.add(R.drawable.ic_share_location_item);
+		}
+		if (canShareContacts) {
+			optionImagesList.add(R.drawable.ic_contact_item);
+		}
+		final Integer[] optionIcons = new Integer[optionImagesList.size()];
+		optionImagesList.toArray(optionIcons);
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
 
@@ -2039,9 +2093,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						int requestCode;
 						Intent pickIntent = new Intent();
 						Intent newMediaFileIntent = null;
-						if (!canShareLocation) {
-							which++;
-						}
 						if (which != 0) {
 							if (externalStorageState == ExternalStorageState.NONE) {
 								Toast.makeText(getApplicationContext(),
@@ -2050,9 +2101,27 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 								return;
 							}
 						}
+
 						switch (which) {
 						case 0:
-							requestCode = HikeConstants.SHARE_LOCATION_CODE;
+							requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
+							pickIntent = new Intent(
+									MediaStore.ACTION_IMAGE_CAPTURE);
+							selectedFile = Utils.getOutputMediaFile(
+									HikeFileType.IMAGE, null, null);
+
+							pickIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+									Uri.fromFile(selectedFile));
+							/*
+							 * For images, save the file path as a preferences
+							 * since in some devices the reference to the file
+							 * becomes null.
+							 */
+							Editor editor = prefs.edit();
+							editor.putString(HikeMessengerApp.FILE_PATH,
+									selectedFile.getAbsolutePath());
+							editor.commit();
+
 							break;
 						case 2:
 							requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
@@ -2071,24 +2140,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							requestCode = HikeConstants.RECORD_AUDIO_TRANSFER_CODE;
 							break;
 
+						case 5:
+							if (canShareLocation) {
+								requestCode = HikeConstants.SHARE_LOCATION_CODE;
+								break;
+							}
+						case 6:
+							requestCode = HikeConstants.SHARE_CONTACT_CODE;
+							break;
+
 						case 1:
 						default:
 							requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
 							pickIntent.setType("image/*");
-							newMediaFileIntent = new Intent(
-									MediaStore.ACTION_IMAGE_CAPTURE);
-							selectedFile = Utils.getOutputMediaFile(
-									HikeFileType.IMAGE, null, null);
-
-							/*
-							 * For images, save the file path as a preferences
-							 * since in some devices the reference to the file
-							 * becomes null.
-							 */
-							Editor editor = prefs.edit();
-							editor.putString(HikeMessengerApp.FILE_PATH,
-									selectedFile.getAbsolutePath());
-							editor.commit();
 							break;
 						}
 						if (requestCode == HikeConstants.SHARE_LOCATION_CODE) {
@@ -2098,11 +2162,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						} else if (requestCode == HikeConstants.AUDIO_TRANSFER_CODE) {
 							showAudioDialog();
 							return;
+						} else if (requestCode == HikeConstants.SHARE_CONTACT_CODE) {
+							pickIntent = new Intent(Intent.ACTION_PICK,
+									Contacts.CONTENT_URI);
+							startActivityForResult(pickIntent, requestCode);
+							return;
 						}
-						pickIntent.setAction(Intent.ACTION_PICK);
+						Intent chooserIntent;
+						if (requestCode != HikeConstants.IMAGE_CAPTURE_CODE) {
+							pickIntent.setAction(Intent.ACTION_PICK);
 
-						Intent chooserIntent = Intent.createChooser(pickIntent,
-								"");
+							chooserIntent = Intent
+									.createChooser(pickIntent, "");
+						} else {
+							chooserIntent = pickIntent;
+						}
+
 						if (externalStorageState == ExternalStorageState.WRITEABLE) {
 							/*
 							 * Cannot send a file for new videos because of an
@@ -2111,7 +2186,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							 * /verifiyandsetparameter
 							 * -error-when-trying-to-record-video
 							 */
-							if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE) {
+							if (requestCode == HikeConstants.IMAGE_CAPTURE_CODE) {
 								if (selectedFile == null) {
 									Log.w(getClass().getSimpleName(),
 											"Unable to create file to store media.");
@@ -2124,9 +2199,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 											Toast.LENGTH_LONG).show();
 									return;
 								}
-								newMediaFileIntent.putExtra(
-										MediaStore.EXTRA_OUTPUT,
-										Uri.fromFile(selectedFile));
 							}
 							if (newMediaFileIntent != null) {
 								chooserIntent.putExtra(
@@ -2543,10 +2615,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if ((requestCode == HikeConstants.IMAGE_TRANSFER_CODE
+		if ((requestCode == HikeConstants.IMAGE_CAPTURE_CODE
+				|| requestCode == HikeConstants.IMAGE_TRANSFER_CODE
 				|| requestCode == HikeConstants.VIDEO_TRANSFER_CODE || requestCode == HikeConstants.AUDIO_TRANSFER_CODE)
 				&& resultCode == RESULT_OK) {
-			if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE) {
+			if (requestCode == HikeConstants.IMAGE_CAPTURE_CODE) {
 				selectedFile = new File(prefs.getString(
 						HikeMessengerApp.FILE_PATH, ""));
 
@@ -2561,7 +2634,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				return;
 			}
 
-			HikeFileType hikeFileType = requestCode == HikeConstants.IMAGE_TRANSFER_CODE ? HikeFileType.IMAGE
+			HikeFileType hikeFileType = (requestCode == HikeConstants.IMAGE_TRANSFER_CODE || requestCode == HikeConstants.IMAGE_CAPTURE_CODE) ? HikeFileType.IMAGE
 					: requestCode == HikeConstants.VIDEO_TRANSFER_CODE ? HikeFileType.VIDEO
 							: HikeFileType.AUDIO;
 
@@ -2608,11 +2681,221 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude
 					+ " long:" + longitude + " zoom: " + zoomLevel);
 			initialiseLocationTransfer(latitude, longitude, zoomLevel, null);
+		} else if (requestCode == HikeConstants.SHARE_CONTACT_CODE
+				&& resultCode == RESULT_OK) {
+			String id = data.getData().getLastPathSegment();
+			getContactData(id);
 		} else if (resultCode == RESULT_CANCELED) {
 			clearTempData();
 			Log.d(getClass().getSimpleName(), "File transfer Cancelled");
 			selectedFile = null;
 		}
+	}
+
+	private void getContactData(String id) {
+		StringBuilder mimeTypes = new StringBuilder("(");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Phone.CONTENT_ITEM_TYPE)
+				+ ",");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Email.CONTENT_ITEM_TYPE)
+				+ ",");
+		mimeTypes.append(DatabaseUtils
+				.sqlEscapeString(StructuredPostal.CONTENT_ITEM_TYPE) + ",");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Event.CONTENT_ITEM_TYPE)
+				+ ")");
+
+		String selection = Data.CONTACT_ID + " =? AND " + Data.MIMETYPE
+				+ " IN " + mimeTypes.toString();
+
+		String[] projection = new String[] { Data.DATA1, Data.DATA2,
+				Data.DATA3, Data.MIMETYPE, Data.DISPLAY_NAME };
+
+		Cursor c = getContentResolver().query(Data.CONTENT_URI, projection,
+				selection, new String[] { id }, null);
+
+		int data1Idx = c.getColumnIndex(Data.DATA1);
+		int data2Idx = c.getColumnIndex(Data.DATA2);
+		int data3Idx = c.getColumnIndex(Data.DATA3);
+		int mimeTypeIdx = c.getColumnIndex(Data.MIMETYPE);
+		int nameIdx = c.getColumnIndex(Data.DISPLAY_NAME);
+
+		JSONObject contactJson = new JSONObject();
+
+		JSONObject phoneNumbersJson = null;
+		JSONObject emailsJson = null;
+		JSONObject addressesJson = null;
+		JSONObject eventsJson = null;
+
+		List<ContactInfoData> items = new ArrayList<ContactInfoData>();
+		String name = null;
+		try {
+			while (c.moveToNext()) {
+				String mimeType = c.getString(mimeTypeIdx);
+				if (Phone.CONTENT_ITEM_TYPE.equals(mimeType)) {
+					if (!contactJson.has(HikeConstants.NAME)) {
+						String dispName = c.getString(nameIdx);
+						contactJson.put(HikeConstants.NAME, dispName);
+						name = dispName;
+					}
+
+					if (phoneNumbersJson == null) {
+						phoneNumbersJson = new JSONObject();
+						contactJson.put(HikeConstants.PHONE_NUMBERS,
+								phoneNumbersJson);
+					}
+
+					String type = Phone.getTypeLabel(getResources(),
+							c.getInt(data2Idx), c.getString(data3Idx))
+							.toString();
+					String msisdn = c.getString(data1Idx);
+
+					phoneNumbersJson.put(type, msisdn);
+
+					items.add(new ContactInfoData(DataType.PHONE_NUMBER,
+							msisdn, type));
+				} else if (Email.CONTENT_ITEM_TYPE.equals(mimeType)) {
+
+					if (emailsJson == null) {
+						emailsJson = new JSONObject();
+						contactJson.put(HikeConstants.EMAILS, emailsJson);
+					}
+
+					String type = Email.getTypeLabel(getResources(),
+							c.getInt(data2Idx), c.getString(data3Idx))
+							.toString();
+					String email = c.getString(data1Idx);
+
+					emailsJson.put(type, email);
+
+					items.add(new ContactInfoData(DataType.EMAIL, email, type));
+				} else if (StructuredPostal.CONTENT_ITEM_TYPE.equals(mimeType)) {
+
+					if (addressesJson == null) {
+						addressesJson = new JSONObject();
+						contactJson.put(HikeConstants.ADDRESSES, addressesJson);
+					}
+
+					String type = StructuredPostal.getTypeLabel(getResources(),
+							c.getInt(data2Idx), c.getString(data3Idx))
+							.toString();
+					String address = c.getString(data1Idx);
+
+					addressesJson.put(type, address);
+
+					items.add(new ContactInfoData(DataType.ADDRESS, address,
+							type));
+				} else if (Event.CONTENT_ITEM_TYPE.equals(mimeType)) {
+
+					if (eventsJson == null) {
+						eventsJson = new JSONObject();
+						contactJson.put(HikeConstants.EVENTS, eventsJson);
+					}
+
+					String event;
+					int eventType = c.getInt(data2Idx);
+					if (eventType == Event.TYPE_ANNIVERSARY) {
+						event = getString(R.string.anniversary);
+					} else if (eventType == Event.TYPE_OTHER) {
+						event = getString(R.string.other);
+					} else if (eventType == Event.TYPE_BIRTHDAY) {
+						event = getString(R.string.birthday);
+					} else {
+						event = c.getString(data3Idx);
+					}
+					String type = event.toString();
+					String eventDate = c.getString(data1Idx);
+
+					eventsJson.put(type, eventDate);
+
+					items.add(new ContactInfoData(DataType.EVENT, eventDate,
+							type));
+				}
+			}
+		} catch (JSONException e) {
+			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+
+		Log.d(getClass().getSimpleName(),
+				"Data of contact is : " + contactJson.toString());
+		// initialiseContactTransfer(contactJson);
+		clearTempData();
+		showContactDetails(items, name, contactJson, false);
+	}
+
+	public void showContactDetails(final List<ContactInfoData> items,
+			final String name, final JSONObject contactInfo,
+			final boolean saveContact) {
+		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.contact_share_info);
+
+		TextView contactName = (TextView) dialog
+				.findViewById(R.id.contact_name);
+		ListView contactDetails = (ListView) dialog
+				.findViewById(R.id.contact_details);
+		Button yesBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button noBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+		TextView targetAccount = (TextView) dialog
+				.findViewById(R.id.target_account);
+		final Spinner accounts = (Spinner) dialog
+				.findViewById(R.id.account_spinner);
+
+		yesBtn.setText(saveContact ? R.string.save : R.string.send);
+
+		if (saveContact) {
+			accounts.setVisibility(View.VISIBLE);
+			targetAccount.setVisibility(View.VISIBLE);
+			accounts.setAdapter(new AccountAdapter(getApplicationContext(),
+					getAccountList()));
+		} else {
+			accounts.setVisibility(View.GONE);
+			targetAccount.setVisibility(View.GONE);
+		}
+
+		contactName.setText(name);
+		contactDetails.setAdapter(new ArrayAdapter<ContactInfoData>(
+				getApplicationContext(), android.R.layout.select_dialog_item,
+				android.R.id.text1, items) {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				ContactInfoData contactInfoData = getItem(position);
+
+				android.widget.AbsListView.LayoutParams lp = (android.widget.AbsListView.LayoutParams) v
+						.getLayoutParams();
+				lp.height = (int) getResources().getDimension(
+						R.dimen.contact_details_height);
+				v.setLayoutParams(lp);
+				TextView details = (TextView) v
+						.findViewById(android.R.id.text1);
+				details.setTextSize(getResources().getDimension(
+						R.dimen.contact_details_text_size));
+				details.setMinimumHeight((int) getResources().getDimension(
+						R.dimen.contact_details_height));
+				details.setText(contactInfoData.getDataType() + ": "
+						+ contactInfoData.getData() + " ("
+						+ contactInfoData.getDataSubType() + ")");
+				return v;
+			}
+
+		});
+		yesBtn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (saveContact) {
+					saveContact(items, accounts, name);
+				} else {
+					initialiseContactTransfer(contactInfo);
+				}
+				dialog.dismiss();
+			}
+		});
+		noBtn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+		dialog.show();
 	}
 
 	private void initialiseFileTransfer(String filePath,
@@ -2628,10 +2911,101 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void initialiseLocationTransfer(double latitude, double longitude,
 			int zoomLevel, String fileKey) {
 		clearTempData();
-		UploadLocationTask uploadLocationTask = new UploadLocationTask(
+		UploadContactOrLocationTask uploadLocationTask = new UploadContactOrLocationTask(
 				mContactNumber, latitude, longitude, zoomLevel, fileKey,
 				getApplicationContext());
 		uploadLocationTask.execute();
+	}
+
+	private void initialiseContactTransfer(JSONObject contactJson) {
+		UploadContactOrLocationTask contactOrLocationTask = new UploadContactOrLocationTask(
+				mContactNumber, contactJson, getApplicationContext());
+		contactOrLocationTask.execute();
+	}
+
+	private void saveContact(List<ContactInfoData> items,
+			Spinner accountSpinner, String name) {
+
+		AccountData accountData = (AccountData) accountSpinner
+				.getSelectedItem();
+
+		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+		int rawContactInsertIndex = ops.size();
+
+		ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+				.withValue(RawContacts.ACCOUNT_TYPE, accountData.getType())
+				.withValue(RawContacts.ACCOUNT_NAME, accountData.getName())
+				.build());
+
+		for (ContactInfoData contactInfoData : items) {
+			switch (contactInfoData.getDataType()) {
+			case ADDRESS:
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactInsertIndex)
+						.withValue(Data.MIMETYPE,
+								StructuredPostal.CONTENT_ITEM_TYPE)
+						.withValue(StructuredPostal.DATA,
+								contactInfoData.getData())
+						.withValue(StructuredPostal.TYPE,
+								StructuredPostal.TYPE_CUSTOM)
+						.withValue(StructuredPostal.LABEL,
+								contactInfoData.getDataSubType()).build());
+				break;
+			case EMAIL:
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE)
+						.withValue(Email.DATA, contactInfoData.getData())
+						.withValue(Email.TYPE, Email.TYPE_CUSTOM)
+						.withValue(Email.LABEL,
+								contactInfoData.getDataSubType()).build());
+				break;
+			case EVENT:
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Event.CONTENT_ITEM_TYPE)
+						.withValue(Event.DATA, contactInfoData.getData())
+						.withValue(Event.TYPE, Event.TYPE_CUSTOM)
+						.withValue(Event.LABEL,
+								contactInfoData.getDataSubType()).build());
+				break;
+			case PHONE_NUMBER:
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
+						.withValue(Phone.NUMBER, contactInfoData.getData())
+						.withValue(Phone.TYPE, Phone.TYPE_CUSTOM)
+						.withValue(Phone.LABEL,
+								contactInfoData.getDataSubType()).build());
+				break;
+			}
+		}
+		ops.add(ContentProviderOperation
+				.newInsert(Data.CONTENT_URI)
+				.withValueBackReference(Data.RAW_CONTACT_ID,
+						rawContactInsertIndex)
+				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
+				.withValue(StructuredName.DISPLAY_NAME, name).build());
+		try {
+			getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (OperationApplicationException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override
@@ -3074,5 +3448,50 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
 		// TODO Auto-generated method stub
 
+	}
+
+	private List<AccountData> getAccountList() {
+		Account[] a = AccountManager.get(this).getAccounts();
+		// Clear out any old data to prevent duplicates
+		List<AccountData> accounts = new ArrayList<AccountData>();
+
+		// Get account data from system
+		AuthenticatorDescription[] accountTypes = AccountManager.get(this)
+				.getAuthenticatorTypes();
+
+		// Populate tables
+		for (int i = 0; i < a.length; i++) {
+			// The user may have multiple accounts with the same name, so we
+			// need to construct a
+			// meaningful display name for each.
+			String systemAccountType = a[i].type;
+			AuthenticatorDescription ad = getAuthenticatorDescription(
+					systemAccountType, accountTypes);
+			AccountData data = new AccountData(a[i].name, ad, this);
+			accounts.add(data);
+		}
+
+		return accounts;
+	}
+
+	/**
+	 * Obtain the AuthenticatorDescription for a given account type.
+	 * 
+	 * @param type
+	 *            The account type to locate.
+	 * @param dictionary
+	 *            An array of AuthenticatorDescriptions, as returned by
+	 *            AccountManager.
+	 * @return The description for the specified account type.
+	 */
+	private AuthenticatorDescription getAuthenticatorDescription(String type,
+			AuthenticatorDescription[] dictionary) {
+		for (int i = 0; i < dictionary.length; i++) {
+			if (dictionary[i].type.equals(type)) {
+				return dictionary[i];
+			}
+		}
+		// No match found
+		throw new RuntimeException("Unable to find matching authenticator");
 	}
 }

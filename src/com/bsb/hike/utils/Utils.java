@@ -68,6 +68,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -94,7 +95,10 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
@@ -418,6 +422,9 @@ public class Utils {
 			break;
 		case AUDIO:
 			path.append(HikeConstants.AUDIO_ROOT);
+			break;
+		default:
+			return null;
 		}
 
 		File mediaStorageDir = new File(path.toString());
@@ -1676,4 +1683,75 @@ public class Utils {
 		intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
 		activity.startActivityForResult(intent, HikeConstants.CROP_RESULT);
 	}
+
+	public static long getContactId(Context context, long rawContactId) {
+		Cursor cur = null;
+		try {
+			cur = context.getContentResolver().query(
+					ContactsContract.RawContacts.CONTENT_URI,
+					new String[] { ContactsContract.RawContacts.CONTACT_ID },
+					ContactsContract.RawContacts._ID + "=" + rawContactId,
+					null, null);
+			if (cur.moveToFirst()) {
+				return cur
+						.getLong(cur
+								.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (cur != null) {
+				cur.close();
+			}
+		}
+		return -1l;
+	}
+
+	public static List<ContactInfoData> getContactDataFromHikeFile(
+			HikeFile hikeFile) {
+		List<ContactInfoData> items = new ArrayList<ContactInfoData>();
+
+		JSONObject phoneNumbers = hikeFile.getPhoneNumbers();
+		JSONObject emails = hikeFile.getEmails();
+		JSONObject events = hikeFile.getEvents();
+		JSONObject addresses = hikeFile.getAddresses();
+
+		if (phoneNumbers != null) {
+			JSONArray phoneNumberKeys = phoneNumbers.names();
+			for (int i = 0; i < phoneNumberKeys.length(); i++) {
+				String key = phoneNumberKeys.optString(i);
+				items.add(new ContactInfoData(DataType.PHONE_NUMBER,
+						phoneNumbers.optString(key), key));
+			}
+		}
+
+		if (emails != null) {
+			JSONArray emailKeys = emails.names();
+			for (int i = 0; i < emailKeys.length(); i++) {
+				String key = emailKeys.optString(i);
+				items.add(new ContactInfoData(DataType.EMAIL, emails
+						.optString(key), key));
+			}
+		}
+
+		if (events != null) {
+			JSONArray eventKeys = events.names();
+			for (int i = 0; i < eventKeys.length(); i++) {
+				String key = eventKeys.optString(i);
+				items.add(new ContactInfoData(DataType.EVENT, events
+						.optString(key), key));
+			}
+		}
+
+		if (addresses != null) {
+			JSONArray addressKeys = addresses.names();
+			for (int i = 0; i < addressKeys.length(); i++) {
+				String key = addressKeys.optString(i);
+				items.add(new ContactInfoData(DataType.ADDRESS, addresses
+						.optString(key), key));
+			}
+		}
+		return items;
+	}
+
 }

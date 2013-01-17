@@ -654,7 +654,8 @@ public class AccountUtils {
 		httpPut.addHeader("X-Thumbnail-Required", "0");
 
 		final AbstractHttpEntity entity;
-		if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType)) {
+		if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType)
+				&& !HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType)) {
 			entity = new CustomFileEntity(new File(filePath), "",
 					new ProgressListener() {
 						@Override
