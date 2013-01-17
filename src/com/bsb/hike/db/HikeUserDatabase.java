@@ -1054,7 +1054,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public List<ContactInfo> getNonHikeContactsFromListOfNumbers(
+	public List<ContactInfo> getNonHikeRecentContactsFromListOfNumbers(
 			String selectionNumbers, Map<String, Long> recentValues,
 			boolean indiaOnly, FavoriteType favoriteType) {
 
@@ -1148,8 +1148,111 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			boolean indiaOnly, FavoriteType favoriteType) {
 		Pair<String, Map<String, Long>> data = ContactUtils.getRecentNumbers(
 				mContext, limit);
-		return getNonHikeContactsFromListOfNumbers(data.first, data.second,
-				indiaOnly, favoriteType);
+		return getNonHikeRecentContactsFromListOfNumbers(data.first,
+				data.second, indiaOnly, favoriteType);
+	}
+
+	private List<Pair<AtomicBoolean, ContactInfo>> getNonHikeMostContactedContactsFromListOfNumbers(
+			String selectionNumbers,
+			final Map<String, Integer> mostContactedValues, int limit) {
+
+		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
+				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
+				DBConstants.HAS_CUSTOM_PHOTO };
+
+		String selection = DBConstants.PHONE + " IN " + selectionNumbers
+				+ " AND " + DBConstants.ONHIKE + "=0 LIMIT " + limit;
+
+		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
+
+		Cursor c = null;
+		try {
+			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
+					null, null, null, null);
+
+			int idx = c.getColumnIndex(DBConstants.ID);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int nameIdx = c.getColumnIndex(DBConstants.NAME);
+			int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+			int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+			int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+			int hasCustomPhotoIdx = c
+					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+
+			List<Pair<AtomicBoolean, ContactInfo>> contactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+
+			Set<String> nameSet = new HashSet<String>();
+
+			while (c.moveToNext()) {
+				String name = c.getString(nameIdx);
+
+				if (nameSet.contains(name)) {
+					continue;
+				}
+
+				nameSet.add(name);
+
+				/*
+				 * All our timestamps are in seconds.
+				 */
+				long lastMessagedCurrent = c.getLong(lastMessagedIdx);
+
+				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+						c.getString(msisdnIdx), name, c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
+				contactList.add(new Pair<AtomicBoolean, ContactInfo>(
+						new AtomicBoolean(false), contactInfo));
+			}
+
+			Collections.sort(contactList,
+					new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
+						@Override
+						public int compare(
+								Pair<AtomicBoolean, ContactInfo> lhs,
+								Pair<AtomicBoolean, ContactInfo> rhs) {
+							int lhsContactNum = mostContactedValues
+									.get(lhs.second.getPhoneNum());
+							int rhsContactNum = mostContactedValues
+									.get(rhs.second.getPhoneNum());
+
+							if (lhsContactNum != rhsContactNum) {
+								return -((Integer) lhsContactNum)
+										.compareTo(rhsContactNum);
+							}
+							return lhs.second
+									.getName()
+									.toLowerCase()
+									.compareTo(
+											rhs.second.getName().toLowerCase());
+						}
+					});
+
+			for (int i = 0; i < 10; i++) {
+				Pair<AtomicBoolean, ContactInfo> val = contactList.get(i);
+				val.first.set(true);
+			}
+
+			return contactList;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeMostContactedContacts(
+			int limit) {
+		/*
+		 * Sending twice the limit to account for the contacts that might be on
+		 * hike
+		 */
+		Pair<String, Map<String, Integer>> data = ContactUtils
+				.getMostContactedContacts(mContext, limit * 2);
+		return getNonHikeMostContactedContactsFromListOfNumbers(data.first,
+				data.second, limit);
 	}
 
 	public List<ContactInfo> getContactNamesFromMsisdnList(String msisdns) {

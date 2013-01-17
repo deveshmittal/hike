@@ -35,11 +35,15 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 	private Button titleBtn;
 	private EditText input;
 	private Set<String> selectedContacts;
+	private boolean showMostContactedContacts;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hikelistactivity);
+
+		showMostContactedContacts = getIntent().getBooleanExtra(
+				HikeConstants.Extras.SHOW_MOST_CONTACTED, false);
 
 		selectedContacts = new HashSet<String>();
 
@@ -57,8 +61,10 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
 
-		adapter = new HikeInviteAdapter(this, -1, HikeUserDatabase
-				.getInstance().getNonHikeContacts());
+		adapter = new HikeInviteAdapter(this, -1,
+				showMostContactedContacts ? HikeUserDatabase.getInstance()
+						.getNonHikeMostContactedContacts(50) : HikeUserDatabase
+						.getInstance().getNonHikeContacts());
 		input.addTextChangedListener(adapter);
 
 		labelView.setText(R.string.invite_via_sms);
