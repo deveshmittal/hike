@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -18,6 +19,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -298,7 +300,12 @@ public class Tutorial extends DrawerBaseActivity implements OnClickListener {
 			intent.putExtra(Intent.EXTRA_TEXT, message.toString());
 		}
 		if (intent != null) {
-			startActivity(intent);
+			try {
+				startActivity(intent);
+			} catch (ActivityNotFoundException e) {
+				Toast.makeText(getApplicationContext(), R.string.no_mail_app,
+						Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 }
