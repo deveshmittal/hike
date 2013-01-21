@@ -2093,7 +2093,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						int requestCode;
 						Intent pickIntent = new Intent();
 						Intent newMediaFileIntent = null;
-						if (which != 0) {
+						/*
+						 * If we're not doing a location/contact transfer, we
+						 * need an external storage
+						 */
+						if (which != 5 || which != 6) {
 							if (externalStorageState == ExternalStorageState.NONE) {
 								Toast.makeText(getApplicationContext(),
 										R.string.no_external_storage,
