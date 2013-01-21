@@ -13,4 +13,6 @@
 	<dimen name="tell_a_friend_subtext_width">150dp</dimen>
 	<dimen name="drawer_text_width">150dp</dimen>
 	<dimen name="contact_details_height">50dp</dimen>
+	<dimen name="drawer_item_height">71dp</dimen>
+	<dimen name="drawer_item_width">75dp</dimen>
 </resources>

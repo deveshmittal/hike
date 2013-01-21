@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/drawer_item_width"
     android:layout_height="match_parent" >
 
     <View
@@ -27,41 +27,25 @@
 
             <LinearLayout
                 android:id="@+id/left_drawer_profile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_drawer_profile"
-                android:clickable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp" >
+                style="@style/LeftDrawerItem" >
 
                 <ImageView
                     android:id="@+id/profile_image"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    android:layout_marginRight="10dp"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
                     android:src="@drawable/ic_avatar1" />
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:drawableRight="@drawable/ic_drawer_arrow"
-                    android:shadowColor="#66000000"
-                    android:shadowDy="-0.7"
-                    android:shadowRadius="0.5"
-                    android:text="Rishabh Sharma"
-                    android:textColor="#cbc5b9"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
+                    style="@style/LeftDrawerItemText"
+                    android:text="@string/my_profile" />
             </LinearLayout>
 
             <View
                 android:id="@+id/divider"
                 style="@style/LeftDrawerDivider" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/left_drawer_home"
                 style="@style/LeftDrawerItem" >
 
@@ -74,13 +58,13 @@
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
                     android:text="@string/home" />
-            </RelativeLayout>
+            </LinearLayout>
 
             <View
                 android:id="@+id/divider"
                 style="@style/LeftDrawerDivider" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/left_drawer_group_chat"
                 style="@style/LeftDrawerItem" >
 
@@ -93,13 +77,13 @@
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
                     android:text="@string/group_chat" />
-            </RelativeLayout>
+            </LinearLayout>
 
             <View
                 android:id="@+id/divider"
                 style="@style/LeftDrawerDivider" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/left_drawer_tell_a_friend"
                 style="@style/LeftDrawerItem" >
 
@@ -112,13 +96,13 @@
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
                     android:text="@string/invite_friends" />
-            </RelativeLayout>
+            </LinearLayout>
 
             <View
                 android:id="@+id/left_credits_divider"
                 style="@style/LeftDrawerDivider" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/left_drawer_free_sms"
                 style="@style/LeftDrawerItem" >
 
@@ -131,30 +115,13 @@
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
                     android:text="@string/free_sms_txt" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/credit_num"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/bg_credit_num"
-                    android:gravity="center"
-                    android:shadowColor="#3d000000"
-                    android:shadowDx="0.5"
-                    android:shadowDy="0.5"
-                    android:shadowRadius="0.2"
-                    android:text="25"
-                    android:textColor="@color/offwhite"
-                    android:textStyle="bold"
-                    android:visibility="visible" />
-            </RelativeLayout>
+            </LinearLayout>
 
             <View
                 android:id="@+id/divider_rewards"
                 style="@style/LeftDrawerDivider" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/left_drawer_rewards"
                 style="@style/LeftDrawerItem" >
 
@@ -167,70 +134,30 @@
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
                     android:text="@string/rewards" />
-                
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/talk_time_num"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/bg_credit_num"
-                    android:gravity="center"
-                    android:shadowColor="#3d000000"
-                    android:shadowDx="0.5"
-                    android:shadowDy="0.5"
-                    android:shadowRadius="0.2"
-                    android:text="25"
-                    android:textColor="@color/offwhite"
-                    android:textStyle="bold"
-                    android:visibility="visible" />
-            </RelativeLayout>
+            </LinearLayout>
 
             <View
                 android:id="@+id/divider"
                 style="@style/LeftDrawerDivider" />
 
-            <RelativeLayout
+            <LinearLayout
                 android:id="@+id/left_drawer_help"
                 style="@style/LeftDrawerItem" >
 
                 <ImageView
                     android:id="@+id/item_icon"
                     style="@style/LeftDrawerItemIcon"
-                    android:src="@drawable/ic_drawer_help" />
+                    android:src="@drawable/ic_drawer_settings" />
 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
                     android:text="@string/help" />
-            </RelativeLayout>
+            </LinearLayout>
 
             <View
                 android:id="@+id/divider"
                 style="@style/LeftDrawerDivider" />
-
-            <RelativeLayout
-                android:id="@+id/with_love_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="35dp"
-                android:layout_marginTop="20dp" >
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/made_with_love"
-                    android:layout_width="wrap_content"
-                    android:layout_height="20dp"
-                    android:layout_centerInParent="true"
-                    android:shadowColor="#36FFFFFF"
-                    android:shadowDy="0.6"
-                    android:shadowRadius="0.6"
-                    android:src="@drawable/with_love"
-                    android:text="@string/with_love"
-                    android:textColor="#53514e"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    hike:font="omnes" />
-            </RelativeLayout>
         </LinearLayout>
     </ScrollView>
 

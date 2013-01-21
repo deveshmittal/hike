@@ -11,12 +11,8 @@ import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -67,17 +63,15 @@ public class DrawerLayout extends RelativeLayout implements
 	private View mRightSidebar;
 
 	private View mContent;
-	private int mSidebarWidth;
-	private int mSidebarOffsetForAnimation;
+	private int mRightSidebarWidth;
+	private int mRightSidebarOffsetForAnimation;
+	private int mLeftSidebarWidth;
+	private int mLeftSidebarOffsetForAnimation;
 	private int topBarButtonWidth;
 
 	private Listener mListener;
 
 	private boolean mPressed = false;
-
-	private TextView creditsNum;
-
-	private TextView talkTimeNum;
 
 	private SharedPreferences accountPrefs;
 
@@ -89,9 +83,7 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private ImageView profileImg;
 
-	private TextView profileName;
-
-	private ContactInfo me;
+	private BitmapDrawable leftDrawerBg;
 
 	private BitmapDrawable rightDrawerBg;
 
@@ -128,11 +120,13 @@ public class DrawerLayout extends RelativeLayout implements
 		handler = new Handler();
 		topBarButtonWidth = (int) (48 * Utils.densityMultiplier);
 		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-		mSidebarWidth = (int) ((isPortrait ? context.getResources()
+		mRightSidebarWidth = (int) ((isPortrait ? context.getResources()
 				.getDisplayMetrics().widthPixels : context.getResources()
 				.getDisplayMetrics().heightPixels) - topBarButtonWidth);
-		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
+		mRightSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
 
+		mLeftSidebarWidth = (int) (72 * Utils.densityMultiplier);
+		mLeftSidebarOffsetForAnimation = 10;
 		/*
 		 * Fix for android v2.3 and below specific bug where the bitmap is not
 		 * tiled and gets stretched instead if we use the xml. So we're creating
@@ -143,6 +137,10 @@ public class DrawerLayout extends RelativeLayout implements
 		rightDrawerBg = new BitmapDrawable(BitmapFactory.decodeResource(
 				getResources(), R.drawable.bg_right_drawer));
 		rightDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+
+		leftDrawerBg = new BitmapDrawable(BitmapFactory.decodeResource(
+				getResources(), R.drawable.bg_right_drawer));
+		leftDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 
 		freeSMS = PreferenceManager.getDefaultSharedPreferences(getContext())
 				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
@@ -281,9 +279,7 @@ public class DrawerLayout extends RelativeLayout implements
 	public void setUpLeftDrawerView() {
 
 		profileImg = (ImageView) findViewById(R.id.profile_image);
-		profileName = (TextView) findViewById(R.id.name);
 
-		setProfileName();
 		setProfileImage();
 		renderLeftDrawerItems(PreferenceManager.getDefaultSharedPreferences(
 				getContext()).getBoolean(HikeConstants.FREE_SMS_PREF, true));
@@ -311,29 +307,6 @@ public class DrawerLayout extends RelativeLayout implements
 				rewardsOn ? VISIBLE : GONE);
 		findViewById(R.id.divider_rewards).setVisibility(
 				rewardsOn ? VISIBLE : GONE);
-
-		creditsNum = (TextView) findViewById(R.id.credit_num);
-		updateCredits(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0));
-
-		talkTimeNum = (TextView) findViewById(R.id.talk_time_num);
-		updateTalkTime(accountPrefs.getInt(HikeMessengerApp.TALK_TIME, 0));
-
-		TextView withLoveTextView = (TextView) findViewById(R.id.made_with_love);
-
-		String love = getContext().getString(R.string.love);
-		String withLove = getContext().getString(R.string.with_love);
-
-		Drawable drawable = getContext().getResources().getDrawable(
-				R.drawable.ic_left_drawer_heart);
-		drawable.setBounds(0, -10, drawable.getIntrinsicWidth(),
-				drawable.getIntrinsicHeight() - 10);
-
-		SpannableStringBuilder ssb = new SpannableStringBuilder(withLove);
-		ssb.setSpan(new ImageSpan(drawable), withLove.indexOf(love),
-				withLove.indexOf(love) + love.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-		withLoveTextView.setText(ssb);
 	}
 
 	@Override
@@ -429,28 +402,11 @@ public class DrawerLayout extends RelativeLayout implements
 		}
 	};
 
-	public void updateCredits(int credits) {
-		if (creditsNum != null) {
-			creditsNum.setText(Integer.toString(credits));
-		}
-	}
-
-	public void updateTalkTime(int talkTime) {
-		if (talkTimeNum != null) {
-			talkTimeNum.setVisibility(talkTime > 0 ? View.VISIBLE
-					: View.INVISIBLE);
-			talkTimeNum.setText(Integer.toString(talkTime));
-		}
-	}
-
 	public void setProfileImage() {
+		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
+				"");
 		profileImg.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(me.getMsisdn()));
-	}
-
-	public void setProfileName() {
-		me = Utils.getUserContactInfo(accountPrefs);
-		profileName.setText(me.getName());
+				.getIconForMSISDN(msisdn));
 	}
 
 	@Override
@@ -475,30 +431,31 @@ public class DrawerLayout extends RelativeLayout implements
 		}
 
 		LayoutParams leftLp = (LayoutParams) mLeftSidebar.getLayoutParams();
-		leftLp.width = mSidebarWidth;
+		leftLp.width = mLeftSidebarWidth;
 		mLeftSidebar.setLayoutParams(leftLp);
 
 		LayoutParams rightLp = (LayoutParams) mRightSidebar.getLayoutParams();
-		rightLp.width = mSidebarWidth;
+		rightLp.width = mRightSidebarWidth;
 		mRightSidebar.setLayoutParams(rightLp);
 
-		mLeftSidebar.setBackgroundDrawable(rightDrawerBg);
+		mLeftSidebar.setBackgroundDrawable(leftDrawerBg);
 		mRightSidebar.setBackgroundDrawable(rightDrawerBg);
 	}
 
 	@Override
 	public void onLayout(boolean changed, int l, int t, int r, int b) {
 		/* the title bar assign top padding, drop it */
-		mLeftSidebar.layout(l, 0, l + mSidebarWidth,
+		mLeftSidebar.layout(l, 0, l + mLeftSidebarWidth,
 				0 + mLeftSidebar.getMeasuredHeight());
 
-		mRightSidebar.layout(r - mSidebarWidth, 0, r,
+		mRightSidebar.layout(r - mRightSidebarWidth, 0, r,
 				0 + mRightSidebar.getMeasuredHeight());
 
 		if (mLeftOpened) {
-			mContent.layout(l + mSidebarWidth, 0, r + mSidebarWidth, b);
+			mContent.layout(l + mLeftSidebarWidth, 0, r + mLeftSidebarWidth, b);
 		} else if (mRightOpened) {
-			mContent.layout(l - mSidebarWidth, 0, r - mSidebarWidth, b);
+			mContent.layout(l - mRightSidebarWidth, 0, r - mRightSidebarWidth,
+					b);
 		} else {
 			mContent.layout(l, 0, r, b);
 		}
@@ -643,23 +600,30 @@ public class DrawerLayout extends RelativeLayout implements
 		int sidebarPosition;
 		boolean noAnim;
 		boolean leftDrawer;
+		int sidebarOffset;
+		int sidebarWidth;
 
 		public OpenDrawerAnimation(View sidebar, View content, boolean noAnim,
 				boolean leftDrawer) {
+			this.leftDrawer = leftDrawer;
+
 			this.contentPosition = 0;
 			this.sidebarPosition = 0;
+
+			this.sidebarOffset = leftDrawer ? mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
+			this.sidebarWidth = leftDrawer ? mLeftSidebarWidth
+					: mRightSidebarWidth;
 
 			this.content = content;
 
 			this.sidebar = sidebar;
 			this.sidebar.setVisibility(View.VISIBLE);
-			this.sidebar
-					.offsetLeftAndRight(leftDrawer ? -mSidebarOffsetForAnimation
-							: mSidebarOffsetForAnimation);
+			this.sidebar.offsetLeftAndRight(leftDrawer ? -sidebarOffset
+					: sidebarOffset);
 			invalidate();
 
 			this.noAnim = noAnim;
-			this.leftDrawer = leftDrawer;
 		}
 
 		@Override
@@ -668,20 +632,20 @@ public class DrawerLayout extends RelativeLayout implements
 			if (!noAnim) {
 				float contentFactor = Math
 						.max(0.1f,
-								((float) (Math.abs(contentPosition) * 100 / mSidebarWidth) / 100));
+								((float) (Math.abs(contentPosition) * 100 / sidebarWidth) / 100));
 
 				float sidebarFactor = Math
 						.max(0.1f,
-								((float) (Math.abs(sidebarPosition) * 100 / mSidebarOffsetForAnimation) / 100));
+								((float) (Math.abs(sidebarPosition) * 100 / sidebarOffset) / 100));
 
-				int sidebarIncrements = (int) (((int) mSidebarOffsetForAnimation / ANIMATION_STEPS) * interpolator
+				int sidebarIncrements = (int) (((int) sidebarOffset / ANIMATION_STEPS) * interpolator
 						.getInterpolation(sidebarFactor));
-				int contentIncrements = (int) (((int) mSidebarWidth / ANIMATION_STEPS) * interpolator
+				int contentIncrements = (int) (((int) sidebarWidth / ANIMATION_STEPS) * interpolator
 						.getInterpolation(contentFactor));
 
-				sidebarIncrements = Math.min(sidebarIncrements,
-						mSidebarOffsetForAnimation - Math.abs(sidebarPosition));
-				contentIncrements = Math.min(contentIncrements, mSidebarWidth
+				sidebarIncrements = Math.min(sidebarIncrements, sidebarOffset
+						- Math.abs(sidebarPosition));
+				contentIncrements = Math.min(contentIncrements, sidebarWidth
 						- Math.abs(contentPosition));
 
 				sidebarIncrements = Math.max(sidebarIncrements, 1);
@@ -692,22 +656,22 @@ public class DrawerLayout extends RelativeLayout implements
 					contentIncrements = -contentIncrements;
 				}
 
-				if ((Math.abs(contentPosition) < mSidebarWidth)
-						|| (Math.abs(sidebarPosition) < mSidebarOffsetForAnimation)) {
-					if (Math.abs(contentPosition) < mSidebarWidth) {
+				if ((Math.abs(contentPosition) < sidebarWidth)
+						|| (Math.abs(sidebarPosition) < sidebarOffset)) {
+					if (Math.abs(contentPosition) < sidebarWidth) {
 						contentPosition += contentIncrements;
 						content.offsetLeftAndRight(contentIncrements);
 					}
 
-					if (Math.abs(sidebarPosition) < mSidebarOffsetForAnimation) {
+					if (Math.abs(sidebarPosition) < sidebarOffset) {
 						sidebarPosition += sidebarIncrements;
 						sidebar.offsetLeftAndRight(sidebarIncrements);
 					} else {
-						int offset = mSidebarOffsetForAnimation
+						int offset = sidebarOffset
 								- (leftDrawer ? sidebarPosition
 										: -sidebarPosition);
-						sidebarPosition = leftDrawer ? mSidebarOffsetForAnimation
-								: -mSidebarOffsetForAnimation;
+						sidebarPosition = leftDrawer ? sidebarOffset
+								: -sidebarOffset;
 						sidebar.offsetLeftAndRight(offset);
 					}
 
@@ -740,17 +704,24 @@ public class DrawerLayout extends RelativeLayout implements
 		int sidebarPosition;
 		boolean noAnim;
 		boolean leftDrawer;
+		int sidebarOffset;
+		int sidebarWidth;
 
 		public CloseDrawerAnimation(View sidebar, View content, boolean noAnim,
 				boolean leftDrawer) {
-			this.contentPosition = leftDrawer ? mSidebarWidth : -mSidebarWidth;
-			this.sidebarPosition = leftDrawer ? mSidebarOffsetForAnimation
-					: -mSidebarOffsetForAnimation;
+			this.leftDrawer = leftDrawer;
+
+			this.sidebarOffset = leftDrawer ? mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
+			this.sidebarWidth = leftDrawer ? mLeftSidebarWidth
+					: mRightSidebarWidth;
+
+			this.contentPosition = leftDrawer ? sidebarWidth : -sidebarWidth;
+			this.sidebarPosition = leftDrawer ? sidebarOffset : -sidebarOffset;
 
 			this.content = content;
 			this.sidebar = sidebar;
 
-			this.leftDrawer = leftDrawer;
 			this.noAnim = noAnim;
 		}
 
@@ -760,22 +731,22 @@ public class DrawerLayout extends RelativeLayout implements
 			if (!noAnim) {
 				float contentFactor = Math
 						.max(0.1f,
-								((float) ((mSidebarWidth - Math
-										.abs(contentPosition)) * 100 / mSidebarWidth) / 100));
+								((float) ((sidebarWidth - Math
+										.abs(contentPosition)) * 100 / sidebarWidth) / 100));
 
 				float sidebarFactor = Math
 						.max(0.1f,
-								((float) ((mSidebarOffsetForAnimation - Math
-										.abs(sidebarPosition)) * 100 / mSidebarWidth) / 100));
+								((float) ((sidebarOffset - Math
+										.abs(sidebarPosition)) * 100 / sidebarOffset) / 100));
 
-				int sidebarIncrements = (int) (((int) mSidebarOffsetForAnimation / ANIMATION_STEPS) * interpolator
+				int sidebarIncrements = (int) (((int) sidebarOffset / ANIMATION_STEPS) * interpolator
 						.getInterpolation(sidebarFactor));
-				int contentIncrements = (int) (((int) mSidebarWidth / ANIMATION_STEPS) * interpolator
+				int contentIncrements = (int) (((int) sidebarWidth / ANIMATION_STEPS) * interpolator
 						.getInterpolation(contentFactor));
 
-				sidebarIncrements = Math.min(sidebarIncrements,
-						mSidebarOffsetForAnimation + Math.abs(sidebarPosition));
-				contentIncrements = Math.min(contentIncrements, mSidebarWidth
+				sidebarIncrements = Math.min(sidebarIncrements, sidebarOffset
+						+ Math.abs(sidebarPosition));
+				contentIncrements = Math.min(contentIncrements, sidebarWidth
 						+ Math.abs(contentPosition));
 
 				sidebarIncrements = Math.max(sidebarIncrements, 1);
@@ -819,16 +790,16 @@ public class DrawerLayout extends RelativeLayout implements
 			if (leftDrawer) {
 				mLeftOpened = false;
 				if (!noAnim) {
-					sidebar.offsetLeftAndRight(mSidebarOffsetForAnimation);
+					sidebar.offsetLeftAndRight(sidebarOffset);
 				} else {
-					content.offsetLeftAndRight(-mSidebarWidth);
+					content.offsetLeftAndRight(-sidebarWidth);
 				}
 			} else {
 				mRightOpened = false;
 				if (!noAnim) {
-					sidebar.offsetLeftAndRight(-mSidebarOffsetForAnimation);
+					sidebar.offsetLeftAndRight(-sidebarOffset);
 				} else {
-					content.offsetLeftAndRight(mSidebarWidth);
+					content.offsetLeftAndRight(sidebarWidth);
 				}
 			}
 		}

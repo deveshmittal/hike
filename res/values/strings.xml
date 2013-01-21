@@ -337,4 +337,5 @@
 	<string name="save">Save</string>
 	<string name="fb_fetch_image_error">Could not pull data from Facebook</string>
 	<string name="no_mail_app">No app found for sending a mail.</string>
+	<string name="my_profile">My Profile</string>
 </resources>
