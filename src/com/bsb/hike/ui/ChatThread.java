@@ -2734,12 +2734,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		try {
 			while (c.moveToNext()) {
 				String mimeType = c.getString(mimeTypeIdx);
+
+				if (!contactJson.has(HikeConstants.NAME)) {
+					String dispName = c.getString(nameIdx);
+					contactJson.put(HikeConstants.NAME, dispName);
+					name = dispName;
+				}
+
 				if (Phone.CONTENT_ITEM_TYPE.equals(mimeType)) {
-					if (!contactJson.has(HikeConstants.NAME)) {
-						String dispName = c.getString(nameIdx);
-						contactJson.put(HikeConstants.NAME, dispName);
-						name = dispName;
-					}
 
 					if (phoneNumbersJson == null) {
 						phoneNumbersJson = new JSONObject();
@@ -2820,7 +2822,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		Log.d(getClass().getSimpleName(),
 				"Data of contact is : " + contactJson.toString());
-		// initialiseContactTransfer(contactJson);
 		clearTempData();
 		showContactDetails(items, name, contactJson, false);
 	}
