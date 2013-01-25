@@ -12,7 +12,7 @@
         android:layout_marginLeft="-1dp"
         android:onClick="onToggleLeftSideBarClicked"
         android:layout_height="@dimen/top_bar_btn_height"
-        android:src="@drawable/ic_drawer"
+        android:src="@drawable/ic_topbar_menu"
         android:background="@drawable/top_bar_btn_selector"
         android:visibility="gone" />
     
