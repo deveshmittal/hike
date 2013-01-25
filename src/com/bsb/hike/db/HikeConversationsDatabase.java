@@ -206,34 +206,36 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						.rawQuery(
 								"SELECT name FROM sqlite_master WHERE type='table' AND name=?",
 								new String[] { DBConstants.FILE_TABLE });
-				if (!table.moveToFirst()) {
-					// no table exists
-					return;
-				}
+				/*
+				 * Only do something if the table exists.
+				 */
+				if (table.moveToFirst()) {
 
-				c = db.query(DBConstants.FILE_TABLE, null, null, null, null,
-						null, null);
+					c = db.query(DBConstants.FILE_TABLE, null, null, null,
+							null, null, null);
 
-				int fileNameIdx = c.getColumnIndex(DBConstants.FILE_NAME);
-				int fileKeyIdx = c.getColumnIndex(DBConstants.FILE_KEY);
+					int fileNameIdx = c.getColumnIndex(DBConstants.FILE_NAME);
+					int fileKeyIdx = c.getColumnIndex(DBConstants.FILE_KEY);
 
-				JSONObject data = new JSONObject();
+					JSONObject data = new JSONObject();
 
-				while (c.moveToNext()) {
-					String fileName = c.getString(fileNameIdx);
-					String fileKey = c.getString(fileKeyIdx);
+					while (c.moveToNext()) {
+						String fileName = c.getString(fileNameIdx);
+						String fileKey = c.getString(fileKeyIdx);
 
-					try {
-						data.put(fileName, fileKey);
-					} catch (JSONException e) {
-						Log.e(getClass().getSimpleName(), "Invalid values");
+						try {
+							data.put(fileName, fileKey);
+						} catch (JSONException e) {
+							Log.e(getClass().getSimpleName(), "Invalid values");
+						}
 					}
-				}
-				Log.d(getClass().getSimpleName(), "DB data: " + data.toString());
-				Utils.makeNewFileWithExistingData(data);
+					Log.d(getClass().getSimpleName(),
+							"DB data: " + data.toString());
+					Utils.makeNewFileWithExistingData(data);
 
-				String drop = "DROP TABLE " + DBConstants.FILE_TABLE;
-				db.execSQL(drop);
+					String drop = "DROP TABLE " + DBConstants.FILE_TABLE;
+					db.execSQL(drop);
+				}
 			} finally {
 				if (table != null) {
 					table.close();
