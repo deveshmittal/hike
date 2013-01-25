@@ -707,7 +707,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 		HikeUserDatabase huDb = null;
 
-		StringBuilder msisdns = new StringBuilder("(");
+		StringBuilder msisdns = null;
 		try {
 			huDb = HikeUserDatabase.getInstance();
 			while (c.moveToNext()) {
@@ -717,6 +717,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				long convid = c.getInt(convIdx);
 
 				if (!Utils.isGroupConversation(msisdn)) {
+					if (msisdns == null) {
+						msisdns = new StringBuilder("(");
+					}
 					msisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				}
 				conv = new Conversation(msisdn, convid);
@@ -736,7 +739,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				conv.addMessage(message);
 				conversationMap.put(msisdn, conv);
 			}
-			msisdns.replace(msisdns.lastIndexOf(","), msisdns.length(), ")");
+			if (msisdns != null) {
+				msisdns.replace(msisdns.lastIndexOf(","), msisdns.length(), ")");
+			} else {
+				msisdns = new StringBuilder("()");
+			}
 
 			List<ContactInfo> contactList = huDb
 					.getContactNamesFromMsisdnList(msisdns.toString());
@@ -788,9 +795,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				conversationMap.put(groupId, groupConversation);
 			}
 
-		} catch (Exception e) {
-			Log.e("HikeConversationsDatabase",
-					"Unable to retrieve conversations", e);
 		} finally {
 			c.close();
 			if (groupInfoCursor != null) {
