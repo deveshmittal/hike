@@ -314,7 +314,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 						.getParcelableExtra(Intent.EXTRA_STREAM);
 				Log.d(getClass().getSimpleName(),
 						"File path uri: " + fileUri.toString());
-				String fileUriStart = "file://";
+				String fileUriStart = "file:";
 				String fileUriString = fileUri.toString();
 				String filePath;
 				if (fileUriString.startsWith(fileUriStart)) {
