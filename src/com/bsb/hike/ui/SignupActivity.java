@@ -976,9 +976,6 @@ public class SignupActivity extends Activity implements
 			return;
 		}
 
-		Log.d(getClass().getSimpleName(),
-				"Activity result received " + data.toString()
-						+ " REQUEST CODE: " + requestCode);
 		Session session = Session.getActiveSession();
 		session.onActivityResult(this, requestCode, resultCode, data);
 		if (fbClicked) {
