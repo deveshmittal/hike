@@ -4,7 +4,7 @@
     android:layout_height="match_parent" >
 
     <View
-        android:layout_width="9dp"
+        android:layout_width="5dp"
         android:layout_height="match_parent"
         android:background="@drawable/right_shadow" />
 

@@ -223,9 +223,9 @@
 	<string name="privacy">Privacy</string>
 	<string name="notifications">Notifications</string>
 	<string name="favorites">Favorites</string>
-	<string name="recent">Recents</string>
-	<string name="friends_on_hike">Friends on hike</string>
-	<string name="invite_friends">Invite friends</string>
+	<string name="recent">RECENTS</string>
+	<string name="friends_on_hike">FRIENDS ON HIKE</string>
+	<string name="invite_friends">INVITE FRIENDS</string>
 	<string name="to">To</string>
 	<string name="start_typing">Start typing a name...</string>
 	<string name="downloading">Downloading file...</string>
@@ -338,4 +338,5 @@
 	<string name="fb_fetch_image_error">Could not pull data from Facebook</string>
 	<string name="no_mail_app">No app found for sending a mail.</string>
 	<string name="my_profile">My Profile</string>
+	<string name="contacts_on_hike">CONTACTS ON HIKE</string>
 </resources>

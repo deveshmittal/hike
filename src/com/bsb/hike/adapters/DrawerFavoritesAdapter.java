@@ -110,7 +110,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		// Contact for "Favorite Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, context.getString(R.string.favorites), null));
+				null, context.getString(R.string.friends_on_hike), null));
 
 		/*
 		 * If favorite list is empty, we add an element to show the empty view
@@ -126,7 +126,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		// Contact for "On Hike Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, context.getString(R.string.friends_on_hike), null));
+				null, context.getString(R.string.contacts_on_hike), null));
 		completeList.addAll(onHikeList);
 
 		// Contact for "Recent Section"

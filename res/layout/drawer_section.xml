@@ -6,9 +6,8 @@
     android:gravity="center_vertical"
     android:paddingLeft="10dp"
     android:shadowColor="@color/black"
-    android:shadowDy="-0.7"
-    android:shadowRadius="0.7"
+    android:shadowDy="-0.5"
+    android:shadowRadius="0.5"
     android:text="Text"
     android:textColor="@color/drawer_section"
-    android:textSize="15sp"
-    android:textStyle="bold" />
+    android:textSize="13sp" />
