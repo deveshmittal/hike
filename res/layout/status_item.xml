@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/status_item"
+    android:layout_width="match_parent"
+    android:layout_height="64dp" >
+
+    <ImageView
+        android:id="@+id/avatar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/bg_status_type"
+        android:paddingBottom="2dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_text_status" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/status_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/avatar"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:paddingRight="10dp"
+        android:shadowColor="#000000"
+        android:shadowDy="1.0"
+        android:shadowRadius="1.0"
+        android:text="This is hike lasj flas flsa flasfj lsj flas flaslf lkasfkas vl;jsa;lk ja;slkjf ;lasfd"
+        android:textColor="@color/white"
+        android:textSize="14sp" />
+
+</RelativeLayout>

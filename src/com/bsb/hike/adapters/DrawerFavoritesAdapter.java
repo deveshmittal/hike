@@ -13,9 +13,7 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Log;
 import android.util.Pair;
@@ -23,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -54,6 +53,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private boolean freeSMSOn;
 	private ContactInfo recentSection;
 	private ContactInfo emptyFavorites;
+	private String status;
 
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
@@ -63,7 +63,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	public static final int ITEM_HEIGHT = (int) (55 * Utils.densityMultiplier);
 
 	public static enum FavoriteAdapterViewType {
-		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT
+		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, STATUS
 	}
 
 	public DrawerFavoritesAdapter(Context context) {
@@ -73,6 +73,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		recentList = new ArrayList<ContactInfo>(0);
 		freeSMSOn = PreferenceManager.getDefaultSharedPreferences(context)
 				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
+		status = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+				HikeMessengerApp.LAST_STATUS,
+				context.getString(R.string.default_status));
 		new AsyncTask<Void, Void, Void>() {
 
 			@Override
@@ -107,6 +111,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	private void makeCompleteList() {
 		completeList.clear();
+
+		// For the status item
+		completeList.add(null);
 
 		// Contact for "Favorite Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
@@ -277,7 +284,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	@Override
 	public int getItemViewType(int position) {
 		ContactInfo contactInfo = getItem(position);
-		if (SECTION_ID.equals(contactInfo.getId())) {
+		if (position == 0) {
+			return FavoriteAdapterViewType.STATUS.ordinal();
+		} else if (SECTION_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.SECTION.ordinal();
 		} else if (EMPTY_FAVORITES_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
@@ -296,7 +305,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	public boolean isEnabled(int position) {
 		FavoriteAdapterViewType viewType = FavoriteAdapterViewType.values()[getItemViewType(position)];
 		if (viewType == FavoriteAdapterViewType.EMPTY_FAVORITE
-				|| viewType == FavoriteAdapterViewType.SECTION) {
+				|| viewType == FavoriteAdapterViewType.SECTION
+				|| viewType == FavoriteAdapterViewType.STATUS) {
 			return false;
 		}
 		return true;
@@ -328,6 +338,14 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			viewHolder = new ViewHolder();
 
 			switch (viewType) {
+			case STATUS:
+				convertView = layoutInflater
+						.inflate(R.layout.status_item, null);
+				viewHolder.text = (TextView) convertView
+						.findViewById(R.id.status_text);
+				viewHolder.avatarImg = (ImageView) convertView
+						.findViewById(R.id.avatar);
+				break;
 			case RECENT:
 			case FAVORITE:
 				convertView = layoutInflater
@@ -364,6 +382,16 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		}
 
 		switch (viewType) {
+		case STATUS:
+			// set the user's status.
+			viewHolder.text.setText(status);
+			convertView.setOnClickListener(this);
+
+			int statusHeight = (int) (64 * Utils.densityMultiplier);
+			AbsListView.LayoutParams statusLp = new AbsListView.LayoutParams(
+					AbsListView.LayoutParams.MATCH_PARENT, statusHeight);
+			convertView.setLayoutParams(statusLp);
+			break;
 		case RECENT:
 			viewHolder.hikeImg.setVisibility(View.GONE);
 		case FAVORITE:

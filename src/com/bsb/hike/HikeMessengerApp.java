@@ -173,6 +173,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String GCK_SHOWN = "gckShown";
 	public static final String ADD_CONTACT_SHOWN = "addContactShown";
 
+	public static final String LAST_STATUS = "lastStatus";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
