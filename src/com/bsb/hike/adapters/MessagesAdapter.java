@@ -43,6 +43,8 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
@@ -60,7 +62,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	public static final int LAST_READ_CONV_MESSAGE_ID = -911;
 
 	private enum ViewType {
-		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, TYPING, LAST_READ
+		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, TYPING, LAST_READ, STATUS_MESSAGE
 	};
 
 	private class ViewHolder {
@@ -107,6 +109,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} else if (convMessage.isFileTransferMessage()) {
 			type = convMessage.isSent() ? ViewType.FILE_TRANSFER_SEND
 					: ViewType.FILE_TRANSFER_RECEIVE;
+		} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE) {
+			type = ViewType.STATUS_MESSAGE;
 		} else if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
 			type = ViewType.PARTICIPANT_INFO;
 		} else if (convMessage.isSent()) {
@@ -147,6 +151,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				break;
 			case LAST_READ:
 				v = inflater.inflate(R.layout.last_read_line, null);
+				break;
+			case STATUS_MESSAGE:
+				v = inflater.inflate(R.layout.profile_timeline_item, null);
+
+				holder.image = (ImageView) v.findViewById(R.id.status_type);
+				holder.messageTextView = (TextView) v
+						.findViewById(R.id.status_text);
+				holder.fileThumb = (ImageView) v.findViewById(R.id.status_pic);
+				holder.timestampTextView = (TextView) v.findViewById(R.id.time);
+				holder.marginView = v.findViewById(R.id.empty_view);
+				holder.container = (ViewGroup) v
+						.findViewById(R.id.content_container);
 				break;
 			case PARTICIPANT_INFO:
 				v = inflater.inflate(R.layout.message_item_receive, null);
@@ -258,12 +274,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.timestampTextView.setText(dateFormatted.toUpperCase());
 			holder.timestampContainer.setVisibility(View.VISIBLE);
 		} else {
-			holder.timestampContainer.setVisibility(View.GONE);
+			if (holder.timestampContainer != null) {
+				holder.timestampContainer.setVisibility(View.GONE);
+			}
 		}
 
 		ParticipantInfoState infoState = convMessage.getParticipantInfoState();
 		if ((infoState != ParticipantInfoState.NO_INFO)
-				) {
+				&& (infoState != ParticipantInfoState.STATUS_MESSAGE)) {
 			((ViewGroup) holder.container).removeAllViews();
 			int positiveMargin = (int) (8 * Utils.densityMultiplier);
 			int left = 0;
@@ -516,6 +534,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 			}
 			return v;
+		} else if (infoState == ParticipantInfoState.STATUS_MESSAGE) {
+			holder.container
+					.setBackgroundResource(R.drawable.bg_status_chat_thread);
+
+			StatusMessage statusMessage = convMessage.getMetadata()
+					.getStatusMessage();
+			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
+				holder.image.setImageResource(R.drawable.ic_text_status);
+			}
+			holder.messageTextView.setText(statusMessage.getText());
+			holder.timestampTextView.setText(convMessage
+					.getTimestampFormatted(true));
+			holder.fileThumb.setVisibility(View.GONE);
+
+			int padding = (int) (10 * Utils.densityMultiplier);
+			holder.container.setPadding(padding, padding, padding, padding);
+
+			holder.marginView.setVisibility(View.VISIBLE);
+
+			return v;
 		}
 
 		MessageMetadata metadata = convMessage.getMetadata();
@@ -756,6 +794,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	}
 
 	private boolean shouldDisplayTimestamp(int position) {
+		/*
+		 * We show the time stamp in the status message separately so no need to
+		 * show this time stamp.
+		 */
+		if (ViewType.values()[getItemViewType(position)] == ViewType.STATUS_MESSAGE) {
+			return false;
+		}
 		/*
 		 * only show the timestamp if the delta between this message and the
 		 * previous one is greater than 10 minutes
