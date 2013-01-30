@@ -274,6 +274,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		makeCompleteList();
 	}
 
+	public void updateStatus(String status) {
+		this.status = status;
+		notifyDataSetChanged();
 	}
 
 	@Override
@@ -468,15 +471,20 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		ImageView avatarImg;
 		ImageView hikeImg;
 		Button invite;
-		TextView name;
+		TextView text;
 		ImageView addImg;
-		Button addToFav;
-		Button notNow;
 	}
 
 	@Override
 	public void onClick(View v) {
-		ContactInfo contactInfo = (ContactInfo) v.getTag();
+
+		ContactInfo contactInfo = null;
+		Object tag = v.getTag();
+
+		if (tag instanceof ContactInfo) {
+			contactInfo = (ContactInfo) tag;
+		}
+
 		if (v.getId() == R.id.add_fav) {
 			if (contactInfo.getFavoriteType() == FavoriteType.FAVORITE) {
 				Intent callIntent = new Intent(Intent.ACTION_CALL);
@@ -505,6 +513,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					contactInfo, FavoriteType.NOT_FAVORITE);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteRemoved);
+		} else if (v.getId() == R.id.status_item) {
+			// show the status UI
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STATUS_DIALOG,
+					null);
 		}
 	}
 }

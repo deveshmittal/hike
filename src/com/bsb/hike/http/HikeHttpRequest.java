@@ -23,6 +23,7 @@ public class HikeHttpRequest {
 	private byte[] mPostData;
 	private JSONObject response;
 	private String filePath;
+	private String statusMessage;
 
 	public HikeHttpRequest(String path, HikeHttpCallback completionRunnable) {
 		this.mPath = path;
@@ -47,6 +48,14 @@ public class HikeHttpRequest {
 
 	public String getPath() {
 		return mPath;
+	}
+
+	public String getStatusMessage() {
+		return statusMessage;
+	}
+
+	public void setStatusMessage(String statusMessage) {
+		this.statusMessage = statusMessage;
 	}
 
 	public void onSuccess() {

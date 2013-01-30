@@ -605,27 +605,49 @@ public class AccountUtils {
 	public static void performRequest(HikeHttpRequest hikeHttpRequest,
 			boolean addToken) throws NetworkErrorException,
 			IllegalStateException {
-		HttpPost post = new HttpPost(base + hikeHttpRequest.getPath());
+		HttpRequestBase requestBase;
+		boolean isUpdatingStatus = !TextUtils.isEmpty(hikeHttpRequest
+				.getStatusMessage());
+		/*
+		 * We need to make a PUT request for status updates. For other requests
+		 * we do POST.
+		 */
+		if (!isUpdatingStatus) {
+			requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+		} else {
+			requestBase = new HttpPut(base + hikeHttpRequest.getPath());
+		}
 		if (addToken) {
-			addToken(post);
+			addToken(requestBase);
 		}
 		try {
-			AbstractHttpEntity entity;
+			AbstractHttpEntity entity = null;
 
 			if (!TextUtils.isEmpty(hikeHttpRequest.getFilePath())) {
 				entity = new FileEntity(
 						new File(hikeHttpRequest.getFilePath()), "");
+			} else if (isUpdatingStatus) {
+				requestBase.addHeader(HikeConstants.STATUS_MESSAGE_HEADER,
+						hikeHttpRequest.getStatusMessage());
 			} else {
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
 						HTTP.DEFAULT_CONTENT_CHARSET);
 			}
 
-			entity.setContentType(hikeHttpRequest.getContentType());
-			post.setEntity(entity);
-			JSONObject obj = executeRequest(post);
+			if (entity != null) {
+				entity.setContentType(hikeHttpRequest.getContentType());
+				((HttpPost) requestBase).setEntity(entity);
+			}
+			JSONObject obj = executeRequest(requestBase);
 			Log.d("AccountUtils", "Response: " + obj);
 			if ((obj == null) || (!"ok".equals(obj.optString("stat")))) {
 				throw new NetworkErrorException("Unable to perform request");
+			}
+			/*
+			 * We need the response to save the id of the status.
+			 */
+			if (isUpdatingStatus) {
+				hikeHttpRequest.setResponse(obj);
 			}
 		} catch (UnsupportedEncodingException e) {
 			Log.wtf("AccountUtils", "Unable to encode name");

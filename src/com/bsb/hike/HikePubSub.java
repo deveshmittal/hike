@@ -190,7 +190,11 @@ public class HikePubSub implements Runnable {
 
 	public static final String TALK_TIME_CHANGED = "talkTimeChanged";
 
+	public static final String SHOW_STATUS_DIALOG = "showStatusDialog";
+
 	public static final String STATUS_MESSAGE_RECEIVED = "statusMessageReceived";
+
+	public static final String MY_STATUS_CHANGED = "myStatusChanged";
 
 	private final Thread mThread;
 

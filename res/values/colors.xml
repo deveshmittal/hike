@@ -55,4 +55,6 @@
     <color name="drawer_section">#cbc5b9</color>
     <color name="social_btn_txt">#c8c7c2</color>
     <color name="drawer_text">#e7e6e0</color>
+    <color name="status_dialog_bg">#e4e4e2</color>
+    <color name="status_counter">#b9b8b3</color>
 </resources>

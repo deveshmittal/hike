@@ -259,6 +259,7 @@ public class HikeConstants {
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
+	public static final String STATUS_MESSAGE_HEADER = "hike-status-message";
 	/*
 	 * Contact Type
 	 */
