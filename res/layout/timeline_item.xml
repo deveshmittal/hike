@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/timeline_selector" >
+
+    <RelativeLayout
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        
+        android:padding="15dp" >
+
+        <ImageView
+            android:id="@+id/avatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginRight="15dp"
+            android:src="@drawable/ic_avatar1" />
+
+        <ImageView
+            android:id="@+id/status_type"
+            android:layout_width="21dp"
+            android:layout_height="21dp"
+            android:layout_alignLeft="@id/avatar"
+            android:layout_alignTop="@id/avatar"
+            android:layout_marginLeft="37dp"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/bg_status_type"
+            android:paddingBottom="3dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_pic_status" />
+
+        <LinearLayout
+            android:id="@+id/side_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@id/avatar"
+            android:gravity="right"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2 mins ago"
+                android:textColor="@color/timestampcolor"
+                android:textSize="12sp"
+                android:textStyle="italic" />
+
+            <ImageView
+                android:id="@+id/details_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onDetailsBtnClick"
+                android:focusable="false"
+                android:background="@null"
+                android:paddingTop="10dp"
+                android:src="@drawable/ic_details_btn" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/details_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_toLeftOf="@id/side_content"
+            android:layout_toRightOf="@id/avatar"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Rishabh Sharma"
+                android:textColor="@color/lightblack"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/main_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="Added you as a friend"
+                android:textColor="@color/group_item"
+                android:textSize="14sp"
+                android:textStyle="italic" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="I just added you aas  a firend . do the same?"
+                android:textColor="@color/group_item"
+                android:textSize="12sp"
+                android:textStyle="italic" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btn_container"
+            android:layout_below="@id/details_content"
+            android:layout_toRightOf="@id/avatar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/yes_btn"
+                style="@style/StatusYesBtn"
+                android:onClick="onYesBtnClick"
+                android:focusable="false"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="Confirm" />
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/no_btn"
+                style="@style/StatusNoBtn"
+                android:layout_marginLeft="10dp"
+                android:onClick="onNoBtnClick"
+                android:focusable="false"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="Not Now" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</LinearLayout>

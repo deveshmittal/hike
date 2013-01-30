@@ -25,16 +25,43 @@
         android:background="@drawable/button_separator"
         android:visibility="gone" />
     
-    <ImageView
-        android:id="@+id/title_hikeicon"
+    <LinearLayout
+        android:id="@+id/title_icon_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
-        android:layout_marginLeft="17dp"
-        android:src="@drawable/ic_logoheader"
-        android:visibility="gone" />
+        android:gravity="center" >
+
+        <ImageView
+            android:id="@+id/title_hikeicon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:onClick="onOpenTimelineClick"
+            android:src="@drawable/ic_logoheader"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/notification_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="3dp"
+            android:background="@drawable/no_notification"
+            android:gravity="center"
+            android:onClick="onOpenTimelineClick"
+            android:paddingLeft="1dp"
+            android:shadowColor="#660000"
+            android:shadowDy="-0.5"
+            android:shadowRadius="0.5"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/title"

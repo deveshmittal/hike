@@ -130,6 +130,7 @@ public class DrawerBaseActivity extends Activity implements
 		/*
 		 * Only show the favorites drawer in the Messages list screen
 		 */
+		if ((this instanceof MessagesList) || (this instanceof CentralTimeline)) {
 			parentLayout.setUpRightDrawerView(this);
 
 			if (showButtons) {
@@ -246,8 +247,13 @@ public class DrawerBaseActivity extends Activity implements
 				Intent intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
-				overridePendingTransition(R.anim.alpha_in,
-						R.anim.slide_out_right_noalpha);
+				if (this instanceof CentralTimeline) {
+					overridePendingTransition(R.anim.no_animation,
+							R.anim.slide_down_noalpha);
+				} else {
+					overridePendingTransition(R.anim.alpha_in,
+							R.anim.slide_out_right_noalpha);
+				}
 			} else {
 				finish();
 			}

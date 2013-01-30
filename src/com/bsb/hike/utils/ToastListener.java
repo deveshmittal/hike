@@ -21,14 +21,14 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.MessagesList;
 
 public class ToastListener implements Listener {
 
@@ -134,10 +134,8 @@ public class ToastListener implements Listener {
 			}
 			Activity activity = (currentActivity != null) ? currentActivity
 					.get() : null;
-			if (activity instanceof MessagesList) {
-				if (((MessagesList) activity).parentLayout.isRightOpening()) {
-					return;
-				}
+			if (activity instanceof CentralTimeline) {
+				return;
 			}
 			toaster.notifyFavorite(contactInfo);
 		}

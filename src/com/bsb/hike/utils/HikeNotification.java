@@ -21,6 +21,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.MessagesList;
 
@@ -126,8 +127,7 @@ public class HikeNotification {
 
 		long timeStamp = System.currentTimeMillis() / 1000;
 
-		Intent notificationIntent = new Intent(context, MessagesList.class);
-		notificationIntent.putExtra(HikeConstants.Extras.OPEN_FAVORITES, true);
+		Intent notificationIntent = new Intent(context, CentralTimeline.class);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		int icon = R.drawable.ic_contact_logo;

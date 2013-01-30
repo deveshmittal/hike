@@ -284,7 +284,9 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		View view = findViewById(R.id.title_hikeicon);
 		view.setVisibility(View.VISIBLE);
-		view.setOnClickListener(this);
+
+		View notificationView = findViewById(R.id.notification_icon);
+		notificationView.setVisibility(View.VISIBLE);
 
 		/*
 		 * mSearchIconView = findViewById(R.id.search);
@@ -1358,5 +1360,11 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 		mToolTip.setVisibility(View.VISIBLE);
 
+	}
+
+	public void onOpenTimelineClick(View v) {
+		Intent intent = new Intent(this, CentralTimeline.class);
+		startActivity(intent);
+		overridePendingTransition(R.anim.slide_up_noalpha, R.anim.no_animation);
 	}
 }
