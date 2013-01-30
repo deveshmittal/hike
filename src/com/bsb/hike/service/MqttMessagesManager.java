@@ -28,6 +28,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
@@ -566,6 +567,20 @@ public class MqttMessagesManager {
 			editor.commit();
 
 			this.pubSub.publish(HikePubSub.TALK_TIME_CHANGED, talkTime);
+		} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type)) {
+			StatusMessage statusMessage = new StatusMessage(jsonObj);
+			long id = convDb.addStatusMessage(statusMessage);
+
+			if (id == -1) {
+				Log.d(getClass().getSimpleName(),
+						"This status message was already added");
+				return;
+			}
+
+			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
+
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			saveStatusMsg(jsonObj, msisdn);
 		}
 	}
 

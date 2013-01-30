@@ -76,7 +76,10 @@ public class HikeConstants {
 	public static final String PHONE_NUMBERS = "phone_numbers";
 	public static final String EMAILS = "emails";
 	public static final String ADDRESSES = "addresses";
-	public static final String EVENTS = "events"; 
+	public static final String EVENTS = "events";
+	public static final String STATUS_ID = "statusid";
+	public static final String MOOD = "mood";
+	public static final String STATUS_MESSAGE = "msg";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -519,6 +522,7 @@ public class HikeConstants {
 		public static final String ACCOUNT_CONFIG = "ac";
 		public static final String REWARDS = "rewards";
 		public static final String DISPLAY_PIC = "dp";
+		public static final String STATUS_UPDATE = "su";
 	}
 
 	public static enum FTResult {

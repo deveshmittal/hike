@@ -169,7 +169,7 @@ public class HikePubSub implements Runnable {
 	public static final String REMOVE_MESSAGE_FROM_CHAT_THREAD = "removeMessageFromChatThread";
 
 	public static final String SOCIAL_AUTH_COMPLETED = "socialAuthCompleted";
-	
+
 	public static final String REMOVE_TWITTER_VIEW = "removeTwitterView";
 
 	public static final String FREE_SMS_TOGGLED = "freeSMSToggled";
@@ -189,6 +189,8 @@ public class HikePubSub implements Runnable {
 	public static final String TOGGLE_REWARDS = "toggleRewards";
 
 	public static final String TALK_TIME_CHANGED = "talkTimeChanged";
+
+	public static final String STATUS_MESSAGE_RECEIVED = "statusMessageReceived";
 
 	private final Thread mThread;
 
