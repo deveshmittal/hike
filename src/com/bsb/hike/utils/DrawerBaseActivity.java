@@ -181,8 +181,6 @@ public class DrawerBaseActivity extends Activity implements
 
 	@Override
 	public void rightSidebarOpened() {
-		parentLayout
-				.cancelFavoriteNotifications((NotificationManager) getSystemService(NOTIFICATION_SERVICE));
 	}
 
 	@Override

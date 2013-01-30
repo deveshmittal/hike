@@ -3,7 +3,6 @@ package com.bsb.hike.view;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,7 +26,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -91,8 +89,6 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private boolean freeSMS;
 
-	private TextView pendingRequests;
-
 	private boolean isAnimating = false;
 
 	private CustomInterpolator interpolator;
@@ -150,15 +146,12 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public void setUpRightDrawerView(Activity activity) {
 		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
-		pendingRequests = (TextView) findViewById(R.id.fav_requests);
 
-		drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext(), this);
+		drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext());
 		favoriteListView.setAdapter(drawerFavoritesAdapter);
 
 		favoriteListView.setOnItemClickListener(this);
 		activity.registerForContextMenu(favoriteListView);
-
-		updatePendingRequests();
 	}
 
 	@Override
@@ -181,27 +174,17 @@ public class DrawerLayout extends RelativeLayout implements
 		getContext().startActivity(intent);
 	}
 
-	public void updatePendingRequests() {
-		int pendingRequestsNum = drawerFavoritesAdapter.getPendingRequests();
-		pendingRequests.setVisibility(pendingRequestsNum > 0 ? View.VISIBLE
-				: View.GONE);
-		pendingRequests.setText(pendingRequestsNum + "");
-	}
-
 	public void removeFromFavorite(ContactInfo contactInfo) {
 		drawerFavoritesAdapter.removeFavoriteItem(contactInfo);
-		updatePendingRequests();
 	}
 
 	public void addToFavorite(ContactInfo contactInfo) {
 		drawerFavoritesAdapter.addFavoriteItem(contactInfo);
-		updatePendingRequests();
 	}
 
 	public void refreshFavoritesDrawer() {
 		if (drawerFavoritesAdapter != null) {
 			drawerFavoritesAdapter.notifyDataSetChanged();
-			updatePendingRequests();
 		}
 	}
 
@@ -215,21 +198,14 @@ public class DrawerLayout extends RelativeLayout implements
 	public void updateRecentContacts(ContactInfo contactInfo) {
 		Log.d(getClass().getSimpleName(), "Update Recent List");
 		drawerFavoritesAdapter.updateRecentContactsList(contactInfo);
-		updatePendingRequests();
 	}
 
 	public void refreshFavorites(List<ContactInfo> favoriteList) {
 		drawerFavoritesAdapter.refreshFavoritesList(favoriteList);
-		updatePendingRequests();
 	}
 
 	public void refreshRecents(List<ContactInfo> recents) {
 		drawerFavoritesAdapter.refreshRecents(recents);
-	}
-
-	public void cancelFavoriteNotifications(
-			NotificationManager notificationManager) {
-		drawerFavoritesAdapter.cancelFavoriteNotifications(notificationManager);
 	}
 
 	public void onCreateFavoritesContextMenu(Activity activity, Menu menu,

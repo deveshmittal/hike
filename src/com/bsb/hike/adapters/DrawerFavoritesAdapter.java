@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -41,7 +40,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.DrawerLayout;
 
 public class DrawerFavoritesAdapter extends BaseAdapter implements
 		OnClickListener {
@@ -68,8 +66,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT
 	}
 
-	public DrawerFavoritesAdapter(Context context,
-			final DrawerLayout drawerLayout) {
+	public DrawerFavoritesAdapter(Context context) {
 		completeList = new ArrayList<ContactInfo>();
 		favoriteList = new ArrayList<ContactInfo>(0);
 		onHikeList = new ArrayList<ContactInfo>(0);
@@ -100,7 +97,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			@Override
 			protected void onPostExecute(Void result) {
 				makeCompleteList();
-				drawerLayout.updatePendingRequests();
 			}
 
 		}.execute();
@@ -271,12 +267,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		makeCompleteList();
 	}
 
-	public void cancelFavoriteNotifications(NotificationManager manager) {
-		for (ContactInfo contactInfo : recommendedFavoriteList) {
-			if (contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE) {
-				manager.cancel(contactInfo.getMsisdn().hashCode());
-			}
-		}
 	}
 
 	@Override
