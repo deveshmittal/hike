@@ -339,4 +339,9 @@
         <item name="android:shadowRadius">0.5</item>
     </style>
     
+    <style name="ProfileShadow">
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowDy">0.7</item>
+        <item name="android:shadowRadius">0.7</item>
+    </style>
 </resources>

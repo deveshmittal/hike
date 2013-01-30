@@ -338,8 +338,26 @@
 	<string name="fb_fetch_image_error">Could not pull data from Facebook</string>
 	<string name="no_mail_app">No app found for sending a mail.</string>
 	<string name="my_profile">My Profile</string>
+	<string name="not_on_hike">%1$s is missing all the action. Help him upgrade to hike.</string>
+	<string name="add_as_friend_info">You need to be friends with %1$s to be able to get status updates.</string>
+	<string name="add_as_friend">Add as friend</string>
 	<string name="updating_status">Updating status</string>
+	<string name="add_member">Add a member</string>
+	<string name="invite_all_members">Invite SMS members to hike</string>
+	<string name="send_message">Send a message</string>
+	<string name="post_status">Post a status</string>
+	<string name="owner">Owner</string>
+	<string name="on_sms">on SMS</string>
 	<string name="default_status">Tap to update status</string>
 	<string name="update_status_fail">Could not update status</string>
+	<string name="no_friends">Tap on plus so send a friend request.</string>
 	<string name="contacts_on_hike">CONTACTS ON HIKE</string>
+	<string name="team_hike">team hike</string>
+	<string name="hey_name">Hey %1$s!</string>
+	<string name="add_friend_info">When you add a hike friend, you can see their updates right here.</string>
+	<string name="add_hike_friend">Add a hike friend</string>
+	<string name="added_as_hike_friend">Added you as a friend</string>
+	<string name="added_as_hike_friend_info">%1$s can now see updates from you. Would you like to do the same?</string>
+	<string name="confirm">Confirm</string>
+	<string name="recent_updates">Recent Updates</string>
 </resources>

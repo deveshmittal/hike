@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/offwhite"
+    android:orientation="vertical"
+    android:padding="8dp" >
+
+    <LinearLayout
+        android:id="@+id/btn_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal" >
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn1"
+            style="@style/ProfileButtons"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/ic_add_member"
+            android:onClick="onProfileSmallLeftBtnClick"
+            android:text="Hellp" />
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="0dp" />
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn2"
+            style="@style/ProfileButtons"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableLeft="@drawable/ic_leave_group"
+            android:onClick="onProfileSmallRightBtnClick"
+            android:text="@string/leave_group" />
+    </LinearLayout>
+
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/btn3"
+        style="@style/ProfileButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_msg_small"
+        android:onClick="onProfileLargeBtnClick"
+        android:text="Hellp" />
+
+</LinearLayout>

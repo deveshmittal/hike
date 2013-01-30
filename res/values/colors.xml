@@ -57,4 +57,7 @@
     <color name="drawer_text">#e7e6e0</color>
     <color name="status_dialog_bg">#e4e4e2</color>
     <color name="status_counter">#b9b8b3</color>
+    <color name="status_yes_btn">#31719f</color>
+    <color name="group_item">#444444</color>
+    <color name="group_info">#362f2d</color>
 </resources>
