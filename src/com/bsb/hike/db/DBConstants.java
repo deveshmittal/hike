@@ -4,7 +4,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 7;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 8;
 
 	public static final int USERS_DATABASE_VERSION = 7;
 
@@ -107,6 +107,18 @@ public class DBConstants {
 	public static final String FAVORITE_TYPE_SELECTION = "COALESCE((SELECT "
 			+ FAVORITE_TYPE + " FROM " + FAVORITES_TABLE + " WHERE "
 			+ FAVORITES_TABLE + "." + MSISDN + " = " + USERS_TABLE + "."
-			+ MSISDN + "), + " + FavoriteType.NOT_FAVORITE.ordinal()
-			+ ") AS " + FAVORITE_TYPE;
+			+ MSISDN + "), + " + FavoriteType.NOT_FAVORITE.ordinal() + ") AS "
+			+ FAVORITE_TYPE;
+
+	public static final String STATUS_TABLE = "statusTable";
+
+	public static final String STATUS_ID = "statusId";
+
+	public static final String STATUS_MAPPED_ID = "statusMappedId";
+
+	public static final String STATUS_TEXT = "statusText";
+
+	public static final String STATUS_TYPE = "statusType";
+
+	public static final String STATUS_SEEN = "statusSeen";
 }

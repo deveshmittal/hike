@@ -33,6 +33,8 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 
@@ -115,6 +117,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " ON " + DBConstants.EMOTICON_TABLE + " ( "
 				+ DBConstants.EMOTICON_NUM + " ) ";
 		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STATUS_TABLE + " ("
+				+ DBConstants.STATUS_ID
+				+ " INTEGER PRIMARY KEY AUTOINCREMENT, "
+				+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, "
+				+ DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT
+				+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
+				+ DBConstants.TIMESTAMP + " INTEGER, "
+				+ DBConstants.STATUS_SEEN + " INTEGER DEFAULT 0" + " )";
+		db.execSQL(sql);
 	}
 
 	public void deleteAll() {
@@ -122,6 +133,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.delete(DBConstants.MESSAGES_TABLE, null, null);
 		mDb.delete(DBConstants.GROUP_MEMBERS_TABLE, null, null);
 		mDb.delete(DBConstants.GROUP_INFO_TABLE, null, null);
+		mDb.delete(DBConstants.EMOTICON_TABLE, null, null);
+		mDb.delete(DBConstants.STATUS_TABLE, null, null);
 	}
 
 	@Override
@@ -1381,5 +1394,131 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				c.close();
 			}
 		}
+	}
+
+	public long addStatusMessage(StatusMessage statusMessage) {
+		ContentValues values = new ContentValues();
+		values.put(DBConstants.STATUS_MAPPED_ID, statusMessage.getMappedId());
+		values.put(DBConstants.STATUS_TEXT, statusMessage.getText());
+		values.put(DBConstants.MSISDN, statusMessage.getMsisdn());
+		values.put(DBConstants.STATUS_TYPE, statusMessage
+				.getStatusMessageType().ordinal());
+		values.put(DBConstants.TIMESTAMP, statusMessage.getTimeStamp());
+
+		long id = mDb.insert(DBConstants.STATUS_TABLE, null, values);
+		statusMessage.setId(id);
+
+		return id;
+	}
+
+	public List<StatusMessage> getStatusMessages(String... msisdnList) {
+		String[] columns = new String[] { DBConstants.STATUS_ID,
+				DBConstants.STATUS_MAPPED_ID, DBConstants.MSISDN,
+				DBConstants.STATUS_TEXT, DBConstants.STATUS_TYPE,
+				DBConstants.STATUS_SEEN, DBConstants.TIMESTAMP };
+		String selection = null;
+
+		StringBuilder msisdnSelection = null;
+		if (msisdnList != null) {
+			msisdnSelection = new StringBuilder("(");
+			for (String msisdn : msisdnList) {
+				msisdnSelection.append(DatabaseUtils.sqlEscapeString(msisdn)
+						+ ",");
+			}
+			msisdnSelection.replace(msisdnSelection.lastIndexOf(","),
+					msisdnSelection.length(), ")");
+		}
+
+		if (!TextUtils.isEmpty(msisdnSelection)) {
+			selection = DBConstants.MSISDN + " IN " + msisdnSelection.toString();
+		}
+		String orderBy = DBConstants.STATUS_SEEN + ", " + DBConstants.STATUS_ID
+				+ " DESC";
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.STATUS_TABLE, columns, selection, null,
+					null, null, orderBy);
+
+			List<StatusMessage> statusMessages = new ArrayList<StatusMessage>(
+					c.getCount());
+			Map<String, List<StatusMessage>> statusMessagesMap = new HashMap<String, List<StatusMessage>>();
+
+			int idIdx = c.getColumnIndex(DBConstants.STATUS_ID);
+			int mappedIdIdx = c.getColumnIndex(DBConstants.STATUS_MAPPED_ID);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int textIdx = c.getColumnIndex(DBConstants.STATUS_TEXT);
+			int typeIdx = c.getColumnIndex(DBConstants.STATUS_TYPE);
+			int seenIdx = c.getColumnIndex(DBConstants.STATUS_SEEN);
+			int tsIdx = c.getColumnIndex(DBConstants.TIMESTAMP);
+
+			StringBuilder msisdns = null;
+			while (c.moveToNext()) {
+				String msisdn = c.getString(msisdnIdx);
+
+				StatusMessage statusMessage = new StatusMessage(
+						c.getLong(idIdx), c.getString(mappedIdIdx), msisdn,
+						null, c.getString(textIdx),
+						StatusMessageType.values()[c.getInt(typeIdx)],
+						c.getLong(tsIdx), c.getInt(seenIdx) == 1);
+				statusMessages.add(statusMessage);
+
+				Log.d(getClass().getSimpleName(),
+						"ID: " + statusMessage.getId());
+
+				List<StatusMessage> msisdnMessages = statusMessagesMap
+						.get(msisdn);
+				if (msisdnMessages == null) {
+					if (msisdns == null) {
+						msisdns = new StringBuilder("(");
+					}
+					msisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
+					msisdnMessages = new ArrayList<StatusMessage>();
+					statusMessagesMap.put(msisdn, msisdnMessages);
+				}
+				msisdnMessages.add(statusMessage);
+			}
+			if (msisdns != null) {
+				msisdns.replace(msisdns.lastIndexOf(","), msisdns.length(), ")");
+				Log.d(getClass().getSimpleName(),
+						"Msisdns: " + msisdns.toString());
+
+				List<ContactInfo> contactList = HikeUserDatabase.getInstance()
+						.getContactNamesFromMsisdnList(msisdns.toString());
+				for (ContactInfo contactInfo : contactList) {
+					List<StatusMessage> msisdnMessages = statusMessagesMap
+							.get(contactInfo.getMsisdn());
+					if (msisdnMessages != null) {
+						for (StatusMessage statusMessage : msisdnMessages) {
+							statusMessage.setName(contactInfo.getName());
+						}
+					}
+				}
+			}
+
+			return statusMessages;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public void setStatusMessagesRead(long[] ids) {
+		StringBuilder selectionIds = new StringBuilder("(");
+
+		for (long id : ids) {
+			selectionIds.append(id + ",");
+		}
+
+		selectionIds.replace(selectionIds.lastIndexOf(","),
+				selectionIds.length(), ")");
+
+		String whereClause = DBConstants.STATUS_ID + " IN "
+				+ selectionIds.toString();
+
+		ContentValues values = new ContentValues(1);
+		values.put(DBConstants.STATUS_SEEN, 1);
+
+		mDb.update(DBConstants.STATUS_TABLE, values, whereClause, null);
 	}
 }
