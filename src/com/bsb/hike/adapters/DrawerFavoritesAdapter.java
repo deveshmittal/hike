@@ -49,7 +49,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private LayoutInflater layoutInflater;
 	private Context context;
 
-	private List<ContactInfo> recommendedFavoriteList;
 	private List<ContactInfo> favoriteList;
 	private List<ContactInfo> onHikeList;
 	private List<ContactInfo> recentList;
@@ -66,13 +65,12 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	public static final int ITEM_HEIGHT = (int) (55 * Utils.densityMultiplier);
 
 	public static enum FavoriteAdapterViewType {
-		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, RECOMMENDED_FAVORITE
+		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT
 	}
 
 	public DrawerFavoritesAdapter(Context context,
 			final DrawerLayout drawerLayout) {
 		completeList = new ArrayList<ContactInfo>();
-		recommendedFavoriteList = new ArrayList<ContactInfo>(0);
 		favoriteList = new ArrayList<ContactInfo>(0);
 		onHikeList = new ArrayList<ContactInfo>(0);
 		recentList = new ArrayList<ContactInfo>(0);
@@ -84,15 +82,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			protected Void doInBackground(Void... params) {
 				HikeUserDatabase hikeUserDatabase = HikeUserDatabase
 						.getInstance();
-
-				recommendedFavoriteList = hikeUserDatabase
-						.getContactsOfFavoriteType(
-								FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-								HikeConstants.BOTH_VALUE);
-				recommendedFavoriteList.addAll(hikeUserDatabase
-						.getContactsOfFavoriteType(
-								FavoriteType.RECOMMENDED_FAVORITE,
-								HikeConstants.BOTH_VALUE));
 
 				favoriteList = hikeUserDatabase.getContactsOfFavoriteType(
 						FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE);
@@ -131,12 +120,11 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		 * If favorite list is empty, we add an element to show the empty view
 		 * in the listview.
 		 */
-		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
+		if (favoriteList.isEmpty()) {
 			emptyFavorites = new ContactInfo(
 					DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null, null, null);
 			completeList.add(emptyFavorites);
 		} else {
-			completeList.addAll(recommendedFavoriteList);
 			completeList.addAll(favoriteList);
 		}
 
@@ -164,13 +152,11 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		 * We first check if we are showing the empty favorites item. If we are,
 		 * we remove it before adding the new favorite.
 		 */
-		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
+		if (favoriteList.isEmpty()) {
 			completeList.remove(emptyFavorites);
 		}
 		// Remove from the other lists.
 		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
-		removeContactFromListByMatchingMsisdn(recommendedFavoriteList,
-				contactInfo);
 		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
 		removeContactFromListByMatchingMsisdn(favoriteList, contactInfo);
 
@@ -180,35 +166,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		makeCompleteList();
 	}
 
-	public void addRecommendedFavoriteItem(ContactInfo contactInfo) {
-		/*
-		 * We first check if we are showing the empty favorites item. If we are,
-		 * we remove it before adding the new favorite.
-		 */
-		if (favoriteList.isEmpty() && recommendedFavoriteList.isEmpty()) {
-			completeList.remove(emptyFavorites);
-		}
-		// Remove from the hike list.
-		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
-		// Remove from the recents list.
-		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
-		recommendedFavoriteList.add(0, contactInfo);
-
-		makeCompleteList();
-	}
-
-	public void addAutoRecommendedFavorites(List<ContactInfo> contactInfoList) {
-		recommendedFavoriteList.addAll(contactInfoList);
-
-		recentList.removeAll(contactInfoList);
-		onHikeList.removeAll(contactInfoList);
-
-		makeCompleteList();
-	}
-
 	public void removeFavoriteItem(ContactInfo contactInfo) {
-		removeContactFromListByMatchingMsisdn(recommendedFavoriteList,
-				contactInfo);
 		removeContactFromListByMatchingMsisdn(favoriteList, contactInfo);
 
 		if (TextUtils.isEmpty(contactInfo.getName())) {
@@ -293,21 +251,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		this.favoriteList = favoriteList;
 		Collections.sort(favoriteList);
 
-		recommendedFavoriteList.removeAll(favoriteList);
 		onHikeList.removeAll(favoriteList);
 		recentList.removeAll(favoriteList);
-
-		makeCompleteList();
-	}
-
-	public void refreshRecommendedFavorites(
-			List<ContactInfo> recommendedFavoriteList) {
-		this.recommendedFavoriteList = recommendedFavoriteList;
-		Collections.sort(recommendedFavoriteList);
-
-		favoriteList.removeAll(recommendedFavoriteList);
-		onHikeList.removeAll(recommendedFavoriteList);
-		recentList.removeAll(recommendedFavoriteList);
 
 		makeCompleteList();
 	}
@@ -324,10 +269,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	public void refreshRecents(List<ContactInfo> recents) {
 		recentList = recents;
 		makeCompleteList();
-	}
-
-	public int getPendingRequests() {
-		return recommendedFavoriteList.size();
 	}
 
 	public void cancelFavoriteNotifications(NotificationManager manager) {
@@ -352,9 +293,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
 		} else if (contactInfo.getFavoriteType() == FavoriteType.NOT_FAVORITE) {
 			return FavoriteAdapterViewType.RECENT.ordinal();
-		} else if (contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE
-				|| contactInfo.getFavoriteType() == FavoriteType.AUTO_RECOMMENDED_FAVORITE) {
-			return FavoriteAdapterViewType.RECOMMENDED_FAVORITE.ordinal();
 		}
 		return FavoriteAdapterViewType.FAVORITE.ordinal();
 	}
@@ -409,7 +347,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						.findViewById(R.id.add_fav);
 				viewHolder.avatarImg = (ImageView) convertView
 						.findViewById(R.id.item_icon);
-				viewHolder.name = (TextView) convertView
+				viewHolder.text = (TextView) convertView
 						.findViewById(R.id.item_name);
 				viewHolder.hikeImg = (ImageView) convertView
 						.findViewById(R.id.hike_icon);
@@ -426,22 +364,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				convertView = layoutInflater.inflate(R.layout.empty_favorites,
 						null);
 
-				viewHolder.name = (TextView) convertView
+				viewHolder.text = (TextView) convertView
 						.findViewById(R.id.item_txt);
-				break;
-
-			case RECOMMENDED_FAVORITE:
-				convertView = layoutInflater.inflate(
-						R.layout.recommended_favorite_item, null);
-
-				viewHolder.avatarImg = (ImageView) convertView
-						.findViewById(R.id.item_icon);
-				viewHolder.name = (TextView) convertView
-						.findViewById(R.id.item_msg);
-				viewHolder.addToFav = (Button) convertView
-						.findViewById(R.id.add);
-				viewHolder.notNow = (Button) convertView
-						.findViewById(R.id.not_now);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -463,7 +387,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					viewHolder.invite.setOnClickListener(this);
 					viewHolder.invite.setTag(contactInfo);
 
-					LayoutParams lp = (LayoutParams) viewHolder.name
+					LayoutParams lp = (LayoutParams) viewHolder.text
 							.getLayoutParams();
 					lp.addRule(RelativeLayout.LEFT_OF, R.id.invite_fav);
 				} else {
@@ -473,7 +397,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					viewHolder.invite.setVisibility(View.GONE);
 					viewHolder.addImg.setImageResource(R.drawable.add_fav);
 
-					LayoutParams lp = (LayoutParams) viewHolder.name
+					LayoutParams lp = (LayoutParams) viewHolder.text
 							.getLayoutParams();
 					lp.addRule(RelativeLayout.LEFT_OF, R.id.add_fav);
 				}
@@ -482,7 +406,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			}
 			viewHolder.avatarImg.setImageDrawable(IconCacheManager
 					.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
-			viewHolder.name
+			viewHolder.text
 					.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
 							.getMsisdn() : contactInfo.getName());
 
@@ -502,12 +426,12 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			break;
 
 		case EMPTY_FAVORITE:
-			String text = viewHolder.name.getText().toString();
+			String text = viewHolder.text.getText().toString();
 			String replace = context.getString(R.string.plus);
 			SpannableString spannableString = new SpannableString(text);
 
 			Drawable drawable = context.getResources().getDrawable(
-					R.drawable.ic_add_favorite);
+					R.drawable.ic_add_fav);
 			int height = (int) ((7 * drawable.getIntrinsicHeight()) / 10);
 			int width = (int) ((7 * drawable.getIntrinsicWidth()) / 10);
 			drawable.setBounds(0, 0, width, height);
@@ -516,30 +440,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					text.indexOf(replace),
 					text.indexOf(replace) + replace.length(),
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			viewHolder.name.setText(spannableString);
-			break;
-
-		case RECOMMENDED_FAVORITE:
-			String name = contactInfo.getFirstName();
-			String msg = context
-					.getString(
-							contactInfo.getFavoriteType() == FavoriteType.RECOMMENDED_FAVORITE ? R.string.recommended_favorite
-									: R.string.auto_recommended_favorite, name);
-			SpannableStringBuilder message = new SpannableStringBuilder(msg);
-			message.setSpan(new ForegroundColorSpan(context.getResources()
-					.getColor(R.color.drawer_text)),
-					msg.indexOf(name) + name.length(), msg.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-			viewHolder.avatarImg.setImageDrawable(IconCacheManager
-					.getInstance().getIconForMSISDN(contactInfo.getMsisdn()));
-			viewHolder.name.setText(message);
-
-			viewHolder.addToFav.setTag(contactInfo);
-			viewHolder.addToFav.setOnClickListener(this);
-
-			viewHolder.notNow.setTag(contactInfo);
-			viewHolder.notNow.setOnClickListener(this);
+			viewHolder.text.setText(spannableString);
 			break;
 		}
 		return convertView;

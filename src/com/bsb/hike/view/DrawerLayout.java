@@ -193,11 +193,6 @@ public class DrawerLayout extends RelativeLayout implements
 		updatePendingRequests();
 	}
 
-	public void addToRecommended(ContactInfo contactInfo) {
-		drawerFavoritesAdapter.addRecommendedFavoriteItem(contactInfo);
-		updatePendingRequests();
-	}
-
 	public void addToFavorite(ContactInfo contactInfo) {
 		drawerFavoritesAdapter.addFavoriteItem(contactInfo);
 		updatePendingRequests();
@@ -206,14 +201,6 @@ public class DrawerLayout extends RelativeLayout implements
 	public void refreshFavoritesDrawer() {
 		if (drawerFavoritesAdapter != null) {
 			drawerFavoritesAdapter.notifyDataSetChanged();
-			updatePendingRequests();
-		}
-	}
-
-	public void addAutoRecommendedFavoritesList(
-			List<ContactInfo> contactInfoList) {
-		if (drawerFavoritesAdapter != null) {
-			drawerFavoritesAdapter.addAutoRecommendedFavorites(contactInfoList);
 			updatePendingRequests();
 		}
 	}
@@ -233,13 +220,6 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public void refreshFavorites(List<ContactInfo> favoriteList) {
 		drawerFavoritesAdapter.refreshFavoritesList(favoriteList);
-		updatePendingRequests();
-	}
-
-	public void refreshRecommendedFavorites(
-			List<ContactInfo> recommendedFavoriteList) {
-		drawerFavoritesAdapter
-				.refreshRecommendedFavorites(recommendedFavoriteList);
 		updatePendingRequests();
 	}
 
