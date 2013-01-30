@@ -68,7 +68,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		TextView messageTextView;
 		TextView timestampTextView;
 		ImageView image;
-		ViewGroup participantInfoContainer;
+		ViewGroup container;
 		ImageView fileThumb;
 		ImageView showFileBtn;
 		CircularProgress circularProgress;
@@ -156,7 +156,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v
 						.findViewById(R.id.timestamp);
-				holder.participantInfoContainer = (ViewGroup) v
+				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
 
 				holder.image.setVisibility(View.GONE);
@@ -238,10 +238,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v
 						.findViewById(R.id.timestamp);
-				holder.participantInfoContainer = (ViewGroup) v
+				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
 
-				holder.participantInfoContainer.setVisibility(View.GONE);
+				holder.container.setVisibility(View.GONE);
 				break;
 			}
 			v.setTag(holder);
@@ -261,8 +261,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.timestampContainer.setVisibility(View.GONE);
 		}
 
-		if (convMessage.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
-			((ViewGroup) holder.participantInfoContainer).removeAllViews();
+		ParticipantInfoState infoState = convMessage.getParticipantInfoState();
+		if ((infoState != ParticipantInfoState.NO_INFO)
+				) {
+			((ViewGroup) holder.container).removeAllViews();
 			int positiveMargin = (int) (8 * Utils.densityMultiplier);
 			int left = 0;
 			int top = 0;
@@ -270,7 +272,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			int bottom = positiveMargin;
 
 			MessageMetadata metadata = convMessage.getMetadata();
-			if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) {
+			if (infoState == ParticipantInfoState.PARTICIPANT_JOINED) {
 				JSONArray participantInfoArray = metadata
 						.getGcjParticipantInfo();
 
@@ -295,15 +297,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						Utils.getFormattedParticipantInfo(message, highlight),
 						R.drawable.ic_hike_user);
 
-				((ViewGroup) holder.participantInfoContainer)
-						.addView(participantInfo);
-			} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
-					|| convMessage.getParticipantInfoState() == ParticipantInfoState.GROUP_END) {
+				((ViewGroup) holder.container).addView(participantInfo);
+			} else if (infoState == ParticipantInfoState.PARTICIPANT_LEFT
+					|| infoState == ParticipantInfoState.GROUP_END) {
 				TextView participantInfo = (TextView) inflater.inflate(
 						R.layout.participant_info, null);
 
 				CharSequence message;
-				if (convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT) {
+				if (infoState == ParticipantInfoState.PARTICIPANT_LEFT) {
 					// Showing the block internation sms message if the user was
 					// booted because of that reason
 					if (metadata.isShowBIS()) {
@@ -325,8 +326,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						lp.setMargins(left, top, right, bottom);
 						mainMessage.setLayoutParams(lp);
 
-						((ViewGroup) holder.participantInfoContainer)
-								.addView(mainMessage);
+						((ViewGroup) holder.container).addView(mainMessage);
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation)
@@ -347,10 +347,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				lp.setMargins(left, top, right, 0);
 				participantInfo.setLayoutParams(lp);
 
-				((ViewGroup) holder.participantInfoContainer)
-						.addView(participantInfo);
-			} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN
-					|| convMessage.getParticipantInfoState() == ParticipantInfoState.USER_OPT_IN) {
+				((ViewGroup) holder.container).addView(participantInfo);
+			} else if (infoState == ParticipantInfoState.USER_JOIN
+					|| infoState == ParticipantInfoState.USER_OPT_IN) {
 				String name;
 				String message;
 				if (conversation instanceof GroupConversation) {
@@ -360,14 +359,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.getContactInfo().getFirstName();
 					message = context
 							.getString(
-									convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? R.string.joined_hike
+									infoState == ParticipantInfoState.USER_JOIN ? R.string.joined_hike
 											: R.string.joined_conversation,
 									name);
 				} else {
 					name = Utils.getFirstName(conversation.getLabel());
 					message = context
 							.getString(
-									convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? R.string.joined_hike
+									infoState == ParticipantInfoState.USER_JOIN ? R.string.joined_hike
 											: R.string.optin_one_to_one, name);
 				}
 
@@ -376,7 +375,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				setTextAndIconForSystemMessages(
 						mainMessage,
 						Utils.getFormattedParticipantInfo(message, name),
-						convMessage.getParticipantInfoState() == ParticipantInfoState.USER_JOIN ? R.drawable.ic_hike_user
+						infoState == ParticipantInfoState.USER_JOIN ? R.drawable.ic_hike_user
 								: R.drawable.ic_opt_in);
 
 				TextView creditsMessageView = null;
@@ -405,14 +404,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						creditsMessageView != null ? bottom : 0);
 				mainMessage.setLayoutParams(lp);
 
-				((ViewGroup) holder.participantInfoContainer)
-						.addView(mainMessage);
+				((ViewGroup) holder.container).addView(mainMessage);
 				if (creditsMessageView != null) {
-					((ViewGroup) holder.participantInfoContainer)
-							.addView(creditsMessageView);
+					((ViewGroup) holder.container).addView(creditsMessageView);
 				}
-			} else if ((convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME)
-					|| (convMessage.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_IMAGE)) {
+			} else if ((infoState == ParticipantInfoState.CHANGED_GROUP_NAME)
+					|| (infoState == ParticipantInfoState.CHANGED_GROUP_IMAGE)) {
 				String participantName = ((GroupConversation) conversation)
 						.getGroupParticipant(metadata.getMsisdn())
 						.getContactInfo().getFirstName();
@@ -427,9 +424,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						Utils.getFormattedParticipantInfo(message,
 								participantName), R.drawable.ic_group_info);
 
-				((ViewGroup) holder.participantInfoContainer)
-						.addView(mainMessage);
-			} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
+				((ViewGroup) holder.container).addView(mainMessage);
+			} else if (infoState == ParticipantInfoState.BLOCK_INTERNATIONAL_SMS) {
 				String info = context.getString(R.string.block_internation_sms);
 				String textToHighlight = context
 						.getString(R.string.block_internation_sms_bold_text);
@@ -441,9 +437,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						Utils.getFormattedParticipantInfo(info, textToHighlight),
 						R.drawable.ic_no_int_sms);
 
-				((ViewGroup) holder.participantInfoContainer)
-						.addView(mainMessage);
-			} else if (convMessage.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE) {
+				((ViewGroup) holder.container).addView(mainMessage);
+			} else if (infoState == ParticipantInfoState.INTRO_MESSAGE) {
 				String name = Utils.getFirstName(conversation.getLabel());
 				String message = context.getString(
 						conversation.isOnhike() ? R.string.intro_hike_thread
@@ -456,9 +451,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						conversation.isOnhike() ? R.drawable.ic_hike_user
 								: R.drawable.ic_sms_user);
 
-				((ViewGroup) holder.participantInfoContainer)
-						.addView(mainMessage);
-			} else {
+				((ViewGroup) holder.container).addView(mainMessage);
+			} else if (infoState == ParticipantInfoState.DND_USER) {
 				JSONArray dndNumbers = metadata.getDndNumbers();
 
 				TextView dndMessage = (TextView) inflater.inflate(
@@ -518,8 +512,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					lp.setMargins(left, top, right, 0);
 					dndMessage.setLayoutParams(lp);
 
-					((ViewGroup) holder.participantInfoContainer)
-							.addView(dndMessage);
+					((ViewGroup) holder.container).addView(dndMessage);
 				}
 			}
 			return v;
