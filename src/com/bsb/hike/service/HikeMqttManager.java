@@ -630,6 +630,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 		 */
 		if (mqttConnection == null) {
 			pbCB.onFailure(null);
+			return;
 		}
 
 		mqttConnection.publish(new UTF8Buffer(this.topic
