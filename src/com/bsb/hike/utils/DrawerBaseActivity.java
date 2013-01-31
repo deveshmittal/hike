@@ -27,6 +27,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager.BadTokenException;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -427,8 +428,7 @@ public class DrawerBaseActivity extends Activity implements
 	}
 
 	public void showStatusDialog(boolean hasSelectedFile) {
-		statusDialog = new Dialog(DrawerBaseActivity.this,
-				R.style.Theme_CustomDialog_Status);
+		statusDialog = new Dialog(this, R.style.Theme_CustomDialog_Status);
 		statusDialog.setContentView(R.layout.status_dialog);
 
 		final Button titleBtn = (Button) statusDialog
@@ -475,7 +475,15 @@ public class DrawerBaseActivity extends Activity implements
 			}
 		});
 
-		statusDialog.show();
+		/*
+		 * The app would randomly crash here. We catch that particular
+		 * exception. Behavior of the app remains the same even after catching
+		 * this exception
+		 */
+		try {
+			statusDialog.show();
+		} catch (BadTokenException e) {
+		}
 		mActivityTask.showingStatusDialog = true;
 
 		statusDialog.setOnCancelListener(new OnCancelListener() {
