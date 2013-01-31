@@ -141,7 +141,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				null,
 				(freeSMSOn && HikeMessengerApp.isIndianUser()) ? context
 						.getString(R.string.recent) : context
-						.getString(R.string.invite_friends), null);
+						.getString(R.string.invite_friends_caps), null);
 		completeList.add(recentSection);
 
 		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE

@@ -224,7 +224,8 @@
 	<string name="favorites">Favoriten</string>
 	<string name="recent">ZULETZT</string>
 	<string name="friends_on_hike">FREUNDE BEI HIKE</string>
-	<string name="invite_friends">FREUNDE EINLADEN</string>
+	<string name="invite_friends">Freunde Einladen</string>
+	<string name="invite_friends_caps">FREUNDE EINLADEN</string>
 	<string name="to">Zu</string>
 	<string name="start_typing">Gib einen Namen ein...</string>
 	<string name="downloading">Datei wird heruntergeladen...</string>

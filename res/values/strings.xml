@@ -225,7 +225,8 @@
 	<string name="favorites">Favorites</string>
 	<string name="recent">RECENTS</string>
 	<string name="friends_on_hike">FRIENDS ON HIKE</string>
-	<string name="invite_friends">INVITE FRIENDS</string>
+	<string name="invite_friends">Invite Friends</string>
+	<string name="invite_friends_caps">INVITE FRIENDS</string>
 	<string name="to">To</string>
 	<string name="start_typing">Start typing a name...</string>
 	<string name="downloading">Downloading file...</string>
