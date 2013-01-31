@@ -470,7 +470,7 @@ public class HikeConstants {
 
 		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD,
-		 * proF, helP
+		 * proF, settinG
 		 */
 		public static final String DRAWER_HOME = "drShomE";
 		public static final String DRAWER_GROUP_CHAT = "drSgC";
@@ -478,7 +478,7 @@ public class HikeConstants {
 		public static final String DRAWER_REWARDS = "drSreW";
 		public static final String DRAWER_CREDITS = "drScreD";
 		public static final String DRAWER_PROFILE = "drSproF";
-		public static final String DRAWER_HELP = "drShelP";
+		public static final String DRAWER_SETTINGS = "drSsettinG";
 
 		/*
 		 * Rewards screen <screen> = rewS <event> = inV, clM, faQ

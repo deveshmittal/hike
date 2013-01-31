@@ -40,6 +40,7 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.ui.WebViewActivity;
@@ -253,7 +254,7 @@ public class DrawerLayout extends RelativeLayout implements
 		int[] ids = { R.id.left_drawer_home, R.id.left_drawer_group_chat,
 				R.id.left_drawer_tell_a_friend, R.id.left_drawer_free_sms,
 				R.id.left_drawer_profile, R.id.left_drawer_rewards,
-				R.id.left_drawer_help };
+				R.id.left_drawer_settings };
 
 		for (int i = 0; i < ids.length; i++) {
 			findViewById(ids[i]).setOnClickListener(this);
@@ -306,13 +307,10 @@ public class DrawerLayout extends RelativeLayout implements
 			intent = activity instanceof ProfileActivity ? null : new Intent(
 					getContext(), ProfileActivity.class);
 			break;
-		case R.id.left_drawer_help:
-			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HELP);
-			intent = activity instanceof Tutorial ? null : new Intent(
-					getContext(), Tutorial.class);
-			if (intent != null) {
-				intent.putExtra(HikeConstants.Extras.HELP_PAGE, true);
-			}
+		case R.id.left_drawer_settings:
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_SETTINGS);
+			intent = activity instanceof SettingsActivity ? null : new Intent(
+					getContext(), SettingsActivity.class);
 			break;
 		case R.id.left_drawer_rewards:
 			intent = activity instanceof WebViewActivity ? null : new Intent(

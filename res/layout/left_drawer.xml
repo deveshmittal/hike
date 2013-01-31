@@ -141,7 +141,7 @@
                 style="@style/LeftDrawerDivider" />
 
             <LinearLayout
-                android:id="@+id/left_drawer_help"
+                android:id="@+id/left_drawer_settings"
                 style="@style/LeftDrawerItem" >
 
                 <ImageView
@@ -152,7 +152,7 @@
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
-                    android:text="@string/help" />
+                    android:text="@string/settings" />
             </LinearLayout>
 
             <View

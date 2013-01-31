@@ -361,4 +361,5 @@
 	<string name="added_as_hike_friend_info">%1$s can now see updates from you. Would you like to do the same?</string>
 	<string name="confirm">Confirm</string>
 	<string name="recent_updates">Recent Updates</string>
+	<string name="manage_account">Manage Account</string>
 </resources>
