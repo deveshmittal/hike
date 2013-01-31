@@ -23,7 +23,6 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.MessagesList;
 
 public class HikeNotification {
 	public static final int HIKE_NOTIFICATION = 0;
