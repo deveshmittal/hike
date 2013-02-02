@@ -19,6 +19,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -1341,5 +1342,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		} finally {
 			c.close();
 		}
+	}
+
+	public int getPendingFriendRequestCount() {
+		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
+				+ DBConstants.FAVORITES_TABLE + " WHERE "
+				+ DBConstants.FAVORITE_TYPE + "="
+				+ FavoriteType.RECOMMENDED_FAVORITE.ordinal(), null);
 	}
 }

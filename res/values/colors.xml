@@ -24,8 +24,8 @@
     <color name="emoticon_page_bg">#eef7f7f4</color>
     <color name="list_selected">#efefec</color>
     <color name="list_pressed">#eaeae8</color>
-    <color name="other_list_selected">#efefec</color>
-    <color name="other_list_pressed">#eaeae8</color>
+    <color name="other_list_selected">#ffffff</color>
+    <color name="other_list_pressed">#e6e6e3</color>
     <color name="invite_all">#9c9a93</color>
     <color name="send_blue">#a1cfe6</color>
     <color name="send_green">#c7d9a3</color>
@@ -60,4 +60,7 @@
     <color name="status_yes_btn">#31719f</color>
     <color name="group_item">#444444</color>
     <color name="group_info">#362f2d</color>
+    <color name="seen_timeline_item_pressed">#d8d8d6</color>
+    <color name="seen_timeline_item">#ededeb</color>
+    <color name="alert_item_pressed">#d6d6d3</color>
 </resources>

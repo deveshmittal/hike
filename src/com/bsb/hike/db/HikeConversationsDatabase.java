@@ -1430,7 +1430,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 
 		if (!TextUtils.isEmpty(msisdnSelection)) {
-			selection = DBConstants.MSISDN + " IN " + msisdnSelection.toString();
+			selection = DBConstants.MSISDN + " IN "
+					+ msisdnSelection.toString();
 		}
 		String orderBy = DBConstants.STATUS_SEEN + ", " + DBConstants.STATUS_ID
 				+ " DESC";
@@ -1503,22 +1504,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void setStatusMessagesRead(long[] ids) {
-		StringBuilder selectionIds = new StringBuilder("(");
+	public void setStatusMessagesSeen(String msisdn) {
 
-		for (long id : ids) {
-			selectionIds.append(id + ",");
+		String whereClause = null;
+		String[] whereArgs = null;
+		if (msisdn != null) {
+			whereClause = DBConstants.MSISDN + "=?";
+			whereArgs = new String[] { msisdn };
 		}
-
-		selectionIds.replace(selectionIds.lastIndexOf(","),
-				selectionIds.length(), ")");
-
-		String whereClause = DBConstants.STATUS_ID + " IN "
-				+ selectionIds.toString();
 
 		ContentValues values = new ContentValues(1);
 		values.put(DBConstants.STATUS_SEEN, 1);
 
-		mDb.update(DBConstants.STATUS_TABLE, values, whereClause, null);
+		mDb.update(DBConstants.STATUS_TABLE, values, whereClause, whereArgs);
+	}
+
+	public int getUnseenStatusMessageCount() {
+		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
+				+ DBConstants.STATUS_TABLE + " WHERE "
+				+ DBConstants.STATUS_SEEN + "=0", null);
 	}
 }

@@ -50,6 +50,11 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	protected void onResume() {
 		super.onResume();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
+		if (isLastStatusMessageUnseen()) {
+			HikeConversationsDatabase.getInstance().setStatusMessagesSeen(null);
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
+		}
 	}
 
 	@Override
@@ -220,12 +225,15 @@ public class CentralTimeline extends DrawerBaseActivity implements
 									getString(R.string.added_as_hike_friend),
 									StatusMessageType.FRIEND_REQUEST, System
 											.currentTimeMillis() / 1000));
+			friendRequests++;
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
 
 		} else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
 			StatusMessage statusMessage = (StatusMessage) object;
@@ -233,12 +241,28 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					.getContactInfoFromMSISDN(statusMessage.getMsisdn(), false);
 			statusMessage.setName(contactInfo.getName());
 			statusMessages.add(friendRequests, statusMessage);
+			HikeConversationsDatabase.getInstance().setStatusMessagesSeen(null);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
 		}
+	}
+
+	private boolean isLastStatusMessageUnseen() {
+		/*
+		 * We check here whether the latest status message is unseen or not. For
+		 * that we ignore the friend requests (Which are always marked as
+		 * unseen).
+		 */
+		int startIndex = friendRequests;
+		if (statusMessages.size() <= friendRequests) {
+			return false;
+		}
+		return !statusMessages.get(startIndex).isStatusSeen();
 	}
 }

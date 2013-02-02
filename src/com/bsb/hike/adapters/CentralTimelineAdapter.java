@@ -90,6 +90,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					.findViewById(R.id.yes_btn);
 			viewHolder.noBtn = (TextView) convertView.findViewById(R.id.no_btn);
 
+			viewHolder.divider = (ImageView) convertView
+					.findViewById(R.id.divider);
+
+			viewHolder.content = (ViewGroup) convertView
+					.findViewById(R.id.main_content);
+
 			convertView.setTag(viewHolder);
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
@@ -139,11 +145,38 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.statusType
 					.setBackgroundResource(R.drawable.bg_status_type);
 		}
+		viewHolder.content
+				.setBackgroundResource(statusMessage.isStatusSeen() ? R.drawable.seen_timeline_selector
+						: R.drawable.timeline_selector);
+
+		viewHolder.divider
+				.setBackgroundResource(isLastUnseenStatus(position) ? R.drawable.new_update_repeat
+						: R.drawable.ic_thread_divider_profile);
+
 		viewHolder.detailsBtn.setTag(statusMessage);
 		viewHolder.yesBtn.setTag(statusMessage);
 		viewHolder.noBtn.setTag(statusMessage);
 
 		return convertView;
+	}
+
+	private boolean isLastUnseenStatus(int position) {
+		/*
+		 * We show a different divider if the status message in the current
+		 * position is unseen and the one after that has already been seen.
+		 */
+		StatusMessage currentStatusMessage = getItem(position);
+		if (currentStatusMessage.isStatusSeen()) {
+			return false;
+		}
+		StatusMessage nextStatusMessage = position < (statusMessages.size() - 1) ? getItem(position + 1)
+				: null;
+		if (nextStatusMessage == null) {
+			return true;
+		} else if (nextStatusMessage.isStatusSeen()) {
+			return true;
+		}
+		return false;
 	}
 
 	private class ViewHolder {
@@ -156,5 +189,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		ImageView detailsBtn;
 		TextView yesBtn;
 		TextView noBtn;
+		ImageView divider;
+		ViewGroup content;
 	}
 }

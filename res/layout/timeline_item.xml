@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/timeline_selector" >
+    android:background="@color/seen_timeline_item" >
 
     <RelativeLayout
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        
+        android:background="@drawable/seen_timeline_selector"
         android:padding="15dp" >
 
         <ImageView
@@ -54,9 +54,9 @@
                 android:id="@+id/details_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="onDetailsBtnClick"
-                android:focusable="false"
                 android:background="@null"
+                android:focusable="false"
+                android:onClick="onDetailsBtnClick"
                 android:paddingTop="10dp"
                 android:src="@drawable/ic_details_btn" />
         </LinearLayout>
@@ -104,19 +104,19 @@
 
         <LinearLayout
             android:id="@+id/btn_container"
-            android:layout_below="@id/details_content"
-            android:layout_toRightOf="@id/avatar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/details_content"
             android:layout_marginTop="5dp"
+            android:layout_toRightOf="@id/avatar"
             android:gravity="center"
             android:orientation="horizontal" >
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/yes_btn"
                 style="@style/StatusYesBtn"
-                android:onClick="onYesBtnClick"
                 android:focusable="false"
+                android:onClick="onYesBtnClick"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text="Confirm" />
@@ -125,12 +125,18 @@
                 android:id="@+id/no_btn"
                 style="@style/StatusNoBtn"
                 android:layout_marginLeft="10dp"
-                android:onClick="onNoBtnClick"
                 android:focusable="false"
+                android:onClick="onNoBtnClick"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text="Not Now" />
         </LinearLayout>
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_thread_divider_profile" />
 
 </LinearLayout>

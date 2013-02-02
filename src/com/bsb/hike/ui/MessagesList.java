@@ -73,6 +73,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
@@ -129,7 +130,9 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED,
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.UPDATE_AVAILABLE,
 			HikePubSub.CONTACT_ADDED, HikePubSub.MESSAGE_DELETED,
-			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION };
+			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED,
+			HikePubSub.RESET_NOTIFICATION_COUNTER };
 
 	private Dialog updateAlert;
 
@@ -138,6 +141,8 @@ public class MessagesList extends DrawerBaseActivity implements
 	private Handler messageRefreshHandler;
 
 	private Button notificationCounter;
+
+	private int notificationCount;
 
 	@Override
 	protected void onPause() {
@@ -286,6 +291,10 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		notificationCounter = (Button) findViewById(R.id.title_hikeicon);
 		notificationCounter.setVisibility(View.VISIBLE);
+		int unseenStatus = HikeConversationsDatabase.getInstance()
+				.getUnseenStatusMessageCount()
+				+ HikeUserDatabase.getInstance().getPendingFriendRequestCount();
+		setNotificationCounter(unseenStatus);
 		/*
 		 * mSearchIconView = findViewById(R.id.search);
 		 * mSearchIconView.setOnClickListener(this);
@@ -988,7 +997,42 @@ public class MessagesList extends DrawerBaseActivity implements
 			toggleTypingNotification(true, msisdn);
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
 			toggleTypingNotification(false, (String) object);
+		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
+				|| HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
+			if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
+				final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+				if (favoriteToggle.second != FavoriteType.RECOMMENDED_FAVORITE) {
+					return;
+				}
+			}
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setNotificationCounter(++notificationCount);
+				}
+			});
+		} else if (HikePubSub.RESET_NOTIFICATION_COUNTER.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setNotificationCounter(0);
+				}
+			});
 		}
+	}
+
+	private void setNotificationCounter(int notificationCount) {
+		if (notificationCount > 0) {
+			notificationCounter.setBackgroundResource(R.drawable.notification);
+			notificationCounter.setText(Integer.toString(notificationCount));
+		} else {
+			notificationCounter
+					.setBackgroundResource(R.drawable.no_notification);
+			notificationCounter.setText("");
+		}
+		this.notificationCount = notificationCount;
 	}
 
 	private void toggleTypingNotification(boolean isTyping, String msisdn) {

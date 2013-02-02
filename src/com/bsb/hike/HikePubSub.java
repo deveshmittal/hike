@@ -196,6 +196,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String MY_STATUS_CHANGED = "myStatusChanged";
 
+	public static final String RESET_NOTIFICATION_COUNTER = "resetNotificationCounter";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
