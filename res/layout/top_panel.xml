@@ -5,23 +5,23 @@
     android:layout_height="48dp"
     android:background="@drawable/headerbar" >
 
-    <ImageButton 
+    <ImageButton
         android:id="@+id/topbar_menu"
         android:layout_width="48dp"
-        android:layout_marginTop="-2dp"
-        android:layout_marginLeft="-1dp"
-        android:onClick="onToggleLeftSideBarClicked"
         android:layout_height="@dimen/top_bar_btn_height"
-        android:src="@drawable/ic_topbar_menu"
+        android:layout_marginLeft="-1dp"
+        android:layout_marginTop="-2dp"
         android:background="@drawable/top_bar_btn_selector"
+        android:onClick="onToggleLeftSideBarClicked"
+        android:src="@drawable/ic_topbar_menu"
         android:visibility="gone" />
-    
+
     <View
         android:id="@+id/menu_bar"
-        android:layout_toRightOf="@+id/topbar_menu"
         android:layout_width="1dp"
         android:layout_height="@dimen/top_bar_btn_height"
         android:layout_marginTop="-1dp"
+        android:layout_toRightOf="@+id/topbar_menu"
         android:background="@drawable/button_separator"
         android:visibility="gone" />
 
@@ -61,7 +61,7 @@
         android:singleLine="true"
         android:textAppearance="@style/ChatLabelStyle"
         android:textSize="20dp" />
-    
+
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/title_centered"
         android:layout_width="wrap_content"
@@ -95,9 +95,9 @@
 
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/title_icon"
-            android:layout_marginLeft="-1dp"
             android:layout_width="60dp"
             android:layout_height="@dimen/top_bar_btn_height"
+            android:layout_marginLeft="-1dp"
             android:layout_marginTop="-1dp"
             android:background="@drawable/top_bar_btn_selector"
             android:gravity="center"
@@ -118,9 +118,9 @@
 
         <ImageButton
             android:id="@+id/title_image_btn"
-            android:layout_marginLeft="-1dp"
             android:layout_width="48dp"
             android:layout_height="@dimen/top_bar_btn_height"
+            android:layout_marginLeft="-1dp"
             android:layout_marginTop="-2dp"
             android:background="@drawable/top_bar_btn_selector"
             android:onClick="onTitleIconClick"
@@ -169,7 +169,6 @@
                 android:textStyle="bold"
                 android:visibility="gone" />
         </RelativeLayout>
-
     </LinearLayout>
 
 </RelativeLayout>
