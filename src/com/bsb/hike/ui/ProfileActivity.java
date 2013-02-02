@@ -305,6 +305,17 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
 
+		findViewById(R.id.button_bar).setVisibility(View.VISIBLE);
+		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn);
+		topBarBtn.setVisibility(View.VISIBLE);
+		/*
+		 * This would only happen for unknown contacts.
+		 */
+		if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+			topBarBtn.setImageResource(R.drawable.ic_add_to_contacts_top);
+		} else {
+			topBarBtn.setImageResource(R.drawable.ic_call_top);
+		}
 	}
 
 	private void setupGroupProfileScreen() {
@@ -399,6 +410,14 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						contactInfo, contactInfo.getFavoriteType());
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			}
+		} else if (v.getId() == R.id.title_image_btn) {
+			if (profileType == ProfileType.CONTACT_INFO) {
+				if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+					onAddToContactClicked(null);
+				} else {
+					onCallClicked(null);
+				}
 			}
 		}
 	}
@@ -1348,6 +1367,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				@Override
 				public void run() {
 					profileAdapter.updateContactInfo(contactInfo);
+					if (topBarBtn != null) {
+						topBarBtn.setImageResource(R.drawable.ic_call_top);
+					}
 				}
 			});
 		} else if (HikePubSub.USER_JOINED.equals(type)
