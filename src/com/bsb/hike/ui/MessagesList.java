@@ -137,6 +137,8 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	private Handler messageRefreshHandler;
 
+	private Button notificationCounter;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -282,12 +284,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 		}
 
-		View view = findViewById(R.id.title_hikeicon);
-		view.setVisibility(View.VISIBLE);
-
-		View notificationView = findViewById(R.id.notification_icon);
-		notificationView.setVisibility(View.VISIBLE);
-
+		notificationCounter = (Button) findViewById(R.id.title_hikeicon);
+		notificationCounter.setVisibility(View.VISIBLE);
 		/*
 		 * mSearchIconView = findViewById(R.id.search);
 		 * mSearchIconView.setOnClickListener(this);
