@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:layout_gravity="center_vertical"
-    android:background="@color/profile_item_bckg"
+    android:background="@drawable/alert_item_selector"
     android:gravity="center_vertical"
     android:orientation="vertical"
     android:paddingLeft="10dp"
