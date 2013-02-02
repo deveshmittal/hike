@@ -276,9 +276,12 @@ public class ProfileAdapter extends BaseAdapter {
 			break;
 
 		case EMPTY_STATUS:
+			String contactName = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo
+					.getMsisdn() : mContactInfo.getName();
+
 			viewHolder.text.setText(context.getString(
 					mContactInfo.isOnhike() ? R.string.add_as_friend_info
-							: R.string.not_on_hike, mContactInfo.getName()));
+							: R.string.not_on_hike, contactName));
 
 			viewHolder.icon
 					.setImageResource(mContactInfo.isOnhike() ? R.drawable.ic_not_friend
