@@ -51,11 +51,6 @@
                 android:footerDividersEnabled="false"
                 android:listSelector="@android:color/transparent" />
             
-            <View
-                android:id="@+id/list_dropshadow"
-                android:layout_width="fill_parent"
-                android:layout_height="1dp"
-                android:background="@drawable/dropshadow" />
         </LinearLayout>
     </com.bsb.hike.view.DrawerLayout>
 
