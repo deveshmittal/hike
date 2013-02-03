@@ -223,7 +223,7 @@
 	<string name="notifications">Benachrichtigungen</string>
 	<string name="favorites">Favoriten</string>
 	<string name="recent">ZULETZT</string>
-	<string name="friends_on_hike">FREUNDE BEI HIKE</string>
+	<string name="friends_on_hike">FREUNDE BEI HIKE (%1$d)</string>
 	<string name="invite_friends">Freunde Einladen</string>
 	<string name="invite_friends_caps">FREUNDE EINLADEN</string>
 	<string name="to">Zu</string>

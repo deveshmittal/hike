@@ -7,6 +7,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -53,7 +54,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private boolean freeSMSOn;
 	private ContactInfo recentSection;
 	private ContactInfo emptyFavorites;
+	private ContactInfo friendsOnHikeSection;
 	private String status;
+	private int statusDrawableResource;
 
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
@@ -73,10 +76,13 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		recentList = new ArrayList<ContactInfo>(0);
 		freeSMSOn = PreferenceManager.getDefaultSharedPreferences(context)
 				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
-		status = context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-				HikeMessengerApp.LAST_STATUS,
+		SharedPreferences preferences = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		status = preferences.getString(HikeMessengerApp.LAST_STATUS,
 				context.getString(R.string.default_status));
+		statusDrawableResource = preferences
+				.contains(HikeMessengerApp.LAST_STATUS) ? R.drawable.ic_text_status
+				: R.drawable.ic_no_status_posted;
 		new AsyncTask<Void, Void, Void>() {
 
 			@Override
@@ -116,8 +122,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		completeList.add(null);
 
 		// Contact for "Favorite Section"
-		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, context.getString(R.string.friends_on_hike), null));
+		friendsOnHikeSection = new ContactInfo(
+				DrawerFavoritesAdapter.SECTION_ID, null, context.getString(
+						R.string.friends_on_hike, favoriteList.size()), null);
+		completeList.add(friendsOnHikeSection);
 
 		/*
 		 * If favorite list is empty, we add an element to show the empty view
@@ -276,6 +284,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	public void updateStatus(String status) {
 		this.status = status;
+		this.statusDrawableResource = R.drawable.ic_text_status;
 		notifyDataSetChanged();
 	}
 
@@ -388,6 +397,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		case STATUS:
 			// set the user's status.
 			viewHolder.text.setText(status);
+			viewHolder.avatarImg.setImageResource(statusDrawableResource);
 			convertView.setOnClickListener(this);
 
 			int statusHeight = (int) (64 * Utils.densityMultiplier);
