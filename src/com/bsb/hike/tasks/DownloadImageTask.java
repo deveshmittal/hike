@@ -9,29 +9,29 @@ import android.util.Log;
 
 import com.bsb.hike.utils.Utils;
 
-public class DownloadPicasaImageTask extends AsyncTask<Void, Void, Boolean> {
+public class DownloadImageTask extends AsyncTask<Void, Void, Boolean> {
 
-	public static interface PicasaDownloadResult {
+	public static interface ImageDownloadResult {
 		public void downloadFinished(boolean result);
 	}
 
 	private File destFile;
-	private Uri picasaUri;
+	private Uri imageUri;
 	private Context context;
-	private PicasaDownloadResult picasaDownloadResult;
+	private ImageDownloadResult imageDownloadResult;
 
-	public DownloadPicasaImageTask(Context context, File destFile,
-			Uri picasaUri, PicasaDownloadResult picasaDownloadResult) {
+	public DownloadImageTask(Context context, File destFile,
+			Uri picasaUri, ImageDownloadResult imageDownloadResult) {
 		this.destFile = destFile;
-		this.picasaUri = picasaUri;
+		this.imageUri = picasaUri;
 		this.context = context;
-		this.picasaDownloadResult = picasaDownloadResult;
+		this.imageDownloadResult = imageDownloadResult;
 	}
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
 		try {
-			Utils.downloadAndSaveFile(context, destFile, picasaUri);
+			Utils.downloadAndSaveFile(context, destFile, imageUri);
 			return Boolean.TRUE;
 		} catch (Exception e) {
 			Log.e(getClass().getSimpleName(), "Error while fetching image", e);
@@ -41,6 +41,6 @@ public class DownloadPicasaImageTask extends AsyncTask<Void, Void, Boolean> {
 
 	@Override
 	protected void onPostExecute(Boolean result) {
-		picasaDownloadResult.downloadFinished(result);
+		imageDownloadResult.downloadFinished(result);
 	}
 }

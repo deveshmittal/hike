@@ -20,7 +20,6 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -53,12 +52,14 @@ import android.widget.ViewFlipper;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.DownloadPicasaImageTask;
-import com.bsb.hike.tasks.DownloadPicasaImageTask.PicasaDownloadResult;
+import com.bsb.hike.tasks.DownloadImageTask;
+import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -76,7 +77,7 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 public class SignupActivity extends Activity implements
 		SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener,
 		OnClickListener, FinishableEvent, OnCancelListener,
-		DialogInterface.OnClickListener {
+		DialogInterface.OnClickListener, Listener {
 
 	private SignupTask mTask;
 
@@ -130,11 +131,10 @@ public class SignupActivity extends Activity implements
 
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
-		public DownloadPicasaImageTask downloadPicasaImageTask; /*
-																 * the task to
-																 * download the
-																 * picasa image
-																 */
+		public DownloadImageTask downloadImageTask; /*
+													 * the task to download the
+													 * picasa image
+													 */
 
 		public String destFilePath = null;
 
@@ -142,6 +142,7 @@ public class SignupActivity extends Activity implements
 											 * the bitmap before the user saves
 											 * it
 											 */
+		public String userName = null;
 	}
 
 	@Override
@@ -172,7 +173,7 @@ public class SignupActivity extends Activity implements
 						getString(R.string.calling_you));
 				dialog.setCancelable(true);
 				dialog.setOnCancelListener(this);
-			} else if (mActivityState.downloadPicasaImageTask != null) {
+			} else if (mActivityState.downloadImageTask != null) {
 				dialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
 			}
@@ -237,6 +238,9 @@ public class SignupActivity extends Activity implements
 
 		errorImage.setImageDrawable(ad);
 		ad.start();
+
+		HikeMessengerApp.getPubSub().addListener(
+				HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
 	}
 
 	@Override
@@ -331,6 +335,8 @@ public class SignupActivity extends Activity implements
 
 	protected void onDestroy() {
 		super.onDestroy();
+		HikeMessengerApp.getPubSub().removeListener(
+				HikePubSub.FACEBOOK_IMAGE_DOWNLOADED, this);
 		if (dialog != null) {
 			dialog.dismiss();
 			dialog = null;
@@ -865,39 +871,38 @@ public class SignupActivity extends Activity implements
 								.getString(HikeMessengerApp.MSISDN_SETTING, ""));
 
 						final File destFile = new File(directory, fileName);
-						new AsyncTask<Void, Void, Boolean>() {
+						mActivityState.downloadImageTask = new DownloadImageTask(
+								getApplicationContext(), destFile, Uri
+										.parse(fbProfileUrl),
+								new ImageDownloadResult() {
 
-							@Override
-							protected Boolean doInBackground(Void... params) {
-								try {
-									Utils.downloadAndSaveFile(
-											getApplicationContext(), destFile,
-											Uri.parse(fbProfileUrl));
-
-									return true;
-								} catch (Exception e) {
-									return false;
-								}
-							}
-
-							@Override
-							protected void onPostExecute(Boolean result) {
-								if (!result) {
-									Toast.makeText(getApplicationContext(),
-											R.string.fb_fetch_image_error,
-											Toast.LENGTH_SHORT).show();
-									return;
-								}
-								mActivityState.destFilePath = destFile
-										.getPath();
-								setProfileImage();
-
-								String name = user.getName();
-								enterEditText.setText(name);
-								enterEditText.setSelection(name.length());
-							}
-
-						}.execute();
+									@Override
+									public void downloadFinished(boolean result) {
+										mActivityState = new ActivityState();
+										if (!result) {
+											Toast.makeText(
+													getApplicationContext(),
+													R.string.fb_fetch_image_error,
+													Toast.LENGTH_SHORT).show();
+										} else {
+											mActivityState.destFilePath = destFile
+													.getPath();
+											mActivityState.userName = user
+													.getName();
+										}
+										HikeMessengerApp
+												.getPubSub()
+												.publish(
+														HikePubSub.FACEBOOK_IMAGE_DOWNLOADED,
+														result);
+									}
+								});
+						mActivityState.downloadImageTask.execute();
+						dialog = ProgressDialog.show(
+								SignupActivity.this,
+								null,
+								getResources().getString(
+										R.string.downloading_image));
 					}
 				}
 			});
@@ -1044,9 +1049,9 @@ public class SignupActivity extends Activity implements
 				Utils.startCropActivity(this, path, destFilePath);
 			} else {
 				final File destFile = new File(path);
-				mActivityState.downloadPicasaImageTask = new DownloadPicasaImageTask(
+				mActivityState.downloadImageTask = new DownloadImageTask(
 						getApplicationContext(), destFile, selectedFileUri,
-						new PicasaDownloadResult() {
+						new ImageDownloadResult() {
 
 							@Override
 							public void downloadFinished(boolean result) {
@@ -1056,7 +1061,7 @@ public class SignupActivity extends Activity implements
 								}
 								mActivityState = new ActivityState();
 								if (!result) {
-									Toast.makeText(SignupActivity.this,
+									Toast.makeText(getApplicationContext(),
 											R.string.error_download,
 											Toast.LENGTH_SHORT).show();
 								} else {
@@ -1067,7 +1072,7 @@ public class SignupActivity extends Activity implements
 								}
 							}
 						});
-				mActivityState.downloadPicasaImageTask.execute();
+				mActivityState.downloadImageTask.execute();
 				dialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
 			}
@@ -1088,5 +1093,30 @@ public class SignupActivity extends Activity implements
 				mActivityState.destFilePath,
 				HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) {
+		if (HikePubSub.FACEBOOK_IMAGE_DOWNLOADED.equals(type)) {
+			final boolean result = (Boolean) object;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (dialog != null) {
+						dialog.dismiss();
+						dialog = null;
+					}
+					if (!result) {
+						return;
+					}
+					setProfileImage();
+
+					enterEditText.setText(mActivityState.userName);
+					enterEditText
+							.setSelection(mActivityState.userName.length());
+				}
+			});
+		}
 	}
 }

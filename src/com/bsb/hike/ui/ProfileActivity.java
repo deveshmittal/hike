@@ -73,8 +73,8 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.DownloadPicasaImageTask;
-import com.bsb.hike.tasks.DownloadPicasaImageTask.PicasaDownloadResult;
+import com.bsb.hike.tasks.DownloadImageTask;
+import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -144,7 +144,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
-		public DownloadPicasaImageTask downloadPicasaImageTask; /*
+		public DownloadImageTask downloadPicasaImageTask; /*
 																 * the task to
 																 * download the
 																 * picasa image
@@ -803,9 +803,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				Utils.startCropActivity(this, path, destFilePath);
 			} else {
 				final File destFile = new File(path);
-				mActivityState.downloadPicasaImageTask = new DownloadPicasaImageTask(
+				mActivityState.downloadPicasaImageTask = new DownloadImageTask(
 						getApplicationContext(), destFile, selectedFileUri,
-						new PicasaDownloadResult() {
+						new ImageDownloadResult() {
 
 							@Override
 							public void downloadFinished(boolean result) {

@@ -49,8 +49,8 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.DownloadPicasaImageTask;
-import com.bsb.hike.tasks.DownloadPicasaImageTask.PicasaDownloadResult;
+import com.bsb.hike.tasks.DownloadImageTask;
+import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.MessagesList;
@@ -84,7 +84,7 @@ public class DrawerBaseActivity extends Activity implements
 	private class ActivityTask {
 		boolean showingStatusDialog = false;
 		String filePath = null;
-		DownloadPicasaImageTask downloadPicasaImageTask = null;
+		DownloadImageTask downloadPicasaImageTask = null;
 		Bitmap filePreview = null;
 		HikeHTTPTask hikeHTTPTask = null;
 	}
@@ -669,9 +669,9 @@ public class DrawerBaseActivity extends Activity implements
 				if (Utils.isPicasaUri(selectedFileUri.toString())) {
 					final File destFile = selectedFile;
 					// Picasa image
-					mActivityTask.downloadPicasaImageTask = new DownloadPicasaImageTask(
+					mActivityTask.downloadPicasaImageTask = new DownloadImageTask(
 							getApplicationContext(), destFile, selectedFileUri,
-							new PicasaDownloadResult() {
+							new ImageDownloadResult() {
 								@Override
 								public void downloadFinished(boolean result) {
 									mActivityTask.downloadPicasaImageTask = null;
