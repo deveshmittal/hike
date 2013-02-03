@@ -147,6 +147,10 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
 		StatusMessage statusMessage = centralTimelineAdapter.getItem(position);
+		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
+				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)) {
+			return;
+		}
 
 		Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null,
 				statusMessage.getMsisdn(), statusMessage.getName(),
@@ -195,6 +199,11 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 	public void onDetailsBtnClick(View v) {
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
+
+		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
+				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)) {
+			return;
+		}
 
 		Intent intent = new Intent();
 		intent.setClass(this, ProfileActivity.class);
