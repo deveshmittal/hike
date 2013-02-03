@@ -28,6 +28,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginTop="3dp"
             android:gravity="right"
+            android:paddingTop="1dp"
             android:text="2 Minutes Ago"
             android:textColor="@color/timestampcolor"
             android:textSize="12sp"
