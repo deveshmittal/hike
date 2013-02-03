@@ -88,10 +88,24 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		String[] friendMsisdns = new String[friendMsisdnLength + 1];
 
 		for (int i = 0; i < friendRequests; i++) {
-			friendMsisdns[i] = friendRequestList.get(i).getMsisdn();
+			ContactInfo contactInfo = friendRequestList.get(i);
+			/*
+			 * We don't show status updates from unknown contacts
+			 */
+			if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+				continue;
+			}
+			friendMsisdns[i] = contactInfo.getMsisdn();
 		}
 		for (int i = 0; i < friends; i++) {
-			friendMsisdns[i + friendRequests] = friendsList.get(i).getMsisdn();
+			ContactInfo contactInfo = friendsList.get(i);
+			/*
+			 * We don't show status updates from unknown contacts
+			 */
+			if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+				continue;
+			}
+			friendMsisdns[i + friendRequests] = contactInfo.getMsisdn();
 		}
 		friendMsisdns[friendMsisdnLength] = userMsisdn;
 
