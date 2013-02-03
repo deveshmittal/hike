@@ -92,6 +92,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 				favoriteList = hikeUserDatabase.getContactsOfFavoriteType(
 						FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE);
+				favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+						FavoriteType.PENDING, HikeConstants.BOTH_VALUE));
 				Collections.sort(favoriteList);
 
 				onHikeList = hikeUserDatabase.getContactsOfFavoriteType(
@@ -502,7 +504,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				context.startActivity(callIntent);
 			} else {
 				Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
-						contactInfo, FavoriteType.FAVORITE);
+						contactInfo, FavoriteType.PENDING);
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 			}

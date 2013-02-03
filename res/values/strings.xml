@@ -366,4 +366,7 @@
 	<string name="status">Status</string>
 	<string name="post">Post</string>
 	<string name="which_friend_invite">Which of your friends would you like to invite to hike?</string>
+	<string name="confirmed_friend">Confirmed you as a friend</string>
+	<string name="confirmed_friend_info">You can now see updates from %1$s</string>
+	<string name="waiting_for_accept">Waiting for %1$s to accept you friend request</string>
 </resources>

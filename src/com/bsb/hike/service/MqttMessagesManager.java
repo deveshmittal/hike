@@ -19,6 +19,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
@@ -29,6 +30,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
@@ -539,12 +541,25 @@ public class MqttMessagesManager {
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					false);
 			if (contactInfo == null
-					|| contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
+					|| (contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE && contactInfo
+							.getFavoriteType() != FavoriteType.PENDING)) {
 				return;
 			}
+			FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.NOT_FAVORITE ? FavoriteType.RECOMMENDED_FAVORITE
+					: FavoriteType.FAVORITE;
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
-					contactInfo, FavoriteType.RECOMMENDED_FAVORITE);
+					contactInfo, favoriteType);
 			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			if (favoriteType == FavoriteType.FAVORITE) {
+				StatusMessage statusMessage = new StatusMessage(0, null,
+						msisdn, contactInfo.getName(),
+						context.getString(R.string.confirmed_friend),
+						StatusMessageType.FRIEND_REQUEST_ACCEPTED,
+						System.currentTimeMillis() / 1000);
+				convDb.addStatusMessage(statusMessage);
+				pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED,
+						statusMessage);
+			}
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 

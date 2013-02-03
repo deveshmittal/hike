@@ -13,10 +13,11 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		NOT_FAVORITE, /* Not a favorite */
 		RECOMMENDED_FAVORITE, /* Contacts that added the user as a favorite */
 		FAVORITE, /* Contacts that were added as favorites */
-		AUTO_RECOMMENDED_FAVORITE /*
-								 * Contacts that were recommended by the app to
-								 * be added as favorites
-								 */
+		AUTO_RECOMMENDED_FAVORITE, /*
+									 * Contacts that were recommended by the app
+									 * to be added as favorites
+									 */
+		PENDING /* Pending friend request */
 	}
 
 	@Override

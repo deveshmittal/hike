@@ -122,7 +122,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED,
 			HikePubSub.USER_LEFT, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
 			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED,
-			HikePubSub.STATUS_MESSAGE_RECEIVED };
+			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED };
 
 	private String[] profilePubSubListeners = {
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
@@ -145,10 +145,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
 		public DownloadImageTask downloadPicasaImageTask; /*
-																 * the task to
-																 * download the
-																 * picasa image
-																 */
+														 * the task to download
+														 * the picasa image
+														 */
 		public DownloadProfileImageTask downloadProfileImageTask;
 
 		public String destFilePath = null; /*
@@ -282,23 +281,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		}
 
 		profileItems = new ArrayList<StatusMessage>();
-		// Adding an item for the header
-		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_HEADER_ID,
-				null, null, null, null, null, 0));
-		if (showMessageBtn) {
-			// Adding an item for the button
-			profileItems.add(new StatusMessage(
-					ProfileAdapter.PROFILE_BUTTON_ID, null, null, null, null,
-					null, 0));
-		}
-		if (contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE) {
-			profileItems.addAll(HikeConversationsDatabase.getInstance()
-					.getStatusMessages(mLocalMSISDN));
-		} else {
-			// Adding an item for the empty status
-			profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_EMPTY_ID,
-					null, null, null, null, null, 0));
-		}
+		setupContactProfileList();
 
 		profileAdapter = new ProfileAdapter(this, profileItems, null,
 				contactInfo, false);
@@ -315,6 +298,28 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			topBarBtn.setImageResource(R.drawable.ic_add_to_contacts_top);
 		} else {
 			topBarBtn.setImageResource(R.drawable.ic_call_top);
+		}
+	}
+
+	private void setupContactProfileList() {
+		profileItems.clear();
+		// Adding an item for the header
+		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_HEADER_ID,
+				null, null, null, null, null, 0));
+		if (showMessageBtn) {
+			// Adding an item for the button
+			profileItems.add(new StatusMessage(
+					ProfileAdapter.PROFILE_BUTTON_ID, null, null, null, null,
+					null, 0));
+		}
+		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE)
+				&& (contactInfo.getFavoriteType() != FavoriteType.PENDING)) {
+			profileItems.addAll(HikeConversationsDatabase.getInstance()
+					.getStatusMessages(mLocalMSISDN));
+		} else {
+			// Adding an item for the empty status
+			profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_EMPTY_ID,
+					null, null, null, null, null, 0));
 		}
 	}
 
@@ -1182,7 +1187,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	public void onProfileNegativeBtnClick(View v) {
 		if (contactInfo.isOnhike()) {
-			contactInfo.setFavoriteType(FavoriteType.FAVORITE);
+			contactInfo.setFavoriteType(FavoriteType.PENDING);
 
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, contactInfo.getFavoriteType());
@@ -1408,6 +1413,24 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				return;
 			}
 			profileItems.add(showMessageBtn ? 2 : 1, statusMessage);
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					profileAdapter.notifyDataSetChanged();
+				}
+			});
+		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
+			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
+
+			ContactInfo contactInfo = favoriteToggle.first;
+			FavoriteType favoriteType = favoriteToggle.second;
+
+			if (!mLocalMSISDN.equals(contactInfo.getMsisdn())) {
+				return;
+			}
+			this.contactInfo.setFavoriteType(favoriteType);
+			setupContactProfileList();
 			runOnUiThread(new Runnable() {
 
 				@Override

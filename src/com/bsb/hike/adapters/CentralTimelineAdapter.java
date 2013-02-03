@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 
 public class CentralTimelineAdapter extends BaseAdapter {
@@ -111,7 +110,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(true));
 
-		if (statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS) {
+		switch (statusMessage.getStatusMessageType()) {
+		case NO_STATUS:
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
 			viewHolder.yesBtn.setVisibility(View.VISIBLE);
 			viewHolder.noBtn.setVisibility(View.GONE);
@@ -120,7 +120,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.yesBtn.setText(R.string.add_hike_friend);
 			viewHolder.statusType.setImageResource(R.drawable.ic_no_status);
 			viewHolder.statusType.setBackgroundDrawable(null);
-		} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) {
+			break;
+		case FRIEND_REQUEST:
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
 			viewHolder.yesBtn.setVisibility(View.VISIBLE);
 			viewHolder.noBtn.setVisibility(View.VISIBLE);
@@ -135,15 +136,28 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					.setImageResource(R.drawable.ic_profile_pic_status);
 			viewHolder.statusType
 					.setBackgroundResource(R.drawable.bg_status_type);
-		} else {
+			break;
+		case TEXT:
 			viewHolder.extraInfo.setVisibility(View.GONE);
 			viewHolder.yesBtn.setVisibility(View.GONE);
 			viewHolder.noBtn.setVisibility(View.GONE);
-			viewHolder.extraInfo.setVisibility(View.GONE);
 
 			viewHolder.statusType.setImageResource(R.drawable.ic_text_status);
 			viewHolder.statusType
 					.setBackgroundResource(R.drawable.bg_status_type);
+			break;
+		case FRIEND_REQUEST_ACCEPTED:
+			viewHolder.yesBtn.setVisibility(View.GONE);
+			viewHolder.noBtn.setVisibility(View.GONE);
+			viewHolder.extraInfo.setVisibility(View.VISIBLE);
+
+			viewHolder.extraInfo.setText(context.getString(
+					R.string.confirmed_friend_info, statusMessage.getName()));
+			viewHolder.statusType
+					.setImageResource(R.drawable.ic_profile_pic_status);
+			viewHolder.statusType
+					.setBackgroundResource(R.drawable.bg_status_type);
+			break;
 		}
 		viewHolder.content
 				.setBackgroundResource(statusMessage.isStatusSeen() ? R.drawable.seen_timeline_selector

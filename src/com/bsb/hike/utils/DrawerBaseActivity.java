@@ -344,11 +344,11 @@ public class DrawerBaseActivity extends Activity implements
 				public void run() {
 					FavoriteType favoriteType = favoriteToggle.second;
 					ContactInfo contactInfo = favoriteToggle.first;
-					if (favoriteType == FavoriteType.FAVORITE) {
-						contactInfo.setFavoriteType(FavoriteType.FAVORITE);
+					contactInfo.setFavoriteType(favoriteType);
+					if ((favoriteType == FavoriteType.FAVORITE)
+							|| (favoriteType == FavoriteType.PENDING)) {
 						parentLayout.addToFavorite(contactInfo);
 					} else if (favoriteType == FavoriteType.NOT_FAVORITE) {
-						contactInfo.setFavoriteType(FavoriteType.NOT_FAVORITE);
 						parentLayout.removeFromFavorite(contactInfo);
 					}
 				}
@@ -364,7 +364,8 @@ public class DrawerBaseActivity extends Activity implements
 
 				@Override
 				public void run() {
-					if (contactInfo.getFavoriteType() != FavoriteType.FAVORITE) {
+					if ((contactInfo.getFavoriteType() != FavoriteType.FAVORITE)
+							&& (contactInfo.getFavoriteType() != FavoriteType.PENDING)) {
 						parentLayout.updateRecentContacts(contactInfo);
 					} else {
 						parentLayout.addToFavorite(contactInfo);
@@ -377,6 +378,8 @@ public class DrawerBaseActivity extends Activity implements
 			final List<ContactInfo> favoriteList = hikeUserDatabase
 					.getContactsOfFavoriteType(FavoriteType.FAVORITE,
 							HikeConstants.BOTH_VALUE);
+			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.PENDING, HikeConstants.BOTH_VALUE));
 			runOnUiThread(new Runnable() {
 
 				@Override

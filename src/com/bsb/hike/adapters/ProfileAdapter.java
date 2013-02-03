@@ -18,6 +18,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 
 @SuppressWarnings("unchecked")
@@ -279,17 +280,24 @@ public class ProfileAdapter extends BaseAdapter {
 			String contactName = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo
 					.getMsisdn() : mContactInfo.getName();
 
-			viewHolder.text.setText(context.getString(
-					mContactInfo.isOnhike() ? R.string.add_as_friend_info
-							: R.string.not_on_hike, contactName));
+			if (mContactInfo.isOnhike()) {
+				viewHolder.icon.setImageResource(R.drawable.ic_not_friend);
+				if (mContactInfo.getFavoriteType() == FavoriteType.PENDING) {
+					viewHolder.text.setText(context.getString(
+							R.string.waiting_for_accept, contactName));
+					viewHolder.btn1.setVisibility(View.GONE);
+				} else {
+					viewHolder.text.setText(context.getString(
+							R.string.add_as_friend_info, contactName));
+					viewHolder.btn1.setText(R.string.add_as_friend);
+				}
+			} else {
+				viewHolder.icon.setImageResource(R.drawable.ic_not_on_hike);
+				viewHolder.text.setText(context.getString(R.string.not_on_hike,
+						contactName));
+				viewHolder.btn1.setText(R.string.invite_to_hike);
+			}
 
-			viewHolder.icon
-					.setImageResource(mContactInfo.isOnhike() ? R.drawable.ic_not_friend
-							: R.drawable.ic_not_on_hike);
-
-			viewHolder.btn1
-					.setText(mContactInfo.isOnhike() ? R.string.add_as_friend
-							: R.string.invite_to_hike);
 			break;
 		}
 
