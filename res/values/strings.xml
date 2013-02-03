@@ -365,4 +365,5 @@
 	<string name="whats_up_user">What\'s up, %1$s?</string>
 	<string name="status">Status</string>
 	<string name="post">Post</string>
+	<string name="which_friend_invite">Which of your friends would you like to invite to hike?</string>
 </resources>

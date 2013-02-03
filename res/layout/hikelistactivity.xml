@@ -21,7 +21,7 @@
         android:minHeight="48dp"
         android:orientation="horizontal" >
 
-        <TextView
+        <com.bsb.hike.view.CustomFontTextView
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:gravity="center_vertical"
@@ -30,7 +30,7 @@
             android:textColor="#818181"
             android:textSize="16sp" />
 
-        <EditText
+        <com.bsb.hike.view.CustomFontEditText
             android:id="@+id/input_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,10 +47,26 @@
             android:textColor="@color/lightblack"
             android:textColorHint="#cdcdc8"
             android:textSize="16sp"
-            android:visibility="visible" >
-        </EditText>
+            android:visibility="visible" />
     </LinearLayout>
 
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/nux_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingBottom="10dp"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:paddingTop="10dp"
+        android:shadowColor="@color/white"
+        android:shadowDy="0.5"
+        android:shadowRadius="0.5"
+        android:text="@string/which_friend_invite"
+        android:textColor="@color/timestampcolor"
+        android:textSize="14sp"
+        android:visibility="gone" />
+    
     <ListView
         android:id="@+id/contact_list"
         android:layout_width="match_parent"

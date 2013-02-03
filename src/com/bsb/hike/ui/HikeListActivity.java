@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -57,14 +58,36 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 
 		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 
+		if (showMostContactedContacts) {
+			findViewById(R.id.input_number_container).setVisibility(View.GONE);
+			findViewById(R.id.nux_text).setVisibility(View.VISIBLE);
+		}
+
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
 
-		adapter = new HikeInviteAdapter(this, -1,
-				showMostContactedContacts ? HikeUserDatabase.getInstance()
-						.getNonHikeMostContactedContacts(50) : HikeUserDatabase
-						.getInstance().getNonHikeContacts());
+		List<Pair<AtomicBoolean, ContactInfo>> contactList = showMostContactedContacts ? HikeUserDatabase
+				.getInstance().getNonHikeMostContactedContacts(50)
+				: HikeUserDatabase.getInstance().getNonHikeContacts();
+
+		/*
+		 * This would be true when we have pre checked items.
+		 */
+		if (showMostContactedContacts) {
+			for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList) {
+				boolean checked = contactItem.first.get();
+				if (checked) {
+					selectedContacts.add(contactItem.second.getMsisdn());
+				} else {
+					break;
+				}
+			}
+			Log.d(getClass().getSimpleName(), "Selected contacts: "
+					+ selectedContacts.size());
+		}
+
+		adapter = new HikeInviteAdapter(this, -1, contactList);
 		input.addTextChangedListener(adapter);
 
 		labelView.setText(R.string.invite_via_sms);
