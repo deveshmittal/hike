@@ -362,4 +362,7 @@
 	<string name="confirm">Confirm</string>
 	<string name="recent_updates">Recent Updates</string>
 	<string name="manage_account">Manage Account</string>
+	<string name="whats_up_user">What\'s up, %1$s?</string>
+	<string name="status">Status</string>
+	<string name="post">Post</string>
 </resources>

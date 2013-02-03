@@ -83,8 +83,8 @@
             android:layout_marginBottom="15dp"
             android:layout_toRightOf="@id/avatar"
             android:background="@null"
-            android:hint="What&apos;s up?"
             android:maxLines="4"
+            android:hint="@string/whats_up_user"
             android:textColor="@color/subtext" />
 
         <ImageView

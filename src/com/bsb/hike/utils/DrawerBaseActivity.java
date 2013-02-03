@@ -433,7 +433,7 @@ public class DrawerBaseActivity extends Activity implements
 
 		final Button titleBtn = (Button) statusDialog
 				.findViewById(R.id.title_icon);
-		titleBtn.setText("Post");
+		titleBtn.setText(R.string.post);
 		titleBtn.setEnabled(false);
 		titleBtn.setVisibility(View.VISIBLE);
 
@@ -441,7 +441,7 @@ public class DrawerBaseActivity extends Activity implements
 				.setVisibility(View.VISIBLE);
 
 		TextView mTitleView = (TextView) statusDialog.findViewById(R.id.title);
-		mTitleView.setText("Status");
+		mTitleView.setText(R.string.status);
 
 		ImageView avatar = (ImageView) statusDialog.findViewById(R.id.avatar);
 		avatar.setImageDrawable(IconCacheManager.getInstance()
