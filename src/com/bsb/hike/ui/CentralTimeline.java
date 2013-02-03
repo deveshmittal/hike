@@ -169,6 +169,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null,
 				statusMessage.getMsisdn(), statusMessage.getName(),
 				statusMessage.getMsisdn()));
+		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 		intent.setClass(this, ChatThread.class);
 		startActivity(intent);
 	}

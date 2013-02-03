@@ -559,7 +559,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			Intent intent = null;
 			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)
 					&& !getIntent().hasExtra(
-							HikeConstants.Extras.FORWARD_MESSAGE)) {
+							HikeConstants.Extras.FORWARD_MESSAGE)
+					&& !getIntent().getBooleanExtra(
+							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)) {
 				intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
