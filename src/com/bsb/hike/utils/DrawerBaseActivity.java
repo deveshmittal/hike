@@ -248,7 +248,9 @@ public class DrawerBaseActivity extends Activity implements
 		} else if (parentLayout.isRightOpening()) {
 			parentLayout.closeRightSidebar(false);
 		} else {
-			if (!(this instanceof MessagesList)) {
+			if (!(this instanceof MessagesList)
+					&& !getIntent().getBooleanExtra(
+							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)) {
 				Intent intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);

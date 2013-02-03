@@ -39,6 +39,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 	private String[] pubSubListeners = new String[] {
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED };
+	private String userMsisdn;
 
 	@Override
 	protected void onPause() {
@@ -68,9 +69,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 		timelineContent = (ListView) findViewById(R.id.timeline_content);
 
-		String userMsisdn = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(
-				HikeMessengerApp.MSISDN_SETTING, "");
+		userMsisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 		List<ContactInfo> friendRequestList = HikeUserDatabase.getInstance()
 				.getContactsOfFavoriteType(FavoriteType.RECOMMENDED_FAVORITE,
@@ -164,6 +164,11 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)) {
 			return;
+		} else if (userMsisdn.equals(statusMessage.getMsisdn())) {
+			Intent intent = new Intent(this, ProfileActivity.class);
+			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
+			startActivity(intent);
+			return;
 		}
 
 		Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(null,
@@ -215,17 +220,21 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	public void onDetailsBtnClick(View v) {
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
 
+		Intent intent = new Intent(this, ProfileActivity.class);
+		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
+
 		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)) {
 			return;
+		} else if (userMsisdn.equals(statusMessage.getMsisdn())) {
+			startActivity(intent);
+			return;
 		}
 
-		Intent intent = new Intent();
 		intent.setClass(this, ProfileActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
 				statusMessage.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 		startActivity(intent);
 	}
 
