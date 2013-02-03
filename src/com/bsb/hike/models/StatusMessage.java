@@ -12,7 +12,7 @@ import com.ocpsoft.pretty.time.PrettyTime;
 public class StatusMessage {
 
 	public static enum StatusMessageType {
-		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED
+		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED, NO_STATUS
 	}
 
 	private long id;

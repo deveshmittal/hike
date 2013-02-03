@@ -111,7 +111,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(true));
 
-		if (statusMessage.getId() == EMPTY_STATUS_ID) {
+		if (statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS) {
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
 			viewHolder.yesBtn.setVisibility(View.VISIBLE);
 			viewHolder.noBtn.setVisibility(View.GONE);

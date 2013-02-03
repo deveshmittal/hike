@@ -119,7 +119,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			statusMessages.add(new StatusMessage(
 					CentralTimelineAdapter.EMPTY_STATUS_ID, null, "12345",
 					getString(R.string.team_hike), getString(R.string.hey_name,
-							name), null, System.currentTimeMillis() / 1000));
+							name), StatusMessageType.NO_STATUS, System
+							.currentTimeMillis() / 1000));
 		}
 
 		centralTimelineAdapter = new CentralTimelineAdapter(this,
