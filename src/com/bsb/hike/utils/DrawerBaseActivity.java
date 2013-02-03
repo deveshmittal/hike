@@ -69,6 +69,7 @@ public class DrawerBaseActivity extends Activity implements
 	private ActivityTask mActivityTask;
 	private Dialog statusDialog;
 	private ProgressDialog progressDialog;
+	private SharedPreferences preferences;
 
 	private String[] leftDrawerPubSubListeners = {
 			HikePubSub.PROFILE_PIC_CHANGED, HikePubSub.FREE_SMS_TOGGLED,
@@ -97,6 +98,8 @@ public class DrawerBaseActivity extends Activity implements
 			getWindow().setFlags(HikeConstants.FLAG_HARDWARE_ACCELERATED,
 					HikeConstants.FLAG_HARDWARE_ACCELERATED);
 		}
+		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				MODE_PRIVATE);
 	}
 
 	@Override
@@ -158,8 +161,7 @@ public class DrawerBaseActivity extends Activity implements
 			}
 		}
 
-		userMsisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, "");
+		userMsisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 		Object o = getLastNonConfigurationInstance();
 
@@ -559,14 +561,11 @@ public class DrawerBaseActivity extends Activity implements
 											.optString(HikeConstants.STATUS_ID);
 									String text = data
 											.optString(HikeConstants.STATUS_MESSAGE);
-									SharedPreferences prefs = getSharedPreferences(
-											HikeMessengerApp.ACCOUNT_SETTINGS,
-											MODE_PRIVATE);
-									String msisdn = prefs
+									String msisdn = preferences
 											.getString(
 													HikeMessengerApp.MSISDN_SETTING,
 													"");
-									String name = prefs.getString(
+									String name = preferences.getString(
 											HikeMessengerApp.NAME_SETTING, "");
 									long time = (long) System
 											.currentTimeMillis() / 1000;
@@ -577,7 +576,7 @@ public class DrawerBaseActivity extends Activity implements
 									HikeConversationsDatabase.getInstance()
 											.addStatusMessage(statusMessage);
 
-									Editor editor = prefs.edit();
+									Editor editor = preferences.edit();
 									editor.putString(
 											HikeMessengerApp.LAST_STATUS, text);
 									editor.commit();
@@ -644,11 +643,9 @@ public class DrawerBaseActivity extends Activity implements
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if ((requestCode == IMAGE_PICK_CODE) && resultCode == RESULT_OK) {
 			File selectedFile = null;
-			SharedPreferences prefs = getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 
 			if (requestCode == IMAGE_PICK_CODE) {
-				selectedFile = new File(prefs.getString(
+				selectedFile = new File(preferences.getString(
 						HikeMessengerApp.FILE_PATH, ""));
 
 				clearTempData();
@@ -749,9 +746,7 @@ public class DrawerBaseActivity extends Activity implements
 	}
 
 	private void clearTempData() {
-		SharedPreferences prefs = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		Editor editor = prefs.edit();
+		Editor editor = preferences.edit();
 		editor.remove(HikeMessengerApp.TEMP_NAME);
 		editor.remove(HikeMessengerApp.TEMP_NUM);
 		editor.commit();
