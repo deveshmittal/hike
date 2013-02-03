@@ -349,7 +349,7 @@
 	<string name="post_status">Post a status</string>
 	<string name="owner">Owner</string>
 	<string name="on_sms">on SMS</string>
-	<string name="default_status">Tap to update status</string>
+	<string name="default_status">Tap to update status...</string>
 	<string name="update_status_fail">Could not update status</string>
 	<string name="no_friends">Tap on plus so send a friend request.</string>
 	<string name="contacts_on_hike">CONTACTS ON HIKE</string>
