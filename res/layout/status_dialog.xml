@@ -9,7 +9,7 @@
         android:id="@+id/top_panel"
         layout="@layout/top_panel" />
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="52dp"
@@ -17,36 +17,27 @@
         android:orientation="horizontal" >
 
         <ImageButton
-            android:id="@+id/insert_img_btn"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@null"
-            android:onClick="onInsertImageClick"
-            android:src="@drawable/insert_img_btn" />
-
-        <ImageButton
             android:id="@+id/post_fb_btn"
-            android:layout_width="0dp"
+            android:layout_width="70dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:background="@null"
             android:src="@drawable/post_fb" />
 
         <ImageButton
             android:id="@+id/post_twitter_btn"
-            android:layout_width="0dp"
+            android:layout_width="70dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_toRightOf="@id/post_fb_btn"
             android:background="@null"
             android:src="@drawable/post_twitter" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/char_counter"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_alignParentRight="true"
             android:gravity="center"
+            android:paddingRight="20dp"
             android:shadowColor="@color/white"
             android:shadowDy="0.7"
             android:shadowRadius="0.7"
@@ -54,7 +45,8 @@
             android:textColor="@color/status_counter"
             android:textSize="19sp"
             android:textStyle="bold|italic" />
-    </LinearLayout>
+
+    </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
@@ -83,7 +75,6 @@
             android:layout_marginBottom="15dp"
             android:layout_toRightOf="@id/avatar"
             android:background="@null"
-            android:maxLines="4"
             android:hint="@string/whats_up_user"
             android:textColor="@color/subtext" />
 

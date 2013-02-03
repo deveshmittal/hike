@@ -11,6 +11,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -88,6 +89,7 @@ public class DrawerBaseActivity extends Activity implements
 		DownloadImageTask downloadPicasaImageTask = null;
 		Bitmap filePreview = null;
 		HikeHTTPTask hikeHTTPTask = null;
+		String status = null;
 	}
 
 	@Override
@@ -449,15 +451,29 @@ public class DrawerBaseActivity extends Activity implements
 		avatar.setImageDrawable(IconCacheManager.getInstance()
 				.getIconForMSISDN(userMsisdn));
 
-		ImageButton insertImgBtn = (ImageButton) statusDialog
-				.findViewById(R.id.insert_img_btn);
+		// ImageButton insertImgBtn = (ImageButton) statusDialog
+		// .findViewById(R.id.insert_img_btn);
 		ImageButton fbPostBtn = (ImageButton) statusDialog
 				.findViewById(R.id.post_fb_btn);
 		ImageButton twitterPostBtn = (ImageButton) statusDialog
 				.findViewById(R.id.post_twitter_btn);
 
+		final TextView charCounter = (TextView) statusDialog
+				.findViewById(R.id.char_counter);
+
 		final EditText statusTxt = (EditText) statusDialog
 				.findViewById(R.id.status_txt);
+
+		String statusHint = getString(R.string.whats_up_user,
+				Utils.getFirstName(preferences.getString(
+						HikeMessengerApp.NAME_SETTING, "")));
+
+		statusTxt.setHint(statusHint);
+
+		statusTxt.setText(mActivityTask.status);
+
+		charCounter.setText(Integer.toString(statusTxt.length()));
+
 		statusTxt.addTextChangedListener(new TextWatcher() {
 
 			@Override
@@ -472,8 +488,8 @@ public class DrawerBaseActivity extends Activity implements
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				titleBtn.setEnabled((mActivityTask.filePath != null)
-						|| (s.length() > 0));
+				titleBtn.setEnabled(s.length() > 0);
+				charCounter.setText(Integer.toString(s.length()));
 			}
 		});
 
@@ -493,6 +509,15 @@ public class DrawerBaseActivity extends Activity implements
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				mActivityTask.showingStatusDialog = false;
+				mActivityTask.status = null;
+			}
+		});
+
+		statusDialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				mActivityTask.status = statusTxt.getText().toString();
 			}
 		});
 
@@ -501,45 +526,45 @@ public class DrawerBaseActivity extends Activity implements
 			public void onClick(View v) {
 				Log.d(getClass().getSimpleName(), "Onclick event");
 				switch (v.getId()) {
-				case R.id.insert_img_btn:
+				// case R.id.insert_img_btn:
 
-					// if (Utils.getExternalStorageState() ==
-					// ExternalStorageState.NONE) {
-					// Toast.makeText(getApplicationContext(),
-					// R.string.no_external_storage,
-					// Toast.LENGTH_SHORT).show();
-					// return;
-					// }
-					//
-					// SharedPreferences prefs = getSharedPreferences(
-					// HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-					//
-					// Intent pickIntent = new Intent();
-					// pickIntent.setType("image/*");
-					// pickIntent.setAction(Intent.ACTION_PICK);
-					//
-					// Intent newMediaFileIntent = new Intent(
-					// MediaStore.ACTION_IMAGE_CAPTURE);
-					//
-					// File selectedFile = Utils.getOutputMediaFile(
-					// HikeFileType.IMAGE, null, null);
-					//
-					// Editor editor = prefs.edit();
-					// editor.putString(HikeMessengerApp.FILE_PATH,
-					// selectedFile.getAbsolutePath());
-					// editor.commit();
-					//
-					// Intent chooserIntent = Intent.createChooser(pickIntent,
-					// "");
-					//
-					// newMediaFileIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-					// Uri.fromFile(selectedFile));
-					//
-					// chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
-					// new Intent[] { newMediaFileIntent });
-					//
-					// startActivityForResult(chooserIntent, IMAGE_PICK_CODE);
-					break;
+				// if (Utils.getExternalStorageState() ==
+				// ExternalStorageState.NONE) {
+				// Toast.makeText(getApplicationContext(),
+				// R.string.no_external_storage,
+				// Toast.LENGTH_SHORT).show();
+				// return;
+				// }
+				//
+				// SharedPreferences prefs = getSharedPreferences(
+				// HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+				//
+				// Intent pickIntent = new Intent();
+				// pickIntent.setType("image/*");
+				// pickIntent.setAction(Intent.ACTION_PICK);
+				//
+				// Intent newMediaFileIntent = new Intent(
+				// MediaStore.ACTION_IMAGE_CAPTURE);
+				//
+				// File selectedFile = Utils.getOutputMediaFile(
+				// HikeFileType.IMAGE, null, null);
+				//
+				// Editor editor = prefs.edit();
+				// editor.putString(HikeMessengerApp.FILE_PATH,
+				// selectedFile.getAbsolutePath());
+				// editor.commit();
+				//
+				// Intent chooserIntent = Intent.createChooser(pickIntent,
+				// "");
+				//
+				// newMediaFileIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+				// Uri.fromFile(selectedFile));
+				//
+				// chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
+				// new Intent[] { newMediaFileIntent });
+				//
+				// startActivityForResult(chooserIntent, IMAGE_PICK_CODE);
+				// break;
 				case R.id.post_fb_btn:
 				case R.id.post_twitter_btn:
 					v.setSelected(!v.isSelected());
@@ -628,7 +653,7 @@ public class DrawerBaseActivity extends Activity implements
 			}
 		};
 
-		insertImgBtn.setOnClickListener(statusDialogListener);
+		// insertImgBtn.setOnClickListener(statusDialogListener);
 		fbPostBtn.setOnClickListener(statusDialogListener);
 		twitterPostBtn.setOnClickListener(statusDialogListener);
 		titleBtn.setOnClickListener(statusDialogListener);
