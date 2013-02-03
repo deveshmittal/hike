@@ -381,19 +381,19 @@ public class SignupActivity extends Activity implements
 			} else {
 				final String input = enterEditText.getText().toString();
 				if (viewFlipper.getDisplayedChild() == NUMBER) {
+					String codeAndIso = countryPicker.getText().toString();
+					final String code = codeAndIso.substring(
+							codeAndIso.indexOf("+"), codeAndIso.length());
+
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
 					builder.setTitle(R.string.number_confirm_title);
-					builder.setMessage(input);
+					builder.setMessage(code + input);
 					builder.setPositiveButton(R.string.yes,
 							new DialogInterface.OnClickListener() {
 
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									String code = countryPicker.getText()
-											.toString();
-									code = code.substring(code.indexOf("+"),
-											code.length());
 									String number = code + input;
 									Editor editor = accountPrefs.edit();
 									editor.putString(
