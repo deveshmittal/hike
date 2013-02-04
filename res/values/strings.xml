@@ -371,4 +371,5 @@
 	<string name="waiting_for_accept">Waiting for %1$s to accept you friend request</string>
 	<string name="changed_profile">Changed their profile picture</string>
 	<string name="status_update">Status update</string>
+	<string name="remove_friend">Remove</string>
 </resources>
