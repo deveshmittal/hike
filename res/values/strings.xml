@@ -358,7 +358,7 @@
 	<string name="add_friend_info">When you add a hike friend, you can see their updates right here.</string>
 	<string name="add_hike_friend">Add a hike friend</string>
 	<string name="added_as_hike_friend">Added you as a friend</string>
-	<string name="added_as_hike_friend_info">%1$s can now see updates from you. Would you like to do the same?</string>
+	<string name="added_as_hike_friend_info">You can now see updates from %1$s. Would you like to do show %1$s your updates?</string>
 	<string name="confirm">Confirm</string>
 	<string name="recent_updates">Recent Updates</string>
 	<string name="manage_account">Manage Account</string>
