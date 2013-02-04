@@ -257,6 +257,7 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.text.append(" (" + contactInfo.getMsisdn() + ")");
 			}
 
+			viewHolder.subText.setVisibility(View.VISIBLE);
 			if (groupConversation.getGroupOwner().equals(
 					contactInfo.getMsisdn())) {
 				viewHolder.subText.setText(R.string.owner);
