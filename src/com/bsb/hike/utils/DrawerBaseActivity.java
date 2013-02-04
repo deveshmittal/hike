@@ -513,8 +513,7 @@ public class DrawerBaseActivity extends Activity implements
 
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				mActivityTask.showingStatusDialog = false;
-				mActivityTask.status = null;
+				mActivityTask = new ActivityTask();
 			}
 		});
 
@@ -628,7 +627,7 @@ public class DrawerBaseActivity extends Activity implements
 														HikePubSub.STATUS_MESSAGE_RECEIVED,
 														statusMessage);
 									}
-									mActivityTask.showingStatusDialog = false;
+									statusTxt.setText("");
 								}
 
 								@Override
@@ -637,7 +636,6 @@ public class DrawerBaseActivity extends Activity implements
 										progressDialog.dismiss();
 										progressDialog = null;
 									}
-									mActivityTask.showingStatusDialog = false;
 									Toast.makeText(getApplicationContext(),
 											R.string.update_status_fail,
 											Toast.LENGTH_SHORT).show();
