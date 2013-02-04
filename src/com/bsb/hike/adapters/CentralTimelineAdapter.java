@@ -16,8 +16,10 @@ import com.bsb.hike.models.utils.IconCacheManager;
 
 public class CentralTimelineAdapter extends BaseAdapter {
 
-	public static final long EMPTY_STATUS_ID = -1;
+	public static final long EMPTY_STATUS_NO_FRIEND_ID = -1;
 	public static final long FRIEND_REQUEST_ID = -2;
+	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
+	public static final long EMPTY_STATUS_NO_FRIEND_NO_STATUS_ID = -4;
 
 	private List<StatusMessage> statusMessages;
 	private Context context;
@@ -121,8 +123,13 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.yesBtn.setVisibility(View.VISIBLE);
 			viewHolder.noBtn.setVisibility(View.GONE);
 
-			viewHolder.extraInfo.setText(R.string.add_friend_info);
-			viewHolder.yesBtn.setText(R.string.add_hike_friend);
+			if (EMPTY_STATUS_NO_FRIEND_ID == statusMessage.getId()) {
+				viewHolder.extraInfo.setText(R.string.add_friend_info);
+				viewHolder.yesBtn.setText(R.string.add_hike_friend);
+			} else if (EMPTY_STATUS_NO_STATUS_ID == statusMessage.getId()) {
+				viewHolder.extraInfo.setText(R.string.no_status);
+				viewHolder.yesBtn.setText(R.string.update_status);
+			}
 			viewHolder.statusType.setImageResource(R.drawable.ic_no_status);
 			viewHolder.statusType.setBackgroundDrawable(null);
 			break;

@@ -5,6 +5,7 @@ import java.util.List;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -36,6 +37,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	private ListView timelineContent;
 	private List<StatusMessage> statusMessages;
 	private int friendRequests;
+	private StatusMessage noStatusMessage;
+	private StatusMessage noFriendMessage;
 
 	private String[] pubSubListeners = new String[] {
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED };
@@ -127,14 +130,32 @@ public class CentralTimeline extends DrawerBaseActivity implements
 											.currentTimeMillis() / 1000));
 		}
 
-		String name = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE).getString(HikeMessengerApp.NAME_SETTING, null);
+		SharedPreferences preferences = getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
+		String name = preferences
+				.getString(HikeMessengerApp.NAME_SETTING, null);
+		String lastStatus = preferences.getString(HikeMessengerApp.LAST_STATUS,
+				"");
+
 		if (statusMessages.isEmpty()) {
-			statusMessages.add(new StatusMessage(
-					CentralTimelineAdapter.EMPTY_STATUS_ID, null, "12345",
-					getString(R.string.team_hike), getString(R.string.hey_name,
-							name), StatusMessageType.NO_STATUS, System
-							.currentTimeMillis() / 1000));
+			if (TextUtils.isEmpty(lastStatus)) {
+				noStatusMessage = new StatusMessage(
+						CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID, null,
+						"12345", getString(R.string.team_hike), getString(
+								R.string.hey_name, name),
+						StatusMessageType.NO_STATUS,
+						System.currentTimeMillis() / 1000);
+				statusMessages.add(noStatusMessage);
+			}
+			if (friendMsisdnLength == 0) {
+				noFriendMessage = new StatusMessage(
+						CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID, null,
+						"12345", getString(R.string.team_hike), getString(
+								R.string.hey_name, name),
+						StatusMessageType.NO_STATUS,
+						System.currentTimeMillis() / 1000);
+				statusMessages.add(noFriendMessage);
+			}
 		}
 
 		centralTimelineAdapter = new CentralTimelineAdapter(this,
@@ -182,8 +203,12 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	public void onYesBtnClick(View v) {
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
 
-		if (CentralTimelineAdapter.EMPTY_STATUS_ID == statusMessage.getId()) {
+		if (CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID == statusMessage
+				.getId()) {
 			parentLayout.openRightSidebar();
+		} else if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
+				.getId()) {
+			showStatusDialog(false);
 		} else {
 			toggleFavoriteAndRemoveTimelineItem(statusMessage,
 					FavoriteType.FAVORITE);
@@ -244,7 +269,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			ContactInfo contactInfo = favoriteToggle.first;
-			if (favoriteToggle.second != FavoriteType.RECOMMENDED_FAVORITE) {
+			if (favoriteToggle.second != FavoriteType.RECOMMENDED_FAVORITE
+					|| favoriteToggle.second != FavoriteType.FAVORITE) {
 				return;
 			}
 			statusMessages
@@ -260,6 +286,9 @@ public class CentralTimeline extends DrawerBaseActivity implements
 									StatusMessageType.FRIEND_REQUEST, System
 											.currentTimeMillis() / 1000));
 			friendRequests++;
+			if (noStatusMessage != null) {
+				statusMessages.remove(noFriendMessage);
+			}
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -276,6 +305,9 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			statusMessage.setName(contactInfo.getName());
 			statusMessages.add(friendRequests, statusMessage);
 			HikeConversationsDatabase.getInstance().setStatusMessagesSeen(null);
+			if (noStatusMessage != null) {
+				statusMessages.remove(noStatusMessage);
+			}
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

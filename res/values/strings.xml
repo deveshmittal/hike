@@ -373,4 +373,6 @@
 	<string name="status_update">Status update</string>
 	<string name="remove_friend">Remove</string>
 	<string name="added_friend">I added you as a friend</string>
+	<string name="no_status">Looks like you haven\'t posted any status updates yet.</string>
+	<string name="update_status">Update status</string>
 </resources>
