@@ -366,6 +366,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
 		profileContent.setOnItemLongClickListener(this);
+		profileContent.setOnItemClickListener(this);
 	}
 
 	private void setupGroupProfileList() {
@@ -1562,9 +1563,31 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> arg0, View view, int position,
-			long id) {
+	public void onItemClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		GroupParticipant groupParticipant = (GroupParticipant) profileAdapter
+				.getItem(position);
+		if (groupParticipant == null) {
+			return;
+		}
 
+		ContactInfo contactInfo = groupParticipant.getContactInfo();
+
+		String myMsisdn = preferences.getString(
+				HikeMessengerApp.MSISDN_SETTING, "");
+
+		Intent intent = new Intent(this, ProfileActivity.class);
+
+		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
+		if (myMsisdn.equals(contactInfo.getMsisdn())) {
+			startActivity(intent);
+			return;
+		}
+
+		intent.setClass(this, ProfileActivity.class);
+		intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
+				contactInfo.getMsisdn());
+		startActivity(intent);
 	}
 
 	@Override
