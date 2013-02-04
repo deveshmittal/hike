@@ -281,6 +281,7 @@ public class ConvMessage {
 			break;
 		case STATUS_MESSAGE:
 			this.mTimestamp = metadata.getStatusMessage().getTimeStamp();
+			this.mMessage = context.getString(R.string.status_update);
 			break;
 		}
 		this.mConversation = conversation;
