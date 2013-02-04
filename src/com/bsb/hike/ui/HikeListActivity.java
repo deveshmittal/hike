@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -111,23 +113,32 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 					Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
 		}
-		Toast.makeText(
-				getApplicationContext(),
-				selectedContacts.isEmpty() ? R.string.select_invite_contacts
-						: R.string.invites_sent, Toast.LENGTH_SHORT).show();
-		if (!selectedContacts.isEmpty()) {
-			finish();
+		if (!selectedContacts.isEmpty() || showMostContactedContacts) {
+			if (!selectedContacts.isEmpty()) {
+				Toast.makeText(getApplicationContext(), R.string.invites_sent,
+						Toast.LENGTH_SHORT).show();
+			}
+			if (showMostContactedContacts) {
+				Editor editor = getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_TUTORIAL, true);
+				editor.commit();
+
+				Intent i = new Intent(this, MessagesList.class);
+				i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
+				startActivity(i);
+				finish();
+			} else {
+				finish();
+			}
+		} else {
+			Toast.makeText(getApplicationContext(),
+					R.string.select_invite_contacts, Toast.LENGTH_SHORT).show();
 		}
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View view, int arg2, long arg3) {
-		/*
-		 * Had to add this because of a JB specific issue:
-		 * http://code.google.com/p/android/issues/detail?id=35885
-		 */
-		// CheckBox ctv = (CheckBox) view.findViewById(R.id.checkbox);
-		// ctv.setChecked(!ctv.isChecked());
 		Object tag = view.getTag();
 		if (tag instanceof Pair<?, ?>) {
 			Pair<AtomicBoolean, ContactInfo> pair = (Pair<AtomicBoolean, ContactInfo>) tag;

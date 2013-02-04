@@ -239,7 +239,8 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (HikeMessengerApp.isIndianUser()
 				&& !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL,
 						false)) {
-			Intent i = new Intent(MessagesList.this, Tutorial.class);
+			Intent i = new Intent(MessagesList.this, HikeListActivity.class);
+			i.putExtra(HikeConstants.Extras.SHOW_MOST_CONTACTED, true);
 			startActivity(i);
 			finish();
 			return;
