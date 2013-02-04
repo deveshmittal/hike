@@ -358,10 +358,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
 		participantsList = new ArrayList<GroupParticipant>();
-		setupGroupProfileList();
-
 		profileAdapter = new ProfileAdapter(this, participantsList,
 				groupConversation, null, false);
+
+		setupGroupProfileList();
 
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
@@ -379,16 +379,29 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		List<GroupParticipant> participants = new ArrayList<GroupParticipant>(
 				participantMap.values());
+		participants.add(userInfo);
 		Collections.sort(participants);
 
+		boolean hasSmsUser = false;
+
+		for (GroupParticipant participant : participants) {
+			if (!participant.getContactInfo().isOnhike()) {
+				hasSmsUser = true;
+				break;
+			}
+		}
+
 		participantsList.addAll(participants);
-		participantsList.add(userInfo);
 		// Adding an item for the button
 		participantsList.add(new GroupParticipant(new ContactInfo(
 				ProfileAdapter.GROUP_BUTTON_ID, null, null, null)));
 
 		isGroupOwner = userInfo.getContactInfo().getMsisdn()
 				.equals(groupConversation.getGroupOwner());
+
+		profileAdapter.setNumParticipants(participants.size());
+		profileAdapter.setHasSmsUser(hasSmsUser);
+		profileAdapter.notifyDataSetChanged();
 	}
 
 	public void onTitleIconClick(View v) {
@@ -1316,11 +1329,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				String msisdn = ((JSONObject) object)
 						.optString(HikeConstants.DATA);
 				this.participantMap.remove(msisdn);
-				setupGroupProfileList();
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						profileAdapter.notifyDataSetChanged();
+						setupGroupProfileList();
 					}
 				});
 			}
@@ -1348,11 +1360,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					participantMap.put(msisdn,
 							new GroupParticipant(participant));
 				}
-				setupGroupProfileList();
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						profileAdapter.notifyDataSetChanged();
+						setupGroupProfileList();
 					}
 				});
 			}

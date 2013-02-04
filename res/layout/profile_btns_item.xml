@@ -24,6 +24,7 @@
             android:text="Hellp" />
 
         <View
+            android:id="@+id/btn_divider"
             android:layout_width="8dp"
             android:layout_height="0dp" />
 

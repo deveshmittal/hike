@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.GroupConversation;
@@ -44,6 +45,8 @@ public class ProfileAdapter extends BaseAdapter {
 	private Bitmap profilePreview;
 	private boolean groupProfile;
 	private boolean myProfile;
+	private boolean hasSMSUser;
+	private int numParticipants;
 
 	public ProfileAdapter(Context context, List<?> itemList,
 			GroupConversation groupConversation, ContactInfo contactInfo,
@@ -151,6 +154,8 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.btn2 = (Button) v.findViewById(R.id.btn2);
 				viewHolder.btn3 = (Button) v.findViewById(R.id.btn3);
 
+				viewHolder.btnDivider = v.findViewById(R.id.btn_divider);
+
 				viewHolder.container = (ViewGroup) v
 						.findViewById(R.id.btn_container);
 				break;
@@ -221,6 +226,18 @@ public class ProfileAdapter extends BaseAdapter {
 
 		case BUTTONS:
 			if (groupParticipant != null) {
+				viewHolder.btn1
+						.setVisibility(numParticipants < HikeConstants.MAX_CONTACTS_IN_GROUP ? View.VISIBLE
+								: View.GONE);
+				viewHolder.btn2.setVisibility(View.VISIBLE);
+				viewHolder.btn3.setVisibility(hasSMSUser ? View.VISIBLE
+						: View.GONE);
+
+				viewHolder.btnDivider
+						.setVisibility(viewHolder.btn1.getVisibility() == View.VISIBLE
+								&& viewHolder.btn2.getVisibility() == View.VISIBLE ? View.VISIBLE
+								: View.GONE);
+
 				viewHolder.btn1.setText(R.string.add_member);
 				viewHolder.btn2.setText(R.string.leave_group);
 				viewHolder.btn3.setText(R.string.invite_all_members);
@@ -324,6 +341,7 @@ public class ProfileAdapter extends BaseAdapter {
 		Button btn2;
 		Button btn3;
 		ViewGroup container;
+		View btnDivider;
 	}
 
 	@Override
@@ -355,5 +373,13 @@ public class ProfileAdapter extends BaseAdapter {
 	public void updateContactInfo(ContactInfo contactInfo) {
 		this.mContactInfo = contactInfo;
 		notifyDataSetChanged();
+	}
+
+	public void setHasSmsUser(boolean hasSMSUser) {
+		this.hasSMSUser = hasSMSUser;
+	}
+
+	public void setNumParticipants(int numParticipants) {
+		this.numParticipants = numParticipants;
 	}
 }
