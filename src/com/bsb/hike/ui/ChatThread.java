@@ -2072,23 +2072,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
 
 		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
-				android.R.layout.select_dialog_item, android.R.id.text1,
-				options) {
+				R.layout.alert_item, R.id.item, options) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View v = super.getView(position, convertView, parent);
-				TextView tv = (TextView) v.findViewById(android.R.id.text1);
+				TextView tv = (TextView) v.findViewById(R.id.item);
 				tv.setCompoundDrawablesWithIntrinsicBounds(
 						optionIcons[position], 0, 0, 0);
-				tv.setCompoundDrawablePadding((int) (15 * Utils.densityMultiplier));
 				return v;
 			}
 
 		};
 
-		builder.setTitle(R.string.share_file);
-		builder.setIcon(R.drawable.ic_share_header);
 		builder.setAdapter(dialogAdapter,
 				new DialogInterface.OnClickListener() {
 					@Override
@@ -2228,6 +2224,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				});
 
 		filePickerDialog = builder.create();
+		((AlertDialog) filePickerDialog).getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
 		filePickerDialog.show();
 	}
 
