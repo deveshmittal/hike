@@ -6,7 +6,10 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
+import android.content.Context;
+
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.R;
 import com.ocpsoft.pretty.time.PrettyTime;
 
 public class StatusMessage {
@@ -32,10 +35,14 @@ public class StatusMessage {
 		JSONObject data = statusMessageJson.optJSONObject(HikeConstants.DATA);
 
 		this.mappedId = data.optString(HikeConstants.STATUS_ID);
-		this.text = data.optString(HikeConstants.STATUS_MESSAGE);
 
-		// TODO Add if clause when we add support for more types.
-		this.statusMessageType = StatusMessageType.TEXT;
+		if (data.optBoolean(HikeConstants.PROFILE)) {
+			this.statusMessageType = StatusMessageType.PROFILE_PIC;
+			this.text = "";
+		} else if (data.has(HikeConstants.STATUS_MESSAGE)) {
+			this.statusMessageType = StatusMessageType.TEXT;
+			this.text = data.optString(HikeConstants.STATUS_MESSAGE);
+		}
 	}
 
 	public StatusMessage(long id, String mappedId, String msisdn, String name,

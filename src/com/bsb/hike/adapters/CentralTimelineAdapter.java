@@ -95,6 +95,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.content = (ViewGroup) convertView
 					.findViewById(R.id.main_content);
 
+			viewHolder.statusImg = (ImageView) convertView
+					.findViewById(R.id.status_pic);
+
 			convertView.setTag(viewHolder);
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
@@ -109,6 +112,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		viewHolder.mainInfo.setText(statusMessage.getText());
 
 		viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(true));
+
+		viewHolder.statusImg.setVisibility(View.GONE);
 
 		switch (statusMessage.getStatusMessageType()) {
 		case NO_STATUS:
@@ -145,6 +150,21 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.statusType.setImageResource(R.drawable.ic_text_status);
 			viewHolder.statusType
 					.setBackgroundResource(R.drawable.bg_status_type);
+			break;
+		case PROFILE_PIC:
+			viewHolder.extraInfo.setVisibility(View.GONE);
+			viewHolder.yesBtn.setVisibility(View.GONE);
+			viewHolder.noBtn.setVisibility(View.GONE);
+			viewHolder.statusImg.setVisibility(View.VISIBLE);
+
+			viewHolder.mainInfo.setText(R.string.changed_profile);
+			viewHolder.statusType
+					.setImageResource(R.drawable.ic_profile_pic_status);
+			viewHolder.statusType
+					.setBackgroundResource(R.drawable.bg_status_type);
+			viewHolder.statusImg.setImageDrawable(IconCacheManager
+					.getInstance()
+					.getIconForMSISDN(statusMessage.getMappedId()));
 			break;
 		case FRIEND_REQUEST_ACCEPTED:
 			viewHolder.yesBtn.setVisibility(View.GONE);
@@ -205,5 +225,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		TextView noBtn;
 		ImageView divider;
 		ViewGroup content;
+		ImageView statusImg;
 	}
 }

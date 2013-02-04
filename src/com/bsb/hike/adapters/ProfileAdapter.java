@@ -19,6 +19,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 
 @SuppressWarnings("unchecked")
@@ -274,6 +275,15 @@ public class ProfileAdapter extends BaseAdapter {
 			viewHolder.subText.setText(statusMessage
 					.getTimestampFormatted(true));
 			viewHolder.icon.setImageResource(R.drawable.ic_text_status);
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+				viewHolder.image.setVisibility(View.VISIBLE);
+				viewHolder.image.setImageDrawable(IconCacheManager
+						.getInstance().getIconForMSISDN(
+								statusMessage.getMappedId()));
+				viewHolder.icon
+						.setImageResource(R.drawable.ic_profile_pic_status);
+				viewHolder.text.setText(R.string.changed_profile);
+			}
 			break;
 
 		case EMPTY_STATUS:

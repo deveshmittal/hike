@@ -542,8 +542,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					.getStatusMessage();
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
 				holder.image.setImageResource(R.drawable.ic_text_status);
+				holder.messageTextView.setText(statusMessage.getText());
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+				holder.image.setImageResource(R.drawable.ic_profile_pic_status);
+				holder.messageTextView.setText(R.string.changed_profile);
 			}
-			holder.messageTextView.setText(statusMessage.getText());
 			holder.timestampTextView.setText(convMessage
 					.getTimestampFormatted(true));
 			holder.fileThumb.setVisibility(View.GONE);

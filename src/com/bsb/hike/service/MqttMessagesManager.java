@@ -584,12 +584,26 @@ public class MqttMessagesManager {
 			this.pubSub.publish(HikePubSub.TALK_TIME_CHANGED, talkTime);
 		} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type)) {
 			StatusMessage statusMessage = new StatusMessage(jsonObj);
+			/*
+			 * This would be true for unsupported status message types. We
+			 * should not be doing anything if we get one.
+			 */
+			if (statusMessage.getStatusMessageType() == null) {
+				return;
+			}
 			long id = convDb.addStatusMessage(statusMessage);
 
 			if (id == -1) {
 				Log.d(getClass().getSimpleName(),
 						"This status message was already added");
 				return;
+			}
+
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+				String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA)
+						.getString(HikeConstants.THUMBNAIL);
+				this.userDb.setIcon(statusMessage.getMappedId(),
+						Base64.decode(iconBase64, Base64.DEFAULT), false);
 			}
 
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);

@@ -299,4 +299,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		}
 		return !statusMessages.get(startIndex).isStatusSeen();
 	}
+
+	public void onViewImageClicked(View v) {
+
+	}
 }

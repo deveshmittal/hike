@@ -101,6 +101,15 @@
                 android:textColor="@color/group_item"
                 android:textSize="12sp"
                 android:textStyle="italic" />
+            
+            <ImageView
+                android:id="@+id/status_pic"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginTop="5dp"
+                android:scaleType="fitCenter"
+                android:onClick="onViewImageClicked"
+                android:visibility="gone" />
         </LinearLayout>
 
         <LinearLayout
