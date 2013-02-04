@@ -368,10 +368,10 @@ public class MessagesList extends DrawerBaseActivity implements
 		 */
 		onNewIntent(getIntent());
 
-		if (!accountPrefs.getBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN,
-				false)) {
-			showFavoritesIntroOverlay();
-		}
+//		if (!accountPrefs.getBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN,
+//				false)) {
+//			showFavoritesIntroOverlay();
+//		}
 
 		/*
 		 * Check whether we have an existing typing notification for any
