@@ -134,7 +134,7 @@ public class HikeNotification {
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
 				.getName())) ? contactInfo.getName() : msisdn;
 
-		String message = context.getString(R.string.added_favorite);
+		String message = context.getString(R.string.added_friend);
 
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
 				key, message));

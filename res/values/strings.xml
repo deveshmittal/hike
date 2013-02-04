@@ -372,4 +372,5 @@
 	<string name="changed_profile">Changed their profile picture</string>
 	<string name="status_update">Status update</string>
 	<string name="remove_friend">Remove</string>
+	<string name="added_friend">I added you as a friend</string>
 </resources>
