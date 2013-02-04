@@ -654,7 +654,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.showFileBtn
 							.setImageResource(ChatThread.fileTransferTaskMap
 									.containsKey(convMessage.getMsgID()) ? R.drawable.ic_open_file_disabled
-									: hikeFile.wasFileDownloaded() ? R.drawable.ic_open_received_file
+									: (hikeFile.wasFileDownloaded() && hikeFile
+											.getHikeFileType() != HikeFileType.CONTACT) ? R.drawable.ic_open_received_file
 											: R.drawable.ic_download_file);
 				}
 			}
