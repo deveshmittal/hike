@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.NotificationManager;
+import android.content.ActivityNotFoundException;
 import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -3500,5 +3501,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 		// No match found
 		throw new RuntimeException("Unable to find matching authenticator");
+	}
+
+	@Override
+	public void startActivity(Intent intent) {
+		try {
+			/* Workaround for an HTC issue */
+			if (intent.getComponent() != null
+					&& ".HtcLinkifyDispatcherActivity".equals(intent
+							.getComponent().getShortClassName()))
+				intent.setComponent(null);
+			super.startActivity(intent);
+		} catch (ActivityNotFoundException e) {
+			super.startActivity(Intent.createChooser(intent, null));
+		}
 	}
 }
