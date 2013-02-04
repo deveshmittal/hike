@@ -351,7 +351,7 @@
 	<string name="on_sms">on SMS</string>
 	<string name="default_status">Tap to update status...</string>
 	<string name="update_status_fail">Could not update status</string>
-	<string name="no_friends">Tap on plus so send a friend request.</string>
+	<string name="no_friends">Tap on plus to send a friend request.</string>
 	<string name="contacts_on_hike">CONTACTS ON HIKE</string>
 	<string name="team_hike">team hike</string>
 	<string name="hey_name">Hey %1$s!</string>
