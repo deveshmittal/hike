@@ -167,6 +167,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	private List<GroupParticipant> participantsList;
 
+	private boolean isGroupOwner;
+
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
 	public Object onRetainNonConfigurationInstance() {
@@ -384,6 +386,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		// Adding an item for the button
 		participantsList.add(new GroupParticipant(new ContactInfo(
 				ProfileAdapter.GROUP_BUTTON_ID, null, null, null)));
+
+		isGroupOwner = userInfo.getContactInfo().getMsisdn()
+				.equals(groupConversation.getGroupOwner());
 	}
 
 	public void onTitleIconClick(View v) {
@@ -1581,8 +1586,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			optionsList.add(getString(R.string.add_to_contacts));
 			optionImagesList.add(R.drawable.ic_add_to_contacts);
 		}
-		optionsList.add(getString(R.string.remove_from_group));
-		optionImagesList.add(R.drawable.ic_remove_from_group);
+		if (isGroupOwner) {
+			optionsList.add(getString(R.string.remove_from_group));
+			optionImagesList.add(R.drawable.ic_remove_from_group);
+		}
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
