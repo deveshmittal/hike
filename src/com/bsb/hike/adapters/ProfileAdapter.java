@@ -301,6 +301,9 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.icon
 						.setImageResource(R.drawable.ic_profile_pic_status);
 				viewHolder.text.setText(R.string.changed_profile);
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED) {
+				viewHolder.icon
+				.setImageResource(R.drawable.ic_profile_pic_status);
 			}
 			break;
 
