@@ -371,7 +371,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	private void setupGroupProfileList() {
 		GroupParticipant userInfo = new GroupParticipant(
-				Utils.getUserContactInfo(preferences));
+				Utils.getUserContactInfo(preferences, true));
 
 		participantsList.clear();
 		// Adding an item for the header

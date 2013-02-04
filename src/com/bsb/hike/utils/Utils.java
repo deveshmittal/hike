@@ -825,10 +825,22 @@ public class Utils {
 	}
 
 	public static ContactInfo getUserContactInfo(SharedPreferences prefs) {
+		return getUserContactInfo(prefs, false);
+	}
+
+	public static ContactInfo getUserContactInfo(SharedPreferences prefs,
+			boolean showNameAsYou) {
 		String myMsisdn = prefs
 				.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		String myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
-		return new ContactInfo(myMsisdn, myMsisdn, myName, myMsisdn, true);
+
+		String myName;
+		if (showNameAsYou) {
+			myName = "You";
+		} else {
+			myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
+		}
+
+		return new ContactInfo(myName, myMsisdn, myName, myMsisdn, true);
 	}
 
 	public static boolean wasScreenOpenedNNumberOfTimes(
