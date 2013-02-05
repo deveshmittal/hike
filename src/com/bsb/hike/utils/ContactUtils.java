@@ -348,6 +348,7 @@ public class ContactUtils {
 			Context context, int limit) {
 		Cursor whatsappContactsCursor = null;
 		Cursor phoneContactsCursor = null;
+		Cursor otherContactsCursor = null;
 
 		try {
 			String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
@@ -374,6 +375,17 @@ public class ContactUtils {
 						whatsappContactIds.length(), ")");
 			}
 
+			/*
+			 * This number is required when the user does not have enough
+			 * whatsapp contacts.
+			 */
+			int otherContactsRequired = 0;
+			if (whatsappContactIds != null
+					&& whatsappContactsCursor.getCount() < limit) {
+				otherContactsRequired = limit
+						- whatsappContactsCursor.getCount();
+			}
+
 			String[] newProjection = new String[] { Phone.NUMBER,
 					Phone.TIMES_CONTACTED };
 			String newSelection = whatsappContactIds != null ? (Phone.CONTACT_ID
@@ -384,37 +396,31 @@ public class ContactUtils {
 					Phone.CONTENT_URI, newProjection, newSelection, null,
 					Phone.TIMES_CONTACTED + " DESC LIMIT " + limit);
 
-			int numberColIdx = phoneContactsCursor.getColumnIndex(Phone.NUMBER);
-			int timesContactedIdx = phoneContactsCursor
-					.getColumnIndex(Phone.TIMES_CONTACTED);
-
 			Map<String, Integer> mostContactedNumbers = new HashMap<String, Integer>();
 			StringBuilder sb = null;
 
 			if (phoneContactsCursor.getCount() > 0) {
 				sb = new StringBuilder("(");
-				while (phoneContactsCursor.moveToNext()) {
-					String number = phoneContactsCursor.getString(numberColIdx);
 
-					if (TextUtils.isEmpty(number)) {
-						continue;
+				extractContactInfo(phoneContactsCursor, sb,
+						mostContactedNumbers, true);
+
+				if (otherContactsRequired > 0) {
+					newSelection = Phone.CONTACT_ID + " NOT IN "
+							+ whatsappContactIds.toString();
+
+					otherContactsCursor = context.getContentResolver().query(
+							Phone.CONTENT_URI,
+							newProjection,
+							newSelection,
+							null,
+							Phone.TIMES_CONTACTED + " DESC LIMIT "
+									+ otherContactsRequired);
+
+					if (otherContactsCursor.getCount() > 0) {
+						extractContactInfo(otherContactsCursor, sb,
+								mostContactedNumbers, false);
 					}
-
-					int lastTimeContacted = phoneContactsCursor
-							.getInt(timesContactedIdx);
-
-					/*
-					 * Checking if we already have this number and whether the
-					 * last time contacted was sooner than the newer value.
-					 */
-					if (mostContactedNumbers.containsKey(number)
-							&& mostContactedNumbers.get(number) > lastTimeContacted) {
-						continue;
-					}
-					mostContactedNumbers.put(number, lastTimeContacted);
-
-					number = DatabaseUtils.sqlEscapeString(number);
-					sb.append(number + ",");
 				}
 				sb.replace(sb.length() - 1, sb.length(), ")");
 			} else {
@@ -431,7 +437,43 @@ public class ContactUtils {
 			if (phoneContactsCursor != null) {
 				phoneContactsCursor.close();
 			}
+			if (otherContactsCursor != null) {
+				phoneContactsCursor.close();
+			}
 		}
 	}
 
+	private static void extractContactInfo(Cursor c, StringBuilder sb,
+			Map<String, Integer> numbers, boolean whatsappContacts) {
+		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
+		int timesContactedIdx = c.getColumnIndex(Phone.TIMES_CONTACTED);
+
+		while (c.moveToNext()) {
+			String number = c.getString(numberColIdx);
+
+			if (TextUtils.isEmpty(number)) {
+				continue;
+			}
+
+			/*
+			 * We apply a multiplier of 2 for whatsapp contacts to give them a
+			 * greater weight.
+			 */
+			int lastTimeContacted = whatsappContacts ? 2 * c
+					.getInt(timesContactedIdx) : c.getInt(timesContactedIdx);
+
+			/*
+			 * Checking if we already have this number and whether the last time
+			 * contacted was sooner than the newer value.
+			 */
+			if (numbers.containsKey(number)
+					&& numbers.get(number) > lastTimeContacted) {
+				continue;
+			}
+			numbers.put(number, lastTimeContacted);
+
+			number = DatabaseUtils.sqlEscapeString(number);
+			sb.append(number + ",");
+		}
+	}
 }
