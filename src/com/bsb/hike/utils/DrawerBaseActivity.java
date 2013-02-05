@@ -255,6 +255,7 @@ public class DrawerBaseActivity extends Activity implements
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 				if (this instanceof CentralTimeline) {
+					finish();
 					overridePendingTransition(R.anim.no_animation,
 							R.anim.slide_down_noalpha);
 				} else {
