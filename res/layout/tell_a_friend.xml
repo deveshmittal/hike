@@ -87,7 +87,7 @@
                             android:drawablePadding="5dp"
                             android:drawableRight="@drawable/ic_arrow"
                             android:paddingRight="10dp"
-                            android:text="@string/sms_subtext"
+                            android:text="@string/free_sms_txt"
                             android:textColor="#a4a49a"
                             android:textSize="13sp"
                             android:textStyle="italic" />
