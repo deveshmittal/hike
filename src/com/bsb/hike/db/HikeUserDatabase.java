@@ -1231,7 +1231,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						}
 					});
 
-			for (int i = 0; i < 10; i++) {
+			for (int i = 0; i < Math.min(10, contactList.size()); i++) {
 				Pair<AtomicBoolean, ContactInfo> val = contactList.get(i);
 				val.first.set(true);
 			}
