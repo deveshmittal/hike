@@ -48,7 +48,7 @@ public class SettingsActivity extends DrawerBaseActivity implements
 		itemIcons.add(R.drawable.ic_contact);
 
 		ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(this,
-				R.layout.alert_item, R.id.item, items) {
+				R.layout.setting_item, R.id.item, items) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
@@ -56,7 +56,6 @@ public class SettingsActivity extends DrawerBaseActivity implements
 				TextView tv = (TextView) v.findViewById(R.id.item);
 				tv.setCompoundDrawablesWithIntrinsicBounds(
 						itemIcons.get(position), 0, 0, 0);
-				v.setBackgroundResource(R.drawable.timeline_selector);
 				return v;
 			}
 

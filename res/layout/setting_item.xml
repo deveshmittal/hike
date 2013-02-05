@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:layout_gravity="center_vertical"
+    android:background="@drawable/timeline_selector"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp" >
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/ic_send_message"
+        android:drawablePadding="12dp"
+        android:gravity="center_vertical"
+        android:text="Send a message"
+        android:textColor="@color/setting_item"
+        android:textSize="16sp" />
+
+</LinearLayout>
