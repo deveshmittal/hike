@@ -95,7 +95,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			/*
 			 * We don't show status updates from unknown contacts
 			 */
-			if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+			if (contactInfo.getMsisdn().equals(contactInfo.getId())
+					|| TextUtils.isEmpty(contactInfo.getMsisdn())) {
 				continue;
 			}
 			friendMsisdns[i] = contactInfo.getMsisdn();
@@ -105,7 +106,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			/*
 			 * We don't show status updates from unknown contacts
 			 */
-			if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+			if (contactInfo.getMsisdn().equals(contactInfo.getId())
+					|| TextUtils.isEmpty(contactInfo.getMsisdn())) {
 				continue;
 			}
 			friendMsisdns[i + friendRequests] = contactInfo.getMsisdn();
