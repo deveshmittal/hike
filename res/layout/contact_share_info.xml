@@ -1,9 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="270dp"
-    android:layout_height="300dp"
-    android:background="@color/dialog_bg"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:background="@color/profile_item_bckg"
     android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/contact_info_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/contact_image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_avatar1" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/contact_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Contact Name"
+            android:textColor="@color/lightblack"
+            android:textSize="15sp"
+            android:textStyle="italic" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/ic_thread_divider_profile" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/target_account"
@@ -22,46 +52,56 @@
         android:layout_below="@id/target_account"
         android:visibility="visible" />
 
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/contact_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/account_spinner"
-        android:paddingLeft="10dp"
-        android:paddingTop="10dp"
-        android:text="Contact Name"
-        android:textColor="@color/lightblack"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:id="@+id/btn_container"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" >
+        android:layout_height="1dp"
+        android:background="@drawable/ic_thread_divider_profile" />
 
-        <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/btn_ok"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/send" />
-
-        <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/btn_cancel"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/cancel" />
-    </LinearLayout>
-
-    <ListView
-        android:id="@+id/contact_details"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/btn_container"
-        android:layout_below="@id/contact_name"
-        android:listSelector="@android:color/transparent" >
-    </ListView>
+        android:layout_height="match_parent" >
 
-</RelativeLayout>
+        <LinearLayout
+            android:id="@+id/btn_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:padding="10dp" >
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/btn_ok"
+                style="@style/StatusYesBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/send" />
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/btn_cancel"
+                style="@style/StatusNoBtn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="1"
+                android:text="@string/cancel" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_above="@id/btn_container"
+            android:background="@drawable/ic_thread_divider_profile" />
+
+        <ListView
+            android:id="@+id/contact_details"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/divider"
+            android:divider="@drawable/ic_thread_divider_profile"
+            android:fadingEdge="none"
+            android:listSelector="@android:color/transparent" >
+        </ListView>
+    </RelativeLayout>
+
+</LinearLayout>

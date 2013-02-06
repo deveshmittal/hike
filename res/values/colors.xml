@@ -64,4 +64,5 @@
     <color name="seen_timeline_item">#ededeb</color>
     <color name="alert_item_pressed">#d6d6d3</color>
     <color name="setting_item">#444444</color>
+    <color name="contact_item_header">#8c8c8c</color>
 </resources>

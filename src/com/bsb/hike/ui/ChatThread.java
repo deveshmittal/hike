@@ -2867,28 +2867,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		contactName.setText(name);
 		contactDetails.setAdapter(new ArrayAdapter<ContactInfoData>(
-				getApplicationContext(), android.R.layout.select_dialog_item,
-				android.R.id.text1, items) {
+				getApplicationContext(), R.layout.contact_share_item,
+				R.id.info_value, items) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View v = super.getView(position, convertView, parent);
 				ContactInfoData contactInfoData = getItem(position);
 
-				android.widget.AbsListView.LayoutParams lp = (android.widget.AbsListView.LayoutParams) v
-						.getLayoutParams();
-				lp.height = (int) getResources().getDimension(
-						R.dimen.contact_details_height);
-				v.setLayoutParams(lp);
-				TextView details = (TextView) v
-						.findViewById(android.R.id.text1);
-				details.setTextSize(getResources().getDimension(
-						R.dimen.contact_details_text_size));
-				details.setMinimumHeight((int) getResources().getDimension(
-						R.dimen.contact_details_height));
-				details.setText(contactInfoData.getDataType() + ": "
-						+ contactInfoData.getData() + " ("
-						+ contactInfoData.getDataSubType() + ")");
+				TextView header = (TextView) v.findViewById(R.id.info_head);
+				header.setText(contactInfoData.getDataSubType());
+
+				TextView details = (TextView) v.findViewById(R.id.info_value);
+				details.setText(contactInfoData.getData());
 				return v;
 			}
 
