@@ -55,8 +55,7 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 		titleBtn = (Button) findViewById(R.id.title_icon);
 		input = (EditText) findViewById(R.id.input_number);
 
-		titleBtn.setText(showMostContactedContacts ? R.string.invite_friends
-				: R.string.send);
+		titleBtn.setText(R.string.send);
 		titleBtn.setVisibility(View.VISIBLE);
 
 		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
@@ -93,7 +92,8 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 		adapter = new HikeInviteAdapter(this, -1, contactList);
 		input.addTextChangedListener(adapter);
 
-		labelView.setText(R.string.invite_via_sms);
+		labelView.setText(showMostContactedContacts ? R.string.invite_friends
+				: R.string.invite_via_sms);
 
 		listView.setAdapter(adapter);
 	}
