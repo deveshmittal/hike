@@ -292,6 +292,8 @@ public class HikeConstants {
 	public static final int GALLERY_RESULT = 1;
 	public static final int CROP_RESULT = 2;
 
+	public static final int MIN_STATUS_COUNT = 5;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
