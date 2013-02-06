@@ -3474,7 +3474,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			/*
 			 * Only showing the user's google accounts
 			 */
-			if(!"com.google".equals(type)) {
+			if (!"com.google".equals(type)) {
 				continue;
 			}
 			String systemAccountType = type;
