@@ -1403,7 +1403,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					// Do something
+					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		} else if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type)
