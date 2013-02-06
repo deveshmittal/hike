@@ -78,6 +78,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
@@ -143,6 +144,8 @@ public class MessagesList extends DrawerBaseActivity implements
 	private Button notificationCounter;
 
 	private int notificationCount;
+
+	private String userMsisdn;
 
 	@Override
 	protected void onPause() {
@@ -290,10 +293,13 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 		}
 
+		userMsisdn = accountPrefs
+				.getString(HikeMessengerApp.MSISDN_SETTING, "");
+
 		notificationCounter = (Button) findViewById(R.id.title_hikeicon);
 		notificationCounter.setVisibility(View.VISIBLE);
 		int unseenStatus = HikeConversationsDatabase.getInstance()
-				.getUnseenStatusMessageCount()
+				.getUnseenStatusMessageCount(userMsisdn)
 				+ HikeUserDatabase.getInstance().getPendingFriendRequestCount();
 		setNotificationCounter(unseenStatus);
 		/*
@@ -1003,6 +1009,14 @@ public class MessagesList extends DrawerBaseActivity implements
 			if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 				final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 				if (favoriteToggle.second != FavoriteType.RECOMMENDED_FAVORITE) {
+					return;
+				}
+			} else {
+				StatusMessage statusMessage = (StatusMessage) object;
+				/*
+				 * We don't show a notification for the user's own statuses
+				 */
+				if(userMsisdn.equals(statusMessage.getMsisdn())) {
 					return;
 				}
 			}

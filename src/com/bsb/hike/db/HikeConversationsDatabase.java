@@ -1519,9 +1519,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.update(DBConstants.STATUS_TABLE, values, whereClause, whereArgs);
 	}
 
-	public int getUnseenStatusMessageCount() {
+	public int getUnseenStatusMessageCount(String userMsisdn) {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
 				+ DBConstants.STATUS_TABLE + " WHERE "
-				+ DBConstants.STATUS_SEEN + "=0", null);
+				+ DBConstants.STATUS_SEEN + "=0 AND " + DBConstants.MSISDN
+				+ "!=?", new String[] { userMsisdn });
 	}
 }
