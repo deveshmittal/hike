@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.NotificationManager;
@@ -84,14 +85,12 @@ public class CentralTimeline extends DrawerBaseActivity implements
 						HikeConstants.BOTH_VALUE);
 
 		friendRequests = friendRequestList.size();
-		int friends = friendsList.size();
 
 		int friendMsisdnLength = friendRequestList.size() + friendsList.size();
 
-		String[] friendMsisdns = new String[friendMsisdnLength + 1];
+		ArrayList<String> msisdnList = new ArrayList<String>();
 
-		for (int i = 0; i < friendRequests; i++) {
-			ContactInfo contactInfo = friendRequestList.get(i);
+		for (ContactInfo contactInfo : friendRequestList) {
 			/*
 			 * We don't show status updates from unknown contacts
 			 */
@@ -99,10 +98,9 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					|| TextUtils.isEmpty(contactInfo.getMsisdn())) {
 				continue;
 			}
-			friendMsisdns[i] = contactInfo.getMsisdn();
+			msisdnList.add(contactInfo.getMsisdn());
 		}
-		for (int i = 0; i < friends; i++) {
-			ContactInfo contactInfo = friendsList.get(i);
+		for (ContactInfo contactInfo : friendsList) {
 			/*
 			 * We don't show status updates from unknown contacts
 			 */
@@ -110,10 +108,12 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					|| TextUtils.isEmpty(contactInfo.getMsisdn())) {
 				continue;
 			}
-			friendMsisdns[i + friendRequests] = contactInfo.getMsisdn();
+			msisdnList.add(contactInfo.getMsisdn());
 		}
-		friendMsisdns[friendMsisdnLength] = userMsisdn;
+		msisdnList.add(userMsisdn);
 
+		String[] friendMsisdns = new String[msisdnList.size()];
+		msisdnList.toArray(friendMsisdns);
 		statusMessages = HikeConversationsDatabase.getInstance()
 				.getStatusMessages(friendMsisdns);
 
