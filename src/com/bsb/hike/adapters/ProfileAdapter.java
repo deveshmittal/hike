@@ -323,6 +323,7 @@ public class ProfileAdapter extends BaseAdapter {
 					viewHolder.text.setText(context.getString(
 							R.string.add_as_friend_info, contactName));
 					viewHolder.btn1.setText(R.string.add_as_friend);
+					viewHolder.btn1.setVisibility(View.VISIBLE);
 				}
 			} else {
 				viewHolder.icon.setImageResource(R.drawable.ic_not_on_hike);
