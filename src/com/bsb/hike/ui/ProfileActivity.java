@@ -315,7 +315,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					null, 0));
 		}
 		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE)
-				&& (contactInfo.getFavoriteType() != FavoriteType.PENDING)) {
+				&& (contactInfo.getFavoriteType() != FavoriteType.PENDING)
+				&& (contactInfo.isOnhike())) {
 			profileItems.addAll(HikeConversationsDatabase.getInstance()
 					.getStatusMessages(mLocalMSISDN));
 		} else {
