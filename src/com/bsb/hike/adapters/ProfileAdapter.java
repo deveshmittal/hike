@@ -279,7 +279,9 @@ public class ProfileAdapter extends BaseAdapter {
 					contactInfo.getMsisdn())) {
 				viewHolder.subText.setText(R.string.owner);
 			} else if (!contactInfo.isOnhike()) {
-				viewHolder.subText.setText(R.string.on_sms);
+				viewHolder.subText
+						.setText(groupParticipant.onDnd() ? R.string.on_sms
+								: R.string.on_sms);
 			} else {
 				viewHolder.subText.setVisibility(View.GONE);
 			}
