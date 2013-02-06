@@ -2726,10 +2726,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		JSONObject contactJson = new JSONObject();
 
-		JSONObject phoneNumbersJson = null;
-		JSONObject emailsJson = null;
-		JSONObject addressesJson = null;
-		JSONObject eventsJson = null;
+		JSONArray phoneNumbersJson = null;
+		JSONArray emailsJson = null;
+		JSONArray addressesJson = null;
+		JSONArray eventsJson = null;
 
 		List<ContactInfoData> items = new ArrayList<ContactInfoData>();
 		String name = null;
@@ -2746,7 +2746,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				if (Phone.CONTENT_ITEM_TYPE.equals(mimeType)) {
 
 					if (phoneNumbersJson == null) {
-						phoneNumbersJson = new JSONObject();
+						phoneNumbersJson = new JSONArray();
 						contactJson.put(HikeConstants.PHONE_NUMBERS,
 								phoneNumbersJson);
 					}
@@ -2756,14 +2756,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							.toString();
 					String msisdn = c.getString(data1Idx);
 
-					phoneNumbersJson.put(type, msisdn);
+					JSONObject data = new JSONObject();
+					data.put(type, msisdn);
+					phoneNumbersJson.put(data);
 
 					items.add(new ContactInfoData(DataType.PHONE_NUMBER,
 							msisdn, type));
 				} else if (Email.CONTENT_ITEM_TYPE.equals(mimeType)) {
 
 					if (emailsJson == null) {
-						emailsJson = new JSONObject();
+						emailsJson = new JSONArray();
 						contactJson.put(HikeConstants.EMAILS, emailsJson);
 					}
 
@@ -2772,13 +2774,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							.toString();
 					String email = c.getString(data1Idx);
 
-					emailsJson.put(type, email);
+					JSONObject data = new JSONObject();
+					data.put(type, email);
+					emailsJson.put(data);
 
 					items.add(new ContactInfoData(DataType.EMAIL, email, type));
 				} else if (StructuredPostal.CONTENT_ITEM_TYPE.equals(mimeType)) {
 
 					if (addressesJson == null) {
-						addressesJson = new JSONObject();
+						addressesJson = new JSONArray();
 						contactJson.put(HikeConstants.ADDRESSES, addressesJson);
 					}
 
@@ -2787,14 +2791,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							.toString();
 					String address = c.getString(data1Idx);
 
-					addressesJson.put(type, address);
+					JSONObject data = new JSONObject();
+					data.put(type, address);
+					addressesJson.put(data);
 
 					items.add(new ContactInfoData(DataType.ADDRESS, address,
 							type));
 				} else if (Event.CONTENT_ITEM_TYPE.equals(mimeType)) {
 
 					if (eventsJson == null) {
-						eventsJson = new JSONObject();
+						eventsJson = new JSONArray();
 						contactJson.put(HikeConstants.EVENTS, eventsJson);
 					}
 
@@ -2812,7 +2818,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					String type = event.toString();
 					String eventDate = c.getString(data1Idx);
 
-					eventsJson.put(type, eventDate);
+					JSONObject data = new JSONObject();
+					data.put(type, eventDate);
+					eventsJson.put(data);
 
 					items.add(new ContactInfoData(DataType.EVENT, eventDate,
 							type));
@@ -3471,7 +3479,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			// The user may have multiple accounts with the same name, so we
 			// need to construct a
 			// meaningful display name for each.
-			String systemAccountType = a[i].type;
+			String type = a[i].type;
+			/*
+			 * Only showing the user's google accounts
+			 */
+			if(!"com.google".equals(type)) {
+				continue;
+			}
+			String systemAccountType = type;
 			AuthenticatorDescription ad = getAuthenticatorDescription(
 					systemAccountType, accountTypes);
 			AccountData data = new AccountData(a[i].name, ad, this);

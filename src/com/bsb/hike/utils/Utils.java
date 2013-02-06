@@ -1723,43 +1723,43 @@ public class Utils {
 			HikeFile hikeFile) {
 		List<ContactInfoData> items = new ArrayList<ContactInfoData>();
 
-		JSONObject phoneNumbers = hikeFile.getPhoneNumbers();
-		JSONObject emails = hikeFile.getEmails();
-		JSONObject events = hikeFile.getEvents();
-		JSONObject addresses = hikeFile.getAddresses();
+		JSONArray phoneNumbers = hikeFile.getPhoneNumbers();
+		JSONArray emails = hikeFile.getEmails();
+		JSONArray events = hikeFile.getEvents();
+		JSONArray addresses = hikeFile.getAddresses();
 
 		if (phoneNumbers != null) {
-			JSONArray phoneNumberKeys = phoneNumbers.names();
-			for (int i = 0; i < phoneNumberKeys.length(); i++) {
-				String key = phoneNumberKeys.optString(i);
-				items.add(new ContactInfoData(DataType.PHONE_NUMBER,
-						phoneNumbers.optString(key), key));
+			for (int i = 0; i < phoneNumbers.length(); i++) {
+				JSONObject data = phoneNumbers.optJSONObject(i);
+				String key = data.names().optString(0);
+				items.add(new ContactInfoData(DataType.PHONE_NUMBER, data
+						.optString(key), key));
 			}
 		}
 
 		if (emails != null) {
-			JSONArray emailKeys = emails.names();
-			for (int i = 0; i < emailKeys.length(); i++) {
-				String key = emailKeys.optString(i);
-				items.add(new ContactInfoData(DataType.EMAIL, emails
+			for (int i = 0; i < emails.length(); i++) {
+				JSONObject data = emails.optJSONObject(i);
+				String key = data.names().optString(0);
+				items.add(new ContactInfoData(DataType.EMAIL, data
 						.optString(key), key));
 			}
 		}
 
 		if (events != null) {
-			JSONArray eventKeys = events.names();
-			for (int i = 0; i < eventKeys.length(); i++) {
-				String key = eventKeys.optString(i);
-				items.add(new ContactInfoData(DataType.EVENT, events
+			for (int i = 0; i < events.length(); i++) {
+				JSONObject data = events.optJSONObject(i);
+				String key = data.names().optString(0);
+				items.add(new ContactInfoData(DataType.EVENT, data
 						.optString(key), key));
 			}
 		}
 
 		if (addresses != null) {
-			JSONArray addressKeys = addresses.names();
-			for (int i = 0; i < addressKeys.length(); i++) {
-				String key = addressKeys.optString(i);
-				items.add(new ContactInfoData(DataType.ADDRESS, addresses
+			for (int i = 0; i < addresses.length(); i++) {
+				JSONObject data = addresses.optJSONObject(i);
+				String key = data.names().optString(0);
+				items.add(new ContactInfoData(DataType.ADDRESS, data
 						.optString(key), key));
 			}
 		}

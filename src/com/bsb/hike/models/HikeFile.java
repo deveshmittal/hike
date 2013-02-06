@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import java.io.File;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -89,10 +90,10 @@ public class HikeFile {
 	private String address;
 
 	private String displayName;
-	private JSONObject phoneNumbers;
-	private JSONObject emails;
-	private JSONObject addresses;
-	private JSONObject events;
+	private JSONArray phoneNumbers;
+	private JSONArray emails;
+	private JSONArray addresses;
+	private JSONArray events;
 
 	public HikeFile(JSONObject fileJSON) {
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
@@ -114,10 +115,10 @@ public class HikeFile {
 			this.fileName = this.file.getName();
 		}
 		this.displayName = fileJSON.optString(HikeConstants.NAME);
-		this.phoneNumbers = fileJSON.optJSONObject(HikeConstants.PHONE_NUMBERS);
-		this.emails = fileJSON.optJSONObject(HikeConstants.EMAILS);
-		this.addresses = fileJSON.optJSONObject(HikeConstants.ADDRESSES);
-		this.events = fileJSON.optJSONObject(HikeConstants.EVENTS);
+		this.phoneNumbers = fileJSON.optJSONArray(HikeConstants.PHONE_NUMBERS);
+		this.emails = fileJSON.optJSONArray(HikeConstants.EMAILS);
+		this.addresses = fileJSON.optJSONArray(HikeConstants.ADDRESSES);
+		this.events = fileJSON.optJSONArray(HikeConstants.EVENTS);
 	}
 
 	public HikeFile(String fileName, String fileTypeString,
@@ -261,19 +262,19 @@ public class HikeFile {
 		return displayName;
 	}
 
-	public JSONObject getPhoneNumbers() {
+	public JSONArray getPhoneNumbers() {
 		return phoneNumbers;
 	}
 
-	public JSONObject getEmails() {
+	public JSONArray getEmails() {
 		return emails;
 	}
 
-	public JSONObject getAddresses() {
+	public JSONArray getAddresses() {
 		return addresses;
 	}
 
-	public JSONObject getEvents() {
+	public JSONArray getEvents() {
 		return events;
 	}
 
