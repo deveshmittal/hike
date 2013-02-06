@@ -139,7 +139,11 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		String lastStatus = preferences.getString(HikeMessengerApp.LAST_STATUS,
 				"");
 
-		if (statusMessages.isEmpty()) {
+		/*
+		 * If we already have a few status messages in the timeline, no need to
+		 * prompt the user to post his/her own message.
+		 */
+		if (statusMessages.size() < HikeConstants.MIN_STATUS_COUNT) {
 			if (TextUtils.isEmpty(lastStatus)) {
 				noStatusMessage = new StatusMessage(
 						CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID, null,
@@ -147,17 +151,17 @@ public class CentralTimeline extends DrawerBaseActivity implements
 								R.string.hey_name, name),
 						StatusMessageType.NO_STATUS,
 						System.currentTimeMillis() / 1000);
-				statusMessages.add(noStatusMessage);
+				statusMessages.add(0, noStatusMessage);
 			}
-			if (friendMsisdnLength == 0) {
-				noFriendMessage = new StatusMessage(
-						CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID, null,
-						"12345", getString(R.string.team_hike), getString(
-								R.string.hey_name, name),
-						StatusMessageType.NO_STATUS,
-						System.currentTimeMillis() / 1000);
-				statusMessages.add(noFriendMessage);
-			}
+		}
+		if (friendMsisdnLength == 0) {
+			noFriendMessage = new StatusMessage(
+					CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID, null,
+					"12345", getString(R.string.team_hike), getString(
+							R.string.hey_name, name),
+					StatusMessageType.NO_STATUS,
+					System.currentTimeMillis() / 1000);
+			statusMessages.add(0, noFriendMessage);
 		}
 
 		centralTimelineAdapter = new CentralTimelineAdapter(this,
@@ -275,8 +279,9 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					|| favoriteToggle.second != FavoriteType.FAVORITE) {
 				return;
 			}
+			int startIndex = getStartIndex();
 			statusMessages
-					.add(0,
+					.add(startIndex,
 							new StatusMessage(
 									CentralTimelineAdapter.FRIEND_REQUEST_ID,
 									null,
@@ -290,6 +295,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			friendRequests++;
 			if (noStatusMessage != null) {
 				statusMessages.remove(noFriendMessage);
+				noFriendMessage = null;
 			}
 			runOnUiThread(new Runnable() {
 				@Override
@@ -305,10 +311,15 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			ContactInfo contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN(statusMessage.getMsisdn(), false);
 			statusMessage.setName(contactInfo.getName());
-			statusMessages.add(friendRequests, statusMessage);
+
+			int startIndex = getStartIndex();
+
+			statusMessages.add(friendRequests + startIndex, statusMessage);
 			HikeConversationsDatabase.getInstance().setStatusMessagesSeen(null);
-			if (noStatusMessage != null) {
+			if (noStatusMessage != null
+					&& statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT) {
 				statusMessages.remove(noStatusMessage);
+				noStatusMessage = null;
 			}
 			runOnUiThread(new Runnable() {
 				@Override
@@ -319,6 +330,17 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
 		}
+	}
+
+	private int getStartIndex() {
+		int startIndex = 0;
+		if (noFriendMessage != null) {
+			startIndex++;
+		}
+		if (noStatusMessage != null) {
+			startIndex++;
+		}
+		return startIndex;
 	}
 
 	private boolean isLastStatusMessageUnseen() {
