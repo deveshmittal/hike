@@ -172,6 +172,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.statusImg.setImageDrawable(IconCacheManager
 					.getInstance()
 					.getIconForMSISDN(statusMessage.getMappedId()));
+			viewHolder.statusImg.setId(position);
 			break;
 		case FRIEND_REQUEST_ACCEPTED:
 			viewHolder.yesBtn.setVisibility(View.GONE);
@@ -197,6 +198,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		viewHolder.detailsBtn.setTag(statusMessage);
 		viewHolder.yesBtn.setTag(statusMessage);
 		viewHolder.noBtn.setTag(statusMessage);
+		viewHolder.statusImg.setTag(statusMessage);
 
 		return convertView;
 	}

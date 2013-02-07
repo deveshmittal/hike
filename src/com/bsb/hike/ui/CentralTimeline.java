@@ -1,20 +1,36 @@
 package com.bsb.hike.ui;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -28,8 +44,11 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class CentralTimeline extends DrawerBaseActivity implements
 		OnItemClickListener, Listener {
@@ -42,8 +61,20 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	private StatusMessage noFriendMessage;
 
 	private String[] pubSubListeners = new String[] {
-			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED };
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED,
+			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
+			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
 	private String userMsisdn;
+	private ActivityState mActivityState;
+	private ProgressDialog mDialog;
+
+	private class ActivityState {
+		public DownloadProfileImageTask downloadProfileImageTask;
+		public boolean viewingProfileImage = false;
+		public boolean animatedProfileImage = false;
+		public int imageViewId = -1;
+		public String mappedId = null;
+	}
 
 	@Override
 	protected void onPause() {
@@ -63,10 +94,30 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	}
 
 	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return mActivityState;
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.central_timeline);
 		afterSetContentView(savedInstanceState, false);
+
+		Object o = getLastNonConfigurationInstance();
+		if (o instanceof ActivityState) {
+			mActivityState = (ActivityState) o;
+			if (mActivityState.downloadProfileImageTask != null) {
+				mDialog = ProgressDialog.show(this, null, getResources()
+						.getString(R.string.downloading_image));
+				if (mActivityState.downloadProfileImageTask != null) {
+					mDialog.setCancelable(true);
+					setDialogOnCancelListener();
+				}
+			}
+		} else {
+			mActivityState = new ActivityState();
+		}
 
 		TextView titleTV = (TextView) findViewById(R.id.title);
 		titleTV.setText(R.string.recent_updates);
@@ -176,6 +227,26 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		}
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+
+		if (mActivityState.viewingProfileImage) {
+			downloadOrShowProfileImage(false, false, mActivityState.mappedId,
+					mActivityState.imageViewId);
+		}
+	}
+
+	public void onBackPressed() {
+		if (mActivityState.viewingProfileImage) {
+			View profileContainer = findViewById(R.id.profile_image_container);
+
+			animateProfileImage(false, mActivityState.imageViewId);
+			profileContainer.setVisibility(View.GONE);
+
+			mActivityState.viewingProfileImage = false;
+			mActivityState.animatedProfileImage = false;
+			expandedWithoutAnimation = false;
+			return;
+		}
+		super.onBackPressed();
 	}
 
 	@Override
@@ -329,6 +400,26 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			});
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
+		} else if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type)
+				|| HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED.equals(type)) {
+			final String msisdn = (String) object;
+			if (!msisdn.equals(mActivityState.mappedId)) {
+				return;
+			}
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					mActivityState = new ActivityState();
+					mActivityState.animatedProfileImage = true;
+					downloadOrShowProfileImage(false, true, msisdn,
+							mActivityState.imageViewId);
+
+					if (mDialog != null) {
+						mDialog.dismiss();
+						mDialog = null;
+					}
+				}
+			});
 		}
 	}
 
@@ -357,6 +448,184 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	}
 
 	public void onViewImageClicked(View v) {
-
+		StatusMessage statusMessage = (StatusMessage) v.getTag();
+		mActivityState.imageViewId = v.getId();
+		mActivityState.mappedId = statusMessage.getMappedId();
+		downloadOrShowProfileImage(true, false, mActivityState.mappedId,
+				v.getId());
 	}
+
+	private void downloadOrShowProfileImage(boolean startNewDownload,
+			boolean justDownloaded, String mappedId, int viewId) {
+		if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
+			Toast.makeText(getApplicationContext(),
+					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+
+		boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(
+				mappedId);
+
+		String fileName = hasCustomImage ? Utils
+				.getProfileImageFileName(mappedId) : Utils
+				.getDefaultAvatarServerName(this, mappedId);
+
+		File file = new File(basePath, fileName);
+
+		if (file.exists()) {
+			showLargerImage(
+					BitmapDrawable.createFromPath(basePath + "/" + fileName),
+					justDownloaded, viewId);
+		} else {
+			showLargerImage(
+					IconCacheManager.getInstance().getIconForMSISDN(mappedId),
+					justDownloaded, viewId);
+			if (startNewDownload) {
+				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
+						getApplicationContext(), mappedId, fileName, true, true);
+				mActivityState.downloadProfileImageTask.execute();
+
+				mDialog = ProgressDialog.show(this, null, getResources()
+						.getString(R.string.downloading_image));
+				mDialog.setCancelable(true);
+				setDialogOnCancelListener();
+			}
+		}
+	}
+
+	private void setDialogOnCancelListener() {
+		mDialog.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				if (mActivityState.downloadProfileImageTask != null) {
+					mActivityState.downloadProfileImageTask.cancel(true);
+				}
+				mActivityState = new ActivityState();
+			}
+		});
+	}
+
+	public void hideLargerImage(View v) {
+		onBackPressed();
+	}
+
+	private boolean expandedWithoutAnimation = false;
+
+	private void showLargerImage(Drawable image, boolean justDownloaded,
+			int viewId) {
+		mActivityState.viewingProfileImage = true;
+
+		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
+		profileImageContainer.setVisibility(View.VISIBLE);
+
+		ImageView profileImageLarge = (ImageView) findViewById(R.id.profile_image_large);
+
+		if (!justDownloaded) {
+			if (!mActivityState.animatedProfileImage) {
+				mActivityState.animatedProfileImage = true;
+				animateProfileImage(true, viewId);
+			} else {
+				expandedWithoutAnimation = true;
+				((LinearLayout) profileImageContainer)
+						.setGravity(Gravity.CENTER);
+				LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
+						LayoutParams.MATCH_PARENT);
+				profileImageLarge.setLayoutParams(lp);
+			}
+		}
+
+		((ImageView) findViewById(R.id.profile_image_large))
+				.setImageDrawable(image);
+	}
+
+	private void animateProfileImage(boolean expand, int viewId) {
+		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
+		((LinearLayout) profileImageContainer).setGravity(Gravity.NO_GRAVITY);
+		ImageView profileImageLarge = (ImageView) findViewById(R.id.profile_image_large);
+		ImageView profileImageSmall = (ImageView) findViewById(viewId);
+
+		if (profileImageSmall != null) {
+			int maxWidth = (expand || !expandedWithoutAnimation) ? getResources()
+					.getDisplayMetrics().widthPixels : profileImageSmall
+					.getMeasuredHeight();
+			int maxHeight = (expand || !expandedWithoutAnimation) ? getResources()
+					.getDisplayMetrics().heightPixels : profileImageSmall
+					.getMeasuredHeight();
+
+			int screenHeight = getResources().getDisplayMetrics().heightPixels;
+
+			int startWidth = (int) ((expand || !expandedWithoutAnimation) ? getResources()
+					.getDimension(R.dimen.timeline_pic) : profileImageLarge
+					.getWidth());
+			int startHeight = (int) ((expand || !expandedWithoutAnimation) ? getResources()
+					.getDimension(R.dimen.timeline_pic) : profileImageLarge
+					.getHeight());
+
+			int[] startLocations = new int[2];
+			if (expand || mActivityState.animatedProfileImage) {
+				profileImageSmall.getLocationOnScreen(startLocations);
+			} else {
+				profileImageLarge.getLocationOnScreen(startLocations);
+			}
+
+			int statusBarHeight = screenHeight
+					- profileImageContainer.getHeight();
+
+			int startLocX = startLocations[0];
+			int startLocY = startLocations[1] - statusBarHeight;
+
+			LayoutParams startLp = new LayoutParams(startWidth, startHeight);
+			startLp.setMargins(startLocX, startLocY, 0, 0);
+
+			profileImageLarge.setLayoutParams(startLp);
+
+			float multiplier;
+			if (maxWidth > maxHeight) {
+				multiplier = maxHeight / startHeight;
+			} else {
+				multiplier = maxWidth / startWidth;
+			}
+
+			ScaleAnimation scaleAnimation = (expand || expandedWithoutAnimation) ? new ScaleAnimation(
+					1.0f, multiplier, 1.0f, multiplier) : new ScaleAnimation(
+					multiplier, 1.0f, multiplier, 1.0f);
+
+			int xDest;
+			int yDest;
+			if (expand || !expandedWithoutAnimation) {
+				xDest = maxWidth / 2;
+				xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
+				yDest = maxHeight / 2;
+				yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
+			} else {
+				int[] endLocations = new int[2];
+				profileImageSmall.getLocationInWindow(endLocations);
+				xDest = endLocations[0];
+				yDest = endLocations[1];
+			}
+
+			TranslateAnimation translateAnimation = (expand || expandedWithoutAnimation) ? new TranslateAnimation(
+					0, xDest, 0, yDest) : new TranslateAnimation(xDest, 0,
+					yDest, 0);
+
+			AnimationSet animationSet = new AnimationSet(true);
+			animationSet.addAnimation(scaleAnimation);
+			animationSet.addAnimation(translateAnimation);
+			animationSet.setFillAfter(true);
+			animationSet.setDuration(350);
+			animationSet.setStartOffset(expand ? 150 : 0);
+
+			profileImageLarge.startAnimation(animationSet);
+		}
+		AlphaAnimation alphaAnimation = expand ? new AlphaAnimation(0.0f, 1.0f)
+				: new AlphaAnimation(1.0f, 0.0f);
+		alphaAnimation.setDuration(200);
+		alphaAnimation.setStartOffset(expand ? 0 : 200);
+		profileImageContainer.startAnimation(alphaAnimation);
+	}
+
 }
