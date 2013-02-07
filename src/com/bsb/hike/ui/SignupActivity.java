@@ -388,7 +388,7 @@ public class SignupActivity extends Activity implements
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
 					builder.setTitle(R.string.number_confirm_title);
 					builder.setMessage(code + input);
-					builder.setPositiveButton(R.string.yes,
+					builder.setPositiveButton(R.string.confirm,
 							new DialogInterface.OnClickListener() {
 
 								@Override
@@ -406,7 +406,7 @@ public class SignupActivity extends Activity implements
 									startLoading();
 								}
 							});
-					builder.setNegativeButton(R.string.no,
+					builder.setNegativeButton(R.string.cancel,
 							new DialogInterface.OnClickListener() {
 
 								@Override
