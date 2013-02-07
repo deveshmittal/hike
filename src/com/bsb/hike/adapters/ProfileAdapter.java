@@ -218,6 +218,7 @@ public class ProfileAdapter extends BaseAdapter {
 			} else {
 				viewHolder.image.setImageBitmap(profilePreview);
 			}
+			viewHolder.image.setTag(statusMessage);
 			viewHolder.subText.setVisibility(View.GONE);
 			viewHolder.icon
 					.setVisibility((myProfile || groupConversation != null) ? View.VISIBLE
@@ -302,10 +303,12 @@ public class ProfileAdapter extends BaseAdapter {
 								statusMessage.getMappedId()));
 				viewHolder.icon
 						.setImageResource(R.drawable.ic_profile_pic_status);
+				viewHolder.image.setId(position);
+				viewHolder.image.setTag(statusMessage);
 				viewHolder.text.setText(R.string.changed_profile);
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED) {
 				viewHolder.icon
-				.setImageResource(R.drawable.ic_profile_pic_status);
+						.setImageResource(R.drawable.ic_profile_pic_status);
 			}
 			break;
 

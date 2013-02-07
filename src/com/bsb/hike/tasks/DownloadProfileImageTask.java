@@ -27,28 +27,33 @@ import com.bsb.hike.utils.Utils;
 public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 
 	private Context context;
-	private String msisdn;
+	private String id;
 	private String urlString;
 	private String fileName;
 	private String filePath;
 
-	public DownloadProfileImageTask(Context context, String msisdn,
-			String fileName, boolean hasCustomIcon) {
+	public DownloadProfileImageTask(Context context, String id,
+			String fileName, boolean hasCustomIcon, boolean statusImage) {
 		this.context = context;
-		this.msisdn = msisdn;
+		this.id = id;
 
-		boolean isGroupConversation = Utils.isGroupConversation(msisdn);
-
-		if (hasCustomIcon) {
-			this.urlString = AccountUtils.base
-					+ (isGroupConversation ? "/group/" + msisdn + "/avatar"
-							: "/account/avatar/" + msisdn) + "?fullsize=1";
+		if (statusImage) {
+			this.urlString = AccountUtils.base + "/user/status/" + id
+					+ "?only_image=true";
 		} else {
-			this.urlString = (AccountUtils.ssl ? AccountUtils.HTTPS_STRING
-					: AccountUtils.HTTP_STRING)
-					+ AccountUtils.host
-					+ ":"
-					+ AccountUtils.port + "/static/avatars/" + fileName;
+			boolean isGroupConversation = Utils.isGroupConversation(id);
+
+			if (hasCustomIcon) {
+				this.urlString = AccountUtils.base
+						+ (isGroupConversation ? "/group/" + id + "/avatar"
+								: "/account/avatar/" + id) + "?fullsize=1";
+			} else {
+				this.urlString = (AccountUtils.ssl ? AccountUtils.HTTPS_STRING
+						: AccountUtils.HTTP_STRING)
+						+ AccountUtils.host
+						+ ":"
+						+ AccountUtils.port + "/static/avatars/" + fileName;
+			}
 		}
 
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
@@ -128,10 +133,10 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 			File file = new File(fileName);
 			file.delete();
 			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED, msisdn);
+					HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED, id);
 		} else {
 			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.PROFILE_IMAGE_DOWNLOADED, msisdn);
+					HikePubSub.PROFILE_IMAGE_DOWNLOADED, id);
 		}
 	}
 

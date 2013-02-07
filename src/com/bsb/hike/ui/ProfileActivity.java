@@ -157,6 +157,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		public int genderType;
 		public boolean viewingProfileImage = false;
 		public boolean animatedProfileImage = false;
+		public int imageViewId = -1;
+		public String id = null;
 	}
 
 	public File selectedFileIcon;
@@ -258,7 +260,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		}
 		if (mActivityState.viewingProfileImage) {
-			downloadOrShowProfileImage(false, false);
+			downloadOrShowProfileImage(false, false, mActivityState.imageViewId);
 		}
 	}
 
@@ -540,7 +542,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (mActivityState.viewingProfileImage) {
 			View profileContainer = findViewById(R.id.profile_image_container);
 
-			animateProfileImage(false);
+			animateProfileImage(false, mActivityState.imageViewId);
 			profileContainer.setVisibility(View.GONE);
 
 			mActivityState.viewingProfileImage = false;
@@ -935,41 +937,55 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onViewImageClicked(View v) {
-		downloadOrShowProfileImage(true, false);
+		StatusMessage statusMessage = (StatusMessage) v.getTag();
+		mActivityState.imageViewId = v.getId();
+		mActivityState.id = (statusMessage == null || statusMessage
+				.getMappedId() == null) ? mLocalMSISDN : statusMessage
+				.getMappedId();
+		downloadOrShowProfileImage(true, false, v.getId());
 	}
 
 	private void downloadOrShowProfileImage(boolean startNewDownload,
-			boolean justDownloaded) {
+			boolean justDownloaded, int viewId) {
 		if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 			Toast.makeText(getApplicationContext(),
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 			return;
 		}
 
+		StatusMessage statusMessage = (StatusMessage) findViewById(viewId)
+				.getTag();
+
+		boolean statusImage = false;
+		String id = mLocalMSISDN;
+		if (profileType != ProfileType.GROUP_INFO
+				&& statusMessage.getMappedId() != null) {
+			id = statusMessage.getMappedId();
+			statusImage = true;
+		}
+
 		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 
-		boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(
-				mLocalMSISDN);
+		boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(id);
 
-		String fileName = hasCustomImage ? Utils
-				.getProfileImageFileName(mLocalMSISDN) : Utils
-				.getDefaultAvatarServerName(this, mLocalMSISDN);
+		String fileName = hasCustomImage ? Utils.getProfileImageFileName(id)
+				: Utils.getDefaultAvatarServerName(this, id);
 
 		File file = new File(basePath, fileName);
 
 		if (file.exists()) {
 			showLargerImage(
 					BitmapDrawable.createFromPath(basePath + "/" + fileName),
-					justDownloaded);
+					justDownloaded, viewId);
 		} else {
 			showLargerImage(
 					IconCacheManager.getInstance().getIconForMSISDN(
-							mLocalMSISDN), justDownloaded);
+							mLocalMSISDN), justDownloaded, viewId);
 			if (startNewDownload) {
 				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
-						getApplicationContext(), mLocalMSISDN, fileName,
-						hasCustomImage);
+						getApplicationContext(), id, fileName, hasCustomImage,
+						statusImage);
 				mActivityState.downloadProfileImageTask.execute();
 
 				mDialog = ProgressDialog.show(this, null, getResources()
@@ -999,7 +1015,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	private boolean expandedWithoutAnimation = false;
 
-	private void showLargerImage(Drawable image, boolean justDownloaded) {
+	private void showLargerImage(Drawable image, boolean justDownloaded,
+			int viewId) {
 		mActivityState.viewingProfileImage = true;
 
 		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
@@ -1010,7 +1027,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (!justDownloaded) {
 			if (!mActivityState.animatedProfileImage) {
 				mActivityState.animatedProfileImage = true;
-				animateProfileImage(true);
+				animateProfileImage(true, viewId);
 			} else {
 				expandedWithoutAnimation = true;
 				((LinearLayout) profileImageContainer)
@@ -1025,85 +1042,88 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.setImageDrawable(image);
 	}
 
-	private void animateProfileImage(boolean expand) {
+	private void animateProfileImage(boolean expand, int viewId) {
 		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
 		((LinearLayout) profileImageContainer).setGravity(Gravity.NO_GRAVITY);
 		ImageView profileImageLarge = (ImageView) findViewById(R.id.profile_image_large);
-		ImageView profileImageSmall = (ImageView) findViewById(R.id.profile);
+		ImageView profileImageSmall = (ImageView) findViewById(viewId);
 
-		int maxWidth = (expand || !expandedWithoutAnimation) ? getResources()
-				.getDisplayMetrics().widthPixels : profileImageSmall
-				.getMeasuredHeight();
-		int maxHeight = (expand || !expandedWithoutAnimation) ? getResources()
-				.getDisplayMetrics().heightPixels : profileImageSmall
-				.getMeasuredHeight();
+		if (profileImageSmall != null) {
+			int maxWidth = (expand || !expandedWithoutAnimation) ? getResources()
+					.getDisplayMetrics().widthPixels : profileImageSmall
+					.getMeasuredHeight();
+			int maxHeight = (expand || !expandedWithoutAnimation) ? getResources()
+					.getDisplayMetrics().heightPixels : profileImageSmall
+					.getMeasuredHeight();
 
-		int screenHeight = getResources().getDisplayMetrics().heightPixels;
+			int screenHeight = getResources().getDisplayMetrics().heightPixels;
 
-		int startWidth = (expand || !expandedWithoutAnimation) ? profileImageSmall
-				.getWidth() : profileImageLarge.getWidth();
-		int startHeight = (expand || !expandedWithoutAnimation) ? profileImageSmall
-				.getHeight() : profileImageLarge.getHeight();
+			int startWidth = (expand || !expandedWithoutAnimation) ? profileImageSmall
+					.getWidth() : profileImageLarge.getWidth();
+			int startHeight = (expand || !expandedWithoutAnimation) ? profileImageSmall
+					.getHeight() : profileImageLarge.getHeight();
 
-		int[] startLocations = new int[2];
-		if (expand || mActivityState.animatedProfileImage) {
-			profileImageSmall.getLocationOnScreen(startLocations);
-		} else {
-			profileImageLarge.getLocationOnScreen(startLocations);
+			int[] startLocations = new int[2];
+			if (expand || mActivityState.animatedProfileImage) {
+				profileImageSmall.getLocationOnScreen(startLocations);
+			} else {
+				profileImageLarge.getLocationOnScreen(startLocations);
+			}
+
+			int statusBarHeight = screenHeight
+					- profileImageContainer.getHeight();
+
+			int startLocX = startLocations[0];
+			int startLocY = startLocations[1] - statusBarHeight;
+
+			LayoutParams startLp = new LayoutParams(startWidth, startHeight);
+			startLp.setMargins(startLocX, startLocY, 0, 0);
+
+			profileImageLarge.setLayoutParams(startLp);
+
+			float multiplier;
+			if (maxWidth > maxHeight) {
+				multiplier = maxHeight / startHeight;
+			} else {
+				multiplier = maxWidth / startWidth;
+			}
+
+			ScaleAnimation scaleAnimation = (expand || expandedWithoutAnimation) ? new ScaleAnimation(
+					1.0f, multiplier, 1.0f, multiplier) : new ScaleAnimation(
+					multiplier, 1.0f, multiplier, 1.0f);
+
+			int xDest;
+			int yDest;
+			if (expand || !expandedWithoutAnimation) {
+				xDest = maxWidth / 2;
+				xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
+				yDest = maxHeight / 2;
+				yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
+			} else {
+				int[] endLocations = new int[2];
+				profileImageSmall.getLocationInWindow(endLocations);
+				xDest = endLocations[0];
+				yDest = endLocations[1];
+			}
+
+			TranslateAnimation translateAnimation = (expand || expandedWithoutAnimation) ? new TranslateAnimation(
+					0, xDest, 0, yDest) : new TranslateAnimation(xDest, 0,
+					yDest, 0);
+
+			AnimationSet animationSet = new AnimationSet(true);
+			animationSet.addAnimation(scaleAnimation);
+			animationSet.addAnimation(translateAnimation);
+			animationSet.setFillAfter(true);
+			animationSet.setDuration(350);
+			animationSet.setStartOffset(expand ? 150 : 0);
+
+			profileImageLarge.startAnimation(animationSet);
 		}
-
-		int statusBarHeight = screenHeight - profileImageContainer.getHeight();
-
-		int startLocX = startLocations[0];
-		int startLocY = startLocations[1] - statusBarHeight;
-
-		LayoutParams startLp = new LayoutParams(startWidth, startHeight);
-		startLp.setMargins(startLocX, startLocY, 0, 0);
-
-		profileImageLarge.setLayoutParams(startLp);
-
-		float multiplier;
-		if (maxWidth > maxHeight) {
-			multiplier = maxHeight / startHeight;
-		} else {
-			multiplier = maxWidth / startWidth;
-		}
-
-		ScaleAnimation scaleAnimation = (expand || expandedWithoutAnimation) ? new ScaleAnimation(
-				1.0f, multiplier, 1.0f, multiplier) : new ScaleAnimation(
-				multiplier, 1.0f, multiplier, 1.0f);
-
-		int xDest;
-		int yDest;
-		if (expand || !expandedWithoutAnimation) {
-			xDest = maxWidth / 2;
-			xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
-			yDest = maxHeight / 2;
-			yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
-		} else {
-			int[] endLocations = new int[2];
-			profileImageSmall.getLocationInWindow(endLocations);
-			xDest = endLocations[0];
-			yDest = endLocations[1];
-		}
-
-		TranslateAnimation translateAnimation = (expand || expandedWithoutAnimation) ? new TranslateAnimation(
-				0, xDest, 0, yDest)
-				: new TranslateAnimation(xDest, 0, yDest, 0);
-
-		AnimationSet animationSet = new AnimationSet(true);
-		animationSet.addAnimation(scaleAnimation);
-		animationSet.addAnimation(translateAnimation);
-		animationSet.setFillAfter(true);
-		animationSet.setDuration(350);
-		animationSet.setStartOffset(expand ? 150 : 0);
-
 		AlphaAnimation alphaAnimation = expand ? new AlphaAnimation(0.0f, 1.0f)
 				: new AlphaAnimation(1.0f, 0.0f);
 		alphaAnimation.setDuration(200);
 		alphaAnimation.setStartOffset(expand ? 0 : 200);
 		profileImageContainer.startAnimation(alphaAnimation);
-		profileImageLarge.startAnimation(animationSet);
 	}
 
 	public void onChangeImageClicked(View v) {
@@ -1409,7 +1429,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		} else if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type)
 				|| HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED.equals(type)) {
 			String msisdn = (String) object;
-			if (!mLocalMSISDN.equals(msisdn)) {
+			if (!msisdn.equals(mActivityState.id)) {
 				return;
 			}
 			runOnUiThread(new Runnable() {
@@ -1417,7 +1437,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				public void run() {
 					mActivityState = new ActivityState();
 					mActivityState.animatedProfileImage = true;
-					downloadOrShowProfileImage(false, true);
+					downloadOrShowProfileImage(false, true,
+							mActivityState.imageViewId);
 
 					if (mDialog != null) {
 						mDialog.dismiss();
