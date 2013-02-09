@@ -547,6 +547,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 			mActivityState.viewingProfileImage = false;
 			mActivityState.animatedProfileImage = false;
+			mActivityState.downloadProfileImageTask = null;
+			mActivityState.id = null;
+			mActivityState.imageViewId = -1;
 			expandedWithoutAnimation = false;
 			return;
 		}
@@ -759,7 +762,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			mDialog = null;
 		}
 
-		mActivityState = new ActivityState();
+		mActivityState.task = null;
 	}
 
 	@Override
@@ -840,7 +843,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 									mDialog.dismiss();
 									mDialog = null;
 								}
-								mActivityState = new ActivityState();
+								mActivityState.downloadPicasaImageTask = null;
 								if (!result) {
 									Toast.makeText(getApplicationContext(),
 											R.string.error_download,
@@ -942,7 +945,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		mActivityState.id = (statusMessage == null || statusMessage
 				.getMappedId() == null) ? mLocalMSISDN : statusMessage
 				.getMappedId();
-		downloadOrShowProfileImage(true, false, v.getId());
+		downloadOrShowProfileImage(true, false, mActivityState.imageViewId);
 	}
 
 	private void downloadOrShowProfileImage(boolean startNewDownload,
@@ -952,18 +955,25 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 			return;
 		}
-
-		StatusMessage statusMessage = (StatusMessage) findViewById(viewId)
-				.getTag();
-
-		boolean statusImage = false;
-		String id = mLocalMSISDN;
-		if (profileType != ProfileType.GROUP_INFO
-				&& statusMessage.getMappedId() != null) {
-			id = statusMessage.getMappedId();
-			statusImage = true;
+		/*
+		 * The id should not be null if the image was just downloaded.
+		 */
+		if(justDownloaded && mActivityState.id == null) {
+			return;
 		}
 
+		String id = justDownloaded ? mActivityState.id : mLocalMSISDN;
+		boolean statusImage = false;
+		if (!justDownloaded) {
+			StatusMessage statusMessage = (StatusMessage) findViewById(viewId)
+					.getTag();
+
+			if (profileType != ProfileType.GROUP_INFO
+					&& statusMessage.getMappedId() != null) {
+				id = statusMessage.getMappedId();
+				statusImage = true;
+			}
+		}
 		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 
@@ -1004,7 +1014,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				if (mActivityState.downloadProfileImageTask != null) {
 					mActivityState.downloadProfileImageTask.cancel(true);
 				}
-				mActivityState = new ActivityState();
+				onBackPressed();
 			}
 		});
 	}
@@ -1435,7 +1445,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					mActivityState = new ActivityState();
+					mActivityState.downloadProfileImageTask = null;
 					mActivityState.animatedProfileImage = true;
 					downloadOrShowProfileImage(false, true,
 							mActivityState.imageViewId);

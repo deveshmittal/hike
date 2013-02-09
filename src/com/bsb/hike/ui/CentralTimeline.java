@@ -241,8 +241,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			animateProfileImage(false, mActivityState.imageViewId);
 			profileContainer.setVisibility(View.GONE);
 
-			mActivityState.viewingProfileImage = false;
-			mActivityState.animatedProfileImage = false;
+			mActivityState = new ActivityState();
 			expandedWithoutAnimation = false;
 			return;
 		}
@@ -409,7 +408,6 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					mActivityState = new ActivityState();
 					mActivityState.animatedProfileImage = true;
 					downloadOrShowProfileImage(false, true, msisdn,
 							mActivityState.imageViewId);
@@ -462,6 +460,12 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 			return;
 		}
+		/*
+		 * The id should not be null if the image was just downloaded.
+		 */
+		if (justDownloaded && mActivityState.mappedId == null) {
+			return;
+		}
 
 		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
@@ -504,7 +508,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 				if (mActivityState.downloadProfileImageTask != null) {
 					mActivityState.downloadProfileImageTask.cancel(true);
 				}
-				mActivityState = new ActivityState();
+				onBackPressed();
 			}
 		});
 	}
