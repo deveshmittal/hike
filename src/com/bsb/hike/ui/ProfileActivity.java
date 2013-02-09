@@ -410,7 +410,13 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	public void onTitleIconClick(View v) {
 		if (profileType == ProfileType.USER_PROFILE) {
-			super.onTitleIconClick(v);
+			if (v.getId() == R.id.title_icon) {
+				Intent intent = new Intent(this, ProfileActivity.class);
+				intent.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
+				startActivity(intent);
+			} else {
+				super.onTitleIconClick(v);
+			}
 			return;
 		}
 		if (v.getId() == R.id.title_image_btn2) {
@@ -526,6 +532,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 		mTitleView.setText(getResources().getString(R.string.profile_title));
+
+		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+		Button editBtn = (Button) findViewById(R.id.title_icon);
+		editBtn.setVisibility(View.VISIBLE);
+		editBtn.setText(R.string.edit);
 	}
 
 	private void fetchPersistentData() {
@@ -646,7 +657,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap,
 					Bitmap.CompressFormat.JPEG, 100);
 
-			profileAdapter.setProfilePreview(smallerBitmap);
+			if (profileAdapter != null) {
+				profileAdapter.setProfilePreview(smallerBitmap);
+			}
 
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
 					+ "/avatar", new HikeHttpRequest.HikeHttpCallback() {
