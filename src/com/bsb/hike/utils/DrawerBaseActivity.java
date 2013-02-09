@@ -74,7 +74,8 @@ public class DrawerBaseActivity extends Activity implements
 
 	private String[] leftDrawerPubSubListeners = {
 			HikePubSub.PROFILE_PIC_CHANGED, HikePubSub.FREE_SMS_TOGGLED,
-			HikePubSub.TOGGLE_REWARDS };
+			HikePubSub.TOGGLE_REWARDS, HikePubSub.SMS_CREDIT_CHANGED,
+			HikePubSub.TALK_TIME_CHANGED };
 
 	private String[] rightDrawerPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
@@ -286,7 +287,15 @@ public class DrawerBaseActivity extends Activity implements
 
 	@Override
 	public void onEventReceived(String type, final Object object) {
-		if (HikePubSub.PROFILE_PIC_CHANGED.equals(type)) {
+		if (HikePubSub.SMS_CREDIT_CHANGED.equals(type)) {
+			final int credits = (Integer) object;
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					parentLayout.updateCredits(credits);
+				}
+			});
+		} else if (HikePubSub.PROFILE_PIC_CHANGED.equals(type)) {
 			runOnUiThread(new Runnable() {
 
 				@Override
@@ -310,6 +319,15 @@ public class DrawerBaseActivity extends Activity implements
 				@Override
 				public void run() {
 					parentLayout.setUpLeftDrawerView();
+				}
+			});
+		} else if (HikePubSub.TALK_TIME_CHANGED.equals(type)) {
+			final int talkTime = (Integer) object;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					parentLayout.updateTalkTime(talkTime);
 				}
 			});
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {

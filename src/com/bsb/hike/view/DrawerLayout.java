@@ -10,8 +10,12 @@ import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -26,6 +30,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -42,7 +47,6 @@ import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.TellAFriend;
-import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.CustomInterpolator;
@@ -71,6 +75,10 @@ public class DrawerLayout extends RelativeLayout implements
 	private Listener mListener;
 
 	private boolean mPressed = false;
+
+	private TextView creditsNum;
+
+	private TextView talkTimeNum;
 
 	private SharedPreferences accountPrefs;
 
@@ -122,8 +130,8 @@ public class DrawerLayout extends RelativeLayout implements
 				.getDisplayMetrics().heightPixels) - topBarButtonWidth);
 		mRightSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
 
-		mLeftSidebarWidth = (int) (72 * Utils.densityMultiplier);
-		mLeftSidebarOffsetForAnimation = 10;
+		mLeftSidebarWidth = mRightSidebarWidth;
+		mLeftSidebarOffsetForAnimation = mRightSidebarOffsetForAnimation;
 		/*
 		 * Fix for android v2.3 and below specific bug where the bitmap is not
 		 * tiled and gets stretched instead if we use the xml. So we're creating
@@ -268,6 +276,29 @@ public class DrawerLayout extends RelativeLayout implements
 				rewardsOn ? VISIBLE : GONE);
 		findViewById(R.id.divider_rewards).setVisibility(
 				rewardsOn ? VISIBLE : GONE);
+
+		creditsNum = (TextView) findViewById(R.id.credit_num);
+		updateCredits(accountPrefs.getInt(HikeMessengerApp.SMS_SETTING, 0));
+
+		talkTimeNum = (TextView) findViewById(R.id.talk_time_num);
+		updateTalkTime(accountPrefs.getInt(HikeMessengerApp.TALK_TIME, 0));
+
+		TextView withLoveTextView = (TextView) findViewById(R.id.made_with_love);
+
+		String love = getContext().getString(R.string.love);
+		String withLove = getContext().getString(R.string.with_love);
+
+		Drawable drawable = getContext().getResources().getDrawable(
+				R.drawable.ic_left_drawer_heart);
+		drawable.setBounds(0, -10, drawable.getIntrinsicWidth(),
+				drawable.getIntrinsicHeight() - 10);
+
+		SpannableStringBuilder ssb = new SpannableStringBuilder(withLove);
+		ssb.setSpan(new ImageSpan(drawable), withLove.indexOf(love),
+				withLove.indexOf(love) + love.length(),
+				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+		withLoveTextView.setText(ssb);
 	}
 
 	@Override
@@ -365,6 +396,20 @@ public class DrawerLayout extends RelativeLayout implements
 				"");
 		profileImg.setImageDrawable(IconCacheManager.getInstance()
 				.getIconForMSISDN(msisdn));
+	}
+
+	public void updateCredits(int credits) {
+		if (creditsNum != null) {
+			creditsNum.setText(Integer.toString(credits));
+		}
+	}
+
+	public void updateTalkTime(int talkTime) {
+		if (talkTimeNum != null) {
+			talkTimeNum.setVisibility(talkTime > 0 ? View.VISIBLE
+					: View.INVISIBLE);
+			talkTimeNum.setText(Integer.toString(talkTime));
+		}
 	}
 
 	@Override
