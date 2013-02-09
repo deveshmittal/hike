@@ -347,8 +347,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			ContactInfo contactInfo = favoriteToggle.first;
-			if (favoriteToggle.second != FavoriteType.RECOMMENDED_FAVORITE
-					|| favoriteToggle.second != FavoriteType.FAVORITE) {
+			if (favoriteToggle.second != FavoriteType.RECOMMENDED_FAVORITE) {
 				return;
 			}
 			int startIndex = getStartIndex();
@@ -375,8 +374,6 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
 
 		} else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
 			StatusMessage statusMessage = (StatusMessage) object;
@@ -440,8 +437,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		 * that we ignore the friend requests (Which are always marked as
 		 * unseen).
 		 */
-		int startIndex = friendRequests;
-		if (statusMessages.size() <= friendRequests) {
+		int startIndex = getStartIndex() + friendRequests;
+		if (statusMessages.size() <= startIndex) {
 			return false;
 		}
 		return !statusMessages.get(startIndex).isStatusSeen();
