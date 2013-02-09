@@ -55,7 +55,7 @@ import com.bsb.hike.utils.Utils;
 public class DrawerLayout extends RelativeLayout implements
 		OnItemClickListener, View.OnClickListener {
 
-	private final static int ANIMATION_STEPS = (int) (7 * Utils.densityMultiplier);
+	private final int animationSteps;
 
 	private final static int DURATION_BETWEEN_EACH_STEP = 5;
 
@@ -123,6 +123,7 @@ public class DrawerLayout extends RelativeLayout implements
 		accountPrefs = getContext().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		handler = new Handler();
+		animationSteps = (int) (7 * Utils.densityMultiplier);
 		topBarButtonWidth = (int) (48 * Utils.densityMultiplier);
 		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		mRightSidebarWidth = (int) ((isPortrait ? context.getResources()
@@ -641,9 +642,9 @@ public class DrawerLayout extends RelativeLayout implements
 						.max(0.1f,
 								((float) (Math.abs(sidebarPosition) * 100 / sidebarOffset) / 100));
 
-				int sidebarIncrements = (int) (((int) sidebarOffset / ANIMATION_STEPS) * interpolator
+				int sidebarIncrements = (int) (((int) sidebarOffset / animationSteps) * interpolator
 						.getInterpolation(sidebarFactor));
-				int contentIncrements = (int) (((int) sidebarWidth / ANIMATION_STEPS) * interpolator
+				int contentIncrements = (int) (((int) sidebarWidth / animationSteps) * interpolator
 						.getInterpolation(contentFactor));
 
 				sidebarIncrements = Math.min(sidebarIncrements, sidebarOffset
@@ -742,9 +743,9 @@ public class DrawerLayout extends RelativeLayout implements
 								((float) ((sidebarOffset - Math
 										.abs(sidebarPosition)) * 100 / sidebarOffset) / 100));
 
-				int sidebarIncrements = (int) (((int) sidebarOffset / ANIMATION_STEPS) * interpolator
+				int sidebarIncrements = (int) (((int) sidebarOffset / animationSteps) * interpolator
 						.getInterpolation(sidebarFactor));
-				int contentIncrements = (int) (((int) sidebarWidth / ANIMATION_STEPS) * interpolator
+				int contentIncrements = (int) (((int) sidebarWidth / animationSteps) * interpolator
 						.getInterpolation(contentFactor));
 
 				sidebarIncrements = Math.min(sidebarIncrements, sidebarOffset
