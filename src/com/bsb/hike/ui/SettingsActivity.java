@@ -37,12 +37,14 @@ public class SettingsActivity extends DrawerBaseActivity implements
 
 		items = new ArrayList<String>();
 		items.add(getString(R.string.notifications));
+		items.add(getString(R.string.blocked_list));
 		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.faq));
 		items.add(getString(R.string.contact));
 
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
 		itemIcons.add(R.drawable.ic_notifications);
+		itemIcons.add(R.drawable.ic_block);
 		itemIcons.add(R.drawable.ic_manage_account);
 		itemIcons.add(R.drawable.ic_faq);
 		itemIcons.add(R.drawable.ic_contact);
@@ -77,17 +79,21 @@ public class SettingsActivity extends DrawerBaseActivity implements
 					R.xml.notification_preferences);
 			break;
 		case 1:
+			intent = new Intent(this, HikeListActivity.class);
+			intent.putExtra(HikeConstants.Extras.BLOCKED_LIST, true);
+			break;
+		case 2:
 			intent = new Intent(this, HikePreferences.class);
 			intent.putExtra(HikeConstants.Extras.PREF,
 					R.xml.privacy_preferences);
 			break;
-		case 2:
+		case 3:
 			intent = new Intent(this, WebViewActivity.class);
 			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
 					HikeConstants.HELP_URL);
 			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
 			break;
-		case 3:
+		case 4:
 			intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
 

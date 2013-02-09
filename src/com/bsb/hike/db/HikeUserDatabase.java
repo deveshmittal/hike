@@ -843,6 +843,19 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		return blocked;
 	}
 
+	public List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList() {
+		List<ContactInfo> contactList = getContacts();
+		List<Pair<AtomicBoolean, ContactInfo>> blockedContactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+		Set<String> blockedUsers = getBlockedUsers();
+		Collections.sort(contactList);
+		for (ContactInfo contactInfo : contactList) {
+			blockedContactList.add(new Pair<AtomicBoolean, ContactInfo>(
+					new AtomicBoolean(blockedUsers.contains(contactInfo
+							.getMsisdn())), contactInfo));
+		}
+		return blockedContactList;
+	}
+
 	public void setIcon(String msisdn, byte[] data, boolean isProfileImage) {
 		if (!isProfileImage) {
 			/*

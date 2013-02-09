@@ -1,8 +1,11 @@
 package com.bsb.hike.ui;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,21 +35,34 @@ import com.bsb.hike.utils.Utils;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class HikeListActivity extends Activity implements OnItemClickListener {
+
+	private enum Type {
+		NUX, INVITE, BLOCK
+	}
+
 	private HikeInviteAdapter adapter;
 	private ListView listView;
 	private TextView labelView;
 	private Button titleBtn;
 	private EditText input;
 	private Set<String> selectedContacts;
-	private boolean showMostContactedContacts;
+	private Type type;
+	private Map<String, Boolean> toggleBlockMap;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hikelistactivity);
 
-		showMostContactedContacts = getIntent().getBooleanExtra(
-				HikeConstants.Extras.SHOW_MOST_CONTACTED, false);
+		if (getIntent().getBooleanExtra(
+				HikeConstants.Extras.SHOW_MOST_CONTACTED, false)) {
+			type = Type.NUX;
+		} else if (getIntent().getBooleanExtra(
+				HikeConstants.Extras.BLOCKED_LIST, false)) {
+			type = Type.BLOCK;
+		} else {
+			type = Type.INVITE;
+		}
 
 		selectedContacts = new HashSet<String>();
 
@@ -55,12 +71,12 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 		titleBtn = (Button) findViewById(R.id.title_icon);
 		input = (EditText) findViewById(R.id.input_number);
 
-		titleBtn.setText(R.string.send);
+		titleBtn.setText(type == Type.BLOCK ? R.string.done : R.string.send);
 		titleBtn.setVisibility(View.VISIBLE);
 
 		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 
-		if (showMostContactedContacts) {
+		if (type == Type.NUX) {
 			findViewById(R.id.input_number_container).setVisibility(View.GONE);
 			findViewById(R.id.nux_text).setVisibility(View.VISIBLE);
 		}
@@ -69,14 +85,21 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
 
-		List<Pair<AtomicBoolean, ContactInfo>> contactList = showMostContactedContacts ? HikeUserDatabase
-				.getInstance().getNonHikeMostContactedContacts(50)
-				: HikeUserDatabase.getInstance().getNonHikeContacts();
+		HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
+		List<Pair<AtomicBoolean, ContactInfo>> contactList;
+		if (type == Type.NUX) {
+			contactList = hUDB.getNonHikeMostContactedContacts(50);
+		} else if (type == Type.BLOCK) {
+			contactList = hUDB.getBlockedUserList();
+			toggleBlockMap = new HashMap<String, Boolean>();
+		} else {
+			contactList = hUDB.getNonHikeContacts();
+		}
 
 		/*
 		 * This would be true when we have pre checked items.
 		 */
-		if (showMostContactedContacts) {
+		if (type != Type.INVITE) {
 			for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList) {
 				boolean checked = contactItem.first.get();
 				if (checked) {
@@ -85,15 +108,19 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 					break;
 				}
 			}
-			Log.d(getClass().getSimpleName(), "Selected contacts: "
-					+ selectedContacts.size());
 		}
 
-		adapter = new HikeInviteAdapter(this, -1, contactList);
+		adapter = new HikeInviteAdapter(this, -1, contactList,
+				type == Type.BLOCK);
 		input.addTextChangedListener(adapter);
 
-		labelView.setText(showMostContactedContacts ? R.string.invite_friends
-				: R.string.invite_via_sms);
+		if (type == Type.NUX) {
+			labelView.setText(R.string.invite_friends);
+		} else if (type == Type.BLOCK) {
+			labelView.setText(R.string.blocked_list);
+		} else {
+			labelView.setText(R.string.invite_via_sms);
+		}
 
 		listView.setAdapter(adapter);
 	}
@@ -104,37 +131,52 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 	}
 
 	public void onTitleIconClick(View v) {
-		Iterator<String> iterator = selectedContacts.iterator();
-		while (iterator.hasNext()) {
-			String msisdn = iterator.next();
-			Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-			FiksuTrackingManager.uploadPurchaseEvent(this,
-					HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-					HikeConstants.CURRENCY);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-					Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
-		}
-		if (!selectedContacts.isEmpty() || showMostContactedContacts) {
-			if (!selectedContacts.isEmpty()) {
-				Toast.makeText(getApplicationContext(), R.string.invites_sent,
-						Toast.LENGTH_SHORT).show();
+		if (type != Type.BLOCK) {
+			Iterator<String> iterator = selectedContacts.iterator();
+			while (iterator.hasNext()) {
+				String msisdn = iterator.next();
+				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
+				FiksuTrackingManager.uploadPurchaseEvent(this,
+						HikeConstants.INVITE, HikeConstants.INVITE_SENT,
+						HikeConstants.CURRENCY);
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH,
+						Utils.makeHike2SMSInviteMessage(msisdn, this)
+								.serialize());
 			}
-			if (showMostContactedContacts) {
-				Editor editor = getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_TUTORIAL, true);
-				editor.commit();
+			if (!selectedContacts.isEmpty() || type == Type.NUX) {
+				if (!selectedContacts.isEmpty()) {
+					Toast.makeText(getApplicationContext(),
+							R.string.invites_sent, Toast.LENGTH_SHORT).show();
+				}
+				if (type == Type.NUX) {
+					Editor editor = getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
+							.edit();
+					editor.putBoolean(HikeMessengerApp.SHOWN_TUTORIAL, true);
+					editor.commit();
 
-				Intent i = new Intent(this, MessagesList.class);
-				i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
-				startActivity(i);
+					Intent i = new Intent(this, MessagesList.class);
+					i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
+					startActivity(i);
+				}
 				finish();
 			} else {
-				finish();
+				Toast.makeText(getApplicationContext(),
+						R.string.select_invite_contacts, Toast.LENGTH_SHORT)
+						.show();
 			}
 		} else {
-			Toast.makeText(getApplicationContext(),
-					R.string.select_invite_contacts, Toast.LENGTH_SHORT).show();
+			for (Entry<String, Boolean> toggleBlockEntry : toggleBlockMap
+					.entrySet()) {
+				String msisdn = toggleBlockEntry.getKey();
+				boolean blocked = toggleBlockEntry.getValue();
+
+				HikeMessengerApp.getPubSub().publish(
+						blocked ? HikePubSub.BLOCK_USER
+								: HikePubSub.UNBLOCK_USER, msisdn);
+				finish();
+			}
 		}
 	}
 
@@ -147,10 +189,15 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 			view.setTag(pair);
 			adapter.notifyDataSetChanged();
 			String msisdn = pair.second.getMsisdn();
-			if (selectedContacts.contains(msisdn)) {
-				selectedContacts.remove(msisdn);
+			if (type != Type.BLOCK) {
+				if (selectedContacts.contains(msisdn)) {
+					selectedContacts.remove(msisdn);
+				} else {
+					selectedContacts.add(msisdn);
+				}
 			} else {
-				selectedContacts.add(msisdn);
+				boolean blocked = pair.first.get();
+				toggleBlockMap.put(msisdn, blocked);
 			}
 		} else {
 			String msisdn = ((ContactInfo) tag).getMsisdn();

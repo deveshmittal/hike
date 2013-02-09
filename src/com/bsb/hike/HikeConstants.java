@@ -385,6 +385,7 @@ public class HikeConstants {
 		public static final String SHOW_MOST_CONTACTED = "showMostContacted";
 		public static final String CONTACT_METADATA = "contactMetadata";
 		public static final String FROM_CENTRAL_TIMELINE = "fromCentralTimeline";
+		public static final String BLOCKED_LIST = "blockedList";
 	}
 
 	public static final class LogEvent {

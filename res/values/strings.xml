@@ -377,4 +377,5 @@
 	<string name="update_status">Update status</string>
 	<string name="free_sms_txt">Free SMS</string>
 	<string name="on_dnd">on DND</string>
+	<string name="blocked_list">Blocked List</string>
 </resources>

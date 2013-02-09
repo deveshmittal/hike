@@ -4,4 +4,5 @@
     <dimen name="fav_indicator_paddingBottom">2dp</dimen>
     <dimen name="fav_indicator_marginRight">7dp</dimen>
     <dimen name="fav_indicator_marginTop">7dp</dimen>
+    <dimen name="checkbox_marginRight">15dp</dimen>
 </resources>
