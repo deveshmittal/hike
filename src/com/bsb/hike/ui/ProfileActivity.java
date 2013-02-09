@@ -385,7 +385,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		List<GroupParticipant> participants = new ArrayList<GroupParticipant>(
 				participantMap.values());
-		participants.add(userInfo);
+
+		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn())) {
+			participants.add(userInfo);
+		}
+
 		Collections.sort(participants);
 
 		boolean hasSmsUser = false;
