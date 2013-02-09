@@ -15,6 +15,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -28,10 +29,12 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.WindowManager.BadTokenException;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -461,6 +464,17 @@ public class DrawerBaseActivity extends Activity implements
 	public void showStatusDialog(boolean hasSelectedFile) {
 		statusDialog = new Dialog(this, R.style.Theme_CustomDialog_Status);
 		statusDialog.setContentView(R.layout.status_dialog);
+
+		ViewGroup parent = (ViewGroup) statusDialog
+				.findViewById(R.id.parent_layout);
+		int screenHeight = getResources().getDisplayMetrics().heightPixels;
+		int dialogHeight = (int) (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? screenHeight / 2
+				: FrameLayout.LayoutParams.MATCH_PARENT);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+				FrameLayout.LayoutParams.MATCH_PARENT, dialogHeight);
+		lp.topMargin = (int) (5 * Utils.densityMultiplier);
+		lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
+		parent.setLayoutParams(lp);
 
 		final Button titleBtn = (Button) statusDialog
 				.findViewById(R.id.title_icon);
