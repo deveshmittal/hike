@@ -971,7 +971,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		/*
 		 * The id should not be null if the image was just downloaded.
 		 */
-		if(justDownloaded && mActivityState.id == null) {
+		if (justDownloaded && mActivityState.id == null) {
 			return;
 		}
 
