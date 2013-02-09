@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 
 public class CentralTimelineAdapter extends BaseAdapter {
@@ -175,12 +176,16 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.statusImg.setId(position);
 			break;
 		case FRIEND_REQUEST_ACCEPTED:
+		case USER_ACCEPTED_FRIEND_REQUEST:
 			viewHolder.yesBtn.setVisibility(View.GONE);
 			viewHolder.noBtn.setVisibility(View.GONE);
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
 
-			viewHolder.extraInfo.setText(context.getString(
-					R.string.confirmed_friend_info, statusMessage.getName()));
+			viewHolder.extraInfo
+					.setText(context.getString(
+							statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED ? R.string.confirmed_friend_info
+									: R.string.accepted_friend_request_info,
+							statusMessage.getName()));
 			viewHolder.statusType
 					.setImageResource(R.drawable.ic_profile_pic_status);
 			viewHolder.statusType

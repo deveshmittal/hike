@@ -6,16 +6,13 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
-import android.content.Context;
-
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.R;
 import com.ocpsoft.pretty.time.PrettyTime;
 
 public class StatusMessage {
 
 	public static enum StatusMessageType {
-		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED, NO_STATUS
+		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED, NO_STATUS, USER_ACCEPTED_FRIEND_REQUEST
 	}
 
 	private long id;

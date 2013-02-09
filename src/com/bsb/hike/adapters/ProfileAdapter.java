@@ -306,7 +306,8 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.image.setId(position);
 				viewHolder.image.setTag(statusMessage);
 				viewHolder.text.setText(R.string.changed_profile);
-			} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED) {
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
+					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
 				viewHolder.icon
 						.setImageResource(R.drawable.ic_profile_pic_status);
 			}

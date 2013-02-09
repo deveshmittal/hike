@@ -202,6 +202,10 @@ public class HikePubSub implements Runnable {
 
 	public static final String DECREMENT_NOTIFICATION_COUNTER = "decrementNotificationCounter";
 
+	public static final String FRIEND_REQUEST_ACCEPTED = "friendRequestAccepted";
+	
+	public static final String REMOVED_FROM_FRIENDS = "removedFromFriends";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

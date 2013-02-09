@@ -72,6 +72,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ProfileItem;
 import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
@@ -122,7 +123,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED,
 			HikePubSub.USER_LEFT, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
 			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED,
-			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED };
+			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED,
+			HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REMOVED_FROM_FRIENDS };
 
 	private String[] profilePubSubListeners = {
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
@@ -1471,7 +1473,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			});
 		} else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
 			StatusMessage statusMessage = (StatusMessage) object;
-			if (!mLocalMSISDN.equals(statusMessage.getMsisdn())) {
+			if (!mLocalMSISDN.equals(statusMessage.getMsisdn())
+					|| statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
+					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
 				return;
 			}
 			profileItems.add(showMessageBtn ? 2 : 1, statusMessage);
@@ -1482,7 +1486,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
-		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
+		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
+				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
+				|| HikePubSub.REMOVED_FROM_FRIENDS.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 
 			ContactInfo contactInfo = favoriteToggle.first;

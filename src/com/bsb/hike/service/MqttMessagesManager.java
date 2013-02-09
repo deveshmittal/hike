@@ -549,7 +549,11 @@ public class MqttMessagesManager {
 					: FavoriteType.FAVORITE;
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, favoriteType);
-			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			this.pubSub
+					.publish(
+							favoriteType == FavoriteType.RECOMMENDED_FAVORITE ? HikePubSub.FAVORITE_TOGGLED
+									: HikePubSub.FRIEND_REQUEST_ACCEPTED,
+							favoriteToggle);
 			if (favoriteType == FavoriteType.FAVORITE) {
 				StatusMessage statusMessage = new StatusMessage(0, null,
 						msisdn, contactInfo.getName(),
@@ -614,14 +618,14 @@ public class MqttMessagesManager {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					false);
-			if (contactInfo == null
-					|| contactInfo.getFavoriteType() != FavoriteType.PENDING) {
+			if (contactInfo == null) {
 				return;
 			}
 			FavoriteType favoriteType = FavoriteType.NOT_FAVORITE;
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, favoriteType);
-			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			this.pubSub
+					.publish(HikePubSub.REMOVED_FROM_FRIENDS, favoriteToggle);
 		}
 	}
 

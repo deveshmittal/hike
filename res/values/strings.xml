@@ -379,4 +379,6 @@
 	<string name="on_dnd">on DND</string>
 	<string name="blocked_list">Blocked List</string>
 	<string name="edit">Edit</string>
+	<string name="accepted_friend_request">Confirmed as a friend</string>
+	<string name="accepted_friend_request_info">%1$s can now see your updates</string>
 </resources>
