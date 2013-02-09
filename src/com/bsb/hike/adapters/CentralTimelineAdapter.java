@@ -204,6 +204,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		viewHolder.yesBtn.setTag(statusMessage);
 		viewHolder.noBtn.setTag(statusMessage);
 		viewHolder.statusImg.setTag(statusMessage);
+		viewHolder.avatar.setTag(statusMessage);
 
 		return convertView;
 	}
