@@ -608,6 +608,12 @@ public class MqttMessagesManager {
 						.getString(HikeConstants.THUMBNAIL);
 				this.userDb.setIcon(statusMessage.getMappedId(),
 						Base64.decode(iconBase64, Base64.DEFAULT), false);
+				/*
+				 * Removing the thumbnail string from the JSON, since we've
+				 * already saved it.
+				 */
+				jsonObj.getJSONObject(HikeConstants.DATA).remove(
+						HikeConstants.THUMBNAIL);
 			}
 
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
