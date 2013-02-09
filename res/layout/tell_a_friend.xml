@@ -71,7 +71,7 @@
                             android:drawableLeft="@drawable/ic_invite_sms"
                             android:drawablePadding="5dp"
                             android:paddingLeft="10dp"
-                            android:text="@string/sms"
+                            android:text="@string/free_sms_txt"
                             android:textColor="@color/lightblack"
                             android:textSize="15sp"
                             android:textStyle="bold|italic" />
@@ -86,7 +86,7 @@
                             android:drawablePadding="5dp"
                             android:drawableRight="@drawable/ic_arrow"
                             android:paddingRight="10dp"
-                            android:text="@string/free_sms_txt"
+                            android:text="@string/invite_free_sms"
                             android:textColor="#a4a49a"
                             android:textSize="13sp"
                             android:textStyle="italic" />
