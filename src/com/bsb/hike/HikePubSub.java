@@ -200,6 +200,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String FACEBOOK_IMAGE_DOWNLOADED = "facebookImageDownloaded";
 
+	public static final String DECREMENT_NOTIFICATION_COUNTER = "decrementNotificationCounter";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

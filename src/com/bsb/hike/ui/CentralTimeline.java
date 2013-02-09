@@ -316,6 +316,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			}
 		}
 		centralTimelineAdapter.notifyDataSetChanged();
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.DECREMENT_NOTIFICATION_COUNTER, null);
 	}
 
 	public void onDetailsBtnClick(View v) {
