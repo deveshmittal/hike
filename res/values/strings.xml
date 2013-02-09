@@ -368,7 +368,7 @@
 	<string name="which_friend_invite">Which of your friends would you like to invite to hike?</string>
 	<string name="confirmed_friend">Confirmed you as a friend</string>
 	<string name="confirmed_friend_info">You can now see updates from %1$s</string>
-	<string name="waiting_for_accept">Waiting for %1$s to accept you friend request</string>
+	<string name="waiting_for_accept">Waiting for %1$s to accept your friend request</string>
 	<string name="changed_profile">Changed their profile picture</string>
 	<string name="status_update">Status update</string>
 	<string name="remove_friend">Remove</string>
