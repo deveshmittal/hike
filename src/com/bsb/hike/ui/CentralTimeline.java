@@ -375,7 +375,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 									StatusMessageType.FRIEND_REQUEST, System
 											.currentTimeMillis() / 1000));
 			friendRequests++;
-			if (noStatusMessage != null) {
+			if (noFriendMessage != null) {
 				statusMessages.remove(noFriendMessage);
 				noFriendMessage = null;
 			}
