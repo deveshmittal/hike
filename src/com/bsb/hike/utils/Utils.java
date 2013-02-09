@@ -125,7 +125,7 @@ public class Utils {
 
 	private static TranslateAnimation mInFromRight;
 
-	public static float densityMultiplier;
+	public static float densityMultiplier = 1.0f;
 
 	static {
 		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
@@ -784,11 +784,9 @@ public class Utils {
 	 * @param activity
 	 */
 	public static void setDensityMultiplier(Activity activity) {
-		if (Utils.densityMultiplier == 0.0f) {
-			DisplayMetrics metrics = new DisplayMetrics();
-			activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-			Utils.densityMultiplier = metrics.scaledDensity;
-		}
+		DisplayMetrics metrics = new DisplayMetrics();
+		activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		Utils.densityMultiplier = metrics.scaledDensity;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info,
