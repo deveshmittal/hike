@@ -240,7 +240,9 @@ public class ProfileAdapter extends BaseAdapter {
 								: View.GONE);
 
 				viewHolder.btn1.setText(R.string.add_member);
-				viewHolder.btn2.setText(R.string.leave_group);
+				viewHolder.btn2
+						.setText(groupConversation.isMuted() ? R.string.unmute_group
+								: R.string.mute_group);
 				viewHolder.btn3.setText(R.string.invite_all_members);
 
 				viewHolder.btn1.setCompoundDrawablesWithIntrinsicBounds(

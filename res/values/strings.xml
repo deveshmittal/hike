@@ -382,4 +382,7 @@
 	<string name="accepted_friend_request">Confirmed as a friend</string>
 	<string name="accepted_friend_request_info">%1$s can now see your updates</string>
 	<string name="invite_free_sms">Invite via free SMS</string>
+	<string name="leave">Leave</string>
+	<string name="mute_group">Mute group</string>
+	<string name="unmute_group">Unmute group</string>
 </resources>

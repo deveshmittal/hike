@@ -372,6 +372,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileContent.setAdapter(profileAdapter);
 		profileContent.setOnItemLongClickListener(this);
 		profileContent.setOnItemClickListener(this);
+
+		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+		Button leaveBtn = (Button) findViewById(R.id.title_icon);
+		leaveBtn.setVisibility(View.VISIBLE);
+		leaveBtn.setText(R.string.leave);
 	}
 
 	private void setupGroupProfileList() {
@@ -390,6 +395,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			participants.add(userInfo);
 		}
 
+		// Adding an item for the button
+		participantsList.add(new GroupParticipant(new ContactInfo(
+				ProfileAdapter.GROUP_BUTTON_ID, null, null, null)));
+
 		Collections.sort(participants);
 
 		boolean hasSmsUser = false;
@@ -402,9 +411,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		}
 
 		participantsList.addAll(participants);
-		// Adding an item for the button
-		participantsList.add(new GroupParticipant(new ContactInfo(
-				ProfileAdapter.GROUP_BUTTON_ID, null, null, null)));
 
 		isGroupOwner = userInfo.getContactInfo().getMsisdn()
 				.equals(groupConversation.getGroupOwner());
@@ -457,6 +463,42 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				} else {
 					onCallClicked(null);
 				}
+			}
+		} else if (v.getId() == R.id.title_icon) {
+			if (profileType == ProfileType.GROUP_INFO) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setMessage(R.string.leave_group_confirm);
+				builder.setPositiveButton(R.string.yes,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								Intent intent = new Intent(
+										ProfileActivity.this,
+										MessagesList.class);
+								intent.putExtra(
+										HikeConstants.Extras.GROUP_LEFT,
+										mLocalMSISDN);
+								intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+								startActivity(intent);
+								finish();
+								overridePendingTransition(
+										R.anim.slide_in_left_noalpha,
+										R.anim.slide_out_right_noalpha);
+							}
+						});
+				builder.setNegativeButton(R.string.no,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+							}
+						});
+				builder.setCancelable(true);
+				AlertDialog alertDialog = builder.create();
+				alertDialog.show();
 			}
 		}
 	}
@@ -1224,34 +1266,15 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onProfileSmallRightBtnClick(View v) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage(R.string.leave_group_confirm);
-		builder.setPositiveButton(R.string.yes,
-				new DialogInterface.OnClickListener() {
+		groupConversation.setIsMuted(!groupConversation.isMuted());
+		((Button) v)
+				.setText(groupConversation.isMuted() ? R.string.unmute_group
+						: R.string.mute_group);
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						Intent intent = new Intent(ProfileActivity.this,
-								MessagesList.class);
-						intent.putExtra(HikeConstants.Extras.GROUP_LEFT,
-								mLocalMSISDN);
-						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						startActivity(intent);
-						finish();
-						overridePendingTransition(R.anim.slide_in_left_noalpha,
-								R.anim.slide_out_right_noalpha);
-					}
-				});
-		builder.setNegativeButton(R.string.no,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-					}
-				});
-		builder.setCancelable(true);
-		AlertDialog alertDialog = builder.create();
-		alertDialog.show();
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.MUTE_CONVERSATION_TOGGLED,
+				new Pair<String, Boolean>(groupConversation.getMsisdn(),
+						groupConversation.isMuted()));
 	}
 
 	public void onProfileNegativeBtnClick(View v) {
