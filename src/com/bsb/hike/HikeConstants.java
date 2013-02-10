@@ -82,6 +82,7 @@ public class HikeConstants {
 	public static final String STATUS_MESSAGE = "msg";
 	public static final String PROFILE = "profile";
 	public static final String ICON = "icon";
+	public static final String MUTED = "muted";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

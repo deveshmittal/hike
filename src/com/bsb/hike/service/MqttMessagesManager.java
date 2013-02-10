@@ -486,6 +486,18 @@ public class MqttMessagesManager {
 								userId);
 					}
 				}
+				if (account.has(HikeConstants.MUTED)) {
+					JSONObject mutedGroups = account
+							.getJSONObject(HikeConstants.MUTED);
+					JSONArray groupIds = mutedGroups.names();
+					if (groupIds != null && groupIds.length() > 0) {
+						for (int i = 0; i < groupIds.length(); i++) {
+							HikeConversationsDatabase.getInstance()
+									.toggleGroupMute(groupIds.optString(i),
+											true);
+						}
+					}
+				}
 				if (account.has(HikeConstants.FAVORITES)) {
 					JSONObject favorites = account
 							.getJSONObject(HikeConstants.FAVORITES);
