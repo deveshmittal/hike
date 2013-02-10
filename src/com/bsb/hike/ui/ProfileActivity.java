@@ -1665,8 +1665,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		intent.setClass(this, ProfileActivity.class);
 		intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
 				contactInfo.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.ON_HIKE,
-				contactInfo.isOnhike());
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, contactInfo.isOnhike());
 		startActivity(intent);
 	}
 
