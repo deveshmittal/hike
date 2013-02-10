@@ -441,6 +441,8 @@ public class MqttMessagesManager {
 							Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 					IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.PROFILE_PIC_CHANGED, null);
 				}
 				if (account.has(HikeConstants.ACCOUNTS)) {
 					JSONObject accounts = account
