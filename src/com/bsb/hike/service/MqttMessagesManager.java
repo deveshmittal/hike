@@ -432,6 +432,16 @@ public class MqttMessagesManager {
 			}
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
+				if (account.has(HikeConstants.ICON)) {
+					String msisdn = settings.getString(
+							HikeMessengerApp.MSISDN_SETTING, "");
+
+					String iconBase64 = jsonObj.getString(HikeConstants.DATA);
+					this.userDb.setIcon(msisdn,
+							Base64.decode(iconBase64, Base64.DEFAULT), false);
+
+					IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+				}
 				if (account.has(HikeConstants.ACCOUNTS)) {
 					JSONObject accounts = account
 							.getJSONObject(HikeConstants.ACCOUNTS);
