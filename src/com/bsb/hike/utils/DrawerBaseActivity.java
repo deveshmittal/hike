@@ -678,8 +678,10 @@ public class DrawerBaseActivity extends Activity implements
 								}
 
 							});
-					hikeHttpRequest.setStatusMessage(statusTxt.getText()
-							.toString());
+					String status = statusTxt.getText().toString()
+							.replaceAll("\n", " ");
+					Log.d(getClass().getSimpleName(), "Status: " + status);
+					hikeHttpRequest.setStatusMessage(status);
 					mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
 					mActivityTask.hikeHTTPTask.execute(hikeHttpRequest);
 
