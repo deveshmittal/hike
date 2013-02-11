@@ -298,12 +298,12 @@ public class MessagesList extends DrawerBaseActivity implements
 		userMsisdn = accountPrefs
 				.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
-		notificationCounter = (Button) findViewById(R.id.title_hikeicon);
-		notificationCounter.setVisibility(View.VISIBLE);
-		int unseenStatus = HikeConversationsDatabase.getInstance()
-				.getUnseenStatusMessageCount(userMsisdn)
-				+ HikeUserDatabase.getInstance().getPendingFriendRequestCount();
-		setNotificationCounter(unseenStatus);
+		View title = findViewById(R.id.title_hikeicon);
+		title.setVisibility(View.VISIBLE);
+		// int unseenStatus = HikeConversationsDatabase.getInstance()
+		// .getUnseenStatusMessageCount(userMsisdn)
+		// + HikeUserDatabase.getInstance().getPendingFriendRequestCount();
+		// setNotificationCounter(unseenStatus);
 		/*
 		 * mSearchIconView = findViewById(R.id.search);
 		 * mSearchIconView.setOnClickListener(this);
