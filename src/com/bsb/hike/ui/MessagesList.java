@@ -24,6 +24,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -524,11 +525,20 @@ public class MessagesList extends DrawerBaseActivity implements
 	}
 
 	private void createNewConversationsForFirstTimeUser() {
-		Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-		vibrator.vibrate(400);
+		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+		int ringerMode = audioManager.getRingerMode();
+		int vibrateMode = audioManager
+				.getVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER);
 
-		MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.v1);
-		mediaPlayer.start();
+		if (vibrateMode != AudioManager.VIBRATE_SETTING_OFF) {
+			Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+			vibrator.vibrate(400);
+		}
+
+		if (ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+			MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.v1);
+			mediaPlayer.start();
+		}
 
 		List<ContactInfo> recentNonHikeContacts = new ArrayList<ContactInfo>(0);
 		if (HikeMessengerApp.isIndianUser()) {
