@@ -565,8 +565,7 @@ public class MqttMessagesManager {
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					false);
 			if (contactInfo == null
-					|| (contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE && contactInfo
-							.getFavoriteType() != FavoriteType.PENDING)) {
+					|| (contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE)) {
 				return;
 			}
 			FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.NOT_FAVORITE ? FavoriteType.RECOMMENDED_FAVORITE

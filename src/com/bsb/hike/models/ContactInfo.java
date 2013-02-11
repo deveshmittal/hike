@@ -17,7 +17,6 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 									 * Contacts that were recommended by the app
 									 * to be added as favorites
 									 */
-		PENDING /* Pending friend request */
 	}
 
 	@Override

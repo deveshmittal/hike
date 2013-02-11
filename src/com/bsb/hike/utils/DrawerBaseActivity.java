@@ -373,8 +373,7 @@ public class DrawerBaseActivity extends Activity implements
 					FavoriteType favoriteType = favoriteToggle.second;
 					ContactInfo contactInfo = favoriteToggle.first;
 					contactInfo.setFavoriteType(favoriteType);
-					if ((favoriteType == FavoriteType.FAVORITE)
-							|| (favoriteType == FavoriteType.PENDING)) {
+					if ((favoriteType == FavoriteType.FAVORITE)) {
 						parentLayout.addToFavorite(contactInfo);
 					} else if (favoriteType == FavoriteType.NOT_FAVORITE) {
 						parentLayout.removeFromFavorite(contactInfo);
@@ -408,8 +407,7 @@ public class DrawerBaseActivity extends Activity implements
 
 				@Override
 				public void run() {
-					if ((contactInfo.getFavoriteType() != FavoriteType.FAVORITE)
-							&& (contactInfo.getFavoriteType() != FavoriteType.PENDING)) {
+					if ((contactInfo.getFavoriteType() != FavoriteType.FAVORITE)) {
 						parentLayout.updateRecentContacts(contactInfo);
 					} else {
 						parentLayout.addToFavorite(contactInfo);
