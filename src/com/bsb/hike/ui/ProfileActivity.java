@@ -3,10 +3,10 @@ package com.bsb.hike.ui;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +33,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
@@ -41,18 +42,12 @@ import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,7 +56,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -71,8 +65,6 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.ProfileItem;
-import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
@@ -86,9 +78,9 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class ProfileActivity extends DrawerBaseActivity implements
 		FinishableEvent, android.content.DialogInterface.OnClickListener,
-		Listener, OnLongClickListener, OnItemClickListener,
-		OnItemLongClickListener {
+		Listener, OnLongClickListener {
 
+	private ImageView mIconView;
 	private EditText mNameEdit;
 
 	private View currentSelection;
@@ -101,13 +93,16 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private boolean isBackPressed = false;
 	private EditText mEmailEdit;
 	private String emailTxt;
-	private Map<String, GroupParticipant> participantMap;
+	private Map<String, GroupParticipant> participantList;
 
 	private ProfileType profileType;
 	private String httpRequestURL;
 	private String groupOwner;
 
+	private boolean shouldShowInviteAllButton = false;
 	private TextView mNameDisplay;
+	private ViewGroup participantNameContainer;
+	private ProfileItem[] items;
 	private int lastSavedGender;
 
 	private SharedPreferences preferences;
@@ -122,20 +117,15 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED,
 			HikePubSub.USER_LEFT, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED,
-			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED,
-			HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REMOVED_FROM_FRIENDS };
+			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
 
 	private String[] profilePubSubListeners = {
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED,
-			HikePubSub.STATUS_MESSAGE_RECEIVED };
-
+			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
 	private GroupConversation groupConversation;
 	private ImageButton topBarBtn;
 	private ContactInfo contactInfo;
 	private boolean isBlocked;
-	private boolean showMessageBtn = true;
 
 	private static enum ProfileType {
 		USER_PROFILE, // The user profile screen
@@ -159,19 +149,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		public int genderType;
 		public boolean viewingProfileImage = false;
 		public boolean animatedProfileImage = false;
-		public int imageViewId = -1;
-		public String id = null;
 	}
 
-	public File selectedFileIcon;
-	private ListView profileContent;
-	private ProfileAdapter profileAdapter;
-
-	private List<StatusMessage> profileItems;
-
-	private List<GroupParticipant> participantsList;
-
-	private boolean isGroupOwner;
+	public File selectedFileIcon; /*
+								 * the selected file that we'll store the
+								 * profile camera picture
+								 */
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
@@ -241,8 +224,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			setupGroupProfileScreen();
 		} else if (getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO)) {
 			this.profileType = ProfileType.CONTACT_INFO;
-			this.showMessageBtn = getIntent().getBooleanExtra(
-					HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false);
 			HikeMessengerApp.getPubSub().addListeners(this,
 					contactInfoPubSubListeners);
 			setupContactProfileScreen();
@@ -262,15 +243,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		}
 		if (mActivityState.viewingProfileImage) {
-			downloadOrShowProfileImage(false, false, mActivityState.imageViewId);
+			downloadOrShowProfileImage(false, false);
 		}
 	}
 
 	private void setupContactProfileScreen() {
-		setContentView(R.layout.profile);
-
-		TextView mTitleView = (TextView) findViewById(R.id.title);
-		mTitleView.setText(R.string.user_info);
+		setContentView(R.layout.contact_info);
 
 		boolean canCall = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_TELEPHONY);
@@ -281,60 +259,62 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(
 				mLocalMSISDN, false);
 
+		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn2);
+
 		if (!contactInfo.isOnhike()) {
 			contactInfo.setOnhike(getIntent().getBooleanExtra(
 					HikeConstants.Extras.ON_HIKE, false));
 		}
 
-		profileItems = new ArrayList<StatusMessage>();
-		setupContactProfileList();
-
-		profileAdapter = new ProfileAdapter(this, profileItems, null,
-				contactInfo, false);
-		profileContent = (ListView) findViewById(R.id.profile_content);
-		profileContent.setAdapter(profileAdapter);
-
-		findViewById(R.id.button_bar).setVisibility(View.VISIBLE);
-		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn);
+		topBarBtn
+				.setImageResource(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? R.drawable.ic_favorite
+						: R.drawable.ic_not_favorite);
 		topBarBtn.setVisibility(View.VISIBLE);
-		/*
-		 * This would only happen for unknown contacts.
-		 */
-		if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
-			topBarBtn.setImageResource(R.drawable.ic_add_to_contacts_top);
-		} else {
-			topBarBtn.setImageResource(R.drawable.ic_call_top);
-		}
-	}
+		findViewById(R.id.title_image_btn2_container).setVisibility(
+				View.VISIBLE);
 
-	private void setupContactProfileList() {
-		profileItems.clear();
-		// Adding an item for the header
-		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_HEADER_ID,
-				null, null, null, null, null, 0));
-		if (showMessageBtn) {
-			// Adding an item for the button
-			profileItems.add(new StatusMessage(
-					ProfileAdapter.PROFILE_BUTTON_ID, null, null, null, null,
-					null, 0));
-		}
-		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE)
-				&& (contactInfo.getFavoriteType() != FavoriteType.PENDING)
-				&& (contactInfo.isOnhike())) {
-			profileItems.addAll(HikeConversationsDatabase.getInstance()
-					.getStatusMessages(mLocalMSISDN));
-		} else {
-			// Adding an item for the empty status
-			profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_EMPTY_ID,
-					null, null, null, null, null, 0));
-		}
+		findViewById(R.id.add_to_contacts).setVisibility(
+				!TextUtils.isEmpty(contactInfo.getName()) ? View.GONE
+						: View.VISIBLE);
+		findViewById(R.id.invite_to_hike_btn).setVisibility(
+				contactInfo.isOnhike() ? View.GONE : View.VISIBLE);
+		findViewById(R.id.call_btn).setVisibility(
+				canCall ? View.VISIBLE : View.GONE);
+
+		TextView mTitleView = (TextView) findViewById(R.id.title);
+		mTitleView.setText(R.string.user_info);
+
+		mIconView = (ImageView) findViewById(R.id.profile);
+		mIconView.setImageDrawable(IconCacheManager.getInstance()
+				.getIconForMSISDN(mLocalMSISDN));
+
+		isBlocked = HikeUserDatabase.getInstance().isBlocked(mLocalMSISDN);
+		((TextView) findViewById(R.id.block_user_btn))
+				.setText(!isBlocked ? R.string.block_user
+						: R.string.unblock_user);
+
+		((TextView) findViewById(R.id.name_current)).setText(TextUtils
+				.isEmpty(contactInfo.getName()) ? mLocalMSISDN : contactInfo
+				.getName());
 	}
 
 	private void setupGroupProfileScreen() {
-		setContentView(R.layout.profile);
+		setContentView(R.layout.group_info);
 
+		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+
+		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn2);
+
+		ViewGroup addParticipantsLayout = (ViewGroup) findViewById(R.id.add_participants_layout);
 		TextView mTitleView = (TextView) findViewById(R.id.title);
-		mTitleView.setText(R.string.group_info);
+		mNameEdit = (EditText) findViewById(R.id.name_input);
+		mNameDisplay = (TextView) findViewById(R.id.name_display);
+		mIconView = (ImageView) findViewById(R.id.profile);
+
+		addParticipantsLayout.setFocusable(true);
+		addParticipantsLayout
+				.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 
 		this.mLocalMSISDN = getIntent().getStringExtra(
 				HikeConstants.Extras.EXISTING_GROUP_CHAT);
@@ -344,91 +324,162 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		groupConversation = (GroupConversation) hCDB.getConversation(
 				mLocalMSISDN, 0);
 
-		participantMap = groupConversation.getGroupParticipantList();
-		List<String> inactiveMsisdns = new ArrayList<String>();
-		/*
-		 * Removing inactive participants
-		 */
-		for (Entry<String, GroupParticipant> participantEntry : participantMap
-				.entrySet()) {
-			GroupParticipant groupParticipant = participantEntry.getValue();
-			if (groupParticipant.hasLeft()) {
-				inactiveMsisdns.add(participantEntry.getKey());
-			}
-		}
-		for (String msisdn : inactiveMsisdns) {
-			participantMap.remove(msisdn);
-		}
-
+		participantList = groupConversation.getGroupParticipantList();
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
-		participantsList = new ArrayList<GroupParticipant>();
-		profileAdapter = new ProfileAdapter(this, participantsList,
-				groupConversation, null, false);
+		participantNameContainer = (ViewGroup) findViewById(R.id.group_participant_container);
 
-		setupGroupProfileList();
+		topBarBtn
+				.setImageResource(groupConversation.isMuted() ? R.drawable.ic_group_muted
+						: R.drawable.ic_group_not_muted);
+		topBarBtn.setVisibility(View.VISIBLE);
+		findViewById(R.id.title_image_btn2_container).setVisibility(
+				View.VISIBLE);
 
-		profileContent = (ListView) findViewById(R.id.profile_content);
-		profileContent.setAdapter(profileAdapter);
-		profileContent.setOnItemLongClickListener(this);
-		profileContent.setOnItemClickListener(this);
+		groupOwner = groupConversation.getGroupOwner();
 
-		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-		Button leaveBtn = (Button) findViewById(R.id.title_icon);
-		leaveBtn.setVisibility(View.VISIBLE);
-		leaveBtn.setText(R.string.leave);
+		GroupParticipant userInfo = new GroupParticipant(
+				Utils.getUserContactInfo(preferences));
+
+		isBlocked = HikeUserDatabase.getInstance().isBlocked(groupOwner);
+
+		boolean isUserGroupOwner = false;
+
+		Button blockGroupOwner = (Button) findViewById(R.id.block_owner_btn);
+		if (groupOwner.equals(userInfo.getContactInfo().getMsisdn())) {
+			blockGroupOwner.setVisibility(View.GONE);
+			findViewById(R.id.empty_horizontal_space).setVisibility(View.GONE);
+			isUserGroupOwner = true;
+		} else {
+			blockGroupOwner.setVisibility(View.VISIBLE);
+			findViewById(R.id.empty_horizontal_space).setVisibility(
+					View.VISIBLE);
+			blockGroupOwner.setText(isBlocked ? R.string.unblock_owner
+					: R.string.block_owner);
+		}
+
+		int activeParticipants = setupParticipantView();
+
+		// Disable the add participants item
+		if (activeParticipants == HikeConstants.MAX_CONTACTS_IN_GROUP) {
+			addParticipantsLayout.setEnabled(false);
+			((TextView) findViewById(R.id.add_participants_txt))
+					.setTextColor(getResources().getColor(R.color.lightgrey));
+		}
+
+		findViewById(R.id.invite_all_btn).setVisibility(
+				shouldShowInviteAllButton ? View.VISIBLE : View.GONE);
+
+		nameTxt = groupConversation.getLabel();
+
+		// Make sure that the group name text does not exceed the permitted
+		// length
+		int maxLength = getResources().getInteger(
+				R.integer.max_length_group_name);
+		if (nameTxt.length() > maxLength) {
+			nameTxt = nameTxt.substring(0, maxLength);
+		}
+
+		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(
+				groupConversation.getMsisdn());
+
+		mIconView.setImageDrawable(drawable);
+
+		mNameEdit.setText(nameTxt);
+		mNameDisplay.setText(nameTxt);
+		mTitleView.setText(R.string.group_info);
+
+		mNameEdit.setVisibility(View.GONE);
+		mNameDisplay.setVisibility(View.VISIBLE);
+
+		if (isUserGroupOwner
+				&& !preferences.getBoolean(HikeMessengerApp.GCK_SHOWN, false)) {
+			Toast.makeText(this, R.string.gck_help, Toast.LENGTH_LONG).show();
+
+			Editor editor = preferences.edit();
+			editor.putBoolean(HikeMessengerApp.GCK_SHOWN, true);
+			editor.commit();
+		}
 	}
 
-	private void setupGroupProfileList() {
+	private int setupParticipantView() {
+		View groupOwnerItem = (View) findViewById(R.id.group_owner);
+
+		int left = (int) (0 * Utils.densityMultiplier);
+		int top = (int) (0 * Utils.densityMultiplier);
+		int right = (int) (0 * Utils.densityMultiplier);
+		int bottom = (int) (6 * Utils.densityMultiplier);
+
 		GroupParticipant userInfo = new GroupParticipant(
-				Utils.getUserContactInfo(preferences, true));
+				Utils.getUserContactInfo(preferences));
+		participantList.put(userInfo.getContactInfo().getMsisdn(), userInfo);
 
-		participantsList.clear();
-		// Adding an item for the header
-		participantsList.add(new GroupParticipant(new ContactInfo(
-				ProfileAdapter.GROUP_HEADER_ID, null, null, null)));
+		Set<String> activeParticipants = new HashSet<String>();
+		activeParticipants.add(groupOwner);
 
-		List<GroupParticipant> participants = new ArrayList<GroupParticipant>(
-				participantMap.values());
-
-		if (!participantMap.containsKey(userInfo.getContactInfo().getMsisdn())) {
-			participants.add(userInfo);
-		}
-
-		// Adding an item for the button
-		participantsList.add(new GroupParticipant(new ContactInfo(
-				ProfileAdapter.GROUP_BUTTON_ID, null, null, null)));
-
-		Collections.sort(participants);
-
-		boolean hasSmsUser = false;
-
-		for (GroupParticipant participant : participants) {
-			if (!participant.getContactInfo().isOnhike()) {
-				hasSmsUser = true;
-				break;
+		for (Entry<String, GroupParticipant> participant : participantList
+				.entrySet()) {
+			ContactInfo contactInfo = participant.getValue().getContactInfo();
+			if (participant.getKey().equals(groupOwner)) {
+				TextView groupOwnerTextView = (TextView) groupOwnerItem
+						.findViewById(R.id.participant_name);
+				groupOwnerTextView.setText(participant.getValue()
+						.getContactInfo().getFirstName());
+				continue;
 			}
+			if (!contactInfo.isOnhike() && !participant.getValue().hasLeft()) {
+				shouldShowInviteAllButton = true;
+			}
+			// Dont show participant that has left group
+			if (participant.getValue().hasLeft()) {
+				continue;
+			}
+			activeParticipants.add(participant.getKey());
+			View participantNameItem = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE))
+					.inflate(R.layout.participant_name_item, null);
+
+			TextView participantName = (TextView) participantNameItem
+					.findViewById(R.id.participant_name);
+			participantName.setText(Utils.ellipsizeName(contactInfo
+					.getFirstName()));
+			if (contactInfo.getMsisdn().equals(
+					userInfo.getContactInfo().getMsisdn())) {
+				participantName.append(" (Me)");
+			} else if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+				participantName.append(" (" + contactInfo.getMsisdn() + ")");
+			}
+			participantName.setTextColor(getResources().getColor(
+					contactInfo.isOnhike() ? R.color.contact_blue
+							: R.color.contact_green));
+			participantName
+					.setBackgroundResource(contactInfo.isOnhike() ? R.drawable.hike_contact_bg
+							: R.drawable.sms_contact_bg);
+
+			ImageView dndImg = (ImageView) participantNameItem
+					.findViewById(R.id.dnd_img);
+			dndImg.setVisibility(!contactInfo.isOnhike()
+					&& participant.getValue().onDnd() ? View.VISIBLE
+					: View.INVISIBLE);
+
+			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+					LayoutParams.WRAP_CONTENT);
+			lp.setMargins(left, top, right, bottom);
+			participantNameItem.setLayoutParams(lp);
+			participantNameItem.setId(participant.getKey().hashCode());
+
+			participantNameItem.setTag(contactInfo);
+			participantNameItem.setOnLongClickListener(this);
+
+			participantNameContainer.addView(participantNameItem);
 		}
+		participantList.remove(userInfo.getContactInfo().getMsisdn());
 
-		participantsList.addAll(participants);
-
-		isGroupOwner = userInfo.getContactInfo().getMsisdn()
-				.equals(groupConversation.getGroupOwner());
-
-		profileAdapter.setNumParticipants(participants.size());
-		profileAdapter.setHasSmsUser(hasSmsUser);
-		profileAdapter.notifyDataSetChanged();
+		return activeParticipants.size();
 	}
 
 	public void onTitleIconClick(View v) {
 		if (profileType == ProfileType.USER_PROFILE) {
-			if (v.getId() == R.id.title_icon) {
-				Intent intent = new Intent(this, ProfileActivity.class);
-				intent.putExtra(HikeConstants.Extras.EDIT_PROFILE, true);
-				startActivity(intent);
-			} else {
-				super.onTitleIconClick(v);
-			}
+			super.onTitleIconClick(v);
 			return;
 		}
 		if (v.getId() == R.id.title_image_btn2) {
@@ -455,50 +506,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						contactInfo, contactInfo.getFavoriteType());
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
-			}
-		} else if (v.getId() == R.id.title_image_btn) {
-			if (profileType == ProfileType.CONTACT_INFO) {
-				if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
-					onAddToContactClicked(null);
-				} else {
-					onCallClicked(null);
-				}
-			}
-		} else if (v.getId() == R.id.title_icon) {
-			if (profileType == ProfileType.GROUP_INFO) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setMessage(R.string.leave_group_confirm);
-				builder.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								Intent intent = new Intent(
-										ProfileActivity.this,
-										MessagesList.class);
-								intent.putExtra(
-										HikeConstants.Extras.GROUP_LEFT,
-										mLocalMSISDN);
-								intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-								startActivity(intent);
-								finish();
-								overridePendingTransition(
-										R.anim.slide_in_left_noalpha,
-										R.anim.slide_out_right_noalpha);
-							}
-						});
-				builder.setNegativeButton(R.string.no,
-						new DialogInterface.OnClickListener() {
-
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-							}
-						});
-				builder.setCancelable(true);
-				AlertDialog alertDialog = builder.create();
-				alertDialog.show();
 			}
 		}
 	}
@@ -560,31 +567,47 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		setContentView(R.layout.profile);
 		afterSetContentView(savedInstanceState);
 
-		ContactInfo myInfo = Utils.getUserContactInfo(preferences);
-
-		profileItems = new ArrayList<StatusMessage>();
-		// Adding an item for the header
-		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_HEADER_ID,
-				null, myInfo.getMsisdn(), myInfo.getName(), null, null, 0));
-		// Adding an item for the button
-		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_BUTTON_ID,
-				null, null, null, null, null, 0));
-		profileItems.addAll(HikeConversationsDatabase.getInstance()
-				.getStatusMessages(mLocalMSISDN));
-
-		profileAdapter = new ProfileAdapter(this, profileItems, null, myInfo,
-				true);
-
-		profileContent = (ListView) findViewById(R.id.profile_content);
-		profileContent.setAdapter(profileAdapter);
-
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
-		mTitleView.setText(getResources().getString(R.string.profile_title));
+		TextView mNameView = (TextView) findViewById(R.id.name_current);
 
-		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-		Button editBtn = (Button) findViewById(R.id.title_icon);
-		editBtn.setVisibility(View.VISIBLE);
-		editBtn.setText(R.string.edit);
+		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info);
+		ViewGroup notifications = (ViewGroup) findViewById(R.id.notifications);
+		ViewGroup privacy = (ViewGroup) findViewById(R.id.privacy);
+
+		myInfo.setBackgroundResource(R.drawable.profile_single_item_selector);
+		notifications
+				.setBackgroundResource(R.drawable.profile_top_item_selector);
+		privacy.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+
+		mIconView = (ImageView) findViewById(R.id.profile);
+
+		ViewGroup[] itemLayouts = new ViewGroup[] { notifications, privacy };
+
+		items = new ProfileItem[] {
+				new ProfileItem.ProfilePreferenceItem(
+						getString(R.string.notifications),
+						R.drawable.ic_notifications,
+						R.xml.notification_preferences),
+				new ProfileItem.ProfilePreferenceItem(
+						getString(R.string.privacy), R.drawable.ic_privacy,
+						R.xml.privacy_preferences) };
+
+		for (int i = 0; i < items.length; i++) {
+			items[i].createViewHolder(itemLayouts[i], items[i]);
+			items[i].bindView(ProfileActivity.this, itemLayouts[i]);
+		}
+
+		notifications.findViewById(R.id.divider).setVisibility(View.GONE);
+
+		mTitleView.setText(getResources().getString(R.string.profile_title));
+		mNameView.setText(nameTxt);
+		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(
+				mLocalMSISDN);
+		mIconView.setImageDrawable(drawable);
+
+		myInfo.setFocusable(true);
+		notifications.setFocusable(true);
+		privacy.setFocusable(true);
 	}
 
 	private void fetchPersistentData() {
@@ -601,14 +624,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (mActivityState.viewingProfileImage) {
 			View profileContainer = findViewById(R.id.profile_image_container);
 
-			animateProfileImage(false, mActivityState.imageViewId);
+			animateProfileImage(false);
 			profileContainer.setVisibility(View.GONE);
 
 			mActivityState.viewingProfileImage = false;
 			mActivityState.animatedProfileImage = false;
-			mActivityState.downloadProfileImageTask = null;
-			mActivityState.id = null;
-			mActivityState.imageViewId = -1;
 			expandedWithoutAnimation = false;
 			return;
 		}
@@ -705,8 +725,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			final byte[] bytes = Utils.bitmapToBytes(smallerBitmap,
 					Bitmap.CompressFormat.JPEG, 100);
 
-			if (profileAdapter != null) {
-				profileAdapter.setProfilePreview(smallerBitmap);
+			if (mIconView != null) {
+				mIconView.setImageBitmap(smallerBitmap);
 			}
 
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
@@ -715,7 +735,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					Log.d("ProfileActivity", "resetting image");
 					Utils.removeTempProfileImage(mLocalMSISDN);
 					mActivityState.destFilePath = null;
-					profileAdapter.notifyDataSetChanged();
+					if (mIconView != null) {
+						/* reset the image */
+						mIconView.setImageDrawable(IconCacheManager
+								.getInstance().getIconForMSISDN(mLocalMSISDN));
+					}
 					if (isBackPressed) {
 						finishEditing();
 					}
@@ -823,7 +847,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			mDialog = null;
 		}
 
-		mActivityState.task = null;
+		mActivityState = new ActivityState();
 	}
 
 	@Override
@@ -904,7 +928,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 									mDialog.dismiss();
 									mDialog = null;
 								}
-								mActivityState.downloadPicasaImageTask = null;
+								mActivityState = new ActivityState();
 								if (!result) {
 									Toast.makeText(getApplicationContext(),
 											R.string.error_download,
@@ -1001,62 +1025,41 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onViewImageClicked(View v) {
-		StatusMessage statusMessage = (StatusMessage) v.getTag();
-		mActivityState.imageViewId = v.getId();
-		mActivityState.id = (statusMessage == null || statusMessage
-				.getMappedId() == null) ? mLocalMSISDN : statusMessage
-				.getMappedId();
-		downloadOrShowProfileImage(true, false, mActivityState.imageViewId);
+		downloadOrShowProfileImage(true, false);
 	}
 
 	private void downloadOrShowProfileImage(boolean startNewDownload,
-			boolean justDownloaded, int viewId) {
+			boolean justDownloaded) {
 		if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 			Toast.makeText(getApplicationContext(),
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
 			return;
 		}
-		/*
-		 * The id should not be null if the image was just downloaded.
-		 */
-		if (justDownloaded && mActivityState.id == null) {
-			return;
-		}
 
-		String id = justDownloaded ? mActivityState.id : mLocalMSISDN;
-		boolean statusImage = false;
-		if (!justDownloaded) {
-			StatusMessage statusMessage = (StatusMessage) findViewById(viewId)
-					.getTag();
-
-			if (profileType != ProfileType.GROUP_INFO
-					&& statusMessage.getMappedId() != null) {
-				id = statusMessage.getMappedId();
-				statusImage = true;
-			}
-		}
 		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 
-		boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(id);
+		boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(
+				mLocalMSISDN);
 
-		String fileName = hasCustomImage ? Utils.getProfileImageFileName(id)
-				: Utils.getDefaultAvatarServerName(this, id);
+		String fileName = hasCustomImage ? Utils
+				.getProfileImageFileName(mLocalMSISDN) : Utils
+				.getDefaultAvatarServerName(this, mLocalMSISDN);
 
 		File file = new File(basePath, fileName);
 
 		if (file.exists()) {
 			showLargerImage(
 					BitmapDrawable.createFromPath(basePath + "/" + fileName),
-					justDownloaded, viewId);
+					justDownloaded);
 		} else {
 			showLargerImage(
 					IconCacheManager.getInstance().getIconForMSISDN(
-							mLocalMSISDN), justDownloaded, viewId);
+							mLocalMSISDN), justDownloaded);
 			if (startNewDownload) {
 				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
-						getApplicationContext(), id, fileName, hasCustomImage,
-						statusImage);
+						getApplicationContext(), mLocalMSISDN, fileName,
+						hasCustomImage, false);
 				mActivityState.downloadProfileImageTask.execute();
 
 				mDialog = ProgressDialog.show(this, null, getResources()
@@ -1075,7 +1078,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				if (mActivityState.downloadProfileImageTask != null) {
 					mActivityState.downloadProfileImageTask.cancel(true);
 				}
-				onBackPressed();
+				mActivityState = new ActivityState();
 			}
 		});
 	}
@@ -1086,8 +1089,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	private boolean expandedWithoutAnimation = false;
 
-	private void showLargerImage(Drawable image, boolean justDownloaded,
-			int viewId) {
+	private void showLargerImage(Drawable image, boolean justDownloaded) {
 		mActivityState.viewingProfileImage = true;
 
 		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
@@ -1098,7 +1100,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (!justDownloaded) {
 			if (!mActivityState.animatedProfileImage) {
 				mActivityState.animatedProfileImage = true;
-				animateProfileImage(true, viewId);
+				animateProfileImage(true);
 			} else {
 				expandedWithoutAnimation = true;
 				((LinearLayout) profileImageContainer)
@@ -1113,88 +1115,85 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.setImageDrawable(image);
 	}
 
-	private void animateProfileImage(boolean expand, int viewId) {
+	private void animateProfileImage(boolean expand) {
 		ViewGroup profileImageContainer = (ViewGroup) findViewById(R.id.profile_image_container);
 		((LinearLayout) profileImageContainer).setGravity(Gravity.NO_GRAVITY);
 		ImageView profileImageLarge = (ImageView) findViewById(R.id.profile_image_large);
-		ImageView profileImageSmall = (ImageView) findViewById(viewId);
+		ImageView profileImageSmall = (ImageView) findViewById(R.id.profile);
 
-		if (profileImageSmall != null) {
-			int maxWidth = (expand || !expandedWithoutAnimation) ? getResources()
-					.getDisplayMetrics().widthPixels : profileImageSmall
-					.getMeasuredHeight();
-			int maxHeight = (expand || !expandedWithoutAnimation) ? getResources()
-					.getDisplayMetrics().heightPixels : profileImageSmall
-					.getMeasuredHeight();
+		int maxWidth = (expand || !expandedWithoutAnimation) ? getResources()
+				.getDisplayMetrics().widthPixels : profileImageSmall
+				.getMeasuredHeight();
+		int maxHeight = (expand || !expandedWithoutAnimation) ? getResources()
+				.getDisplayMetrics().heightPixels : profileImageSmall
+				.getMeasuredHeight();
 
-			int screenHeight = getResources().getDisplayMetrics().heightPixels;
+		int screenHeight = getResources().getDisplayMetrics().heightPixels;
 
-			int startWidth = (expand || !expandedWithoutAnimation) ? profileImageSmall
-					.getWidth() : profileImageLarge.getWidth();
-			int startHeight = (expand || !expandedWithoutAnimation) ? profileImageSmall
-					.getHeight() : profileImageLarge.getHeight();
+		int startWidth = (expand || !expandedWithoutAnimation) ? profileImageSmall
+				.getWidth() : profileImageLarge.getWidth();
+		int startHeight = (expand || !expandedWithoutAnimation) ? profileImageSmall
+				.getHeight() : profileImageLarge.getHeight();
 
-			int[] startLocations = new int[2];
-			if (expand || mActivityState.animatedProfileImage) {
-				profileImageSmall.getLocationOnScreen(startLocations);
-			} else {
-				profileImageLarge.getLocationOnScreen(startLocations);
-			}
-
-			int statusBarHeight = screenHeight
-					- profileImageContainer.getHeight();
-
-			int startLocX = startLocations[0];
-			int startLocY = startLocations[1] - statusBarHeight;
-
-			LayoutParams startLp = new LayoutParams(startWidth, startHeight);
-			startLp.setMargins(startLocX, startLocY, 0, 0);
-
-			profileImageLarge.setLayoutParams(startLp);
-
-			float multiplier;
-			if (maxWidth > maxHeight) {
-				multiplier = maxHeight / startHeight;
-			} else {
-				multiplier = maxWidth / startWidth;
-			}
-
-			ScaleAnimation scaleAnimation = (expand || expandedWithoutAnimation) ? new ScaleAnimation(
-					1.0f, multiplier, 1.0f, multiplier) : new ScaleAnimation(
-					multiplier, 1.0f, multiplier, 1.0f);
-
-			int xDest;
-			int yDest;
-			if (expand || !expandedWithoutAnimation) {
-				xDest = maxWidth / 2;
-				xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
-				yDest = maxHeight / 2;
-				yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
-			} else {
-				int[] endLocations = new int[2];
-				profileImageSmall.getLocationInWindow(endLocations);
-				xDest = endLocations[0];
-				yDest = endLocations[1];
-			}
-
-			TranslateAnimation translateAnimation = (expand || expandedWithoutAnimation) ? new TranslateAnimation(
-					0, xDest, 0, yDest) : new TranslateAnimation(xDest, 0,
-					yDest, 0);
-
-			AnimationSet animationSet = new AnimationSet(true);
-			animationSet.addAnimation(scaleAnimation);
-			animationSet.addAnimation(translateAnimation);
-			animationSet.setFillAfter(true);
-			animationSet.setDuration(350);
-			animationSet.setStartOffset(expand ? 150 : 0);
-
-			profileImageLarge.startAnimation(animationSet);
+		int[] startLocations = new int[2];
+		if (expand || mActivityState.animatedProfileImage) {
+			profileImageSmall.getLocationOnScreen(startLocations);
+		} else {
+			profileImageLarge.getLocationOnScreen(startLocations);
 		}
+
+		int statusBarHeight = screenHeight - profileImageContainer.getHeight();
+
+		int startLocX = startLocations[0];
+		int startLocY = startLocations[1] - statusBarHeight;
+
+		LayoutParams startLp = new LayoutParams(startWidth, startHeight);
+		startLp.setMargins(startLocX, startLocY, 0, 0);
+
+		profileImageLarge.setLayoutParams(startLp);
+
+		float multiplier;
+		if (maxWidth > maxHeight) {
+			multiplier = maxHeight / startHeight;
+		} else {
+			multiplier = maxWidth / startWidth;
+		}
+
+		ScaleAnimation scaleAnimation = (expand || expandedWithoutAnimation) ? new ScaleAnimation(
+				1.0f, multiplier, 1.0f, multiplier) : new ScaleAnimation(
+				multiplier, 1.0f, multiplier, 1.0f);
+
+		int xDest;
+		int yDest;
+		if (expand || !expandedWithoutAnimation) {
+			xDest = maxWidth / 2;
+			xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
+			yDest = maxHeight / 2;
+			yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
+		} else {
+			int[] endLocations = new int[2];
+			profileImageSmall.getLocationInWindow(endLocations);
+			xDest = endLocations[0];
+			yDest = endLocations[1];
+		}
+
+		TranslateAnimation translateAnimation = (expand || expandedWithoutAnimation) ? new TranslateAnimation(
+				0, xDest, 0, yDest)
+				: new TranslateAnimation(xDest, 0, yDest, 0);
+
+		AnimationSet animationSet = new AnimationSet(true);
+		animationSet.addAnimation(scaleAnimation);
+		animationSet.addAnimation(translateAnimation);
+		animationSet.setFillAfter(true);
+		animationSet.setDuration(350);
+		animationSet.setStartOffset(expand ? 150 : 0);
+
 		AlphaAnimation alphaAnimation = expand ? new AlphaAnimation(0.0f, 1.0f)
 				: new AlphaAnimation(1.0f, 0.0f);
 		alphaAnimation.setDuration(200);
 		alphaAnimation.setStartOffset(expand ? 0 : 200);
 		profileImageContainer.startAnimation(alphaAnimation);
+		profileImageLarge.startAnimation(animationSet);
 	}
 
 	public void onChangeImageClicked(View v) {
@@ -1219,40 +1218,24 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		finish();
 	}
 
-	public void onProfileLargeBtnClick(View v) {
-		switch (profileType) {
-		case GROUP_INFO:
-			for (Entry<String, GroupParticipant> participant : participantMap
-					.entrySet()) {
-				if (!participant.getValue().getContactInfo().isOnhike()
-						&& !participant.getValue().hasLeft()) {
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.MQTT_PUBLISH,
-							Utils.makeHike2SMSInviteMessage(
-									participant.getKey(), this).serialize());
-				}
+	public void onInviteAllClicked(View v) {
+		for (Entry<String, GroupParticipant> participant : participantList
+				.entrySet()) {
+			if (!participant.getValue().getContactInfo().isOnhike()
+					&& !participant.getValue().hasLeft()) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH,
+						Utils.makeHike2SMSInviteMessage(participant.getKey(),
+								this).serialize());
 			}
-			Toast toast = Toast.makeText(ProfileActivity.this,
-					R.string.invite_sent, Toast.LENGTH_SHORT);
-			toast.setGravity(Gravity.BOTTOM, 0, 0);
-			toast.show();
-			break;
-		case CONTACT_INFO:
-			openChatThread(contactInfo);
-			break;
-		case USER_PROFILE:
-			showStatusDialog(false);
-			break;
 		}
+		Toast toast = Toast.makeText(ProfileActivity.this,
+				R.string.invite_sent, Toast.LENGTH_SHORT);
+		toast.setGravity(Gravity.BOTTOM, 0, 0);
+		toast.show();
 	}
 
-	private void openChatThread(ContactInfo contactInfo) {
-		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
-		intent.setClass(this, ChatThread.class);
-		startActivity(intent);
-	}
-
-	public void onProfileSmallLeftBtnClick(View v) {
+	public void onAddNewParticipantsClicked(View v) {
 		Utils.logEvent(ProfileActivity.this,
 				HikeConstants.LogEvent.ADD_PARTICIPANT);
 
@@ -1265,36 +1248,35 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				R.anim.slide_out_left_noalpha);
 	}
 
-	public void onProfileSmallRightBtnClick(View v) {
-		groupConversation.setIsMuted(!groupConversation.isMuted());
-		((Button) v)
-				.setText(groupConversation.isMuted() ? R.string.unmute_group
-						: R.string.mute_group);
+	public void onLeaveGroupClicked(View v) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.leave_group_confirm);
+		builder.setPositiveButton(R.string.yes,
+				new DialogInterface.OnClickListener() {
 
-		HikeMessengerApp.getPubSub().publish(
-				HikePubSub.MUTE_CONVERSATION_TOGGLED,
-				new Pair<String, Boolean>(groupConversation.getMsisdn(),
-						groupConversation.isMuted()));
-	}
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Intent intent = new Intent(ProfileActivity.this,
+								MessagesList.class);
+						intent.putExtra(HikeConstants.Extras.GROUP_LEFT,
+								mLocalMSISDN);
+						intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+						startActivity(intent);
+						finish();
+						overridePendingTransition(R.anim.slide_in_left_noalpha,
+								R.anim.slide_out_right_noalpha);
+					}
+				});
+		builder.setNegativeButton(R.string.no,
+				new DialogInterface.OnClickListener() {
 
-	public void onProfileNegativeBtnClick(View v) {
-		if (contactInfo.isOnhike()) {
-			contactInfo.setFavoriteType(FavoriteType.PENDING);
-
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
-					contactInfo, contactInfo.getFavoriteType());
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
-					favoriteToggle);
-			Toast.makeText(getApplicationContext(),
-					"Waiting for your friend to accept the request",
-					Toast.LENGTH_SHORT).show();
-		} else {
-			inviteToHike(contactInfo.getMsisdn());
-		}
-	}
-
-	public void onEditGroupNameClick(View v) {
-		
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+					}
+				});
+		builder.setCancelable(true);
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
 	}
 
 	public void onBlockGroupOwnerClicked(View v) {
@@ -1331,14 +1313,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onInviteToHikeClicked(View v) {
-		inviteToHike(contactInfo.getMsisdn());
-	}
-
-	private void inviteToHike(String msisdn) {
 		FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE,
 				HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-				Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.MQTT_PUBLISH,
+				Utils.makeHike2SMSInviteMessage(contactInfo.getMsisdn(), this)
+						.serialize());
 
 		Toast toast = Toast.makeText(ProfileActivity.this,
 				R.string.invite_sent, Toast.LENGTH_SHORT);
@@ -1380,22 +1360,23 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				HikeConversationsDatabase db = HikeConversationsDatabase
 						.getInstance();
 				nameTxt = db.getGroupName(mLocalMSISDN);
-				groupConversation.setContactName(nameTxt);
 
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						profileAdapter
-								.updateGroupConversation(groupConversation);
+						mNameEdit.setText(nameTxt);
+						mNameDisplay.setText(nameTxt);
 					}
 				});
 			}
 		} else if (HikePubSub.ICON_CHANGED.equals(type)) {
 			if (mLocalMSISDN.equals((String) object)) {
+				final Drawable drawable = IconCacheManager.getInstance()
+						.getIconForMSISDN(mLocalMSISDN);
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						profileAdapter.notifyDataSetChanged();
+						mIconView.setImageDrawable(drawable);
 					}
 				});
 			}
@@ -1406,11 +1387,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					.optString(HikeConstants.TO))) {
 				String msisdn = ((JSONObject) object)
 						.optString(HikeConstants.DATA);
-				this.participantMap.remove(msisdn);
+				this.participantList.remove(msisdn);
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						setupGroupProfileList();
+						participantNameContainer.removeAllViews();
+						setupParticipantView();
 					}
 				});
 			}
@@ -1420,28 +1402,65 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				final JSONObject obj = (JSONObject) object;
 				final JSONArray participants = obj
 						.optJSONArray(HikeConstants.DATA);
-				for (int i = 0; i < participants.length(); i++) {
-					String msisdn = participants.optJSONObject(i).optString(
-							HikeConstants.MSISDN);
-
-					HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-					ContactInfo participant = hUDB.getContactInfoFromMSISDN(
-							msisdn, false);
-
-					if (TextUtils.isEmpty(participant.getName())) {
-						HikeConversationsDatabase hCDB = HikeConversationsDatabase
-								.getInstance();
-						participant.setName(hCDB.getParticipantName(
-								mLocalMSISDN, msisdn));
-					}
-
-					participantMap.put(msisdn,
-							new GroupParticipant(participant));
-				}
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						setupGroupProfileList();
+						for (int i = 0; i < participants.length(); i++) {
+							String msisdn = participants.optJSONObject(i)
+									.optString(HikeConstants.MSISDN);
+
+							HikeUserDatabase hUDB = HikeUserDatabase
+									.getInstance();
+							ContactInfo participant = hUDB
+									.getContactInfoFromMSISDN(msisdn, false);
+
+							if (TextUtils.isEmpty(participant.getName())) {
+								HikeConversationsDatabase hCDB = HikeConversationsDatabase
+										.getInstance();
+								participant.setName(hCDB.getParticipantName(
+										mLocalMSISDN, msisdn));
+							}
+
+							if (!participant.isOnhike()) {
+								shouldShowInviteAllButton = true;
+								findViewById(R.id.invite_all_btn)
+										.setVisibility(View.VISIBLE);
+							}
+
+							View participantNameItem = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE))
+									.inflate(R.layout.participant_name_item,
+											null);
+							TextView participantName = (TextView) participantNameItem
+									.findViewById(R.id.participant_name);
+							participantName.setText(participant.getFirstName());
+							participantName
+									.setTextColor(getResources()
+											.getColor(
+													participant.isOnhike() ? R.color.contact_blue
+															: R.color.contact_green));
+							participantName.setBackgroundResource(participant
+									.isOnhike() ? R.drawable.hike_contact_bg
+									: R.drawable.sms_contact_bg);
+
+							LayoutParams lp = new LayoutParams(
+									LayoutParams.WRAP_CONTENT,
+									LayoutParams.WRAP_CONTENT);
+							lp.setMargins(0, 0, 0,
+									(int) (6 * Utils.densityMultiplier));
+							participantNameItem.setLayoutParams(lp);
+
+							participantNameItem.setTag(participant);
+							participantNameItem
+									.setOnLongClickListener(ProfileActivity.this);
+
+							participantNameItem.setId(msisdn.hashCode());
+							participantNameContainer
+									.addView(participantNameItem);
+
+							participantList.put(msisdn, new GroupParticipant(
+									participant));
+						}
+
 					}
 				});
 			}
@@ -1465,10 +1484,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					profileAdapter.updateContactInfo(contactInfo);
-					if (topBarBtn != null) {
-						topBarBtn.setImageResource(R.drawable.ic_call_top);
-					}
+					((TextView) findViewById(R.id.name_current))
+							.setText(ProfileActivity.this.contactInfo.getName());
+					findViewById(R.id.add_to_contacts).setVisibility(View.GONE);
+
+					findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
+					topBarBtn.setVisibility(View.VISIBLE);
 				}
 			});
 		} else if (HikePubSub.USER_JOINED.equals(type)
@@ -1476,65 +1497,31 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			if (!mLocalMSISDN.equals((String) object)) {
 				return;
 			}
+			final boolean userJoin = HikePubSub.USER_JOINED.equals(type);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					profileAdapter.notifyDataSetChanged();
+					findViewById(R.id.invite_to_hike_btn).setVisibility(
+							userJoin ? View.GONE : View.VISIBLE);
 				}
 			});
 		} else if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type)
 				|| HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED.equals(type)) {
 			String msisdn = (String) object;
-			if (!msisdn.equals(mActivityState.id)) {
+			if (!mLocalMSISDN.equals(msisdn)) {
 				return;
 			}
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					mActivityState.downloadProfileImageTask = null;
+					mActivityState = new ActivityState();
 					mActivityState.animatedProfileImage = true;
-					downloadOrShowProfileImage(false, true,
-							mActivityState.imageViewId);
+					downloadOrShowProfileImage(false, true);
 
 					if (mDialog != null) {
 						mDialog.dismiss();
 						mDialog = null;
 					}
-				}
-			});
-		} else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
-			StatusMessage statusMessage = (StatusMessage) object;
-			if (!mLocalMSISDN.equals(statusMessage.getMsisdn())
-					|| statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
-					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
-				return;
-			}
-			profileItems.add(showMessageBtn ? 2 : 1, statusMessage);
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					profileAdapter.notifyDataSetChanged();
-				}
-			});
-		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
-				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
-				|| HikePubSub.REMOVED_FROM_FRIENDS.equals(type)) {
-			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
-
-			ContactInfo contactInfo = favoriteToggle.first;
-			FavoriteType favoriteType = favoriteToggle.second;
-
-			if (!mLocalMSISDN.equals(contactInfo.getMsisdn())) {
-				return;
-			}
-			this.contactInfo.setFavoriteType(favoriteType);
-			setupContactProfileList();
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}
@@ -1586,174 +1573,60 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					addToContacts(contactInfo.getMsisdn());
 				} else if (getString(R.string.remove_from_group).equals(
 						items[position])) {
-					removeFromGroup(contactInfo);
+					AlertDialog.Builder builder = new AlertDialog.Builder(
+							ProfileActivity.this);
+
+					String message = getString(R.string.remove_confirm,
+							contactInfo.getFirstName());
+
+					builder.setMessage(message);
+					builder.setPositiveButton(R.string.yes,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									JSONObject object = new JSONObject();
+									try {
+										object.put(HikeConstants.TO,
+												groupConversation.getMsisdn());
+										object.put(
+												HikeConstants.TYPE,
+												HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
+
+										JSONObject data = new JSONObject();
+
+										JSONArray msisdns = new JSONArray();
+										msisdns.put(contactInfo.getMsisdn());
+
+										data.put(HikeConstants.MSISDNS, msisdns);
+
+										object.put(HikeConstants.DATA, data);
+									} catch (JSONException e) {
+										Log.e(getClass().getSimpleName(),
+												"Invalid JSON", e);
+									}
+									HikeMessengerApp.getPubSub().publish(
+											HikePubSub.MQTT_PUBLISH, object);
+								}
+							});
+					builder.setNegativeButton(R.string.no,
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+								}
+							});
+					builder.setCancelable(true);
+					AlertDialog alertDialog = builder.create();
+					alertDialog.show();
 				}
 			}
 		});
 
 		AlertDialog dialog = builder.create();
 		dialog.show();
-		return true;
-	}
-
-	private void removeFromGroup(final ContactInfo contactInfo) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(
-				ProfileActivity.this);
-
-		String message = getString(R.string.remove_confirm,
-				contactInfo.getFirstName());
-
-		builder.setMessage(message);
-		builder.setPositiveButton(R.string.yes,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						JSONObject object = new JSONObject();
-						try {
-							object.put(HikeConstants.TO,
-									groupConversation.getMsisdn());
-							object.put(
-									HikeConstants.TYPE,
-									HikeConstants.MqttMessageTypes.GROUP_CHAT_KICK);
-
-							JSONObject data = new JSONObject();
-
-							JSONArray msisdns = new JSONArray();
-							msisdns.put(contactInfo.getMsisdn());
-
-							data.put(HikeConstants.MSISDNS, msisdns);
-
-							object.put(HikeConstants.DATA, data);
-						} catch (JSONException e) {
-							Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-						}
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.MQTT_PUBLISH, object);
-					}
-				});
-		builder.setNegativeButton(R.string.no,
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-					}
-				});
-		builder.setCancelable(true);
-		AlertDialog alertDialog = builder.create();
-		alertDialog.show();
-	}
-
-	@Override
-	public void onItemClick(AdapterView<?> adapterView, View view,
-			int position, long id) {
-		GroupParticipant groupParticipant = (GroupParticipant) profileAdapter
-				.getItem(position);
-		if (groupParticipant == null) {
-			return;
-		}
-
-		ContactInfo contactInfo = groupParticipant.getContactInfo();
-
-		String myMsisdn = preferences.getString(
-				HikeMessengerApp.MSISDN_SETTING, "");
-
-		Intent intent = new Intent(this, ProfileActivity.class);
-
-		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
-		if (myMsisdn.equals(contactInfo.getMsisdn())) {
-			startActivity(intent);
-			return;
-		}
-
-		intent.setClass(this, ProfileActivity.class);
-		intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
-				contactInfo.getMsisdn());
-		intent.putExtra(HikeConstants.Extras.ON_HIKE, contactInfo.isOnhike());
-		startActivity(intent);
-	}
-
-	@Override
-	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
-			int position, long id) {
-		GroupParticipant groupParticipant = (GroupParticipant) profileAdapter
-				.getItem(position);
-		if (groupParticipant == null) {
-			return false;
-		}
-
-		String myMsisdn = preferences.getString(
-				HikeMessengerApp.MSISDN_SETTING, "");
-
-		final ContactInfo contactInfo = groupParticipant.getContactInfo();
-		if (myMsisdn.equals(contactInfo.getMsisdn())) {
-			return false;
-		}
-
-		ArrayList<String> optionsList = new ArrayList<String>();
-		ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
-
-		optionsList.add(getString(R.string.send_message));
-		optionImagesList.add(R.drawable.ic_send_message);
-		if (!contactInfo.isOnhike()) {
-			optionsList.add(getString(R.string.invite_to_hike));
-			optionImagesList.add(R.drawable.ic_invite_single);
-		}
-		if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
-			optionsList.add(getString(R.string.add_to_contacts));
-			optionImagesList.add(R.drawable.ic_add_to_contacts);
-		}
-		if (isGroupOwner) {
-			optionsList.add(getString(R.string.remove_from_group));
-			optionImagesList.add(R.drawable.ic_remove_from_group);
-		}
-
-		final String[] options = new String[optionsList.size()];
-		optionsList.toArray(options);
-
-		final Integer[] optionIcons = new Integer[optionImagesList.size()];
-		optionImagesList.toArray(optionIcons);
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
-				R.layout.alert_item, R.id.item, options) {
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				View v = super.getView(position, convertView, parent);
-				TextView tv = (TextView) v.findViewById(R.id.item);
-				tv.setCompoundDrawablesWithIntrinsicBounds(
-						optionIcons[position], 0, 0, 0);
-				return v;
-			}
-
-		};
-
-		builder.setAdapter(dialogAdapter,
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						String option = options[which];
-						if (getString(R.string.send_message).equals(option)) {
-							openChatThread(contactInfo);
-						} else if (getString(R.string.invite_to_hike).equals(
-								option)) {
-							inviteToHike(contactInfo.getMsisdn());
-						} else if (getString(R.string.add_to_contacts).equals(
-								option)) {
-							addToContacts(contactInfo.getMsisdn());
-						} else if (getString(R.string.remove_from_group)
-								.equals(option)) {
-							removeFromGroup(contactInfo);
-						}
-					}
-				});
-
-		AlertDialog alertDialog = builder.show();
-		alertDialog.getListView().setDivider(
-				getResources()
-						.getDrawable(R.drawable.ic_thread_divider_profile));
 		return true;
 	}
 }
