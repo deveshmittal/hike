@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -287,6 +288,8 @@ public class DrawerBaseActivity extends Activity implements
 
 	@Override
 	public void rightSidebarOpened() {
+		parentLayout
+				.cancelFavoriteNotifications((NotificationManager) getSystemService(NOTIFICATION_SERVICE));
 	}
 
 	@Override
@@ -453,14 +456,6 @@ public class DrawerBaseActivity extends Activity implements
 				@Override
 				public void run() {
 					showStatusDialog(false);
-				}
-			});
-		} else if (HikePubSub.MY_STATUS_CHANGED.equals(type)) {
-			final String status = (String) object;
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					parentLayout.updateStatus(status);
 				}
 			});
 		}
