@@ -1293,6 +1293,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		}
 	}
 
+	public void onEditGroupNameClick(View v) {
+		
+	}
+
 	public void onBlockGroupOwnerClicked(View v) {
 		Button blockBtn = (Button) v;
 		HikeMessengerApp.getPubSub().publish(

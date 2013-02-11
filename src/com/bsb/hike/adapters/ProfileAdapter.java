@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -145,6 +146,8 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
 				viewHolder.icon = (ImageView) v
 						.findViewById(R.id.change_profile);
+				viewHolder.editGroupName = (ImageButton) v
+						.findViewById(R.id.edit_group_name);
 				break;
 
 			case BUTTONS:
@@ -205,10 +208,12 @@ public class ProfileAdapter extends BaseAdapter {
 			if (groupParticipant != null) {
 				msisdn = groupConversation.getMsisdn();
 				name = groupConversation.getLabel();
+				viewHolder.editGroupName.setVisibility(View.VISIBLE);
 			} else {
 				msisdn = mContactInfo.getMsisdn();
 				name = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo
 						.getMsisdn() : mContactInfo.getName();
+				viewHolder.editGroupName.setVisibility(View.GONE);
 			}
 
 			viewHolder.text.setText(name);
@@ -354,6 +359,7 @@ public class ProfileAdapter extends BaseAdapter {
 		Button btn3;
 		ViewGroup container;
 		View btnDivider;
+		ImageButton editGroupName;
 	}
 
 	@Override
