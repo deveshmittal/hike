@@ -388,4 +388,7 @@
 	<string name="account">Account</string>
 	<string name="deleting_account">Deleting Account</string>
 	<string name="unlinking_account">Unlinking Account</string>
+	<string name="enter_num">Please enter your phone number</string>
+	<string name="enter_pin">Please enter the PIN</string>
+	<string name="enter_name">Please enter your name</string>
 </resources>

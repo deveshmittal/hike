@@ -362,8 +362,16 @@ public class SignupActivity extends Activity implements
 
 	private void submitClicked() {
 		if (TextUtils.isEmpty(enterEditText.getText())) {
-			Toast toast = Toast.makeText(this, R.string.enter_some_text,
-					Toast.LENGTH_SHORT);
+			int displayedChild = viewFlipper.getDisplayedChild();
+			int stringRes;
+			if (displayedChild == NUMBER) {
+				stringRes = R.string.enter_num;
+			} else if (displayedChild == PIN) {
+				stringRes = R.string.enter_pin;
+			} else {
+				stringRes = R.string.enter_name;
+			}
+			Toast toast = Toast.makeText(this, stringRes, Toast.LENGTH_SHORT);
 			toast.setGravity(Gravity.CENTER, 0, 0);
 			toast.show();
 			return;
