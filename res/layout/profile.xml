@@ -47,6 +47,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
                 android:fadingEdge="none" >
 
                 <LinearLayout
@@ -75,8 +76,7 @@
                         <RelativeLayout
                             android:id="@+id/my_info"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:onClick="onEditProfileClicked" >
+                            android:layout_height="wrap_content" >
 
                             <RelativeLayout
                                 android:id="@+id/avatar_border"
@@ -86,16 +86,15 @@
                                 android:layout_marginBottom="24dp"
                                 android:layout_marginLeft="14dp"
                                 android:layout_marginRight="14dp"
-                                android:layout_marginTop="24dp"
-                                 >
+                                android:layout_marginTop="24dp" >
 
                                 <ImageView
                                     android:id="@+id/profile"
                                     android:layout_width="80dp"
                                     android:layout_height="80dp"
                                     android:layout_centerInParent="true"
-                                    android:src="@drawable/ic_avatar1"
-                                    android:onClick="onViewImageClicked" />
+                                    android:onClick="onViewImageClicked"
+                                    android:src="@drawable/ic_avatar1" />
 
                                 <ImageView
                                     android:id="@+id/profile_border"
@@ -110,33 +109,25 @@
                                     android:layout_alignParentRight="true"
                                     android:layout_marginBottom="5dp"
                                     android:layout_marginRight="5dp"
-                                    android:src="@drawable/ic_edit_profile"
-                                    android:onClick="onChangeImageClicked" />
+                                    android:onClick="onChangeImageClicked"
+                                    android:src="@drawable/ic_edit_profile" />
                             </RelativeLayout>
-
-                            <ImageView
-                                android:id="@+id/name_arrow"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentRight="true"
-                                android:layout_centerVertical="true"
-                                android:layout_marginRight="12dp"
-                                android:src="@drawable/ic_arrow" />
 
                             <LinearLayout
                                 android:id="@+id/info_layout"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_centerVertical="true"
-                                android:layout_toLeftOf="@id/name_arrow"
+                                android:layout_marginRight="10dp"
                                 android:layout_toRightOf="@id/avatar_border"
                                 android:orientation="vertical" >
 
-                                <com.bsb.hike.view.CustomFontTextView
+                                <com.bsb.hike.view.CustomFontEditText
                                     android:id="@+id/name_current"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginRight="10dp"
+                                    android:background="@null"
                                     android:ellipsize="end"
                                     android:singleLine="true"
                                     android:text="Kavin Bharti Mittal"
@@ -145,42 +136,167 @@
                                     android:textStyle="bold" />
                             </LinearLayout>
                         </RelativeLayout>
-                    </LinearLayout>
 
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/settings_txt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="5dp"
-                        android:text="@string/settings"
-                        android:textColor="@color/timestampcolor"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        <RelativeLayout
+                            android:id="@+id/phone"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical" >
 
-                    <LinearLayout
-                        android:id="@+id/prefs"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/profile_bckg"
-                        android:orientation="vertical" >
+                            <View
+                                android:id="@+id/divider"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@drawable/ic_thread_divider_profile" />
 
-                        <include
-                            android:id="@+id/notifications"
-                            android:layout_marginBottom="50dp"
-                            layout="@layout/profile_item" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal" >
 
-                        <include
-                            android:id="@+id/privacy"
-                            android:layout_marginBottom="10dp"
-                            layout="@layout/profile_item" />
+                                <com.bsb.hike.view.CustomFontTextView
+                                    android:id="@+id/phone_edit_field"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="15dp"
+                                    android:layout_marginTop="15dp"
+                                    android:layout_weight="1.1"
+                                    android:paddingLeft="15dp"
+                                    android:text="Name"
+                                    android:textColor="@color/lightblack"
+                                    android:textSize="16sp" />
+
+                                <com.bsb.hike.view.CustomFontEditText
+                                    android:id="@+id/phone_input"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="2"
+                                    android:background="@null"
+                                    android:inputType="phone"
+                                    android:textColor="@color/lightgrey"
+                                    android:textSize="16sp"
+                                    android:textStyle="italic"
+                                    android:visibility="visible" />
+                            </LinearLayout>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/email"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical" >
+
+                            <View
+                                android:id="@+id/divider"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@drawable/ic_thread_divider_profile" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal" >
+
+                                <com.bsb.hike.view.CustomFontTextView
+                                    android:id="@+id/email_edit_field"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="15dp"
+                                    android:layout_marginTop="15dp"
+                                    android:layout_weight="1.1"
+                                    android:paddingLeft="15dp"
+                                    android:text="Name"
+                                    android:textColor="@color/lightblack"
+                                    android:textSize="16sp" />
+
+                                <com.bsb.hike.view.CustomFontEditText
+                                    android:id="@+id/email_input"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="2"
+                                    android:background="@null"
+                                    android:inputType="textEmailAddress"
+                                    android:textColor="@color/subtext"
+                                    android:textSize="16sp"
+                                    android:textStyle="italic"
+                                    android:visibility="visible" />
+                            </LinearLayout>
+                        </RelativeLayout>
+
+                        <RelativeLayout
+                            android:id="@+id/gender"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical" >
+
+                            <View
+                                android:id="@+id/divider"
+                                android:layout_width="match_parent"
+                                android:layout_height="1dp"
+                                android:background="@drawable/ic_thread_divider_profile" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal" >
+
+                                <com.bsb.hike.view.CustomFontTextView
+                                    android:id="@+id/gender_edit_field"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="15dp"
+                                    android:layout_marginTop="15dp"
+                                    android:layout_weight="1.1"
+                                    android:paddingLeft="15dp"
+                                    android:text="Name"
+                                    android:textColor="@color/lightblack"
+                                    android:textSize="16sp" />
+
+                                <LinearLayout
+                                    android:id="@+id/pick_gender"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="2"
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal" >
+
+                                    <ImageView
+                                        android:id="@+id/guy"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:background="@drawable/ic_profile_emo_selector"
+                                        android:onClick="onEmoticonClick"
+                                        android:paddingBottom="5dp"
+                                        android:paddingLeft="30dp"
+                                        android:paddingRight="30dp"
+                                        android:paddingTop="5dp"
+                                        android:src="@drawable/ic_guy" />
+
+                                    <ImageView
+                                        android:id="@+id/girl"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginLeft="5dp"
+                                        android:layout_marginRight="5dp"
+                                        android:background="@drawable/ic_profile_emo_selector"
+                                        android:onClick="onEmoticonClick"
+                                        android:paddingBottom="5dp"
+                                        android:paddingLeft="30dp"
+                                        android:paddingRight="30dp"
+                                        android:paddingTop="5dp"
+                                        android:src="@drawable/ic_girl" />
+                                </LinearLayout>
+                            </LinearLayout>
+                        </RelativeLayout>
                     </LinearLayout>
                 </LinearLayout>
             </ScrollView>
         </LinearLayout>
     </com.bsb.hike.view.DrawerLayout>
 
-    <include layout="@layout/profile_image"/>
+    <include layout="@layout/profile_image" />
 
 </RelativeLayout>

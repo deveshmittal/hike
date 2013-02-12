@@ -568,46 +568,53 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		afterSetContentView(savedInstanceState);
 
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
-		TextView mNameView = (TextView) findViewById(R.id.name_current);
 
 		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info);
-		ViewGroup notifications = (ViewGroup) findViewById(R.id.notifications);
-		ViewGroup privacy = (ViewGroup) findViewById(R.id.privacy);
-
-		myInfo.setBackgroundResource(R.drawable.profile_single_item_selector);
-		notifications
-				.setBackgroundResource(R.drawable.profile_top_item_selector);
-		privacy.setBackgroundResource(R.drawable.profile_bottom_item_selector);
+		ViewGroup phone = (ViewGroup) findViewById(R.id.phone);
+		ViewGroup email = (ViewGroup) findViewById(R.id.email);
+		ViewGroup gender = (ViewGroup) findViewById(R.id.gender);
 
 		mIconView = (ImageView) findViewById(R.id.profile);
 
-		ViewGroup[] itemLayouts = new ViewGroup[] { notifications, privacy };
-
-		items = new ProfileItem[] {
-				new ProfileItem.ProfilePreferenceItem(
-						getString(R.string.notifications),
-						R.drawable.ic_notifications,
-						R.xml.notification_preferences),
-				new ProfileItem.ProfilePreferenceItem(
-						getString(R.string.privacy), R.drawable.ic_privacy,
-						R.xml.privacy_preferences) };
-
-		for (int i = 0; i < items.length; i++) {
-			items[i].createViewHolder(itemLayouts[i], items[i]);
-			items[i].bindView(ProfileActivity.this, itemLayouts[i]);
-		}
-
-		notifications.findViewById(R.id.divider).setVisibility(View.GONE);
-
 		mTitleView.setText(getResources().getString(R.string.profile_title));
-		mNameView.setText(nameTxt);
 		Drawable drawable = IconCacheManager.getInstance().getIconForMSISDN(
 				mLocalMSISDN);
 		mIconView.setImageDrawable(drawable);
 
 		myInfo.setFocusable(true);
-		notifications.setFocusable(true);
-		privacy.setFocusable(true);
+
+		mNameEdit = (EditText) findViewById(R.id.name_current);
+		mEmailEdit = (EditText) email.findViewById(R.id.email_input);
+
+		((TextView) phone.findViewById(R.id.phone_edit_field))
+				.setText(R.string.phone_num);
+		((TextView) email.findViewById(R.id.email_edit_field))
+				.setText(R.string.email);
+		((TextView) gender.findViewById(R.id.gender_edit_field))
+				.setText(R.string.gender);
+
+		((EditText) phone.findViewById(R.id.phone_input)).setText(mLocalMSISDN);
+		((EditText) phone.findViewById(R.id.phone_input)).setEnabled(false);
+
+		// Make sure that the name text does not exceed the permitted length
+		int maxLength = getResources().getInteger(R.integer.max_length_name);
+		if (nameTxt.length() > maxLength) {
+			nameTxt = nameTxt.substring(0, maxLength);
+		}
+
+		mNameEdit.setText(nameTxt);
+		mEmailEdit.setText(emailTxt);
+
+		mNameEdit.setSelection(nameTxt.length());
+		mEmailEdit.setSelection(emailTxt.length());
+
+		onEmoticonClick(mActivityState.genderType == 0 ? null
+				: mActivityState.genderType == 1 ? gender
+						.findViewById(R.id.guy) : gender
+						.findViewById(R.id.girl));
+
+		// Hide the cursor initially
+		Utils.hideCursor(mNameEdit, getResources());
 	}
 
 	private void fetchPersistentData() {
@@ -633,7 +640,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			return;
 		}
 		if (this.profileType == ProfileType.USER_PROFILE_EDIT
-				|| this.profileType == ProfileType.GROUP_INFO) {
+				|| this.profileType == ProfileType.GROUP_INFO
+				|| this.profileType == ProfileType.USER_PROFILE) {
 			isBackPressed = true;
 			saveChanges();
 			overridePendingTransition(R.anim.slide_in_left_noalpha,
@@ -658,7 +666,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	public void saveChanges() {
 		ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
 
-		if (this.profileType == ProfileType.USER_PROFILE_EDIT
+		if ((this.profileType == ProfileType.USER_PROFILE_EDIT || this.profileType == ProfileType.USER_PROFILE)
 				&& !TextUtils.isEmpty(mEmailEdit.getText())) {
 			if (!Utils.isValidEmail(mEmailEdit.getText())) {
 				Toast.makeText(this,
@@ -766,7 +774,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			requests.add(request);
 		}
 
-		if (this.profileType == ProfileType.USER_PROFILE_EDIT
+		if ((this.profileType == ProfileType.USER_PROFILE_EDIT || this.profileType == ProfileType.USER_PROFILE)
 				&& ((!emailTxt.equals(mEmailEdit.getText().toString())) || ((mActivityState.genderType != lastSavedGender)))) {
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
 					+ "/profile", new HikeHttpRequest.HikeHttpCallback() {
@@ -828,7 +836,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	private void finishEditing() {
-		if (this.profileType != ProfileType.GROUP_INFO) {
+		if (this.profileType != ProfileType.GROUP_INFO
+				&& this.profileType != ProfileType.USER_PROFILE) {
 			Intent i = new Intent(this, ProfileActivity.class);
 			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
