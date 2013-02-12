@@ -385,4 +385,7 @@
 	<string name="leave">Leave</string>
 	<string name="mute_group">Mute group</string>
 	<string name="unmute_group">Unmute group</string>
+	<string name="account">Account</string>
+	<string name="deleting_account">Deleting Account</string>
+	<string name="unlinking_account">Unlinking Account</string>
 </resources>

@@ -92,8 +92,9 @@ public class HikePreferences extends PreferenceActivity implements
 		Log.d("HikePreferences", "setting task:" + task.isFinished());
 		if (!task.isFinished()) {
 			mTask = task;
-			mDialog = ProgressDialog.show(this, "Account",
-					isDeleting ? "Deleting Account" : "Unlinking Account");
+			mDialog = ProgressDialog.show(this, getString(R.string.account),
+					isDeleting ? getString(R.string.deleting_account)
+							: getString(R.string.unlinking_account));
 		}
 	}
 
