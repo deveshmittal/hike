@@ -437,12 +437,18 @@ public class MqttMessagesManager {
 							HikeMessengerApp.MSISDN_SETTING, "");
 
 					String iconBase64 = jsonObj.getString(HikeConstants.DATA);
-					this.userDb.setIcon(msisdn,
-							Base64.decode(iconBase64, Base64.DEFAULT), false);
+					try {
+						byte[] profileImageBytes = Base64.decode(iconBase64,
+								Base64.DEFAULT);
+						this.userDb.setIcon(msisdn, profileImageBytes, false);
 
-					IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.PROFILE_PIC_CHANGED, null);
+						IconCacheManager.getInstance().clearIconForMSISDN(
+								msisdn);
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.PROFILE_PIC_CHANGED, null);
+					} catch (Exception e) {
+						Log.w(getClass().getSimpleName(), "Invalid image bytes");
+					}
 				}
 				if (account.has(HikeConstants.ACCOUNTS)) {
 					JSONObject accounts = account
