@@ -25,12 +25,14 @@ import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -344,10 +346,6 @@ public class HikeMessengerApp extends Application implements Listener {
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 
-		Utils.setupServerURL(
-				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
-				Utils.switchSSLOn(getApplicationContext()));
-
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
 		ErrorReporter.getInstance().setReportSender(customReportSender);
@@ -373,6 +371,18 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
 				HikeConstants.INDIA_COUNTRY_CODE);
+
+		SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		if (!preferenceManager.contains(HikeConstants.SSL_PREF)) {
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(HikeConstants.SSL_PREF, !isIndianUser);
+			editor.commit();
+		}
+
+		Utils.setupServerURL(
+				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
+				Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, ClearTypingNotification>();
 
@@ -464,7 +474,9 @@ public class HikeMessengerApp extends Application implements Listener {
 		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type)) {
 			SharedPreferences settings = getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			boolean isWifiConnection = (Boolean) object;
+			boolean isWifiConnection = object != null ? (Boolean) object
+					: Utils.switchSSLOn(getApplicationContext());
+
 			Utils.setupServerURL(
 					settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 					isWifiConnection);

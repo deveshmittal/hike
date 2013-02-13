@@ -65,6 +65,10 @@ public class IconCheckBoxPreference extends CheckBoxPreference {
 			Log.d(getClass().getSimpleName(), "Free SMS toggled");
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FREE_SMS_TOGGLED, isChecked());
 		}
+		if (HikeConstants.SSL_PREF.equals(getKey())) {
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.SWITCHED_DATA_CONNECTION, null);
+		}
 		super.notifyChanged();
 	}
 

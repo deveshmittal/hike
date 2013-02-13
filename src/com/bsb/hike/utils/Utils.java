@@ -1597,6 +1597,14 @@ public class Utils {
 	}
 
 	public static boolean switchSSLOn(Context context) {
+		/*
+		 * If the preference itself is switched to off, we don't need to check
+		 * if the wifi is on or off.
+		 */
+		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+				HikeConstants.SSL_PREF, true)) {
+			return false;
+		}
 		ConnectivityManager cm = (ConnectivityManager) context
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return (cm != null && cm.getActiveNetworkInfo() != null && (cm

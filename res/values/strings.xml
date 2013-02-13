@@ -391,4 +391,6 @@
 	<string name="enter_num">Please enter your phone number</string>
 	<string name="enter_pin">Please enter the PIN</string>
 	<string name="enter_name">Please enter your name</string>
+	<string name="ssl">SSL</string>
+	<string name="ssl_info">Toggle SSL</string>
 </resources>

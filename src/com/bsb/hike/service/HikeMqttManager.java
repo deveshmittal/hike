@@ -733,8 +733,9 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 	@Override
 	public void onEventReceived(String type, Object object) {
 		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type)) {
-			boolean isWifiConnection = (Boolean) object;
-			setBrokerHostPort(isWifiConnection);
+			boolean switchSslOn = object != null ? (Boolean) object
+					: Utils.switchSSLOn(mHikeService);
+			setBrokerHostPort(switchSslOn);
 		}
 	}
 

@@ -264,8 +264,16 @@ public class SignupActivity extends Activity implements
 				Editor editor = prefs.edit();
 				editor.putBoolean(HikeConstants.FREE_SMS_PREF,
 						HikeMessengerApp.isIndianUser());
+				editor.putBoolean(HikeConstants.SSL_PREF,
+						!HikeMessengerApp.isIndianUser());
 				editor.remove(HikeMessengerApp.TEMP_COUNTRY_CODE);
 				editor.commit();
+
+				/*
+				 * Update the urls to use ssl or not.
+				 */
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.SWITCHED_DATA_CONNECTION, null);
 
 				if (!HikeMessengerApp.isIndianUser()) {
 					FiksuTrackingManager.initialize(getApplication());

@@ -3,6 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:title="@string/privacy">
 
+    <com.bsb.hike.view.IconCheckBoxPreference
+        icon="preference_free_sms"
+        android:key="sslPref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/ssl_info"
+        android:title="@string/ssl"
+        android:widgetLayout="@layout/checkbox_widget" />
+
     <com.bsb.hike.view.IconPreference
 		icon="ic_delete_priv"
 		android:layout="@layout/icon_preference"
