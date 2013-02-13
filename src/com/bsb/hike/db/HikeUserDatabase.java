@@ -1363,4 +1363,87 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.FAVORITE_TYPE + "="
 				+ FavoriteType.RECOMMENDED_FAVORITE.ordinal(), null);
 	}
+
+	public List<Pair<AtomicBoolean, ContactInfo>> getFamilyList(Context context) {
+		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
+				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
+				DBConstants.HAS_CUSTOM_PHOTO };
+
+		String userName = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+				HikeMessengerApp.NAME_SETTING, "");
+		String lastName = null;
+		String[] userNameSplit = userName.split(" ");
+		if (userNameSplit.length > 1) {
+			lastName = userNameSplit[userNameSplit.length - 1];
+		}
+
+		StringBuilder selectionStringBuilder = new StringBuilder();
+		for (String nuxKeyword : HikeConstants.NUX_KEYWORDS) {
+			selectionStringBuilder.append(DBConstants.NAME + " LIKE '%"
+					+ nuxKeyword + "%' OR ");
+		}
+		if (lastName != null) {
+			selectionStringBuilder.append(DBConstants.NAME + " LIKE '%"
+					+ lastName + "' OR ");
+		}
+		selectionStringBuilder.replace(
+				selectionStringBuilder.lastIndexOf("OR "),
+				selectionStringBuilder.length(), " AND " + DBConstants.ONHIKE
+						+ "=0");
+		String selection = selectionStringBuilder.toString();
+
+		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
+
+		Cursor c = null;
+		try {
+			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
+					null, null, null, null);
+
+			int idx = c.getColumnIndex(DBConstants.ID);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int nameIdx = c.getColumnIndex(DBConstants.NAME);
+			int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+			int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+			int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+			int hasCustomPhotoIdx = c
+					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+
+			List<Pair<AtomicBoolean, ContactInfo>> contactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+
+			Set<String> nameSet = new HashSet<String>();
+
+			while (c.moveToNext()) {
+				String name = c.getString(nameIdx);
+
+				if (nameSet.contains(name)) {
+					continue;
+				}
+
+				nameSet.add(name);
+
+				long lastMessagedCurrent = c.getLong(lastMessagedIdx);
+
+				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+						c.getString(msisdnIdx), name, c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
+				contactList.add(new Pair<AtomicBoolean, ContactInfo>(
+						new AtomicBoolean(false), contactInfo));
+			}
+
+			for (int i = 0; i < Math.min(10, contactList.size()); i++) {
+				Pair<AtomicBoolean, ContactInfo> val = contactList.get(i);
+				val.first.set(true);
+			}
+
+			return contactList;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
 }
