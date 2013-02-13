@@ -58,12 +58,13 @@ public class IconCheckBoxPreference extends CheckBoxPreference {
 			imageView.setSelected(isChecked());
 		}
 		/*
-		 * Publish event that the free SMS has been toggled so that
-		 * the drawer UI can be updated.
+		 * Publish event that the free SMS has been toggled so that the drawer
+		 * UI can be updated.
 		 */
 		if (HikeConstants.FREE_SMS_PREF.equals(getKey())) {
 			Log.d(getClass().getSimpleName(), "Free SMS toggled");
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FREE_SMS_TOGGLED, isChecked());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FREE_SMS_TOGGLED,
+					isChecked());
 		}
 		if (HikeConstants.SSL_PREF.equals(getKey())) {
 			HikeMessengerApp.getPubSub().publish(
