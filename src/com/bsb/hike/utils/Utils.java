@@ -1143,6 +1143,12 @@ public class Utils {
 
 	public static boolean copyFile(String srcFilePath, String destFilePath,
 			HikeFileType hikeFileType) {
+		/*
+		 * If source and destination have the same path, just return.
+		 */
+		if (srcFilePath.equals(destFilePath)) {
+			return true;
+		}
 		try {
 			InputStream src;
 			if (hikeFileType == HikeFileType.IMAGE) {
