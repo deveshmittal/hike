@@ -234,8 +234,9 @@ public class HikeFile {
 			return false;
 		}
 		if (file == null) {
-			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey)
-					.exists();
+			File file = Utils.getOutputMediaFile(hikeFileType, fileName,
+					fileKey);
+			return file == null ? false : file.exists();
 		}
 		return file.exists();
 	}
