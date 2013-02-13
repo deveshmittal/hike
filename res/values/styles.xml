@@ -102,7 +102,7 @@
 	    <item name="android:shadowColor">#0f3a56</item>
 	    <item name="android:shadowDy">-0.5</item>
 	    <item name="android:shadowRadius">0.5</item>
-	    <item name="android:textColor">@color/offwhite</item>
+	    <item name="android:textColor">@drawable/signup_btn_text</item>
 	</style>
 	
 	<style name="SignupButton.Text.Bold.Loading">

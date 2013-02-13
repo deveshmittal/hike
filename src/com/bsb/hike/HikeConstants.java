@@ -139,6 +139,7 @@ public class HikeConstants {
 
 	/* the max amount of time we wait for the PIN */
 	public static final int PIN_CAPTURE_TIME = 60 * 1000;
+	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
 	/*
 	 * the amount to wait before showing the PIN screen on non sim devices.
 	 */

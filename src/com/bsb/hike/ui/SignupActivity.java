@@ -21,6 +21,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -129,6 +130,8 @@ public class SignupActivity extends Activity implements
 
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 
+	private CountDownTimer countDownTimer;
+
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
 		public DownloadImageTask downloadImageTask; /*
@@ -143,6 +146,8 @@ public class SignupActivity extends Activity implements
 											 * it
 											 */
 		public String userName = null;
+
+		public long timeLeft = 0;
 	}
 
 	@Override
@@ -200,7 +205,7 @@ public class SignupActivity extends Activity implements
 				}
 				break;
 			case PIN:
-				prepareLayoutForGettingPin();
+				prepareLayoutForGettingPin(mActivityState.timeLeft);
 				break;
 			case NAME:
 				prepareLayoutForGettingName(savedInstanceState);
@@ -348,6 +353,10 @@ public class SignupActivity extends Activity implements
 		if (dialog != null) {
 			dialog.dismiss();
 			dialog = null;
+		}
+		if (countDownTimer != null) {
+			countDownTimer.cancel();
+			countDownTimer = null;
 		}
 	}
 
@@ -559,7 +568,7 @@ public class SignupActivity extends Activity implements
 		dialog.show();
 	}
 
-	private void prepareLayoutForGettingPin() {
+	private void prepareLayoutForGettingPin(long timeLeft) {
 		initializeViews(pinLayout);
 
 		callmeBtn.setVisibility(View.VISIBLE);
@@ -577,6 +586,27 @@ public class SignupActivity extends Activity implements
 						+ tapHere.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 		tapHereText.setText(ssb);
+
+		countDownTimer = new CountDownTimer(timeLeft, 1000) {
+
+			@Override
+			public void onTick(long millisUntilFinished) {
+				long secondsUntilFinished = millisUntilFinished / 1000;
+				int minutes = (int) (secondsUntilFinished / 60);
+				int seconds = (int) (secondsUntilFinished % 60);
+				String text = String.format("%1$02d:%2$02d", minutes, seconds);
+				callmeBtn.setText(text);
+				mActivityState.timeLeft = millisUntilFinished;
+				callmeBtn.setEnabled(false);
+			}
+
+			@Override
+			public void onFinish() {
+				callmeBtn.setText(R.string.call_me_signup);
+				callmeBtn.setEnabled(true);
+			}
+		};
+		countDownTimer.start();
 	}
 
 	private void prepareLayoutForGettingName(Bundle savedInstanceState) {
@@ -710,6 +740,13 @@ public class SignupActivity extends Activity implements
 
 	@Override
 	public void onProgressUpdate(StateValue stateValue) {
+		/*
+		 * Making sure the countdown timer doesn't keep running when the state
+		 * values changes.
+		 */
+		if (countDownTimer != null) {
+			countDownTimer.cancel();
+		}
 		String value = stateValue.value;
 		mCurrentState = stateValue;
 		Log.d("SignupActivity", "Current State " + mCurrentState.state.name()
@@ -747,7 +784,7 @@ public class SignupActivity extends Activity implements
 			break;
 		case PIN:
 			viewFlipper.setDisplayedChild(PIN);
-			prepareLayoutForGettingPin();
+			prepareLayoutForGettingPin(HikeConstants.CALL_ME_WAIT_TIME);
 
 			// Wrong Pin
 			if (value != null && value.equals(HikeConstants.PIN_ERROR)) {
