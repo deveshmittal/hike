@@ -644,8 +644,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				|| this.profileType == ProfileType.USER_PROFILE) {
 			isBackPressed = true;
 			saveChanges();
-			overridePendingTransition(R.anim.slide_in_left_noalpha,
-					R.anim.slide_out_right_noalpha);
+			if (this.profileType != ProfileType.USER_PROFILE) {
+				overridePendingTransition(R.anim.slide_in_left_noalpha,
+						R.anim.slide_out_right_noalpha);
+			}
 		} else {
 			if (this.profileType == ProfileType.USER_PROFILE) {
 				super.onBackPressed();
@@ -841,6 +843,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			Intent i = new Intent(this, ProfileActivity.class);
 			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
+		} else if (this.profileType == ProfileType.USER_PROFILE) {
+			super.onBackPressed();
+			return;
 		}
 		finish();
 	}
