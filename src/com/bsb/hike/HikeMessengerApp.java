@@ -345,6 +345,7 @@ public class HikeMessengerApp extends Application implements Listener {
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
 
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
@@ -396,6 +397,9 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		if (token != null) {
 			AccountUtils.setToken(token);
+		}
+		if (uid != null) {
+			AccountUtils.setUID(uid);
 		}
 		try {
 			AccountUtils.setAppVersion(getPackageManager().getPackageInfo(

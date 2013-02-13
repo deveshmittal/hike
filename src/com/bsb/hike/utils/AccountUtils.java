@@ -125,10 +125,16 @@ public class AccountUtils {
 
 	public static String mToken = null;
 
+	public static String mUid = null;
+
 	private static String appVersion = null;
 
 	public static void setToken(String token) {
 		mToken = token;
+	}
+
+	public static void setUID(String uid) {
+		mUid = uid;
 	}
 
 	public static void setAppVersion(String version) {
@@ -424,6 +430,7 @@ public class AccountUtils {
 			throw new IllegalStateException("Token is null");
 		}
 		req.addHeader("Cookie", "user=" + mToken);
+		req.addHeader("Cookie", "UID=" + mUid);
 	}
 
 	private static void assertIfTokenNull() {

@@ -488,6 +488,7 @@ public class Utils {
 	public static void savedAccountCredentials(AccountInfo accountInfo,
 			SharedPreferences.Editor editor) {
 		AccountUtils.setToken(accountInfo.token);
+		AccountUtils.setUID(accountInfo.uid);
 		editor.putString(HikeMessengerApp.MSISDN_SETTING, accountInfo.msisdn);
 		editor.putString(HikeMessengerApp.TOKEN_SETTING, accountInfo.token);
 		editor.putString(HikeMessengerApp.UID_SETTING, accountInfo.uid);

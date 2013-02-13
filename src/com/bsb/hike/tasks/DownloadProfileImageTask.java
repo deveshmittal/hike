@@ -80,6 +80,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 			URLConnection connection = url.openConnection();
 			connection.addRequestProperty("Cookie", "user="
 					+ AccountUtils.mToken);
+			connection.addRequestProperty("Cookie", "UID=" + AccountUtils.mUid);
 
 			if (AccountUtils.ssl) {
 				((HttpsURLConnection) connection)
