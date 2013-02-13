@@ -1596,7 +1596,7 @@ public class Utils {
 		return uri;
 	}
 
-	public static boolean isWifiOn(Context context) {
+	public static boolean switchSSLOn(Context context) {
 		ConnectivityManager cm = (ConnectivityManager) context
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return (cm != null && cm.getActiveNetworkInfo() != null && (cm

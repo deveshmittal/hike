@@ -622,7 +622,7 @@ public class HikeService extends Service {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			boolean isWifiOn = Utils.isWifiOn(getApplicationContext());
+			boolean isWifiOn = Utils.switchSSLOn(getApplicationContext());
 			if (wasWifiOnLastTime == isWifiOn) {
 				Log.d("SSL", "Same connection type as before. Wifi? "
 						+ isWifiOn);

@@ -118,7 +118,7 @@ public class WelcomeActivity extends Activity implements
 		boolean production = sharedPreferences.getBoolean(
 				HikeMessengerApp.PRODUCTION, true);
 
-		Utils.setupServerURL(!production, Utils.isWifiOn(this));
+		Utils.setupServerURL(!production, Utils.switchSSLOn(this));
 
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE).edit();

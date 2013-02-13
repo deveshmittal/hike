@@ -346,7 +346,7 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		Utils.setupServerURL(
 				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
-				Utils.isWifiOn(getApplicationContext()));
+				Utils.switchSSLOn(getApplicationContext()));
 
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();

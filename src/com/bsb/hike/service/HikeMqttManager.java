@@ -248,7 +248,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 		settings = this.mHikeService.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		setBrokerHostPort(Utils.isWifiOn(mHikeService));
+		setBrokerHostPort(Utils.switchSSLOn(mHikeService));
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
@@ -283,7 +283,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			mqtt.setCleanSession(false);
 			mqtt.setUserName(uid);
 			mqtt.setPassword(password);
-			mqtt.setSSL(Utils.isWifiOn(mHikeService));
+			mqtt.setSSL(Utils.switchSSLOn(mHikeService));
 		} catch (URISyntaxException e) {
 			// something went wrong!
 			mqtt = null;
