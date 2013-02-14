@@ -391,8 +391,8 @@
 	<string name="enter_num">Please enter your phone number</string>
 	<string name="enter_pin">Please enter the PIN</string>
 	<string name="enter_name">Please enter your name</string>
-	<string name="ssl">SSL</string>
-	<string name="ssl_info">Toggle SSL</string>
+	<string name="ssl">128-bit SSL</string>
+	<string name="ssl_info">Wi-Fi only</string>
 	<string name="contact_saved">Contact saved</string>
 	<string name="contact_not_saved">Contact could not be saved</string>
 	<string name="which_family">Would you like to invite your family members to hike?</string>
