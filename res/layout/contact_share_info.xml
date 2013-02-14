@@ -42,14 +42,20 @@
         android:paddingLeft="10dp"
         android:paddingTop="10dp"
         android:text="@string/target_account"
-        android:textColor="@color/lightblack"
-        android:textSize="14sp" />
+        android:textColor="@color/contact_item_header"
+        android:textSize="12sp"
+        android:textStyle="bold|italic" />
 
     <Spinner
         android:id="@+id/account_spinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/target_account"
+        android:background="@drawable/bg_account_spinner"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="12dp"
+        android:paddingLeft="10dp"
         android:visibility="visible" />
 
     <View
