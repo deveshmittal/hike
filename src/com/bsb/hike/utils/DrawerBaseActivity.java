@@ -60,16 +60,14 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.view.DrawerLayout;
+import com.bsb.hike.view.DrawerLayout.CurrentState;
 
 public class DrawerBaseActivity extends Activity implements
 		DrawerLayout.Listener, HikePubSub.Listener {
 
-	private static final long DELAY_BEFORE_ENABLE_ANIMATION = 1000;
-
 	private static final int IMAGE_PICK_CODE = 1991;
 
 	public DrawerLayout parentLayout;
-	private long waitTime;
 	private String userMsisdn;
 	private ActivityTask mActivityTask;
 	private Dialog statusDialog;
@@ -108,12 +106,6 @@ public class DrawerBaseActivity extends Activity implements
 		}
 		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		waitTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -211,25 +203,11 @@ public class DrawerBaseActivity extends Activity implements
 	}
 
 	public void onToggleLeftSideBarClicked(View v) {
-		/*
-		 * Adding a delay before we enable the animation. Otherwise the
-		 * animation would randomly over-shoot or under-shoot
-		 */
-		if (System.currentTimeMillis() - waitTime <= DELAY_BEFORE_ENABLE_ANIMATION) {
-			return;
-		}
 		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
 		parentLayout.toggleSidebar(false, true);
 	}
 
 	public void onTitleIconClick(View v) {
-		/*
-		 * Adding a delay before we enable the animation. Otherwise the
-		 * animation would randomly over-shoot or under-shoot
-		 */
-		if (System.currentTimeMillis() - waitTime <= DELAY_BEFORE_ENABLE_ANIMATION) {
-			return;
-		}
 		Utils.logEvent(this, HikeConstants.LogEvent.DRAWER_BUTTON);
 		parentLayout.toggleSidebar(false, false);
 	}
