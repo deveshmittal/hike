@@ -1222,6 +1222,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void showNudgeDialog() {
 
 		final Dialog nudgeAlert = new Dialog(this, R.style.Theme_CustomDialog);
+		nudgeAlert.setCancelable(true);
 		nudgeAlert.setContentView(R.layout.nudge_dialog);
 
 		nudgeAlert.setCancelable(false);
@@ -1232,6 +1233,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			@Override
 			public void onClick(View v) {
 				nudgeAlert.cancel();
+			}
+		});
+		nudgeAlert.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
 				Editor editor = prefs.edit();
 				editor.putBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, true);
 				editor.commit();
