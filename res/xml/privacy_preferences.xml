@@ -4,7 +4,7 @@
     android:title="@string/privacy">
 
     <com.bsb.hike.view.IconCheckBoxPreference
-        icon="preference_free_sms"
+        icon="ic_ssl"
         android:key="sslPref"
         android:layout="@layout/icon_preference"
         android:summary="@string/ssl_info"
