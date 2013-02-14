@@ -164,8 +164,11 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 			if (!selectedContacts.isEmpty() || type == Type.NUX1
 					|| type == Type.NUX2) {
 				if (!selectedContacts.isEmpty()) {
-					Toast.makeText(getApplicationContext(),
-							R.string.invites_sent, Toast.LENGTH_SHORT).show();
+					Toast.makeText(
+							getApplicationContext(),
+							selectedContacts.size() > 1 ? R.string.invites_sent
+									: R.string.invite_sent, Toast.LENGTH_SHORT)
+							.show();
 				}
 				if (type == Type.NUX1) {
 					Editor editor = getSharedPreferences(
