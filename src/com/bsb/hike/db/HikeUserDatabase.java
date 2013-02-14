@@ -1449,4 +1449,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			}
 		}
 	}
+
+	public boolean doesContactExist(String msisdn) {
+		String[] columns = new String[] { DBConstants.NAME };
+		String selection = DBConstants.MSISDN + "=? ";
+		Cursor c = null;
+
+		try {
+			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
+					new String[] { msisdn }, null, null, null);
+			return c.moveToFirst();
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
 }

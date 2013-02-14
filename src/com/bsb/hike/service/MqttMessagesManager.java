@@ -650,7 +650,8 @@ public class MqttMessagesManager {
 		 * chats with that participant. Otherwise for other types, we only show
 		 * the message if the user already has an existing conversation.
 		 */
-		if ((conversation == null && !isUJMsg)
+		if ((conversation == null && (!isUJMsg || !userDb
+				.doesContactExist(msisdn)))
 				|| (conversation != null
 						&& TextUtils.isEmpty(conversation.getContactName())
 						&& isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation))) {
