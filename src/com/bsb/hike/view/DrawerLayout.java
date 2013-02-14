@@ -58,10 +58,13 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private final int animationSteps;
 
-	private final static int DURATION_BETWEEN_EACH_STEP = 5;
+	private final static int DURATION_BETWEEN_EACH_STEP = 16;
 
-	private boolean mLeftOpened;
-	private boolean mRightOpened;
+	public static enum CurrentState {
+		NONE, LEFT, RIGHT
+	}
+
+	private CurrentState currentState;
 
 	private View mLeftSidebar;
 	private View mRightSidebar;
@@ -72,6 +75,13 @@ public class DrawerLayout extends RelativeLayout implements
 	private int mLeftSidebarWidth;
 	private int mLeftSidebarOffsetForAnimation;
 	private int topBarButtonWidth;
+
+	private int contentCurrentPosition;
+	private int contentFinalPosition;
+	private int sidebarCurrentPosition;
+	private int sidebarFinalPosition;
+
+	private int rightSidebarFinalPosition;
 
 	private Listener mListener;
 
@@ -123,16 +133,20 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public DrawerLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		setChildrenDrawingOrderEnabled(true);
+		currentState = CurrentState.NONE;
 		accountPrefs = getContext().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		handler = new Handler();
-		animationSteps = (int) (7 * Utils.densityMultiplier);
+		animationSteps = (int) (8);
 		topBarButtonWidth = (int) (48 * Utils.densityMultiplier);
 		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		mRightSidebarWidth = (int) ((isPortrait ? context.getResources()
 				.getDisplayMetrics().widthPixels : context.getResources()
 				.getDisplayMetrics().heightPixels) - topBarButtonWidth);
-		mRightSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
+		mRightSidebarOffsetForAnimation = (int) (150 * Utils.densityMultiplier);
+		rightSidebarFinalPosition = context.getResources().getDisplayMetrics().widthPixels
+				- mRightSidebarWidth;
 
 		mLeftSidebarWidth = mRightSidebarWidth;
 		mLeftSidebarOffsetForAnimation = mRightSidebarOffsetForAnimation;
@@ -419,7 +433,7 @@ public class DrawerLayout extends RelativeLayout implements
 						R.anim.slide_out_left_noalpha);
 			}
 		} else {
-			closeLeftSidebar(false);
+			closeSidebar(false);
 		}
 	}
 
@@ -427,7 +441,7 @@ public class DrawerLayout extends RelativeLayout implements
 		@Override
 		public void run() {
 			mContent.clearAnimation();
-			closeLeftSidebar(true);
+			closeSidebar(true);
 		}
 	};
 
@@ -487,45 +501,45 @@ public class DrawerLayout extends RelativeLayout implements
 
 	@Override
 	public void onLayout(boolean changed, int l, int t, int r, int b) {
-		/* the title bar assign top padding, drop it */
-		mLeftSidebar.layout(l, 0, l + mLeftSidebarWidth,
-				0 + mLeftSidebar.getMeasuredHeight());
 
-		mRightSidebar.layout(r - mRightSidebarWidth, 0, r,
-				0 + mRightSidebar.getMeasuredHeight());
+		int width = r - l;
+		int height = b - t;
 
-		if (mLeftOpened) {
-			mContent.layout(l + mLeftSidebarWidth, 0, r + mLeftSidebarWidth, b);
-		} else if (mRightOpened) {
-			mContent.layout(l - mRightSidebarWidth, 0, r - mRightSidebarWidth,
-					b);
-		} else {
-			mContent.layout(l, 0, r, b);
-		}
+		mContent.layout(contentCurrentPosition, 0, width
+				+ contentCurrentPosition, height);
+
+		mRightSidebar.layout(
+				rightSidebarFinalPosition + sidebarCurrentPosition, 0, width,
+				height);
+
+		mLeftSidebar.layout(sidebarCurrentPosition, 0, width, height);
 	}
 
 	@Override
 	public void onMeasure(int w, int h) {
-		super.onMeasure(w, h);
-		super.measureChildren(w, h);
-	}
 
-	@Override
-	protected void measureChild(View child, int parentWSpec, int parentHSpec) {
-		/* the max width of Sidebar is 90% of Parent */
-		if (child == mLeftSidebar || child == mRightSidebar) {
-			int mode = MeasureSpec.getMode(parentWSpec);
-			int width = (int) (getMeasuredWidth() * 0.9);
-			super.measureChild(child, MeasureSpec.makeMeasureSpec(width, mode),
-					parentHSpec);
-		} else {
-			super.measureChild(child, parentWSpec, parentHSpec);
+		int width = MeasureSpec.getSize(w);
+		int height = MeasureSpec.getSize(h);
+
+		super.setMeasuredDimension(width, height);
+
+		if (mLeftSidebar != null) {
+			measureChild(mLeftSidebar, MeasureSpec.makeMeasureSpec(
+					mLeftSidebarWidth, MeasureSpec.EXACTLY), h);
+		}
+		if (mRightSidebar != null) {
+			measureChild(mRightSidebar, MeasureSpec.makeMeasureSpec(
+					mRightSidebarWidth, MeasureSpec.EXACTLY), h);
+		}
+		if (mContent != null) {
+			measureChild(mContent,
+					MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), h);
 		}
 	}
 
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
-		if (!isLeftOpening() && !isRightOpening()) {
+		if (currentState == CurrentState.NONE) {
 			return false;
 		}
 
@@ -552,7 +566,7 @@ public class DrawerLayout extends RelativeLayout implements
 			if (mPressed && action == MotionEvent.ACTION_UP
 					&& mListener != null) {
 				mPressed = false;
-				return mLeftOpened ? mListener
+				return currentState == CurrentState.LEFT ? mListener
 						.onContentTouchedWhenOpeningLeftSidebar() : mListener
 						.onContentTouchedWhenOpeningRightSidebar();
 			}
@@ -568,14 +582,8 @@ public class DrawerLayout extends RelativeLayout implements
 		activity = (Activity) l;
 	}
 
-	/* to see if the Left Sidebar is visible */
-	public boolean isLeftOpening() {
-		return mLeftOpened;
-	}
-
-	/* to see if the Right Sidebar is visible */
-	public boolean isRightOpening() {
-		return mRightOpened;
+	public CurrentState getCurrentState() {
+		return currentState;
 	}
 
 	public void toggleSidebar(boolean noAnimation, boolean leftSidebar) {
@@ -585,7 +593,7 @@ public class DrawerLayout extends RelativeLayout implements
 		isAnimating = true;
 
 		if (leftSidebar) {
-			if (mLeftOpened) {
+			if (currentState != CurrentState.NONE) {
 				handler.post(new CloseDrawerAnimation(mLeftSidebar, mContent,
 						noAnimation, true));
 			} else {
@@ -593,7 +601,7 @@ public class DrawerLayout extends RelativeLayout implements
 						noAnimation, true));
 			}
 		} else {
-			if (mRightOpened) {
+			if (currentState != CurrentState.NONE) {
 				handler.post(new CloseDrawerAnimation(mRightSidebar, mContent,
 						noAnimation, false));
 			} else {
@@ -603,27 +611,20 @@ public class DrawerLayout extends RelativeLayout implements
 		}
 	}
 
+	public void closeSidebar(boolean noAnimation) {
+		toggleSidebar(noAnimation, currentState == CurrentState.LEFT ? true
+				: false);
+	}
+
 	public void openLeftSidebar() {
-		if (!mLeftOpened) {
+		if (currentState == CurrentState.NONE) {
 			toggleSidebar(false, true);
 		}
 	}
 
-	public void closeLeftSidebar(boolean noAnimation) {
-		if (mLeftOpened) {
-			toggleSidebar(noAnimation, true);
-		}
-	}
-
 	public void openRightSidebar() {
-		if (!mRightOpened) {
+		if (currentState == CurrentState.NONE) {
 			toggleSidebar(false, false);
-		}
-	}
-
-	public void closeRightSidebar(boolean noAnimation) {
-		if (mRightOpened) {
-			toggleSidebar(noAnimation, false);
 		}
 	}
 
@@ -639,34 +640,34 @@ public class DrawerLayout extends RelativeLayout implements
 
 		View sidebar;
 		View content;
-		int contentPosition;
-		int sidebarPosition;
 		boolean noAnim;
 		boolean leftDrawer;
 		int sidebarOffset;
-		int sidebarWidth;
 
 		public OpenDrawerAnimation(View sidebar, View content, boolean noAnim,
 				boolean leftDrawer) {
 			this.leftDrawer = leftDrawer;
 
-			this.contentPosition = 0;
-			this.sidebarPosition = 0;
-
-			this.sidebarOffset = leftDrawer ? mLeftSidebarOffsetForAnimation
+			contentCurrentPosition = 0;
+			sidebarCurrentPosition = leftDrawer ? -mLeftSidebarOffsetForAnimation
 					: mRightSidebarOffsetForAnimation;
-			this.sidebarWidth = leftDrawer ? mLeftSidebarWidth
+
+			sidebarFinalPosition = 0;
+			contentFinalPosition = leftDrawer ? mLeftSidebarWidth
 					: mRightSidebarWidth;
+
+			sidebarOffset = leftDrawer ? mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
 
 			this.content = content;
 
 			this.sidebar = sidebar;
 			this.sidebar.setVisibility(View.VISIBLE);
-			this.sidebar.offsetLeftAndRight(leftDrawer ? -sidebarOffset
-					: sidebarOffset);
-			invalidate();
+			requestLayout();
 
 			this.noAnim = noAnim;
+
+			currentState = leftDrawer ? CurrentState.LEFT : CurrentState.RIGHT;
 		}
 
 		@Override
@@ -675,21 +676,24 @@ public class DrawerLayout extends RelativeLayout implements
 			if (!noAnim) {
 				float contentFactor = Math
 						.max(0.1f,
-								((float) (Math.abs(contentPosition) * 100 / sidebarWidth) / 100));
+								((float) (Math.abs(contentCurrentPosition) * 100 / contentFinalPosition) / 100));
 
 				float sidebarFactor = Math
 						.max(0.1f,
-								((float) (Math.abs(sidebarPosition) * 100 / sidebarOffset) / 100));
+								((float) ((sidebarOffset - Math
+										.abs(sidebarCurrentPosition)) * 100 / sidebarOffset) / 100));
 
-				int sidebarIncrements = (int) (((int) sidebarOffset / animationSteps) * interpolator
+				int sidebarIncrements = (int) (((int) sidebarOffset / (animationSteps)) * interpolator
 						.getInterpolation(sidebarFactor));
-				int contentIncrements = (int) (((int) sidebarWidth / animationSteps) * interpolator
+				int contentIncrements = (int) (((int) contentFinalPosition / animationSteps) * interpolator
 						.getInterpolation(contentFactor));
 
-				sidebarIncrements = Math.min(sidebarIncrements, sidebarOffset
-						- Math.abs(sidebarPosition));
-				contentIncrements = Math.min(contentIncrements, sidebarWidth
-						- Math.abs(contentPosition));
+				sidebarIncrements = Math.min(sidebarIncrements,
+						Math.abs(sidebarCurrentPosition));
+				contentIncrements = Math
+						.min(contentIncrements,
+								contentFinalPosition
+										- Math.abs(contentCurrentPosition));
 
 				sidebarIncrements = Math.max(sidebarIncrements, 1);
 				contentIncrements = Math.max(contentIncrements, 1);
@@ -699,23 +703,16 @@ public class DrawerLayout extends RelativeLayout implements
 					contentIncrements = -contentIncrements;
 				}
 
-				if ((Math.abs(contentPosition) < sidebarWidth)
-						|| (Math.abs(sidebarPosition) < sidebarOffset)) {
-					if (Math.abs(contentPosition) < sidebarWidth) {
-						contentPosition += contentIncrements;
-						content.offsetLeftAndRight(contentIncrements);
+				boolean sidebarAnimComplete = (currentState == CurrentState.LEFT && sidebarCurrentPosition <= 0)
+						|| (currentState == CurrentState.RIGHT && sidebarCurrentPosition >= 0);
+				if ((Math.abs(contentCurrentPosition) < contentFinalPosition)
+						|| (sidebarAnimComplete)) {
+					if (Math.abs(contentCurrentPosition) < contentFinalPosition) {
+						contentCurrentPosition += contentIncrements;
 					}
 
-					if (Math.abs(sidebarPosition) < sidebarOffset) {
-						sidebarPosition += sidebarIncrements;
-						sidebar.offsetLeftAndRight(sidebarIncrements);
-					} else {
-						int offset = sidebarOffset
-								- (leftDrawer ? sidebarPosition
-										: -sidebarPosition);
-						sidebarPosition = leftDrawer ? sidebarOffset
-								: -sidebarOffset;
-						sidebar.offsetLeftAndRight(offset);
+					if (sidebarAnimComplete) {
+						sidebarCurrentPosition += sidebarIncrements;
 					}
 
 					handler.postDelayed(this, DURATION_BETWEEN_EACH_STEP);
@@ -725,17 +722,21 @@ public class DrawerLayout extends RelativeLayout implements
 			} else {
 				finishAnim();
 			}
-			invalidate();
+			requestLayout();
 		}
 
 		private void finishAnim() {
 			isAnimating = false;
+			sidebarCurrentPosition = sidebarFinalPosition;
 			if (leftDrawer) {
-				mLeftOpened = true;
+				currentState = CurrentState.LEFT;
+				contentCurrentPosition = contentFinalPosition;
 			} else {
 				mListener.rightSidebarOpened();
-				mRightOpened = true;
+				currentState = CurrentState.RIGHT;
+				contentCurrentPosition = -contentFinalPosition;
 			}
+			sidebarCurrentPosition = sidebarFinalPosition;
 		}
 	}
 
@@ -743,29 +744,23 @@ public class DrawerLayout extends RelativeLayout implements
 
 		View sidebar;
 		View content;
-		int contentPosition;
-		int sidebarPosition;
 		boolean noAnim;
 		boolean leftDrawer;
-		int sidebarOffset;
-		int sidebarWidth;
+		private int sidebarOffset;
 
 		public CloseDrawerAnimation(View sidebar, View content, boolean noAnim,
 				boolean leftDrawer) {
 			this.leftDrawer = leftDrawer;
 
-			this.sidebarOffset = leftDrawer ? mLeftSidebarOffsetForAnimation
-					: mRightSidebarOffsetForAnimation;
-			this.sidebarWidth = leftDrawer ? mLeftSidebarWidth
-					: mRightSidebarWidth;
-
-			this.contentPosition = leftDrawer ? sidebarWidth : -sidebarWidth;
-			this.sidebarPosition = leftDrawer ? sidebarOffset : -sidebarOffset;
-
 			this.content = content;
 			this.sidebar = sidebar;
 
 			this.noAnim = noAnim;
+
+			sidebarOffset = leftDrawer ? mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
+			sidebarFinalPosition = leftDrawer ? -mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
 		}
 
 		@Override
@@ -774,23 +769,22 @@ public class DrawerLayout extends RelativeLayout implements
 			if (!noAnim) {
 				float contentFactor = Math
 						.max(0.1f,
-								((float) ((sidebarWidth - Math
-										.abs(contentPosition)) * 100 / sidebarWidth) / 100));
+								((float) ((contentFinalPosition - Math
+										.abs(contentCurrentPosition)) * 100 / contentFinalPosition) / 100));
 
 				float sidebarFactor = Math
 						.max(0.1f,
-								((float) ((sidebarOffset - Math
-										.abs(sidebarPosition)) * 100 / sidebarOffset) / 100));
+								((float) ((Math.abs(sidebarCurrentPosition)) * 100 / sidebarOffset) / 100));
 
 				int sidebarIncrements = (int) (((int) sidebarOffset / animationSteps) * interpolator
 						.getInterpolation(sidebarFactor));
-				int contentIncrements = (int) (((int) sidebarWidth / animationSteps) * interpolator
+				int contentIncrements = (int) (((int) contentFinalPosition / animationSteps) * interpolator
 						.getInterpolation(contentFactor));
 
 				sidebarIncrements = Math.min(sidebarIncrements, sidebarOffset
-						+ Math.abs(sidebarPosition));
-				contentIncrements = Math.min(contentIncrements, sidebarWidth
-						+ Math.abs(contentPosition));
+						- Math.abs(sidebarCurrentPosition));
+				contentIncrements = Math.min(contentIncrements,
+						contentFinalPosition + Math.abs(contentFinalPosition));
 
 				sidebarIncrements = Math.max(sidebarIncrements, 1);
 				contentIncrements = Math.max(contentIncrements, 1);
@@ -800,21 +794,14 @@ public class DrawerLayout extends RelativeLayout implements
 					contentIncrements = -contentIncrements;
 				}
 
-				if ((Math.abs(contentPosition) > 0)
-						|| (Math.abs(sidebarPosition) > 0)) {
-					if (Math.abs(contentPosition) > 0) {
-						contentPosition += contentIncrements;
-						content.offsetLeftAndRight(contentIncrements);
+				if ((Math.abs(contentCurrentPosition) > 0)
+						|| (Math.abs(sidebarCurrentPosition) < sidebarOffset)) {
+					if (Math.abs(contentCurrentPosition) > 0) {
+						contentCurrentPosition += contentIncrements;
 					}
 
-					if ((leftDrawer && sidebarPosition > 0)
-							|| (!leftDrawer && sidebarPosition < 0)) {
-						sidebarPosition += sidebarIncrements;
-						sidebar.offsetLeftAndRight(sidebarIncrements);
-					} else {
-						int offset = -sidebarPosition;
-						sidebarPosition = 0;
-						sidebar.offsetLeftAndRight(offset);
+					if (Math.abs(sidebarCurrentPosition) < sidebarOffset) {
+						sidebarCurrentPosition += sidebarIncrements;
 					}
 
 					handler.postDelayed(this, DURATION_BETWEEN_EACH_STEP);
@@ -824,27 +811,15 @@ public class DrawerLayout extends RelativeLayout implements
 			} else {
 				finishAnim();
 			}
-			invalidate();
+			requestLayout();
 		}
 
 		private void finishAnim() {
 			isAnimating = false;
 			sidebar.setVisibility(View.INVISIBLE);
-			if (leftDrawer) {
-				mLeftOpened = false;
-				if (!noAnim) {
-					sidebar.offsetLeftAndRight(sidebarOffset);
-				} else {
-					content.offsetLeftAndRight(-sidebarWidth);
-				}
-			} else {
-				mRightOpened = false;
-				if (!noAnim) {
-					sidebar.offsetLeftAndRight(-sidebarOffset);
-				} else {
-					content.offsetLeftAndRight(sidebarWidth);
-				}
-			}
+			contentCurrentPosition = 0;
+			sidebarCurrentPosition = sidebarFinalPosition;
+			currentState = CurrentState.NONE;
 		}
 	}
 }

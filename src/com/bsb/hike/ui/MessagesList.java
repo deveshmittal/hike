@@ -213,7 +213,7 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (intent.getBooleanExtra(HikeConstants.Extras.GOING_BACK_TO_HOME,
 				false)) {
 			((DrawerLayout) findViewById(R.id.drawer_layout))
-					.closeLeftSidebar(true);
+					.closeSidebar(true);
 		}
 
 		if (intent.hasExtra(HikeConstants.Extras.GROUP_LEFT)) {

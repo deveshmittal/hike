@@ -235,24 +235,24 @@ public class DrawerBaseActivity extends Activity implements
 	}
 
 	public void onEmptySpaceClicked(View v) {
-		parentLayout.closeLeftSidebar(false);
+		parentLayout.closeSidebar(false);
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.IS_LEFT_DRAWER_VISIBLE,
-				this.parentLayout != null && this.parentLayout.isLeftOpening());
+				this.parentLayout != null
+						&& parentLayout.getCurrentState() == CurrentState.LEFT);
 		outState.putBoolean(HikeConstants.Extras.IS_RIGHT_DRAWER_VISIBLE,
-				this.parentLayout != null && this.parentLayout.isRightOpening());
+				this.parentLayout != null
+						&& parentLayout.getCurrentState() == CurrentState.RIGHT);
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	public void onBackPressed() {
-		if (parentLayout.isLeftOpening()) {
-			parentLayout.closeLeftSidebar(false);
-		} else if (parentLayout.isRightOpening()) {
-			parentLayout.closeRightSidebar(false);
+		if (parentLayout.getCurrentState() != CurrentState.NONE) {
+			parentLayout.closeSidebar(false);
 		} else {
 			if (!(this instanceof MessagesList)
 					&& !getIntent().getBooleanExtra(
@@ -276,13 +276,13 @@ public class DrawerBaseActivity extends Activity implements
 
 	@Override
 	public boolean onContentTouchedWhenOpeningLeftSidebar() {
-		parentLayout.closeLeftSidebar(false);
+		parentLayout.closeSidebar(false);
 		return true;
 	}
 
 	@Override
 	public boolean onContentTouchedWhenOpeningRightSidebar() {
-		parentLayout.closeRightSidebar(false);
+		parentLayout.closeSidebar(false);
 		return true;
 	}
 
