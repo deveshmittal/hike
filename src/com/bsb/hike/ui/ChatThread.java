@@ -3004,14 +3004,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						rawContactInsertIndex)
 				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
 				.withValue(StructuredName.DISPLAY_NAME, name).build());
+		boolean contactSaveSuccessful;
 		try {
 			getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+			contactSaveSuccessful = true;
 		} catch (RemoteException e) {
 			e.printStackTrace();
+			contactSaveSuccessful = false;
 		} catch (OperationApplicationException e) {
 			e.printStackTrace();
+			contactSaveSuccessful = false;
 		}
-
+		Toast.makeText(
+				getApplicationContext(),
+				contactSaveSuccessful ? R.string.contact_saved
+						: R.string.contact_not_saved, Toast.LENGTH_SHORT)
+				.show();
 	}
 
 	@Override
