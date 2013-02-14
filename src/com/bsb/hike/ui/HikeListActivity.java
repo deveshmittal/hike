@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -34,7 +35,8 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.Utils;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class HikeListActivity extends Activity implements OnItemClickListener {
+public class HikeListActivity extends Activity implements OnItemClickListener,
+		OnClickListener {
 
 	private enum Type {
 		NUX1, NUX2, INVITE, BLOCK
@@ -94,6 +96,7 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 			contactList = hUDB
 					.getNonHikeMostContactedContacts(HikeConstants.MAX_NUX_CONTACTS);
 			labelView.setText(R.string.invite_friends);
+			labelView.setOnClickListener(this);
 			break;
 		case NUX2:
 			findViewById(R.id.input_number_container).setVisibility(View.GONE);
@@ -103,6 +106,7 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 			contactList = hUDB.getFamilyList(this,
 					HikeConstants.MAX_NUX_CONTACTS);
 			labelView.setText(R.string.invite_family);
+			labelView.setOnClickListener(this);
 			break;
 		case BLOCK:
 			titleBtn.setText(R.string.done);
@@ -240,5 +244,15 @@ public class HikeListActivity extends Activity implements OnItemClickListener {
 			Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT)
 					.show();
 		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		skipNux();
+	}
+
+	private void skipNux() {
+		selectedContacts.clear();
+		onTitleIconClick(null);
 	}
 }
