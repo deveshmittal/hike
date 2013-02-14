@@ -4,6 +4,15 @@
     android:title="@string/privacy">
 
     <com.bsb.hike.view.IconCheckBoxPreference
+        icon="preference_free_sms"
+        android:defaultValue="true"
+        android:key="freeSmsPref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/free_sms_msg"
+        android:title="@string/free_sms"
+        android:widgetLayout="@layout/checkbox_widget" />
+    
+    <com.bsb.hike.view.IconCheckBoxPreference
         icon="ic_ssl"
         android:key="sslPref"
         android:layout="@layout/icon_preference"
