@@ -241,11 +241,15 @@ public class MessagesList extends DrawerBaseActivity implements
 		String token = accountPrefs.getString(HikeMessengerApp.TOKEN_SETTING,
 				null);
 
-		if (HikeMessengerApp.isIndianUser()
-				&& !accountPrefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL,
-						false)) {
+		if (!accountPrefs.getBoolean(HikeMessengerApp.NUX1_DONE, false)) {
 			Intent i = new Intent(MessagesList.this, HikeListActivity.class);
 			i.putExtra(HikeConstants.Extras.SHOW_MOST_CONTACTED, true);
+			startActivity(i);
+			finish();
+			return;
+		} else if (!accountPrefs.getBoolean(HikeMessengerApp.NUX2_DONE, false)) {
+			Intent i = new Intent(MessagesList.this, HikeListActivity.class);
+			i.putExtra(HikeConstants.Extras.SHOW_FAMILY, true);
 			startActivity(i);
 			finish();
 			return;

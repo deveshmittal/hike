@@ -143,6 +143,9 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String GCM_ID_SENT = "gcmIdSent";
 
+	public static final String NUX1_DONE = "nux1Done";
+
+	public static final String NUX2_DONE = "nux2Done";
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"

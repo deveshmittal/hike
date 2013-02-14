@@ -298,6 +298,9 @@ public class HikeConstants {
 
 	public static final int MIN_STATUS_COUNT = 5;
 
+	public static final int MAX_NUX_CONTACTS = 30;
+	public static final int MAX_PRECHECKED_CONTACTS = 15;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
@@ -390,6 +393,7 @@ public class HikeConstants {
 		public static final String CONTACT_METADATA = "contactMetadata";
 		public static final String FROM_CENTRAL_TIMELINE = "fromCentralTimeline";
 		public static final String BLOCKED_LIST = "blockedList";
+		public static final String SHOW_FAMILY = "showFamily";
 	}
 
 	public static final class LogEvent {

@@ -32,7 +32,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0) : prefs;
 		if (!TextUtils.isEmpty(prefs.getString(HikeMessengerApp.TOKEN_SETTING,
 				null))
-				&& prefs.getBoolean(HikeMessengerApp.SHOWN_TUTORIAL, false)) {
+				&& prefs.getBoolean(HikeMessengerApp.NUX2_DONE, false)) {
 			HikeMessengerApp app = (HikeMessengerApp) context
 					.getApplicationContext();
 			app.connectToService();

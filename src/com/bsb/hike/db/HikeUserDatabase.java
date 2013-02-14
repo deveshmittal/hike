@@ -1244,7 +1244,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						}
 					});
 
-			for (int i = 0; i < Math.min(10, contactList.size()); i++) {
+			for (int i = 0; i < Math.min(HikeConstants.MAX_PRECHECKED_CONTACTS,
+					contactList.size()); i++) {
 				Pair<AtomicBoolean, ContactInfo> val = contactList.get(i);
 				val.first.set(true);
 			}
@@ -1364,7 +1365,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ FavoriteType.RECOMMENDED_FAVORITE.ordinal(), null);
 	}
 
-	public List<Pair<AtomicBoolean, ContactInfo>> getFamilyList(Context context) {
+	public List<Pair<AtomicBoolean, ContactInfo>> getFamilyList(
+			Context context, int limit) {
 		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
@@ -1391,7 +1393,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		selectionStringBuilder.replace(
 				selectionStringBuilder.lastIndexOf("OR "),
 				selectionStringBuilder.length(), " AND " + DBConstants.ONHIKE
-						+ "=0");
+						+ "=0 LIMIT " + limit);
 		String selection = selectionStringBuilder.toString();
 
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
@@ -1434,7 +1436,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						new AtomicBoolean(false), contactInfo));
 			}
 
-			for (int i = 0; i < Math.min(10, contactList.size()); i++) {
+			for (int i = 0; i < Math.min(HikeConstants.MAX_PRECHECKED_CONTACTS,
+					contactList.size()); i++) {
 				Pair<AtomicBoolean, ContactInfo> val = contactList.get(i);
 				val.first.set(true);
 			}
