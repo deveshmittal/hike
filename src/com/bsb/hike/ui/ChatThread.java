@@ -1228,7 +1228,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		nudgeAlert.setCancelable(true);
 		nudgeAlert.setContentView(R.layout.nudge_dialog);
 
-		nudgeAlert.setCancelable(false);
+		nudgeAlert.setCancelable(true);
 
 		Button okBtn = (Button) nudgeAlert.findViewById(R.id.ok_btn);
 		okBtn.setOnClickListener(new OnClickListener() {
