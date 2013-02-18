@@ -130,7 +130,7 @@ public class Utils {
 	static {
 		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
 		msisdnRegex = Pattern.compile("\\[(\\+\\d*)\\]");
-		pinRegex = Pattern.compile("\\d{6}");
+		pinRegex = Pattern.compile("\\d{4,6}");
 	}
 
 	public static String join(Collection<?> s, String delimiter,

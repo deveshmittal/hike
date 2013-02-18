@@ -394,7 +394,7 @@ public class AccountUtils {
 	}
 
 	public static String validateNumber(String number) {
-		HttpPost httppost = new HttpPost(base + "/account/validate");
+		HttpPost httppost = new HttpPost(base + "/account/validate?digits=4");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try {
