@@ -36,6 +36,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -1381,19 +1382,25 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			lastName = userNameSplit[userNameSplit.length - 1];
 		}
 
-		StringBuilder selectionStringBuilder = new StringBuilder();
-		for (String nuxKeyword : HikeConstants.NUX_KEYWORDS) {
-			selectionStringBuilder.append(DBConstants.NAME + " LIKE '%"
-					+ nuxKeyword + "%' OR ");
+		StringBuilder selectionStringBuilder = new StringBuilder("(");
+
+		String[] familyKeywords = context.getResources().getStringArray(
+				R.array.family_array);
+
+		for (String nuxKeyword : familyKeywords) {
+			selectionStringBuilder.append(DBConstants.NAME + " LIKE "
+					+ DatabaseUtils.sqlEscapeString("%" + nuxKeyword + "%")
+					+ " OR ");
 		}
 		if (lastName != null) {
-			selectionStringBuilder.append(DBConstants.NAME + " LIKE '%"
-					+ lastName + "' OR ");
+			selectionStringBuilder.append(DBConstants.NAME + " LIKE "
+					+ DatabaseUtils.sqlEscapeString("% " + lastName)
+					+ " OR ");
 		}
 		selectionStringBuilder.replace(
 				selectionStringBuilder.lastIndexOf("OR "),
-				selectionStringBuilder.length(), " AND " + DBConstants.ONHIKE
-						+ "=0 LIMIT " + limit);
+				selectionStringBuilder.length(), ") AND " + DBConstants.ONHIKE
+						+ "=0 AND " + DBConstants.MSISDN + " != 'null' " +"LIMIT " + limit);
 		String selection = selectionStringBuilder.toString();
 
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);

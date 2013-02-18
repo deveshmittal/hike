@@ -542,11 +542,4 @@ public class HikeConstants {
 	public static enum FTResult {
 		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED
 	}
-
-	public static final String[] NUX_KEYWORDS = { "mother", "mum", "mom",
-			"mam", "maternal", "dad", "pop", "father", "sis", "bro", "uncle",
-			"aunt", "grandma", "gramps", "granny", "nan", "papa", "behen",
-			"didi", "bhai", "chacha", "fufaa", "foofaa", "chachi", "bua",
-			"mutter", "vater", "schwester", "bruder", "onkel ", "pfandleiher ",
-			"tante", "gro§mutter", "gro§papa", "omi", "oma" };
 }
