@@ -580,7 +580,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ContactInfo> getContactsOfFavoriteType(
-			FavoriteType favoriteType, int onHike) {
+			FavoriteType favoriteType, int onHike, String myMsisdn) {
 		String favoriteMsisdnColumnName = "tempMsisdn";
 		StringBuilder queryBuilder = new StringBuilder("SELECT "
 				+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + ", "
@@ -610,6 +610,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						+ favoriteType.ordinal());
 			}
 		}
+		queryBuilder.append(" AND " + DBConstants.USERS_TABLE + "."
+				+ DBConstants.MSISDN + " != "
+				+ DatabaseUtils.sqlEscapeString(myMsisdn));
 		if (onHike != -1) {
 			queryBuilder.append(" AND " + DBConstants.ONHIKE + " = " + onHike);
 		}
@@ -668,9 +671,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ContactInfo> getContactsForComposeScreen(boolean freeSMSOn,
-			boolean fwdOrgroupChat) {
+			boolean fwdOrgroupChat, String userMsisdn) {
 		String selection = DBConstants.MSISDN
-				+ " != 'null'"
+				+ " != 'null' AND "
+				+ DBConstants.MSISDN
+				+ " != "
+				+ DatabaseUtils.sqlEscapeString(userMsisdn)
 				+ ((freeSMSOn && fwdOrgroupChat) ? " AND (("
 						+ DBConstants.ONHIKE + " = 0 AND " + DBConstants.MSISDN
 						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))"

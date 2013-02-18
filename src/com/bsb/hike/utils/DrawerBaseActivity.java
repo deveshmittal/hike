@@ -363,10 +363,13 @@ public class DrawerBaseActivity extends Activity implements
 				}
 			});
 		} else if (HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED.equals(type)) {
+			String myMsisdn = preferences.getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+
 			final List<ContactInfo> autoRecommendedFavorites = HikeUserDatabase
 					.getInstance().getContactsOfFavoriteType(
 							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE);
+							HikeConstants.BOTH_VALUE, myMsisdn);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -393,19 +396,22 @@ public class DrawerBaseActivity extends Activity implements
 				}
 			});
 		} else if (HikePubSub.REFRESH_FAVORITES.equals(type)) {
+			String myMsisdn = preferences.getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
 			final List<ContactInfo> favoriteList = hikeUserDatabase
 					.getContactsOfFavoriteType(FavoriteType.FAVORITE,
-							HikeConstants.BOTH_VALUE);
+							HikeConstants.BOTH_VALUE, myMsisdn);
 			final List<ContactInfo> recommendedFavoriteList = hikeUserDatabase
 					.getContactsOfFavoriteType(
 							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE);
+							HikeConstants.BOTH_VALUE, myMsisdn);
 			recommendedFavoriteList.addAll(hikeUserDatabase
 					.getContactsOfFavoriteType(
 							FavoriteType.RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE));
+							HikeConstants.BOTH_VALUE, myMsisdn));
 			runOnUiThread(new Runnable() {
 
 				@Override

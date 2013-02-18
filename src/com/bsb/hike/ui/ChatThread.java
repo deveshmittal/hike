@@ -367,10 +367,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
 				getApplicationContext()).getBoolean(
 				HikeConstants.FREE_SMS_PREF, true);
+		String userMsisdn = prefs
+				.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
 				.getContactsForComposeScreen(freeSMSOn,
-						(isGroupChat || isForwardingMessage || isSharingFile));
+						(isGroupChat || isForwardingMessage || isSharingFile),
+						userMsisdn);
 
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, this.mConversationDb
@@ -1923,13 +1926,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (v.getId() == R.id.title_image_btn) {
 			dismissToolTip();
 			if (!(mConversation instanceof GroupConversation)) {
+				String userMsisdn = prefs.getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
 				Intent intent = new Intent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
-						mContactNumber);
-				intent.putExtra(HikeConstants.Extras.ON_HIKE,
-						mConversation.isOnhike());
+				if (!userMsisdn.equals(mContactNumber)) {
+					intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
+							mContactNumber);
+					intent.putExtra(HikeConstants.Extras.ON_HIKE,
+							mConversation.isOnhike());
+				}
 				startActivity(intent);
 			} else {
 				if (!((GroupConversation) mConversation).getIsGroupAlive()) {

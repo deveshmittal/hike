@@ -129,11 +129,11 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 		List<ContactInfo> friendRequestList = HikeUserDatabase.getInstance()
 				.getContactsOfFavoriteType(FavoriteType.RECOMMENDED_FAVORITE,
-						HikeConstants.BOTH_VALUE);
+						HikeConstants.BOTH_VALUE, userMsisdn);
 
 		List<ContactInfo> friendsList = HikeUserDatabase.getInstance()
 				.getContactsOfFavoriteType(FavoriteType.FAVORITE,
-						HikeConstants.BOTH_VALUE);
+						HikeConstants.BOTH_VALUE, userMsisdn);
 
 		friendRequests = friendRequestList.size();
 

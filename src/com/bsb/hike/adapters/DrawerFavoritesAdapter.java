@@ -69,7 +69,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, RECOMMENDED_FAVORITE
 	}
 
-	public DrawerFavoritesAdapter(Context context,
+	public DrawerFavoritesAdapter(final Context context,
 			final DrawerLayout drawerLayout) {
 		completeList = new ArrayList<ContactInfo>();
 		recommendedFavoriteList = new ArrayList<ContactInfo>(0);
@@ -85,21 +85,26 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				HikeUserDatabase hikeUserDatabase = HikeUserDatabase
 						.getInstance();
 
+				String myMsisdn = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
 				// recommendedFavoriteList = hikeUserDatabase
 				// .getContactsOfFavoriteType(
 				// FavoriteType.AUTO_RECOMMENDED_FAVORITE,
 				// HikeConstants.BOTH_VALUE);
-				recommendedFavoriteList.addAll(hikeUserDatabase
+				recommendedFavoriteList = hikeUserDatabase
 						.getContactsOfFavoriteType(
 								FavoriteType.RECOMMENDED_FAVORITE,
-								HikeConstants.BOTH_VALUE));
+								HikeConstants.BOTH_VALUE, myMsisdn);
 
 				favoriteList = hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE);
+						FavoriteType.FAVORITE, HikeConstants.BOTH_VALUE,
+						myMsisdn);
 				Collections.sort(favoriteList);
 
 				onHikeList = hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.NOT_FAVORITE, HikeConstants.ON_HIKE_VALUE);
+						FavoriteType.NOT_FAVORITE, HikeConstants.ON_HIKE_VALUE,
+						myMsisdn);
 
 				recentList = hikeUserDatabase.getNonHikeRecentContacts(-1,
 						HikeMessengerApp.isIndianUser(),
