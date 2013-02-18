@@ -1048,8 +1048,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			Log.d(getClass().getSimpleName(),
 					"Auto rec fav added: " + c.getCount());
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
+			// HikeMessengerApp.getPubSub().publish(
+			// HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
 		}
 	}
 
