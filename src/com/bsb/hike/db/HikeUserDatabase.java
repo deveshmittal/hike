@@ -1400,13 +1400,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 		if (lastName != null) {
 			selectionStringBuilder.append(DBConstants.NAME + " LIKE "
-					+ DatabaseUtils.sqlEscapeString("% " + lastName)
-					+ " OR ");
+					+ DatabaseUtils.sqlEscapeString("% " + lastName) + " OR ");
 		}
 		selectionStringBuilder.replace(
 				selectionStringBuilder.lastIndexOf("OR "),
 				selectionStringBuilder.length(), ") AND " + DBConstants.ONHIKE
-						+ "=0 AND " + DBConstants.MSISDN + " != 'null' " +"LIMIT " + limit);
+						+ "=0 AND " + DBConstants.MSISDN + " != 'null' "
+						+ "LIMIT " + limit);
 		String selection = selectionStringBuilder.toString();
 
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
