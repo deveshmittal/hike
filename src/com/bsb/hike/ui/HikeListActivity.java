@@ -178,6 +178,10 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					editor.commit();
 
 					Intent i = new Intent(this, HikeListActivity.class);
+					if (getIntent().getBooleanExtra(
+							HikeConstants.Extras.FIRST_TIME_USER, false)) {
+						i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
+					}
 					i.putExtra(HikeConstants.Extras.SHOW_FAMILY, true);
 					startActivity(i);
 				} else if (type == Type.NUX2) {
@@ -188,7 +192,10 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					editor.commit();
 
 					Intent i = new Intent(this, MessagesList.class);
-					i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
+					if (getIntent().getBooleanExtra(
+							HikeConstants.Extras.FIRST_TIME_USER, false)) {
+						i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
+					}
 					startActivity(i);
 				}
 				finish();
