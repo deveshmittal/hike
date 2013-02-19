@@ -397,4 +397,5 @@
 	<string name="contact_not_saved">Contact could not be saved</string>
 	<string name="which_family">Would you like to invite your family members to hike?</string>
 	<string name="invite_family">Your Family</string>
+	<string name="share_fb_twitter">Share on Facebook and Twitter</string>
 </resources>

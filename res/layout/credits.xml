@@ -219,9 +219,8 @@
                             android:id="@+id/free_sms_100"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
                             android:gravity="center"
-                            android:text="@string/connect_and_get"
+                            android:text="@string/share_fb_twitter"
                             android:textColor="@color/credits_text"
                             android:textSize="13sp" />
 

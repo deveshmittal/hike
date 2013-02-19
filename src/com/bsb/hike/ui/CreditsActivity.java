@@ -160,18 +160,6 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		freeSms50.setText(ssb);
 
-		freeSmsString = getString(R.string.connect_and_get);
-		textToColor = getString(R.string.free_sms_100);
-		startIndex = freeSmsString.indexOf(textToColor);
-
-		ssb = new SpannableStringBuilder(freeSmsString);
-		ssb.setSpan(
-				new ForegroundColorSpan(getResources().getColor(
-						R.color.unread_message_blue)), startIndex, startIndex
-						+ textToColor.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		freeSms100.setText(ssb);
-
 		mTitleView.setText(R.string.free_sms_txt);
 
 		updateCredits();
