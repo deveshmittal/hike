@@ -843,15 +843,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		try {
 			ConvMessage convMessage = (ConvMessage) v.getTag();
 			if (convMessage != null && convMessage.isFileTransferMessage()) {
-				if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
+						.get(0);
+				if (Utils.getExternalStorageState() == ExternalStorageState.NONE
+						&& hikeFile.getHikeFileType() != HikeFileType.CONTACT
+						&& hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
 					Toast.makeText(context, R.string.no_external_storage,
 							Toast.LENGTH_SHORT).show();
 					return;
 				}
-				Log.d(getClass().getSimpleName(),
-						"Message: " + convMessage.getMessage());
-				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
-						.get(0);
 				if (convMessage.isSent()) {
 					Log.d(getClass().getSimpleName(),
 							"Hike File name: " + hikeFile.getFileName()
