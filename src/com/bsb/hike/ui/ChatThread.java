@@ -834,7 +834,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 
 			MenuItem shareItem = menu.findItem(R.id.share);
-			shareItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
+			shareItem.setVisible(false);
 
 			MenuItem forwardItem = menu.findItem(R.id.forward);
 			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey())
