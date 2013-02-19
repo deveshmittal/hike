@@ -139,6 +139,7 @@ import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
@@ -287,6 +288,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private boolean reachedEnd;
 
+	private ContactDialog contactDialog;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -410,6 +413,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 			mComposeViewWatcher.uninit();
 			mComposeViewWatcher = null;
+		}
+		if (contactDialog != null) {
+			contactDialog.dismiss();
+			contactDialog = null;
 		}
 	}
 
@@ -2854,19 +2861,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	public void showContactDetails(final List<ContactInfoData> items,
 			final String name, final JSONObject contactInfo,
 			final boolean saveContact) {
-		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.contact_share_info);
+		contactDialog = new ContactDialog(this, R.style.Theme_CustomDialog);
+		contactDialog.setContentView(R.layout.contact_share_info);
 
-		TextView contactName = (TextView) dialog
+		ViewGroup parent = (ViewGroup) contactDialog.findViewById(R.id.parent);
+		TextView contactName = (TextView) contactDialog
 				.findViewById(R.id.contact_name);
-		ListView contactDetails = (ListView) dialog
+		ListView contactDetails = (ListView) contactDialog
 				.findViewById(R.id.contact_details);
-		Button yesBtn = (Button) dialog.findViewById(R.id.btn_ok);
-		Button noBtn = (Button) dialog.findViewById(R.id.btn_cancel);
-		TextView targetAccount = (TextView) dialog
+		Button yesBtn = (Button) contactDialog.findViewById(R.id.btn_ok);
+		Button noBtn = (Button) contactDialog.findViewById(R.id.btn_cancel);
+		TextView targetAccount = (TextView) contactDialog
 				.findViewById(R.id.target_account);
-		final Spinner accounts = (Spinner) dialog
+		final Spinner accounts = (Spinner) contactDialog
 				.findViewById(R.id.account_spinner);
+
+		contactDialog.setViewReferences(parent, accounts);
 
 		yesBtn.setText(saveContact ? R.string.save : R.string.send);
 
@@ -2907,16 +2917,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				} else {
 					initialiseContactTransfer(contactInfo);
 				}
-				dialog.dismiss();
+				contactDialog.dismiss();
 			}
 		});
 		noBtn.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				dialog.dismiss();
+				contactDialog.dismiss();
 			}
 		});
-		dialog.show();
+		contactDialog.show();
 	}
 
 	private void initialiseFileTransfer(String filePath,
