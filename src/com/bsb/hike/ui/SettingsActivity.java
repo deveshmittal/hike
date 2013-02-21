@@ -38,12 +38,14 @@ public class SettingsActivity extends DrawerBaseActivity implements
 		items = new ArrayList<String>();
 		items.add(getString(R.string.notifications));
 		items.add(getString(R.string.manage_account));
+		items.add(getString(R.string.system_health));
 		items.add(getString(R.string.faq));
 		items.add(getString(R.string.contact));
 
 		final ArrayList<Integer> itemIcons = new ArrayList<Integer>();
 		itemIcons.add(R.drawable.ic_notifications);
 		itemIcons.add(R.drawable.ic_manage_account);
+		itemIcons.add(R.drawable.ic_system_health);
 		itemIcons.add(R.drawable.ic_faq);
 		itemIcons.add(R.drawable.ic_contact);
 
@@ -82,12 +84,16 @@ public class SettingsActivity extends DrawerBaseActivity implements
 					R.xml.privacy_preferences);
 			break;
 		case 2:
+			intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(HikeConstants.SYSTEM_HEALTH_URL));
+			break;
+		case 3:
 			intent = new Intent(this, WebViewActivity.class);
 			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
 					HikeConstants.HELP_URL);
 			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
 			break;
-		case 3:
+		case 4:
 			intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
 
