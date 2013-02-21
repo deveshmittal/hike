@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Handler;
@@ -635,6 +636,12 @@ public class MqttMessagesManager {
 					Log.w(getClass().getSimpleName(),
 							"Exception while posting ab", e);
 				}
+			} else if (data.optBoolean(HikeConstants.PUSH)) {
+				Editor editor = settings.edit();
+				editor.putBoolean(HikeMessengerApp.GCM_ID_SENT, false);
+				editor.commit();
+				context.sendBroadcast(new Intent(
+						HikeService.SEND_TO_SERVER_ACTION));
 			}
 		}
 	}
