@@ -1390,13 +1390,31 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		StringBuilder selectionStringBuilder = new StringBuilder("(");
 
-		String[] familyKeywords = context.getResources().getStringArray(
-				R.array.family_array);
+		String[] familyKeywordExactName = context.getResources()
+				.getStringArray(R.array.family_array_exact_name);
+		String[] familyKeywordLike = context.getResources().getStringArray(
+				R.array.family_keyword_like);
 
-		for (String nuxKeyword : familyKeywords) {
-			selectionStringBuilder.append(DBConstants.NAME + " LIKE "
-					+ DatabaseUtils.sqlEscapeString("%" + nuxKeyword + "%")
-					+ " OR ");
+		selectionStringBuilder.append("lower(" + DBConstants.NAME + ")"
+				+ " IN (");
+		for (String nuxKeyword : familyKeywordExactName) {
+			selectionStringBuilder.append(DatabaseUtils
+					.sqlEscapeString(nuxKeyword) + ", ");
+		}
+		selectionStringBuilder.replace(
+				selectionStringBuilder.lastIndexOf(", "),
+				selectionStringBuilder.length(), ") OR ");
+		for (String nuxKeyWord : familyKeywordLike) {
+			selectionStringBuilder
+					.append(DBConstants.NAME + " LIKE "
+							+ DatabaseUtils.sqlEscapeString(nuxKeyWord + " %")
+							+ " OR ");
+		}
+		for (String nuxKeyWord : familyKeywordLike) {
+			selectionStringBuilder
+					.append(DBConstants.NAME + " LIKE "
+							+ DatabaseUtils.sqlEscapeString("% " + nuxKeyWord)
+							+ " OR ");
 		}
 		if (lastName != null) {
 			selectionStringBuilder.append(DBConstants.NAME + " LIKE "
