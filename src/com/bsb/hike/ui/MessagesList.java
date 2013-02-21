@@ -82,6 +82,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
+import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.DrawerLayout;
@@ -266,6 +267,8 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		setContentView(R.layout.main);
 		afterSetContentView(savedInstanceState);
+
+		AppRater.appLaunched(this);
 
 		isToolTipShowing = savedInstanceState != null
 				&& savedInstanceState

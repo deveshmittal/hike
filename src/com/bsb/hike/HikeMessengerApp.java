@@ -180,6 +180,9 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String LAST_STATUS = "lastStatus";
 
+	public static final String APP_LAUNCHES = "appLaunches";
+	public static final String DONT_SHOW_APP_RATER = "dontShowAppRater";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
