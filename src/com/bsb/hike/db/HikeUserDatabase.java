@@ -1373,7 +1373,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<Pair<AtomicBoolean, ContactInfo>> getFamilyList(
-			Context context, int limit) {
+			Context context, String nux1Numbers, int limit) {
 		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
@@ -1420,11 +1420,17 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			selectionStringBuilder.append(DBConstants.NAME + " LIKE "
 					+ DatabaseUtils.sqlEscapeString("% " + lastName) + " OR ");
 		}
-		selectionStringBuilder.replace(
-				selectionStringBuilder.lastIndexOf("OR "),
-				selectionStringBuilder.length(), ") AND " + DBConstants.ONHIKE
-						+ "=0 AND " + DBConstants.MSISDN + " != 'null' "
-						+ "LIMIT " + limit);
+		selectionStringBuilder
+				.replace(selectionStringBuilder.lastIndexOf("OR "),
+						selectionStringBuilder.length(), ") AND "
+								+ DBConstants.ONHIKE
+								+ "=0 AND "
+								+ DBConstants.MSISDN
+								+ " != 'null'"
+								+ (TextUtils.isEmpty(nux1Numbers) ? ""
+										: " AND " + DBConstants.MSISDN
+												+ " NOT IN " + nux1Numbers)
+								+ " LIMIT " + limit);
 		String selection = selectionStringBuilder.toString();
 
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);

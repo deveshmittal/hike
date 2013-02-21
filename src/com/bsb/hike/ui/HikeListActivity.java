@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
@@ -103,7 +104,10 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 			nuxText.setVisibility(View.VISIBLE);
 			nuxText.setText(R.string.which_family);
 			titleBtn.setText(R.string.done);
-			contactList = hUDB.getFamilyList(this,
+			contactList = hUDB.getFamilyList(
+					this,
+					getIntent().getStringExtra(
+							HikeConstants.Extras.NUX1_NUMBERS),
 					HikeConstants.MAX_NUX_CONTACTS);
 			labelView.setText(R.string.invite_family);
 			labelView.setOnClickListener(this);
@@ -150,6 +154,15 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 	public void onTitleIconClick(View v) {
 		if (type != Type.BLOCK) {
 			Iterator<String> iterator = selectedContacts.iterator();
+
+			/*
+			 * Will use this to ensure that invited numbers don't appear in
+			 * NUX2.
+			 */
+			StringBuilder selectedNumbers = null;
+			if (type == Type.NUX1) {
+				selectedNumbers = new StringBuilder("(");
+			}
 			while (iterator.hasNext()) {
 				String msisdn = iterator.next();
 				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
@@ -160,7 +173,16 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 						HikePubSub.MQTT_PUBLISH,
 						Utils.makeHike2SMSInviteMessage(msisdn, this)
 								.serialize());
+				selectedNumbers.append(DatabaseUtils.sqlEscapeString(msisdn)
+						+ ", ");
 			}
+			if (selectedNumbers.lastIndexOf(", ") != -1) {
+				selectedNumbers.replace(selectedNumbers.lastIndexOf(", "),
+						selectedNumbers.length(), ")");
+			} else {
+				selectedNumbers = null;
+			}
+
 			if (!selectedContacts.isEmpty() || type == Type.NUX1
 					|| type == Type.NUX2) {
 				if (!selectedContacts.isEmpty()) {
@@ -185,6 +207,8 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
 							.edit();
 					editor.putBoolean(HikeMessengerApp.NUX2_DONE, true);
+					editor.putString(HikeConstants.Extras.NUX1_NUMBERS,
+							selectedNumbers.toString());
 					editor.commit();
 
 					Intent i = new Intent(this, MessagesList.class);
