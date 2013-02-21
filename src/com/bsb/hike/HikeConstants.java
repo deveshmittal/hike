@@ -83,6 +83,7 @@ public class HikeConstants {
 	public static final String PROFILE = "profile";
 	public static final String ICON = "icon";
 	public static final String MUTED = "muted";
+	public static final String POST_AB = "postab";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -538,6 +539,7 @@ public class HikeConstants {
 		public static final String REWARDS = "rewards";
 		public static final String DISPLAY_PIC = "dp";
 		public static final String STATUS_UPDATE = "su";
+		public static final String ACTION = "action";
 	}
 
 	public static enum FTResult {

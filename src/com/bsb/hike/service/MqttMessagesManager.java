@@ -1,5 +1,6 @@
 package com.bsb.hike.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -615,6 +617,25 @@ public class MqttMessagesManager {
 			editor.commit();
 
 			this.pubSub.publish(HikePubSub.TALK_TIME_CHANGED, talkTime);
+		} else if (HikeConstants.MqttMessageTypes.ACTION.equals(type)) {
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			if (data.optBoolean(HikeConstants.POST_AB)) {
+				String token = settings.getString(
+						HikeMessengerApp.TOKEN_SETTING, null);
+				List<ContactInfo> contactinfos = ContactUtils
+						.getContacts(this.context);
+				Map<String, List<ContactInfo>> contacts = ContactUtils
+						.convertToMap(contactinfos);
+				try {
+					AccountUtils.postAddressBook(token, contacts);
+				} catch (IllegalStateException e) {
+					Log.w(getClass().getSimpleName(),
+							"Exception while posting ab", e);
+				} catch (IOException e) {
+					Log.w(getClass().getSimpleName(),
+							"Exception while posting ab", e);
+				}
+			}
 		}
 	}
 
