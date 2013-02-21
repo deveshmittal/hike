@@ -439,7 +439,7 @@ public class MqttMessagesManager {
 					String msisdn = settings.getString(
 							HikeMessengerApp.MSISDN_SETTING, "");
 
-					String iconBase64 = jsonObj.getString(HikeConstants.DATA);
+					String iconBase64 = account.getString(HikeConstants.ICON);
 					try {
 						byte[] profileImageBytes = Base64.decode(iconBase64,
 								Base64.DEFAULT);
