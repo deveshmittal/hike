@@ -183,6 +183,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String APP_LAUNCHES = "appLaunches";
 	public static final String DONT_SHOW_APP_RATER = "dontShowAppRater";
 
+	public static final String INTRO_DONE = "introDone";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;

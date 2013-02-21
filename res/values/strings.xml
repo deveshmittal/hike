@@ -407,4 +407,7 @@
 	<string name="male">Male</string>
 	<string name="female">Female</string>
 	<string name="you">You</string>
+	<string name="ready_to_hike">Ready to hike</string>
+	<string name="happy_messaging">Happy Messaging</string>
+	<string name="intro_info">Messaging hike friends is free &amp; unlimited.</string>
 </resources>
