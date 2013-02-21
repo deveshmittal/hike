@@ -98,6 +98,9 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					.getNonHikeMostContactedContacts(HikeConstants.MAX_NUX_CONTACTS);
 			labelView.setText(R.string.invite_friends);
 			labelView.setOnClickListener(this);
+			if (contactList.isEmpty()) {
+				onTitleIconClick(null);
+			}
 			break;
 		case NUX2:
 			findViewById(R.id.input_number_container).setVisibility(View.GONE);
@@ -111,6 +114,9 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					HikeConstants.MAX_NUX_CONTACTS);
 			labelView.setText(R.string.invite_family);
 			labelView.setOnClickListener(this);
+			if (contactList.isEmpty()) {
+				onTitleIconClick(null);
+			}
 			break;
 		case BLOCK:
 			titleBtn.setText(R.string.done);
