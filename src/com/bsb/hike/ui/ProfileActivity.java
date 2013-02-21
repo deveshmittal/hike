@@ -102,7 +102,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private boolean shouldShowInviteAllButton = false;
 	private TextView mNameDisplay;
 	private ViewGroup participantNameContainer;
-	private ProfileItem[] items;
 	private int lastSavedGender;
 
 	private SharedPreferences preferences;
@@ -846,7 +845,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			mDialog = null;
 		}
 
+		int lastGenderType = mActivityState.genderType;
 		mActivityState = new ActivityState();
+		mActivityState.genderType = lastGenderType;
 	}
 
 	@Override
@@ -927,7 +928,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 									mDialog.dismiss();
 									mDialog = null;
 								}
+								int lastGenderType = mActivityState.genderType;
 								mActivityState = new ActivityState();
+								mActivityState.genderType = lastGenderType;
 								if (!result) {
 									Toast.makeText(getApplicationContext(),
 											R.string.error_download,
@@ -1077,7 +1080,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				if (mActivityState.downloadProfileImageTask != null) {
 					mActivityState.downloadProfileImageTask.cancel(true);
 				}
+				int lastGenderType = mActivityState.genderType;
 				mActivityState = new ActivityState();
+				mActivityState.genderType = lastGenderType;
 			}
 		});
 	}
