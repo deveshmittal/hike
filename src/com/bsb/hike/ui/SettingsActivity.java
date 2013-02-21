@@ -23,8 +23,6 @@ import com.bsb.hike.utils.DrawerBaseActivity;
 public class SettingsActivity extends DrawerBaseActivity implements
 		OnItemClickListener {
 
-	private ArrayList<String> items;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -35,7 +33,7 @@ public class SettingsActivity extends DrawerBaseActivity implements
 		TextView titleTV = (TextView) findViewById(R.id.title_centered);
 		titleTV.setText(R.string.settings);
 
-		items = new ArrayList<String>();
+		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(R.string.notifications));
 		items.add(getString(R.string.manage_account));
 		items.add(getString(R.string.system_health));
