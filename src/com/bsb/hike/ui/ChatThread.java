@@ -96,6 +96,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -2875,6 +2876,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				.findViewById(R.id.target_account);
 		final Spinner accounts = (Spinner) contactDialog
 				.findViewById(R.id.account_spinner);
+
+		int screenHeight = getResources().getDisplayMetrics().heightPixels;
+		int dialogWidth = (int) getResources().getDimension(
+				R.dimen.contact_info_width);
+		int dialogHeight = (int) (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? ((3 * screenHeight) / 4)
+				: FrameLayout.LayoutParams.MATCH_PARENT);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+				dialogWidth, dialogHeight);
+		lp.topMargin = (int) (5 * Utils.densityMultiplier);
+		lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
+
+		parent.setLayoutParams(lp);
 
 		contactDialog.setViewReferences(parent, accounts);
 

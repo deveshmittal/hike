@@ -16,4 +16,5 @@
 	<dimen name="drawer_item_height">71dp</dimen>
 	<dimen name="drawer_item_width">75dp</dimen>
 	<dimen name="timeline_pic">100dp</dimen>
+	<dimen name="contact_info_width">300dp</dimen>
 </resources>
