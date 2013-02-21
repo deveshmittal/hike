@@ -429,8 +429,7 @@ public class AccountUtils {
 		if (TextUtils.isEmpty(mToken)) {
 			throw new IllegalStateException("Token is null");
 		}
-		req.addHeader("Cookie", "user=" + mToken);
-		req.addHeader("Cookie", "UID=" + mUid);
+		req.addHeader("Cookie", "user=" + mToken + "; UID=" + mUid);
 	}
 
 	private static void assertIfTokenNull() {
