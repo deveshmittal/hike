@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
@@ -428,9 +429,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 			} else if ((infoState == ParticipantInfoState.CHANGED_GROUP_NAME)
 					|| (infoState == ParticipantInfoState.CHANGED_GROUP_IMAGE)) {
-				String participantName = ((GroupConversation) conversation)
-						.getGroupParticipant(metadata.getMsisdn())
-						.getContactInfo().getFirstName();
+				String msisdn = metadata.getMsisdn();
+				String userMsisdn = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
+				String participantName = userMsisdn.equals(msisdn) ? context
+						.getString(R.string.you)
+						: ((GroupConversation) conversation)
+								.getGroupParticipant(msisdn).getContactInfo()
+								.getFirstName();
 				String message = String
 						.format(context.getString(convMessage
 								.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name

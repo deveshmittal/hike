@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
@@ -267,9 +268,16 @@ public class ConvMessage {
 			break;
 		case CHANGED_GROUP_NAME:
 		case CHANGED_GROUP_IMAGE:
-			String participantName = ((GroupConversation) conversation)
-					.getGroupParticipant(metadata.getMsisdn()).getContactInfo()
-					.getFirstName();
+			String msisdn = metadata.getMsisdn();
+			String userMsisdn = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+
+			String participantName = userMsisdn.equals(msisdn) ? context
+					.getString(R.string.you)
+					: ((GroupConversation) conversation)
+							.getGroupParticipant(msisdn).getContactInfo()
+							.getFirstName();
 			this.mMessage = String
 					.format(context
 							.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name

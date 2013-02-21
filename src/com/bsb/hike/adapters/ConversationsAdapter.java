@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -163,9 +164,18 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					markedUp = context.getString(R.string.group_chat_end);
 				}
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME) {
-				String participantName = ((GroupConversation) conversation)
-						.getGroupParticipant(metadata.getMsisdn())
-						.getContactInfo().getFirstName();
+				String msisdn = metadata.getMsisdn();
+
+				String userMsisdn = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
+				String participantName = userMsisdn.equals(msisdn) ? context
+						.getString(R.string.you)
+						: ((GroupConversation) conversation)
+								.getGroupParticipant(msisdn).getContactInfo()
+								.getFirstName();
+
 				markedUp = String.format(
 						context.getString(R.string.change_group_name),
 						participantName);
