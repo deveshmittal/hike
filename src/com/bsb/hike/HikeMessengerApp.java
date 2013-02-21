@@ -185,6 +185,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String INTRO_DONE = "introDone";
 
+	public static final String JUST_SIGNED_UP = "justSignedUp";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;

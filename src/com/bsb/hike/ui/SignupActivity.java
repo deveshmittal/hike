@@ -264,6 +264,10 @@ public class SignupActivity extends Activity implements
 				HikeMessengerApp.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE
 						.equals(countryCode));
 
+				Editor accountEditor = accountPrefs.edit();
+				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
+				accountEditor.commit();
+
 				SharedPreferences prefs = PreferenceManager
 						.getDefaultSharedPreferences(this);
 				Editor editor = prefs.edit();
@@ -291,7 +295,6 @@ public class SignupActivity extends Activity implements
 					public void run() {
 						Intent i = new Intent(SignupActivity.this,
 								MessagesList.class);
-						i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
 						startActivity(i);
 						finish();
 					}

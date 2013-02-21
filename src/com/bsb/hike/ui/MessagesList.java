@@ -243,7 +243,12 @@ public class MessagesList extends DrawerBaseActivity implements
 				null);
 
 		Intent i = null;
-		if (!accountPrefs.getBoolean(HikeMessengerApp.NUX1_DONE, false)) {
+		boolean justSignedUp = accountPrefs.getBoolean(
+				HikeMessengerApp.JUST_SIGNED_UP, false);
+		if (justSignedUp
+				&& !accountPrefs.getBoolean(HikeMessengerApp.INTRO_DONE, false)) {
+			i = new Intent(MessagesList.this, Tutorial.class);
+		} else if (!accountPrefs.getBoolean(HikeMessengerApp.NUX1_DONE, false)) {
 			i = new Intent(MessagesList.this, HikeListActivity.class);
 			i.putExtra(HikeConstants.Extras.SHOW_MOST_CONTACTED, true);
 		} else if (!accountPrefs.getBoolean(HikeMessengerApp.NUX2_DONE, false)) {
@@ -251,10 +256,6 @@ public class MessagesList extends DrawerBaseActivity implements
 			i.putExtra(HikeConstants.Extras.SHOW_FAMILY, true);
 		}
 		if (i != null) {
-			if (getIntent().getBooleanExtra(
-					HikeConstants.Extras.FIRST_TIME_USER, false)) {
-				i.putExtra(HikeConstants.Extras.FIRST_TIME_USER, true);
-			}
 			startActivity(i);
 			finish();
 			return;
@@ -289,8 +290,12 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		mConversationsView = (ListView) findViewById(R.id.conversations);
 
-		if (getIntent().getBooleanExtra(HikeConstants.Extras.FIRST_TIME_USER,
-				false)) {
+		if (justSignedUp) {
+
+			Editor editor = accountPrefs.edit();
+			editor.remove(HikeMessengerApp.JUST_SIGNED_UP);
+			editor.commit();
+
 			if (!deviceDetailsSent) {
 				sendDeviceDetails();
 			}
