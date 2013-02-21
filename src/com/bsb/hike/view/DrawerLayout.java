@@ -138,7 +138,7 @@ public class DrawerLayout extends RelativeLayout implements
 		accountPrefs = getContext().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		handler = new Handler();
-		animationSteps = (int) (8);
+		animationSteps = Math.min((int) (8 * Utils.densityMultiplier), 10);
 		topBarButtonWidth = (int) (48 * Utils.densityMultiplier);
 		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		mRightSidebarWidth = (int) ((isPortrait ? context.getResources()
