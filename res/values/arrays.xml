@@ -673,25 +673,6 @@
 	</string-array>
 		
 	<string-array name="family_array">
-	    <item>aunt</item>
-	    <item>aunty</item>
-	    <item>auntie</item>
-	    <item>uncle</item>
-	    <item>grandma</item>
-	    <item>granny</item>
-	    <item>grandpa</item>
-	    <item>nanna</item>
-	    <item>cousin</item>
-	    <item>uncle</item>
-	    <item>mama</item>
-	    <item>mamu</item>
-	    <item>chacha</item>
-	    <item>chachu</item>
-	    <item>mom</item>
-	    <item>dad</item>
-	    <item>bhai</item>
-	    <item>bhaiya</item>
-	    <item>didi</item>
 	    <item>\'opà</item>
 	    <item>aayi</item>
 	    <item>abatyse</item>
