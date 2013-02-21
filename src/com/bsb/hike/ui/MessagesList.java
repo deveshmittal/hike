@@ -256,9 +256,15 @@ public class MessagesList extends DrawerBaseActivity implements
 			i.putExtra(HikeConstants.Extras.SHOW_FAMILY, true);
 		}
 		if (i != null) {
-			startActivity(i);
-			finish();
-			return;
+			boolean startNux = true;
+			if (!justSignedUp) {
+				startNux = HikeUserDatabase.getInstance().getHikeContactCount() < 10;
+			}
+			if (startNux) {
+				startActivity(i);
+				finish();
+				return;
+			}
 		}
 
 		// TODO this is being called everytime this activity is created. Way too

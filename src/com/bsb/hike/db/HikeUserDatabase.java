@@ -1502,4 +1502,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			}
 		}
 	}
+
+	public int getHikeContactCount() {
+		String selection = DBConstants.ONHIKE + " = 1";
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE,
+				new String[] { DBConstants.MSISDN }, selection, null, null,
+				null, null);
+		try {
+			return c.getCount();
+		} finally {
+			c.close();
+		}
+	}
 }
