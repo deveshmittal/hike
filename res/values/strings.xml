@@ -404,4 +404,6 @@
 	<string name="ask_me_later">Ask me later</string>
 	<string name="no_thanks_rate">No, thanks</string>
 	<string name="system_health">System Health</string>
+	<string name="male">Male</string>
+	<string name="female">Female</string>
 </resources>

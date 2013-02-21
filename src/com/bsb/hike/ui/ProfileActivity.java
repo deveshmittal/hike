@@ -569,11 +569,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 
-		ViewGroup myInfo = (ViewGroup) findViewById(R.id.my_info);
-		ViewGroup phone = (ViewGroup) findViewById(R.id.phone);
-		ViewGroup email = (ViewGroup) findViewById(R.id.email);
-		ViewGroup gender = (ViewGroup) findViewById(R.id.gender);
-
 		mIconView = (ImageView) findViewById(R.id.profile);
 
 		mTitleView.setText(getResources().getString(R.string.profile_title));
@@ -581,20 +576,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				mLocalMSISDN);
 		mIconView.setImageDrawable(drawable);
 
-		myInfo.setFocusable(true);
-
 		mNameEdit = (EditText) findViewById(R.id.name_current);
-		mEmailEdit = (EditText) email.findViewById(R.id.email_input);
+		mEmailEdit = (EditText) findViewById(R.id.email_input);
 
-		((TextView) phone.findViewById(R.id.phone_edit_field))
-				.setText(R.string.phone_num);
-		((TextView) email.findViewById(R.id.email_edit_field))
-				.setText(R.string.email);
-		((TextView) gender.findViewById(R.id.gender_edit_field))
-				.setText(R.string.gender);
-
-		((EditText) phone.findViewById(R.id.phone_input)).setText(mLocalMSISDN);
-		((EditText) phone.findViewById(R.id.phone_input)).setEnabled(false);
+		((EditText) findViewById(R.id.phone_input)).setText(mLocalMSISDN);
+		((EditText) findViewById(R.id.phone_input)).setEnabled(false);
 
 		// Make sure that the name text does not exceed the permitted length
 		int maxLength = getResources().getInteger(R.integer.max_length_name);
@@ -609,9 +595,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		mEmailEdit.setSelection(emailTxt.length());
 
 		onEmoticonClick(mActivityState.genderType == 0 ? null
-				: mActivityState.genderType == 1 ? gender
-						.findViewById(R.id.guy) : gender
-						.findViewById(R.id.girl));
+				: mActivityState.genderType == 1 ? findViewById(R.id.guy)
+						: findViewById(R.id.girl));
 
 		// Hide the cursor initially
 		Utils.hideCursor(mNameEdit, getResources());
