@@ -410,4 +410,7 @@
 	<string name="ready_to_hike">Ready to hike</string>
 	<string name="happy_messaging">Happy Messaging</string>
 	<string name="intro_info">Messaging hike friends is free &amp; unlimited.</string>
+	<string name="hike_msg">Hike Message...</string>
+	<string name="sms_msg">Text Message...</string>
+	<string name="group_msg">Group Message...</string>
 </resources>

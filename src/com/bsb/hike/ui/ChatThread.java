@@ -1269,7 +1269,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mSendBtn.setTextColor(getResources().getColorStateList(
 					R.color.send_hike));
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
-			mComposeView.setHint("Free Message...");
+			mComposeView
+					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
+							: R.string.hike_msg);
 			findViewById(R.id.title_image_btn2).setEnabled(true);
 		} else {
 			updateChatMetadata();
@@ -1278,7 +1280,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mSendBtn.setTextColor(getResources().getColorStateList(
 					R.color.send_sms));
 			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn);
-			mComposeView.setHint("SMS Message...");
+			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
 
