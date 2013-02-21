@@ -293,14 +293,15 @@ public class ContactUtils {
 					new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED },
 					null, null, sortBy);
 
-			int numberColIdx = c.getColumnIndex(Phone.NUMBER);
-			int lastTimeContactedIdx = c
-					.getColumnIndex(Phone.LAST_TIME_CONTACTED);
-
 			Map<String, Long> recentlyContactedNumbers = new HashMap<String, Long>();
+
 			StringBuilder sb = null;
 
-			if (c.getCount() > 0) {
+			if (c != null && c.getCount() > 0) {
+				int numberColIdx = c.getColumnIndex(Phone.NUMBER);
+				int lastTimeContactedIdx = c
+						.getColumnIndex(Phone.LAST_TIME_CONTACTED);
+
 				sb = new StringBuilder("(");
 				while (c.moveToNext()) {
 					String number = c.getString(numberColIdx);
