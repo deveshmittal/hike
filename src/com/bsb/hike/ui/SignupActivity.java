@@ -64,6 +64,7 @@ import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
+import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
@@ -747,7 +748,7 @@ public class SignupActivity extends Activity implements
 		 * Making sure the countdown timer doesn't keep running when the state
 		 * values changes.
 		 */
-		if (countDownTimer != null) {
+		if (countDownTimer != null && stateValue.state != State.PIN) {
 			countDownTimer.cancel();
 		}
 		String value = stateValue.value;
@@ -787,10 +788,10 @@ public class SignupActivity extends Activity implements
 			break;
 		case PIN:
 			viewFlipper.setDisplayedChild(PIN);
-			prepareLayoutForGettingPin(HikeConstants.CALL_ME_WAIT_TIME);
 
 			// Wrong Pin
 			if (value != null && value.equals(HikeConstants.PIN_ERROR)) {
+				prepareLayoutForGettingPin(mActivityState.timeLeft);
 				infoTxt.setText(R.string.wrong_pin_signup);
 				loadingLayout.setVisibility(View.GONE);
 				callmeBtn.setVisibility(View.VISIBLE);
@@ -802,6 +803,7 @@ public class SignupActivity extends Activity implements
 			}
 			// Manual entry for pin
 			else {
+				prepareLayoutForGettingPin(HikeConstants.CALL_ME_WAIT_TIME);
 				setAnimation();
 			}
 			break;
