@@ -181,7 +181,7 @@ public class HikeNotification {
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
 		notification.defaults |= 0 | vibrate;
-		if (playNativeJingle) {
+		if (playNativeJingle && playSound != 0) {
 			notification.sound = Uri.parse("android.resource://"
 					+ context.getPackageName() + "/" + R.raw.v1);
 		} else if (playSound != 0) {
