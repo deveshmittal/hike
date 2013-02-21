@@ -960,7 +960,7 @@ public class SignupActivity extends Activity implements
 								SignupActivity.this,
 								null,
 								getResources().getString(
-										R.string.downloading_image));
+										R.string.fetching_info));
 					}
 				}
 			});
