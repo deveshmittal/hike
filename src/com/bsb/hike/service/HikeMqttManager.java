@@ -724,6 +724,8 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
 					: reconnectTime;
 
+			Log.d(getClass().getSimpleName(), "Reconnect time (sec): "
+					+ reconnectTime);
 			this.mHikeService.scheduleNextPing(reconnectTime);
 		} catch (Exception e) {
 			Log.e(getClass().getSimpleName(), "Exception", e);
