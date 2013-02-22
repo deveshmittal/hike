@@ -1183,7 +1183,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				DBConstants.HAS_CUSTOM_PHOTO };
 
 		String selection = DBConstants.PHONE + " IN " + selectionNumbers
-				+ " AND " + DBConstants.ONHIKE + "=0 LIMIT " + limit;
+				+ " AND " + DBConstants.MSISDN + "!='null' AND "
+				+ DBConstants.ONHIKE + "=0 LIMIT " + limit;
 
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
 
