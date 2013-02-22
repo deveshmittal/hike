@@ -86,6 +86,7 @@ import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.DrawerLayout;
+import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class MessagesList extends DrawerBaseActivity implements
 		OnClickListener, OnItemClickListener, HikePubSub.Listener,
@@ -125,6 +126,8 @@ public class MessagesList extends DrawerBaseActivity implements
 	private boolean deviceDetailsSent = false;
 
 	private boolean introMessageAdded = false;
+
+	private boolean nuxNumbersInvited = false;
 
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ,
@@ -289,6 +292,9 @@ public class MessagesList extends DrawerBaseActivity implements
 		introMessageAdded = savedInstanceState != null
 				&& savedInstanceState
 						.getBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED);
+		nuxNumbersInvited = savedInstanceState != null
+				&& savedInstanceState
+						.getBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED);
 
 		int updateTypeAvailable = accountPrefs.getInt(
 				HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
@@ -314,6 +320,11 @@ public class MessagesList extends DrawerBaseActivity implements
 					}
 				}, 500);
 				introMessageAdded = true;
+			}
+		}
+		if (!nuxNumbersInvited) {
+			if (accountPrefs.contains(HikeMessengerApp.INVITED_NUMBERS)) {
+				inviteNuxNumbers();
 			}
 		}
 
@@ -546,6 +557,33 @@ public class MessagesList extends DrawerBaseActivity implements
 		deviceDetailsSent = true;
 	}
 
+	private void inviteNuxNumbers() {
+		(new Handler()).postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				String invitedNumbers = accountPrefs.getString(
+						HikeMessengerApp.INVITED_NUMBERS, "");
+				if (TextUtils.isEmpty(invitedNumbers)) {
+					return;
+				}
+				String[] invitedNumbersArray = invitedNumbers.split(",");
+				for (String msisdn : invitedNumbersArray) {
+					FiksuTrackingManager.uploadPurchaseEvent(MessagesList.this,
+							HikeConstants.INVITE, HikeConstants.INVITE_SENT,
+							HikeConstants.CURRENCY);
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.MQTT_PUBLISH,
+							Utils.makeHike2SMSInviteMessage(msisdn,
+									MessagesList.this).serialize());
+				}
+				Editor editor = accountPrefs.edit();
+				editor.remove(HikeMessengerApp.INVITED_NUMBERS);
+				editor.commit();
+			}
+		}, 5 * 1000);
+		nuxNumbersInvited = true;
+	}
+
 	private void createNewConversationsForFirstTimeUser() {
 		AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 		int ringerMode = audioManager.getRingerMode();
@@ -629,6 +667,8 @@ public class MessagesList extends DrawerBaseActivity implements
 				wasAlertCancelled);
 		outState.putBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED,
 				introMessageAdded);
+		outState.putBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED,
+				nuxNumbersInvited);
 		super.onSaveInstanceState(outState);
 	}
 

@@ -169,24 +169,44 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 			if (type == Type.NUX1) {
 				selectedNumbers = new StringBuilder("(");
 			}
+			/*
+			 * For nux1 and 2, we won't be able to send the message immediately
+			 * since we're not connected to the server at that time. So we save
+			 * these numbers as a preference and send them once we're connected.
+			 */
+			StringBuilder invitedNumbers = null;
+			if (type == Type.NUX1 || type == Type.NUX2) {
+				invitedNumbers = new StringBuilder(getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
+						.getString(HikeMessengerApp.INVITED_NUMBERS, ""));
+			}
 			while (iterator.hasNext()) {
 				String msisdn = iterator.next();
 				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-				FiksuTrackingManager.uploadPurchaseEvent(this,
-						HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-						HikeConstants.CURRENCY);
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH,
-						Utils.makeHike2SMSInviteMessage(msisdn, this)
-								.serialize());
-				selectedNumbers.append(DatabaseUtils.sqlEscapeString(msisdn)
-						+ ", ");
+
+				if (type != Type.NUX1 && type != Type.NUX2) {
+					FiksuTrackingManager.uploadPurchaseEvent(this,
+							HikeConstants.INVITE, HikeConstants.INVITE_SENT,
+							HikeConstants.CURRENCY);
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.MQTT_PUBLISH,
+							Utils.makeHike2SMSInviteMessage(msisdn, this)
+									.serialize());
+				} else {
+					if (type == Type.NUX1) {
+						selectedNumbers.append(DatabaseUtils
+								.sqlEscapeString(msisdn) + ", ");
+					}
+					invitedNumbers.append(msisdn + ",");
+				}
 			}
-			if (selectedNumbers.lastIndexOf(", ") != -1) {
-				selectedNumbers.replace(selectedNumbers.lastIndexOf(", "),
-						selectedNumbers.length(), ")");
-			} else {
-				selectedNumbers = null;
+			if (type == Type.NUX1) {
+				if (selectedNumbers.lastIndexOf(", ") != -1) {
+					selectedNumbers.replace(selectedNumbers.lastIndexOf(", "),
+							selectedNumbers.length(), ")");
+				} else {
+					selectedNumbers = null;
+				}
 			}
 
 			if (!selectedContacts.isEmpty() || type == Type.NUX1
@@ -203,18 +223,24 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
 							.edit();
 					editor.putBoolean(HikeMessengerApp.NUX1_DONE, true);
+					editor.putString(HikeMessengerApp.INVITED_NUMBERS,
+							invitedNumbers.toString());
 					editor.commit();
 
 					Intent i = new Intent(this, HikeListActivity.class);
 					i.putExtra(HikeConstants.Extras.SHOW_FAMILY, true);
+					if (selectedNumbers != null) {
+						i.putExtra(HikeConstants.Extras.NUX1_NUMBERS,
+								selectedNumbers.toString());
+					}
 					startActivity(i);
 				} else if (type == Type.NUX2) {
 					Editor editor = getSharedPreferences(
 							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
 							.edit();
 					editor.putBoolean(HikeMessengerApp.NUX2_DONE, true);
-					editor.putString(HikeConstants.Extras.NUX1_NUMBERS,
-							selectedNumbers.toString());
+					editor.putString(HikeMessengerApp.INVITED_NUMBERS,
+							invitedNumbers.toString());
 					editor.commit();
 
 					Intent i = new Intent(this, MessagesList.class);
