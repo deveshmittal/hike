@@ -406,12 +406,8 @@ public class DrawerBaseActivity extends Activity implements
 							HikeConstants.BOTH_VALUE, myMsisdn);
 			final List<ContactInfo> recommendedFavoriteList = hikeUserDatabase
 					.getContactsOfFavoriteType(
-							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE, myMsisdn);
-			recommendedFavoriteList.addAll(hikeUserDatabase
-					.getContactsOfFavoriteType(
 							FavoriteType.RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE, myMsisdn));
+							HikeConstants.BOTH_VALUE, myMsisdn);
 			runOnUiThread(new Runnable() {
 
 				@Override
