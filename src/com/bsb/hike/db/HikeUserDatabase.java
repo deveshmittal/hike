@@ -1204,16 +1204,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			List<Pair<AtomicBoolean, ContactInfo>> contactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
 
-			Set<String> nameSet = new HashSet<String>();
+			Set<String> msisdnSet = new HashSet<String>();
 
 			while (c.moveToNext()) {
-				String name = c.getString(nameIdx);
+				String msisdn = c.getString(msisdnIdx);
 
-				if (nameSet.contains(name)) {
+				if (msisdnSet.contains(msisdn)) {
 					continue;
 				}
 
-				nameSet.add(name);
+				msisdnSet.add(msisdn);
 
 				/*
 				 * All our timestamps are in seconds.
@@ -1221,7 +1221,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				long lastMessagedCurrent = c.getLong(lastMessagedIdx);
 
 				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
-						c.getString(msisdnIdx), name, c.getString(phoneNumIdx),
+						msisdn, c.getString(nameIdx), c.getString(phoneNumIdx),
 						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
 						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
 				contactList.add(new Pair<AtomicBoolean, ContactInfo>(
@@ -1452,21 +1452,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			List<Pair<AtomicBoolean, ContactInfo>> contactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
 
-			Set<String> nameSet = new HashSet<String>();
+			Set<String> msisdnSet = new HashSet<String>();
 
 			while (c.moveToNext()) {
-				String name = c.getString(nameIdx);
+				String msisdn = c.getString(msisdnIdx);
 
-				if (nameSet.contains(name)) {
+				if (msisdnSet.contains(msisdn)) {
 					continue;
 				}
 
-				nameSet.add(name);
+				msisdnSet.add(msisdn);
 
 				long lastMessagedCurrent = c.getLong(lastMessagedIdx);
 
 				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
-						c.getString(msisdnIdx), name, c.getString(phoneNumIdx),
+						msisdn, c.getString(nameIdx), c.getString(phoneNumIdx),
 						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
 						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
 				contactList.add(new Pair<AtomicBoolean, ContactInfo>(
