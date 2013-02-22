@@ -29,7 +29,7 @@
         android:widgetLayout="@layout/checkbox_widget" />
 
 	<com.bsb.hike.view.IconCheckBoxPreference
-        icon="preference_sound"
+        icon="ic_hike_jingle"
         android:defaultValue="true"
         android:key="jinglePref"
         android:layout="@layout/icon_preference"
