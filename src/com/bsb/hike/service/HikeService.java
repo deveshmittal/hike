@@ -721,6 +721,15 @@ public class HikeService extends Service {
 			final String regId = GCMRegistrar
 					.getRegistrationId(HikeService.this);
 			if ("".equals(regId)) {
+				/*
+				 * Since we are registering again, we should clear this
+				 * preference
+				 */
+				Editor editor = getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+				editor.remove(HikeMessengerApp.GCM_ID_SENT);
+				editor.commit();
+
 				GCMRegistrar.register(HikeService.this,
 						HikeConstants.APP_PUSH_ID);
 			} else {
