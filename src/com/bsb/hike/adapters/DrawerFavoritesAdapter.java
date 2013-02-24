@@ -319,6 +319,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	public void freeSMSToggled(boolean freeSMS) {
 		this.freeSMSOn = freeSMS;
+		if (recentSection == null) {
+			return;
+		}
 		recentSection
 				.setName((freeSMSOn && HikeMessengerApp.isIndianUser()) ? context
 						.getString(R.string.recent) : context
