@@ -121,8 +121,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 			destinationFile.delete();
 		}
 
-		context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri
-				.fromFile(destinationFile)));
+		context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+				Uri.fromFile(destinationFile)));
 
 		ChatThread.fileTransferTaskMap.remove(msgId);
 		HikeMessengerApp.getPubSub().publish(
