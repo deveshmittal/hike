@@ -596,7 +596,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						+ DBConstants.MSISDN + " FROM "
 						+ DBConstants.FAVORITES_TABLE + ") AND "
 						+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN
-						+ " != 'null'");
+						+ " != 'null' AND " + DBConstants.USERS_TABLE + "."
+						+ DBConstants.MSISDN + " != "
+						+ DatabaseUtils.sqlEscapeString(myMsisdn));
 			} else {
 				queryBuilder.append(", " + DBConstants.FAVORITES_TABLE + "."
 						+ DBConstants.MSISDN + " AS "
@@ -607,12 +609,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						+ DBConstants.MSISDN + " = " + DBConstants.USERS_TABLE
 						+ "." + DBConstants.MSISDN + " WHERE "
 						+ DBConstants.FAVORITE_TYPE + " = "
-						+ favoriteType.ordinal());
+						+ favoriteType.ordinal() + " AND "
+						+ favoriteMsisdnColumnName + " != "
+						+ DatabaseUtils.sqlEscapeString(myMsisdn));
 			}
 		}
-		queryBuilder.append(" AND " + DBConstants.USERS_TABLE + "."
-				+ DBConstants.MSISDN + " != "
-				+ DatabaseUtils.sqlEscapeString(myMsisdn));
 		if (onHike != -1) {
 			queryBuilder.append(" AND " + DBConstants.ONHIKE + " = " + onHike);
 		}
