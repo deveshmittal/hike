@@ -45,6 +45,11 @@ public class WelcomeActivity extends Activity implements
 		super.onCreate(savedState);
 		setContentView(R.layout.welcomescreen);
 
+		Utils.setupServerURL(
+				getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+						MODE_PRIVATE).getBoolean(HikeMessengerApp.PRODUCTION,
+						true), Utils.switchSSLOn(getApplicationContext()));
+
 		mAcceptButton = (Button) findViewById(R.id.btn_continue);
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
