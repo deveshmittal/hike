@@ -741,7 +741,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 		}
 	}
 
-	private void setBrokerHostPort(boolean ssl) {
+	private synchronized void setBrokerHostPort(boolean ssl) {
 		Log.d("SSL", "Switching broker port/host. SSL? " + ssl);
 		String brokerHost = settings
 				.getString(HikeMessengerApp.BROKER_HOST, "");
