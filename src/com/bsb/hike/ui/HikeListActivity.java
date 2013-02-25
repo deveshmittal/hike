@@ -301,6 +301,7 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
 			Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT)
 					.show();
+			finish();
 		}
 	}
 
