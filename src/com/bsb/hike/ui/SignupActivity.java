@@ -591,26 +591,32 @@ public class SignupActivity extends Activity implements
 
 		tapHereText.setText(ssb);
 
-		countDownTimer = new CountDownTimer(timeLeft, 1000) {
+		if (timeLeft > 0) {
+			countDownTimer = new CountDownTimer(timeLeft, 1000) {
 
-			@Override
-			public void onTick(long millisUntilFinished) {
-				long secondsUntilFinished = millisUntilFinished / 1000;
-				int minutes = (int) (secondsUntilFinished / 60);
-				int seconds = (int) (secondsUntilFinished % 60);
-				String text = String.format("%1$02d:%2$02d", minutes, seconds);
-				callmeBtn.setText(text);
-				mActivityState.timeLeft = millisUntilFinished;
-				callmeBtn.setEnabled(false);
-			}
+				@Override
+				public void onTick(long millisUntilFinished) {
+					long secondsUntilFinished = millisUntilFinished / 1000;
+					int minutes = (int) (secondsUntilFinished / 60);
+					int seconds = (int) (secondsUntilFinished % 60);
+					String text = String.format("%1$02d:%2$02d", minutes,
+							seconds);
+					callmeBtn.setText(text);
+					mActivityState.timeLeft = millisUntilFinished;
+					callmeBtn.setEnabled(false);
+				}
 
-			@Override
-			public void onFinish() {
-				callmeBtn.setText(R.string.call_me_signup);
-				callmeBtn.setEnabled(true);
-			}
-		};
-		countDownTimer.start();
+				@Override
+				public void onFinish() {
+					callmeBtn.setText(R.string.call_me_signup);
+					callmeBtn.setEnabled(true);
+				}
+			};
+			countDownTimer.start();
+		} else {
+			callmeBtn.setText(R.string.call_me_signup);
+			callmeBtn.setEnabled(true);
+		}
 	}
 
 	private void prepareLayoutForGettingName(Bundle savedInstanceState) {
