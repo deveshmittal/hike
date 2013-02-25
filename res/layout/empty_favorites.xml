@@ -20,7 +20,7 @@
         android:layout_marginTop="5dp"
         android:shadowRadius="0.5"
         android:gravity="center"
-        android:text="@string/no_friends"
+        android:text="@string/no_favorite"
         android:textColor="#b7b1a7"
         android:textSize="13sp" />
 
