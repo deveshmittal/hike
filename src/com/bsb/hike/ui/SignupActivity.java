@@ -315,6 +315,9 @@ public class SignupActivity extends Activity implements
 		} else if (v.getId() == tryAgainBtn.getId()) {
 			restartTask();
 		} else if (tapHereText != null && v.getId() == tapHereText.getId()) {
+			if (countDownTimer != null) {
+				countDownTimer.cancel();
+			}
 			mTask.addUserInput("");
 		} else if (callmeBtn != null && v.getId() == callmeBtn.getId()) {
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/pin-call",
