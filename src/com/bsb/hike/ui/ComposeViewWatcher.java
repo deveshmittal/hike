@@ -128,6 +128,7 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener {
 	}
 
 	private String mod;
+	private int startIndex;
 
 	@Override
 	public void afterTextChanged(Editable editable) {
@@ -138,7 +139,8 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener {
 		if (!TextUtils.isEmpty(mod)
 				&& SmileyParser.getInstance().containsEmoticon(mod)) {
 			// For adding smileys as the user is typing.
-			SmileyParser.getInstance().addSmileyToEditable(editable, false);
+			SmileyParser.getInstance().addSmileyToEditable(editable, false,
+					startIndex, mod.length());
 		}
 	}
 
@@ -153,6 +155,7 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener {
 		int startOffset = Math.min(initial.length(),
 				SmileyParser.MAX_EMOTICON_TEXT_LENGTH);
 		mod = s.subSequence(start - startOffset, start + count).toString();
+		startIndex = start - startOffset;
 	}
 
 	@Override

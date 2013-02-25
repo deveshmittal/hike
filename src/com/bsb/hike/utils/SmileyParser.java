@@ -194,9 +194,18 @@ public class SmileyParser {
 	 *            afterTextChanged method of the TextWatcher.
 	 */
 	public void addSmileyToEditable(Editable editable, boolean showSmallIcon) {
+		addSmileyToEditable(editable, showSmallIcon, 0, editable.length());
+	}
+
+	public void addSmileyToEditable(Editable editable, boolean showSmallIcon,
+			int startIndex, int length) {
 		Matcher matcher = mPattern.matcher(editable);
 		int count = 0;
 		while (matcher.find() && (count < MAX_EMOTICONS)) {
+			if (matcher.start() < startIndex
+					|| matcher.start() >= startIndex + length) {
+				continue;
+			}
 			count++;
 			int resId = mSmileyToRes.get(matcher.group());
 			Drawable smiley = mContext.getResources().getDrawable(resId);
