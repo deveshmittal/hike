@@ -21,6 +21,7 @@ public class GroupConversation extends Conversation {
 	private String groupOwner;
 	private boolean isGroupAlive;
 	private boolean isMuted;
+	private boolean hasSmsUser;
 	private Map<String, GroupParticipant> groupParticipantList;
 
 	public GroupConversation(String msisdn, long convId, String contactName,
@@ -93,6 +94,14 @@ public class GroupConversation extends Conversation {
 
 	public boolean isMuted() {
 		return isMuted;
+	}
+
+	public void setHasSmsUser(boolean hasSmsUser) {
+		this.hasSmsUser = hasSmsUser;
+	}
+
+	public boolean hasSmsUser() {
+		return hasSmsUser;
 	}
 
 	public JSONObject serialize(String type) {

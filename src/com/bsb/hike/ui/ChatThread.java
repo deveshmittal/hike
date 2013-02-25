@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1066,6 +1067,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			convMessage.setConversation(mConversation);
 
 			sendMessage(convMessage);
+		} else if (mConversation instanceof GroupConversation) {
+			startActivity(new Intent(ChatThread.this, HikeListActivity.class));
 		} else {
 			Toast toast = Toast.makeText(this, R.string.already_hike_user,
 					Toast.LENGTH_LONG);
@@ -1132,6 +1135,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 			mConversation = mConversationDb.addConversation(mContactNumber,
 					false, "", null);
+		}
+
+		/*
+		 * Setting a flag which tells us whether the group contains sms users or
+		 * not.
+		 */
+		if (mConversation instanceof GroupConversation) {
+			boolean hasSmsUser = false;
+			for (Entry<String, GroupParticipant> entry : ((GroupConversation) mConversation)
+					.getGroupParticipantList().entrySet()) {
+				GroupParticipant groupParticipant = entry.getValue();
+				if (!groupParticipant.getContactInfo().isOnhike()) {
+					hasSmsUser = true;
+					break;
+				}
+			}
+			((GroupConversation) mConversation).setHasSmsUser(hasSmsUser);
 		}
 
 		mLabel = mConversation.getLabel();
@@ -1273,6 +1293,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
 							: R.string.hike_msg);
 			findViewById(R.id.title_image_btn2).setEnabled(true);
+			if ((mConversation instanceof GroupConversation)
+					&& ((GroupConversation) mConversation).hasSmsUser()
+					&& mCredits == 0) {
+				if (mCredits == 0) {
+					zeroCredits();
+				} else {
+					nonZeroCredits();
+				}
+			}
 		} else {
 			updateChatMetadata();
 			((ImageButton) findViewById(R.id.emo_btn))
@@ -1446,7 +1475,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					updateChatMetadata();
+					updateUIForHikeStatus();
 					if (!animatedOnce) {
 						animatedOnce = prefs.getBoolean(
 								HikeConstants.Extras.ANIMATED_ONCE, false);
@@ -1690,35 +1719,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void updateChatMetadata() {
 		mMetadataNumChars.setVisibility(View.VISIBLE);
 		if (mCredits <= 0) {
-			mSendBtn.setEnabled(false);
-
-			if (!TextUtils.isEmpty(mComposeView.getText())) {
-				mComposeView.setText("");
-			}
-			mComposeView.setHint("0 Free SMS left...");
-			mComposeView.setEnabled(false);
-			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
-			findViewById(R.id.title_image_btn2).setEnabled(false);
-
-			boolean show = mConversationDb.wasOverlayDismissed(mConversation
-					.getMsisdn());
-			if (!show) {
-				showOverlay(false);
-			}
+			zeroCredits();
 		} else {
-			if (!mComposeView.isEnabled()) {
-				if (!TextUtils.isEmpty(mComposeView.getText())) {
-					mComposeView.setText("");
-				}
-				mComposeView.setHint(R.string.type_to_compose);
-				mComposeView.setEnabled(true);
-			}
-			findViewById(R.id.title_image_btn2).setEnabled(true);
-			findViewById(R.id.info_layout).setVisibility(View.GONE);
-
-			if (!blockOverlay) {
-				hideOverlay();
-			}
+			nonZeroCredits();
 
 			if (mComposeView.getLineCount() > 2) {
 				mMetadataNumChars.setVisibility(View.VISIBLE);
@@ -1739,6 +1742,40 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			} else {
 				mMetadataNumChars.setVisibility(View.INVISIBLE);
 			}
+		}
+	}
+
+	private void zeroCredits() {
+		mSendBtn.setEnabled(false);
+
+		if (!TextUtils.isEmpty(mComposeView.getText())) {
+			mComposeView.setText("");
+		}
+		mComposeView.setHint("0 Free SMS left...");
+		mComposeView.setEnabled(false);
+		findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+		findViewById(R.id.title_image_btn2).setEnabled(false);
+
+		boolean show = mConversationDb.wasOverlayDismissed(mConversation
+				.getMsisdn());
+		if (!show) {
+			showOverlay(false);
+		}
+	}
+
+	private void nonZeroCredits() {
+		if (!mComposeView.isEnabled()) {
+			if (!TextUtils.isEmpty(mComposeView.getText())) {
+				mComposeView.setText("");
+			}
+			mComposeView.setHint(R.string.type_to_compose);
+			mComposeView.setEnabled(true);
+		}
+		findViewById(R.id.title_image_btn2).setEnabled(true);
+		findViewById(R.id.info_layout).setVisibility(View.GONE);
+
+		if (!blockOverlay) {
+			hideOverlay();
 		}
 	}
 
@@ -1909,9 +1946,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			overlayBtn.setText(R.string.unblock_title);
 		} else {
 			mConversationDb.setOverlay(false, mConversation.getMsisdn());
-			formatString = getResources().getString(R.string.no_credits);
+			formatString = getResources()
+					.getString(
+							mConversation instanceof GroupConversation ? R.string.no_credits_gc
+									: R.string.no_credits);
 			overlayImg.setImageResource(R.drawable.ic_no_credits);
-			overlayBtn.setText(R.string.invite_now);
+			overlayBtn
+					.setText(mConversation instanceof GroupConversation ? R.string.invite_friends
+							: R.string.invite_now);
 			mOverlayLayout.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -1925,9 +1967,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		/* bold the blocked users name */
 		String formatted = String.format(formatString, label);
 		SpannableString str = new SpannableString(formatted);
-		int start = formatString.indexOf("%1$s");
-		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start, start
-				+ label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (!(mConversation instanceof GroupConversation) || blockOverlay) {
+			int start = formatString.indexOf("%1$s");
+			str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
+					start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 		message.setText(str);
 	}
 
