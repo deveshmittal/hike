@@ -13,10 +13,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -1331,10 +1333,28 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onCallClicked(View v) {
-		Utils.logEvent(this, HikeConstants.LogEvent.MENU_CALL);
-		Intent callIntent = new Intent(Intent.ACTION_CALL);
-		callIntent.setData(Uri.parse("tel:" + mLocalMSISDN));
-		startActivity(callIntent);
+		Builder builder = new Builder(this);
+		builder.setTitle(R.string.call_not_free_head);
+		builder.setMessage(R.string.call_not_free_body);
+		builder.setPositiveButton(R.string.call, new OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				Utils.logEvent(ProfileActivity.this,
+						HikeConstants.LogEvent.MENU_CALL);
+				Intent callIntent = new Intent(Intent.ACTION_CALL);
+				callIntent.setData(Uri.parse("tel:" + mLocalMSISDN));
+				startActivity(callIntent);
+			}
+		});
+		builder.setNegativeButton(R.string.cancel, new OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		builder.show();
 	}
 
 	public void onBlockUserClicked(View v) {

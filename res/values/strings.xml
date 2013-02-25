@@ -414,4 +414,6 @@
 	<string name="sms_msg">Text Message...</string>
 	<string name="group_msg">Group Message...</string>
 	<string name="fetching_info">Fetching info...</string>
+	<string name="call_not_free_head">Operator Rates Apply</string>
+	<string name="call_not_free_body">Your telecom operator may charge you for this call.</string>
 </resources>
