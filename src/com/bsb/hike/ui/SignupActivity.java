@@ -613,6 +613,7 @@ public class SignupActivity extends Activity implements
 				public void onFinish() {
 					callmeBtn.setText(R.string.call_me_signup);
 					callmeBtn.setEnabled(true);
+					mActivityState.timeLeft = 0;
 				}
 			};
 			countDownTimer.start();
