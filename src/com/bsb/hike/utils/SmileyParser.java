@@ -203,7 +203,7 @@ public class SmileyParser {
 		int count = 0;
 		while (matcher.find() && (count < MAX_EMOTICONS)) {
 			if (matcher.start() < startIndex
-					|| matcher.start() >= startIndex + length) {
+					|| matcher.end() > startIndex + length) {
 				continue;
 			}
 			count++;
