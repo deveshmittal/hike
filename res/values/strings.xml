@@ -416,5 +416,5 @@
 	<string name="fetching_info">Fetching info...</string>
 	<string name="call_not_free_head">Operator Rates Apply</string>
 	<string name="call_not_free_body">Your telecom operator may charge you for this call.</string>
-	<string name="no_credits_gc">You\'ve run out of free SMS.  Invite friends to get more.</string>
+	<string name="no_credits_gc">You\'ve run out of free SMS.  SMS users will no longer receive your messages.</string>
 </resources>

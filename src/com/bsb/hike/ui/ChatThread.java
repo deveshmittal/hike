@@ -815,6 +815,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mOverlayLayout.setAnimation(fadeOut);
 		}
 		mOverlayLayout.setVisibility(View.INVISIBLE);
+		if (mConversation instanceof GroupConversation) {
+			mComposeView.setEnabled(true);
+		}
 		isOverlayShowing = false;
 	}
 
@@ -1294,8 +1297,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							: R.string.hike_msg);
 			findViewById(R.id.title_image_btn2).setEnabled(true);
 			if ((mConversation instanceof GroupConversation)
-					&& ((GroupConversation) mConversation).hasSmsUser()
-					&& mCredits == 0) {
+					&& ((GroupConversation) mConversation).hasSmsUser()) {
 				if (mCredits == 0) {
 					zeroCredits();
 				} else {
@@ -1746,15 +1748,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void zeroCredits() {
+		Log.d(getClass().getSimpleName(), "Zero credits");
 		mSendBtn.setEnabled(false);
 
 		if (!TextUtils.isEmpty(mComposeView.getText())) {
 			mComposeView.setText("");
 		}
-		mComposeView.setHint("0 Free SMS left...");
-		mComposeView.setEnabled(false);
-		findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
-		findViewById(R.id.title_image_btn2).setEnabled(false);
+		if (!(mConversation instanceof GroupConversation)) {
+			mComposeView.setHint("0 Free SMS left...");
+			mComposeView.setEnabled(false);
+			findViewById(R.id.title_image_btn2).setEnabled(false);
+			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+		} else {
+			findViewById(R.id.group_info_layout).setVisibility(View.VISIBLE);
+		}
 
 		boolean show = mConversationDb.wasOverlayDismissed(mConversation
 				.getMsisdn());
@@ -1764,15 +1771,24 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void nonZeroCredits() {
+		Log.d(getClass().getSimpleName(), "Non Zero credits");
 		if (!mComposeView.isEnabled()) {
 			if (!TextUtils.isEmpty(mComposeView.getText())) {
 				mComposeView.setText("");
 			}
-			mComposeView.setHint(R.string.type_to_compose);
+			if (mConversation instanceof GroupConversation) {
+				mComposeView.setHint(R.string.group_msg);
+			} else if (mConversation.isOnhike()) {
+				mComposeView.setHint(R.string.hike_msg);
+			} else {
+				mComposeView.setHint(R.string.sms_msg);
+			}
 			mComposeView.setEnabled(true);
 		}
 		findViewById(R.id.title_image_btn2).setEnabled(true);
-		findViewById(R.id.info_layout).setVisibility(View.GONE);
+		findViewById(
+				(mConversation instanceof GroupConversation) ? R.id.group_info_layout
+						: R.id.info_layout).setVisibility(View.GONE);
 
 		if (!blockOverlay) {
 			hideOverlay();
@@ -1952,7 +1968,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 									: R.string.no_credits);
 			overlayImg.setImageResource(R.drawable.ic_no_credits);
 			overlayBtn
-					.setText(mConversation instanceof GroupConversation ? R.string.invite_friends
+					.setText(mConversation instanceof GroupConversation ? R.string.invite_to_hike
 							: R.string.invite_now);
 			mOverlayLayout.setOnClickListener(new OnClickListener() {
 
@@ -2010,7 +2026,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				overridePendingTransition(R.anim.slide_in_right_noalpha,
 						R.anim.slide_out_left_noalpha);
 			}
-		} else if (v.getId() == R.id.info_layout) {
+		} else if (v.getId() == R.id.info_layout
+				|| v.getId() == R.id.group_info_layout) {
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.I_BUTTON);
 			showOverlay(false);
 		} else if (v.getId() == R.id.title_icon) {
