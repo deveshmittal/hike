@@ -643,6 +643,52 @@ public class MqttMessagesManager {
 				context.sendBroadcast(new Intent(
 						HikeService.SEND_TO_SERVER_ACTION));
 			}
+		} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type)) {
+			StatusMessage statusMessage = new StatusMessage(jsonObj);
+			/*
+			 * This would be true for unsupported status message types. We
+			 * should not be doing anything if we get one.
+			 */
+			if (statusMessage.getStatusMessageType() == null) {
+				return;
+			}
+			long id = convDb.addStatusMessage(statusMessage);
+
+			if (id == -1) {
+				Log.d(getClass().getSimpleName(),
+						"This status message was already added");
+				return;
+			}
+
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+				String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA)
+						.getString(HikeConstants.THUMBNAIL);
+				this.userDb.setIcon(statusMessage.getMappedId(),
+						Base64.decode(iconBase64, Base64.DEFAULT), false);
+				/*
+				 * Removing the thumbnail string from the JSON, since we've
+				 * already saved it.
+				 */
+				jsonObj.getJSONObject(HikeConstants.DATA).remove(
+						HikeConstants.THUMBNAIL);
+			}
+
+			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
+
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			saveStatusMsg(jsonObj, msisdn);
+		} else if (HikeConstants.MqttMessageTypes.REMOVE_FAVORITE.equals(type)) {
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
+					false);
+			if (contactInfo == null) {
+				return;
+			}
+			FavoriteType favoriteType = FavoriteType.NOT_FAVORITE;
+			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
+					contactInfo, favoriteType);
+			this.pubSub
+					.publish(HikePubSub.REMOVED_FROM_FRIENDS, favoriteToggle);
 		}
 	}
 
