@@ -27,9 +27,8 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.MessagesList;
-import com.bsb.hike.view.DrawerLayout.CurrentState;
 
 public class ToastListener implements Listener {
 
@@ -135,10 +134,8 @@ public class ToastListener implements Listener {
 			}
 			Activity activity = (currentActivity != null) ? currentActivity
 					.get() : null;
-			if (activity instanceof MessagesList) {
-				if (((MessagesList) activity).parentLayout.getCurrentState() == CurrentState.RIGHT) {
-					return;
-				}
+			if (activity instanceof CentralTimeline) {
+				return;
 			}
 			toaster.notifyFavorite(contactInfo);
 		}
