@@ -187,7 +187,7 @@ public class DbConversationListener implements Listener {
 				mPubSub.publish(
 						HikePubSub.MQTT_PUBLISH,
 						serializeMsg(
-								(favoriteType == FavoriteType.FAVORITE) ? HikeConstants.MqttMessageTypes.ADD_FAVORITE
+								(favoriteType == FavoriteType.FAVORITE || favoriteType == FavoriteType.PENDING) ? HikeConstants.MqttMessageTypes.ADD_FAVORITE
 										: HikeConstants.MqttMessageTypes.REMOVE_FAVORITE,
 								contactInfo.getMsisdn()));
 			}

@@ -326,16 +326,16 @@ public class ProfileAdapter extends BaseAdapter {
 
 			if (mContactInfo.isOnhike()) {
 				viewHolder.icon.setImageResource(R.drawable.ic_not_friend);
-//				if (mContactInfo.getFavoriteType() == FavoriteType.PENDING) {
-//					viewHolder.text.setText(context.getString(
-//							R.string.waiting_for_accept, contactName));
-//					viewHolder.btn1.setVisibility(View.GONE);
-//				} else {
+				if (mContactInfo.getFavoriteType() == FavoriteType.PENDING) {
+					viewHolder.text.setText(context.getString(
+							R.string.waiting_for_accept, contactName));
+					viewHolder.btn1.setVisibility(View.GONE);
+				} else {
 					viewHolder.text.setText(context.getString(
 							R.string.add_as_friend_info, contactName));
 					viewHolder.btn1.setText(R.string.add_as_friend);
 					viewHolder.btn1.setVisibility(View.VISIBLE);
-//				}
+				}
 			} else {
 				viewHolder.icon.setImageResource(R.drawable.ic_not_on_hike);
 				viewHolder.text.setText(context.getString(R.string.not_on_hike,
