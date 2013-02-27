@@ -353,26 +353,7 @@ public class DrawerBaseActivity extends Activity implements
 						parentLayout.addToFavorite(contactInfo);
 					} else if (favoriteType == FavoriteType.NOT_FAVORITE) {
 						parentLayout.removeFromFavorite(contactInfo);
-					} else if (favoriteType == FavoriteType.RECOMMENDED_FAVORITE) {
-						contactInfo
-								.setFavoriteType(FavoriteType.RECOMMENDED_FAVORITE);
-						parentLayout.addToRecommended(contactInfo);
 					}
-				}
-			});
-		} else if (HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED.equals(type)) {
-			String myMsisdn = preferences.getString(
-					HikeMessengerApp.MSISDN_SETTING, "");
-
-			final List<ContactInfo> autoRecommendedFavorites = HikeUserDatabase
-					.getInstance().getContactsOfFavoriteType(
-							FavoriteType.AUTO_RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE, myMsisdn);
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					parentLayout
-							.addAutoRecommendedFavoritesList(autoRecommendedFavorites);
 				}
 			});
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
@@ -403,17 +384,13 @@ public class DrawerBaseActivity extends Activity implements
 			final List<ContactInfo> favoriteList = hikeUserDatabase
 					.getContactsOfFavoriteType(FavoriteType.FAVORITE,
 							HikeConstants.BOTH_VALUE, myMsisdn);
-			final List<ContactInfo> recommendedFavoriteList = hikeUserDatabase
-					.getContactsOfFavoriteType(
-							FavoriteType.RECOMMENDED_FAVORITE,
-							HikeConstants.BOTH_VALUE, myMsisdn);
+			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.PENDING, HikeConstants.BOTH_VALUE, myMsisdn));
 			runOnUiThread(new Runnable() {
 
 				@Override
 				public void run() {
 					parentLayout.refreshFavorites(favoriteList);
-					parentLayout
-							.refreshRecommendedFavorites(recommendedFavoriteList);
 				}
 			});
 		} else if (HikePubSub.REFRESH_RECENTS.equals(type)) {
