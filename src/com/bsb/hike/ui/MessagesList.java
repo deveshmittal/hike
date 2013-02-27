@@ -1120,14 +1120,14 @@ public class MessagesList extends DrawerBaseActivity implements
 	}
 
 	private void setNotificationCounter(int notificationCount) {
-//		if (notificationCount > 0) {
-//			notificationCounter.setBackgroundResource(R.drawable.notification);
-//			notificationCounter.setText(Integer.toString(notificationCount));
-//		} else {
-//			notificationCounter
-//					.setBackgroundResource(R.drawable.no_notification);
-//			notificationCounter.setText("");
-//		}
+		if (notificationCount > 0) {
+			notificationCounter.setBackgroundResource(R.drawable.notification);
+			notificationCounter.setText(Integer.toString(notificationCount));
+		} else {
+			notificationCounter
+					.setBackgroundResource(R.drawable.no_notification);
+			notificationCounter.setText("");
+		}
 		this.notificationCount = notificationCount;
 	}
 
