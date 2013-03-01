@@ -643,7 +643,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	public void saveChanges() {
 		ArrayList<HikeHttpRequest> requests = new ArrayList<HikeHttpRequest>();
 
-		if ((this.profileType == ProfileType.USER_PROFILE_EDIT || this.profileType == ProfileType.USER_PROFILE)
+		if ((this.profileType == ProfileType.USER_PROFILE_EDIT)
 				&& !TextUtils.isEmpty(mEmailEdit.getText())) {
 			if (!Utils.isValidEmail(mEmailEdit.getText())) {
 				Toast.makeText(this,
@@ -747,7 +747,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			requests.add(request);
 		}
 
-		if ((this.profileType == ProfileType.USER_PROFILE_EDIT || this.profileType == ProfileType.USER_PROFILE)
+		if ((this.profileType == ProfileType.USER_PROFILE_EDIT)
 				&& ((!emailTxt.equals(mEmailEdit.getText().toString())) || ((mActivityState.genderType != lastSavedGender)))) {
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
 					+ "/profile", new HikeHttpRequest.HikeHttpCallback() {
