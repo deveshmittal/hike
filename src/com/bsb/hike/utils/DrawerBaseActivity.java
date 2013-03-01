@@ -455,6 +455,8 @@ public class DrawerBaseActivity extends Activity implements
 				FrameLayout.LayoutParams.MATCH_PARENT, dialogHeight);
 		lp.topMargin = (int) (5 * Utils.densityMultiplier);
 		lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
+		lp.leftMargin = (int) (5 * Utils.densityMultiplier);
+		lp.rightMargin = (int) (5 * Utils.densityMultiplier);
 		parent.setLayoutParams(lp);
 
 		final Button titleBtn = (Button) statusDialog
