@@ -624,6 +624,17 @@ public class SignupActivity extends Activity implements
 	}
 
 	private void prepareLayoutForGettingName(Bundle savedInstanceState) {
+		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		/*
+		 * Making sure we create the profile picture folder before the user sets
+		 * one.
+		 */
+		File dir = new File(directory);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+
 		initializeViews(nameLayout);
 
 		Session session = Session.getActiveSession();
@@ -1156,6 +1167,11 @@ public class SignupActivity extends Activity implements
 
 	private void setProfileImage() {
 		if (mIconView == null) {
+			return;
+		}
+		if (!new File(mActivityState.destFilePath).exists()) {
+			Toast.makeText(getApplicationContext(), R.string.image_failed,
+					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		mActivityState.profileBitmap = Utils.scaleDownImage(
