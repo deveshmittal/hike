@@ -844,6 +844,14 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
+		/*
+		 * Making sure the directory exists before setting a profile image
+		 */
+		File dir = new File(directory);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+
 		String fileName = Utils.getTempProfileImageFileName(mLocalMSISDN);
 		final String destFilePath = directory + "/" + fileName;
 
