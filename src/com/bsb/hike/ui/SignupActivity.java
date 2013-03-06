@@ -133,6 +133,8 @@ public class SignupActivity extends Activity implements
 
 	private CountDownTimer countDownTimer;
 
+	private boolean showingNumberConfimationDialog;
+
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
 		public DownloadImageTask downloadImageTask; /*
@@ -413,6 +415,14 @@ public class SignupActivity extends Activity implements
 			} else {
 				final String input = enterEditText.getText().toString();
 				if (viewFlipper.getDisplayedChild() == NUMBER) {
+					/*
+					 * Adding this check since some device's IME call this part
+					 * of the code twice.
+					 */
+					if (showingNumberConfimationDialog) {
+						return;
+					}
+
 					String codeAndIso = countryPicker.getText().toString();
 					final String code = codeAndIso.substring(
 							codeAndIso.indexOf("+"), codeAndIso.length());
@@ -436,6 +446,7 @@ public class SignupActivity extends Activity implements
 									mTask.addUserInput(number);
 
 									startLoading();
+									dialog.cancel();
 								}
 							});
 					builder.setNegativeButton(R.string.cancel,
@@ -444,10 +455,18 @@ public class SignupActivity extends Activity implements
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									dialog.dismiss();
+									dialog.cancel();
 								}
 							});
-					builder.show();
+					Dialog dialog = builder.show();
+					dialog.setOnCancelListener(new OnCancelListener() {
+
+						@Override
+						public void onCancel(DialogInterface dialog) {
+							showingNumberConfimationDialog = false;
+						}
+					});
+					showingNumberConfimationDialog = true;
 				} else {
 					if (!TextUtils.isEmpty(mActivityState.destFilePath)) {
 						mTask.addProfilePicPath(mActivityState.destFilePath,
