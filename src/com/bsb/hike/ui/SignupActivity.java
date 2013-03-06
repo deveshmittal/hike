@@ -831,7 +831,9 @@ public class SignupActivity extends Activity implements
 
 			// Wrong Pin
 			if (value != null && value.equals(HikeConstants.PIN_ERROR)) {
-				countDownTimer.cancel();
+				if (countDownTimer != null) {
+					countDownTimer.cancel();
+				}
 				prepareLayoutForGettingPin(mActivityState.timeLeft);
 				infoTxt.setText(R.string.wrong_pin_signup);
 				loadingLayout.setVisibility(View.GONE);
