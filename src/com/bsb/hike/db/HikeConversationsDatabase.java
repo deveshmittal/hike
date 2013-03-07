@@ -1554,4 +1554,34 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 		mDb.update(DBConstants.STATUS_TABLE, values, whereClause, whereArgs);
 	}
+
+	public void deleteStatus(String statusId) {
+		String selection = DBConstants.STATUS_MAPPED_ID + "=?";
+		String[] whereArgs = new String[] { statusId };
+		/*
+		 * First we want the message id corresponding to this status.
+		 */
+		Cursor c = mDb.query(DBConstants.STATUS_TABLE,
+				new String[] { DBConstants.MESSAGE_ID }, selection, whereArgs,
+				null, null, null);
+		long messageId = 0;
+		try {
+			if (c.moveToFirst()) {
+				messageId = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+			}
+		} finally {
+			c.close();
+		}
+
+		/*
+		 * Now we delete the status
+		 */
+		mDb.delete(DBConstants.STATUS_TABLE, selection, whereArgs);
+
+		/*
+		 * And we delete the message
+		 */
+		mDb.delete(DBConstants.MESSAGES_TABLE, DBConstants.MESSAGE_ID + "=?",
+				new String[] { Long.toString(messageId) });
+	}
 }
