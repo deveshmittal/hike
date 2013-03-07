@@ -898,9 +898,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					}
 					if (!ChatThread.fileTransferTaskMap.containsKey(convMessage
 							.getMsgID())
-							&& ((hikeFile.getHikeFileType() == HikeFileType.LOCATION))
-							|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT)
-							|| receivedFile.exists()) {
+							&& ((hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+									|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || receivedFile
+										.exists())) {
 						openFile(hikeFile, convMessage);
 					} else if (!ChatThread.fileTransferTaskMap
 							.containsKey(convMessage.getMsgID())) {
