@@ -110,6 +110,9 @@ public abstract class HikeArrayAdapter<T> extends ArrayAdapter<T> implements
 	}
 
 	public int getPositionForSection(int section) {
+		if (alphaIndexer == null) {
+			return 0;
+		}
 		return alphaIndexer.get(sections[section]);
 	}
 
