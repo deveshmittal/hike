@@ -616,8 +616,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			return;
 		}
 		if (this.profileType == ProfileType.USER_PROFILE_EDIT
-				|| this.profileType == ProfileType.GROUP_INFO
-				|| this.profileType == ProfileType.USER_PROFILE) {
+				|| this.profileType == ProfileType.GROUP_INFO) {
 			isBackPressed = true;
 			saveChanges();
 			if (this.profileType != ProfileType.USER_PROFILE) {
