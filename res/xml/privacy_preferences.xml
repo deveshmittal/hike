@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/privacy">
+    android:title="@string/manage_account">
 
     <com.bsb.hike.view.IconCheckBoxPreference
         icon="preference_free_sms"
