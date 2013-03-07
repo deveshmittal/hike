@@ -38,6 +38,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.tasks.CheckForUpdateTask;
@@ -759,7 +760,8 @@ public class HikeService extends Service {
 			Log.d(getClass().getSimpleName(),
 					"GCM id was not sent. Sending now");
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
-					"/account/device", new HikeHttpCallback() {
+					"/account/device", RequestType.OTHER,
+					new HikeHttpCallback() {
 						public void onSuccess(JSONObject response) {
 							Log.d(SendGCMIdToServerTrigger.this.getClass()
 									.getSimpleName(), "Send successful");

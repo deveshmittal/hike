@@ -48,6 +48,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.StatusMessage;
@@ -594,7 +595,8 @@ public class DrawerBaseActivity extends Activity implements
 					break;
 				case R.id.title_icon:
 					HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
-							"/user/status", new HikeHttpCallback() {
+							"/user/status", RequestType.STATUS_UPDATE,
+							new HikeHttpCallback() {
 
 								@Override
 								public void onSuccess(JSONObject response) {

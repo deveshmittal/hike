@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.Utils;
@@ -103,7 +104,7 @@ public class FeedbackActivity extends Activity implements FinishableEvent {
 			String feedback = mFeedbackText.getEditableText().toString();
 			mTask = new HikeHTTPTask(this, R.string.sending_feedback_failed);
 			HikeHttpRequest request = new HikeHttpRequest("/feedback",
-					new HikeHttpRequest.HikeHttpCallback() {
+					RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback() {
 						public void onFailure() {
 
 						}

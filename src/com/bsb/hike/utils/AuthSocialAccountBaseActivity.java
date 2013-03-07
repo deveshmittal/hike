@@ -21,6 +21,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.view.TwitterOAuthView;
 import com.bsb.hike.view.TwitterOAuthView.Result;
@@ -217,7 +218,7 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 		Log.d(getClass().getSimpleName(), "Request: " + request.toString());
 		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
 				facebook ? "/account/connect/fb" : "/account/connect/twitter",
-				new HikeHttpRequest.HikeHttpCallback() {
+				RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback() {
 					public void onSuccess(JSONObject response) {
 						if (dialog != null) {
 							dialog.dismiss();

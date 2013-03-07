@@ -57,6 +57,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadImageTask;
@@ -323,7 +324,7 @@ public class SignupActivity extends Activity implements
 			mTask.addUserInput("");
 		} else if (callmeBtn != null && v.getId() == callmeBtn.getId()) {
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/pin-call",
-					new HikeHttpRequest.HikeHttpCallback() {
+					RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback() {
 						public void onFailure() {
 						}
 

@@ -17,6 +17,10 @@ public class HikeHttpRequest {
 
 	};
 
+	public static enum RequestType {
+		STATUS_UPDATE, PROFILE_PIC, OTHER
+	}
+
 	private String mPath;
 	private JSONObject mJSONData;
 	private HikeHttpCallback mCompletionRunnable;
@@ -24,9 +28,12 @@ public class HikeHttpRequest {
 	private JSONObject response;
 	private String filePath;
 	private String statusMessage;
+	private RequestType requestType;
 
-	public HikeHttpRequest(String path, HikeHttpCallback completionRunnable) {
+	public HikeHttpRequest(String path, RequestType requestType,
+			HikeHttpCallback completionRunnable) {
 		this.mPath = path;
+		this.requestType = requestType;
 		this.mCompletionRunnable = completionRunnable;
 	}
 
@@ -96,5 +103,9 @@ public class HikeHttpRequest {
 
 	public JSONObject getResponse() {
 		return response;
+	}
+
+	public RequestType getRequestType() {
+		return requestType;
 	}
 }

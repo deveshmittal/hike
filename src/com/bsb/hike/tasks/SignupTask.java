@@ -30,6 +30,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactUtils;
@@ -119,7 +120,8 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 	}
 
 	public void addProfilePicPath(String path, Bitmap profilePic) {
-		profilePicRequest = new HikeHttpRequest("/account/avatar", null);
+		profilePicRequest = new HikeHttpRequest("/account/avatar",
+				RequestType.PROFILE_PIC, null);
 		profilePicRequest.setFilePath(path);
 		this.profilePicSmall = profilePic;
 	}

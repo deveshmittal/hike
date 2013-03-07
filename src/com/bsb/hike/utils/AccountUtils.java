@@ -66,6 +66,7 @@ import com.bsb.hike.http.CustomFileEntity;
 import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
@@ -611,33 +612,31 @@ public class AccountUtils {
 	public static void performRequest(HikeHttpRequest hikeHttpRequest,
 			boolean addToken) throws NetworkErrorException,
 			IllegalStateException {
-		HttpRequestBase requestBase;
-		boolean isUpdatingStatus = !TextUtils.isEmpty(hikeHttpRequest
-				.getStatusMessage());
-		/*
-		 * We need to make a PUT request for status updates. For other requests
-		 * we do POST.
-		 */
-		if (!isUpdatingStatus) {
-			requestBase = new HttpPost(base + hikeHttpRequest.getPath());
-		} else {
-			requestBase = new HttpPut(base + hikeHttpRequest.getPath());
-		}
-		if (addToken) {
-			addToken(requestBase);
-		}
+		HttpRequestBase requestBase = null;
+		AbstractHttpEntity entity = null;
+		RequestType requestType = hikeHttpRequest.getRequestType();
 		try {
-			AbstractHttpEntity entity = null;
-
-			if (!TextUtils.isEmpty(hikeHttpRequest.getFilePath())) {
-				entity = new FileEntity(
-						new File(hikeHttpRequest.getFilePath()), "");
-			} else if (isUpdatingStatus) {
+			switch (requestType) {
+			case STATUS_UPDATE:
+				requestBase = new HttpPut(base + hikeHttpRequest.getPath());
 				requestBase.addHeader(HikeConstants.STATUS_MESSAGE_HEADER,
 						hikeHttpRequest.getStatusMessage());
-			} else {
+				break;
+
+			case PROFILE_PIC:
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+				entity = new FileEntity(
+						new File(hikeHttpRequest.getFilePath()), "");
+				break;
+
+			case OTHER:
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
 						HTTP.DEFAULT_CONTENT_CHARSET);
+				break;
+			}
+			if (addToken) {
+				addToken(requestBase);
 			}
 
 			if (entity != null) {
@@ -652,7 +651,7 @@ public class AccountUtils {
 			/*
 			 * We need the response to save the id of the status.
 			 */
-			if (isUpdatingStatus) {
+			if (requestType == RequestType.STATUS_UPDATE) {
 				hikeHttpRequest.setResponse(obj);
 			}
 		} catch (UnsupportedEncodingException e) {

@@ -67,6 +67,7 @@ import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
@@ -658,37 +659,40 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			if (!TextUtils.isEmpty(newName) && !nameTxt.equals(newName)) {
 				/* user edited the text, so update the profile */
 				HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
-						+ "/name", new HikeHttpRequest.HikeHttpCallback() {
-					public void onFailure() {
-						if (isBackPressed) {
-							finishEditing();
-						}
-					}
+						+ "/name", RequestType.OTHER,
+						new HikeHttpRequest.HikeHttpCallback() {
+							public void onFailure() {
+								if (isBackPressed) {
+									finishEditing();
+								}
+							}
 
-					public void onSuccess(JSONObject response) {
-						if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO) {
-							/*
-							 * if the request was successful, update the shared
-							 * preferences and the UI
-							 */
-							String name = newName;
-							Editor editor = preferences.edit();
-							editor.putString(HikeMessengerApp.NAME_SETTING,
-									name);
-							editor.commit();
-							HikeMessengerApp.getPubSub().publish(
-									HikePubSub.PROFILE_NAME_CHANGED, null);
-						} else {
-							HikeConversationsDatabase hCDB = HikeConversationsDatabase
-									.getInstance();
-							hCDB.setGroupName(
-									ProfileActivity.this.mLocalMSISDN, newName);
-						}
-						if (isBackPressed) {
-							finishEditing();
-						}
-					}
-				});
+							public void onSuccess(JSONObject response) {
+								if (ProfileActivity.this.profileType != ProfileType.GROUP_INFO) {
+									/*
+									 * if the request was successful, update the
+									 * shared preferences and the UI
+									 */
+									String name = newName;
+									Editor editor = preferences.edit();
+									editor.putString(
+											HikeMessengerApp.NAME_SETTING, name);
+									editor.commit();
+									HikeMessengerApp.getPubSub().publish(
+											HikePubSub.PROFILE_NAME_CHANGED,
+											null);
+								} else {
+									HikeConversationsDatabase hCDB = HikeConversationsDatabase
+											.getInstance();
+									hCDB.setGroupName(
+											ProfileActivity.this.mLocalMSISDN,
+											newName);
+								}
+								if (isBackPressed) {
+									finishEditing();
+								}
+							}
+						});
 
 				JSONObject json = new JSONObject();
 				try {
@@ -715,33 +719,35 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
-					+ "/avatar", new HikeHttpRequest.HikeHttpCallback() {
-				public void onFailure() {
-					Log.d("ProfileActivity", "resetting image");
-					Utils.removeTempProfileImage(mLocalMSISDN);
-					mActivityState.destFilePath = null;
-					profileAdapter.notifyDataSetChanged();
-					if (isBackPressed) {
-						finishEditing();
-					}
-				}
+					+ "/avatar", RequestType.PROFILE_PIC,
+					new HikeHttpRequest.HikeHttpCallback() {
+						public void onFailure() {
+							Log.d("ProfileActivity", "resetting image");
+							Utils.removeTempProfileImage(mLocalMSISDN);
+							mActivityState.destFilePath = null;
+							profileAdapter.notifyDataSetChanged();
+							if (isBackPressed) {
+								finishEditing();
+							}
+						}
 
-				public void onSuccess(JSONObject response) {
-					HikeUserDatabase db = HikeUserDatabase.getInstance();
-					db.setIcon(mLocalMSISDN, bytes, false);
+						public void onSuccess(JSONObject response) {
+							HikeUserDatabase db = HikeUserDatabase
+									.getInstance();
+							db.setIcon(mLocalMSISDN, bytes, false);
 
-					Utils.renameTempProfileImage(mLocalMSISDN);
+							Utils.renameTempProfileImage(mLocalMSISDN);
 
-					if (profileType == ProfileType.USER_PROFILE
-							|| profileType == ProfileType.USER_PROFILE_EDIT) {
-						HikeMessengerApp.getPubSub().publish(
-								HikePubSub.PROFILE_PIC_CHANGED, null);
-					}
-					if (isBackPressed) {
-						finishEditing();
-					}
-				}
-			});
+							if (profileType == ProfileType.USER_PROFILE
+									|| profileType == ProfileType.USER_PROFILE_EDIT) {
+								HikeMessengerApp.getPubSub().publish(
+										HikePubSub.PROFILE_PIC_CHANGED, null);
+							}
+							if (isBackPressed) {
+								finishEditing();
+							}
+						}
+					});
 
 			request.setFilePath(mActivityState.destFilePath);
 			requests.add(request);
@@ -750,29 +756,30 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if ((this.profileType == ProfileType.USER_PROFILE_EDIT)
 				&& ((!emailTxt.equals(mEmailEdit.getText().toString())) || ((mActivityState.genderType != lastSavedGender)))) {
 			HikeHttpRequest request = new HikeHttpRequest(httpRequestURL
-					+ "/profile", new HikeHttpRequest.HikeHttpCallback() {
-				public void onFailure() {
-					if (isBackPressed) {
-						finishEditing();
-					}
-				}
+					+ "/profile", RequestType.OTHER,
+					new HikeHttpRequest.HikeHttpCallback() {
+						public void onFailure() {
+							if (isBackPressed) {
+								finishEditing();
+							}
+						}
 
-				public void onSuccess(JSONObject response) {
-					Editor editor = preferences.edit();
-					if (Utils.isValidEmail(mEmailEdit.getText())) {
-						editor.putString(HikeConstants.Extras.EMAIL, mEmailEdit
-								.getText().toString());
-					}
-					editor.putInt(
-							HikeConstants.Extras.GENDER,
-							currentSelection != null ? (currentSelection
-									.getId() == R.id.guy ? 1 : 2) : 0);
-					editor.commit();
-					if (isBackPressed) {
-						finishEditing();
-					}
-				}
-			});
+						public void onSuccess(JSONObject response) {
+							Editor editor = preferences.edit();
+							if (Utils.isValidEmail(mEmailEdit.getText())) {
+								editor.putString(HikeConstants.Extras.EMAIL,
+										mEmailEdit.getText().toString());
+							}
+							editor.putInt(
+									HikeConstants.Extras.GENDER,
+									currentSelection != null ? (currentSelection
+											.getId() == R.id.guy ? 1 : 2) : 0);
+							editor.commit();
+							if (isBackPressed) {
+								finishEditing();
+							}
+						}
+					});
 			JSONObject obj = new JSONObject();
 			try {
 				Log.d(getClass().getSimpleName(), "Profile details Email: "
