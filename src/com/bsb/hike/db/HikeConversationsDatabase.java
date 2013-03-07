@@ -124,7 +124,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT
 				+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
 				+ DBConstants.TIMESTAMP + " INTEGER, "
-				+ DBConstants.STATUS_SEEN + " INTEGER DEFAULT 0" + " )";
+				+ DBConstants.STATUS_SEEN + " INTEGER DEFAULT 0, "
+				+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0" + " )";
 		db.execSQL(sql);
 	}
 
@@ -257,6 +258,24 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					c.close();
 				}
 			}
+		}
+		/*
+		 * Dropping the earlier status table to ensure the previous statuses (if
+		 * any) are deleted.
+		 */
+		if (oldVersion < 9) {
+			String drop = "DROP TABLE " + DBConstants.STATUS_TABLE;
+			db.execSQL(drop);
+			String sql = "CREATE TABLE IF NOT EXISTS "
+					+ DBConstants.STATUS_TABLE + " (" + DBConstants.STATUS_ID
+					+ " INTEGER PRIMARY KEY AUTOINCREMENT, "
+					+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, "
+					+ DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT
+					+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
+					+ DBConstants.TIMESTAMP + " INTEGER, "
+					+ DBConstants.STATUS_SEEN + " INTEGER DEFAULT 0, "
+					+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0" + " )";
+			db.execSQL(sql);
 		}
 	}
 
