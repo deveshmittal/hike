@@ -67,6 +67,7 @@ import com.bsb.hike.adapters.ProfileAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -580,6 +581,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
+		profileContent.setOnItemLongClickListener(this);
 
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 		mTitleView.setText(getResources().getString(R.string.profile_title));
@@ -1717,37 +1719,56 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
-		GroupParticipant groupParticipant = (GroupParticipant) profileAdapter
-				.getItem(position);
-		if (groupParticipant == null) {
-			return false;
-		}
-
-		String myMsisdn = preferences.getString(
-				HikeMessengerApp.MSISDN_SETTING, "");
-
-		final ContactInfo contactInfo = groupParticipant.getContactInfo();
-		if (myMsisdn.equals(contactInfo.getMsisdn())) {
-			return false;
-		}
 
 		ArrayList<String> optionsList = new ArrayList<String>();
 		ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
 
-		optionsList.add(getString(R.string.send_message));
-		optionImagesList.add(R.drawable.ic_send_message);
-		if (!contactInfo.isOnhike()) {
-			optionsList.add(getString(R.string.invite_to_hike));
-			optionImagesList.add(R.drawable.ic_invite_single);
+		ContactInfo tempContactInfo = null;
+		StatusMessage tempStatusMessage = null;
+
+		if (profileType == ProfileType.GROUP_INFO) {
+			GroupParticipant groupParticipant = (GroupParticipant) profileAdapter
+					.getItem(position);
+			if (groupParticipant == null) {
+				return false;
+			}
+
+			String myMsisdn = preferences.getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+
+			tempContactInfo = groupParticipant.getContactInfo();
+			if (myMsisdn.equals(tempContactInfo.getMsisdn())) {
+				return false;
+			}
+
+			optionsList.add(getString(R.string.send_message));
+			optionImagesList.add(R.drawable.ic_send_message);
+			if (!tempContactInfo.isOnhike()) {
+				optionsList.add(getString(R.string.invite_to_hike));
+				optionImagesList.add(R.drawable.ic_invite_single);
+			}
+			if (tempContactInfo.getMsisdn().equals(tempContactInfo.getId())) {
+				optionsList.add(getString(R.string.add_to_contacts));
+				optionImagesList.add(R.drawable.ic_add_to_contacts);
+			}
+			if (isGroupOwner) {
+				optionsList.add(getString(R.string.remove_from_group));
+				optionImagesList.add(R.drawable.ic_remove_from_group);
+			}
+
+		} else if (profileType == ProfileType.USER_PROFILE) {
+			tempStatusMessage = (StatusMessage) profileAdapter
+					.getItem(position);
+			if (tempStatusMessage == null
+					|| tempStatusMessage.getStatusMessageType() != StatusMessageType.TEXT) {
+				return false;
+			}
+
+			optionsList.add(getString(R.string.delete_status));
 		}
-		if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
-			optionsList.add(getString(R.string.add_to_contacts));
-			optionImagesList.add(R.drawable.ic_add_to_contacts);
-		}
-		if (isGroupOwner) {
-			optionsList.add(getString(R.string.remove_from_group));
-			optionImagesList.add(R.drawable.ic_remove_from_group);
-		}
+
+		final ContactInfo contactInfo = tempContactInfo;
+		final StatusMessage statusMessage = tempStatusMessage;
 
 		final String[] options = new String[optionsList.size()];
 		optionsList.toArray(options);
@@ -1763,9 +1784,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View v = super.getView(position, convertView, parent);
-				TextView tv = (TextView) v.findViewById(R.id.item);
-				tv.setCompoundDrawablesWithIntrinsicBounds(
-						optionIcons[position], 0, 0, 0);
+				if (optionIcons.length > 0) {
+					TextView tv = (TextView) v.findViewById(R.id.item);
+					tv.setCompoundDrawablesWithIntrinsicBounds(
+							optionIcons[position], 0, 0, 0);
+				}
 				return v;
 			}
 
@@ -1787,6 +1810,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						} else if (getString(R.string.remove_from_group)
 								.equals(option)) {
 							removeFromGroup(contactInfo);
+						} else if (getString(R.string.delete_status).equals(
+								option)) {
+							showDeleteStatusConfirmationDialog(statusMessage
+									.getMappedId());
 						}
 					}
 				});
@@ -1796,5 +1823,44 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				getResources()
 						.getDrawable(R.drawable.ic_thread_divider_profile));
 		return true;
+	}
+
+	private void showDeleteStatusConfirmationDialog(final String statusId) {
+		AlertDialog.Builder builder = new Builder(this);
+		builder.setMessage(R.string.delete_status_confirmation);
+
+		builder.setNegativeButton(R.string.no, new OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		builder.setPositiveButton(R.string.yes, new OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				deleteStatus(statusId);
+			}
+		});
+		builder.show();
+	}
+
+	private void deleteStatus(final String statusId) {
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/user/status/"
+				+ statusId, RequestType.DELETE_STATUS, new HikeHttpCallback() {
+
+			@Override
+			public void onSuccess(JSONObject response) {
+				HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_STATUS,
+						statusId);
+			}
+
+		});
+		mActivityState.task = new HikeHTTPTask(this,
+				R.string.delete_status_error);
+		mActivityState.task.execute(hikeHttpRequest);
+		mDialog = ProgressDialog.show(this, null,
+				getString(R.string.deleting_status));
 	}
 }

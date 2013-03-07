@@ -634,6 +634,10 @@ public class AccountUtils {
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
 						HTTP.DEFAULT_CONTENT_CHARSET);
 				break;
+
+			case DELETE_STATUS:
+				requestBase = new HttpDelete(base + hikeHttpRequest.getPath());
+				break;
 			}
 			if (addToken) {
 				addToken(requestBase);
