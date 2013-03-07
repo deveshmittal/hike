@@ -685,6 +685,10 @@ public class MqttMessagesManager {
 
 			convDb.setMessageIdForStatus(statusMessage.getMappedId(),
 					convMessage.getMsgID());
+		} else if (HikeConstants.MqttMessageTypes.DELETE_STATUS.equals(type)) {
+			String statusId = jsonObj.getJSONObject(HikeConstants.DATA)
+					.getString(HikeConstants.STATUS_ID);
+			pubSub.publish(HikePubSub.DELETE_STATUS, statusId);
 		}
 	}
 

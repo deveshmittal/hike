@@ -60,6 +60,7 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.FRIEND_REQUEST_ACCEPTED, this);
 		mPubSub.addListener(HikePubSub.REMOVED_FROM_FRIENDS, this);
+		mPubSub.addListener(HikePubSub.DELETE_STATUS, this);
 	}
 
 	@Override
@@ -203,6 +204,9 @@ public class DbConversationListener implements Listener {
 					HikePubSub.MQTT_PUBLISH,
 					serializeMsg(mute ? HikeConstants.MqttMessageTypes.MUTE
 							: HikeConstants.MqttMessageTypes.UNMUTE, id));
+		} else if (HikePubSub.DELETE_STATUS.equals(type)) {
+			String statusId = (String) object;
+			mConversationDb.deleteStatus(statusId);
 		}
 	}
 

@@ -206,6 +206,8 @@ public class HikePubSub implements Runnable {
 	
 	public static final String REMOVED_FROM_FRIENDS = "removedFromFriends";
 
+	public static final String DELETE_STATUS = "deleteStatus";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

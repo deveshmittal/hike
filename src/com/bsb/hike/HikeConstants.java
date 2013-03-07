@@ -543,6 +543,7 @@ public class HikeConstants {
 		public static final String DISPLAY_PIC = "dp";
 		public static final String STATUS_UPDATE = "su";
 		public static final String ACTION = "action";
+		public static final String DELETE_STATUS = "dsu";
 	}
 
 	public static enum FTResult {
