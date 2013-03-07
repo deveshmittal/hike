@@ -405,4 +405,5 @@
 	<string name="fetching_info">Infos werden eingeholt...</string>
 	<string name="call_not_free_head">Telefonanbieter erhebt Kosten</string>
 	<string name="call_not_free_body">Dein Telefonanbieter erhebt möglicherweise Kosten für diesen Anruf.</string>
+	<string name="not_now">Nicht jetzt</string>
 </resources>
