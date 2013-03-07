@@ -677,19 +677,14 @@ public class MqttMessagesManager {
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
 
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
-			saveStatusMsg(jsonObj, msisdn);
-		} else if (HikeConstants.MqttMessageTypes.REMOVE_FAVORITE.equals(type)) {
-			String msisdn = jsonObj.getString(HikeConstants.FROM);
-			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
-					false);
-			if (contactInfo == null) {
+			ConvMessage convMessage = saveStatusMsg(jsonObj, msisdn);
+
+			if (convMessage == null) {
 				return;
 			}
-			FavoriteType favoriteType = FavoriteType.NOT_FAVORITE;
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
-					contactInfo, favoriteType);
-			this.pubSub
-					.publish(HikePubSub.REMOVED_FROM_FRIENDS, favoriteToggle);
+
+			convDb.setMessageIdForStatus(statusMessage.getMappedId(),
+					convMessage.getMsgID());
 		}
 	}
 
@@ -707,7 +702,7 @@ public class MqttMessagesManager {
 		convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
 	}
 
-	private void saveStatusMsg(JSONObject jsonObj, String msisdn)
+	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn)
 			throws JSONException {
 		Conversation conversation = convDb.getConversation(msisdn, 0);
 
@@ -730,7 +725,7 @@ public class MqttMessagesManager {
 				|| (conversation != null
 						&& TextUtils.isEmpty(conversation.getContactName())
 						&& isUJMsg && !isGettingCredits && !(conversation instanceof GroupConversation))) {
-			return;
+			return null;
 		}
 		ConvMessage convMessage = new ConvMessage(jsonObj, conversation,
 				context, false);
@@ -746,6 +741,7 @@ public class MqttMessagesManager {
 									: convMessage.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT ? HikePubSub.PARTICIPANT_LEFT_GROUP
 											: HikePubSub.GROUP_END, jsonObj);
 		}
+		return convMessage;
 	}
 
 	private void addTypingNotification(String msisdn) {

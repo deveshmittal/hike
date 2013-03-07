@@ -1544,4 +1544,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.STATUS_SEEN + "=0 AND " + DBConstants.MSISDN
 				+ "!=?", new String[] { userMsisdn });
 	}
+
+	public void setMessageIdForStatus(String statusId, long messageId) {
+		String whereClause = DBConstants.STATUS_MAPPED_ID + "=?";
+		String[] whereArgs = new String[] { statusId };
+
+		ContentValues values = new ContentValues(1);
+		values.put(DBConstants.MESSAGE_ID, messageId);
+
+		mDb.update(DBConstants.STATUS_TABLE, values, whereClause, whereArgs);
+	}
 }
