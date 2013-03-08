@@ -1,5 +1,9 @@
 package com.bsb.hike.models;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,6 +39,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	private String phoneNum;
 
 	private FavoriteType favoriteType;
+
+	private long hikeJoinTime;
 
 	public String getName() {
 		return name;
@@ -114,6 +120,14 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 	public void setFavoriteType(FavoriteType favoriteType) {
 		this.favoriteType = favoriteType;
+	}
+
+	public long getHikeJoinTime() {
+		return hikeJoinTime;
+	}
+
+	public void setHikeJoinTime(long hikeJoinTime) {
+		this.hikeJoinTime = hikeJoinTime;
 	}
 
 	public boolean isUnknownContact() {

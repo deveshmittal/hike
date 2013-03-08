@@ -374,12 +374,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public ContactInfo getContactInfoFromMSISDN(String msisdn,
 			boolean ifNotFoundReturnNull) {
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
-				DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME,
-				DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE,
-				DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO,
-				DBConstants.FAVORITE_TYPE_SELECTION }, DBConstants.MSISDN
-				+ "=?", new String[] { msisdn }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE,
+				new String[] { DBConstants.MSISDN, DBConstants.ID,
+						DBConstants.NAME, DBConstants.ONHIKE,
+						DBConstants.PHONE, DBConstants.MSISDN_TYPE,
+						DBConstants.LAST_MESSAGED,
+						DBConstants.HAS_CUSTOM_PHOTO,
+						DBConstants.FAVORITE_TYPE_SELECTION,
+						DBConstants.HIKE_JOIN_TIME },
+				DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null,
+				null);
 
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
@@ -433,6 +437,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
 		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 		int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
+		int hikeJoinTimeIdx = c.getColumnIndex(DBConstants.HIKE_JOIN_TIME);
 
 		Set<String> msisdnSet = null;
 
@@ -446,11 +451,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			} else if (distinct) {
 				msisdnSet.add(msisdn);
 			}
+			long hikeJoinTime = 0;
+			if (hikeJoinTimeIdx != -1) {
+				hikeJoinTime = c.getLong(hikeJoinTimeIdx);
+			}
 			ContactInfo contactInfo = new ContactInfo(c.getString(idx),
 					c.getString(msisdnIdx), c.getString(nameIdx),
 					c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
 					c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx),
-					c.getInt(hasCustomPhotoIdx) == 1);
+					c.getInt(hasCustomPhotoIdx) == 1, hikeJoinTime);
 			if (favoriteIdx != -1) {
 				int favoriteTypeOrd = c.getInt(favoriteIdx);
 				contactInfo
