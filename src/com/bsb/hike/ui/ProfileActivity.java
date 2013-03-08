@@ -166,6 +166,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		public boolean animatedProfileImage = false;
 		public int imageViewId = -1;
 		public String id = null;
+		public boolean statusImage = false;
 	}
 
 	public File selectedFileIcon;
@@ -621,6 +622,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			mActivityState.downloadProfileImageTask = null;
 			mActivityState.id = null;
 			mActivityState.imageViewId = -1;
+			mActivityState.statusImage = false;
 			expandedWithoutAnimation = false;
 			return;
 		}
@@ -1038,6 +1040,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		mActivityState.id = (statusMessage == null || statusMessage
 				.getMappedId() == null) ? mLocalMSISDN : statusMessage
 				.getMappedId();
+		mActivityState.statusImage = statusMessage != null
+				&& statusMessage.getMappedId() == null;
 		downloadOrShowProfileImage(true, false, mActivityState.imageViewId);
 	}
 
@@ -1056,17 +1060,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		}
 
 		String id = justDownloaded ? mActivityState.id : mLocalMSISDN;
-		boolean statusImage = false;
-		if (!justDownloaded) {
-			StatusMessage statusMessage = (StatusMessage) findViewById(viewId)
-					.getTag();
-
-			if (profileType != ProfileType.GROUP_INFO
-					&& statusMessage.getMappedId() != null) {
-				id = statusMessage.getMappedId();
-				statusImage = true;
-			}
-		}
 		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 
@@ -1088,7 +1081,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			if (startNewDownload) {
 				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
 						getApplicationContext(), id, fileName, hasCustomImage,
-						statusImage);
+						mActivityState.statusImage);
 				mActivityState.downloadProfileImageTask.execute();
 
 				mDialog = ProgressDialog.show(this, null, getResources()
