@@ -71,7 +71,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ " TEXT, " + DBConstants.HAS_CUSTOM_PHOTO + " INTEGER, "
 				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, "
 				+ DBConstants.MSISDN_TYPE + " STRING, "
-				+ DBConstants.LAST_MESSAGED + " INTEGER" + " )";
+				+ DBConstants.LAST_MESSAGED + " INTEGER, "
+				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0" + " )";
 
 		db.execSQL(create);
 
@@ -186,6 +187,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			db.execSQL(create);
 			db.execSQL(insert);
 			db.execSQL(drop);
+		}
+		if (oldVersion < 8) {
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
+					+ " ADD COLUMN " + DBConstants.HIKE_JOIN_TIME
+					+ " INTEGER DEFAULT 0";
+			db.execSQL(alter);
 		}
 	}
 
@@ -1527,5 +1534,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		} finally {
 			c.close();
 		}
+	}
+
+	public void setHikeJoinTime(String msisdn, long hikeJoinTime) {
+		String whereClause = DBConstants.MSISDN + "=?";
+		String[] whereArgs = new String[] { msisdn };
+
+		ContentValues values = new ContentValues(1);
+		values.put(DBConstants.HIKE_JOIN_TIME, hikeJoinTime);
+
+		mDb.update(DBConstants.USERS_TABLE, values, whereClause, whereArgs);
 	}
 }

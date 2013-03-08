@@ -6,7 +6,7 @@ public class DBConstants {
 
 	public static final int CONVERSATIONS_DATABASE_VERSION = 9;
 
-	public static final int USERS_DATABASE_VERSION = 7;
+	public static final int USERS_DATABASE_VERSION = 8;
 
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 
@@ -121,4 +121,6 @@ public class DBConstants {
 	public static final String STATUS_TYPE = "statusType";
 
 	public static final String STATUS_SEEN = "statusSeen";
+
+	public static final String HIKE_JOIN_TIME = "hikeJoinTime";
 }
