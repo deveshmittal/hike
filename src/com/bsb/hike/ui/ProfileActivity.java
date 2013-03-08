@@ -324,6 +324,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		}
 		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND)
 				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
+				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_REJECTED)
 				&& (contactInfo.isOnhike())) {
 			profileItems.addAll(HikeConversationsDatabase.getInstance()
 					.getStatusMessages(mLocalMSISDN));
