@@ -139,6 +139,13 @@ public class ProfileAdapter extends BaseAdapter {
 			switch (viewType) {
 			case HEADER:
 				v = inflater.inflate(R.layout.profile_header, null);
+				if (!myProfile
+						&& (groupConversation != null || mContactInfo
+								.getFavoriteType() != FavoriteType.FAVORITE)) {
+					v.setBackgroundResource(R.drawable.bg_group_profile);
+				} else {
+					v.setBackgroundResource(R.drawable.bg_profile);
+				}
 
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.subText = (TextView) v.findViewById(R.id.info);
