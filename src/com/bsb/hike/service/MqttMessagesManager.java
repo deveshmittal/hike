@@ -573,9 +573,7 @@ public class MqttMessagesManager {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					false);
-			if (contactInfo == null
-					|| (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo
-							.getFavoriteType() != FavoriteType.REQUEST_SENT)) {
+			if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
 				return;
 			}
 			FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND ? FavoriteType.REQUEST_RECEIVED
