@@ -417,6 +417,7 @@
 	<string name="call_not_free_head">Operator Rates Apply</string>
 	<string name="call_not_free_body">Your telecom operator may charge you for this call.</string>
 	<string name="no_credits_gc">You\'ve run out of free SMS.  SMS users will no longer receive your messages.</string>
+	<string name="added_as_friend">%1$s added you as a friend.</string>
 	<string name="not_now">Not now</string>
 	<string name="delete_status">Delete update</string>
 	<string name="delete_status_confirmation">Are you sure you want to delete this update?</string>

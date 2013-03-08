@@ -17,10 +17,10 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.StatusMessage;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 
@@ -155,6 +155,16 @@ public class ProfileAdapter extends BaseAdapter {
 						.findViewById(R.id.change_profile);
 				viewHolder.editGroupName = (ImageButton) v
 						.findViewById(R.id.edit_group_name);
+				viewHolder.requestLayout = (ViewGroup) v
+						.findViewById(R.id.request_layout);
+
+				viewHolder.requestMain = (TextView) v
+						.findViewById(R.id.req_main);
+				viewHolder.requestInfo = (TextView) v
+						.findViewById(R.id.req_info);
+
+				viewHolder.btn1 = (Button) v.findViewById(R.id.yes_btn);
+				viewHolder.btn2 = (Button) v.findViewById(R.id.no_btn);
 				break;
 
 			case BUTTONS:
@@ -235,6 +245,22 @@ public class ProfileAdapter extends BaseAdapter {
 			viewHolder.icon
 					.setVisibility((myProfile || groupConversation != null) ? View.VISIBLE
 							: View.GONE);
+			if (mContactInfo != null) {
+				if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+					viewHolder.requestLayout.setVisibility(View.VISIBLE);
+
+					viewHolder.requestMain.setText(context.getString(
+							R.string.added_as_friend, mContactInfo.getName()));
+					viewHolder.requestInfo.setText(context.getString(
+							R.string.added_as_hike_friend_info,
+							mContactInfo.getFirstName()));
+
+					viewHolder.btn1.setTag(mContactInfo);
+					viewHolder.btn2.setTag(mContactInfo);
+				} else {
+					viewHolder.requestLayout.setVisibility(View.GONE);
+				}
+			}
 			break;
 
 		case BUTTONS:
@@ -359,6 +385,8 @@ public class ProfileAdapter extends BaseAdapter {
 	private class ViewHolder {
 		TextView text;
 		TextView subText;
+		TextView requestMain;
+		TextView requestInfo;
 		ImageView image;
 		ImageView icon;
 		Button btn1;
@@ -367,6 +395,7 @@ public class ProfileAdapter extends BaseAdapter {
 		ViewGroup container;
 		View btnDivider;
 		ImageButton editGroupName;
+		ViewGroup requestLayout;
 	}
 
 	@Override
