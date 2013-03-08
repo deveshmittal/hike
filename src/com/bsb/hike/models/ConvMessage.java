@@ -249,7 +249,7 @@ public class ConvMessage {
 					name = Utils.getFirstName(conversation.getLabel());
 				}
 				this.mMessage = String.format(
-						context.getString(R.string.joined_hike), name);
+						context.getString(R.string.joined_hike_new), name);
 			}
 			break;
 		case USER_OPT_IN:

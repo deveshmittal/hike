@@ -378,14 +378,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.getContactInfo().getFirstName();
 					message = context
 							.getString(
-									infoState == ParticipantInfoState.USER_JOIN ? R.string.joined_hike
+									infoState == ParticipantInfoState.USER_JOIN ? R.string.joined_hike_new
 											: R.string.joined_conversation,
 									name);
 				} else {
 					name = Utils.getFirstName(conversation.getLabel());
 					message = context
 							.getString(
-									infoState == ParticipantInfoState.USER_JOIN ? R.string.joined_hike
+									infoState == ParticipantInfoState.USER_JOIN ? R.string.joined_hike_new
 											: R.string.optin_one_to_one, name);
 				}
 

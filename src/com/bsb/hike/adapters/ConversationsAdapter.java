@@ -144,7 +144,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						.getFirstName(conversation.getLabel()));
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
 				markedUp = TextUtils.isEmpty(message.getMessage()) ? String
-						.format(context.getString(R.string.joined_hike),
+						.format(context.getString(R.string.joined_hike_new),
 								Utils.getFirstName(conversation.getLabel()))
 						: message.getMessage();
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
