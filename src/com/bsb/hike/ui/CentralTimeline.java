@@ -304,8 +304,12 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 		Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
 				contactInfo, favoriteType);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
-				favoriteAdded);
+		HikeMessengerApp
+				.getPubSub()
+				.publish(
+						favoriteType == FavoriteType.FRIEND ? HikePubSub.FAVORITE_TOGGLED
+								: HikePubSub.REJECT_FRIEND_REQUEST,
+						favoriteAdded);
 
 		for (StatusMessage listItem : statusMessages) {
 			if (listItem.getMsisdn().equals(statusMessage.getMsisdn())

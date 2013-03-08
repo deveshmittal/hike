@@ -145,6 +145,7 @@
                 style="@style/StatusYesBtn"
                 android:background="@drawable/bg_request_yes_btn"
                 android:focusable="false"
+                android:onClick="onYesBtnClick"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text="@string/confirm" />
@@ -155,6 +156,7 @@
                 android:background="@drawable/bg_request_no_btn"
                 android:layout_marginLeft="10dp"
                 android:focusable="false"
+                android:onClick="onNoBtnClick"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text="@string/not_now" />

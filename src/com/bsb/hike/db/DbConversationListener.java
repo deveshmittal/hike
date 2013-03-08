@@ -184,14 +184,19 @@ public class DbConversationListener implements Listener {
 
 			if (favoriteType != FavoriteType.REQUEST_RECEIVED
 					&& favoriteType != FavoriteType.REQUEST_REJECTED
-					&& !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
-					&& !HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
-				mPubSub.publish(
-						HikePubSub.MQTT_PUBLISH,
-						serializeMsg(
-								(favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_SENT) ? HikeConstants.MqttMessageTypes.ADD_FAVORITE
-										: HikeConstants.MqttMessageTypes.REMOVE_FAVORITE,
-								contactInfo.getMsisdn()));
+					&& !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)) {
+				String requestType;
+				if (favoriteType == FavoriteType.FRIEND
+						|| favoriteType == FavoriteType.REQUEST_SENT) {
+					requestType = HikeConstants.MqttMessageTypes.ADD_FAVORITE;
+				} else if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
+					requestType = HikeConstants.MqttMessageTypes.POSTPONE_FAVORITE;
+				} else {
+					requestType = HikeConstants.MqttMessageTypes.REMOVE_FAVORITE;
+				}
+
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH,
+						serializeMsg(requestType, contactInfo.getMsisdn()));
 			}
 		} else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type)) {
 			Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;

@@ -128,7 +128,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			HikePubSub.USER_LEFT, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
 			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED,
-			HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST };
+			HikePubSub.FRIEND_REQUEST_ACCEPTED,
+			HikePubSub.REJECT_FRIEND_REQUEST };
 
 	private String[] profilePubSubListeners = {
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
@@ -1221,6 +1222,28 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		alphaAnimation.setDuration(200);
 		alphaAnimation.setStartOffset(expand ? 0 : 200);
 		profileImageContainer.startAnimation(alphaAnimation);
+	}
+
+	public void onYesBtnClick(View v) {
+		ContactInfo contactInfo = (ContactInfo) v.getTag();
+		respondToFriendRequest(contactInfo, true);
+	}
+
+	public void onNoBtnClick(View v) {
+		ContactInfo contactInfo = (ContactInfo) v.getTag();
+		respondToFriendRequest(contactInfo, false);
+	}
+
+	private void respondToFriendRequest(ContactInfo contactInfo,
+			boolean accepted) {
+		FavoriteType favoriteType = accepted ? FavoriteType.FRIEND
+				: FavoriteType.NOT_FRIEND;
+		contactInfo.setFavoriteType(favoriteType);
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(
+				contactInfo, favoriteType);
+		HikeMessengerApp.getPubSub().publish(
+				accepted ? HikePubSub.FAVORITE_TOGGLED
+						: HikePubSub.REJECT_FRIEND_REQUEST, favoriteToggle);
 	}
 
 	public void onChangeImageClicked(View v) {
