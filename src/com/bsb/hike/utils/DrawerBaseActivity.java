@@ -349,10 +349,10 @@ public class DrawerBaseActivity extends Activity implements
 					FavoriteType favoriteType = favoriteToggle.second;
 					ContactInfo contactInfo = favoriteToggle.first;
 					contactInfo.setFavoriteType(favoriteType);
-					if ((favoriteType == FavoriteType.FAVORITE)
-							|| (favoriteType == FavoriteType.PENDING)) {
+					if ((favoriteType == FavoriteType.FRIEND)
+							|| (favoriteType == FavoriteType.REQUEST_SENT)) {
 						parentLayout.addToFavorite(contactInfo);
-					} else if (favoriteType == FavoriteType.NOT_FAVORITE) {
+					} else if (favoriteType == FavoriteType.NOT_FRIEND) {
 						parentLayout.removeFromFavorite(contactInfo);
 					}
 				}
@@ -368,8 +368,8 @@ public class DrawerBaseActivity extends Activity implements
 
 				@Override
 				public void run() {
-					if ((contactInfo.getFavoriteType() != FavoriteType.FAVORITE)
-							&& (contactInfo.getFavoriteType() != FavoriteType.PENDING)) {
+					if ((contactInfo.getFavoriteType() != FavoriteType.FRIEND)
+							&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)) {
 						parentLayout.updateRecentContacts(contactInfo);
 					} else {
 						parentLayout.addToFavorite(contactInfo);
@@ -383,10 +383,10 @@ public class DrawerBaseActivity extends Activity implements
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
 			final List<ContactInfo> favoriteList = hikeUserDatabase
-					.getContactsOfFavoriteType(FavoriteType.FAVORITE,
+					.getContactsOfFavoriteType(FavoriteType.FRIEND,
 							HikeConstants.BOTH_VALUE, myMsisdn);
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-					FavoriteType.PENDING, HikeConstants.BOTH_VALUE, myMsisdn));
+					FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, myMsisdn));
 			runOnUiThread(new Runnable() {
 
 				@Override
@@ -398,7 +398,7 @@ public class DrawerBaseActivity extends Activity implements
 			final List<ContactInfo> recentList = HikeUserDatabase.getInstance()
 					.getNonHikeRecentContacts(-1,
 							HikeMessengerApp.isIndianUser(),
-							FavoriteType.NOT_FAVORITE);
+							FavoriteType.NOT_FRIEND);
 			runOnUiThread(new Runnable() {
 
 				@Override

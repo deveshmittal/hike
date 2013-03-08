@@ -107,7 +107,7 @@ public class DBConstants {
 	public static final String FAVORITE_TYPE_SELECTION = "COALESCE((SELECT "
 			+ FAVORITE_TYPE + " FROM " + FAVORITES_TABLE + " WHERE "
 			+ FAVORITES_TABLE + "." + MSISDN + " = " + USERS_TABLE + "."
-			+ MSISDN + "), + " + FavoriteType.NOT_FAVORITE.ordinal() + ") AS "
+			+ MSISDN + "), + " + FavoriteType.NOT_FRIEND.ordinal() + ") AS "
 			+ FAVORITE_TYPE;
 
 	public static final String STATUS_TABLE = "statusTable";

@@ -128,11 +128,11 @@ public class CentralTimeline extends DrawerBaseActivity implements
 				MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 		List<ContactInfo> friendRequestList = HikeUserDatabase.getInstance()
-				.getContactsOfFavoriteType(FavoriteType.RECOMMENDED_FAVORITE,
+				.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED,
 						HikeConstants.BOTH_VALUE, userMsisdn);
 
 		List<ContactInfo> friendsList = HikeUserDatabase.getInstance()
-				.getContactsOfFavoriteType(FavoriteType.FAVORITE,
+				.getContactsOfFavoriteType(FavoriteType.FRIEND,
 						HikeConstants.BOTH_VALUE, userMsisdn);
 
 		friendRequests = friendRequestList.size();
@@ -287,14 +287,14 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			showStatusDialog(false);
 		} else {
 			toggleFavoriteAndRemoveTimelineItem(statusMessage,
-					FavoriteType.FAVORITE);
+					FavoriteType.FRIEND);
 		}
 	}
 
 	public void onNoBtnClick(View v) {
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
 		toggleFavoriteAndRemoveTimelineItem(statusMessage,
-				FavoriteType.NOT_FAVORITE);
+				FavoriteType.NOT_FRIEND);
 	}
 
 	private void toggleFavoriteAndRemoveTimelineItem(
@@ -319,7 +319,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.DECREMENT_NOTIFICATION_COUNTER, null);
 
-		if (favoriteType == FavoriteType.FAVORITE) {
+		if (favoriteType == FavoriteType.FRIEND) {
 			StatusMessage message = new StatusMessage(0, null,
 					statusMessage.getMsisdn(), contactInfo.getName(),
 					getString(R.string.accepted_friend_request),
@@ -358,7 +358,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			ContactInfo contactInfo = favoriteToggle.first;
-			if (favoriteToggle.second != FavoriteType.RECOMMENDED_FAVORITE) {
+			if (favoriteToggle.second != FavoriteType.REQUEST_RECEIVED) {
 				return;
 			}
 			int startIndex = getStartIndex();

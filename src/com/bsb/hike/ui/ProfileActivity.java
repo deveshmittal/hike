@@ -322,8 +322,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					ProfileAdapter.PROFILE_BUTTON_ID, null, null, null, null,
 					null, 0));
 		}
-		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE)
-				&& (contactInfo.getFavoriteType() != FavoriteType.PENDING)
+		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND)
+				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
 				&& (contactInfo.isOnhike())) {
 			profileItems.addAll(HikeConversationsDatabase.getInstance()
 					.getStatusMessages(mLocalMSISDN));
@@ -449,11 +449,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 								groupConversation.isMuted()));
 			} else if (profileType == ProfileType.CONTACT_INFO) {
 				contactInfo
-						.setFavoriteType(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? FavoriteType.NOT_FAVORITE
-								: FavoriteType.FAVORITE);
+						.setFavoriteType(contactInfo.getFavoriteType() == FavoriteType.FRIEND ? FavoriteType.NOT_FRIEND
+								: FavoriteType.FRIEND);
 
 				((ImageView) v)
-						.setImageResource(contactInfo.getFavoriteType() == FavoriteType.FAVORITE ? R.drawable.ic_favorite
+						.setImageResource(contactInfo.getFavoriteType() == FavoriteType.FRIEND ? R.drawable.ic_favorite
 								: R.drawable.ic_not_favorite);
 				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 						contactInfo, contactInfo.getFavoriteType());
@@ -1304,7 +1304,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	public void onProfileNegativeBtnClick(View v) {
 		if (contactInfo.isOnhike()) {
-			contactInfo.setFavoriteType(FavoriteType.PENDING);
+			contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
 
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, contactInfo.getFavoriteType());

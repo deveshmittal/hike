@@ -574,20 +574,20 @@ public class MqttMessagesManager {
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					false);
 			if (contactInfo == null
-					|| (contactInfo.getFavoriteType() != FavoriteType.NOT_FAVORITE && contactInfo
-							.getFavoriteType() != FavoriteType.PENDING)) {
+					|| (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND && contactInfo
+							.getFavoriteType() != FavoriteType.REQUEST_SENT)) {
 				return;
 			}
-			FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.NOT_FAVORITE ? FavoriteType.RECOMMENDED_FAVORITE
-					: FavoriteType.FAVORITE;
+			FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND ? FavoriteType.REQUEST_RECEIVED
+					: FavoriteType.FRIEND;
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, favoriteType);
 			this.pubSub
 					.publish(
-							favoriteType == FavoriteType.RECOMMENDED_FAVORITE ? HikePubSub.FAVORITE_TOGGLED
+							favoriteType == FavoriteType.REQUEST_RECEIVED ? HikePubSub.FAVORITE_TOGGLED
 									: HikePubSub.FRIEND_REQUEST_ACCEPTED,
 							favoriteToggle);
-			if (favoriteType == FavoriteType.FAVORITE) {
+			if (favoriteType == FavoriteType.FRIEND) {
 				StatusMessage statusMessage = new StatusMessage(0, null,
 						msisdn, contactInfo.getName(),
 						context.getString(R.string.confirmed_friend),

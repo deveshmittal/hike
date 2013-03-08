@@ -182,13 +182,13 @@ public class DbConversationListener implements Listener {
 
 			mUserDb.toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
 
-			if (favoriteType != FavoriteType.RECOMMENDED_FAVORITE
+			if (favoriteType != FavoriteType.REQUEST_RECEIVED
 					&& !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
 					&& !HikePubSub.REMOVED_FROM_FRIENDS.equals(type)) {
 				mPubSub.publish(
 						HikePubSub.MQTT_PUBLISH,
 						serializeMsg(
-								(favoriteType == FavoriteType.FAVORITE || favoriteType == FavoriteType.PENDING) ? HikeConstants.MqttMessageTypes.ADD_FAVORITE
+								(favoriteType == FavoriteType.FRIEND || favoriteType == FavoriteType.REQUEST_SENT) ? HikeConstants.MqttMessageTypes.ADD_FAVORITE
 										: HikeConstants.MqttMessageTypes.REMOVE_FAVORITE,
 								contactInfo.getMsisdn()));
 			}

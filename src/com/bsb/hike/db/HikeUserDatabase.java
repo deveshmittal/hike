@@ -281,7 +281,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 											.getColumnIndex(DBConstants.FAVORITE_TYPE));
 							contact.setFavoriteType(FavoriteType.values()[favoriteTypeOrdinal]);
 						} else {
-							contact.setFavoriteType(FavoriteType.NOT_FAVORITE);
+							contact.setFavoriteType(FavoriteType.NOT_FRIEND);
 						}
 					} finally {
 						favoriteCursor.close();
@@ -391,7 +391,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					/*
 					 * Setting the favorite type for unknown contacts
 					 */
-					FavoriteType favoriteType = FavoriteType.NOT_FAVORITE;
+					FavoriteType favoriteType = FavoriteType.NOT_FRIEND;
 					if (favoriteCursor.moveToFirst()) {
 						favoriteType = FavoriteType.values()[favoriteCursor
 								.getInt(favoriteCursor
@@ -449,7 +449,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				contactInfo
 						.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
 			} else {
-				contactInfo.setFavoriteType(FavoriteType.NOT_FAVORITE);
+				contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
 			}
 			contactInfos.add(contactInfo);
 		}
@@ -527,7 +527,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				contactInfo
 						.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
 			} else {
-				contactInfo.setFavoriteType(FavoriteType.NOT_FAVORITE);
+				contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
 			}
 			contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(
 					new AtomicBoolean(false), contactInfo));
@@ -589,7 +589,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSISDN_TYPE + ", " + DBConstants.HAS_CUSTOM_PHOTO
 				+ ", " + DBConstants.LAST_MESSAGED);
 		if (favoriteType != null) {
-			if (favoriteType == FavoriteType.NOT_FAVORITE) {
+			if (favoriteType == FavoriteType.NOT_FRIEND) {
 				queryBuilder.append(" FROM " + DBConstants.USERS_TABLE
 						+ " WHERE " + DBConstants.USERS_TABLE + "."
 						+ DBConstants.MSISDN + " NOT IN (SELECT "
@@ -640,7 +640,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
 		while (c.moveToNext()) {
 			String msisdn = c
-					.getString(favoriteType == FavoriteType.NOT_FAVORITE ? userMsisdnIdx
+					.getString(favoriteType == FavoriteType.NOT_FRIEND ? userMsisdnIdx
 							: favoriteMsisdnIdx);
 			if (msisdnSet.contains(msisdn)) {
 				continue;
@@ -979,7 +979,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		 * If we are setting the type as not favorite, we'll remove the row
 		 * itself.
 		 */
-		if (favoriteType == FavoriteType.NOT_FAVORITE) {
+		if (favoriteType == FavoriteType.NOT_FRIEND) {
 			mDb.delete(DBConstants.FAVORITES_TABLE, DBConstants.MSISDN + "=?",
 					new String[] { msisdn });
 			return;
@@ -1066,7 +1066,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			c = mDb.query(DBConstants.FAVORITES_TABLE,
 					new String[] { DBConstants.MSISDN }, DBConstants.MSISDN
 							+ "=? AND " + DBConstants.FAVORITE_TYPE + "="
-							+ FavoriteType.FAVORITE.ordinal(),
+							+ FavoriteType.FRIEND.ordinal(),
 					new String[] { msisdn }, null, null, null);
 			return c.moveToFirst();
 		} finally {
@@ -1333,8 +1333,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				String msisdn = msisdns.optString(i);
 				JSONObject msisdnInfo = favorites.optJSONObject(msisdn);
 				FavoriteType favoriteType = msisdnInfo
-						.optBoolean(HikeConstants.PENDING) ? FavoriteType.RECOMMENDED_FAVORITE
-						: FavoriteType.FAVORITE;
+						.optBoolean(HikeConstants.PENDING) ? FavoriteType.REQUEST_RECEIVED
+						: FavoriteType.FRIEND;
 
 				insertStatement.bindString(
 						ih.getColumnIndex(DBConstants.MSISDN), msisdn);
@@ -1377,7 +1377,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
 				+ DBConstants.FAVORITES_TABLE + " WHERE "
 				+ DBConstants.FAVORITE_TYPE + "="
-				+ FavoriteType.RECOMMENDED_FAVORITE.ordinal(), null);
+				+ FavoriteType.REQUEST_RECEIVED.ordinal(), null);
 	}
 
 	public List<Pair<AtomicBoolean, ContactInfo>> getFamilyList(

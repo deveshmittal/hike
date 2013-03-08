@@ -129,7 +129,7 @@ public class ToastListener implements Listener {
 			/*
 			 * Only notify when someone has added the user as a favorite.
 			 */
-			if (favoriteType != FavoriteType.RECOMMENDED_FAVORITE) {
+			if (favoriteType != FavoriteType.REQUEST_RECEIVED) {
 				return;
 			}
 			Activity activity = (currentActivity != null) ? currentActivity

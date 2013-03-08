@@ -1081,7 +1081,7 @@ public class MessagesList extends DrawerBaseActivity implements
 				|| HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
 			if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 				final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
-				if (favoriteToggle.second != FavoriteType.RECOMMENDED_FAVORITE) {
+				if (favoriteToggle.second != FavoriteType.REQUEST_RECEIVED) {
 					return;
 				}
 			} else {

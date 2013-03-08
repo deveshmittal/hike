@@ -141,7 +141,7 @@ public class ProfileAdapter extends BaseAdapter {
 				v = inflater.inflate(R.layout.profile_header, null);
 				if (!myProfile
 						&& (groupConversation != null || mContactInfo
-								.getFavoriteType() != FavoriteType.FAVORITE)) {
+								.getFavoriteType() != FavoriteType.FRIEND)) {
 					v.setBackgroundResource(R.drawable.bg_group_profile);
 				} else {
 					v.setBackgroundResource(R.drawable.bg_profile);
@@ -333,7 +333,7 @@ public class ProfileAdapter extends BaseAdapter {
 
 			if (mContactInfo.isOnhike()) {
 				viewHolder.icon.setImageResource(R.drawable.ic_not_friend);
-				if (mContactInfo.getFavoriteType() == FavoriteType.PENDING) {
+				if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
 					viewHolder.text.setText(context.getString(
 							R.string.waiting_for_accept, contactName));
 					viewHolder.btn1.setVisibility(View.GONE);
