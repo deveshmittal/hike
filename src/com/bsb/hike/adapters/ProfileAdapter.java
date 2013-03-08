@@ -261,6 +261,15 @@ public class ProfileAdapter extends BaseAdapter {
 					viewHolder.requestLayout.setVisibility(View.GONE);
 				}
 			}
+			if (mContactInfo.isOnhike() && !mContactInfo.isUnknownContact()
+					&& mContactInfo.getHikeJoinTime() > 0) {
+				viewHolder.subText.setVisibility(View.VISIBLE);
+				viewHolder.subText.setText(context.getString(
+						R.string.on_hike_since,
+						mContactInfo.getFormattedHikeJoinTime()));
+			} else {
+				viewHolder.subText.setVisibility(View.GONE);
+			}
 			break;
 
 		case BUTTONS:

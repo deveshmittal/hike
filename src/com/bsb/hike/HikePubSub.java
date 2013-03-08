@@ -203,10 +203,12 @@ public class HikePubSub implements Runnable {
 	public static final String DECREMENT_NOTIFICATION_COUNTER = "decrementNotificationCounter";
 
 	public static final String FRIEND_REQUEST_ACCEPTED = "friendRequestAccepted";
-	
+
 	public static final String REJECT_FRIEND_REQUEST = "rejectFriendRequest";
 
 	public static final String DELETE_STATUS = "deleteStatus";
+
+	public static final String HIKE_JOIN_TIME_OBTAINED = "hikeJoinTimeObtained";
 
 	private final Thread mThread;
 

@@ -23,6 +23,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -638,6 +639,9 @@ public class AccountUtils {
 			case DELETE_STATUS:
 				requestBase = new HttpDelete(base + hikeHttpRequest.getPath());
 				break;
+
+			case HIKE_JOIN_TIME:
+				requestBase = new HttpGet(base + hikeHttpRequest.getPath());
 			}
 			if (addToken) {
 				addToken(requestBase);
@@ -649,13 +653,15 @@ public class AccountUtils {
 			}
 			JSONObject obj = executeRequest(requestBase);
 			Log.d("AccountUtils", "Response: " + obj);
-			if ((obj == null) || (!"ok".equals(obj.optString("stat")))) {
+			if (((obj == null) || (!"ok".equals(obj.optString("stat")))
+					&& requestType != RequestType.HIKE_JOIN_TIME)) {
 				throw new NetworkErrorException("Unable to perform request");
 			}
 			/*
 			 * We need the response to save the id of the status.
 			 */
-			if (requestType == RequestType.STATUS_UPDATE) {
+			if (requestType == RequestType.STATUS_UPDATE
+					|| requestType == RequestType.HIKE_JOIN_TIME) {
 				hikeHttpRequest.setResponse(obj);
 			}
 		} catch (UnsupportedEncodingException e) {

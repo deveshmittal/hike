@@ -85,6 +85,7 @@ public class HikeConstants {
 	public static final String MUTED = "muted";
 	public static final String POST_AB = "postab";
 	public static final String PUSH = "push";
+	public static final String JOIN_TIME = "jointime";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

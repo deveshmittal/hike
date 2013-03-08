@@ -423,4 +423,5 @@
 	<string name="delete_status_confirmation">Are you sure you want to delete this update?</string>
 	<string name="delete_status_error">Unable to delete status. Please try again later.</string>
 	<string name="deleting_status">Deleting update...</string>
+	<string name="on_hike_since">on hike since %1$s</string>
 </resources>

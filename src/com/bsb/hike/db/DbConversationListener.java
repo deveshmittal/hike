@@ -61,6 +61,7 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.FRIEND_REQUEST_ACCEPTED, this);
 		mPubSub.addListener(HikePubSub.REJECT_FRIEND_REQUEST, this);
 		mPubSub.addListener(HikePubSub.DELETE_STATUS, this);
+		mPubSub.addListener(HikePubSub.HIKE_JOIN_TIME_OBTAINED, this);
 	}
 
 	@Override
@@ -213,6 +214,13 @@ public class DbConversationListener implements Listener {
 		} else if (HikePubSub.DELETE_STATUS.equals(type)) {
 			String statusId = (String) object;
 			mConversationDb.deleteStatus(statusId);
+		} else if (HikePubSub.HIKE_JOIN_TIME_OBTAINED.equals(type)) {
+			Pair<String, Long> msisdnHikeJoinTimePair = (Pair<String, Long>) object;
+
+			String msisdn = msisdnHikeJoinTimePair.first;
+			long hikeJoinTime = msisdnHikeJoinTimePair.second;
+
+			mUserDb.setHikeJoinTime(msisdn, hikeJoinTime);
 		}
 	}
 

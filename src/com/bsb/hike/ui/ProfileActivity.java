@@ -129,7 +129,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED,
 			HikePubSub.FRIEND_REQUEST_ACCEPTED,
-			HikePubSub.REJECT_FRIEND_REQUEST };
+			HikePubSub.REJECT_FRIEND_REQUEST,
+			HikePubSub.HIKE_JOIN_TIME_OBTAINED };
 
 	private String[] profilePubSubListeners = {
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
@@ -156,6 +157,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 														 * the picasa image
 														 */
 		public DownloadProfileImageTask downloadProfileImageTask;
+		public HikeHTTPTask getHikeJoinTimeTask;
 
 		public String destFilePath = null; /*
 											 * the bitmap before the user saves
@@ -315,6 +317,36 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				topBarBtn.setVisibility(View.GONE);
 				findViewById(R.id.button_bar).setVisibility(View.GONE);
 			}
+		}
+		/*
+		 * if the hike join time for a known hike contact is 0, we request the
+		 * server for the hike join time.
+		 */
+		if (contactInfo.isOnhike() && !contactInfo.isUnknownContact()
+				&& contactInfo.getHikeJoinTime() == 0) {
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+					"/account/profile/" + mLocalMSISDN,
+					RequestType.HIKE_JOIN_TIME, new HikeHttpCallback() {
+						@Override
+						public void onSuccess(JSONObject response) {
+							Log.d(getClass().getSimpleName(), "Response: "
+									+ response.toString());
+							try {
+								JSONObject profile = response
+										.getJSONObject(HikeConstants.PROFILE);
+								long hikeJoinTime = profile.optLong(
+										HikeConstants.JOIN_TIME, 0);
+								HikeMessengerApp.getPubSub().publish(
+										HikePubSub.HIKE_JOIN_TIME_OBTAINED,
+										new Pair<String, Long>(mLocalMSISDN,
+												hikeJoinTime));
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+						}
+					});
+			mActivityState.getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
+			mActivityState.getHikeJoinTimeTask.execute(hikeHttpRequest);
 		}
 	}
 
@@ -1595,6 +1627,24 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 			this.contactInfo.setFavoriteType(favoriteType);
 			setupContactProfileList();
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					profileAdapter.notifyDataSetChanged();
+				}
+			});
+		} else if (HikePubSub.HIKE_JOIN_TIME_OBTAINED.equals(type)) {
+			Pair<String, Long> msisdnHikeJoinTimePair = (Pair<String, Long>) object;
+
+			String msisdn = msisdnHikeJoinTimePair.first;
+			long hikeJoinTime = msisdnHikeJoinTimePair.second;
+
+			if (!msisdn.equals(mLocalMSISDN)) {
+				return;
+			}
+
+			contactInfo.setHikeJoinTime(hikeJoinTime);
 			runOnUiThread(new Runnable() {
 
 				@Override

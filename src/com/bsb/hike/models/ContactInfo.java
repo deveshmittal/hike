@@ -137,6 +137,12 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		return msisdn.equals(id);
 	}
 
+	public String getFormattedHikeJoinTime() {
+		String format = "MMM ''yy";
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(new Date(hikeJoinTime));
+	}
+
 	public ContactInfo(String id, String msisdn, String name, String phoneNum) {
 		this(id, msisdn, name, phoneNum, false, "", 0, false);
 	}
@@ -149,6 +155,13 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	public ContactInfo(String id, String msisdn, String name, String phoneNum,
 			boolean onhike, String msisdnType, long lastMessaged,
 			boolean hasCustomPhoto) {
+		this(id, msisdn, name, phoneNum, onhike, msisdnType, lastMessaged,
+				hasCustomPhoto, 0);
+	}
+
+	public ContactInfo(String id, String msisdn, String name, String phoneNum,
+			boolean onhike, String msisdnType, long lastMessaged,
+			boolean hasCustomPhoto, long hikeJoinTime) {
 		this.id = id;
 		this.msisdn = msisdn;
 		this.name = name;
@@ -157,6 +170,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		this.hasCustomPhoto = hasCustomPhoto;
 		this.msisdnType = msisdnType;
 		this.lastMessaged = lastMessaged;
+		this.hikeJoinTime = hikeJoinTime;
 	}
 
 	@Override
