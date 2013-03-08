@@ -85,7 +85,7 @@ public class DrawerBaseActivity extends Activity implements
 			HikePubSub.CONTACT_ADDED, HikePubSub.REFRESH_FAVORITES,
 			HikePubSub.REFRESH_RECENTS, HikePubSub.SHOW_STATUS_DIALOG,
 			HikePubSub.MY_STATUS_CHANGED, HikePubSub.FRIEND_REQUEST_ACCEPTED,
-			HikePubSub.REMOVED_FROM_FRIENDS };
+			HikePubSub.REJECT_FRIEND_REQUEST };
 
 	private class ActivityTask {
 		boolean showingStatusDialog = false;
@@ -341,7 +341,7 @@ public class DrawerBaseActivity extends Activity implements
 			});
 		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
 				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
-				|| HikePubSub.REMOVED_FROM_FRIENDS.equals(type)) {
+				|| HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			runOnUiThread(new Runnable() {
 				@Override

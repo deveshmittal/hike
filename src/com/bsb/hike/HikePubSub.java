@@ -204,7 +204,7 @@ public class HikePubSub implements Runnable {
 
 	public static final String FRIEND_REQUEST_ACCEPTED = "friendRequestAccepted";
 	
-	public static final String REMOVED_FROM_FRIENDS = "removedFromFriends";
+	public static final String REJECT_FRIEND_REQUEST = "rejectFriendRequest";
 
 	public static final String DELETE_STATUS = "deleteStatus";
 

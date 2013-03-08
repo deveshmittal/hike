@@ -128,7 +128,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			HikePubSub.USER_LEFT, HikePubSub.PROFILE_IMAGE_DOWNLOADED,
 			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED,
 			HikePubSub.STATUS_MESSAGE_RECEIVED, HikePubSub.FAVORITE_TOGGLED,
-			HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REMOVED_FROM_FRIENDS };
+			HikePubSub.FRIEND_REQUEST_ACCEPTED, HikePubSub.REJECT_FRIEND_REQUEST };
 
 	private String[] profilePubSubListeners = {
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
@@ -1562,7 +1562,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			});
 		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
 				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
-				|| HikePubSub.REMOVED_FROM_FRIENDS.equals(type)) {
+				|| HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 
 			ContactInfo contactInfo = favoriteToggle.first;

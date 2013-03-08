@@ -59,7 +59,7 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.FAVORITE_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.FRIEND_REQUEST_ACCEPTED, this);
-		mPubSub.addListener(HikePubSub.REMOVED_FROM_FRIENDS, this);
+		mPubSub.addListener(HikePubSub.REJECT_FRIEND_REQUEST, this);
 		mPubSub.addListener(HikePubSub.DELETE_STATUS, this);
 	}
 
@@ -174,7 +174,7 @@ public class DbConversationListener implements Listener {
 			}
 		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
 				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
-				|| HikePubSub.REMOVED_FROM_FRIENDS.equals(type)) {
+				|| HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 
 			ContactInfo contactInfo = favoriteToggle.first;
@@ -183,8 +183,9 @@ public class DbConversationListener implements Listener {
 			mUserDb.toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
 
 			if (favoriteType != FavoriteType.REQUEST_RECEIVED
+					&& favoriteType != FavoriteType.REQUEST_REJECTED
 					&& !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
-					&& !HikePubSub.REMOVED_FROM_FRIENDS.equals(type)) {
+					&& !HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
 				mPubSub.publish(
 						HikePubSub.MQTT_PUBLISH,
 						serializeMsg(
