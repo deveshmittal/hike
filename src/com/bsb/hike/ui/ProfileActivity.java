@@ -1073,7 +1073,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.getMappedId() == null) ? mLocalMSISDN : statusMessage
 				.getMappedId();
 		mActivityState.statusImage = statusMessage != null
-				&& statusMessage.getMappedId() == null;
+				&& statusMessage.getMappedId() != null;
 		downloadOrShowProfileImage(true, false, mActivityState.imageViewId);
 	}
 
@@ -1091,14 +1091,18 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			return;
 		}
 
-		String id = justDownloaded ? mActivityState.id : mLocalMSISDN;
 		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 
-		boolean hasCustomImage = HikeUserDatabase.getInstance().hasIcon(id);
+		boolean hasCustomImage = false;
+		if (!mActivityState.statusImage) {
+			hasCustomImage = HikeUserDatabase.getInstance().hasIcon(
+					mActivityState.id);
+		}
 
-		String fileName = hasCustomImage ? Utils.getProfileImageFileName(id)
-				: Utils.getDefaultAvatarServerName(this, id);
+		String fileName = hasCustomImage ? Utils
+				.getProfileImageFileName(mActivityState.id) : Utils
+				.getDefaultAvatarServerName(this, mActivityState.id);
 
 		File file = new File(basePath, fileName);
 
@@ -1109,11 +1113,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		} else {
 			showLargerImage(
 					IconCacheManager.getInstance().getIconForMSISDN(
-							mLocalMSISDN), justDownloaded, viewId);
+							mActivityState.id), justDownloaded, viewId);
 			if (startNewDownload) {
 				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
-						getApplicationContext(), id, fileName, hasCustomImage,
-						mActivityState.statusImage);
+						getApplicationContext(), mActivityState.id, fileName,
+						hasCustomImage, mActivityState.statusImage);
 				mActivityState.downloadProfileImageTask.execute();
 
 				mDialog = ProgressDialog.show(this, null, getResources()
