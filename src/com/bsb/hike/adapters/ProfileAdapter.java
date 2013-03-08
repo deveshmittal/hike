@@ -311,7 +311,7 @@ public class ProfileAdapter extends BaseAdapter {
 					.getIconForMSISDN(contactInfo.getMsisdn()));
 
 			viewHolder.text.setText(contactInfo.getName());
-			if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+			if (contactInfo.isUnknownContact()) {
 				viewHolder.text.append(" (" + contactInfo.getMsisdn() + ")");
 			}
 

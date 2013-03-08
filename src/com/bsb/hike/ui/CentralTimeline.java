@@ -145,7 +145,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			/*
 			 * We don't show status updates from unknown contacts
 			 */
-			if (contactInfo.getMsisdn().equals(contactInfo.getId())
+			if (contactInfo.isUnknownContact()
 					|| TextUtils.isEmpty(contactInfo.getMsisdn())) {
 				continue;
 			}
@@ -155,7 +155,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			/*
 			 * We don't show status updates from unknown contacts
 			 */
-			if (contactInfo.getMsisdn().equals(contactInfo.getId())
+			if (contactInfo.isUnknownContact()
 					|| TextUtils.isEmpty(contactInfo.getMsisdn())) {
 				continue;
 			}

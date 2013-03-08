@@ -116,6 +116,13 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		this.favoriteType = favoriteType;
 	}
 
+	public boolean isUnknownContact() {
+		/*
+		 * For unknown contacts, we make the id and msisdn equal.
+		 */
+		return msisdn.equals(id);
+	}
+
 	public ContactInfo(String id, String msisdn, String name, String phoneNum) {
 		this(id, msisdn, name, phoneNum, false, "", 0, false);
 	}

@@ -305,7 +305,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		/*
 		 * This would only happen for unknown contacts.
 		 */
-		if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+		if (contactInfo.isUnknownContact()) {
 			topBarBtn.setImageResource(R.drawable.ic_add_to_contacts_top);
 		} else {
 			if (canCall) {
@@ -469,7 +469,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		} else if (v.getId() == R.id.title_image_btn) {
 			if (profileType == ProfileType.CONTACT_INFO) {
-				if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+				if (contactInfo.isUnknownContact()) {
 					onAddToContactClicked(null);
 				} else {
 					onCallClicked(null);
@@ -1632,7 +1632,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		/*
 		 * This should only be true in case of unknown contacts.
 		 */
-		if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
+		if (contactInfo.isUnknownContact()) {
 			itemList.add(getString(R.string.add_to_contacts));
 		}
 
@@ -1776,7 +1776,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				optionsList.add(getString(R.string.invite_to_hike));
 				optionImagesList.add(R.drawable.ic_invite_single);
 			}
-			if (tempContactInfo.getMsisdn().equals(tempContactInfo.getId())) {
+			if (tempContactInfo.isUnknownContact()) {
 				optionsList.add(getString(R.string.add_to_contacts));
 				optionImagesList.add(R.drawable.ic_add_to_contacts);
 			}
