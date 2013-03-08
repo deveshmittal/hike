@@ -308,7 +308,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (contactInfo.getMsisdn().equals(contactInfo.getId())) {
 			topBarBtn.setImageResource(R.drawable.ic_add_to_contacts_top);
 		} else {
-			topBarBtn.setImageResource(R.drawable.ic_call_top);
+			if (canCall) {
+				topBarBtn.setImageResource(R.drawable.ic_call_top);
+			} else {
+				topBarBtn.setVisibility(View.GONE);
+				findViewById(R.id.button_bar).setVisibility(View.GONE);
+			}
 		}
 	}
 
