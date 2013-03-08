@@ -687,6 +687,18 @@ public class MqttMessagesManager {
 			String statusId = jsonObj.getJSONObject(HikeConstants.DATA)
 					.getString(HikeConstants.STATUS_ID);
 			pubSub.publish(HikePubSub.DELETE_STATUS, statusId);
+		} else if (HikeConstants.MqttMessageTypes.POSTPONE_FAVORITE
+				.equals(type)) {
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
+					false);
+			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
+				return;
+			}
+			FavoriteType favoriteType = FavoriteType.REQUEST_REJECTED;
+			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(
+					contactInfo, favoriteType);
+			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 		}
 	}
 
