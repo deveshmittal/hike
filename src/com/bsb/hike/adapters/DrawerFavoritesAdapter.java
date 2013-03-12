@@ -108,6 +108,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				onHikeList = hikeUserDatabase.getContactsOfFavoriteType(
 						FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE,
 						myMsisdn);
+				onHikeList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+						FavoriteType.REQUEST_RECEIVED,
+						HikeConstants.ON_HIKE_VALUE, myMsisdn));
+				Collections.sort(onHikeList);
 
 				recentList = hikeUserDatabase.getNonHikeRecentContacts(-1,
 						HikeMessengerApp.isIndianUser(),
@@ -317,7 +321,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			return FavoriteAdapterViewType.SECTION.ordinal();
 		} else if (EMPTY_FAVORITES_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
-		} else if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
+		} else if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND
+				|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
 			return FavoriteAdapterViewType.RECENT.ordinal();
 		}
 		return FavoriteAdapterViewType.FAVORITE.ordinal();
@@ -516,8 +521,14 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				callIntent.setData(Uri.parse("tel:" + contactInfo.getMsisdn()));
 				context.startActivity(callIntent);
 			} else {
+				FavoriteType favoriteType;
+				if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+					favoriteType = FavoriteType.FRIEND;
+				} else {
+					favoriteType = FavoriteType.REQUEST_SENT;
+				}
 				Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
-						contactInfo, FavoriteType.REQUEST_SENT);
+						contactInfo, favoriteType);
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FAVORITE_TOGGLED, favoriteAdded);
 			}
