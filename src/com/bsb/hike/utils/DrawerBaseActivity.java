@@ -26,11 +26,13 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager.BadTokenException;
+import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -446,6 +448,9 @@ public class DrawerBaseActivity extends Activity implements
 	public void showStatusDialog(boolean hasSelectedFile) {
 		statusDialog = new Dialog(this, R.style.Theme_CustomDialog_Status);
 		statusDialog.setContentView(R.layout.status_dialog);
+		LayoutParams dialogParams = statusDialog.getWindow().getAttributes();
+		dialogParams.gravity = Gravity.TOP;
+		statusDialog.getWindow().setAttributes(dialogParams);
 
 		ViewGroup parent = (ViewGroup) statusDialog
 				.findViewById(R.id.parent_layout);
