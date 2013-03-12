@@ -261,7 +261,8 @@ public class ProfileAdapter extends BaseAdapter {
 					viewHolder.requestLayout.setVisibility(View.GONE);
 				}
 			}
-			if (mContactInfo.isOnhike() && !mContactInfo.isUnknownContact()
+			if (mContactInfo != null && mContactInfo.isOnhike()
+					&& !mContactInfo.isUnknownContact()
 					&& mContactInfo.getHikeJoinTime() > 0) {
 				viewHolder.subText.setVisibility(View.VISIBLE);
 				viewHolder.subText.setText(context.getString(
