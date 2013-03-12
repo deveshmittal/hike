@@ -160,7 +160,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		freeSms50.setText(ssb);
 
-		mTitleView.setText(R.string.free_sms_txt);
+		mTitleView.setText(R.string.free_messaging_txt);
 
 		updateCredits();
 		setupSocialButtons();

@@ -116,7 +116,7 @@
 	<string name="tap_to_play">ZUM ABSPIELEN TIPPEN</string>
 	<string name="playing">WIEDERGABE</string>
 	<string name="home">Startseite</string>
-	<string name="free_sms_txt">Kostenloses Messaging</string>
+	<string name="free_messaging_txt">Kostenloses Messaging</string>
 	<string name="rewards">Belohnung</string>
 	<string name="help">Hilfe</string>
 	<string name="rewards_info">Freunde einladen, Belohnungen erhalten.\n Für jeden Freund der sich anmeldet bekommst du:</string>
