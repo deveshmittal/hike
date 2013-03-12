@@ -591,7 +591,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 			/* slide down if we're still selecting a user, otherwise slide back */
 			if (mConversation == null
-					&& !getIntent().hasExtra(HikeConstants.Extras.GROUP_CHAT)
+					&& !getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)
 					&& !getIntent().hasExtra(
 							HikeConstants.Extras.FORWARD_MESSAGE)) {
 				overridePendingTransition(R.anim.no_animation,

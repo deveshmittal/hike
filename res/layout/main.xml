@@ -41,25 +41,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/top_panel"
-            android:background="@color/offwhite"
             android:cacheColorHint="#00000000"
-            android:divider="@drawable/ic_thread_divider_other"
+            android:divider="@drawable/ic_thread_divider_profile"
             android:dividerHeight="1dp"
             android:fadingEdge="none"
+            android:listSelector="@android:color/transparent"
             android:footerDividersEnabled="false" />
-
-        <View
-            android:id="@+id/conversation_list_dropshadow"
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:layout_below="@id/conversations"
-            android:background="@drawable/dropshadow" />
-
-        <View 
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clickable="true"
-            android:layout_below="@id/conversation_list_dropshadow"/>
 
         <View
             android:id="@+id/messages_list_overlay"
@@ -91,24 +78,48 @@
                     android:layout_centerInParent="true"
                     android:src="@drawable/no_threads" />
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginBottom="@dimen/tip_bottom_margin"
-                    android:layout_marginRight="60dp"
-                    android:src="@drawable/start_help" />
             </RelativeLayout>
         </RelativeLayout>
 
-        <Button
-            android:id="@+id/edit_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <LinearLayout
+            android:layout_width="197dp"
+            android:layout_height="52dp"
+            android:layout_marginBottom="7dp"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:background="@drawable/newmessage" />
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/bg_plus_hike"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:onClick="onGroupChatClick"
+                android:paddingLeft="5dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/group_chat" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:onClick="onOneToOneClick"
+                android:scaleType="centerInside"
+                android:src="@drawable/one_to_one" />
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                android:onClick="onStatusClick"
+                android:paddingRight="5dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/status" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/tool_tip_on_top"

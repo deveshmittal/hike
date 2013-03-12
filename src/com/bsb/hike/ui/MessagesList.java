@@ -53,6 +53,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -104,8 +105,6 @@ public class MessagesList extends DrawerBaseActivity implements
 	private ListView mConversationsView;
 
 	private View mSearchIconView;
-
-	private View mEditMessageIconView;
 
 	private View mEmptyView;
 
@@ -342,9 +341,6 @@ public class MessagesList extends DrawerBaseActivity implements
 		 * mSearchIconView.setOnClickListener(this);
 		 */
 
-		mEditMessageIconView = findViewById(R.id.edit_message);
-		mEditMessageIconView.setOnClickListener(this);
-
 		/* set the empty view layout for the list */
 		mEmptyView = findViewById(R.id.empty_view);
 		mEmptyView.setOnClickListener(this);
@@ -396,6 +392,14 @@ public class MessagesList extends DrawerBaseActivity implements
 		 * always notifyOnChange by hand
 		 */
 		mAdapter.setNotifyOnChange(false);
+
+		View footerView = getLayoutInflater().inflate(
+				R.layout.conversation_list_footer, null);
+		AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(
+				AbsListView.LayoutParams.MATCH_PARENT, (int) getResources()
+						.getDimension(R.dimen.conversation_footer_height));
+		footerView.setLayoutParams(layoutParams);
+		mConversationsView.addFooterView(footerView);
 
 		mConversationsView.setAdapter(mAdapter);
 
@@ -690,6 +694,9 @@ public class MessagesList extends DrawerBaseActivity implements
 			return super.onContextItemSelected(item);
 		}
 		Conversation conv = mAdapter.getItem((int) info.id);
+		if (conv == null) {
+			return false;
+		}
 		switch (item.getItemId()) {
 		case R.id.shortcut:
 			Utils.logEvent(MessagesList.this,
@@ -730,10 +737,15 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (v.getId() != R.id.conversations) {
 			return;
 		}
+
+		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
+		if (adapterInfo.position >= mAdapter.getCount()) {
+			return;
+		}
+
 		android.view.MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.conversation_menu, menu);
 
-		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
 		Conversation conversation = mAdapter.getItem(adapterInfo.position);
 		if (conversation instanceof GroupConversation) {
 			MenuItem delete = menu.findItem(R.id.delete);
@@ -794,15 +806,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	@Override
 	public void onClick(View v) {
-		if ((v == mEditMessageIconView)) {
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.COMPOSE_BUTTON);
-			Intent intent = new Intent(this, ChatThread.class);
-			intent.putExtra(HikeConstants.Extras.EDIT, true);
-			startActivity(intent);
-			overridePendingTransition(R.anim.slide_up_noalpha,
-					R.anim.no_animation);
-		} else if (v.getId() == R.id.title_hikeicon) {
+		if (v.getId() == R.id.title_hikeicon) {
 			changeMqttBroker();
 		}
 	}
@@ -1227,6 +1231,9 @@ public class MessagesList extends DrawerBaseActivity implements
 			int position, long id) {
 		Conversation conv = (Conversation) adapterView
 				.getItemAtPosition(position);
+		if (conv == null) {
+			return;
+		}
 		Intent intent = createIntentForConversation(conv);
 		startActivity(intent);
 		overridePendingTransition(R.anim.slide_in_right_noalpha,
@@ -1504,5 +1511,24 @@ public class MessagesList extends DrawerBaseActivity implements
 		Intent intent = new Intent(this, CentralTimeline.class);
 		startActivity(intent);
 		overridePendingTransition(R.anim.slide_up_noalpha, R.anim.no_animation);
+	}
+
+	public void onGroupChatClick(View v) {
+		Intent intent = new Intent(this, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+		startActivity(intent);
+		overridePendingTransition(R.anim.slide_up_noalpha, R.anim.no_animation);
+	}
+
+	public void onOneToOneClick(View v) {
+		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.COMPOSE_BUTTON);
+		Intent intent = new Intent(this, ChatThread.class);
+		intent.putExtra(HikeConstants.Extras.EDIT, true);
+		startActivity(intent);
+		overridePendingTransition(R.anim.slide_up_noalpha, R.anim.no_animation);
+	}
+
+	public void onStatusClick(View v) {
+		showStatusDialog(false);
 	}
 }
