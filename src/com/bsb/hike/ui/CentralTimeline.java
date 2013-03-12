@@ -101,6 +101,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Utils.setDensityMultiplier(this);
 		setContentView(R.layout.central_timeline);
 		afterSetContentView(savedInstanceState, false);
 
