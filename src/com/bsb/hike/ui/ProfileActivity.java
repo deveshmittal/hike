@@ -1094,7 +1094,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 
-		boolean hasCustomImage = false;
+		boolean hasCustomImage = true;
 		if (!mActivityState.statusImage) {
 			hasCustomImage = HikeUserDatabase.getInstance().hasIcon(
 					mActivityState.id);
