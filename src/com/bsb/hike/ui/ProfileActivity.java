@@ -278,7 +278,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		setContentView(R.layout.profile);
 
 		TextView mTitleView = (TextView) findViewById(R.id.title);
-		mTitleView.setText(R.string.user_info);
+		mTitleView.setText(R.string.profile_title);
 
 		boolean canCall = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_TELEPHONY);
