@@ -689,7 +689,8 @@ public class MqttMessagesManager {
 					.getString(HikeConstants.STATUS_ID);
 			pubSub.publish(HikePubSub.DELETE_STATUS, statusId);
 		} else if (HikeConstants.MqttMessageTypes.POSTPONE_FAVORITE
-				.equals(type)) {
+				.equals(type)
+				|| HikeConstants.MqttMessageTypes.REMOVE_FAVORITE.equals(type)) {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					false);
