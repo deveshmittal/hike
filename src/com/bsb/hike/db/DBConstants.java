@@ -121,4 +121,6 @@ public class DBConstants {
 	public static final String STATUS_TYPE = "statusType";
 
 	public static final String HIKE_JOIN_TIME = "hikeJoinTime";
+
+	public static final String SHOW_IN_TIMELINE = "showInTimeline";
 }

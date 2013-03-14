@@ -366,7 +366,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_REJECTED)
 				&& (contactInfo.isOnhike())) {
 			profileItems.addAll(HikeConversationsDatabase.getInstance()
-					.getStatusMessages(mLocalMSISDN));
+					.getStatusMessages(false, mLocalMSISDN));
 		} else {
 			// Adding an item for the empty status
 			profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_EMPTY_ID,
@@ -614,7 +614,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_BUTTON_ID,
 				null, null, null, null, null, 0));
 		profileItems.addAll(HikeConversationsDatabase.getInstance()
-				.getStatusMessages(mLocalMSISDN));
+				.getStatusMessages(false, mLocalMSISDN));
 
 		profileAdapter = new ProfileAdapter(this, profileItems, null, myInfo,
 				true);

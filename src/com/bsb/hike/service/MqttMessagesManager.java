@@ -592,7 +592,9 @@ public class MqttMessagesManager {
 						context.getString(R.string.confirmed_friend),
 						StatusMessageType.FRIEND_REQUEST_ACCEPTED,
 						System.currentTimeMillis() / 1000);
-				convDb.addStatusMessage(statusMessage);
+
+				convDb.addStatusMessage(statusMessage, true);
+
 				pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED,
 						statusMessage);
 			}
@@ -652,7 +654,13 @@ public class MqttMessagesManager {
 			if (statusMessage.getStatusMessageType() == null) {
 				return;
 			}
-			long id = convDb.addStatusMessage(statusMessage);
+
+			/*
+			 * Only add updates to timeline for contacts that have a 2-way
+			 * relationship with the user.
+			 */
+			long id = convDb.addStatusMessage(statusMessage,
+					userDb.isContactFavorite(statusMessage.getMsisdn()));
 
 			if (id == -1) {
 				Log.d(getClass().getSimpleName(),

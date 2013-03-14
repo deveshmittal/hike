@@ -205,7 +205,7 @@ public class DbConversationListener implements Listener {
 								context.getString(R.string.user_added_contact_as_friend),
 								StatusMessageType.FRIEND_REQUEST_ACCEPTED,
 								System.currentTimeMillis() / 1000);
-						mConversationDb.addStatusMessage(statusMessage);
+						mConversationDb.addStatusMessage(statusMessage, true);
 						mPubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED,
 								statusMessage);
 					}

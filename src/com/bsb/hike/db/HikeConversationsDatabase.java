@@ -125,7 +125,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT
 				+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
 				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID
-				+ " INTEGER DEFAULT 0" + " )";
+				+ " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE
+				+ " INTEGER" + " )";
+		;
 		db.execSQL(sql);
 	}
 
@@ -273,7 +275,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT
 					+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
 					+ DBConstants.TIMESTAMP + " INTEGER, "
-					+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0" + " )";
+					+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, "
+					+ DBConstants.SHOW_IN_TIMELINE + " INTEGER" + " )";
 			db.execSQL(sql);
 		}
 	}
@@ -1414,7 +1417,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public long addStatusMessage(StatusMessage statusMessage) {
+	public long addStatusMessage(StatusMessage statusMessage,
+			boolean showInCentralTimeline) {
 		ContentValues values = new ContentValues();
 		values.put(DBConstants.STATUS_MAPPED_ID, statusMessage.getMappedId());
 		values.put(DBConstants.STATUS_TEXT, statusMessage.getText());
@@ -1422,6 +1426,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		values.put(DBConstants.STATUS_TYPE, statusMessage
 				.getStatusMessageType().ordinal());
 		values.put(DBConstants.TIMESTAMP, statusMessage.getTimeStamp());
+		values.put(DBConstants.SHOW_IN_TIMELINE, showInCentralTimeline);
 
 		long id = mDb.insert(DBConstants.STATUS_TABLE, null, values);
 		statusMessage.setId(id);
@@ -1429,12 +1434,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		return id;
 	}
 
-	public List<StatusMessage> getStatusMessages(String... msisdnList) {
+	public List<StatusMessage> getStatusMessages(boolean timelineUpdatesOnly,
+			String... msisdnList) {
 		String[] columns = new String[] { DBConstants.STATUS_ID,
 				DBConstants.STATUS_MAPPED_ID, DBConstants.MSISDN,
 				DBConstants.STATUS_TEXT, DBConstants.STATUS_TYPE,
 				DBConstants.TIMESTAMP };
-		String selection = null;
+
+		StringBuilder selection = new StringBuilder();
 
 		StringBuilder msisdnSelection = null;
 		if (msisdnList != null) {
@@ -1448,14 +1455,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 
 		if (!TextUtils.isEmpty(msisdnSelection)) {
-			selection = DBConstants.MSISDN + " IN "
-					+ msisdnSelection.toString();
+			selection.append(DBConstants.MSISDN + " IN "
+					+ msisdnSelection.toString()
+					+ (timelineUpdatesOnly ? " AND " : ""));
+		}
+		if (timelineUpdatesOnly) {
+			selection.append(DBConstants.SHOW_IN_TIMELINE + " =1");
 		}
 		String orderBy = DBConstants.STATUS_ID + " DESC";
 		Cursor c = null;
 		try {
-			c = mDb.query(DBConstants.STATUS_TABLE, columns, selection, null,
-					null, null, orderBy);
+			c = mDb.query(DBConstants.STATUS_TABLE, columns,
+					selection.toString(), null, null, null, orderBy);
 
 			List<StatusMessage> statusMessages = new ArrayList<StatusMessage>(
 					c.getCount());

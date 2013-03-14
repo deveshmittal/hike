@@ -182,7 +182,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		String[] friendMsisdns = new String[msisdnList.size()];
 		msisdnList.toArray(friendMsisdns);
 		statusMessages = HikeConversationsDatabase.getInstance()
-				.getStatusMessages(friendMsisdns);
+				.getStatusMessages(true, friendMsisdns);
 
 		for (ContactInfo contactInfo : friendRequestList) {
 			statusMessages
