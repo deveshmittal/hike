@@ -153,26 +153,12 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 		friendRequests = friendRequestList.size();
 
-		int friendMsisdnLength = friendRequestList.size() + friendsList.size();
+		int friendMsisdnLength = friendsList.size();
 
 		ArrayList<String> msisdnList = new ArrayList<String>();
 
-		for (ContactInfo contactInfo : friendRequestList) {
-			/*
-			 * We don't show status updates from unknown contacts
-			 */
-			if (contactInfo.isUnknownContact()
-					|| TextUtils.isEmpty(contactInfo.getMsisdn())) {
-				continue;
-			}
-			msisdnList.add(contactInfo.getMsisdn());
-		}
 		for (ContactInfo contactInfo : friendsList) {
-			/*
-			 * We don't show status updates from unknown contacts
-			 */
-			if (contactInfo.isUnknownContact()
-					|| TextUtils.isEmpty(contactInfo.getMsisdn())) {
+			if (TextUtils.isEmpty(contactInfo.getMsisdn())) {
 				continue;
 			}
 			msisdnList.add(contactInfo.getMsisdn());
