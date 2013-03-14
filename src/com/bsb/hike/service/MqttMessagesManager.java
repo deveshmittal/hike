@@ -672,6 +672,7 @@ public class MqttMessagesManager {
 						HikeConstants.THUMBNAIL);
 			}
 
+			incrementUnseenStatusCount();
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
 
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
@@ -700,6 +701,14 @@ public class MqttMessagesManager {
 					contactInfo, favoriteType);
 			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 		}
+	}
+
+	private void incrementUnseenStatusCount() {
+		int count = settings.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		count++;
+		Editor editor = settings.edit();
+		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, count);
+		editor.commit();
 	}
 
 	private void updateDbBatch(long[] ids, ConvMessage.State status,

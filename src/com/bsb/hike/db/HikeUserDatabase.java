@@ -1554,4 +1554,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		mDb.update(DBConstants.USERS_TABLE, values, whereClause, whereArgs);
 	}
+
+	public int getFriendTableRowCount() {
+		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
+				+ DBConstants.FAVORITES_TABLE, null);
+	}
 }

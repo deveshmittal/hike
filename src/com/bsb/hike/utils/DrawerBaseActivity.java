@@ -631,9 +631,15 @@ public class DrawerBaseActivity extends Activity implements
 									HikeConversationsDatabase.getInstance()
 											.addStatusMessage(statusMessage);
 
+									int unseenUserStatusCount = preferences
+											.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
+													0);
 									Editor editor = preferences.edit();
 									editor.putString(
 											HikeMessengerApp.LAST_STATUS, text);
+									editor.putInt(
+											HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
+											++unseenUserStatusCount);
 									editor.commit();
 
 									HikeMessengerApp.getPubSub().publish(

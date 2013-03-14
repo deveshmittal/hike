@@ -25,12 +25,15 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
+	private int unseenCount;
 
 	public CentralTimelineAdapter(Context context,
-			List<StatusMessage> statusMessages, String userMsisdn) {
+			List<StatusMessage> statusMessages, String userMsisdn,
+			int unseenCount) {
 		this.context = context;
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
+		this.unseenCount = unseenCount;
 	}
 
 	@Override
@@ -193,7 +196,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			break;
 		}
 		viewHolder.content
-				.setBackgroundResource(statusMessage.isStatusSeen() ? R.drawable.seen_timeline_selector
+				.setBackgroundResource(position >= unseenCount ? R.drawable.seen_timeline_selector
 						: R.drawable.timeline_selector);
 
 		viewHolder.divider
@@ -214,15 +217,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		 * We show a different divider if the status message in the current
 		 * position is unseen and the one after that has already been seen.
 		 */
-		StatusMessage currentStatusMessage = getItem(position);
-		if (currentStatusMessage.isStatusSeen()) {
+		if (position >= unseenCount) {
 			return false;
 		}
-		StatusMessage nextStatusMessage = position < (statusMessages.size() - 1) ? getItem(position + 1)
-				: null;
-		if (nextStatusMessage == null) {
+		if (position == statusMessages.size() - 1) {
 			return true;
-		} else if (nextStatusMessage.isStatusSeen()) {
+		} else if (position + 1 >= unseenCount) {
 			return true;
 		}
 		return false;

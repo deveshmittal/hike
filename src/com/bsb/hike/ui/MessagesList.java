@@ -164,6 +164,9 @@ public class MessagesList extends DrawerBaseActivity implements
 		super.onResume();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
 		HikeMessengerApp.getFacebook().extendAccessTokenIfNeeded(this, null);
+
+		int unseenStatus = Utils.getNotificationCount(accountPrefs, false);
+		setNotificationCounter(unseenStatus);
 	}
 
 	private class DeleteConversationsAsyncTask extends
@@ -332,10 +335,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		notificationCounter = (Button) findViewById(R.id.title_hikeicon);
 		notificationCounter.setVisibility(View.VISIBLE);
-		int unseenStatus = HikeConversationsDatabase.getInstance()
-				.getUnseenStatusMessageCount(userMsisdn)
-				+ HikeUserDatabase.getInstance().getPendingFriendRequestCount();
-		setNotificationCounter(unseenStatus);
+
 		/*
 		 * mSearchIconView = findViewById(R.id.search);
 		 * mSearchIconView.setOnClickListener(this);

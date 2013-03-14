@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -59,6 +60,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	private int friendRequests;
 	private StatusMessage noStatusMessage;
 	private StatusMessage noFriendMessage;
+	private int unseenCount;
+	private SharedPreferences prefs;
 
 	private String[] pubSubListeners = new String[] {
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED,
@@ -86,11 +89,19 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	protected void onResume() {
 		super.onResume();
 		HikeMessengerApp.getPubSub().publish(HikePubSub.NEW_ACTIVITY, this);
-		if (isLastStatusMessageUnseen()) {
-			HikeConversationsDatabase.getInstance().setStatusMessagesSeen(null);
+		if (prefs.getInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0) > 0
+				|| prefs.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0) > 0) {
+			resetUnseenStatusCount();
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
 		}
+	}
+
+	private void resetUnseenStatusCount() {
+		Editor editor = prefs.edit();
+		editor.putInt(HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+		editor.putInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		editor.commit();
 	}
 
 	@Override
@@ -104,6 +115,11 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		Utils.setDensityMultiplier(this);
 		setContentView(R.layout.central_timeline);
 		afterSetContentView(savedInstanceState, false);
+
+		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				MODE_PRIVATE);
+
+		unseenCount = Utils.getNotificationCount(prefs, true);
 
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof ActivityState) {
@@ -125,8 +141,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 		timelineContent = (ListView) findViewById(R.id.timeline_content);
 
-		userMsisdn = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				MODE_PRIVATE).getString(HikeMessengerApp.MSISDN_SETTING, "");
+		userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 		List<ContactInfo> friendRequestList = HikeUserDatabase.getInstance()
 				.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED,
@@ -184,12 +199,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 											.currentTimeMillis() / 1000));
 		}
 
-		SharedPreferences preferences = getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-		String name = preferences
-				.getString(HikeMessengerApp.NAME_SETTING, null);
-		String lastStatus = preferences.getString(HikeMessengerApp.LAST_STATUS,
-				"");
+		String name = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
+		String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS, "");
 
 		/*
 		 * If we already have a few status messages in the timeline, no need to
@@ -217,7 +228,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		}
 
 		centralTimelineAdapter = new CentralTimelineAdapter(this,
-				statusMessages, userMsisdn);
+				statusMessages, userMsisdn, unseenCount);
 		timelineContent.setAdapter(centralTimelineAdapter);
 		timelineContent.setOnItemClickListener(this);
 
@@ -400,7 +411,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			int startIndex = getStartIndex();
 
 			statusMessages.add(friendRequests + startIndex, statusMessage);
-			HikeConversationsDatabase.getInstance().setStatusMessagesSeen(null);
+			resetUnseenStatusCount();
 			if (noStatusMessage != null
 					&& statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT) {
 				statusMessages.remove(noStatusMessage);
@@ -445,19 +456,6 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			startIndex++;
 		}
 		return startIndex;
-	}
-
-	private boolean isLastStatusMessageUnseen() {
-		/*
-		 * We check here whether the latest status message is unseen or not. For
-		 * that we ignore the friend requests (Which are always marked as
-		 * unseen).
-		 */
-		int startIndex = getStartIndex() + friendRequests;
-		if (statusMessages.size() <= startIndex) {
-			return false;
-		}
-		return !statusMessages.get(startIndex).isStatusSeen();
 	}
 
 	public void onViewImageClicked(View v) {

@@ -123,9 +123,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.STATUS_MAPPED_ID + " TEXT UNIQUE, "
 				+ DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT
 				+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
-				+ DBConstants.TIMESTAMP + " INTEGER, "
-				+ DBConstants.STATUS_SEEN + " INTEGER DEFAULT 0, "
-				+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0" + " )";
+				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID
+				+ " INTEGER DEFAULT 0" + " )";
 		db.execSQL(sql);
 	}
 
@@ -263,7 +262,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * Dropping the earlier status table to ensure the previous statuses (if
 		 * any) are deleted.
 		 */
-		if (oldVersion < 9) {
+		if (oldVersion < 10) {
 			String drop = "DROP TABLE " + DBConstants.STATUS_TABLE;
 			db.execSQL(drop);
 			String sql = "CREATE TABLE IF NOT EXISTS "
@@ -273,7 +272,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ DBConstants.MSISDN + " TEXT, " + DBConstants.STATUS_TEXT
 					+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
 					+ DBConstants.TIMESTAMP + " INTEGER, "
-					+ DBConstants.STATUS_SEEN + " INTEGER DEFAULT 0, "
 					+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0" + " )";
 			db.execSQL(sql);
 		}
@@ -1434,7 +1432,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		String[] columns = new String[] { DBConstants.STATUS_ID,
 				DBConstants.STATUS_MAPPED_ID, DBConstants.MSISDN,
 				DBConstants.STATUS_TEXT, DBConstants.STATUS_TYPE,
-				DBConstants.STATUS_SEEN, DBConstants.TIMESTAMP };
+				DBConstants.TIMESTAMP };
 		String selection = null;
 
 		StringBuilder msisdnSelection = null;
@@ -1452,8 +1450,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			selection = DBConstants.MSISDN + " IN "
 					+ msisdnSelection.toString();
 		}
-		String orderBy = DBConstants.STATUS_SEEN + ", " + DBConstants.STATUS_ID
-				+ " DESC";
+		String orderBy = DBConstants.STATUS_ID + " DESC";
 		Cursor c = null;
 		try {
 			c = mDb.query(DBConstants.STATUS_TABLE, columns, selection, null,
@@ -1468,7 +1465,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 			int textIdx = c.getColumnIndex(DBConstants.STATUS_TEXT);
 			int typeIdx = c.getColumnIndex(DBConstants.STATUS_TYPE);
-			int seenIdx = c.getColumnIndex(DBConstants.STATUS_SEEN);
 			int tsIdx = c.getColumnIndex(DBConstants.TIMESTAMP);
 
 			StringBuilder msisdns = null;
@@ -1479,7 +1475,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						c.getLong(idIdx), c.getString(mappedIdIdx), msisdn,
 						null, c.getString(textIdx),
 						StatusMessageType.values()[c.getInt(typeIdx)],
-						c.getLong(tsIdx), c.getInt(seenIdx) == 1);
+						c.getLong(tsIdx));
 				statusMessages.add(statusMessage);
 
 				Log.d(getClass().getSimpleName(),
@@ -1523,28 +1519,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void setStatusMessagesSeen(String msisdn) {
-
-		String whereClause = null;
-		String[] whereArgs = null;
-		if (msisdn != null) {
-			whereClause = DBConstants.MSISDN + "=?";
-			whereArgs = new String[] { msisdn };
-		}
-
-		ContentValues values = new ContentValues(1);
-		values.put(DBConstants.STATUS_SEEN, 1);
-
-		mDb.update(DBConstants.STATUS_TABLE, values, whereClause, whereArgs);
-	}
-
-	public int getUnseenStatusMessageCount(String userMsisdn) {
-		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
-				+ DBConstants.STATUS_TABLE + " WHERE "
-				+ DBConstants.STATUS_SEEN + "=0 AND " + DBConstants.MSISDN
-				+ "!=?", new String[] { userMsisdn });
-	}
-
 	public void setMessageIdForStatus(String statusId, long messageId) {
 		String whereClause = DBConstants.STATUS_MAPPED_ID + "=?";
 		String[] whereArgs = new String[] { statusId };
@@ -1583,5 +1557,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 */
 		mDb.delete(DBConstants.MESSAGES_TABLE, DBConstants.MESSAGE_ID + "=?",
 				new String[] { Long.toString(messageId) });
+	}
+
+	public int getStatusMessageCount() {
+		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
+				+ DBConstants.STATUS_TABLE, null);
 	}
 }

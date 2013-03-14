@@ -94,6 +94,8 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.cropimage.CropImage;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
@@ -1779,4 +1781,32 @@ public class Utils {
 		return items;
 	}
 
+	public static int getNotificationCount(SharedPreferences accountPrefs,
+			boolean countUsersStatus) {
+		int notificationCount = 0;
+
+		if (TextUtils.isEmpty(accountPrefs.getString(
+				HikeMessengerApp.LAST_STATUS, ""))
+				&& HikeConversationsDatabase.getInstance()
+						.getStatusMessageCount() < HikeConstants.MIN_STATUS_COUNT) {
+			notificationCount++;
+		}
+
+		if (HikeUserDatabase.getInstance().getFriendTableRowCount() == 0) {
+			notificationCount++;
+		} else {
+			notificationCount += HikeUserDatabase.getInstance()
+					.getPendingFriendRequestCount();
+		}
+
+		notificationCount += accountPrefs.getInt(
+				HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+
+		if (countUsersStatus) {
+			notificationCount += accountPrefs.getInt(
+					HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		}
+
+		return notificationCount;
+	}
 }

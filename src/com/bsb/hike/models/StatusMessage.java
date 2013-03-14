@@ -21,7 +21,6 @@ public class StatusMessage {
 	private String name;
 	private String text;
 	private StatusMessageType statusMessageType;
-	private boolean statusSeen;
 	private long timeStamp;
 
 	public StatusMessage(JSONObject statusMessageJson) {
@@ -44,13 +43,6 @@ public class StatusMessage {
 
 	public StatusMessage(long id, String mappedId, String msisdn, String name,
 			String text, StatusMessageType statusMessageType, long timeStamp) {
-		this(id, mappedId, msisdn, name, text, statusMessageType, timeStamp,
-				false);
-	}
-
-	public StatusMessage(long id, String mappedId, String msisdn, String name,
-			String text, StatusMessageType statusMessageType, long timeStamp,
-			boolean statusSeen) {
 		this.id = id;
 		this.mappedId = mappedId;
 		this.msisdn = msisdn;
@@ -58,7 +50,6 @@ public class StatusMessage {
 		this.text = text;
 		this.statusMessageType = statusMessageType;
 		this.timeStamp = timeStamp;
-		this.statusSeen = statusSeen;
 	}
 
 	public void setId(long id) {
@@ -91,10 +82,6 @@ public class StatusMessage {
 
 	public StatusMessageType getStatusMessageType() {
 		return statusMessageType;
-	}
-
-	public boolean isStatusSeen() {
-		return statusSeen;
 	}
 
 	public long getTimeStamp() {
