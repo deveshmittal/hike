@@ -113,7 +113,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				.getIconForMSISDN(statusMessage.getMsisdn()));
 		viewHolder.name
 				.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me"
-						: statusMessage.getName());
+						: statusMessage.getNotNullName());
 
 		viewHolder.mainInfo.setText(statusMessage.getText());
 
@@ -145,7 +145,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.extraInfo
 					.setText(context.getString(
 							R.string.added_as_hike_friend_info,
-							statusMessage.getName()));
+							statusMessage.getNotNullName()));
 			viewHolder.yesBtn.setText(R.string.confirm);
 			viewHolder.noBtn.setText(R.string.no_thanks);
 			viewHolder.statusType
@@ -188,7 +188,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					.setText(context.getString(
 							statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED ? R.string.confirmed_friend_info
 									: R.string.accepted_friend_request_info,
-							statusMessage.getName()));
+							statusMessage.getNotNullName()));
 			viewHolder.statusType
 					.setImageResource(R.drawable.ic_profile_pic_status);
 			viewHolder.statusType

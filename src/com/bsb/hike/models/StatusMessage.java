@@ -6,6 +6,8 @@ import java.util.Date;
 
 import org.json.JSONObject;
 
+import android.text.TextUtils;
+
 import com.bsb.hike.HikeConstants;
 import com.ocpsoft.pretty.time.PrettyTime;
 
@@ -74,6 +76,10 @@ public class StatusMessage {
 
 	public String getName() {
 		return name;
+	}
+
+	public String getNotNullName() {
+		return TextUtils.isEmpty(name) ? msisdn : name;
 	}
 
 	public String getText() {
