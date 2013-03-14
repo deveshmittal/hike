@@ -203,7 +203,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 				statusMessages.add(0, noStatusMessage);
 			}
 		}
-		if (friendMsisdnLength == 0) {
+		if (friendMsisdnLength == 0
+				&& HikeUserDatabase.getInstance().getFriendTableRowCount() == 0) {
 			noFriendMessage = new StatusMessage(
 					CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID, null,
 					"12345", getString(R.string.team_hike), getString(
