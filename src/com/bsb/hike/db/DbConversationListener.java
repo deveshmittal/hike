@@ -17,11 +17,14 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.GroupParticipant;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
@@ -189,6 +192,24 @@ public class DbConversationListener implements Listener {
 				String requestType;
 				if (favoriteType == FavoriteType.FRIEND
 						|| favoriteType == FavoriteType.REQUEST_SENT) {
+
+					/*
+					 * Adding a status message for accepting the friend request
+					 */
+					if (favoriteType == FavoriteType.FRIEND) {
+						StatusMessage statusMessage = new StatusMessage(
+								0,
+								null,
+								contactInfo.getMsisdn(),
+								contactInfo.getName(),
+								context.getString(R.string.user_added_contact_as_friend),
+								StatusMessageType.FRIEND_REQUEST_ACCEPTED,
+								System.currentTimeMillis() / 1000);
+						mConversationDb.addStatusMessage(statusMessage);
+						mPubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED,
+								statusMessage);
+					}
+
 					requestType = HikeConstants.MqttMessageTypes.ADD_FAVORITE;
 				} else if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
 					requestType = HikeConstants.MqttMessageTypes.POSTPONE_FAVORITE;

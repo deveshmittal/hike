@@ -334,17 +334,6 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		centralTimelineAdapter.notifyDataSetChanged();
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.DECREMENT_NOTIFICATION_COUNTER, null);
-
-		if (favoriteType == FavoriteType.FRIEND) {
-			StatusMessage message = new StatusMessage(0, null,
-					statusMessage.getMsisdn(), contactInfo.getName(),
-					getString(R.string.accepted_friend_request),
-					StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST,
-					System.currentTimeMillis() / 1000);
-			HikeConversationsDatabase.getInstance().addStatusMessage(message);
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.STATUS_MESSAGE_RECEIVED, message);
-		}
 	}
 
 	public void onDetailsBtnClick(View v) {
