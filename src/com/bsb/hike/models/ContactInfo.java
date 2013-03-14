@@ -14,7 +14,7 @@ import com.bsb.hike.utils.Utils;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	public static enum FavoriteType {
-		NOT_FRIEND, REQUEST_RECEIVED, FRIEND, AUTO_RECOMMENDED_FAVORITE, REQUEST_SENT, REQUEST_REJECTED
+		NOT_FRIEND, REQUEST_RECEIVED, FRIEND, AUTO_RECOMMENDED_FAVORITE, REQUEST_SENT, REQUEST_REJECTED, SUBSCRIBED_ONLY
 	}
 
 	@Override

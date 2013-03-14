@@ -1271,7 +1271,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private void respondToFriendRequest(ContactInfo contactInfo,
 			boolean accepted) {
 		FavoriteType favoriteType = accepted ? FavoriteType.FRIEND
-				: FavoriteType.NOT_FRIEND;
+				: FavoriteType.SUBSCRIBED_ONLY;
 		contactInfo.setFavoriteType(favoriteType);
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(
 				contactInfo, favoriteType);

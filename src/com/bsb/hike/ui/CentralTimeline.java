@@ -306,7 +306,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	public void onNoBtnClick(View v) {
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
 		toggleFavoriteAndRemoveTimelineItem(statusMessage,
-				FavoriteType.NOT_FRIEND);
+				FavoriteType.SUBSCRIBED_ONLY);
 	}
 
 	private void toggleFavoriteAndRemoveTimelineItem(

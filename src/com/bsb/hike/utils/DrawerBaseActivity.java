@@ -354,7 +354,8 @@ public class DrawerBaseActivity extends Activity implements
 					if ((favoriteType == FavoriteType.FRIEND)
 							|| (favoriteType == FavoriteType.REQUEST_SENT)) {
 						parentLayout.addToFavorite(contactInfo);
-					} else if (favoriteType == FavoriteType.NOT_FRIEND) {
+					} else if (favoriteType == FavoriteType.NOT_FRIEND
+							|| favoriteType == FavoriteType.SUBSCRIBED_ONLY) {
 						parentLayout.removeFromFavorite(contactInfo);
 					}
 				}

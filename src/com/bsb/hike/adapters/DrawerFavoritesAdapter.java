@@ -111,6 +111,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				onHikeList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 						FavoriteType.REQUEST_RECEIVED,
 						HikeConstants.ON_HIKE_VALUE, myMsisdn));
+				onHikeList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+						FavoriteType.SUBSCRIBED_ONLY,
+						HikeConstants.ON_HIKE_VALUE, myMsisdn));
 				Collections.sort(onHikeList);
 
 				recentList = hikeUserDatabase.getNonHikeRecentContacts(-1,
@@ -322,7 +325,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		} else if (EMPTY_FAVORITES_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
 		} else if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND
-				|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+				|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED
+				|| contactInfo.getFavoriteType() == FavoriteType.SUBSCRIBED_ONLY) {
 			return FavoriteAdapterViewType.RECENT.ordinal();
 		}
 		return FavoriteAdapterViewType.FAVORITE.ordinal();

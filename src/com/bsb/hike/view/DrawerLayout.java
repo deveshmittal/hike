@@ -251,8 +251,14 @@ public class DrawerLayout extends RelativeLayout implements
 				.getMenuInfo();
 		ContactInfo contactInfo = drawerFavoritesAdapter.getItem((int) info.id);
 		if (menuItem.getItemId() == R.id.remove_fav) {
+			FavoriteType favoriteType;
+			if(contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+				favoriteType = FavoriteType.SUBSCRIBED_ONLY;
+			} else {
+				favoriteType = FavoriteType.NOT_FRIEND;
+			}
 			Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
-					contactInfo, FavoriteType.NOT_FRIEND);
+					contactInfo, favoriteType);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 					favoriteRemoved);
 			return true;

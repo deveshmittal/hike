@@ -248,6 +248,9 @@ public class ProfileAdapter extends BaseAdapter {
 			if (mContactInfo != null) {
 				if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
 					viewHolder.requestLayout.setVisibility(View.VISIBLE);
+					viewHolder.requestInfo.setVisibility(View.VISIBLE);
+					viewHolder.requestMain.setVisibility(View.VISIBLE);
+					viewHolder.btn2.setVisibility(View.VISIBLE);
 
 					viewHolder.requestMain.setText(context.getString(
 							R.string.added_as_friend, mContactInfo.getName()));
@@ -255,8 +258,17 @@ public class ProfileAdapter extends BaseAdapter {
 							R.string.added_as_hike_friend_info,
 							mContactInfo.getFirstName()));
 
+					viewHolder.btn1.setText(R.string.confirm);
 					viewHolder.btn1.setTag(mContactInfo);
 					viewHolder.btn2.setTag(mContactInfo);
+				} else if (mContactInfo.getFavoriteType() == FavoriteType.SUBSCRIBED_ONLY) {
+					viewHolder.requestLayout.setVisibility(View.VISIBLE);
+					viewHolder.requestInfo.setVisibility(View.GONE);
+					viewHolder.requestMain.setVisibility(View.GONE);
+					viewHolder.btn2.setVisibility(View.GONE);
+
+					viewHolder.btn1.setText(R.string.add_as_friend);
+					viewHolder.btn1.setTag(mContactInfo);
 				} else {
 					viewHolder.requestLayout.setVisibility(View.GONE);
 				}
