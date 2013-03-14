@@ -194,6 +194,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					+ " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
+		if (oldVersion < 9) {
+			/*
+			 * Removing all auto recommended favorites.
+			 */
+			db.delete(DBConstants.FAVORITES_TABLE, DBConstants.FAVORITE_TYPE
+					+ "=" + FavoriteType.AUTO_RECOMMENDED_FAVORITE.ordinal(),
+					null);
+		}
 	}
 
 	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync)
