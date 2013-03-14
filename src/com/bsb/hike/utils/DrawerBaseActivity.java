@@ -389,7 +389,8 @@ public class DrawerBaseActivity extends Activity implements
 					.getContactsOfFavoriteType(FavoriteType.FRIEND,
 							HikeConstants.BOTH_VALUE, myMsisdn);
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-					FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE, myMsisdn));
+					FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE,
+					myMsisdn));
 			runOnUiThread(new Runnable() {
 
 				@Override
