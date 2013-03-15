@@ -140,7 +140,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	public String getFormattedHikeJoinTime() {
 		String format = "MMM ''yy";
 		DateFormat df = new SimpleDateFormat(format);
-		return df.format(new Date(hikeJoinTime));
+		return df.format(new Date(hikeJoinTime * 1000));
 	}
 
 	public ContactInfo(String id, String msisdn, String name, String phoneNum) {
