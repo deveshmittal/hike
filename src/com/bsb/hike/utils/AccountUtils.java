@@ -619,9 +619,9 @@ public class AccountUtils {
 		try {
 			switch (requestType) {
 			case STATUS_UPDATE:
-				requestBase = new HttpPut(base + hikeHttpRequest.getPath());
-				requestBase.addHeader(HikeConstants.STATUS_MESSAGE_HEADER,
-						hikeHttpRequest.getStatusMessage());
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
+						HTTP.DEFAULT_CONTENT_CHARSET);
 				break;
 
 			case PROFILE_PIC:

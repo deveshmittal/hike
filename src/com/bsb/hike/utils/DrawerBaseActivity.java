@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -676,10 +677,15 @@ public class DrawerBaseActivity extends Activity implements
 								}
 
 							});
-					String status = statusTxt.getText().toString()
-							.replaceAll("\n", " ");
+					String status = statusTxt.getText().toString();
 					Log.d(getClass().getSimpleName(), "Status: " + status);
-					hikeHttpRequest.setStatusMessage(status);
+					JSONObject data = new JSONObject();
+					try {
+						data.put(HikeConstants.STATUS_MESSAGE_2, status);
+					} catch (JSONException e) {
+						Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+					}
+					hikeHttpRequest.setJSONData(data);
 					mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
 					mActivityTask.hikeHTTPTask.execute(hikeHttpRequest);
 
