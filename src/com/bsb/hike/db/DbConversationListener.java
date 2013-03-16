@@ -187,7 +187,7 @@ public class DbConversationListener implements Listener {
 			mUserDb.toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
 
 			if (favoriteType != FavoriteType.REQUEST_RECEIVED
-					&& favoriteType != FavoriteType.REQUEST_REJECTED
+					&& favoriteType != FavoriteType.REQUEST_SENT_REJECTED
 					&& !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)) {
 				String requestType;
 				if (favoriteType == FavoriteType.FRIEND

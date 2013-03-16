@@ -101,7 +101,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE,
 						myMsisdn));
 				favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.REQUEST_REJECTED,
+						FavoriteType.REQUEST_SENT_REJECTED,
 						HikeConstants.BOTH_VALUE, myMsisdn));
 				Collections.sort(favoriteList);
 
@@ -112,7 +112,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						FavoriteType.REQUEST_RECEIVED,
 						HikeConstants.ON_HIKE_VALUE, myMsisdn));
 				onHikeList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.SUBSCRIBED_ONLY,
+						FavoriteType.REQUEST_RECEIVED_REJECTED,
 						HikeConstants.ON_HIKE_VALUE, myMsisdn));
 				Collections.sort(onHikeList);
 
@@ -326,7 +326,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
 		} else if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND
 				|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED
-				|| contactInfo.getFavoriteType() == FavoriteType.SUBSCRIBED_ONLY) {
+				|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
 			return FavoriteAdapterViewType.RECENT.ordinal();
 		}
 		return FavoriteAdapterViewType.FAVORITE.ordinal();

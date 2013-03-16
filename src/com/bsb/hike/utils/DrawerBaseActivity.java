@@ -357,7 +357,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 							|| (favoriteType == FavoriteType.REQUEST_SENT)) {
 						parentLayout.addToFavorite(contactInfo);
 					} else if (favoriteType == FavoriteType.NOT_FRIEND
-							|| favoriteType == FavoriteType.SUBSCRIBED_ONLY) {
+							|| favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED) {
 						parentLayout.removeFromFavorite(contactInfo);
 					}
 				}

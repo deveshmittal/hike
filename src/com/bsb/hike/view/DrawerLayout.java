@@ -253,7 +253,7 @@ public class DrawerLayout extends RelativeLayout implements
 		if (menuItem.getItemId() == R.id.remove_fav) {
 			FavoriteType favoriteType;
 			if(contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
-				favoriteType = FavoriteType.SUBSCRIBED_ONLY;
+				favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
 			} else {
 				favoriteType = FavoriteType.NOT_FRIEND;
 			}

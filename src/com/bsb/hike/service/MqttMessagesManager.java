@@ -578,7 +578,7 @@ public class MqttMessagesManager {
 			}
 			FavoriteType currentType = contactInfo.getFavoriteType();
 			FavoriteType favoriteType = (currentType == FavoriteType.NOT_FRIEND
-					|| currentType == FavoriteType.SUBSCRIBED_ONLY || currentType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.REQUEST_RECEIVED
+					|| currentType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.REQUEST_RECEIVED
 					: FavoriteType.FRIEND;
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
 					contactInfo, favoriteType);
@@ -707,8 +707,8 @@ public class MqttMessagesManager {
 			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
 				return;
 			}
-			FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.SUBSCRIBED_ONLY ? FavoriteType.NOT_FRIEND
-					: FavoriteType.REQUEST_REJECTED;
+			FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED ? FavoriteType.NOT_FRIEND
+					: FavoriteType.REQUEST_SENT_REJECTED;
 			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(
 					contactInfo, favoriteType);
 			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);

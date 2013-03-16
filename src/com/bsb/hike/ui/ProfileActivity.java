@@ -363,7 +363,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		}
 		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND)
 				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
-				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_REJECTED)
+				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
 				&& (contactInfo.isOnhike())) {
 			profileItems.addAll(HikeConversationsDatabase.getInstance()
 					.getStatusMessages(false, mLocalMSISDN));
@@ -1271,7 +1271,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private void respondToFriendRequest(ContactInfo contactInfo,
 			boolean accepted) {
 		FavoriteType favoriteType = accepted ? FavoriteType.FRIEND
-				: FavoriteType.SUBSCRIBED_ONLY;
+				: FavoriteType.REQUEST_RECEIVED_REJECTED;
 		contactInfo.setFavoriteType(favoriteType);
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(
 				contactInfo, favoriteType);

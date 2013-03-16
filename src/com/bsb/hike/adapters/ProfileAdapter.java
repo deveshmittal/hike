@@ -261,7 +261,7 @@ public class ProfileAdapter extends BaseAdapter {
 					viewHolder.btn1.setText(R.string.confirm);
 					viewHolder.btn1.setTag(mContactInfo);
 					viewHolder.btn2.setTag(mContactInfo);
-				} else if (mContactInfo.getFavoriteType() == FavoriteType.SUBSCRIBED_ONLY) {
+				} else if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
 					viewHolder.requestLayout.setVisibility(View.VISIBLE);
 					viewHolder.requestInfo.setVisibility(View.GONE);
 					viewHolder.requestMain.setVisibility(View.GONE);
