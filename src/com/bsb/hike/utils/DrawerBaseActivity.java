@@ -517,6 +517,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		statusTxt.setHint(statusHint);
 
 		statusTxt.setText(mActivityTask.status);
+		statusTxt.setSelection(statusTxt.length());
 
 		charCounter.setText(Integer
 				.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
