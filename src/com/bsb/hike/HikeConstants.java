@@ -308,6 +308,8 @@ public class HikeConstants {
 	public static final int MAX_NUX_CONTACTS = 30;
 	public static final int MAX_PRECHECKED_CONTACTS = 15;
 
+	public static final int MAX_TWITTER_POST_LENGTH = 140;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

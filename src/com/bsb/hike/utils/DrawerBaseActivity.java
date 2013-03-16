@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Pair;
@@ -517,7 +518,9 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 		statusTxt.setText(mActivityTask.status);
 
-		charCounter.setText(Integer.toString(statusTxt.length()));
+		charCounter.setText(Integer
+				.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
+						- statusTxt.length()));
 
 		statusTxt.addTextChangedListener(new TextWatcher() {
 
@@ -534,7 +537,9 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			@Override
 			public void afterTextChanged(Editable s) {
 				titleBtn.setEnabled(s.toString().trim().length() > 0);
-				charCounter.setText(Integer.toString(s.length()));
+				charCounter.setText(Integer
+						.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
+								- s.length()));
 			}
 		});
 
@@ -620,7 +625,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 					startFBAuth(false);
 					break;
 				case R.id.post_twitter_btn:
-					v.setSelected(!v.isSelected());
+					setSelectionSocialButton(false, !v.isSelected());
+
 					if (!v.isSelected()
 							|| preferences.getBoolean(
 									HikeMessengerApp.TWITTER_AUTH_COMPLETE,
@@ -755,6 +761,24 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		View v = statusDialog.findViewById(facebook ? R.id.post_fb_btn
 				: R.id.post_twitter_btn);
 		v.setSelected(selection);
+		if (!facebook) {
+			setCharCountForStatus(statusDialog.findViewById(R.id.char_counter),
+					(EditText) statusDialog.findViewById(R.id.status_txt),
+					v.isSelected());
+		}
+	}
+
+	private void setCharCountForStatus(View charCounter, EditText statusTxt,
+			boolean isSelected) {
+		charCounter.setVisibility(isSelected ? View.VISIBLE : View.INVISIBLE);
+
+		if (isSelected) {
+			statusTxt
+					.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
+							HikeConstants.MAX_TWITTER_POST_LENGTH) });
+		} else {
+			statusTxt.setFilters(new InputFilter[] {});
+		}
 	}
 
 	@Override
