@@ -80,7 +80,8 @@
             android:background="@null"
             android:textSize="18sp"
             android:hint="@string/whats_up_user"
-            android:textColor="@color/subtext" />
+            android:textColor="@color/subtext"
+            android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|" />
 
         <ImageView
             android:id="@+id/img_inserted"
