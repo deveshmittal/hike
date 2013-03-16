@@ -36,6 +36,7 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 public class AuthSocialAccountBaseActivity extends Activity implements
 		DialogListener, TwitterAuthListener {
 
+	public static final int FB_AUTH_REQUEST_CODE = 64206;
 	private static final String CALLBACK_URL = "http://get.hike.in/";
 
 	private HikeHTTPTask hikeHTTPTask;

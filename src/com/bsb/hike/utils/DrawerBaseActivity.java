@@ -61,6 +61,7 @@ import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.MessagesList;
+import com.bsb.hike.ui.TwitterAuthActivity;
 import com.bsb.hike.view.DrawerLayout;
 import com.bsb.hike.view.DrawerLayout.CurrentState;
 
@@ -87,7 +88,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			HikePubSub.CONTACT_ADDED, HikePubSub.REFRESH_FAVORITES,
 			HikePubSub.REFRESH_RECENTS, HikePubSub.SHOW_STATUS_DIALOG,
 			HikePubSub.MY_STATUS_CHANGED, HikePubSub.FRIEND_REQUEST_ACCEPTED,
-			HikePubSub.REJECT_FRIEND_REQUEST };
+			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.SOCIAL_AUTH_COMPLETED,
+			HikePubSub.SOCIAL_AUTH_FAILED };
 
 	private class ActivityTask {
 		boolean showingStatusDialog = false;
@@ -271,7 +273,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 	}
 
 	@Override
-	public void onEventReceived(String type, final Object object) {
+	public void onEventReceived(final String type, final Object object) {
 		if (HikePubSub.SMS_CREDIT_CHANGED.equals(type)) {
 			final int credits = (Integer) object;
 			runOnUiThread(new Runnable() {
@@ -423,6 +425,17 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				@Override
 				public void run() {
 					parentLayout.updateStatus(status);
+				}
+			});
+		} else if (HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type)
+				|| HikePubSub.SOCIAL_AUTH_FAILED.equals(type)) {
+			final boolean facebook = (Boolean) object;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setSelectionSocialButton(facebook,
+							HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type));
 				}
 			});
 		}
@@ -597,8 +610,25 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				// startActivityForResult(chooserIntent, IMAGE_PICK_CODE);
 				// break;
 				case R.id.post_fb_btn:
+					v.setSelected(!v.isSelected());
+					if (!v.isSelected()
+							|| preferences.getBoolean(
+									HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
+									false)) {
+						return;
+					}
+					startFBAuth(false);
+					break;
 				case R.id.post_twitter_btn:
 					v.setSelected(!v.isSelected());
+					if (!v.isSelected()
+							|| preferences.getBoolean(
+									HikeMessengerApp.TWITTER_AUTH_COMPLETE,
+									false)) {
+						return;
+					}
+					startActivity(new Intent(DrawerBaseActivity.this,
+							TwitterAuthActivity.class));
 					break;
 				case R.id.title_icon:
 					HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
@@ -677,13 +707,22 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 							});
 					String status = statusTxt.getText().toString();
+
+					boolean facebook = statusDialog.findViewById(
+							R.id.post_fb_btn).isSelected();
+					boolean twitter = statusDialog.findViewById(
+							R.id.post_twitter_btn).isSelected();
+
 					Log.d(getClass().getSimpleName(), "Status: " + status);
 					JSONObject data = new JSONObject();
 					try {
 						data.put(HikeConstants.STATUS_MESSAGE_2, status);
+						data.put(HikeConstants.FACEBOOK_STATUS, facebook);
+						data.put(HikeConstants.TWITTER_STATUS, twitter);
 					} catch (JSONException e) {
 						Log.w(getClass().getSimpleName(), "Invalid JSON", e);
 					}
+
 					hikeHttpRequest.setJSONData(data);
 					mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
 					mActivityTask.hikeHTTPTask.execute(hikeHttpRequest);
@@ -706,6 +745,15 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			showFilePreview();
 		}
 		toggleEnablePostButton();
+	}
+
+	private void setSelectionSocialButton(boolean facebook, boolean selection) {
+		if (statusDialog == null || !statusDialog.isShowing()) {
+			return;
+		}
+		View v = statusDialog.findViewById(facebook ? R.id.post_fb_btn
+				: R.id.post_twitter_btn);
+		v.setSelected(selection);
 	}
 
 	@Override
@@ -776,8 +824,11 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			mActivityTask.filePath = filePath;
 			showFilePreview();
 		} else if (resultCode == RESULT_CANCELED) {
-			clearTempData();
-			Log.d(getClass().getSimpleName(), "File transfer Cancelled");
+			if (requestCode == AuthSocialAccountBaseActivity.FB_AUTH_REQUEST_CODE) {
+				setSelectionSocialButton(true, false);
+			} else {
+				clearTempData();
+			}
 		}
 	}
 

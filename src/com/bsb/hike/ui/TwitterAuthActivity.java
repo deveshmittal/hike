@@ -27,6 +27,13 @@ public class TwitterAuthActivity extends AuthSocialAccountBaseActivity
 	}
 
 	@Override
+	public void onBackPressed() {
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
+				false);
+		super.onBackPressed();
+	}
+
+	@Override
 	public void onEventReceived(String type, Object object) {
 		if (HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type)
 				|| HikePubSub.SOCIAL_AUTH_FAILED.equals(type)) {
