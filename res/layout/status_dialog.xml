@@ -70,7 +70,7 @@
             android:textSize="16sp"
             android:textStyle="bold|italic" />
 
-        <EditText
+        <com.bsb.hike.view.CustomFontEditText
             android:id="@+id/status_txt"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
