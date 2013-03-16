@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import twitter4j.auth.AccessToken;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -32,7 +33,7 @@ import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
+public class AuthSocialAccountBaseActivity extends Activity implements
 		DialogListener, TwitterAuthListener {
 
 	private static final String CALLBACK_URL = "http://get.hike.in/";

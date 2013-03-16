@@ -31,14 +31,13 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.AsyncFacebookRunner.RequestListener;
 import com.facebook.android.FacebookError;
 
-public class CreditsActivity extends AuthSocialAccountBaseActivity implements
-		Listener {
+public class CreditsActivity extends DrawerBaseActivity implements Listener {
 	private TextView mTitleView;
 	private ViewGroup creditsContainer;
 	private SharedPreferences settings;

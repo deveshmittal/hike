@@ -25,15 +25,14 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 
-public class TellAFriend extends AuthSocialAccountBaseActivity implements
-		OnClickListener {
+public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 
 	private boolean facebookPostPopupShowing = false;
 

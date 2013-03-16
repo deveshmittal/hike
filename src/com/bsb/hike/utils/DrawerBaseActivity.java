@@ -7,7 +7,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -65,7 +64,7 @@ import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.view.DrawerLayout;
 import com.bsb.hike.view.DrawerLayout.CurrentState;
 
-public class DrawerBaseActivity extends Activity implements
+public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		DrawerLayout.Listener, HikePubSub.Listener {
 
 	private static final int IMAGE_PICK_CODE = 1991;
