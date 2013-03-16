@@ -661,7 +661,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 											0, mappedId, msisdn, name, text,
 											StatusMessageType.TEXT, time);
 									HikeConversationsDatabase.getInstance()
-											.addStatusMessage(statusMessage, true);
+											.addStatusMessage(statusMessage,
+													true);
 
 									int unseenUserStatusCount = preferences
 											.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
