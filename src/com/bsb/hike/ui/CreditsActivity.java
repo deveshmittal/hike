@@ -75,8 +75,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 	private DeleteSocialCredentialsTask deleteSocialCredentialsTask;
 
 	private String[] pubSubListeners = { HikePubSub.SMS_CREDIT_CHANGED,
-			HikePubSub.INVITEE_NUM_CHANGED, HikePubSub.REMOVE_TWITTER_VIEW,
-			HikePubSub.SOCIAL_AUTH_COMPLETED };
+			HikePubSub.INVITEE_NUM_CHANGED, HikePubSub.SOCIAL_AUTH_COMPLETED };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,13 +84,6 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		currentOffset = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? OFFSET_PORTRAIT
 				: OFFSET_LANDSCAPE;
-
-		if (savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE)) {
-			onTwitterClick(null);
-			return;
-		}
 
 		initalizeViews(savedInstanceState);
 
@@ -223,7 +215,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 
 	public void onTwitterClick(View v) {
 		if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
-			startTwitterAuth(true);
+			startActivity(new Intent(this, TwitterAuthActivity.class));
 		} else {
 			showCredentialUnlinkAlert(false);
 		}
@@ -290,15 +282,6 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 				@Override
 				public void run() {
 					updateCredits();
-				}
-			});
-		} else if (HikePubSub.REMOVE_TWITTER_VIEW.equals(type)) {
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					initalizeViews(null);
-					twitterOAuthView = null;
 				}
 			});
 		} else if (HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type)) {

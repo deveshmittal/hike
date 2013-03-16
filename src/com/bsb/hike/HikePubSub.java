@@ -170,7 +170,7 @@ public class HikePubSub implements Runnable {
 
 	public static final String SOCIAL_AUTH_COMPLETED = "socialAuthCompleted";
 
-	public static final String REMOVE_TWITTER_VIEW = "removeTwitterView";
+	public static final String SOCIAL_AUTH_FAILED = "socialAuthFailed";
 
 	public static final String FREE_SMS_TOGGLED = "freeSMSToggled";
 
