@@ -533,7 +533,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				titleBtn.setEnabled(s.length() > 0);
+				titleBtn.setEnabled(s.toString().trim().length() > 0);
 				charCounter.setText(Integer.toString(s.length()));
 			}
 		});
