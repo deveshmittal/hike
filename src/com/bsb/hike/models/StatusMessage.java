@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.ocpsoft.pretty.time.PrettyTime;
 
 public class StatusMessage {
@@ -24,6 +25,8 @@ public class StatusMessage {
 	private String text;
 	private StatusMessageType statusMessageType;
 	private long timeStamp;
+	private int moodId;
+	private int timeOfDay;
 
 	public StatusMessage(JSONObject statusMessageJson) {
 		this.msisdn = statusMessageJson.optString(HikeConstants.FROM);
@@ -41,10 +44,19 @@ public class StatusMessage {
 			this.statusMessageType = StatusMessageType.TEXT;
 			this.text = data.optString(HikeConstants.STATUS_MESSAGE);
 		}
+		this.moodId = data.optInt(HikeConstants.MOOD) - 1;
+		this.timeOfDay = data.optInt(HikeConstants.TIME_OF_DAY);
 	}
 
 	public StatusMessage(long id, String mappedId, String msisdn, String name,
 			String text, StatusMessageType statusMessageType, long timeStamp) {
+		this(id, mappedId, msisdn, name, text, statusMessageType, timeStamp,
+				-1, 0);
+	}
+
+	public StatusMessage(long id, String mappedId, String msisdn, String name,
+			String text, StatusMessageType statusMessageType, long timeStamp,
+			int moodId, int timeOfDay) {
 		this.id = id;
 		this.mappedId = mappedId;
 		this.msisdn = msisdn;
@@ -52,6 +64,8 @@ public class StatusMessage {
 		this.text = text;
 		this.statusMessageType = statusMessageType;
 		this.timeStamp = timeStamp;
+		this.moodId = moodId;
+		this.timeOfDay = timeOfDay;
 	}
 
 	public void setId(long id) {
@@ -92,6 +106,18 @@ public class StatusMessage {
 
 	public long getTimeStamp() {
 		return timeStamp;
+	}
+
+	public boolean hasMood() {
+		return (moodId > -1 && moodId < EmoticonConstants.MOOD_RES_IDS.length);
+	}
+
+	public int getMoodId() {
+		return moodId;
+	}
+
+	public int getTimeOfDay() {
+		return timeOfDay;
 	}
 
 	public String getTimestampFormatted(boolean pretty) {
