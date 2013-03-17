@@ -136,6 +136,11 @@ public class MqttMessagesManager {
 			boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED
 					.equals(type);
 			if (joined) {
+				long joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
+				if (joinTime > 0) {
+					userDb.setHikeJoinTime(msisdn, joinTime);
+				}
+
 				saveStatusMsg(jsonObj, msisdn);
 
 				List<String> groupConversations = convDb
