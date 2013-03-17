@@ -10,28 +10,37 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/seen_timeline_selector"
-        android:padding="15dp" >
+        android:padding="10dp" >
 
         <ImageView
             android:id="@+id/avatar"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginRight="15dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:onClick="onDetailsBtnClick"
             android:src="@drawable/ic_avatar1" />
 
-        <ImageView
-            android:id="@+id/status_type"
-            android:layout_width="21dp"
-            android:layout_height="21dp"
-            android:layout_alignLeft="@id/avatar"
+        <LinearLayout
+            android:id="@+id/type_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@id/avatar"
             android:layout_alignTop="@id/avatar"
-            android:layout_marginLeft="37dp"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/bg_status_type"
-            android:paddingBottom="3dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_pic_status" />
+            android:layout_toRightOf="@id/avatar"
+            android:gravity="center" >
+
+            <ImageView
+                android:id="@+id/status_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/avatar"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_toRightOf="@id/avatar"
+                android:background="@drawable/bg_status_type"
+                android:paddingBottom="3dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_pic_status" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/side_content"
@@ -69,7 +78,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
             android:layout_toLeftOf="@id/side_content"
-            android:layout_toRightOf="@id/avatar"
+            android:layout_toRightOf="@id/type_container"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
@@ -119,7 +128,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/details_content"
             android:layout_marginTop="5dp"
-            android:layout_toRightOf="@id/avatar"
+            android:layout_toRightOf="@id/type_container"
             android:gravity="center"
             android:orientation="horizontal" >
 
