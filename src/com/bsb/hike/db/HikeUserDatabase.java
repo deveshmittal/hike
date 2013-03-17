@@ -884,15 +884,107 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList() {
-		List<ContactInfo> contactList = getContacts();
+		String blockedMsisdnColumnName = "blk";
+
+		String query = "SELECT " + DBConstants.USERS_TABLE + "."
+				+ DBConstants.MSISDN + ", " + DBConstants.ID + ", "
+				+ DBConstants.NAME + ", " + DBConstants.ONHIKE + ", "
+				+ DBConstants.PHONE + ", " + DBConstants.MSISDN_TYPE + ", "
+				+ DBConstants.HAS_CUSTOM_PHOTO + ", "
+				+ DBConstants.LAST_MESSAGED + ", " + DBConstants.BLOCK_TABLE
+				+ "." + DBConstants.MSISDN + " AS " + blockedMsisdnColumnName
+				+ " FROM " + DBConstants.BLOCK_TABLE + " LEFT OUTER JOIN "
+				+ DBConstants.USERS_TABLE + " ON " + DBConstants.BLOCK_TABLE
+				+ "." + DBConstants.MSISDN + " = " + DBConstants.USERS_TABLE
+				+ "." + DBConstants.MSISDN;
+
+		Cursor c = mDb.rawQuery(query, null);
+
+		int idx = c.getColumnIndex(DBConstants.ID);
+		int userMsisdnIdx = c.getColumnIndex(DBConstants.USERS_TABLE + "."
+				+ DBConstants.MSISDN);
+		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		int blockedMsisdnIdx = c.getColumnIndex(blockedMsisdnColumnName);
+		int nameIdx = c.getColumnIndex(DBConstants.NAME);
+		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+		int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+		int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+
+		Set<String> msisdnSet = null;
+
+		msisdnSet = new HashSet<String>();
+
 		List<Pair<AtomicBoolean, ContactInfo>> blockedContactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
-		Set<String> blockedUsers = getBlockedUsers();
-		Collections.sort(contactList);
-		for (ContactInfo contactInfo : contactList) {
+		while (c.moveToNext()) {
+			String blockedMsisdn = c.getString(blockedMsisdnIdx);
+			String userMsisdn = c.getString(userMsisdnIdx);
+
+			String msisdn = TextUtils.isEmpty(blockedMsisdn) ? userMsisdn
+					: blockedMsisdn;
+
+			if (msisdnSet.contains(msisdn)) {
+				continue;
+			}
+			msisdnSet.add(msisdn);
+
+			ContactInfo contactInfo;
+
+			if (TextUtils.isEmpty(userMsisdn)) {
+				contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
+			} else {
+				contactInfo = new ContactInfo(c.getString(idx), userMsisdn,
+						c.getString(nameIdx), c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						c.getLong(lastMessagedIdx),
+						c.getInt(hasCustomPhotoIdx) == 1);
+			}
+
 			blockedContactList.add(new Pair<AtomicBoolean, ContactInfo>(
-					new AtomicBoolean(blockedUsers.contains(contactInfo
-							.getMsisdn())), contactInfo));
+					new AtomicBoolean(true), contactInfo));
 		}
+		c.close();
+
+		String selection = DBConstants.MSISDN + " != 'null'";
+		c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
+				DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME,
+				DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE,
+				DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO },
+				selection, null, null, null, null);
+
+		while (c.moveToNext()) {
+			String msisdn = c.getString(msisdnIdx);
+			if (msisdnSet.contains(msisdn)) {
+				continue;
+			}
+			msisdnSet.add(msisdn);
+			ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+					c.getString(msisdnIdx), c.getString(nameIdx),
+					c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
+					c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx),
+					c.getInt(hasCustomPhotoIdx) == 1);
+			blockedContactList.add(new Pair<AtomicBoolean, ContactInfo>(
+					new AtomicBoolean(false), contactInfo));
+		}
+
+		Collections.sort(blockedContactList,
+				new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
+
+					@Override
+					public int compare(Pair<AtomicBoolean, ContactInfo> lhs,
+							Pair<AtomicBoolean, ContactInfo> rhs) {
+						boolean lhsBlocked = lhs.first.get();
+						boolean rhsBlocked = rhs.first.get();
+						if (lhsBlocked && !rhsBlocked) {
+							return -1;
+						} else if (rhsBlocked && !lhsBlocked) {
+							return 1;
+						} else {
+							return lhs.second.compareTo(rhs.second);
+						}
+					}
+				});
 		return blockedContactList;
 	}
 
