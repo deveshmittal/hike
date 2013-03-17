@@ -470,9 +470,15 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 		ViewGroup parent = (ViewGroup) statusDialog
 				.findViewById(R.id.parent_layout);
+
 		int screenHeight = getResources().getDisplayMetrics().heightPixels;
 		int dialogHeight = (int) (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? screenHeight / 2
 				: FrameLayout.LayoutParams.MATCH_PARENT);
+
+		if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+			dialogHeight += ((int) 20 * Utils.densityMultiplier);
+		}
+
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.MATCH_PARENT, dialogHeight);
 		lp.topMargin = (int) (5 * Utils.densityMultiplier);
