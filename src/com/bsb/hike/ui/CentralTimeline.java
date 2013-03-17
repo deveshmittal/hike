@@ -64,7 +64,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	private SharedPreferences prefs;
 
 	private String[] pubSubListeners = new String[] {
-			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED,
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
 			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
 	private String userMsisdn;
@@ -378,7 +378,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 				}
 			});
 
-		} else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
+		} else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
 			StatusMessage statusMessage = (StatusMessage) object;
 			ContactInfo contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN(statusMessage.getMsisdn(), false);

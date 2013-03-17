@@ -598,6 +598,10 @@ public class MqttMessagesManager {
 
 				pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED,
 						statusMessage);
+				pubSub.publish(HikePubSub.TIMELINE_UPDATE_RECIEVED,
+						statusMessage);
+
+				incrementUnseenStatusCount();
 			}
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
@@ -656,12 +660,13 @@ public class MqttMessagesManager {
 				return;
 			}
 
+			boolean twoWayFavorite = userDb.isContactFavorite(statusMessage
+					.getMsisdn());
 			/*
 			 * Only add updates to timeline for contacts that have a 2-way
 			 * relationship with the user.
 			 */
-			long id = convDb.addStatusMessage(statusMessage,
-					userDb.isContactFavorite(statusMessage.getMsisdn()));
+			long id = convDb.addStatusMessage(statusMessage, twoWayFavorite);
 
 			if (id == -1) {
 				Log.d(getClass().getSimpleName(),
@@ -682,7 +687,11 @@ public class MqttMessagesManager {
 						HikeConstants.THUMBNAIL);
 			}
 
-			incrementUnseenStatusCount();
+			if (twoWayFavorite) {
+				incrementUnseenStatusCount();
+				pubSub.publish(HikePubSub.TIMELINE_UPDATE_RECIEVED,
+						statusMessage);
+			}
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
 
 			String msisdn = jsonObj.getString(HikeConstants.FROM);

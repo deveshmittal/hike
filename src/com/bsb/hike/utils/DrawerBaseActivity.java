@@ -693,6 +693,9 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 							HikeMessengerApp.getPubSub().publish(
 									HikePubSub.STATUS_MESSAGE_RECEIVED,
 									statusMessage);
+							HikeMessengerApp.getPubSub().publish(
+									HikePubSub.TIMELINE_UPDATE_RECIEVED,
+									statusMessage);
 						}
 						statusTxt.setText("");
 					}
