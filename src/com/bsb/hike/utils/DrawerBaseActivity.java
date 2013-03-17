@@ -696,6 +696,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 								.optString(HikeConstants.STATUS_ID);
 						String text = data
 								.optString(HikeConstants.STATUS_MESSAGE);
+						int moodId = data.optInt(HikeConstants.MOOD) - 1;
+						int timeOfDay = data.optInt(HikeConstants.TIME_OF_DAY);
 						String msisdn = preferences.getString(
 								HikeMessengerApp.MSISDN_SETTING, "");
 						String name = preferences.getString(
@@ -704,7 +706,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 						StatusMessage statusMessage = new StatusMessage(0,
 								mappedId, msisdn, name, text,
-								StatusMessageType.TEXT, time);
+								StatusMessageType.TEXT, time, moodId, timeOfDay);
 						HikeConversationsDatabase.getInstance()
 								.addStatusMessage(statusMessage, true);
 
