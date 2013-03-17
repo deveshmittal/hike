@@ -25,6 +25,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.models.GroupParticipant;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
@@ -118,6 +119,10 @@ public class DbConversationListener implements Listener {
 			String msisdn = (String) object;
 			mUserDb.block(msisdn);
 			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
+			/*
+			 * We remove the icon for a blocked user as well.
+			 */
+			IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, blockObj);
 		} else if (HikePubSub.UNBLOCK_USER.equals(type)) {
 			String msisdn = (String) object;
