@@ -469,42 +469,55 @@ public class MqttMessagesManager {
 					JSONObject accounts = account
 							.getJSONObject(HikeConstants.ACCOUNTS);
 					if (accounts.has(HikeConstants.TWITTER)) {
-						JSONObject twitter = accounts
-								.getJSONObject(HikeConstants.TWITTER);
-						String token = twitter.getString(HikeConstants.ID);
-						String tokenSecret = twitter
-								.getString(HikeConstants.TOKEN);
-						HikeMessengerApp
-								.makeTwitterInstance(token, tokenSecret);
+						try {
+							JSONObject twitter = accounts
+									.getJSONObject(HikeConstants.TWITTER);
+							String token = twitter.getString(HikeConstants.ID);
+							String tokenSecret = twitter
+									.getString(HikeConstants.TOKEN);
+							HikeMessengerApp.makeTwitterInstance(token,
+									tokenSecret);
 
-						editor.putString(HikeMessengerApp.TWITTER_TOKEN, token);
-						editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET,
-								tokenSecret);
-						editor.putBoolean(
-								HikeMessengerApp.TWITTER_AUTH_COMPLETE, true);
+							editor.putString(HikeMessengerApp.TWITTER_TOKEN,
+									token);
+							editor.putString(
+									HikeMessengerApp.TWITTER_TOKEN_SECRET,
+									tokenSecret);
+							editor.putBoolean(
+									HikeMessengerApp.TWITTER_AUTH_COMPLETE,
+									true);
+						} catch (JSONException e) {
+							Log.w(getClass().getSimpleName(), "Unknown format for twitter", e);
+						}
 					}
 					if (accounts.has(HikeConstants.FACEBOOK)) {
-						JSONObject facebookJSON = accounts
-								.getJSONObject(HikeConstants.FACEBOOK);
-						String userId = facebookJSON
-								.getString(HikeConstants.ID);
-						String userToken = facebookJSON
-								.getString(HikeConstants.TOKEN);
-						long expires = facebookJSON
-								.getLong(HikeConstants.EXPIRES);
-						Facebook facebook = HikeMessengerApp.getFacebook();
+						try {
+							JSONObject facebookJSON = accounts
+									.getJSONObject(HikeConstants.FACEBOOK);
+							String userId = facebookJSON
+									.getString(HikeConstants.ID);
+							String userToken = facebookJSON
+									.getString(HikeConstants.TOKEN);
+							long expires = facebookJSON
+									.getLong(HikeConstants.EXPIRES);
+							Facebook facebook = HikeMessengerApp.getFacebook();
 
-						facebook.setAccessToken(userToken);
-						facebook.setAccessExpires(expires);
+							facebook.setAccessToken(userToken);
+							facebook.setAccessExpires(expires);
 
-						editor.putBoolean(
-								HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, true);
-						editor.putLong(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
-								facebook.getAccessExpires());
-						editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,
-								facebook.getAccessToken());
-						editor.putString(HikeMessengerApp.FACEBOOK_USER_ID,
-								userId);
+							editor.putBoolean(
+									HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
+									true);
+							editor.putLong(
+									HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
+									facebook.getAccessExpires());
+							editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,
+									facebook.getAccessToken());
+							editor.putString(HikeMessengerApp.FACEBOOK_USER_ID,
+									userId);
+						} catch (JSONException e) {
+							Log.w(getClass().getSimpleName(), "Unknown format for facebook", e);
+						}
 					}
 				}
 				if (account.has(HikeConstants.MUTED)) {
