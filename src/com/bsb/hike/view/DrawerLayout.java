@@ -280,10 +280,9 @@ public class DrawerLayout extends RelativeLayout implements
 		boolean rewardsOn = accountPrefs.getBoolean(
 				HikeMessengerApp.SHOW_REWARDS, false);
 
-		int[] ids = { R.id.left_drawer_home, R.id.left_drawer_group_chat,
-				R.id.left_drawer_tell_a_friend, R.id.left_drawer_free_sms,
-				R.id.left_drawer_profile, R.id.left_drawer_rewards,
-				R.id.left_drawer_settings };
+		int[] ids = { R.id.left_drawer_home, R.id.left_drawer_tell_a_friend,
+				R.id.left_drawer_free_sms, R.id.left_drawer_profile,
+				R.id.left_drawer_rewards, R.id.left_drawer_settings };
 
 		for (int i = 0; i < ids.length; i++) {
 			findViewById(ids[i]).setOnClickListener(this);
@@ -333,16 +332,6 @@ public class DrawerLayout extends RelativeLayout implements
 			intent = activity instanceof MessagesList ? null : new Intent(
 					getContext(), MessagesList.class);
 			goingBackToHome = true;
-			break;
-		case R.id.left_drawer_group_chat:
-			Utils.logEvent(getContext(),
-					HikeConstants.LogEvent.DRAWER_GROUP_CHAT);
-			intent = activity instanceof ChatThread ? null : new Intent(
-					getContext(), ChatThread.class);
-			if (intent != null) {
-				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-			}
-			handler.postDelayed(resetSidebar, 400);
 			break;
 		case R.id.left_drawer_tell_a_friend:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_INVITE);

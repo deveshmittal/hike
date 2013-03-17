@@ -81,25 +81,6 @@
                 style="@style/LeftDrawerDivider" />
 
             <RelativeLayout
-                android:id="@+id/left_drawer_group_chat"
-                style="@style/LeftDrawerItem" >
-
-                <ImageView
-                    android:id="@+id/item_icon"
-                    style="@style/LeftDrawerItemIcon"
-                    android:src="@drawable/ic_drawer_group_chat" />
-
-                <com.bsb.hike.view.CustomFontTextView
-                    android:id="@+id/item_name"
-                    style="@style/LeftDrawerItemText"
-                    android:text="@string/group_chat" />
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/divider"
-                style="@style/LeftDrawerDivider" />
-
-            <RelativeLayout
                 android:id="@+id/left_drawer_tell_a_friend"
                 style="@style/LeftDrawerItem" >
 
