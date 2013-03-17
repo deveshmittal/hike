@@ -595,45 +595,6 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			public void onClick(View v) {
 				Log.d(getClass().getSimpleName(), "Onclick event");
 				switch (v.getId()) {
-				// case R.id.insert_img_btn:
-
-				// if (Utils.getExternalStorageState() ==
-				// ExternalStorageState.NONE) {
-				// Toast.makeText(getApplicationContext(),
-				// R.string.no_external_storage,
-				// Toast.LENGTH_SHORT).show();
-				// return;
-				// }
-				//
-				// SharedPreferences prefs = getSharedPreferences(
-				// HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
-				//
-				// Intent pickIntent = new Intent();
-				// pickIntent.setType("image/*");
-				// pickIntent.setAction(Intent.ACTION_PICK);
-				//
-				// Intent newMediaFileIntent = new Intent(
-				// MediaStore.ACTION_IMAGE_CAPTURE);
-				//
-				// File selectedFile = Utils.getOutputMediaFile(
-				// HikeFileType.IMAGE, null, null);
-				//
-				// Editor editor = prefs.edit();
-				// editor.putString(HikeMessengerApp.FILE_PATH,
-				// selectedFile.getAbsolutePath());
-				// editor.commit();
-				//
-				// Intent chooserIntent = Intent.createChooser(pickIntent,
-				// "");
-				//
-				// newMediaFileIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-				// Uri.fromFile(selectedFile));
-				//
-				// chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
-				// new Intent[] { newMediaFileIntent });
-				//
-				// startActivityForResult(chooserIntent, IMAGE_PICK_CODE);
-				// break;
 				case R.id.post_fb_btn:
 					v.setSelected(!v.isSelected());
 					if (!v.isSelected()
