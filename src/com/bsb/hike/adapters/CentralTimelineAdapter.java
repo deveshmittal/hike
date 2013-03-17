@@ -14,6 +14,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.EmoticonConstants;
 
 public class CentralTimelineAdapter extends BaseAdapter {
 
@@ -142,10 +143,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.yesBtn.setVisibility(View.VISIBLE);
 			viewHolder.noBtn.setVisibility(View.VISIBLE);
 
-			viewHolder.extraInfo
-					.setText(context.getString(
-							R.string.added_as_hike_friend_info,
-							statusMessage.getNotNullName()));
+			viewHolder.extraInfo.setText(context.getString(
+					R.string.added_as_hike_friend_info,
+					statusMessage.getNotNullName()));
 			viewHolder.yesBtn.setText(R.string.confirm);
 			viewHolder.noBtn.setText(R.string.no_thanks);
 			viewHolder.statusType
@@ -195,6 +195,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					.setBackgroundResource(R.drawable.bg_status_type);
 			break;
 		}
+
+		if (statusMessage.hasMood()) {
+			viewHolder.statusImg.setBackgroundDrawable(null);
+			viewHolder.statusImg
+					.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
+							.getMoodId()]);
+		}
+
 		viewHolder.content
 				.setBackgroundResource(position >= unseenCount ? R.drawable.seen_timeline_selector
 						: R.drawable.timeline_selector);

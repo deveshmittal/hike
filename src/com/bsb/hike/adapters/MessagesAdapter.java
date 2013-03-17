@@ -51,6 +51,7 @@ import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -554,6 +555,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 				holder.image.setImageResource(R.drawable.ic_profile_pic_status);
 				holder.messageTextView.setText(R.string.changed_profile);
+			}
+			if (statusMessage.hasMood()) {
+				holder.image.setBackgroundDrawable(null);
+				holder.image
+						.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
+								.getMoodId()]);
+			} else {
+				holder.image.setBackgroundResource(R.drawable.bg_status_type);
 			}
 			holder.timestampTextView.setText(convMessage
 					.getTimestampFormatted(true));

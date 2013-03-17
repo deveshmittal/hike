@@ -23,6 +23,7 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.EmoticonConstants;
 
 @SuppressWarnings("unchecked")
 public class ProfileAdapter extends BaseAdapter {
@@ -372,6 +373,15 @@ public class ProfileAdapter extends BaseAdapter {
 					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
 				viewHolder.icon
 						.setImageResource(R.drawable.ic_profile_pic_status);
+			}
+			if (statusMessage.hasMood()) {
+				viewHolder.icon.setBackgroundDrawable(null);
+				viewHolder.icon
+						.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
+								.getMoodId()]);
+			} else {
+				viewHolder.icon
+						.setBackgroundResource(R.drawable.bg_status_type);
 			}
 			break;
 
