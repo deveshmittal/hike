@@ -1364,9 +1364,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			for (int i = 0; i < msisdns.length(); i++) {
 				String msisdn = msisdns.optString(i);
 				JSONObject msisdnInfo = favorites.optJSONObject(msisdn);
-				FavoriteType favoriteType = msisdnInfo
-						.optBoolean(HikeConstants.PENDING) ? FavoriteType.REQUEST_RECEIVED
-						: FavoriteType.FRIEND;
+
+				FavoriteType favoriteType;
+				if (msisdnInfo.has(HikeConstants.PENDING)) {
+					boolean pending = msisdnInfo
+							.optBoolean(HikeConstants.PENDING);
+					favoriteType = pending ? FavoriteType.REQUEST_RECEIVED
+							: FavoriteType.REQUEST_RECEIVED_REJECTED;
+				} else if (msisdnInfo.has(HikeConstants.REQUEST_PENDING)) {
+					boolean requestPending = msisdnInfo
+							.optBoolean(HikeConstants.REQUEST_PENDING);
+					favoriteType = requestPending ? FavoriteType.REQUEST_SENT
+							: FavoriteType.REQUEST_SENT_REJECTED;
+				} else {
+					favoriteType = FavoriteType.FRIEND;
+				}
 
 				insertStatement.bindString(
 						ih.getColumnIndex(DBConstants.MSISDN), msisdn);
