@@ -105,6 +105,12 @@ public class ProfileAdapter extends BaseAdapter {
 
 	@Override
 	public boolean isEnabled(int position) {
+		/*
+		 * We got an IndexOutOfBoundsException here.
+		 */
+		if (position >= getCount()) {
+			return false;
+		}
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 		if (viewType == ViewType.HEADER) {
 			return false;
