@@ -1981,6 +1981,13 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			public void onSuccess(JSONObject response) {
 				HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_STATUS,
 						statusId);
+				for (StatusMessage message : profileItems) {
+					if (statusId.equals(message.getMappedId())) {
+						profileItems.remove(message);
+						break;
+					}
+				}
+				profileAdapter.notifyDataSetChanged();
 			}
 
 		});
