@@ -83,7 +83,8 @@ public class HikeInviteAdapter extends
 				numView.append(" (" + contactInfo.getMsisdnType() + ")");
 			}
 		} else {
-			numView.setText(R.string.tap_here_invite);
+			numView.setText(showingBlockedList ? R.string.tap_here_block
+					: R.string.tap_here_invite);
 		}
 		numView.setVisibility(isEnabled(position) ? View.VISIBLE
 				: View.INVISIBLE);
@@ -173,9 +174,6 @@ public class HikeInviteAdapter extends
 	}
 
 	private boolean shouldShowExtraElement(String s) {
-		if (showingBlockedList) {
-			return false;
-		}
 		String pattern = "(\\+?\\d*)";
 		if (s.matches(pattern)) {
 			return true;

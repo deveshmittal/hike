@@ -287,20 +287,34 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 			}
 		} else {
 			String msisdn = ((ContactInfo) tag).getMsisdn();
-			msisdn = Utils.normalizeNumber(
-					msisdn,
-					getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-							MODE_PRIVATE).getString(
-							HikeMessengerApp.COUNTRY_CODE,
-							HikeConstants.INDIA_COUNTRY_CODE));
-			Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-			FiksuTrackingManager.uploadPurchaseEvent(this,
-					HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-					HikeConstants.CURRENCY);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-					Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
-			Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT)
-					.show();
+			if (type == Type.BLOCK) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.BLOCK_USER,
+						Utils.normalizeNumber(
+								msisdn,
+								getSharedPreferences(
+										HikeMessengerApp.ACCOUNT_SETTINGS,
+										MODE_PRIVATE).getString(
+										HikeMessengerApp.COUNTRY_CODE,
+										HikeConstants.INDIA_COUNTRY_CODE)));
+			} else {
+				msisdn = Utils.normalizeNumber(
+						msisdn,
+						getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+								MODE_PRIVATE).getString(
+								HikeMessengerApp.COUNTRY_CODE,
+								HikeConstants.INDIA_COUNTRY_CODE));
+				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
+				FiksuTrackingManager.uploadPurchaseEvent(this,
+						HikeConstants.INVITE, HikeConstants.INVITE_SENT,
+						HikeConstants.CURRENCY);
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.MQTT_PUBLISH,
+						Utils.makeHike2SMSInviteMessage(msisdn, this)
+								.serialize());
+				Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT)
+						.show();
+			}
 			finish();
 		}
 	}

@@ -426,4 +426,5 @@
 	<string name="on_hike_since">on hike since %1$s</string>
 	<string name="joined_hike_new">%1$s just joined hike, say \'Hi\' :)</string>
 	<string name="user_added_contact_as_friend">Added as a friend</string>
+	<string name="tap_here_block">Tap here to block this number</string>
 </resources>
