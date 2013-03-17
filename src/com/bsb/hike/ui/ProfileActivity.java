@@ -1886,7 +1886,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			tempStatusMessage = (StatusMessage) profileAdapter
 					.getItem(position);
 			if (tempStatusMessage == null
-					|| tempStatusMessage.getStatusMessageType() != StatusMessageType.TEXT) {
+					|| (tempStatusMessage.getStatusMessageType() != StatusMessageType.TEXT && tempStatusMessage
+							.getStatusMessageType() != StatusMessageType.PROFILE_PIC)) {
 				return false;
 			}
 

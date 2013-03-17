@@ -240,6 +240,10 @@ public class DbConversationListener implements Listener {
 		} else if (HikePubSub.DELETE_STATUS.equals(type)) {
 			String statusId = (String) object;
 			mConversationDb.deleteStatus(statusId);
+			/*
+			 * If the status also has an icon, we delete that as well.
+			 */
+			mUserDb.removeIcon(statusId);
 		} else if (HikePubSub.HIKE_JOIN_TIME_OBTAINED.equals(type)) {
 			Pair<String, Long> msisdnHikeJoinTimePair = (Pair<String, Long>) object;
 
