@@ -784,6 +784,56 @@ public class ProfileActivity extends DrawerBaseActivity implements
 									|| profileType == ProfileType.USER_PROFILE_EDIT) {
 								HikeMessengerApp.getPubSub().publish(
 										HikePubSub.PROFILE_PIC_CHANGED, null);
+
+								/*
+								 * Making the profile pic change a status
+								 * message.
+								 */
+								JSONObject data = response
+										.optJSONObject("status");
+
+								String mappedId = data
+										.optString(HikeConstants.STATUS_ID);
+								String msisdn = preferences.getString(
+										HikeMessengerApp.MSISDN_SETTING, "");
+								String name = preferences.getString(
+										HikeMessengerApp.NAME_SETTING, "");
+								long time = (long) System.currentTimeMillis() / 1000;
+
+								StatusMessage statusMessage = new StatusMessage(
+										0, mappedId, msisdn, name, "",
+										StatusMessageType.PROFILE_PIC, time,
+										-1, 0);
+								HikeConversationsDatabase.getInstance()
+										.addStatusMessage(statusMessage, true);
+
+								HikeUserDatabase.getInstance().setIcon(
+										statusMessage.getMappedId(), bytes,
+										false);
+
+								int unseenUserStatusCount = preferences
+										.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
+												0);
+								Editor editor = preferences.edit();
+								editor.putInt(
+										HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
+										++unseenUserStatusCount);
+								editor.commit();
+								/*
+								 * This would happen in the case where the user
+								 * has added a self contact and received an mqtt
+								 * message before saving this to the db.
+								 */
+								if (statusMessage.getId() != -1) {
+									HikeMessengerApp.getPubSub().publish(
+											HikePubSub.STATUS_MESSAGE_RECEIVED,
+											statusMessage);
+									HikeMessengerApp
+											.getPubSub()
+											.publish(
+													HikePubSub.TIMELINE_UPDATE_RECIEVED,
+													statusMessage);
+								}
 							}
 							if (isBackPressed) {
 								finishEditing();

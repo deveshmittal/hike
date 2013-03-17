@@ -661,7 +661,8 @@ public class AccountUtils {
 			 * We need the response to save the id of the status.
 			 */
 			if (requestType == RequestType.STATUS_UPDATE
-					|| requestType == RequestType.HIKE_JOIN_TIME) {
+					|| requestType == RequestType.HIKE_JOIN_TIME
+					|| requestType == RequestType.PROFILE_PIC) {
 				hikeHttpRequest.setResponse(obj);
 			}
 		} catch (UnsupportedEncodingException e) {
