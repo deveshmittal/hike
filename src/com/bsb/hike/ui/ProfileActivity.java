@@ -1411,7 +1411,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						groupConversation.isMuted()));
 	}
 
-	public void onProfileNegativeBtnClick(View v) {
+	public void onProfileBtn1Click(View v) {
 		if (contactInfo.isOnhike()) {
 			contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
 
@@ -1425,6 +1425,15 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		} else {
 			inviteToHike(contactInfo.getMsisdn());
 		}
+	}
+
+	public void onProfileBtn2Click(View v) {
+		contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
+
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
+				contactInfo, contactInfo.getFavoriteType());
+		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
+				favoriteToggle);
 	}
 
 	public void onEditGroupNameClick(View v) {

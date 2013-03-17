@@ -217,6 +217,8 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.text = (TextView) v.findViewById(R.id.info);
 				viewHolder.icon = (ImageView) v.findViewById(R.id.icon);
 				viewHolder.btn1 = (Button) v.findViewById(R.id.btn);
+				viewHolder.btn2 = (Button) v
+						.findViewById(R.id.add_sms_friend_btn);
 				break;
 			}
 
@@ -396,6 +398,7 @@ public class ProfileAdapter extends BaseAdapter {
 					.getMsisdn() : mContactInfo.getName();
 
 			if (mContactInfo.isOnhike()) {
+				viewHolder.btn2.setVisibility(View.GONE);
 				viewHolder.icon.setImageResource(R.drawable.ic_not_friend);
 				if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
 					viewHolder.text.setText(context.getString(
@@ -412,6 +415,9 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.text.setText(context.getString(R.string.not_on_hike,
 						contactName));
 				viewHolder.btn1.setText(R.string.invite_to_hike);
+				viewHolder.btn2
+						.setVisibility(mContactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND ? View.VISIBLE
+								: View.GONE);
 			}
 
 			break;

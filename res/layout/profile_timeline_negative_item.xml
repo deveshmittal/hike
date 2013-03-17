@@ -27,10 +27,25 @@
         android:textColor="@color/lightblack"
         android:textSize="14sp" />
 
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/btn"
-        style="@style/StatusYesBtn"
-        android:onClick="onProfileNegativeBtnClick"
-        android:text="@string/invite_to_hike" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn"
+            style="@style/StatusYesBtn"
+            android:onClick="onProfileBtn1Click"
+            android:text="@string/invite_to_hike" />
+        
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/add_sms_friend_btn"
+            style="@style/StatusNoBtn"
+            android:layout_marginLeft="10dp"
+            android:onClick="onProfileBtn2Click"
+            android:text="@string/add_as_friend" />
+
+    </LinearLayout>
 
 </LinearLayout>
