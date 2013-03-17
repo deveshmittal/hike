@@ -774,6 +774,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						}
 
 						public void onSuccess(JSONObject response) {
+							mActivityState.destFilePath = null;
 							HikeUserDatabase db = HikeUserDatabase
 									.getInstance();
 							db.setIcon(mLocalMSISDN, bytes, false);
