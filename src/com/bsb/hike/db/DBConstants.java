@@ -4,7 +4,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 10;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 11;
 
 	public static final int USERS_DATABASE_VERSION = 9;
 
@@ -123,4 +123,8 @@ public class DBConstants {
 	public static final String HIKE_JOIN_TIME = "hikeJoinTime";
 
 	public static final String SHOW_IN_TIMELINE = "showInTimeline";
+
+	public static final String MOOD_ID = "moodId";
+
+	public static final String TIME_OF_DAY = "timeOfDay";
 }

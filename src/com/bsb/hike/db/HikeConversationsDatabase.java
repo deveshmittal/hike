@@ -27,7 +27,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
@@ -126,7 +125,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
 				+ DBConstants.TIMESTAMP + " INTEGER, " + DBConstants.MESSAGE_ID
 				+ " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE
-				+ " INTEGER" + " )";
+				+ " INTEGER, " + DBConstants.MOOD_ID + " INTEGER, "
+				+ DBConstants.TIME_OF_DAY + " INTEGER" + " )";
 		;
 		db.execSQL(sql);
 	}
@@ -265,7 +265,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * Dropping the earlier status table to ensure the previous statuses (if
 		 * any) are deleted.
 		 */
-		if (oldVersion < 10) {
+		if (oldVersion < 11) {
 			String drop = "DROP TABLE " + DBConstants.STATUS_TABLE;
 			db.execSQL(drop);
 			String sql = "CREATE TABLE IF NOT EXISTS "
@@ -276,7 +276,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ " TEXT, " + DBConstants.STATUS_TYPE + " INTEGER, "
 					+ DBConstants.TIMESTAMP + " INTEGER, "
 					+ DBConstants.MESSAGE_ID + " INTEGER DEFAULT 0, "
-					+ DBConstants.SHOW_IN_TIMELINE + " INTEGER" + " )";
+					+ DBConstants.SHOW_IN_TIMELINE + " INTEGER, "
+					+ DBConstants.MOOD_ID + " INTEGER, "
+					+ DBConstants.TIME_OF_DAY + " INTEGER" + " )";
 			db.execSQL(sql);
 		}
 	}
@@ -1427,6 +1429,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				.getStatusMessageType().ordinal());
 		values.put(DBConstants.TIMESTAMP, statusMessage.getTimeStamp());
 		values.put(DBConstants.SHOW_IN_TIMELINE, showInCentralTimeline);
+		values.put(DBConstants.MOOD_ID, statusMessage.getMoodId());
+		values.put(DBConstants.TIME_OF_DAY, statusMessage.getTimeOfDay());
 
 		long id = mDb.insert(DBConstants.STATUS_TABLE, null, values);
 		statusMessage.setId(id);
@@ -1439,7 +1443,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		String[] columns = new String[] { DBConstants.STATUS_ID,
 				DBConstants.STATUS_MAPPED_ID, DBConstants.MSISDN,
 				DBConstants.STATUS_TEXT, DBConstants.STATUS_TYPE,
-				DBConstants.TIMESTAMP };
+				DBConstants.TIMESTAMP, DBConstants.MOOD_ID,
+				DBConstants.TIME_OF_DAY };
 
 		StringBuilder selection = new StringBuilder();
 
@@ -1478,6 +1483,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			int textIdx = c.getColumnIndex(DBConstants.STATUS_TEXT);
 			int typeIdx = c.getColumnIndex(DBConstants.STATUS_TYPE);
 			int tsIdx = c.getColumnIndex(DBConstants.TIMESTAMP);
+			int moodIdIdx = c.getColumnIndex(DBConstants.MOOD_ID);
+			int timeOfDayIdx = c.getColumnIndex(DBConstants.TIME_OF_DAY);
 
 			StringBuilder msisdns = null;
 			while (c.moveToNext()) {
@@ -1487,7 +1494,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						c.getLong(idIdx), c.getString(mappedIdIdx), msisdn,
 						null, c.getString(textIdx),
 						StatusMessageType.values()[c.getInt(typeIdx)],
-						c.getLong(tsIdx));
+						c.getLong(tsIdx), c.getInt(moodIdIdx),
+						c.getInt(timeOfDayIdx));
 				statusMessages.add(statusMessage);
 
 				Log.d(getClass().getSimpleName(),
