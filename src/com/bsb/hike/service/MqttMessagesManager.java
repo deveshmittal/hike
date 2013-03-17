@@ -151,6 +151,13 @@ public class MqttMessagesManager {
 			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
 			this.convDb.updateOnHikeStatus(msisdn, joined);
 
+			/*
+			 * Change the friend type since the user has now left hike
+			 */
+			if (!joined) {
+				removeOrPostponeFriendType(msisdn);
+			}
+
 			this.pubSub.publish(joined ? HikePubSub.USER_JOINED
 					: HikePubSub.USER_LEFT, msisdn);
 		} else if (HikeConstants.MqttMessageTypes.INVITE_INFO.equals(type)) // Invite
@@ -711,17 +718,21 @@ public class MqttMessagesManager {
 				.equals(type)
 				|| HikeConstants.MqttMessageTypes.REMOVE_FAVORITE.equals(type)) {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
-			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
-					false);
-			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
-				return;
-			}
-			FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED ? FavoriteType.NOT_FRIEND
-					: FavoriteType.REQUEST_SENT_REJECTED;
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(
-					contactInfo, favoriteType);
-			this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			removeOrPostponeFriendType(msisdn);
 		}
+	}
+
+	private void removeOrPostponeFriendType(String msisdn) {
+		ContactInfo contactInfo = userDb
+				.getContactInfoFromMSISDN(msisdn, false);
+		if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
+			return;
+		}
+		FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED ? FavoriteType.NOT_FRIEND
+				: FavoriteType.REQUEST_SENT_REJECTED;
+		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(
+				contactInfo, favoriteType);
+		this.pubSub.publish(HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
 	}
 
 	private void incrementUnseenStatusCount() {
