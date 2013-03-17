@@ -1156,5 +1156,72 @@
 	    <item>memaw</item>
 	    <item>meemaw</item>
 	</string-array>
+
+	<string-array name="mood_headings">
+	    <item>Food</item>
+	    <item>Sunny</item>
+	    <item>Rainy</item>
+	    <item>Sleepy</item>
+	    <item>Coffee</item>
+	    <item>Popcorn</item>
+	    <item>Gym</item>
+	    <item>Car</item>
+	    <item>Bike</item>
+	    <item>TV</item>
+	    <item>Beer</item>
+	    <item>Sick</item>
+	    <item>Game</item>
+	    <item>Music</item>
+	    <item>Reading</item>
+	    <item>Love</item>
+	    <item>Writing</item>
+	    <item>Happy</item>
+	    <item>Sad</item>
+	    <item>Confused</item>
+	    <item>OMG</item>
+	    <item>LOL</item>
+	    <item>Busy</item>
+	</string-array>	
 	
+	<string-array name="mood_prefills_morning">
+	    <item>A healthy food, for a wealthy mood!</item>
+	    <item>What a beautiful morning</item>
+	    <item>Its raining, its pouring...</item>
+	    <item>Sleeeepppyyy...</item>
+	    <item>My favorite morning pick me up.</item>
+	    <item>Movie time!</item>
+	    <item>No pain, no gain.</item>
+	    <item>On the road...</item>
+	    <item>If wheels could fly, I\'d be scooterman...</item>
+	    <item>Watching TV...</item>
+	    <item>Have no fear, I\'ve got beer...</item>
+	</string-array>
+	
+	<string-array name="mood_prefills_day">
+	    <item>Eating a delicious meal.</item>
+	    <item>What a beautiful day</item>
+	    <item>Its raining, its pouring...</item>
+	    <item>Sleeeepppyyy...</item>
+	    <item>Caffeinated...</item>
+	    <item>Movie time!</item>
+	    <item>No pain, no gain.</item>
+	    <item>On the road...</item>
+	    <item>If wheels could fly, I\'d be scooterman...</item>
+	    <item>Watching TV...</item>
+	    <item>Have no fear, I\'ve got beer...</item>
+	</string-array>
+	
+	<string-array name="mood_prefills_night">
+	    <item>Eating a delicious meal.</item>
+	    <item>What a beautiful day</item>
+	    <item>Its raining, its pouring...</item>
+	    <item>Yawnnn...</item>
+	    <item>Caffeinated...</item>
+	    <item>Movie time!</item>
+	    <item>Too fit to quit!</item>
+	    <item>On the road...</item>
+	    <item>If wheels could fly, I\'d be scooterman...</item>
+	    <item>Watching TV...</item>
+	    <item>Where there\'s life, there\'s Beer...</item>
+	</string-array>
 </resources>

@@ -68,4 +68,6 @@
     <color name="gender_unchecked">#9c9a93</color>
     <color name="profile_hint">#c7c7c5</color>
     <color name="profile_disabled">#90908e</color>
+    <color name="mood_text">#a4a4a4</color>
+    <color name="mood_selector">#f1f1ee</color>
 </resources>

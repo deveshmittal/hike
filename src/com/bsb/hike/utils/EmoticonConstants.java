@@ -635,4 +635,17 @@ public class EmoticonConstants {
 			R.drawable.e02a, R.drawable.e02b, R.drawable.e02c, R.drawable.e02d,
 			R.drawable.e02e, R.drawable.e332, R.drawable.e333, R.drawable.e24e,
 			R.drawable.e24f, R.drawable.e537 };
+
+	public static final int[] MOOD_RES_IDS = { R.drawable.mood_01_food,
+			R.drawable.mood_02_sunny, R.drawable.mood_03_rainy,
+			R.drawable.mood_04_sleepy, R.drawable.mood_05_tea,
+			R.drawable.mood_06_popcorn, R.drawable.mood_07_gym,
+			R.drawable.mood_08_car, R.drawable.mood_09_scooter,
+			R.drawable.mood_10_tv, R.drawable.mood_11_beer,
+			R.drawable.mood_12_hungover, R.drawable.mood_13_game,
+			R.drawable.mood_14_music, R.drawable.mood_15_reader,
+			R.drawable.mood_16_love, R.drawable.mood_17_write,
+			R.drawable.mood_18_happy, R.drawable.mood_19_sad,
+			R.drawable.mood_20_confused, R.drawable.mood_21_surprise,
+			R.drawable.mood_22_laugh, R.drawable.mood_23_busy };
 }

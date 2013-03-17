@@ -2,6 +2,7 @@ package com.bsb.hike.utils;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Calendar;
 import java.util.List;
 
 import org.json.JSONException;
@@ -20,6 +21,8 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
@@ -40,6 +43,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +51,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.MoodAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -65,6 +70,7 @@ import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.ui.TwitterAuthActivity;
 import com.bsb.hike.view.DrawerLayout;
 import com.bsb.hike.view.DrawerLayout.CurrentState;
+import com.bsb.hike.view.StatusDialog;
 
 public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		DrawerLayout.Listener, HikePubSub.Listener {
@@ -92,8 +98,11 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.SOCIAL_AUTH_COMPLETED,
 			HikePubSub.SOCIAL_AUTH_FAILED };
 
+	private ImageView pageSelected;
+
 	private class ActivityTask {
 		boolean showingStatusDialog = false;
+		int moodId = -1;
 		String filePath = null;
 		DownloadImageTask downloadPicasaImageTask = null;
 		Bitmap filePreview = null;
@@ -462,7 +471,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 	}
 
 	public void showStatusDialog(boolean hasSelectedFile) {
-		statusDialog = new Dialog(this, R.style.Theme_CustomDialog_Status);
+		statusDialog = new StatusDialog(this, R.style.Theme_CustomDialog_Status);
 		statusDialog.setContentView(R.layout.status_dialog);
 		LayoutParams dialogParams = statusDialog.getWindow().getAttributes();
 		dialogParams.gravity = Gravity.TOP;
@@ -509,6 +518,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				.findViewById(R.id.post_fb_btn);
 		ImageButton twitterPostBtn = (ImageButton) statusDialog
 				.findViewById(R.id.post_twitter_btn);
+		ImageButton moodBtn = (ImageButton) statusDialog
+				.findViewById(R.id.mood_btn);
 
 		final TextView charCounter = (TextView) statusDialog
 				.findViewById(R.id.char_counter);
@@ -524,6 +535,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 		statusTxt.setText(mActivityTask.status);
 		statusTxt.setSelection(statusTxt.length());
+
+		setMood(mActivityTask.moodId);
 
 		charCounter.setText(Integer
 				.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
@@ -644,107 +657,10 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 							TwitterAuthActivity.class));
 					break;
 				case R.id.title_icon:
-					HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
-							"/user/status", RequestType.STATUS_UPDATE,
-							new HikeHttpCallback() {
-
-								@Override
-								public void onSuccess(JSONObject response) {
-									if (progressDialog != null) {
-										progressDialog.dismiss();
-										progressDialog = null;
-									}
-									JSONObject data = response
-											.optJSONObject("data");
-
-									String mappedId = data
-											.optString(HikeConstants.STATUS_ID);
-									String text = data
-											.optString(HikeConstants.STATUS_MESSAGE);
-									String msisdn = preferences
-											.getString(
-													HikeMessengerApp.MSISDN_SETTING,
-													"");
-									String name = preferences.getString(
-											HikeMessengerApp.NAME_SETTING, "");
-									long time = (long) System
-											.currentTimeMillis() / 1000;
-
-									StatusMessage statusMessage = new StatusMessage(
-											0, mappedId, msisdn, name, text,
-											StatusMessageType.TEXT, time);
-									HikeConversationsDatabase.getInstance()
-											.addStatusMessage(statusMessage,
-													true);
-
-									int unseenUserStatusCount = preferences
-											.getInt(HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
-													0);
-									Editor editor = preferences.edit();
-									editor.putString(
-											HikeMessengerApp.LAST_STATUS, text);
-									editor.putInt(
-											HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
-											++unseenUserStatusCount);
-									editor.commit();
-
-									HikeMessengerApp.getPubSub().publish(
-											HikePubSub.MY_STATUS_CHANGED, text);
-									statusDialog.cancel();
-
-									/*
-									 * This would happen in the case where the
-									 * user has added a self contact and
-									 * received an mqtt message before saving
-									 * this to the db.
-									 */
-									if (statusMessage.getId() != -1) {
-										HikeMessengerApp
-												.getPubSub()
-												.publish(
-														HikePubSub.STATUS_MESSAGE_RECEIVED,
-														statusMessage);
-									}
-									statusTxt.setText("");
-								}
-
-								@Override
-								public void onFailure() {
-									if (progressDialog != null) {
-										progressDialog.dismiss();
-										progressDialog = null;
-									}
-									Toast.makeText(getApplicationContext(),
-											R.string.update_status_fail,
-											Toast.LENGTH_SHORT).show();
-								}
-
-							});
-					String status = statusTxt.getText().toString();
-
-					boolean facebook = statusDialog.findViewById(
-							R.id.post_fb_btn).isSelected();
-					boolean twitter = statusDialog.findViewById(
-							R.id.post_twitter_btn).isSelected();
-
-					Log.d(getClass().getSimpleName(), "Status: " + status);
-					JSONObject data = new JSONObject();
-					try {
-						data.put(HikeConstants.STATUS_MESSAGE_2, status);
-						data.put(HikeConstants.FACEBOOK_STATUS, facebook);
-						data.put(HikeConstants.TWITTER_STATUS, twitter);
-					} catch (JSONException e) {
-						Log.w(getClass().getSimpleName(), "Invalid JSON", e);
-					}
-
-					hikeHttpRequest.setJSONData(data);
-					mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
-					mActivityTask.hikeHTTPTask.execute(hikeHttpRequest);
-
-					progressDialog = ProgressDialog.show(
-							DrawerBaseActivity.this, null, getResources()
-									.getString(R.string.updating_status));
-
+					postStatus();
+					break;
+				case R.id.mood_btn:
+					showMoodSelector();
 					break;
 				}
 			}
@@ -754,11 +670,111 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		fbPostBtn.setOnClickListener(statusDialogListener);
 		twitterPostBtn.setOnClickListener(statusDialogListener);
 		titleBtn.setOnClickListener(statusDialogListener);
+		moodBtn.setOnClickListener(statusDialogListener);
 
 		if (hasSelectedFile) {
 			showFilePreview();
 		}
 		toggleEnablePostButton();
+	}
+
+	private void postStatus() {
+		final EditText statusTxt = (EditText) statusDialog
+				.findViewById(R.id.status_txt);
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/user/status",
+				RequestType.STATUS_UPDATE, new HikeHttpCallback() {
+
+					@Override
+					public void onSuccess(JSONObject response) {
+						if (progressDialog != null) {
+							progressDialog.dismiss();
+							progressDialog = null;
+						}
+						JSONObject data = response.optJSONObject("data");
+
+						String mappedId = data
+								.optString(HikeConstants.STATUS_ID);
+						String text = data
+								.optString(HikeConstants.STATUS_MESSAGE);
+						String msisdn = preferences.getString(
+								HikeMessengerApp.MSISDN_SETTING, "");
+						String name = preferences.getString(
+								HikeMessengerApp.NAME_SETTING, "");
+						long time = (long) System.currentTimeMillis() / 1000;
+
+						StatusMessage statusMessage = new StatusMessage(0,
+								mappedId, msisdn, name, text,
+								StatusMessageType.TEXT, time);
+						HikeConversationsDatabase.getInstance()
+								.addStatusMessage(statusMessage, true);
+
+						int unseenUserStatusCount = preferences.getInt(
+								HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+						Editor editor = preferences.edit();
+						editor.putString(HikeMessengerApp.LAST_STATUS, text);
+						editor.putInt(
+								HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
+								++unseenUserStatusCount);
+						editor.commit();
+
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.MY_STATUS_CHANGED, text);
+						statusDialog.cancel();
+
+						/*
+						 * This would happen in the case where the user has
+						 * added a self contact and received an mqtt message
+						 * before saving this to the db.
+						 */
+						if (statusMessage.getId() != -1) {
+							HikeMessengerApp.getPubSub().publish(
+									HikePubSub.STATUS_MESSAGE_RECEIVED,
+									statusMessage);
+						}
+						statusTxt.setText("");
+					}
+
+					@Override
+					public void onFailure() {
+						if (progressDialog != null) {
+							progressDialog.dismiss();
+							progressDialog = null;
+						}
+						Toast.makeText(getApplicationContext(),
+								R.string.update_status_fail, Toast.LENGTH_SHORT)
+								.show();
+						mActivityTask.hikeHTTPTask = null;
+					}
+
+				});
+		String status = statusTxt.getText().toString();
+
+		boolean facebook = statusDialog.findViewById(R.id.post_fb_btn)
+				.isSelected();
+		boolean twitter = statusDialog.findViewById(R.id.post_twitter_btn)
+				.isSelected();
+
+		Log.d(getClass().getSimpleName(), "Status: " + status);
+		JSONObject data = new JSONObject();
+		try {
+			data.put(HikeConstants.STATUS_MESSAGE_2, status);
+			data.put(HikeConstants.FACEBOOK_STATUS, facebook);
+			data.put(HikeConstants.TWITTER_STATUS, twitter);
+			if (mActivityTask.moodId != -1) {
+				data.put(HikeConstants.MOOD, mActivityTask.moodId + 1);
+				data.put(HikeConstants.TIME_OF_DAY, getTimeOfDay());
+			}
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		Log.d(getClass().getSimpleName(), "JSON: " + data);
+
+		hikeHttpRequest.setJSONData(data);
+		mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
+		mActivityTask.hikeHTTPTask.execute(hikeHttpRequest);
+
+		progressDialog = ProgressDialog.show(DrawerBaseActivity.this, null,
+				getResources().getString(R.string.updating_status));
 	}
 
 	private void setSelectionSocialButton(boolean facebook, boolean selection) {
@@ -786,6 +802,113 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		} else {
 			statusTxt.setFilters(new InputFilter[] {});
 		}
+	}
+
+	private void showMoodSelector() {
+		if (statusDialog == null || !statusDialog.isShowing()) {
+			return;
+		}
+		ViewGroup moodParent = (ViewGroup) statusDialog
+				.findViewById(R.id.mood_parent);
+		final ViewGroup pageIndicatorContainer = (ViewGroup) statusDialog
+				.findViewById(R.id.page_indicator_container);
+		ViewPager moodPager = (ViewPager) statusDialog
+				.findViewById(R.id.mood_pager);
+
+		moodParent.setVisibility(View.VISIBLE);
+
+		MoodAdapter moodAdapter = new MoodAdapter(this);
+		moodPager.setAdapter(moodAdapter);
+
+		int indicatorCount = moodAdapter.getCount();
+		int rightMargin = (int) (5 * Utils.densityMultiplier);
+		int indicatorSize = (int) (5 * Utils.densityMultiplier);
+
+		pageIndicatorContainer.removeAllViews();
+
+		for (int i = 0; i < indicatorCount; i++) {
+			ImageView iv = new ImageView(this);
+			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+					indicatorSize, indicatorSize);
+
+			if (i != indicatorCount - 1) {
+				layoutParams.rightMargin = rightMargin;
+			}
+
+			iv.setLayoutParams(layoutParams);
+			iv.setImageResource(i == 0 ? R.drawable.mood_page_indicator_selected
+					: R.drawable.mood_page_indicator_unselected);
+
+			if (i == 0) {
+				pageSelected = iv;
+			}
+
+			iv.setId(i);
+			pageIndicatorContainer.addView(iv);
+		}
+
+		moodPager.setOnPageChangeListener(new OnPageChangeListener() {
+			@Override
+			public void onPageSelected(int pageNum) {
+				ImageView iv = (ImageView) pageIndicatorContainer
+						.findViewById(pageNum);
+
+				iv.setImageResource(R.drawable.mood_page_indicator_selected);
+				pageSelected
+						.setImageResource(R.drawable.mood_page_indicator_unselected);
+
+				pageSelected = iv;
+			}
+
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {
+			}
+
+			@Override
+			public void onPageScrollStateChanged(int arg0) {
+			}
+		});
+	}
+
+	public void setMood(int moodId) {
+		if (statusDialog == null || moodId == -1) {
+			return;
+		}
+		mActivityTask.moodId = moodId;
+
+		EditText statusTxt = (EditText) statusDialog
+				.findViewById(R.id.status_txt);
+		ImageView avatar = (ImageView) statusDialog.findViewById(R.id.avatar);
+		avatar.setImageResource(EmoticonConstants.MOOD_RES_IDS[moodId]);
+
+		int timeOfDay = getTimeOfDay();
+		String[] prefillTextArray;
+		if (timeOfDay == 1) {
+			prefillTextArray = getResources().getStringArray(
+					R.array.mood_prefills_morning);
+		} else if (timeOfDay == 2) {
+			prefillTextArray = getResources().getStringArray(
+					R.array.mood_prefills_day);
+		} else {
+			prefillTextArray = getResources().getStringArray(
+					R.array.mood_prefills_night);
+		}
+
+		if (moodId < prefillTextArray.length && statusTxt.length() == 0) {
+			statusTxt.setText(prefillTextArray[moodId]);
+			statusTxt.setSelection(0, statusTxt.length());
+		}
+		statusDialog.onBackPressed();
+	}
+
+	private int getTimeOfDay() {
+		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+		if (hour >= 4 && hour < 12) {
+			return 1;
+		} else if (hour >= 12 && hour < 8) {
+			return 2;
+		}
+		return 3;
 	}
 
 	@Override
