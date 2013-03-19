@@ -38,6 +38,8 @@
             android:layout_marginRight="4dp"
             android:paddingTop="8dp"
             android:paddingBottom="9dp"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
             android:src="@drawable/add_fav"
             android:visibility="gone" />
         
