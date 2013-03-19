@@ -98,6 +98,7 @@ public class HikeConstants {
 	public static final String LED_PREF = "ledPref";
 	public static final String NATIVE_JINGLE_PREF = "jinglePref";
 	public static final String SSL_PREF = "sslPref";
+	public static final String STATUS_PREF = "statusPref";
 	public static final String HIKEBOT = "TD-HIKE";
 
 	public static final String DONE = "Done";
