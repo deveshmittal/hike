@@ -338,7 +338,6 @@
 	<string name="post_status">Statusmeldung posten</string>
 	<string name="owner">Besitzer</string>
 	<string name="on_sms">per SMS</string>
-	<string name="default_status">Tippen, um Status zu aktualisieren...</string>
 	<string name="update_status_fail">Status aktualisieren fehlgeschlagen</string>
 	<string name="no_friends">Auf plus tippen, um Freundschaftsanfrage zu senden.</string>
 	<string name="contacts_on_hike">KONTAKTE BEI HIKE</string>

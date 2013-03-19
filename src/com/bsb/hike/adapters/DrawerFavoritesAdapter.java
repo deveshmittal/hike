@@ -8,14 +8,17 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ImageSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -379,6 +382,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						.inflate(R.layout.status_item, null);
 				viewHolder.text = (TextView) convertView
 						.findViewById(R.id.status_text);
+				viewHolder.textInfo = (TextView) convertView
+						.findViewById(R.id.status_text_info);
 				viewHolder.avatarImg = (ImageView) convertView
 						.findViewById(R.id.avatar);
 				break;
@@ -419,8 +424,21 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		switch (viewType) {
 		case STATUS:
-			// set the user's status.
-			viewHolder.text.setText(status);
+			if (context.getString(R.string.default_status).equals(status)) {
+				viewHolder.textInfo.setVisibility(View.VISIBLE);
+				String tapHere = context.getString(R.string.tap_here);
+
+				SpannableStringBuilder ssb = new SpannableStringBuilder(status);
+				ssb.setSpan(new StyleSpan(Typeface.BOLD),
+						status.indexOf(tapHere), status.indexOf(tapHere)
+								+ tapHere.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				
+				viewHolder.text.setText(ssb);
+			} else {
+				viewHolder.textInfo.setVisibility(View.GONE);
+				viewHolder.text.setText(status);
+			}
 			viewHolder.avatarImg.setImageResource(statusDrawableResource);
 			convertView.setOnClickListener(this);
 
@@ -507,6 +525,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		Button invite;
 		TextView text;
 		ImageView addImg;
+		TextView textInfo;
 	}
 
 	@Override

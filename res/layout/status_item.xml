@@ -16,20 +16,40 @@
         android:scaleType="centerInside"
         android:src="@drawable/ic_text_status" />
 
-    <com.bsb.hike.view.CustomFontTextView
-        android:id="@+id/status_text"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/avatar"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:paddingRight="10dp"
-        android:shadowColor="#000000"
-        android:shadowDy="1.0"
-        android:shadowRadius="1.0"
-        android:text="This is hike lasj flas flsa flasfj lsj flas flaslf lkasfkas vl;jsa;lk ja;slkjf ;lasfd"
-        android:textColor="@color/white"
-        android:textSize="14sp" />
+        android:orientation="vertical" >
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/status_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/avatar"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:paddingRight="10dp"
+            android:shadowColor="#000000"
+            android:shadowDy="1.0"
+            android:shadowRadius="1.0"
+            android:text="@string/default_status"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/status_text_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:shadowColor="#000000"
+            android:shadowDy="1.0"
+            android:shadowRadius="1.0"
+            android:text="@string/default_status_info"
+            android:textColor="#cdc6ba"
+            android:textSize="10sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </RelativeLayout>
