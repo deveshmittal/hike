@@ -197,8 +197,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		}
 
 		if (statusMessage.hasMood()) {
-			viewHolder.statusImg.setBackgroundDrawable(null);
-			viewHolder.statusImg
+			viewHolder.statusType.setBackgroundDrawable(null);
+			viewHolder.statusType
 					.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
 							.getMoodId()]);
 		}
