@@ -146,7 +146,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		// Contact for "Favorite Section"
 		friendsOnHikeSection = new ContactInfo(
 				DrawerFavoritesAdapter.SECTION_ID, null, context.getString(
-						R.string.friends_on_hike, favoriteList.size()), null);
+						R.string.circle_friends, favoriteList.size()), null);
 		completeList.add(friendsOnHikeSection);
 
 		/*

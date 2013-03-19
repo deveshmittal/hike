@@ -431,4 +431,5 @@
 	<string name="free_sms_invite">free SMS invite.</string>
 	<string name="which_family">Send your family a free SMS invite.</string>
 	<string name="skip">Skip</string>
+	<string name="circle_friends">CIRCLE OF FRIENDS (%1$d)</string>
 </resources>
