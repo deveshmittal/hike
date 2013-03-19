@@ -163,7 +163,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		// Contact for "On Hike Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, context.getString(R.string.contacts_on_hike), null));
+				null, context.getString(R.string.contacts_on_hike, onHikeList.size()), null));
 		completeList.addAll(onHikeList);
 
 		// Contact for "Recent Section"

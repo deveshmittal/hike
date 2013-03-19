@@ -340,7 +340,7 @@
 	<string name="on_sms">per SMS</string>
 	<string name="update_status_fail">Status aktualisieren fehlgeschlagen</string>
 	<string name="no_friends">Auf plus tippen, um Freundschaftsanfrage zu senden.</string>
-	<string name="contacts_on_hike">KONTAKTE BEI HIKE</string>
+	<string name="contacts_on_hike">KONTAKTE BEI HIKE (%1$d)</string>
 	<string name="team_hike">Team hike</string>
 	<string name="hey_name">Hi %1$s!</string>
 	<string name="add_friend_info">Wenn du hike Freunde hinzufügst, kannst du ihre Updates hier sehen.</string>
