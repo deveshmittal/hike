@@ -419,6 +419,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		Button leaveBtn = (Button) findViewById(R.id.title_icon);
 		leaveBtn.setVisibility(View.VISIBLE);
 		leaveBtn.setText(R.string.leave);
+
+		nameTxt = groupConversation.getLabel();
 	}
 
 	private void setupGroupProfileList() {
@@ -1435,7 +1437,20 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onEditGroupNameClick(View v) {
+		profileAdapter.setEditingGroupName(true);
+		profileAdapter.notifyDataSetChanged();
+		mNameEdit = (EditText) findViewById(R.id.name_edit);
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,
+				InputMethodManager.HIDE_IMPLICIT_ONLY);
+	}
 
+	public void onCancelEditGroupNameClick(View v) {
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mNameEdit.getWindowToken(), 0);
+		profileAdapter.setEditingGroupName(false);
+		profileAdapter.notifyDataSetChanged();
+		mNameEdit = null;
 	}
 
 	public void onBlockGroupOwnerClicked(View v) {
@@ -1446,17 +1461,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		isBlocked = !isBlocked;
 		blockBtn.setText(!isBlocked ? R.string.block_owner
 				: R.string.unblock_owner);
-	}
-
-	public void onEditGroupNameClicked(View v) {
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,
-				InputMethodManager.HIDE_IMPLICIT_ONLY);
-		Log.d(getClass().getSimpleName(), "ONSHOWN");
-		mNameDisplay.setVisibility(View.GONE);
-		mNameEdit.setVisibility(View.VISIBLE);
-		mNameEdit.setSelection(mNameEdit.length());
-		mNameEdit.requestFocus();
 	}
 
 	public void onAddToContactClicked(View v) {
