@@ -138,10 +138,17 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 									dndNames.toString());
 				}
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE) {
-				markedUp = String.format(context.getString(conversation
-						.isOnhike() ? R.string.intro_hike_thread
-						: R.string.intro_sms_thread), Utils
-						.getFirstName(conversation.getLabel()));
+				if (conversation.isOnhike()) {
+					boolean firstIntro = conversation.getMsisdn().hashCode() % 2 == 0;
+					markedUp = String.format(context
+							.getString(firstIntro ? R.string.start_thread1
+									: R.string.start_thread1), Utils
+							.getFirstName(conversation.getLabel()));
+				} else {
+					markedUp = String.format(
+							context.getString(R.string.intro_sms_thread),
+							Utils.getFirstName(conversation.getLabel()));
+				}
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
 				markedUp = TextUtils.isEmpty(message.getMessage()) ? String
 						.format(context.getString(R.string.joined_hike_new),

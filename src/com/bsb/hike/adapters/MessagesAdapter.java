@@ -467,9 +467,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				((ViewGroup) holder.container).addView(mainMessage);
 			} else if (infoState == ParticipantInfoState.INTRO_MESSAGE) {
 				String name = Utils.getFirstName(conversation.getLabel());
-				String message = context.getString(
-						conversation.isOnhike() ? R.string.intro_hike_thread
-								: R.string.intro_sms_thread, name);
+				String message;
+				if (conversation.isOnhike()) {
+					boolean firstIntro = conversation.getMsisdn().hashCode() % 2 == 0;
+					message = String.format(context
+							.getString(firstIntro ? R.string.start_thread1
+									: R.string.start_thread1), name);
+				} else {
+					message = String.format(
+							context.getString(R.string.intro_sms_thread), name);
+				}
 
 				TextView mainMessage = (TextView) inflater.inflate(
 						R.layout.participant_info, null);

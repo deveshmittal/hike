@@ -640,10 +640,17 @@ public class MessagesList extends DrawerBaseActivity implements
 			e.printStackTrace();
 		}
 
-		String message = String.format(
-				getString(onHike ? R.string.intro_hike_thread
-						: R.string.intro_sms_thread), contactInfo
-						.getFirstName());
+		String message;
+		if (onHike) {
+			boolean firstIntro = contactInfo.getMsisdn().hashCode() % 2 == 0;
+			message = String.format(
+					getString(firstIntro ? R.string.start_thread1
+							: R.string.start_thread1), contactInfo
+							.getFirstName());
+		} else {
+			message = String.format(getString(R.string.intro_sms_thread),
+					contactInfo.getFirstName());
+		}
 		ConvMessage convMessage = new ConvMessage(message,
 				contactInfo.getMsisdn(), System.currentTimeMillis() / 1000,
 				State.RECEIVED_UNREAD);
