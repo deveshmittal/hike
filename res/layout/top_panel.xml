@@ -24,7 +24,31 @@
         android:layout_toRightOf="@+id/topbar_menu"
         android:background="@drawable/button_separator"
         android:visibility="gone" />
-
+    
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/title_icon_left"
+        android:layout_width="60dp"
+        android:layout_height="@dimen/top_bar_btn_height"
+        android:layout_marginLeft="-1dp"
+        android:layout_marginTop="-1dp"
+        android:background="@drawable/top_bar_btn_selector"
+        android:gravity="center"
+        android:onClick="onTitleIconLeftClick"
+        android:text="@string/skip"
+        android:textColor="@drawable/top_bar_btn_txt_selector"
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+    
+    <View
+        android:id="@+id/menu_bar_left"
+        android:layout_width="1dp"
+        android:layout_height="@dimen/top_bar_btn_height"
+        android:layout_marginTop="-1dp"
+        android:layout_toRightOf="@+id/title_icon_left"
+        android:background="@drawable/button_separator"
+        android:visibility="gone" />
+    
     <Button
         android:id="@+id/title_hikeicon"
         android:layout_width="wrap_content"

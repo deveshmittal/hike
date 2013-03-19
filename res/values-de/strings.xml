@@ -353,7 +353,6 @@
 	<string name="whats_up_user">Was geht, %1$s?</string>
 	<string name="status">Status</string>
 	<string name="post">Posten</string>
-	<string name="which_friend_invite">Welche deiner Freunde möchtest du zu hike einladen?</string>
 	<string name="confirmed_friend">Hat dich als Freund bestätigt.</string>
 	<string name="confirmed_friend_info">Du kannst jetzt Updates von %1$s sehen.</string>
 	<string name="waiting_for_accept">Warten bis %1$s deine Freundschaftsanfrage akzeptiert.</string>
@@ -383,7 +382,6 @@
 	<string name="ssl_info">Nur WLAN</string>
 	<string name="contact_saved">Kontakt gespeichert</string>
 	<string name="contact_not_saved">Kontakt speichern fehlgeschlagen</string>
-	<string name="which_family">Möchtest du Familienmitglieder zu hike einladen?</string>
 	<string name="invite_family">Deine Familie</string>
 	<string name="share_fb_twitter">Auf Facebook und Twitter teilen.</string>
 	<string name="app_rate_title">Dir gefällt hike?</string>

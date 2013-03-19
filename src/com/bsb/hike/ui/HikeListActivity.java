@@ -13,7 +13,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.DatabaseUtils;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -72,7 +76,8 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 
 		selectedContacts = new HashSet<String>();
 
-		labelView = (TextView) findViewById(R.id.title);
+		labelView = (TextView) findViewById(type == Type.NUX1
+				|| type == Type.NUX2 ? R.id.title_centered : R.id.title);
 		listView = (ListView) findViewById(R.id.contact_list);
 		titleBtn = (Button) findViewById(R.id.title_icon);
 		input = (EditText) findViewById(R.id.input_number);
@@ -92,7 +97,6 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 		case NUX1:
 			findViewById(R.id.input_number_container).setVisibility(View.GONE);
 			nuxText.setVisibility(View.VISIBLE);
-			nuxText.setText(R.string.which_friend_invite);
 			titleBtn.setText(R.string.next_signup);
 			contactList = hUDB
 					.getNonHikeMostContactedContacts(HikeConstants.MAX_NUX_CONTACTS);
@@ -105,7 +109,6 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 		case NUX2:
 			findViewById(R.id.input_number_container).setVisibility(View.GONE);
 			nuxText.setVisibility(View.VISIBLE);
-			nuxText.setText(R.string.which_family);
 			titleBtn.setText(R.string.done);
 			contactList = hUDB.getFamilyList(
 					this,
@@ -131,6 +134,21 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 			break;
 		}
 
+		if (type == Type.NUX1 || type == Type.NUX2) {
+			String freeSmsInvite = getString(R.string.free_sms_invite);
+			String message = getString(type == Type.NUX1 ? R.string.which_friend_invite
+					: R.string.which_family);
+			SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(
+					message);
+			spannableStringBuilder.setSpan(new StyleSpan(Typeface.BOLD),
+					message.indexOf(freeSmsInvite),
+					message.indexOf(freeSmsInvite) + freeSmsInvite.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			nuxText.setText(spannableStringBuilder);
+
+			findViewById(R.id.title_icon_left).setVisibility(View.VISIBLE);
+			findViewById(R.id.menu_bar_left).setVisibility(View.VISIBLE);
+		}
 		/*
 		 * This would be true when we have pre checked items.
 		 */
@@ -155,6 +173,11 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+	}
+
+	public void onTitleIconLeftClick(View v) {
+		selectedContacts.clear();
+		onTitleIconClick(null);
 	}
 
 	public void onTitleIconClick(View v) {

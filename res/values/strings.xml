@@ -364,7 +364,6 @@
 	<string name="whats_up_user">What\'s up, %1$s?</string>
 	<string name="status">Status</string>
 	<string name="post">Post</string>
-	<string name="which_friend_invite">Which of your friends would you like to invite to hike?</string>
 	<string name="confirmed_friend">Confirmed you as a friend</string>
 	<string name="confirmed_friend_info">You can now see updates from %1$s</string>
 	<string name="waiting_for_accept">Waiting for %1$s to accept your friend request</string>
@@ -394,7 +393,6 @@
 	<string name="ssl_info">Wi-Fi only</string>
 	<string name="contact_saved">Contact saved</string>
 	<string name="contact_not_saved">Contact could not be saved</string>
-	<string name="which_family">Would you like to invite your family members to hike?</string>
 	<string name="invite_family">Your Family</string>
 	<string name="share_fb_twitter">Share on Facebook and Twitter</string>
 	<string name="app_rate_title">Love using hike?</string>
@@ -429,4 +427,8 @@
 	<string name="default_status">Tap here to update your status.</string>
 	<string name="tap_here">Tap here</string>
 	<string name="default_status_info">(Only friends can see your hike updates)</string>
+	<string name="which_friend_invite">Send your friends a free SMS invite.</string>
+	<string name="free_sms_invite">free SMS invite.</string>
+	<string name="which_family">Send your family a free SMS invite.</string>
+	<string name="skip">Skip</string>
 </resources>
