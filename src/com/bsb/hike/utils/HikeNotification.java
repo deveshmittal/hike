@@ -22,6 +22,8 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.StatusMessage;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.ChatThread;
 
@@ -139,6 +141,45 @@ public class HikeNotification {
 
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
 				key, message));
+
+		showNotification(notificationIntent, icon, timeStamp, notificationId,
+				text, msisdn, key, message);
+	}
+
+	public void notifyStatusMessage(StatusMessage statusMessage) {
+		if (!PreferenceManager.getDefaultSharedPreferences(this.context)
+				.getBoolean(HikeConstants.STATUS_PREF, true)) {
+			return;
+		}
+		int notificationId = statusMessage.getMsisdn().hashCode();
+
+		String msisdn = statusMessage.getMsisdn();
+
+		long timeStamp = statusMessage.getTimeStamp();
+
+		Intent notificationIntent = new Intent(context, CentralTimeline.class);
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+
+		int icon = R.drawable.ic_contact_logo;
+
+		String key = statusMessage.getNotNullName();
+
+		String message = null;
+		String text = null;
+		if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
+			message = "\"" + statusMessage.getText() + "\"";
+			text = context.getString(R.string.status_text_notification, key,
+					message);
+		} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+			message = context
+					.getString(R.string.status_profile_pic_notification);
+			text = key + " " + message;
+		} else {
+			/*
+			 * We don't know how to display this type. Just return.
+			 */
+			return;
+		}
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, msisdn, key, message);

@@ -220,7 +220,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		timelineContent.setOnItemClickListener(this);
 
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		for (int i = 0; i < friendRequests; i++) {
+		for (int i = 0; i < Math.min(unseenCount, statusMessages.size()); i++) {
 			notificationManager.cancel(statusMessages.get(i).getMsisdn()
 					.hashCode());
 		}

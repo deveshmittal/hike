@@ -25,6 +25,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.ui.CentralTimeline;
@@ -50,6 +51,8 @@ public class ToastListener implements Listener {
 				this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.FAVORITE_TOGGLED,
 				this);
+		HikeMessengerApp.getPubSub().addListener(
+				HikePubSub.TIMELINE_UPDATE_RECIEVED, this);
 		this.toaster = new HikeNotification(context);
 		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
@@ -138,6 +141,18 @@ public class ToastListener implements Listener {
 				return;
 			}
 			toaster.notifyFavorite(contactInfo);
+		} else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
+			if (currentActivity != null) {
+				return;
+			}
+			StatusMessage statusMessage = (StatusMessage) object;
+			String msisdn = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+			if (msisdn.equals(statusMessage.getMsisdn())) {
+				return;
+			}
+			toaster.notifyStatusMessage(statusMessage);
 		}
 	}
 
