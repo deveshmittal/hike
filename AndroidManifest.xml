@@ -181,6 +181,11 @@
 				<data android:scheme="package"/>                
             </intent-filter>
         </receiver>
+        <receiver android:name=".service.LocaleChangeReceiver">
+            <intent-filter >
+				<action android:name="android.intent.action.LOCALE_CHANGED"/>
+            </intent-filter>
+        </receiver>
         <receiver
             android:name="com.fiksu.asotracking.InstallTracking"
             android:exported="true" >
