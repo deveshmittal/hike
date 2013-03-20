@@ -1187,7 +1187,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		editor.commit();
 	}
 
-	private void toggleEnablePostButton() {
+	public void toggleEnablePostButton() {
 		if (statusDialog == null) {
 			return;
 		}

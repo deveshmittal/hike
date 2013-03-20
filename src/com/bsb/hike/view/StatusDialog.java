@@ -1,17 +1,21 @@
 package com.bsb.hike.view;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.bsb.hike.R;
+import com.bsb.hike.utils.DrawerBaseActivity;
 
 public class StatusDialog extends Dialog {
 
+	Activity activity;
+
 	public StatusDialog(Context context, int theme) {
 		super(context, theme);
+		activity = (Activity) context;
 	}
 
 	@Override
@@ -24,7 +28,7 @@ public class StatusDialog extends Dialog {
 			v2.setVisibility(View.GONE);
 			Button post = ((Button) findViewById(R.id.title_icon));
 			post.setText(R.string.post);
-			post.setEnabled(((EditText) findViewById(R.id.status_txt)).length() > 0);
+			((DrawerBaseActivity) activity).toggleEnablePostButton();
 			return;
 		}
 		super.onBackPressed();
