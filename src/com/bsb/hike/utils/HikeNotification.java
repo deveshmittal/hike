@@ -147,8 +147,13 @@ public class HikeNotification {
 	}
 
 	public void notifyStatusMessage(StatusMessage statusMessage) {
-		if (!PreferenceManager.getDefaultSharedPreferences(this.context)
-				.getBoolean(HikeConstants.STATUS_PREF, true)) {
+		/*
+		 * We only proceed if the current status preference value is 0 which
+		 * denotes that the user wants immediate notifications. Else we simply
+		 * return
+		 */
+		if (PreferenceManager.getDefaultSharedPreferences(this.context).getInt(
+				HikeConstants.STATUS_PREF, 0) != 0) {
 			return;
 		}
 		int notificationId = statusMessage.getMsisdn().hashCode();
