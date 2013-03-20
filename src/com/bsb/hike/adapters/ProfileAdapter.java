@@ -388,7 +388,7 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 				viewHolder.subText.setText(R.string.owner);
 			} else if (!contactInfo.isOnhike()) {
 				viewHolder.subText
-						.setText(groupParticipant.onDnd() ? R.string.on_sms
+						.setText(groupParticipant.onDnd() ? R.string.on_dnd
 								: R.string.on_sms);
 			} else {
 				viewHolder.subText.setVisibility(View.GONE);
