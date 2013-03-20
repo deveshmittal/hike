@@ -321,8 +321,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		 * if the hike join time for a known hike contact is 0, we request the
 		 * server for the hike join time.
 		 */
-		if (contactInfo.isOnhike() && !contactInfo.isUnknownContact()
-				&& contactInfo.getHikeJoinTime() == 0) {
+		if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() == 0) {
 			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
 					"/account/profile/" + mLocalMSISDN,
 					RequestType.HIKE_JOIN_TIME, new HikeHttpCallback() {

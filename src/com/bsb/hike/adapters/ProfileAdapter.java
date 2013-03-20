@@ -293,15 +293,20 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 					viewHolder.requestLayout.setVisibility(View.GONE);
 				}
 			}
-			if (mContactInfo != null && mContactInfo.isOnhike()
-					&& !mContactInfo.isUnknownContact()
-					&& mContactInfo.getHikeJoinTime() > 0) {
-				viewHolder.subText.setVisibility(View.VISIBLE);
-				viewHolder.subText.setText(context.getString(
-						R.string.on_hike_since,
-						mContactInfo.getFormattedHikeJoinTime()));
-			} else {
-				viewHolder.subText.setVisibility(View.GONE);
+			if (mContactInfo != null) {
+				if (mContactInfo.isOnhike()) {
+					if (mContactInfo.getHikeJoinTime() > 0) {
+						viewHolder.subText.setVisibility(View.VISIBLE);
+						viewHolder.subText.setText(context.getString(
+								R.string.on_hike_since,
+								mContactInfo.getFormattedHikeJoinTime()));
+					} else {
+						viewHolder.subText.setVisibility(View.GONE);
+					}
+				} else {
+					viewHolder.subText.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(R.string.on_sms);
+				}
 			}
 
 			if (groupConversation != null) {
