@@ -81,7 +81,7 @@
                 android:textColor="@color/status_counter"
                 android:textSize="16sp"
                 android:textStyle="bold|italic"
-                android:visibility="invisible" />
+                android:visibility="gone" />
 
             <com.bsb.hike.view.CustomFontEditText
                 android:id="@+id/status_txt"

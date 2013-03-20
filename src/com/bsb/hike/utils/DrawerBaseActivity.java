@@ -759,7 +759,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 	private void setCharCountForStatus(View charCounter, EditText statusTxt,
 			boolean isSelected) {
-		charCounter.setVisibility(isSelected ? View.VISIBLE : View.INVISIBLE);
+		charCounter.setVisibility(isSelected ? View.VISIBLE : View.GONE);
 
 		if (isSelected) {
 			statusTxt
