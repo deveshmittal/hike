@@ -645,6 +645,14 @@ public class MqttMessagesManager {
 				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, showRewards);
 			}
 
+			if (data.has(HikeConstants.ENABLE_PUSH_BATCHING_STATUS_NOTIFICATIONS)) {
+				JSONArray array = data
+						.getJSONArray(HikeConstants.ENABLE_PUSH_BATCHING_STATUS_NOTIFICATIONS);
+				editor.putString(
+						HikeMessengerApp.BATCH_STATUS_NOTIFICATION_VALUES,
+						array.toString());
+			}
+
 			editor.commit();
 
 			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);

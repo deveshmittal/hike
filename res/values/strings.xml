@@ -426,7 +426,7 @@
 	<string name="tap_here_block">Tap here to block this number</string>
 	<string name="status_text_notification">%1$s wrote: %2$s</string>
 	<string name="status_profile_pic_notification">updated profile picture</string>
-	<string name="status_update_info">Status update</string>
+	<string name="status_updates">Status updates</string>
 	<string name="default_status">Tap here to update your status.</string>
 	<string name="tap_here">Tap here</string>
 	<string name="default_status_info">(Only friends can see your hike updates)</string>
@@ -437,4 +437,8 @@
 	<string name="start_thread1">Say Hi to %1$s!</string>
 	<string name="start_thread2">Message %1$s on Hike</string>
 	<string name="circle_friends">CIRCLE OF FRIENDS (%1$d)</string>
+	<string name="immediate">Immediate</string>
+	<string name="every_hour">Every hour</string>
+	<string name="every_x_hours">Every %1$d hours</string>
+	<string name="off">Off</string>
 </resources>

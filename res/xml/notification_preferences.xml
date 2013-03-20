@@ -37,13 +37,10 @@
         android:title="@string/native_jingle"
         android:widgetLayout="@layout/checkbox_widget" />
 	
-	<com.bsb.hike.view.IconCheckBoxPreference
+	<com.bsb.hike.view.IconPreference
         icon="ic_status_update_pref"
-        android:defaultValue="true"
         android:key="statusPref"
         android:layout="@layout/icon_preference"
-        android:summary="@string/status_update_info"
-        android:title="@string/status_update"
-        android:widgetLayout="@layout/checkbox_widget" />	
+        android:title="@string/status_updates" />	
 	
 </PreferenceScreen>

@@ -193,6 +193,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String UNSEEN_USER_STATUS_COUNT = "unseenUserStatusCount";
 
+	public static final String BATCH_STATUS_NOTIFICATION_VALUES = "batchStatusNotificationValues";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
