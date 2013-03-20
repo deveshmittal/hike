@@ -833,6 +833,7 @@ public class Utils {
 			boolean showNameAsYou) {
 		String myMsisdn = prefs
 				.getString(HikeMessengerApp.MSISDN_SETTING, null);
+		long userJoinTime = prefs.getLong(HikeMessengerApp.USER_JOIN_TIME, 0);
 
 		String myName;
 		if (showNameAsYou) {
@@ -841,7 +842,11 @@ public class Utils {
 			myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
 		}
 
-		return new ContactInfo(myName, myMsisdn, myName, myMsisdn, true);
+		ContactInfo contactInfo = new ContactInfo(myName, myMsisdn, myName,
+				myMsisdn, true);
+		contactInfo.setHikeJoinTime(userJoinTime);
+
+		return contactInfo;
 	}
 
 	public static boolean wasScreenOpenedNNumberOfTimes(

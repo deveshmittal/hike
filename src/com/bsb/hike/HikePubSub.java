@@ -212,6 +212,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String TIMELINE_UPDATE_RECIEVED = "timelineUpdateRecieved";
 
+	public static final String USER_JOIN_TIME_OBTAINED = "userJoinTimeObtained";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

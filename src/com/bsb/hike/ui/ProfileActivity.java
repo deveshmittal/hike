@@ -135,7 +135,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private String[] profilePubSubListeners = {
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
 			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED,
-			HikePubSub.STATUS_MESSAGE_RECEIVED };
+			HikePubSub.STATUS_MESSAGE_RECEIVED,
+			HikePubSub.USER_JOIN_TIME_OBTAINED };
 
 	private GroupConversation groupConversation;
 	private ImageButton topBarBtn;
@@ -601,20 +602,21 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		setContentView(R.layout.profile);
 		afterSetContentView(savedInstanceState);
 
-		ContactInfo myInfo = Utils.getUserContactInfo(preferences);
+		contactInfo = Utils.getUserContactInfo(preferences);
 
 		profileItems = new ArrayList<StatusMessage>();
 		// Adding an item for the header
 		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_HEADER_ID,
-				null, myInfo.getMsisdn(), myInfo.getName(), null, null, 0));
+				null, contactInfo.getMsisdn(), contactInfo.getName(), null,
+				null, 0));
 		// Adding an item for the button
 		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_BUTTON_ID,
 				null, null, null, null, null, 0));
 		profileItems.addAll(HikeConversationsDatabase.getInstance()
 				.getStatusMessages(false, mLocalMSISDN));
 
-		profileAdapter = new ProfileAdapter(this, profileItems, null, myInfo,
-				true);
+		profileAdapter = new ProfileAdapter(this, profileItems, null,
+				contactInfo, true);
 
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
@@ -627,6 +629,38 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		Button editBtn = (Button) findViewById(R.id.title_icon);
 		editBtn.setVisibility(View.VISIBLE);
 		editBtn.setText(R.string.edit);
+
+		if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() == 0) {
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+					"/account/profile/" + mLocalMSISDN,
+					RequestType.HIKE_JOIN_TIME, new HikeHttpCallback() {
+						@Override
+						public void onSuccess(JSONObject response) {
+							Log.d(getClass().getSimpleName(), "Response: "
+									+ response.toString());
+							try {
+								JSONObject profile = response
+										.getJSONObject(HikeConstants.PROFILE);
+								long hikeJoinTime = profile.optLong(
+										HikeConstants.JOIN_TIME, 0);
+
+								Editor editor = preferences.edit();
+								editor.putLong(HikeMessengerApp.USER_JOIN_TIME,
+										hikeJoinTime);
+								editor.commit();
+
+								HikeMessengerApp.getPubSub().publish(
+										HikePubSub.USER_JOIN_TIME_OBTAINED,
+										new Pair<String, Long>(mLocalMSISDN,
+												hikeJoinTime));
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+						}
+					});
+			mActivityState.getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
+			mActivityState.getHikeJoinTimeTask.execute(hikeHttpRequest);
+		}
 	}
 
 	private void fetchPersistentData() {
@@ -1701,7 +1735,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
-		} else if (HikePubSub.HIKE_JOIN_TIME_OBTAINED.equals(type)) {
+		} else if (HikePubSub.HIKE_JOIN_TIME_OBTAINED.equals(type)
+				|| HikePubSub.USER_JOIN_TIME_OBTAINED.equals(type)) {
 			Pair<String, Long> msisdnHikeJoinTimePair = (Pair<String, Long>) object;
 
 			String msisdn = msisdnHikeJoinTimePair.first;

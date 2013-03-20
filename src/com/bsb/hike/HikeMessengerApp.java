@@ -196,6 +196,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String BATCH_STATUS_NOTIFICATION_VALUES = "batchStatusNotificationValues";
 
+	public static final String USER_JOIN_TIME = "userJoinTime";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
