@@ -631,12 +631,20 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 
-			String rewardToken = data.getString(HikeConstants.REWARDS_TOKEN);
-			boolean showRewards = data.getBoolean(HikeConstants.SHOW_REWARDS);
-
 			Editor editor = settings.edit();
-			editor.putString(HikeMessengerApp.REWARDS_TOKEN, rewardToken);
-			editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, showRewards);
+
+			if (data.has(HikeConstants.REWARDS_TOKEN)) {
+				String rewardToken = data
+						.getString(HikeConstants.REWARDS_TOKEN);
+				editor.putString(HikeMessengerApp.REWARDS_TOKEN, rewardToken);
+			}
+
+			if (data.has(HikeConstants.SHOW_REWARDS)) {
+				boolean showRewards = data
+						.getBoolean(HikeConstants.SHOW_REWARDS);
+				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, showRewards);
+			}
+
 			editor.commit();
 
 			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
