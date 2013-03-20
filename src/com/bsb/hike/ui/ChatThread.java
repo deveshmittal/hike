@@ -3346,6 +3346,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				emoticonLayout.setAnimation(slideUp);
 			}
 			emoticonLayout.setVisibility(View.VISIBLE);
+			InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
 		}
 
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {
