@@ -591,7 +591,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 			/* slide down if we're still selecting a user, otherwise slide back */
 			if (mConversation == null
-					&& !getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)
+					&& !getIntent().hasExtra(
+							HikeConstants.Extras.EXISTING_GROUP_CHAT)
 					&& !getIntent().hasExtra(
 							HikeConstants.Extras.FORWARD_MESSAGE)) {
 				overridePendingTransition(R.anim.no_animation,
@@ -2945,8 +2946,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				R.dimen.contact_info_width);
 		int dialogHeight = (int) (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? ((3 * screenHeight) / 4)
 				: FrameLayout.LayoutParams.MATCH_PARENT);
-		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-				dialogWidth, dialogHeight);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dialogWidth,
+				dialogHeight);
 		lp.topMargin = (int) (5 * Utils.densityMultiplier);
 		lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
 
