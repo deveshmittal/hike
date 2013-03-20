@@ -51,6 +51,7 @@ import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
@@ -582,6 +583,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			holder.marginView.setVisibility(View.VISIBLE);
 
+			holder.container.setTag(convMessage);
+			holder.container.setOnClickListener(this);
+
 			return v;
 		}
 
@@ -936,6 +940,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						notifyDataSetChanged();
 					}
 				}
+			} else if (convMessage != null
+					&& convMessage.getMetadata().getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE) {
+				Intent intent = new Intent(context, ProfileActivity.class);
+				intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE,
+						true);
+				intent.putExtra(HikeConstants.Extras.ON_HIKE,
+						conversation.isOnhike());
+
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
+						convMessage.getMsisdn());
+				context.startActivity(intent);
 			}
 		} catch (ActivityNotFoundException e) {
 			Log.w(getClass().getSimpleName(),
