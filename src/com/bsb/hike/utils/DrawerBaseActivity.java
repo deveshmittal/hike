@@ -777,7 +777,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		ViewGroup moodParent = (ViewGroup) statusDialog
 				.findViewById(R.id.mood_parent);
 		final ViewGroup pageIndicatorContainer = (ViewGroup) statusDialog
-				.findViewById(R.id.page_indicator_container);
+				.findViewById(R.id.mood_page_indicator_container);
 		ViewPager moodPager = (ViewPager) statusDialog
 				.findViewById(R.id.mood_pager);
 
