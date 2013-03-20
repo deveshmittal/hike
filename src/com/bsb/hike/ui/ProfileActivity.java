@@ -249,8 +249,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			setupGroupProfileScreen();
 		} else if (getIntent().hasExtra(HikeConstants.Extras.CONTACT_INFO)) {
 			this.profileType = ProfileType.CONTACT_INFO;
-			this.showMessageBtn = getIntent().getBooleanExtra(
-					HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false);
+			this.showMessageBtn = true;
 			HikeMessengerApp.getPubSub().addListeners(this,
 					contactInfoPubSubListeners);
 			setupContactProfileScreen();
