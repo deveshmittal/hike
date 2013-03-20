@@ -539,9 +539,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		final EditText statusTxt = (EditText) statusDialog
 				.findViewById(R.id.status_txt);
 
-		String statusHint = getString(R.string.whats_up_user,
-				Utils.getFirstName(preferences.getString(
-						HikeMessengerApp.NAME_SETTING, "")));
+		String statusHint = getStatusDefaultHint();
 
 		statusTxt.setHint(statusHint);
 		statusTxt.setText("");
@@ -650,6 +648,11 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			showFilePreview();
 		}
 		toggleEnablePostButton();
+	}
+
+	private String getStatusDefaultHint() {
+		return getString(R.string.whats_up_user, Utils.getFirstName(preferences
+				.getString(HikeMessengerApp.NAME_SETTING, "")));
 	}
 
 	private void postStatus() {
