@@ -3,7 +3,6 @@ package com.bsb.hike.ui;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,9 +12,10 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.Conversation;
-import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.EmoticonTextWatcher;
 
-public class ComposeViewWatcher implements Runnable, TextWatcher, Listener {
+public class ComposeViewWatcher extends EmoticonTextWatcher implements
+		Runnable, Listener {
 	private Conversation mConversation;
 
 	private long mTextLastChanged = 0;
@@ -127,35 +127,24 @@ public class ComposeViewWatcher implements Runnable, TextWatcher, Listener {
 		mTextLastChanged = 0;
 	}
 
-	private String mod;
-	private int startIndex;
-
 	@Override
 	public void afterTextChanged(Editable editable) {
 		if (!TextUtils.isEmpty(editable)) {
 			onTextLastChanged();
 		}
 		setBtnEnabled();
-		if (!TextUtils.isEmpty(mod)
-				&& SmileyParser.getInstance().containsEmoticon(mod)) {
-			// For adding smileys as the user is typing.
-			SmileyParser.getInstance().addSmileyToEditable(editable, false,
-					startIndex, mod.length());
-		}
+		super.afterTextChanged(editable);
 	}
 
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
+		super.beforeTextChanged(s, start, count, after);
 	}
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		String initial = s.subSequence(0, start).toString();
-		int startOffset = Math.min(initial.length(),
-				SmileyParser.MAX_EMOTICON_TEXT_LENGTH);
-		mod = s.subSequence(start - startOffset, start + count).toString();
-		startIndex = start - startOffset;
+		super.onTextChanged(s, start, before, count);
 	}
 
 	@Override
