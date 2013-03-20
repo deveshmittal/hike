@@ -787,53 +787,39 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		moodPager.setAdapter(moodAdapter);
 
 		int indicatorCount = moodAdapter.getCount();
-		int rightMargin = (int) (5 * Utils.densityMultiplier);
-		int indicatorSize = (int) (5 * Utils.densityMultiplier);
+		addPageIndicators(pageIndicatorContainer, indicatorCount);
 
-		pageIndicatorContainer.removeAllViews();
+		moodPager.setOnPageChangeListener(new IndicatorChanger(
+				pageIndicatorContainer));
+	}
 
-		for (int i = 0; i < indicatorCount; i++) {
-			ImageView iv = new ImageView(this);
-			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-					indicatorSize, indicatorSize);
+	private class IndicatorChanger implements OnPageChangeListener {
 
-			if (i != indicatorCount - 1) {
-				layoutParams.rightMargin = rightMargin;
-			}
+		private View pageIndicatorContainer;
 
-			iv.setLayoutParams(layoutParams);
-			iv.setImageResource(i == 0 ? R.drawable.mood_page_indicator_selected
-					: R.drawable.mood_page_indicator_unselected);
-
-			if (i == 0) {
-				pageSelected = iv;
-			}
-
-			iv.setId(i);
-			pageIndicatorContainer.addView(iv);
+		public IndicatorChanger(View v) {
+			this.pageIndicatorContainer = v;
 		}
 
-		moodPager.setOnPageChangeListener(new OnPageChangeListener() {
-			@Override
-			public void onPageSelected(int pageNum) {
-				ImageView iv = (ImageView) pageIndicatorContainer
-						.findViewById(pageNum);
+		@Override
+		public void onPageSelected(int pageNum) {
+			ImageView iv = (ImageView) pageIndicatorContainer
+					.findViewById(pageNum);
 
-				iv.setImageResource(R.drawable.mood_page_indicator_selected);
-				pageSelected
-						.setImageResource(R.drawable.mood_page_indicator_unselected);
+			iv.setImageResource(R.drawable.mood_page_indicator_selected);
+			pageSelected
+					.setImageResource(R.drawable.mood_page_indicator_unselected);
 
-				pageSelected = iv;
-			}
+			pageSelected = iv;
+		}
 
-			@Override
-			public void onPageScrolled(int arg0, float arg1, int arg2) {
-			}
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
+		}
 
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-			}
-		});
+		@Override
+		public void onPageScrollStateChanged(int arg0) {
+		}
 	}
 
 	public void setMood(int moodId) {
@@ -860,11 +846,37 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 					R.array.mood_prefills_night);
 		}
 
-		if (moodId < prefillTextArray.length && statusTxt.length() == 0) {
-			statusTxt.setText(prefillTextArray[moodId]);
-			statusTxt.setSelection(0, statusTxt.length());
 		}
 		statusDialog.onBackPressed();
+	}
+
+	private void addPageIndicators(ViewGroup pageIndicatorContainer,
+			int indicatorCount) {
+		int rightMargin = (int) (5 * Utils.densityMultiplier);
+		int indicatorSize = (int) (5 * Utils.densityMultiplier);
+
+		pageIndicatorContainer.removeAllViews();
+
+		for (int i = 0; i < indicatorCount; i++) {
+			ImageView iv = new ImageView(this);
+			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+					indicatorSize, indicatorSize);
+
+			if (i != indicatorCount - 1) {
+				layoutParams.rightMargin = rightMargin;
+			}
+
+			iv.setLayoutParams(layoutParams);
+			iv.setImageResource(i == 0 ? R.drawable.mood_page_indicator_selected
+					: R.drawable.mood_page_indicator_unselected);
+
+			if (i == 0) {
+				pageSelected = iv;
+			}
+
+			iv.setId(i);
+			pageIndicatorContainer.addView(iv);
+		}
 	}
 
 	private int getTimeOfDay() {
