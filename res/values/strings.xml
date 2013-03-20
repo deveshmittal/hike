@@ -441,4 +441,5 @@
 	<string name="every_hour">Every hour</string>
 	<string name="every_x_hours">Every %1$d hours</string>
 	<string name="off">Off</string>
+	<string name="moods">Moods</string>
 </resources>

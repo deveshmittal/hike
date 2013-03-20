@@ -504,7 +504,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		statusDialog.findViewById(R.id.button_bar_2)
 				.setVisibility(View.VISIBLE);
 
-		TextView mTitleView = (TextView) statusDialog.findViewById(R.id.title);
+		final TextView mTitleView = (TextView) statusDialog.findViewById(R.id.title);
 		mTitleView.setText(R.string.status);
 
 		ImageView avatar = (ImageView) statusDialog.findViewById(R.id.avatar);
@@ -605,7 +605,13 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 							TwitterAuthActivity.class));
 					break;
 				case R.id.title_icon:
-					postStatus();
+					if ((statusDialog.findViewById(R.id.mood_parent)
+							.getVisibility() == View.VISIBLE)) {
+						statusDialog.onBackPressed();
+						mTitleView.setText(R.string.status_update);
+					} else {
+						postStatus();
+					}
 					break;
 				case R.id.mood_btn:
 					showMoodSelector();
@@ -770,6 +776,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		if (statusDialog == null || !statusDialog.isShowing()) {
 			return;
 		}
+		showCancelButton(true);
+
 		ViewGroup moodParent = (ViewGroup) statusDialog
 				.findViewById(R.id.mood_parent);
 		final ViewGroup pageIndicatorContainer = (ViewGroup) statusDialog
@@ -875,6 +883,17 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 			iv.setId(i);
 			pageIndicatorContainer.addView(iv);
+		}
+	}
+
+	private void showCancelButton(boolean moodLayout) {
+		Button titleBtn = (Button) statusDialog.findViewById(R.id.title_icon);
+		titleBtn.setText(R.string.cancel);
+		titleBtn.setEnabled(true);
+		if (moodLayout) {
+			TextView mTitleView = (TextView) statusDialog
+					.findViewById(R.id.title);
+			mTitleView.setText(R.string.moods);
 		}
 	}
 
