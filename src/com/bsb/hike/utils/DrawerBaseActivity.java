@@ -551,7 +551,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				titleBtn.setEnabled(s.toString().trim().length() > 0);
+				toggleEnablePostButton();
 				charCounter.setText(Integer
 						.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
 								- s.length()));
@@ -700,7 +700,16 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 					}
 
 				});
-		String status = statusTxt.getText().toString();
+		String status = null;
+		/*
+		 * If the text box is empty, the we take the hint text which is a
+		 * prefill for moods.
+		 */
+		if (TextUtils.isEmpty(statusTxt.getText())) {
+			status = statusTxt.getHint().toString();
+		} else {
+			status = statusTxt.getText().toString();
+		}
 
 		boolean facebook = statusDialog.findViewById(R.id.post_fb_btn)
 				.isSelected();
@@ -833,7 +842,10 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 					R.array.mood_prefills_night);
 		}
 
+		if (moodId < prefillTextArray.length) {
+			statusTxt.setHint(prefillTextArray[moodId]);
 		}
+		toggleEnablePostButton();
 		statusDialog.onBackPressed();
 	}
 
@@ -1000,7 +1012,11 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		EditText statusTxt = (EditText) statusDialog
 				.findViewById(R.id.status_txt);
 
-		titleBtn.setEnabled((mActivityTask.filePath != null)
+		/*
+		 * Enabling if the text length is > 0 or if the user has selected a mood
+		 * with some prefilled text.
+		 */
+		titleBtn.setEnabled((mActivityTask.moodId >= 0 && mActivityTask.moodId < 11)
 				|| (statusTxt.length() > 0));
 	}
 }
