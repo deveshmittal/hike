@@ -73,11 +73,12 @@
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_marginRight="15dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_avatar1" />
+                android:src="@drawable/ic_text_status"
+                android:background="@drawable/bg_status_type" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/char_counter"

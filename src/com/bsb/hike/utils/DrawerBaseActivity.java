@@ -520,8 +520,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		mTitleView.setText(R.string.status);
 
 		ImageView avatar = (ImageView) statusDialog.findViewById(R.id.avatar);
-		avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(userMsisdn));
+		avatar.setImageResource(R.drawable.ic_text_status);
+		avatar.setBackgroundResource(R.drawable.bg_status_type);
 
 		// ImageButton insertImgBtn = (ImageButton) statusDialog
 		// .findViewById(R.id.insert_img_btn);
