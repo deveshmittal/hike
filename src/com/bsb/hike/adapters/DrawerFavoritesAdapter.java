@@ -42,6 +42,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 
 public class DrawerFavoritesAdapter extends BaseAdapter implements
@@ -83,9 +84,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		status = preferences.getString(HikeMessengerApp.LAST_STATUS,
 				context.getString(R.string.default_status));
-		statusDrawableResource = preferences
-				.contains(HikeMessengerApp.LAST_STATUS) ? R.drawable.ic_text_status
-				: R.drawable.ic_no_status_posted;
+		int moodId = preferences.getInt(HikeMessengerApp.LAST_MOOD, -1);
+		statusDrawableResource = moodId == -1 ? R.drawable.ic_text_status
+				: EmoticonConstants.MOOD_RES_IDS[moodId];
 		new AsyncTask<Void, Void, Void>() {
 
 			@Override
@@ -307,9 +308,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		makeCompleteList();
 	}
 
-	public void updateStatus(String status) {
+	public void updateStatus(String status, int moodId) {
 		this.status = status;
-		this.statusDrawableResource = R.drawable.ic_text_status;
+		this.statusDrawableResource = moodId == -1 ? R.drawable.ic_text_status
+				: EmoticonConstants.MOOD_RES_IDS[moodId];
 		notifyDataSetChanged();
 	}
 
@@ -440,6 +442,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				viewHolder.text.setText(status);
 			}
 			viewHolder.avatarImg.setImageResource(statusDrawableResource);
+			viewHolder.avatarImg
+					.setBackgroundResource(statusDrawableResource == R.drawable.ic_text_status ? R.drawable.bg_status_type
+							: 0);
 			convertView.setOnClickListener(this);
 
 			int statusHeight = (int) (64 * Utils.densityMultiplier);

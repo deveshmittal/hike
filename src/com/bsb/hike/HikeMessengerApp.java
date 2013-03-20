@@ -179,6 +179,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String ADD_CONTACT_SHOWN = "addContactShown";
 
 	public static final String LAST_STATUS = "lastStatus";
+	public static final String LAST_MOOD = "lastMood";
 
 	public static final String APP_LAUNCHES = "appLaunches";
 	public static final String DONT_SHOW_APP_RATER = "dontShowAppRater";

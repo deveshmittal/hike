@@ -242,8 +242,8 @@ public class DrawerLayout extends RelativeLayout implements
 		menuInflater.inflate(R.menu.favorites_menu, menu);
 	}
 
-	public void updateStatus(String status) {
-		drawerFavoritesAdapter.updateStatus(status);
+	public void updateStatus(String status, int moodId) {
+		drawerFavoritesAdapter.updateStatus(status, moodId);
 	}
 
 	public boolean onFavoritesContextItemSelected(MenuItem menuItem) {

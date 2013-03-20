@@ -443,7 +443,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					parentLayout.updateStatus(status);
+					parentLayout.updateStatus(status,
+							preferences.getInt(HikeMessengerApp.LAST_MOOD, -1));
 				}
 			});
 		} else if (HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type)
@@ -687,6 +688,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 								HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 						Editor editor = preferences.edit();
 						editor.putString(HikeMessengerApp.LAST_STATUS, text);
+						editor.putInt(HikeMessengerApp.LAST_MOOD, moodId);
 						editor.putInt(
 								HikeMessengerApp.UNSEEN_USER_STATUS_COUNT,
 								++unseenUserStatusCount);
