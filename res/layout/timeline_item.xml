@@ -16,7 +16,6 @@
             android:id="@+id/avatar"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:onClick="onDetailsBtnClick"
             android:src="@drawable/ic_avatar1" />
 
         <LinearLayout
