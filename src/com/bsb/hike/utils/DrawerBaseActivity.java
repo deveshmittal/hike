@@ -515,7 +515,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		statusDialog.findViewById(R.id.button_bar_2)
 				.setVisibility(View.VISIBLE);
 
-		final TextView mTitleView = (TextView) statusDialog.findViewById(R.id.title);
+		final TextView mTitleView = (TextView) statusDialog
+				.findViewById(R.id.title);
 		mTitleView.setText(R.string.status);
 
 		ImageView avatar = (ImageView) statusDialog.findViewById(R.id.avatar);

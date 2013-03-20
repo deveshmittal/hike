@@ -356,9 +356,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_HEADER_ID,
 				null, null, null, null, null, 0));
 		// Adding an item for the button
-		profileItems.add(new StatusMessage(
-				ProfileAdapter.PROFILE_BUTTON_ID, null, null, null, null,
-				null, 0));
+		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_BUTTON_ID,
+				null, null, null, null, null, 0));
 		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND)
 				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
 				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)

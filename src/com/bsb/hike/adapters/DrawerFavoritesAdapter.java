@@ -164,7 +164,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 		// Contact for "On Hike Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, context.getString(R.string.contacts_on_hike, onHikeList.size()), null));
+				null, context.getString(R.string.contacts_on_hike,
+						onHikeList.size()), null));
 		completeList.addAll(onHikeList);
 
 		// Contact for "Recent Section"
@@ -435,7 +436,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 						status.indexOf(tapHere), status.indexOf(tapHere)
 								+ tapHere.length(),
 						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				
+
 				viewHolder.text.setText(ssb);
 			} else {
 				viewHolder.textInfo.setVisibility(View.GONE);
