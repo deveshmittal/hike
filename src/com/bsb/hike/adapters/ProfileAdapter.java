@@ -347,7 +347,8 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 				viewHolder.btn1.setCompoundDrawablesWithIntrinsicBounds(
 						R.drawable.ic_add_member, 0, 0, 0);
 				viewHolder.btn2.setCompoundDrawablesWithIntrinsicBounds(
-						R.drawable.ic_leave_group, 0, 0, 0);
+						groupConversation.isMuted() ? R.drawable.ic_unmute
+								: R.drawable.ic_mute, 0, 0, 0);
 				viewHolder.btn1.setCompoundDrawablesWithIntrinsicBounds(
 						R.drawable.ic_invite_all_members, 0, 0, 0);
 

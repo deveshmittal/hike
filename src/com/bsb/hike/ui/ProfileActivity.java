@@ -1404,6 +1404,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		((Button) v)
 				.setText(groupConversation.isMuted() ? R.string.unmute_group
 						: R.string.mute_group);
+		((Button) v)
+				.setCompoundDrawablesWithIntrinsicBounds(groupConversation
+						.isMuted() ? R.drawable.ic_unmute : R.drawable.ic_mute,
+						0, 0, 0);
 
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.MUTE_CONVERSATION_TOGGLED,
