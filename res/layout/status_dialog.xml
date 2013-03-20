@@ -15,7 +15,7 @@
         android:layout_height="match_parent"
         android:layout_below="@id/top_panel" >
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/bottom_bar"
             android:layout_width="match_parent"
             android:layout_height="52dp"
@@ -24,27 +24,39 @@
 
             <ImageButton
                 android:id="@+id/post_twitter_btn"
-                android:layout_width="70dp"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:background="@null"
+                android:layout_weight="1"
                 android:src="@drawable/post_twitter" />
 
             <ImageButton
                 android:id="@+id/post_fb_btn"
-                android:layout_width="70dp"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_toRightOf="@id/post_twitter_btn"
                 android:background="@null"
+                android:layout_weight="1"
                 android:src="@drawable/post_fb" />
 
             <ImageButton
-                android:id="@+id/mood_btn"
-                android:layout_width="70dp"
+                android:id="@+id/emoji_btn"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
                 android:background="@null"
+                android:layout_weight="1"
                 android:src="@drawable/post_twitter" />
-        </RelativeLayout>
+
+            <ImageButton
+                android:id="@+id/mood_btn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:background="@null"
+                android:layout_weight="1"
+                android:src="@drawable/post_twitter" />
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"
@@ -118,6 +130,16 @@
         </RelativeLayout>
 
         <include layout="@layout/mood_selector_layout" />
+
+        <LinearLayout
+            android:id="@+id/emoji_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+
+            <include layout="@layout/emoticon_layout" />
+        </LinearLayout>
+
     </RelativeLayout>
 
 </RelativeLayout>
