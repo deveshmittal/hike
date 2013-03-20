@@ -328,6 +328,11 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 		Intent intent = new Intent(this, ProfileActivity.class);
 		intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
+		/*
+		 * Adding this extra for unknown contacts whose hike status is not
+		 * present in the db.
+		 */
+		intent.putExtra(HikeConstants.Extras.ON_HIKE, true);
 
 		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
 				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)) {
