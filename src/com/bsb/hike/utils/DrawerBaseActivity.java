@@ -1013,9 +1013,10 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 					R.array.mood_prefills_night);
 		}
 
-		if (moodId < prefillTextArray.length) {
-			statusTxt.setHint(prefillTextArray[moodId]);
-		}
+		statusTxt
+				.setHint(moodId < prefillTextArray.length ? prefillTextArray[moodId]
+						: getStatusDefaultHint());
+
 		toggleEnablePostButton();
 		statusDialog.onBackPressed();
 	}
