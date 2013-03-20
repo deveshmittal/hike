@@ -273,7 +273,7 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 					viewHolder.btn2.setVisibility(View.VISIBLE);
 
 					viewHolder.requestMain.setText(context.getString(
-							R.string.added_as_friend, mContactInfo.getName()));
+							R.string.added_as_friend, name));
 					viewHolder.requestInfo.setText(context.getString(
 							R.string.added_as_hike_friend_info,
 							mContactInfo.getFirstName()));
