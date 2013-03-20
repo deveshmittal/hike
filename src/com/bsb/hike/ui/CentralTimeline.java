@@ -334,8 +334,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		 */
 		intent.putExtra(HikeConstants.Extras.ON_HIKE, true);
 
-		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
-				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)) {
+		if (statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS) {
 			return;
 		} else if (userMsisdn.equals(statusMessage.getMsisdn())) {
 			startActivity(intent);
