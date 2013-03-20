@@ -27,6 +27,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.SmileyParser;
 
 @SuppressWarnings("unchecked")
 public class ProfileAdapter extends BaseAdapter implements TextWatcher {
@@ -391,7 +392,9 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 			break;
 
 		case STATUS:
-			viewHolder.text.setText(statusMessage.getText());
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			viewHolder.text.setText(smileyParser.addSmileySpans(
+					statusMessage.getText(), true));
 			viewHolder.image.setVisibility(View.GONE);
 			viewHolder.subText.setText(statusMessage
 					.getTimestampFormatted(true));

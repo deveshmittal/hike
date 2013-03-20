@@ -558,7 +558,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					.getStatusMessage();
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
 				holder.image.setImageResource(R.drawable.ic_text_status);
-				holder.messageTextView.setText(statusMessage.getText());
+				SmileyParser smileyParser = SmileyParser.getInstance();
+				holder.messageTextView.setText(smileyParser.addSmileySpans(
+						statusMessage.getText(), true));
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 				holder.image.setImageResource(R.drawable.ic_profile_pic_status);
 				holder.messageTextView.setText(R.string.changed_profile);

@@ -15,6 +15,7 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.SmileyParser;
 
 public class CentralTimelineAdapter extends BaseAdapter {
 
@@ -158,6 +159,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.yesBtn.setVisibility(View.GONE);
 			viewHolder.noBtn.setVisibility(View.GONE);
 
+			SmileyParser smileyParser = SmileyParser.getInstance();
+			viewHolder.mainInfo.setText(smileyParser.addSmileySpans(
+					statusMessage.getText(), true));
 			viewHolder.statusType.setImageResource(R.drawable.ic_text_status);
 			viewHolder.statusType
 					.setBackgroundResource(R.drawable.bg_status_type);
