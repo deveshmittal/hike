@@ -12,7 +12,6 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -107,7 +106,6 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		DownloadImageTask downloadPicasaImageTask = null;
 		Bitmap filePreview = null;
 		HikeHTTPTask hikeHTTPTask = null;
-		String status = null;
 	}
 
 	@Override
@@ -213,6 +211,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		if (statusDialog != null) {
 			statusDialog.dismiss();
 			statusDialog = null;
+			mActivityTask.moodId = -1;
 		}
 	}
 
@@ -532,11 +531,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 						HikeMessengerApp.NAME_SETTING, "")));
 
 		statusTxt.setHint(statusHint);
-
-		statusTxt.setText(mActivityTask.status);
-		statusTxt.setSelection(statusTxt.length());
-
-		setMood(mActivityTask.moodId);
+		statusTxt.setText("");
 
 		charCounter.setText(Integer
 				.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
@@ -579,14 +574,6 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				mActivityTask = new ActivityTask();
-			}
-		});
-
-		statusDialog.setOnDismissListener(new OnDismissListener() {
-
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				mActivityTask.status = statusTxt.getText().toString();
 			}
 		});
 
