@@ -214,6 +214,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String USER_JOIN_TIME_OBTAINED = "userJoinTimeObtained";
 
+	public static final String STATUS_POST_REQUEST_DONE = "statusPostRequestDone";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

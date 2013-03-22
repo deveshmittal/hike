@@ -105,7 +105,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			HikePubSub.REFRESH_RECENTS, HikePubSub.SHOW_STATUS_DIALOG,
 			HikePubSub.MY_STATUS_CHANGED, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.SOCIAL_AUTH_COMPLETED,
-			HikePubSub.SOCIAL_AUTH_FAILED };
+			HikePubSub.SOCIAL_AUTH_FAILED, HikePubSub.STATUS_POST_REQUEST_DONE };
 
 	private ImageView pageSelected;
 
@@ -458,6 +458,22 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 							HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type));
 				}
 			});
+		} else if (HikePubSub.STATUS_POST_REQUEST_DONE.equals(type)) {
+			final boolean statusPosted = (Boolean) object;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (progressDialog != null) {
+						progressDialog.dismiss();
+						progressDialog = null;
+					}
+					if (statusPosted && statusDialog != null) {
+						statusDialog.cancel();
+						statusDialog = null;
+					}
+				}
+			});
 		}
 	}
 
@@ -664,10 +680,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 					@Override
 					public void onSuccess(JSONObject response) {
-						if (progressDialog != null) {
-							progressDialog.dismiss();
-							progressDialog = null;
-						}
+						mActivityTask = new ActivityTask();
+
 						JSONObject data = response.optJSONObject("data");
 
 						String mappedId = data
@@ -700,7 +714,6 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.MY_STATUS_CHANGED, text);
-						statusDialog.cancel();
 
 						/*
 						 * This would happen in the case where the user has
@@ -716,6 +729,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 									statusMessage);
 						}
 						statusTxt.setText("");
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.STATUS_POST_REQUEST_DONE, true);
 					}
 
 					@Override
@@ -728,6 +743,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 								R.string.update_status_fail, Toast.LENGTH_SHORT)
 								.show();
 						mActivityTask.hikeHTTPTask = null;
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.STATUS_POST_REQUEST_DONE, false);
 					}
 
 				});
