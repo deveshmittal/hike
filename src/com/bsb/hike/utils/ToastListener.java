@@ -143,7 +143,7 @@ public class ToastListener implements Listener {
 			}
 			toaster.notifyFavorite(contactInfo);
 		} else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
-			if (currentActivity != null) {
+			if (currentActivity.get() != null) {
 				return;
 			}
 			StatusMessage statusMessage = (StatusMessage) object;
