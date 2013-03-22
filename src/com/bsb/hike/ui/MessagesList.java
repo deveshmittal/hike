@@ -870,7 +870,7 @@ public class MessagesList extends DrawerBaseActivity implements
 		if ((HikePubSub.MESSAGE_RECEIVED.equals(type))
 				|| (HikePubSub.MESSAGE_SENT.equals(type))) {
 			Log.d("MESSAGE LIST", "New msg event sent or received.");
-			final ConvMessage message = (ConvMessage) object;
+			ConvMessage message = (ConvMessage) object;
 			/* find the conversation corresponding to this message */
 			String msisdn = message.getMsisdn();
 			final Conversation conv = mConversationsByMSISDN.get(msisdn);
@@ -885,6 +885,25 @@ public class MessagesList extends DrawerBaseActivity implements
 				return;
 			}
 
+			if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE) {
+				if (!conv.getMessages().isEmpty()) {
+					ConvMessage prevMessage = conv.getMessages().get(
+							conv.getMessages().size() - 1);
+					String metadata = message.getMetadata().serialize();
+					message = new ConvMessage(message.getMessage(),
+							message.getMsisdn(), prevMessage.getTimestamp(),
+							prevMessage.getState(), prevMessage.getMsgID(),
+							prevMessage.getMappedMsgID(),
+							message.getGroupParticipantMsisdn());
+					try {
+						message.setMetadata(metadata);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					message.setConversation(prevMessage.getConversation());
+				}
+			}
 			// For updating the group name if some participant has joined or
 			// left the group
 			else if ((conv instanceof GroupConversation)
@@ -894,6 +913,7 @@ public class MessagesList extends DrawerBaseActivity implements
 				((GroupConversation) conv).setGroupParticipantList(hCDB
 						.getGroupParticipants(conv.getMsisdn(), false, false));
 			}
+			final ConvMessage finalMessage = message;
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -902,8 +922,8 @@ public class MessagesList extends DrawerBaseActivity implements
 						mAdapter.add(conv);
 					}
 
-					conv.addMessage(message);
-					Log.d("MessagesList", "new message is " + message);
+					conv.addMessage(finalMessage);
+					Log.d("MessagesList", "new message is " + finalMessage);
 					mAdapter.sort(mConversationsComparator);
 
 					if (messageRefreshHandler == null) {
