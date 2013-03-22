@@ -105,8 +105,10 @@ public class DbConversationListener implements Listener {
 				}
 			}
 		} else if (HikePubSub.DELETE_MESSAGE.equals(type)) {
-			ConvMessage message = ((ConvMessage) object);
-			mConversationDb.deleteMessage(message);
+			Pair<ConvMessage, Boolean> deleteMessage = (Pair<ConvMessage, Boolean>) object;
+			ConvMessage message = deleteMessage.first;
+			mConversationDb.deleteMessage(deleteMessage.first,
+					deleteMessage.second);
 			persistence.removeMessage(message.getMsgID());
 		} else if (HikePubSub.MESSAGE_FAILED.equals(type)) // server got msg
 		// from client 1 and

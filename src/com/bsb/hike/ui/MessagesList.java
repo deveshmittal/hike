@@ -134,7 +134,7 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.NEW_CONVERSATION, HikePubSub.MESSAGE_SENT,
 			HikePubSub.MSG_READ, HikePubSub.ICON_CHANGED,
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.UPDATE_AVAILABLE,
-			HikePubSub.CONTACT_ADDED, HikePubSub.MESSAGE_DELETED,
+			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.RESET_NOTIFICATION_COUNTER,
@@ -935,38 +935,31 @@ public class MessagesList extends DrawerBaseActivity implements
 				}
 			});
 
-		} else if (HikePubSub.MESSAGE_DELETED.equals(type)) {
-			Log.d(getClass().getSimpleName(), "Message Deleted");
-			final ConvMessage message = (ConvMessage) object;
-			String msisdn = message.getMsisdn();
+		} else if (HikePubSub.LAST_MESSAGE_DELETED.equals(type)) {
+			Pair<ConvMessage, String> messageMsisdnPair = (Pair<ConvMessage, String>) object;
+
+			final ConvMessage message = messageMsisdnPair.first;
+			final String msisdn = messageMsisdnPair.second;
+
+			final boolean conversationEmpty = message == null;
+
 			final Conversation conversation = mConversationsByMSISDN
 					.get(msisdn);
 
-			if (conversation == null) {
-				return;
-			}
+			final List<ConvMessage> messageList = new ArrayList<ConvMessage>(1);
 
-			List<ConvMessage> existingList = conversation.getMessages();
-			/*
-			 * Checking if the message deleted was the last message in the
-			 * conversation. If it wasn't, no need to do anything here.
-			 */
-			if (existingList.get(existingList.size() - 1).getMsgID() != message
-					.getMsgID()) {
-				Log.d(getClass().getSimpleName(),
-						"The last message was not deleted. No need to do anything here");
-				return;
+			if (!conversationEmpty) {
+				if (conversation == null) {
+					return;
+				}
+				messageList.add(message);
 			}
-
-			final List<ConvMessage> messageList = HikeConversationsDatabase
-					.getInstance().getConversationThread(msisdn,
-							conversation.getConvId(), 1, conversation, -1);
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if (messageList.isEmpty()) {
-						mConversationsByMSISDN.remove(conversation.getMsisdn());
-						mConversationsAdded.remove(conversation.getMsisdn());
+					if (conversationEmpty) {
+						mConversationsByMSISDN.remove(msisdn);
+						mConversationsAdded.remove(msisdn);
 						mAdapter.remove(conversation);
 					} else {
 						conversation.setMessages(messageList);

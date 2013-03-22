@@ -21,6 +21,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -989,6 +990,49 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		return conversations;
 	}
 
+	private ConvMessage getLastMessageForConversation(String msisdn) {
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {
+				DBConstants.MESSAGE, DBConstants.MSG_STATUS,
+				DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID,
+				DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA,
+				DBConstants.GROUP_PARTICIPANT }, DBConstants.MSISDN + "=?",
+				new String[] { msisdn }, null, null, null);
+
+		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
+		final int msgStatusColumn = c.getColumnIndex(DBConstants.MSG_STATUS);
+		final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
+		final int mappedMsgIdColumn = c
+				.getColumnIndex(DBConstants.MAPPED_MSG_ID);
+		final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGE_ID);
+		final int metadataColumn = c
+				.getColumnIndex(DBConstants.MESSAGE_METADATA);
+		final int groupParticipantColumn = c
+				.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+
+		try {
+			if (c.moveToFirst()) {
+				ConvMessage message = new ConvMessage(c.getString(msgColumn),
+						msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c
+								.getInt(msgStatusColumn)),
+						c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn),
+						c.getString(groupParticipantColumn));
+				String metadata = c.getString(metadataColumn);
+				try {
+					message.setMetadata(metadata);
+				} catch (JSONException e) {
+					Log.e(HikeConversationsDatabase.class.getName(),
+							"Invalid JSON metadata", e);
+				}
+				return message;
+			}
+			return null;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
 	private Map<String, Map<String, GroupParticipant>> getAllGroupParticipants() {
 		Cursor c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE, new String[] {
 				DBConstants.GROUP_ID, DBConstants.MSISDN, DBConstants.HAS_LEFT,
@@ -1123,12 +1167,76 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	/* deletes a single message */
-	public void deleteMessage(ConvMessage convMessage) {
+	public void deleteMessage(ConvMessage convMessage, boolean isLastMessage) {
 		Long[] bindArgs = new Long[] { convMessage.getMsgID() };
 		mDb.execSQL("DELETE FROM " + DBConstants.MESSAGES_TABLE + " WHERE "
 				+ DBConstants.MESSAGE_ID + "= ?", bindArgs);
-		HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_DELETED,
-				convMessage);
+
+		if (isLastMessage) {
+			deleteMessageFromConversation(convMessage.getMsisdn(), convMessage
+					.getConversation().getConvId());
+		}
+	}
+
+	private void deleteMessageFromConversation(String msisdn, long convId) {
+		/*
+		 * We get the latest message from the messages table
+		 */
+		Cursor c = null;
+
+		try {
+			c = mDb.query(DBConstants.MESSAGES_TABLE, null, DBConstants.CONV_ID
+					+ "=?", new String[] { Long.toString(convId) }, null, null,
+					DBConstants.MESSAGE_ID + " DESC LIMIT " + 1);
+			boolean conversationEmpty = false;
+			if (c.moveToFirst()) {
+				final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
+				final int msgStatusColumn = c
+						.getColumnIndex(DBConstants.MSG_STATUS);
+				final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
+				final int mappedMsgIdColumn = c
+						.getColumnIndex(DBConstants.MAPPED_MSG_ID);
+				final int msgIdColumn = c
+						.getColumnIndex(DBConstants.MESSAGE_ID);
+				final int metadataColumn = c
+						.getColumnIndex(DBConstants.MESSAGE_METADATA);
+				final int groupParticipantColumn = c
+						.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+
+				ConvMessage message = new ConvMessage(c.getString(msgColumn),
+						msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c
+								.getInt(msgStatusColumn)),
+						c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn),
+						c.getString(groupParticipantColumn));
+				String metadata = c.getString(metadataColumn);
+				try {
+					message.setMetadata(metadata);
+				} catch (JSONException e) {
+					Log.e(HikeConversationsDatabase.class.getName(),
+							"Invalid JSON metadata", e);
+				}
+				ContentValues contentValues = getContentValueForConversationMessage(message);
+				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
+						DBConstants.MSISDN + "=?", new String[] { msisdn });
+			} else {
+				/*
+				 * This conversation is empty.
+				 */
+				mDb.delete(DBConstants.CONVERSATIONS_TABLE, DBConstants.MSISDN
+						+ "=?", new String[] { msisdn });
+				conversationEmpty = true;
+			}
+			ConvMessage newLastMessage = conversationEmpty ? null
+					: getLastMessageForConversation(msisdn);
+
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.LAST_MESSAGE_DELETED,
+					new Pair<ConvMessage, String>(newLastMessage, msisdn));
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
 	}
 
 	public boolean wasOverlayDismissed(String msisdn) {
@@ -1736,6 +1844,27 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 */
 		mDb.delete(DBConstants.MESSAGES_TABLE, DBConstants.MESSAGE_ID + "=?",
 				new String[] { Long.toString(messageId) });
+
+		/*
+		 * Checking if the status message deleted was the last message
+		 */
+		Cursor c1 = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {
+				DBConstants.MSISDN, DBConstants.CONV_ID },
+				DBConstants.MESSAGE_ID + "=?",
+				new String[] { Long.toString(messageId) }, null, null, null);
+		try {
+			if (c1.moveToFirst()) {
+				String msisdn = c1.getString(c1
+						.getColumnIndex(DBConstants.MSISDN));
+				long convId = c1
+						.getLong(c1.getColumnIndex(DBConstants.CONV_ID));
+				deleteMessageFromConversation(msisdn, convId);
+			}
+		} finally {
+			if (c1 != null) {
+				c1.close();
+			}
+		}
 	}
 
 	public int getStatusMessageCount() {

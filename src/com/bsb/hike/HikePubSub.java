@@ -112,7 +112,7 @@ public class HikePubSub implements Runnable {
 	public static final String DELETE_MESSAGE = "deleteMessage";
 
 	/* published when the clients has deleted the message */
-	public static final String MESSAGE_DELETED = "messageDeleted";
+	public static final String LAST_MESSAGE_DELETED = "lastMessageDeleted";
 
 	public static final String MESSAGE_FAILED = "messageFailed";
 

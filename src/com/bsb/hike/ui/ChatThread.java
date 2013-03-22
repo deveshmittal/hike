@@ -1894,7 +1894,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void removeMessage(ConvMessage convMessage) {
-		mPubSub.publish(HikePubSub.DELETE_MESSAGE, convMessage);
+		boolean lastMessage = convMessage
+				.equals(messages.get(messages.size() - 1));
+		mPubSub.publish(HikePubSub.DELETE_MESSAGE,
+				new Pair<ConvMessage, Boolean>(convMessage, lastMessage));
 		messages.remove(convMessage);
 		mAdapter.notifyDataSetChanged();
 	}
