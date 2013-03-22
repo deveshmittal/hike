@@ -10,6 +10,8 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -55,7 +57,8 @@ public class HikeNotification {
 		// exist
 		if (TextUtils.isEmpty(message)
 				&& convMsg.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
-			message = String.format(context.getString(R.string.joined_hike_new),
+			message = String.format(
+					context.getString(R.string.joined_hike_new),
 					contactInfo.getFirstName());
 		}
 		long timestamp = convMsg.getTimestamp();
@@ -119,7 +122,7 @@ public class HikeNotification {
 		}
 
 		showNotification(notificationIntent, icon, timestamp, notificationId,
-				text, msisdn, key, message);
+				text, key, message);
 	}
 
 	public void notifyFavorite(ContactInfo contactInfo) {
@@ -143,7 +146,7 @@ public class HikeNotification {
 				key, message));
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
-				text, msisdn, key, message);
+				text, key, message);
 	}
 
 	public void notifyStatusMessage(StatusMessage statusMessage) {
@@ -187,12 +190,12 @@ public class HikeNotification {
 		}
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
-				text, msisdn, key, message);
+				text, key, message);
 	}
 
 	private void showNotification(Intent notificationIntent, int icon,
-			long timestamp, int notificationId, CharSequence text,
-			String msisdn, String key, String message) {
+			long timestamp, int notificationId, CharSequence text, String key,
+			String message) {
 
 		boolean shouldNotPlayNotification = (System.currentTimeMillis() - lastNotificationTime) < MIN_TIME_BETWEEN_NOTIFICATIONS;
 
@@ -213,34 +216,31 @@ public class HikeNotification {
 		boolean led = preferenceManager
 				.getBoolean(HikeConstants.LED_PREF, true);
 
-		Notification notification = new Notification(icon, text,
-				timestamp * 1000);
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+				context).setSmallIcon(R.drawable.ic_contact_logo)
+				.setContentTitle(key).setContentText(message).setTicker(text)
+				.setDefaults(vibrate);
+
+		if (playNativeJingle && playSound != 0) {
+			mBuilder.setSound(Uri.parse("android.resource://"
+					+ context.getPackageName() + "/" + R.raw.v1));
+		} else if (playSound != 0) {
+			mBuilder.setDefaults(playSound);
+		}
 
 		if (led) {
-			notification.ledARGB = Color.BLUE;
-			notification.ledOnMS = 300;
-			notification.ledOffMS = 1000;
-
-			notification.flags |= Notification.FLAG_SHOW_LIGHTS;
-		}
-		notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-		notification.defaults |= 0 | vibrate;
-		if (playNativeJingle && playSound != 0) {
-			notification.sound = Uri.parse("android.resource://"
-					+ context.getPackageName() + "/" + R.raw.v1);
-		} else if (playSound != 0) {
-			notification.defaults |= playSound | vibrate;
+			mBuilder.setLights(Color.BLUE, 300, 1000);
 		}
 
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-				notificationIntent, 0);
-		notification.setLatestEventInfo(context, key, message, contentIntent);
+		TaskStackBuilder stackBuilder = TaskStackBuilder.from(context);
+		stackBuilder.addNextIntent(notificationIntent);
 
-		notificationManager.notify(notificationId, notification);
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
+				PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(resultPendingIntent);
 
-		// If the notification was played this time, we should reset the value.
-		// Else we leave it as is.
+		notificationManager.notify(notificationId, mBuilder.getNotification());
+
 		lastNotificationTime = shouldNotPlayNotification ? lastNotificationTime
 				: System.currentTimeMillis();
 	}
