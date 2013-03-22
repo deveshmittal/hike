@@ -596,6 +596,14 @@ public class MqttMessagesManager {
 			saveStatusMsg(jsonObj, msisdn);
 		} else if (HikeConstants.MqttMessageTypes.ADD_FAVORITE.equals(type)) {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
+
+			/*
+			 * Ignore if contact is blocked.
+			 */
+			if (userDb.isBlocked(msisdn)) {
+				return;
+			}
+
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
 					false);
 			if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
@@ -696,8 +704,11 @@ public class MqttMessagesManager {
 			/*
 			 * This would be true for unsupported status message types. We
 			 * should not be doing anything if we get one.
+			 * 
+			 * Also if the user is blocked, we ignore the message.
 			 */
-			if (statusMessage.getStatusMessageType() == null) {
+			if (statusMessage.getStatusMessageType() == null
+					|| userDb.isBlocked(statusMessage.getMsisdn())) {
 				return;
 			}
 

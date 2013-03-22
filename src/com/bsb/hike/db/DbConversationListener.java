@@ -120,6 +120,10 @@ public class DbConversationListener implements Listener {
 		} else if (HikePubSub.BLOCK_USER.equals(type)) {
 			String msisdn = (String) object;
 			mUserDb.block(msisdn);
+			/*
+			 * When a user blocks someone, we reset the contact's friend type.
+			 */
+			mUserDb.toggleContactFavorite(msisdn, FavoriteType.NOT_FRIEND);
 			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
 			/*
 			 * We remove the icon for a blocked user as well.
