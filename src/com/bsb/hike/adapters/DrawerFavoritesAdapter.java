@@ -89,6 +89,10 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				: EmoticonConstants.MOOD_RES_IDS[moodId];
 		new AsyncTask<Void, Void, Void>() {
 
+			List<ContactInfo> favoriteTaskList;
+			List<ContactInfo> onHikeTaskList;
+			List<ContactInfo> recentTaskList;
+
 			@Override
 			protected Void doInBackground(Void... params) {
 				String myMsisdn = context.getSharedPreferences(
@@ -98,29 +102,32 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				HikeUserDatabase hikeUserDatabase = HikeUserDatabase
 						.getInstance();
 
-				favoriteList = hikeUserDatabase
+				favoriteTaskList = hikeUserDatabase
 						.getContactsOfFavoriteType(FavoriteType.FRIEND,
 								HikeConstants.BOTH_VALUE, myMsisdn);
-				favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE,
-						myMsisdn));
-				favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.REQUEST_SENT_REJECTED,
-						HikeConstants.BOTH_VALUE, myMsisdn));
-				Collections.sort(favoriteList);
+				favoriteTaskList.addAll(hikeUserDatabase
+						.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT,
+								HikeConstants.BOTH_VALUE, myMsisdn));
+				favoriteTaskList.addAll(hikeUserDatabase
+						.getContactsOfFavoriteType(
+								FavoriteType.REQUEST_SENT_REJECTED,
+								HikeConstants.BOTH_VALUE, myMsisdn));
+				Collections.sort(favoriteTaskList);
 
-				onHikeList = hikeUserDatabase.getContactsOfFavoriteType(
+				onHikeTaskList = hikeUserDatabase.getContactsOfFavoriteType(
 						FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE,
 						myMsisdn);
-				onHikeList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.REQUEST_RECEIVED,
-						HikeConstants.ON_HIKE_VALUE, myMsisdn));
-				onHikeList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.REQUEST_RECEIVED_REJECTED,
-						HikeConstants.ON_HIKE_VALUE, myMsisdn));
-				Collections.sort(onHikeList);
+				onHikeTaskList.addAll(hikeUserDatabase
+						.getContactsOfFavoriteType(
+								FavoriteType.REQUEST_RECEIVED,
+								HikeConstants.ON_HIKE_VALUE, myMsisdn));
+				onHikeTaskList.addAll(hikeUserDatabase
+						.getContactsOfFavoriteType(
+								FavoriteType.REQUEST_RECEIVED_REJECTED,
+								HikeConstants.ON_HIKE_VALUE, myMsisdn));
+				Collections.sort(onHikeTaskList);
 
-				recentList = hikeUserDatabase.getNonHikeRecentContacts(-1,
+				recentTaskList = hikeUserDatabase.getNonHikeRecentContacts(-1,
 						HikeMessengerApp.isIndianUser(),
 						FavoriteType.NOT_FRIEND);
 
@@ -129,6 +136,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 			@Override
 			protected void onPostExecute(Void result) {
+				favoriteList = favoriteTaskList;
+				onHikeList = onHikeTaskList;
+				recentList = recentTaskList;
 				makeCompleteList();
 			}
 
