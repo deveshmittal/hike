@@ -55,6 +55,7 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 	private int numParticipants;
 	private boolean editingGroupName;
 	private String editedGroupName;
+	private boolean isContactBlocked;
 
 	public ProfileAdapter(Context context, List<?> itemList,
 			GroupConversation groupConversation, ContactInfo contactInfo,
@@ -70,6 +71,23 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 		this.mContactInfo = contactInfo;
 		this.groupConversation = groupConversation;
 		this.myProfile = myProfile;
+	}
+
+	public ProfileAdapter(Context context, List<?> itemList,
+			GroupConversation groupConversation, ContactInfo contactInfo,
+			boolean myProfile, boolean isContactBlocked) {
+		this.context = context;
+		this.groupProfile = groupConversation != null;
+		if (groupProfile) {
+			groupParticipants = (List<GroupParticipant>) itemList;
+			editedGroupName = groupConversation.getLabel();
+		} else {
+			statusMessages = (List<StatusMessage>) itemList;
+		}
+		this.mContactInfo = contactInfo;
+		this.groupConversation = groupConversation;
+		this.myProfile = myProfile;
+		this.isContactBlocked = isContactBlocked;
 	}
 
 	@Override
@@ -435,27 +453,35 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 			String contactName = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo
 					.getMsisdn() : mContactInfo.getName();
 
-			if (mContactInfo.isOnhike()) {
-				viewHolder.btn2.setVisibility(View.GONE);
-				viewHolder.icon.setImageResource(R.drawable.ic_not_friend);
-				if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
-					viewHolder.text.setText(context.getString(
-							R.string.waiting_for_accept, contactName));
-					viewHolder.btn1.setVisibility(View.GONE);
+			if (!isContactBlocked) {
+				if (mContactInfo.isOnhike()) {
+					viewHolder.btn2.setVisibility(View.GONE);
+					viewHolder.icon.setImageResource(R.drawable.ic_not_friend);
+					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
+						viewHolder.text.setText(context.getString(
+								R.string.waiting_for_accept, contactName));
+						viewHolder.btn1.setVisibility(View.GONE);
+					} else {
+						viewHolder.text.setText(context.getString(
+								R.string.add_as_friend_info, contactName));
+						viewHolder.btn1.setText(R.string.add_as_friend);
+						viewHolder.btn1.setVisibility(View.VISIBLE);
+					}
 				} else {
+					viewHolder.icon.setImageResource(R.drawable.ic_not_on_hike);
 					viewHolder.text.setText(context.getString(
-							R.string.add_as_friend_info, contactName));
-					viewHolder.btn1.setText(R.string.add_as_friend);
-					viewHolder.btn1.setVisibility(View.VISIBLE);
+							R.string.not_on_hike, contactName));
+					viewHolder.btn1.setText(R.string.invite_to_hike);
+					viewHolder.btn2
+							.setVisibility(mContactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND ? View.VISIBLE
+									: View.GONE);
 				}
 			} else {
-				viewHolder.icon.setImageResource(R.drawable.ic_not_on_hike);
-				viewHolder.text.setText(context.getString(R.string.not_on_hike,
+				viewHolder.icon.setImageResource(R.drawable.ic_block_profile);
+				viewHolder.text.setText(context.getString(R.string.user_blocked,
 						contactName));
-				viewHolder.btn1.setText(R.string.invite_to_hike);
-				viewHolder.btn2
-						.setVisibility(mContactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND ? View.VISIBLE
-								: View.GONE);
+				viewHolder.btn1.setText(R.string.unblock_title);
+				viewHolder.btn2.setVisibility(View.GONE);
 			}
 
 			break;
@@ -528,6 +554,14 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		editedGroupName = s.toString();
+	}
+
+	public void setIsContactBlocked(boolean b) {
+		isContactBlocked = b;
+	}
+
+	public boolean isContactBlocked() {
+		return isContactBlocked;
 	}
 
 	@Override

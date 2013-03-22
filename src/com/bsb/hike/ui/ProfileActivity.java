@@ -298,7 +298,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		setupContactProfileList();
 
 		profileAdapter = new ProfileAdapter(this, profileItems, null,
-				contactInfo, false);
+				contactInfo, false, HikeUserDatabase.getInstance().isBlocked(
+						mLocalMSISDN));
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
 
@@ -1451,18 +1452,25 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onProfileBtn1Click(View v) {
-		if (contactInfo.isOnhike()) {
-			contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
-
-			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
-					contactInfo, contactInfo.getFavoriteType());
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
-					favoriteToggle);
-			Toast.makeText(getApplicationContext(),
-					"Waiting for your friend to accept the request",
-					Toast.LENGTH_SHORT).show();
+		if (profileAdapter.isContactBlocked()) {
+			HikeMessengerApp.getPubSub().publish(HikePubSub.UNBLOCK_USER,
+					mLocalMSISDN);
+			profileAdapter.setIsContactBlocked(false);
+			profileAdapter.notifyDataSetChanged();
 		} else {
-			inviteToHike(contactInfo.getMsisdn());
+			if (contactInfo.isOnhike()) {
+				contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
+
+				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
+						contactInfo, contactInfo.getFavoriteType());
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+				Toast.makeText(getApplicationContext(),
+						"Waiting for your friend to accept the request",
+						Toast.LENGTH_SHORT).show();
+			} else {
+				inviteToHike(contactInfo.getMsisdn());
+			}
 		}
 	}
 

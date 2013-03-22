@@ -442,4 +442,5 @@
 	<string name="every_x_hours">Every %1$d hours</string>
 	<string name="off">Off</string>
 	<string name="moods">Moods</string>
+	<string name="user_blocked">You have blocked %1$s.</string>
 </resources>
