@@ -1077,6 +1077,9 @@ public class MessagesList extends DrawerBaseActivity implements
 			final String groupName = db.getGroupName(groupId);
 
 			Conversation conv = mConversationsByMSISDN.get(groupId);
+			if (conv == null) {
+				return;
+			}
 			conv.setContactName(groupName);
 
 			runOnUiThread(this);
