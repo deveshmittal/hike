@@ -824,6 +824,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 								JSONObject data = response
 										.optJSONObject("status");
 
+								if (data == null) {
+									return;
+								}
+
 								String mappedId = data
 										.optString(HikeConstants.STATUS_ID);
 								String msisdn = preferences.getString(
