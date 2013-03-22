@@ -756,6 +756,91 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
+	/**
+	 * Using this method to get the conversation with the last message. If there
+	 * is no last message, we return null.
+	 * 
+	 * @param msisdn
+	 * @return
+	 */
+	public Conversation getConversationWithLastMessage(String msisdn) {
+		Log.d(getClass().getSimpleName(), "Fetching conversation with msisdn: "
+				+ msisdn);
+		Cursor c = null;
+		HikeUserDatabase huDb = null;
+		Conversation conv = null;
+		try {
+			c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {
+					DBConstants.MSISDN, DBConstants.CONV_ID,
+					DBConstants.MESSAGE, DBConstants.MSG_STATUS,
+					DBConstants.TIMESTAMP, DBConstants.MAPPED_MSG_ID,
+					DBConstants.MESSAGE_ID, DBConstants.MESSAGE_METADATA,
+					DBConstants.GROUP_PARTICIPANT, DBConstants.ONHIKE },
+					DBConstants.MSISDN + "=?", new String[] { msisdn }, null,
+					null, null);
+			if (!c.moveToFirst()) {
+				Log.d(getClass().getSimpleName(), "Could not find db entry");
+				return null;
+			}
+
+			long convid = c.getInt(c.getColumnIndex(DBConstants.CONV_ID));
+			boolean onhike = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) != 0;
+			final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
+			final int msgStatusColumn = c
+					.getColumnIndex(DBConstants.MSG_STATUS);
+			final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
+			final int mappedMsgIdColumn = c
+					.getColumnIndex(DBConstants.MAPPED_MSG_ID);
+			final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int metadataColumn = c
+					.getColumnIndex(DBConstants.MESSAGE_METADATA);
+			final int groupParticipantColumn = c
+					.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+
+			String messageString = c.getString(msgColumn);
+			String metadata = c.getString(metadataColumn);
+
+			/*
+			 * If the message does not contain any text or metadata, its an
+			 * empty message and the conversation is blank.
+			 */
+			if (TextUtils.isEmpty(messageString) && TextUtils.isEmpty(metadata)) {
+				return null;
+			}
+
+			if (Utils.isGroupConversation(msisdn)) {
+				conv = getGroupConversation(msisdn, convid);
+			} else {
+				huDb = HikeUserDatabase.getInstance();
+				ContactInfo contactInfo = huDb.getContactInfoFromMSISDN(msisdn,
+						false);
+
+				onhike |= contactInfo.isOnhike();
+				conv = new Conversation(msisdn, convid, contactInfo.getName(),
+						onhike);
+			}
+
+			ConvMessage message = new ConvMessage(messageString, msisdn,
+					c.getInt(tsColumn), ConvMessage.stateValue(c
+							.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
+					c.getLong(mappedMsgIdColumn),
+					c.getString(groupParticipantColumn));
+			try {
+				message.setMetadata(metadata);
+			} catch (JSONException e) {
+				Log.e(HikeConversationsDatabase.class.getName(),
+						"Invalid JSON metadata", e);
+			}
+			conv.addMessage(message);
+
+			return conv;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
 	public List<Conversation> getConversations() {
 		long startTime = System.currentTimeMillis();
 

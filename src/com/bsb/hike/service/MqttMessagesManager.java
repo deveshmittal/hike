@@ -793,7 +793,8 @@ public class MqttMessagesManager {
 
 	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn)
 			throws JSONException {
-		Conversation conversation = convDb.getConversation(msisdn, 0);
+		Conversation conversation = convDb
+				.getConversationWithLastMessage(msisdn);
 
 		boolean isUJMsg = HikeConstants.MqttMessageTypes.USER_JOINED
 				.equals(jsonObj.getString(HikeConstants.TYPE));
