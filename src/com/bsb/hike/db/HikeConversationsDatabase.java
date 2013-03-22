@@ -1578,6 +1578,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		values.put(DBConstants.SHOW_IN_TIMELINE, showInCentralTimeline);
 		values.put(DBConstants.MOOD_ID, statusMessage.getMoodId());
 		values.put(DBConstants.TIME_OF_DAY, statusMessage.getTimeOfDay());
+		/*
+		 * Inserting -1 to denote that this status is not a part of any
+		 * conversation yet.
+		 */
+		values.put(DBConstants.MESSAGE_ID, -1);
 
 		long id = mDb.insert(DBConstants.STATUS_TABLE, null, values);
 		statusMessage.setId(id);
@@ -1719,6 +1724,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 */
 		mDb.delete(DBConstants.STATUS_TABLE, selection, whereArgs);
 
+		/*
+		 * This would be true if the status message was not a part of any
+		 * conversation.
+		 */
+		if (messageId == -1) {
+			return;
+		}
 		/*
 		 * And we delete the message
 		 */
