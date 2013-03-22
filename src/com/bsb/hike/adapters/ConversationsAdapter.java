@@ -18,6 +18,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -62,14 +63,24 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 			ImageView imgStatus = (ImageView) v
 					.findViewById(R.id.msg_status_indicator);
-			int resId = message.getImageState();
-			if (resId > 0) {
-				imgStatus.setImageResource(resId);
-				imgStatus.setVisibility(View.VISIBLE);
-			} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
-					&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
-				imgStatus.setImageResource(R.drawable.ic_unread);
-				imgStatus.setVisibility(View.VISIBLE);
+			/*
+			 * If the message is a status message, we only show an indicator if
+			 * the status of the message is unread.
+			 */
+			if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE
+					|| message.getState() == State.RECEIVED_UNREAD) {
+				int resId = message.getImageState();
+				if (resId > 0) {
+					imgStatus.setImageResource(resId);
+					imgStatus.setVisibility(View.VISIBLE);
+				} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
+						&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
+					imgStatus.setImageResource(R.drawable.ic_unread);
+					imgStatus.setVisibility(View.VISIBLE);
+				} else {
+					imgStatus.setImageResource(0);
+					imgStatus.setVisibility(View.GONE);
+				}
 			} else {
 				imgStatus.setImageResource(0);
 				imgStatus.setVisibility(View.GONE);
