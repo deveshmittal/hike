@@ -14,8 +14,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
@@ -24,6 +26,8 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
@@ -52,7 +56,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class CentralTimeline extends DrawerBaseActivity implements
-		OnItemClickListener, Listener {
+		OnItemClickListener, Listener, OnScrollListener {
 
 	private CentralTimelineAdapter centralTimelineAdapter;
 	private ListView timelineContent;
@@ -70,6 +74,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	private String userMsisdn;
 	private ActivityState mActivityState;
 	private ProgressDialog mDialog;
+	private String[] friendMsisdns;
 
 	private class ActivityState {
 		public DownloadProfileImageTask downloadProfileImageTask;
@@ -165,10 +170,12 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		}
 		msisdnList.add(userMsisdn);
 
-		String[] friendMsisdns = new String[msisdnList.size()];
+		friendMsisdns = new String[msisdnList.size()];
 		msisdnList.toArray(friendMsisdns);
 		statusMessages = HikeConversationsDatabase.getInstance()
-				.getStatusMessages(true, friendMsisdns);
+				.getStatusMessages(true,
+						HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
+						friendMsisdns);
 
 		for (ContactInfo contactInfo : friendRequestList) {
 			statusMessages
@@ -218,6 +225,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 				statusMessages, userMsisdn, unseenCount);
 		timelineContent.setAdapter(centralTimelineAdapter);
 		timelineContent.setOnItemClickListener(this);
+		timelineContent.setOnScrollListener(this);
 
 		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		for (int i = 0; i < Math.min(unseenCount, statusMessages.size()); i++) {
@@ -621,4 +629,60 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		profileImageContainer.startAnimation(alphaAnimation);
 	}
 
+	private boolean reachedEnd;
+	private boolean loadingMoreMessages;
+
+	@Override
+	public void onScroll(AbsListView view, final int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		if (!reachedEnd
+				&& !loadingMoreMessages
+				&& !statusMessages.isEmpty()
+				&& (firstVisibleItem + visibleItemCount) >= (statusMessages
+						.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)) {
+
+			Log.d(getClass().getSimpleName(), "Loading more items");
+			loadingMoreMessages = true;
+
+			new AsyncTask<Void, Void, List<StatusMessage>>() {
+
+				@Override
+				protected List<StatusMessage> doInBackground(Void... params) {
+					List<StatusMessage> olderMessages = HikeConversationsDatabase
+							.getInstance()
+							.getStatusMessages(
+									true,
+									HikeConstants.MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME,
+									(int) statusMessages.get(
+											statusMessages.size() - 1).getId(),
+									friendMsisdns);
+					return olderMessages;
+				}
+
+				@Override
+				protected void onPostExecute(List<StatusMessage> olderMessages) {
+					if (!olderMessages.isEmpty()) {
+						statusMessages.addAll(statusMessages.size(),
+								olderMessages);
+						centralTimelineAdapter.notifyDataSetChanged();
+						timelineContent.setSelection(firstVisibleItem);
+					} else {
+						/*
+						 * This signifies that we've reached the end. No need to
+						 * query the db anymore unless we add a new message.
+						 */
+						reachedEnd = true;
+					}
+
+					loadingMoreMessages = false;
+				}
+
+			}.execute();
+
+		}
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
+	}
 }

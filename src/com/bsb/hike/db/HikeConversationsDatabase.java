@@ -1700,6 +1700,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public List<StatusMessage> getStatusMessages(boolean timelineUpdatesOnly,
 			String... msisdnList) {
+		return getStatusMessages(timelineUpdatesOnly, -1, -1, msisdnList);
+	}
+
+	public List<StatusMessage> getStatusMessages(boolean timelineUpdatesOnly,
+			int limit, int lastStatusId, String... msisdnList) {
 		String[] columns = new String[] { DBConstants.STATUS_ID,
 				DBConstants.STATUS_MAPPED_ID, DBConstants.MSISDN,
 				DBConstants.STATUS_TEXT, DBConstants.STATUS_TYPE,
@@ -1725,9 +1730,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ (timelineUpdatesOnly ? " AND " : ""));
 		}
 		if (timelineUpdatesOnly) {
-			selection.append(DBConstants.SHOW_IN_TIMELINE + " =1");
+			selection.append(DBConstants.SHOW_IN_TIMELINE + " =1 ");
 		}
-		String orderBy = DBConstants.STATUS_ID + " DESC";
+		if (lastStatusId != -1) {
+			selection.append(" AND " + DBConstants.STATUS_ID + " < "
+					+ lastStatusId);
+		}
+
+		String orderBy = DBConstants.STATUS_ID + " DESC ";
+
+		if (limit != -1) {
+			orderBy += "LIMIT " + limit;
+		}
+
 		Cursor c = null;
 		try {
 			c = mDb.query(DBConstants.STATUS_TABLE, columns,
@@ -1758,9 +1773,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						c.getInt(timeOfDayIdx));
 				statusMessages.add(statusMessage);
 
-				Log.d(getClass().getSimpleName(),
-						"ID: " + statusMessage.getId());
-
 				List<StatusMessage> msisdnMessages = statusMessagesMap
 						.get(msisdn);
 				if (msisdnMessages == null) {
@@ -1775,8 +1787,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 			if (msisdns != null) {
 				msisdns.replace(msisdns.lastIndexOf(","), msisdns.length(), ")");
-				Log.d(getClass().getSimpleName(),
-						"Msisdns: " + msisdns.toString());
 
 				List<ContactInfo> contactList = HikeUserDatabase.getInstance()
 						.getContactNamesFromMsisdnList(msisdns.toString());
