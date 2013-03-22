@@ -1000,6 +1000,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				.findViewById(R.id.status_txt);
 		ImageView avatar = (ImageView) statusDialog.findViewById(R.id.avatar);
 		avatar.setImageResource(EmoticonConstants.MOOD_RES_IDS[moodId]);
+		avatar.setBackgroundResource(0);
 
 		int timeOfDay = getTimeOfDay();
 		String[] prefillTextArray;
