@@ -15,6 +15,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
 
@@ -289,7 +290,17 @@ public class ConvMessage {
 			break;
 		case STATUS_MESSAGE:
 			this.mTimestamp = metadata.getStatusMessage().getTimeStamp();
-			this.mMessage = context.getString(R.string.status_update);
+			String msg;
+			if (metadata.getStatusMessage().getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+				msg = context.getString(R.string.changed_profile);
+			} else {
+				msg = metadata.getStatusMessage().getText();
+			}
+			this.mMessage = "\"" + msg + "\"";
+			/*
+			 * We want all status message state to be read by default.
+			 */
+			isSelfGenerated = true;
 			break;
 		}
 		this.mConversation = conversation;
