@@ -280,6 +280,14 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		makeCompleteList();
 	}
 
+	public void removeContact(ContactInfo contactInfo) {
+		removeContactFromListByMatchingMsisdn(onHikeList, contactInfo);
+		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
+		removeContactFromListByMatchingMsisdn(favoriteList, contactInfo);
+
+		makeCompleteList();
+	}
+
 	private void removeContactFromListByMatchingMsisdn(
 			List<ContactInfo> contactList, ContactInfo contactInfo) {
 

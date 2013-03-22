@@ -70,7 +70,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadImageTask;
 import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.HikeHTTPTask;
@@ -105,7 +104,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			HikePubSub.REFRESH_RECENTS, HikePubSub.SHOW_STATUS_DIALOG,
 			HikePubSub.MY_STATUS_CHANGED, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.SOCIAL_AUTH_COMPLETED,
-			HikePubSub.SOCIAL_AUTH_FAILED, HikePubSub.STATUS_POST_REQUEST_DONE };
+			HikePubSub.SOCIAL_AUTH_FAILED, HikePubSub.STATUS_POST_REQUEST_DONE,
+			HikePubSub.BLOCK_USER, HikePubSub.UNBLOCK_USER };
 
 	private ImageView pageSelected;
 
@@ -471,6 +471,26 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 					if (statusPosted && statusDialog != null) {
 						statusDialog.cancel();
 						statusDialog = null;
+					}
+				}
+			});
+		} else if (HikePubSub.BLOCK_USER.equals(type)
+				|| HikePubSub.UNBLOCK_USER.equals(type)) {
+			String msisdn = (String) object;
+			final ContactInfo contactInfo = HikeUserDatabase.getInstance()
+					.getContactInfoFromMSISDN(msisdn, true);
+			final boolean blocked = HikePubSub.BLOCK_USER.equals(type);
+			if (contactInfo == null) {
+				return;
+			}
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (blocked) {
+						parentLayout.removeContact(contactInfo);
+					} else {
+						parentLayout.updateRecentContacts(contactInfo);
 					}
 				}
 			});
