@@ -488,7 +488,8 @@ public class MqttMessagesManager {
 									HikeMessengerApp.TWITTER_AUTH_COMPLETE,
 									true);
 						} catch (JSONException e) {
-							Log.w(getClass().getSimpleName(), "Unknown format for twitter", e);
+							Log.w(getClass().getSimpleName(),
+									"Unknown format for twitter", e);
 						}
 					}
 					if (accounts.has(HikeConstants.FACEBOOK)) {
@@ -517,7 +518,8 @@ public class MqttMessagesManager {
 							editor.putString(HikeMessengerApp.FACEBOOK_USER_ID,
 									userId);
 						} catch (JSONException e) {
-							Log.w(getClass().getSimpleName(), "Unknown format for facebook", e);
+							Log.w(getClass().getSimpleName(),
+									"Unknown format for facebook", e);
 						}
 					}
 				}
