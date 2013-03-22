@@ -194,6 +194,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		super.onDestroy();
 		if (mDialog != null) {
 			mDialog.dismiss();
+			mDialog = null;
 		}
 		if ((mActivityState != null) && (mActivityState.task != null)) {
 			mActivityState.task.setActivity(null);
