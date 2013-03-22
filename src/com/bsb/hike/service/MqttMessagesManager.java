@@ -701,13 +701,15 @@ public class MqttMessagesManager {
 				return;
 			}
 
-			boolean twoWayFavorite = userDb.isContactFavorite(statusMessage
-					.getMsisdn());
+			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(
+					statusMessage.getMsisdn(), false);
+			FavoriteType favoriteType = contactInfo.getFavoriteType();
 			/*
 			 * Only add updates to timeline for contacts that have a 2-way
 			 * relationship with the user.
 			 */
-			long id = convDb.addStatusMessage(statusMessage, twoWayFavorite);
+			long id = convDb.addStatusMessage(statusMessage,
+					favoriteType == FavoriteType.FRIEND);
 
 			if (id == -1) {
 				Log.d(getClass().getSimpleName(),
@@ -728,7 +730,11 @@ public class MqttMessagesManager {
 						HikeConstants.THUMBNAIL);
 			}
 
-			if (twoWayFavorite) {
+			statusMessage
+					.setName(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
+							.getMsisdn() : contactInfo.getName());
+
+			if (favoriteType == FavoriteType.FRIEND) {
 				incrementUnseenStatusCount();
 				pubSub.publish(HikePubSub.TIMELINE_UPDATE_RECIEVED,
 						statusMessage);

@@ -384,10 +384,6 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 		} else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
 			StatusMessage statusMessage = (StatusMessage) object;
-			ContactInfo contactInfo = HikeUserDatabase.getInstance()
-					.getContactInfoFromMSISDN(statusMessage.getMsisdn(), false);
-			statusMessage.setName(contactInfo.getName());
-
 			int startIndex = getStartIndex();
 
 			statusMessages.add(friendRequests + startIndex, statusMessage);
