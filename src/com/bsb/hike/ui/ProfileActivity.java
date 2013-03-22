@@ -208,7 +208,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			HikeMessengerApp.getPubSub().removeListeners(this,
 					profilePubSubListeners);
 		}
-		mActivityState = null;
 	}
 
 	@Override
