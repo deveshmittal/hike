@@ -841,6 +841,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 		ViewGroup parent = (ViewGroup) statusDialog
 				.findViewById(R.id.emoji_container);
+		parent.setClickable(true);
 		View categories = statusDialog
 				.findViewById(R.id.emoticons_categories_container);
 		View shadow = statusDialog.findViewById(R.id.top_shadow);
@@ -980,6 +981,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 		ViewGroup moodParent = (ViewGroup) statusDialog
 				.findViewById(R.id.mood_parent);
+		moodParent.setClickable(true);
 		final ViewGroup pageIndicatorContainer = (ViewGroup) statusDialog
 				.findViewById(R.id.mood_page_indicator_container);
 		ViewPager moodPager = (ViewPager) statusDialog
