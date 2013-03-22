@@ -43,6 +43,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class DrawerFavoritesAdapter extends BaseAdapter implements
@@ -458,7 +459,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				viewHolder.text.setText(ssb);
 			} else {
 				viewHolder.textInfo.setVisibility(View.GONE);
-				viewHolder.text.setText(status);
+				viewHolder.text.setText(SmileyParser.getInstance()
+						.addSmileySpans(status, true));
 			}
 			viewHolder.avatarImg.setImageResource(statusDrawableResource);
 			viewHolder.avatarImg
