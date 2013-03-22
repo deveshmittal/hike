@@ -28,6 +28,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
@@ -90,7 +91,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " INTEGER PRIMARY KEY AUTOINCREMENT, " + DBConstants.ONHIKE
 				+ " INTEGER, " + DBConstants.CONTACT_ID + " STRING, "
 				+ DBConstants.MSISDN + " UNIQUE, "
-				+ DBConstants.OVERLAY_DISMISSED + " INTEGER" + " )";
+				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, "
+				+ DBConstants.MESSAGE + " STRING, " + DBConstants.MSG_STATUS
+				+ " INTEGER, " + DBConstants.TIMESTAMP + " INTEGER, "
+				+ DBConstants.MESSAGE_ID + " INTEGER, "
+				+ DBConstants.MAPPED_MSG_ID + " INTEGER, "
+				+ DBConstants.MESSAGE_METADATA + " TEXT, "
+				+ DBConstants.GROUP_PARTICIPANT + " TEXT, "
+				+ DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0" + " )";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_MEMBERS_TABLE
 				+ " ( " + DBConstants.GROUP_ID + " STRING, "
@@ -265,9 +273,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * Dropping the earlier status table to ensure the previous statuses (if
 		 * any) are deleted.
 		 */
-		if (oldVersion < 11) {
+		if (oldVersion < 12) {
 			String drop = "DROP TABLE " + DBConstants.STATUS_TABLE;
-			db.execSQL(drop);
+
 			String sql = "CREATE TABLE IF NOT EXISTS "
 					+ DBConstants.STATUS_TABLE + " (" + DBConstants.STATUS_ID
 					+ " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -279,7 +287,37 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ DBConstants.SHOW_IN_TIMELINE + " INTEGER, "
 					+ DBConstants.MOOD_ID + " INTEGER, "
 					+ DBConstants.TIME_OF_DAY + " INTEGER" + " )";
+
+			String alter1 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.MESSAGE + " STRING";
+			String alter2 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.MSG_STATUS + " INTEGER";
+			String alter3 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.TIMESTAMP + " INTEGER";
+			String alter4 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.MESSAGE_ID + " INTEGER";
+			String alter5 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.MAPPED_MSG_ID + " INTEGER";
+			String alter6 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.MESSAGE_METADATA + " TEXT";
+			String alter7 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.GROUP_PARTICIPANT + " TEXT";
+			String alter8 = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.IS_STATUS_MSG
+					+ " INTEGER DEFAULT 0";
+
+			db.execSQL(drop);
 			db.execSQL(sql);
+			db.execSQL(alter1);
+			db.execSQL(alter2);
+			db.execSQL(alter3);
+			db.execSQL(alter4);
+			db.execSQL(alter5);
+			db.execSQL(alter6);
+			db.execSQL(alter7);
+			db.execSQL(alter8);
+
+			denormaliseConversations(db);
 		}
 	}
 
@@ -307,7 +345,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSG_STATUS + " =" + val + " WHERE "
 				+ initialWhereClause;
 
+		String conversationQuery = "UPDATE " + DBConstants.CONVERSATIONS_TABLE
+				+ " SET " + DBConstants.MSG_STATUS + " =" + val + " WHERE "
+				+ initialWhereClause;
+
 		executeUpdateMessageStatusStatement(query, val, msisdn);
+		executeUpdateMessageStatusStatement(conversationQuery, val, msisdn);
 	}
 
 	public void updateBatch(long[] ids, int status, String msisdn) {
@@ -328,7 +371,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSG_STATUS + " =" + status + " WHERE "
 				+ initialWhereClause;
 
+		String conversationQuery = "UPDATE " + DBConstants.CONVERSATIONS_TABLE
+				+ " SET " + DBConstants.MSG_STATUS + " =" + status + " WHERE "
+				+ initialWhereClause;
+
 		executeUpdateMessageStatusStatement(query, status, msisdn);
+		executeUpdateMessageStatusStatement(conversationQuery, status, msisdn);
 	}
 
 	public void executeUpdateMessageStatusStatement(String updateStatement,
@@ -367,6 +415,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
 				DBConstants.MESSAGE_ID + "=?",
 				new String[] { String.valueOf(msgID) });
+
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
+				DBConstants.MESSAGE_ID + "=? AND " + DBConstants.IS_STATUS_MSG
+						+ " = 0", new String[] { String.valueOf(msgID) });
 	}
 
 	private void bindConversationInsert(SQLiteStatement insertStatement,
@@ -403,8 +455,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		Cursor c = mDb
 				.query(DBConstants.MESSAGES_TABLE + ","
 						+ DBConstants.CONVERSATIONS_TABLE,
-						new String[] { DBConstants.MESSAGE },
-						DBConstants.MAPPED_MSG_ID + "=? AND "
+						new String[] { DBConstants.MESSAGES_TABLE + "."
+								+ DBConstants.MESSAGE },
+						DBConstants.MESSAGES_TABLE + "."
+								+ DBConstants.MAPPED_MSG_ID + "=? AND "
+								+ DBConstants.MESSAGES_TABLE + "."
 								+ DBConstants.MESSAGE + "=? AND "
 								+ DBConstants.CONVERSATIONS_TABLE + "."
 								+ DBConstants.MSISDN + "=?",
@@ -457,11 +512,43 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				conv.setConversation(conversation);
 			}
 			conv.setMsgID(msgId);
+
+			/*
+			 * Updating the conversations table
+			 */
+			ContentValues contentValues = getContentValueForConversationMessage(conv);
+			mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
+					DBConstants.MSISDN + "=?",
+					new String[] { conv.getMsisdn() });
 		}
 
 		insertStatement.close();
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
+	}
+
+	private ContentValues getContentValueForConversationMessage(ConvMessage conv) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.MESSAGE, conv.getMessage());
+		contentValues.put(DBConstants.MESSAGE_METADATA,
+				conv.getMetadata() != null ? conv.getMetadata().serialize()
+						: "");
+		contentValues.put(
+				DBConstants.GROUP_PARTICIPANT,
+				conv.getGroupParticipantMsisdn() != null ? conv
+						.getGroupParticipantMsisdn() : "");
+
+		boolean statusMessage = conv.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE;
+		contentValues.put(DBConstants.IS_STATUS_MSG, statusMessage);
+
+		if (!statusMessage) {
+			contentValues.put(DBConstants.MESSAGE_ID, conv.getMsgID());
+			contentValues.put(DBConstants.MAPPED_MSG_ID, conv.getMappedMsgID());
+			contentValues
+					.put(DBConstants.MSG_STATUS, conv.getState().ordinal());
+			contentValues.put(DBConstants.TIMESTAMP, conv.getTimestamp());
+		}
+		return contentValues;
 	}
 
 	public void deleteConversation(Long[] ids, List<String> msisdns) {
@@ -672,48 +759,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	public List<Conversation> getConversations() {
 		long startTime = System.currentTimeMillis();
 
-		String query = "SELECT "
-				+ DBConstants.MESSAGES_TABLE
-				+ "."
-				+ DBConstants.MESSAGE
-				+ ", "
-				+ DBConstants.MESSAGES_TABLE
-				+ "."
-				+ DBConstants.MSG_STATUS
-				+ ", "
-				+ DBConstants.MESSAGES_TABLE
-				+ "."
-				+ DBConstants.TIMESTAMP
-				+ ", "
-				+ DBConstants.MESSAGES_TABLE
-				+ "."
-				+ DBConstants.MESSAGE_ID
-				+ ", "
-				+ DBConstants.MESSAGES_TABLE
-				+ "."
-				+ DBConstants.MAPPED_MSG_ID
-				+ ", "
-				+ DBConstants.MESSAGES_TABLE
-				+ "."
-				+ DBConstants.MESSAGE_METADATA
-				+ ", "
-				+ DBConstants.MESSAGES_TABLE
-				+ "."
-				+ DBConstants.GROUP_PARTICIPANT
-				+ ", "
-				+ DBConstants.CONVERSATIONS_TABLE
-				+ "."
-				+ DBConstants.CONV_ID
-				+ ", "
-				+ DBConstants.CONVERSATIONS_TABLE
-				+ "."
-				+ DBConstants.MSISDN
-				+ " FROM conversations, messages LEFT OUTER JOIN messages "
-				+ "AS max ON messages.convid = max.convid AND max.msgid > messages.msgid"
-				+ " WHERE max.msgid IS NULL AND messages.convid = conversations.convid";
-
 		Cursor groupInfoCursor = null;
-		Cursor c = mDb.rawQuery(query, null);
+		Cursor c = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {
+				DBConstants.MSISDN, DBConstants.CONV_ID, DBConstants.MESSAGE,
+				DBConstants.MSG_STATUS, DBConstants.TIMESTAMP,
+				DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID,
+				DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT },
+				null, null, null, null, null);
 
 		Map<String, Conversation> conversationMap = new HashMap<String, Conversation>(
 				c.getCount());
@@ -721,27 +773,19 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		List<Conversation> conversations = new ArrayList<Conversation>(
 				c.getCount());
 
-		final int msisdnIdx = c.getColumnIndex(DBConstants.CONVERSATIONS_TABLE
-				+ "." + DBConstants.MSISDN);
-		final int convIdx = c.getColumnIndex(DBConstants.CONVERSATIONS_TABLE
-				+ "." + DBConstants.CONV_ID);
+		final int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		final int convIdx = c.getColumnIndex(DBConstants.CONV_ID);
 
-		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
-				+ DBConstants.MESSAGE);
-		final int msgStatusColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
-				+ "." + DBConstants.MSG_STATUS);
-		final int tsColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
-				+ DBConstants.TIMESTAMP);
+		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
+		final int msgStatusColumn = c.getColumnIndex(DBConstants.MSG_STATUS);
+		final int tsColumn = c.getColumnIndex(DBConstants.TIMESTAMP);
 		final int mappedMsgIdColumn = c
-				.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
-						+ DBConstants.MAPPED_MSG_ID);
-		final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
-				+ "." + DBConstants.MESSAGE_ID);
-		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
-				+ "." + DBConstants.MESSAGE_METADATA);
+				.getColumnIndex(DBConstants.MAPPED_MSG_ID);
+		final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGE_ID);
+		final int metadataColumn = c
+				.getColumnIndex(DBConstants.MESSAGE_METADATA);
 		final int groupParticipantColumn = c
-				.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
-						+ DBConstants.GROUP_PARTICIPANT);
+				.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 
 		HikeUserDatabase huDb = null;
 
@@ -753,6 +797,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				// TODO this can be expressed in a single sql query
 				String msisdn = c.getString(msisdnIdx);
 				long convid = c.getInt(convIdx);
+				String messageString = c.getString(msgColumn);
+				String metadata = c.getString(metadataColumn);
+
+				/*
+				 * If the message does not contain any text or metadata, its an
+				 * empty message and the conversation is blank.
+				 */
+				if (TextUtils.isEmpty(messageString)
+						&& TextUtils.isEmpty(metadata)) {
+					continue;
+				}
 
 				if (!Utils.isGroupConversation(msisdn)) {
 					if (msisdns == null) {
@@ -762,18 +817,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				}
 				conv = new Conversation(msisdn, convid);
 
-				ConvMessage message = new ConvMessage(c.getString(msgColumn),
-						msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c
+				ConvMessage message = new ConvMessage(messageString, msisdn,
+						c.getInt(tsColumn), ConvMessage.stateValue(c
 								.getInt(msgStatusColumn)),
 						c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn),
 						c.getString(groupParticipantColumn));
-				String metadata = c.getString(metadataColumn);
 				try {
 					message.setMetadata(metadata);
 				} catch (JSONException e) {
 					Log.e(HikeConversationsDatabase.class.getName(),
 							"Invalid JSON metadata", e);
 				}
+
 				conv.addMessage(message);
 				conversationMap.put(msisdn, conv);
 			}
@@ -820,6 +875,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				boolean isGroupAlive = groupInfoCursor.getInt(groupAliveIdx) != 0;
 
 				Conversation conversation = conversationMap.get(groupId);
+				if (conversation == null) {
+					continue;
+				}
 				Map<String, GroupParticipant> groupParticipants = groupIdParticipantsMap
 						.get(groupId);
 
@@ -970,6 +1028,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				ConvMessage.State.RECEIVED_READ.ordinal());
 		int rowsAffected = mDb.update(DBConstants.MESSAGES_TABLE, values,
 				DBConstants.MESSAGE_ID + " in " + sb.toString(), null);
+
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, values,
+				DBConstants.MESSAGE_ID + " in " + sb.toString(), null);
+
 		Log.d("HIKE CONVERSATION DB ", "Rows Updated : " + rowsAffected);
 		c.close();
 		return ids;
@@ -1582,5 +1644,105 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	public int getStatusMessageCount() {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
 				+ DBConstants.STATUS_TABLE, null);
+	}
+
+	private void denormaliseConversations(SQLiteDatabase mDb) {
+		Log.d(getClass().getSimpleName(), "Denormalisingggg");
+		String query = "SELECT "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MESSAGE
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MSG_STATUS
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.TIMESTAMP
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MESSAGE_ID
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MAPPED_MSG_ID
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.MESSAGE_METADATA
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.GROUP_PARTICIPANT
+				+ ", "
+				+ DBConstants.MESSAGES_TABLE
+				+ "."
+				+ DBConstants.CONV_ID
+				+ " FROM messages LEFT OUTER JOIN messages "
+				+ "AS max ON messages.convid = max.convid AND max.msgid > messages.msgid"
+				+ " WHERE max.msgid IS NULL";
+
+		Cursor c = mDb.rawQuery(query, null);
+		mDb.beginTransaction();
+
+		final int convIdx = c.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+				+ DBConstants.CONV_ID);
+		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+				+ DBConstants.MESSAGE);
+		final int msgStatusColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
+				+ "." + DBConstants.MSG_STATUS);
+		final int tsColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+				+ DBConstants.TIMESTAMP);
+		final int mappedMsgIdColumn = c
+				.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+						+ DBConstants.MAPPED_MSG_ID);
+		final int msgIdColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
+				+ "." + DBConstants.MESSAGE_ID);
+		final int metadataColumn = c.getColumnIndex(DBConstants.MESSAGES_TABLE
+				+ "." + DBConstants.MESSAGE_METADATA);
+		final int groupParticipantColumn = c
+				.getColumnIndex(DBConstants.MESSAGES_TABLE + "."
+						+ DBConstants.GROUP_PARTICIPANT);
+
+		try {
+			while (c.moveToNext()) {
+				String message = c.getString(msgColumn);
+				int msgState = c.getInt(msgStatusColumn);
+				int timeStamp = c.getInt(tsColumn);
+				long messageId = c.getLong(msgIdColumn);
+				long mappedMessageId = c.getLong(mappedMsgIdColumn);
+				String metadata = c.getString(metadataColumn);
+				String groupParticipant = c.getString(groupParticipantColumn);
+				int convid = c.getInt(convIdx);
+
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(DBConstants.MESSAGE, message);
+				contentValues.put(DBConstants.MSG_STATUS, msgState);
+				contentValues.put(DBConstants.TIMESTAMP, timeStamp);
+				contentValues.put(DBConstants.MESSAGE_ID, messageId);
+				contentValues.put(DBConstants.MAPPED_MSG_ID, mappedMessageId);
+				contentValues.put(DBConstants.MESSAGE_METADATA, metadata);
+				contentValues.put(DBConstants.GROUP_PARTICIPANT,
+						groupParticipant);
+				try {
+					MessageMetadata messageMetadata = new MessageMetadata(
+							new JSONObject(metadata));
+					contentValues
+							.put(DBConstants.IS_STATUS_MSG,
+									messageMetadata.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE);
+				} catch (JSONException e) {
+					Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+				}
+
+				mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
+						DBConstants.CONV_ID + "=" + convid, null);
+			}
+			mDb.setTransactionSuccessful();
+		} finally {
+			mDb.endTransaction();
+			c.close();
+		}
 	}
 }
