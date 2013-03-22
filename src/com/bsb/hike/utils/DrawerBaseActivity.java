@@ -728,7 +728,6 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 									HikePubSub.TIMELINE_UPDATE_RECIEVED,
 									statusMessage);
 						}
-						statusTxt.setText("");
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.STATUS_POST_REQUEST_DONE, true);
 					}
