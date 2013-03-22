@@ -1660,6 +1660,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
 			final ContactInfo contact = (ContactInfo) object;
+			if (contactInfo == null) {
+				return;
+			}
+
 			if (!this.mLocalMSISDN.equals(contact.getMsisdn())) {
 				return;
 			}

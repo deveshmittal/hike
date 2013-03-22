@@ -1093,6 +1093,11 @@ public class MessagesList extends DrawerBaseActivity implements
 			});
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
 			ContactInfo contactInfo = (ContactInfo) object;
+
+			if (contactInfo == null) {
+				return;
+			}
+
 			Conversation conversation = this.mConversationsByMSISDN
 					.get(contactInfo.getMsisdn());
 			if (conversation != null) {

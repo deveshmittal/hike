@@ -1591,6 +1591,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
 			ContactInfo contactInfo = (ContactInfo) object;
+			if (contactInfo == null) {
+				return;
+			}
+
 			if (this.mContactNumber.equals(contactInfo.getMsisdn())) {
 				this.mContactName = contactInfo.getName();
 				mConversation.setContactName(this.mContactName);
