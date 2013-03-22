@@ -136,7 +136,7 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.GROUP_NAME_CHANGED, HikePubSub.UPDATE_AVAILABLE,
 			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
-			HikePubSub.FAVORITE_TOGGLED, HikePubSub.STATUS_MESSAGE_RECEIVED,
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.RESET_NOTIFICATION_COUNTER,
 			HikePubSub.DECREMENT_NOTIFICATION_COUNTER };
 
@@ -1105,7 +1105,7 @@ public class MessagesList extends DrawerBaseActivity implements
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
 			toggleTypingNotification(false, (String) object);
 		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
-				|| HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
+				|| HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
 			if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 				final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 				if (favoriteToggle.second != FavoriteType.REQUEST_RECEIVED) {
