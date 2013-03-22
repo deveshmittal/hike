@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -770,6 +771,23 @@ public class MqttMessagesManager {
 				|| HikeConstants.MqttMessageTypes.REMOVE_FAVORITE.equals(type)) {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			removeOrPostponeFriendType(msisdn);
+		} else if (HikeConstants.MqttMessageTypes.BATCH_STATUS_UPDATE
+				.equals(type)) {
+			/*
+			 * Only proceed if the user has selected a batch update preference
+			 */
+			if (PreferenceManager.getDefaultSharedPreferences(context).getInt(
+					HikeConstants.STATUS_PREF, 0) <= 0) {
+				return;
+			}
+
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+
+			String header = data.getString(HikeConstants.BATCH_HEADER);
+			String message = data.getString(HikeConstants.BATCH_MESSAGE);
+
+			pubSub.publish(HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
+					new Pair<String, String>(header, message));
 		}
 	}
 

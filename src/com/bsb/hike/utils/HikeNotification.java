@@ -37,6 +37,7 @@ public class HikeNotification {
 	private NotificationManager notificationManager;
 	private long lastNotificationTime;
 
+	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
 
 	public HikeNotification(Context context) {
@@ -188,6 +189,24 @@ public class HikeNotification {
 			 */
 			return;
 		}
+
+		showNotification(notificationIntent, icon, timeStamp, notificationId,
+				text, key, message);
+	}
+
+	public void notifyBatchUpdate(String header, String message) {
+		int notificationId = 9876;
+
+		long timeStamp = System.currentTimeMillis() / 1000;
+
+		Intent notificationIntent = new Intent(context, CentralTimeline.class);
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+
+		int icon = R.drawable.ic_contact_logo;
+
+		String key = header;
+
+		String text = message;
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);

@@ -216,6 +216,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String STATUS_POST_REQUEST_DONE = "statusPostRequestDone";
 
+	public static final String BATCH_STATUS_UPDATE_PUSH_RECEIVED = "batchSUReceived";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

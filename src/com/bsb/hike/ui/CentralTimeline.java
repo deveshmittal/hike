@@ -52,6 +52,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
+import com.bsb.hike.utils.HikeNotification;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
@@ -232,6 +233,10 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			notificationManager.cancel(statusMessages.get(i).getMsisdn()
 					.hashCode());
 		}
+		/*
+		 * Canceling the batch status update notification.
+		 */
+		notificationManager.cancel(HikeNotification.BATCH_SU_NOTIFICATION_ID);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 
