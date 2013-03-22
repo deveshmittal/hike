@@ -219,6 +219,8 @@ public class DbConversationListener implements Listener {
 						mConversationDb.addStatusMessage(statusMessage, true);
 						mPubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED,
 								statusMessage);
+						mPubSub.publish(HikePubSub.TIMELINE_UPDATE_RECIEVED,
+								statusMessage);
 					}
 
 					requestType = HikeConstants.MqttMessageTypes.ADD_FAVORITE;
