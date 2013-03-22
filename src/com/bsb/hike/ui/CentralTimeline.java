@@ -321,11 +321,12 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		for (StatusMessage listItem : statusMessages) {
 			if (listItem.getMsisdn().equals(statusMessage.getMsisdn())
 					&& listItem.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) {
-				statusMessages.remove(listItem);
 				friendRequests--;
+				statusMessages.remove(listItem);
 				break;
 			}
 		}
+		centralTimelineAdapter.decrementUnseenCount();
 		centralTimelineAdapter.notifyDataSetChanged();
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.DECREMENT_NOTIFICATION_COUNTER, null);
@@ -361,49 +362,58 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		super.onEventReceived(type, object);
 		if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
-			ContactInfo contactInfo = favoriteToggle.first;
+			final ContactInfo contactInfo = favoriteToggle.first;
 			if (favoriteToggle.second != FavoriteType.REQUEST_RECEIVED) {
 				return;
 			}
-			int startIndex = getStartIndex();
-			statusMessages
-					.add(startIndex,
-							new StatusMessage(
-									CentralTimelineAdapter.FRIEND_REQUEST_ID,
-									null,
-									contactInfo.getMsisdn(),
-									TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
-											.getMsisdn() : contactInfo
-											.getName(),
-									getString(R.string.added_as_hike_friend),
-									StatusMessageType.FRIEND_REQUEST, System
-											.currentTimeMillis() / 1000));
-			friendRequests++;
-			if (noFriendMessage != null) {
-				statusMessages.remove(noFriendMessage);
-				noFriendMessage = null;
-			}
+			final int startIndex = getStartIndex();
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					statusMessages
+							.add(startIndex,
+									new StatusMessage(
+											CentralTimelineAdapter.FRIEND_REQUEST_ID,
+											null,
+											contactInfo.getMsisdn(),
+											TextUtils.isEmpty(contactInfo
+													.getName()) ? contactInfo
+													.getMsisdn() : contactInfo
+													.getName(),
+											getString(R.string.added_as_hike_friend),
+											StatusMessageType.FRIEND_REQUEST,
+											System.currentTimeMillis() / 1000));
+					friendRequests++;
+					if (noFriendMessage != null) {
+						statusMessages.remove(noFriendMessage);
+						noFriendMessage = null;
+					} else {
+						/*
+						 * Since a new item was added, we increment the unseen
+						 * count.
+						 */
+						centralTimelineAdapter.incrementUnseenCount();
+					}
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
 
 		} else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
-			StatusMessage statusMessage = (StatusMessage) object;
-			int startIndex = getStartIndex();
-
-			statusMessages.add(friendRequests + startIndex, statusMessage);
+			final StatusMessage statusMessage = (StatusMessage) object;
+			final int startIndex = getStartIndex();
 			resetUnseenStatusCount();
-			if (noStatusMessage != null
-					&& statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT) {
-				statusMessages.remove(noStatusMessage);
-				noStatusMessage = null;
-			}
+
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					statusMessages.add(friendRequests + startIndex,
+							statusMessage);
+					if (noStatusMessage != null
+							&& statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT) {
+						statusMessages.remove(noStatusMessage);
+						noStatusMessage = null;
+					}
+					centralTimelineAdapter.incrementUnseenCount();
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});

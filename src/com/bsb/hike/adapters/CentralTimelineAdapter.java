@@ -64,6 +64,16 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		return true;
 	}
 
+	public void incrementUnseenCount() {
+		unseenCount++;
+	}
+
+	public void decrementUnseenCount() {
+		if (unseenCount > 0) {
+			unseenCount--;
+		}
+	}
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater) context
