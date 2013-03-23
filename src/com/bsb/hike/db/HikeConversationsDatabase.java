@@ -759,7 +759,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	/**
 	 * Using this method to get the conversation with the last message. If there
-	 * is no last message, we return null.
+	 * is no last message, we return null if the conversation is not a GC.
 	 * 
 	 * @param msisdn
 	 * @return
@@ -805,7 +805,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			 * If the message does not contain any text or metadata, its an
 			 * empty message and the conversation is blank.
 			 */
-			if (TextUtils.isEmpty(messageString) && TextUtils.isEmpty(metadata)) {
+			if (!Utils.isGroupConversation(msisdn)
+					&& TextUtils.isEmpty(messageString)
+					&& TextUtils.isEmpty(metadata)) {
 				return null;
 			}
 
