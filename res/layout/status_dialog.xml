@@ -3,7 +3,6 @@
     android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
     android:background="@color/status_dialog_bg" >
 
     <include
@@ -23,38 +22,39 @@
             android:orientation="horizontal" >
 
             <ImageButton
+                android:id="@+id/post_fb_btn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:layout_weight="1"
+                android:onClick="onFacebookClick"
+                android:src="@drawable/post_fb" />
+
+            <ImageButton
                 android:id="@+id/post_twitter_btn"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:background="@null"
                 android:layout_weight="1"
+                android:onClick="onTwitterClick"
                 android:src="@drawable/post_twitter" />
-
-            <ImageButton
-                android:id="@+id/post_fb_btn"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_toRightOf="@id/post_twitter_btn"
-                android:background="@null"
-                android:layout_weight="1"
-                android:src="@drawable/post_fb" />
 
             <ImageButton
                 android:id="@+id/emoji_btn"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
                 android:background="@null"
                 android:layout_weight="1"
+                android:onClick="onEmojiClick"
                 android:src="@drawable/post_twitter" />
 
             <ImageButton
                 android:id="@+id/mood_btn"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_alignParentRight="true"
                 android:background="@null"
                 android:layout_weight="1"
+                android:onClick="onMoodClick"
                 android:src="@drawable/post_twitter" />
         </LinearLayout>
 

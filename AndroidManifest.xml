@@ -170,6 +170,10 @@
         <activity android:name=".ui.TwitterAuthActivity"
             android:theme="@style/NoTitleBar" >
         </activity>
+        <activity android:name=".ui.StatusUpdate"
+            android:theme="@style/NoTitleBar"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
         <receiver android:name=".service.BootService" >
             <intent-filter >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

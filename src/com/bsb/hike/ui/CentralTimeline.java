@@ -296,7 +296,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			parentLayout.openRightSidebar();
 		} else if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
 				.getId()) {
-			showStatusDialog(false);
+			startActivity(new Intent(this, StatusUpdate.class));
 		} else {
 			toggleFavoriteAndRemoveTimelineItem(statusMessage,
 					FavoriteType.FRIEND);

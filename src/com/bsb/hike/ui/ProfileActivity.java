@@ -1411,7 +1411,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			openChatThread(contactInfo);
 			break;
 		case USER_PROFILE:
-			showStatusDialog(false);
+			startActivity(new Intent(this, StatusUpdate.class));
 			break;
 		}
 	}

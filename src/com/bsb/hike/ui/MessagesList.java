@@ -1557,6 +1557,6 @@ public class MessagesList extends DrawerBaseActivity implements
 	}
 
 	public void onStatusClick(View v) {
-		showStatusDialog(false);
+		startActivity(new Intent(this, StatusUpdate.class));
 	}
 }
