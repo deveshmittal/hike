@@ -1105,7 +1105,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
 		if (hour >= 4 && hour < 12) {
 			return 1;
-		} else if (hour >= 12 && hour < 8) {
+		} else if (hour >= 12 && hour < 20) {
 			return 2;
 		}
 		return 3;
