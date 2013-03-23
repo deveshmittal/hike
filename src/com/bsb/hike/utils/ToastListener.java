@@ -144,7 +144,7 @@ public class ToastListener implements Listener {
 			}
 			toaster.notifyFavorite(contactInfo);
 		} else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
-			if (currentActivity.get() != null) {
+			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
 			StatusMessage statusMessage = (StatusMessage) object;
@@ -156,7 +156,7 @@ public class ToastListener implements Listener {
 			}
 			toaster.notifyStatusMessage(statusMessage);
 		} else if (HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED.equals(type)) {
-			if (currentActivity.get() != null) {
+			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
 			Pair<String, String> batchSU = (Pair<String, String>) object;
