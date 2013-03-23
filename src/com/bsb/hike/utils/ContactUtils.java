@@ -219,51 +219,67 @@ public class ContactUtils {
 				ContactsContract.Contacts.DISPLAY_NAME };
 
 		String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
-		Cursor contacts = ctx.getContentResolver().query(
-				ContactsContract.Contacts.CONTENT_URI, projection, selection,
-				null, null);
+		Cursor contacts = null;
 
-		int idFieldColumnIndex = contacts
-				.getColumnIndex(ContactsContract.Contacts._ID);
-		int nameFieldColumnIndex = contacts
-				.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
 		List<ContactInfo> contactinfos = new ArrayList<ContactInfo>();
-		Log.d("ContactUtils", "Starting to scan address book");
-		long tm = System.currentTimeMillis();
 		Map<String, String> contactNames = new HashMap<String, String>();
-		while (contacts.moveToNext()) {
-			String id = contacts.getString(idFieldColumnIndex);
-			String name = contacts.getString(nameFieldColumnIndex);
-			contactNames.put(id, name);
-		}
+		try {
+			contacts = ctx.getContentResolver().query(
+					ContactsContract.Contacts.CONTENT_URI, projection,
+					selection, null, null);
 
-		contacts.close();
-
-		Cursor phones = ctx.getContentResolver().query(Phone.CONTENT_URI,
-				new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null, null,
-				null);
-
-		int numberColIdx = phones.getColumnIndex(Phone.NUMBER);
-		int idColIdx = phones.getColumnIndex(Phone.CONTACT_ID);
-		while (phones.moveToNext()) {
-			String number = phones.getString(numberColIdx);
-			String id = phones.getString(idColIdx);
-			String name = contactNames.get(id);
-			if ((name != null) && (number != null)) {
-				if (contactsToStore.add("_" + name + "_" + number)) // if this
-																	// element
-																	// is added
-																	// successfully
-																	// , it
-																	// returns
-																	// true
-				{
-					contactinfos.add(new ContactInfo(id, null, name, number));
-				}
+			int idFieldColumnIndex = contacts
+					.getColumnIndex(ContactsContract.Contacts._ID);
+			int nameFieldColumnIndex = contacts
+					.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+			Log.d("ContactUtils", "Starting to scan address book");
+			while (contacts.moveToNext()) {
+				String id = contacts.getString(idFieldColumnIndex);
+				String name = contacts.getString(nameFieldColumnIndex);
+				contactNames.put(id, name);
+			}
+		} finally {
+			if (contacts != null) {
+				contacts.close();
 			}
 		}
 
-		phones.close();
+		Cursor phones = null;
+
+		try {
+			phones = ctx.getContentResolver().query(Phone.CONTENT_URI,
+					new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null,
+					null, null);
+
+			int numberColIdx = phones.getColumnIndex(Phone.NUMBER);
+			int idColIdx = phones.getColumnIndex(Phone.CONTACT_ID);
+
+			while (phones.moveToNext()) {
+				String number = phones.getString(numberColIdx);
+				String id = phones.getString(idColIdx);
+				String name = contactNames.get(id);
+				if ((name != null) && (number != null)) {
+					if (contactsToStore.add("_" + name + "_" + number)) // if
+																		// this
+																		// element
+																		// is
+																		// added
+																		// successfully
+																		// , it
+																		// returns
+																		// true
+					{
+						contactinfos
+								.add(new ContactInfo(id, null, name, number));
+					}
+				}
+			}
+		} finally {
+			if (phones != null) {
+				phones.close();
+
+			}
+		}
 
 		return contactinfos;
 	}
