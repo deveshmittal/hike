@@ -655,8 +655,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		Cursor c = mDb.rawQuery(query, null);
 
 		int idx = c.getColumnIndex(DBConstants.ID);
-		int userMsisdnIdx = c.getColumnIndex(DBConstants.USERS_TABLE + "."
-				+ DBConstants.MSISDN);
+		int userMsisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 		int favoriteMsisdnIdx = c.getColumnIndex(favoriteMsisdnColumnName);
 		int nameIdx = c.getColumnIndex(DBConstants.NAME);
 		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
