@@ -1325,7 +1325,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return false;
 		}
 
-		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD;
+		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD
+				|| lastMsg.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE;
 	}
 
 	/*
