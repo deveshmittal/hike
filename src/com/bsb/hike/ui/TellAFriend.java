@@ -105,6 +105,12 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 	}
 
 	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		HikeMessengerApp.getFacebook().authorizeCallback(requestCode,
+				resultCode, data);
+	}
+
+	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.facebook:
