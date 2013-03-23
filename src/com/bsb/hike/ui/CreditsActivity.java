@@ -1,9 +1,5 @@
 package com.bsb.hike.ui;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
@@ -33,9 +29,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
-import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.AsyncFacebookRunner.RequestListener;
-import com.facebook.android.FacebookError;
 
 public class CreditsActivity extends DrawerBaseActivity implements Listener {
 	private TextView mTitleView;
@@ -340,34 +333,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 			try {
 				AccountUtils.deleteSocialCredentials(facebook);
 				if (facebook) {
-					AsyncFacebookRunner mAsyncRunner = new AsyncFacebookRunner(
-							HikeMessengerApp.getFacebook());
-					mAsyncRunner.logout(getApplicationContext(),
-							new RequestListener() {
-								@Override
-								public void onMalformedURLException(
-										MalformedURLException arg0, Object arg1) {
-								}
-
-								@Override
-								public void onIOException(IOException arg0,
-										Object arg1) {
-								}
-
-								@Override
-								public void onFileNotFoundException(
-										FileNotFoundException arg0, Object arg1) {
-								}
-
-								@Override
-								public void onFacebookError(FacebookError arg0,
-										Object arg1) {
-								}
-
-								@Override
-								public void onComplete(String arg0, Object arg1) {
-								}
-							});
 
 					HikeMessengerApp.getFacebook().setAccessExpires(0);
 					HikeMessengerApp.getFacebook().setAccessToken("");
