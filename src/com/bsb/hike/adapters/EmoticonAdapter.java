@@ -18,7 +18,6 @@ import android.widget.TextView;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -39,9 +38,6 @@ public class EmoticonAdapter extends PagerAdapter implements
 	public static final int MAX_EMOTICONS_PER_PAGE_LANDSCAPE = 20;
 	public static final int MAX_EMOTICONS_PER_ROW_LANDSCAPE = 10;
 
-	public static final int MAX_EMOTICONS_PER_PAGE_STATUS = 28;
-	public static final int MAX_EMOTICONS_PER_ROW_STATUS = 7;
-
 	public static final int RECENTS_SUBCATEGORY_INDEX = -1;
 
 	private int EMOTICON_NUM_PAGES;
@@ -60,12 +56,10 @@ public class EmoticonAdapter extends PagerAdapter implements
 
 	public EmoticonAdapter(Activity activity, EditText composeBox,
 			EmoticonType emoticonType, int whichSubCategory, boolean isPortrait) {
-		MAX_EMOTICONS_PER_PAGE = activity instanceof DrawerBaseActivity ? MAX_EMOTICONS_PER_PAGE_STATUS
-				: (isPortrait ? MAX_EMOTICONS_PER_PAGE_PORTRAIT
-						: MAX_EMOTICONS_PER_PAGE_LANDSCAPE);
-		MAX_EMOTICONS_PER_ROW = activity instanceof DrawerBaseActivity ? MAX_EMOTICONS_PER_ROW_STATUS
-				: (isPortrait ? MAX_EMOTICONS_PER_ROW_PORTRAIT
-						: MAX_EMOTICONS_PER_ROW_LANDSCAPE);
+		MAX_EMOTICONS_PER_PAGE = isPortrait ? MAX_EMOTICONS_PER_PAGE_PORTRAIT
+				: MAX_EMOTICONS_PER_PAGE_LANDSCAPE;
+		MAX_EMOTICONS_PER_ROW = isPortrait ? MAX_EMOTICONS_PER_ROW_PORTRAIT
+				: MAX_EMOTICONS_PER_ROW_LANDSCAPE;
 
 		this.inflater = LayoutInflater.from(activity);
 		this.activity = activity;
@@ -227,11 +221,7 @@ public class EmoticonAdapter extends PagerAdapter implements
 		int emoticonIndex = (Integer) arg1.getTag();
 		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(
 				emoticonIndex, System.currentTimeMillis());
-		if (activity instanceof ChatThread) {
-			((ChatThread) activity).onEmoticonBtnClicked(null, 0);
-		} else if (activity instanceof DrawerBaseActivity) {
-			((DrawerBaseActivity) activity).hideEmoticonSelector();
-		}
+		((ChatThread) activity).onEmoticonBtnClicked(null, 0);
 		// We don't add an emoticon if the compose box is near its maximum
 		// length of characters
 		if (composeBox.length() >= activity.getResources().getInteger(
