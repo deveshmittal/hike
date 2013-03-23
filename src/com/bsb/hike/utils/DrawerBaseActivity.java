@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -205,15 +206,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				}
 			});
 		} else if (HikePubSub.FREE_SMS_TOGGLED.equals(type)) {
-			final boolean freeSMSOn = (Boolean) object;
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					parentLayout.renderLeftDrawerItems(freeSMSOn);
-					parentLayout.freeSMSToggled(freeSMSOn);
-				}
-			});
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_RECENTS, null);
 		} else if (HikePubSub.TOGGLE_REWARDS.equals(type)) {
 			runOnUiThread(new Runnable() {
 
@@ -315,10 +308,11 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				}
 			});
 		} else if (HikePubSub.REFRESH_RECENTS.equals(type)) {
+			boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
+					this).getBoolean(HikeConstants.FREE_SMS_PREF, false);
 			final List<ContactInfo> recentList = HikeUserDatabase.getInstance()
-					.getNonHikeRecentContacts(-1,
-							HikeMessengerApp.isIndianUser(),
-							FavoriteType.NOT_FRIEND);
+					.getRecentContacts(-1, false, FavoriteType.NOT_FRIEND,
+							freeSMSOn ? 1 : 0);
 			runOnUiThread(new Runnable() {
 
 				@Override

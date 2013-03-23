@@ -184,15 +184,6 @@ public class DrawerLayout extends RelativeLayout implements
 
 		ContactInfo contactInfo = drawerFavoritesAdapter.getItem(position);
 
-		/*
-		 * If the user taps on a non hike contact and is not an Indian user, we
-		 * do nothing.
-		 */
-		if (!contactInfo.isOnhike()
-				&& (!HikeMessengerApp.isIndianUser() || !freeSMS)) {
-			return;
-		}
-
 		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 		intent.setClass(getContext(), ChatThread.class);
 		getContext().startActivity(intent);
@@ -209,13 +200,6 @@ public class DrawerLayout extends RelativeLayout implements
 	public void refreshFavoritesDrawer() {
 		if (drawerFavoritesAdapter != null) {
 			drawerFavoritesAdapter.notifyDataSetChanged();
-		}
-	}
-
-	public void freeSMSToggled(boolean freeSMS) {
-		if (drawerFavoritesAdapter != null) {
-			this.freeSMS = freeSMS;
-			drawerFavoritesAdapter.freeSMSToggled(freeSMS);
 		}
 	}
 

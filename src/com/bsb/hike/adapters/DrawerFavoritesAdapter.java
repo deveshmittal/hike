@@ -128,9 +128,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 								HikeConstants.ON_HIKE_VALUE, myMsisdn));
 				Collections.sort(onHikeTaskList);
 
-				recentTaskList = hikeUserDatabase.getNonHikeRecentContacts(-1,
-						HikeMessengerApp.isIndianUser(),
-						FavoriteType.NOT_FRIEND);
+				recentTaskList = hikeUserDatabase.getRecentContacts(-1, false,
+						FavoriteType.NOT_FRIEND, freeSMSOn ? 1 : 0);
 
 				return null;
 			}
@@ -173,23 +172,21 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			completeList.addAll(favoriteList);
 		}
 
+		// Contact for "Recent Section"
+		recentSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				null, context.getString(R.string.recent), null);
+		completeList.add(recentSection);
+
+		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
+				: recentList.size();
+		completeList.addAll(recentList.subList(0, recentListLastElement));
+
 		// Contact for "On Hike Section"
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
 				null, context.getString(R.string.contacts_on_hike,
 						onHikeList.size()), null));
 		completeList.addAll(onHikeList);
 
-		// Contact for "Recent Section"
-		recentSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null,
-				(freeSMSOn && HikeMessengerApp.isIndianUser()) ? context
-						.getString(R.string.recent) : context
-						.getString(R.string.invite_friends_caps), null);
-		completeList.add(recentSection);
-
-		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
-				: recentList.size();
-		completeList.addAll(recentList.subList(0, recentListLastElement));
 		notifyDataSetChanged();
 	}
 
@@ -309,18 +306,6 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		recentList.removeAll(favoriteList);
 
 		makeCompleteList();
-	}
-
-	public void freeSMSToggled(boolean freeSMS) {
-		this.freeSMSOn = freeSMS;
-		if (recentSection == null) {
-			return;
-		}
-		recentSection
-				.setName((freeSMSOn && HikeMessengerApp.isIndianUser()) ? context
-						.getString(R.string.recent) : context
-						.getString(R.string.invite_friends));
-		notifyDataSetChanged();
 	}
 
 	public void refreshRecents(List<ContactInfo> recents) {
@@ -477,29 +462,15 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			viewHolder.hikeImg.setVisibility(View.GONE);
 		case FAVORITE:
 			if (viewType == FavoriteAdapterViewType.RECENT) {
-				if ((!HikeMessengerApp.isIndianUser() && !contactInfo
-						.isOnhike())
-						|| (HikeMessengerApp.isIndianUser()
-								&& !contactInfo.isOnhike() && !freeSMSOn)) {
-					viewHolder.addImg.setVisibility(View.GONE);
-					viewHolder.invite.setVisibility(View.VISIBLE);
-					viewHolder.invite.setOnClickListener(this);
-					viewHolder.invite.setTag(contactInfo);
+				viewHolder.addImg.setOnClickListener(this);
+				viewHolder.addImg.setTag(contactInfo);
+				viewHolder.addImg.setVisibility(View.VISIBLE);
+				viewHolder.invite.setVisibility(View.GONE);
+				viewHolder.addImg.setImageResource(R.drawable.add_fav);
 
-					LayoutParams lp = (LayoutParams) viewHolder.text
-							.getLayoutParams();
-					lp.addRule(RelativeLayout.LEFT_OF, R.id.invite_fav);
-				} else {
-					viewHolder.addImg.setOnClickListener(this);
-					viewHolder.addImg.setTag(contactInfo);
-					viewHolder.addImg.setVisibility(View.VISIBLE);
-					viewHolder.invite.setVisibility(View.GONE);
-					viewHolder.addImg.setImageResource(R.drawable.add_fav);
-
-					LayoutParams lp = (LayoutParams) viewHolder.text
-							.getLayoutParams();
-					lp.addRule(RelativeLayout.LEFT_OF, R.id.add_fav);
-				}
+				LayoutParams lp = (LayoutParams) viewHolder.text
+						.getLayoutParams();
+				lp.addRule(RelativeLayout.LEFT_OF, R.id.add_fav);
 			} else {
 				viewHolder.addImg.setVisibility(View.GONE);
 			}

@@ -1199,27 +1199,35 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public List<ContactInfo> getNonHikeRecentContactsFromListOfNumbers(
+	public List<ContactInfo> getRecentContactsFromListOfNumbers(
 			String selectionNumbers, Map<String, Long> recentValues,
-			boolean indiaOnly, FavoriteType favoriteType) {
+			boolean indiaOnly, FavoriteType favoriteType, int freeSmsSetting) {
 
 		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
 				DBConstants.HAS_CUSTOM_PHOTO };
 
-		String selection = DBConstants.PHONE
-				+ " IN "
-				+ selectionNumbers
-				+ " AND "
-				+ DBConstants.ONHIKE
-				+ "=0"
-				+ (indiaOnly ? " AND " + DBConstants.MSISDN + " LIKE '+91%'"
-						: "")
-				+ (favoriteType != null ? " AND " + DBConstants.MSISDN
-						+ " NOT IN (SELECT " + DBConstants.MSISDN + " FROM "
-						+ DBConstants.FAVORITES_TABLE + ")" : "");
+		StringBuilder selectionBuilder = new StringBuilder();
 
+		selectionBuilder.append(DBConstants.PHONE + " IN " + selectionNumbers);
+		selectionBuilder.append(indiaOnly ? " AND " + DBConstants.MSISDN
+				+ " LIKE '+91%'" : "");
+		selectionBuilder.append(favoriteType != null ? " AND "
+				+ DBConstants.MSISDN + " NOT IN (SELECT " + DBConstants.MSISDN
+				+ " FROM " + DBConstants.FAVORITES_TABLE + ")" : "");
+		selectionBuilder.append(" AND " + DBConstants.MSISDN + "!='null'");
+		if (freeSmsSetting == -1) {
+			selectionBuilder.append(" AND " + DBConstants.ONHIKE + "=0");
+		} else if (freeSmsSetting == 0) {
+			selectionBuilder.append(" AND " + DBConstants.ONHIKE + " =1");
+		} else if (freeSmsSetting == 1) {
+			selectionBuilder.append(" AND ((" + DBConstants.ONHIKE
+					+ " =1) OR (" + DBConstants.ONHIKE + " =0 AND "
+					+ DBConstants.MSISDN + " LIKE '+91%'))");
+		}
+
+		String selection = selectionBuilder.toString();
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
 
 		Cursor c = null;
@@ -1293,8 +1301,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			boolean indiaOnly, FavoriteType favoriteType) {
 		Pair<String, Map<String, Long>> data = ContactUtils.getRecentNumbers(
 				mContext, limit);
-		return getNonHikeRecentContactsFromListOfNumbers(data.first,
-				data.second, indiaOnly, favoriteType);
+		return getRecentContactsFromListOfNumbers(data.first, data.second,
+				indiaOnly, favoriteType, -1);
+	}
+
+	public List<ContactInfo> getRecentContacts(int limit, boolean indiaOnly,
+			FavoriteType favoriteType, int freeSmsSetting) {
+		Pair<String, Map<String, Long>> data = ContactUtils.getRecentNumbers(
+				mContext, limit);
+		return getRecentContactsFromListOfNumbers(data.first, data.second,
+				indiaOnly, favoriteType, freeSmsSetting);
 	}
 
 	private List<Pair<AtomicBoolean, ContactInfo>> getNonHikeMostContactedContactsFromListOfNumbers(
