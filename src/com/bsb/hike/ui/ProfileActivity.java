@@ -27,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Intents.Insert;
@@ -43,6 +44,8 @@ import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -91,7 +94,7 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 public class ProfileActivity extends DrawerBaseActivity implements
 		FinishableEvent, android.content.DialogInterface.OnClickListener,
 		Listener, OnLongClickListener, OnItemClickListener,
-		OnItemLongClickListener {
+		OnItemLongClickListener, OnScrollListener {
 
 	private EditText mNameEdit;
 
@@ -302,6 +305,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						mLocalMSISDN));
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
+		profileContent.setOnScrollListener(this);
 
 		findViewById(R.id.button_bar).setVisibility(View.VISIBLE);
 		topBarBtn = (ImageButton) findViewById(R.id.title_image_btn);
@@ -363,7 +367,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
 				&& (contactInfo.isOnhike())) {
 			profileItems.addAll(HikeConversationsDatabase.getInstance()
-					.getStatusMessages(false, mLocalMSISDN));
+					.getStatusMessages(false,
+							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
+							mLocalMSISDN));
 		} else {
 			// Adding an item for the empty status
 			profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_EMPTY_ID,
@@ -614,7 +620,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_BUTTON_ID,
 				null, null, null, null, null, 0));
 		profileItems.addAll(HikeConversationsDatabase.getInstance()
-				.getStatusMessages(false, mLocalMSISDN));
+				.getStatusMessages(false,
+						HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
+						mLocalMSISDN));
 
 		profileAdapter = new ProfileAdapter(this, profileItems, null,
 				contactInfo, true);
@@ -622,6 +630,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
 		profileContent.setOnItemLongClickListener(this);
+		profileContent.setOnScrollListener(this);
 
 		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
 		mTitleView.setText(getResources().getString(R.string.profile_title));
@@ -662,6 +671,62 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			mActivityState.getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
 			mActivityState.getHikeJoinTimeTask.execute(hikeHttpRequest);
 		}
+	}
+
+	boolean reachedEnd;
+	boolean loadingMoreMessages;
+
+	@Override
+	public void onScroll(AbsListView view, final int firstVisibleItem,
+			int visibleItemCount, int totalItemCount) {
+		if (!reachedEnd
+				&& !loadingMoreMessages
+				&& !profileItems.isEmpty()
+				&& (firstVisibleItem + visibleItemCount) >= (profileItems
+						.size() - HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES)) {
+
+			Log.d(getClass().getSimpleName(), "Loading more items");
+			loadingMoreMessages = true;
+
+			new AsyncTask<Void, Void, List<StatusMessage>>() {
+
+				@Override
+				protected List<StatusMessage> doInBackground(Void... params) {
+					List<StatusMessage> olderMessages = HikeConversationsDatabase
+							.getInstance()
+							.getStatusMessages(
+									true,
+									HikeConstants.MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME,
+									(int) profileItems.get(
+											profileItems.size() - 1).getId(),
+									mLocalMSISDN);
+					return olderMessages;
+				}
+
+				@Override
+				protected void onPostExecute(List<StatusMessage> olderMessages) {
+					if (!olderMessages.isEmpty()) {
+						profileItems.addAll(profileItems.size(), olderMessages);
+						profileAdapter.notifyDataSetChanged();
+						profileContent.setSelection(firstVisibleItem);
+					} else {
+						/*
+						 * This signifies that we've reached the end. No need to
+						 * query the db anymore unless we add a new message.
+						 */
+						reachedEnd = true;
+					}
+
+					loadingMoreMessages = false;
+				}
+
+			}.execute();
+
+		}
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int scrollState) {
 	}
 
 	private void fetchPersistentData() {
