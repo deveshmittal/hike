@@ -443,4 +443,5 @@
 	<string name="off">Off</string>
 	<string name="moods">Moods</string>
 	<string name="user_blocked">You have blocked %1$s.</string>
+	<string name="twitter_length_exceed">Twitter post can have 140 characters at most</string>
 </resources>

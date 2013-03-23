@@ -335,6 +335,13 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 				: R.id.post_twitter_btn);
 		v.setSelected(selection);
 		if (!facebook) {
+			if (statusTxt.length() > HikeConstants.MAX_TWITTER_POST_LENGTH) {
+				Toast.makeText(getApplicationContext(),
+						R.string.twitter_length_exceed, Toast.LENGTH_SHORT)
+						.show();
+				v.setSelected(false);
+				return;
+			}
 			setCharCountForStatus(findViewById(R.id.char_counter),
 					(EditText) findViewById(R.id.status_txt), v.isSelected());
 		}
