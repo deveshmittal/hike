@@ -36,7 +36,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.MoodAdapter;
 import com.bsb.hike.adapters.StatusEmojiAdapter;
@@ -58,6 +57,10 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private class ActivityTask {
 		int moodId = -1;
 		HikeHTTPTask hikeHTTPTask = null;
+		boolean fbSelected = false;
+		boolean twitterSelected = false;
+		boolean emojiShowing = false;
+		boolean moodShowing = false;
 	}
 
 	private ActivityTask mActivityTask;
@@ -153,6 +156,18 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		toggleEnablePostButton();
 
+		View fb = findViewById(R.id.post_fb_btn);
+		View twitter = findViewById(R.id.post_twitter_btn);
+
+		fb.setSelected(mActivityTask.fbSelected);
+		twitter.setSelected(mActivityTask.twitterSelected);
+
+		if (mActivityTask.emojiShowing) {
+			showEmojiSelector();
+		} else if (mActivityTask.moodShowing) {
+			showMoodSelector();
+		}
+
 		HikeMessengerApp.getPubSub().addListeners(this, pubsubListeners);
 	}
 
@@ -176,7 +191,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	public void onFacebookClick(View v) {
-		v.setSelected(!v.isSelected());
+		setSelectionSocialButton(true, !v.isSelected());
 		if (!v.isSelected()
 				|| preferences.getBoolean(
 						HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false)) {
@@ -209,8 +224,10 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	private void hideEmojiOrMoodLayout() {
 		if (moodParent.getVisibility() == View.VISIBLE) {
+			mActivityTask.moodShowing = false;
 			moodParent.setVisibility(View.GONE);
 		} else if (emojiParent.getVisibility() == View.VISIBLE) {
+			mActivityTask.emojiShowing = false;
 			emojiParent.setVisibility(View.GONE);
 		}
 		titleBtn.setText(R.string.post);
@@ -344,6 +361,9 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			}
 			setCharCountForStatus(findViewById(R.id.char_counter),
 					(EditText) findViewById(R.id.status_txt), v.isSelected());
+			mActivityTask.twitterSelected = v.isSelected();
+		} else {
+			mActivityTask.fbSelected = v.isSelected();
 		}
 	}
 
@@ -361,6 +381,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void showEmojiSelector() {
+		mActivityTask.emojiShowing = true;
+
 		showCancelButton(false);
 
 		emojiParent.setClickable(true);
@@ -494,6 +516,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void showMoodSelector() {
+		mActivityTask.moodShowing = true;
+
 		showCancelButton(true);
 
 		moodParent.setClickable(true);
