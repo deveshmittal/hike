@@ -799,7 +799,8 @@ public class MqttMessagesManager {
 		if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
 			return;
 		}
-		FavoriteType favoriteType = contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED ? FavoriteType.NOT_FRIEND
+		FavoriteType currentFavoriteType = contactInfo.getFavoriteType();
+		FavoriteType favoriteType = (currentFavoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED || currentFavoriteType == FavoriteType.REQUEST_RECEIVED) ? FavoriteType.NOT_FRIEND
 				: FavoriteType.REQUEST_SENT_REJECTED;
 		Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, ContactInfo.FavoriteType>(
 				contactInfo, favoriteType);
