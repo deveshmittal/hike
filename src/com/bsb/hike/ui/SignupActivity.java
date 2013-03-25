@@ -212,7 +212,7 @@ public class SignupActivity extends Activity implements
 				prepareLayoutForGettingPin(mActivityState.timeLeft);
 				break;
 			case NAME:
-				prepareLayoutForGettingName(savedInstanceState);
+				prepareLayoutForGettingName(savedInstanceState, false);
 				break;
 			}
 			if (savedInstanceState
@@ -228,7 +228,7 @@ public class SignupActivity extends Activity implements
 		} else {
 			if (getIntent().getBooleanExtra(HikeConstants.Extras.MSISDN, false)) {
 				viewFlipper.setDisplayedChild(NAME);
-				prepareLayoutForGettingName(savedInstanceState);
+				prepareLayoutForGettingName(savedInstanceState, false);
 			} else {
 				prepareLayoutForFetchingNumber();
 			}
@@ -473,6 +473,9 @@ public class SignupActivity extends Activity implements
 						mTask.addProfilePicPath(mActivityState.destFilePath,
 								mActivityState.profileBitmap);
 					}
+					if (viewFlipper.getDisplayedChild() == NAME) {
+						hideSoftKeyboard();
+					}
 					mTask.addUserInput(input);
 				}
 			}
@@ -643,7 +646,8 @@ public class SignupActivity extends Activity implements
 		}
 	}
 
-	private void prepareLayoutForGettingName(Bundle savedInstanceState) {
+	private void prepareLayoutForGettingName(Bundle savedInstanceState,
+			boolean addressBookScanningDone) {
 		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 		/*
@@ -673,8 +677,9 @@ public class SignupActivity extends Activity implements
 			}
 		}
 
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(enterEditText.getWindowToken(), 0);
+		if (!addressBookScanningDone) {
+			hideSoftKeyboard();
+		}
 
 		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
 				null);
@@ -700,6 +705,11 @@ public class SignupActivity extends Activity implements
 		} else {
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
 		}
+	}
+
+	private void hideSoftKeyboard() {
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(enterEditText.getWindowToken(), 0);
 	}
 
 	private void resetViewFlipper() {
@@ -805,12 +815,12 @@ public class SignupActivity extends Activity implements
 			} else if (value.equals(HikeConstants.DONE)) {
 				removeAnimation();
 				viewFlipper.setDisplayedChild(NAME);
-				prepareLayoutForGettingName(null);
+				prepareLayoutForGettingName(null, false);
 				setAnimation();
 			} else {
 				/* yay, got the actual MSISDN */
 				viewFlipper.setDisplayedChild(NAME);
-				prepareLayoutForGettingName(null);
+				prepareLayoutForGettingName(null, false);
 			}
 			break;
 		case PULLING_PIN:
@@ -853,7 +863,7 @@ public class SignupActivity extends Activity implements
 			break;
 		case NAME:
 			if (TextUtils.isEmpty(value)) {
-				prepareLayoutForGettingName(null);
+				prepareLayoutForGettingName(null, true);
 			}
 			break;
 		case PROFILE_IMAGE:
