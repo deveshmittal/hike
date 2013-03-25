@@ -84,6 +84,8 @@ public class StatusEmojiAdapter extends PagerAdapter implements
 		GridView emoticonGrid = (GridView) emoticonPage
 				.findViewById(R.id.emoticon_grid);
 		emoticonGrid.setNumColumns(MAX_EMOTICONS_PER_ROW);
+		emoticonGrid.setVerticalScrollBarEnabled(true);
+		emoticonGrid.setHorizontalScrollBarEnabled(false);
 		emoticonGrid.setAdapter(new EmoticonPageAdapter(position));
 		emoticonGrid.setOnItemClickListener(this);
 
