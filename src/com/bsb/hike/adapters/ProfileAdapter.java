@@ -4,15 +4,12 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,7 +27,7 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 
 @SuppressWarnings("unchecked")
-public class ProfileAdapter extends BaseAdapter implements TextWatcher {
+public class ProfileAdapter extends BaseAdapter {
 
 	public static final int PROFILE_HEADER_ID = -1;
 	public static final int PROFILE_BUTTON_ID = -2;
@@ -53,8 +50,6 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 	private boolean myProfile;
 	private boolean hasSMSUser;
 	private int numParticipants;
-	private boolean editingGroupName;
-	private String editedGroupName;
 	private boolean isContactBlocked;
 
 	public ProfileAdapter(Context context, List<?> itemList,
@@ -71,7 +66,6 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 		this.groupProfile = groupConversation != null;
 		if (groupProfile) {
 			groupParticipants = (List<GroupParticipant>) itemList;
-			editedGroupName = groupConversation.getLabel();
 		} else {
 			statusMessages = (List<StatusMessage>) itemList;
 		}
@@ -164,8 +158,6 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 				v = inflater.inflate(R.layout.profile_header, null);
 
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
-				viewHolder.groupName = (EditText) v
-						.findViewById(R.id.name_edit);
 				viewHolder.subText = (TextView) v.findViewById(R.id.info);
 
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
@@ -183,8 +175,6 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 
 				viewHolder.btn1 = (Button) v.findViewById(R.id.yes_btn);
 				viewHolder.btn2 = (Button) v.findViewById(R.id.no_btn);
-				viewHolder.cancelEdit = (ImageButton) v
-						.findViewById(R.id.cancel_edit);
 				break;
 
 			case BUTTONS:
@@ -321,24 +311,6 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 				}
 			}
 
-			if (groupConversation != null) {
-				if (editingGroupName) {
-					viewHolder.text.setVisibility(View.GONE);
-					viewHolder.editGroupName.setVisibility(View.GONE);
-					viewHolder.groupName.setVisibility(View.VISIBLE);
-					viewHolder.groupName.setText(editedGroupName);
-					viewHolder.groupName.addTextChangedListener(this);
-					viewHolder.groupName.requestFocus();
-					viewHolder.groupName.setSelection(viewHolder.groupName
-							.length());
-					viewHolder.cancelEdit.setVisibility(View.VISIBLE);
-				} else {
-					viewHolder.text.setVisibility(View.VISIBLE);
-					viewHolder.editGroupName.setVisibility(View.VISIBLE);
-					viewHolder.groupName.setVisibility(View.GONE);
-					viewHolder.cancelEdit.setVisibility(View.GONE);
-				}
-			}
 			break;
 
 		case BUTTONS:
@@ -502,8 +474,6 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 		View btnDivider;
 		ImageButton editGroupName;
 		ViewGroup requestLayout;
-		EditText groupName;
-		ImageButton cancelEdit;
 		View marginView;
 	}
 
@@ -546,29 +516,11 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 		this.numParticipants = numParticipants;
 	}
 
-	public void setEditingGroupName(boolean editing) {
-		editingGroupName = editing;
-	}
-
-	@Override
-	public void afterTextChanged(Editable s) {
-		editedGroupName = s.toString();
-	}
-
 	public void setIsContactBlocked(boolean b) {
 		isContactBlocked = b;
 	}
 
 	public boolean isContactBlocked() {
 		return isContactBlocked;
-	}
-
-	@Override
-	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {
-	}
-
-	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
 }

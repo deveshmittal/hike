@@ -146,6 +146,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private ContactInfo contactInfo;
 	private boolean isBlocked;
 	private boolean showMessageBtn = true;
+	private Dialog groupEditDialog;
 
 	private static enum ProfileType {
 		USER_PROFILE, // The user profile screen
@@ -173,6 +174,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		public int imageViewId = -1;
 		public String id = null;
 		public boolean statusImage = false;
+		public boolean groupEditDialogShowing = false;
+		public String edittedGroupName = null;
 	}
 
 	public File selectedFileIcon;
@@ -198,6 +201,14 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (mDialog != null) {
 			mDialog.dismiss();
 			mDialog = null;
+		}
+		if (groupEditDialog != null) {
+			if (mNameEdit != null) {
+				mActivityState.edittedGroupName = mNameEdit.getText()
+						.toString();
+			}
+			groupEditDialog.dismiss();
+			groupEditDialog = null;
 		}
 		if ((mActivityState != null) && (mActivityState.task != null)) {
 			mActivityState.task.setActivity(null);
@@ -274,6 +285,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		}
 		if (mActivityState.viewingProfileImage) {
 			downloadOrShowProfileImage(false, false, mActivityState.imageViewId);
+		}
+		if (mActivityState.groupEditDialogShowing) {
+			onEditGroupNameClick(null);
 		}
 	}
 
@@ -759,8 +773,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			expandedWithoutAnimation = false;
 			return;
 		}
-		if (this.profileType == ProfileType.USER_PROFILE_EDIT
-				|| this.profileType == ProfileType.GROUP_INFO) {
+		if (this.profileType == ProfileType.USER_PROFILE_EDIT) {
 			isBackPressed = true;
 			saveChanges();
 			if (this.profileType != ProfileType.USER_PROFILE) {
@@ -1553,20 +1566,67 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	public void onEditGroupNameClick(View v) {
-		profileAdapter.setEditingGroupName(true);
-		profileAdapter.notifyDataSetChanged();
-		mNameEdit = (EditText) findViewById(R.id.name_edit);
+		if (groupConversation == null) {
+			return;
+		}
+		groupEditDialog = new Dialog(this, R.style.Theme_CustomDialog);
+		groupEditDialog.setContentView(R.layout.group_name_change_dialog);
+		groupEditDialog.setCancelable(true);
+
+		mNameEdit = (EditText) groupEditDialog
+				.findViewById(R.id.group_name_edit);
+
+		mNameEdit
+				.setText(TextUtils.isEmpty(mActivityState.edittedGroupName) ? groupConversation
+						.getLabel() : mActivityState.edittedGroupName);
+
+		mNameEdit.setSelection(mNameEdit.length());
+
 		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,
-				InputMethodManager.HIDE_IMPLICIT_ONLY);
+		imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_FORCED);
+
+		mActivityState.groupEditDialogShowing = true;
+
+		Button okBtn = (Button) groupEditDialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) groupEditDialog
+				.findViewById(R.id.btn_cancel);
+
+		okBtn.setText(R.string.save);
+		okBtn.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				hideSoftKeyboard();
+				groupEditDialog.cancel();
+				saveChanges();
+			}
+		});
+		cancelBtn.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				hideSoftKeyboard();
+				groupEditDialog.cancel();
+			}
+		});
+
+		groupEditDialog.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				mActivityState.groupEditDialogShowing = false;
+				mActivityState.edittedGroupName = null;
+			}
+		});
+		groupEditDialog.show();
 	}
 
-	public void onCancelEditGroupNameClick(View v) {
+	private void hideSoftKeyboard() {
+		if (mNameEdit == null) {
+			return;
+		}
 		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mNameEdit.getWindowToken(), 0);
-		profileAdapter.setEditingGroupName(false);
-		profileAdapter.notifyDataSetChanged();
-		mNameEdit = null;
 	}
 
 	public void onBlockGroupOwnerClicked(View v) {

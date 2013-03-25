@@ -445,4 +445,6 @@
 	<string name="confirmed_friend_info">You and %1$s can now see updates from each other.</string>
 	<string name="accepted_friend_request_info">You and %1$s can now see updates from each other.</string>
 	<string name="confirmed_friend_2">is now a friend</string>
+	<string name="no_hike">Invite more friends to hike?</string>
+	<string name="rename_group">Rename the group</string>
 </resources>

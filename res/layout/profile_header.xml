@@ -62,6 +62,8 @@
                 android:layout_height="wrap_content"
                 android:text="Group name"
                 android:textColor="@color/white"
+                android:onClick="onEditGroupNameClick"
+                android:clickable="true"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -75,27 +77,6 @@
                 android:src="@drawable/ic_edit_group_name"
                 android:visibility="gone" />
 
-            <com.bsb.hike.view.CustomFontEditText
-                android:id="@+id/name_edit"
-                style="@style/ProfileShadow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:text="Group name"
-                android:textColor="@color/white"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:visibility="gone" />
-
-            <ImageButton
-                android:id="@+id/cancel_edit"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:onClick="onCancelEditGroupNameClick"
-                android:paddingLeft="5dp"
-                android:src="@drawable/ic_close"
-                android:visibility="gone" />
         </LinearLayout>
 
         <com.bsb.hike.view.CustomFontTextView
