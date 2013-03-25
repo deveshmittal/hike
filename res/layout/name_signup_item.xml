@@ -56,7 +56,7 @@
         android:id="@+id/et_enter_name"
         style="@style/SignupButton"
         android:layout_below="@id/avatar_border"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/tb_name"
         android:hint="@string/name"
         android:imeOptions="actionDone"

@@ -206,7 +206,7 @@
                         android:minHeight="46dp"
                         android:paddingBottom="2dp"
                         android:paddingRight="5dp"
-                        android:paddingTop="2dp"
+                        android:paddingTop="4dp"
                         android:textColor="@color/chat_color"
                         android:textColorHint="#cdcdc8"
                         android:textSize="15sp"

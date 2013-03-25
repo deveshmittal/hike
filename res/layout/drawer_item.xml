@@ -16,7 +16,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="7dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:src="@drawable/ic_drawer_home" />
         
         <ImageView
@@ -69,7 +70,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="7dp"
             android:layout_toRightOf="@id/hike_icon"
             android:layout_toLeftOf="@id/add_fav"
             android:ellipsize="end"

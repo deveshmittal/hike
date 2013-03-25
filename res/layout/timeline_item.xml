@@ -138,6 +138,7 @@
                 android:onClick="onYesBtnClick"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
+                android:paddingBottom="2dp"
                 android:text="@string/confirm" />
 
             <com.bsb.hike.view.CustomFontButton
@@ -148,6 +149,7 @@
                 android:onClick="onNoBtnClick"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
+                android:paddingBottom="2dp"
                 android:text="@string/not_now" />
         </LinearLayout>
     </RelativeLayout>
