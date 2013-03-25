@@ -1222,6 +1222,11 @@ public class SignupActivity extends Activity implements
 					enterEditText.setText(mActivityState.userName);
 					enterEditText
 							.setSelection(mActivityState.userName.length());
+					Button fbBtn = (Button) findViewById(R.id.connect_fb);
+					if (fbBtn != null) {
+						fbBtn.setEnabled(false);
+						fbBtn.setText(R.string.connected);
+					}
 				}
 			});
 		}
