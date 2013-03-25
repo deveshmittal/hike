@@ -10,7 +10,6 @@
         android:id="@+id/btn_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:orientation="horizontal" >
 
         <com.bsb.hike.view.CustomFontButton
@@ -44,6 +43,7 @@
         style="@style/ProfileButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:drawableLeft="@drawable/ic_msg_small"
         android:onClick="onProfileLargeBtnClick"
         android:text="Hellp" />
