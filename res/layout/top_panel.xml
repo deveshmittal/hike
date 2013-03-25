@@ -49,23 +49,31 @@
         android:background="@drawable/button_separator"
         android:visibility="gone" />
     
-    <Button
-        android:id="@+id/title_hikeicon"
+    <LinearLayout
+        android:id="@+id/counter_container"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_gravity="center"
-        android:layout_marginLeft="17dp"
-        android:background="@drawable/notification"
+        android:clickable="true"
         android:onClick="onOpenTimelineClick"
-        android:shadowColor="#660000"
-        android:shadowDy="-0.5"
-        android:shadowRadius="0.5"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:visibility="gone" />
+        android:visibility="gone" >
+
+        <Button
+            android:id="@+id/title_hikeicon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/notification"
+            android:onClick="onOpenTimelineClick"
+            android:shadowColor="#660000"
+            android:shadowDy="-0.5"
+            android:shadowRadius="0.5"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </LinearLayout>
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/title"

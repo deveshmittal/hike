@@ -335,6 +335,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		notificationCounter = (Button) findViewById(R.id.title_hikeicon);
 		notificationCounter.setVisibility(View.VISIBLE);
+		findViewById(R.id.counter_container).setVisibility(View.VISIBLE);
 
 		/*
 		 * mSearchIconView = findViewById(R.id.search);
