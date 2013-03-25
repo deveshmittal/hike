@@ -419,6 +419,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileContent.setAdapter(profileAdapter);
 		profileContent.setOnItemLongClickListener(this);
 		profileContent.setOnItemClickListener(this);
+		profileContent.setDivider(null);
 
 		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		Button leaveBtn = (Button) findViewById(R.id.title_icon);
