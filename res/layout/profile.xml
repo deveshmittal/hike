@@ -31,7 +31,7 @@
             android:id="@+id/animation_layout_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/thatch_repeat"
+            android:background="@color/offwhite"
             android:orientation="vertical" >
 
             <include
