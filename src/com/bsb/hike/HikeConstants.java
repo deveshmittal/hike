@@ -415,6 +415,7 @@ public class HikeConstants {
 		public static final String SHOW_FAMILY = "showFamily";
 		public static final String NUX1_NUMBERS = "nux1Numbers";
 		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
+		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
 	}
 
 	public static final class LogEvent {

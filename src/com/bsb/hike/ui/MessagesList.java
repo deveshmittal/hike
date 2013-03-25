@@ -1365,6 +1365,9 @@ public class MessagesList extends DrawerBaseActivity implements
 	}
 
 	public void onStatusClick(View v) {
-		startActivity(new Intent(this, StatusUpdate.class));
+		Intent intent = new Intent(this, StatusUpdate.class);
+		intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN, true);
+		startActivity(intent);
+		overridePendingTransition(R.anim.slide_up_noalpha, R.anim.no_animation);
 	}
 }

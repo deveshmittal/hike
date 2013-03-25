@@ -215,6 +215,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			hideEmojiOrMoodLayout();
 		} else {
 			super.onBackPressed();
+			if (getIntent().getBooleanExtra(
+					HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN, false)) {
+				overridePendingTransition(R.anim.no_animation,
+						R.anim.slide_down_noalpha);
+			}
 		}
 	}
 
