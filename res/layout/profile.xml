@@ -44,10 +44,19 @@
             <ListView
                 android:id="@+id/profile_content"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:cacheColorHint="#00000000"
                 android:divider="@drawable/ic_thread_divider_profile"
                 android:fadingEdge="none" />
+            
+            <ImageView
+                android:id="@+id/group_list_drop_shadow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
+                android:src="@drawable/conversation_list_drop_shadow"
+                android:visibility="gone" />
+
         </LinearLayout>
     </com.bsb.hike.view.DrawerLayout>
 

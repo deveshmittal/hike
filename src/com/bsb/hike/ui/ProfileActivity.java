@@ -421,6 +421,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileContent.setOnItemClickListener(this);
 		profileContent.setDivider(null);
 
+		findViewById(R.id.group_list_drop_shadow).setVisibility(View.VISIBLE);
 		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		Button leaveBtn = (Button) findViewById(R.id.title_icon);
 		leaveBtn.setVisibility(View.VISIBLE);
