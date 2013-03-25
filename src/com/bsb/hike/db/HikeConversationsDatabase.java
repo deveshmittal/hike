@@ -1827,13 +1827,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		/*
 		 * First we want the message id corresponding to this status.
 		 */
-		Cursor c = mDb.query(DBConstants.STATUS_TABLE,
-				new String[] { DBConstants.MESSAGE_ID }, selection, whereArgs,
-				null, null, null);
+		Cursor c = mDb.query(DBConstants.STATUS_TABLE, new String[] {
+				DBConstants.MESSAGE_ID, DBConstants.MSISDN }, selection,
+				whereArgs, null, null, null);
 		long messageId = 0;
+		String msisdn = "";
 		try {
 			if (c.moveToFirst()) {
 				messageId = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+				msisdn = c.getString(c.getColumnIndex(DBConstants.MSISDN));
 			}
 		} finally {
 			c.close();
@@ -1861,16 +1863,30 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * Checking if the status message deleted was the last message
 		 */
 		Cursor c1 = mDb.query(DBConstants.CONVERSATIONS_TABLE, new String[] {
-				DBConstants.MSISDN, DBConstants.CONV_ID },
-				DBConstants.MESSAGE_ID + "=?",
-				new String[] { Long.toString(messageId) }, null, null, null);
+				DBConstants.CONV_ID, DBConstants.MESSAGE_METADATA },
+				DBConstants.IS_STATUS_MSG + "=1 AND " + DBConstants.MSISDN
+						+ "=?", new String[] { msisdn }, null, null, null);
 		try {
 			if (c1.moveToFirst()) {
-				String msisdn = c1.getString(c1
-						.getColumnIndex(DBConstants.MSISDN));
 				long convId = c1
 						.getLong(c1.getColumnIndex(DBConstants.CONV_ID));
-				deleteMessageFromConversation(msisdn, convId);
+				String metadataString = c1.getString(c1
+						.getColumnIndex(DBConstants.MESSAGE_METADATA));
+				try {
+					MessageMetadata messageMetadata = new MessageMetadata(
+							new JSONObject(metadataString));
+					Log.d(getClass().getSimpleName(), "Deleting: " + statusId
+							+ " LASt Status ID: "
+							+ messageMetadata.getStatusMessage().getMappedId());
+
+					if (statusId.equals(messageMetadata.getStatusMessage()
+							.getMappedId())) {
+						deleteMessageFromConversation(msisdn, convId);
+					}
+
+				} catch (JSONException e) {
+					Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+				}
 			}
 		} finally {
 			if (c1 != null) {
