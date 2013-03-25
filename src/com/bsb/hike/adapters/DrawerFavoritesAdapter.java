@@ -502,8 +502,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 			Drawable drawable = context.getResources().getDrawable(
 					R.drawable.ic_add_fav);
-			int height = (int) ((7 * drawable.getIntrinsicHeight()) / 10);
-			int width = (int) ((7 * drawable.getIntrinsicWidth()) / 10);
+			int height = drawable.getIntrinsicHeight();
+			int width = drawable.getIntrinsicWidth();
 			drawable.setBounds(0, 0, width, height);
 
 			spannableString.setSpan(new ImageSpan(drawable),
