@@ -7,7 +7,7 @@
 
     <ImageButton
         android:id="@+id/topbar_menu"
-        android:layout_width="48dp"
+        android:layout_width="@dimen/top_bar_btn_height"
         android:layout_height="@dimen/top_bar_btn_height"
         android:layout_marginLeft="-1dp"
         android:layout_marginTop="-2dp"
@@ -150,7 +150,7 @@
 
         <ImageButton
             android:id="@+id/title_image_btn"
-            android:layout_width="48dp"
+            android:layout_width="@dimen/top_bar_btn_height"
             android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginLeft="-1dp"
             android:layout_marginTop="-2dp"
@@ -169,7 +169,7 @@
 
         <RelativeLayout
             android:id="@+id/title_image_btn2_container"
-            android:layout_width="48dp"
+            android:layout_width="@dimen/top_bar_btn_height"
             android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginLeft="-1dp"
             android:layout_marginTop="-2dp"
@@ -177,7 +177,7 @@
 
             <ImageButton
                 android:id="@+id/title_image_btn2"
-                android:layout_width="48dp"
+                android:layout_width="@dimen/top_bar_btn_height"
                 android:layout_height="@dimen/top_bar_btn_height"
                 android:background="@drawable/top_bar_btn_selector"
                 android:onClick="onTitleIconClick"
