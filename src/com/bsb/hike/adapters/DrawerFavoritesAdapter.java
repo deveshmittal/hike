@@ -42,6 +42,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -60,18 +61,20 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private ContactInfo recentSection;
 	private ContactInfo emptyFavorites;
 	private ContactInfo friendsOnHikeSection;
+	private ContactInfo emptyHike;
 	private String status;
 	private int statusDrawableResource;
 
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
+	public static final String EMPTY_HIKE_ID = "-914";
 
 	public static final int IMAGE_BOUNDS = (int) (40 * Utils.densityMultiplier);
 
 	public static final int ITEM_HEIGHT = (int) (55 * Utils.densityMultiplier);
 
 	public static enum FavoriteAdapterViewType {
-		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, STATUS
+		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, STATUS, EMPTY_HIKE
 	}
 
 	public DrawerFavoritesAdapter(final Context context) {
@@ -137,7 +140,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			@Override
 			protected void onPostExecute(Void result) {
 				favoriteList = favoriteTaskList;
-				onHikeList = onHikeTaskList;
+				 onHikeList = onHikeTaskList;
 				recentList = recentTaskList;
 				makeCompleteList();
 			}
@@ -185,7 +188,12 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
 				null, context.getString(R.string.contacts_on_hike,
 						onHikeList.size()), null));
-		completeList.addAll(onHikeList);
+		if (onHikeList.isEmpty()) {
+			emptyHike = new ContactInfo(EMPTY_HIKE_ID, null, null, null);
+			completeList.add(emptyHike);
+		} else {
+			completeList.addAll(onHikeList);
+		}
 
 		notifyDataSetChanged();
 	}
@@ -263,6 +271,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		removeContactFromListByMatchingMsisdn(recentList, contactInfo);
 
 		if (contactInfo.isOnhike()) {
+			if (onHikeList.isEmpty()) {
+				completeList.remove(emptyHike);
+			}
 			onHikeList.add(0, contactInfo);
 			Collections.sort(onHikeList);
 		} else {
@@ -334,6 +345,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			return FavoriteAdapterViewType.SECTION.ordinal();
 		} else if (EMPTY_FAVORITES_ID.equals(contactInfo.getId())) {
 			return FavoriteAdapterViewType.EMPTY_FAVORITE.ordinal();
+		} else if (EMPTY_HIKE_ID.equals(contactInfo.getId())) {
+			return FavoriteAdapterViewType.EMPTY_HIKE.ordinal();
 		} else if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND
 				|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED
 				|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
@@ -352,7 +365,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		FavoriteAdapterViewType viewType = FavoriteAdapterViewType.values()[getItemViewType(position)];
 		if (viewType == FavoriteAdapterViewType.EMPTY_FAVORITE
 				|| viewType == FavoriteAdapterViewType.SECTION
-				|| viewType == FavoriteAdapterViewType.STATUS) {
+				|| viewType == FavoriteAdapterViewType.STATUS
+				|| viewType == FavoriteAdapterViewType.EMPTY_HIKE) {
 			return false;
 		}
 		return true;
@@ -423,6 +437,11 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				viewHolder.text = (TextView) convertView
 						.findViewById(R.id.item_txt);
 				break;
+			case EMPTY_HIKE:
+				convertView = layoutInflater.inflate(
+						R.layout.no_contact_on_hike, null);
+				viewHolder.invite = (Button) convertView
+						.findViewById(R.id.invite_btn);
 			}
 			convertView.setTag(viewHolder);
 		} else {
@@ -512,6 +531,13 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			viewHolder.text.setText(spannableString);
 			break;
+
+		case EMPTY_HIKE:
+			viewHolder.invite.setOnClickListener(this);
+
+			android.widget.AbsListView.LayoutParams lParams = new android.widget.AbsListView.LayoutParams(
+					LayoutParams.MATCH_PARENT, ITEM_HEIGHT);
+			convertView.setLayoutParams(lParams);
 		}
 		return convertView;
 	}
@@ -573,6 +599,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			// show the status UI
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_STATUS_DIALOG,
 					null);
+		} else if (v.getId() == R.id.invite_btn) {
+			context.startActivity(new Intent(context, TellAFriend.class));
 		}
 	}
 }
