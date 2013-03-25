@@ -4,9 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.NotificationManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -52,7 +50,6 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
-import com.bsb.hike.utils.HikeNotification;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 
@@ -228,15 +225,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		timelineContent.setOnItemClickListener(this);
 		timelineContent.setOnScrollListener(this);
 
-		NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		for (int i = 0; i < Math.min(unseenCount, statusMessages.size()); i++) {
-			notificationManager.cancel(statusMessages.get(i).getMsisdn()
-					.hashCode());
-		}
-		/*
-		 * Canceling the batch status update notification.
-		 */
-		notificationManager.cancel(HikeNotification.BATCH_SU_NOTIFICATION_ID);
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 

@@ -218,6 +218,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String BATCH_STATUS_UPDATE_PUSH_RECEIVED = "batchSUReceived";
 
+	public static final String CANCEL_ALL_STATUS_NOTIFICATIONS = "cancelAllStatusNotifications";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

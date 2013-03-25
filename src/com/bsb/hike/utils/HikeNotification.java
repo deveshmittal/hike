@@ -1,5 +1,7 @@
 package com.bsb.hike.utils;
 
+import java.util.ArrayList;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -32,18 +34,20 @@ import com.bsb.hike.ui.ChatThread;
 public class HikeNotification {
 	public static final int HIKE_NOTIFICATION = 0;
 
+	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
+	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
+
 	private Context context;
 
 	private NotificationManager notificationManager;
 	private long lastNotificationTime;
-
-	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
-	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
+	private ArrayList<Integer> statusNotificationIdList;
 
 	public HikeNotification(Context context) {
 		this.context = context;
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
+		this.statusNotificationIdList = new ArrayList<Integer>();
 	}
 
 	public void notifyMessage(ContactInfo contactInfo, ConvMessage convMsg) {
@@ -148,6 +152,7 @@ public class HikeNotification {
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);
+		statusNotificationIdList.add(notificationId);
 	}
 
 	public void notifyStatusMessage(StatusMessage statusMessage) {
@@ -202,12 +207,13 @@ public class HikeNotification {
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);
+		statusNotificationIdList.add(notificationId);
 	}
 
 	public void notifyBatchUpdate(String header, String message) {
-		int notificationId = 9876;
-
 		long timeStamp = System.currentTimeMillis() / 1000;
+
+		int notificationId = (int) timeStamp;
 
 		Intent notificationIntent = new Intent(context, CentralTimeline.class);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
@@ -220,6 +226,14 @@ public class HikeNotification {
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);
+		statusNotificationIdList.add(notificationId);
+	}
+
+	public void cancelAllStatusNotifications() {
+		for (Integer notifId : statusNotificationIdList) {
+			notificationManager.cancel(notifId);
+		}
+		statusNotificationIdList.clear();
 	}
 
 	private void showNotification(Intent notificationIntent, int icon,

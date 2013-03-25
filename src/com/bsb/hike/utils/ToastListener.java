@@ -55,6 +55,8 @@ public class ToastListener implements Listener {
 				HikePubSub.TIMELINE_UPDATE_RECIEVED, this);
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED, this);
+		HikeMessengerApp.getPubSub().addListener(
+				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, this);
 		this.toaster = new HikeNotification(context);
 		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
@@ -161,6 +163,8 @@ public class ToastListener implements Listener {
 			}
 			Pair<String, String> batchSU = (Pair<String, String>) object;
 			toaster.notifyBatchUpdate(batchSU.first, batchSU.second);
+		} else if (HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS.equals(type)) {
+			toaster.cancelAllStatusNotifications();
 		}
 	}
 
