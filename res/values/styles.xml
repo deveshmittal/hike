@@ -188,8 +188,6 @@
 	    <item name="android:paddingRight">30dp</item>
 	</style>
 
-    <style name="SignupButton.Text"></style>
-
     <style name="Theme.CustomDialog.Status">
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
