@@ -70,4 +70,6 @@
     <color name="profile_disabled">#90908e</color>
     <color name="mood_text">#a4a4a4</color>
     <color name="mood_selector">#f1f1ee</color>
+    <color name="mood_divider_1">#f7f7f6</color>
+    <color name="mood_divider_2">#e1e1de</color>
 </resources>

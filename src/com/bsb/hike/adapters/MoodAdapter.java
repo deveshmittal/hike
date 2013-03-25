@@ -24,7 +24,7 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 	private Context context;
 
 	private final int moodHeight = (int) (65 * Utils.densityMultiplier);
-	private final int moodWidth = (int) (70 * Utils.densityMultiplier);
+	private final int moodWidth;
 
 	public MoodAdapter(Context context) {
 		this.inflater = LayoutInflater.from(context);
@@ -33,6 +33,9 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 				R.array.mood_headings);
 		this.moodCount = EmoticonConstants.MOOD_RES_IDS.length;
 		this.inflater = LayoutInflater.from(context);
+
+		int width = context.getResources().getDisplayMetrics().widthPixels;
+		moodWidth = (int) (width / 4);
 	}
 
 	@Override
