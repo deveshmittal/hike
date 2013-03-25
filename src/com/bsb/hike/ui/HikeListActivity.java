@@ -284,8 +284,8 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 				HikeMessengerApp.getPubSub().publish(
 						blocked ? HikePubSub.BLOCK_USER
 								: HikePubSub.UNBLOCK_USER, msisdn);
-				finish();
 			}
+			finish();
 		}
 	}
 
