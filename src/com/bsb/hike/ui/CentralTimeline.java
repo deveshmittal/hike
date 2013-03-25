@@ -404,7 +404,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					statusMessages.add(friendRequests + startIndex,
 							statusMessage);
 					if (noStatusMessage != null
-							&& statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT) {
+							&& (statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT || statusMessage
+									.getMsisdn().equals(userMsisdn))) {
 						statusMessages.remove(noStatusMessage);
 						noStatusMessage = null;
 					}
