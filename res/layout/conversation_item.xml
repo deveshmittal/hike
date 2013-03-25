@@ -8,30 +8,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/list_item"
-        android:paddingBottom="7dp"
-        android:paddingTop="7dp" >
+        android:paddingBottom="@dimen/avatar_top_bottom"
+        android:paddingTop="@dimen/avatar_top_bottom" >
 
         <ImageView
             android:id="@+id/avatar"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
+            android:layout_width="@dimen/avatar_width_height"
+            android:layout_height="@dimen/avatar_width_height"
             android:layout_centerVertical="true"
             android:layout_alignParentLeft="true"
-            android:layout_marginLeft="17dp"
+            android:layout_marginLeft="@dimen/avatar_left_right"
+            android:layout_marginRight="@dimen/avatar_left_right"
             android:src="@drawable/ic_avatar1" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/contact"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="17dp"
             android:layout_marginRight="10dp"
             android:layout_toLeftOf="@+id/last_message_timestamp"
             android:layout_toRightOf="@id/avatar"
             android:ellipsize="end"
             android:singleLine="true"
             android:text="Kavin Mittal"
-            android:textSize="18sp"
+            android:textSize="@dimen/main_text_size"
             android:textColor="@color/lightblack"
             android:layout_alignTop="@id/avatar" />
 
@@ -74,7 +74,7 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
-                android:textSize="14sp"
+                android:textSize="@dimen/sub_text_size"
                 android:textColor="@color/lightblack" 
                 android:textStyle="italic"
                 android:visibility="invisible"/>
