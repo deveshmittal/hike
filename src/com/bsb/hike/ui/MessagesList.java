@@ -31,26 +31,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
-import android.text.style.ImageSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
@@ -60,8 +51,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -92,8 +81,6 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 public class MessagesList extends DrawerBaseActivity implements
 		OnClickListener, OnItemClickListener, HikePubSub.Listener,
 		android.content.DialogInterface.OnClickListener, Runnable {
-	private static final int INVITE_PICKER_RESULT = 1001;
-
 	public static final Object COMPOSE = "compose";
 
 	private ConversationsAdapter mAdapter;
@@ -103,8 +90,6 @@ public class MessagesList extends DrawerBaseActivity implements
 	private Set<String> mConversationsAdded;
 
 	private ListView mConversationsView;
-
-	private View mSearchIconView;
 
 	private View mEmptyView;
 
@@ -117,8 +102,6 @@ public class MessagesList extends DrawerBaseActivity implements
 	private View updateToolTipParent;
 
 	private View groupChatToolTipParent;
-
-	private boolean isToolTipShowing;
 
 	private boolean wasAlertCancelled = false;
 
@@ -244,8 +227,6 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				0);
-		String token = accountPrefs.getString(HikeMessengerApp.TOKEN_SETTING,
-				null);
 
 		Intent i = null;
 		boolean justSignedUp = accountPrefs.getBoolean(
@@ -282,9 +263,6 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		AppRater.appLaunched(this);
 
-		isToolTipShowing = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		wasAlertCancelled = savedInstanceState != null
 				&& savedInstanceState
 						.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
@@ -431,118 +409,12 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 	}
 
-	private static final int TUTORIAL_PAGE_COUNT = 2;
-
-	private void showFavoritesIntroOverlay() {
-		findViewById(R.id.favorite_intro).setVisibility(View.VISIBLE);
-		ViewPager tutorialPager = (ViewPager) findViewById(R.id.tutorial_pager);
-
-		ViewGroup pageIndicatorContainer = (ViewGroup) findViewById(R.id.page_indicator_container);
-
-		int rightMargin = (int) (10 * Utils.densityMultiplier);
-		final ImageView[] pageIndicators = new ImageView[TUTORIAL_PAGE_COUNT];
-		for (int i = 0; i < TUTORIAL_PAGE_COUNT; i++) {
-			pageIndicators[i] = new ImageView(this);
-			LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-					LayoutParams.WRAP_CONTENT);
-			if (i != TUTORIAL_PAGE_COUNT - 1) {
-				lp.setMargins(0, 0, rightMargin, 0);
-			}
-			pageIndicators[i]
-					.setImageResource(i == 0 ? R.drawable.ic_page_selected
-							: R.drawable.ic_page_not_selected);
-			pageIndicators[i].setLayoutParams(lp);
-			pageIndicatorContainer.addView(pageIndicators[i]);
-		}
-		pageIndicatorContainer.requestLayout();
-
-		tutorialPager.setAdapter(new TutorialPagerAdapter());
-
-		tutorialPager.setOnPageChangeListener(new OnPageChangeListener() {
-			@Override
-			public void onPageSelected(int position) {
-				for (ImageView pageIndicator : pageIndicators) {
-					pageIndicator
-							.setImageResource(R.drawable.page_indicator_unselected);
-				}
-				pageIndicators[position]
-						.setImageResource(R.drawable.page_indicator_selected);
-			}
-
-			@Override
-			public void onPageScrolled(int arg0, float arg1, int arg2) {
-			}
-
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-			}
-		});
-	}
-
 	public void onFavoriteIntroClick(View v) {
 		findViewById(R.id.favorite_intro).setVisibility(View.GONE);
 
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN, true);
 		editor.commit();
-	}
-
-	private class TutorialPagerAdapter extends PagerAdapter {
-
-		LayoutInflater layoutInflater;
-
-		public TutorialPagerAdapter() {
-			layoutInflater = LayoutInflater.from(MessagesList.this);
-		}
-
-		@Override
-		public int getCount() {
-			return TUTORIAL_PAGE_COUNT;
-		}
-
-		@Override
-		public boolean isViewFromObject(View view, Object object) {
-			return view == object;
-		}
-
-		@Override
-		public void destroyItem(ViewGroup container, int position, Object object) {
-			((ViewPager) container).removeView((View) object);
-		}
-
-		@Override
-		public Object instantiateItem(ViewGroup container, int position) {
-			View parent = layoutInflater.inflate(
-					R.layout.favorite_tutorial_item, null);
-
-			ImageView tutorialImage = (ImageView) parent
-					.findViewById(R.id.favorite_img);
-			tutorialImage
-					.setImageResource(position == 0 ? R.drawable.intro_fav_1
-							: R.drawable.intro_fav_2);
-
-			TextView tutorialInfo = (TextView) parent
-					.findViewById(R.id.fav_info);
-			tutorialInfo.setText(position == 0 ? R.string.fav_info1
-					: R.string.fav_info2);
-			if (position == 1) {
-				String plus = getString(R.string.plus);
-				String favInfoString = getString(R.string.fav_info2);
-
-				SpannableStringBuilder ssb = new SpannableStringBuilder(
-						favInfoString);
-				ssb.setSpan(new ImageSpan(MessagesList.this,
-						R.drawable.ic_small_add), favInfoString.indexOf(plus),
-						favInfoString.indexOf(plus) + plus.length(),
-						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-				tutorialInfo.setText(ssb);
-			}
-
-			((ViewPager) container).addView(parent);
-			return parent;
-		}
-
 	}
 
 	private void sendDeviceDetails() {
@@ -766,11 +638,6 @@ public class MessagesList extends DrawerBaseActivity implements
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
 		return true;
-	}
-
-	private void showCreditsScreen() {
-		Intent intent = new Intent(this, CreditsActivity.class);
-		startActivity(intent);
 	}
 
 	@Override
@@ -1474,66 +1341,6 @@ public class MessagesList extends DrawerBaseActivity implements
 			updateAlertOkBtn.setText(R.string.update_app);
 			updateAlertOkBtn.setEnabled(true);
 		}
-	}
-
-	private void showUpdateToolTip(int updateType) {
-		updateToolTipParent = findViewById(R.id.tool_tip_on_top);
-		updateToolTipParent.setVisibility(View.VISIBLE);
-		((LinearLayout) updateToolTipParent
-				.findViewById(R.id.tool_tip_parent_layout))
-				.setGravity(Gravity.CENTER_HORIZONTAL);
-		mToolTip = updateToolTipParent.findViewById(R.id.credits_help_layout);
-		mToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
-
-		// To make the tool tip non closable if a critical update is available
-		mToolTip.findViewById(R.id.close).setVisibility(
-				updateType == HikeConstants.NORMAL_UPDATE ? View.VISIBLE
-						: View.GONE);
-
-		((MarginLayoutParams) mToolTip.getLayoutParams())
-				.setMargins(0, 0, 0, 0);
-
-		TextView text = (TextView) mToolTip.findViewById(R.id.tool_tip);
-		((MarginLayoutParams) text.getLayoutParams()).setMargins(
-				(updateType == HikeConstants.NORMAL_UPDATE ? 0
-						: (int) (15 * Utils.densityMultiplier)), 0, 0, 0);
-		text.setText(this.accountPrefs.getString(
-				HikeConstants.Extras.UPDATE_MESSAGE, ""));
-
-		if (!isToolTipShowing) {
-			Animation alphaIn = AnimationUtils.loadAnimation(MessagesList.this,
-					android.R.anim.fade_in);
-			alphaIn.setStartOffset(1000);
-			mToolTip.setAnimation(alphaIn);
-		}
-		mToolTip.setVisibility(View.VISIBLE);
-
-	}
-
-	private void showGroupChatToolTip() {
-		groupChatToolTipParent = findViewById(R.id.tool_tip_on_top);
-		groupChatToolTipParent.setVisibility(View.VISIBLE);
-		((LinearLayout) groupChatToolTipParent
-				.findViewById(R.id.tool_tip_parent_layout))
-				.setGravity(Gravity.CENTER_HORIZONTAL);
-		mToolTip = groupChatToolTipParent
-				.findViewById(R.id.credits_help_layout);
-		mToolTip.setBackgroundResource(R.drawable.home_credits_tool_tip_bg);
-
-		((MarginLayoutParams) mToolTip.getLayoutParams())
-				.setMargins(0, 0, 0, 0);
-
-		TextView text = (TextView) mToolTip.findViewById(R.id.tool_tip);
-		text.setText(R.string.we_have_gc);
-
-		if (!isToolTipShowing) {
-			Animation alphaIn = AnimationUtils.loadAnimation(MessagesList.this,
-					android.R.anim.fade_in);
-			alphaIn.setStartOffset(1000);
-			mToolTip.setAnimation(alphaIn);
-		}
-		mToolTip.setVisibility(View.VISIBLE);
-
 	}
 
 	public void onOpenTimelineClick(View v) {
