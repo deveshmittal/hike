@@ -2,26 +2,45 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="20dp"
-    android:paddingBottom="20dp"
     android:background="@color/offwhite"
-    android:gravity="center"
+    android:gravity="center_horizontal"
     android:orientation="vertical" >
 
+    <View
+        android:id="@+id/div1"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#e0e0dc" />
+
+    <View
+        android:id="@+id/div2"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@id/div1"
+        android:background="#cdccc8" />
+
+    <View
+        android:id="@+id/div3"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@id/div2"
+        android:background="#fefefe" />
+    
     <ImageView
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="15dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginBottom="17dp"
         android:src="@drawable/ic_not_on_hike" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
         android:gravity="center"
         android:text="@string/not_on_hike"
         android:textColor="@color/lightblack"

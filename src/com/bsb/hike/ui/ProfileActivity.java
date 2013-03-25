@@ -380,6 +380,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private void setupGroupProfileScreen() {
 		setContentView(R.layout.profile);
 
+		findViewById(R.id.animation_layout_content).setBackgroundResource(
+				R.drawable.thatch_repeat);
 		TextView mTitleView = (TextView) findViewById(R.id.title);
 		mTitleView.setText(R.string.group_info);
 

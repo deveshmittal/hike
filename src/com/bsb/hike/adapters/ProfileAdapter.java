@@ -140,7 +140,7 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 		if (viewType == ViewType.HEADER) {
 			return false;
 		} else if (viewType == ViewType.BUTTONS) {
-			return !groupProfile;
+			return false;
 		}
 		return true;
 	}
@@ -211,6 +211,7 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 				viewHolder.btn3 = (Button) v.findViewById(R.id.btn3);
 
 				viewHolder.btnDivider = v.findViewById(R.id.btn_divider);
+				viewHolder.marginView = v.findViewById(R.id.margin_view);
 
 				viewHolder.container = (ViewGroup) v
 						.findViewById(R.id.btn_container);
@@ -355,6 +356,8 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 				viewHolder.btn2.setVisibility(View.VISIBLE);
 				viewHolder.btn3.setVisibility(hasSMSUser ? View.VISIBLE
 						: View.GONE);
+				viewHolder.marginView.setVisibility(hasSMSUser ? View.VISIBLE
+						: View.GONE);
 
 				viewHolder.btnDivider
 						.setVisibility(viewHolder.btn1.getVisibility() == View.VISIBLE
@@ -380,6 +383,8 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 				viewHolder.btn1.setVisibility(View.GONE);
 				viewHolder.btn2.setVisibility(View.GONE);
 				viewHolder.container.setVisibility(View.GONE);
+
+				viewHolder.marginView.setVisibility(View.GONE);
 
 				viewHolder.btn3.setText(myProfile ? R.string.post_status
 						: R.string.send_message);
@@ -478,8 +483,8 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 				}
 			} else {
 				viewHolder.icon.setImageResource(R.drawable.ic_block_profile);
-				viewHolder.text.setText(context.getString(R.string.user_blocked,
-						contactName));
+				viewHolder.text.setText(context.getString(
+						R.string.user_blocked, contactName));
 				viewHolder.btn1.setText(R.string.unblock_title);
 				viewHolder.btn2.setVisibility(View.GONE);
 			}
@@ -506,6 +511,7 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 		ViewGroup requestLayout;
 		EditText groupName;
 		ImageButton cancelEdit;
+		View marginView;
 	}
 
 	@Override
