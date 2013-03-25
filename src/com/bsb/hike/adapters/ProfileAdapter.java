@@ -60,17 +60,8 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 	public ProfileAdapter(Context context, List<?> itemList,
 			GroupConversation groupConversation, ContactInfo contactInfo,
 			boolean myProfile) {
-		this.context = context;
-		this.groupProfile = groupConversation != null;
-		if (groupProfile) {
-			groupParticipants = (List<GroupParticipant>) itemList;
-			editedGroupName = groupConversation.getLabel();
-		} else {
-			statusMessages = (List<StatusMessage>) itemList;
-		}
-		this.mContactInfo = contactInfo;
-		this.groupConversation = groupConversation;
-		this.myProfile = myProfile;
+		this(context, itemList, groupConversation, contactInfo, myProfile,
+				false);
 	}
 
 	public ProfileAdapter(Context context, List<?> itemList,
