@@ -171,13 +171,6 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 			switch (viewType) {
 			case HEADER:
 				v = inflater.inflate(R.layout.profile_header, null);
-				if (!myProfile
-						&& (groupConversation != null || mContactInfo
-								.getFavoriteType() != FavoriteType.FRIEND)) {
-					v.setBackgroundResource(R.drawable.bg_group_profile);
-				} else {
-					v.setBackgroundResource(R.drawable.bg_profile);
-				}
 
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.groupName = (EditText) v
@@ -261,6 +254,15 @@ public class ProfileAdapter extends BaseAdapter implements TextWatcher {
 		case HEADER:
 			String msisdn;
 			String name;
+
+			if (!myProfile
+					&& (groupConversation != null || mContactInfo
+							.getFavoriteType() != FavoriteType.FRIEND)) {
+				v.setBackgroundResource(R.drawable.bg_group_profile);
+			} else {
+				v.setBackgroundResource(R.drawable.bg_profile);
+			}
+
 			if (groupParticipant != null) {
 				msisdn = groupConversation.getMsisdn();
 				name = groupConversation.getLabel();
