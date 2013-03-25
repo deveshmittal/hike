@@ -428,7 +428,7 @@ public class MessagesList extends DrawerBaseActivity implements
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.MQTT_PUBLISH, obj);
 				}
-				Utils.requestAccountInfo();
+				Utils.requestAccountInfo(false);
 			}
 		}, 5 * 1000);
 		deviceDetailsSent = true;

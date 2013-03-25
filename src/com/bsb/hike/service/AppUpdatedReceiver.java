@@ -52,7 +52,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.MQTT_PUBLISH, obj);
 					}
-					Utils.requestAccountInfo();
+					Utils.requestAccountInfo(true);
 				}
 			}, 5 * 1000);
 

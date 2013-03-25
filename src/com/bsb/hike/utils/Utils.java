@@ -98,12 +98,12 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfoData;
-import com.bsb.hike.models.ConvMessage;
-import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.ContactInfoData.DataType;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
@@ -946,12 +946,17 @@ public class Utils {
 	/**
 	 * Requests the server to send an account info packet
 	 */
-	public static void requestAccountInfo() {
+	public static void requestAccountInfo(boolean upgrade) {
 		Log.d("Utils", "Requesting account info");
 		JSONObject requestAccountInfo = new JSONObject();
 		try {
 			requestAccountInfo.put(HikeConstants.TYPE,
 					HikeConstants.MqttMessageTypes.REQUEST_ACCOUNT_INFO);
+
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.UPGRADE, upgrade);
+
+			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 					requestAccountInfo);
 		} catch (JSONException e) {
