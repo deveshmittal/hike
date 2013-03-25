@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -233,6 +234,16 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		titleBtn.setText(R.string.post);
 		mTitleView.setText(R.string.status);
 		toggleEnablePostButton();
+		/*
+		 * Show soft keyboard.
+		 */
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.showSoftInput(statusTxt, InputMethodManager.SHOW_IMPLICIT);
+	}
+
+	private void hideSoftKeyboard() {
+		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(statusTxt.getWindowToken(), 0);
 	}
 
 	private String getStatusDefaultHint() {
@@ -381,6 +392,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void showEmojiSelector() {
+		hideSoftKeyboard();
+
 		mActivityTask.emojiShowing = true;
 
 		showCancelButton(false);
@@ -516,6 +529,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void showMoodSelector() {
+		hideSoftKeyboard();
+
 		mActivityTask.moodShowing = true;
 
 		showCancelButton(true);
