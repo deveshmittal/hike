@@ -68,7 +68,7 @@
                 android:onClick="onDetailsBtnClick"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:src="@drawable/ic_details_btn" />
+                android:src="@drawable/details_btn" />
         </LinearLayout>
 
         <LinearLayout
