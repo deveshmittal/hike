@@ -67,6 +67,13 @@
         android:textSize="14sp"
         android:visibility="gone" />
     
+    <View 
+        android:id="@+id/nux_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/ic_thread_divider_profile"
+        android:visibility="gone"/>
+    
     <ListView
         android:id="@+id/contact_list"
         android:layout_width="match_parent"

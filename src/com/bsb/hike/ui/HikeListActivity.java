@@ -135,6 +135,7 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 		}
 
 		if (type == Type.NUX1 || type == Type.NUX2) {
+			findViewById(R.id.nux_divider).setVisibility(View.VISIBLE);
 			String freeSmsInvite = getString(R.string.free_sms_invite);
 			String message = getString(type == Type.NUX1 ? R.string.which_friend_invite
 					: R.string.which_family);
