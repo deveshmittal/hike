@@ -59,10 +59,17 @@
         </LinearLayout>
 
         <View
+            android:id="@+id/div2"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="1px"
             android:layout_above="@id/bottom_bar"
-            android:background="@drawable/ic_thread_divider_profile" />
+            android:background="@color/white" />
+        <View
+            android:id="@+id/div1"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_above="@id/div2"
+            android:background="#bebcb8" />
 
         <RelativeLayout
             android:id="@+id/content_container"
