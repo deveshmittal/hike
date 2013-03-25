@@ -162,8 +162,6 @@ public class HikeNotification {
 		}
 		int notificationId = statusMessage.getMsisdn().hashCode();
 
-		String msisdn = statusMessage.getMsisdn();
-
 		long timeStamp = statusMessage.getTimeStamp();
 
 		Intent notificationIntent = new Intent(context, CentralTimeline.class);
@@ -191,6 +189,9 @@ public class HikeNotification {
 		} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 			message = context
 					.getString(R.string.status_profile_pic_notification);
+			text = key + " " + message;
+		} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED) {
+			message = context.getString(R.string.confirmed_friend_2);
 			text = key + " " + message;
 		} else {
 			/*
