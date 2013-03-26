@@ -688,6 +688,8 @@ public class DrawerLayout extends RelativeLayout implements
 			content.scrollTo(-contentCurrentPosition, 0);
 			sidebar.scrollTo(-sidebarCurrentPosition, 0);
 
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.DRAWER_ANIMATION_COMPLETE, null);
 		}
 	}
 
@@ -777,6 +779,8 @@ public class DrawerLayout extends RelativeLayout implements
 
 			content.scrollTo(-contentCurrentPosition, 0);
 			sidebar.scrollTo(-sidebarCurrentPosition, 0);
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.DRAWER_ANIMATION_COMPLETE, null);
 		}
 	}
 }
