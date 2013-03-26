@@ -121,7 +121,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.RESET_NOTIFICATION_COUNTER,
-			HikePubSub.DECREMENT_NOTIFICATION_COUNTER };
+			HikePubSub.DECREMENT_NOTIFICATION_COUNTER,
+			HikePubSub.DRAWER_ANIMATION_COMPLETE };
 
 	private Dialog updateAlert;
 
@@ -354,7 +355,7 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 
 			mAdapter = new ConversationsAdapter(MessagesList.this,
-					R.layout.conversation_item, conversations);
+					R.layout.conversation_item, conversations, parentLayout);
 
 			HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
 					pubSubListeners);
@@ -731,6 +732,10 @@ public class MessagesList extends DrawerBaseActivity implements
 		mqttDialog.show();
 	}
 
+	private ArrayList<ConvMessage> receivedMsgWhileAnimating = new ArrayList<ConvMessage>();
+
+	private boolean refreshAfterAnimation;
+
 	@Override
 	public void onEventReceived(String type, Object object) {
 		super.onEventReceived(type, object);
@@ -781,22 +786,16 @@ public class MessagesList extends DrawerBaseActivity implements
 				((GroupConversation) conv).setGroupParticipantList(hCDB
 						.getGroupParticipants(conv.getMsisdn(), false, false));
 			}
+			if (parentLayout.isAnimating()) {
+				refreshAfterAnimation = true;
+				receivedMsgWhileAnimating.add(message);
+				return;
+			}
 			final ConvMessage finalMessage = message;
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if (!mConversationsAdded.contains(conv.getMsisdn())) {
-						mConversationsAdded.add(conv.getMsisdn());
-						mAdapter.add(conv);
-					}
-
-					conv.addMessage(finalMessage);
-					Log.d("MessagesList", "new message is " + finalMessage);
-					mAdapter.sort(mConversationsComparator);
-
-					if (messageRefreshHandler == null) {
-						messageRefreshHandler = new Handler();
-					}
+					addMessage(finalMessage);
 
 					messageRefreshHandler.removeCallbacks(MessagesList.this);
 					messageRefreshHandler.postDelayed(MessagesList.this, 100);
@@ -1016,7 +1015,50 @@ public class MessagesList extends DrawerBaseActivity implements
 					setNotificationCounter(--notificationCount);
 				}
 			});
+		} else if (HikePubSub.DRAWER_ANIMATION_COMPLETE.equals(type)) {
+			if (!refreshAfterAnimation) {
+				return;
+			}
+			refreshAfterAnimation = false;
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					showReceivedMessages(receivedMsgWhileAnimating);
+					receivedMsgWhileAnimating.clear();
+					mAdapter.drawerAnimationComplete();
+				}
+			});
 		}
+	}
+
+	private void addMessage(ConvMessage convMessage) {
+		Conversation conv = convMessage.getConversation();
+		if (!mConversationsAdded.contains(conv.getMsisdn())) {
+			mConversationsAdded.add(conv.getMsisdn());
+			mAdapter.add(conv);
+		}
+
+		conv.addMessage(convMessage);
+		Log.d("MessagesList", "new message is " + convMessage);
+		mAdapter.sort(mConversationsComparator);
+
+		if (messageRefreshHandler == null) {
+			messageRefreshHandler = new Handler();
+		}
+	}
+
+	private void showReceivedMessages(final List<ConvMessage> convMessageList) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				for (ConvMessage convMessage : convMessageList) {
+					addMessage(convMessage);
+				}
+				messageRefreshHandler.removeCallbacks(MessagesList.this);
+				messageRefreshHandler.postDelayed(MessagesList.this, 100);
+			}
+		});
 	}
 
 	private void setNotificationCounter(int notificationCount) {

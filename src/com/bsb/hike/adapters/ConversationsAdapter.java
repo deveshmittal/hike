@@ -28,17 +28,39 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.DrawerLayout;
+import com.bsb.hike.view.DrawerLayout.Listener;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 	private int mResourceId;
 	private MessagesList mMessagesList;
+	private DrawerLayout drawerLayout;
+	private boolean shouldRefresh;
 
 	public ConversationsAdapter(MessagesList messagesList,
-			int textViewResourceId, List<Conversation> objects) {
+			int textViewResourceId, List<Conversation> objects,
+			DrawerLayout drawerLayout) {
 		super(messagesList, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
 		mMessagesList = messagesList;
+		this.drawerLayout = drawerLayout;
+	}
+
+	@Override
+	public void notifyDataSetChanged() {
+		if (drawerLayout.isAnimating()) {
+			shouldRefresh = true;
+			return;
+		}
+		super.notifyDataSetChanged();
+	}
+
+	public void drawerAnimationComplete() {
+		if (shouldRefresh) {
+			super.notifyDataSetChanged();
+			shouldRefresh = false;
+		}
 	}
 
 	@Override
@@ -241,4 +263,5 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 		return v;
 	}
+
 }
