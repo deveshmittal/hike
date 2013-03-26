@@ -1798,7 +1798,7 @@ public class Utils {
 		if (TextUtils.isEmpty(accountPrefs.getString(
 				HikeMessengerApp.LAST_STATUS, ""))
 				&& HikeConversationsDatabase.getInstance()
-						.getStatusMessageCount() < HikeConstants.MIN_STATUS_COUNT) {
+						.getTimelineStatusMessageCount() < HikeConstants.MIN_STATUS_COUNT) {
 			notificationCount++;
 		}
 
