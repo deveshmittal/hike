@@ -15,9 +15,9 @@
 
     <LinearLayout
         android:id="@+id/animation_layout_right_sidebar"
-        android:layout_alignParentRight="true"
         android:layout_width="272dp"
         android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
         android:visibility="invisible" >
 
         <include layout="@layout/right_drawer" />
@@ -26,114 +26,118 @@
     <RelativeLayout
         android:id="@+id/animation_layout_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/thatch_repeat" >
-
-        <include
-            android:id="@+id/top_panel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            layout="@layout/top_panel" />
-
-        <ListView
-            android:id="@+id/conversations"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/top_panel"
-            android:cacheColorHint="#00000000"
-            android:divider="@drawable/ic_thread_divider_profile"
-            android:dividerHeight="1dp"
-            android:fadingEdge="none"
-            android:listSelector="@android:color/transparent"
-            android:footerDividersEnabled="false" />
-
-        <View
-            android:id="@+id/messages_list_overlay"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_alignParentBottom="true"
-            android:background="@color/transparent_white"
-            android:visibility="visible" >
-        </View>
-
-        <LinearLayout
-            android:id="@+id/main_buttons_container"
-            android:layout_width="197dp"
-            android:layout_height="52dp"
-            android:layout_marginBottom="7dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/bg_plus_hike"
-            android:gravity="center_vertical"
-            android:orientation="horizontal" >
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
-                android:onClick="onGroupChatClick"
-                android:paddingLeft="5dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/group_chat" />
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
-                android:onClick="onOneToOneClick"
-                android:scaleType="centerInside"
-                android:src="@drawable/one_to_one" />
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@null"
-                android:onClick="onStatusClick"
-                android:paddingRight="5dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/status" />
-        </LinearLayout>
+        android:layout_height="match_parent" >
 
         <RelativeLayout
-            android:id="@+id/empty_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/top_panel"
-            android:layout_above="@id/main_buttons_container"
-            android:background="@drawable/thatch_repeat"
-            android:visibility="visible" >
+            android:background="@drawable/thatch_repeat" >
 
-            <include layout="@layout/tool_tip" />
-
-            <RelativeLayout
+            <include
+                android:id="@+id/top_panel"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentTop="true" >
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                layout="@layout/top_panel" />
+
+            <ListView
+                android:id="@+id/conversations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/top_panel"
+                android:cacheColorHint="#00000000"
+                android:divider="@drawable/ic_thread_divider_profile"
+                android:dividerHeight="1dp"
+                android:fadingEdge="none"
+                android:footerDividersEnabled="false"
+                android:listSelector="@android:color/transparent" />
+
+            <View
+                android:id="@+id/messages_list_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/transparent_white"
+                android:visibility="visible" >
+            </View>
+
+            <LinearLayout
+                android:id="@+id/main_buttons_container"
+                android:layout_width="197dp"
+                android:layout_height="52dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="7dp"
+                android:background="@drawable/bg_plus_hike"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" >
 
                 <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:src="@drawable/no_threads" />
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:onClick="onGroupChatClick"
+                    android:paddingLeft="5dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/group_chat" />
 
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:onClick="onOneToOneClick"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/one_to_one" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:onClick="onStatusClick"
+                    android:paddingRight="5dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/status" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/empty_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/main_buttons_container"
+                android:layout_below="@id/top_panel"
+                android:background="@drawable/thatch_repeat"
+                android:visibility="visible" >
+
+                <include layout="@layout/tool_tip" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentTop="true" >
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/no_threads" />
+                </RelativeLayout>
             </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/tool_tip_on_top"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/top_panel"
+                android:visibility="visible" >
+
+                <include layout="@layout/tool_tip" />
+            </LinearLayout>
+
+            <include layout="@layout/favorites_intro_overlay" />
         </RelativeLayout>
-        
-        <LinearLayout
-            android:id="@+id/tool_tip_on_top"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/top_panel"
-            android:visibility="visible" >
-
-            <include layout="@layout/tool_tip" />
-        </LinearLayout>
-
-        <include layout="@layout/favorites_intro_overlay" />
     </RelativeLayout>
 
 </com.bsb.hike.view.DrawerLayout>

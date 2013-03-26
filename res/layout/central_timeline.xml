@@ -31,25 +31,31 @@
             android:id="@+id/animation_layout_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/seen_timeline_item"
             android:orientation="vertical" >
 
-            <include
-                android:id="@+id/top_panel_ref"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                layout="@layout/top_panel" />
+                android:layout_height="match_parent"
+                android:background="@color/seen_timeline_item"
+                android:orientation="vertical" >
 
-            <ListView
-                android:id="@+id/timeline_content"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:cacheColorHint="#00000000"
-                android:divider="@null"
-                android:fadingEdge="none"
-                android:footerDividersEnabled="false"
-                android:listSelector="@android:color/transparent" />
+                <include
+                    android:id="@+id/top_panel_ref"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    layout="@layout/top_panel" />
+
+                <ListView
+                    android:id="@+id/timeline_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cacheColorHint="#00000000"
+                    android:divider="@null"
+                    android:fadingEdge="none"
+                    android:footerDividersEnabled="false"
+                    android:listSelector="@android:color/transparent" />
+            </LinearLayout>
         </LinearLayout>
     </com.bsb.hike.view.DrawerLayout>
 
