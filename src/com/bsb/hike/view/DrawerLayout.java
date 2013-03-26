@@ -141,7 +141,7 @@ public class DrawerLayout extends RelativeLayout implements
 		mRightSidebarWidth = (int) ((isPortrait ? context.getResources()
 				.getDisplayMetrics().widthPixels : context.getResources()
 				.getDisplayMetrics().heightPixels) - topBarButtonWidth);
-		mRightSidebarOffsetForAnimation = (int) (150 * Utils.densityMultiplier);
+		mRightSidebarOffsetForAnimation = (int) (100 * Utils.densityMultiplier);
 		rightSidebarFinalPosition = context.getResources().getDisplayMetrics().widthPixels
 				- mRightSidebarWidth;
 
@@ -449,14 +449,11 @@ public class DrawerLayout extends RelativeLayout implements
 		int width = r - l;
 		int height = b - t;
 
-		mContent.layout(contentCurrentPosition, 0, width
-				+ contentCurrentPosition, height);
+		mContent.layout(0, 0, width, height);
 
-		mRightSidebar.layout(
-				rightSidebarFinalPosition + sidebarCurrentPosition, 0, width,
-				height);
+		mRightSidebar.layout(rightSidebarFinalPosition, 0, width, height);
 
-		mLeftSidebar.layout(sidebarCurrentPosition, 0, width, height);
+		mLeftSidebar.layout(0, 0, width, height);
 	}
 
 	@Override
@@ -500,9 +497,9 @@ public class DrawerLayout extends RelativeLayout implements
 		 */
 		int x = (int) ev.getX();
 		int y = (int) ev.getY();
-		if (mContent.getLeft() < x && mContent.getRight() > x
-				&& mContent.getTop() + topBarButtonWidth < y
-				&& mContent.getBottom() > y) {
+		if (((currentState == CurrentState.LEFT && mLeftSidebarWidth < x) || (currentState == CurrentState.RIGHT && topBarButtonWidth > x))
+				&& (mContent.getTop() + topBarButtonWidth < y && mContent
+						.getBottom() > y)) {
 			if (action == MotionEvent.ACTION_DOWN) {
 				mPressed = true;
 			}
@@ -524,6 +521,10 @@ public class DrawerLayout extends RelativeLayout implements
 	public void setListener(Listener l) {
 		mListener = l;
 		activity = (Activity) l;
+	}
+
+	public void setActivity(Activity a) {
+		activity = a;
 	}
 
 	public CurrentState getCurrentState() {
@@ -576,7 +577,10 @@ public class DrawerLayout extends RelativeLayout implements
 		public boolean onContentTouchedWhenOpeningLeftSidebar();
 
 		public boolean onContentTouchedWhenOpeningRightSidebar();
+	}
 
+	public boolean isAnimating() {
+		return isAnimating;
 	}
 
 	class OpenDrawerAnimation implements Runnable {
@@ -606,7 +610,7 @@ public class DrawerLayout extends RelativeLayout implements
 
 			this.sidebar = sidebar;
 			this.sidebar.setVisibility(View.VISIBLE);
-			requestLayout();
+			this.sidebar.scrollTo(-sidebarCurrentPosition, 0);
 
 			this.noAnim = noAnim;
 
@@ -652,10 +656,12 @@ public class DrawerLayout extends RelativeLayout implements
 						|| (sidebarAnimComplete)) {
 					if (Math.abs(contentCurrentPosition) < contentFinalPosition) {
 						contentCurrentPosition += contentIncrements;
+						content.scrollTo(-contentCurrentPosition, 0);
 					}
 
 					if (sidebarAnimComplete) {
 						sidebarCurrentPosition += sidebarIncrements;
+						sidebar.scrollTo(-sidebarCurrentPosition, 0);
 					}
 
 					handler.postDelayed(this, DURATION_BETWEEN_EACH_STEP);
@@ -665,7 +671,6 @@ public class DrawerLayout extends RelativeLayout implements
 			} else {
 				finishAnim();
 			}
-			requestLayout();
 		}
 
 		private void finishAnim() {
@@ -675,11 +680,14 @@ public class DrawerLayout extends RelativeLayout implements
 				currentState = CurrentState.LEFT;
 				contentCurrentPosition = contentFinalPosition;
 			} else {
-				mListener.rightSidebarOpened();
 				currentState = CurrentState.RIGHT;
 				contentCurrentPosition = -contentFinalPosition;
 			}
 			sidebarCurrentPosition = sidebarFinalPosition;
+
+			content.scrollTo(-contentCurrentPosition, 0);
+			sidebar.scrollTo(-sidebarCurrentPosition, 0);
+
 		}
 	}
 
@@ -737,14 +745,18 @@ public class DrawerLayout extends RelativeLayout implements
 					contentIncrements = -contentIncrements;
 				}
 
-				if ((Math.abs(contentCurrentPosition) > 0)
+				boolean currentAnimationComplete = (leftDrawer && contentCurrentPosition > 0)
+						|| (!leftDrawer && contentCurrentPosition < 0);
+				if ((currentAnimationComplete)
 						|| (Math.abs(sidebarCurrentPosition) < sidebarOffset)) {
-					if (Math.abs(contentCurrentPosition) > 0) {
+					if (currentAnimationComplete) {
 						contentCurrentPosition += contentIncrements;
+						content.scrollTo(-contentCurrentPosition, 0);
 					}
 
 					if (Math.abs(sidebarCurrentPosition) < sidebarOffset) {
 						sidebarCurrentPosition += sidebarIncrements;
+						sidebar.scrollTo(-sidebarCurrentPosition, 0);
 					}
 
 					handler.postDelayed(this, DURATION_BETWEEN_EACH_STEP);
@@ -754,7 +766,6 @@ public class DrawerLayout extends RelativeLayout implements
 			} else {
 				finishAnim();
 			}
-			requestLayout();
 		}
 
 		private void finishAnim() {
@@ -763,6 +774,9 @@ public class DrawerLayout extends RelativeLayout implements
 			contentCurrentPosition = 0;
 			sidebarCurrentPosition = sidebarFinalPosition;
 			currentState = CurrentState.NONE;
+
+			content.scrollTo(-contentCurrentPosition, 0);
+			sidebar.scrollTo(-sidebarCurrentPosition, 0);
 		}
 	}
 }

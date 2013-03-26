@@ -68,6 +68,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			boolean showButtons) {
 		parentLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		parentLayout.setListener(this);
+		parentLayout.setActivity(this);
 		parentLayout.setUpLeftDrawerView();
 
 		if (showButtons) {
