@@ -1469,10 +1469,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		Cursor c = mDb.query(DBConstants.GROUP_INFO_TABLE,
 				new String[] { DBConstants.GROUP_ALIVE }, DBConstants.GROUP_ID
 						+ "=?", new String[] { groupId }, null, null, null);
-		if (!c.moveToFirst()) {
-			return false;
+		try {
+			if (!c.moveToFirst()) {
+				return false;
+			}
+			return c.getInt(c.getColumnIndex(DBConstants.GROUP_ALIVE)) == 1;
+		} finally {
+			c.close();
 		}
-		return c.getInt(c.getColumnIndex(DBConstants.GROUP_ALIVE)) == 1;
 	}
 
 	public boolean isGroupMuted(String groupId) {
