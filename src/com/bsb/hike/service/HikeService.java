@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -291,6 +292,11 @@ public class HikeService extends Service {
 		/* listen for changes in the addressbook */
 		getContentResolver().registerContentObserver(
 				ContactsContract.Contacts.CONTENT_URI, true, contactsReceived);
+		/*
+		 * listen for changes in sim contacts
+		 */
+		getContentResolver().registerContentObserver(
+				Uri.parse("content://icc/adn"), true, contactsReceived);
 		if (manualContactSyncTrigger == null) {
 			manualContactSyncTrigger = new ManualContactSyncTrigger();
 			registerReceiver(manualContactSyncTrigger, new IntentFilter(
