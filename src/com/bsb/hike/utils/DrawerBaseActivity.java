@@ -184,10 +184,6 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 	}
 
 	@Override
-	public void rightSidebarOpened() {
-	}
-
-	@Override
 	public void onEventReceived(final String type, final Object object) {
 		if (HikePubSub.SMS_CREDIT_CHANGED.equals(type)) {
 			final int credits = (Integer) object;

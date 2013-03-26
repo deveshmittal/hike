@@ -577,7 +577,6 @@ public class DrawerLayout extends RelativeLayout implements
 
 		public boolean onContentTouchedWhenOpeningRightSidebar();
 
-		public void rightSidebarOpened();
 	}
 
 	class OpenDrawerAnimation implements Runnable {
