@@ -358,37 +358,41 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 			final ContactInfo contactInfo = favoriteToggle.first;
-			if (favoriteToggle.second != FavoriteType.REQUEST_RECEIVED) {
+			if (favoriteToggle.second != FavoriteType.REQUEST_RECEIVED
+					&& favoriteToggle.second != FavoriteType.REQUEST_SENT) {
 				return;
 			}
 			final int startIndex = getStartIndex();
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					statusMessages
-							.add(startIndex,
-									new StatusMessage(
-											CentralTimelineAdapter.FRIEND_REQUEST_ID,
-											null,
-											contactInfo.getMsisdn(),
-											TextUtils.isEmpty(contactInfo
-													.getName()) ? contactInfo
-													.getMsisdn() : contactInfo
-													.getName(),
-											getString(R.string.added_as_hike_friend),
-											StatusMessageType.FRIEND_REQUEST,
-											System.currentTimeMillis() / 1000));
-					friendRequests++;
+					if (favoriteToggle.second == FavoriteType.REQUEST_RECEIVED) {
+						statusMessages
+								.add(startIndex,
+										new StatusMessage(
+												CentralTimelineAdapter.FRIEND_REQUEST_ID,
+												null,
+												contactInfo.getMsisdn(),
+												TextUtils.isEmpty(contactInfo
+														.getName()) ? contactInfo
+														.getMsisdn()
+														: contactInfo.getName(),
+												getString(R.string.added_as_hike_friend),
+												StatusMessageType.FRIEND_REQUEST,
+												System.currentTimeMillis() / 1000));
+						friendRequests++;
+					}
 					if (noFriendMessage != null) {
 						statusMessages.remove(noFriendMessage);
 						noFriendMessage = null;
-					} else {
+					} else if (favoriteToggle.second == FavoriteType.REQUEST_RECEIVED) {
 						/*
 						 * Since a new item was added, we increment the unseen
 						 * count.
 						 */
 						centralTimelineAdapter.incrementUnseenCount();
 					}
+
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
