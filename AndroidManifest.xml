@@ -3,7 +3,7 @@
     package="com.bsb.hike"
     android:versionCode="154"
     android:installLocation="auto"
-    android:versionName="1.8.6">
+    android:versionName="1.8.7">
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
