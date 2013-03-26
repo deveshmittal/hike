@@ -213,7 +213,7 @@ public class DbConversationListener implements Listener {
 								null,
 								contactInfo.getMsisdn(),
 								contactInfo.getName(),
-								context.getString(R.string.user_added_contact_as_friend),
+								context.getString(R.string.accepted_friend_request),
 								StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST,
 								System.currentTimeMillis() / 1000);
 						mConversationDb.addStatusMessage(statusMessage, true);
