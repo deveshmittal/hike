@@ -410,26 +410,12 @@ public class Utils {
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.
 
-		StringBuilder path = new StringBuilder(
-				HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
-		switch (type) {
-		case PROFILE:
-			path.append(HikeConstants.PROFILE_ROOT);
-			break;
-		case IMAGE:
-			path.append(HikeConstants.IMAGE_ROOT);
-			break;
-		case VIDEO:
-			path.append(HikeConstants.VIDEO_ROOT);
-			break;
-		case AUDIO:
-			path.append(HikeConstants.AUDIO_ROOT);
-			break;
-		default:
+		String path = getFileParent(type);
+		if (path == null) {
 			return null;
 		}
 
-		File mediaStorageDir = new File(path.toString());
+		File mediaStorageDir = new File(path);
 		// This location works best if you want the created images to be shared
 		// between applications and persist after your app has been uninstalled.
 
@@ -463,6 +449,28 @@ public class Utils {
 		String fileName = getUniqueFileName(orgFileName, fileKey);
 
 		return new File(mediaStorageDir, fileName);
+	}
+
+	public static String getFileParent(HikeFileType type) {
+		StringBuilder path = new StringBuilder(
+				HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
+		switch (type) {
+		case PROFILE:
+			path.append(HikeConstants.PROFILE_ROOT);
+			break;
+		case IMAGE:
+			path.append(HikeConstants.IMAGE_ROOT);
+			break;
+		case VIDEO:
+			path.append(HikeConstants.VIDEO_ROOT);
+			break;
+		case AUDIO:
+			path.append(HikeConstants.AUDIO_ROOT);
+			break;
+		default:
+			return null;
+		}
+		return path.toString();
 	}
 
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {

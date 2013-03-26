@@ -984,8 +984,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				SmileyParser.getInstance().addSmileyToEditable(
 						mComposeView.getText(), false);
 			} else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH)) {
-				String fileKey = intent
-						.getStringExtra(HikeConstants.Extras.FILE_KEY);
+				String fileKey = null;
 				String filePath = intent
 						.getStringExtra(HikeConstants.Extras.FILE_PATH);
 				String fileType = intent
@@ -1001,8 +1000,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				// orientation change.
 				intent.removeExtra(HikeConstants.Extras.FILE_PATH);
 			} else if (intent.hasExtra(HikeConstants.Extras.LATITUDE)) {
-				String fileKey = intent
-						.getStringExtra(HikeConstants.Extras.FILE_KEY);
+				String fileKey = null;
 				double latitude = intent.getDoubleExtra(
 						HikeConstants.Extras.LATITUDE, 0);
 				double longitude = intent.getDoubleExtra(

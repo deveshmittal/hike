@@ -100,14 +100,21 @@ public class UploadFileTask extends FileTransferTaskBase {
 								fileName, null);
 						Log.d(getClass().getSimpleName(), "Copying file: "
 								+ filePath + " to " + selectedFile.getPath());
-						// TODO Check performance on low end phones. If slow,
-						// should remove from UI thread.
-						// Saving the file to hike local folder
-						if (!Utils.copyFile(filePath, selectedFile.getPath(),
-								hikeFileType)) {
-							return FTResult.READ_FAIL;
+						/*
+						 * Checking if this file already exists in the hike
+						 * folder.
+						 */
+						if (!filePath.contains(Utils
+								.getFileParent(hikeFileType))) {
+							// Saving the file to hike local folder
+							if (!Utils.copyFile(filePath,
+									selectedFile.getPath(), hikeFileType)) {
+								return FTResult.READ_FAIL;
+							}
+							filePath = selectedFile.getPath();
+						} else {
+							selectedFile = file;
 						}
-						filePath = selectedFile.getPath();
 					} else {
 						selectedFile = new File(filePath);
 					}
