@@ -758,6 +758,11 @@ public class MessagesList extends DrawerBaseActivity implements
 				return;
 			}
 
+			/*
+			 * Ensuring the message's conversation is not null;
+			 */
+			message.setConversation(conv);
+
 			if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE) {
 				if (!conv.getMessages().isEmpty()) {
 					ConvMessage prevMessage = conv.getMessages().get(
