@@ -40,7 +40,7 @@
                 android:layout_alignParentTop="true"
                 layout="@layout/top_panel" />
 
-            <ListView
+            <com.bsb.hike.view.ConversationListView
                 android:id="@+id/conversations"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
