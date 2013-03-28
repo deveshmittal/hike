@@ -338,7 +338,6 @@
 	<string name="post_status">Statusmeldung posten</string>
 	<string name="owner">Besitzer</string>
 	<string name="on_sms">per SMS</string>
-	<string name="update_status_fail">Status aktualisieren fehlgeschlagen</string>
 	<string name="contacts_on_hike">KONTAKTE BEI HIKE (%1$d)</string>
 	<string name="team_hike">Team hike</string>
 	<string name="hey_name">Hi %1$s!</string>
