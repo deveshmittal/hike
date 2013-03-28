@@ -552,6 +552,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			return v;
 		} else if (infoState == ParticipantInfoState.STATUS_MESSAGE) {
+			v.findViewById(R.id.div1).setVisibility(View.GONE);
+			v.findViewById(R.id.div2).setVisibility(View.GONE);
+			v.findViewById(R.id.div3).setVisibility(View.GONE);
+
 			holder.container
 					.setBackgroundResource(R.drawable.bg_status_chat_thread);
 
