@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:button="?android:attr/listChoiceIndicatorSingle"
+        android:button="@drawable/preference_radio_btn"
        	android:clickable="false"
        	android:focusable="false"
         android:visibility="gone" />
