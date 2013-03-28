@@ -97,4 +97,19 @@
         android:layout_height="1dp"
         android:background="@drawable/dropshadow" />
 
+    <LinearLayout
+        android:id="@+id/progress_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone" >
+
+        <ProgressBar
+            android:id="@+id/loading_progress"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:indeterminateDrawable="@drawable/loading"
+            android:visibility="visible" />
+    </LinearLayout>
+
 </LinearLayout>

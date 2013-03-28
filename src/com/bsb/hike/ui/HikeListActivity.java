@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.database.DatabaseUtils;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -89,47 +90,29 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
 
-		HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
-		List<Pair<AtomicBoolean, ContactInfo>> contactList = null;
-
 		TextView nuxText = (TextView) findViewById(R.id.nux_text);
 		switch (type) {
 		case NUX1:
 			findViewById(R.id.input_number_container).setVisibility(View.GONE);
 			nuxText.setVisibility(View.VISIBLE);
 			titleBtn.setText(R.string.next_signup);
-			contactList = hUDB
-					.getNonHikeMostContactedContacts(HikeConstants.MAX_NUX_CONTACTS);
 			labelView.setText(R.string.invite_friends);
 			labelView.setOnClickListener(this);
-			if (contactList.isEmpty()) {
-				onTitleIconClick(null);
-			}
 			break;
 		case NUX2:
 			findViewById(R.id.input_number_container).setVisibility(View.GONE);
 			nuxText.setVisibility(View.VISIBLE);
 			titleBtn.setText(R.string.done);
-			contactList = hUDB.getFamilyList(
-					this,
-					getIntent().getStringExtra(
-							HikeConstants.Extras.NUX1_NUMBERS),
-					HikeConstants.MAX_NUX_CONTACTS);
 			labelView.setText(R.string.invite_family);
 			labelView.setOnClickListener(this);
-			if (contactList.isEmpty()) {
-				onTitleIconClick(null);
-			}
 			break;
 		case BLOCK:
 			titleBtn.setText(R.string.done);
-			contactList = hUDB.getBlockedUserList();
 			toggleBlockMap = new HashMap<String, Boolean>();
 			labelView.setText(R.string.blocked_list);
 			break;
 		case INVITE:
 			titleBtn.setText(R.string.send);
-			contactList = hUDB.getNonHikeContacts();
 			labelView.setText(R.string.invite_via_sms);
 			break;
 		}
@@ -150,25 +133,88 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 			findViewById(R.id.title_icon_left).setVisibility(View.VISIBLE);
 			findViewById(R.id.menu_bar_left).setVisibility(View.VISIBLE);
 		}
-		/*
-		 * This would be true when we have pre checked items.
-		 */
-		if (type != Type.INVITE) {
-			for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList) {
-				boolean checked = contactItem.first.get();
-				if (checked) {
-					selectedContacts.add(contactItem.second.getMsisdn());
-				} else {
-					break;
-				}
+		new SetupContactList().execute();
+	}
+
+	private class SetupContactList extends
+			AsyncTask<Void, Void, List<Pair<AtomicBoolean, ContactInfo>>> {
+
+		boolean loadOnUiThread;
+
+		@Override
+		protected void onPreExecute() {
+			loadOnUiThread = type != Type.NUX1 && type != Type.NUX2
+					&& Utils.loadOnUiThread();
+			findViewById(R.id.progress_container).setVisibility(
+					loadOnUiThread ? View.GONE : View.VISIBLE);
+		}
+
+		@Override
+		protected List<Pair<AtomicBoolean, ContactInfo>> doInBackground(
+				Void... params) {
+			if (loadOnUiThread) {
+				return null;
+			} else {
+				return getContactList();
 			}
 		}
 
-		adapter = new HikeInviteAdapter(this, -1, contactList,
-				type == Type.BLOCK);
-		input.addTextChangedListener(adapter);
+		@Override
+		protected void onPostExecute(
+				List<Pair<AtomicBoolean, ContactInfo>> contactList) {
+			if (contactList == null) {
+				contactList = getContactList();
+			}
+			if (type == Type.NUX1 || type == Type.NUX2) {
+				if (contactList.isEmpty()) {
+					onTitleIconClick(null);
+				}
+			}
 
-		listView.setAdapter(adapter);
+			findViewById(R.id.progress_container).setVisibility(View.GONE);
+
+			/*
+			 * This would be true when we have pre checked items.
+			 */
+			if (type != Type.INVITE) {
+				for (Pair<AtomicBoolean, ContactInfo> contactItem : contactList) {
+					boolean checked = contactItem.first.get();
+					if (checked) {
+						selectedContacts.add(contactItem.second.getMsisdn());
+					} else {
+						break;
+					}
+				}
+			}
+
+			adapter = new HikeInviteAdapter(HikeListActivity.this, -1,
+					contactList, type == Type.BLOCK);
+			input.addTextChangedListener(adapter);
+
+			listView.setAdapter(adapter);
+		}
+
+	}
+
+	private List<Pair<AtomicBoolean, ContactInfo>> getContactList() {
+		HikeUserDatabase hUDB = HikeUserDatabase.getInstance();
+
+		switch (type) {
+		case NUX1:
+			return hUDB
+					.getNonHikeMostContactedContacts(HikeConstants.MAX_NUX_CONTACTS);
+		case NUX2:
+			return hUDB.getFamilyList(
+					this,
+					getIntent().getStringExtra(
+							HikeConstants.Extras.NUX1_NUMBERS),
+					HikeConstants.MAX_NUX_CONTACTS);
+		case BLOCK:
+			return hUDB.getBlockedUserList();
+		case INVITE:
+			return hUDB.getNonHikeContacts();
+		}
+		return null;
 	}
 
 	@Override
