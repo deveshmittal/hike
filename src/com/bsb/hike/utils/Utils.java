@@ -1827,4 +1827,13 @@ public class Utils {
 
 		return notificationCount;
 	}
+
+	/*
+	 * This method returns whether the device is an mdpi or ldpi device. The
+	 * assumption is that these devices are low end and hence a DB call may
+	 * block the UI on those devices.
+	 */
+	public static boolean loadOnUiThread() {
+		return ((int) 10 * Utils.densityMultiplier) > 10;
+	}
 }

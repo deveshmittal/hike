@@ -43,6 +43,7 @@ import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -327,79 +328,130 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 	}
 
-	/* msg is any text we want to show initially */
-	private void createAutoCompleteView() {
-		boolean isGroupChat = getIntent().getBooleanExtra(
-				HikeConstants.Extras.GROUP_CHAT, false);
-		boolean isForwardingMessage = getIntent().getBooleanExtra(
-				HikeConstants.Extras.FORWARD_MESSAGE, false);
-		boolean isSharingFile = getIntent().getType() != null;
-		// Getting the group id. This will be a valid value if the intent was
-		// passed to add group participants.
-		String existingGroupId = getIntent().getStringExtra(
-				HikeConstants.Extras.EXISTING_GROUP_CHAT);
+	private class CreateAutoCompleteViewTask extends
+			AsyncTask<Void, Void, List<ContactInfo>> {
 
-		mComposeView.removeTextChangedListener(this);
+		private boolean isGroupChat;
+		private boolean isForwardingMessage;
+		private boolean isSharingFile;
+		private boolean freeSMSOn;
+		private String userMsisdn;
+		private String existingGroupId;
+		boolean loadOnUiThread;
 
-		if (isSharingFile) {
-			mLabelView.setText(R.string.share_file);
-		} else if (isForwardingMessage) {
-			mLabelView.setText(R.string.forward);
-		} else if (!TextUtils.isEmpty(existingGroupId)) {
-			mLabelView.setText(R.string.add_group);
-		} else if (isGroupChat) {
-			mLabelView.setText(R.string.new_group);
-		} else {
-			mLabelView.setText(R.string.new_message);
+		@Override
+		protected void onPreExecute() {
+			isGroupChat = getIntent().getBooleanExtra(
+					HikeConstants.Extras.GROUP_CHAT, false);
+			isForwardingMessage = getIntent().getBooleanExtra(
+					HikeConstants.Extras.FORWARD_MESSAGE, false);
+			isSharingFile = getIntent().getType() != null;
+			// Getting the group id. This will be a valid value if the intent
+			// was
+			// passed to add group participants.
+			existingGroupId = getIntent().getStringExtra(
+					HikeConstants.Extras.EXISTING_GROUP_CHAT);
+
+			mComposeView.removeTextChangedListener(ChatThread.this);
+
+			if (isSharingFile) {
+				mLabelView.setText(R.string.share_file);
+			} else if (isForwardingMessage) {
+				mLabelView.setText(R.string.forward);
+			} else if (!TextUtils.isEmpty(existingGroupId)) {
+				mLabelView.setText(R.string.add_group);
+			} else if (isGroupChat) {
+				mLabelView.setText(R.string.new_group);
+			} else {
+				mLabelView.setText(R.string.new_message);
+			}
+
+			mBottomView.setVisibility(View.GONE);
+
+			if (isGroupChat) {
+				titleBtn = (Button) findViewById(R.id.title_icon);
+				titleBtn.setText(R.string.done);
+				titleBtn.setEnabled(false);
+				titleBtn.setVisibility(View.VISIBLE);
+				findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+			} else {
+				// Removing the attachment button that remains visible while
+				// forwarding files
+				findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
+				findViewById(R.id.title_image_btn2_container).setVisibility(
+						View.GONE);
+				findViewById(R.id.button_bar3).setVisibility(View.GONE);
+			}
+			freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
+					getApplicationContext()).getBoolean(
+					HikeConstants.FREE_SMS_PREF, true);
+			userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
+
+			loadOnUiThread = Utils.loadOnUiThread();
+			/*
+			 * Show the progress icon.
+			 */
+			findViewById(R.id.progress_container).setVisibility(
+					loadOnUiThread ? View.GONE : View.VISIBLE);
 		}
 
-		mBottomView.setVisibility(View.GONE);
-
-		if (isGroupChat) {
-			titleBtn = (Button) findViewById(R.id.title_icon);
-			titleBtn.setText(R.string.done);
-			titleBtn.setEnabled(false);
-			titleBtn.setVisibility(View.VISIBLE);
-			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-		} else {
-			// Removing the attachment buttong that remains visible while
-			// forwarding files
-			findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
-			findViewById(R.id.title_image_btn2_container).setVisibility(
-					View.GONE);
-			findViewById(R.id.button_bar3).setVisibility(View.GONE);
+		@Override
+		protected List<ContactInfo> doInBackground(Void... params) {
+			if (!loadOnUiThread) {
+				return getContactsForComposeScreen(userMsisdn, freeSMSOn,
+						isGroupChat, isForwardingMessage, isSharingFile);
+			} else {
+				return null;
+			}
 		}
-		boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
-				getApplicationContext()).getBoolean(
-				HikeConstants.FREE_SMS_PREF, true);
-		String userMsisdn = prefs
-				.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
+		@Override
+		protected void onPostExecute(List<ContactInfo> contactList) {
+			if (contactList == null) {
+				contactList = getContactsForComposeScreen(userMsisdn,
+						freeSMSOn, isGroupChat, isForwardingMessage,
+						isSharingFile);
+			}
+			/*
+			 * Hide the progress icon.
+			 */
+			findViewById(R.id.progress_container).setVisibility(View.GONE);
+
+			mInputNumberView.setText("");
+			HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
+					ChatThread.this, contactList, mInputNumberView,
+					isGroupChat, titleBtn, existingGroupId, getIntent(),
+					freeSMSOn);
+			mContactSearchView.setAdapter(adapter);
+			mContactSearchView.setOnItemClickListener(adapter);
+			mInputNumberView.addTextChangedListener(adapter);
+			mInputNumberView.setSingleLine(!isGroupChat);
+
+			mInputNumberContainer.setVisibility(View.VISIBLE);
+			mInputNumberView.setVisibility(View.VISIBLE);
+			mContactSearchView.setVisibility(View.VISIBLE);
+			mInputNumberView.requestFocus();
+
+			InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+			imm.showSoftInput(mContactSearchView,
+					InputMethodManager.SHOW_IMPLICIT);
+		}
+
+	}
+
+	private List<ContactInfo> getContactsForComposeScreen(String userMsisdn,
+			boolean freeSMSOn, boolean isGroupChat,
+			boolean isForwardingMessage, boolean isSharingFile) {
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
 				.getContactsForComposeScreen(freeSMSOn,
 						(isGroupChat || isForwardingMessage || isSharingFile),
 						userMsisdn);
 
 		if (isForwardingMessage || isSharingFile) {
-			contactList.addAll(0, this.mConversationDb
+			contactList.addAll(0, ChatThread.this.mConversationDb
 					.getGroupNameAndParticipantsAsContacts());
 		}
-		mInputNumberView.setText("");
-		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this,
-				contactList, mInputNumberView, isGroupChat, titleBtn,
-				existingGroupId, getIntent(), freeSMSOn);
-		mContactSearchView.setAdapter(adapter);
-		mContactSearchView.setOnItemClickListener(adapter);
-		mInputNumberView.addTextChangedListener(adapter);
-		mInputNumberView.setSingleLine(!isGroupChat);
-
-		mInputNumberContainer.setVisibility(View.VISIBLE);
-		mInputNumberView.setVisibility(View.VISIBLE);
-		mContactSearchView.setVisibility(View.VISIBLE);
-		mInputNumberView.requestFocus();
-		getWindow().setSoftInputMode(
-				WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
+		return contactList;
 	}
 
 	@Override
@@ -1045,7 +1097,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			 * The user chose to either start a new conversation or forward a
 			 * message.
 			 */
-			createAutoCompleteView();
+			new CreateAutoCompleteViewTask().execute();
 		}
 		/*
 		 * close context menu(if open) if the previous MSISDN is different from
