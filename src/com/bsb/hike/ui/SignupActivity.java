@@ -294,15 +294,9 @@ public class SignupActivity extends Activity implements
 				// Tracking the registration event for Fiksu
 				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
-				mHandler.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						Intent i = new Intent(SignupActivity.this,
-								MessagesList.class);
-						startActivity(i);
-						finish();
-					}
-				}, 2500);
+				mHandler.removeCallbacks(startWelcomeScreen);
+				mHandler.postDelayed(startWelcomeScreen, 2500);
+
 			} else if (mCurrentState != null && mCurrentState.value != null
 					&& mCurrentState.value.equals(HikeConstants.CHANGE_NUMBER)) {
 				restartTask();
@@ -311,6 +305,15 @@ public class SignupActivity extends Activity implements
 			mActivityState = new ActivityState();
 		}
 	}
+
+	Runnable startWelcomeScreen = new Runnable() {
+		@Override
+		public void run() {
+			Intent i = new Intent(SignupActivity.this, MessagesList.class);
+			startActivity(i);
+			finish();
+		}
+	};
 
 	public void onClick(View v) {
 		if (v.getId() == submitBtn.getId()) {
