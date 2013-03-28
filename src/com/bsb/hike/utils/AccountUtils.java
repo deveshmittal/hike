@@ -335,6 +335,8 @@ public class AccountUtils {
 
 			data.put("set_cookie", "0");
 			data.put("devicetype", os);
+			data.put(HikeConstants.LogEvent.OS, os);
+			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 			data.put("deviceid", deviceId);
 			data.put("devicetoken", deviceId);
 			data.put("deviceversion", device);
