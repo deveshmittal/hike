@@ -98,6 +98,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
 		}
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
 	}
 
 	private void resetUnseenStatusCount() {
@@ -232,9 +234,6 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		timelineContent.setAdapter(centralTimelineAdapter);
 		timelineContent.setOnItemClickListener(this);
 		timelineContent.setOnScrollListener(this);
-
-		HikeMessengerApp.getPubSub().publish(
-				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 
