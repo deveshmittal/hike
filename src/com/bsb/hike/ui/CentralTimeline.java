@@ -206,6 +206,14 @@ public class CentralTimeline extends DrawerBaseActivity implements
 						StatusMessageType.NO_STATUS,
 						System.currentTimeMillis() / 1000);
 				statusMessages.add(0, noStatusMessage);
+			} else if (statusMessages.isEmpty()) {
+				noStatusMessage = new StatusMessage(
+						CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID,
+						null, "12345", getString(R.string.team_hike),
+						getString(R.string.hey_name, name),
+						StatusMessageType.NO_STATUS,
+						System.currentTimeMillis() / 1000);
+				statusMessages.add(0, noStatusMessage);
 			}
 		}
 		if (friendMsisdnLength == 0
@@ -285,7 +293,9 @@ public class CentralTimeline extends DrawerBaseActivity implements
 				.getId()) {
 			parentLayout.openRightSidebar();
 		} else if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
-				.getId()) {
+				.getId()
+				|| CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+						.getId()) {
 			startActivity(new Intent(this, StatusUpdate.class));
 		} else {
 			toggleFavoriteAndRemoveTimelineItem(statusMessage,
