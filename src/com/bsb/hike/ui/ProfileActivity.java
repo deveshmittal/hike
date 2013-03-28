@@ -124,7 +124,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			HikePubSub.PARTICIPANT_JOINED_GROUP,
 			HikePubSub.PARTICIPANT_LEFT_GROUP,
 			HikePubSub.PROFILE_IMAGE_DOWNLOADED,
-			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED };
+			HikePubSub.PROFILE_IMAGE_NOT_DOWNLOADED, HikePubSub.USER_JOINED,
+			HikePubSub.USER_LEFT };
 
 	private String[] contactInfoPubSubListeners = { HikePubSub.ICON_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.USER_JOINED,
@@ -1816,13 +1817,27 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			});
 		} else if (HikePubSub.USER_JOINED.equals(type)
 				|| HikePubSub.USER_LEFT.equals(type)) {
-			if (!mLocalMSISDN.equals((String) object)) {
+			String msisdn = (String) object;
+			if (!mLocalMSISDN.equals(msisdn)
+					&& profileType != ProfileType.GROUP_INFO) {
 				return;
+			} else if (profileType == ProfileType.GROUP_INFO) {
+				GroupParticipant groupParticipant = groupConversation
+						.getGroupParticipant(msisdn);
+				if (groupParticipant == null) {
+					return;
+				}
+				groupParticipant.getContactInfo().setOnhike(
+						HikePubSub.USER_JOINED.equals(type));
 			}
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					profileAdapter.notifyDataSetChanged();
+					if (profileType == ProfileType.GROUP_INFO) {
+						setupGroupProfileList();
+					} else {
+						profileAdapter.notifyDataSetChanged();
+					}
 				}
 			});
 		} else if (HikePubSub.PROFILE_IMAGE_DOWNLOADED.equals(type)
