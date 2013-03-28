@@ -758,11 +758,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				return;
 			}
 
-			/*
-			 * Ensuring the message's conversation is not null;
-			 */
-			message.setConversation(conv);
-
 			if (message.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE) {
 				if (!conv.getMessages().isEmpty()) {
 					ConvMessage prevMessage = conv.getMessages().get(
@@ -779,7 +774,6 @@ public class MessagesList extends DrawerBaseActivity implements
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					message.setConversation(prevMessage.getConversation());
 				}
 			}
 			// For updating the group name if some participant has joined or
@@ -796,6 +790,12 @@ public class MessagesList extends DrawerBaseActivity implements
 				receivedMsgWhileAnimating.add(message);
 				return;
 			}
+
+			/*
+			 * Ensuring the message's conversation is not null;
+			 */
+			message.setConversation(conv);
+
 			final ConvMessage finalMessage = message;
 			runOnUiThread(new Runnable() {
 				@Override

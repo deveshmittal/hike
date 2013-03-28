@@ -916,6 +916,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					Log.e(HikeConversationsDatabase.class.getName(),
 							"Invalid JSON metadata", e);
 				}
+				message.setConversation(conv);
 
 				conv.addMessage(message);
 				conversationMap.put(msisdn, conv);
@@ -974,6 +975,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						groupOwner, isGroupAlive);
 				groupConversation.setGroupParticipantList(groupParticipants);
 				groupConversation.setMessages(conversation.getMessages());
+
+				/*
+				 * Setting the conversation for the message.
+				 */
+				if (!conversation.getMessages().isEmpty()) {
+					ConvMessage message = conversation.getMessages().get(0);
+					message.setConversation(groupConversation);
+				}
 
 				conversationMap.remove(groupId);
 				conversationMap.put(groupId, groupConversation);
