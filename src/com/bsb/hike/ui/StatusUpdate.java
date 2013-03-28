@@ -485,6 +485,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			setupEmoticonLayout(EmoticonType.EMOJI, whichSubcategory,
 					emoticonViewPager, statusTxt);
 			tabHost.setCurrentTab(whichSubcategory);
+			emoticonViewPager.setCurrentItem(whichSubcategory);
 		}
 
 		emoticonLayout.setVisibility(View.VISIBLE);
