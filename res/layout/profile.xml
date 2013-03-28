@@ -31,33 +31,39 @@
             android:id="@+id/animation_layout_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/offwhite"
             android:orientation="vertical" >
 
-            <include
-                android:id="@+id/top_panel_ref"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                layout="@layout/top_panel" />
+                android:layout_height="match_parent"
+                android:background="@color/offwhite"
+                android:orientation="vertical" >
 
-            <ListView
-                android:id="@+id/profile_content"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:cacheColorHint="#00000000"
-                android:divider="@null"
-                android:fadingEdge="none" />
-            
-            <ImageView
-                android:id="@+id/group_list_drop_shadow"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scaleType="fitXY"
-                android:src="@drawable/conversation_list_drop_shadow"
-                android:visibility="gone" />
+                <include
+                    android:id="@+id/top_panel_ref"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    layout="@layout/top_panel" />
 
+                <ListView
+                    android:id="@+id/profile_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cacheColorHint="#00000000"
+                    android:divider="@null"
+                    android:fadingEdge="none" />
+
+                <ImageView
+                    android:id="@+id/group_list_drop_shadow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/conversation_list_drop_shadow"
+                    android:visibility="gone" />
+            </LinearLayout>
         </LinearLayout>
+
     </com.bsb.hike.view.DrawerLayout>
 
     <include layout="@layout/profile_image" />
