@@ -23,7 +23,7 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 	private LayoutInflater inflater;
 	private Context context;
 
-	private final int moodHeight = (int) (65 * Utils.densityMultiplier);
+	private final int moodHeight;
 	private final int moodWidth;
 
 	public MoodAdapter(Context context) {
@@ -35,7 +35,8 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 		this.inflater = LayoutInflater.from(context);
 
 		int width = context.getResources().getDisplayMetrics().widthPixels;
-		moodWidth = (int) (width / 4);
+		moodWidth = (int) (width / 3);
+		moodHeight = moodWidth;
 	}
 
 	@Override

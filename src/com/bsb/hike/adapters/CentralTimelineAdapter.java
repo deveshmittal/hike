@@ -91,8 +91,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			viewHolder.avatar = (ImageView) convertView
 					.findViewById(R.id.avatar);
-			viewHolder.statusType = (ImageView) convertView
-					.findViewById(R.id.status_type);
 
 			viewHolder.name = (TextView) convertView.findViewById(R.id.name);
 			viewHolder.mainInfo = (TextView) convertView
@@ -122,8 +120,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 
-		viewHolder.avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(statusMessage.getMsisdn()));
+		if (statusMessage.hasMood()) {
+			viewHolder.avatar
+					.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
+							.getMoodId()]);
+		} else {
+			viewHolder.avatar.setImageDrawable(IconCacheManager.getInstance()
+					.getIconForMSISDN(statusMessage.getMsisdn()));
+		}
 		viewHolder.name
 				.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me"
 						: statusMessage.getNotNullName());
@@ -151,8 +155,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.extraInfo.setText(R.string.no_status_recently);
 				viewHolder.yesBtn.setText(R.string.update_status);
 			}
-			viewHolder.statusType.setImageResource(R.drawable.ic_no_status);
-			viewHolder.statusType.setBackgroundDrawable(null);
 			break;
 		case FRIEND_REQUEST:
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
@@ -164,10 +166,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 					statusMessage.getNotNullName()));
 			viewHolder.yesBtn.setText(R.string.confirm);
 			viewHolder.noBtn.setText(R.string.no_thanks);
-			viewHolder.statusType
-					.setImageResource(R.drawable.ic_profile_pic_status);
-			viewHolder.statusType
-					.setBackgroundResource(R.drawable.bg_status_type);
 			break;
 		case TEXT:
 			viewHolder.extraInfo.setVisibility(View.GONE);
@@ -177,9 +175,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			viewHolder.mainInfo.setText(smileyParser.addSmileySpans(
 					statusMessage.getText(), true));
-			viewHolder.statusType.setImageResource(R.drawable.ic_text_status);
-			viewHolder.statusType
-					.setBackgroundResource(R.drawable.bg_status_type);
 			break;
 		case PROFILE_PIC:
 			viewHolder.extraInfo.setVisibility(View.GONE);
@@ -188,10 +183,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.statusImg.setVisibility(View.VISIBLE);
 
 			viewHolder.mainInfo.setText(R.string.changed_profile);
-			viewHolder.statusType
-					.setImageResource(R.drawable.ic_profile_pic_status);
-			viewHolder.statusType
-					.setBackgroundResource(R.drawable.bg_status_type);
 			viewHolder.statusImg.setImageDrawable(IconCacheManager
 					.getInstance()
 					.getIconForMSISDN(statusMessage.getMappedId()));
@@ -208,18 +199,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED ? R.string.confirmed_friend_info
 									: R.string.accepted_friend_request_info,
 							statusMessage.getNotNullName()));
-			viewHolder.statusType
-					.setImageResource(R.drawable.ic_profile_pic_status);
-			viewHolder.statusType
-					.setBackgroundResource(R.drawable.bg_status_type);
 			break;
-		}
-
-		if (statusMessage.hasMood()) {
-			viewHolder.statusType.setBackgroundDrawable(null);
-			viewHolder.statusType
-					.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
-							.getMoodId()]);
 		}
 
 		viewHolder.content
@@ -257,7 +237,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	private class ViewHolder {
 		ImageView avatar;
-		ImageView statusType;
 		TextView name;
 		TextView mainInfo;
 		TextView extraInfo;

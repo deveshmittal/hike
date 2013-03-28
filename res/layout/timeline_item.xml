@@ -14,32 +14,10 @@
 
         <ImageView
             android:id="@+id/avatar"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="10dp"
             android:src="@drawable/ic_avatar1" />
-
-        <LinearLayout
-            android:id="@+id/type_container"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignBottom="@id/avatar"
-            android:layout_alignTop="@id/avatar"
-            android:layout_toRightOf="@id/avatar"
-            android:gravity="center" >
-
-            <ImageView
-                android:id="@+id/status_type"
-                android:layout_width="23dp"
-                android:layout_height="23dp"
-                android:layout_alignTop="@id/avatar"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_toRightOf="@id/avatar"
-                android:background="@drawable/bg_status_type"
-                android:paddingBottom="3dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_pic_status" />
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/side_content"
@@ -76,7 +54,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
             android:layout_toLeftOf="@id/side_content"
-            android:layout_toRightOf="@id/type_container"
+            android:layout_toRightOf="@id/avatar"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
@@ -126,7 +104,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/details_content"
             android:layout_marginTop="5dp"
-            android:layout_toRightOf="@id/type_container"
+            android:layout_toRightOf="@id/avatar"
             android:gravity="center"
             android:orientation="horizontal" >
 

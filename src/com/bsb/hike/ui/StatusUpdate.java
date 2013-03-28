@@ -560,22 +560,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		avatar.setImageResource(EmoticonConstants.MOOD_RES_IDS[moodId]);
 		avatar.setBackgroundResource(0);
 
-		int timeOfDay = getTimeOfDay();
-		String[] prefillTextArray;
-		if (timeOfDay == 1) {
-			prefillTextArray = getResources().getStringArray(
-					R.array.mood_prefills_morning);
-		} else if (timeOfDay == 2) {
-			prefillTextArray = getResources().getStringArray(
-					R.array.mood_prefills_day);
-		} else {
-			prefillTextArray = getResources().getStringArray(
-					R.array.mood_prefills_night);
-		}
-
-		statusTxt
-				.setHint(moodId < prefillTextArray.length ? prefillTextArray[moodId]
-						: getStatusDefaultHint());
+		statusTxt.setHint(getStatusDefaultHint());
 
 		toggleEnablePostButton();
 		if (isEmojiOrMoodLayoutVisible()) {

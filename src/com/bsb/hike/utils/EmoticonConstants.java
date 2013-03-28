@@ -636,16 +636,21 @@ public class EmoticonConstants {
 			R.drawable.e02e, R.drawable.e332, R.drawable.e333, R.drawable.e24e,
 			R.drawable.e24f, R.drawable.e537 };
 
-	public static final int[] MOOD_RES_IDS = { R.drawable.mood_01_food,
-			R.drawable.mood_02_sunny, R.drawable.mood_03_rainy,
-			R.drawable.mood_04_sleepy, R.drawable.mood_05_tea,
-			R.drawable.mood_06_popcorn, R.drawable.mood_07_gym,
-			R.drawable.mood_08_car, R.drawable.mood_09_scooter,
-			R.drawable.mood_10_tv, R.drawable.mood_11_beer,
-			R.drawable.mood_12_hungover, R.drawable.mood_13_game,
-			R.drawable.mood_14_music, R.drawable.mood_15_reader,
-			R.drawable.mood_16_love, R.drawable.mood_17_write,
-			R.drawable.mood_18_happy, R.drawable.mood_19_sad,
-			R.drawable.mood_20_confused, R.drawable.mood_21_surprise,
-			R.drawable.mood_22_laugh, R.drawable.mood_23_busy };
+	public static final int[] MOOD_RES_IDS = { R.drawable.mood_01_happy,
+			R.drawable.mood_02_sad, R.drawable.mood_03_angry,
+			R.drawable.mood_04_confused, R.drawable.mood_05_omg,
+			R.drawable.mood_06_sleepy, R.drawable.mood_07_hungover,
+			R.drawable.mood_08_in_love, R.drawable.mood_09_chilling,
+			R.drawable.mood_10_reading, R.drawable.mood_11_middle_finger,
+			R.drawable.mood_12_boozing, R.drawable.mood_13_love,
+			R.drawable.mood_14_insomniac, R.drawable.mood_15_coding,
+			R.drawable.mood_16_traffic, R.drawable.mood_17_late,
+			R.drawable.mood_18_shopping, R.drawable.mood_19_gaming,
+			R.drawable.mood_20_driving, R.drawable.mood_21_caffeinating,
+			R.drawable.mood_22_movie, R.drawable.mood_23_television,
+			R.drawable.mood_24_busy, R.drawable.mood_25_bangalore,
+			R.drawable.mood_26_chennai, R.drawable.mood_27_delhi,
+			R.drawable.mood_28_hyderabad, R.drawable.mood_29_kolkata,
+			R.drawable.mood_30_mumbai, R.drawable.mood_31_pune,
+			R.drawable.mood_32_punjab, R.drawable.mood_33_rajasthan };
 }

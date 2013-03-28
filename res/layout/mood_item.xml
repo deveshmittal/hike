@@ -38,11 +38,11 @@
 
         <ImageView
             android:id="@+id/mood"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_centerHorizontal="true"
             android:scaleType="centerInside"
-            android:src="@drawable/mood_01_food" />
+            android:src="@drawable/mood_01_happy" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/mood_text"
@@ -53,7 +53,7 @@
             android:shadowColor="@color/white"
             android:shadowDy="0.5"
             android:shadowRadius="0.5"
-            android:text="Food"
+            android:text="Happy"
             android:textColor="@color/mood_text"
             android:textSize="11sp"
             android:textStyle="bold|italic" />
