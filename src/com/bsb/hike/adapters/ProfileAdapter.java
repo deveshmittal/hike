@@ -212,6 +212,8 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.icon = (ImageView) v.findViewById(R.id.status_type);
 
 				viewHolder.container = (ViewGroup) v.findViewById(R.id.content);
+				viewHolder.contentContainer = (ViewGroup) v
+						.findViewById(R.id.content_container);
 				break;
 
 			case EMPTY_STATUS:
@@ -386,6 +388,10 @@ public class ProfileAdapter extends BaseAdapter {
 			break;
 
 		case STATUS:
+			if (myProfile) {
+				viewHolder.contentContainer
+						.setBackgroundResource(R.drawable.timeline_selector);
+			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			viewHolder.text.setText(smileyParser.addSmileySpans(
 					statusMessage.getText(), true));
@@ -475,6 +481,7 @@ public class ProfileAdapter extends BaseAdapter {
 		ImageButton editGroupName;
 		ViewGroup requestLayout;
 		View marginView;
+		ViewGroup contentContainer;
 	}
 
 	@Override
