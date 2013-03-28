@@ -642,6 +642,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 						progressDialog = null;
 					}
 					if (statusPosted) {
+						hideSoftKeyboard();
 						finish();
 					}
 				}
