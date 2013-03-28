@@ -171,7 +171,7 @@ public class DrawerLayout extends RelativeLayout implements
 	public void setUpRightDrawerView(Activity activity) {
 		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
 
-		drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext());
+		drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext(), this);
 		favoriteListView.setAdapter(drawerFavoritesAdapter);
 
 		favoriteListView.setOnItemClickListener(this);

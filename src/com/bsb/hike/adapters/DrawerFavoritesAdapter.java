@@ -46,6 +46,7 @@ import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.DrawerLayout;
 
 public class DrawerFavoritesAdapter extends BaseAdapter implements
 		OnClickListener {
@@ -64,6 +65,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private ContactInfo emptyHike;
 	private String status;
 	private int statusDrawableResource;
+	private boolean listLoaded;
 
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
@@ -77,7 +79,11 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		SECTION, FAVORITE, EMPTY_FAVORITE, RECENT, STATUS, EMPTY_HIKE
 	}
 
-	public DrawerFavoritesAdapter(final Context context) {
+	public DrawerFavoritesAdapter(final Context context,
+			final DrawerLayout drawerLayout) {
+		this.context = context;
+		this.layoutInflater = LayoutInflater.from(context);
+
 		completeList = new ArrayList<ContactInfo>();
 		favoriteList = new ArrayList<ContactInfo>(0);
 		onHikeList = new ArrayList<ContactInfo>(0);
@@ -91,6 +97,12 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		int moodId = preferences.getInt(HikeMessengerApp.LAST_MOOD, -1);
 		statusDrawableResource = moodId == -1 ? R.drawable.ic_text_status
 				: EmoticonConstants.MOOD_RES_IDS[moodId];
+
+		/*
+		 * Show the initial View with the loader icon.
+		 */
+		makeCompleteList();
+
 		new AsyncTask<Void, Void, Void>() {
 
 			List<ContactInfo> favoriteTaskList;
@@ -139,16 +151,17 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 			@Override
 			protected void onPostExecute(Void result) {
+				listLoaded = true;
+				drawerLayout.findViewById(R.id.loading_progress).setVisibility(
+						View.GONE);
+
 				favoriteList = favoriteTaskList;
-				 onHikeList = onHikeTaskList;
+				onHikeList = onHikeTaskList;
 				recentList = recentTaskList;
 				makeCompleteList();
 			}
 
 		}.execute();
-
-		this.context = context;
-		this.layoutInflater = LayoutInflater.from(context);
 	}
 
 	private void makeCompleteList() {
@@ -157,42 +170,54 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		// For the status item
 		completeList.add(null);
 
-		// Contact for "Favorite Section"
-		friendsOnHikeSection = new ContactInfo(
-				DrawerFavoritesAdapter.SECTION_ID, null, context.getString(
-						R.string.circle_friends, favoriteList.size()), null);
-		completeList.add(friendsOnHikeSection);
+		if (listLoaded) {
+			// Contact for "Favorite Section"
+			friendsOnHikeSection = new ContactInfo(
+					DrawerFavoritesAdapter.SECTION_ID, null, context.getString(
+							R.string.circle_friends, favoriteList.size()), null);
+			completeList.add(friendsOnHikeSection);
 
-		/*
-		 * If favorite list is empty, we add an element to show the empty view
-		 * in the listview.
-		 */
-		if (favoriteList.isEmpty()) {
-			emptyFavorites = new ContactInfo(
-					DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null, null, null);
-			completeList.add(emptyFavorites);
+			/*
+			 * If favorite list is empty, we add an element to show the empty
+			 * view in the listview.
+			 */
+			if (favoriteList.isEmpty()) {
+				emptyFavorites = new ContactInfo(
+						DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null, null,
+						null);
+				completeList.add(emptyFavorites);
+			} else {
+				completeList.addAll(favoriteList);
+			}
+
+			// Contact for "Recent Section"
+			recentSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+					null, context.getString(R.string.recent), null);
+			completeList.add(recentSection);
+
+			int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
+					: recentList.size();
+			completeList.addAll(recentList.subList(0, recentListLastElement));
+
+			// Contact for "On Hike Section"
+			completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+					null, context.getString(R.string.contacts_on_hike,
+							onHikeList.size()), null));
+			if (onHikeList.isEmpty()) {
+				emptyHike = new ContactInfo(EMPTY_HIKE_ID, null, null, null);
+				completeList.add(emptyHike);
+			} else {
+				completeList.addAll(onHikeList);
+			}
 		} else {
-			completeList.addAll(favoriteList);
-		}
-
-		// Contact for "Recent Section"
-		recentSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, context.getString(R.string.recent), null);
-		completeList.add(recentSection);
-
-		int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
-				: recentList.size();
-		completeList.addAll(recentList.subList(0, recentListLastElement));
-
-		// Contact for "On Hike Section"
-		completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-				null, context.getString(R.string.contacts_on_hike,
-						onHikeList.size()), null));
-		if (onHikeList.isEmpty()) {
-			emptyHike = new ContactInfo(EMPTY_HIKE_ID, null, null, null);
-			completeList.add(emptyHike);
-		} else {
-			completeList.addAll(onHikeList);
+			/*
+			 * Showing the progress loading icon while the list is being fetched
+			 * from the db.
+			 */
+			// Contact for "On Hike Section"
+			completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+					null, context.getString(R.string.contacts_on_hike,
+							onHikeList.size()), null));
 		}
 
 		notifyDataSetChanged();
