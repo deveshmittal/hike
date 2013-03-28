@@ -66,6 +66,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 	private String status;
 	private int statusDrawableResource;
 	private boolean listLoaded;
+	private boolean zeroContacts;
 
 	public static final String SECTION_ID = "-911";
 	public static final String EMPTY_FAVORITES_ID = "-913";
@@ -171,43 +172,61 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		completeList.add(null);
 
 		if (listLoaded) {
-			// Contact for "Favorite Section"
-			friendsOnHikeSection = new ContactInfo(
-					DrawerFavoritesAdapter.SECTION_ID, null, context.getString(
-							R.string.circle_friends, favoriteList.size()), null);
-			completeList.add(friendsOnHikeSection);
 
-			/*
-			 * If favorite list is empty, we add an element to show the empty
-			 * view in the listview.
-			 */
-			if (favoriteList.isEmpty()) {
+			if (favoriteList.isEmpty() && recentList.isEmpty()
+					&& onHikeList.isEmpty()) {
+				zeroContacts = true;
+				completeList.add(new ContactInfo(
+						DrawerFavoritesAdapter.SECTION_ID, null, context
+								.getString(R.string.contacts_on_hike,
+										onHikeList.size()), null));
+
 				emptyFavorites = new ContactInfo(
 						DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null, null,
 						null);
 				completeList.add(emptyFavorites);
 			} else {
-				completeList.addAll(favoriteList);
-			}
+				// Contact for "Favorite Section"
+				friendsOnHikeSection = new ContactInfo(
+						DrawerFavoritesAdapter.SECTION_ID, null,
+						context.getString(R.string.circle_friends,
+								favoriteList.size()), null);
+				completeList.add(friendsOnHikeSection);
+				/*
+				 * If favorite list is empty, we add an element to show the
+				 * empty view in the listview.
+				 */
+				if (favoriteList.isEmpty()) {
+					emptyFavorites = new ContactInfo(
+							DrawerFavoritesAdapter.EMPTY_FAVORITES_ID, null,
+							null, null);
+					completeList.add(emptyFavorites);
+				} else {
+					completeList.addAll(favoriteList);
+				}
 
-			// Contact for "Recent Section"
-			recentSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-					null, context.getString(R.string.recent), null);
-			completeList.add(recentSection);
+				// Contact for "Recent Section"
+				recentSection = new ContactInfo(
+						DrawerFavoritesAdapter.SECTION_ID, null,
+						context.getString(R.string.recent), null);
+				completeList.add(recentSection);
 
-			int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
-					: recentList.size();
-			completeList.addAll(recentList.subList(0, recentListLastElement));
+				int recentListLastElement = recentList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE ? HikeConstants.RECENT_COUNT_IN_FAVORITE
+						: recentList.size();
+				completeList.addAll(recentList
+						.subList(0, recentListLastElement));
 
-			// Contact for "On Hike Section"
-			completeList.add(new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
-					null, context.getString(R.string.contacts_on_hike,
-							onHikeList.size()), null));
-			if (onHikeList.isEmpty()) {
-				emptyHike = new ContactInfo(EMPTY_HIKE_ID, null, null, null);
-				completeList.add(emptyHike);
-			} else {
-				completeList.addAll(onHikeList);
+				// Contact for "On Hike Section"
+				completeList.add(new ContactInfo(
+						DrawerFavoritesAdapter.SECTION_ID, null, context
+								.getString(R.string.contacts_on_hike,
+										onHikeList.size()), null));
+				if (onHikeList.isEmpty()) {
+					emptyHike = new ContactInfo(EMPTY_HIKE_ID, null, null, null);
+					completeList.add(emptyHike);
+				} else {
+					completeList.addAll(onHikeList);
+				}
 			}
 		} else {
 			/*
@@ -461,6 +480,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 				viewHolder.text = (TextView) convertView
 						.findViewById(R.id.item_txt);
+				viewHolder.invite = (Button) convertView
+						.findViewById(R.id.invite_btn);
 				break;
 			case EMPTY_HIKE:
 				convertView = layoutInflater.inflate(
@@ -540,21 +561,29 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 			break;
 
 		case EMPTY_FAVORITE:
-			String text = viewHolder.text.getText().toString();
-			String replace = context.getString(R.string.plus);
-			SpannableString spannableString = new SpannableString(text);
+			if (zeroContacts) {
+				viewHolder.text.setText(R.string.no_contacts_hike);
+				viewHolder.invite.setVisibility(View.VISIBLE);
+				viewHolder.invite.setOnClickListener(this);
+			} else {
+				viewHolder.invite.setVisibility(View.GONE);
 
-			Drawable drawable = context.getResources().getDrawable(
-					R.drawable.ic_add_fav);
-			int height = drawable.getIntrinsicHeight();
-			int width = drawable.getIntrinsicWidth();
-			drawable.setBounds(0, 0, width, height);
+				String text = context.getString(R.string.no_friends);
+				String replace = context.getString(R.string.plus);
+				SpannableString spannableString = new SpannableString(text);
 
-			spannableString.setSpan(new ImageSpan(drawable),
-					text.indexOf(replace),
-					text.indexOf(replace) + replace.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			viewHolder.text.setText(spannableString);
+				Drawable drawable = context.getResources().getDrawable(
+						R.drawable.ic_add_fav);
+				int height = drawable.getIntrinsicHeight();
+				int width = drawable.getIntrinsicWidth();
+				drawable.setBounds(0, 0, width, height);
+
+				spannableString.setSpan(new ImageSpan(drawable),
+						text.indexOf(replace),
+						text.indexOf(replace) + replace.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				viewHolder.text.setText(spannableString);
+			}
 			break;
 
 		case EMPTY_HIKE:

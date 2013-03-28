@@ -24,4 +24,21 @@
         android:textColor="#b7b1a7"
         android:textSize="13sp" />
 
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/invite_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/bg_invite_no_contacts"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:shadowColor="#37709b"
+        android:shadowDy="-0.7"
+        android:shadowRadius="0.7"
+        android:text="@string/invite_friends"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:textStyle="bold|italic"
+        android:visibility="gone" />
+        
 </LinearLayout>
