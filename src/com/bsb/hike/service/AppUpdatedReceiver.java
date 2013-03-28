@@ -29,7 +29,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 		if (context.getPackageName().equals(
 				intent.getData().getSchemeSpecificPart())) {
 			Log.d(getClass().getSimpleName(), "App has been updated");
-			SharedPreferences prefs = context.getSharedPreferences(
+			final SharedPreferences prefs = context.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
 			/*
@@ -53,6 +53,20 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 								HikePubSub.MQTT_PUBLISH, obj);
 					}
 					Utils.requestAccountInfo(true);
+
+					/*
+					 * Resetting the boolean preference to post details again
+					 */
+					Editor editor = prefs.edit();
+					editor.remove(HikeMessengerApp.DEVICE_DETAILS_SENT);
+					editor.commit();
+
+					/*
+					 * We send details to the server using the broadcast
+					 * receiver registered in our service.
+					 */
+					context.sendBroadcast(new Intent(
+							HikeService.SEND_DEV_DETAILS_TO_SERVER_ACTION));
 				}
 			}, 5 * 1000);
 

@@ -198,6 +198,9 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String USER_JOIN_TIME = "userJoinTime";
 
+	public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
+	public static final String LAST_BACK_OFF_TIME_DEV_DETAILS = "lastBackOffTimeDevDetails";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;

@@ -16,9 +16,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -151,6 +153,9 @@ public class HikeService extends Service {
 	// used to send GCM registeration id to server
 	public static final String SEND_TO_SERVER_ACTION = "com.bsb.hike.SEND_TO_SERVER";
 
+	// used to send GCM registeration id to server
+	public static final String SEND_DEV_DETAILS_TO_SERVER_ACTION = "com.bsb.hike.SEND_DEV_DETAILS_TO_SERVER";
+
 	// constants used by status bar notifications
 	public static final int MQTT_NOTIFICATION_ONGOING = 1;
 
@@ -185,6 +190,8 @@ public class HikeService extends Service {
 	private RegisterToGCMTrigger registerToGCMTrigger;
 
 	private SendGCMIdToServerTrigger sendGCMIdToServerTrigger;
+
+	private PostDeviceDetails postDeviceDetails;
 
 	private HikeMqttManager mMqttManager;
 	private ContactListChangeIntentReceiver contactsReceived;
@@ -282,6 +289,12 @@ public class HikeService extends Service {
 			scheduleNextUpdateCheck();
 		}
 
+		if (postDeviceDetails == null) {
+			postDeviceDetails = new PostDeviceDetails();
+			registerReceiver(postDeviceDetails, new IntentFilter(
+					SEND_DEV_DETAILS_TO_SERVER_ACTION));
+			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
+		}
 		/*
 		 * register with the Contact list to get an update whenever the phone
 		 * book changes. Use the application thread for the intent receiver, the
@@ -462,6 +475,11 @@ public class HikeService extends Service {
 		if (sendGCMIdToServerTrigger != null) {
 			unregisterReceiver(sendGCMIdToServerTrigger);
 			sendGCMIdToServerTrigger = null;
+		}
+
+		if (postDeviceDetails != null) {
+			unregisterReceiver(postDeviceDetails);
+			postDeviceDetails = null;
 		}
 	}
 
@@ -780,7 +798,7 @@ public class HikeService extends Service {
 						public void onFailure() {
 							Log.d(SendGCMIdToServerTrigger.this.getClass()
 									.getSimpleName(), "Send unsuccessful");
-							scheduleNextSendToServerAction();
+							scheduleNextSendToServerAction(true);
 						}
 					});
 			JSONObject request = new JSONObject();
@@ -797,13 +815,76 @@ public class HikeService extends Service {
 		}
 	}
 
-	private void scheduleNextSendToServerAction() {
+	private class PostDeviceDetails extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+					MODE_PRIVATE).getBoolean(
+					HikeMessengerApp.DEVICE_DETAILS_SENT, false)) {
+				Log.d(getClass().getSimpleName(), "Device details sent");
+				return;
+			}
+			Log.d(getClass().getSimpleName(),
+					"Sending device details to server");
+
+			String osVersion = Build.VERSION.RELEASE;
+			String devType = HikeConstants.ANDROID;
+			String os = HikeConstants.ANDROID;
+			String deviceVersion = Build.MANUFACTURER + " " + Build.MODEL;
+			String appVersion = "";
+			try {
+				appVersion = context.getPackageManager().getPackageInfo(
+						context.getPackageName(), 0).versionName;
+			} catch (NameNotFoundException e) {
+				Log.e("AccountUtils", "Unable to get app version");
+			}
+
+			JSONObject data = new JSONObject();
+			try {
+				data.put(HikeConstants.DEV_TYPE, devType);
+				data.put(HikeConstants.APP_VERSION, appVersion);
+				data.put(HikeConstants.LogEvent.OS, os);
+				data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
+				data.put(HikeConstants.DEVICE_VERSION, deviceVersion);
+			} catch (JSONException e) {
+				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+			}
+
+			HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+					"/account/update", RequestType.OTHER,
+					new HikeHttpCallback() {
+						public void onSuccess(JSONObject response) {
+							Log.d(getClass().getSimpleName(), "Send successful");
+							Editor editor = getSharedPreferences(
+									HikeMessengerApp.ACCOUNT_SETTINGS,
+									MODE_PRIVATE).edit();
+							editor.putBoolean(
+									HikeMessengerApp.DEVICE_DETAILS_SENT, true);
+							editor.commit();
+						}
+
+						public void onFailure() {
+							Log.d(getClass().getSimpleName(),
+									"Send unsuccessful");
+							scheduleNextSendToServerAction(false);
+						}
+					});
+			hikeHttpRequest.setJSONData(data);
+
+			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
+			hikeHTTPTask.execute(hikeHttpRequest);
+		}
+	}
+
+	private void scheduleNextSendToServerAction(boolean gcmReg) {
 		Log.d(getClass().getSimpleName(), "Scheduling next GCM registration");
 
 		SharedPreferences preferences = getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE);
 		int lastBackOffTime = preferences.getInt(
-				HikeMessengerApp.LAST_BACK_OFF_TIME, 0);
+				gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
+						: HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS, 0);
 
 		lastBackOffTime = lastBackOffTime == 0 ? HikeConstants.RECONNECT_TIME
 				: (lastBackOffTime * 2);
@@ -812,7 +893,8 @@ public class HikeService extends Service {
 
 		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
-				new Intent(HikeService.SEND_TO_SERVER_ACTION),
+				new Intent(gcmReg ? HikeService.SEND_TO_SERVER_ACTION
+						: HikeService.SEND_DEV_DETAILS_TO_SERVER_ACTION),
 				PendingIntent.FLAG_UPDATE_CURRENT);
 
 		Calendar wakeUpTime = Calendar.getInstance();
@@ -825,7 +907,9 @@ public class HikeService extends Service {
 				pendingIntent);
 
 		Editor editor = preferences.edit();
-		editor.putInt(HikeMessengerApp.LAST_BACK_OFF_TIME, lastBackOffTime);
+		editor.putInt(gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
+				: HikeMessengerApp.LAST_BACK_OFF_TIME_DEV_DETAILS,
+				lastBackOffTime);
 		editor.commit();
 	}
 
