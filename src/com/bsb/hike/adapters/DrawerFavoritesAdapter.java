@@ -518,7 +518,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 							: 0);
 			convertView.setOnClickListener(this);
 
-			int statusHeight = (int) (64 * Utils.densityMultiplier);
+			int statusHeight = (int) (75 * Utils.densityMultiplier);
 			AbsListView.LayoutParams statusLp = new AbsListView.LayoutParams(
 					AbsListView.LayoutParams.MATCH_PARENT, statusHeight);
 			convertView.setLayoutParams(statusLp);
