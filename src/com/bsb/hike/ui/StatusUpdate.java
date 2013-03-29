@@ -555,7 +555,9 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		avatar.setImageResource(EmoticonConstants.MOOD_RES_IDS[moodId]);
 		avatar.setBackgroundResource(0);
 
-		statusTxt.setHint(getStatusDefaultHint());
+		String[] moodsArray = getResources().getStringArray(
+				R.array.mood_headings);
+		statusTxt.setHint(moodsArray[moodId]);
 
 		toggleEnablePostButton();
 		if (isEmojiOrMoodLayoutVisible()) {
@@ -594,8 +596,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		 * Enabling if the text length is > 0 or if the user has selected a mood
 		 * with some prefilled text.
 		 */
-		titleBtn.setEnabled((mActivityTask.moodId >= 0 && mActivityTask.moodId < 11)
-				|| (statusTxt.length() > 0));
+		titleBtn.setEnabled(mActivityTask.moodId >= 0 || statusTxt.length() > 0);
 	}
 
 	@Override
