@@ -70,14 +70,11 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.Pair;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -92,7 +89,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -151,7 +148,8 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 public class ChatThread extends Activity implements HikePubSub.Listener,
 		TextWatcher, OnEditorActionListener, OnSoftKeyboardListener,
-		View.OnKeyListener, FinishableEvent, OnTouchListener, OnScrollListener {
+		View.OnKeyListener, FinishableEvent, OnTouchListener, OnScrollListener,
+		OnItemLongClickListener {
 	private HikePubSub mPubSub;
 
 	private HikeConversationsDatabase mConversationDb;
@@ -530,9 +528,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						R.id.hike_emoticons_btn) : R.id.hike_emoticons_btn);
 		currentEmoticonCategorySelected.setSelected(true);
 
-		/* register for long-press's */
-		registerForContextMenu(mConversationsView);
-
 		/*
 		 * ensure that when the softkeyboard Done button is pressed (different
 		 * than the sen button we have), we send the message.
@@ -670,18 +665,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		} else {
 			onEmoticonBtnClicked(null, 0);
 		}
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-				.getMenuInfo();
-		ConvMessage message = mAdapter.getItem((int) info.id);
-		if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
-			return false;
-		}
-
-		return performContextBasedOperationOnMessage(message, item.getItemId());
 	}
 
 	public boolean performContextBasedOperationOnMessage(ConvMessage message,
@@ -872,47 +855,73 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
+	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		ArrayList<String> optionsList = new ArrayList<String>();
 
-		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		ConvMessage message = mAdapter.getItem(adapterInfo.position);
+		final ConvMessage message = mAdapter.getItem(position);
+
 		if (message == null
 				|| message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
-			return;
+			return false;
 		}
 
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.message_menu, menu);
 		if (message.isFileTransferMessage()) {
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-
-			MenuItem shareItem = menu.findItem(R.id.share);
-			shareItem.setVisible(false);
-
-			MenuItem forwardItem = menu.findItem(R.id.forward);
-			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey())
-					&& hikeFile.wasFileDownloaded());
-
-			MenuItem copyItem = menu.findItem(R.id.copy);
-			copyItem.setVisible(false);
-
-			if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID())) {
-				MenuItem item = menu.findItem(R.id.cancel_file_transfer);
-				item.setTitle(message.isSent() ? R.string.cancel_upload
-						: R.string.cancel_download);
-				item.setVisible(true);
+			if (!TextUtils.isEmpty(hikeFile.getFileKey())
+					&& hikeFile.wasFileDownloaded()) {
+				optionsList.add(getString(R.string.forward));
 			}
+			if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID())) {
+				optionsList
+						.add(message.isSent() ? getString(R.string.cancel_upload)
+								: getString(R.string.cancel_download));
+			}
+		} else if (message.getMetadata() == null
+				|| !message.getMetadata().isPokeMessage()) {
+			optionsList.add(getString(R.string.forward));
+			optionsList.add(getString(R.string.copy));
 		}
-		if (message.getMetadata() != null
-				&& message.getMetadata().isPokeMessage()) {
-			MenuItem forwardItem = menu.findItem(R.id.forward);
-			forwardItem.setVisible(false);
 
-			MenuItem copyItem = menu.findItem(R.id.copy);
-			copyItem.setVisible(false);
-		}
+		optionsList.add(getString(R.string.delete));
+
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
+				R.layout.alert_item, R.id.item, options);
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String option = options[which];
+						if (getString(R.string.forward).equals(option)) {
+							performContextBasedOperationOnMessage(message,
+									R.id.forward);
+						} else if (getString(R.string.cancel_download).equals(
+								option)
+								|| getString(R.string.cancel_upload).equals(
+										option)) {
+							performContextBasedOperationOnMessage(message,
+									R.id.cancel_file_transfer);
+						} else if (getString(R.string.copy).equals(option)) {
+							performContextBasedOperationOnMessage(message,
+									R.id.copy);
+						} else if (getString(R.string.delete).equals(option)) {
+							performContextBasedOperationOnMessage(message,
+									R.id.delete);
+						}
+					}
+				});
+
+		AlertDialog alertDialog = builder.show();
+		alertDialog.getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
+		return true;
 	}
 
 	private void sendMessage(ConvMessage convMessage) {
@@ -1231,6 +1240,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		mConversationsView.setAdapter(mAdapter);
+		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
 

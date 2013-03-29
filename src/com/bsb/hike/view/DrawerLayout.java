@@ -1,9 +1,12 @@
 package com.bsb.hike.view;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -19,15 +22,13 @@ import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -50,6 +51,7 @@ import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.CustomInterpolator;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 
 public class DrawerLayout extends RelativeLayout implements
@@ -175,7 +177,8 @@ public class DrawerLayout extends RelativeLayout implements
 		favoriteListView.setAdapter(drawerFavoritesAdapter);
 
 		favoriteListView.setOnItemClickListener(this);
-		activity.registerForContextMenu(favoriteListView);
+		favoriteListView
+				.setOnItemLongClickListener((DrawerBaseActivity) activity);
 	}
 
 	@Override
@@ -220,38 +223,60 @@ public class DrawerLayout extends RelativeLayout implements
 		drawerFavoritesAdapter.removeContact(contactInfo);
 	}
 
-	public void onCreateFavoritesContextMenu(Activity activity, Menu menu,
-			int position) {
+	public boolean onLongClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+
 		if (drawerFavoritesAdapter.getItemViewType(position) != FavoriteAdapterViewType.FAVORITE
 				.ordinal()) {
-			return;
+			return false;
 		}
-		MenuInflater menuInflater = activity.getMenuInflater();
-		menuInflater.inflate(R.menu.favorites_menu, menu);
+
+		ArrayList<String> optionsList = new ArrayList<String>();
+
+		final ContactInfo contactInfo = drawerFavoritesAdapter
+				.getItem(position);
+
+		optionsList.add(activity.getString(R.string.remove_circle));
+
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(activity,
+				R.layout.alert_item, R.id.item, options);
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String option = options[which];
+						if (activity.getString(R.string.remove_circle).equals(
+								option)) {
+							FavoriteType favoriteType;
+							if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+								favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
+							} else {
+								favoriteType = FavoriteType.NOT_FRIEND;
+							}
+							Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
+									contactInfo, favoriteType);
+							HikeMessengerApp.getPubSub().publish(
+									HikePubSub.FAVORITE_TOGGLED,
+									favoriteRemoved);
+						}
+					}
+				});
+
+		AlertDialog alertDialog = builder.show();
+		alertDialog.getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
+		return true;
 	}
 
 	public void updateStatus(String status, int moodId) {
 		drawerFavoritesAdapter.updateStatus(status, moodId);
-	}
-
-	public boolean onFavoritesContextItemSelected(MenuItem menuItem) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuItem
-				.getMenuInfo();
-		ContactInfo contactInfo = drawerFavoritesAdapter.getItem((int) info.id);
-		if (menuItem.getItemId() == R.id.remove_fav) {
-			FavoriteType favoriteType;
-			if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
-				favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
-			} else {
-				favoriteType = FavoriteType.NOT_FRIEND;
-			}
-			Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
-					contactInfo, favoriteType);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
-					favoriteRemoved);
-			return true;
-		}
-		return false;
 	}
 
 	public void setUpLeftDrawerView() {

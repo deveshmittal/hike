@@ -450,4 +450,5 @@
 	<string name="update_status_fail">Could not update status. Please check your network connection and try again later.</string>
 	<string name="no_status_recently">Looks like you haven\'t posted an update recently.</string>
 	<string name="meet_hike">Meet hike</string>
+	<string name="remove_circle">Remove from Circle of Friends</string>
 </resources>

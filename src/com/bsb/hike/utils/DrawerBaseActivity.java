@@ -8,11 +8,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Pair;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 
 import com.bsb.hike.HikeConstants;
@@ -29,7 +27,7 @@ import com.bsb.hike.view.DrawerLayout;
 import com.bsb.hike.view.DrawerLayout.CurrentState;
 
 public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
-		DrawerLayout.Listener, HikePubSub.Listener {
+		DrawerLayout.Listener, HikePubSub.Listener, OnItemLongClickListener {
 
 	public DrawerLayout parentLayout;
 	private SharedPreferences preferences;
@@ -358,22 +356,9 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		if (v.getId() != R.id.favorite_list) {
-			return;
-		}
-
-		/* enable resend options on failed messages */
-		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		parentLayout.onCreateFavoritesContextMenu(this, menu,
-				adapterInfo.position);
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		return parentLayout.onFavoritesContextItemSelected(item);
+	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		return parentLayout.onLongClick(adapterView, view, position, id);
 	}
 
 }

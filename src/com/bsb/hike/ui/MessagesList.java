@@ -34,8 +34,6 @@ import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,11 +44,13 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,7 +80,8 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class MessagesList extends DrawerBaseActivity implements
 		OnClickListener, OnItemClickListener, HikePubSub.Listener,
-		android.content.DialogInterface.OnClickListener, Runnable {
+		android.content.DialogInterface.OnClickListener, Runnable,
+		OnItemLongClickListener {
 	public static final Object COMPOSE = "compose";
 
 	private ConversationsAdapter mAdapter;
@@ -389,8 +390,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		mConversationsView.setAdapter(mAdapter);
 
-		/* register for long-press's */
-		registerForContextMenu(mConversationsView);
+		mConversationsView.setOnItemLongClickListener(this);
 
 		/*
 		 * Calling this manually since this method is not called when the
@@ -574,70 +574,72 @@ public class MessagesList extends DrawerBaseActivity implements
 	}
 
 	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-				.getMenuInfo();
-		if (item.getItemId() == R.id.remove_fav) {
-			return super.onContextItemSelected(item);
+	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		if (adapterView.getId() == R.id.favorite_list) {
+			return super.onItemLongClick(adapterView, view, position, id);
 		}
-		Conversation conv = mAdapter.getItem((int) info.id);
-		if (conv == null) {
-			return false;
-		}
-		switch (item.getItemId()) {
-		case R.id.shortcut:
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.ADD_SHORTCUT);
-			Intent shortcutIntent = createIntentForConversation(conv);
-			Intent intent = new Intent();
-			Log.i("CreateShortcut", "Creating intent for broadcasting");
-			intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-			intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, conv.getLabel());
-			Drawable d = IconCacheManager.getInstance().getIconForMSISDN(
-					conv.getMsisdn());
-			Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-			Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 60, 60, false);
-			bitmap = null;
-			intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
-			intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
-			sendBroadcast(intent);
-			return true;
-		case R.id.delete:
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.DELETE_CONVERSATION);
-			if (conv instanceof GroupConversation) {
-				leaveGroup(conv);
-			} else {
-				DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-				task.execute(conv);
-			}
-			return true;
-		default:
-			return super.onContextItemSelected(item);
-		}
-	}
+		ArrayList<String> optionsList = new ArrayList<String>();
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		if (v.getId() != R.id.conversations) {
-			return;
+		final Conversation conv = mAdapter.getItem(position);
+
+		optionsList.add(getString(R.string.shortcut));
+		if (conv instanceof GroupConversation) {
+			optionsList.add(getString(R.string.delete_leave));
+		} else {
+			optionsList.add(getString(R.string.delete));
 		}
 
-		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		if (adapterInfo.position >= mAdapter.getCount()) {
-			return;
-		}
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
 
-		android.view.MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.conversation_menu, menu);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		Conversation conversation = mAdapter.getItem(adapterInfo.position);
-		if (conversation instanceof GroupConversation) {
-			MenuItem delete = menu.findItem(R.id.delete);
-			delete.setTitle(R.string.delete_leave);
-		}
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
+				R.layout.alert_item, R.id.item, options);
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String option = options[which];
+						if (getString(R.string.shortcut).equals(option)) {
+							Utils.logEvent(MessagesList.this,
+									HikeConstants.LogEvent.ADD_SHORTCUT);
+							Intent shortcutIntent = createIntentForConversation(conv);
+							Intent intent = new Intent();
+							intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
+									shortcutIntent);
+							intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
+									conv.getLabel());
+							Drawable d = IconCacheManager.getInstance()
+									.getIconForMSISDN(conv.getMsisdn());
+							Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+							Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
+									60, 60, false);
+							bitmap = null;
+							intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
+							intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+							sendBroadcast(intent);
+						} else if (getString(R.string.delete).equals(option)) {
+							Utils.logEvent(MessagesList.this,
+									HikeConstants.LogEvent.DELETE_CONVERSATION);
+							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+							task.execute(conv);
+						} else if (getString(R.string.delete_leave).equals(
+								option)) {
+							Utils.logEvent(MessagesList.this,
+									HikeConstants.LogEvent.DELETE_CONVERSATION);
+							leaveGroup(conv);
+						}
+					}
+				});
+
+		AlertDialog alertDialog = builder.show();
+		alertDialog.getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
+		return true;
 	}
 
 	@Override
