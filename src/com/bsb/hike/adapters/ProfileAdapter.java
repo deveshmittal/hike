@@ -358,6 +358,7 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.btn3.setCompoundDrawablesWithIntrinsicBounds(
 						myProfile ? R.drawable.ic_post_status
 								: R.drawable.ic_msg_small, 0, 0, 0);
+				v.setBackgroundResource(R.color.seen_timeline_item);
 			}
 			break;
 
@@ -390,7 +391,7 @@ public class ProfileAdapter extends BaseAdapter {
 		case STATUS:
 			if (myProfile) {
 				viewHolder.contentContainer
-						.setBackgroundResource(R.drawable.timeline_selector);
+						.setBackgroundResource(R.drawable.seen_timeline_selector);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			viewHolder.text.setText(smileyParser.addSmileySpans(
