@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
@@ -313,6 +314,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 				errorStringId = R.string.upload_failed;
 			}
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
+		}
+		if (selectedFile != null) {
+			context.sendBroadcast(new Intent(
+					Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
+							.fromFile(selectedFile)));
 		}
 	}
 }
