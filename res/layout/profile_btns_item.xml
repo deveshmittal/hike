@@ -3,53 +3,79 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/offwhite"
-    android:orientation="vertical"
-    android:padding="8dp" >
+    android:orientation="vertical" >
 
     <LinearLayout
-        android:id="@+id/btn_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp" >
 
-        <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/btn1"
-            style="@style/ProfileButtons"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/btn_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawableLeft="@drawable/ic_add_member"
-            android:onClick="onProfileSmallLeftBtnClick"
-            android:text="Hellp" />
+            android:orientation="horizontal" >
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/btn1"
+                style="@style/ProfileButtons"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_add_member"
+                android:onClick="onProfileSmallLeftBtnClick"
+                android:text="Hellp" />
+
+            <View
+                android:id="@+id/btn_divider"
+                android:layout_width="8dp"
+                android:layout_height="0dp" />
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/btn2"
+                style="@style/ProfileButtons"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_leave_group"
+                android:onClick="onProfileSmallRightBtnClick"
+                android:text="@string/leave_group" />
+        </LinearLayout>
 
         <View
-            android:id="@+id/btn_divider"
-            android:layout_width="8dp"
-            android:layout_height="0dp" />
+            android:id="@+id/margin_view"
+            android:layout_width="wrap_content"
+            android:layout_height="8dp" />
 
         <com.bsb.hike.view.CustomFontButton
-            android:id="@+id/btn2"
+            android:id="@+id/btn3"
             style="@style/ProfileButtons"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawableLeft="@drawable/ic_leave_group"
-            android:onClick="onProfileSmallRightBtnClick"
-            android:text="@string/leave_group" />
+            android:drawableLeft="@drawable/ic_msg_small"
+            android:onClick="onProfileLargeBtnClick"
+            android:text="Hellp" />
     </LinearLayout>
 
     <View
-        android:id="@+id/margin_view"
-        android:layout_width="wrap_content"
-        android:layout_height="8dp" />
-
-    <com.bsb.hike.view.CustomFontButton
-        android:id="@+id/btn3"
-        style="@style/ProfileButtons"
+        android:id="@+id/div1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/ic_msg_small"
-        android:onClick="onProfileLargeBtnClick"
-        android:text="Hellp" />
+        android:layout_height="1px"
+        android:background="#e0e0dc" />
+
+    <View
+        android:id="@+id/div2"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@id/div1"
+        android:background="#cdccc8" />
+
+    <View
+        android:id="@+id/div3"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@id/div2"
+        android:background="#fefefe" />
 
 </LinearLayout>

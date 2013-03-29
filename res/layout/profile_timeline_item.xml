@@ -3,26 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
-
-    <View
-        android:id="@+id/div1"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="#e0e0dc" />
-
-    <View
-        android:id="@+id/div2"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_below="@id/div1"
-        android:background="#cdccc8" />
-
-    <View
-        android:id="@+id/div3"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_below="@id/div2"
-        android:background="#fefefe" />
     
     <RelativeLayout
         android:id="@+id/content_container"
@@ -90,4 +70,23 @@
         android:layout_below="@id/content"
         android:visibility="gone" />
 
+    <View
+        android:id="@+id/div1"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="#e0e0dc" />
+
+    <View
+        android:id="@+id/div2"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@id/div1"
+        android:background="#cdccc8" />
+
+    <View
+        android:id="@+id/div3"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@id/div2"
+        android:background="#fefefe" />
 </LinearLayout>
