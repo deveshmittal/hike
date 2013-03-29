@@ -432,9 +432,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mContactSearchView.setVisibility(View.VISIBLE);
 			mInputNumberView.requestFocus();
 
-			InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-			imm.showSoftInput(mContactSearchView,
-					InputMethodManager.SHOW_IMPLICIT);
+			getWindow().setSoftInputMode(
+					WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 		}
 
 	}
