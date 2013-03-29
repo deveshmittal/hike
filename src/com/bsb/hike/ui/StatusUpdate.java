@@ -107,7 +107,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		mTitleView = (TextView) findViewById(R.id.title);
 
 		titleBtn.setText(R.string.post);
-		titleBtn.setEnabled(false);
 		titleBtn.setVisibility(View.VISIBLE);
 
 		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
@@ -155,8 +154,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		});
 		statusTxt.addTextChangedListener(new EmoticonTextWatcher());
 
-		toggleEnablePostButton();
-
 		View fb = findViewById(R.id.post_fb_btn);
 		View twitter = findViewById(R.id.post_twitter_btn);
 
@@ -167,6 +164,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			showEmojiSelector();
 		} else if (mActivityTask.moodShowing) {
 			showMoodSelector();
+		} else {
+			toggleEnablePostButton();
 		}
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubsubListeners);
@@ -596,7 +595,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		 * Enabling if the text length is > 0 or if the user has selected a mood
 		 * with some prefilled text.
 		 */
-		titleBtn.setEnabled(mActivityTask.moodId >= 0 || statusTxt.length() > 0);
+		titleBtn.setEnabled(mActivityTask.moodId >= 0 || statusTxt.length() > 0
+				|| isEmojiOrMoodLayoutVisible());
 	}
 
 	@Override
