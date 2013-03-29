@@ -37,23 +37,27 @@
                 android:textSize="12sp"
                 android:textStyle="italic" />
 
-            <ImageView
-                android:id="@+id/details_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:focusable="false"
-                android:onClick="onDetailsBtnClick"
-                android:paddingTop="2dp"
-                android:src="@drawable/details_btn" />
         </LinearLayout>
+        
+        <ImageView
+            android:id="@+id/details_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/side_content"
+            android:layout_alignRight="@id/side_content"
+            android:background="@null"
+            android:focusable="false"
+            android:onClick="onDetailsBtnClick"
+            android:paddingTop="3dp"
+            android:src="@drawable/details_btn" />
 
         <LinearLayout
             android:id="@+id/details_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@id/side_content"
+            android:layout_alignTop="@id/avatar"
+            android:layout_toLeftOf="@id/details_btn"
             android:layout_toRightOf="@id/avatar"
             android:orientation="vertical" >
 
