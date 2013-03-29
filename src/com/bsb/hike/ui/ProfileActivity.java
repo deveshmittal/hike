@@ -1597,7 +1597,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 			@Override
 			public void onClick(View v) {
-				hideSoftKeyboard();
+				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
 				groupEditDialog.cancel();
 				saveChanges();
 			}
@@ -1606,7 +1606,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 			@Override
 			public void onClick(View v) {
-				hideSoftKeyboard();
+				Utils.hideSoftKeyboard(ProfileActivity.this, mNameEdit);
 				groupEditDialog.cancel();
 			}
 		});
@@ -1620,14 +1620,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		});
 		groupEditDialog.show();
-	}
-
-	private void hideSoftKeyboard() {
-		if (mNameEdit == null) {
-			return;
-		}
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(mNameEdit.getWindowToken(), 0);
 	}
 
 	public void onBlockGroupOwnerClicked(View v) {

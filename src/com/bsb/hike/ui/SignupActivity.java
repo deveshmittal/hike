@@ -40,7 +40,6 @@ import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -477,7 +476,7 @@ public class SignupActivity extends Activity implements
 								mActivityState.profileBitmap);
 					}
 					if (viewFlipper.getDisplayedChild() == NAME) {
-						hideSoftKeyboard();
+						Utils.hideSoftKeyboard(this, enterEditText);
 					}
 					mTask.addUserInput(input);
 				}
@@ -681,7 +680,7 @@ public class SignupActivity extends Activity implements
 		}
 
 		if (!addressBookScanningDone) {
-			hideSoftKeyboard();
+			Utils.hideSoftKeyboard(this, enterEditText);
 		}
 
 		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
@@ -710,11 +709,6 @@ public class SignupActivity extends Activity implements
 		}
 	}
 
-	private void hideSoftKeyboard() {
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(enterEditText.getWindowToken(), 0);
-	}
-
 	private void resetViewFlipper() {
 		booBooLayout.setVisibility(View.GONE);
 		viewFlipper.setVisibility(View.VISIBLE);
@@ -734,9 +728,7 @@ public class SignupActivity extends Activity implements
 		submitBtn.setVisibility(View.VISIBLE);
 		booBooLayout.setVisibility(View.VISIBLE);
 		viewFlipper.setVisibility(View.GONE);
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(enterEditText.getWindowToken(),
-				InputMethodManager.HIDE_NOT_ALWAYS);
+		Utils.hideSoftKeyboard(this, enterEditText);
 	}
 
 	private void setListeners() {

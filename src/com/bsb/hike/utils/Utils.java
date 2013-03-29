@@ -87,6 +87,7 @@ import android.view.View.OnTouchListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.bsb.hike.HikeConstants;
@@ -1835,5 +1836,14 @@ public class Utils {
 	 */
 	public static boolean loadOnUiThread() {
 		return ((int) 10 * Utils.densityMultiplier) > 10;
+	}
+
+	public static void hideSoftKeyboard(Context context, View v) {
+		if (v == null) {
+			return;
+		}
+		InputMethodManager imm = (InputMethodManager) context
+				.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 	}
 }

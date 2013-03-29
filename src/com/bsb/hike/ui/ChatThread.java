@@ -23,7 +23,6 @@ import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentProviderOperation;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -90,7 +89,6 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -1904,8 +1902,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						&& (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 						&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (config.keyboard != Configuration.KEYBOARD_NOKEYS)))) {
 			boolean ret = mSendBtn.performClick();
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
+			Utils.hideSoftKeyboard(this, mComposeView);
 			return ret;
 		}
 		return false;
@@ -1982,9 +1979,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void showOverlay(boolean blockOverlay) {
 		this.blockOverlay = blockOverlay;
 
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(),
-				InputMethodManager.HIDE_NOT_ALWAYS);
+		Utils.hideSoftKeyboard(this, mComposeView);
 
 		if (mOverlayLayout.getVisibility() != View.VISIBLE && !isOverlayShowing
 				&& hasWindowFocus()) {
@@ -3404,8 +3399,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				emoticonLayout.setAnimation(slideUp);
 			}
 			emoticonLayout.setVisibility(View.VISIBLE);
-			InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
+			Utils.hideSoftKeyboard(this, mComposeView);
 		}
 
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {

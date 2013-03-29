@@ -246,11 +246,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		imm.showSoftInput(statusTxt, InputMethodManager.SHOW_IMPLICIT);
 	}
 
-	private void hideSoftKeyboard() {
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(statusTxt.getWindowToken(), 0);
-	}
-
 	private String getStatusDefaultHint() {
 		return getString(R.string.whats_up_user, Utils.getFirstName(preferences
 				.getString(HikeMessengerApp.NAME_SETTING, "")));
@@ -397,7 +392,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void showEmojiSelector() {
-		hideSoftKeyboard();
+		Utils.hideSoftKeyboard(this, statusTxt);
 
 		mActivityTask.emojiShowing = true;
 
@@ -535,7 +530,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void showMoodSelector() {
-		hideSoftKeyboard();
+		Utils.hideSoftKeyboard(this, statusTxt);
 
 		mActivityTask.moodShowing = true;
 
@@ -627,7 +622,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 						progressDialog = null;
 					}
 					if (statusPosted) {
-						hideSoftKeyboard();
+						Utils.hideSoftKeyboard(StatusUpdate.this, statusTxt);
 						finish();
 					}
 				}
