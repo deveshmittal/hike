@@ -46,7 +46,7 @@
                 android:background="@null"
                 android:layout_weight="1"
                 android:onClick="onEmojiClick"
-                android:src="@drawable/post_twitter" />
+                android:src="@drawable/ic_emoji_btn" />
 
             <ImageButton
                 android:id="@+id/mood_btn"
@@ -55,7 +55,7 @@
                 android:background="@null"
                 android:layout_weight="1"
                 android:onClick="onMoodClick"
-                android:src="@drawable/post_twitter" />
+                android:src="@drawable/ic_mood_btn" />
         </LinearLayout>
 
         <View
