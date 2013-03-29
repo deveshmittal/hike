@@ -10,7 +10,7 @@
         android:layout_width="@dimen/top_bar_btn_height"
         android:layout_height="@dimen/top_bar_btn_height"
         android:layout_marginLeft="-1dp"
-        android:layout_marginTop="-2dp"
+        android:layout_marginTop="-1dp"
         android:background="@drawable/top_bar_btn_selector"
         android:onClick="onToggleLeftSideBarClicked"
         android:src="@drawable/ic_topbar_menu"
@@ -153,7 +153,7 @@
             android:layout_width="@dimen/top_bar_btn_height"
             android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginLeft="-1dp"
-            android:layout_marginTop="-2dp"
+            android:layout_marginTop="-1dp"
             android:background="@drawable/top_bar_btn_selector"
             android:onClick="onTitleIconClick"
             android:src="@drawable/credits_btn"
@@ -172,7 +172,7 @@
             android:layout_width="@dimen/top_bar_btn_height"
             android:layout_height="@dimen/top_bar_btn_height"
             android:layout_marginLeft="-1dp"
-            android:layout_marginTop="-2dp"
+            android:layout_marginTop="-1dp"
             android:visibility="gone" >
 
             <ImageButton

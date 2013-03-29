@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="top_bar_btn_height">47dp</dimen>
+    <dimen name="top_bar_btn_height">48dp</dimen>
     <dimen name="fav_tut_arrow_marginTop">5dp</dimen>
     <dimen name="fav_tut_heading_marginTop">10dp</dimen>
     <dimen name="fav_tut_pager_height">250dp</dimen>
