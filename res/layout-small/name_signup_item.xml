@@ -33,8 +33,8 @@
 
             <RelativeLayout
                 android:id="@+id/avatar_border"
-                android:layout_width="90dp"
-                android:layout_height="90dp"
+                android:layout_width="89dp"
+                android:layout_height="89dp"
                 android:layout_below="@id/txt_img2"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp"
@@ -42,8 +42,8 @@
 
                 <ImageView
                     android:id="@+id/profile"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
+                    android:layout_width="84dp"
+                    android:layout_height="84dp"
                     android:layout_centerInParent="true"
                     android:src="@drawable/ic_avatar1" />
 
@@ -51,7 +51,7 @@
                     android:id="@+id/profile_border"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/square" />
+                    android:background="@drawable/square" />
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -59,7 +59,7 @@
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentRight="true"
                     android:layout_marginBottom="5dp"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginRight="3dp"
                     android:src="@drawable/ic_edit_profile" />
             </RelativeLayout>
 
