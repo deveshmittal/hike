@@ -3553,7 +3553,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			@Override
 			public void run() {
 				mConversationsView.smoothScrollBy(-1, 1);
-				mConversationsView.smoothScrollToPosition(mAdapter.getCount());
+				mConversationsView.smoothScrollToPosition(mAdapter.getCount() - 1);
 			}
 		}, 10);
 
