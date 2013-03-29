@@ -1035,7 +1035,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				@Override
 				public void run() {
 					showReceivedMessages(receivedMsgWhileAnimating);
-					receivedMsgWhileAnimating.clear();
 					mAdapter.drawerAnimationComplete();
 				}
 			});
@@ -1067,6 +1066,7 @@ public class MessagesList extends DrawerBaseActivity implements
 				}
 				messageRefreshHandler.removeCallbacks(MessagesList.this);
 				messageRefreshHandler.postDelayed(MessagesList.this, 100);
+				receivedMsgWhileAnimating.clear();
 			}
 		});
 	}
