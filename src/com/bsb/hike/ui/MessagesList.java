@@ -248,6 +248,7 @@ public class MessagesList extends DrawerBaseActivity implements
 				startNux = HikeUserDatabase.getInstance().getHikeContactCount() < 10;
 			}
 			if (startNux) {
+				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(i);
 				finish();
 				return;
