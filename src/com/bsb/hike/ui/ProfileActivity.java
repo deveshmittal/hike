@@ -1502,6 +1502,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private void openChatThread(ContactInfo contactInfo) {
 		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 		intent.setClass(this, ChatThread.class);
+		if (!getIntent().getBooleanExtra(
+				HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)) {
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			overridePendingTransition(R.anim.slide_in_left_noalpha,
+					R.anim.slide_out_right_noalpha);
+		}
 		startActivity(intent);
 	}
 
