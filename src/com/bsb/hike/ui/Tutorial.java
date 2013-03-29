@@ -20,12 +20,12 @@ public class Tutorial extends Activity {
 		setContentView(R.layout.signup_tutorial_base);
 
 		Button titleBtn = (Button) findViewById(R.id.title_icon);
-		titleBtn.setText(R.string.done);
+		titleBtn.setText(R.string.next_signup);
 		titleBtn.setVisibility(View.VISIBLE);
 		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 
 		TextView mTitleView = (TextView) findViewById(R.id.title);
-		mTitleView.setText(R.string.ready_to_hike);
+		mTitleView.setText(R.string.meet_hike);
 
 		boolean isLandscape = getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT;
 		findViewById(R.id.intro_img).setVisibility(
