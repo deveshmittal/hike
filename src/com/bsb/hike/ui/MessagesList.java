@@ -251,6 +251,11 @@ public class MessagesList extends DrawerBaseActivity implements
 				startActivity(i);
 				finish();
 				return;
+			} else {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.NUX1_DONE, true);
+				editor.putBoolean(HikeMessengerApp.NUX2_DONE, true);
+				editor.commit();
 			}
 		}
 
