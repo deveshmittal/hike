@@ -380,13 +380,10 @@ public class MqttMessagesManager {
 				return;
 			}
 
-			long[] ids = new long[msgIds.length()];
-			for (int i = 0; i < ids.length; i++) {
-				ids[i] = msgIds.optLong(i);
+			long[] ids = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn);
+			if (ids == null) {
+				return;
 			}
-			Log.d(getClass().getSimpleName(), "Delivery report received : "
-					+ "	;	REPORT : DELIVERED READ");
-			updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ, msisdn);
 
 			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, ids);
 

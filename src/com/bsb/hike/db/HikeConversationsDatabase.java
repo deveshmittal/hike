@@ -354,6 +354,50 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		executeUpdateMessageStatusStatement(conversationQuery, val, msisdn);
 	}
 
+	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn) {
+		Cursor c = mDb.query(
+				DBConstants.MESSAGES_TABLE,
+				new String[] { DBConstants.MESSAGE_ID },
+				DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID
+						+ " FROM " + DBConstants.CONVERSATIONS_TABLE
+						+ " WHERE " + DBConstants.MSISDN + "=? ) AND "
+						+ DBConstants.MSG_STATUS + "="
+						+ State.SENT_DELIVERED.ordinal(),
+				new String[] { msisdn }, null, null, null);
+		long[] ids = new long[c.getCount()];
+
+		if (ids.length == 0) {
+			return null;
+		}
+
+		StringBuilder sb = new StringBuilder("(");
+		int i = 0;
+		while (c.moveToNext()) {
+			long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+			sb.append(id + ",");
+			ids[i++] = id;
+		}
+		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
+
+		String initialWhereClause = DBConstants.MESSAGE_ID + " in "
+				+ sb.toString();
+
+		int status = State.SENT_DELIVERED_READ.ordinal();
+
+		String query = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET "
+				+ DBConstants.MSG_STATUS + " =" + status + " WHERE "
+				+ initialWhereClause;
+
+		String conversationQuery = "UPDATE " + DBConstants.CONVERSATIONS_TABLE
+				+ " SET " + DBConstants.MSG_STATUS + " =" + status + " WHERE "
+				+ initialWhereClause;
+
+		executeUpdateMessageStatusStatement(query, status, msisdn);
+		executeUpdateMessageStatusStatement(conversationQuery, status, msisdn);
+
+		return ids;
+	}
+
 	public void updateBatch(long[] ids, int status, String msisdn) {
 		StringBuilder sb = new StringBuilder("(");
 		/* TODO make utils.join work for arrays */
