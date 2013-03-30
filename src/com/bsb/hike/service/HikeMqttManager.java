@@ -633,10 +633,15 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			return;
 		}
 
-		mqttConnection.publish(new UTF8Buffer(this.topic
-				+ HikeConstants.PUBLISH_TOPIC),
-				new Buffer(packet.getMessage()), qos == 0 ? QoS.AT_MOST_ONCE
-						: QoS.AT_LEAST_ONCE, false, pbCB);
+		try {
+			mqttConnection.publish(new UTF8Buffer(this.topic
+					+ HikeConstants.PUBLISH_TOPIC),
+					new Buffer(packet.getMessage()),
+					qos == 0 ? QoS.AT_MOST_ONCE : QoS.AT_LEAST_ONCE, false,
+					pbCB);
+		} catch (IllegalStateException e) {
+			Log.w(getClass().getSimpleName(), "Disconnected", e);
+		}
 	}
 
 	public void unsubscribeFromUIEvents() {
