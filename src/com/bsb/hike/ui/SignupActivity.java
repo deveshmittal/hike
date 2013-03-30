@@ -934,15 +934,18 @@ public class SignupActivity extends Activity implements
 	}
 
 	boolean fbClicked = false;
+	boolean fbAuthing = false;
 
 	public void onFacebookConnectClick(View v) {
 		fbClicked = true;
 		Session session = Session.getActiveSession();
+
 		Log.d(getClass().getSimpleName(), "FB CLICKED");
 		if (!session.isOpened() && !session.isClosed()) {
 			session.openForRead(new Session.OpenRequest(this)
 					.setCallback(statusCallback));
 			Log.d(getClass().getSimpleName(), "Opening for read");
+			fbAuthing = true;
 		} else {
 			Session.openActiveSession(this, true, statusCallback);
 			Log.d(getClass().getSimpleName(), "Opening active session");
@@ -956,6 +959,19 @@ public class SignupActivity extends Activity implements
 			if (fbClicked && session.isOpened()) {
 				updateView();
 				fbClicked = false;
+			}
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.d(getClass().getSimpleName(), "OnResume Called");
+		if (fbAuthing) {
+			Session session = Session.getActiveSession();
+			if (session != null) {
+				Log.d(getClass().getSimpleName(), "Clearing token");
+				session.closeAndClearTokenInformation();
 			}
 		}
 	}
@@ -1092,6 +1108,7 @@ public class SignupActivity extends Activity implements
 		session.onActivityResult(this, requestCode, resultCode, data);
 		if (fbClicked) {
 			onFacebookConnectClick(null);
+			fbAuthing = false;
 		}
 
 		File selectedFileIcon;
