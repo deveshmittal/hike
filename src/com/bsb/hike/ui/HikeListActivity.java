@@ -224,7 +224,7 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 
 	public void onTitleIconLeftClick(View v) {
 		selectedContacts.clear();
-		onTitleIconClick(null);
+		onTitleIconClick(v);
 	}
 
 	public void onTitleIconClick(View v) {
@@ -295,6 +295,8 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					editor.putBoolean(HikeMessengerApp.NUX1_DONE, true);
 					editor.putString(HikeMessengerApp.INVITED_NUMBERS,
 							invitedNumbers.toString());
+					editor.putBoolean(HikeConstants.LogEvent.NUX_SKIP1,
+							v.getId() == R.id.title_icon_left);
 					editor.commit();
 
 					Intent i = new Intent(this, HikeListActivity.class);
@@ -311,9 +313,12 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					editor.putBoolean(HikeMessengerApp.NUX2_DONE, true);
 					editor.putString(HikeMessengerApp.INVITED_NUMBERS,
 							invitedNumbers.toString());
+					editor.putBoolean(HikeConstants.LogEvent.NUX_SKIP2,
+							v.getId() == R.id.title_icon_left);
 					editor.commit();
 
 					Intent i = new Intent(this, MessagesList.class);
+					i.putExtra(HikeConstants.Extras.FROM_NUX_SCREEN, true);
 					startActivity(i);
 				}
 				finish();

@@ -316,6 +316,13 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 		}
 
+		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_NUX_SCREEN,
+				false)) {
+			if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)) {
+				sendNuxEvents();
+			}
+		}
+
 		userMsisdn = accountPrefs
 				.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
@@ -414,6 +421,42 @@ public class MessagesList extends DrawerBaseActivity implements
 			String msisdn = iterator.next();
 			toggleTypingNotification(true, msisdn);
 		}
+	}
+
+	private void sendNuxEvents() {
+		(new Handler()).postDelayed(new Runnable() {
+
+			@Override
+			public void run() {
+
+				JSONObject data = new JSONObject();
+				JSONObject obj = new JSONObject();
+
+				try {
+					data.put(HikeConstants.LogEvent.NUX_SKIP1,
+							accountPrefs.getBoolean(
+									HikeConstants.LogEvent.NUX_SKIP1, false));
+					data.put(HikeConstants.LogEvent.NUX_SKIP2,
+							accountPrefs.getBoolean(
+									HikeConstants.LogEvent.NUX_SKIP2, false));
+					data.put(HikeConstants.LogEvent.TAG, "mob");
+
+					obj.put(HikeConstants.TYPE,
+							HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+					obj.put(HikeConstants.DATA, data);
+				} catch (JSONException e) {
+					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+				}
+
+				Editor editor = accountPrefs.edit();
+				editor.remove(HikeConstants.LogEvent.NUX_SKIP1);
+				editor.remove(HikeConstants.LogEvent.NUX_SKIP2);
+				editor.commit();
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						obj);
+			}
+		}, 5 * 1000);
 	}
 
 	public void onFavoriteIntroClick(View v) {
