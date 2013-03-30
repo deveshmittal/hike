@@ -2,6 +2,7 @@ package com.bsb.hike.tasks;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,6 +86,9 @@ public class DownloadFileTask extends FileTransferTaskBase {
 		} catch (MalformedURLException e) {
 			Log.e(getClass().getSimpleName(), "Invalid URL", e);
 			return FTResult.DOWNLOAD_FAILED;
+		} catch (FileNotFoundException e) {
+			Log.e(getClass().getSimpleName(), "File Expired", e);
+			return FTResult.FILE_EXPIRED;
 		} catch (IOException e) {
 			Log.e(getClass().getSimpleName(), "Error while downloding file", e);
 			return FTResult.DOWNLOAD_FAILED;
@@ -116,7 +120,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 		if (result != FTResult.SUCCESS) {
 			int errorStringId = result == FTResult.FILE_TOO_LARGE ? R.string.not_enough_space
 					: result == FTResult.CANCELLED ? R.string.download_cancelled
-							: R.string.download_failed;
+							: result == FTResult.FILE_EXPIRED ? R.string.file_expire
+									: R.string.download_failed;
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
 			destinationFile.delete();
 		}
