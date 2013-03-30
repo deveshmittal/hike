@@ -210,7 +210,7 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 
 				String unauthedMSISDN = AccountUtils.validateNumber(number);
 
-				if (unauthedMSISDN == null) {
+				if (TextUtils.isEmpty(unauthedMSISDN)) {
 					Log.d("SignupTask", "Unable to send PIN to user");
 					publishProgress(new StateValue(State.ERROR, null));
 					return Boolean.FALSE;
