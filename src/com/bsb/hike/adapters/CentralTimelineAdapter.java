@@ -138,6 +138,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		viewHolder.statusImg.setVisibility(View.GONE);
 
+		viewHolder.detailsBtn.setVisibility(View.VISIBLE);
+
 		switch (statusMessage.getStatusMessageType()) {
 		case NO_STATUS:
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
@@ -155,6 +157,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.extraInfo.setText(R.string.no_status_recently);
 				viewHolder.yesBtn.setText(R.string.update_status);
 			}
+			viewHolder.detailsBtn.setVisibility(View.GONE);
 			break;
 		case FRIEND_REQUEST:
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
