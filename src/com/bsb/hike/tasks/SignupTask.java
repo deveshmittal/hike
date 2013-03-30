@@ -282,6 +282,14 @@ public class SignupTask extends AsyncTask<Void, SignupTask.StateValue, Boolean>
 					}
 					accountInfo = AccountUtils.registerAccount(context, pin,
 							unauthedMSISDN);
+					/*
+					 * if it fails, we try once again.
+					 */
+					if (accountInfo == null) {
+						accountInfo = AccountUtils.registerAccount(context,
+								pin, unauthedMSISDN);
+					}
+
 					if (accountInfo == null) {
 						this.data = null;
 						publishProgress(new StateValue(State.ERROR, null));
