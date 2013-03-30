@@ -102,7 +102,7 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 		case NUX2:
 			findViewById(R.id.input_number_container).setVisibility(View.GONE);
 			nuxText.setVisibility(View.VISIBLE);
-			titleBtn.setText(R.string.done);
+			titleBtn.setText(R.string.next_signup);
 			labelView.setText(R.string.invite_family);
 			labelView.setOnClickListener(this);
 			break;
