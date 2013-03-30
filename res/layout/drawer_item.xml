@@ -30,17 +30,16 @@
             android:visibility="gone"
             android:src="@drawable/ic_fav_hike" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/add_fav"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="4dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="9dp"
             android:paddingRight="10dp"
             android:paddingLeft="10dp"
+            android:background="@null"
             android:src="@drawable/add_fav"
             android:visibility="gone" />
         
