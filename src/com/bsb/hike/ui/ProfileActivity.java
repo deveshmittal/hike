@@ -1556,9 +1556,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						contactInfo, contactInfo.getFavoriteType());
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
-				Toast.makeText(getApplicationContext(),
-						"Waiting for your friend to accept the request",
-						Toast.LENGTH_SHORT).show();
 			} else {
 				inviteToHike(contactInfo.getMsisdn());
 			}
