@@ -18,6 +18,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
+import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 
 public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
@@ -59,6 +60,11 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			editor.clear();
 			appPrefEditor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
+
+			Session session = Session.getActiveSession();
+			if (session != null) {
+				session.closeAndClearTokenInformation();
+			}
 
 			return true;
 		} catch (Exception e) {
