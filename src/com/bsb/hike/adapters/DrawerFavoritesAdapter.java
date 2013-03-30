@@ -112,6 +112,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 			@Override
 			protected Void doInBackground(Void... params) {
+				Log.d(getClass().getSimpleName(),
+						"Favorite List started fetching");
+
 				String myMsisdn = context.getSharedPreferences(
 						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 						HikeMessengerApp.MSISDN_SETTING, "");
@@ -152,6 +155,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 			@Override
 			protected void onPostExecute(Void result) {
+				Log.d(getClass().getSimpleName(), "Favorite List fetched");
 				listLoaded = true;
 				drawerLayout.findViewById(R.id.loading_progress).setVisibility(
 						View.GONE);
