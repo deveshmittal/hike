@@ -200,7 +200,6 @@
 	<string name="email_subtext">Per E-Mail einladen</string>
 	<string name="other_subtext">Einladungs-URL anfordern</string>
 	<string name="email_subject">hike. Gratis Messaging mit Spaß, ein Leben lang</string>
-	<string name="email_body">Hallo! Ich habe angefangen hike zu benutzen, eine tolle neue kostenlose neue Messaging-App. Du kannst Freunden die bei hike sind, und auch denen, die es noch nicht sind, kostenlos Nachrichten schicken! Messaging war noch nie simpler. Lade die App auf http://get.hike.in/%1$s herunter, um mir kostenlos Nachrichten zu senden!</string>
 	<string name="twitter_msg">Ich benutze @hikeapp, eine tolle neue kostenlose neue Messaging-App! Lade die App auf http://get.hike.in/%1$s herunter, um mir kostenlos Nachrichten zu senden!</string>
 	<string name="facebook_msg">Ich habe angefangen, hike zu benutzen, eine tolle neue kostenlose neue Messaging-App. Du kannst Freunden die bei hike sind, und auch denen, die es noch nicht sind, kostenlos Nachrichten schicken! Messaging war noch nie simpler. Lade die App auf http://get.hike.in/%1$s herunter, um mir kostenlos Nachrichten zu senden!</string>
 	<string name="gps_disabled">Für genauere Ortsbestimmung, GPS einschalten.</string>
@@ -424,7 +423,6 @@
 	<string name="twitter_length_exceed">Twitter-Posts können nur aus maximal 140 Zeichen bestehen.</string>
 	<string name="changed_profile">Hat das Profilbild geändert</string>
 	<string name="add_friend_info">Hier siehst du Updates aus deinem Freundeskreis.</string>
-	<string name="add_hike_friend">Freundeskreis anzeigen</string>
 	<string name="no_friends">Tippe auf plus, um einen Kontakt zu deinem Freundeskreis hinzuzufügen.</string>
 	<string name="added_as_hike_friend_info">Du kannst jetzt Updates von %1$s sehen. Möchtest du dasselbe machen?</string>
 	<string name="confirmed_friend">Ist jetzt mit dir befreundet.</string>
