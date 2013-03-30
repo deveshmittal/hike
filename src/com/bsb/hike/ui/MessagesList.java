@@ -579,6 +579,9 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (adapterView.getId() == R.id.favorite_list) {
 			return super.onItemLongClick(adapterView, view, position, id);
 		}
+		if (position >= mAdapter.getCount()) {
+			return false;
+		}
 		ArrayList<String> optionsList = new ArrayList<String>();
 
 		final Conversation conv = mAdapter.getItem(position);
