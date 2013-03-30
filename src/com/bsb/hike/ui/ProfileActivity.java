@@ -882,7 +882,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 							Log.d("ProfileActivity", "resetting image");
 							Utils.removeTempProfileImage(mLocalMSISDN);
 							mActivityState.destFilePath = null;
-							profileAdapter.notifyDataSetChanged();
+							if (profileAdapter != null) {
+								profileAdapter.notifyDataSetChanged();
+							}
 							if (isBackPressed) {
 								finishEditing();
 							}
