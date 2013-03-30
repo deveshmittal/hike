@@ -12,6 +12,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
@@ -25,6 +26,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.Utils;
 
 @SuppressWarnings("unchecked")
 public class ProfileAdapter extends BaseAdapter {
@@ -423,6 +425,15 @@ public class ProfileAdapter extends BaseAdapter {
 			} else {
 				viewHolder.icon
 						.setBackgroundResource(R.drawable.bg_status_type);
+			}
+			LayoutParams lp = (LayoutParams) viewHolder.subText.getLayoutParams();
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC
+					|| viewHolder.text.getLineCount() > 1) {
+				lp.topMargin = 0;
+				viewHolder.subText.setLayoutParams(lp);
+			} else {
+				lp.topMargin = (int) (5 * Utils.densityMultiplier);
+				viewHolder.subText.setLayoutParams(lp);
 			}
 			break;
 
