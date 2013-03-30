@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Editable;
@@ -77,6 +78,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private ViewGroup emojiParent;
 	private EditText statusTxt;
 
+	private Handler handler;
+
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		return mActivityTask;
@@ -97,6 +100,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		} else {
 			mActivityTask = new ActivityTask();
 		}
+
+		handler = new Handler();
 
 		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
@@ -170,6 +175,18 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubsubListeners);
 	}
+
+	private Runnable cancelStatusPost = new Runnable() {
+
+		@Override
+		public void run() {
+			Toast.makeText(getApplicationContext(),
+					R.string.update_status_fail, Toast.LENGTH_SHORT).show();
+			mActivityTask.hikeHTTPTask = null;
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.STATUS_POST_REQUEST_DONE, false);
+		}
+	};
 
 	public void onTitleIconClick(View v) {
 		if (isEmojiOrMoodLayoutVisible()) {
@@ -352,6 +369,12 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		hikeHttpRequest.setJSONData(data);
 		mActivityTask.hikeHTTPTask = new HikeHTTPTask(null, 0);
 		mActivityTask.hikeHTTPTask.execute(hikeHttpRequest);
+
+		/*
+		 * Starting the manual cancel as well.
+		 */
+		handler.removeCallbacks(cancelStatusPost);
+		handler.postDelayed(cancelStatusPost, 60 * 1000);
 
 		progressDialog = ProgressDialog.show(this, null, getResources()
 				.getString(R.string.updating_status));
@@ -626,6 +649,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 						Utils.hideSoftKeyboard(StatusUpdate.this, statusTxt);
 						finish();
 					}
+					handler.removeCallbacks(cancelStatusPost);
 				}
 			});
 		}
