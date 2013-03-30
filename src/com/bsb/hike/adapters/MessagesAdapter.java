@@ -52,7 +52,6 @@ import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -573,7 +572,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (statusMessage.hasMood()) {
 				holder.image.setBackgroundDrawable(null);
 				holder.image
-						.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
+						.setImageResource(Utils.getMoodsResource()[statusMessage
 								.getMoodId()]);
 			} else {
 				holder.image.setBackgroundResource(R.drawable.bg_status_type);

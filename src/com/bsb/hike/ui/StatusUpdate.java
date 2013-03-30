@@ -551,7 +551,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		}
 		mActivityTask.moodId = moodId;
 
-		avatar.setImageResource(EmoticonConstants.MOOD_RES_IDS[moodId]);
+		avatar.setImageResource(Utils.getMoodsResource()[moodId]);
 		avatar.setBackgroundResource(0);
 
 		String[] moodsArray = getResources().getStringArray(

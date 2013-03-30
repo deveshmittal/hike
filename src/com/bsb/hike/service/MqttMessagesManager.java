@@ -661,7 +661,16 @@ public class MqttMessagesManager {
 						array.toString());
 			}
 
+			if (data.has(HikeConstants.CRICKET_MOODS)) {
+				editor.putBoolean(HikeMessengerApp.SHOW_CRICKET_MOODS,
+						data.optBoolean(HikeConstants.CRICKET_MOODS, true));
+			}
+
 			editor.commit();
+			if (data.has(HikeConstants.CRICKET_MOODS)) {
+				((HikeMessengerApp) context.getApplicationContext())
+						.setMoodsResource();
+			}
 
 			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
 		} else if (HikeConstants.MqttMessageTypes.REWARDS.equals(type)) {

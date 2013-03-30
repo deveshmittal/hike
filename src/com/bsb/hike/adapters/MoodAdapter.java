@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.ui.StatusUpdate;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 
 public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
@@ -26,17 +25,21 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 	private final int moodHeight;
 	private final int moodWidth;
 
+	private int[] moods;
+
 	public MoodAdapter(Context context) {
 		this.inflater = LayoutInflater.from(context);
 		this.context = context;
 		this.moodHeadings = context.getResources().getStringArray(
 				R.array.mood_headings);
-		this.moodCount = EmoticonConstants.MOOD_RES_IDS.length;
 		this.inflater = LayoutInflater.from(context);
 
 		int width = context.getResources().getDisplayMetrics().widthPixels;
 		moodWidth = (int) (width / 3);
 		moodHeight = moodWidth;
+
+		this.moods = Utils.getMoodsResource();
+		this.moodCount = moods.length;
 	}
 
 	@Override
@@ -68,7 +71,7 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 		ImageView moodImage = (ImageView) convertView.findViewById(R.id.mood);
 		TextView moodText = (TextView) convertView.findViewById(R.id.mood_text);
 
-		moodImage.setImageResource(EmoticonConstants.MOOD_RES_IDS[position]);
+		moodImage.setImageResource(moods[position]);
 		moodText.setText(moodHeadings[position]);
 
 		return convertView;

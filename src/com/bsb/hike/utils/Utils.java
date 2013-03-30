@@ -1846,4 +1846,8 @@ public class Utils {
 				.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 	}
+
+	public static int[] getMoodsResource() {
+		return HikeMessengerApp.getMoodsResource();
+	}
 }

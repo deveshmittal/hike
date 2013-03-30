@@ -14,8 +14,8 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.Utils;
 
 public class CentralTimelineAdapter extends BaseAdapter {
 
@@ -122,7 +122,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		if (statusMessage.hasMood()) {
 			viewHolder.avatar
-					.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
+					.setImageResource(Utils.getMoodsResource()[statusMessage
 							.getMoodId()]);
 		} else {
 			viewHolder.avatar.setImageDrawable(IconCacheManager.getInstance()

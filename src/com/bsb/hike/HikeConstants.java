@@ -100,6 +100,7 @@ public class HikeConstants {
 	public static final String DEV_TYPE = "dev_type";
 	public static final String APP_VERSION = "app_version";
 	public static final String DEVICE_VERSION = "deviceversion";
+	public static final String CRICKET_MOODS = "cmoods";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

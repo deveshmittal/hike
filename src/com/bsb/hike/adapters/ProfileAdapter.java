@@ -24,7 +24,6 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -419,9 +418,8 @@ public class ProfileAdapter extends BaseAdapter {
 			}
 			if (statusMessage.hasMood()) {
 				viewHolder.icon.setBackgroundDrawable(null);
-				viewHolder.icon
-						.setImageResource(EmoticonConstants.MOOD_RES_IDS[statusMessage
-								.getMoodId()]);
+				viewHolder.icon.setImageResource(Utils
+						.getMoodsResource()[statusMessage.getMoodId()]);
 			} else {
 				viewHolder.icon
 						.setBackgroundResource(R.drawable.bg_status_type);

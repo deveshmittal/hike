@@ -49,6 +49,7 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.ClearTypingNotification;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.Utils;
@@ -201,6 +202,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
 	public static final String LAST_BACK_OFF_TIME_DEV_DETAILS = "lastBackOffTimeDevDetails";
 
+	public static final String SHOW_CRICKET_MOODS = "showCricketMoods";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
@@ -212,6 +215,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	private static Messenger mMessenger;
 
 	private static Map<String, ClearTypingNotification> typingNotificationMap;
+
+	private static int[] moodsResource;
 
 	private Messenger mService;
 
@@ -417,6 +422,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		initialiseListeners();
 
+		setMoodsResource();
+
 		mMessenger = new Messenger(new IncomingHandler());
 
 		if (token != null) {
@@ -433,6 +440,16 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
+	}
+
+	public void setMoodsResource() {
+		moodsResource = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				0).getBoolean(HikeMessengerApp.SHOW_CRICKET_MOODS, true) ? EmoticonConstants.MOOD_WITH_IPL_RES_IDS
+				: EmoticonConstants.MOOD_NO_IPL_RES_IDS;
+	}
+
+	public static int[] getMoodsResource() {
+		return moodsResource;
 	}
 
 	public static Facebook getFacebook() {

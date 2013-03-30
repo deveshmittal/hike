@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
 
 public class StatusMessage {
@@ -109,7 +109,7 @@ public class StatusMessage {
 	}
 
 	public boolean hasMood() {
-		return (moodId > -1 && moodId < EmoticonConstants.MOOD_RES_IDS.length);
+		return (moodId > -1 && moodId < Utils.getMoodsResource().length);
 	}
 
 	public int getMoodId() {

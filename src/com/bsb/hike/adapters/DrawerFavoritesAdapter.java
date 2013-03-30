@@ -43,7 +43,6 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.TellAFriend;
-import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.DrawerLayout;
@@ -96,8 +95,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 		status = preferences.getString(HikeMessengerApp.LAST_STATUS,
 				context.getString(R.string.default_status));
 		int moodId = preferences.getInt(HikeMessengerApp.LAST_MOOD, -1);
-		statusDrawableResource = moodId == -1 ? R.drawable.ic_text_status
-				: EmoticonConstants.MOOD_RES_IDS[moodId];
+		statusDrawableResource = moodId == -1
+				|| moodId >= Utils.getMoodsResource().length ? R.drawable.ic_text_status
+				: Utils.getMoodsResource()[moodId];
 
 		/*
 		 * Show the initial View with the loader icon.
@@ -370,8 +370,9 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 
 	public void updateStatus(String status, int moodId) {
 		this.status = status;
-		this.statusDrawableResource = moodId == -1 ? R.drawable.ic_text_status
-				: EmoticonConstants.MOOD_RES_IDS[moodId];
+		this.statusDrawableResource = moodId == -1
+				|| moodId >= Utils.getMoodsResource().length ? R.drawable.ic_text_status
+				: Utils.getMoodsResource()[moodId];
 		notifyDataSetChanged();
 	}
 
