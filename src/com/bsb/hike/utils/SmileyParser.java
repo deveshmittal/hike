@@ -31,7 +31,7 @@ public class SmileyParser {
 	// Singleton stuff
 	private static SmileyParser sInstance = null;
 
-	private static final float SCALE_FACTOR = 0.8f;
+	private static final float SCALE_FACTOR = 0.85f;
 
 	public static SmileyParser getInstance() {
 		return sInstance;
