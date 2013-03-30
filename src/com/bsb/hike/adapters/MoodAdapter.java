@@ -27,7 +27,7 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 
 	private int[] moods;
 
-	public MoodAdapter(Context context) {
+	public MoodAdapter(Context context, int columns) {
 		this.inflater = LayoutInflater.from(context);
 		this.context = context;
 		this.moodHeadings = context.getResources().getStringArray(
@@ -35,7 +35,7 @@ public class MoodAdapter extends BaseAdapter implements OnItemClickListener {
 		this.inflater = LayoutInflater.from(context);
 
 		int width = context.getResources().getDisplayMetrics().widthPixels;
-		moodWidth = (int) (width / 3);
+		moodWidth = (int) (width / columns);
 		moodHeight = moodWidth;
 
 		this.moods = Utils.getMoodsResource();

@@ -9,6 +9,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
@@ -563,7 +564,11 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		moodParent.setVisibility(View.VISIBLE);
 
-		MoodAdapter moodAdapter = new MoodAdapter(this);
+		boolean portrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+		int columns = portrait ? 4 : 6;
+		
+		moodPager.setNumColumns(columns);
+		MoodAdapter moodAdapter = new MoodAdapter(this, columns);
 		moodPager.setAdapter(moodAdapter);
 		moodPager.setOnItemClickListener(moodAdapter);
 	}
