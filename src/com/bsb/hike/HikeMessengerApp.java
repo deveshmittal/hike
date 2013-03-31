@@ -204,6 +204,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SHOW_CRICKET_MOODS = "showCricketMoods";
 
+	public static final String FRIEND_INTRO_SHOWN = "friendIntroShown";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;

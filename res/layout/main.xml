@@ -137,7 +137,7 @@
                 <include layout="@layout/tool_tip" />
             </LinearLayout>
 
-            <include layout="@layout/favorites_intro_overlay" />
+            <include layout="@layout/friend_btn_tutorial" />
         </RelativeLayout>
     </RelativeLayout>
 

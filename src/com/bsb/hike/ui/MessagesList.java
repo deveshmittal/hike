@@ -422,6 +422,11 @@ public class MessagesList extends DrawerBaseActivity implements
 			String msisdn = iterator.next();
 			toggleTypingNotification(true, msisdn);
 		}
+
+		if (!accountPrefs
+				.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)) {
+			findViewById(R.id.friend_intro).setVisibility(View.VISIBLE);
+		}
 	}
 
 	private void sendNuxEvents() {
@@ -469,6 +474,14 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		Editor editor = accountPrefs.edit();
 		editor.putBoolean(HikeMessengerApp.FAVORITES_INTRO_SHOWN, true);
+		editor.commit();
+	}
+
+	public void onFriendIntroClick(View v) {
+		findViewById(R.id.friend_intro).setVisibility(View.GONE);
+
+		Editor editor = accountPrefs.edit();
+		editor.putBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, true);
 		editor.commit();
 	}
 

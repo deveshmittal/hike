@@ -431,4 +431,6 @@
 	<string name="no_contacts_hike">Du hast keine Kontakte bei hike</string>
 	<string name="update_status_fail">Status konnte nicht aktualisiert werden. Bitte überprüfe deine Netzwerkverbindung und versuche es erneut.</string>
 	<string name="no_status_recently">Du hast in letzter Zeit keine Updates gepostet.</string>
+	<string name="friends_on_hike_tut">Freunde bei hike</string>
+	
 </resources>
