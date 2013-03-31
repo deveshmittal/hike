@@ -1160,28 +1160,28 @@
 	<string-array name="mood_headings">
 	    <item>Happy</item>
 	    <item>Sad</item>
-	    <item>Angry</item>
+	    <item>In Love</item>
+	    <item>Surprised</item>
 	    <item>Confused</item>
-	    <item>OMG</item>
+	    <item>Angry</item>
 	    <item>Sleepy</item>
 	    <item>Hungover</item>
-	    <item>In Love</item>
 	    <item>Chilling</item>
-	    <item>Reading</item>
+	    <item>Studying</item>
+	    <item>Busy</item>
+	    <item>Love</item>
 	    <item>Middle Finger</item>
 	    <item>Boozing</item>
-	    <item>Love</item>
+	    <item>In a Movie</item>
+	    <item>Caffeinated</item>
 	    <item>Insomniac</item>
-	    <item>Coding</item>
-	    <item>Traffic</item>
-	    <item>Late</item>
+	    <item>Driving</item>
+	    <item>Stuck in Traffic</item>
+	    <item>Running Late</item>
 	    <item>Shopping</item>
 	    <item>Gaming</item>
-	    <item>Driving</item>
-	    <item>Caffeinated</item>
-	    <item>Movie</item>
-	    <item>Television</item>
-	    <item>Busy</item>
+	    <item>Coding</item>
+	    <item>Watching TV</item>
 	    <item>Bangalore</item>
 	    <item>Chennai</item>
 	    <item>Delhi</item>
