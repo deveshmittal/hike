@@ -338,23 +338,17 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		addConversations(l);
 	}
 
-	public void updateMsgStatus(long msgID, int val, String msisdn) {
+	public int updateMsgStatus(long msgID, int val, String msisdn) {
 		String initialWhereClause = DBConstants.MESSAGE_ID + " ="
 				+ String.valueOf(msgID);
 
-		String query = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET "
-				+ DBConstants.MSG_STATUS + " =" + val + " WHERE "
-				+ initialWhereClause;
+		String query = initialWhereClause;
 
-		String conversationQuery = "UPDATE " + DBConstants.CONVERSATIONS_TABLE
-				+ " SET " + DBConstants.MSG_STATUS + " =" + val + " WHERE "
-				+ initialWhereClause;
-
-		executeUpdateMessageStatusStatement(query, val, msisdn);
-		executeUpdateMessageStatusStatement(conversationQuery, val, msisdn);
+		return executeUpdateMessageStatusStatement(query, val, msisdn);
 	}
 
-	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn) {
+	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn,
+			JSONArray msgIds) {
 		Cursor c = mDb.query(
 				DBConstants.MESSAGES_TABLE,
 				new String[] { DBConstants.MESSAGE_ID },
@@ -364,18 +358,29 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						+ DBConstants.MSG_STATUS + "="
 						+ State.SENT_DELIVERED.ordinal(),
 				new String[] { msisdn }, null, null, null);
-		long[] ids = new long[c.getCount()];
+		long[] ids = new long[c.getCount() + msgIds.length()];
 
-		if (ids.length == 0) {
+		if (ids.length == 0 && msgIds.length() == 0) {
 			return null;
 		}
 
 		StringBuilder sb = new StringBuilder("(");
 		int i = 0;
-		while (c.moveToNext()) {
-			long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
-			sb.append(id + ",");
-			ids[i++] = id;
+		try {
+			while (c.moveToNext()) {
+				long id = c.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+				sb.append(id + ",");
+				ids[i++] = id;
+			}
+			for (i = 0; i < msgIds.length(); i++) {
+				long id = msgIds.optLong(i);
+				sb.append(id + ",");
+				ids[c.getCount() + i++] = id;
+			}
+		} finally {
+			if (c != null) {
+				c.close();
+			}
 		}
 		sb.replace(sb.lastIndexOf(","), sb.length(), ")");
 
@@ -384,21 +389,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 		int status = State.SENT_DELIVERED_READ.ordinal();
 
-		String query = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET "
-				+ DBConstants.MSG_STATUS + " =" + status + " WHERE "
-				+ initialWhereClause;
-
-		String conversationQuery = "UPDATE " + DBConstants.CONVERSATIONS_TABLE
-				+ " SET " + DBConstants.MSG_STATUS + " =" + status + " WHERE "
-				+ initialWhereClause;
+		String query = initialWhereClause;
 
 		executeUpdateMessageStatusStatement(query, status, msisdn);
-		executeUpdateMessageStatusStatement(conversationQuery, status, msisdn);
 
 		return ids;
 	}
 
-	public void updateBatch(long[] ids, int status, String msisdn) {
+	public int updateBatch(long[] ids, int status, String msisdn) {
 		StringBuilder sb = new StringBuilder("(");
 		/* TODO make utils.join work for arrays */
 		for (int i = 0; i < ids.length; i++) {
@@ -412,19 +410,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		String initialWhereClause = DBConstants.MESSAGE_ID + " in "
 				+ sb.toString();
 
-		String query = "UPDATE " + DBConstants.MESSAGES_TABLE + " SET "
-				+ DBConstants.MSG_STATUS + " =" + status + " WHERE "
-				+ initialWhereClause;
+		String query = initialWhereClause;
 
-		String conversationQuery = "UPDATE " + DBConstants.CONVERSATIONS_TABLE
-				+ " SET " + DBConstants.MSG_STATUS + " =" + status + " WHERE "
-				+ initialWhereClause;
-
-		executeUpdateMessageStatusStatement(query, status, msisdn);
-		executeUpdateMessageStatusStatement(conversationQuery, status, msisdn);
+		return executeUpdateMessageStatusStatement(query, status, msisdn);
 	}
 
-	public void executeUpdateMessageStatusStatement(String updateStatement,
+	public int executeUpdateMessageStatusStatement(String updateStatement,
 			int status, String msisdn) {
 		int minStatusOrdinal;
 		int maxStatusOrdinal;
@@ -451,7 +442,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						+ DBConstants.MSISDN + " ='" + msisdn + "')") : "");
 		Log.d(getClass().getSimpleName(), "UPDATE STATEMENT: "
 				+ updateStatement);
-		mDb.execSQL(updateStatement);
+
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.MSG_STATUS, status);
+		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
+				updateStatement, null);
+		return mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
+				updateStatement, null);
 	}
 
 	public void updateMessageMetadata(long msgID, MessageMetadata metadata) {

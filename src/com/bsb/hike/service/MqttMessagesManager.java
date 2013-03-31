@@ -360,7 +360,13 @@ public class MqttMessagesManager {
 			Log.d(getClass().getSimpleName(),
 					"Delivery report received for msgid : " + msgID
 							+ "	;	REPORT : DELIVERED");
-			updateDB(msgID, ConvMessage.State.SENT_DELIVERED, msisdn);
+			int rowsUpdated = updateDB(msgID, ConvMessage.State.SENT_DELIVERED,
+					msisdn);
+
+			if (rowsUpdated == 0) {
+				Log.d(getClass().getSimpleName(), "No rows updated");
+				return;
+			}
 
 			Pair<String, Long> pair = new Pair<String, Long>(msisdn, msgID);
 
@@ -380,7 +386,8 @@ public class MqttMessagesManager {
 				return;
 			}
 
-			long[] ids = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn);
+			long[] ids = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn,
+					msgIds);
 			if (ids == null) {
 				return;
 			}
@@ -826,13 +833,13 @@ public class MqttMessagesManager {
 		convDb.updateBatch(ids, status.ordinal(), msisdn);
 	}
 
-	private void updateDB(Object object, ConvMessage.State status, String msisdn) {
+	private int updateDB(Object object, ConvMessage.State status, String msisdn) {
 		long msgID = (Long) object;
 		/*
 		 * TODO we should lookup the convid for this user, since otherwise one
 		 * could set mess with the state for other conversations
 		 */
-		convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
+		return convDb.updateMsgStatus(msgID, status.ordinal(), msisdn);
 	}
 
 	private ConvMessage saveStatusMsg(JSONObject jsonObj, String msisdn)
