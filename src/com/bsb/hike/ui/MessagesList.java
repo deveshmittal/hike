@@ -318,7 +318,8 @@ public class MessagesList extends DrawerBaseActivity implements
 
 		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_NUX_SCREEN,
 				false)) {
-			if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)) {
+			if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)
+					|| accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP1)) {
 				sendNuxEvents();
 			}
 		}
@@ -433,12 +434,16 @@ public class MessagesList extends DrawerBaseActivity implements
 				JSONObject obj = new JSONObject();
 
 				try {
-					data.put(HikeConstants.LogEvent.NUX_SKIP1,
-							accountPrefs.getBoolean(
-									HikeConstants.LogEvent.NUX_SKIP1, false));
-					data.put(HikeConstants.LogEvent.NUX_SKIP2,
-							accountPrefs.getBoolean(
-									HikeConstants.LogEvent.NUX_SKIP2, false));
+					if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP1)) {
+						data.put(HikeConstants.LogEvent.NUX_SKIP1, accountPrefs
+								.getBoolean(HikeConstants.LogEvent.NUX_SKIP1,
+										false));
+					}
+					if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)) {
+						data.put(HikeConstants.LogEvent.NUX_SKIP2, accountPrefs
+								.getBoolean(HikeConstants.LogEvent.NUX_SKIP2,
+										false));
+					}
 					data.put(HikeConstants.LogEvent.TAG, "mob");
 
 					obj.put(HikeConstants.TYPE,

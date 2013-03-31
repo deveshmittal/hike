@@ -279,8 +279,8 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 				}
 			}
 
-			if (!selectedContacts.isEmpty() || type == Type.NUX1
-					|| type == Type.NUX2) {
+			if (!selectedContacts.isEmpty()
+					|| (v != null && v.getId() == R.id.title_icon_left)) {
 				if (!selectedContacts.isEmpty()) {
 					Toast.makeText(
 							getApplicationContext(),
@@ -295,8 +295,10 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					editor.putBoolean(HikeMessengerApp.NUX1_DONE, true);
 					editor.putString(HikeMessengerApp.INVITED_NUMBERS,
 							invitedNumbers.toString());
-					editor.putBoolean(HikeConstants.LogEvent.NUX_SKIP1,
-							v.getId() == R.id.title_icon_left);
+					if (v != null) {
+						editor.putBoolean(HikeConstants.LogEvent.NUX_SKIP1,
+								v.getId() == R.id.title_icon_left);
+					}
 					editor.commit();
 
 					Intent i = new Intent(this, HikeListActivity.class);
@@ -313,8 +315,10 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					editor.putBoolean(HikeMessengerApp.NUX2_DONE, true);
 					editor.putString(HikeMessengerApp.INVITED_NUMBERS,
 							invitedNumbers.toString());
-					editor.putBoolean(HikeConstants.LogEvent.NUX_SKIP2,
-							v.getId() == R.id.title_icon_left);
+					if (v != null) {
+						editor.putBoolean(HikeConstants.LogEvent.NUX_SKIP2,
+								v.getId() == R.id.title_icon_left);
+					}
 					editor.commit();
 
 					Intent i = new Intent(this, MessagesList.class);
