@@ -239,8 +239,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 											.getContactInfo().getFirstName(),
 									markedUp);
 				}
-				SmileyParser smileyParser = SmileyParser.getInstance();
-				markedUp = smileyParser.addSmileySpans(markedUp, true);
+				if (!HikeMessengerApp.isMicromaxA78()) {
+					SmileyParser smileyParser = SmileyParser.getInstance();
+					markedUp = smileyParser.addSmileySpans(markedUp, true);
+				}
 			}
 			messageView.setVisibility(View.VISIBLE);
 			messageView.setText(markedUp);
