@@ -252,14 +252,6 @@ public class ProfileAdapter extends BaseAdapter {
 			String msisdn;
 			String name;
 
-			if (!myProfile
-					&& (groupConversation != null || mContactInfo
-							.getFavoriteType() != FavoriteType.FRIEND)) {
-				v.setBackgroundResource(R.drawable.bg_group_profile);
-			} else {
-				v.setBackgroundResource(R.drawable.bg_profile);
-			}
-
 			if (groupParticipant != null) {
 				msisdn = groupConversation.getMsisdn();
 				name = groupConversation.getLabel();
