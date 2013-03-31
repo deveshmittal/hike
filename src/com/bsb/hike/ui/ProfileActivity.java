@@ -1549,9 +1549,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		if (groupConversation == null) {
 			return;
 		}
-		groupEditDialog = new Dialog(this, R.style.Theme_CustomDialog);
+		groupEditDialog = new Dialog(this, R.style.Theme_CustomDialog_Keyboard);
 		groupEditDialog.setContentView(R.layout.group_name_change_dialog);
 		groupEditDialog.setCancelable(true);
+		groupEditDialog.getWindow().setGravity(Gravity.CENTER);
 
 		mNameEdit = (EditText) groupEditDialog
 				.findViewById(R.id.group_name_edit);
@@ -1563,7 +1564,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		mNameEdit.setSelection(mNameEdit.length());
 
 		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_FORCED);
+		imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_IMPLICIT);
 
 		mActivityState.groupEditDialogShowing = true;
 

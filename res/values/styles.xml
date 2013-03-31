@@ -120,6 +120,10 @@
 	    <item name="android:windowIsFloating">true</item>
 	    <item name="android:windowNoTitle">true</item>
 	</style>
+	
+	<style name="Theme.CustomDialog.Keyboard">
+	    <item name="android:windowSoftInputMode">adjustResize|stateVisible</item>
+	</style>
 
 	<style name="Text.Credits">
 	    <item name="android:layout_marginTop">5dp</item>
