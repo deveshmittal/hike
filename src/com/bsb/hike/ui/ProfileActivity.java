@@ -1327,61 +1327,65 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			int startHeight = (expand || !expandedWithoutAnimation) ? profileImageSmall
 					.getHeight() : profileImageLarge.getHeight();
 
-			int[] startLocations = new int[2];
-			if (expand || mActivityState.animatedProfileImage) {
-				profileImageSmall.getLocationOnScreen(startLocations);
-			} else {
-				profileImageLarge.getLocationOnScreen(startLocations);
+			if (startHeight != 0 && startWidth != 0) {
+				int[] startLocations = new int[2];
+				if (expand || mActivityState.animatedProfileImage) {
+					profileImageSmall.getLocationOnScreen(startLocations);
+				} else {
+					profileImageLarge.getLocationOnScreen(startLocations);
+				}
+
+				int statusBarHeight = screenHeight
+						- profileImageContainer.getHeight();
+
+				int startLocX = startLocations[0];
+				int startLocY = startLocations[1] - statusBarHeight;
+
+				LayoutParams startLp = new LayoutParams(startWidth, startHeight);
+				startLp.setMargins(startLocX, startLocY, 0, 0);
+
+				profileImageLarge.setLayoutParams(startLp);
+
+				float multiplier;
+				if (maxWidth > maxHeight) {
+					multiplier = maxHeight / startHeight;
+				} else {
+					multiplier = maxWidth / startWidth;
+				}
+
+				ScaleAnimation scaleAnimation = (expand || expandedWithoutAnimation) ? new ScaleAnimation(
+						1.0f, multiplier, 1.0f, multiplier)
+						: new ScaleAnimation(multiplier, 1.0f, multiplier, 1.0f);
+
+				int xDest;
+				int yDest;
+				if (expand || !expandedWithoutAnimation) {
+					xDest = maxWidth / 2;
+					xDest -= (((int) (startWidth * multiplier)) / 2)
+							+ startLocX;
+					yDest = maxHeight / 2;
+					yDest -= (((int) (startHeight * multiplier)) / 2)
+							+ startLocY;
+				} else {
+					int[] endLocations = new int[2];
+					profileImageSmall.getLocationInWindow(endLocations);
+					xDest = endLocations[0];
+					yDest = endLocations[1];
+				}
+
+				TranslateAnimation translateAnimation = (expand || expandedWithoutAnimation) ? new TranslateAnimation(
+						0, xDest, 0, yDest) : new TranslateAnimation(xDest, 0,
+						yDest, 0);
+
+				AnimationSet animationSet = new AnimationSet(true);
+				animationSet.addAnimation(scaleAnimation);
+				animationSet.addAnimation(translateAnimation);
+				animationSet.setFillAfter(true);
+				animationSet.setDuration(350);
+				animationSet.setStartOffset(expand ? 150 : 0);
+
+				profileImageLarge.startAnimation(animationSet);
 			}
-
-			int statusBarHeight = screenHeight
-					- profileImageContainer.getHeight();
-
-			int startLocX = startLocations[0];
-			int startLocY = startLocations[1] - statusBarHeight;
-
-			LayoutParams startLp = new LayoutParams(startWidth, startHeight);
-			startLp.setMargins(startLocX, startLocY, 0, 0);
-
-			profileImageLarge.setLayoutParams(startLp);
-
-			float multiplier;
-			if (maxWidth > maxHeight) {
-				multiplier = maxHeight / startHeight;
-			} else {
-				multiplier = maxWidth / startWidth;
-			}
-
-			ScaleAnimation scaleAnimation = (expand || expandedWithoutAnimation) ? new ScaleAnimation(
-					1.0f, multiplier, 1.0f, multiplier) : new ScaleAnimation(
-					multiplier, 1.0f, multiplier, 1.0f);
-
-			int xDest;
-			int yDest;
-			if (expand || !expandedWithoutAnimation) {
-				xDest = maxWidth / 2;
-				xDest -= (((int) (startWidth * multiplier)) / 2) + startLocX;
-				yDest = maxHeight / 2;
-				yDest -= (((int) (startHeight * multiplier)) / 2) + startLocY;
-			} else {
-				int[] endLocations = new int[2];
-				profileImageSmall.getLocationInWindow(endLocations);
-				xDest = endLocations[0];
-				yDest = endLocations[1];
-			}
-
-			TranslateAnimation translateAnimation = (expand || expandedWithoutAnimation) ? new TranslateAnimation(
-					0, xDest, 0, yDest) : new TranslateAnimation(xDest, 0,
-					yDest, 0);
-
-			AnimationSet animationSet = new AnimationSet(true);
-			animationSet.addAnimation(scaleAnimation);
-			animationSet.addAnimation(translateAnimation);
-			animationSet.setFillAfter(true);
-			animationSet.setDuration(350);
-			animationSet.setStartOffset(expand ? 150 : 0);
-
-			profileImageLarge.startAnimation(animationSet);
 		}
 		AlphaAnimation alphaAnimation = expand ? new AlphaAnimation(0.0f, 1.0f)
 				: new AlphaAnimation(1.0f, 0.0f);
