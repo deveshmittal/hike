@@ -281,7 +281,8 @@ public class ProfileAdapter extends BaseAdapter {
 					viewHolder.btn2.setVisibility(View.VISIBLE);
 
 					viewHolder.requestMain.setText(context.getString(
-							R.string.added_as_friend, name));
+							R.string.added_as_friend,
+							mContactInfo.getFirstName()));
 					viewHolder.requestInfo.setText(context.getString(
 							R.string.added_as_hike_friend_info,
 							mContactInfo.getFirstName()));
@@ -456,8 +457,7 @@ public class ProfileAdapter extends BaseAdapter {
 			break;
 
 		case EMPTY_STATUS:
-			String contactName = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo
-					.getMsisdn() : mContactInfo.getName();
+			String contactName = mContactInfo.getFirstName();
 
 			if (!isContactBlocked) {
 				if (mContactInfo.isOnhike()) {
