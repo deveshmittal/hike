@@ -114,7 +114,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	private String httpRequestURL;
 	private String groupOwner;
 
-	private TextView mNameDisplay;
 	private int lastSavedGender;
 
 	private SharedPreferences preferences;
@@ -438,11 +437,10 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		profileContent.setOnItemClickListener(this);
 		profileContent.setDivider(null);
 
-		findViewById(R.id.group_list_drop_shadow).setVisibility(View.VISIBLE);
 		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 		Button leaveBtn = (Button) findViewById(R.id.title_icon);
 		leaveBtn.setVisibility(View.VISIBLE);
-		leaveBtn.setText(R.string.leave);
+		leaveBtn.setText(R.string.edit);
 
 		nameTxt = groupConversation.getLabel();
 	}
@@ -469,22 +467,16 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		Collections.sort(participants);
 
-		boolean hasSmsUser = false;
-
-		for (GroupParticipant participant : participants) {
-			if (!participant.getContactInfo().isOnhike()) {
-				hasSmsUser = true;
-				break;
-			}
-		}
-
 		participantsList.addAll(participants);
+
+		// Adding an item for the button
+		participantsList.add(new GroupParticipant(new ContactInfo(
+				ProfileAdapter.GROUP_LEAVE_BUTTON_ID, null, null, null)));
 
 		isGroupOwner = userInfo.getContactInfo().getMsisdn()
 				.equals(groupConversation.getGroupOwner());
 
 		profileAdapter.setNumParticipants(participants.size());
-		profileAdapter.setHasSmsUser(hasSmsUser);
 		profileAdapter.notifyDataSetChanged();
 	}
 
@@ -534,39 +526,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			}
 		} else if (v.getId() == R.id.title_icon) {
 			if (profileType == ProfileType.GROUP_INFO) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setMessage(R.string.leave_group_confirm);
-				builder.setPositiveButton(R.string.yes,
-						new DialogInterface.OnClickListener() {
-
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								Intent intent = new Intent(
-										ProfileActivity.this,
-										MessagesList.class);
-								intent.putExtra(
-										HikeConstants.Extras.GROUP_LEFT,
-										mLocalMSISDN);
-								intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-								startActivity(intent);
-								finish();
-								overridePendingTransition(
-										R.anim.slide_in_left_noalpha,
-										R.anim.slide_out_right_noalpha);
-							}
-						});
-				builder.setNegativeButton(R.string.no,
-						new DialogInterface.OnClickListener() {
-
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-							}
-						});
-				builder.setCancelable(true);
-				AlertDialog alertDialog = builder.create();
-				alertDialog.show();
+				onEditGroupNameClick(null);
 			}
 		}
 	}
@@ -1477,20 +1437,35 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	public void onProfileLargeBtnClick(View v) {
 		switch (profileType) {
 		case GROUP_INFO:
-			for (Entry<String, GroupParticipant> participant : participantMap
-					.entrySet()) {
-				if (!participant.getValue().getContactInfo().isOnhike()
-						&& !participant.getValue().hasLeft()) {
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.MQTT_PUBLISH,
-							Utils.makeHike2SMSInviteMessage(
-									participant.getKey(), this).serialize());
-				}
-			}
-			Toast toast = Toast.makeText(ProfileActivity.this,
-					R.string.invite_sent, Toast.LENGTH_SHORT);
-			toast.setGravity(Gravity.BOTTOM, 0, 0);
-			toast.show();
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.leave_group_confirm);
+			builder.setPositiveButton(R.string.yes,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Intent intent = new Intent(ProfileActivity.this,
+									MessagesList.class);
+							intent.putExtra(HikeConstants.Extras.GROUP_LEFT,
+									mLocalMSISDN);
+							intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+							startActivity(intent);
+							finish();
+							overridePendingTransition(
+									R.anim.slide_in_left_noalpha,
+									R.anim.slide_out_right_noalpha);
+						}
+					});
+			builder.setNegativeButton(R.string.no,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+						}
+					});
+			builder.setCancelable(true);
+			AlertDialog alertDialog = builder.create();
+			alertDialog.show();
 			break;
 		case CONTACT_INFO:
 			openChatThread(contactInfo);
@@ -1528,13 +1503,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	public void onProfileSmallRightBtnClick(View v) {
 		groupConversation.setIsMuted(!groupConversation.isMuted());
-		((Button) v)
-				.setText(groupConversation.isMuted() ? R.string.unmute_group
-						: R.string.mute_group);
-		((Button) v)
-				.setCompoundDrawablesWithIntrinsicBounds(groupConversation
-						.isMuted() ? R.drawable.ic_unmute : R.drawable.ic_mute,
-						0, 0, 0);
+
+		((TextView) v.findViewById(R.id.btn2_txt)).setText(groupConversation
+				.isMuted() ? R.string.unmute_group : R.string.mute_group);
+		((ImageView) v.findViewById(R.id.btn2_img))
+				.setImageResource(groupConversation.isMuted() ? R.drawable.ic_unmute
+						: R.drawable.ic_mute);
 
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.MUTE_CONVERSATION_TOGGLED,

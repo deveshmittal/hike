@@ -154,6 +154,11 @@
 	    <item name="android:layout_width">match_parent</item>
 	    <item name="android:layout_height">wrap_content</item>
 	    <item name="android:background">@drawable/invite_chatthread_button</item>
+	</style>
+	
+	<style name="ProfileButtonTextView">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
 	    <item name="android:textColor">@color/invite_all</item>
 	    <item name="android:textSize">14sp</item>
 	    <item name="android:textStyle">bold|italic</item>
@@ -161,6 +166,7 @@
 	    <item name="android:shadowDy">1.2</item>
 	    <item name="android:shadowRadius">1.2</item>
 	    <item name="android:gravity">center</item>
+	    <item name="android:paddingBottom">1dp</item>
 	</style>
 	
 	<style name="FavoriteButtons">

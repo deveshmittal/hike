@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
@@ -36,6 +35,7 @@ public class ProfileAdapter extends BaseAdapter {
 
 	public static final String GROUP_HEADER_ID = "-1";
 	public static final String GROUP_BUTTON_ID = "-2";
+	public static final String GROUP_LEAVE_BUTTON_ID = "-3";
 
 	private static enum ViewType {
 		HEADER, BUTTONS, STATUS, GROUP_PARTICIPANT, EMPTY_STATUS
@@ -49,7 +49,6 @@ public class ProfileAdapter extends BaseAdapter {
 	private Bitmap profilePreview;
 	private boolean groupProfile;
 	private boolean myProfile;
-	private boolean hasSMSUser;
 	private int numParticipants;
 	private boolean isContactBlocked;
 
@@ -84,7 +83,8 @@ public class ProfileAdapter extends BaseAdapter {
 					.getContactInfo();
 			if (GROUP_HEADER_ID.equals(contactInfo.getId())) {
 				viewType = ViewType.HEADER;
-			} else if (GROUP_BUTTON_ID.equals(contactInfo.getId())) {
+			} else if (GROUP_BUTTON_ID.equals(contactInfo.getId())
+					|| GROUP_LEAVE_BUTTON_ID.equals(contactInfo.getId())) {
 				viewType = ViewType.BUTTONS;
 			} else {
 				viewType = ViewType.GROUP_PARTICIPANT;
@@ -164,8 +164,6 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
 				viewHolder.icon = (ImageView) v
 						.findViewById(R.id.change_profile);
-				viewHolder.editGroupName = (ImageButton) v
-						.findViewById(R.id.edit_group_name);
 				viewHolder.requestLayout = (ViewGroup) v
 						.findViewById(R.id.request_layout);
 
@@ -181,10 +179,25 @@ public class ProfileAdapter extends BaseAdapter {
 			case BUTTONS:
 				v = inflater.inflate(R.layout.profile_btns_item, null);
 
-				viewHolder.btn1 = (Button) v.findViewById(R.id.btn1);
-				viewHolder.btn2 = (Button) v.findViewById(R.id.btn2);
-				viewHolder.btn3 = (Button) v.findViewById(R.id.btn3);
+				viewHolder.btnContainer1 = v.findViewById(R.id.btn1);
+				viewHolder.btnContainer2 = v.findViewById(R.id.btn2);
+				viewHolder.btnContainer3 = v.findViewById(R.id.btn3);
 
+				viewHolder.btnText1 = (TextView) v.findViewById(R.id.btn1_txt);
+				viewHolder.btnText2 = (TextView) v.findViewById(R.id.btn2_txt);
+				viewHolder.btnText3 = (TextView) v.findViewById(R.id.btn3_txt);
+
+				viewHolder.btnImage1 = (ImageView) v
+						.findViewById(R.id.btn1_img);
+				viewHolder.btnImage2 = (ImageView) v
+						.findViewById(R.id.btn2_img);
+				viewHolder.btnImage3 = (ImageView) v
+						.findViewById(R.id.btn3_img);
+
+				viewHolder.divContainer1 = (ViewGroup) v
+						.findViewById(R.id.div_container_1);
+				viewHolder.divContainer2 = (ViewGroup) v
+						.findViewById(R.id.div_container_2);
 				viewHolder.btnDivider = v.findViewById(R.id.btn_divider);
 				viewHolder.marginView = v.findViewById(R.id.margin_view);
 
@@ -250,12 +263,10 @@ public class ProfileAdapter extends BaseAdapter {
 			if (groupParticipant != null) {
 				msisdn = groupConversation.getMsisdn();
 				name = groupConversation.getLabel();
-				viewHolder.editGroupName.setVisibility(View.VISIBLE);
 			} else {
 				msisdn = mContactInfo.getMsisdn();
 				name = TextUtils.isEmpty(mContactInfo.getName()) ? mContactInfo
 						.getMsisdn() : mContactInfo.getName();
-				viewHolder.editGroupName.setVisibility(View.GONE);
 			}
 
 			viewHolder.text.setText(name);
@@ -306,7 +317,7 @@ public class ProfileAdapter extends BaseAdapter {
 								R.string.on_hike_since,
 								mContactInfo.getFormattedHikeJoinTime()));
 					} else {
-						viewHolder.subText.setVisibility(View.GONE);
+						viewHolder.subText.setVisibility(View.INVISIBLE);
 					}
 				} else {
 					viewHolder.subText.setVisibility(View.VISIBLE);
@@ -318,48 +329,63 @@ public class ProfileAdapter extends BaseAdapter {
 
 		case BUTTONS:
 			if (groupParticipant != null) {
-				viewHolder.btn1
-						.setVisibility(numParticipants < HikeConstants.MAX_CONTACTS_IN_GROUP ? View.VISIBLE
-								: View.GONE);
-				viewHolder.btn2.setVisibility(View.VISIBLE);
-				viewHolder.btn3.setVisibility(hasSMSUser ? View.VISIBLE
-						: View.GONE);
-				viewHolder.marginView.setVisibility(hasSMSUser ? View.VISIBLE
-						: View.GONE);
+				if (groupParticipant.getContactInfo().getId()
+						.equals(GROUP_BUTTON_ID)) {
+					viewHolder.btnContainer1
+							.setVisibility(numParticipants < HikeConstants.MAX_CONTACTS_IN_GROUP ? View.VISIBLE
+									: View.GONE);
+					viewHolder.btnContainer2.setVisibility(View.VISIBLE);
+					viewHolder.btnContainer3.setVisibility(View.GONE);
+					viewHolder.marginView.setVisibility(View.GONE);
 
-				viewHolder.btnDivider
-						.setVisibility(viewHolder.btn1.getVisibility() == View.VISIBLE
-								&& viewHolder.btn2.getVisibility() == View.VISIBLE ? View.VISIBLE
-								: View.GONE);
+					viewHolder.btnDivider
+							.setVisibility(viewHolder.btnContainer1
+									.getVisibility() == View.VISIBLE
+									&& viewHolder.btnContainer2.getVisibility() == View.VISIBLE ? View.VISIBLE
+									: View.GONE);
 
-				viewHolder.btn1.setText(R.string.add_member);
-				viewHolder.btn2
-						.setText(groupConversation.isMuted() ? R.string.unmute_group
-								: R.string.mute_group);
-				viewHolder.btn3.setText(R.string.invite_all_members);
+					viewHolder.btnText1.setText(R.string.add_member);
+					viewHolder.btnText2
+							.setText(groupConversation.isMuted() ? R.string.unmute_group
+									: R.string.mute_group);
 
-				viewHolder.btn1.setCompoundDrawablesWithIntrinsicBounds(
-						R.drawable.ic_add_member, 0, 0, 0);
-				viewHolder.btn2.setCompoundDrawablesWithIntrinsicBounds(
-						groupConversation.isMuted() ? R.drawable.ic_unmute
-								: R.drawable.ic_mute, 0, 0, 0);
-				viewHolder.btn1.setCompoundDrawablesWithIntrinsicBounds(
-						R.drawable.ic_invite_all_members, 0, 0, 0);
+					viewHolder.btnImage1
+							.setImageResource(R.drawable.ic_add_member);
+					viewHolder.btnImage2.setImageResource(groupConversation
+							.isMuted() ? R.drawable.ic_unmute
+							: R.drawable.ic_mute);
+				} else {
+					viewHolder.btnContainer1.setVisibility(View.GONE);
+					viewHolder.btnContainer2.setVisibility(View.GONE);
+					viewHolder.btnContainer3.setVisibility(View.VISIBLE);
+					viewHolder.marginView.setVisibility(View.GONE);
 
-				v.setBackgroundResource(R.drawable.thatch_repeat);
+					viewHolder.btnDivider.setVisibility(View.GONE);
+
+					viewHolder.btnText3.setText(R.string.leave_group);
+
+					viewHolder.btnImage3
+							.setImageResource(R.drawable.ic_leave_group);
+				}
+				v.setBackgroundResource(R.color.seen_timeline_item);
+				viewHolder.divContainer1.setVisibility(View.VISIBLE);
+				viewHolder.divContainer2.setVisibility(View.GONE);
 			} else {
-				viewHolder.btn1.setVisibility(View.GONE);
-				viewHolder.btn2.setVisibility(View.GONE);
+				viewHolder.btnContainer1.setVisibility(View.GONE);
+				viewHolder.btnContainer2.setVisibility(View.GONE);
 				viewHolder.container.setVisibility(View.GONE);
 
 				viewHolder.marginView.setVisibility(View.GONE);
 
-				viewHolder.btn3.setText(myProfile ? R.string.post_status
+				viewHolder.btnContainer3.setVisibility(View.VISIBLE);
+				viewHolder.btnText3.setText(myProfile ? R.string.post_status
 						: R.string.send_message);
-				viewHolder.btn3.setCompoundDrawablesWithIntrinsicBounds(
-						myProfile ? R.drawable.ic_post_status
-								: R.drawable.ic_msg_small, 0, 0, 0);
+				viewHolder.btnImage3
+						.setImageResource(myProfile ? R.drawable.ic_post_status
+								: R.drawable.ic_msg_small);
 				v.setBackgroundResource(R.color.seen_timeline_item);
+				viewHolder.divContainer1.setVisibility(View.GONE);
+				viewHolder.divContainer2.setVisibility(View.VISIBLE);
 			}
 			break;
 
@@ -418,13 +444,15 @@ public class ProfileAdapter extends BaseAdapter {
 			}
 			if (statusMessage.hasMood()) {
 				viewHolder.icon.setBackgroundDrawable(null);
-				viewHolder.icon.setImageResource(Utils
-						.getMoodsResource()[statusMessage.getMoodId()]);
+				viewHolder.icon
+						.setImageResource(Utils.getMoodsResource()[statusMessage
+								.getMoodId()]);
 			} else {
 				viewHolder.icon
 						.setBackgroundResource(R.drawable.bg_status_type);
 			}
-			LayoutParams lp = (LayoutParams) viewHolder.subText.getLayoutParams();
+			LayoutParams lp = (LayoutParams) viewHolder.subText
+					.getLayoutParams();
 			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC
 					|| viewHolder.text.getLineCount() > 1) {
 				lp.topMargin = 0;
@@ -485,13 +513,22 @@ public class ProfileAdapter extends BaseAdapter {
 		ImageView icon;
 		Button btn1;
 		Button btn2;
-		Button btn3;
 		ViewGroup container;
 		View btnDivider;
-		ImageButton editGroupName;
 		ViewGroup requestLayout;
 		View marginView;
 		ViewGroup contentContainer;
+		View btnContainer1;
+		View btnContainer2;
+		View btnContainer3;
+		TextView btnText1;
+		TextView btnText2;
+		TextView btnText3;
+		ImageView btnImage1;
+		ImageView btnImage2;
+		ImageView btnImage3;
+		ViewGroup divContainer1;
+		ViewGroup divContainer2;
 	}
 
 	@Override
@@ -523,10 +560,6 @@ public class ProfileAdapter extends BaseAdapter {
 	public void updateContactInfo(ContactInfo contactInfo) {
 		this.mContactInfo = contactInfo;
 		notifyDataSetChanged();
-	}
-
-	public void setHasSmsUser(boolean hasSMSUser) {
-		this.hasSMSUser = hasSMSUser;
 	}
 
 	public void setNumParticipants(int numParticipants) {

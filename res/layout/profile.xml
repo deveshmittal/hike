@@ -54,13 +54,6 @@
                     android:divider="@null"
                     android:fadingEdge="none" />
 
-                <ImageView
-                    android:id="@+id/group_list_drop_shadow"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:scaleType="fitXY"
-                    android:src="@drawable/conversation_list_drop_shadow"
-                    android:visibility="gone" />
             </LinearLayout>
         </LinearLayout>
 
