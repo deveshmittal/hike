@@ -804,7 +804,7 @@ public class MessagesList extends DrawerBaseActivity implements
 		mqttDialog.show();
 	}
 
-	private ArrayList<ConvMessage> receivedMsgWhileAnimating = new ArrayList<ConvMessage>();
+	private ArrayList<Pair<Conversation, ConvMessage>> receivedMsgWhileAnimating = new ArrayList<Pair<Conversation, ConvMessage>>();
 
 	private boolean refreshAfterAnimation;
 
@@ -859,20 +859,17 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 			if (parentLayout.isAnimating()) {
 				refreshAfterAnimation = true;
-				receivedMsgWhileAnimating.add(message);
+				receivedMsgWhileAnimating
+						.add(new Pair<Conversation, ConvMessage>(conv, message));
 				return;
 			}
 
-			/*
-			 * Ensuring the message's conversation is not null;
-			 */
-			message.setConversation(conv);
-
 			final ConvMessage finalMessage = message;
+
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					addMessage(finalMessage);
+					addMessage(conv, finalMessage);
 
 					messageRefreshHandler.removeCallbacks(MessagesList.this);
 					messageRefreshHandler.postDelayed(MessagesList.this, 100);
@@ -1108,8 +1105,7 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 	}
 
-	private void addMessage(ConvMessage convMessage) {
-		Conversation conv = convMessage.getConversation();
+	private void addMessage(Conversation conv, ConvMessage convMessage) {
 		if (!mConversationsAdded.contains(conv.getMsisdn())) {
 			mConversationsAdded.add(conv.getMsisdn());
 			mAdapter.add(conv);
@@ -1124,12 +1120,14 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 	}
 
-	private void showReceivedMessages(final List<ConvMessage> convMessageList) {
+	private void showReceivedMessages(
+			final List<Pair<Conversation, ConvMessage>> convMessageList) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				for (ConvMessage convMessage : convMessageList) {
-					addMessage(convMessage);
+				for (Pair<Conversation, ConvMessage> conversationConvMessagePair : convMessageList) {
+					addMessage(conversationConvMessagePair.first,
+							conversationConvMessagePair.second);
 				}
 				messageRefreshHandler.removeCallbacks(MessagesList.this);
 				messageRefreshHandler.postDelayed(MessagesList.this, 100);
