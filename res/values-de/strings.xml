@@ -25,7 +25,6 @@
     <string name="image_failed">Bild konnte nicht geöffnet werden</string>
     <string name="block_title">Sperren</string>
     <string name="unblock_title">Entsperren</string>
-    <string name="invite_message">Hallo! Ich benutze hike, eine tolle neue kostenlose Messaging-App von Bharti SoftBank. Lade die App auf http://get.hike.in/%1$s herunter, um mir kostenlos Nachrichten zu senden!</string>
 	<string name="feedback">Feedback</string>
 	<string name="sending_feedback">Feedback senden</string>
 	<string name="sending_feedback_failed">Kann Feedback nicht senden</string>
@@ -200,14 +199,12 @@
 	<string name="email_subtext">Per E-Mail einladen</string>
 	<string name="other_subtext">Einladungs-URL anfordern</string>
 	<string name="email_subject">hike. Gratis Messaging mit Spaß, ein Leben lang</string>
-	<string name="twitter_msg">Ich benutze @hikeapp, eine tolle neue kostenlose neue Messaging-App! Lade die App auf http://get.hike.in/%1$s herunter, um mir kostenlos Nachrichten zu senden!</string>
 	<string name="facebook_msg">Ich habe angefangen, hike zu benutzen, eine tolle neue kostenlose neue Messaging-App. Du kannst Freunden die bei hike sind, und auch denen, die es noch nicht sind, kostenlos Nachrichten schicken! Messaging war noch nie simpler. Lade die App auf http://get.hike.in/%1$s herunter, um mir kostenlos Nachrichten zu senden!</string>
 	<string name="gps_disabled">Für genauere Ortsbestimmung, GPS einschalten.</string>
 	<string name="twitter_post_success">Auf deine Chronik gepostet.</string>
 	<string name="twitter_post_fail">Konnte nicht auf deine Chronik posten.</string>
 	<string name="fb_post_success">Nachricht auf deine Pinnwand gepostet.</string>
 	<string name="fb_post_fail">Konnte nicht auf deine Pinnwand posten.</string>
-	<string name="facebook_description">Noch nie war Messaging einfacher als mit hike. Schicke Freunden weltweit Nachrichten, auch denen, die hike nicht installiert haben. Und das kostenlos :)</string>
 	<string name="vibrate">Vibrieren</string>
 	<string name="vibrate_msg">Bei neuer Nachricht vibrieren</string>
 	<string name="sound">Ton</string>
