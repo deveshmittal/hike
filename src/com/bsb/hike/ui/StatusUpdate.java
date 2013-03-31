@@ -22,6 +22,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -130,7 +132,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		String statusHint = getStatusDefaultHint();
 
 		statusTxt.setHint(statusHint);
-		statusTxt.setText("");
 
 		charCounter.setText(Integer
 				.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
@@ -168,9 +169,21 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		if (mActivityTask.emojiShowing) {
 			showEmojiSelector();
+			getWindow()
+					.setSoftInputMode(
+							WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+									| WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 		} else if (mActivityTask.moodShowing) {
 			showMoodSelector();
+			getWindow()
+					.setSoftInputMode(
+							WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+									| WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 		} else {
+			getWindow()
+					.setSoftInputMode(
+							WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE
+									| WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 			toggleEnablePostButton();
 		}
 
@@ -566,7 +579,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		boolean portrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 		int columns = portrait ? 4 : 6;
-		
+
 		moodPager.setNumColumns(columns);
 		MoodAdapter moodAdapter = new MoodAdapter(this, columns);
 		moodPager.setAdapter(moodAdapter);
