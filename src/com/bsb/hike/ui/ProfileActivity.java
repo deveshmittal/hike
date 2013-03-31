@@ -1488,6 +1488,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			overridePendingTransition(R.anim.slide_in_left_noalpha,
 					R.anim.slide_out_right_noalpha);
+		} else {
+			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
 		}
 		startActivity(intent);
 	}

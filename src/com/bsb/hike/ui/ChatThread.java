@@ -618,6 +618,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					&& !getIntent().hasExtra(
 							HikeConstants.Extras.FORWARD_MESSAGE)
 					&& !getIntent().getBooleanExtra(
+							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)
+					&& !getIntent().getBooleanExtra(
 							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)) {
 				intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
