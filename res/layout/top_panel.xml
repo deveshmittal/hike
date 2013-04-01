@@ -38,6 +38,7 @@
         android:textColor="@drawable/top_bar_btn_txt_selector"
         android:textSize="16dp"
         android:textStyle="bold"
+        android:paddingBottom="@dimen/top_btn_padding"
         android:visibility="gone" />
     
     <View
@@ -141,6 +142,7 @@
             android:textColor="@drawable/top_bar_btn_txt_selector"
             android:textSize="16dp"
             android:textStyle="bold"
+            android:paddingBottom="@dimen/top_btn_padding"
             android:visibility="gone" />
 
         <View
