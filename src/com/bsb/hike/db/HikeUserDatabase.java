@@ -966,6 +966,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			blockedContactList.add(new Pair<AtomicBoolean, ContactInfo>(
 					new AtomicBoolean(false), contactInfo));
 		}
+		c.close();
 
 		Collections.sort(blockedContactList,
 				new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
