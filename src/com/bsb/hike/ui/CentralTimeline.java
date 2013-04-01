@@ -192,7 +192,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 											.currentTimeMillis() / 1000));
 		}
 
-		String name = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
+		String name = Utils.getFirstName(prefs.getString(
+				HikeMessengerApp.NAME_SETTING, null));
 		String lastStatus = prefs.getString(HikeMessengerApp.LAST_STATUS, "");
 
 		/*
