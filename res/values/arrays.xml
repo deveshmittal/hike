@@ -1160,7 +1160,7 @@
 	<string-array name="mood_headings">
 	    <item>Happy</item>
 	    <item>Sad</item>
-	    <item>In Love</item>
+	    <item>In love</item>
 	    <item>Surprised</item>
 	    <item>Confused</item>
 	    <item>Angry</item>
@@ -1170,14 +1170,14 @@
 	    <item>Studying</item>
 	    <item>Busy</item>
 	    <item>Love</item>
-	    <item>Middle Finger</item>
+	    <item>Middle finger</item>
 	    <item>Boozing</item>
-	    <item>In a Movie</item>
+	    <item>In a movie</item>
 	    <item>Caffeinated</item>
 	    <item>Insomniac</item>
 	    <item>Driving</item>
-	    <item>Stuck in Traffic</item>
-	    <item>Running Late</item>
+	    <item>Stuck in traffic</item>
+	    <item>Running late</item>
 	    <item>Shopping</item>
 	    <item>Gaming</item>
 	    <item>Coding</item>
