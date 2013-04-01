@@ -389,6 +389,8 @@
 	<string name="fetching_info">Infos werden eingeholt...</string>
 	<string name="call_not_free_head">Telefonanbieter erhebt Kosten</string>
 	<string name="call_not_free_body">Dein Telefonanbieter erhebt möglicherweise Kosten für diesen Anruf.</string>
+	<string name="no_credits_gc">Du hast keine Frei-SMS mehr. SMS-Benutzer werden deine Nachrichten nicht mehr erhalten.</string>
+	<string name="added_as_friend">%1$s hat dich als Freund hinzugefügt.</string>
 	<string name="not_now">Nicht jetzt</string>
 	<string name="delete_status">Update löschen</string>
 	<string name="delete_status_confirmation">Möchtest du dieses Update sicher löschen?</string>
@@ -433,12 +435,12 @@
 	<string name="no_status_recently">Du hast in letzter Zeit keine Updates gepostet.</string>
 	<string name="friends_on_hike_tut">Freunde bei hike</string>
 	
-	<string name="meet_hike">Meet hike</string>
-	<string name="remove_circle">Remove from Circle of Friends</string>
-	<string name="add_hike_friend">View friends</string>
+	<string name="meet_hike">Über hike</string>
+	<string name="remove_circle">Entfernen von Circle of Friends</string>
+	<string name="add_hike_friend">Freundeskreis anzeigen</string>
 	<string name="email_body">Hi!\n\nIch habe nun hike, ein kooles neues Messaging-app. Sir können hike von get.hike.in herunterladen.\n\nhike hat einige vergnügte Emotikons. Sie können auch Status updates zu Ihren besten Freundenkreis posten. Denken Sie an es wie BBM für Nicht-Blackberry Handys, jedoch viel besser!\n\nBekkomen Sie das alles von hike und verlassen Sie die einfachen langweiligen Sms!</string>
-	<string name="file_expire">This file no longer exists.</string>
-	<string name="friends_on_hike_tut_info">Tap on the button to see friends on hike</string>
+	<string name="file_expire">Diese Datei existiert nicht mehr.</string>
+	<string name="friends_on_hike_tut_info">Tippen Sie auf die Schaltfläche, um Freunde auf hike sehen</string>
 	<string name="twitter_msg">Ich benutzt @hikeapp 2.0 mit Status updates und Launen. Einfache und schöne Nachrichten. Total kostenlos.</string>
 	<string name="facebook_description">Hi!\n\nIch habe nun hike, ein kooles neues Messaging-app. Sir können hike von get.hike.in herunterladen.\n\nhike hat einige vergnügte Emotikons. Sie können auch Status updates zu Ihren besten Freundenkreis posten. Denken Sie an es wie BBM für Nicht-Blackberry Handys, jedoch viel besser!</string>
 	<string name="invite_message">Hey! Lade hike 2.0 nun mit Status updates herunter! - get.hike.in</string>	
