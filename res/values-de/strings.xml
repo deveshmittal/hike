@@ -324,7 +324,7 @@
 	<string name="fb_fetch_image_error">Facebook-Daten konnten nicht abgerufen werden.</string>
 	<string name="no_mail_app">Keine App zum Senden einer Nachricht gefunden.</string>
 	<string name="my_profile">Profil</string>
-	<string name="not_on_hike">%1$s verpasst die ganze Action. Hilf ihm hike beizutreten.</string>
+	<string name="not_on_hike">%1$s verpasst die ganze Action. Hilf %1$s hike beizutreten.</string>
 	<string name="add_as_friend_info">Um Updates von %1$s zu sehen, musst du %1$s zu deinen Kontakten hinzufügen.</string>
 	<string name="add_as_friend">Als Freund hinzufügen</string>
 	<string name="updating_status">Status wird aktualisiert</string>
