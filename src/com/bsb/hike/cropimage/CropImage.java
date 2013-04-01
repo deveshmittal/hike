@@ -302,9 +302,17 @@ public class CropImage extends MonitoredActivity {
 		/* If the output is required to a specific size then scale or fill */
 		if (mOutputX != 0 && mOutputY != 0) {
 			if (mScale) {
-				/* Scale the image to the required dimensions */
-				croppedImage = Util.transform(new Matrix(), croppedImage,
-						mOutputX, mOutputY, mScaleUp);
+				/*
+				 * This throws an NPE for low end phones when their memory runs
+				 * low.
+				 */
+				try {
+					/* Scale the image to the required dimensions */
+					croppedImage = Util.transform(new Matrix(), croppedImage,
+							mOutputX, mOutputY, mScaleUp);
+				} catch (NullPointerException e) {
+					croppedImage = null;
+				}
 			} else {
 
 				/*
@@ -361,20 +369,23 @@ public class CropImage extends MonitoredActivity {
 
 	private void saveOutput(Bitmap croppedImage) {
 		if (mSaveUri != null) {
-			OutputStream outputStream = null;
-			try {
-				outputStream = mContentResolver.openOutputStream(mSaveUri);
-				if (outputStream != null) {
-					croppedImage.compress(mOutputFormat, 100, outputStream);
+			if (croppedImage != null) {
+				OutputStream outputStream = null;
+				try {
+					outputStream = mContentResolver.openOutputStream(mSaveUri);
+					if (outputStream != null) {
+						croppedImage.compress(mOutputFormat, 100, outputStream);
+					}
+				} catch (IOException ex) {
+					// TODO: report error to caller
+					Log.e(TAG, "Cannot open file: " + mSaveUri, ex);
+				} finally {
+					Util.closeSilently(outputStream);
 				}
-			} catch (IOException ex) {
-				// TODO: report error to caller
-				Log.e(TAG, "Cannot open file: " + mSaveUri, ex);
-			} finally {
-				Util.closeSilently(outputStream);
 			}
 			Bundle extras = new Bundle();
-			extras.putString(MediaStore.EXTRA_OUTPUT, mSaveUri.getPath());
+			extras.putString(MediaStore.EXTRA_OUTPUT,
+					croppedImage == null ? null : mSaveUri.getPath());
 			setResult(RESULT_OK,
 					new Intent(mSaveUri.toString()).putExtras(extras));
 		} else {

@@ -1123,6 +1123,11 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		case HikeConstants.CROP_RESULT:
 			mActivityState.destFilePath = data
 					.getStringExtra(MediaStore.EXTRA_OUTPUT);
+			if (mActivityState.destFilePath == null) {
+				Toast.makeText(getApplicationContext(), R.string.error_setting_profile,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
 			if ((this.profileType == ProfileType.USER_PROFILE)
 					|| (this.profileType == ProfileType.GROUP_INFO)) {
 				saveChanges();

@@ -443,5 +443,6 @@
 	<string name="friends_on_hike_tut_info">Tippen Sie auf die Schaltfläche, um Freunde auf hike sehen</string>
 	<string name="twitter_msg">Ich benutzt @hikeapp 2.0 mit Status updates und Launen. Einfache und schöne Nachrichten. Total kostenlos.</string>
 	<string name="facebook_description">Hi!\n\nIch habe nun hike, ein kooles neues Messaging-app. Sir können hike von get.hike.in herunterladen.\n\nhike hat einige vergnügte Emotikons. Sie können auch Status updates zu Ihren besten Freundenkreis posten. Denken Sie an es wie BBM für Nicht-Blackberry Handys, jedoch viel besser!</string>
-	<string name="invite_message">Hey! Lade hike 2.0 nun mit Status updates herunter! - get.hike.in</string>	
+	<string name="invite_message">Hey! Lade hike 2.0 nun mit Status updates herunter! - get.hike.in</string>
+	<string name="error_setting_profile">Es gab einen Fehler beim Festlegen deinem Profilbild.</string>	
 </resources>
