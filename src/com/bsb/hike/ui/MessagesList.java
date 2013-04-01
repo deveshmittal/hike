@@ -269,8 +269,6 @@ public class MessagesList extends DrawerBaseActivity implements
 		setContentView(R.layout.main);
 		afterSetContentView(savedInstanceState);
 
-		AppRater.appLaunched(this);
-
 		wasAlertCancelled = savedInstanceState != null
 				&& savedInstanceState
 						.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
@@ -423,9 +421,14 @@ public class MessagesList extends DrawerBaseActivity implements
 			toggleTypingNotification(true, msisdn);
 		}
 
-		if (!accountPrefs
-				.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)) {
+		if (!accountPrefs.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)) {
 			findViewById(R.id.friend_intro).setVisibility(View.VISIBLE);
+		} else if (savedInstanceState == null) {
+			/*
+			 * Only show app rater if the tutorial is not being shown an the app
+			 * was just launched i.e not an orientation change
+			 */
+			AppRater.appLaunched(this);
 		}
 	}
 
