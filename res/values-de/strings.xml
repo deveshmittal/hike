@@ -325,7 +325,7 @@
 	<string name="no_mail_app">Keine App zum Senden einer Nachricht gefunden.</string>
 	<string name="my_profile">Profil</string>
 	<string name="not_on_hike">%1$s verpasst die ganze Action. Hilf ihm hike beizutreten.</string>
-	<string name="add_as_friend_info">Du musst mit %1$s befreundet sein, um Statusmeldungen zu erhalten.</string>
+	<string name="add_as_friend_info">Um Updates von %1$s zu sehen, musst du %1$s zu deinen Kontakten hinzufügen.</string>
 	<string name="add_as_friend">Als Freund hinzufügen</string>
 	<string name="updating_status">Status wird aktualisiert</string>
 	<string name="add_member">Mitglied hinzufügen</string>

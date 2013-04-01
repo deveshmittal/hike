@@ -336,7 +336,7 @@
 	<string name="no_mail_app">No app found for sending a mail.</string>
 	<string name="my_profile">My Profile</string>
 	<string name="not_on_hike">%1$s is missing all the action. Help him upgrade to hike.</string>
-	<string name="add_as_friend_info">You need to be friends with %1$s to be able to get status updates.</string>
+	<string name="add_as_friend_info">You need to be friends with %1$s to be able to get %1$s\'s status updates.</string>
 	<string name="add_as_friend">Add as friend</string>
 	<string name="updating_status">Updating status</string>
 	<string name="add_member">Add a member</string>
