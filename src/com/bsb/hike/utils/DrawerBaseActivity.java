@@ -202,6 +202,13 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			});
 		} else if (HikePubSub.FREE_SMS_TOGGLED.equals(type)) {
 			HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_RECENTS, null);
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					parentLayout.setUpLeftDrawerView();
+				}
+			});
 		} else if (HikePubSub.TOGGLE_REWARDS.equals(type)) {
 			runOnUiThread(new Runnable() {
 
