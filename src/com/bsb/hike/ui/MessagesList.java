@@ -445,12 +445,12 @@ public class MessagesList extends DrawerBaseActivity implements
 					if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP1)) {
 						data.put(HikeConstants.LogEvent.NUX_SKIP1, accountPrefs
 								.getBoolean(HikeConstants.LogEvent.NUX_SKIP1,
-										false));
+										false) ? 1 : 0);
 					}
 					if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)) {
 						data.put(HikeConstants.LogEvent.NUX_SKIP2, accountPrefs
 								.getBoolean(HikeConstants.LogEvent.NUX_SKIP2,
-										false));
+										false) ? 1 : 0);
 					}
 					data.put(HikeConstants.LogEvent.TAG, "mob");
 
