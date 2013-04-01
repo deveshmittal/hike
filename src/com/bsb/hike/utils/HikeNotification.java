@@ -179,7 +179,8 @@ public class HikeNotification {
 		String message = null;
 		String text = null;
 		if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
-			message = "\"" + statusMessage.getText() + "\"";
+			message = context.getString(R.string.status_text_notification, "\""
+					+ statusMessage.getText() + "\"");
 			/*
 			 * Jellybean has added support for emojis so we don't need to add a
 			 * '*' to replace them
@@ -189,8 +190,7 @@ public class HikeNotification {
 				message = SmileyParser.getInstance().replaceEmojiWithCharacter(
 						message, "*");
 			}
-			text = context.getString(R.string.status_text_notification, key,
-					message);
+			text = key + " " + message;
 		} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 			message = context
 					.getString(R.string.status_profile_pic_notification);

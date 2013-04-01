@@ -411,7 +411,7 @@
 	<string name="joined_hike_new">%1$s just joined hike, say \'Hi\' :)</string>
 	<string name="user_added_contact_as_friend">Added as a friend</string>
 	<string name="tap_here_block">Tap here to block this number</string>
-	<string name="status_text_notification">%1$s wrote %2$s</string>
+	<string name="status_text_notification">wrote %1$s</string>
 	<string name="status_profile_pic_notification">Changed profile picture</string>
 	<string name="status_updates">Status updates</string>
 	<string name="default_status">Tap here to update your status.</string>

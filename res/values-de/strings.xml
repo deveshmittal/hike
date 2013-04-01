@@ -400,7 +400,7 @@
 	<string name="joined_hike_new">%1$s hat sich gerade bei hike angemeldet, sag doch \'Hallo\' :)</string>
 	<string name="user_added_contact_as_friend">Als Freund hinzugefügt</string>
 	<string name="tap_here_block">Hier tippen, um diese Nummer zu sperren.</string>
-	<string name="status_text_notification">%1$s hat %2$s geschrieben.</string>
+	<string name="status_text_notification">schrieb %1$s</string>
 	<string name="status_profile_pic_notification">Hat das Profilbild geändert</string>
 	<string name="status_updates">Statusmeldungen</string>
 	<string name="default_status">Hier tippen, um deinen Status zu aktualisieren.</string>
