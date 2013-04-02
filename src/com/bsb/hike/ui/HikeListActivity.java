@@ -280,7 +280,7 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 			}
 
 			if (!selectedContacts.isEmpty()
-					|| (v != null && v.getId() == R.id.title_icon_left)) {
+					|| (type == Type.NUX1 || type == Type.NUX2)) {
 				if (!selectedContacts.isEmpty()) {
 					Toast.makeText(
 							getApplicationContext(),
