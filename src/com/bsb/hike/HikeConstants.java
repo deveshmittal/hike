@@ -326,8 +326,6 @@ public class HikeConstants {
 
 	public static final int MAX_TWITTER_POST_LENGTH = 140;
 
-	public static final String MICROMAX_A78 = "MicromaxA78";
-
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

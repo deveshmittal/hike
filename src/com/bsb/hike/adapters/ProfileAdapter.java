@@ -15,7 +15,6 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -415,12 +414,8 @@ public class ProfileAdapter extends BaseAdapter {
 						.setBackgroundResource(R.drawable.seen_timeline_selector);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
-			if (HikeMessengerApp.isMicromaxA78()) {
-				viewHolder.text.setText(statusMessage.getText());
-			} else {
-				viewHolder.text.setText(smileyParser.addSmileySpans(
-						statusMessage.getText(), true));
-			}
+			viewHolder.text.setText(smileyParser.addSmileySpans(
+					statusMessage.getText(), true));
 			viewHolder.image.setVisibility(View.GONE);
 			viewHolder.subText.setText(statusMessage
 					.getTimestampFormatted(true));

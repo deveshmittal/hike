@@ -28,7 +28,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -230,12 +229,6 @@ public class HikeMessengerApp extends Application implements Listener {
 	private HikeServiceConnection mServiceConnection;
 
 	private boolean mInitialized;
-
-	/*
-	 * Added this boolean to check if the current device is a Micromax A78. This
-	 * device crashes when rendering emoticons.
-	 */
-	private static boolean isMicromaxA78;
 
 	private String token;
 
@@ -451,16 +444,8 @@ public class HikeMessengerApp extends Application implements Listener {
 		} catch (NameNotFoundException e) {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
-
-		String device = Build.MANUFACTURER + Build.MODEL;
-		isMicromaxA78 = HikeConstants.MICROMAX_A78.equalsIgnoreCase(device);
-
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
-	}
-
-	public static boolean isMicromaxA78() {
-		return isMicromaxA78;
 	}
 
 	public void setMoodsResource() {

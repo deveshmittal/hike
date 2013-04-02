@@ -10,7 +10,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -177,12 +176,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.noBtn.setVisibility(View.GONE);
 
 			SmileyParser smileyParser = SmileyParser.getInstance();
-			if (HikeMessengerApp.isMicromaxA78()) {
-				viewHolder.mainInfo.setText(statusMessage.getText());
-			} else {
-				viewHolder.mainInfo.setText(smileyParser.addSmileySpans(
-						statusMessage.getText(), true));
-			}
+			viewHolder.mainInfo.setText(smileyParser.addSmileySpans(
+					statusMessage.getText(), true));
 			break;
 		case PROFILE_PIC:
 			viewHolder.extraInfo.setVisibility(View.GONE);

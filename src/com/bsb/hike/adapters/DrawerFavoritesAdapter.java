@@ -514,12 +514,8 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				viewHolder.text.setText(ssb);
 			} else {
 				viewHolder.textInfo.setVisibility(View.GONE);
-				if (HikeMessengerApp.isMicromaxA78()) {
-					viewHolder.text.setText(status);
-				} else {
-					viewHolder.text.setText(SmileyParser.getInstance()
-							.addSmileySpans(status, true));
-				}
+				viewHolder.text.setText(SmileyParser.getInstance()
+						.addSmileySpans(status, true));
 			}
 			viewHolder.avatarImg.setImageResource(statusDrawableResource);
 			viewHolder.avatarImg
