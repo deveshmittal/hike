@@ -169,7 +169,7 @@
 
                 <com.bsb.hike.view.CustomFontButton
                     android:id="@+id/send_message"
-                    android:layout_width="48dp"
+                    android:layout_width="49dp"
                     android:layout_height="33dp"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"

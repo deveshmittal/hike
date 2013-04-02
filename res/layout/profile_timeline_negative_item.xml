@@ -47,4 +47,10 @@
 
     </LinearLayout>
 
+    <View
+        android:id="@+id/empty_view"
+        android:layout_width="1dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:src="@drawable/ic_not_on_hike" />
 </LinearLayout>
