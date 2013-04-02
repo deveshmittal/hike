@@ -1,13 +1,12 @@
 package com.bsb.hike.utils;
 
-import java.util.ArrayList;
-
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -17,8 +16,10 @@ import android.support.v4.app.TaskStackBuilder;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -36,18 +37,20 @@ public class HikeNotification {
 
 	public static final int BATCH_SU_NOTIFICATION_ID = 9876;
 	private static final long MIN_TIME_BETWEEN_NOTIFICATIONS = 5 * 1000;
+	private static final String SEPERATOR = " ";
 
 	private Context context;
 
 	private NotificationManager notificationManager;
 	private long lastNotificationTime;
-	private ArrayList<Integer> statusNotificationIdList;
+	private SharedPreferences sharedPreferences;
 
 	public HikeNotification(Context context) {
 		this.context = context;
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		this.statusNotificationIdList = new ArrayList<Integer>();
+		this.sharedPreferences = context.getSharedPreferences(
+				HikeMessengerApp.STATUS_NOTIFICATION_SETTING, 0);
 	}
 
 	public void notifyMessage(ContactInfo contactInfo, ConvMessage convMsg) {
@@ -152,7 +155,7 @@ public class HikeNotification {
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);
-		statusNotificationIdList.add(notificationId);
+		addNotificationId(notificationId);
 	}
 
 	public void notifyStatusMessage(StatusMessage statusMessage) {
@@ -207,7 +210,7 @@ public class HikeNotification {
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);
-		statusNotificationIdList.add(notificationId);
+		addNotificationId(notificationId);
 	}
 
 	public void notifyBatchUpdate(String header, String message) {
@@ -226,14 +229,35 @@ public class HikeNotification {
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);
-		statusNotificationIdList.add(notificationId);
+		addNotificationId(notificationId);
+	}
+
+	private void addNotificationId(int id) {
+		String ids = sharedPreferences.getString(HikeMessengerApp.STATUS_IDS,
+				"");
+
+		ids += Integer.toString(id) + SEPERATOR;
+
+		Editor editor = sharedPreferences.edit();
+		editor.putString(HikeMessengerApp.STATUS_IDS, ids);
+		editor.commit();
 	}
 
 	public void cancelAllStatusNotifications() {
-		for (Integer notifId : statusNotificationIdList) {
-			notificationManager.cancel(notifId);
+		String ids = sharedPreferences.getString(HikeMessengerApp.STATUS_IDS,
+				"");
+		String[] idArray = ids.split(SEPERATOR);
+
+		for (String id : idArray) {
+			if (TextUtils.isEmpty(id.trim())) {
+				continue;
+			}
+			notificationManager.cancel(Integer.parseInt(id));
 		}
-		statusNotificationIdList.clear();
+
+		Editor editor = sharedPreferences.edit();
+		editor.remove(HikeMessengerApp.STATUS_IDS);
+		editor.commit();
 	}
 
 	private void showNotification(Intent notificationIntent, int icon,

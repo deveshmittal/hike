@@ -207,6 +207,10 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String FRIEND_INTRO_SHOWN = "friendIntroShown";
 
+	public static final String STATUS_NOTIFICATION_SETTING = "statusNotificationSetting";
+
+	public static final String STATUS_IDS = "statusIds";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
