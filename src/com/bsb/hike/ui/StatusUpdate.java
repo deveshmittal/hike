@@ -22,7 +22,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -82,6 +81,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private EditText statusTxt;
 
 	private Handler handler;
+	private TextView charCounter;
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
@@ -125,7 +125,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		avatar.setImageResource(R.drawable.ic_text_status);
 		avatar.setBackgroundResource(R.drawable.bg_status_type);
 
-		final TextView charCounter = (TextView) findViewById(R.id.char_counter);
+		charCounter = (TextView) findViewById(R.id.char_counter);
 
 		statusTxt = (EditText) findViewById(R.id.status_txt);
 
@@ -415,16 +415,14 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 				v.setSelected(false);
 				return;
 			}
-			setCharCountForStatus(findViewById(R.id.char_counter),
-					(EditText) findViewById(R.id.status_txt), v.isSelected());
+			setCharCountForStatus(v.isSelected());
 			mActivityTask.twitterSelected = v.isSelected();
 		} else {
 			mActivityTask.fbSelected = v.isSelected();
 		}
 	}
 
-	private void setCharCountForStatus(View charCounter, EditText statusTxt,
-			boolean isSelected) {
+	private void setCharCountForStatus(boolean isSelected) {
 		charCounter.setVisibility(View.VISIBLE);
 
 		if (isSelected) {
@@ -613,6 +611,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		if (isEmojiOrMoodLayoutVisible()) {
 			onBackPressed();
 		}
+		setCharCountForStatus(findViewById(R.id.post_twitter_btn).isSelected());
 	}
 
 	private void showCancelButton(boolean moodLayout) {
