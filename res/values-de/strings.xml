@@ -405,7 +405,7 @@
 	<string name="status_updates">Statusmeldungen</string>
 	<string name="default_status">Hier tippen, um deinen Status zu aktualisieren.</string>
 	<string name="tap_here">Hier tippen</string>
-	<string name="default_status_info">(Nur deine Freunde können deine hike-Updates sehen)</string>
+	<string name="default_status_info">(Nur deine Freunde bei hike können deinen Statusmeldungen sehen.)</string>
 	<string name="which_friend_invite">Sende deinen Freunden eine Frei-SMS-Einladung.</string>
 	<string name="free_sms_invite">Frei-SMS-Einladung.</string>
 	<string name="which_family">Sende deiner Familie eine Frei-SMS-Einladung.</string>

@@ -416,7 +416,7 @@
 	<string name="status_updates">Status updates</string>
 	<string name="default_status">Tap here to update your status.</string>
 	<string name="tap_here">Tap here</string>
-	<string name="default_status_info">(Only friends can see your hike updates)</string>
+	<string name="default_status_info">(Only your circle of friends can see your updates)</string>
 	<string name="which_friend_invite">Send your friends a free SMS invite.</string>
 	<string name="free_sms_invite">free SMS invite.</string>
 	<string name="which_family">Send your family a free SMS invite.</string>
