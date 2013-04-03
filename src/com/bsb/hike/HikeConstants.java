@@ -325,6 +325,7 @@ public class HikeConstants {
 	public static final int MAX_PRECHECKED_CONTACTS = 15;
 
 	public static final int MAX_TWITTER_POST_LENGTH = 140;
+	public static final int MAX_MOOD_TWITTER_POST_LENGTH = 130;
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";

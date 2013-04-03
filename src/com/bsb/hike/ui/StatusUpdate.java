@@ -133,9 +133,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		statusTxt.setHint(statusHint);
 
-		charCounter.setText(Integer
-				.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
-						- statusTxt.length()));
+		charCounter.setText(Integer.toString(statusTxt.length()));
 
 		setMood(mActivityTask.moodId);
 
@@ -154,9 +152,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			@Override
 			public void afterTextChanged(Editable s) {
 				toggleEnablePostButton();
-				charCounter.setText(Integer
-						.toString(HikeConstants.MAX_TWITTER_POST_LENGTH
-								- s.length()));
+				charCounter.setText(Integer.toString(s.length()));
 			}
 		});
 		statusTxt.addTextChangedListener(new EmoticonTextWatcher());
@@ -236,6 +232,12 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	public void onMoodClick(View v) {
+		if (findViewById(R.id.post_twitter_btn).isSelected()
+				&& statusTxt.length() > HikeConstants.MAX_MOOD_TWITTER_POST_LENGTH) {
+			Toast.makeText(getApplicationContext(), R.string.mood_tweet_error,
+					Toast.LENGTH_LONG).show();
+			return;
+		}
 		showMoodSelector();
 	}
 
@@ -399,6 +401,13 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 				: R.id.post_twitter_btn);
 		v.setSelected(selection);
 		if (!facebook) {
+			if (mActivityTask.moodId != -1
+					&& statusTxt.length() > HikeConstants.MAX_MOOD_TWITTER_POST_LENGTH) {
+				Toast.makeText(getApplicationContext(),
+						R.string.mood_tweet_error, Toast.LENGTH_LONG).show();
+				v.setSelected(false);
+				return;
+			}
 			if (statusTxt.length() > HikeConstants.MAX_TWITTER_POST_LENGTH) {
 				Toast.makeText(getApplicationContext(),
 						R.string.twitter_length_exceed, Toast.LENGTH_SHORT)
@@ -416,12 +425,13 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	private void setCharCountForStatus(View charCounter, EditText statusTxt,
 			boolean isSelected) {
-		charCounter.setVisibility(isSelected ? View.VISIBLE : View.GONE);
+		charCounter.setVisibility(View.VISIBLE);
 
 		if (isSelected) {
 			statusTxt
 					.setFilters(new InputFilter[] { new InputFilter.LengthFilter(
-							HikeConstants.MAX_TWITTER_POST_LENGTH) });
+							mActivityTask.moodId != -1 ? HikeConstants.MAX_MOOD_TWITTER_POST_LENGTH
+									: HikeConstants.MAX_TWITTER_POST_LENGTH) });
 		} else {
 			statusTxt.setFilters(new InputFilter[] {});
 		}
