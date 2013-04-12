@@ -1550,13 +1550,34 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public int setGroupName(String groupId, String groupname) {
-		if (!doesConversationExist(groupId)) {
-			return 0;
+		Cursor c = null;
+
+		try {
+			c = mDb.query(DBConstants.GROUP_INFO_TABLE,
+					new String[] { DBConstants.GROUP_NAME },
+					DBConstants.GROUP_ID + "=?", new String[] { groupId },
+					null, null, null);
+
+			if (!c.moveToFirst()) {
+				return 0;
+			}
+
+			String existingName = c.getString(c
+					.getColumnIndex(DBConstants.GROUP_NAME));
+
+			if (groupname.equals(existingName)) {
+				return 0;
+			}
+
+			ContentValues values = new ContentValues(1);
+			values.put(DBConstants.GROUP_NAME, groupname);
+			return mDb.update(DBConstants.GROUP_INFO_TABLE, values,
+					DBConstants.GROUP_ID + " = ?", new String[] { groupId });
+		} finally {
+			if (c != null) {
+				c.close();
+			}
 		}
-		ContentValues values = new ContentValues(1);
-		values.put(DBConstants.GROUP_NAME, groupname);
-		return mDb.update(DBConstants.GROUP_INFO_TABLE, values,
-				DBConstants.GROUP_ID + " = ?", new String[] { groupId });
 	}
 
 	public String getParticipantName(String groupId, String msisdn) {
