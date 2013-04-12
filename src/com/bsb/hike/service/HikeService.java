@@ -562,6 +562,8 @@ public class HikeService extends Service {
 
 		@Override
 		public void onChange(boolean selfChange) {
+			Log.d(getClass().getSimpleName(), "Contact content observer called");
+
 			HikeService.this.mContactsChangedHandler
 					.removeCallbacks(mContactsChanged);
 			HikeService.this.mContactsChangedHandler.postDelayed(

@@ -138,6 +138,8 @@ public class ContactUtils {
 			for (String string : hike_contacts_by_id.keySet()) {
 				ids_json.put(string);
 			}
+			Log.d("ContactUtils", "New contacts:" + new_contacts_by_id.size()
+					+ " DELETED contacts: " + ids_json.length());
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(
 					new_contacts_by_id, ids_json);
 
