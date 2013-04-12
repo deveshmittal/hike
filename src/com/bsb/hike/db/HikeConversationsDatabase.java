@@ -929,15 +929,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				String messageString = c.getString(msgColumn);
 				String metadata = c.getString(metadataColumn);
 
-				/*
-				 * If the message does not contain any text or metadata, its an
-				 * empty message and the conversation is blank.
-				 */
-				if (TextUtils.isEmpty(messageString)
-						&& TextUtils.isEmpty(metadata)) {
-					continue;
-				}
-
 				if (!Utils.isGroupConversation(msisdn)) {
 					if (msisdns == null) {
 						msisdns = new StringBuilder("(");
@@ -946,20 +937,29 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				}
 				conv = new Conversation(msisdn, convid);
 
-				ConvMessage message = new ConvMessage(messageString, msisdn,
-						c.getInt(tsColumn), ConvMessage.stateValue(c
-								.getInt(msgStatusColumn)),
-						c.getLong(msgIdColumn), c.getLong(mappedMsgIdColumn),
-						c.getString(groupParticipantColumn));
-				try {
-					message.setMetadata(metadata);
-				} catch (JSONException e) {
-					Log.e(HikeConversationsDatabase.class.getName(),
-							"Invalid JSON metadata", e);
-				}
-				message.setConversation(conv);
+				/*
+				 * If the message does not contain any text or metadata, its an
+				 * empty message and the conversation is blank.
+				 */
+				if (!TextUtils.isEmpty(messageString)
+						|| !TextUtils.isEmpty(metadata)) {
+					ConvMessage message = new ConvMessage(messageString,
+							msisdn, c.getInt(tsColumn),
+							ConvMessage.stateValue(c.getInt(msgStatusColumn)),
+							c.getLong(msgIdColumn),
+							c.getLong(mappedMsgIdColumn),
+							c.getString(groupParticipantColumn));
+					try {
+						message.setMetadata(metadata);
+					} catch (JSONException e) {
+						Log.e(HikeConversationsDatabase.class.getName(),
+								"Invalid JSON metadata", e);
+					}
+					message.setConversation(conv);
 
-				conv.addMessage(message);
+					conv.addMessage(message);
+				}
+
 				conversationMap.put(msisdn, conv);
 			}
 			if (msisdns != null) {
