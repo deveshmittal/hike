@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="green">#669933</color>
@@ -14,7 +14,7 @@
     <color name="transparent_black_darker">#DA00</color>
     <color name="offwhite">#F7F7F4</color>
     <color name="signup_blue">#57b2ee</color>
-    <color name="disabled">#60FFFFFF</color>
+    <color name="disabled">#DDF7F7F4</color>
     <color name="subtext">#666666</color>
     <color name="loading">#4797ce</color>
     <color name="profile_item_bckg">#eeeeeb</color>
@@ -24,8 +24,8 @@
     <color name="emoticon_page_bg">#eef7f7f4</color>
     <color name="list_selected">#efefec</color>
     <color name="list_pressed">#eaeae8</color>
-    <color name="other_list_selected">#efefec</color>
-    <color name="other_list_pressed">#eaeae8</color>
+    <color name="other_list_selected">#ffffff</color>
+    <color name="other_list_pressed">#e6e6e3</color>
     <color name="invite_all">#9c9a93</color>
     <color name="send_blue">#a1cfe6</color>
     <color name="send_green">#c7d9a3</color>
@@ -55,4 +55,21 @@
     <color name="drawer_section">#cbc5b9</color>
     <color name="social_btn_txt">#c8c7c2</color>
     <color name="drawer_text">#e7e6e0</color>
+    <color name="status_dialog_bg">#e4e4e2</color>
+    <color name="status_counter">#b9b8b3</color>
+    <color name="status_yes_btn">#31719f</color>
+    <color name="group_item">#444444</color>
+    <color name="group_info">#362f2d</color>
+    <color name="seen_timeline_item_pressed">#d8d8d6</color>
+    <color name="seen_timeline_item">#ededeb</color>
+    <color name="alert_item_pressed">#d6d6d3</color>
+    <color name="setting_item">#444444</color>
+    <color name="contact_item_header">#8c8c8c</color>
+    <color name="gender_unchecked">#9c9a93</color>
+    <color name="profile_hint">#c7c7c5</color>
+    <color name="profile_disabled">#90908e</color>
+    <color name="mood_text">#a4a4a4</color>
+    <color name="mood_selector">#f1f1ee</color>
+    <color name="mood_divider_1">#f7f7f6</color>
+    <color name="mood_divider_2">#e1e1de</color>
 </resources>

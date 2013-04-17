@@ -1,6 +1,6 @@
 package com.bsb.hike.adapters;
 
-import android.content.Context;
+import android.app.Activity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
@@ -43,7 +43,7 @@ public class EmoticonAdapter extends PagerAdapter implements
 	private int EMOTICON_NUM_PAGES;
 
 	private LayoutInflater inflater;
-	private Context context;
+	private Activity activity;
 	private EditText composeBox;
 	private int offset;
 	private int whichSubCategory;
@@ -54,15 +54,15 @@ public class EmoticonAdapter extends PagerAdapter implements
 
 	private final int EMOTICON_SIZE = (int) (27 * Utils.densityMultiplier);
 
-	public EmoticonAdapter(Context context, EditText composeBox,
+	public EmoticonAdapter(Activity activity, EditText composeBox,
 			EmoticonType emoticonType, int whichSubCategory, boolean isPortrait) {
 		MAX_EMOTICONS_PER_PAGE = isPortrait ? MAX_EMOTICONS_PER_PAGE_PORTRAIT
 				: MAX_EMOTICONS_PER_PAGE_LANDSCAPE;
 		MAX_EMOTICONS_PER_ROW = isPortrait ? MAX_EMOTICONS_PER_ROW_PORTRAIT
 				: MAX_EMOTICONS_PER_ROW_LANDSCAPE;
 
-		this.inflater = LayoutInflater.from(context);
-		this.context = context;
+		this.inflater = LayoutInflater.from(activity);
+		this.activity = activity;
 		this.composeBox = composeBox;
 
 		// We want the value to be -1 to signify Recent Emoticons tab
@@ -92,7 +92,6 @@ public class EmoticonAdapter extends PagerAdapter implements
 			EMOTICON_NUM_PAGES = recentEmoticons.length == 0 ? 1
 					: calculateNumPages(recentEmoticons.length);
 		}
-
 	}
 
 	private int calculateNumPages(int numEmoticons) {
@@ -136,6 +135,8 @@ public class EmoticonAdapter extends PagerAdapter implements
 		GridView emoticonGrid = (GridView) emoticonPage
 				.findViewById(R.id.emoticon_grid);
 		emoticonGrid.setNumColumns(MAX_EMOTICONS_PER_ROW);
+		emoticonGrid.setVerticalScrollBarEnabled(false);
+		emoticonGrid.setHorizontalScrollBarEnabled(false);
 		emoticonGrid.setAdapter(new EmoticonPageAdapter(position));
 		emoticonGrid.setOnItemClickListener(this);
 
@@ -162,7 +163,7 @@ public class EmoticonAdapter extends PagerAdapter implements
 
 		public EmoticonPageAdapter(int currentPage) {
 			this.currentPage = currentPage;
-			this.inflater = LayoutInflater.from(context);
+			this.inflater = LayoutInflater.from(activity);
 		}
 
 		@Override
@@ -222,10 +223,10 @@ public class EmoticonAdapter extends PagerAdapter implements
 		int emoticonIndex = (Integer) arg1.getTag();
 		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(
 				emoticonIndex, System.currentTimeMillis());
-		((ChatThread) context).onEmoticonBtnClicked(null, 0);
+		((ChatThread) activity).onEmoticonBtnClicked(null, 0);
 		// We don't add an emoticon if the compose box is near its maximum
 		// length of characters
-		if (composeBox.length() >= context.getResources().getInteger(
+		if (composeBox.length() >= activity.getResources().getInteger(
 				R.integer.max_length_message) - 20) {
 			return;
 		}

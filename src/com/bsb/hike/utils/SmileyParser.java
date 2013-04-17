@@ -19,7 +19,7 @@ import com.bsb.hike.R;
  * to graphical ones.
  */
 public class SmileyParser {
-	private static int MAX_EMOTICONS = 10;
+	private static int MAX_EMOTICONS = 20;
 
 	public static final int[] HIKE_EMOTICONS_SUBCATEGORIES = { 80, 30, 39 };
 
@@ -31,7 +31,7 @@ public class SmileyParser {
 	// Singleton stuff
 	private static SmileyParser sInstance = null;
 
-	private static final float SCALE_FACTOR = 0.8f;
+	private static final float SCALE_FACTOR = 0.85f;
 
 	public static SmileyParser getInstance() {
 		return sInstance;
@@ -194,9 +194,18 @@ public class SmileyParser {
 	 *            afterTextChanged method of the TextWatcher.
 	 */
 	public void addSmileyToEditable(Editable editable, boolean showSmallIcon) {
+		addSmileyToEditable(editable, showSmallIcon, 0, editable.length());
+	}
+
+	public void addSmileyToEditable(Editable editable, boolean showSmallIcon,
+			int startIndex, int length) {
 		Matcher matcher = mPattern.matcher(editable);
 		int count = 0;
 		while (matcher.find() && (count < MAX_EMOTICONS)) {
+			if (matcher.start() < startIndex
+					|| matcher.end() > startIndex + length) {
+				continue;
+			}
 			count++;
 			int resId = mSmileyToRes.get(matcher.group());
 			Drawable smiley = mContext.getResources().getDrawable(resId);

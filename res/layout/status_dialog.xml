@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/status_dialog_bg" >
+
+    <include
+        android:id="@+id/top_panel"
+        layout="@layout/top_panel" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/top_panel" >
+
+        <LinearLayout
+            android:id="@+id/bottom_bar"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal" >
+
+            <ImageButton
+                android:id="@+id/post_fb_btn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:layout_weight="1"
+                android:onClick="onFacebookClick"
+                android:src="@drawable/post_fb" />
+
+            <ImageButton
+                android:id="@+id/post_twitter_btn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:layout_weight="1"
+                android:onClick="onTwitterClick"
+                android:src="@drawable/post_twitter" />
+
+            <ImageButton
+                android:id="@+id/emoji_btn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:layout_weight="1"
+                android:onClick="onEmojiClick"
+                android:src="@drawable/ic_emoji_btn" />
+
+            <ImageButton
+                android:id="@+id/mood_btn"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:layout_weight="1"
+                android:onClick="onMoodClick"
+                android:src="@drawable/ic_mood_btn" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/div2"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_above="@id/bottom_bar"
+            android:background="@color/white" />
+        <View
+            android:id="@+id/div1"
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_above="@id/div2"
+            android:background="#bebcb8" />
+
+        <RelativeLayout
+            android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/bottom_bar"
+            android:layout_margin="15dp" >
+
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginRight="15dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_text_status"
+                android:background="@drawable/bg_status_type" />
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/char_counter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="10dp"
+                android:gravity="center"
+                android:shadowColor="@color/white"
+                android:shadowDy="0.7"
+                android:shadowRadius="0.7"
+                android:text="977"
+                android:textColor="@color/status_counter"
+                android:textSize="16sp"
+                android:textStyle="bold|italic" />
+
+            <com.bsb.hike.view.CustomFontEditText
+                android:id="@+id/status_txt"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toLeftOf="@id/char_counter"
+                android:layout_toRightOf="@id/avatar"
+                android:background="@null"
+                android:gravity="top"
+                android:hint="@string/whats_up_user"
+                android:inputType="text|textAutoCorrect|textCapSentences|textMultiLine|"
+                android:textColor="@color/subtext"
+                android:textSize="18sp" />
+
+            <ImageView
+                android:id="@+id/img_inserted"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_below="@id/status_txt"
+                android:layout_toRightOf="@id/avatar"
+                android:src="@drawable/ic_avatar1"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/remove_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignRight="@id/img_inserted"
+                android:layout_alignTop="@id/img_inserted"
+                android:layout_marginRight="2dp"
+                android:layout_marginTop="2dp"
+                android:src="@drawable/ic_remove_img"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+        <include layout="@layout/mood_selector_layout" />
+
+        <LinearLayout
+            android:id="@+id/emoji_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+
+            <include layout="@layout/emoticon_layout" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

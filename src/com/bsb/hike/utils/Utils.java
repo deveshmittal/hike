@@ -68,6 +68,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -86,17 +87,24 @@ import android.view.View.OnTouchListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.cropimage.CropImage;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
@@ -120,12 +128,12 @@ public class Utils {
 
 	private static TranslateAnimation mInFromRight;
 
-	public static float densityMultiplier;
+	public static float densityMultiplier = 1.0f;
 
 	static {
 		shortCodeRegex = Pattern.compile("\\*\\d{3,10}#");
 		msisdnRegex = Pattern.compile("\\[(\\+\\d*)\\]");
-		pinRegex = Pattern.compile("\\d{6}");
+		pinRegex = Pattern.compile("\\d{4,6}");
 	}
 
 	public static String join(Collection<?> s, String delimiter,
@@ -403,23 +411,12 @@ public class Utils {
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.
 
-		StringBuilder path = new StringBuilder(
-				HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
-		switch (type) {
-		case PROFILE:
-			path.append(HikeConstants.PROFILE_ROOT);
-			break;
-		case IMAGE:
-			path.append(HikeConstants.IMAGE_ROOT);
-			break;
-		case VIDEO:
-			path.append(HikeConstants.VIDEO_ROOT);
-			break;
-		case AUDIO:
-			path.append(HikeConstants.AUDIO_ROOT);
+		String path = getFileParent(type);
+		if (path == null) {
+			return null;
 		}
 
-		File mediaStorageDir = new File(path.toString());
+		File mediaStorageDir = new File(path);
 		// This location works best if you want the created images to be shared
 		// between applications and persist after your app has been uninstalled.
 
@@ -455,6 +452,28 @@ public class Utils {
 		return new File(mediaStorageDir, fileName);
 	}
 
+	public static String getFileParent(HikeFileType type) {
+		StringBuilder path = new StringBuilder(
+				HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT);
+		switch (type) {
+		case PROFILE:
+			path.append(HikeConstants.PROFILE_ROOT);
+			break;
+		case IMAGE:
+			path.append(HikeConstants.IMAGE_ROOT);
+			break;
+		case VIDEO:
+			path.append(HikeConstants.VIDEO_ROOT);
+			break;
+		case AUDIO:
+			path.append(HikeConstants.AUDIO_ROOT);
+			break;
+		default:
+			return null;
+		}
+		return path.toString();
+	}
+
 	public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
 		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
 				bitmap.getHeight(), Config.ARGB_8888);
@@ -480,6 +499,7 @@ public class Utils {
 	public static void savedAccountCredentials(AccountInfo accountInfo,
 			SharedPreferences.Editor editor) {
 		AccountUtils.setToken(accountInfo.token);
+		AccountUtils.setUID(accountInfo.uid);
 		editor.putString(HikeMessengerApp.MSISDN_SETTING, accountInfo.msisdn);
 		editor.putString(HikeMessengerApp.TOKEN_SETTING, accountInfo.token);
 		editor.putString(HikeMessengerApp.UID_SETTING, accountInfo.uid);
@@ -776,11 +796,9 @@ public class Utils {
 	 * @param activity
 	 */
 	public static void setDensityMultiplier(Activity activity) {
-		if (Utils.densityMultiplier == 0.0f) {
-			DisplayMetrics metrics = new DisplayMetrics();
-			activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-			Utils.densityMultiplier = metrics.scaledDensity;
-		}
+		DisplayMetrics metrics = new DisplayMetrics();
+		activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		Utils.densityMultiplier = metrics.scaledDensity;
 	}
 
 	public static CharSequence getFormattedParticipantInfo(String info,
@@ -817,10 +835,27 @@ public class Utils {
 	}
 
 	public static ContactInfo getUserContactInfo(SharedPreferences prefs) {
+		return getUserContactInfo(prefs, false);
+	}
+
+	public static ContactInfo getUserContactInfo(SharedPreferences prefs,
+			boolean showNameAsYou) {
 		String myMsisdn = prefs
 				.getString(HikeMessengerApp.MSISDN_SETTING, null);
-		String myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
-		return new ContactInfo(myMsisdn, myMsisdn, myName, myMsisdn, true);
+		long userJoinTime = prefs.getLong(HikeMessengerApp.USER_JOIN_TIME, 0);
+
+		String myName;
+		if (showNameAsYou) {
+			myName = "You";
+		} else {
+			myName = prefs.getString(HikeMessengerApp.NAME_SETTING, null);
+		}
+
+		ContactInfo contactInfo = new ContactInfo(myName, myMsisdn, myName,
+				myMsisdn, true);
+		contactInfo.setHikeJoinTime(userJoinTime);
+
+		return contactInfo;
 	}
 
 	public static boolean wasScreenOpenedNNumberOfTimes(
@@ -920,12 +955,17 @@ public class Utils {
 	/**
 	 * Requests the server to send an account info packet
 	 */
-	public static void requestAccountInfo() {
+	public static void requestAccountInfo(boolean upgrade) {
 		Log.d("Utils", "Requesting account info");
 		JSONObject requestAccountInfo = new JSONObject();
 		try {
 			requestAccountInfo.put(HikeConstants.TYPE,
 					HikeConstants.MqttMessageTypes.REQUEST_ACCOUNT_INFO);
+
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.UPGRADE, upgrade);
+
+			requestAccountInfo.put(HikeConstants.DATA, data);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 					requestAccountInfo);
 		} catch (JSONException e) {
@@ -1125,6 +1165,12 @@ public class Utils {
 
 	public static boolean copyFile(String srcFilePath, String destFilePath,
 			HikeFileType hikeFileType) {
+		/*
+		 * If source and destination have the same path, just return.
+		 */
+		if (srcFilePath.equals(destFilePath)) {
+			return true;
+		}
 		try {
 			InputStream src;
 			if (hikeFileType == HikeFileType.IMAGE) {
@@ -1529,17 +1575,17 @@ public class Utils {
 		}
 	}
 
-	public static void downloadPicasaFile(Context context, File destFile,
-			Uri picasaUri) throws Exception {
+	public static void downloadAndSaveFile(Context context, File destFile,
+			Uri uri) throws Exception {
 		InputStream is = null;
 		OutputStream os = null;
 		try {
 
-			if (isPicasaUri(picasaUri.toString())
-					&& !picasaUri.toString().startsWith("http")) {
-				is = context.getContentResolver().openInputStream(picasaUri);
+			if (isPicasaUri(uri.toString())
+					&& !uri.toString().startsWith("http")) {
+				is = context.getContentResolver().openInputStream(uri);
 			} else {
-				is = new URL(picasaUri.toString()).openStream();
+				is = new URL(uri.toString()).openStream();
 			}
 			os = new FileOutputStream(destFile);
 
@@ -1578,11 +1624,42 @@ public class Utils {
 		return uri;
 	}
 
-	public static boolean isWifiOn(Context context) {
+	public static boolean switchSSLOn(Context context) {
+		/*
+		 * If the preference itself is switched to off, we don't need to check
+		 * if the wifi is on or off.
+		 */
+		if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(
+				HikeConstants.SSL_PREF, true)) {
+			return false;
+		}
 		ConnectivityManager cm = (ConnectivityManager) context
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return (cm != null && cm.getActiveNetworkInfo() != null && (cm
 				.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI));
+	}
+
+	public static boolean renameTempProfileImage(String msisdn) {
+		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		String tempFileName = Utils.getTempProfileImageFileName(msisdn);
+		String newFileName = Utils.getProfileImageFileName(msisdn);
+
+		File tempFile = new File(directory, tempFileName);
+		File newFile = new File(directory, newFileName);
+		return tempFile.renameTo(newFile);
+	}
+
+	public static boolean removeTempProfileImage(String msisdn) {
+		String directory = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		String tempFileName = Utils.getTempProfileImageFileName(msisdn);
+
+		return (new File(directory, tempFileName)).delete();
+	}
+
+	public static String getTempProfileImageFileName(String msisdn) {
+		return getValidFileNameForMsisdn(msisdn) + "_tmp.jpg";
 	}
 
 	public static String getProfileImageFileName(String msisdn) {
@@ -1635,5 +1712,142 @@ public class Utils {
 	public static String getHashedDeviceId(String deviceId)
 			throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		return "and:" + SHA1(deviceId);
+	}
+
+	public static void startCropActivity(Activity activity, String path,
+			String destPath) {
+		/* Crop the image */
+		Intent intent = new Intent(activity, CropImage.class);
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, destPath);
+		intent.putExtra(HikeConstants.Extras.IMAGE_PATH, path);
+		intent.putExtra(HikeConstants.Extras.SCALE, true);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_X,
+				HikeConstants.MAX_DIMENSION_FULL_SIZE_PROFILE_PX);
+		intent.putExtra(HikeConstants.Extras.OUTPUT_Y,
+				HikeConstants.MAX_DIMENSION_FULL_SIZE_PROFILE_PX);
+		intent.putExtra(HikeConstants.Extras.ASPECT_X, 1);
+		intent.putExtra(HikeConstants.Extras.ASPECT_Y, 1);
+		activity.startActivityForResult(intent, HikeConstants.CROP_RESULT);
+	}
+
+	public static long getContactId(Context context, long rawContactId) {
+		Cursor cur = null;
+		try {
+			cur = context.getContentResolver().query(
+					ContactsContract.RawContacts.CONTENT_URI,
+					new String[] { ContactsContract.RawContacts.CONTACT_ID },
+					ContactsContract.RawContacts._ID + "=" + rawContactId,
+					null, null);
+			if (cur.moveToFirst()) {
+				return cur
+						.getLong(cur
+								.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (cur != null) {
+				cur.close();
+			}
+		}
+		return -1l;
+	}
+
+	public static List<ContactInfoData> getContactDataFromHikeFile(
+			HikeFile hikeFile) {
+		List<ContactInfoData> items = new ArrayList<ContactInfoData>();
+
+		JSONArray phoneNumbers = hikeFile.getPhoneNumbers();
+		JSONArray emails = hikeFile.getEmails();
+		JSONArray events = hikeFile.getEvents();
+		JSONArray addresses = hikeFile.getAddresses();
+
+		if (phoneNumbers != null) {
+			for (int i = 0; i < phoneNumbers.length(); i++) {
+				JSONObject data = phoneNumbers.optJSONObject(i);
+				String key = data.names().optString(0);
+				items.add(new ContactInfoData(DataType.PHONE_NUMBER, data
+						.optString(key), key));
+			}
+		}
+
+		if (emails != null) {
+			for (int i = 0; i < emails.length(); i++) {
+				JSONObject data = emails.optJSONObject(i);
+				String key = data.names().optString(0);
+				items.add(new ContactInfoData(DataType.EMAIL, data
+						.optString(key), key));
+			}
+		}
+
+		if (events != null) {
+			for (int i = 0; i < events.length(); i++) {
+				JSONObject data = events.optJSONObject(i);
+				String key = data.names().optString(0);
+				items.add(new ContactInfoData(DataType.EVENT, data
+						.optString(key), key));
+			}
+		}
+
+		if (addresses != null) {
+			for (int i = 0; i < addresses.length(); i++) {
+				JSONObject data = addresses.optJSONObject(i);
+				String key = data.names().optString(0);
+				items.add(new ContactInfoData(DataType.ADDRESS, data
+						.optString(key), key));
+			}
+		}
+		return items;
+	}
+
+	public static int getNotificationCount(SharedPreferences accountPrefs,
+			boolean countUsersStatus) {
+		int notificationCount = 0;
+
+		if (TextUtils.isEmpty(accountPrefs.getString(
+				HikeMessengerApp.LAST_STATUS, ""))
+				&& HikeConversationsDatabase.getInstance()
+						.getTimelineStatusMessageCount() < HikeConstants.MIN_STATUS_COUNT) {
+			notificationCount++;
+		}
+
+		if (HikeUserDatabase.getInstance().getFriendTableRowCount() == 0) {
+			notificationCount++;
+		} else {
+			notificationCount += HikeUserDatabase.getInstance()
+					.getPendingFriendRequestCount();
+		}
+
+		notificationCount += accountPrefs.getInt(
+				HikeMessengerApp.UNSEEN_STATUS_COUNT, 0);
+
+		if (countUsersStatus) {
+			notificationCount += accountPrefs.getInt(
+					HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
+		}
+
+		return notificationCount;
+	}
+
+	/*
+	 * This method returns whether the device is an mdpi or ldpi device. The
+	 * assumption is that these devices are low end and hence a DB call may
+	 * block the UI on those devices.
+	 */
+	public static boolean loadOnUiThread() {
+		return ((int) 10 * Utils.densityMultiplier) > 10;
+	}
+
+	public static void hideSoftKeyboard(Context context, View v) {
+		if (v == null) {
+			return;
+		}
+		InputMethodManager imm = (InputMethodManager) context
+				.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+	}
+
+	public static int[] getMoodsResource() {
+		return HikeMessengerApp.getMoodsResource();
 	}
 }

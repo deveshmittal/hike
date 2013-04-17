@@ -112,7 +112,7 @@ public class HikePubSub implements Runnable {
 	public static final String DELETE_MESSAGE = "deleteMessage";
 
 	/* published when the clients has deleted the message */
-	public static final String MESSAGE_DELETED = "messageDeleted";
+	public static final String LAST_MESSAGE_DELETED = "lastMessageDeleted";
 
 	public static final String MESSAGE_FAILED = "messageFailed";
 
@@ -169,8 +169,8 @@ public class HikePubSub implements Runnable {
 	public static final String REMOVE_MESSAGE_FROM_CHAT_THREAD = "removeMessageFromChatThread";
 
 	public static final String SOCIAL_AUTH_COMPLETED = "socialAuthCompleted";
-	
-	public static final String REMOVE_TWITTER_VIEW = "removeTwitterView";
+
+	public static final String SOCIAL_AUTH_FAILED = "socialAuthFailed";
 
 	public static final String FREE_SMS_TOGGLED = "freeSMSToggled";
 
@@ -189,6 +189,38 @@ public class HikePubSub implements Runnable {
 	public static final String TOGGLE_REWARDS = "toggleRewards";
 
 	public static final String TALK_TIME_CHANGED = "talkTimeChanged";
+
+	public static final String SHOW_STATUS_DIALOG = "showStatusDialog";
+
+	public static final String STATUS_MESSAGE_RECEIVED = "statusMessageReceived";
+
+	public static final String MY_STATUS_CHANGED = "myStatusChanged";
+
+	public static final String RESET_NOTIFICATION_COUNTER = "resetNotificationCounter";
+
+	public static final String FACEBOOK_IMAGE_DOWNLOADED = "facebookImageDownloaded";
+
+	public static final String DECREMENT_NOTIFICATION_COUNTER = "decrementNotificationCounter";
+
+	public static final String FRIEND_REQUEST_ACCEPTED = "friendRequestAccepted";
+
+	public static final String REJECT_FRIEND_REQUEST = "rejectFriendRequest";
+
+	public static final String DELETE_STATUS = "deleteStatus";
+
+	public static final String HIKE_JOIN_TIME_OBTAINED = "hikeJoinTimeObtained";
+
+	public static final String TIMELINE_UPDATE_RECIEVED = "timelineUpdateRecieved";
+
+	public static final String USER_JOIN_TIME_OBTAINED = "userJoinTimeObtained";
+
+	public static final String STATUS_POST_REQUEST_DONE = "statusPostRequestDone";
+
+	public static final String BATCH_STATUS_UPDATE_PUSH_RECEIVED = "batchSUReceived";
+
+	public static final String CANCEL_ALL_STATUS_NOTIFICATIONS = "cancelAllStatusNotifications";
+
+	public static final String DRAWER_ANIMATION_COMPLETE = "drawerAnimationComplete";
 
 	private final Thread mThread;
 

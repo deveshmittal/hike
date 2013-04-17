@@ -1,9 +1,5 @@
 package com.bsb.hike.ui;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
@@ -31,14 +27,10 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
-import com.facebook.android.AsyncFacebookRunner;
-import com.facebook.android.AsyncFacebookRunner.RequestListener;
-import com.facebook.android.FacebookError;
 
-public class CreditsActivity extends AuthSocialAccountBaseActivity implements
-		Listener {
+public class CreditsActivity extends DrawerBaseActivity implements Listener {
 	private TextView mTitleView;
 	private ViewGroup creditsContainer;
 	private SharedPreferences settings;
@@ -75,8 +67,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 	private DeleteSocialCredentialsTask deleteSocialCredentialsTask;
 
 	private String[] pubSubListeners = { HikePubSub.SMS_CREDIT_CHANGED,
-			HikePubSub.INVITEE_NUM_CHANGED, HikePubSub.REMOVE_TWITTER_VIEW,
-			HikePubSub.SOCIAL_AUTH_COMPLETED };
+			HikePubSub.INVITEE_NUM_CHANGED, HikePubSub.SOCIAL_AUTH_COMPLETED };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,13 +76,6 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		currentOffset = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? OFFSET_PORTRAIT
 				: OFFSET_LANDSCAPE;
-
-		if (savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE)) {
-			onTwitterClick(null);
-			return;
-		}
 
 		initalizeViews(savedInstanceState);
 
@@ -160,19 +144,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		freeSms50.setText(ssb);
 
-		freeSmsString = getString(R.string.connect_and_get);
-		textToColor = getString(R.string.free_sms_100);
-		startIndex = freeSmsString.indexOf(textToColor);
-
-		ssb = new SpannableStringBuilder(freeSmsString);
-		ssb.setSpan(
-				new ForegroundColorSpan(getResources().getColor(
-						R.color.unread_message_blue)), startIndex, startIndex
-						+ textToColor.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		freeSms100.setText(ssb);
-
-		mTitleView.setText(R.string.free_sms_txt);
+		mTitleView.setText(R.string.free_messaging_txt);
 
 		updateCredits();
 		setupSocialButtons();
@@ -235,7 +207,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 
 	public void onTwitterClick(View v) {
 		if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
-			startTwitterAuth(true);
+			startActivity(new Intent(this, TwitterAuthActivity.class));
 		} else {
 			showCredentialUnlinkAlert(false);
 		}
@@ -304,15 +276,6 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 					updateCredits();
 				}
 			});
-		} else if (HikePubSub.REMOVE_TWITTER_VIEW.equals(type)) {
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					initalizeViews(null);
-					twitterOAuthView = null;
-				}
-			});
 		} else if (HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type)) {
 			runOnUiThread(new Runnable() {
 
@@ -370,34 +333,6 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 			try {
 				AccountUtils.deleteSocialCredentials(facebook);
 				if (facebook) {
-					AsyncFacebookRunner mAsyncRunner = new AsyncFacebookRunner(
-							HikeMessengerApp.getFacebook());
-					mAsyncRunner.logout(getApplicationContext(),
-							new RequestListener() {
-								@Override
-								public void onMalformedURLException(
-										MalformedURLException arg0, Object arg1) {
-								}
-
-								@Override
-								public void onIOException(IOException arg0,
-										Object arg1) {
-								}
-
-								@Override
-								public void onFileNotFoundException(
-										FileNotFoundException arg0, Object arg1) {
-								}
-
-								@Override
-								public void onFacebookError(FacebookError arg0,
-										Object arg1) {
-								}
-
-								@Override
-								public void onComplete(String arg0, Object arg1) {
-								}
-							});
 
 					HikeMessengerApp.getFacebook().setAccessExpires(0);
 					HikeMessengerApp.getFacebook().setAccessToken("");

@@ -17,15 +17,6 @@
         android:layout="@layout/icon_preference"
         android:summary="@string/sound_msg"
         android:title="@string/sound"
-        android:widgetLayout="@layout/checkbox_widget" />
-
-	<com.bsb.hike.view.IconCheckBoxPreference
-        icon="preference_free_sms"
-        android:defaultValue="true"
-        android:key="freeSmsPref"
-        android:layout="@layout/icon_preference"
-        android:summary="@string/free_sms_msg"
-        android:title="@string/free_sms"
         android:widgetLayout="@layout/checkbox_widget" />    
 
 	<com.bsb.hike.view.IconCheckBoxPreference
@@ -36,5 +27,20 @@
         android:summary="@string/led_notification_info"
         android:title="@string/led_notification"
         android:widgetLayout="@layout/checkbox_widget" />
+
+	<com.bsb.hike.view.IconCheckBoxPreference
+        icon="ic_hike_jingle"
+        android:defaultValue="true"
+        android:key="jinglePref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/native_jingle_info"
+        android:title="@string/native_jingle"
+        android:widgetLayout="@layout/checkbox_widget" />
+	
+	<com.bsb.hike.view.IconPreference
+        icon="ic_status_update_pref"
+        android:key="statusPref"
+        android:layout="@layout/icon_preference"
+        android:title="@string/status_updates" />	
 	
 </PreferenceScreen>

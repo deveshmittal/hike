@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <com.bsb.hike.view.DrawerLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:id="@+id/animation_layout_left_sidebar"
+            android:layout_width="272dp"
+            android:layout_height="match_parent"
+            android:visibility="invisible" >
+
+            <include layout="@layout/left_drawer" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/animation_layout_right_sidebar"
+            android:layout_width="272dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:visibility="invisible" >
+
+            <include layout="@layout/right_drawer" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/animation_layout_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/seen_timeline_item"
+                android:orientation="vertical" >
+
+                <include
+                    android:id="@+id/top_panel_ref"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    layout="@layout/top_panel" />
+
+                <ListView
+                    android:id="@+id/timeline_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cacheColorHint="#00000000"
+                    android:divider="@null"
+                    android:fadingEdge="none"
+                    android:footerDividersEnabled="false"
+                    android:listSelector="@android:color/transparent" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.bsb.hike.view.DrawerLayout>
+
+    <include layout="@layout/profile_image" />
+
+</RelativeLayout>

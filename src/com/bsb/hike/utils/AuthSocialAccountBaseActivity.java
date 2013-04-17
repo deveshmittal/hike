@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import twitter4j.auth.AccessToken;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -21,6 +22,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.view.TwitterOAuthView;
 import com.bsb.hike.view.TwitterOAuthView.Result;
@@ -31,9 +33,10 @@ import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
+public class AuthSocialAccountBaseActivity extends Activity implements
 		DialogListener, TwitterAuthListener {
 
+	public static final int FB_AUTH_REQUEST_CODE = 64206;
 	private static final String CALLBACK_URL = "http://get.hike.in/";
 
 	private HikeHTTPTask hikeHTTPTask;
@@ -91,18 +94,11 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 
 	@Override
 	public void onBackPressed() {
-		if (twitterOAuthView != null) {
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.REMOVE_TWITTER_VIEW, null);
-			return;
-		}
 		super.onBackPressed();
 	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.TWITTER_VIEW_VISIBLE,
-				twitterOAuthView != null);
 		outState.putBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING,
 				facebookAuthPopupShowing);
 		super.onSaveInstanceState(outState);
@@ -128,8 +124,6 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 
 	@Override
 	public void onSuccess(TwitterOAuthView view, AccessToken accessToken) {
-		HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_TWITTER_VIEW,
-				null);
 		Log.d(getClass().getSimpleName(), "TOKEN:  " + accessToken.getToken()
 				+ " SECRET: " + accessToken.getTokenSecret());
 
@@ -150,8 +144,8 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 
 	@Override
 	public void onFailure(TwitterOAuthView view, Result result) {
-		HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_TWITTER_VIEW,
-				null);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
+				false);
 	}
 
 	@Override
@@ -177,10 +171,16 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 			return;
 		} catch (MalformedURLException e1) {
 			Log.e(getClass().getSimpleName(), "Malformed URL", e1);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
+					true);
 		} catch (JSONException e2) {
 			Log.e(getClass().getSimpleName(), "Invalid JSON", e2);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
+					true);
 		} catch (IOException e3) {
 			Log.e(getClass().getSimpleName(), "IOException", e3);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
+					true);
 		}
 	}
 
@@ -188,17 +188,23 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 	public void onFacebookError(FacebookError error) {
 		facebookAuthPopupShowing = false;
 		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
+				true);
 	}
 
 	@Override
 	public void onError(DialogError e) {
 		facebookAuthPopupShowing = false;
 		Toast.makeText(this, R.string.social_failed, Toast.LENGTH_SHORT).show();
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
+				true);
 	}
 
 	@Override
 	public void onCancel() {
 		facebookAuthPopupShowing = false;
+		HikeMessengerApp.getPubSub().publish(HikePubSub.SOCIAL_AUTH_FAILED,
+				true);
 	}
 
 	private void sendCredentialsToServer(String id, String token, long expires,
@@ -217,7 +223,7 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 		Log.d(getClass().getSimpleName(), "Request: " + request.toString());
 		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
 				facebook ? "/account/connect/fb" : "/account/connect/twitter",
-				new HikeHttpRequest.HikeHttpCallback() {
+				RequestType.OTHER, new HikeHttpRequest.HikeHttpCallback() {
 					public void onSuccess(JSONObject response) {
 						if (dialog != null) {
 							dialog.dismiss();
@@ -279,6 +285,8 @@ public class AuthSocialAccountBaseActivity extends DrawerBaseActivity implements
 						}
 						editor.commit();
 						hikeHTTPTask = null;
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.SOCIAL_AUTH_FAILED, facebook);
 					}
 				});
 		hikeHttpRequest.setJSONData(request);

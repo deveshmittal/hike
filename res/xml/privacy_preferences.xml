@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/privacy">
+    android:title="@string/manage_account">
+
+    <com.bsb.hike.view.IconCheckBoxPreference
+        icon="preference_free_sms"
+        android:defaultValue="true"
+        android:key="freeSmsPref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/free_sms_msg"
+        android:title="@string/free_sms"
+        android:widgetLayout="@layout/checkbox_widget" />
+    
+    <com.bsb.hike.view.IconCheckBoxPreference
+        icon="ic_ssl"
+        android:key="sslPref"
+        android:layout="@layout/icon_preference"
+        android:summary="@string/ssl_info"
+        android:title="@string/ssl"
+        android:widgetLayout="@layout/checkbox_widget" />
 
     <com.bsb.hike.view.IconPreference
 		icon="ic_delete_priv"

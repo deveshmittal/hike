@@ -6,11 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -18,6 +18,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.ui.HikePreferences;
 import com.bsb.hike.utils.AccountUtils;
+import com.facebook.Session;
 import com.google.android.gcm.GCMRegistrar;
 
 public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
@@ -39,6 +40,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 				.getInstance();
 		Editor editor = activity.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, Context.MODE_PRIVATE).edit();
+		Editor appPrefEditor = PreferenceManager.getDefaultSharedPreferences(
+				activity).edit();
 
 		try {
 			AccountUtils.deleteOrUnlinkAccount(this.delete);
@@ -55,7 +58,13 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			convDb.deleteAll();
 			IconCacheManager.getInstance().clearIconCache();
 			editor.clear();
+			appPrefEditor.clear();
 			Log.d("DeleteAccountTask", "account deleted");
+
+			Session session = Session.getActiveSession();
+			if (session != null) {
+				session.closeAndClearTokenInformation();
+			}
 
 			return true;
 		} catch (Exception e) {
@@ -63,6 +72,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 			return false;
 		} finally {
 			editor.commit();
+			appPrefEditor.commit();
 		}
 	}
 

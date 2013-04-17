@@ -19,6 +19,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -35,6 +36,7 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -69,7 +71,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ " TEXT, " + DBConstants.HAS_CUSTOM_PHOTO + " INTEGER, "
 				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, "
 				+ DBConstants.MSISDN_TYPE + " STRING, "
-				+ DBConstants.LAST_MESSAGED + " INTEGER" + " )";
+				+ DBConstants.LAST_MESSAGED + " INTEGER, "
+				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0" + " )";
 
 		db.execSQL(create);
 
@@ -185,6 +188,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			db.execSQL(insert);
 			db.execSQL(drop);
 		}
+		if (oldVersion < 8) {
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
+					+ " ADD COLUMN " + DBConstants.HIKE_JOIN_TIME
+					+ " INTEGER DEFAULT 0";
+			db.execSQL(alter);
+		}
+		if (oldVersion < 9) {
+			/*
+			 * Removing all auto recommended favorites.
+			 */
+			db.delete(DBConstants.FAVORITES_TABLE, DBConstants.FAVORITE_TYPE
+					+ "=" + FavoriteType.AUTO_RECOMMENDED_FAVORITE.ordinal(),
+					null);
+		}
 	}
 
 	public void addContacts(List<ContactInfo> contacts, boolean isFirstSync)
@@ -272,13 +289,17 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 							DBConstants.MSISDN + "=?",
 							new String[] { contact.getMsisdn() }, null, null,
 							null);
-					if (favoriteCursor.moveToFirst()) {
-						int favoriteTypeOrdinal = favoriteCursor
-								.getInt(favoriteCursor
-										.getColumnIndex(DBConstants.FAVORITE_TYPE));
-						contact.setFavoriteType(FavoriteType.values()[favoriteTypeOrdinal]);
-					} else {
-						contact.setFavoriteType(FavoriteType.NOT_FAVORITE);
+					try {
+						if (favoriteCursor.moveToFirst()) {
+							int favoriteTypeOrdinal = favoriteCursor
+									.getInt(favoriteCursor
+											.getColumnIndex(DBConstants.FAVORITE_TYPE));
+							contact.setFavoriteType(FavoriteType.values()[favoriteTypeOrdinal]);
+						} else {
+							contact.setFavoriteType(FavoriteType.NOT_FRIEND);
+						}
+					} finally {
+						favoriteCursor.close();
 					}
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.CONTACT_ADDED, contact);
@@ -361,12 +382,16 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public ContactInfo getContactInfoFromMSISDN(String msisdn,
 			boolean ifNotFoundReturnNull) {
-		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
-				DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME,
-				DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE,
-				DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO,
-				DBConstants.FAVORITE_TYPE_SELECTION }, DBConstants.MSISDN
-				+ "=?", new String[] { msisdn }, null, null, null);
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE,
+				new String[] { DBConstants.MSISDN, DBConstants.ID,
+						DBConstants.NAME, DBConstants.ONHIKE,
+						DBConstants.PHONE, DBConstants.MSISDN_TYPE,
+						DBConstants.LAST_MESSAGED,
+						DBConstants.HAS_CUSTOM_PHOTO,
+						DBConstants.FAVORITE_TYPE_SELECTION,
+						DBConstants.HIKE_JOIN_TIME },
+				DBConstants.MSISDN + "=?", new String[] { msisdn }, null, null,
+				null);
 
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
@@ -385,7 +410,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					/*
 					 * Setting the favorite type for unknown contacts
 					 */
-					FavoriteType favoriteType = FavoriteType.NOT_FAVORITE;
+					FavoriteType favoriteType = FavoriteType.NOT_FRIEND;
 					if (favoriteCursor.moveToFirst()) {
 						favoriteType = FavoriteType.values()[favoriteCursor
 								.getInt(favoriteCursor
@@ -420,6 +445,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
 		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 		int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
+		int hikeJoinTimeIdx = c.getColumnIndex(DBConstants.HIKE_JOIN_TIME);
 
 		Set<String> msisdnSet = null;
 
@@ -433,17 +459,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			} else if (distinct) {
 				msisdnSet.add(msisdn);
 			}
+			long hikeJoinTime = 0;
+			if (hikeJoinTimeIdx != -1) {
+				hikeJoinTime = c.getLong(hikeJoinTimeIdx);
+			}
 			ContactInfo contactInfo = new ContactInfo(c.getString(idx),
 					c.getString(msisdnIdx), c.getString(nameIdx),
 					c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
 					c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx),
-					c.getInt(hasCustomPhotoIdx) == 1);
+					c.getInt(hasCustomPhotoIdx) == 1, hikeJoinTime);
 			if (favoriteIdx != -1) {
 				int favoriteTypeOrd = c.getInt(favoriteIdx);
 				contactInfo
 						.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
 			} else {
-				contactInfo.setFavoriteType(FavoriteType.NOT_FAVORITE);
+				contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
 			}
 			contactInfos.add(contactInfo);
 		}
@@ -521,7 +551,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				contactInfo
 						.setFavoriteType(FavoriteType.values()[favoriteTypeOrd]);
 			} else {
-				contactInfo.setFavoriteType(FavoriteType.NOT_FAVORITE);
+				contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
 			}
 			contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(
 					new AtomicBoolean(false), contactInfo));
@@ -574,7 +604,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ContactInfo> getContactsOfFavoriteType(
-			FavoriteType favoriteType, int onHike) {
+			FavoriteType favoriteType, int onHike, String myMsisdn) {
 		String favoriteMsisdnColumnName = "tempMsisdn";
 		StringBuilder queryBuilder = new StringBuilder("SELECT "
 				+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + ", "
@@ -583,14 +613,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSISDN_TYPE + ", " + DBConstants.HAS_CUSTOM_PHOTO
 				+ ", " + DBConstants.LAST_MESSAGED);
 		if (favoriteType != null) {
-			if (favoriteType == FavoriteType.NOT_FAVORITE) {
+			if (favoriteType == FavoriteType.NOT_FRIEND) {
 				queryBuilder.append(" FROM " + DBConstants.USERS_TABLE
 						+ " WHERE " + DBConstants.USERS_TABLE + "."
 						+ DBConstants.MSISDN + " NOT IN (SELECT "
 						+ DBConstants.MSISDN + " FROM "
 						+ DBConstants.FAVORITES_TABLE + ") AND "
 						+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN
-						+ " != 'null'");
+						+ " != 'null' AND " + DBConstants.USERS_TABLE + "."
+						+ DBConstants.MSISDN + " != "
+						+ DatabaseUtils.sqlEscapeString(myMsisdn));
+				queryBuilder.append(" AND " + DBConstants.USERS_TABLE + "."
+						+ DBConstants.MSISDN + " NOT IN (SELECT "
+						+ DBConstants.BLOCK_TABLE + "." + DBConstants.MSISDN
+						+ " FROM " + DBConstants.BLOCK_TABLE + ")");
 			} else {
 				queryBuilder.append(", " + DBConstants.FAVORITES_TABLE + "."
 						+ DBConstants.MSISDN + " AS "
@@ -601,7 +637,13 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 						+ DBConstants.MSISDN + " = " + DBConstants.USERS_TABLE
 						+ "." + DBConstants.MSISDN + " WHERE "
 						+ DBConstants.FAVORITE_TYPE + " = "
-						+ favoriteType.ordinal());
+						+ favoriteType.ordinal() + " AND "
+						+ favoriteMsisdnColumnName + " != "
+						+ DatabaseUtils.sqlEscapeString(myMsisdn));
+				queryBuilder.append(" AND " + favoriteMsisdnColumnName
+						+ " NOT IN (SELECT " + DBConstants.BLOCK_TABLE + "."
+						+ DBConstants.MSISDN + " FROM "
+						+ DBConstants.BLOCK_TABLE + ")");
 			}
 		}
 		if (onHike != -1) {
@@ -613,8 +655,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		Cursor c = mDb.rawQuery(query, null);
 
 		int idx = c.getColumnIndex(DBConstants.ID);
-		int userMsisdnIdx = c.getColumnIndex(DBConstants.USERS_TABLE + "."
-				+ DBConstants.MSISDN);
+		int userMsisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
 		int favoriteMsisdnIdx = c.getColumnIndex(favoriteMsisdnColumnName);
 		int nameIdx = c.getColumnIndex(DBConstants.NAME);
 		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
@@ -630,7 +671,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		List<ContactInfo> contactInfos = new ArrayList<ContactInfo>();
 		while (c.moveToNext()) {
 			String msisdn = c
-					.getString(favoriteType == FavoriteType.NOT_FAVORITE ? userMsisdnIdx
+					.getString(favoriteType == FavoriteType.NOT_FRIEND ? userMsisdnIdx
 							: favoriteMsisdnIdx);
 			if (msisdnSet.contains(msisdn)) {
 				continue;
@@ -662,9 +703,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ContactInfo> getContactsForComposeScreen(boolean freeSMSOn,
-			boolean fwdOrgroupChat) {
+			boolean fwdOrgroupChat, String userMsisdn) {
 		String selection = DBConstants.MSISDN
-				+ " != 'null'"
+				+ " != 'null' AND "
+				+ DBConstants.MSISDN
+				+ " != "
+				+ DatabaseUtils.sqlEscapeString(userMsisdn)
 				+ ((freeSMSOn && fwdOrgroupChat) ? " AND (("
 						+ DBConstants.ONHIKE + " = 0 AND " + DBConstants.MSISDN
 						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))"
@@ -838,6 +882,112 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		return blocked;
 	}
 
+	public List<Pair<AtomicBoolean, ContactInfo>> getBlockedUserList() {
+		String blockedMsisdnColumnName = "blk";
+
+		String query = "SELECT " + DBConstants.USERS_TABLE + "."
+				+ DBConstants.MSISDN + ", " + DBConstants.ID + ", "
+				+ DBConstants.NAME + ", " + DBConstants.ONHIKE + ", "
+				+ DBConstants.PHONE + ", " + DBConstants.MSISDN_TYPE + ", "
+				+ DBConstants.HAS_CUSTOM_PHOTO + ", "
+				+ DBConstants.LAST_MESSAGED + ", " + DBConstants.BLOCK_TABLE
+				+ "." + DBConstants.MSISDN + " AS " + blockedMsisdnColumnName
+				+ " FROM " + DBConstants.BLOCK_TABLE + " LEFT OUTER JOIN "
+				+ DBConstants.USERS_TABLE + " ON " + DBConstants.BLOCK_TABLE
+				+ "." + DBConstants.MSISDN + " = " + DBConstants.USERS_TABLE
+				+ "." + DBConstants.MSISDN;
+
+		Cursor c = mDb.rawQuery(query, null);
+
+		int idx = c.getColumnIndex(DBConstants.ID);
+		int userMsisdnIdx = c.getColumnIndex(DBConstants.USERS_TABLE + "."
+				+ DBConstants.MSISDN);
+		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+		int blockedMsisdnIdx = c.getColumnIndex(blockedMsisdnColumnName);
+		int nameIdx = c.getColumnIndex(DBConstants.NAME);
+		int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+		int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+		int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+		int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+
+		Set<String> msisdnSet = null;
+
+		msisdnSet = new HashSet<String>();
+
+		List<Pair<AtomicBoolean, ContactInfo>> blockedContactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+		while (c.moveToNext()) {
+			String blockedMsisdn = c.getString(blockedMsisdnIdx);
+			String userMsisdn = c.getString(userMsisdnIdx);
+
+			String msisdn = TextUtils.isEmpty(blockedMsisdn) ? userMsisdn
+					: blockedMsisdn;
+
+			if (msisdnSet.contains(msisdn)) {
+				continue;
+			}
+			msisdnSet.add(msisdn);
+
+			ContactInfo contactInfo;
+
+			if (TextUtils.isEmpty(userMsisdn)) {
+				contactInfo = new ContactInfo(msisdn, msisdn, msisdn, msisdn);
+			} else {
+				contactInfo = new ContactInfo(c.getString(idx), userMsisdn,
+						c.getString(nameIdx), c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						c.getLong(lastMessagedIdx),
+						c.getInt(hasCustomPhotoIdx) == 1);
+			}
+
+			blockedContactList.add(new Pair<AtomicBoolean, ContactInfo>(
+					new AtomicBoolean(true), contactInfo));
+		}
+		c.close();
+
+		String selection = DBConstants.MSISDN + " != 'null'";
+		c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
+				DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME,
+				DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE,
+				DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO },
+				selection, null, null, null, null);
+
+		while (c.moveToNext()) {
+			String msisdn = c.getString(msisdnIdx);
+			if (msisdnSet.contains(msisdn)) {
+				continue;
+			}
+			msisdnSet.add(msisdn);
+			ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+					c.getString(msisdnIdx), c.getString(nameIdx),
+					c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
+					c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx),
+					c.getInt(hasCustomPhotoIdx) == 1);
+			blockedContactList.add(new Pair<AtomicBoolean, ContactInfo>(
+					new AtomicBoolean(false), contactInfo));
+		}
+		c.close();
+
+		Collections.sort(blockedContactList,
+				new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
+
+					@Override
+					public int compare(Pair<AtomicBoolean, ContactInfo> lhs,
+							Pair<AtomicBoolean, ContactInfo> rhs) {
+						boolean lhsBlocked = lhs.first.get();
+						boolean rhsBlocked = rhs.first.get();
+						if (lhsBlocked && !rhsBlocked) {
+							return -1;
+						} else if (rhsBlocked && !lhsBlocked) {
+							return 1;
+						} else {
+							return lhs.second.compareTo(rhs.second);
+						}
+					}
+				});
+		return blockedContactList;
+	}
+
 	public void setIcon(String msisdn, byte[] data, boolean isProfileImage) {
 		if (!isProfileImage) {
 			/*
@@ -953,7 +1103,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		 * If we are setting the type as not favorite, we'll remove the row
 		 * itself.
 		 */
-		if (favoriteType == FavoriteType.NOT_FAVORITE) {
+		if (favoriteType == FavoriteType.NOT_FRIEND) {
 			mDb.delete(DBConstants.FAVORITES_TABLE, DBConstants.MSISDN + "=?",
 					new String[] { msisdn });
 			return;
@@ -1029,8 +1179,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			Log.d(getClass().getSimpleName(),
 					"Auto rec fav added: " + c.getCount());
-			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
+			// HikeMessengerApp.getPubSub().publish(
+			// HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
 		}
 	}
 
@@ -1040,7 +1190,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			c = mDb.query(DBConstants.FAVORITES_TABLE,
 					new String[] { DBConstants.MSISDN }, DBConstants.MSISDN
 							+ "=? AND " + DBConstants.FAVORITE_TYPE + "="
-							+ FavoriteType.FAVORITE.ordinal(),
+							+ FavoriteType.FRIEND.ordinal(),
 					new String[] { msisdn }, null, null, null);
 			return c.moveToFirst();
 		} finally {
@@ -1050,27 +1200,35 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public List<ContactInfo> getNonHikeContactsFromListOfNumbers(
+	public List<ContactInfo> getRecentContactsFromListOfNumbers(
 			String selectionNumbers, Map<String, Long> recentValues,
-			boolean indiaOnly, FavoriteType favoriteType) {
+			boolean indiaOnly, FavoriteType favoriteType, int freeSmsSetting) {
 
 		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
 				DBConstants.HAS_CUSTOM_PHOTO };
 
-		String selection = DBConstants.PHONE
-				+ " IN "
-				+ selectionNumbers
-				+ " AND "
-				+ DBConstants.ONHIKE
-				+ "=0"
-				+ (indiaOnly ? " AND " + DBConstants.MSISDN + " LIKE '+91%'"
-						: "")
-				+ (favoriteType != null ? " AND " + DBConstants.MSISDN
-						+ " NOT IN (SELECT " + DBConstants.MSISDN + " FROM "
-						+ DBConstants.FAVORITES_TABLE + ")" : "");
+		StringBuilder selectionBuilder = new StringBuilder();
 
+		selectionBuilder.append(DBConstants.PHONE + " IN " + selectionNumbers);
+		selectionBuilder.append(indiaOnly ? " AND " + DBConstants.MSISDN
+				+ " LIKE '+91%'" : "");
+		selectionBuilder.append(favoriteType != null ? " AND "
+				+ DBConstants.MSISDN + " NOT IN (SELECT " + DBConstants.MSISDN
+				+ " FROM " + DBConstants.FAVORITES_TABLE + ")" : "");
+		selectionBuilder.append(" AND " + DBConstants.MSISDN + "!='null'");
+		if (freeSmsSetting == -1) {
+			selectionBuilder.append(" AND " + DBConstants.ONHIKE + "=0");
+		} else if (freeSmsSetting == 0) {
+			selectionBuilder.append(" AND " + DBConstants.ONHIKE + " =1");
+		} else if (freeSmsSetting == 1) {
+			selectionBuilder.append(" AND ((" + DBConstants.ONHIKE
+					+ " =1) OR (" + DBConstants.ONHIKE + " =0 AND "
+					+ DBConstants.MSISDN + " LIKE '+91%'))");
+		}
+
+		String selection = selectionBuilder.toString();
 		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
 
 		Cursor c = null;
@@ -1144,17 +1302,136 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			boolean indiaOnly, FavoriteType favoriteType) {
 		Pair<String, Map<String, Long>> data = ContactUtils.getRecentNumbers(
 				mContext, limit);
-		return getNonHikeContactsFromListOfNumbers(data.first, data.second,
-				indiaOnly, favoriteType);
+		return getRecentContactsFromListOfNumbers(data.first, data.second,
+				indiaOnly, favoriteType, -1);
 	}
 
-	public List<ContactInfo> getContactNamesFromMsisdnList(StringBuilder msisdns) {
+	public List<ContactInfo> getRecentContacts(int limit, boolean indiaOnly,
+			FavoriteType favoriteType, int freeSmsSetting) {
+		Pair<String, Map<String, Long>> data = ContactUtils.getRecentNumbers(
+				mContext, limit);
+		return getRecentContactsFromListOfNumbers(data.first, data.second,
+				indiaOnly, favoriteType, freeSmsSetting);
+	}
+
+	private List<Pair<AtomicBoolean, ContactInfo>> getNonHikeMostContactedContactsFromListOfNumbers(
+			String selectionNumbers,
+			final Map<String, Integer> mostContactedValues, int limit) {
+
+		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
+				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
+				DBConstants.HAS_CUSTOM_PHOTO };
+
+		String selection = DBConstants.PHONE + " IN " + selectionNumbers
+				+ " AND " + DBConstants.MSISDN + "!='null' AND "
+				+ DBConstants.ONHIKE + "=0 LIMIT " + limit;
+
+		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
+
+		Cursor c = null;
+		try {
+			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
+					null, null, null, null);
+
+			int idx = c.getColumnIndex(DBConstants.ID);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int nameIdx = c.getColumnIndex(DBConstants.NAME);
+			int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+			int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+			int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+			int hasCustomPhotoIdx = c
+					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+
+			List<Pair<AtomicBoolean, ContactInfo>> contactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+
+			Set<String> msisdnSet = new HashSet<String>();
+			Set<String> nameSet = new HashSet<String>();
+
+			while (c.moveToNext()) {
+				String msisdn = c.getString(msisdnIdx);
+				String name = c.getString(nameIdx);
+
+				if (msisdnSet.contains(msisdn)) {
+					continue;
+				}
+				if (nameSet.contains(name)) {
+					continue;
+				}
+
+				msisdnSet.add(msisdn);
+				nameSet.add(name);
+
+				/*
+				 * All our timestamps are in seconds.
+				 */
+				long lastMessagedCurrent = c.getLong(lastMessagedIdx);
+
+				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+						msisdn, name, c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
+				contactList.add(new Pair<AtomicBoolean, ContactInfo>(
+						new AtomicBoolean(false), contactInfo));
+			}
+
+			Collections.sort(contactList,
+					new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
+						@Override
+						public int compare(
+								Pair<AtomicBoolean, ContactInfo> lhs,
+								Pair<AtomicBoolean, ContactInfo> rhs) {
+							int lhsContactNum = mostContactedValues
+									.get(lhs.second.getPhoneNum());
+							int rhsContactNum = mostContactedValues
+									.get(rhs.second.getPhoneNum());
+
+							if (lhsContactNum != rhsContactNum) {
+								return -((Integer) lhsContactNum)
+										.compareTo(rhsContactNum);
+							}
+							return lhs.second
+									.getName()
+									.toLowerCase()
+									.compareTo(
+											rhs.second.getName().toLowerCase());
+						}
+					});
+
+			for (int i = 0; i < Math.min(HikeConstants.MAX_PRECHECKED_CONTACTS,
+					contactList.size()); i++) {
+				Pair<AtomicBoolean, ContactInfo> val = contactList.get(i);
+				val.first.set(true);
+			}
+
+			return contactList;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public List<Pair<AtomicBoolean, ContactInfo>> getNonHikeMostContactedContacts(
+			int limit) {
+		/*
+		 * Sending twice the limit to account for the contacts that might be on
+		 * hike
+		 */
+		Pair<String, Map<String, Integer>> data = ContactUtils
+				.getMostContactedContacts(mContext, limit * 2);
+		return getNonHikeMostContactedContactsFromListOfNumbers(data.first,
+				data.second, limit);
+	}
+
+	public List<ContactInfo> getContactNamesFromMsisdnList(String msisdns) {
 		// select max(name), msisdn from users where msisdn in (...) group by
 		// msisdn;
 		Cursor c = mReadDb.rawQuery("SELECT max(" + DBConstants.NAME + ") AS "
 				+ DBConstants.NAME + ", " + DBConstants.MSISDN + ", "
 				+ DBConstants.ONHIKE + " from " + DBConstants.USERS_TABLE
-				+ " WHERE " + DBConstants.MSISDN + " IN " + msisdns.toString()
+				+ " WHERE " + DBConstants.MSISDN + " IN " + msisdns
 				+ " GROUP BY " + DBConstants.MSISDN, null);
 		try {
 			List<ContactInfo> contactList = new ArrayList<ContactInfo>();
@@ -1195,9 +1472,21 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			for (int i = 0; i < msisdns.length(); i++) {
 				String msisdn = msisdns.optString(i);
 				JSONObject msisdnInfo = favorites.optJSONObject(msisdn);
-				FavoriteType favoriteType = msisdnInfo
-						.optBoolean(HikeConstants.PENDING) ? FavoriteType.RECOMMENDED_FAVORITE
-						: FavoriteType.FAVORITE;
+
+				FavoriteType favoriteType;
+				if (msisdnInfo.has(HikeConstants.PENDING)) {
+					boolean pending = msisdnInfo
+							.optBoolean(HikeConstants.PENDING);
+					favoriteType = pending ? FavoriteType.REQUEST_RECEIVED
+							: FavoriteType.REQUEST_RECEIVED_REJECTED;
+				} else if (msisdnInfo.has(HikeConstants.REQUEST_PENDING)) {
+					boolean requestPending = msisdnInfo
+							.optBoolean(HikeConstants.REQUEST_PENDING);
+					favoriteType = requestPending ? FavoriteType.REQUEST_SENT
+							: FavoriteType.REQUEST_SENT_REJECTED;
+				} else {
+					favoriteType = FavoriteType.FRIEND;
+				}
 
 				insertStatement.bindString(
 						ih.getColumnIndex(DBConstants.MSISDN), msisdn);
@@ -1234,5 +1523,176 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		} finally {
 			c.close();
 		}
+	}
+
+	public int getPendingFriendRequestCount() {
+		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
+				+ DBConstants.FAVORITES_TABLE + " WHERE "
+				+ DBConstants.FAVORITE_TYPE + "="
+				+ FavoriteType.REQUEST_RECEIVED.ordinal(), null);
+	}
+
+	public List<Pair<AtomicBoolean, ContactInfo>> getFamilyList(
+			Context context, String nux1Numbers, int limit) {
+		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
+				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
+				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
+				DBConstants.HAS_CUSTOM_PHOTO };
+
+		String userName = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+				HikeMessengerApp.NAME_SETTING, "");
+		String lastName = null;
+		String[] userNameSplit = userName.split(" ");
+		if (userNameSplit.length > 1) {
+			lastName = userNameSplit[userNameSplit.length - 1];
+		}
+
+		StringBuilder selectionStringBuilder = new StringBuilder("(");
+
+		String[] familyKeywordExactName = context.getResources()
+				.getStringArray(R.array.family_array_exact_name);
+		String[] familyKeywordLike = context.getResources().getStringArray(
+				R.array.family_keyword_like);
+
+		selectionStringBuilder.append("lower(" + DBConstants.NAME + ")"
+				+ " IN (");
+		for (String nuxKeyword : familyKeywordExactName) {
+			selectionStringBuilder.append(DatabaseUtils
+					.sqlEscapeString(nuxKeyword) + ", ");
+		}
+		selectionStringBuilder.replace(
+				selectionStringBuilder.lastIndexOf(", "),
+				selectionStringBuilder.length(), ") OR ");
+		for (String nuxKeyWord : familyKeywordLike) {
+			selectionStringBuilder
+					.append(DBConstants.NAME + " LIKE "
+							+ DatabaseUtils.sqlEscapeString(nuxKeyWord + " %")
+							+ " OR ");
+		}
+		for (String nuxKeyWord : familyKeywordLike) {
+			selectionStringBuilder
+					.append(DBConstants.NAME + " LIKE "
+							+ DatabaseUtils.sqlEscapeString("% " + nuxKeyWord)
+							+ " OR ");
+		}
+		if (lastName != null) {
+			selectionStringBuilder.append(DBConstants.NAME + " LIKE "
+					+ DatabaseUtils.sqlEscapeString("% " + lastName) + " OR ");
+		}
+		selectionStringBuilder
+				.replace(selectionStringBuilder.lastIndexOf("OR "),
+						selectionStringBuilder.length(), ") AND "
+								+ DBConstants.ONHIKE
+								+ "=0 AND "
+								+ DBConstants.MSISDN
+								+ " != 'null'"
+								+ (TextUtils.isEmpty(nux1Numbers) ? ""
+										: " AND " + DBConstants.MSISDN
+												+ " NOT IN " + nux1Numbers)
+								+ " LIMIT " + limit);
+		String selection = selectionStringBuilder.toString();
+
+		Log.d(getClass().getSimpleName(), "Selection query: " + selection);
+
+		Cursor c = null;
+		try {
+			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
+					null, null, null, null);
+
+			int idx = c.getColumnIndex(DBConstants.ID);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int nameIdx = c.getColumnIndex(DBConstants.NAME);
+			int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+			int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+			int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+			int hasCustomPhotoIdx = c
+					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+
+			List<Pair<AtomicBoolean, ContactInfo>> contactList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
+
+			Set<String> msisdnSet = new HashSet<String>();
+			Set<String> nameSet = new HashSet<String>();
+
+			while (c.moveToNext()) {
+				String msisdn = c.getString(msisdnIdx);
+				String name = c.getString(nameIdx);
+
+				if (msisdnSet.contains(msisdn)) {
+					continue;
+				}
+				if (nameSet.contains(name)) {
+					continue;
+				}
+
+				msisdnSet.add(msisdn);
+				nameSet.add(name);
+
+				long lastMessagedCurrent = c.getLong(lastMessagedIdx);
+
+				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+						msisdn, name, c.getString(phoneNumIdx),
+						c.getInt(onhikeIdx) != 0, c.getString(msisdnTypeIdx),
+						lastMessagedCurrent, c.getInt(hasCustomPhotoIdx) == 1);
+				contactList.add(new Pair<AtomicBoolean, ContactInfo>(
+						new AtomicBoolean(false), contactInfo));
+			}
+
+			for (int i = 0; i < Math.min(HikeConstants.MAX_PRECHECKED_CONTACTS,
+					contactList.size()); i++) {
+				Pair<AtomicBoolean, ContactInfo> val = contactList.get(i);
+				val.first.set(true);
+			}
+
+			return contactList;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public boolean doesContactExist(String msisdn) {
+		String[] columns = new String[] { DBConstants.NAME };
+		String selection = DBConstants.MSISDN + "=? ";
+		Cursor c = null;
+
+		try {
+			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
+					new String[] { msisdn }, null, null, null);
+			return c.moveToFirst();
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public int getHikeContactCount() {
+		String selection = DBConstants.ONHIKE + " = 1";
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE,
+				new String[] { DBConstants.MSISDN }, selection, null, null,
+				null, null);
+		try {
+			return c.getCount();
+		} finally {
+			c.close();
+		}
+	}
+
+	public void setHikeJoinTime(String msisdn, long hikeJoinTime) {
+		String whereClause = DBConstants.MSISDN + "=?";
+		String[] whereArgs = new String[] { msisdn };
+
+		ContentValues values = new ContentValues(1);
+		values.put(DBConstants.HIKE_JOIN_TIME, hikeJoinTime);
+
+		mDb.update(DBConstants.USERS_TABLE, values, whereClause, whereArgs);
+	}
+
+	public int getFriendTableRowCount() {
+		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
+				+ DBConstants.FAVORITES_TABLE, null);
 	}
 }

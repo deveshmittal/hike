@@ -138,6 +138,8 @@ public class ContactUtils {
 			for (String string : hike_contacts_by_id.keySet()) {
 				ids_json.put(string);
 			}
+			Log.d("ContactUtils", "New contacts:" + new_contacts_by_id.size()
+					+ " DELETED contacts: " + ids_json.length());
 			List<ContactInfo> updatedContacts = AccountUtils.updateAddressBook(
 					new_contacts_by_id, ids_json);
 
@@ -219,51 +221,67 @@ public class ContactUtils {
 				ContactsContract.Contacts.DISPLAY_NAME };
 
 		String selection = ContactsContract.Contacts.HAS_PHONE_NUMBER + "='1'";
-		Cursor contacts = ctx.getContentResolver().query(
-				ContactsContract.Contacts.CONTENT_URI, projection, selection,
-				null, null);
+		Cursor contacts = null;
 
-		int idFieldColumnIndex = contacts
-				.getColumnIndex(ContactsContract.Contacts._ID);
-		int nameFieldColumnIndex = contacts
-				.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
 		List<ContactInfo> contactinfos = new ArrayList<ContactInfo>();
-		Log.d("ContactUtils", "Starting to scan address book");
-		long tm = System.currentTimeMillis();
 		Map<String, String> contactNames = new HashMap<String, String>();
-		while (contacts.moveToNext()) {
-			String id = contacts.getString(idFieldColumnIndex);
-			String name = contacts.getString(nameFieldColumnIndex);
-			contactNames.put(id, name);
-		}
+		try {
+			contacts = ctx.getContentResolver().query(
+					ContactsContract.Contacts.CONTENT_URI, projection,
+					selection, null, null);
 
-		contacts.close();
-
-		Cursor phones = ctx.getContentResolver().query(Phone.CONTENT_URI,
-				new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null, null,
-				null);
-
-		int numberColIdx = phones.getColumnIndex(Phone.NUMBER);
-		int idColIdx = phones.getColumnIndex(Phone.CONTACT_ID);
-		while (phones.moveToNext()) {
-			String number = phones.getString(numberColIdx);
-			String id = phones.getString(idColIdx);
-			String name = contactNames.get(id);
-			if ((name != null) && (number != null)) {
-				if (contactsToStore.add("_" + name + "_" + number)) // if this
-																	// element
-																	// is added
-																	// successfully
-																	// , it
-																	// returns
-																	// true
-				{
-					contactinfos.add(new ContactInfo(id, null, name, number));
-				}
+			int idFieldColumnIndex = contacts
+					.getColumnIndex(ContactsContract.Contacts._ID);
+			int nameFieldColumnIndex = contacts
+					.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+			Log.d("ContactUtils", "Starting to scan address book");
+			while (contacts.moveToNext()) {
+				String id = contacts.getString(idFieldColumnIndex);
+				String name = contacts.getString(nameFieldColumnIndex);
+				contactNames.put(id, name);
+			}
+		} finally {
+			if (contacts != null) {
+				contacts.close();
 			}
 		}
 
-		phones.close();
+		Cursor phones = null;
+
+		try {
+			phones = ctx.getContentResolver().query(Phone.CONTENT_URI,
+					new String[] { Phone.CONTACT_ID, Phone.NUMBER }, null,
+					null, null);
+
+			int numberColIdx = phones.getColumnIndex(Phone.NUMBER);
+			int idColIdx = phones.getColumnIndex(Phone.CONTACT_ID);
+
+			while (phones.moveToNext()) {
+				String number = phones.getString(numberColIdx);
+				String id = phones.getString(idColIdx);
+				String name = contactNames.get(id);
+				if ((name != null) && (number != null)) {
+					if (contactsToStore.add("_" + name + "_" + number)) // if
+																		// this
+																		// element
+																		// is
+																		// added
+																		// successfully
+																		// , it
+																		// returns
+																		// true
+					{
+						contactinfos
+								.add(new ContactInfo(id, null, name, number));
+					}
+				}
+			}
+		} finally {
+			if (phones != null) {
+				phones.close();
+
+			}
+		}
 
 		return contactinfos;
 	}
@@ -285,49 +303,196 @@ public class ContactUtils {
 	 */
 	public static Pair<String, Map<String, Long>> getRecentNumbers(
 			Context context, int limit) {
-		String sortBy = limit > -1 ? Phone.LAST_TIME_CONTACTED + " DESC LIMIT "
-				+ limit : null;
-		Cursor c = context.getContentResolver().query(Phone.CONTENT_URI,
-				new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED },
-				null, null, sortBy);
+		Cursor c = null;
+		try {
+			String sortBy = limit > -1 ? Phone.LAST_TIME_CONTACTED
+					+ " DESC LIMIT " + limit : null;
+			c = context.getContentResolver().query(Phone.CONTENT_URI,
+					new String[] { Phone.NUMBER, Phone.LAST_TIME_CONTACTED },
+					null, null, sortBy);
 
-		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
-		int lastTimeContactedIdx = c.getColumnIndex(Phone.LAST_TIME_CONTACTED);
+			Map<String, Long> recentlyContactedNumbers = new HashMap<String, Long>();
 
-		Map<String, Long> recentlyContactedNumbers = new HashMap<String, Long>();
-		StringBuilder sb = null;
+			StringBuilder sb = null;
 
-		if (c.getCount() > 0) {
-			sb = new StringBuilder("(");
-			while (c.moveToNext()) {
-				String number = c.getString(numberColIdx);
+			if (c != null && c.getCount() > 0) {
+				int numberColIdx = c.getColumnIndex(Phone.NUMBER);
+				int lastTimeContactedIdx = c
+						.getColumnIndex(Phone.LAST_TIME_CONTACTED);
 
-				if (TextUtils.isEmpty(number)) {
-					continue;
+				sb = new StringBuilder("(");
+				while (c.moveToNext()) {
+					String number = c.getString(numberColIdx);
+
+					if (TextUtils.isEmpty(number)) {
+						continue;
+					}
+
+					long lastTimeContacted = c.getLong(lastTimeContactedIdx);
+
+					/*
+					 * Checking if we already have this number and whether the
+					 * last time contacted was sooner than the newer value.
+					 */
+					if (recentlyContactedNumbers.containsKey(number)
+							&& recentlyContactedNumbers.get(number) > lastTimeContacted) {
+						continue;
+					}
+					recentlyContactedNumbers.put(number,
+							c.getLong(lastTimeContactedIdx));
+
+					number = DatabaseUtils.sqlEscapeString(number);
+					sb.append(number + ",");
 				}
-
-				long lastTimeContacted = c.getLong(lastTimeContactedIdx);
-
-				/*
-				 * Checking if we already have this number and whether the last
-				 * time contacted was sooner than the newer value.
-				 */
-				if (recentlyContactedNumbers.containsKey(number)
-						&& recentlyContactedNumbers.get(number) > lastTimeContacted) {
-					continue;
-				}
-				recentlyContactedNumbers.put(number,
-						c.getLong(lastTimeContactedIdx));
-
-				number = DatabaseUtils.sqlEscapeString(number);
-				sb.append(number + ",");
+				sb.replace(sb.length() - 1, sb.length(), ")");
+			} else {
+				sb = new StringBuilder("()");
 			}
-			sb.replace(sb.length() - 1, sb.length(), ")");
-		} else {
-			sb = new StringBuilder("()");
-		}
 
-		return new Pair<String, Map<String, Long>>(sb.toString(),
-				recentlyContactedNumbers);
+			return new Pair<String, Map<String, Long>>(sb.toString(),
+					recentlyContactedNumbers);
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	/**
+	 * This method will give us the user's most contacted contacts. We also try
+	 * to get the whatsapp contacts if the user has them synced and then sort
+	 * those based on times contacts.
+	 */
+	public static Pair<String, Map<String, Integer>> getMostContactedContacts(
+			Context context, int limit) {
+		Cursor whatsappContactsCursor = null;
+		Cursor phoneContactsCursor = null;
+		Cursor otherContactsCursor = null;
+
+		try {
+			String[] projection = new String[] { ContactsContract.RawContacts.CONTACT_ID };
+
+			String selection = ContactsContract.RawContacts.ACCOUNT_TYPE
+					+ "= 'com.whatsapp'";
+			whatsappContactsCursor = context.getContentResolver().query(
+					ContactsContract.RawContacts.CONTENT_URI, projection,
+					selection, null, null);
+
+			int id = whatsappContactsCursor
+					.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID);
+
+			StringBuilder whatsappContactIds = null;
+
+			if (whatsappContactsCursor.getCount() > 0) {
+				whatsappContactIds = new StringBuilder("(");
+
+				while (whatsappContactsCursor.moveToNext()) {
+					whatsappContactIds.append(whatsappContactsCursor.getInt(id)
+							+ ",");
+				}
+				whatsappContactIds.replace(whatsappContactIds.lastIndexOf(","),
+						whatsappContactIds.length(), ")");
+			}
+
+			/*
+			 * This number is required when the user does not have enough
+			 * whatsapp contacts.
+			 */
+			int otherContactsRequired = 0;
+			if (whatsappContactIds != null
+					&& whatsappContactsCursor.getCount() < limit) {
+				otherContactsRequired = limit
+						- whatsappContactsCursor.getCount();
+			}
+
+			String[] newProjection = new String[] { Phone.NUMBER,
+					Phone.TIMES_CONTACTED };
+			String newSelection = whatsappContactIds != null ? (Phone.CONTACT_ID
+					+ " IN " + whatsappContactIds.toString())
+					: null;
+
+			phoneContactsCursor = context.getContentResolver().query(
+					Phone.CONTENT_URI, newProjection, newSelection, null,
+					Phone.TIMES_CONTACTED + " DESC LIMIT " + limit);
+
+			Map<String, Integer> mostContactedNumbers = new HashMap<String, Integer>();
+			StringBuilder sb = null;
+
+			if (phoneContactsCursor.getCount() > 0) {
+				sb = new StringBuilder("(");
+
+				extractContactInfo(phoneContactsCursor, sb,
+						mostContactedNumbers, true);
+
+				if (otherContactsRequired > 0) {
+					newSelection = Phone.CONTACT_ID + " NOT IN "
+							+ whatsappContactIds.toString();
+
+					otherContactsCursor = context.getContentResolver().query(
+							Phone.CONTENT_URI,
+							newProjection,
+							newSelection,
+							null,
+							Phone.TIMES_CONTACTED + " DESC LIMIT "
+									+ otherContactsRequired);
+
+					if (otherContactsCursor.getCount() > 0) {
+						extractContactInfo(otherContactsCursor, sb,
+								mostContactedNumbers, false);
+					}
+				}
+				sb.replace(sb.length() - 1, sb.length(), ")");
+			} else {
+				sb = new StringBuilder("()");
+			}
+
+			return new Pair<String, Map<String, Integer>>(sb.toString(),
+					mostContactedNumbers);
+
+		} finally {
+			if (whatsappContactsCursor != null) {
+				whatsappContactsCursor.close();
+			}
+			if (phoneContactsCursor != null) {
+				phoneContactsCursor.close();
+			}
+			if (otherContactsCursor != null) {
+				phoneContactsCursor.close();
+			}
+		}
+	}
+
+	private static void extractContactInfo(Cursor c, StringBuilder sb,
+			Map<String, Integer> numbers, boolean whatsappContacts) {
+		int numberColIdx = c.getColumnIndex(Phone.NUMBER);
+		int timesContactedIdx = c.getColumnIndex(Phone.TIMES_CONTACTED);
+
+		while (c.moveToNext()) {
+			String number = c.getString(numberColIdx);
+
+			if (TextUtils.isEmpty(number)) {
+				continue;
+			}
+
+			/*
+			 * We apply a multiplier of 2 for whatsapp contacts to give them a
+			 * greater weight.
+			 */
+			int lastTimeContacted = whatsappContacts ? 2 * c
+					.getInt(timesContactedIdx) : c.getInt(timesContactedIdx);
+
+			/*
+			 * Checking if we already have this number and whether the last time
+			 * contacted was sooner than the newer value.
+			 */
+			if (numbers.containsKey(number)
+					&& numbers.get(number) > lastTimeContacted) {
+				continue;
+			}
+			numbers.put(number, lastTimeContacted);
+
+			number = DatabaseUtils.sqlEscapeString(number);
+			sb.append(number + ",");
+		}
 	}
 }

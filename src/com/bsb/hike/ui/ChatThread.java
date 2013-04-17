@@ -7,26 +7,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AuthenticatorDescription;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.NotificationManager;
-import android.content.Context;
+import android.content.ActivityNotFoundException;
+import android.content.ContentProviderOperation;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -34,11 +42,21 @@ import android.media.MediaRecorder;
 import android.media.MediaRecorder.OnErrorListener;
 import android.media.MediaRecorder.OnInfoListener;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.provider.ContactsContract.CommonDataKinds.Event;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import android.provider.ContactsContract.Contacts;
+import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Intents.Insert;
+import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -52,14 +70,11 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.Pair;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,20 +86,21 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabContentFactory;
@@ -97,6 +113,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.HikeSearchContactAdapter;
@@ -104,7 +121,10 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfoData;
+import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
@@ -114,9 +134,10 @@ import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.tasks.FinishableEvent;
+import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
-import com.bsb.hike.tasks.UploadLocationTask;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
@@ -127,7 +148,8 @@ import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
 public class ChatThread extends Activity implements HikePubSub.Listener,
 		TextWatcher, OnEditorActionListener, OnSoftKeyboardListener,
-		View.OnKeyListener, FinishableEvent, OnTouchListener, OnScrollListener {
+		View.OnKeyListener, FinishableEvent, OnTouchListener, OnScrollListener,
+		OnItemLongClickListener {
 	private HikePubSub mPubSub;
 
 	private HikeConversationsDatabase mConversationDb;
@@ -140,11 +162,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private Conversation mConversation;
 
-	private SetTypingText mClearTypingCallback;
-
 	private ComposeViewWatcher mComposeViewWatcher;
-
-	private Handler mUiThreadHandler;
 
 	/* View element */
 	private Button mSendBtn;
@@ -269,6 +287,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private boolean reachedEnd;
 
+	private ContactDialog contactDialog;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -304,76 +324,129 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 	}
 
-	/* msg is any text we want to show initially */
-	private void createAutoCompleteView() {
-		boolean isGroupChat = getIntent().getBooleanExtra(
-				HikeConstants.Extras.GROUP_CHAT, false);
-		boolean isForwardingMessage = getIntent().getBooleanExtra(
-				HikeConstants.Extras.FORWARD_MESSAGE, false);
-		boolean isSharingFile = getIntent().getType() != null;
-		// Getting the group id. This will be a valid value if the intent was
-		// passed to add group participants.
-		String existingGroupId = getIntent().getStringExtra(
-				HikeConstants.Extras.EXISTING_GROUP_CHAT);
+	private class CreateAutoCompleteViewTask extends
+			AsyncTask<Void, Void, List<ContactInfo>> {
 
-		mComposeView.removeTextChangedListener(this);
+		private boolean isGroupChat;
+		private boolean isForwardingMessage;
+		private boolean isSharingFile;
+		private boolean freeSMSOn;
+		private String userMsisdn;
+		private String existingGroupId;
+		boolean loadOnUiThread;
 
-		if (isSharingFile) {
-			mLabelView.setText(R.string.share_file);
-		} else if (isForwardingMessage) {
-			mLabelView.setText(R.string.forward);
-		} else if (!TextUtils.isEmpty(existingGroupId)) {
-			mLabelView.setText(R.string.add_group);
-		} else if (isGroupChat) {
-			mLabelView.setText(R.string.new_group);
-		} else {
-			mLabelView.setText(R.string.new_message);
+		@Override
+		protected void onPreExecute() {
+			isGroupChat = getIntent().getBooleanExtra(
+					HikeConstants.Extras.GROUP_CHAT, false);
+			isForwardingMessage = getIntent().getBooleanExtra(
+					HikeConstants.Extras.FORWARD_MESSAGE, false);
+			isSharingFile = getIntent().getType() != null;
+			// Getting the group id. This will be a valid value if the intent
+			// was
+			// passed to add group participants.
+			existingGroupId = getIntent().getStringExtra(
+					HikeConstants.Extras.EXISTING_GROUP_CHAT);
+
+			mComposeView.removeTextChangedListener(ChatThread.this);
+
+			if (isSharingFile) {
+				mLabelView.setText(R.string.share_file);
+			} else if (isForwardingMessage) {
+				mLabelView.setText(R.string.forward);
+			} else if (!TextUtils.isEmpty(existingGroupId)) {
+				mLabelView.setText(R.string.add_group);
+			} else if (isGroupChat) {
+				mLabelView.setText(R.string.new_group);
+			} else {
+				mLabelView.setText(R.string.new_message);
+			}
+
+			mBottomView.setVisibility(View.GONE);
+
+			if (isGroupChat) {
+				titleBtn = (Button) findViewById(R.id.title_icon);
+				titleBtn.setText(R.string.done);
+				titleBtn.setEnabled(false);
+				titleBtn.setVisibility(View.VISIBLE);
+				findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+			} else {
+				// Removing the attachment button that remains visible while
+				// forwarding files
+				findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
+				findViewById(R.id.title_image_btn2_container).setVisibility(
+						View.GONE);
+				findViewById(R.id.button_bar3).setVisibility(View.GONE);
+			}
+			freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
+					getApplicationContext()).getBoolean(
+					HikeConstants.FREE_SMS_PREF, true);
+			userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
+
+			loadOnUiThread = Utils.loadOnUiThread();
+			/*
+			 * Show the progress icon.
+			 */
+			findViewById(R.id.progress_container).setVisibility(
+					loadOnUiThread ? View.GONE : View.VISIBLE);
 		}
 
-		mBottomView.setVisibility(View.GONE);
-
-		if (isGroupChat) {
-			titleBtn = (Button) findViewById(R.id.title_icon);
-			titleBtn.setText(R.string.done);
-			titleBtn.setEnabled(false);
-			titleBtn.setVisibility(View.VISIBLE);
-			findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-		} else {
-			// Removing the attachment buttong that remains visible while
-			// forwarding files
-			findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
-			findViewById(R.id.title_image_btn2_container).setVisibility(
-					View.GONE);
-			findViewById(R.id.button_bar3).setVisibility(View.GONE);
+		@Override
+		protected List<ContactInfo> doInBackground(Void... params) {
+			if (!loadOnUiThread) {
+				return getContactsForComposeScreen(userMsisdn, freeSMSOn,
+						isGroupChat, isForwardingMessage, isSharingFile);
+			} else {
+				return null;
+			}
 		}
-		boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
-				getApplicationContext()).getBoolean(
-				HikeConstants.FREE_SMS_PREF, true);
 
+		@Override
+		protected void onPostExecute(List<ContactInfo> contactList) {
+			if (contactList == null) {
+				contactList = getContactsForComposeScreen(userMsisdn,
+						freeSMSOn, isGroupChat, isForwardingMessage,
+						isSharingFile);
+			}
+			/*
+			 * Hide the progress icon.
+			 */
+			findViewById(R.id.progress_container).setVisibility(View.GONE);
+
+			mInputNumberView.setText("");
+			HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
+					ChatThread.this, contactList, mInputNumberView,
+					isGroupChat, titleBtn, existingGroupId, getIntent(),
+					freeSMSOn);
+			mContactSearchView.setAdapter(adapter);
+			mContactSearchView.setOnItemClickListener(adapter);
+			mInputNumberView.addTextChangedListener(adapter);
+			mInputNumberView.setSingleLine(!isGroupChat);
+
+			mInputNumberContainer.setVisibility(View.VISIBLE);
+			mInputNumberView.setVisibility(View.VISIBLE);
+			mContactSearchView.setVisibility(View.VISIBLE);
+			mInputNumberView.requestFocus();
+
+			getWindow().setSoftInputMode(
+					WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+		}
+
+	}
+
+	private List<ContactInfo> getContactsForComposeScreen(String userMsisdn,
+			boolean freeSMSOn, boolean isGroupChat,
+			boolean isForwardingMessage, boolean isSharingFile) {
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
 				.getContactsForComposeScreen(freeSMSOn,
-						(isGroupChat || isForwardingMessage || isSharingFile));
+						(isGroupChat || isForwardingMessage || isSharingFile),
+						userMsisdn);
 
 		if (isForwardingMessage || isSharingFile) {
-			contactList.addAll(0, this.mConversationDb
+			contactList.addAll(0, ChatThread.this.mConversationDb
 					.getGroupNameAndParticipantsAsContacts());
 		}
-		mInputNumberView.setText("");
-		HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(this,
-				contactList, mInputNumberView, isGroupChat, titleBtn,
-				existingGroupId, getIntent(), freeSMSOn);
-		mContactSearchView.setAdapter(adapter);
-		mContactSearchView.setOnItemClickListener(adapter);
-		mInputNumberView.addTextChangedListener(adapter);
-		mInputNumberView.setSingleLine(!isGroupChat);
-
-		mInputNumberContainer.setVisibility(View.VISIBLE);
-		mInputNumberView.setVisibility(View.VISIBLE);
-		mContactSearchView.setVisibility(View.VISIBLE);
-		mInputNumberView.requestFocus();
-		getWindow().setSoftInputMode(
-				WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
+		return contactList;
 	}
 
 	@Override
@@ -390,6 +463,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mComposeViewWatcher.uninit();
 			mComposeViewWatcher = null;
 		}
+		if (contactDialog != null) {
+			contactDialog.dismiss();
+			contactDialog = null;
+		}
 	}
 
 	@Override
@@ -401,8 +478,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Utils.setDensityMultiplier(ChatThread.this);
-		/* add a handler on the UI thread so we can post delayed messages */
-		mUiThreadHandler = new Handler();
 
 		/* force the user into the reg-flow process if the token isn't set */
 		if (Utils.requireAuth(this)) {
@@ -452,9 +527,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY,
 						R.id.hike_emoticons_btn) : R.id.hike_emoticons_btn);
 		currentEmoticonCategorySelected.setSelected(true);
-
-		/* register for long-press's */
-		registerForContextMenu(mConversationsView);
 
 		/*
 		 * ensure that when the softkeyboard Done button is pressed (different
@@ -544,7 +616,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			Intent intent = null;
 			if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)
 					&& !getIntent().hasExtra(
-							HikeConstants.Extras.FORWARD_MESSAGE)) {
+							HikeConstants.Extras.FORWARD_MESSAGE)
+					&& !getIntent().getBooleanExtra(
+							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)
+					&& !getIntent().getBooleanExtra(
+							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)) {
 				intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
@@ -561,7 +637,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 			/* slide down if we're still selecting a user, otherwise slide back */
 			if (mConversation == null
-					&& !getIntent().hasExtra(HikeConstants.Extras.GROUP_CHAT)
+					&& !getIntent().hasExtra(
+							HikeConstants.Extras.EXISTING_GROUP_CHAT)
 					&& !getIntent().hasExtra(
 							HikeConstants.Extras.FORWARD_MESSAGE)) {
 				overridePendingTransition(R.anim.no_animation,
@@ -592,18 +669,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 	}
 
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-				.getMenuInfo();
-		ConvMessage message = mAdapter.getItem((int) info.id);
-		if (message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
-			return false;
-		}
-
-		return performContextBasedOperationOnMessage(message, item.getItemId());
-	}
-
 	public boolean performContextBasedOperationOnMessage(ConvMessage message,
 			int id) {
 		switch (id) {
@@ -626,18 +691,21 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
 				intent.putExtra(HikeConstants.Extras.FILE_KEY,
 						hikeFile.getFileKey());
-				if (hikeFile.getHikeFileType() != HikeFileType.LOCATION) {
-					intent.putExtra(HikeConstants.Extras.FILE_PATH,
-							hikeFile.getFilePath());
-					intent.putExtra(HikeConstants.Extras.FILE_TYPE,
-							hikeFile.getFileTypeString());
-				} else {
+				if (hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
 					intent.putExtra(HikeConstants.Extras.ZOOM_LEVEL,
 							hikeFile.getZoomLevel());
 					intent.putExtra(HikeConstants.Extras.LATITUDE,
 							hikeFile.getLatitude());
 					intent.putExtra(HikeConstants.Extras.LONGITUDE,
 							hikeFile.getLongitude());
+				} else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT) {
+					intent.putExtra(HikeConstants.Extras.CONTACT_METADATA,
+							hikeFile.serialize().toString());
+				} else {
+					intent.putExtra(HikeConstants.Extras.FILE_PATH,
+							hikeFile.getFilePath());
+					intent.putExtra(HikeConstants.Extras.FILE_TYPE,
+							hikeFile.getFileTypeString());
 				}
 			} else {
 				msg = message.getMessage();
@@ -782,51 +850,80 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mOverlayLayout.setAnimation(fadeOut);
 		}
 		mOverlayLayout.setVisibility(View.INVISIBLE);
+		if (mConversation instanceof GroupConversation) {
+			mComposeView.setEnabled(true);
+		}
 		isOverlayShowing = false;
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
+	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		ArrayList<String> optionsList = new ArrayList<String>();
 
-		AdapterView.AdapterContextMenuInfo adapterInfo = (AdapterView.AdapterContextMenuInfo) menuInfo;
-		ConvMessage message = mAdapter.getItem(adapterInfo.position);
+		final ConvMessage message = mAdapter.getItem(position);
+
 		if (message == null
 				|| message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
-			return;
+			return false;
 		}
 
-		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.message_menu, menu);
 		if (message.isFileTransferMessage()) {
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
-
-			MenuItem shareItem = menu.findItem(R.id.share);
-			shareItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey()));
-
-			MenuItem forwardItem = menu.findItem(R.id.forward);
-			forwardItem.setVisible(!TextUtils.isEmpty(hikeFile.getFileKey())
-					&& hikeFile.wasFileDownloaded());
-
-			MenuItem copyItem = menu.findItem(R.id.copy);
-			copyItem.setVisible(false);
-
-			if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID())) {
-				MenuItem item = menu.findItem(R.id.cancel_file_transfer);
-				item.setTitle(message.isSent() ? R.string.cancel_upload
-						: R.string.cancel_download);
-				item.setVisible(true);
+			if (!TextUtils.isEmpty(hikeFile.getFileKey())
+					&& hikeFile.wasFileDownloaded()) {
+				optionsList.add(getString(R.string.forward));
 			}
+			if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID())) {
+				optionsList
+						.add(message.isSent() ? getString(R.string.cancel_upload)
+								: getString(R.string.cancel_download));
+			}
+		} else if (message.getMetadata() == null
+				|| !message.getMetadata().isPokeMessage()) {
+			optionsList.add(getString(R.string.forward));
+			optionsList.add(getString(R.string.copy));
 		}
-		if (message.getMetadata() != null
-				&& message.getMetadata().isPokeMessage()) {
-			MenuItem forwardItem = menu.findItem(R.id.forward);
-			forwardItem.setVisible(false);
 
-			MenuItem copyItem = menu.findItem(R.id.copy);
-			copyItem.setVisible(false);
-		}
+		optionsList.add(getString(R.string.delete));
+
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
+				R.layout.alert_item, R.id.item, options);
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String option = options[which];
+						if (getString(R.string.forward).equals(option)) {
+							performContextBasedOperationOnMessage(message,
+									R.id.forward);
+						} else if (getString(R.string.cancel_download).equals(
+								option)
+								|| getString(R.string.cancel_upload).equals(
+										option)) {
+							performContextBasedOperationOnMessage(message,
+									R.id.cancel_file_transfer);
+						} else if (getString(R.string.copy).equals(option)) {
+							performContextBasedOperationOnMessage(message,
+									R.id.copy);
+						} else if (getString(R.string.delete).equals(option)) {
+							performContextBasedOperationOnMessage(message,
+									R.id.delete);
+						}
+					}
+				});
+
+		AlertDialog alertDialog = builder.show();
+		alertDialog.getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
+		return true;
 	}
 
 	private void sendMessage(ConvMessage convMessage) {
@@ -875,13 +972,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		btnBar.setVisibility(View.GONE);
 
 		String prevContactNumber = null;
-		/*
-		 * prevent any callbacks from previous instances of this activity from
-		 * being fired now
-		 */
-		if (mClearTypingCallback != null) {
-			mUiThreadHandler.removeCallbacks(mClearTypingCallback);
-		}
 
 		if (mComposeViewWatcher != null) {
 			mComposeViewWatcher.uninit();
@@ -954,8 +1044,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				SmileyParser.getInstance().addSmileyToEditable(
 						mComposeView.getText(), false);
 			} else if (intent.hasExtra(HikeConstants.Extras.FILE_PATH)) {
-				String fileKey = intent
-						.getStringExtra(HikeConstants.Extras.FILE_KEY);
+				String fileKey = null;
 				String filePath = intent
 						.getStringExtra(HikeConstants.Extras.FILE_PATH);
 				String fileType = intent
@@ -971,8 +1060,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				// orientation change.
 				intent.removeExtra(HikeConstants.Extras.FILE_PATH);
 			} else if (intent.hasExtra(HikeConstants.Extras.LATITUDE)) {
-				String fileKey = intent
-						.getStringExtra(HikeConstants.Extras.FILE_KEY);
+				String fileKey = null;
 				double latitude = intent.getDoubleExtra(
 						HikeConstants.Extras.LATITUDE, 0);
 				double longitude = intent.getDoubleExtra(
@@ -985,6 +1073,17 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				// Making sure the file does not get forwarded again on
 				// orientation change.
 				intent.removeExtra(HikeConstants.Extras.LATITUDE);
+			} else if (intent.hasExtra(HikeConstants.Extras.CONTACT_METADATA)) {
+				try {
+					JSONObject contactJson = new JSONObject(
+							intent.getStringExtra(HikeConstants.Extras.CONTACT_METADATA));
+					HikeFile hikeFile = new HikeFile(contactJson);
+					showContactDetails(
+							Utils.getContactDataFromHikeFile(hikeFile),
+							hikeFile.getDisplayName(), contactJson, false);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 			}
 			/*
 			 * Since the message was not forwarded, we check if we have any
@@ -1006,7 +1105,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			 * The user chose to either start a new conversation or forward a
 			 * message.
 			 */
-			createAutoCompleteView();
+			new CreateAutoCompleteViewTask().execute();
 		}
 		/*
 		 * close context menu(if open) if the previous MSISDN is different from
@@ -1030,6 +1129,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			convMessage.setConversation(mConversation);
 
 			sendMessage(convMessage);
+		} else if (mConversation instanceof GroupConversation) {
+			startActivity(new Intent(ChatThread.this, HikeListActivity.class));
 		} else {
 			Toast toast = Toast.makeText(this, R.string.already_hike_user,
 					Toast.LENGTH_LONG);
@@ -1098,6 +1199,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					false, "", null);
 		}
 
+		/*
+		 * Setting a flag which tells us whether the group contains sms users or
+		 * not.
+		 */
+		if (mConversation instanceof GroupConversation) {
+			boolean hasSmsUser = false;
+			for (Entry<String, GroupParticipant> entry : ((GroupConversation) mConversation)
+					.getGroupParticipantList().entrySet()) {
+				GroupParticipant groupParticipant = entry.getValue();
+				if (!groupParticipant.getContactInfo().isOnhike()) {
+					hasSmsUser = true;
+					break;
+				}
+			}
+			((GroupConversation) mConversation).setHasSmsUser(hasSmsUser);
+		}
+
 		mLabel = mConversation.getLabel();
 
 		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
@@ -1122,8 +1240,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
-		mAdapter = new MessagesAdapter(this, messages, mConversation);
+		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		mConversationsView.setAdapter(mAdapter);
+		mConversationsView.setOnItemLongClickListener(this);
 		mConversationsView.setOnTouchListener(this);
 		mConversationsView.setOnScrollListener(this);
 
@@ -1184,14 +1303,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				&& !((GroupConversation) mConversation).getIsGroupAlive()) {
 			toggleGroupLife(false);
 		}
+		/*
+		 * Check whether we have an existing typing notification for this
+		 * conversation
+		 */
+		if (HikeMessengerApp.getTypingNotificationSet().containsKey(
+				mContactNumber)) {
+			runOnUiThread(new SetTypingText(true));
+		}
 	}
 
 	private void showNudgeDialog() {
 
 		final Dialog nudgeAlert = new Dialog(this, R.style.Theme_CustomDialog);
+		nudgeAlert.setCancelable(true);
 		nudgeAlert.setContentView(R.layout.nudge_dialog);
 
-		nudgeAlert.setCancelable(false);
+		nudgeAlert.setCancelable(true);
 
 		Button okBtn = (Button) nudgeAlert.findViewById(R.id.ok_btn);
 		okBtn.setOnClickListener(new OnClickListener() {
@@ -1199,6 +1327,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			@Override
 			public void onClick(View v) {
 				nudgeAlert.cancel();
+			}
+		});
+		nudgeAlert.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
 				Editor editor = prefs.edit();
 				editor.putBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, true);
 				editor.commit();
@@ -1218,8 +1352,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mSendBtn.setTextColor(getResources().getColorStateList(
 					R.color.send_hike));
 			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
-			mComposeView.setHint("Free Message...");
+			mComposeView
+					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
+							: R.string.hike_msg);
 			findViewById(R.id.title_image_btn2).setEnabled(true);
+			if ((mConversation instanceof GroupConversation)
+					&& ((GroupConversation) mConversation).hasSmsUser()) {
+				if (mCredits == 0) {
+					zeroCredits();
+				} else {
+					nonZeroCredits();
+				}
+			}
 		} else {
 			updateChatMetadata();
 			((ImageButton) findViewById(R.id.emo_btn))
@@ -1227,7 +1371,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mSendBtn.setTextColor(getResources().getColorStateList(
 					R.color.send_sms));
 			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn);
-			mComposeView.setHint("SMS Message...");
+			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
 
@@ -1240,7 +1384,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			return false;
 		}
 
-		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD;
+		return lastMsg.getState() == ConvMessage.State.RECEIVED_UNREAD
+				|| lastMsg.getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE;
 	}
 
 	/*
@@ -1378,26 +1523,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
 			if (mContactNumber.equals(object)) {
-				if (mClearTypingCallback != null) {
-					// we can assume that if we don't have the callback, then
-					// the UI should be in the right state already
-					runOnUiThread(mClearTypingCallback);
-					mUiThreadHandler.removeCallbacks(mClearTypingCallback);
-				}
+				runOnUiThread(new SetTypingText(false));
 			}
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
 			if (mContactNumber.equals(object)) {
 				runOnUiThread(new SetTypingText(true));
-				// Lazily create the callback to reset the label
-				if (mClearTypingCallback == null) {
-					mClearTypingCallback = new SetTypingText(false);
-				} else {
-					// we've got another typing notification, so we want to
-					// clear it a while from now
-					mUiThreadHandler.removeCallbacks(mClearTypingCallback);
-				}
-				mUiThreadHandler.postDelayed(mClearTypingCallback,
-						HikeConstants.LOCAL_CLEAR_TYPING_TIME);
 			}
 		}
 		// We only consider this case if there is a valid conversation in the
@@ -1408,7 +1538,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					updateChatMetadata();
+					updateUIForHikeStatus();
 					if (!animatedOnce) {
 						animatedOnce = prefs.getBoolean(
 								HikeConstants.Extras.ANIMATED_ONCE, false);
@@ -1521,6 +1651,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 		} else if (HikePubSub.CONTACT_ADDED.equals(type)) {
 			ContactInfo contactInfo = (ContactInfo) object;
+			if (contactInfo == null) {
+				return;
+			}
+
 			if (this.mContactNumber.equals(contactInfo.getMsisdn())) {
 				this.mContactName = contactInfo.getName();
 				mConversation.setContactName(this.mContactName);
@@ -1652,35 +1786,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void updateChatMetadata() {
 		mMetadataNumChars.setVisibility(View.VISIBLE);
 		if (mCredits <= 0) {
-			mSendBtn.setEnabled(false);
-
-			if (!TextUtils.isEmpty(mComposeView.getText())) {
-				mComposeView.setText("");
-			}
-			mComposeView.setHint("0 Free SMS left...");
-			mComposeView.setEnabled(false);
-			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
-			findViewById(R.id.title_image_btn2).setEnabled(false);
-
-			boolean show = mConversationDb.wasOverlayDismissed(mConversation
-					.getMsisdn());
-			if (!show) {
-				showOverlay(false);
-			}
+			zeroCredits();
 		} else {
-			if (!mComposeView.isEnabled()) {
-				if (!TextUtils.isEmpty(mComposeView.getText())) {
-					mComposeView.setText("");
-				}
-				mComposeView.setHint(R.string.type_to_compose);
-				mComposeView.setEnabled(true);
-			}
-			findViewById(R.id.title_image_btn2).setEnabled(true);
-			findViewById(R.id.info_layout).setVisibility(View.GONE);
-
-			if (!blockOverlay) {
-				hideOverlay();
-			}
+			nonZeroCredits();
 
 			if (mComposeView.getLineCount() > 2) {
 				mMetadataNumChars.setVisibility(View.VISIBLE);
@@ -1701,6 +1809,54 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			} else {
 				mMetadataNumChars.setVisibility(View.INVISIBLE);
 			}
+		}
+	}
+
+	private void zeroCredits() {
+		Log.d(getClass().getSimpleName(), "Zero credits");
+		mSendBtn.setEnabled(false);
+
+		if (!TextUtils.isEmpty(mComposeView.getText())) {
+			mComposeView.setText("");
+		}
+		if (!(mConversation instanceof GroupConversation)) {
+			mComposeView.setHint("0 Free SMS left...");
+			mComposeView.setEnabled(false);
+			findViewById(R.id.title_image_btn2).setEnabled(false);
+			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
+		} else {
+			findViewById(R.id.group_info_layout).setVisibility(View.VISIBLE);
+		}
+
+		boolean show = mConversationDb.wasOverlayDismissed(mConversation
+				.getMsisdn());
+		if (!show) {
+			showOverlay(false);
+		}
+	}
+
+	private void nonZeroCredits() {
+		Log.d(getClass().getSimpleName(), "Non Zero credits");
+		if (!mComposeView.isEnabled()) {
+			if (!TextUtils.isEmpty(mComposeView.getText())) {
+				mComposeView.setText("");
+			}
+			if (mConversation instanceof GroupConversation) {
+				mComposeView.setHint(R.string.group_msg);
+			} else if (mConversation.isOnhike()) {
+				mComposeView.setHint(R.string.hike_msg);
+			} else {
+				mComposeView.setHint(R.string.sms_msg);
+			}
+			mComposeView.setEnabled(true);
+		}
+		findViewById(R.id.title_image_btn2).setEnabled(true);
+		findViewById(
+				(mConversation instanceof GroupConversation) ? R.id.group_info_layout
+						: R.id.info_layout).setVisibility(View.GONE);
+
+		if (!blockOverlay) {
+			hideOverlay();
 		}
 	}
 
@@ -1758,8 +1914,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						&& (keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER)
 						&& (keyEvent.getAction() != KeyEvent.ACTION_UP) && (config.keyboard != Configuration.KEYBOARD_NOKEYS)))) {
 			boolean ret = mSendBtn.performClick();
-			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(mComposeView.getWindowToken(), 0);
+			Utils.hideSoftKeyboard(this, mComposeView);
 			return ret;
 		}
 		return false;
@@ -1802,7 +1957,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void removeMessage(ConvMessage convMessage) {
-		mPubSub.publish(HikePubSub.DELETE_MESSAGE, convMessage);
+		boolean lastMessage = convMessage
+				.equals(messages.get(messages.size() - 1));
+		mPubSub.publish(HikePubSub.DELETE_MESSAGE,
+				new Pair<ConvMessage, Boolean>(convMessage, lastMessage));
 		messages.remove(convMessage);
 		mAdapter.notifyDataSetChanged();
 	}
@@ -1833,9 +1991,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void showOverlay(boolean blockOverlay) {
 		this.blockOverlay = blockOverlay;
 
-		InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-		imm.hideSoftInputFromWindow(this.mComposeView.getWindowToken(),
-				InputMethodManager.HIDE_NOT_ALWAYS);
+		Utils.hideSoftKeyboard(this, mComposeView);
 
 		if (mOverlayLayout.getVisibility() != View.VISIBLE && !isOverlayShowing
 				&& hasWindowFocus()) {
@@ -1871,9 +2027,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			overlayBtn.setText(R.string.unblock_title);
 		} else {
 			mConversationDb.setOverlay(false, mConversation.getMsisdn());
-			formatString = getResources().getString(R.string.no_credits);
+			formatString = getResources()
+					.getString(
+							mConversation instanceof GroupConversation ? R.string.no_credits_gc
+									: R.string.no_credits);
 			overlayImg.setImageResource(R.drawable.ic_no_credits);
-			overlayBtn.setText(R.string.invite_now);
+			overlayBtn
+					.setText(mConversation instanceof GroupConversation ? R.string.invite_to_hike
+							: R.string.invite_now);
 			mOverlayLayout.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -1887,9 +2048,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		/* bold the blocked users name */
 		String formatted = String.format(formatString, label);
 		SpannableString str = new SpannableString(formatted);
-		int start = formatString.indexOf("%1$s");
-		str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start, start
-				+ label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (!(mConversation instanceof GroupConversation) || blockOverlay) {
+			int start = formatString.indexOf("%1$s");
+			str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), start,
+					start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 		message.setText(str);
 	}
 
@@ -1898,13 +2061,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (v.getId() == R.id.title_image_btn) {
 			dismissToolTip();
 			if (!(mConversation instanceof GroupConversation)) {
+				String userMsisdn = prefs.getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
 				Intent intent = new Intent();
 				intent.setClass(ChatThread.this, ProfileActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
-						mContactNumber);
-				intent.putExtra(HikeConstants.Extras.ON_HIKE,
-						mConversation.isOnhike());
+				if (!userMsisdn.equals(mContactNumber)) {
+					intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
+							mContactNumber);
+					intent.putExtra(HikeConstants.Extras.ON_HIKE,
+							mConversation.isOnhike());
+				}
 				startActivity(intent);
 			} else {
 				if (!((GroupConversation) mConversation).getIsGroupAlive()) {
@@ -1923,7 +2091,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				overridePendingTransition(R.anim.slide_in_right_noalpha,
 						R.anim.slide_out_left_noalpha);
 			}
-		} else if (v.getId() == R.id.info_layout) {
+		} else if (v.getId() == R.id.info_layout
+				|| v.getId() == R.id.group_info_layout) {
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.I_BUTTON);
 			showOverlay(false);
 		} else if (v.getId() == R.id.title_icon) {
@@ -2017,41 +2186,56 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		final boolean canShareLocation = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_LOCATION);
 
-		final CharSequence[] options = getResources().getStringArray(
-				canShareLocation ? R.array.file_transfer_items
-						: R.array.file_transfer_items_no_loc);
+		final boolean canShareContacts = mConversation.isOnhike();
 
-		final int[] optionIcons;
+		ArrayList<String> optionsList = new ArrayList<String>();
+
+		optionsList.add(getString(R.string.camera));
+		optionsList.add(getString(R.string.choose_photo));
+		optionsList.add(getString(R.string.choose_video));
+		optionsList.add(getString(R.string.choose_audio));
+		optionsList.add(getString(R.string.audio_note));
 		if (canShareLocation) {
-			optionIcons = new int[] { R.drawable.ic_share_location_item,
-					R.drawable.ic_image_item, R.drawable.ic_video_item,
-					R.drawable.ic_music_item, R.drawable.ic_record_item };
-		} else {
-			optionIcons = new int[] { R.drawable.ic_image_item,
-					R.drawable.ic_video_item, R.drawable.ic_music_item,
-					R.drawable.ic_record_item };
+			optionsList.add(getString(R.string.share_location));
 		}
+		if (canShareContacts) {
+			optionsList.add(getString(R.string.contact_info));
+		}
+
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
+
+		ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
+		optionImagesList.add(R.drawable.ic_image_capture_item);
+		optionImagesList.add(R.drawable.ic_image_item);
+		optionImagesList.add(R.drawable.ic_video_item);
+		optionImagesList.add(R.drawable.ic_music_item);
+		optionImagesList.add(R.drawable.ic_record_item);
+		if (canShareLocation) {
+			optionImagesList.add(R.drawable.ic_share_location_item);
+		}
+		if (canShareContacts) {
+			optionImagesList.add(R.drawable.ic_contact_item);
+		}
+		final Integer[] optionIcons = new Integer[optionImagesList.size()];
+		optionImagesList.toArray(optionIcons);
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
 
 		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
-				android.R.layout.select_dialog_item, android.R.id.text1,
-				options) {
+				R.layout.alert_item, R.id.item, options) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
 				View v = super.getView(position, convertView, parent);
-				TextView tv = (TextView) v.findViewById(android.R.id.text1);
+				TextView tv = (TextView) v.findViewById(R.id.item);
 				tv.setCompoundDrawablesWithIntrinsicBounds(
 						optionIcons[position], 0, 0, 0);
-				tv.setCompoundDrawablePadding((int) (15 * Utils.densityMultiplier));
 				return v;
 			}
 
 		};
 
-		builder.setTitle(R.string.share_file);
-		builder.setIcon(R.drawable.ic_share_header);
 		builder.setAdapter(dialogAdapter,
 				new DialogInterface.OnClickListener() {
 					@Override
@@ -2059,19 +2243,39 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						int requestCode;
 						Intent pickIntent = new Intent();
 						Intent newMediaFileIntent = null;
-						if (!canShareLocation) {
-							which++;
-						}
-						if (which != 0) {
+						/*
+						 * If we're not doing a location/contact transfer, we
+						 * need an external storage
+						 */
+						if (which != 5 && which != 6) {
 							if (externalStorageState == ExternalStorageState.NONE) {
 								Toast.makeText(getApplicationContext(),
-										R.string.no_external_storage, Toast.LENGTH_SHORT).show();
+										R.string.no_external_storage,
+										Toast.LENGTH_SHORT).show();
 								return;
 							}
 						}
+
 						switch (which) {
 						case 0:
-							requestCode = HikeConstants.SHARE_LOCATION_CODE;
+							requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
+							pickIntent = new Intent(
+									MediaStore.ACTION_IMAGE_CAPTURE);
+							selectedFile = Utils.getOutputMediaFile(
+									HikeFileType.IMAGE, null, null);
+
+							pickIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+									Uri.fromFile(selectedFile));
+							/*
+							 * For images, save the file path as a preferences
+							 * since in some devices the reference to the file
+							 * becomes null.
+							 */
+							Editor editor = prefs.edit();
+							editor.putString(HikeMessengerApp.FILE_PATH,
+									selectedFile.getAbsolutePath());
+							editor.commit();
+
 							break;
 						case 2:
 							requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
@@ -2090,24 +2294,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							requestCode = HikeConstants.RECORD_AUDIO_TRANSFER_CODE;
 							break;
 
+						case 5:
+							if (canShareLocation) {
+								requestCode = HikeConstants.SHARE_LOCATION_CODE;
+								break;
+							}
+						case 6:
+							requestCode = HikeConstants.SHARE_CONTACT_CODE;
+							break;
+
 						case 1:
 						default:
 							requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
 							pickIntent.setType("image/*");
-							newMediaFileIntent = new Intent(
-									MediaStore.ACTION_IMAGE_CAPTURE);
-							selectedFile = Utils.getOutputMediaFile(
-									HikeFileType.IMAGE, null, null);
-
-							/*
-							 * For images, save the file path as a preferences
-							 * since in some devices the reference to the file
-							 * becomes null.
-							 */
-							Editor editor = prefs.edit();
-							editor.putString(HikeMessengerApp.FILE_PATH,
-									selectedFile.getAbsolutePath());
-							editor.commit();
 							break;
 						}
 						if (requestCode == HikeConstants.SHARE_LOCATION_CODE) {
@@ -2117,11 +2316,22 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						} else if (requestCode == HikeConstants.AUDIO_TRANSFER_CODE) {
 							showAudioDialog();
 							return;
+						} else if (requestCode == HikeConstants.SHARE_CONTACT_CODE) {
+							pickIntent = new Intent(Intent.ACTION_PICK,
+									Contacts.CONTENT_URI);
+							startActivityForResult(pickIntent, requestCode);
+							return;
 						}
-						pickIntent.setAction(Intent.ACTION_PICK);
+						Intent chooserIntent;
+						if (requestCode != HikeConstants.IMAGE_CAPTURE_CODE) {
+							pickIntent.setAction(Intent.ACTION_PICK);
 
-						Intent chooserIntent = Intent.createChooser(pickIntent,
-								"");
+							chooserIntent = Intent
+									.createChooser(pickIntent, "");
+						} else {
+							chooserIntent = pickIntent;
+						}
+
 						if (externalStorageState == ExternalStorageState.WRITEABLE) {
 							/*
 							 * Cannot send a file for new videos because of an
@@ -2130,7 +2340,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							 * /verifiyandsetparameter
 							 * -error-when-trying-to-record-video
 							 */
-							if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE) {
+							if (requestCode == HikeConstants.IMAGE_CAPTURE_CODE) {
 								if (selectedFile == null) {
 									Log.w(getClass().getSimpleName(),
 											"Unable to create file to store media.");
@@ -2143,9 +2353,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 											Toast.LENGTH_LONG).show();
 									return;
 								}
-								newMediaFileIntent.putExtra(
-										MediaStore.EXTRA_OUTPUT,
-										Uri.fromFile(selectedFile));
 							}
 							if (newMediaFileIntent != null) {
 								chooserIntent.putExtra(
@@ -2168,6 +2375,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				});
 
 		filePickerDialog = builder.create();
+		((AlertDialog) filePickerDialog).getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
 		filePickerDialog.show();
 	}
 
@@ -2562,10 +2772,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if ((requestCode == HikeConstants.IMAGE_TRANSFER_CODE
+		if ((requestCode == HikeConstants.IMAGE_CAPTURE_CODE
+				|| requestCode == HikeConstants.IMAGE_TRANSFER_CODE
 				|| requestCode == HikeConstants.VIDEO_TRANSFER_CODE || requestCode == HikeConstants.AUDIO_TRANSFER_CODE)
 				&& resultCode == RESULT_OK) {
-			if (requestCode == HikeConstants.IMAGE_TRANSFER_CODE) {
+			if (requestCode == HikeConstants.IMAGE_CAPTURE_CODE) {
 				selectedFile = new File(prefs.getString(
 						HikeMessengerApp.FILE_PATH, ""));
 
@@ -2580,7 +2791,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				return;
 			}
 
-			HikeFileType hikeFileType = requestCode == HikeConstants.IMAGE_TRANSFER_CODE ? HikeFileType.IMAGE
+			HikeFileType hikeFileType = (requestCode == HikeConstants.IMAGE_TRANSFER_CODE || requestCode == HikeConstants.IMAGE_CAPTURE_CODE) ? HikeFileType.IMAGE
 					: requestCode == HikeConstants.VIDEO_TRANSFER_CODE ? HikeFileType.VIDEO
 							: HikeFileType.AUDIO;
 
@@ -2627,11 +2838,236 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude
 					+ " long:" + longitude + " zoom: " + zoomLevel);
 			initialiseLocationTransfer(latitude, longitude, zoomLevel, null);
+		} else if (requestCode == HikeConstants.SHARE_CONTACT_CODE
+				&& resultCode == RESULT_OK) {
+			String id = data.getData().getLastPathSegment();
+			getContactData(id);
 		} else if (resultCode == RESULT_CANCELED) {
 			clearTempData();
 			Log.d(getClass().getSimpleName(), "File transfer Cancelled");
 			selectedFile = null;
 		}
+	}
+
+	private void getContactData(String id) {
+		StringBuilder mimeTypes = new StringBuilder("(");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Phone.CONTENT_ITEM_TYPE)
+				+ ",");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Email.CONTENT_ITEM_TYPE)
+				+ ",");
+		mimeTypes.append(DatabaseUtils
+				.sqlEscapeString(StructuredPostal.CONTENT_ITEM_TYPE) + ",");
+		mimeTypes.append(DatabaseUtils.sqlEscapeString(Event.CONTENT_ITEM_TYPE)
+				+ ")");
+
+		String selection = Data.CONTACT_ID + " =? AND " + Data.MIMETYPE
+				+ " IN " + mimeTypes.toString();
+
+		String[] projection = new String[] { Data.DATA1, Data.DATA2,
+				Data.DATA3, Data.MIMETYPE, Data.DISPLAY_NAME };
+
+		Cursor c = getContentResolver().query(Data.CONTENT_URI, projection,
+				selection, new String[] { id }, null);
+
+		int data1Idx = c.getColumnIndex(Data.DATA1);
+		int data2Idx = c.getColumnIndex(Data.DATA2);
+		int data3Idx = c.getColumnIndex(Data.DATA3);
+		int mimeTypeIdx = c.getColumnIndex(Data.MIMETYPE);
+		int nameIdx = c.getColumnIndex(Data.DISPLAY_NAME);
+
+		JSONObject contactJson = new JSONObject();
+
+		JSONArray phoneNumbersJson = null;
+		JSONArray emailsJson = null;
+		JSONArray addressesJson = null;
+		JSONArray eventsJson = null;
+
+		List<ContactInfoData> items = new ArrayList<ContactInfoData>();
+		String name = null;
+		try {
+			while (c.moveToNext()) {
+				String mimeType = c.getString(mimeTypeIdx);
+
+				if (!contactJson.has(HikeConstants.NAME)) {
+					String dispName = c.getString(nameIdx);
+					contactJson.put(HikeConstants.NAME, dispName);
+					name = dispName;
+				}
+
+				if (Phone.CONTENT_ITEM_TYPE.equals(mimeType)) {
+
+					if (phoneNumbersJson == null) {
+						phoneNumbersJson = new JSONArray();
+						contactJson.put(HikeConstants.PHONE_NUMBERS,
+								phoneNumbersJson);
+					}
+
+					String type = Phone.getTypeLabel(getResources(),
+							c.getInt(data2Idx), c.getString(data3Idx))
+							.toString();
+					String msisdn = c.getString(data1Idx);
+
+					JSONObject data = new JSONObject();
+					data.put(type, msisdn);
+					phoneNumbersJson.put(data);
+
+					items.add(new ContactInfoData(DataType.PHONE_NUMBER,
+							msisdn, type));
+				} else if (Email.CONTENT_ITEM_TYPE.equals(mimeType)) {
+
+					if (emailsJson == null) {
+						emailsJson = new JSONArray();
+						contactJson.put(HikeConstants.EMAILS, emailsJson);
+					}
+
+					String type = Email.getTypeLabel(getResources(),
+							c.getInt(data2Idx), c.getString(data3Idx))
+							.toString();
+					String email = c.getString(data1Idx);
+
+					JSONObject data = new JSONObject();
+					data.put(type, email);
+					emailsJson.put(data);
+
+					items.add(new ContactInfoData(DataType.EMAIL, email, type));
+				} else if (StructuredPostal.CONTENT_ITEM_TYPE.equals(mimeType)) {
+
+					if (addressesJson == null) {
+						addressesJson = new JSONArray();
+						contactJson.put(HikeConstants.ADDRESSES, addressesJson);
+					}
+
+					String type = StructuredPostal.getTypeLabel(getResources(),
+							c.getInt(data2Idx), c.getString(data3Idx))
+							.toString();
+					String address = c.getString(data1Idx);
+
+					JSONObject data = new JSONObject();
+					data.put(type, address);
+					addressesJson.put(data);
+
+					items.add(new ContactInfoData(DataType.ADDRESS, address,
+							type));
+				} else if (Event.CONTENT_ITEM_TYPE.equals(mimeType)) {
+
+					if (eventsJson == null) {
+						eventsJson = new JSONArray();
+						contactJson.put(HikeConstants.EVENTS, eventsJson);
+					}
+
+					String event;
+					int eventType = c.getInt(data2Idx);
+					if (eventType == Event.TYPE_ANNIVERSARY) {
+						event = getString(R.string.anniversary);
+					} else if (eventType == Event.TYPE_OTHER) {
+						event = getString(R.string.other);
+					} else if (eventType == Event.TYPE_BIRTHDAY) {
+						event = getString(R.string.birthday);
+					} else {
+						event = c.getString(data3Idx);
+					}
+					String type = event.toString();
+					String eventDate = c.getString(data1Idx);
+
+					JSONObject data = new JSONObject();
+					data.put(type, eventDate);
+					eventsJson.put(data);
+
+					items.add(new ContactInfoData(DataType.EVENT, eventDate,
+							type));
+				}
+			}
+		} catch (JSONException e) {
+			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+
+		Log.d(getClass().getSimpleName(),
+				"Data of contact is : " + contactJson.toString());
+		clearTempData();
+		showContactDetails(items, name, contactJson, false);
+	}
+
+	public void showContactDetails(final List<ContactInfoData> items,
+			final String name, final JSONObject contactInfo,
+			final boolean saveContact) {
+		contactDialog = new ContactDialog(this, R.style.Theme_CustomDialog);
+		contactDialog.setContentView(R.layout.contact_share_info);
+
+		ViewGroup parent = (ViewGroup) contactDialog.findViewById(R.id.parent);
+		TextView contactName = (TextView) contactDialog
+				.findViewById(R.id.contact_name);
+		ListView contactDetails = (ListView) contactDialog
+				.findViewById(R.id.contact_details);
+		Button yesBtn = (Button) contactDialog.findViewById(R.id.btn_ok);
+		Button noBtn = (Button) contactDialog.findViewById(R.id.btn_cancel);
+		TextView targetAccount = (TextView) contactDialog
+				.findViewById(R.id.target_account);
+		final Spinner accounts = (Spinner) contactDialog
+				.findViewById(R.id.account_spinner);
+
+		int screenHeight = getResources().getDisplayMetrics().heightPixels;
+		int dialogWidth = (int) getResources().getDimension(
+				R.dimen.contact_info_width);
+		int dialogHeight = (int) (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? ((3 * screenHeight) / 4)
+				: FrameLayout.LayoutParams.MATCH_PARENT);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(dialogWidth,
+				dialogHeight);
+		lp.topMargin = (int) (5 * Utils.densityMultiplier);
+		lp.bottomMargin = (int) (5 * Utils.densityMultiplier);
+
+		parent.setLayoutParams(lp);
+
+		contactDialog.setViewReferences(parent, accounts);
+
+		yesBtn.setText(saveContact ? R.string.save : R.string.send);
+
+		if (saveContact) {
+			accounts.setVisibility(View.VISIBLE);
+			targetAccount.setVisibility(View.VISIBLE);
+			accounts.setAdapter(new AccountAdapter(getApplicationContext(),
+					getAccountList()));
+		} else {
+			accounts.setVisibility(View.GONE);
+			targetAccount.setVisibility(View.GONE);
+		}
+
+		contactName.setText(name);
+		contactDetails.setAdapter(new ArrayAdapter<ContactInfoData>(
+				getApplicationContext(), R.layout.contact_share_item,
+				R.id.info_value, items) {
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				View v = super.getView(position, convertView, parent);
+				ContactInfoData contactInfoData = getItem(position);
+
+				TextView header = (TextView) v.findViewById(R.id.info_head);
+				header.setText(contactInfoData.getDataSubType());
+
+				TextView details = (TextView) v.findViewById(R.id.info_value);
+				details.setText(contactInfoData.getData());
+				return v;
+			}
+
+		});
+		yesBtn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (saveContact) {
+					saveContact(items, accounts, name);
+				} else {
+					initialiseContactTransfer(contactInfo);
+				}
+				contactDialog.dismiss();
+			}
+		});
+		noBtn.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				contactDialog.dismiss();
+			}
+		});
+		contactDialog.show();
 	}
 
 	private void initialiseFileTransfer(String filePath,
@@ -2647,10 +3083,109 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void initialiseLocationTransfer(double latitude, double longitude,
 			int zoomLevel, String fileKey) {
 		clearTempData();
-		UploadLocationTask uploadLocationTask = new UploadLocationTask(
+		UploadContactOrLocationTask uploadLocationTask = new UploadContactOrLocationTask(
 				mContactNumber, latitude, longitude, zoomLevel, fileKey,
 				getApplicationContext());
 		uploadLocationTask.execute();
+	}
+
+	private void initialiseContactTransfer(JSONObject contactJson) {
+		UploadContactOrLocationTask contactOrLocationTask = new UploadContactOrLocationTask(
+				mContactNumber, contactJson, getApplicationContext());
+		contactOrLocationTask.execute();
+	}
+
+	private void saveContact(List<ContactInfoData> items,
+			Spinner accountSpinner, String name) {
+
+		AccountData accountData = (AccountData) accountSpinner
+				.getSelectedItem();
+
+		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+		int rawContactInsertIndex = ops.size();
+
+		ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+				.withValue(RawContacts.ACCOUNT_TYPE, accountData.getType())
+				.withValue(RawContacts.ACCOUNT_NAME, accountData.getName())
+				.build());
+
+		for (ContactInfoData contactInfoData : items) {
+			switch (contactInfoData.getDataType()) {
+			case ADDRESS:
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactInsertIndex)
+						.withValue(Data.MIMETYPE,
+								StructuredPostal.CONTENT_ITEM_TYPE)
+						.withValue(StructuredPostal.DATA,
+								contactInfoData.getData())
+						.withValue(StructuredPostal.TYPE,
+								StructuredPostal.TYPE_CUSTOM)
+						.withValue(StructuredPostal.LABEL,
+								contactInfoData.getDataSubType()).build());
+				break;
+			case EMAIL:
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Email.CONTENT_ITEM_TYPE)
+						.withValue(Email.DATA, contactInfoData.getData())
+						.withValue(Email.TYPE, Email.TYPE_CUSTOM)
+						.withValue(Email.LABEL,
+								contactInfoData.getDataSubType()).build());
+				break;
+			case EVENT:
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Event.CONTENT_ITEM_TYPE)
+						.withValue(Event.DATA, contactInfoData.getData())
+						.withValue(Event.TYPE, Event.TYPE_CUSTOM)
+						.withValue(Event.LABEL,
+								contactInfoData.getDataSubType()).build());
+				break;
+			case PHONE_NUMBER:
+				ops.add(ContentProviderOperation
+						.newInsert(ContactsContract.Data.CONTENT_URI)
+						.withValueBackReference(
+								ContactsContract.Data.RAW_CONTACT_ID,
+								rawContactInsertIndex)
+						.withValue(Data.MIMETYPE, Phone.CONTENT_ITEM_TYPE)
+						.withValue(Phone.NUMBER, contactInfoData.getData())
+						.withValue(Phone.TYPE, Phone.TYPE_CUSTOM)
+						.withValue(Phone.LABEL,
+								contactInfoData.getDataSubType()).build());
+				break;
+			}
+		}
+		ops.add(ContentProviderOperation
+				.newInsert(Data.CONTENT_URI)
+				.withValueBackReference(Data.RAW_CONTACT_ID,
+						rawContactInsertIndex)
+				.withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
+				.withValue(StructuredName.DISPLAY_NAME, name).build());
+		boolean contactSaveSuccessful;
+		try {
+			getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+			contactSaveSuccessful = true;
+		} catch (RemoteException e) {
+			e.printStackTrace();
+			contactSaveSuccessful = false;
+		} catch (OperationApplicationException e) {
+			e.printStackTrace();
+			contactSaveSuccessful = false;
+		}
+		Toast.makeText(
+				getApplicationContext(),
+				contactSaveSuccessful ? R.string.contact_saved
+						: R.string.contact_not_saved, Toast.LENGTH_SHORT)
+				.show();
 	}
 
 	@Override
@@ -2876,6 +3411,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				emoticonLayout.setAnimation(slideUp);
 			}
 			emoticonLayout.setVisibility(View.VISIBLE);
+			Utils.hideSoftKeyboard(this, mComposeView);
 		}
 
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {
@@ -3022,7 +3558,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			@Override
 			public void run() {
 				mConversationsView.smoothScrollBy(-1, 1);
-				mConversationsView.smoothScrollToPosition(mAdapter.getCount());
+				mConversationsView.smoothScrollToPosition(mAdapter.getCount() - 1);
 			}
 		}, 10);
 
@@ -3093,5 +3629,71 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
 		// TODO Auto-generated method stub
 
+	}
+
+	private List<AccountData> getAccountList() {
+		Account[] a = AccountManager.get(this).getAccounts();
+		// Clear out any old data to prevent duplicates
+		List<AccountData> accounts = new ArrayList<AccountData>();
+
+		// Get account data from system
+		AuthenticatorDescription[] accountTypes = AccountManager.get(this)
+				.getAuthenticatorTypes();
+
+		// Populate tables
+		for (int i = 0; i < a.length; i++) {
+			// The user may have multiple accounts with the same name, so we
+			// need to construct a
+			// meaningful display name for each.
+			String type = a[i].type;
+			/*
+			 * Only showing the user's google accounts
+			 */
+			if (!"com.google".equals(type)) {
+				continue;
+			}
+			String systemAccountType = type;
+			AuthenticatorDescription ad = getAuthenticatorDescription(
+					systemAccountType, accountTypes);
+			AccountData data = new AccountData(a[i].name, ad, this);
+			accounts.add(data);
+		}
+
+		return accounts;
+	}
+
+	/**
+	 * Obtain the AuthenticatorDescription for a given account type.
+	 * 
+	 * @param type
+	 *            The account type to locate.
+	 * @param dictionary
+	 *            An array of AuthenticatorDescriptions, as returned by
+	 *            AccountManager.
+	 * @return The description for the specified account type.
+	 */
+	private AuthenticatorDescription getAuthenticatorDescription(String type,
+			AuthenticatorDescription[] dictionary) {
+		for (int i = 0; i < dictionary.length; i++) {
+			if (dictionary[i].type.equals(type)) {
+				return dictionary[i];
+			}
+		}
+		// No match found
+		throw new RuntimeException("Unable to find matching authenticator");
+	}
+
+	@Override
+	public void startActivity(Intent intent) {
+		try {
+			/* Workaround for an HTC issue */
+			if (intent.getComponent() != null
+					&& ".HtcLinkifyDispatcherActivity".equals(intent
+							.getComponent().getShortClassName()))
+				intent.setComponent(null);
+			super.startActivity(intent);
+		} catch (ActivityNotFoundException e) {
+			super.startActivity(Intent.createChooser(intent, null));
+		}
 	}
 }

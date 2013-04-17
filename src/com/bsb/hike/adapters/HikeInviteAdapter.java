@@ -31,9 +31,11 @@ public class HikeInviteAdapter extends
 	private List<Pair<AtomicBoolean, ContactInfo>> filteredList;
 	private ContactFilter filter;
 	private String unknownNumber;
+	private boolean showingBlockedList;
 
 	public HikeInviteAdapter(Activity activity, int viewItemId,
-			List<Pair<AtomicBoolean, ContactInfo>> completeList) {
+			List<Pair<AtomicBoolean, ContactInfo>> completeList,
+			boolean showingBLockedList) {
 
 		super(activity, viewItemId, completeList);
 		this.activity = activity;
@@ -42,6 +44,7 @@ public class HikeInviteAdapter extends
 				completeList.size());
 		this.completeList.addAll(completeList);
 		this.filter = new ContactFilter();
+		this.showingBlockedList = showingBLockedList;
 	}
 
 	@Override
@@ -80,13 +83,16 @@ public class HikeInviteAdapter extends
 				numView.append(" (" + contactInfo.getMsisdnType() + ")");
 			}
 		} else {
-			numView.setText(R.string.tap_here_invite);
+			numView.setText(showingBlockedList ? R.string.tap_here_block
+					: R.string.tap_here_invite);
 		}
 		numView.setVisibility(isEnabled(position) ? View.VISIBLE
 				: View.INVISIBLE);
 
 		CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkbox);
 		checkBox.setVisibility(pair != null ? View.VISIBLE : View.GONE);
+		checkBox.setButtonDrawable(showingBlockedList ? R.drawable.block_button
+				: R.drawable.preference_checkbox);
 
 		if (pair != null) {
 			checkBox.setChecked(isChecked.get());

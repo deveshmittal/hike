@@ -31,156 +31,34 @@
             android:id="@+id/animation_layout_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/thatch_repeat"
             android:orientation="vertical" >
 
-            <include
-                android:id="@+id/top_panel_ref"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                layout="@layout/top_panel" />
-
-            <ScrollView
-                android:id="@+id/profile_sv"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:fadingEdge="none" >
+                android:background="@color/seen_timeline_item"
+                android:orientation="vertical" >
 
-                <LinearLayout
+                <include
+                    android:id="@+id/top_panel_ref"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical" >
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    layout="@layout/top_panel" />
 
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="5dp"
-                        android:text="@string/me"
-                        android:textColor="@color/timestampcolor"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                <ListView
+                    android:id="@+id/profile_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:cacheColorHint="#00000000"
+                    android:divider="@null"
+                    android:fadingEdge="none" />
 
-                    <LinearLayout
-                        android:id="@+id/me_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/profile_bckg"
-                        android:orientation="vertical" >
-
-                        <RelativeLayout
-                            android:id="@+id/my_info"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:onClick="onEditProfileClicked" >
-
-                            <RelativeLayout
-                                android:id="@+id/avatar_border"
-                                android:layout_width="90dp"
-                                android:layout_height="90dp"
-                                android:layout_centerVertical="true"
-                                android:layout_marginBottom="24dp"
-                                android:layout_marginLeft="14dp"
-                                android:layout_marginRight="14dp"
-                                android:layout_marginTop="24dp"
-                                 >
-
-                                <ImageView
-                                    android:id="@+id/profile"
-                                    android:layout_width="80dp"
-                                    android:layout_height="80dp"
-                                    android:layout_centerInParent="true"
-                                    android:src="@drawable/ic_avatar1"
-                                    android:onClick="onViewImageClicked" />
-
-                                <ImageView
-                                    android:id="@+id/profile_border"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:src="@drawable/square" />
-
-                                <ImageView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_alignParentBottom="true"
-                                    android:layout_alignParentRight="true"
-                                    android:layout_marginBottom="5dp"
-                                    android:layout_marginRight="5dp"
-                                    android:src="@drawable/ic_edit_profile"
-                                    android:onClick="onChangeImageClicked" />
-                            </RelativeLayout>
-
-                            <ImageView
-                                android:id="@+id/name_arrow"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentRight="true"
-                                android:layout_centerVertical="true"
-                                android:layout_marginRight="12dp"
-                                android:src="@drawable/ic_arrow" />
-
-                            <LinearLayout
-                                android:id="@+id/info_layout"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_centerVertical="true"
-                                android:layout_toLeftOf="@id/name_arrow"
-                                android:layout_toRightOf="@id/avatar_border"
-                                android:orientation="vertical" >
-
-                                <com.bsb.hike.view.CustomFontTextView
-                                    android:id="@+id/name_current"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginRight="10dp"
-                                    android:ellipsize="end"
-                                    android:singleLine="true"
-                                    android:text="Kavin Bharti Mittal"
-                                    android:textColor="@color/lightblack"
-                                    android:textSize="18dp"
-                                    android:textStyle="bold" />
-                            </LinearLayout>
-                        </RelativeLayout>
-                    </LinearLayout>
-
-                    <com.bsb.hike.view.CustomFontTextView
-                        android:id="@+id/settings_txt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginTop="5dp"
-                        android:text="@string/settings"
-                        android:textColor="@color/timestampcolor"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <LinearLayout
-                        android:id="@+id/prefs"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/profile_bckg"
-                        android:orientation="vertical" >
-
-                        <include
-                            android:id="@+id/notifications"
-                            android:layout_marginBottom="50dp"
-                            layout="@layout/profile_item" />
-
-                        <include
-                            android:id="@+id/privacy"
-                            android:layout_marginBottom="10dp"
-                            layout="@layout/profile_item" />
-                    </LinearLayout>
-                </LinearLayout>
-            </ScrollView>
+            </LinearLayout>
         </LinearLayout>
+
     </com.bsb.hike.view.DrawerLayout>
 
-    <include layout="@layout/profile_image"/>
+    <include layout="@layout/profile_image" />
 
 </RelativeLayout>

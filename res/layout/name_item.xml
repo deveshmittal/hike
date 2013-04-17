@@ -10,15 +10,16 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingBottom="10dp"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
-        android:paddingTop="10dp" >
+        android:paddingBottom="@dimen/avatar_top_bottom"
+        android:paddingLeft="@dimen/avatar_left_right"
+        android:paddingRight="@dimen/avatar_left_right"
+        android:paddingTop="@dimen/avatar_top_bottom" >
 
         <ImageView
             android:id="@+id/user_img"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/avatar_width_height"
+            android:layout_height="@dimen/avatar_width_height"
+            android:layout_marginRight="@dimen/avatar_left_right"
             android:src="@drawable/ic_avatar1" />
 
         <LinearLayout
@@ -30,18 +31,17 @@
                 android:id="@+id/name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
                 android:layout_marginRight="7dp"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="Vijay Raghunathan"
                 android:textColor="@color/lightblack"
-                android:textSize="18sp" />
+                android:textSize="@dimen/main_text_size" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
+                android:layout_marginTop="@dimen/text_subtext_spacing"
                 android:gravity="center_vertical"
                 android:orientation="horizontal" >
 
@@ -57,7 +57,7 @@
                     android:layout_height="wrap_content"
                     android:text="1231231231231"
                     android:textColor="@color/subtext"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/sub_text_size"
                     android:textStyle="italic" />
             </LinearLayout>
         </LinearLayout>
@@ -66,6 +66,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@drawable/ic_thread_divider_other" />
+        android:background="@drawable/ic_thread_divider_profile" />
 
 </LinearLayout>

@@ -23,6 +23,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -33,6 +34,7 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
@@ -65,6 +67,7 @@ import com.bsb.hike.http.CustomFileEntity;
 import com.bsb.hike.http.CustomSSLSocketFactory;
 import com.bsb.hike.http.GzipByteArrayEntity;
 import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.http.HttpPatch;
 import com.bsb.hike.models.ContactInfo;
 
@@ -124,10 +127,16 @@ public class AccountUtils {
 
 	public static String mToken = null;
 
+	public static String mUid = null;
+
 	private static String appVersion = null;
 
 	public static void setToken(String token) {
 		mToken = token;
+	}
+
+	public static void setUID(String uid) {
+		mUid = uid;
 	}
 
 	public static void setAppVersion(String version) {
@@ -326,6 +335,8 @@ public class AccountUtils {
 
 			data.put("set_cookie", "0");
 			data.put("devicetype", os);
+			data.put(HikeConstants.LogEvent.OS, os);
+			data.put(HikeConstants.LogEvent.OS_VERSION, osVersion);
 			data.put("deviceid", deviceId);
 			data.put("devicetoken", deviceId);
 			data.put("deviceversion", device);
@@ -387,7 +398,7 @@ public class AccountUtils {
 	}
 
 	public static String validateNumber(String number) {
-		HttpPost httppost = new HttpPost(base + "/account/validate");
+		HttpPost httppost = new HttpPost(base + "/account/validate?digits=4");
 		AbstractHttpEntity entity = null;
 		JSONObject data = new JSONObject();
 		try {
@@ -422,7 +433,7 @@ public class AccountUtils {
 		if (TextUtils.isEmpty(mToken)) {
 			throw new IllegalStateException("Token is null");
 		}
-		req.addHeader("Cookie", "user=" + mToken);
+		req.addHeader("Cookie", "user=" + mToken + "; UID=" + mUid);
 	}
 
 	private static void assertIfTokenNull() {
@@ -604,19 +615,57 @@ public class AccountUtils {
 	public static void performRequest(HikeHttpRequest hikeHttpRequest,
 			boolean addToken) throws NetworkErrorException,
 			IllegalStateException {
-		HttpPost post = new HttpPost(base + hikeHttpRequest.getPath());
-		if (addToken) {
-			addToken(post);
-		}
+		HttpRequestBase requestBase = null;
+		AbstractHttpEntity entity = null;
+		RequestType requestType = hikeHttpRequest.getRequestType();
 		try {
-			AbstractHttpEntity entity = new GzipByteArrayEntity(
-					hikeHttpRequest.getPostData(), HTTP.DEFAULT_CONTENT_CHARSET);
-			entity.setContentType(hikeHttpRequest.getContentType());
-			post.setEntity(entity);
-			JSONObject obj = executeRequest(post);
+			switch (requestType) {
+			case STATUS_UPDATE:
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
+						HTTP.DEFAULT_CONTENT_CHARSET);
+				break;
+
+			case PROFILE_PIC:
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+				entity = new FileEntity(
+						new File(hikeHttpRequest.getFilePath()), "");
+				break;
+
+			case OTHER:
+				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
+				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
+						HTTP.DEFAULT_CONTENT_CHARSET);
+				break;
+
+			case DELETE_STATUS:
+				requestBase = new HttpDelete(base + hikeHttpRequest.getPath());
+				break;
+
+			case HIKE_JOIN_TIME:
+				requestBase = new HttpGet(base + hikeHttpRequest.getPath());
+			}
+			if (addToken) {
+				addToken(requestBase);
+			}
+
+			if (entity != null) {
+				entity.setContentType(hikeHttpRequest.getContentType());
+				((HttpPost) requestBase).setEntity(entity);
+			}
+			JSONObject obj = executeRequest(requestBase);
 			Log.d("AccountUtils", "Response: " + obj);
-			if ((obj == null) || (!"ok".equals(obj.optString("stat")))) {
+			if (((obj == null) || (!"ok".equals(obj.optString("stat")))
+					&& requestType != RequestType.HIKE_JOIN_TIME)) {
 				throw new NetworkErrorException("Unable to perform request");
+			}
+			/*
+			 * We need the response to save the id of the status.
+			 */
+			if (requestType == RequestType.STATUS_UPDATE
+					|| requestType == RequestType.HIKE_JOIN_TIME
+					|| requestType == RequestType.PROFILE_PIC) {
+				hikeHttpRequest.setResponse(obj);
 			}
 		} catch (UnsupportedEncodingException e) {
 			Log.wtf("AccountUtils", "Unable to encode name");
@@ -645,7 +694,8 @@ public class AccountUtils {
 		httpPut.addHeader("X-Thumbnail-Required", "0");
 
 		final AbstractHttpEntity entity;
-		if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType)) {
+		if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileType)
+				&& !HikeConstants.CONTACT_CONTENT_TYPE.equals(fileType)) {
 			entity = new CustomFileEntity(new File(filePath), "",
 					new ProgressListener() {
 						@Override

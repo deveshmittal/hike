@@ -16,7 +16,7 @@
     <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/et_enter_pin"
         style="@style/SignupButton"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/tb_pin"
         android:hint="@string/pin"
         android:imeOptions="actionDone"

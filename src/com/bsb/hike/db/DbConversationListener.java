@@ -17,11 +17,15 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.R;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.models.GroupParticipant;
 import com.fiksu.asotracking.FiksuTrackingManager;
 
@@ -58,6 +62,10 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE, this);
 		mPubSub.addListener(HikePubSub.FAVORITE_TOGGLED, this);
 		mPubSub.addListener(HikePubSub.MUTE_CONVERSATION_TOGGLED, this);
+		mPubSub.addListener(HikePubSub.FRIEND_REQUEST_ACCEPTED, this);
+		mPubSub.addListener(HikePubSub.REJECT_FRIEND_REQUEST, this);
+		mPubSub.addListener(HikePubSub.DELETE_STATUS, this);
+		mPubSub.addListener(HikePubSub.HIKE_JOIN_TIME_OBTAINED, this);
 	}
 
 	@Override
@@ -97,8 +105,10 @@ public class DbConversationListener implements Listener {
 				}
 			}
 		} else if (HikePubSub.DELETE_MESSAGE.equals(type)) {
-			ConvMessage message = ((ConvMessage) object);
-			mConversationDb.deleteMessage(message);
+			Pair<ConvMessage, Boolean> deleteMessage = (Pair<ConvMessage, Boolean>) object;
+			ConvMessage message = deleteMessage.first;
+			mConversationDb.deleteMessage(deleteMessage.first,
+					deleteMessage.second);
 			persistence.removeMessage(message.getMsgID());
 		} else if (HikePubSub.MESSAGE_FAILED.equals(type)) // server got msg
 		// from client 1 and
@@ -110,7 +120,15 @@ public class DbConversationListener implements Listener {
 		} else if (HikePubSub.BLOCK_USER.equals(type)) {
 			String msisdn = (String) object;
 			mUserDb.block(msisdn);
+			/*
+			 * When a user blocks someone, we reset the contact's friend type.
+			 */
+			mUserDb.toggleContactFavorite(msisdn, FavoriteType.NOT_FRIEND);
 			JSONObject blockObj = blockUnblockSerialize("b", msisdn);
+			/*
+			 * We remove the icon for a blocked user as well.
+			 */
+			IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			mPubSub.publish(HikePubSub.MQTT_PUBLISH, blockObj);
 		} else if (HikePubSub.UNBLOCK_USER.equals(type)) {
 			String msisdn = (String) object;
@@ -169,7 +187,9 @@ public class DbConversationListener implements Listener {
 			} catch (JSONException e) {
 				Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			}
-		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
+		} else if (HikePubSub.FAVORITE_TOGGLED.equals(type)
+				|| HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)
+				|| HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
 			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
 
 			ContactInfo contactInfo = favoriteToggle.first;
@@ -177,13 +197,41 @@ public class DbConversationListener implements Listener {
 
 			mUserDb.toggleContactFavorite(contactInfo.getMsisdn(), favoriteType);
 
-			if (favoriteType != FavoriteType.RECOMMENDED_FAVORITE) {
-				mPubSub.publish(
-						HikePubSub.MQTT_PUBLISH,
-						serializeMsg(
-								favoriteType == FavoriteType.FAVORITE ? HikeConstants.MqttMessageTypes.ADD_FAVORITE
-										: HikeConstants.MqttMessageTypes.REMOVE_FAVORITE,
-								contactInfo.getMsisdn()));
+			if (favoriteType != FavoriteType.REQUEST_RECEIVED
+					&& favoriteType != FavoriteType.REQUEST_SENT_REJECTED
+					&& !HikePubSub.FRIEND_REQUEST_ACCEPTED.equals(type)) {
+				String requestType;
+				if (favoriteType == FavoriteType.FRIEND
+						|| favoriteType == FavoriteType.REQUEST_SENT) {
+
+					/*
+					 * Adding a status message for accepting the friend request
+					 */
+					if (favoriteType == FavoriteType.FRIEND) {
+						StatusMessage statusMessage = new StatusMessage(
+								0,
+								null,
+								contactInfo.getMsisdn(),
+								contactInfo.getName(),
+								context.getString(R.string.accepted_friend_request),
+								StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST,
+								System.currentTimeMillis() / 1000);
+						mConversationDb.addStatusMessage(statusMessage, true);
+						mPubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED,
+								statusMessage);
+						mPubSub.publish(HikePubSub.TIMELINE_UPDATE_RECIEVED,
+								statusMessage);
+					}
+
+					requestType = HikeConstants.MqttMessageTypes.ADD_FAVORITE;
+				} else if (HikePubSub.REJECT_FRIEND_REQUEST.equals(type)) {
+					requestType = HikeConstants.MqttMessageTypes.POSTPONE_FAVORITE;
+				} else {
+					requestType = HikeConstants.MqttMessageTypes.REMOVE_FAVORITE;
+				}
+
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH,
+						serializeMsg(requestType, contactInfo.getMsisdn()));
 			}
 		} else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type)) {
 			Pair<String, Boolean> groupMute = (Pair<String, Boolean>) object;
@@ -197,6 +245,20 @@ public class DbConversationListener implements Listener {
 					HikePubSub.MQTT_PUBLISH,
 					serializeMsg(mute ? HikeConstants.MqttMessageTypes.MUTE
 							: HikeConstants.MqttMessageTypes.UNMUTE, id));
+		} else if (HikePubSub.DELETE_STATUS.equals(type)) {
+			String statusId = (String) object;
+			mConversationDb.deleteStatus(statusId);
+			/*
+			 * If the status also has an icon, we delete that as well.
+			 */
+			mUserDb.removeIcon(statusId);
+		} else if (HikePubSub.HIKE_JOIN_TIME_OBTAINED.equals(type)) {
+			Pair<String, Long> msisdnHikeJoinTimePair = (Pair<String, Long>) object;
+
+			String msisdn = msisdnHikeJoinTimePair.first;
+			long hikeJoinTime = msisdnHikeJoinTimePair.second;
+
+			mUserDb.setHikeJoinTime(msisdn, hikeJoinTime);
 		}
 	}
 

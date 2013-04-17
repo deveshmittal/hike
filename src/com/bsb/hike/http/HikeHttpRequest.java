@@ -17,15 +17,32 @@ public class HikeHttpRequest {
 
 	};
 
+	public static enum RequestType {
+		STATUS_UPDATE, PROFILE_PIC, OTHER, DELETE_STATUS, HIKE_JOIN_TIME
+	}
+
 	private String mPath;
 	private JSONObject mJSONData;
 	private HikeHttpCallback mCompletionRunnable;
 	private byte[] mPostData;
 	private JSONObject response;
+	private String filePath;
+	private String statusMessage;
+	private RequestType requestType;
 
-	public HikeHttpRequest(String path, HikeHttpCallback completionRunnable) {
+	public HikeHttpRequest(String path, RequestType requestType,
+			HikeHttpCallback completionRunnable) {
 		this.mPath = path;
+		this.requestType = requestType;
 		this.mCompletionRunnable = completionRunnable;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+
+	public String getFilePath() {
+		return filePath;
 	}
 
 	public JSONObject getJSONData() {
@@ -38,6 +55,14 @@ public class HikeHttpRequest {
 
 	public String getPath() {
 		return mPath;
+	}
+
+	public String getStatusMessage() {
+		return statusMessage;
+	}
+
+	public void setStatusMessage(String statusMessage) {
+		this.statusMessage = statusMessage;
 	}
 
 	public void onSuccess() {
@@ -78,5 +103,9 @@ public class HikeHttpRequest {
 
 	public JSONObject getResponse() {
 		return response;
+	}
+
+	public RequestType getRequestType() {
+		return requestType;
 	}
 }

@@ -1,5 +1,9 @@
 package com.bsb.hike.models;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,13 +14,7 @@ import com.bsb.hike.utils.Utils;
 
 public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	public static enum FavoriteType {
-		NOT_FAVORITE, /* Not a favorite */
-		RECOMMENDED_FAVORITE, /* Contacts that added the user as a favorite */
-		FAVORITE, /* Contacts that were added as favorites */
-		AUTO_RECOMMENDED_FAVORITE /*
-								 * Contacts that were recommended by the app to
-								 * be added as favorites
-								 */
+		NOT_FRIEND, REQUEST_RECEIVED, FRIEND, AUTO_RECOMMENDED_FAVORITE, REQUEST_SENT, REQUEST_SENT_REJECTED, REQUEST_RECEIVED_REJECTED
 	}
 
 	@Override
@@ -41,6 +39,8 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	private String phoneNum;
 
 	private FavoriteType favoriteType;
+
+	private long hikeJoinTime;
 
 	public String getName() {
 		return name;
@@ -122,6 +122,27 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		this.favoriteType = favoriteType;
 	}
 
+	public long getHikeJoinTime() {
+		return hikeJoinTime;
+	}
+
+	public void setHikeJoinTime(long hikeJoinTime) {
+		this.hikeJoinTime = hikeJoinTime;
+	}
+
+	public boolean isUnknownContact() {
+		/*
+		 * For unknown contacts, we make the id and msisdn equal.
+		 */
+		return msisdn.equals(id);
+	}
+
+	public String getFormattedHikeJoinTime() {
+		String format = "MMM ''yy";
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(new Date(hikeJoinTime * 1000));
+	}
+
 	public ContactInfo(String id, String msisdn, String name, String phoneNum) {
 		this(id, msisdn, name, phoneNum, false, "", 0, false);
 	}
@@ -134,6 +155,13 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	public ContactInfo(String id, String msisdn, String name, String phoneNum,
 			boolean onhike, String msisdnType, long lastMessaged,
 			boolean hasCustomPhoto) {
+		this(id, msisdn, name, phoneNum, onhike, msisdnType, lastMessaged,
+				hasCustomPhoto, 0);
+	}
+
+	public ContactInfo(String id, String msisdn, String name, String phoneNum,
+			boolean onhike, String msisdnType, long lastMessaged,
+			boolean hasCustomPhoto, long hikeJoinTime) {
 		this.id = id;
 		this.msisdn = msisdn;
 		this.name = name;
@@ -142,6 +170,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		this.hasCustomPhoto = hasCustomPhoto;
 		this.msisdnType = msisdnType;
 		this.lastMessaged = lastMessaged;
+		this.hikeJoinTime = hikeJoinTime;
 	}
 
 	@Override

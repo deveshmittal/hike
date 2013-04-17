@@ -16,7 +16,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="7dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:src="@drawable/ic_drawer_home" />
         
         <ImageView
@@ -32,16 +33,15 @@
         <ImageView
             android:id="@+id/add_fav"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="7dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="9dp"
+            android:layout_marginRight="4dp"
+            android:clickable="true"
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            android:background="@null"
             android:src="@drawable/add_fav"
-            android:background="@drawable/bg_fav_no_selector"
             android:visibility="gone" />
         
         <com.bsb.hike.view.CustomFontButton
@@ -70,37 +70,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="7dp"
             android:layout_toRightOf="@id/hike_icon"
             android:layout_toLeftOf="@id/add_fav"
             android:ellipsize="end"
             android:shadowColor="#000000"
-            android:shadowDy="0.7"
-            android:shadowRadius="0.7"
+            android:shadowDy="0.8"
+            android:shadowRadius="0.8"
             android:singleLine="true"
             android:text="Credits asjfdlkjsadlf lasdflasjfl asldfjlasjflk jaslflkasdfj lasfas df lasfdlasj dflas"
-            android:textColor="@color/offwhite"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold|italic" />
         
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/credit_num"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="8dp"
-            android:background="@drawable/bg_credit_num"
-            android:gravity="center"
-            android:shadowColor="#3d000000"
-            android:shadowDx="0.5"
-            android:shadowDy="0.5"
-            android:shadowRadius="0.2"
-            android:text="25"
-            android:textColor="@color/offwhite"
-            android:textStyle="bold"
-            android:visibility="gone" />
-
     </RelativeLayout>
 
     <View

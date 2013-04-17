@@ -15,7 +15,7 @@
 
     <LinearLayout
         style="@style/SignupButton"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
         android:background="@drawable/bg_phone_tb"
         android:gravity="center_vertical"
         android:orientation="horizontal"

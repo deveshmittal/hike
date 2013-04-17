@@ -21,14 +21,15 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
+import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.MessagesList;
 
 public class ToastListener implements Listener {
 
@@ -50,6 +51,12 @@ public class ToastListener implements Listener {
 				this);
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.FAVORITE_TOGGLED,
 				this);
+		HikeMessengerApp.getPubSub().addListener(
+				HikePubSub.TIMELINE_UPDATE_RECIEVED, this);
+		HikeMessengerApp.getPubSub().addListener(
+				HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED, this);
+		HikeMessengerApp.getPubSub().addListener(
+				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, this);
 		this.toaster = new HikeNotification(context);
 		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
@@ -129,17 +136,35 @@ public class ToastListener implements Listener {
 			/*
 			 * Only notify when someone has added the user as a favorite.
 			 */
-			if (favoriteType != FavoriteType.RECOMMENDED_FAVORITE) {
+			if (favoriteType != FavoriteType.REQUEST_RECEIVED) {
 				return;
 			}
 			Activity activity = (currentActivity != null) ? currentActivity
 					.get() : null;
-			if (activity instanceof MessagesList) {
-				if (((MessagesList) activity).parentLayout.isRightOpening()) {
-					return;
-				}
+			if (activity instanceof CentralTimeline) {
+				return;
 			}
 			toaster.notifyFavorite(contactInfo);
+		} else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
+			if (currentActivity != null && currentActivity.get() != null) {
+				return;
+			}
+			StatusMessage statusMessage = (StatusMessage) object;
+			String msisdn = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+			if (msisdn.equals(statusMessage.getMsisdn())) {
+				return;
+			}
+			toaster.notifyStatusMessage(statusMessage);
+		} else if (HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED.equals(type)) {
+			if (currentActivity != null && currentActivity.get() != null) {
+				return;
+			}
+			Pair<String, String> batchSU = (Pair<String, String>) object;
+			toaster.notifyBatchUpdate(batchSU.first, batchSU.second);
+		} else if (HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS.equals(type)) {
+			toaster.cancelAllStatusNotifications();
 		}
 	}
 
