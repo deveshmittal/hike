@@ -27,31 +27,37 @@
         android:id="@+id/animation_layout_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/thatch_repeat"
         android:orientation="vertical" >
 
-        <include
-            android:id="@+id/top_panel"
-            layout="@layout/top_panel" />
-
-        <WebView
-            android:id="@+id/t_and_c_page"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/top_panel" />
-
         <RelativeLayout
-            android:id="@+id/loading_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="invisible" >
+            android:background="@drawable/thatch_repeat"
+            android:orientation="vertical" >
 
-            <ProgressBar
-                android:id="@+id/loading_page"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_centerInParent="true"
-                android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
+            <include
+                android:id="@+id/top_panel"
+                layout="@layout/top_panel" />
+
+            <WebView
+                android:id="@+id/t_and_c_page"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/top_panel" />
+
+            <RelativeLayout
+                android:id="@+id/loading_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible" >
+
+                <ProgressBar
+                    android:id="@+id/loading_page"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_centerInParent="true"
+                    android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
+            </RelativeLayout>
         </RelativeLayout>
     </RelativeLayout>
 

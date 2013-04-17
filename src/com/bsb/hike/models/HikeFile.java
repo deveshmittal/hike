@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import java.io.File;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,7 +20,7 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class HikeFile {
 	public static enum HikeFileType {
-		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION, UNKNOWN;
+		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION, CONTACT, UNKNOWN;
 
 		public static HikeFileType fromString(String fileTypeString) {
 			if (fileTypeString.startsWith("video")) {
@@ -31,6 +32,9 @@ public class HikeFile {
 				return HikeFileType.LOCATION;
 			} else if (fileTypeString.startsWith("image")) {
 				return HikeFileType.IMAGE;
+			} else if (fileTypeString
+					.startsWith(HikeConstants.CONTACT_CONTENT_TYPE)) {
+				return HikeFileType.CONTACT;
 			}
 			return HikeFileType.UNKNOWN;
 		}
@@ -44,6 +48,8 @@ public class HikeFile {
 				return "audio/*";
 			} else if (hikeFileType == LOCATION) {
 				return HikeConstants.LOCATION_CONTENT_TYPE;
+			} else if (hikeFileType == CONTACT) {
+				return HikeConstants.CONTACT_CONTENT_TYPE;
 			}
 			return null;
 		}
@@ -62,6 +68,9 @@ public class HikeFile {
 			} else if (hikeFileType == LOCATION) {
 				return isSent ? context.getString(R.string.location_msg_sent)
 						: context.getString(R.string.location_msg_received);
+			} else if (hikeFileType == CONTACT) {
+				return isSent ? context.getString(R.string.contact_msg_sent)
+						: context.getString(R.string.contact_msg_received);
 			}
 			return context.getString(R.string.unknown_msg);
 		}
@@ -74,10 +83,17 @@ public class HikeFile {
 	private String fileKey;
 	private HikeFileType hikeFileType;
 	private File file;
+
 	private double latitude;
 	private double longitude;
 	private int zoomLevel;
 	private String address;
+
+	private String displayName;
+	private JSONArray phoneNumbers;
+	private JSONArray emails;
+	private JSONArray addresses;
+	private JSONArray events;
 
 	public HikeFile(JSONObject fileJSON) {
 		this.fileName = fileJSON.optString(HikeConstants.FILE_NAME);
@@ -98,6 +114,11 @@ public class HikeFile {
 			// Update the file name to prevent duplicacy
 			this.fileName = this.file.getName();
 		}
+		this.displayName = fileJSON.optString(HikeConstants.NAME);
+		this.phoneNumbers = fileJSON.optJSONArray(HikeConstants.PHONE_NUMBERS);
+		this.emails = fileJSON.optJSONArray(HikeConstants.EMAILS);
+		this.addresses = fileJSON.optJSONArray(HikeConstants.ADDRESSES);
+		this.events = fileJSON.optJSONArray(HikeConstants.EVENTS);
 	}
 
 	public HikeFile(String fileName, String fileTypeString,
@@ -127,16 +148,20 @@ public class HikeFile {
 			JSONObject fileJSON = new JSONObject();
 			fileJSON.putOpt(HikeConstants.CONTENT_TYPE, fileTypeString);
 			fileJSON.putOpt(HikeConstants.FILE_NAME, fileName);
-			if (!HikeConstants.LOCATION_CONTENT_TYPE.equals(fileTypeString)) {
-				fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
-				fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
-			} else {
+			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
+			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
+			if (HikeConstants.LOCATION_CONTENT_TYPE.equals(fileTypeString)) {
 				fileJSON.putOpt(HikeConstants.LATITUDE, latitude);
 				fileJSON.putOpt(HikeConstants.LONGITUDE, longitude);
 				fileJSON.putOpt(HikeConstants.ZOOM_LEVEL, zoomLevel);
 				fileJSON.putOpt(HikeConstants.ADDRESS, address);
-				fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
-				fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
+			} else if (HikeConstants.CONTACT_CONTENT_TYPE
+					.equals(fileTypeString)) {
+				fileJSON.putOpt(HikeConstants.NAME, displayName);
+				fileJSON.putOpt(HikeConstants.PHONE_NUMBERS, phoneNumbers);
+				fileJSON.putOpt(HikeConstants.EMAILS, emails);
+				fileJSON.putOpt(HikeConstants.ADDRESSES, addresses);
+				fileJSON.putOpt(HikeConstants.EVENTS, events);
 			}
 
 			return fileJSON;
@@ -201,15 +226,17 @@ public class HikeFile {
 	}
 
 	public boolean wasFileDownloaded() {
-		if (hikeFileType == HikeFileType.LOCATION) {
+		if (hikeFileType == HikeFileType.LOCATION
+				|| hikeFileType == HikeFileType.CONTACT) {
 			return true;
 		}
 		if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 			return false;
 		}
 		if (file == null) {
-			return Utils.getOutputMediaFile(hikeFileType, fileName, fileKey)
-					.exists();
+			File file = Utils.getOutputMediaFile(hikeFileType, fileName,
+					fileKey);
+			return file == null ? false : file.exists();
 		}
 		return file.exists();
 	}
@@ -231,4 +258,25 @@ public class HikeFile {
 		}
 		return file;
 	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public JSONArray getPhoneNumbers() {
+		return phoneNumbers;
+	}
+
+	public JSONArray getEmails() {
+		return emails;
+	}
+
+	public JSONArray getAddresses() {
+		return addresses;
+	}
+
+	public JSONArray getEvents() {
+		return events;
+	}
+
 }

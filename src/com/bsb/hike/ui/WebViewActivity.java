@@ -43,19 +43,13 @@ public class WebViewActivity extends DrawerBaseActivity {
 		WebViewClient client = new WebViewClient() {
 			@Override
 			public void onPageFinished(WebView view, String url) {
-				if (!rewardsPage) {
-					findViewById(R.id.loading_layout).setVisibility(
-							View.INVISIBLE);
-				}
+				findViewById(R.id.loading_layout).setVisibility(View.INVISIBLE);
 				super.onPageFinished(view, url);
 			}
 
 			@Override
 			public void onPageStarted(WebView view, String url, Bitmap favicon) {
-				if (!rewardsPage) {
-					findViewById(R.id.loading_layout).setVisibility(
-							View.VISIBLE);
-				}
+				findViewById(R.id.loading_layout).setVisibility(View.VISIBLE);
 				super.onPageStarted(view, url, favicon);
 			}
 

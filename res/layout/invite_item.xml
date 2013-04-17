@@ -2,10 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="7dp"
-    android:layout_marginTop="7dp"
     android:background="@drawable/list_item"
-    android:minHeight="?android:attr/listPreferredItemHeight" >
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:paddingBottom="@dimen/avatar_top_bottom"
+    android:paddingTop="@dimen/avatar_top_bottom"
+    android:paddingRight="@dimen/avatar_left_right" >
 
     <CheckBox
         android:id="@+id/checkbox"
@@ -13,29 +14,28 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="3dp"
         android:button="@drawable/preference_checkbox"
         android:clickable="false"
         android:focusable="false" />
 
     <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="18dp"
-            android:src="@drawable/ic_avatar1" />
-    
+        android:id="@+id/avatar"
+        android:layout_width="@dimen/avatar_width_height"
+        android:layout_height="@dimen/avatar_width_height"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/avatar_left_right"
+        android:layout_marginRight="@dimen/avatar_left_right"
+        android:src="@drawable/ic_avatar1" />
+
     <LinearLayout
         android:id="@+id/name_num_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/avatar"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_toLeftOf="@id/checkbox"
+        android:layout_toRightOf="@id/avatar"
         android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
@@ -46,7 +46,7 @@
             android:singleLine="true"
             android:text="Vijay Raghunathan asdfasdfasd asdfasdfasdf ads adsasd"
             android:textColor="@color/lightblack"
-            android:textSize="18sp" />
+            android:textSize="@dimen/main_text_size" />
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/number"
@@ -54,7 +54,8 @@
             android:layout_height="wrap_content"
             android:text="Number"
             android:textColor="@color/subtext"
-            android:textSize="13sp"
+            android:layout_marginTop="@dimen/text_subtext_spacing"
+            android:textSize="@dimen/sub_text_size"
             android:textStyle="italic" />
     </LinearLayout>
 

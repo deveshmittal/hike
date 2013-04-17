@@ -5,6 +5,7 @@ import static org.acra.ACRA.LOG_TAG;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.acra.ACRA;
@@ -24,12 +25,14 @@ import twitter4j.conf.ConfigurationContext;
 import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -45,6 +48,8 @@ import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
+import com.bsb.hike.utils.ClearTypingNotification;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.Utils;
@@ -136,9 +141,12 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String TEMP_NUM = "tempNum";
 
 	public static final String TEMP_COUNTRY_CODE = "tempCountryCode";
-	
+
 	public static final String GCM_ID_SENT = "gcmIdSent";
 
+	public static final String NUX1_DONE = "nux1Done";
+
+	public static final String NUX2_DONE = "nux2Done";
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"
@@ -171,6 +179,37 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String GCK_SHOWN = "gckShown";
 	public static final String ADD_CONTACT_SHOWN = "addContactShown";
 
+	public static final String LAST_STATUS = "lastStatus";
+	public static final String LAST_MOOD = "lastMood";
+
+	public static final String APP_LAUNCHES = "appLaunches";
+	public static final String DONT_SHOW_APP_RATER = "dontShowAppRater";
+
+	public static final String INTRO_DONE = "introDone";
+
+	public static final String JUST_SIGNED_UP = "justSignedUp";
+
+	public static final String INVITED_NUMBERS = "invitedNumbers";
+
+	public static final String UNSEEN_STATUS_COUNT = "unseenStatusCount";
+
+	public static final String UNSEEN_USER_STATUS_COUNT = "unseenUserStatusCount";
+
+	public static final String BATCH_STATUS_NOTIFICATION_VALUES = "batchStatusNotificationValues";
+
+	public static final String USER_JOIN_TIME = "userJoinTime";
+
+	public static final String DEVICE_DETAILS_SENT = "deviceDetailsSent";
+	public static final String LAST_BACK_OFF_TIME_DEV_DETAILS = "lastBackOffTimeDevDetails";
+
+	public static final String SHOW_CRICKET_MOODS = "showCricketMoods";
+
+	public static final String FRIEND_INTRO_SHOWN = "friendIntroShown";
+
+	public static final String STATUS_NOTIFICATION_SETTING = "statusNotificationSetting";
+
+	public static final String STATUS_IDS = "statusIds";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
@@ -180,6 +219,10 @@ public class HikeMessengerApp extends Application implements Listener {
 	private static boolean isIndianUser;
 
 	private static Messenger mMessenger;
+
+	private static Map<String, ClearTypingNotification> typingNotificationMap;
+
+	private static int[] moodsResource;
 
 	private Messenger mService;
 
@@ -337,10 +380,7 @@ public class HikeMessengerApp extends Application implements Listener {
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
-
-		Utils.setupServerURL(
-				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
-				Utils.isWifiOn(getApplicationContext()));
+		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
 
 		ACRA.init(this);
 		CustomReportSender customReportSender = new CustomReportSender();
@@ -368,16 +408,35 @@ public class HikeMessengerApp extends Application implements Listener {
 		isIndianUser = settings.getString(COUNTRY_CODE, "").equals(
 				HikeConstants.INDIA_COUNTRY_CODE);
 
+		SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		if (!preferenceManager.contains(HikeConstants.SSL_PREF)) {
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(HikeConstants.SSL_PREF, !isIndianUser);
+			editor.commit();
+		}
+
+		Utils.setupServerURL(
+				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
+				Utils.switchSSLOn(getApplicationContext()));
+
+		typingNotificationMap = new HashMap<String, ClearTypingNotification>();
+
 		if (!TextUtils.isEmpty(msisdn) && !isIndianUser) {
 			FiksuTrackingManager.initialize(this);
 		}
 
 		initialiseListeners();
 
+		setMoodsResource();
+
 		mMessenger = new Messenger(new IncomingHandler());
 
 		if (token != null) {
 			AccountUtils.setToken(token);
+		}
+		if (uid != null) {
+			AccountUtils.setUID(uid);
 		}
 		try {
 			AccountUtils.setAppVersion(getPackageManager().getPackageInfo(
@@ -387,6 +446,16 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
+	}
+
+	public void setMoodsResource() {
+		moodsResource = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				0).getBoolean(HikeMessengerApp.SHOW_CRICKET_MOODS, true) ? EmoticonConstants.MOOD_WITH_IPL_RES_IDS
+				: EmoticonConstants.MOOD_NO_IPL_RES_IDS;
+	}
+
+	public static int[] getMoodsResource() {
+		return moodsResource;
 	}
 
 	public static Facebook getFacebook() {
@@ -434,6 +503,10 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 	}
 
+	public static Map<String, ClearTypingNotification> getTypingNotificationSet() {
+		return typingNotificationMap;
+	}
+
 	public void initialiseListeners() {
 		if (dbConversationListener == null) {
 			dbConversationListener = new DbConversationListener(
@@ -452,7 +525,9 @@ public class HikeMessengerApp extends Application implements Listener {
 		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type)) {
 			SharedPreferences settings = getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-			boolean isWifiConnection = (Boolean) object;
+			boolean isWifiConnection = object != null ? (Boolean) object
+					: Utils.switchSSLOn(getApplicationContext());
+
 			Utils.setupServerURL(
 					settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 					isWifiConnection);

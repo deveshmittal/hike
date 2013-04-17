@@ -73,11 +73,42 @@ public class HikeConstants {
 	public static final String SHOW_REWARDS = "show_rewards";
 	public static final String REWARDS = "rewards";
 	public static final String TALK_TIME = "tt";
+	public static final String PHONE_NUMBERS = "phone_numbers";
+	public static final String EMAILS = "emails";
+	public static final String ADDRESSES = "addresses";
+	public static final String EVENTS = "events";
+	public static final String STATUS_ID = "statusid";
+	public static final String MOOD = "mood";
+	public static final String STATUS_MESSAGE = "msg";
+	public static final String PROFILE = "profile";
+	public static final String ICON = "icon";
+	public static final String MUTED = "muted";
+	public static final String POST_AB = "postab";
+	public static final String PUSH = "push";
+	public static final String JOIN_TIME = "jointime";
+	public static final String STATUS_MESSAGE_2 = "status-message";
+	public static final String FACEBOOK_STATUS = "fb";
+	public static final String TWITTER_STATUS = "twitter";
+	public static final String TIME_OF_DAY = "timeofday";
+	public static final String REQUEST_PENDING = "requestpending";
+	public static final String LOCALE = "locale";
+	public static final String ENABLE_PUSH_BATCHING_STATUS_NOTIFICATIONS = "enablepushbatchingforsu";
+	public static final String PUSH_SU = "pushsu";
+	public static final String BATCH_HEADER = "h";
+	public static final String BATCH_MESSAGE = "m";
+	public static final String UPGRADE = "upgrade";
+	public static final String DEV_TYPE = "dev_type";
+	public static final String APP_VERSION = "app_version";
+	public static final String DEVICE_VERSION = "deviceversion";
+	public static final String CRICKET_MOODS = "cmoods";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
 	public static final String FREE_SMS_PREF = "freeSmsPref";
 	public static final String LED_PREF = "ledPref";
+	public static final String NATIVE_JINGLE_PREF = "jinglePref";
+	public static final String SSL_PREF = "sslPref";
+	public static final String STATUS_PREF = "statusPref";
 	public static final String HIKEBOT = "TD-HIKE";
 
 	public static final String DONE = "Done";
@@ -90,6 +121,7 @@ public class HikeConstants {
 
 	public static final String HELP_URL = "http://www.hike.in/help/android";
 	public static final String T_AND_C_URL = "http://www.hike.in/terms";
+	public static final String SYSTEM_HEALTH_URL = "http://www.twitter.com/hikestatus";
 
 	public static final String IS_TYPING = "is typing...";
 
@@ -127,6 +159,7 @@ public class HikeConstants {
 
 	/* the max amount of time we wait for the PIN */
 	public static final int PIN_CAPTURE_TIME = 60 * 1000;
+	public static final int CALL_ME_WAIT_TIME = 120 * 1000;
 	/*
 	 * the amount to wait before showing the PIN screen on non sim devices.
 	 */
@@ -142,7 +175,7 @@ public class HikeConstants {
 
 	// More explanation required?
 	public static final int NUM_TIMES_SCREEN_SHOULD_OPEN_BEFORE_TOOL_TIP = 2;
-	public static final String APP_API_VERSION = "1";
+	public static final String APP_API_VERSION = "2";
 
 	public static final int NUM_SMS_PER_FRIEND = 10;
 	public static final int INITIAL_NUM_SMS = 100;
@@ -158,16 +191,22 @@ public class HikeConstants {
 
 	public static final int MAX_BUFFER_SIZE_KB = 100;
 	public static final int MAX_FILE_SIZE = 15 * 1024 * 1024;
-	public static final int SHARE_LOCATION_CODE = 1187;
+
+	public static final int IMAGE_CAPTURE_CODE = 1187;
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
 	public static final int AUDIO_TRANSFER_CODE = 1190;
 	public static final int RECORD_AUDIO_TRANSFER_CODE = 1191;
+	public static final int SHARE_LOCATION_CODE = 1192;
+	public static final int SHARE_CONTACT_CODE = 1193;
+
 	public static final int MAX_DURATION_RECORDING_SEC = 120;
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180;
 
 	public static final int MAX_DIMENSION_LOCATION_THUMBNAIL_PX = 220;
+
+	public static final int MAX_DIMENSION_FULL_SIZE_PROFILE_PX = 500;
 
 	public static final int MAX_DIMENSION_FULL_SIZE_PX = 800;
 
@@ -220,6 +259,9 @@ public class HikeConstants {
 	public static final String LOCATION_CONTENT_TYPE = "hikemap/location";
 	public static final String LOCATION_FILE_NAME = "Location";
 
+	public static final String CONTACT_CONTENT_TYPE = "contact/share";
+	public static final String CONTACT_FILE_NAME = "Contact";
+
 	public static final int DEFAULT_ZOOM_LEVEL = 12;
 
 	// Picasa URI start for JB devices
@@ -230,6 +272,9 @@ public class HikeConstants {
 	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 100;
 	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 50;
 	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 15;
+
+	public static final int MAX_STATUSES_TO_LOAD_INITIALLY = 50;
+	public static final int MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME = 25;
 
 	public static final int SHOW_CREDITS_AFTER_NUM = 10;
 
@@ -242,6 +287,7 @@ public class HikeConstants {
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
+	public static final String STATUS_MESSAGE_HEADER = "hike-status-message";
 	/*
 	 * Contact Type
 	 */
@@ -258,6 +304,28 @@ public class HikeConstants {
 	public static final String FONT = "font";
 
 	public static final int MAX_MESSAGE_PREVIEW_LENGTH = 40;
+
+	public static final String FACEBOOK_PROFILEPIC_URL_FORMAT = "https://graph.facebook.com/%1$s/picture?height=%2$d&width=%2$d";
+
+	/*
+	 * Constants for Profile Pic
+	 */
+	/* dialog IDs */
+	public static final int PROFILE_PICTURE_FROM_CAMERA = 0;
+	public static final int PROFILE_PICTURE_FROM_GALLERY = 1;
+
+	/* activityForResult IDs */
+	public static final int CAMERA_RESULT = 0;
+	public static final int GALLERY_RESULT = 1;
+	public static final int CROP_RESULT = 2;
+
+	public static final int MIN_STATUS_COUNT = 5;
+
+	public static final int MAX_NUX_CONTACTS = 30;
+	public static final int MAX_PRECHECKED_CONTACTS = 15;
+
+	public static final int MAX_TWITTER_POST_LENGTH = 140;
+	public static final int MAX_MOOD_TWITTER_POST_LENGTH = 130;
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
@@ -332,7 +400,6 @@ public class HikeConstants {
 		public static final String UPDATE_URL = "updateURL";
 		public static final String UPDATE_TO_IGNORE = "updateToIgnore";
 		public static final String INTRO_MESSAGE_ADDED = "introMessageAdded";
-		public static final String TWITTER_VIEW_VISIBLE = "twitterViewVisible";
 		public static final String LATITUDE = "latitude";
 		public static final String LONGITUDE = "longitude";
 		public static final String ZOOM_LEVEL = "zoomLevel";
@@ -347,6 +414,15 @@ public class HikeConstants {
 		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
 		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
 		public static final String OPEN_FAVORITES = "openFavorites";
+		public static final String SHOW_MOST_CONTACTED = "showMostContacted";
+		public static final String CONTACT_METADATA = "contactMetadata";
+		public static final String FROM_CENTRAL_TIMELINE = "fromCentralTimeline";
+		public static final String BLOCKED_LIST = "blockedList";
+		public static final String SHOW_FAMILY = "showFamily";
+		public static final String NUX1_NUMBERS = "nux1Numbers";
+		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
+		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
+		public static final String FROM_NUX_SCREEN = "fromNuxScreen";
 	}
 
 	public static final class LogEvent {
@@ -435,7 +511,7 @@ public class HikeConstants {
 
 		/*
 		 * Drawer screen <screen> = drS <event> = homE, gC, inV, reW, creD,
-		 * proF, helP
+		 * proF, settinG
 		 */
 		public static final String DRAWER_HOME = "drShomE";
 		public static final String DRAWER_GROUP_CHAT = "drSgC";
@@ -443,7 +519,7 @@ public class HikeConstants {
 		public static final String DRAWER_REWARDS = "drSreW";
 		public static final String DRAWER_CREDITS = "drScreD";
 		public static final String DRAWER_PROFILE = "drSproF";
-		public static final String DRAWER_HELP = "drShelP";
+		public static final String DRAWER_SETTINGS = "drSsettinG";
 
 		/*
 		 * Rewards screen <screen> = rewS <event> = inV, clM, faQ
@@ -457,6 +533,12 @@ public class HikeConstants {
 		 */
 		public static final String HELP_CONTACT = "helpSconT";
 		public static final String HELP_FAQ = "helpSfaQ";
+
+		/*
+		 * Nux screen
+		 */
+		public static final String NUX_SKIP1 = "nuxSkip1";
+		public static final String NUX_SKIP2 = "nuxSkip2";
 	}
 
 	public static final class MqttMessageTypes {
@@ -489,9 +571,14 @@ public class HikeConstants {
 		public static final String ACCOUNT_CONFIG = "ac";
 		public static final String REWARDS = "rewards";
 		public static final String DISPLAY_PIC = "dp";
+		public static final String STATUS_UPDATE = "su";
+		public static final String ACTION = "action";
+		public static final String DELETE_STATUS = "dsu";
+		public static final String POSTPONE_FAVORITE = "pf";
+		public static final String BATCH_STATUS_UPDATE = "bsu";
 	}
 
 	public static enum FTResult {
-		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED
+		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED
 	}
 }

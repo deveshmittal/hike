@@ -1,10 +1,12 @@
 package com.bsb.hike.view;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.NotificationManager;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -20,18 +22,13 @@ import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
-import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -49,45 +46,43 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.CreditsActivity;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.ui.TellAFriend;
-import com.bsb.hike.ui.Tutorial;
 import com.bsb.hike.ui.WebViewActivity;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.CustomInterpolator;
+import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 
 public class DrawerLayout extends RelativeLayout implements
 		OnItemClickListener, View.OnClickListener {
 
-	public final static int DURATION = 250;
+	private final int animationSteps;
 
-	private boolean mLeftOpened;
-	private boolean mRightOpened;
+	private final static int DURATION_BETWEEN_EACH_STEP = 16;
+
+	public static enum CurrentState {
+		NONE, LEFT, RIGHT
+	}
+
+	private CurrentState currentState;
 
 	private View mLeftSidebar;
 	private View mRightSidebar;
 
 	private View mContent;
-	private int mSidebarWidth;
-	private int mSidebarOffsetForAnimation;
+	private int mRightSidebarWidth;
+	private int mRightSidebarOffsetForAnimation;
+	private int mLeftSidebarWidth;
+	private int mLeftSidebarOffsetForAnimation;
 	private int topBarButtonWidth;
 
-	// Left drawer animations
-	private Animation contentAnimationLeftOut;
-	private Animation leftSidebarTranslateAnimationIn;
-	private Animation contentAnimationRightIn;
-	private Animation leftSidebarTranslateAnimationOut;
+	private int contentCurrentPosition;
+	private int contentFinalPosition;
+	private int sidebarCurrentPosition;
+	private int sidebarFinalPosition;
 
-	// Right drawer animations
-	private Animation contentAnimationRightOut;
-	private Animation rightSidebarTranslateAnimationIn;
-	private Animation contentAnimationLeftIn;
-	private Animation rightSidebarTranslateAnimationOut;
-
-	private OpenListener mLeftOpenListener;
-	private CloseListener mLeftCloseListener;
-
-	private OpenListener mRightOpenListener;
-	private CloseListener mRightCloseListener;
+	private int rightSidebarFinalPosition;
 
 	private Listener mListener;
 
@@ -107,9 +102,7 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private ImageView profileImg;
 
-	private TextView profileName;
-
-	private ContactInfo me;
+	private BitmapDrawable leftDrawerBg;
 
 	private BitmapDrawable rightDrawerBg;
 
@@ -117,7 +110,9 @@ public class DrawerLayout extends RelativeLayout implements
 
 	private boolean freeSMS;
 
-	private TextView pendingRequests;
+	private boolean isAnimating = false;
+
+	private CustomInterpolator interpolator;
 
 	public enum LeftDrawerItems {
 		HOME, GROUP_CHAT, TELL_A_FRIEND, FREE_SMS, PROFILE, HELP
@@ -137,19 +132,23 @@ public class DrawerLayout extends RelativeLayout implements
 
 	public DrawerLayout(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
+		setChildrenDrawingOrderEnabled(true);
+		currentState = CurrentState.NONE;
 		accountPrefs = getContext().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		handler = new Handler();
+		animationSteps = Math.min((int) (8 * Utils.densityMultiplier), 10);
 		topBarButtonWidth = (int) (48 * Utils.densityMultiplier);
 		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-		mSidebarWidth = (int) ((isPortrait ? context.getResources()
+		mRightSidebarWidth = (int) ((isPortrait ? context.getResources()
 				.getDisplayMetrics().widthPixels : context.getResources()
 				.getDisplayMetrics().heightPixels) - topBarButtonWidth);
-		mSidebarOffsetForAnimation = (int) (80 * Utils.densityMultiplier);
+		mRightSidebarOffsetForAnimation = (int) (100 * Utils.densityMultiplier);
+		rightSidebarFinalPosition = context.getResources().getDisplayMetrics().widthPixels
+				- mRightSidebarWidth;
 
-		initializeLeftDrawerAnimations();
-		initializeRightDrawerAnimations();
-
+		mLeftSidebarWidth = mRightSidebarWidth;
+		mLeftSidebarOffsetForAnimation = mRightSidebarOffsetForAnimation;
 		/*
 		 * Fix for android v2.3 and below specific bug where the bitmap is not
 		 * tiled and gets stretched instead if we use the xml. So we're creating
@@ -161,59 +160,25 @@ public class DrawerLayout extends RelativeLayout implements
 				getResources(), R.drawable.bg_right_drawer));
 		rightDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
 
+		leftDrawerBg = new BitmapDrawable(BitmapFactory.decodeResource(
+				getResources(), R.drawable.bg_right_drawer));
+		leftDrawerBg.setTileModeXY(TileMode.REPEAT, TileMode.REPEAT);
+
 		freeSMS = PreferenceManager.getDefaultSharedPreferences(getContext())
 				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
-	}
 
-	private void initializeLeftDrawerAnimations() {
-		/* Close Animations */
-		contentAnimationRightIn = new TranslateAnimation(0, -mSidebarWidth, 0,
-				0);
-		contentAnimationRightIn.setFillAfter(true);
-		contentAnimationRightIn.setFillEnabled(true);
-
-		leftSidebarTranslateAnimationOut = new TranslateAnimation(0,
-				-mSidebarOffsetForAnimation, 0, 0);
-
-		/* Open Animations */
-		contentAnimationLeftOut = new TranslateAnimation(0, mSidebarWidth, 0, 0);
-		contentAnimationLeftOut.setFillAfter(true);
-		contentAnimationLeftOut.setFillEnabled(true);
-
-		leftSidebarTranslateAnimationIn = new TranslateAnimation(
-				-mSidebarOffsetForAnimation, 0, 0, 0);
-	}
-
-	private void initializeRightDrawerAnimations() {
-		/* Close Animations */
-		contentAnimationLeftIn = new TranslateAnimation(0, mSidebarWidth, 0, 0);
-		contentAnimationLeftIn.setFillAfter(true);
-		contentAnimationLeftIn.setFillEnabled(true);
-
-		rightSidebarTranslateAnimationOut = new TranslateAnimation(0,
-				mSidebarOffsetForAnimation, 0, 0);
-
-		/* Open Animations */
-		contentAnimationRightOut = new TranslateAnimation(0, -mSidebarWidth, 0,
-				0);
-		contentAnimationRightOut.setFillAfter(true);
-		contentAnimationRightOut.setFillEnabled(true);
-
-		rightSidebarTranslateAnimationIn = new TranslateAnimation(
-				mSidebarOffsetForAnimation, 0, 0, 0);
+		interpolator = new CustomInterpolator();
 	}
 
 	public void setUpRightDrawerView(Activity activity) {
 		ListView favoriteListView = (ListView) findViewById(R.id.favorite_list);
-		pendingRequests = (TextView) findViewById(R.id.fav_requests);
 
 		drawerFavoritesAdapter = new DrawerFavoritesAdapter(getContext(), this);
 		favoriteListView.setAdapter(drawerFavoritesAdapter);
 
 		favoriteListView.setOnItemClickListener(this);
-		activity.registerForContextMenu(favoriteListView);
-
-		updatePendingRequests();
+		favoriteListView
+				.setOnItemLongClickListener((DrawerBaseActivity) activity);
 	}
 
 	@Override
@@ -222,121 +187,102 @@ public class DrawerLayout extends RelativeLayout implements
 
 		ContactInfo contactInfo = drawerFavoritesAdapter.getItem(position);
 
-		/*
-		 * If the user taps on a non hike contact and is not an Indian user, we
-		 * do nothing.
-		 */
-		if (!contactInfo.isOnhike()
-				&& (!HikeMessengerApp.isIndianUser() || !freeSMS)) {
-			return;
-		}
-
 		Intent intent = Utils.createIntentFromContactInfo(contactInfo);
 		intent.setClass(getContext(), ChatThread.class);
 		getContext().startActivity(intent);
 	}
 
-	public void updatePendingRequests() {
-		int pendingRequestsNum = drawerFavoritesAdapter.getPendingRequests();
-		pendingRequests.setVisibility(pendingRequestsNum > 0 ? View.VISIBLE
-				: View.GONE);
-		pendingRequests.setText(pendingRequestsNum + "");
-	}
-
 	public void removeFromFavorite(ContactInfo contactInfo) {
 		drawerFavoritesAdapter.removeFavoriteItem(contactInfo);
-		updatePendingRequests();
-	}
-
-	public void addToRecommended(ContactInfo contactInfo) {
-		drawerFavoritesAdapter.addRecommendedFavoriteItem(contactInfo);
-		updatePendingRequests();
 	}
 
 	public void addToFavorite(ContactInfo contactInfo) {
 		drawerFavoritesAdapter.addFavoriteItem(contactInfo);
-		updatePendingRequests();
 	}
 
 	public void refreshFavoritesDrawer() {
 		if (drawerFavoritesAdapter != null) {
 			drawerFavoritesAdapter.notifyDataSetChanged();
-			updatePendingRequests();
-		}
-	}
-
-	public void addAutoRecommendedFavoritesList(
-			List<ContactInfo> contactInfoList) {
-		if (drawerFavoritesAdapter != null) {
-			drawerFavoritesAdapter.addAutoRecommendedFavorites(contactInfoList);
-			updatePendingRequests();
-		}
-	}
-
-	public void freeSMSToggled(boolean freeSMS) {
-		if (drawerFavoritesAdapter != null) {
-			this.freeSMS = freeSMS;
-			drawerFavoritesAdapter.freeSMSToggled(freeSMS);
 		}
 	}
 
 	public void updateRecentContacts(ContactInfo contactInfo) {
 		Log.d(getClass().getSimpleName(), "Update Recent List");
 		drawerFavoritesAdapter.updateRecentContactsList(contactInfo);
-		updatePendingRequests();
 	}
 
 	public void refreshFavorites(List<ContactInfo> favoriteList) {
 		drawerFavoritesAdapter.refreshFavoritesList(favoriteList);
-		updatePendingRequests();
-	}
-
-	public void refreshRecommendedFavorites(
-			List<ContactInfo> recommendedFavoriteList) {
-		drawerFavoritesAdapter
-				.refreshRecommendedFavorites(recommendedFavoriteList);
-		updatePendingRequests();
 	}
 
 	public void refreshRecents(List<ContactInfo> recents) {
 		drawerFavoritesAdapter.refreshRecents(recents);
 	}
 
-	public void cancelFavoriteNotifications(
-			NotificationManager notificationManager) {
-		drawerFavoritesAdapter.cancelFavoriteNotifications(notificationManager);
+	public void removeContact(ContactInfo contactInfo) {
+		drawerFavoritesAdapter.removeContact(contactInfo);
 	}
 
-	public void onCreateFavoritesContextMenu(Activity activity, Menu menu,
-			int position) {
+	public boolean onLongClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+
 		if (drawerFavoritesAdapter.getItemViewType(position) != FavoriteAdapterViewType.FAVORITE
 				.ordinal()) {
-			return;
+			return false;
 		}
-		MenuInflater menuInflater = activity.getMenuInflater();
-		menuInflater.inflate(R.menu.favorites_menu, menu);
+
+		ArrayList<String> optionsList = new ArrayList<String>();
+
+		final ContactInfo contactInfo = drawerFavoritesAdapter
+				.getItem(position);
+
+		optionsList.add(activity.getString(R.string.remove_circle));
+
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(activity,
+				R.layout.alert_item, R.id.item, options);
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String option = options[which];
+						if (activity.getString(R.string.remove_circle).equals(
+								option)) {
+							FavoriteType favoriteType;
+							if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+								favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
+							} else {
+								favoriteType = FavoriteType.NOT_FRIEND;
+							}
+							Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
+									contactInfo, favoriteType);
+							HikeMessengerApp.getPubSub().publish(
+									HikePubSub.FAVORITE_TOGGLED,
+									favoriteRemoved);
+						}
+					}
+				});
+
+		AlertDialog alertDialog = builder.show();
+		alertDialog.getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
+		return true;
 	}
 
-	public boolean onFavoritesContextItemSelected(MenuItem menuItem) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuItem
-				.getMenuInfo();
-		ContactInfo contactInfo = drawerFavoritesAdapter.getItem((int) info.id);
-		if (menuItem.getItemId() == R.id.remove_fav) {
-			Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
-					contactInfo, FavoriteType.NOT_FAVORITE);
-			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
-					favoriteRemoved);
-			return true;
-		}
-		return false;
+	public void updateStatus(String status, int moodId) {
+		drawerFavoritesAdapter.updateStatus(status, moodId);
 	}
 
 	public void setUpLeftDrawerView() {
 
 		profileImg = (ImageView) findViewById(R.id.profile_image);
-		profileName = (TextView) findViewById(R.id.name);
 
-		setProfileName();
 		setProfileImage();
 		renderLeftDrawerItems(PreferenceManager.getDefaultSharedPreferences(
 				getContext()).getBoolean(HikeConstants.FREE_SMS_PREF, true));
@@ -347,10 +293,9 @@ public class DrawerLayout extends RelativeLayout implements
 		boolean rewardsOn = accountPrefs.getBoolean(
 				HikeMessengerApp.SHOW_REWARDS, false);
 
-		int[] ids = { R.id.left_drawer_home, R.id.left_drawer_group_chat,
-				R.id.left_drawer_tell_a_friend, R.id.left_drawer_free_sms,
-				R.id.left_drawer_profile, R.id.left_drawer_rewards,
-				R.id.left_drawer_help };
+		int[] ids = { R.id.left_drawer_home, R.id.left_drawer_tell_a_friend,
+				R.id.left_drawer_free_sms, R.id.left_drawer_profile,
+				R.id.left_drawer_rewards, R.id.left_drawer_settings };
 
 		for (int i = 0; i < ids.length; i++) {
 			findViewById(ids[i]).setOnClickListener(this);
@@ -401,16 +346,6 @@ public class DrawerLayout extends RelativeLayout implements
 					getContext(), MessagesList.class);
 			goingBackToHome = true;
 			break;
-		case R.id.left_drawer_group_chat:
-			Utils.logEvent(getContext(),
-					HikeConstants.LogEvent.DRAWER_GROUP_CHAT);
-			intent = activity instanceof ChatThread ? null : new Intent(
-					getContext(), ChatThread.class);
-			if (intent != null) {
-				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-			}
-			handler.postDelayed(resetSidebar, 400);
-			break;
 		case R.id.left_drawer_tell_a_friend:
 			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_INVITE);
 			intent = activity instanceof TellAFriend ? null : new Intent(
@@ -426,13 +361,10 @@ public class DrawerLayout extends RelativeLayout implements
 			intent = activity instanceof ProfileActivity ? null : new Intent(
 					getContext(), ProfileActivity.class);
 			break;
-		case R.id.left_drawer_help:
-			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_HELP);
-			intent = activity instanceof Tutorial ? null : new Intent(
-					getContext(), Tutorial.class);
-			if (intent != null) {
-				intent.putExtra(HikeConstants.Extras.HELP_PAGE, true);
-			}
+		case R.id.left_drawer_settings:
+			Utils.logEvent(getContext(), HikeConstants.LogEvent.DRAWER_SETTINGS);
+			intent = activity instanceof SettingsActivity ? null : new Intent(
+					getContext(), SettingsActivity.class);
 			break;
 		case R.id.left_drawer_rewards:
 			intent = activity instanceof WebViewActivity ? null : new Intent(
@@ -470,7 +402,7 @@ public class DrawerLayout extends RelativeLayout implements
 						R.anim.slide_out_left_noalpha);
 			}
 		} else {
-			closeLeftSidebar(false);
+			closeSidebar(false);
 		}
 	}
 
@@ -478,9 +410,16 @@ public class DrawerLayout extends RelativeLayout implements
 		@Override
 		public void run() {
 			mContent.clearAnimation();
-			closeLeftSidebar(true);
+			closeSidebar(true);
 		}
 	};
+
+	public void setProfileImage() {
+		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
+				"");
+		profileImg.setImageDrawable(IconCacheManager.getInstance()
+				.getIconForMSISDN(msisdn));
+	}
 
 	public void updateCredits(int credits) {
 		if (creditsNum != null) {
@@ -494,16 +433,6 @@ public class DrawerLayout extends RelativeLayout implements
 					: View.INVISIBLE);
 			talkTimeNum.setText(Integer.toString(talkTime));
 		}
-	}
-
-	public void setProfileImage() {
-		profileImg.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(me.getMsisdn()));
-	}
-
-	public void setProfileName() {
-		me = Utils.getUserContactInfo(accountPrefs);
-		profileName.setText(me.getName());
 	}
 
 	@Override
@@ -528,63 +457,55 @@ public class DrawerLayout extends RelativeLayout implements
 		}
 
 		LayoutParams leftLp = (LayoutParams) mLeftSidebar.getLayoutParams();
-		leftLp.width = mSidebarWidth;
+		leftLp.width = mLeftSidebarWidth;
 		mLeftSidebar.setLayoutParams(leftLp);
 
 		LayoutParams rightLp = (LayoutParams) mRightSidebar.getLayoutParams();
-		rightLp.width = mSidebarWidth;
+		rightLp.width = mRightSidebarWidth;
 		mRightSidebar.setLayoutParams(rightLp);
 
-		mLeftSidebar.setBackgroundDrawable(rightDrawerBg);
+		mLeftSidebar.setBackgroundDrawable(leftDrawerBg);
 		mRightSidebar.setBackgroundDrawable(rightDrawerBg);
-
-		mLeftOpenListener = new OpenListener(mLeftSidebar, mContent, true);
-		mLeftCloseListener = new CloseListener(mLeftSidebar, mContent, true);
-
-		mRightOpenListener = new OpenListener(mRightSidebar, mContent, false);
-		mRightCloseListener = new CloseListener(mRightSidebar, mContent, false);
 	}
 
 	@Override
 	public void onLayout(boolean changed, int l, int t, int r, int b) {
-		/* the title bar assign top padding, drop it */
-		mLeftSidebar.layout(l, 0, l + mSidebarWidth,
-				0 + mLeftSidebar.getMeasuredHeight());
 
-		mRightSidebar.layout(r - mSidebarWidth, 0, r,
-				0 + mRightSidebar.getMeasuredHeight());
+		int width = r - l;
+		int height = b - t;
 
-		if (mLeftOpened) {
-			mContent.layout(l + mSidebarWidth, 0, r + mSidebarWidth, b);
-		} else if (mRightOpened) {
-			mContent.layout(l - mSidebarWidth, 0, r - mSidebarWidth, b);
-		} else {
-			mContent.layout(l, 0, r, b);
-		}
+		mContent.layout(0, 0, width, height);
+
+		mRightSidebar.layout(rightSidebarFinalPosition, 0, width, height);
+
+		mLeftSidebar.layout(0, 0, width, height);
 	}
 
 	@Override
 	public void onMeasure(int w, int h) {
-		super.onMeasure(w, h);
-		super.measureChildren(w, h);
-	}
 
-	@Override
-	protected void measureChild(View child, int parentWSpec, int parentHSpec) {
-		/* the max width of Sidebar is 90% of Parent */
-		if (child == mLeftSidebar || child == mRightSidebar) {
-			int mode = MeasureSpec.getMode(parentWSpec);
-			int width = (int) (getMeasuredWidth() * 0.9);
-			super.measureChild(child, MeasureSpec.makeMeasureSpec(width, mode),
-					parentHSpec);
-		} else {
-			super.measureChild(child, parentWSpec, parentHSpec);
+		int width = MeasureSpec.getSize(w);
+		int height = MeasureSpec.getSize(h);
+
+		super.setMeasuredDimension(width, height);
+
+		if (mLeftSidebar != null) {
+			measureChild(mLeftSidebar, MeasureSpec.makeMeasureSpec(
+					mLeftSidebarWidth, MeasureSpec.EXACTLY), h);
+		}
+		if (mRightSidebar != null) {
+			measureChild(mRightSidebar, MeasureSpec.makeMeasureSpec(
+					mRightSidebarWidth, MeasureSpec.EXACTLY), h);
+		}
+		if (mContent != null) {
+			measureChild(mContent,
+					MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), h);
 		}
 	}
 
 	@Override
 	public boolean onInterceptTouchEvent(MotionEvent ev) {
-		if (!isLeftOpening() && !isRightOpening()) {
+		if (currentState == CurrentState.NONE) {
 			return false;
 		}
 
@@ -601,9 +522,9 @@ public class DrawerLayout extends RelativeLayout implements
 		 */
 		int x = (int) ev.getX();
 		int y = (int) ev.getY();
-		if (mContent.getLeft() < x && mContent.getRight() > x
-				&& mContent.getTop() + topBarButtonWidth < y
-				&& mContent.getBottom() > y) {
+		if (((currentState == CurrentState.LEFT && mLeftSidebarWidth < x) || (currentState == CurrentState.RIGHT && topBarButtonWidth > x))
+				&& (mContent.getTop() + topBarButtonWidth < y && mContent
+						.getBottom() > y)) {
 			if (action == MotionEvent.ACTION_DOWN) {
 				mPressed = true;
 			}
@@ -611,7 +532,7 @@ public class DrawerLayout extends RelativeLayout implements
 			if (mPressed && action == MotionEvent.ACTION_UP
 					&& mListener != null) {
 				mPressed = false;
-				return mLeftOpened ? mListener
+				return currentState == CurrentState.LEFT ? mListener
 						.onContentTouchedWhenOpeningLeftSidebar() : mListener
 						.onContentTouchedWhenOpeningRightSidebar();
 			}
@@ -627,140 +548,53 @@ public class DrawerLayout extends RelativeLayout implements
 		activity = (Activity) l;
 	}
 
-	/* to see if the Left Sidebar is visible */
-	public boolean isLeftOpening() {
-		return mLeftOpened;
+	public void setActivity(Activity a) {
+		activity = a;
 	}
 
-	/* to see if the Right Sidebar is visible */
-	public boolean isRightOpening() {
-		return mRightOpened;
+	public CurrentState getCurrentState() {
+		return currentState;
 	}
 
 	public void toggleSidebar(boolean noAnimation, boolean leftSidebar) {
-		if (mContent.getAnimation() != null) {
+		if (isAnimating) {
 			return;
 		}
+		isAnimating = true;
 
 		if (leftSidebar) {
-			if (mLeftOpened) {
-				/* opened, make close animation */
-				animateLayouts(mLeftSidebar, leftSidebarTranslateAnimationOut,
-						contentAnimationRightIn, mLeftCloseListener,
-						noAnimation);
+			if (currentState != CurrentState.NONE) {
+				handler.post(new CloseDrawerAnimation(mLeftSidebar, mContent,
+						noAnimation, true));
 			} else {
-				animateLayouts(mLeftSidebar, leftSidebarTranslateAnimationIn,
-						contentAnimationLeftOut, mLeftOpenListener, noAnimation);
+				handler.post(new OpenDrawerAnimation(mLeftSidebar, mContent,
+						noAnimation, true));
 			}
 		} else {
-			if (mRightOpened) {
-				animateLayouts(mRightSidebar,
-						rightSidebarTranslateAnimationOut,
-						contentAnimationLeftIn, mRightCloseListener,
-						noAnimation);
+			if (currentState != CurrentState.NONE) {
+				handler.post(new CloseDrawerAnimation(mRightSidebar, mContent,
+						noAnimation, false));
 			} else {
-				animateLayouts(mRightSidebar, rightSidebarTranslateAnimationIn,
-						contentAnimationRightOut, mRightOpenListener,
-						noAnimation);
+				handler.post(new OpenDrawerAnimation(mRightSidebar, mContent,
+						noAnimation, false));
 			}
 		}
 	}
 
-	private void animateLayouts(View sidebar, Animation sidebarAnim,
-			Animation contentAnim, AnimationListener listener,
-			boolean noAnimation) {
-		contentAnim.setDuration(noAnimation ? 0 : DURATION);
-		sidebarAnim.setDuration(noAnimation ? 0 : DURATION);
-		/* opened, make close animation */
-		sidebar.startAnimation(sidebarAnim);
-		mContent.startAnimation(contentAnim);
-		contentAnim.setAnimationListener(listener);
+	public void closeSidebar(boolean noAnimation) {
+		toggleSidebar(noAnimation, currentState == CurrentState.LEFT ? true
+				: false);
 	}
 
 	public void openLeftSidebar() {
-		if (!mLeftOpened) {
+		if (currentState == CurrentState.NONE) {
 			toggleSidebar(false, true);
 		}
 	}
 
-	public void closeLeftSidebar(boolean noAnimation) {
-		if (mLeftOpened) {
-			toggleSidebar(noAnimation, true);
-		}
-	}
-
 	public void openRightSidebar() {
-		if (!mRightOpened) {
+		if (currentState == CurrentState.NONE) {
 			toggleSidebar(false, false);
-		}
-	}
-
-	public void closeRightSidebar(boolean noAnimation) {
-		if (mRightOpened) {
-			toggleSidebar(noAnimation, false);
-		}
-	}
-
-	class OpenListener implements Animation.AnimationListener {
-		View iSidebar;
-		View iContent;
-		boolean iLeftSidebar;
-
-		OpenListener(View sidebar, View content, boolean leftSidebar) {
-			iSidebar = sidebar;
-			iContent = content;
-			iLeftSidebar = leftSidebar;
-		}
-
-		public void onAnimationRepeat(Animation animation) {
-		}
-
-		public void onAnimationStart(Animation animation) {
-			iSidebar.setVisibility(View.VISIBLE);
-		}
-
-		public void onAnimationEnd(Animation animation) {
-			iContent.clearAnimation();
-			iSidebar.clearAnimation();
-			if (iLeftSidebar) {
-				mLeftOpened = !mLeftOpened;
-			} else {
-				mRightOpened = !mRightOpened;
-				if (mRightOpened && mListener != null) {
-					mListener.rightSidebarOpened();
-				}
-			}
-			requestLayout();
-		}
-	}
-
-	class CloseListener implements Animation.AnimationListener {
-		View iSidebar;
-		View iContent;
-		boolean iLeftSidebar;
-
-		CloseListener(View sidebar, View content, boolean leftSidebar) {
-			iSidebar = sidebar;
-			iContent = content;
-			iLeftSidebar = leftSidebar;
-		}
-
-		public void onAnimationRepeat(Animation animation) {
-		}
-
-		public void onAnimationStart(Animation animation) {
-		}
-
-		public void onAnimationEnd(Animation animation) {
-			iContent.clearAnimation();
-			iSidebar.clearAnimation();
-			iSidebar.setVisibility(View.INVISIBLE);
-			if (iLeftSidebar) {
-				mLeftOpened = !mLeftOpened;
-			} else {
-				mRightOpened = !mRightOpened;
-			}
-			requestLayout();
 		}
 	}
 
@@ -768,7 +602,210 @@ public class DrawerLayout extends RelativeLayout implements
 		public boolean onContentTouchedWhenOpeningLeftSidebar();
 
 		public boolean onContentTouchedWhenOpeningRightSidebar();
+	}
 
-		public void rightSidebarOpened();
+	public boolean isAnimating() {
+		return isAnimating;
+	}
+
+	class OpenDrawerAnimation implements Runnable {
+
+		View sidebar;
+		View content;
+		boolean noAnim;
+		boolean leftDrawer;
+		int sidebarOffset;
+
+		public OpenDrawerAnimation(View sidebar, View content, boolean noAnim,
+				boolean leftDrawer) {
+			this.leftDrawer = leftDrawer;
+
+			contentCurrentPosition = 0;
+			sidebarCurrentPosition = leftDrawer ? -mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
+
+			sidebarFinalPosition = 0;
+			contentFinalPosition = leftDrawer ? mLeftSidebarWidth
+					: mRightSidebarWidth;
+
+			sidebarOffset = leftDrawer ? mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
+
+			this.content = content;
+
+			this.sidebar = sidebar;
+			this.sidebar.setVisibility(View.VISIBLE);
+			this.sidebar.scrollTo(-sidebarCurrentPosition, 0);
+
+			this.noAnim = noAnim;
+
+			currentState = leftDrawer ? CurrentState.LEFT : CurrentState.RIGHT;
+		}
+
+		@Override
+		public void run() {
+
+			if (!noAnim) {
+				float contentFactor = Math
+						.max(0.1f,
+								((float) (Math.abs(contentCurrentPosition) * 100 / contentFinalPosition) / 100));
+
+				float sidebarFactor = Math
+						.max(0.1f,
+								((float) ((sidebarOffset - Math
+										.abs(sidebarCurrentPosition)) * 100 / sidebarOffset) / 100));
+
+				int sidebarIncrements = (int) (((int) sidebarOffset / (animationSteps)) * interpolator
+						.getInterpolation(sidebarFactor));
+				int contentIncrements = (int) (((int) contentFinalPosition / animationSteps) * interpolator
+						.getInterpolation(contentFactor));
+
+				sidebarIncrements = Math.min(sidebarIncrements,
+						Math.abs(sidebarCurrentPosition));
+				contentIncrements = Math
+						.min(contentIncrements,
+								contentFinalPosition
+										- Math.abs(contentCurrentPosition));
+
+				sidebarIncrements = Math.max(sidebarIncrements, 1);
+				contentIncrements = Math.max(contentIncrements, 1);
+
+				if (!leftDrawer) {
+					sidebarIncrements = -sidebarIncrements;
+					contentIncrements = -contentIncrements;
+				}
+
+				boolean sidebarAnimComplete = (currentState == CurrentState.LEFT && sidebarCurrentPosition <= 0)
+						|| (currentState == CurrentState.RIGHT && sidebarCurrentPosition >= 0);
+				if ((Math.abs(contentCurrentPosition) < contentFinalPosition)
+						|| (sidebarAnimComplete)) {
+					if (Math.abs(contentCurrentPosition) < contentFinalPosition) {
+						contentCurrentPosition += contentIncrements;
+						content.scrollTo(-contentCurrentPosition, 0);
+					}
+
+					if (sidebarAnimComplete) {
+						sidebarCurrentPosition += sidebarIncrements;
+						sidebar.scrollTo(-sidebarCurrentPosition, 0);
+					}
+
+					handler.postDelayed(this, DURATION_BETWEEN_EACH_STEP);
+				} else {
+					finishAnim();
+				}
+			} else {
+				finishAnim();
+			}
+		}
+
+		private void finishAnim() {
+			isAnimating = false;
+			sidebarCurrentPosition = sidebarFinalPosition;
+			if (leftDrawer) {
+				currentState = CurrentState.LEFT;
+				contentCurrentPosition = contentFinalPosition;
+			} else {
+				currentState = CurrentState.RIGHT;
+				contentCurrentPosition = -contentFinalPosition;
+			}
+			sidebarCurrentPosition = sidebarFinalPosition;
+
+			content.scrollTo(-contentCurrentPosition, 0);
+			sidebar.scrollTo(-sidebarCurrentPosition, 0);
+
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.DRAWER_ANIMATION_COMPLETE, null);
+		}
+	}
+
+	class CloseDrawerAnimation implements Runnable {
+
+		View sidebar;
+		View content;
+		boolean noAnim;
+		boolean leftDrawer;
+		private int sidebarOffset;
+
+		public CloseDrawerAnimation(View sidebar, View content, boolean noAnim,
+				boolean leftDrawer) {
+			this.leftDrawer = leftDrawer;
+
+			this.content = content;
+			this.sidebar = sidebar;
+
+			this.noAnim = noAnim;
+
+			sidebarOffset = leftDrawer ? mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
+			sidebarFinalPosition = leftDrawer ? -mLeftSidebarOffsetForAnimation
+					: mRightSidebarOffsetForAnimation;
+		}
+
+		@Override
+		public void run() {
+
+			if (!noAnim) {
+				float contentFactor = Math
+						.max(0.1f,
+								((float) ((contentFinalPosition - Math
+										.abs(contentCurrentPosition)) * 100 / contentFinalPosition) / 100));
+
+				float sidebarFactor = Math
+						.max(0.1f,
+								((float) ((Math.abs(sidebarCurrentPosition)) * 100 / sidebarOffset) / 100));
+
+				int sidebarIncrements = (int) (((int) sidebarOffset / animationSteps) * interpolator
+						.getInterpolation(sidebarFactor));
+				int contentIncrements = (int) (((int) contentFinalPosition / animationSteps) * interpolator
+						.getInterpolation(contentFactor));
+
+				sidebarIncrements = Math.min(sidebarIncrements, sidebarOffset
+						- Math.abs(sidebarCurrentPosition));
+				contentIncrements = Math.min(contentIncrements,
+						contentFinalPosition + Math.abs(contentFinalPosition));
+
+				sidebarIncrements = Math.max(sidebarIncrements, 1);
+				contentIncrements = Math.max(contentIncrements, 1);
+
+				if (leftDrawer) {
+					sidebarIncrements = -sidebarIncrements;
+					contentIncrements = -contentIncrements;
+				}
+
+				boolean currentAnimationComplete = (leftDrawer && contentCurrentPosition > 0)
+						|| (!leftDrawer && contentCurrentPosition < 0);
+				if ((currentAnimationComplete)
+						|| (Math.abs(sidebarCurrentPosition) < sidebarOffset)) {
+					if (currentAnimationComplete) {
+						contentCurrentPosition += contentIncrements;
+						content.scrollTo(-contentCurrentPosition, 0);
+					}
+
+					if (Math.abs(sidebarCurrentPosition) < sidebarOffset) {
+						sidebarCurrentPosition += sidebarIncrements;
+						sidebar.scrollTo(-sidebarCurrentPosition, 0);
+					}
+
+					handler.postDelayed(this, DURATION_BETWEEN_EACH_STEP);
+				} else {
+					finishAnim();
+				}
+			} else {
+				finishAnim();
+			}
+		}
+
+		private void finishAnim() {
+			isAnimating = false;
+			sidebar.setVisibility(View.INVISIBLE);
+			contentCurrentPosition = 0;
+			sidebarCurrentPosition = sidebarFinalPosition;
+			currentState = CurrentState.NONE;
+
+			content.scrollTo(-contentCurrentPosition, 0);
+			sidebar.scrollTo(-sidebarCurrentPosition, 0);
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.DRAWER_ANIMATION_COMPLETE, null);
+		}
 	}
 }

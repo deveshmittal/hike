@@ -3,6 +3,6 @@
 
     <item
         android:id="@+id/remove_fav"
-        android:title="@string/remove_fav"/>
+        android:title="@string/remove_friend"/>
 
 </menu>

@@ -13,7 +13,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.utils.Utils;
 import com.ocpsoft.pretty.time.PrettyTime;
 
@@ -80,7 +82,7 @@ public class ConvMessage {
 		PARTICIPANT_LEFT, // The participant has left
 		PARTICIPANT_JOINED, // The participant has joined
 		GROUP_END, // Group chat has ended
-		USER_OPT_IN, DND_USER, USER_JOIN, CHANGED_GROUP_NAME, CHANGED_GROUP_IMAGE, BLOCK_INTERNATIONAL_SMS, INTRO_MESSAGE;
+		USER_OPT_IN, DND_USER, USER_JOIN, CHANGED_GROUP_NAME, CHANGED_GROUP_IMAGE, BLOCK_INTERNATIONAL_SMS, INTRO_MESSAGE, STATUS_MESSAGE;
 
 		public static ParticipantInfoState fromJSON(JSONObject obj) {
 			String type = obj.optString(HikeConstants.TYPE);
@@ -108,6 +110,9 @@ public class ConvMessage {
 				return BLOCK_INTERNATIONAL_SMS;
 			} else if (HikeConstants.INTRO_MESSAGE.equals(type)) {
 				return ParticipantInfoState.INTRO_MESSAGE;
+			} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE
+					.equals(type)) {
+				return STATUS_MESSAGE;
 			}
 			return NO_INFO;
 		}
@@ -213,6 +218,8 @@ public class ConvMessage {
 					HikeConstants.MSISDN);
 		}
 
+		this.mMessage = "";
+		this.mTimestamp = System.currentTimeMillis() / 1000;
 		switch (this.participantInfoState) {
 		case PARTICIPANT_JOINED:
 			JSONArray arr = metadata.getGcjParticipantInfo();
@@ -243,9 +250,7 @@ public class ConvMessage {
 					name = Utils.getFirstName(conversation.getLabel());
 				}
 				this.mMessage = String.format(
-						context.getString(R.string.joined_hike), name);
-			} else {
-				this.mMessage = "";
+						context.getString(R.string.joined_hike_new), name);
 			}
 			break;
 		case USER_OPT_IN:
@@ -262,14 +267,18 @@ public class ConvMessage {
 							.getString(conversation instanceof GroupConversation ? R.string.joined_conversation
 									: R.string.optin_one_to_one), name);
 			break;
-		case DND_USER:
-			this.mMessage = "";
-			break;
 		case CHANGED_GROUP_NAME:
 		case CHANGED_GROUP_IMAGE:
-			String participantName = ((GroupConversation) conversation)
-					.getGroupParticipant(metadata.getMsisdn()).getContactInfo()
-					.getFirstName();
+			String msisdn = metadata.getMsisdn();
+			String userMsisdn = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+
+			String participantName = userMsisdn.equals(msisdn) ? context
+					.getString(R.string.you)
+					: ((GroupConversation) conversation)
+							.getGroupParticipant(msisdn).getContactInfo()
+							.getFirstName();
 			this.mMessage = String
 					.format(context
 							.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
@@ -279,8 +288,21 @@ public class ConvMessage {
 		case BLOCK_INTERNATIONAL_SMS:
 			this.mMessage = context.getString(R.string.block_internation_sms);
 			break;
+		case STATUS_MESSAGE:
+			this.mTimestamp = metadata.getStatusMessage().getTimeStamp();
+			String msg;
+			if (metadata.getStatusMessage().getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+				msg = context.getString(R.string.changed_profile);
+			} else {
+				msg = metadata.getStatusMessage().getText();
+			}
+			this.mMessage = "\"" + msg + "\"";
+			/*
+			 * We want all status message state to be read by default.
+			 */
+			isSelfGenerated = true;
+			break;
 		}
-		this.mTimestamp = System.currentTimeMillis() / 1000;
 		this.mConversation = conversation;
 		setState(isSelfGenerated ? State.RECEIVED_READ : State.RECEIVED_UNREAD);
 	}

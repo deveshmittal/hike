@@ -14,9 +14,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile.HikeFileType;
@@ -26,17 +28,39 @@ import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.DrawerLayout;
+import com.bsb.hike.view.DrawerLayout.Listener;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 	private int mResourceId;
 	private MessagesList mMessagesList;
+	private DrawerLayout drawerLayout;
+	private boolean shouldRefresh;
 
 	public ConversationsAdapter(MessagesList messagesList,
-			int textViewResourceId, List<Conversation> objects) {
+			int textViewResourceId, List<Conversation> objects,
+			DrawerLayout drawerLayout) {
 		super(messagesList, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
 		mMessagesList = messagesList;
+		this.drawerLayout = drawerLayout;
+	}
+
+	@Override
+	public void notifyDataSetChanged() {
+		if (drawerLayout.isAnimating()) {
+			shouldRefresh = true;
+			return;
+		}
+		super.notifyDataSetChanged();
+	}
+
+	public void drawerAnimationComplete() {
+		if (shouldRefresh) {
+			super.notifyDataSetChanged();
+			shouldRefresh = false;
+		}
 	}
 
 	@Override
@@ -61,14 +85,24 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 			ImageView imgStatus = (ImageView) v
 					.findViewById(R.id.msg_status_indicator);
-			int resId = message.getImageState();
-			if (resId > 0) {
-				imgStatus.setImageResource(resId);
-				imgStatus.setVisibility(View.VISIBLE);
-			} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
-					&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
-				imgStatus.setImageResource(R.drawable.ic_unread);
-				imgStatus.setVisibility(View.VISIBLE);
+			/*
+			 * If the message is a status message, we only show an indicator if
+			 * the status of the message is unread.
+			 */
+			if (message.getParticipantInfoState() != ParticipantInfoState.STATUS_MESSAGE
+					|| message.getState() == State.RECEIVED_UNREAD) {
+				int resId = message.getImageState();
+				if (resId > 0) {
+					imgStatus.setImageResource(resId);
+					imgStatus.setVisibility(View.VISIBLE);
+				} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
+						&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
+					imgStatus.setImageResource(R.drawable.ic_unread);
+					imgStatus.setVisibility(View.VISIBLE);
+				} else {
+					imgStatus.setImageResource(0);
+					imgStatus.setVisibility(View.GONE);
+				}
 			} else {
 				imgStatus.setImageResource(0);
 				imgStatus.setVisibility(View.GONE);
@@ -137,13 +171,20 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 									dndNames.toString());
 				}
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.INTRO_MESSAGE) {
-				markedUp = String.format(context.getString(conversation
-						.isOnhike() ? R.string.intro_hike_thread
-						: R.string.intro_sms_thread), Utils
-						.getFirstName(conversation.getLabel()));
+				if (conversation.isOnhike()) {
+					boolean firstIntro = conversation.getMsisdn().hashCode() % 2 == 0;
+					markedUp = String.format(context
+							.getString(firstIntro ? R.string.start_thread1
+									: R.string.start_thread1), Utils
+							.getFirstName(conversation.getLabel()));
+				} else {
+					markedUp = String.format(
+							context.getString(R.string.intro_sms_thread),
+							Utils.getFirstName(conversation.getLabel()));
+				}
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
 				markedUp = TextUtils.isEmpty(message.getMessage()) ? String
-						.format(context.getString(R.string.joined_hike),
+						.format(context.getString(R.string.joined_hike_new),
 								Utils.getFirstName(conversation.getLabel()))
 						: message.getMessage();
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
@@ -163,9 +204,18 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					markedUp = context.getString(R.string.group_chat_end);
 				}
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME) {
-				String participantName = ((GroupConversation) conversation)
-						.getGroupParticipant(metadata.getMsisdn())
-						.getContactInfo().getFirstName();
+				String msisdn = metadata.getMsisdn();
+
+				String userMsisdn = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+						HikeMessengerApp.MSISDN_SETTING, "");
+
+				String participantName = userMsisdn.equals(msisdn) ? context
+						.getString(R.string.you)
+						: ((GroupConversation) conversation)
+								.getGroupParticipant(msisdn).getContactInfo()
+								.getFirstName();
+
 				markedUp = String.format(
 						context.getString(R.string.change_group_name),
 						participantName);
@@ -213,4 +263,5 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 		return v;
 	}
+
 }

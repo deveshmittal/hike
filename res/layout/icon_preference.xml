@@ -5,16 +5,13 @@ layout. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent" android:layout_height="wrap_content"
 	android:minHeight="?android:attr/listPreferredItemHeight"
-	android:gravity="center_vertical"
-	android:paddingRight="18dp"
-	android:paddingLeft="18dp"
+	android:gravity="center"
+	android:paddingRight="12dp"
+	android:paddingLeft="12dp"
 	android:background="@drawable/list_item">
 
 <RelativeLayout android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginTop="6dp"
-    android:layout_marginBottom="6dip"
-    android:layout_marginRight="5dp"
     android:layout_weight="1">
 
     <ImageView
@@ -23,15 +20,15 @@ layout. -->
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="12dp"
         android:src="@drawable/ic_credits" />
 
     <com.bsb.hike.view.CustomFontTextView android:id="@+android:id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Title"
-        android:textSize="18dp"
-        android:textColor="@color/lightblack"
+        android:textSize="16sp"
+        android:textColor="@color/setting_item"
         android:layout_toRightOf="@id/icon"/>
 
     <com.bsb.hike.view.CustomFontTextView android:id="@+android:id/summary"
@@ -39,9 +36,9 @@ layout. -->
         android:layout_height="wrap_content"
         android:layout_below="@android:id/title"
         android:layout_alignLeft="@android:id/title"
-        android:textSize="13dp"
+        android:textSize="12sp"
         android:text="Summary"
-        android:textColor="@color/notif_subtext"
+        android:textColor="@color/setting_item"
         android:maxLines="4"
         android:textStyle="italic" />
 

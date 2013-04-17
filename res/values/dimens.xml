@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="top_bar_btn_height">47dp</dimen>
+    <dimen name="top_bar_btn_height">48dp</dimen>
     <dimen name="tip_bottom_margin">33dp</dimen>
 	<dimen name="credits_num_height">45dp</dimen>
 	<dimen name="credits_num_width">35dp</dimen>
@@ -12,4 +12,17 @@
 	<dimen name="credits_progress_curve_width">4dp</dimen>
 	<dimen name="tell_a_friend_subtext_width">150dp</dimen>
 	<dimen name="drawer_text_width">150dp</dimen>
+	<dimen name="contact_details_height">50dp</dimen>
+	<dimen name="drawer_item_height">71dp</dimen>
+	<dimen name="drawer_item_width">75dp</dimen>
+	<dimen name="timeline_pic">100dp</dimen>
+	<dimen name="contact_info_width">300dp</dimen>
+	<dimen name="conversation_footer_height">66dp</dimen>
+	<dimen name="avatar_top_bottom">11dp</dimen>
+	<dimen name="avatar_left_right">12dp</dimen>
+	<dimen name="avatar_width_height">48dp</dimen>
+	<dimen name="text_subtext_spacing">2dp</dimen>
+	<dimen name="main_text_size">18sp</dimen>
+	<dimen name="sub_text_size">14sp</dimen>
+	<dimen name="top_btn_padding">0dp</dimen>
 </resources>

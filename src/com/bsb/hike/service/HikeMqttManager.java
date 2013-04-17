@@ -248,7 +248,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 		settings = this.mHikeService.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		setBrokerHostPort(Utils.isWifiOn(mHikeService));
+		setBrokerHostPort(Utils.switchSSLOn(mHikeService));
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
@@ -283,7 +283,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			mqtt.setCleanSession(false);
 			mqtt.setUserName(uid);
 			mqtt.setPassword(password);
-			mqtt.setSSL(Utils.isWifiOn(mHikeService));
+			mqtt.setSSL(Utils.switchSSLOn(mHikeService));
 		} catch (URISyntaxException e) {
 			// something went wrong!
 			mqtt = null;
@@ -630,12 +630,18 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 		 */
 		if (mqttConnection == null) {
 			pbCB.onFailure(null);
+			return;
 		}
 
-		mqttConnection.publish(new UTF8Buffer(this.topic
-				+ HikeConstants.PUBLISH_TOPIC),
-				new Buffer(packet.getMessage()), qos == 0 ? QoS.AT_MOST_ONCE
-						: QoS.AT_LEAST_ONCE, false, pbCB);
+		try {
+			mqttConnection.publish(new UTF8Buffer(this.topic
+					+ HikeConstants.PUBLISH_TOPIC),
+					new Buffer(packet.getMessage()),
+					qos == 0 ? QoS.AT_MOST_ONCE : QoS.AT_LEAST_ONCE, false,
+					pbCB);
+		} catch (IllegalStateException e) {
+			Log.w(getClass().getSimpleName(), "Disconnected", e);
+		}
 	}
 
 	public void unsubscribeFromUIEvents() {
@@ -723,6 +729,8 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
 					: reconnectTime;
 
+			Log.d(getClass().getSimpleName(), "Reconnect time (sec): "
+					+ reconnectTime);
 			this.mHikeService.scheduleNextPing(reconnectTime);
 		} catch (Exception e) {
 			Log.e(getClass().getSimpleName(), "Exception", e);
@@ -732,12 +740,13 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 	@Override
 	public void onEventReceived(String type, Object object) {
 		if (HikePubSub.SWITCHED_DATA_CONNECTION.equals(type)) {
-			boolean isWifiConnection = (Boolean) object;
-			setBrokerHostPort(isWifiConnection);
+			boolean switchSslOn = object != null ? (Boolean) object : Utils
+					.switchSSLOn(mHikeService);
+			setBrokerHostPort(switchSslOn);
 		}
 	}
 
-	private void setBrokerHostPort(boolean ssl) {
+	private synchronized void setBrokerHostPort(boolean ssl) {
 		Log.d("SSL", "Switching broker port/host. SSL? " + ssl);
 		String brokerHost = settings
 				.getString(HikeMessengerApp.BROKER_HOST, "");

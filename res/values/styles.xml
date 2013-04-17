@@ -102,7 +102,7 @@
 	    <item name="android:shadowColor">#0f3a56</item>
 	    <item name="android:shadowDy">-0.5</item>
 	    <item name="android:shadowRadius">0.5</item>
-	    <item name="android:textColor">@color/offwhite</item>
+	    <item name="android:textColor">@drawable/signup_btn_text</item>
 	</style>
 	
 	<style name="SignupButton.Text.Bold.Loading">
@@ -119,6 +119,10 @@
 	<style name="Theme.CustomDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
 	    <item name="android:windowIsFloating">true</item>
 	    <item name="android:windowNoTitle">true</item>
+	</style>
+	
+	<style name="Theme.CustomDialog.Keyboard">
+	    <item name="android:windowSoftInputMode">adjustResize|stateVisible</item>
 	</style>
 
 	<style name="Text.Credits">
@@ -154,13 +158,19 @@
 	    <item name="android:layout_width">match_parent</item>
 	    <item name="android:layout_height">wrap_content</item>
 	    <item name="android:background">@drawable/invite_chatthread_button</item>
+	</style>
+	
+	<style name="ProfileButtonTextView">
+	    <item name="android:layout_width">wrap_content</item>
+	    <item name="android:layout_height">wrap_content</item>
 	    <item name="android:textColor">@color/invite_all</item>
-	    <item name="android:textSize">13sp</item>
+	    <item name="android:textSize">14sp</item>
 	    <item name="android:textStyle">bold|italic</item>
 	    <item name="android:shadowColor">@color/white</item>
-	    <item name="android:shadowDy">-1.0</item>
-	    <item name="android:shadowRadius">1.0</item>
+	    <item name="android:shadowDy">1.2</item>
+	    <item name="android:shadowRadius">1.2</item>
 	    <item name="android:gravity">center</item>
+	    <item name="android:paddingBottom">1dp</item>
 	</style>
 	
 	<style name="FavoriteButtons">
@@ -188,101 +198,8 @@
 	    <item name="android:paddingRight">30dp</item>
 	</style>
 
-    <style name="SignupButton.Text"></style>
-
-    <style name="SignupButton.Text.Info">
-        <item name="android:layout_marginLeft">0dp</item>
-        <item name="android:layout_marginRight">0dp</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:textStyle">bold|italic</item>
-        <item name="android:shadowColor">@color/black</item>
-        <item name="android:shadowDy">0.5</item>
-        <item name="android:shadowRadius">0.5</item>
-        <item name="android:textColor">@color/offwhite</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <style name="SignupButton.Text.Bold">
-        <item name="android:textSize">17sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="SignupButton.Text.Bold.Button">
-        <item name="android:shadowColor">#0f3a56</item>
-        <item name="android:shadowDy">-0.5</item>
-        <item name="android:shadowRadius">0.5</item>
-        <item name="android:textColor">@color/offwhite</item>
-    </style>
-
-    <style name="SignupButton.Text.Bold.Loading">
-        <item name="android:layout_marginLeft">0dp</item>
-        <item name="android:layout_marginRight">0dp</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:shadowColor">#0f3a56</item>
-        <item name="android:shadowDy">0.5</item>
-        <item name="android:shadowRadius">0.5</item>
-        <item name="android:textColor">#51a8dd</item>
-    </style>
-
-    <style name="Theme.CustomDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowNoTitle">true</item>
-    </style>
-
-    <style name="Text.Credits">
-        <item name="android:layout_marginTop">5dp</item>
-        <item name="android:background">@drawable/bg_credits</item>
-        <item name="android:gravity">center</item>
-        <item name="android:minWidth">26dp</item>
-        <item name="android:paddingLeft">5dp</item>
-        <item name="android:paddingRight">5dp</item>
-        <item name="android:shadowColor">#33000000</item>
-        <item name="android:shadowDy">0.5</item>
-        <item name="android:shadowRadius">0.5</item>
-        <item name="android:textColor">#ffffff</item>
-        <item name="android:textSize">10sp</item>
-        <item name="android:textStyle">bold</item>
-    </style>
-
-    <style name="SocialButtons">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:background">@null</item>
-        <item name="android:drawableLeft">@drawable/ic_twitter</item>
-        <item name="android:drawablePadding">5dp</item>
-        <item name="android:textColor">@color/social_btn_txt</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:shadowColor">@color/white</item>
-        <item name="android:shadowDy">1.0</item>
-        <item name="android:shadowRadius">1.0</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <style name="ProfileButtons">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/invite_chatthread_button</item>
-        <item name="android:textColor">@color/invite_all</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textStyle">bold|italic</item>
-        <item name="android:shadowColor">@color/white</item>
-        <item name="android:shadowDy">-1.0</item>
-        <item name="android:shadowRadius">1.0</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <style name="FavoriteButtons">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textStyle">bold|italic</item>
-        <item name="android:shadowColor">@color/black</item>
-        <item name="android:shadowDy">-1.0</item>
-        <item name="android:shadowRadius">1.0</item>
-        <item name="android:gravity">center</item>
+    <style name="Theme.CustomDialog.Status">
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
     <style name="LeftDrawerDivider">
@@ -297,8 +214,8 @@
         <item name="android:layout_height">48dp</item>
         <item name="android:background">@drawable/drawer_top_item_selector</item>
         <item name="android:clickable">true</item>
-        <item name="android:paddingLeft">15dp</item>
-        <item name="android:paddingRight">15dp</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
     </style>
 
     <style name="LeftDrawerItemIcon">
@@ -335,4 +252,39 @@
         <item name="android:shadowRadius">0.5</item>
     </style>
     
+    <style name="ProfileShadow">
+        <item name="android:shadowColor">@color/black</item>
+        <item name="android:shadowDy">0.7</item>
+        <item name="android:shadowRadius">0.7</item>
+    </style>
+    
+    <style name="StatusYesBtn">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/status_yes_btn</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:shadowColor">@color/status_yes_btn</item>
+        <item name="android:shadowDy">-0.5</item>
+        <item name="android:shadowRadius">0.5</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:gravity">center</item>
+    </style>
+    
+    <style name="StatusNoBtn">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/status_no_btn</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:shadowColor">@color/white</item>
+        <item name="android:shadowDy">0.5</item>
+        <item name="android:shadowRadius">0.5</item>
+        <item name="android:textColor">@color/invite_all</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold|italic</item>
+        <item name="android:gravity">center</item>
+    </style>
 </resources>

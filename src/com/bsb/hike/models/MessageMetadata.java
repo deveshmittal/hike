@@ -38,6 +38,7 @@ public class MessageMetadata {
 	private boolean showBIS;
 	private int credits;
 	private boolean isPokeMessage;
+	private StatusMessage statusMessage;
 
 	public MessageMetadata(JSONObject metadata) throws JSONException {
 		this.participantInfoState = metadata.has(HikeConstants.DND_USERS)
@@ -75,6 +76,10 @@ public class MessageMetadata {
 
 		case CHANGED_GROUP_IMAGE:
 			this.msisdn = metadata.getString(HikeConstants.FROM);
+			break;
+		case STATUS_MESSAGE:
+			this.statusMessage = new StatusMessage(metadata);
+			break;
 		}
 		this.newUser = metadata.optString(HikeConstants.NEW_USER)
 				.equals("true");
@@ -152,6 +157,10 @@ public class MessageMetadata {
 
 	public JSONObject getJSON() {
 		return json;
+	}
+
+	public StatusMessage getStatusMessage() {
+		return statusMessage;
 	}
 
 	public Spannable getMessage(final Context context,

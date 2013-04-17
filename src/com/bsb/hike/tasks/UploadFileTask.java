@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.ThumbnailUtils;
@@ -100,14 +101,21 @@ public class UploadFileTask extends FileTransferTaskBase {
 								fileName, null);
 						Log.d(getClass().getSimpleName(), "Copying file: "
 								+ filePath + " to " + selectedFile.getPath());
-						// TODO Check performance on low end phones. If slow,
-						// should remove from UI thread.
-						// Saving the file to hike local folder
-						if (!Utils.copyFile(filePath, selectedFile.getPath(),
-								hikeFileType)) {
-							return FTResult.READ_FAIL;
+						/*
+						 * Checking if this file already exists in the hike
+						 * folder.
+						 */
+						if (!filePath.contains(Utils
+								.getFileParent(hikeFileType))) {
+							// Saving the file to hike local folder
+							if (!Utils.copyFile(filePath,
+									selectedFile.getPath(), hikeFileType)) {
+								return FTResult.READ_FAIL;
+							}
+							filePath = selectedFile.getPath();
+						} else {
+							selectedFile = file;
 						}
-						filePath = selectedFile.getPath();
 					} else {
 						selectedFile = new File(filePath);
 					}
@@ -143,7 +151,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.MESSAGE_SENT, convMessage);
 
-					Utils.downloadPicasaFile(context, selectedFile, picasaUri);
+					Utils.downloadAndSaveFile(context, selectedFile, picasaUri);
 					filePath = selectedFile.getPath();
 				}
 
@@ -306,6 +314,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 				errorStringId = R.string.upload_failed;
 			}
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
+		}
+		if (selectedFile != null) {
+			context.sendBroadcast(new Intent(
+					Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
+							.fromFile(selectedFile)));
 		}
 	}
 }
