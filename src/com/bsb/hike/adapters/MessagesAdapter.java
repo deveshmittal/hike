@@ -565,6 +565,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				holder.messageTextView.setText(smileyParser.addSmileySpans(
 						statusMessage.getText(), true));
+				Linkify.addLinks(holder.messageTextView, Linkify.ALL);
+
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 				holder.image.setImageResource(R.drawable.ic_profile_pic_status);
 				holder.messageTextView.setText(R.string.changed_profile);

@@ -5,6 +5,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -416,6 +417,10 @@ public class ProfileAdapter extends BaseAdapter {
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			viewHolder.text.setText(smileyParser.addSmileySpans(
 					statusMessage.getText(), true));
+
+			Linkify.addLinks(viewHolder.text, Linkify.ALL);
+			viewHolder.text.setMovementMethod(null);
+
 			viewHolder.image.setVisibility(View.GONE);
 			viewHolder.subText.setText(statusMessage
 					.getTimestampFormatted(true));
