@@ -2043,7 +2043,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public int getTimelineStatusMessageCount() {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
-				+ DBConstants.STATUS_TABLE + " WHERE " + DBConstants.SHOW_IN_TIMELINE + " =1", null);
+				+ DBConstants.STATUS_TABLE + " WHERE "
+				+ DBConstants.SHOW_IN_TIMELINE + " =1", null);
 	}
 
 	private void denormaliseConversations(SQLiteDatabase mDb) {
