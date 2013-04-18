@@ -647,7 +647,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		 * Enabling if the text length is > 0 or if the user has selected a mood
 		 * with some prefilled text.
 		 */
-		titleBtn.setEnabled(mActivityTask.moodId >= 0 || statusTxt.length() > 0
+		titleBtn.setEnabled(mActivityTask.moodId >= 0
+				|| statusTxt.getText().toString().trim().length() > 0
 				|| isEmojiOrMoodLayoutVisible());
 	}
 
