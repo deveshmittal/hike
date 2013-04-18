@@ -136,6 +136,17 @@ public class MqttMessagesManager {
 					.getString(HikeConstants.MSISDN);
 			boolean joined = HikeConstants.MqttMessageTypes.USER_JOINED
 					.equals(type);
+
+			boolean stateChanged = false;
+			stateChanged = ContactUtils.updateHikeStatus(this.context, msisdn,
+					joined) > 0;
+
+			stateChanged = this.convDb.updateOnHikeStatus(msisdn, joined) > 0;
+
+			if (!stateChanged) {
+				return;
+			}
+
 			if (joined) {
 				long joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
 				if (joinTime > 0) {
@@ -154,8 +165,6 @@ public class MqttMessagesManager {
 			} else {
 				IconCacheManager.getInstance().deleteIconForMSISDN(msisdn);
 			}
-			ContactUtils.updateHikeStatus(this.context, msisdn, joined);
-			this.convDb.updateOnHikeStatus(msisdn, joined);
 
 			/*
 			 * Change the friend type since the user has now left hike

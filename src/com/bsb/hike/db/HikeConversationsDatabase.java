@@ -322,14 +322,60 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void updateOnHikeStatus(String msisdn, boolean onHike) {
-		ContentValues values = new ContentValues();
-		values.put(DBConstants.ONHIKE, onHike);
-		String[] whereArgs = { msisdn };
-		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN
-				+ "=?", whereArgs);
-		mDb.update(DBConstants.GROUP_MEMBERS_TABLE, values, DBConstants.MSISDN
-				+ "=?", whereArgs);
+	public int updateOnHikeStatus(String msisdn, boolean onHike) {
+		Cursor conversationCursor = null;
+		Cursor groupMemberCursor = null;
+		try {
+			String selection = DBConstants.MSISDN + "=?";
+			String[] args = { msisdn };
+
+			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE,
+					new String[] { DBConstants.ONHIKE }, selection, args, null,
+					null, null);
+
+			groupMemberCursor = mDb.query(DBConstants.GROUP_MEMBERS_TABLE,
+					new String[] { DBConstants.ONHIKE }, selection, args, null,
+					null, null);
+
+			ContentValues values = new ContentValues();
+			values.put(DBConstants.ONHIKE, onHike);
+
+			int rowsUpdated = 0;
+
+			if (conversationCursor.moveToFirst()) {
+
+				boolean prevOnHikeVal = conversationCursor
+						.getInt(conversationCursor
+								.getColumnIndex(DBConstants.ONHIKE)) == 1;
+
+				if (prevOnHikeVal != onHike) {
+					rowsUpdated += mDb.update(DBConstants.CONVERSATIONS_TABLE,
+							values, selection, args);
+				}
+			}
+
+			if (groupMemberCursor.moveToFirst()) {
+
+				boolean prevOnHikeVal = groupMemberCursor
+						.getInt(groupMemberCursor
+								.getColumnIndex(DBConstants.ONHIKE)) == 1;
+
+				if (prevOnHikeVal != onHike) {
+					rowsUpdated += mDb.update(DBConstants.GROUP_MEMBERS_TABLE,
+							values, selection, args);
+				}
+			}
+
+			return rowsUpdated;
+
+		} finally {
+			if (conversationCursor != null) {
+				conversationCursor.close();
+			}
+			if (groupMemberCursor != null) {
+				groupMemberCursor.close();
+			}
+		}
 	}
 
 	public void addConversationMessages(ConvMessage message) {

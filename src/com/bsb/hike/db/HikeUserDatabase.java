@@ -808,11 +808,38 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void updateHikeContact(String msisdn, boolean onhike) {
-		ContentValues vals = new ContentValues(1);
-		vals.put(DBConstants.ONHIKE, onhike);
-		mDb.update(DBConstants.USERS_TABLE, vals, "msisdn=?",
-				new String[] { msisdn });
+	public int updateHikeContact(String msisdn, boolean onhike) {
+		Cursor c = null;
+		try {
+			String selection = DBConstants.MSISDN + "=?";
+			String[] args = { msisdn };
+
+			c = mDb.query(DBConstants.USERS_TABLE,
+					new String[] { DBConstants.ONHIKE }, selection, args, null,
+					null, null);
+
+			if (!c.moveToFirst()) {
+				return 0;
+			}
+
+			boolean onHikeDB = c.getInt(c.getColumnIndex(DBConstants.ONHIKE)) == 1;
+
+			/*
+			 * DB is already updated with this value.
+			 */
+			if (onHikeDB == onhike) {
+				return 0;
+			}
+
+			ContentValues vals = new ContentValues(1);
+			vals.put(DBConstants.ONHIKE, onhike);
+			return mDb.update(DBConstants.USERS_TABLE, vals, "msisdn=?",
+					new String[] { msisdn });
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
 	}
 
 	public void deleteAll() {
