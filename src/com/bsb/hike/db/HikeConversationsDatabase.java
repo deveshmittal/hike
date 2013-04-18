@@ -1432,14 +1432,39 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	 *            : The msisdn of the participant
 	 */
 	public int setParticipantLeft(String groupId, String msisdn) {
-		if (!doesConversationExist(groupId)) {
-			return 0;
+		Cursor c = null;
+		try {
+			String selection = DBConstants.GROUP_ID + "=? AND "
+					+ DBConstants.MSISDN + "=?";
+			String[] selectionArgs = new String[] { groupId, msisdn };
+
+			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE,
+					new String[] { DBConstants.HAS_LEFT }, selection,
+					selectionArgs, null, null, null);
+
+			if (!c.moveToFirst()) {
+				return 0;
+			}
+
+			int hasLeft = c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT));
+			/*
+			 * If member has already left don't do anything.
+			 */
+			if (hasLeft == 1) {
+				return 0;
+			}
+
+			ContentValues contentValues = new ContentValues(1);
+			contentValues.put(DBConstants.HAS_LEFT, 1);
+
+			return mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues,
+					selection, selectionArgs);
+
+		} finally {
+			if (c != null) {
+				c.close();
+			}
 		}
-		ContentValues contentValues = new ContentValues(1);
-		contentValues.put(DBConstants.HAS_LEFT, 1);
-		return mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues,
-				DBConstants.GROUP_ID + " = ? AND " + DBConstants.MSISDN
-						+ " = ? ", new String[] { groupId, msisdn });
 	}
 
 	/**
