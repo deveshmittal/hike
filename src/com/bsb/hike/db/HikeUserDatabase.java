@@ -30,6 +30,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
 
@@ -1057,6 +1058,30 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
 			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata,
 					0, icondata.length));
+		} finally {
+			c.close();
+		}
+	}
+
+	public String getIconIdentifierString(String msisdn) {
+		Cursor c = mDb.query(DBConstants.THUMBNAILS_TABLE,
+				new String[] { DBConstants.IMAGE }, "msisdn=?",
+				new String[] { msisdn }, null, null, null);
+		try {
+			if (!c.moveToFirst()) {
+				/* lookup based on this msisdn */
+				return null;
+			}
+
+			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
+			String iconString = Base64.encodeToString(icondata, Base64.DEFAULT);
+
+			if (iconString.length() < 6) {
+				return iconString;
+			} else {
+				return iconString.substring(0, 5)
+						+ iconString.substring(iconString.length() - 6);
+			}
 		} finally {
 			c.close();
 		}

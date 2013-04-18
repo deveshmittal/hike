@@ -110,6 +110,25 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 			String groupId = jsonObj.getString(HikeConstants.TO);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
+			String newIconIdentifier = null;
+
+			if (iconBase64.length() < 6) {
+				newIconIdentifier = iconBase64;
+			} else {
+				newIconIdentifier = iconBase64.substring(0, 5)
+						+ iconBase64.substring(iconBase64.length() - 6);
+			}
+
+			String oldIconIdentifier = this.userDb
+					.getIconIdentifierString(groupId);
+
+			/*
+			 * Same Icon
+			 */
+			if (newIconIdentifier.equals(oldIconIdentifier)) {
+				return;
+			}
+
 			this.userDb.setIcon(groupId,
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
