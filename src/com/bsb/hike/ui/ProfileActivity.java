@@ -798,12 +798,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 									HikeMessengerApp.getPubSub().publish(
 											HikePubSub.PROFILE_NAME_CHANGED,
 											null);
-								} else {
-									HikeConversationsDatabase hCDB = HikeConversationsDatabase
-											.getInstance();
-									hCDB.setGroupName(
-											ProfileActivity.this.mLocalMSISDN,
-											newName);
 								}
 								if (isBackPressed) {
 									finishEditing();
