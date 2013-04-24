@@ -364,6 +364,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 											 * set the connection to null since
 											 * it's no longer valid
 											 */
+
 					/*
 					 * if something has failed, we wait for one keep-alive
 					 * period before trying again in a real implementation, you
@@ -373,6 +374,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 					 * failure is often an intermittent network issue, however,
 					 * so some limited retry is a good idea
 					 */
+					if (connectionStatus != ConnectionStatus.SERVER_UNAVAILABLE) {
 						if (reconnectTime == 0) {
 							Random random = new Random();
 							reconnectTime = random
@@ -387,6 +389,17 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 								"Reconnect time (sec): " + reconnectTime);
 
 						mHikeService.scheduleNextPing(reconnectTime);
+					} else {
+						Random random = new Random();
+
+						int reconnectIn = random
+								.nextInt(HikeConstants.SERVER_UNAVAILABLE_MAX_CONNECT_TIME) + 1;
+
+						/*
+						 * Converting minutes to seconds
+						 */
+						mHikeService.scheduleNextPing(reconnectIn * 60);
+					}
 				}
 
 				@Override
