@@ -401,8 +401,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID
 						+ " FROM " + DBConstants.CONVERSATIONS_TABLE
 						+ " WHERE " + DBConstants.MSISDN + "=? ) AND "
-						+ DBConstants.MSG_STATUS + "="
-						+ State.SENT_DELIVERED.ordinal(),
+						+ DBConstants.MSG_STATUS + "<"
+						+ State.SENT_DELIVERED_READ.ordinal(),
 				new String[] { msisdn }, null, null, null);
 		long[] ids = new long[c.getCount() + msgIds.length()];
 
