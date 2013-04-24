@@ -671,6 +671,7 @@ public class HikeService extends Service {
 	 * message broker server
 	 */
 	public void scheduleNextPing(int timeout) {
+		Log.d(getClass().getSimpleName(), "Scheduling ping in " + timeout + " seconds");
 		// When the phone is off, the CPU may be stopped. This means that our
 		// code may stop running.
 		// When connecting to the message broker, we specify a 'keep alive'
