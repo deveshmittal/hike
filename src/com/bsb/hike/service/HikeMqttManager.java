@@ -331,20 +331,28 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			mqttConnection.connect(new Callback<Void>() {
 				public void onFailure(Throwable value) {
 					Log.e("HikeMqttManager", "Hike Unable to connect", value);
-					if (value instanceof ConnectionException
-							&& ((ConnectionException) value).getCode().equals(
-									ConnectionStatus.BAD_USERNAME_OR_PASSWORD)) {
-						Log.e("HikeMqttManager", "Invalid account credentials");
-						/*
-						 * delete the token and send a message to the app to
-						 * send the user back to the main screen
-						 */
-						SharedPreferences.Editor editor = mHikeService
-								.getSharedPreferences(
-										HikeMessengerApp.ACCOUNT_SETTINGS, 0)
-								.edit();
-						editor.clear();
-						editor.commit();
+					ConnectionStatus connectionStatus = null;
+					if (value instanceof ConnectionException) {
+
+						connectionStatus = ((ConnectionException) value)
+								.getCode();
+
+						if (connectionStatus == ConnectionStatus.BAD_USERNAME_OR_PASSWORD
+								|| connectionStatus == ConnectionStatus.IDENTIFIER_REJECTED
+								|| connectionStatus == ConnectionStatus.NOT_AUTHORIZED) {
+							Log.e("HikeMqttManager",
+									"Invalid account credentials");
+							/*
+							 * delete the token and send a message to the app to
+							 * send the user back to the main screen
+							 */
+							SharedPreferences.Editor editor = mHikeService
+									.getSharedPreferences(
+											HikeMessengerApp.ACCOUNT_SETTINGS,
+											0).edit();
+							editor.clear();
+							editor.commit();
+						}
 					}
 
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
