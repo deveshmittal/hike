@@ -373,7 +373,20 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 					 * failure is often an intermittent network issue, however,
 					 * so some limited retry is a good idea
 					 */
-					mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
+						if (reconnectTime == 0) {
+							Random random = new Random();
+							reconnectTime = random
+									.nextInt(HikeConstants.RECONNECT_TIME) + 1;
+						} else {
+							reconnectTime *= 2;
+						}
+						reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
+								: reconnectTime;
+
+						Log.d(getClass().getSimpleName(),
+								"Reconnect time (sec): " + reconnectTime);
+
+						mHikeService.scheduleNextPing(reconnectTime);
 				}
 
 				@Override
