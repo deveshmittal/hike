@@ -82,9 +82,6 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 
 		if (savedInstanceState != null) {
 			if (savedInstanceState
-					.getBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING)) {
-				startFBAuth(false);
-			} else if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING)) {
 				onClick(findViewById(R.id.facebook));
 			}
