@@ -438,12 +438,12 @@
 	<string name="meet_hike">Über hike</string>
 	<string name="remove_circle">Entfernen von Circle of Friends</string>
 	<string name="add_hike_friend">Freundeskreis anzeigen</string>
-	<string name="email_body">Hi!\n\nIch habe nun hike, ein kooles neues Messaging-app. Sir können hike von get.hike.in herunterladen.\n\nhike hat einige vergnügte Emotikons. Sie können auch Status updates zu Ihren besten Freundenkreis posten. Denken Sie an es wie BBM für Nicht-Blackberry Handys, jedoch viel besser!\n\nBekkomen Sie das alles von hike und verlassen Sie die einfachen langweiligen Sms!</string>
+	<string name="email_body">Hi!\n\nIch verwende hike - eine einfache, schöne Messaging-App, die absolut kostenlos ist.\n\nBei hike gibt es total witzige Emoticons. Außerdem kannst du Statusmeldungen für deinen Freundeskreis posten. Genau wie BBM, nur viel viel besser!\n\nHol dir jetzt hike und verabschiede dich von langweiligen SMS.\n\nHol dir hike: http://get.hike.in</string>
 	<string name="file_expire">Diese Datei existiert nicht mehr.</string>
 	<string name="friends_on_hike_tut_info">Tippen Sie auf die Schaltfläche, um Freunde auf hike sehen</string>
-	<string name="twitter_msg">Ich benutzt @hikeapp 2.0 mit Status updates und Launen. Einfache und schöne Nachrichten. Total kostenlos.</string>
-	<string name="facebook_description">Hi!\n\nIch habe nun hike, ein kooles neues Messaging-app. Sir können hike von get.hike.in herunterladen.\n\nhike hat einige vergnügte Emotikons. Sie können auch Status updates zu Ihren besten Freundenkreis posten. Denken Sie an es wie BBM für Nicht-Blackberry Handys, jedoch viel besser!</string>
-	<string name="invite_message">Hey! Lade hike 2.0 nun mit Status updates herunter! - get.hike.in</string>
+	<string name="twitter_msg">Ich verwende @hikeapp 2.0 mit Statusmeldungen &amp; Smileys. Genau wie BBM, nur viel besser! Hol dir hike auf http://get.hike.in #gethike</string>
+	<string name="facebook_description">Ich verwende hike - eine einfache, schöne Messaging-App, die absolut kostenlos ist.\n\nBei hike gibt es total witzige Emoticons. Außerdem kannst du Statusmeldungen für deinen Freundeskreis posten. Genau wie BBM, nur viel viel besser!\n\nHol dir jetzt hike und verabschiede dich von langweiligen SMS.\n\nHol dir hike: http://get.hike.in</string>
+	<string name="invite_message">Hi! Hol dir hike 2.0. Kostenloses Messaging, weltweit. Jetzt mit Statusmeldungen und Smileys :) - http://get.hike.in/</string>
 	<string name="error_setting_profile">Es gab einen Fehler beim Festlegen deinem Profilbild.</string>
 	<string name="mood_tweet_error">Ein Tweet mit Stimmungs-Smiley kann maximal 130 Zeichen enthalten.</string>	
 </resources>
