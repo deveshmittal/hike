@@ -445,5 +445,6 @@
 	<string name="facebook_description">Ich verwende hike - eine einfache, schöne Messaging-App, die absolut kostenlos ist.\n\nBei hike gibt es total witzige Emoticons. Außerdem kannst du Statusmeldungen für deinen Freundeskreis posten. Genau wie BBM, nur viel viel besser!\n\nHol dir jetzt hike und verabschiede dich von langweiligen SMS.\n\nHol dir hike: http://get.hike.in</string>
 	<string name="invite_message">Hi! Hol dir hike 2.0. Kostenloses Messaging, weltweit. Jetzt mit Statusmeldungen und Smileys :) - http://get.hike.in/</string>
 	<string name="error_setting_profile">Es gab einen Fehler beim Festlegen deinem Profilbild.</string>
-	<string name="mood_tweet_error">Ein Tweet mit Stimmungs-Smiley kann maximal 130 Zeichen enthalten.</string>	
+	<string name="mood_tweet_error">Ein Tweet mit Stimmungs-Smiley kann maximal 130 Zeichen enthalten.</string>
+	<string name="new_string">Neu</string>	
 </resources>

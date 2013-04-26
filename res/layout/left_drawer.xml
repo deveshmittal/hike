@@ -147,7 +147,7 @@
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/item_name"
                     style="@style/LeftDrawerItemText"
-                    android:text="@string/rewards" />
+                    android:text="@string/new_string" />
                 
                 <com.bsb.hike.view.CustomFontTextView
                     android:id="@+id/talk_time_num"

@@ -456,4 +456,5 @@
 	<string name="invite_message">Hi! Get hike 2.0. Free messaging worldwide. Now with Status Updates and Moods :) - http://get.hike.in/</string>
 	<string name="error_setting_profile">Error setting your profile image.</string>
 	<string name="mood_tweet_error">Posting a mood to twitter can have a maximum of 130 characters.</string>
+	<string name="new_string">New</string>
 </resources>
