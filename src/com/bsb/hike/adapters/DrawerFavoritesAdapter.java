@@ -148,7 +148,7 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				Collections.sort(onHikeTaskList);
 
 				recentTaskList = hikeUserDatabase.getRecentContacts(-1, false,
-						FavoriteType.NOT_FRIEND, freeSMSOn ? 1 : 0);
+						FavoriteType.NOT_FRIEND, freeSMSOn ? 1 : 0, myMsisdn);
 
 				return null;
 			}

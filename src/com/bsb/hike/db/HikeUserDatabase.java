@@ -1254,7 +1254,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public List<ContactInfo> getRecentContactsFromListOfNumbers(
 			String selectionNumbers, Map<String, Long> recentValues,
-			boolean indiaOnly, FavoriteType favoriteType, int freeSmsSetting) {
+			boolean indiaOnly, FavoriteType favoriteType, int freeSmsSetting,
+			String myMsisdn) {
 
 		String[] columns = new String[] { DBConstants.MSISDN, DBConstants.ID,
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
@@ -1270,6 +1271,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSISDN + " NOT IN (SELECT " + DBConstants.MSISDN
 				+ " FROM " + DBConstants.FAVORITES_TABLE + ")" : "");
 		selectionBuilder.append(" AND " + DBConstants.MSISDN + "!='null'");
+
+		selectionBuilder.append(TextUtils.isEmpty(myMsisdn) ? "" : " AND "
+				+ DBConstants.MSISDN + "!="
+				+ DatabaseUtils.sqlEscapeString(myMsisdn));
+
 		if (freeSmsSetting == -1) {
 			selectionBuilder.append(" AND " + DBConstants.ONHIKE + "=0");
 		} else if (freeSmsSetting == 0) {
@@ -1355,15 +1361,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		Pair<String, Map<String, Long>> data = ContactUtils.getRecentNumbers(
 				mContext, limit);
 		return getRecentContactsFromListOfNumbers(data.first, data.second,
-				indiaOnly, favoriteType, -1);
+				indiaOnly, favoriteType, -1, null);
 	}
 
 	public List<ContactInfo> getRecentContacts(int limit, boolean indiaOnly,
-			FavoriteType favoriteType, int freeSmsSetting) {
+			FavoriteType favoriteType, int freeSmsSetting, String myMsisdn) {
 		Pair<String, Map<String, Long>> data = ContactUtils.getRecentNumbers(
 				mContext, limit);
 		return getRecentContactsFromListOfNumbers(data.first, data.second,
-				indiaOnly, favoriteType, freeSmsSetting);
+				indiaOnly, favoriteType, freeSmsSetting, myMsisdn);
 	}
 
 	private List<Pair<AtomicBoolean, ContactInfo>> getNonHikeMostContactedContactsFromListOfNumbers(
