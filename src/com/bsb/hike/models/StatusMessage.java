@@ -5,12 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.Utils;
-import com.ocpsoft.pretty.time.PrettyTime;
 
 public class StatusMessage {
 
