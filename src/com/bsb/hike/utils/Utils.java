@@ -945,6 +945,10 @@ public class Utils {
 	}
 
 	public static boolean isUserOnline(Context context) {
+		if (context == null) {
+			Log.e("HikeService", "Hike service is null!!");
+			return false;
+		}
 		ConnectivityManager cm = (ConnectivityManager) context
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
 		return (cm != null && cm.getActiveNetworkInfo() != null
