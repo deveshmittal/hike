@@ -377,7 +377,7 @@ public class DrawerLayout extends RelativeLayout implements
 								+ accountPrefs.getString(
 										HikeMessengerApp.REWARDS_TOKEN, ""));
 				intent.putExtra(HikeConstants.Extras.TITLE, getContext()
-						.getString(R.string.rewards));
+						.getString(R.string.new_string));
 			}
 			break;
 		}
