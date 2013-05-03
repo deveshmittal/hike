@@ -445,7 +445,6 @@
 	<string name="update_status_fail">Could not update status. Please check your network connection and try again later.</string>
 	<string name="no_status_recently">Looks like you haven\'t posted an update recently.</string>
 	<string name="friends_on_hike_tut">Friends on hike</string>
-	<string name="meet_hike">Meet hike</string>
 	<string name="remove_circle">Remove from Circle of Friends</string>
 	<string name="add_hike_friend">View friends</string>
 	<string name="email_body">Hi!\n\nI started using hike, a simple beautiful messaging app that\'s absolutely free.\n\nhike comes with some hilarious emoticons. You can also post Status Updates to your close circle of friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
