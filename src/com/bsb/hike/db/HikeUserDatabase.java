@@ -195,7 +195,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					+ " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
-		if (oldVersion < 9) {
+		if (oldVersion < 10) {
 			/*
 			 * Removing all auto recommended favorites.
 			 */
@@ -1186,53 +1186,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			}
 			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
-		}
-	}
-
-	public void addAutoRecommendedFavorites() {
-
-		String selection = DBConstants.LAST_MESSAGED + ">0" + " AND "
-				+ DBConstants.MSISDN + " NOT IN (SELECT " + DBConstants.MSISDN
-				+ " FROM " + DBConstants.FAVORITES_TABLE + ")";
-		String orderBy = DBConstants.LAST_MESSAGED + " DESC LIMIT "
-				+ HikeConstants.MAX_AUTO_RECOMMENDED_FAVORITE;
-
-		Cursor c = mDb.query(true, DBConstants.USERS_TABLE,
-				new String[] { DBConstants.MSISDN }, selection, null, null,
-				null, orderBy, null);
-
-		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-
-		SQLiteStatement insertStatement = null;
-		InsertHelper ih = null;
-		try {
-			ih = new InsertHelper(mDb, DBConstants.FAVORITES_TABLE);
-			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO "
-					+ DBConstants.FAVORITES_TABLE + " ( " + DBConstants.MSISDN
-					+ ", " + DBConstants.FAVORITE_TYPE + " ) " + " VALUES (?, "
-					+ FavoriteType.AUTO_RECOMMENDED_FAVORITE.ordinal() + ")");
-			mDb.beginTransaction();
-			while (c.moveToNext()) {
-				String msisdn = c.getString(msisdnIdx);
-				insertStatement.bindString(
-						ih.getColumnIndex(DBConstants.MSISDN), msisdn);
-				insertStatement.executeInsert();
-			}
-		} finally {
-			if (insertStatement != null) {
-				insertStatement.close();
-			}
-			if (ih != null) {
-				ih.close();
-			}
-			c.close();
-			mDb.setTransactionSuccessful();
-			mDb.endTransaction();
-
-			Log.d(getClass().getSimpleName(),
-					"Auto rec fav added: " + c.getCount());
-			// HikeMessengerApp.getPubSub().publish(
-			// HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
 		}
 	}
 

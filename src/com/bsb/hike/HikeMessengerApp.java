@@ -132,8 +132,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String COUNTRY_CODE = "countryCode";
 
-	public static final String AUTO_RECOMMENDED_FAVORITES_ADDED = "autoRecommendedFavoritesAdded";
-
 	public static final String FILE_PATH = "filePath";
 
 	public static final String TEMP_NAME = "tempName";
