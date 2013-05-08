@@ -327,9 +327,11 @@ public class DrawerLayout extends RelativeLayout implements
 				drawable.getIntrinsicHeight() - 10);
 
 		SpannableStringBuilder ssb = new SpannableStringBuilder(withLove);
-		ssb.setSpan(new ImageSpan(drawable), withLove.indexOf(love),
-				withLove.indexOf(love) + love.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (withLove.indexOf(love) != -1) {
+			ssb.setSpan(new ImageSpan(drawable), withLove.indexOf(love),
+					withLove.indexOf(love) + love.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 
 		withLoveTextView.setText(ssb);
 	}

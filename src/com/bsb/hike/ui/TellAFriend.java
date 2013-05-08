@@ -57,11 +57,13 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 			String text = getString(R.string.earn_sms_friend_join);
 			String textToBold = getString(R.string.via_sms);
 			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
-			ssb.setSpan(
-					new ForegroundColorSpan(getResources().getColor(
-							R.color.subtext)), text.indexOf(textToBold),
-					text.indexOf(textToBold) + textToBold.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			if (text.indexOf(textToBold) != -1) {
+				ssb.setSpan(
+						new ForegroundColorSpan(getResources().getColor(
+								R.color.subtext)), text.indexOf(textToBold),
+						text.indexOf(textToBold) + textToBold.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			}
 
 			viaSms.setText(ssb);
 			viaSms.setVisibility(View.VISIBLE);

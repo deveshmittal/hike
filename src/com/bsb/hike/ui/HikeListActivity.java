@@ -124,10 +124,15 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 					: R.string.which_family);
 			SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(
 					message);
-			spannableStringBuilder.setSpan(new StyleSpan(Typeface.BOLD),
-					message.indexOf(freeSmsInvite),
-					message.indexOf(freeSmsInvite) + freeSmsInvite.length(),
-					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			if (message.indexOf(freeSmsInvite) != -1) {
+				spannableStringBuilder
+						.setSpan(
+								new StyleSpan(Typeface.BOLD),
+								message.indexOf(freeSmsInvite),
+								message.indexOf(freeSmsInvite)
+										+ freeSmsInvite.length(),
+								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			}
 			nuxText.setText(spannableStringBuilder);
 
 			findViewById(R.id.title_icon_left).setVisibility(View.VISIBLE);

@@ -613,9 +613,12 @@ public class SignupActivity extends Activity implements
 		String tapHereString = getString(R.string.wrong_num_signup);
 
 		SpannableStringBuilder ssb = new SpannableStringBuilder(tapHereString);
-		ssb.setSpan(new ForegroundColorSpan(0xff6edcff),
-				tapHereString.indexOf(tapHere), tapHereString.indexOf(tapHere)
-						+ tapHere.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (tapHereString.indexOf(tapHere) != -1) {
+			ssb.setSpan(new ForegroundColorSpan(0xff6edcff),
+					tapHereString.indexOf(tapHere),
+					tapHereString.indexOf(tapHere) + tapHere.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 
 		tapHereText.setText(ssb);
 

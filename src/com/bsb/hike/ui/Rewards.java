@@ -43,24 +43,28 @@ public class Rewards extends DrawerBaseActivity {
 		String moneyAmtTxt = moneyAmt.getText().toString();
 		SpannableStringBuilder moneyAmtSsb = new SpannableStringBuilder(
 				moneyAmtTxt);
-		moneyAmtSsb.setSpan(
-				new ImageSpan(this, R.drawable.ic_rupee_black_small),
-				moneyAmtTxt.indexOf(textToBeReplaced),
-				moneyAmtTxt.indexOf(textToBeReplaced)
-						+ textToBeReplaced.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (moneyAmtTxt.indexOf(textToBeReplaced) != -1) {
+			moneyAmtSsb.setSpan(
+					new ImageSpan(this, R.drawable.ic_rupee_black_small),
+					moneyAmtTxt.indexOf(textToBeReplaced),
+					moneyAmtTxt.indexOf(textToBeReplaced)
+							+ textToBeReplaced.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 		moneyAmt.setText(moneyAmtSsb);
 
 		TextView disclaimer = (TextView) findViewById(R.id.disclaimer);
 		String disclaimerTxt = disclaimer.getText().toString();
 		SpannableStringBuilder disclaimerSsb = new SpannableStringBuilder(
 				disclaimerTxt);
-		disclaimerSsb.setSpan(
-				new ImageSpan(this, R.drawable.ic_rupee_disclaimer),
-				disclaimerTxt.indexOf(textToBeReplaced),
-				disclaimerTxt.indexOf(textToBeReplaced)
-						+ textToBeReplaced.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (disclaimerTxt.indexOf(textToBeReplaced) != -1) {
+			disclaimerSsb.setSpan(
+					new ImageSpan(this, R.drawable.ic_rupee_disclaimer),
+					disclaimerTxt.indexOf(textToBeReplaced),
+					disclaimerTxt.indexOf(textToBeReplaced)
+							+ textToBeReplaced.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 		disclaimerSsb.setSpan(
 				new ForegroundColorSpan(getResources().getColor(
 						R.color.signup_blue)),

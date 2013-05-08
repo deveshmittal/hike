@@ -506,10 +506,12 @@ public class DrawerFavoritesAdapter extends BaseAdapter implements
 				String tapHere = context.getString(R.string.tap_here);
 
 				SpannableStringBuilder ssb = new SpannableStringBuilder(status);
-				ssb.setSpan(new StyleSpan(Typeface.BOLD),
-						status.indexOf(tapHere), status.indexOf(tapHere)
-								+ tapHere.length(),
-						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				if (status.indexOf(tapHere) != -1) {
+					ssb.setSpan(new StyleSpan(Typeface.BOLD),
+							status.indexOf(tapHere), status.indexOf(tapHere)
+									+ tapHere.length(),
+							Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				}
 
 				viewHolder.text.setText(ssb);
 			} else {

@@ -137,11 +137,13 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 		int startIndex = freeSmsString.indexOf(textToColor);
 
 		SpannableStringBuilder ssb = new SpannableStringBuilder(freeSmsString);
-		ssb.setSpan(
-				new ForegroundColorSpan(getResources().getColor(
-						R.color.unread_message_blue)), startIndex, startIndex
-						+ textToColor.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (startIndex != -1) {
+			ssb.setSpan(
+					new ForegroundColorSpan(getResources().getColor(
+							R.color.unread_message_blue)), startIndex,
+					startIndex + textToColor.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 		freeSms50.setText(ssb);
 
 		mTitleView.setText(R.string.free_messaging_txt);
