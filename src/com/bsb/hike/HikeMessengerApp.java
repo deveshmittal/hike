@@ -54,7 +54,6 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.Utils;
 import com.facebook.android.Facebook;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 @ReportsCrashes(formKey = "", customReportContent = {
 		ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
@@ -419,10 +418,6 @@ public class HikeMessengerApp extends Application implements Listener {
 				Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, ClearTypingNotification>();
-
-		if (!TextUtils.isEmpty(msisdn) && !isIndianUser) {
-			FiksuTrackingManager.initialize(this);
-		}
 
 		initialiseListeners();
 

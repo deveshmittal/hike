@@ -31,7 +31,6 @@ import com.facebook.android.DialogError;
 import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class AuthSocialAccountBaseActivity extends Activity implements
 		DialogListener, TwitterAuthListener {
@@ -231,20 +230,10 @@ public class AuthSocialAccountBaseActivity extends Activity implements
 								HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
 								.edit();
 						if (facebook) {
-							FiksuTrackingManager.uploadPurchaseEvent(
-									AuthSocialAccountBaseActivity.this,
-									HikeConstants.FACEBOOK,
-									HikeConstants.FACEBOOK_CONNECT,
-									HikeConstants.CURRENCY);
 							editor.putBoolean(
 									HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
 									true);
 						} else {
-							FiksuTrackingManager.uploadPurchaseEvent(
-									AuthSocialAccountBaseActivity.this,
-									HikeConstants.TWITTER,
-									HikeConstants.TWITTER_CONNECT,
-									HikeConstants.CURRENCY);
 							editor.putBoolean(
 									HikeMessengerApp.TWITTER_AUTH_COMPLETE,
 									true);

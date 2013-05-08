@@ -17,17 +17,16 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.R;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.models.GroupParticipant;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class DbConversationListener implements Listener {
 	HikeConversationsDatabase mConversationDb;
@@ -268,9 +267,6 @@ public class DbConversationListener implements Listener {
 	private void uploadFiksuPerDayMessageEvent() {
 		int today = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
 		if (today != dayRecorded) {
-			FiksuTrackingManager.uploadPurchaseEvent(context,
-					HikeConstants.FIRST_MESSAGE,
-					HikeConstants.FIRST_MSG_IN_DAY, HikeConstants.CURRENCY);
 			dayRecorded = today;
 			Editor editor = context.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();

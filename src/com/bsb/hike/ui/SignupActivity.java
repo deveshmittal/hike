@@ -74,7 +74,6 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class SignupActivity extends Activity implements
 		SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener,
@@ -286,12 +285,6 @@ public class SignupActivity extends Activity implements
 				 */
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.SWITCHED_DATA_CONNECTION, null);
-
-				if (!HikeMessengerApp.isIndianUser()) {
-					FiksuTrackingManager.initialize(getApplication());
-				}
-				// Tracking the registration event for Fiksu
-				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
 				mHandler.removeCallbacks(startWelcomeScreen);
 				mHandler.postDelayed(startWelcomeScreen, 2500);

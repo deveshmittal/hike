@@ -39,7 +39,6 @@ import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.utils.Utils;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class HikeListActivity extends Activity implements OnItemClickListener,
 		OnClickListener {
@@ -260,9 +259,6 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
 
 				if (type != Type.NUX1 && type != Type.NUX2) {
-					FiksuTrackingManager.uploadPurchaseEvent(this,
-							HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-							HikeConstants.CURRENCY);
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.MQTT_PUBLISH,
 							Utils.makeHike2SMSInviteMessage(msisdn, this)
@@ -389,9 +385,6 @@ public class HikeListActivity extends Activity implements OnItemClickListener,
 								HikeMessengerApp.COUNTRY_CODE,
 								HikeConstants.INDIA_COUNTRY_CODE));
 				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-				FiksuTrackingManager.uploadPurchaseEvent(this,
-						HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-						HikeConstants.CURRENCY);
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.MQTT_PUBLISH,
 						Utils.makeHike2SMSInviteMessage(msisdn, this)

@@ -89,7 +89,6 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class ProfileActivity extends DrawerBaseActivity implements
 		FinishableEvent, android.content.DialogInterface.OnClickListener,
@@ -1637,8 +1636,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	private void inviteToHike(String msisdn) {
-		FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE,
-				HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 				Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
 

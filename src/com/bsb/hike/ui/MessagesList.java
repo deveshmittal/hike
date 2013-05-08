@@ -76,7 +76,6 @@ import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.DrawerLayout;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class MessagesList extends DrawerBaseActivity implements
 		OnClickListener, OnItemClickListener, HikePubSub.Listener,
@@ -516,9 +515,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				}
 				String[] invitedNumbersArray = invitedNumbers.split(",");
 				for (String msisdn : invitedNumbersArray) {
-					FiksuTrackingManager.uploadPurchaseEvent(MessagesList.this,
-							HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-							HikeConstants.CURRENCY);
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.MQTT_PUBLISH,
 							Utils.makeHike2SMSInviteMessage(msisdn,

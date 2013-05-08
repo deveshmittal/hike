@@ -45,7 +45,6 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.MyDrawable;
 import com.bsb.hike.utils.Utils;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 @SuppressWarnings("unchecked")
 public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
@@ -283,9 +282,6 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			if (inviteOnly) {
 				Log.d(getClass().getSimpleName(),
 						"Inviting " + contactInfo.toString());
-				FiksuTrackingManager.uploadPurchaseEvent(context,
-						HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-						HikeConstants.CURRENCY);
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.MQTT_PUBLISH,
 						Utils.makeHike2SMSInviteMessage(
