@@ -150,6 +150,8 @@ public class SignupActivity extends Activity implements
 		public String userName = null;
 
 		public long timeLeft = 0;
+
+		public boolean fbConnected = false;
 	}
 
 	@Override
@@ -703,6 +705,12 @@ public class SignupActivity extends Activity implements
 		} else {
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
 		}
+
+		if (mActivityState.fbConnected) {
+			Button fbBtn = (Button) findViewById(R.id.connect_fb);
+			fbBtn.setEnabled(false);
+			fbBtn.setText(R.string.connected);
+		}
 	}
 
 	private void resetViewFlipper() {
@@ -1244,6 +1252,7 @@ public class SignupActivity extends Activity implements
 					if (fbBtn != null) {
 						fbBtn.setEnabled(false);
 						fbBtn.setText(R.string.connected);
+						mActivityState.fbConnected = true;
 					}
 				}
 			});
