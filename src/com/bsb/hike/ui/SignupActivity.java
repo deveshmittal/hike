@@ -1025,11 +1025,9 @@ public class SignupActivity extends Activity implements
 									}
 								});
 						mActivityState.downloadImageTask.execute();
-						dialog = ProgressDialog.show(
-								SignupActivity.this,
-								null,
-								getResources().getString(
-										R.string.fetching_info));
+						dialog = ProgressDialog.show(SignupActivity.this, null,
+								getResources()
+										.getString(R.string.fetching_info));
 					}
 				}
 			});
