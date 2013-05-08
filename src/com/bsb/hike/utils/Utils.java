@@ -1854,4 +1854,23 @@ public class Utils {
 	public static int[] getMoodsResource() {
 		return HikeMessengerApp.getMoodsResource();
 	}
+
+	public static void sendLocaleToServer(Context context) {
+		JSONObject object = new JSONObject();
+		JSONObject data = new JSONObject();
+
+		try {
+			data.put(HikeConstants.LOCALE, context.getResources()
+					.getConfiguration().locale.getLanguage());
+
+			object.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+			object.put(HikeConstants.DATA, data);
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					object);
+		} catch (JSONException e) {
+			Log.w("Locale", "Invalid JSON", e);
+		}
+	}
 }

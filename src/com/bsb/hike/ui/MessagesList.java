@@ -499,6 +499,7 @@ public class MessagesList extends DrawerBaseActivity implements
 							HikePubSub.MQTT_PUBLISH, obj);
 				}
 				Utils.requestAccountInfo(false);
+				Utils.sendLocaleToServer(MessagesList.this);
 			}
 		}, 5 * 1000);
 		deviceDetailsSent = true;
