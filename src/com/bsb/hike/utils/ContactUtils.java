@@ -283,6 +283,49 @@ public class ContactUtils {
 			}
 		}
 
+		/*
+		 * We will catch exceptions here since we do not know which devices
+		 * support this URI.
+		 */
+		try {
+			Uri simUri = Uri.parse("content://icc/adn");
+			Cursor cursorSim = ctx.getContentResolver().query(simUri, null,
+					null, null, null);
+
+			while (cursorSim.moveToNext()) {
+				try {
+					String id = cursorSim.getString(cursorSim
+							.getColumnIndex("_id"));
+					String name = cursorSim.getString(cursorSim
+							.getColumnIndex("name"));
+					String number = cursorSim.getString(cursorSim
+							.getColumnIndex("number"));
+					if ((name != null) && (number != null)) {
+						if (contactsToStore.add("_" + name + "_" + number)) // if
+																			// this
+																			// element
+																			// is
+																			// added
+																			// successfully
+																			// ,
+																			// it
+																			// returns
+																			// true
+						{
+							contactinfos.add(new ContactInfo(id, null, name,
+									number));
+						}
+					}
+				} catch (Exception e) {
+					Log.e("ContactUtils",
+							"Expection while adding sim contacts", e);
+				}
+			}
+		} catch (Exception e) {
+			Log.e("ContactUtils", "Expection while querying for sim contacts",
+					e);
+		}
+
 		return contactinfos;
 	}
 
