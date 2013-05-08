@@ -1124,8 +1124,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			mActivityState.destFilePath = data
 					.getStringExtra(MediaStore.EXTRA_OUTPUT);
 			if (mActivityState.destFilePath == null) {
-				Toast.makeText(getApplicationContext(), R.string.error_setting_profile,
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(),
+						R.string.error_setting_profile, Toast.LENGTH_SHORT)
+						.show();
 				return;
 			}
 			if ((this.profileType == ProfileType.USER_PROFILE)

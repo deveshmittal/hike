@@ -420,7 +420,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			toggleTypingNotification(true, msisdn);
 		}
 
-		if (!accountPrefs.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)) {
+		if (!accountPrefs
+				.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)) {
 			findViewById(R.id.friend_intro).setVisibility(View.VISIBLE);
 		} else if (savedInstanceState == null) {
 			/*
