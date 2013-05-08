@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -301,6 +302,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 		this.mLocalMSISDN = getIntent().getStringExtra(
 				HikeConstants.Extras.CONTACT_INFO);
+
+		/*
+		 * Cancel any friend request/status notification from this number.
+		 */
+		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		notificationManager.cancel(mLocalMSISDN.hashCode());
 
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(
 				mLocalMSISDN, false);
