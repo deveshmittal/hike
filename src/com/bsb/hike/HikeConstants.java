@@ -203,7 +203,7 @@ public class HikeConstants {
 	public static final int SHARE_LOCATION_CODE = 1192;
 	public static final int SHARE_CONTACT_CODE = 1193;
 
-	public static final int MAX_DURATION_RECORDING_SEC = 120;
+	public static final int MAX_DURATION_RECORDING_SEC = 360;
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180;
 
