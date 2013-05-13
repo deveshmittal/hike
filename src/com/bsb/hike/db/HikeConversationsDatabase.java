@@ -136,7 +136,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE
 				+ " INTEGER, " + DBConstants.MOOD_ID + " INTEGER, "
 				+ DBConstants.TIME_OF_DAY + " INTEGER" + " )";
-		;
+		db.execSQL(sql);
+		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.STATUS_INDEX
+				+ " ON " + DBConstants.STATUS_TABLE + " ( "
+				+ DBConstants.MSISDN + " ) ";
 		db.execSQL(sql);
 	}
 
@@ -320,6 +323,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 			denormaliseConversations(db);
 		}
+		/*
+		 * Version 13 for creating status index. Will be done by the onCreate
+		 * method.
+		 */
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
