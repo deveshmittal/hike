@@ -186,9 +186,11 @@ public class MqttMessagesManager {
 			}
 
 			/*
-			 * Change the friend type since the user has now left hike
+			 * Change the friend type since the user has now left hike and
+			 * delete this contact's status messages.
 			 */
 			if (!joined) {
+				convDb.deleteStatusMessagesForMsisdn(msisdn);
 				removeOrPostponeFriendType(msisdn);
 			}
 

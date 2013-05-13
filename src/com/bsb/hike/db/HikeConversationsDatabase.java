@@ -2041,6 +2041,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
+	public void deleteStatusMessagesForMsisdn(String msisdn) {
+		String selection = DBConstants.MSISDN + "=?";
+		String[] selectionArgs = { msisdn };
+
+		mDb.delete(DBConstants.STATUS_TABLE, selection, selectionArgs);
+	}
+
 	public int getTimelineStatusMessageCount() {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
 				+ DBConstants.STATUS_TABLE + " WHERE "
