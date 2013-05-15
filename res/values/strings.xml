@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">hike</string>
+    <string name="app_label">&#160;hike</string>
     <string name="invite">Tell a friend</string>
     <string name="deleteconversations">Delete Conversations</string>
     <string name="send">Send</string>
