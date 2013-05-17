@@ -173,6 +173,12 @@
             <intent-filter >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
+            <intent-filter >
+				<action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+            </intent-filter>
+            <intent-filter >
+				<action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+            </intent-filter>
         </receiver>
         <receiver android:name=".service.AppUpdatedReceiver">
             <intent-filter >
