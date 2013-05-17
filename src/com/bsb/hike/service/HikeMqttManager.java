@@ -613,23 +613,31 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 	}
 
 	public void connect() {
-		if (isConnected()) {
-			Log.d("HikeMqttManager", "already connected");
-			return;
-		}
-		if (TextUtils.isEmpty(settings.getString(
-				HikeMessengerApp.TOKEN_SETTING, null))) {
-			return;
-		}
+		PowerManager pm = (PowerManager) this.mHikeService
+				.getSystemService(Context.POWER_SERVICE);
+		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
+		try {
+			wl.acquire();
+			if (isConnected()) {
+				Log.d("HikeMqttManager", "already connected");
+				return;
+			}
+			if (TextUtils.isEmpty(settings.getString(
+					HikeMessengerApp.TOKEN_SETTING, null))) {
+				return;
+			}
 
-		if (Utils.isUserOnline(mHikeService)) {
-			Log.d("HikeMqttManager", "netconnection valid, try to connect");
-			// set the status to show we're trying to connect
-			connectToBroker();
-		} else {
-			// we can't do anything now because we don't have a working
-			// data connection
-			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
+			if (Utils.isUserOnline(mHikeService)) {
+				Log.d("HikeMqttManager", "netconnection valid, try to connect");
+				// set the status to show we're trying to connect
+				connectToBroker();
+			} else {
+				// we can't do anything now because we don't have a working
+				// data connection
+				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
+			}
+		} finally {
+			wl.release();
 		}
 	}
 
