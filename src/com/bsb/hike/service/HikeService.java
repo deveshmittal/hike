@@ -6,9 +6,7 @@ import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlarmManager;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -139,13 +137,7 @@ public class HikeService extends Service {
 	// constant used internally to schedule the next ping event
 	public static final String MQTT_PING_ACTION = "com.bsb.hike.PING";
 
-	// constant used internally to send user stats
-	public static final String MQTT_USER_STATS_SEND_ACTION = "com.bsb.hike.USER_STATS";
-
 	public static final String MQTT_CONTACT_SYNC_ACTION = "com.bsb.hike.CONTACT_SYNC";
-
-	// constant used internally to check for updates
-	public static final String UPDATE_CHECK_ACTION = "com.bsb.hike.UPDATE_CHECK";
 
 	// used to register to GCM
 	public static final String REGISTER_TO_GCM_ACTION = "com.bsb.hike.REGISTER_GCM";
@@ -178,14 +170,8 @@ public class HikeService extends Service {
 	// receiver that wakes the Service up when it's time to ping the server
 	private PingSender pingSender;
 
-	// receiver that sends the user stats once every 24 hours
-	private UserStatsSender userStatsSender;
-
 	// receiver that triggers a contact sync
 	private ManualContactSyncTrigger manualContactSyncTrigger;
-
-	// receiver that triggers a check for updates
-	private UpdateCheckTrigger updateCheckTrigger;
 
 	private RegisterToGCMTrigger registerToGCMTrigger;
 
@@ -274,20 +260,6 @@ public class HikeService extends Service {
 		mContactHandlerLooper = contactHandlerThread.getLooper();
 		mContactsChangedHandler = new Handler(mContactHandlerLooper);
 		mContactsChanged = new ContactsChanged(this);
-
-		if (userStatsSender == null) {
-			userStatsSender = new UserStatsSender();
-			registerReceiver(userStatsSender, new IntentFilter(
-					MQTT_USER_STATS_SEND_ACTION));
-			scheduleNextUserStatsSending();
-		}
-
-		if (updateCheckTrigger == null) {
-			updateCheckTrigger = new UpdateCheckTrigger();
-			registerReceiver(updateCheckTrigger, new IntentFilter(
-					UPDATE_CHECK_ACTION));
-			scheduleNextUpdateCheck();
-		}
 
 		if (postDeviceDetails == null) {
 			postDeviceDetails = new PostDeviceDetails();
@@ -452,19 +424,9 @@ public class HikeService extends Service {
 			mContactHandlerLooper.quit();
 		}
 
-		if (userStatsSender != null) {
-			unregisterReceiver(userStatsSender);
-			userStatsSender = null;
-		}
-
 		if (manualContactSyncTrigger != null) {
 			unregisterReceiver(manualContactSyncTrigger);
 			manualContactSyncTrigger = null;
-		}
-
-		if (updateCheckTrigger != null) {
-			unregisterReceiver(updateCheckTrigger);
-			updateCheckTrigger = null;
 		}
 
 		if (registerToGCMTrigger != null) {
@@ -666,45 +628,33 @@ public class HikeService extends Service {
 		scheduleNextPing((int) (HikeConstants.KEEP_ALIVE * 0.9));
 	}
 
+	private void postRunnableWithDelay(Runnable runnable, long delay) {
+		mHandler.removeCallbacks(runnable);
+		mHandler.postDelayed(runnable, delay);
+	}
+
+	private long getScheduleTime(long wakeUpTime) {
+		return (wakeUpTime - System.currentTimeMillis());
+	}
+
 	/*
 	 * Schedule the next time that you want the phone to wake up and ping the
 	 * message broker server
 	 */
 	public void scheduleNextPing(int timeout) {
-		Log.d(getClass().getSimpleName(), "Scheduling ping in " + timeout + " seconds");
-		// When the phone is off, the CPU may be stopped. This means that our
-		// code may stop running.
-		// When connecting to the message broker, we specify a 'keep alive'
-		// period - a period after which, if the client has not contacted
-		// the server, even if just with a ping, the connection is considered
-		// broken.
-		// To make sure the CPU is woken at least once during each keep alive
-		// period, we schedule a wake up to manually ping the server
-		// thereby keeping the long-running connection open
-		// Normally when using this Java MQTT client library, this ping would be
-		// handled for us.
-		// Note that this may be called multiple times before the next scheduled
-		// ping has fired. This is good - the previously scheduled one will be
-		// cancelled in favour of this one.
-		// This means if something else happens during the keep alive period,
-		// (e.g. we receive an MQTT message), then we start a new keep alive
-		// period, postponing the next ping.
+		Log.d(getClass().getSimpleName(), "Scheduling ping in " + timeout
+				+ " seconds");
 
-		PendingIntent pendingIntent = PendingIntent
-				.getBroadcast(this, 0, new Intent(MQTT_PING_ACTION),
-						PendingIntent.FLAG_UPDATE_CURRENT);
-
-		// in case it takes us a little while to do this, we try and do it
-		// shortly before the keep alive period expires
-		// it means we're pinging slightly more frequently than necessary
-		Calendar wakeUpTime = Calendar.getInstance();
-		wakeUpTime.add(Calendar.SECOND, timeout); // comes from
-		// PushMqttManager.KEEPALIVE
-
-		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(),
-				pendingIntent);
+		postRunnableWithDelay(pingSenderRunnable, timeout * 1000);
 	}
+
+	private Runnable pingSenderRunnable = new Runnable() {
+
+		@Override
+		public void run() {
+			sendBroadcast(new Intent(MQTT_PING_ACTION));
+		}
+	};
 
 	/*
 	 * Used to implement a keep-alive protocol at this Service level - it sends
@@ -720,17 +670,7 @@ public class HikeService extends Service {
 			scheduleNextPing();
 
 		}
-	}
-
-	/*
-	 * Used for sending the user stats to the server once every 24 hours.
-	 */
-	private class UserStatsSender extends BroadcastReceiver {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			sendUserStats();
-		}
-	}
+	};
 
 	private class ManualContactSyncTrigger extends BroadcastReceiver {
 		@Override
@@ -895,19 +835,13 @@ public class HikeService extends Service {
 				lastBackOffTime);
 
 		Log.d(getClass().getSimpleName(), "Scheduling the next disconnect");
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
-				new Intent(gcmReg ? HikeService.SEND_TO_SERVER_ACTION
-						: HikeService.SEND_DEV_DETAILS_TO_SERVER_ACTION),
-				PendingIntent.FLAG_UPDATE_CURRENT);
 
-		Calendar wakeUpTime = Calendar.getInstance();
-		wakeUpTime.add(Calendar.SECOND, lastBackOffTime);
-
-		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-		// Cancel any pending alarms with this pending intent
-		aMgr.cancel(pendingIntent);
-		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(),
-				pendingIntent);
+		if (gcmReg) {
+			postRunnableWithDelay(sendGCMIdToServer, lastBackOffTime * 1000);
+		} else {
+			postRunnableWithDelay(sendDevDetailsToServer,
+					lastBackOffTime * 1000);
+		}
 
 		Editor editor = preferences.edit();
 		editor.putInt(gcmReg ? HikeMessengerApp.LAST_BACK_OFF_TIME
@@ -916,57 +850,59 @@ public class HikeService extends Service {
 		editor.commit();
 	}
 
-	private void scheduleNextManualContactSync() {
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
-				new Intent(MQTT_CONTACT_SYNC_ACTION),
-				PendingIntent.FLAG_UPDATE_CURRENT);
+	private Runnable sendGCMIdToServer = new Runnable() {
+		@Override
+		public void run() {
+			sendBroadcast(new Intent(SEND_TO_SERVER_ACTION));
+		}
+	};
 
+	private Runnable sendDevDetailsToServer = new Runnable() {
+		@Override
+		public void run() {
+			sendBroadcast(new Intent(SEND_DEV_DETAILS_TO_SERVER_ACTION));
+		}
+	};
+
+	private void scheduleNextManualContactSync() {
 		Calendar wakeUpTime = Calendar.getInstance();
 		wakeUpTime.add(Calendar.HOUR, 24);
 
-		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-		// Cancel any pending alarms with this pending intent
-		aMgr.cancel(pendingIntent);
-		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(),
-				pendingIntent);
+		long scheduleTime = getScheduleTime(wakeUpTime.getTimeInMillis());
+
+		postRunnableWithDelay(contactSyncRunnable, scheduleTime);
 	}
 
-	private void sendUserStats() {
-		JSONObject obj = Utils.getDeviceStats(getApplicationContext());
-		if (obj != null) {
-			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, obj);
+	private Runnable contactSyncRunnable = new Runnable() {
+		@Override
+		public void run() {
+			sendBroadcast(new Intent(MQTT_CONTACT_SYNC_ACTION));
 		}
-		scheduleNextUserStatsSending();
-	}
+	};
 
 	private void scheduleNextUserStatsSending() {
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
-				new Intent(MQTT_USER_STATS_SEND_ACTION),
-				PendingIntent.FLAG_UPDATE_CURRENT);
-
 		Calendar wakeUpTime = Calendar.getInstance();
 		wakeUpTime.add(Calendar.HOUR, 12);
 
-		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(),
-				pendingIntent);
+		long scheduleTime = getScheduleTime(wakeUpTime.getTimeInMillis());
+
+		postRunnableWithDelay(sendUserStats, scheduleTime);
 	}
 
-	private class UpdateCheckTrigger extends BroadcastReceiver {
+	private Runnable sendUserStats = new Runnable() {
+
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(
-					HikeService.this);
-			checkForUpdateTask.execute();
+		public void run() {
+			JSONObject obj = Utils.getDeviceStats(getApplicationContext());
+			if (obj != null) {
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						obj);
+			}
+			scheduleNextUserStatsSending();
 		}
-
-	}
+	};
 
 	public void scheduleNextUpdateCheck() {
-		PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
-				new Intent(UPDATE_CHECK_ACTION),
-				PendingIntent.FLAG_UPDATE_CURRENT);
-
 		// Randomizing the time when we will poll the server for an update
 		Random random = new Random();
 
@@ -979,13 +915,20 @@ public class HikeService extends Service {
 			int min = random.nextInt(2) + 1;
 			wakeUpTime.add(Calendar.MINUTE, min);
 		}
+		long scheduleTime = getScheduleTime(wakeUpTime.getTimeInMillis());
 
-		AlarmManager aMgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-		// Cancel any pending alarms with this pending intent
-		aMgr.cancel(pendingIntent);
-		aMgr.set(AlarmManager.RTC_WAKEUP, wakeUpTime.getTimeInMillis(),
-				pendingIntent);
+		postRunnableWithDelay(checkForUpdates, scheduleTime);
 	}
+
+	private Runnable checkForUpdates = new Runnable() {
+
+		@Override
+		public void run() {
+			CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(
+					HikeService.this);
+			checkForUpdateTask.execute();
+		}
+	};
 
 	public boolean appIsConnected() {
 		return mApp != null;
