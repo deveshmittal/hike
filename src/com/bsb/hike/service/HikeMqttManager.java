@@ -115,6 +115,10 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 				Log.w("HikeMqttManager",
 						"Received 'success' for message that's already been triggered");
 			}
+			/*
+			 * Remove the message from the db.
+			 */
+			persistence.removeMessageForPacketId(packet.getPacketId());
 
 			called = true;
 			handler.removeCallbacks(this);
@@ -138,13 +142,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			handler.removeCallbacks(this);
 			Log.d("HikeMqttManager", "unable to send packet");
 			ping();
-			try {
-				HikeMqttManager.this.haveUnsentMessages = true;
-				persistence.addSentMessage(packet);
-			} catch (MqttPersistenceException e) {
-				Log.e("HikeMqttManager",
-						"Unable to persist message" + packet.toString(), e);
-			}
+			HikeMqttManager.this.haveUnsentMessages = true;
 		}
 	}
 
@@ -642,20 +640,20 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 	}
 
 	public void send(HikePacket packet, int qos) {
+		/* only care about failures for messages we care about. */
+		if (qos > 0 && packet.getPacketId() == -1) {
+			try {
+				persistence.addSentMessage(packet);
+			} catch (MqttPersistenceException e) {
+				Log.e("HikeMqttManager", "Unable to persist message");
+			}
+		}
+
 		if (!isConnected()) {
 			Log.d("HikeMqttManager",
 					"trying to send "
 							+ new String(packet.getMessage())
 							+ " but not connected. Try to connect but fail this message");
-
-			/* only care about failures for messages we care about. */
-			if (qos > 0) {
-				try {
-					persistence.addSentMessage(packet);
-				} catch (MqttPersistenceException e) {
-					Log.e("HikeMqttManager", "Unable to persist message");
-				}
-			}
 
 			this.connect();
 			return;
