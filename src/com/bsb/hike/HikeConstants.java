@@ -272,12 +272,12 @@ public class HikeConstants {
 	// Picasa URI start for other devices
 	public static final String OTHER_PICASA_URI_START = "content://com.google.android.gallery3d";
 
-	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 100;
-	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 50;
-	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 15;
+	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
+	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
+	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 10;
 
-	public static final int MAX_STATUSES_TO_LOAD_INITIALLY = 50;
-	public static final int MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME = 25;
+	public static final int MAX_STATUSES_TO_LOAD_INITIALLY = 30;
+	public static final int MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME = 20;
 
 	public static final int SHOW_CREDITS_AFTER_NUM = 10;
 
