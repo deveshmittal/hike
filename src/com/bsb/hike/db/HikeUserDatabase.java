@@ -90,6 +90,22 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ " ( " + DBConstants.MSISDN + " TEXT PRIMARY KEY, "
 				+ DBConstants.FAVORITE_TYPE + " INTEGER" + " ) ";
 		db.execSQL(create);
+
+		create = "CREATE INDEX IF NOT EXISTS " + DBConstants.USER_INDEX
+				+ " ON " + DBConstants.USERS_TABLE + " (" + DBConstants.MSISDN
+				+ ")";
+		db.execSQL(create);
+
+		create = "CREATE INDEX IF NOT EXISTS " + DBConstants.THUMBNAIL_INDEX
+				+ " ON " + DBConstants.THUMBNAILS_TABLE + " ("
+				+ DBConstants.MSISDN + ")";
+		db.execSQL(create);
+
+		create = "CREATE INDEX IF NOT EXISTS " + DBConstants.FAVORITE_INDEX
+				+ " ON " + DBConstants.FAVORITES_TABLE + " ("
+				+ DBConstants.MSISDN + ")";
+		db.execSQL(create);
+
 	}
 
 	private HikeUserDatabase(Context context) {
@@ -202,6 +218,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			db.delete(DBConstants.FAVORITES_TABLE, DBConstants.FAVORITE_TYPE
 					+ "=" + FavoriteType.AUTO_RECOMMENDED_FAVORITE.ordinal(),
 					null);
+		}
+		/*
+		 * Version 11 for adding indexes.
+		 */
+		if (oldVersion < 11) {
+			onCreate(db);
 		}
 	}
 

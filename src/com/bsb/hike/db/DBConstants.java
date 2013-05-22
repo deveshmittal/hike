@@ -6,7 +6,7 @@ public class DBConstants {
 
 	public static final int CONVERSATIONS_DATABASE_VERSION = 13;
 
-	public static final int USERS_DATABASE_VERSION = 10;
+	public static final int USERS_DATABASE_VERSION = 11;
 
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 
@@ -131,4 +131,10 @@ public class DBConstants {
 	public static final String IS_STATUS_MSG = "isStatusMsg";
 	
 	public static final String STATUS_INDEX = "statusIdx";
+
+	public static final String USER_INDEX = "userIdx";
+	
+	public static final String THUMBNAIL_INDEX = "thumbnailIdx";
+	
+	public static final String FAVORITE_INDEX = "favoriteIdx";
 }
