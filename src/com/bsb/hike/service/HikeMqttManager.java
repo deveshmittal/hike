@@ -22,9 +22,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.mqtt.client.Buffer;
@@ -207,8 +205,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 
 	private String password;
 
-	private HikeConversationsDatabase convDb;
-
 	private Map<Integer, HikePacket> mqttIdToPacket;
 
 	private MQTT mqtt;
@@ -221,8 +217,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 
 	private String uid;
 
-	private HikeUserDatabase userDb;
-
 	private Runnable mConnectTimeoutHandler;
 
 	private SharedPreferences settings;
@@ -233,8 +227,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 
 	public HikeMqttManager(HikeService hikeService, Handler handler) {
 		this.mHikeService = hikeService;
-		this.convDb = HikeConversationsDatabase.getInstance();
-		this.userDb = HikeUserDatabase.getInstance();
 		mqttIdToPacket = Collections
 				.synchronizedMap(new HashMap<Integer, HikePacket>());
 		this.handler = handler;
