@@ -720,9 +720,15 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 		try {
 			wl.acquire();
 
+			// receiving this message will have kept the connection alive for
+			// us, so
+			// we take advantage of this to postpone the next scheduled ping
+			this.mHikeService.scheduleNextPing();
+
 			String messageBody = new String(body.toByteArray());
 
 			Log.d("HikeMqttManager", "onPublish called " + messageBody);
+
 			JSONObject jsonObj = new JSONObject(messageBody);
 
 			/*
@@ -735,11 +741,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			if ((topic != null) && (topic.getString().endsWith(("/u")))) {
 				return;
 			}
-
-			// receiving this message will have kept the connection alive for
-			// us, so
-			// we take advantage of this to postpone the next scheduled ping
-			this.mHikeService.scheduleNextPing();
 
 			// we're finished - if the phone is switched off, it's okay for the
 			// CPU
