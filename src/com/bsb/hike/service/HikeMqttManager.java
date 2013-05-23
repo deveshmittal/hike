@@ -737,11 +737,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			 */
 			mqttMessageManager.saveMqttMessage(jsonObj);
 
-			/* don't bother saving messages for the UI topic */
-			if ((topic != null) && (topic.getString().endsWith(("/u")))) {
-				return;
-			}
-
 			// we're finished - if the phone is switched off, it's okay for the
 			// CPU
 			// to sleep now
