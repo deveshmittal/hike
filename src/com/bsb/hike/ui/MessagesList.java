@@ -235,29 +235,10 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (justSignedUp
 				&& !accountPrefs.getBoolean(HikeMessengerApp.INTRO_DONE, false)) {
 			i = new Intent(MessagesList.this, Tutorial.class);
-		} else if (!accountPrefs.getBoolean(HikeMessengerApp.NUX1_DONE, false)) {
-			i = new Intent(MessagesList.this, HikeListActivity.class);
-			i.putExtra(HikeConstants.Extras.SHOW_MOST_CONTACTED, true);
-		} else if (!accountPrefs.getBoolean(HikeMessengerApp.NUX2_DONE, false)) {
-			i = new Intent(MessagesList.this, HikeListActivity.class);
-			i.putExtra(HikeConstants.Extras.SHOW_FAMILY, true);
-		}
-		if (i != null) {
-			boolean startNux = true;
-			if (!justSignedUp) {
-				startNux = HikeUserDatabase.getInstance().getHikeContactCount() < 10;
-			}
-			if (startNux) {
-				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(i);
-				finish();
-				return;
-			} else {
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeMessengerApp.NUX1_DONE, true);
-				editor.putBoolean(HikeMessengerApp.NUX2_DONE, true);
-				editor.commit();
-			}
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(i);
+			finish();
+			return;
 		}
 
 		// TODO this is being called everytime this activity is created. Way too
@@ -310,14 +291,6 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (!nuxNumbersInvited) {
 			if (accountPrefs.contains(HikeMessengerApp.INVITED_NUMBERS)) {
 				inviteNuxNumbers();
-			}
-		}
-
-		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_NUX_SCREEN,
-				false)) {
-			if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)
-					|| accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP1)) {
-				sendNuxEvents();
 			}
 		}
 
@@ -430,46 +403,6 @@ public class MessagesList extends DrawerBaseActivity implements
 			 */
 			AppRater.appLaunched(this);
 		}
-	}
-
-	private void sendNuxEvents() {
-		(new Handler()).postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-
-				JSONObject data = new JSONObject();
-				JSONObject obj = new JSONObject();
-
-				try {
-					if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP1)) {
-						data.put(HikeConstants.LogEvent.NUX_SKIP1, accountPrefs
-								.getBoolean(HikeConstants.LogEvent.NUX_SKIP1,
-										false) ? 1 : 0);
-					}
-					if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)) {
-						data.put(HikeConstants.LogEvent.NUX_SKIP2, accountPrefs
-								.getBoolean(HikeConstants.LogEvent.NUX_SKIP2,
-										false) ? 1 : 0);
-					}
-					data.put(HikeConstants.LogEvent.TAG, "mob");
-
-					obj.put(HikeConstants.TYPE,
-							HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-					obj.put(HikeConstants.DATA, data);
-				} catch (JSONException e) {
-					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-				}
-
-				Editor editor = accountPrefs.edit();
-				editor.remove(HikeConstants.LogEvent.NUX_SKIP1);
-				editor.remove(HikeConstants.LogEvent.NUX_SKIP2);
-				editor.commit();
-
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-						obj);
-			}
-		}, 5 * 1000);
 	}
 
 	public void onFavoriteIntroClick(View v) {

@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 
@@ -38,8 +37,7 @@ public class Tutorial extends Activity {
 		editor.putBoolean(HikeMessengerApp.INTRO_DONE, true);
 		editor.commit();
 
-		Intent i = new Intent(Tutorial.this, HikeListActivity.class);
-		i.putExtra(HikeConstants.Extras.SHOW_MOST_CONTACTED, true);
+		Intent i = new Intent(Tutorial.this, MessagesList.class);
 		startActivity(i);
 		finish();
 	}

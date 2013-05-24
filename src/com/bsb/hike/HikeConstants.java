@@ -416,15 +416,12 @@ public class HikeConstants {
 		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
 		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
 		public static final String OPEN_FAVORITES = "openFavorites";
-		public static final String SHOW_MOST_CONTACTED = "showMostContacted";
 		public static final String CONTACT_METADATA = "contactMetadata";
 		public static final String FROM_CENTRAL_TIMELINE = "fromCentralTimeline";
 		public static final String BLOCKED_LIST = "blockedList";
-		public static final String SHOW_FAMILY = "showFamily";
 		public static final String NUX1_NUMBERS = "nux1Numbers";
 		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
 		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
-		public static final String FROM_NUX_SCREEN = "fromNuxScreen";
 	}
 
 	public static final class LogEvent {
@@ -536,11 +533,6 @@ public class HikeConstants {
 		public static final String HELP_CONTACT = "helpSconT";
 		public static final String HELP_FAQ = "helpSfaQ";
 
-		/*
-		 * Nux screen
-		 */
-		public static final String NUX_SKIP1 = "nuxSkip1";
-		public static final String NUX_SKIP2 = "nuxSkip2";
 	}
 
 	public static final class MqttMessageTypes {
