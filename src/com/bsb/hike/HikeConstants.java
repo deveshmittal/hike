@@ -151,6 +151,9 @@ public class HikeConstants {
 	/* how often to ping after a failure */
 	public static final int RECONNECT_TIME = 10; /* 10 seconds */
 
+	/* how often to ping after a server unavailable failure */
+	public static final int SERVER_UNAVAILABLE_MAX_CONNECT_TIME = 9; /* 9 minutes */
+
 	/* the max amount (in seconds) the reconnect time can be */
 	public static final int MAX_RECONNECT_TIME = 120;
 
@@ -406,7 +409,6 @@ public class HikeConstants {
 		public static final String CONTACT_INFO = "contactInfo";
 		public static final String ON_HIKE = "onHike";
 		public static final String SHOWING_SECOND_LOADING_TXT = "showingSecondLoadingTxt";
-		public static final String FACEBOOK_AUTH_POPUP_SHOWING = "facebookAuthPopupShowing";
 		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
 		public static final String GPS_DIALOG_SHOWN = "gpsDialogShown";
 		public static final String REWARDS_PAGE = "rewardsPage";

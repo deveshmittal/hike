@@ -498,7 +498,7 @@ public class HikeMessengerApp extends Application implements Listener {
 
 			twitter = new TwitterFactory().getInstance(authorization);
 		} catch (IllegalArgumentException e) {
-			Log.e("HikeMessengerApp", "Invalid format", e);
+			Log.w("HikeMessengerApp", "Invalid format", e);
 			return;
 		}
 	}

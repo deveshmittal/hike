@@ -44,7 +44,7 @@
             android:layout_toRightOf="@id/status_type"
             android:orientation="vertical" >
 
-            <com.bsb.hike.view.CustomFontTextView
+            <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/status_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -286,10 +286,10 @@ public class ContactUtils {
 		return contactinfos;
 	}
 
-	public static void updateHikeStatus(Context ctx, String msisdn,
+	public static int updateHikeStatus(Context ctx, String msisdn,
 			boolean onhike) {
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
-		db.updateHikeContact(msisdn, onhike);
+		return db.updateHikeContact(msisdn, onhike);
 	}
 
 	/**

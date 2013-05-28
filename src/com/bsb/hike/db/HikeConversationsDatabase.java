@@ -322,14 +322,60 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void updateOnHikeStatus(String msisdn, boolean onHike) {
-		ContentValues values = new ContentValues();
-		values.put(DBConstants.ONHIKE, onHike);
-		String[] whereArgs = { msisdn };
-		mDb.update(DBConstants.CONVERSATIONS_TABLE, values, DBConstants.MSISDN
-				+ "=?", whereArgs);
-		mDb.update(DBConstants.GROUP_MEMBERS_TABLE, values, DBConstants.MSISDN
-				+ "=?", whereArgs);
+	public int updateOnHikeStatus(String msisdn, boolean onHike) {
+		Cursor conversationCursor = null;
+		Cursor groupMemberCursor = null;
+		try {
+			String selection = DBConstants.MSISDN + "=?";
+			String[] args = { msisdn };
+
+			conversationCursor = mDb.query(DBConstants.CONVERSATIONS_TABLE,
+					new String[] { DBConstants.ONHIKE }, selection, args, null,
+					null, null);
+
+			groupMemberCursor = mDb.query(DBConstants.GROUP_MEMBERS_TABLE,
+					new String[] { DBConstants.ONHIKE }, selection, args, null,
+					null, null);
+
+			ContentValues values = new ContentValues();
+			values.put(DBConstants.ONHIKE, onHike);
+
+			int rowsUpdated = 0;
+
+			if (conversationCursor.moveToFirst()) {
+
+				boolean prevOnHikeVal = conversationCursor
+						.getInt(conversationCursor
+								.getColumnIndex(DBConstants.ONHIKE)) == 1;
+
+				if (prevOnHikeVal != onHike) {
+					rowsUpdated += mDb.update(DBConstants.CONVERSATIONS_TABLE,
+							values, selection, args);
+				}
+			}
+
+			if (groupMemberCursor.moveToFirst()) {
+
+				boolean prevOnHikeVal = groupMemberCursor
+						.getInt(groupMemberCursor
+								.getColumnIndex(DBConstants.ONHIKE)) == 1;
+
+				if (prevOnHikeVal != onHike) {
+					rowsUpdated += mDb.update(DBConstants.GROUP_MEMBERS_TABLE,
+							values, selection, args);
+				}
+			}
+
+			return rowsUpdated;
+
+		} finally {
+			if (conversationCursor != null) {
+				conversationCursor.close();
+			}
+			if (groupMemberCursor != null) {
+				groupMemberCursor.close();
+			}
+		}
 	}
 
 	public void addConversationMessages(ConvMessage message) {
@@ -355,8 +401,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID
 						+ " FROM " + DBConstants.CONVERSATIONS_TABLE
 						+ " WHERE " + DBConstants.MSISDN + "=? ) AND "
-						+ DBConstants.MSG_STATUS + "="
-						+ State.SENT_DELIVERED.ordinal(),
+						+ DBConstants.MSG_STATUS + "<"
+						+ State.SENT_DELIVERED_READ.ordinal(),
 				new String[] { msisdn }, null, null, null);
 		long[] ids = new long[c.getCount() + msgIds.length()];
 
@@ -1432,14 +1478,39 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	 *            : The msisdn of the participant
 	 */
 	public int setParticipantLeft(String groupId, String msisdn) {
-		if (!doesConversationExist(groupId)) {
-			return 0;
+		Cursor c = null;
+		try {
+			String selection = DBConstants.GROUP_ID + "=? AND "
+					+ DBConstants.MSISDN + "=?";
+			String[] selectionArgs = new String[] { groupId, msisdn };
+
+			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE,
+					new String[] { DBConstants.HAS_LEFT }, selection,
+					selectionArgs, null, null, null);
+
+			if (!c.moveToFirst()) {
+				return 0;
+			}
+
+			int hasLeft = c.getInt(c.getColumnIndex(DBConstants.HAS_LEFT));
+			/*
+			 * If member has already left don't do anything.
+			 */
+			if (hasLeft == 1) {
+				return 0;
+			}
+
+			ContentValues contentValues = new ContentValues(1);
+			contentValues.put(DBConstants.HAS_LEFT, 1);
+
+			return mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues,
+					selection, selectionArgs);
+
+		} finally {
+			if (c != null) {
+				c.close();
+			}
 		}
-		ContentValues contentValues = new ContentValues(1);
-		contentValues.put(DBConstants.HAS_LEFT, 1);
-		return mDb.update(DBConstants.GROUP_MEMBERS_TABLE, contentValues,
-				DBConstants.GROUP_ID + " = ? AND " + DBConstants.MSISDN
-						+ " = ? ", new String[] { groupId, msisdn });
 	}
 
 	/**
@@ -1972,7 +2043,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public int getTimelineStatusMessageCount() {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
-				+ DBConstants.STATUS_TABLE + " WHERE " + DBConstants.SHOW_IN_TIMELINE + " =1", null);
+				+ DBConstants.STATUS_TABLE + " WHERE "
+				+ DBConstants.SHOW_IN_TIMELINE + " =1", null);
 	}
 
 	private void denormaliseConversations(SQLiteDatabase mDb) {
