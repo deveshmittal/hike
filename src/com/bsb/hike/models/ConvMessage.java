@@ -7,6 +7,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -17,7 +18,6 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.utils.Utils;
-import com.ocpsoft.pretty.time.PrettyTime;
 
 public class ConvMessage {
 

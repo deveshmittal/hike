@@ -310,11 +310,15 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				}
 			});
 		} else if (HikePubSub.REFRESH_RECENTS.equals(type)) {
+			String myMsisdn = preferences.getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+
 			boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean(HikeConstants.FREE_SMS_PREF, false);
+
 			final List<ContactInfo> recentList = HikeUserDatabase.getInstance()
 					.getRecentContacts(-1, false, FavoriteType.NOT_FRIEND,
-							freeSMSOn ? 1 : 0);
+							freeSMSOn ? 1 : 0, myMsisdn);
 			runOnUiThread(new Runnable() {
 
 				@Override

@@ -82,6 +82,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	private Handler handler;
 	private TextView charCounter;
+	private TabHost tabHost;
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
@@ -108,6 +109,9 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
+
+		tabHost = (TabHost) findViewById(android.R.id.tabhost);
+		tabHost.setup();
 
 		emojiParent = (ViewGroup) findViewById(R.id.emoji_container);
 		moodParent = (ViewGroup) findViewById(R.id.mood_parent);
@@ -453,8 +457,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		ViewGroup emoticonLayout = (ViewGroup) findViewById(R.id.emoji_container);
 		final ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
 		final EditText statusTxt = (EditText) findViewById(R.id.status_txt);
-		final TabHost tabHost = (TabHost) findViewById(android.R.id.tabhost);
-		tabHost.setup();
 
 		int whichSubcategory = 0;
 		boolean isTabInitialised = tabHost.getTabWidget().getTabCount() > 0;
@@ -645,7 +647,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		 * Enabling if the text length is > 0 or if the user has selected a mood
 		 * with some prefilled text.
 		 */
-		titleBtn.setEnabled(mActivityTask.moodId >= 0 || statusTxt.length() > 0
+		titleBtn.setEnabled(mActivityTask.moodId >= 0
+				|| statusTxt.getText().toString().trim().length() > 0
 				|| isEmojiOrMoodLayoutVisible());
 	}
 

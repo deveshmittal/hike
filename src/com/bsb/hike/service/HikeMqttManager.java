@@ -331,20 +331,28 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			mqttConnection.connect(new Callback<Void>() {
 				public void onFailure(Throwable value) {
 					Log.e("HikeMqttManager", "Hike Unable to connect", value);
-					if (value instanceof ConnectionException
-							&& ((ConnectionException) value).getCode().equals(
-									ConnectionStatus.BAD_USERNAME_OR_PASSWORD)) {
-						Log.e("HikeMqttManager", "Invalid account credentials");
-						/*
-						 * delete the token and send a message to the app to
-						 * send the user back to the main screen
-						 */
-						SharedPreferences.Editor editor = mHikeService
-								.getSharedPreferences(
-										HikeMessengerApp.ACCOUNT_SETTINGS, 0)
-								.edit();
-						editor.clear();
-						editor.commit();
+					ConnectionStatus connectionStatus = null;
+					if (value instanceof ConnectionException) {
+
+						connectionStatus = ((ConnectionException) value)
+								.getCode();
+
+						if (connectionStatus == ConnectionStatus.BAD_USERNAME_OR_PASSWORD
+								|| connectionStatus == ConnectionStatus.IDENTIFIER_REJECTED
+								|| connectionStatus == ConnectionStatus.NOT_AUTHORIZED) {
+							Log.e("HikeMqttManager",
+									"Invalid account credentials");
+							/*
+							 * delete the token and send a message to the app to
+							 * send the user back to the main screen
+							 */
+							SharedPreferences.Editor editor = mHikeService
+									.getSharedPreferences(
+											HikeMessengerApp.ACCOUNT_SETTINGS,
+											0).edit();
+							editor.clear();
+							editor.commit();
+						}
 					}
 
 					setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_UNKNOWNREASON);
@@ -356,6 +364,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 											 * set the connection to null since
 											 * it's no longer valid
 											 */
+
 					/*
 					 * if something has failed, we wait for one keep-alive
 					 * period before trying again in a real implementation, you
@@ -365,7 +374,32 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 					 * failure is often an intermittent network issue, however,
 					 * so some limited retry is a good idea
 					 */
-					mHikeService.scheduleNextPing(HikeConstants.RECONNECT_TIME);
+					if (connectionStatus != ConnectionStatus.SERVER_UNAVAILABLE) {
+						if (reconnectTime == 0) {
+							Random random = new Random();
+							reconnectTime = random
+									.nextInt(HikeConstants.RECONNECT_TIME) + 1;
+						} else {
+							reconnectTime *= 2;
+						}
+						reconnectTime = reconnectTime > HikeConstants.MAX_RECONNECT_TIME ? HikeConstants.MAX_RECONNECT_TIME
+								: reconnectTime;
+
+						Log.d(getClass().getSimpleName(),
+								"Reconnect time (sec): " + reconnectTime);
+
+						mHikeService.scheduleNextPing(reconnectTime);
+					} else {
+						Random random = new Random();
+
+						int reconnectIn = random
+								.nextInt(HikeConstants.SERVER_UNAVAILABLE_MAX_CONNECT_TIME) + 1;
+
+						/*
+						 * Converting minutes to seconds
+						 */
+						mHikeService.scheduleNextPing(reconnectIn * 60);
+					}
 				}
 
 				@Override

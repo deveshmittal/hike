@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -178,6 +179,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			viewHolder.mainInfo.setText(smileyParser.addSmileySpans(
 					statusMessage.getText(), true));
+			Linkify.addLinks(viewHolder.mainInfo, Linkify.ALL);
+			viewHolder.mainInfo.setMovementMethod(null);
 			break;
 		case PROFILE_PIC:
 			viewHolder.extraInfo.setVisibility(View.GONE);

@@ -448,12 +448,13 @@
 	<string name="meet_hike">Meet hike</string>
 	<string name="remove_circle">Remove from Circle of Friends</string>
 	<string name="add_hike_friend">View friends</string>
-	<string name="email_body">Hi!\n\nI just got hike, an amazing new messaging app! You can download hike at get.hike.in.\n\nhike comes with some hilarious emoticons. You can also post Status Updates to your close circle of friends! Think of it like BBM for non-Blackberry devices but much, much better!\n\nGet it now from get.hike.in and say good bye to plain boring SMS.</string>
+	<string name="email_body">Hi!\n\nI started using hike, a simple beautiful messaging app thats absolutely free.\n\nhike comes with some hilarious emoticons. You can also post Status Updates to your close circle of friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
 	<string name="file_expire">This file no longer exists.</string>
 	<string name="friends_on_hike_tut_info">Tap on the button to see friends on hike</string>
-	<string name="twitter_msg">I\'m using @hikeapp 2.0 with status updates &amp; moods. Simple &amp; beautiful messaging, absolutely free.</string>
-	<string name="facebook_description">Hi!\n\nI just got hike, an amazing new messaging app! You can download hike at get.hike.in.\n\nhike comes with some hilarious emoticons. You can also post Status Updates to your close circle of friends! Think of it like BBM for non-Blackberry devices but much, much better!</string>
-	<string name="invite_message">Hey. Download hike 2.0. Now with Status Updates :) - get.hike.in</string>
+	<string name="twitter_msg">I\'m using @hikeapp 2.0 with status updates &amp; moods. Its like BBM but much, much better! Get hike at http://get.hike.in #gethike</string>
+	<string name="facebook_description">I started using hike, a simple, beautiful messaging app thats absolutely free.\n\nhike comes with some hilarious emoticons. You can also post Status Updates to your close circle of friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
+	<string name="invite_message">Hi! Get hike 2.0. Free messaging worldwide. Now with Status Updates and Moods :) - http://get.hike.in/</string>
 	<string name="error_setting_profile">Error setting your profile image.</string>
 	<string name="mood_tweet_error">Posting a mood to twitter can have a maximum of 130 characters.</string>
+	<string name="new_string">New</string>
 </resources>

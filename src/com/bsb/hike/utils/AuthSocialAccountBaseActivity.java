@@ -99,8 +99,6 @@ public class AuthSocialAccountBaseActivity extends Activity implements
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING,
-				facebookAuthPopupShowing);
 		super.onSaveInstanceState(outState);
 	}
 

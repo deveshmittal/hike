@@ -148,12 +148,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 
 		updateCredits();
 		setupSocialButtons();
-
-		if (savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.FACEBOOK_AUTH_POPUP_SHOWING)) {
-			onFacebookClick(null);
-		}
 	}
 
 	private void setupSocialButtons() {
