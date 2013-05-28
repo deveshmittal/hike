@@ -132,12 +132,19 @@ public class ConvMessage {
 			State msgState, long msgid, long mappedMsgId,
 			String groupParticipantMsisdn) {
 		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId,
-				groupParticipantMsisdn, ParticipantInfoState.NO_INFO);
+				groupParticipantMsisdn, false);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp,
 			State msgState, long msgid, long mappedMsgId,
-			String groupParticipantMsisdn,
+			String groupParticipantMsisdn, boolean isSMS) {
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId,
+				groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO);
+	}
+
+	public ConvMessage(String message, String msisdn, long timestamp,
+			State msgState, long msgid, long mappedMsgId,
+			String groupParticipantMsisdn, boolean isSMS,
 			ParticipantInfoState participantInfoState) {
 		assert (msisdn != null);
 		this.mMsisdn = msisdn;
@@ -151,6 +158,7 @@ public class ConvMessage {
 				|| msgState == State.SENT_DELIVERED_READ || msgState == State.SENT_FAILED);
 		setState(msgState);
 		this.groupParticipantMsisdn = groupParticipantMsisdn;
+		this.mIsSMS = isSMS;
 		this.participantInfoState = participantInfoState;
 	}
 
@@ -435,9 +443,8 @@ public class ConvMessage {
 					data.put(HikeConstants.POKE, true);
 				}
 			}
-			data.put(
-					mConversation != null && mConversation.isOnhike() ? HikeConstants.HIKE_MESSAGE
-							: HikeConstants.SMS_MESSAGE, mMessage);
+			data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE
+					: HikeConstants.SMS_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP, mTimestamp);
 			data.put(HikeConstants.MESSAGE_ID, msgID);
 
@@ -540,10 +547,6 @@ public class ConvMessage {
 		/* failed is handled separately, since it's applicable to SMS messages */
 		if (mState == State.SENT_FAILED) {
 			return R.drawable.ic_failed;
-		}
-
-		if (isSMS()) {
-			return -1;
 		}
 
 		switch (mState) {

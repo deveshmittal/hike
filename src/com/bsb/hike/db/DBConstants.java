@@ -4,7 +4,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 13;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 14;
 
 	public static final int USERS_DATABASE_VERSION = 11;
 
@@ -137,4 +137,6 @@ public class DBConstants {
 	public static final String THUMBNAIL_INDEX = "thumbnailIdx";
 	
 	public static final String FAVORITE_INDEX = "favoriteIdx";
+
+	public static final String IS_HIKE_MESSAGE = "isHikeMessage";
 }

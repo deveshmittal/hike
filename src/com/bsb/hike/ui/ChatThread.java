@@ -946,6 +946,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		ConvMessage convMessage = new ConvMessage(message, mContactNumber,
 				time, ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setConversation(mConversation);
+		convMessage.setSMS(mConversation == null || !mConversation.isOnhike());
 		sendMessage(convMessage);
 
 		if (mComposeViewWatcher != null) {

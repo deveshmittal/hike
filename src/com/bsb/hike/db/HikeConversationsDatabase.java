@@ -79,7 +79,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MAPPED_MSG_ID + " INTEGER, "
 				+ DBConstants.CONV_ID + " INTEGER,"
 				+ DBConstants.MESSAGE_METADATA + " TEXT, "
-				+ DBConstants.GROUP_PARTICIPANT + " TEXT" + " ) ";
+				+ DBConstants.GROUP_PARTICIPANT + " TEXT, "
+				+ DBConstants.IS_HIKE_MESSAGE + " INTEGER DEFAULT -1" + " ) ";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CONVERSATION_INDEX
@@ -327,6 +328,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		 * Version 13 for creating status index. Will be done by the onCreate
 		 * method.
 		 */
+
+		/*
+		 * Adding a column to keep a track of the message type i.e hike or sms.
+		 */
+		if (oldVersion < 14) {
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE
+					+ " ADD COLUMN " + DBConstants.IS_HIKE_MESSAGE
+					+ " INTEGER DEFAULT -1";
+			db.execSQL(alter);
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -524,7 +535,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		final int mappedMsgIdColumn = 4;
 		final int messageMetadataColumn = 5;
 		final int groupParticipant = 6;
-		final int msisdnColumn = 7;
+		final int isHikeMessageColumn = 7;
+		final int msisdnColumn = 8;
 
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
@@ -537,6 +549,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		insertStatement.bindString(messageMetadataColumn,
 				conv.getMetadata() != null ? conv.getMetadata().serialize()
 						: "");
+		insertStatement.bindLong(isHikeMessageColumn, conv.isSMS() ? 0 : 1);
 		insertStatement.bindString(
 				groupParticipant,
 				conv.getGroupParticipantMsisdn() != null ? conv
@@ -573,8 +586,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ "," + DBConstants.MAPPED_MSG_ID + " ,"
 				+ DBConstants.MESSAGE_METADATA + ","
 				+ DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
-				+ " ) " + " SELECT ?, ?, ?, ?, ?, ?," + DBConstants.CONV_ID
-				+ " FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE "
+				+ ", " + DBConstants.IS_HIKE_MESSAGE + " ) "
+				+ " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID
+				+ ", ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE "
 				+ DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN
 				+ "=?");
 		mDb.beginTransaction();
@@ -770,8 +784,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.MESSAGE, DBConstants.MSG_STATUS,
 				DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
 				DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA,
-				DBConstants.GROUP_PARTICIPANT }, selection,
-				new String[] { Long.toString(convid) }, null, null,
+				DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE },
+				selection, new String[] { Long.toString(convid) }, null, null,
 				DBConstants.MESSAGE_ID + " DESC", limitStr);
 
 		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
@@ -784,13 +798,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				.getColumnIndex(DBConstants.MESSAGE_METADATA);
 		final int groupParticipantColumn = c
 				.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+		final int isHikeMessageColumn = c
+				.getColumnIndex(DBConstants.IS_HIKE_MESSAGE);
+
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
+
 		while (c.moveToNext()) {
+			int hikeMessage = c.getInt(isHikeMessageColumn);
+			boolean isHikeMessage = hikeMessage == -1 ? conversation.isOnhike()
+					: (hikeMessage == 0 ? false : true);
+
 			ConvMessage message = new ConvMessage(c.getString(msgColumn),
 					msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c
 							.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
 					c.getLong(mappedMsgIdColumn),
-					c.getString(groupParticipantColumn));
+					c.getString(groupParticipantColumn), !isHikeMessage);
 			String metadata = c.getString(metadataColumn);
 			try {
 				message.setMetadata(metadata);

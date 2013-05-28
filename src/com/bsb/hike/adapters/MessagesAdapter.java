@@ -211,11 +211,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.message_send);
-				/* label outgoing hike conversations in green */
-				v.findViewById(R.id.sent_message_container)
-						.setBackgroundResource(
-								conversation.isOnhike() ? R.drawable.ic_bubble_blue_selector
-										: R.drawable.ic_bubble_green_selector);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -790,6 +785,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 										.getIconForMSISDN(
 												convMessage.getMsisdn()));
 			}
+		}
+
+		if (convMessage.isSent() && holder.messageContainer != null) {
+			/* label outgoing hike conversations in green */
+			holder.messageContainer
+					.setBackgroundResource(!convMessage.isSMS() ? R.drawable.ic_bubble_blue_selector
+							: R.drawable.ic_bubble_green_selector);
 		}
 
 		return v;
