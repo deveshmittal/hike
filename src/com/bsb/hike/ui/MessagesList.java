@@ -249,18 +249,16 @@ public class MessagesList extends DrawerBaseActivity implements
 		setContentView(R.layout.main);
 		afterSetContentView(savedInstanceState);
 
-		wasAlertCancelled = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
-		deviceDetailsSent = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
-		introMessageAdded = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED);
-		nuxNumbersInvited = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED);
+		if (savedInstanceState != null) {
+			wasAlertCancelled = savedInstanceState
+					.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
+			deviceDetailsSent = savedInstanceState
+					.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
+			introMessageAdded = savedInstanceState
+					.getBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED);
+			nuxNumbersInvited = savedInstanceState
+					.getBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED);
+		}
 
 		int updateTypeAvailable = accountPrefs.getInt(
 				HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
