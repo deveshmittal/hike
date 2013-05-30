@@ -72,4 +72,6 @@
     <color name="mood_selector">#f1f1ee</color>
     <color name="mood_divider_1">#f7f7f6</color>
     <color name="mood_divider_2">#e1e1de</color>
+    <color name="sms_popup_info">#73706a</color>
+    <color name="popup_header">#2588ca</color>
 </resources>

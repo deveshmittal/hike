@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="288dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_sms_popup"
+    android:orientation="vertical" >
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/use_hike_for_sms"
+        android:textColor="@color/popup_header"
+        android:textSize="18sp"
+        android:textStyle="italic" />
+
+    <include layout="@layout/sms_popup_divider" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/use_hike_for_sms_info"
+        android:textColor="#333333"
+        android:textSize="14sp" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:text="@string/find_more"
+        android:textColor="@color/popup_header"
+        android:textSize="14sp" />
+
+    <include layout="@layout/sms_popup_divider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp" >
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_cancel"
+            style="@style/StatusNoBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/cancel" />
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_ok"
+            style="@style/StatusYesBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_weight="1"
+            android:text="@string/continue_txt" />
+    </LinearLayout>
+
+</LinearLayout>
