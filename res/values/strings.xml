@@ -457,6 +457,9 @@
 	<string name="error_setting_profile">Error setting your profile image.</string>
 	<string name="mood_tweet_error">Posting a mood to twitter can have a maximum of 130 characters.</string>
 	<string name="new_string">New</string>
+	<string name="sms_toggle_header">SMS from My Number</string>
+	<string name="sms_toggle_on_subtext">Now sending from my number</string>
+	<string name="sms_toggle_off_subtext">Now sending from a hike number</string>
 	<string name="hike_sms_preview">You have 1 unread message from %1$s</string>
 	<string name="hike_sms_info1">Send from a hike number</string>
 	<string name="hike_sms_info2">Free hike SMS</string>
