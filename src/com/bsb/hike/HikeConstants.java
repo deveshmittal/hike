@@ -1,5 +1,6 @@
 package com.bsb.hike;
 
+import android.net.Uri;
 import android.os.Environment;
 
 public class HikeConstants {
@@ -570,6 +571,25 @@ public class HikeConstants {
 		public static final String DELETE_STATUS = "dsu";
 		public static final String POSTPONE_FAVORITE = "pf";
 		public static final String BATCH_STATUS_UPDATE = "bsu";
+	}
+
+	public static final class SMSNative {
+		/*
+		 * SMS URIs
+		 */
+		public static final Uri CONTENT_URI = Uri.parse("content://sms");
+
+		public static final Uri INBOX_CONTENT_URI = Uri.withAppendedPath(
+				CONTENT_URI, "inbox");
+
+		public static final Uri SENTBOX_CONTENT_URI = Uri.withAppendedPath(
+				CONTENT_URI, "sent");
+
+		public static final String NUMBER = "address";
+		public static final String DATE = "date";
+		public static final String MESSAGE = "body";
+		public static final String READ = "read";
+
 	}
 
 	public static enum FTResult {
