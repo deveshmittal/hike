@@ -222,6 +222,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String DRAWER_ANIMATION_COMPLETE = "drawerAnimationComplete";
 
+	public static final String REFRESH_CONVERSATIONS = "refreshConversations";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

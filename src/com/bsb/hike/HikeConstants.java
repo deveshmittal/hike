@@ -596,4 +596,8 @@ public class HikeConstants {
 	public static enum FTResult {
 		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED
 	}
+
+	public static enum SMSSyncState {
+		SUCCESSFUL, NO_CHANGE, UNSUCCESSFUL
+	}
 }

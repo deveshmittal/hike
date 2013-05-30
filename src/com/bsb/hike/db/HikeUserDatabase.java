@@ -888,6 +888,23 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		return contactInfos.get(0);
 	}
 
+	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number) {
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
+				DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME,
+				DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE,
+				DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, "("
+				+ DBConstants.PHONE + "=? OR " + DBConstants.MSISDN
+				+ "=?) AND " + DBConstants.MSISDN + "!='null'", new String[] {
+				number, number }, null, null, null);
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		c.close();
+		if (contactInfos.isEmpty()) {
+			return null;
+		}
+
+		return contactInfos.get(0);
+	}
+
 	public void unblock(String msisdn) {
 		mDb.delete(DBConstants.BLOCK_TABLE, DBConstants.MSISDN + "=?",
 				new String[] { msisdn });
