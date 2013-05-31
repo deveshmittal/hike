@@ -33,4 +33,7 @@
 	<dimen name="preview_corner_radius">2dp</dimen>
 	<dimen name="free_sms_width">130dp</dimen>
 	<dimen name="free_hike_width">90dp</dimen>
+	<dimen name="micromax_margin">40dp</dimen>
+	<dimen name="hike_tag_width">270dp</dimen>
+	<dimen name="hike_logo_margin">90dp</dimen>
 </resources>

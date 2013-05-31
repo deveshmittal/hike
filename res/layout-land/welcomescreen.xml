@@ -67,19 +67,20 @@
         android:layout_centerHorizontal="true"
         android:layout_centerInParent="true"
         android:paddingBottom="20dp"
-        android:src="@drawable/hi_logo_big" />
+        android:src="@drawable/hi_logo_big"
+        android:visibility="visible" />
 
     <LinearLayout
         android:id="@+id/hike_logo_container"
-        style="@style/WelcomeHikeMessage"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentTop="true"
+        android:layout_above="@id/tc_continue_layout"
         android:layout_centerHorizontal="true"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:clickable="true"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:onClick="onHikeIconClicked"
         android:orientation="vertical"
         android:visibility="invisible" >
@@ -104,18 +105,19 @@
             android:textStyle="bold"
             android:gravity="center"
             hike:font="omnes" />
+        
+        <ImageView
+            android:id="@+id/ic_micromax"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/hike_logo_container"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/micromax_margin"
+            android:src="@drawable/micromax_logo"
+            android:visibility="gone" />
+
     </LinearLayout>
 
-    
-    <ImageView
-        android:id="@+id/ic_micromax"
-        android:layout_below="@id/hike_logo_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/micromax_logo"
-        android:layout_marginTop="@dimen/micromax_margin"
-        android:visibility="gone" />
     
     <include
         android:layout_below="@id/header_dropshadow"

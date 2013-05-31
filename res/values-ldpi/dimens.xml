@@ -5,4 +5,6 @@
     <dimen name="fav_tut_pager_height">235dp</dimen>
     <dimen name="fav_tut_pager_marginTop">10dp</dimen>
     <dimen name="tutorial_button_margin">10dp</dimen>
+    <dimen name="micromax_margin">10dp</dimen>
+    <dimen name="hike_logo_margin">50dp</dimen>
 </resources>

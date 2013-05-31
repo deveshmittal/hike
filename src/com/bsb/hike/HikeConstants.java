@@ -396,6 +396,10 @@ public class HikeConstants {
 
 	public static final int MAX_SMS_PULL_IN_SENTBOX = 1000;
 
+	public static final String MICROMAX = "MICROMAX";
+
+	public static final String[] MICROMAX_MODELS = { "A76", "A210", "A240" };
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
