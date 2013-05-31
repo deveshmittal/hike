@@ -39,6 +39,7 @@ public class WelcomeActivity extends Activity implements
 	private ImageView hikeWelcomeView;
 	private ViewGroup headerLayout;
 	private ImageView errorImage;
+	private ImageView micromaxImage;
 
 	@Override
 	public void onCreate(Bundle savedState) {
@@ -55,6 +56,7 @@ public class WelcomeActivity extends Activity implements
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
 		hiLogoView = findViewById(R.id.ic_hi_logo);
 		hikeWelcomeView = (ImageView) findViewById(R.id.ic_hike_welcome_image);
+		micromaxImage = (ImageView) findViewById(R.id.ic_micromax);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
@@ -69,6 +71,7 @@ public class WelcomeActivity extends Activity implements
 				.getBoolean(HikeMessengerApp.SPLASH_SEEN, false)) {
 			hikeWelcomeView.setVisibility(View.VISIBLE);
 			tcContinueLayout.setVisibility(View.VISIBLE);
+			micromaxImage.setVisibility(View.VISIBLE);
 			hiLogoView.setVisibility(View.GONE);
 		} else {
 			(new Handler()).postDelayed(new Runnable() {
@@ -169,6 +172,7 @@ public class WelcomeActivity extends Activity implements
 							@Override
 							public void onAnimationEnd(Animation animation) {
 								hikeWelcomeView.setVisibility(View.VISIBLE);
+								micromaxImage.setVisibility(View.VISIBLE);
 							}
 						});
 				tcContinueLayout.startAnimation(fadeInAnimation);
@@ -201,6 +205,7 @@ public class WelcomeActivity extends Activity implements
 		} else if (v.getId() == tryAgainBtn.getId()) {
 			tcContinueLayout.setVisibility(View.VISIBLE);
 			hikeWelcomeView.setImageResource(R.drawable.hike_welcome_image);
+			micromaxImage.setVisibility(View.VISIBLE);
 			booBooLayout.setVisibility(View.GONE);
 			onClick(mAcceptButton);
 		}
@@ -215,6 +220,7 @@ public class WelcomeActivity extends Activity implements
 		tcContinueLayout.setVisibility(View.GONE);
 		hikeWelcomeView.setImageDrawable(null);
 		booBooLayout.setVisibility(View.VISIBLE);
+		micromaxImage.setVisibility(View.INVISIBLE);
 	}
 
 	@Override

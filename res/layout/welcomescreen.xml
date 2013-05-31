@@ -67,7 +67,8 @@
         android:layout_centerHorizontal="true"
         android:layout_centerInParent="true"
         android:paddingBottom="20dp"
-        android:src="@drawable/hi_logo_big" />
+        android:src="@drawable/hi_logo_big"
+        android:visibility="visible" />
 
     <ImageView
         android:id="@+id/ic_hike_welcome_image"
@@ -80,6 +81,17 @@
         android:src="@drawable/hike_welcome_image"
         android:visibility="invisible" />
 
+    
+    <ImageView
+        android:id="@+id/ic_micromax"
+        android:layout_below="@id/ic_hike_welcome_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/micromax_logo"
+        android:layout_marginTop="@dimen/micromax_margin"
+        android:visibility="invisible" />
+    
     <include
         android:layout_below="@id/header_dropshadow"
         layout="@layout/boo_boo" />
