@@ -469,4 +469,10 @@
 	<string name="use_hike_for_sms_info">We need to make hike your default SMS inbox to send a regular SMS.</string>
 	<string name="find_more">Find out more</string>
 	<string name="continue_txt">Continue</string>
+	<string name="sms_with_hike">SMS with hike</string>
+	<string name="sms_with_hike_info">Now use hike to send and receive all your SMS along with free hike messages.</string>
+	<string name="tap_here_find_out_more">Tap here to find out more</string>
+	<string name="import_sms">Import SMS</string>
+	<string name="import_sms_info">Would you like to import your existing messages into hike?</string>
+	<string name="importing_sms_info">Give us a minute while we import your messages into hike.</string>
 </resources>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
+    android:layout_width="288dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_sms_popup"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <ImageView
+        android:id="@+id/sms_with_hike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/ic_sms_with_hike" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/sms_with_hike_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:text="@string/sms_with_hike"
+        android:textColor="#2588ca"
+        android:textSize="21sp"
+        android:textStyle="bold"
+        hike:font="omnes" />
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/sms_with_hike_info_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="7dp"
+        android:gravity="center"
+        android:text="@string/sms_with_hike_info"
+        android:textColor="#73706a"
+        android:textSize="15sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp" >
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_cancel"
+            style="@style/StatusNoBtn"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:text="@string/cancel"
+            android:textSize="16sp" />
+
+        <com.bsb.hike.view.CustomFontButton
+            android:id="@+id/btn_ok"
+            style="@style/StatusYesBtn"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_marginLeft="8dp"
+            android:layout_weight="1"
+            android:text="@string/continue_txt"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/tap_here_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/tap_here_find_out_more"
+        android:textColor="#a6a6a6"
+        android:layout_margin="15dp"
+        android:textSize="12sp" />
+</LinearLayout>
