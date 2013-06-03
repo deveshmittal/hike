@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -29,17 +30,30 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.utils.Utils;
 
 public class HikePreferences extends PreferenceActivity implements
-		OnPreferenceClickListener {
+		OnPreferenceClickListener, Listener {
+
+	private enum DialogShowing {
+		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
+	}
 
 	private ActivityCallableTask mTask;
 	ProgressDialog mDialog;
 	private boolean isDeleting;
+
+	private DialogShowing dialogShowing;
+
+	private Dialog smsDialog;
+
+	private String[] pubSubListeners = { HikePubSub.SHOW_SMS_SYNC_DIALOG,
+			HikePubSub.SMS_SYNC_COMPLETE, HikePubSub.SMS_SYNC_FAIL,
+			HikePubSub.SMS_SYNC_START };
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
@@ -92,6 +106,24 @@ public class HikePreferences extends PreferenceActivity implements
 			setStatusPreferenceSummary(statusPreference, currentValue);
 			statusPreference.setOnPreferenceClickListener(this);
 		}
+
+		Preference smsClientPreference = getPreferenceScreen().findPreference(
+				HikeConstants.RECEIVE_SMS_PREF);
+		if (smsClientPreference != null) {
+			HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		}
+
+		if (savedInstanceState != null) {
+			int dialogShowingOrdinal = savedInstanceState.getInt(
+					HikeConstants.Extras.DIALOG_SHOWING, -1);
+			if (dialogShowingOrdinal != -1) {
+				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
+				smsDialog = Utils
+						.showSMSSyncDialog(
+								this,
+								dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
+			}
+		}
 	}
 
 	private void setStatusPreferenceSummary(Preference statusPreference,
@@ -112,6 +144,8 @@ public class HikePreferences extends PreferenceActivity implements
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.IS_DELETING_ACCOUNT,
 				isDeleting);
+		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
+				dialogShowing != null ? dialogShowing.ordinal() : -1);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -122,7 +156,11 @@ public class HikePreferences extends PreferenceActivity implements
 			mDialog.dismiss();
 			mDialog = null;
 		}
-
+		if (smsDialog != null) {
+			smsDialog.cancel();
+			smsDialog = null;
+		}
+		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		mTask = null;
 	}
 
@@ -328,5 +366,34 @@ public class HikePreferences extends PreferenceActivity implements
 		Intent dltIntent = new Intent(this, MessagesList.class);
 		dltIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(dltIntent);
+	}
+
+	@Override
+	public void onEventReceived(String type, Object object) {
+		if (HikePubSub.SHOW_SMS_SYNC_DIALOG.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					smsDialog = Utils.showSMSSyncDialog(HikePreferences.this,
+							true);
+					dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
+				}
+			});
+		} else if (HikePubSub.SMS_SYNC_COMPLETE.equals(type)
+				|| HikePubSub.SMS_SYNC_FAIL.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (smsDialog != null) {
+						smsDialog.dismiss();
+					}
+					dialogShowing = null;
+				}
+			});
+		} else if (HikePubSub.SMS_SYNC_START.equals(type)) {
+			dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
+		}
 	}
 }

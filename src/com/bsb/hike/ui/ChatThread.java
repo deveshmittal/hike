@@ -151,6 +151,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		TextWatcher, OnEditorActionListener, OnSoftKeyboardListener,
 		View.OnKeyListener, FinishableEvent, OnTouchListener, OnScrollListener,
 		OnItemLongClickListener {
+
+	private enum DialogShowing {
+		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
+	}
+
 	private HikePubSub mPubSub;
 
 	private HikeConversationsDatabase mConversationDb;
@@ -270,7 +275,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER,
 			HikePubSub.UNBLOCK_USER,
 			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD,
-			HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE };
+			HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE,
+			HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
+			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START };
 
 	private View currentEmoticonCategorySelected;
 
@@ -289,6 +296,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private boolean reachedEnd;
 
 	private ContactDialog contactDialog;
+
+	private DialogShowing dialogShowing;
+
+	private Dialog smsDialog;
 
 	@Override
 	protected void onPause() {
@@ -476,6 +487,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			contactDialog.dismiss();
 			contactDialog = null;
 		}
+		if (smsDialog != null) {
+			smsDialog.cancel();
+			smsDialog = null;
+		}
 	}
 
 	@Override
@@ -591,6 +606,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					.getBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING)) {
 				showRecordingDialog(savedInstanceState
 						.getLong(HikeConstants.Extras.RECORDER_START_TIME));
+			}
+
+			int dialogShowingOrdinal = savedInstanceState.getInt(
+					HikeConstants.Extras.DIALOG_SHOWING, -1);
+			if (dialogShowingOrdinal != -1) {
+				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
+				smsDialog = Utils
+						.showSMSSyncDialog(
+								this,
+								dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG);
 			}
 		}
 
@@ -1821,6 +1846,29 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					mUpdateAdapter.run();
 				}
 			});
+		} else if (HikePubSub.SHOW_SMS_SYNC_DIALOG.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					smsDialog = Utils.showSMSSyncDialog(ChatThread.this, true);
+					dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION_DIALOG;
+				}
+			});
+		} else if (HikePubSub.SMS_SYNC_COMPLETE.equals(type)
+				|| HikePubSub.SMS_SYNC_FAIL.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (smsDialog != null) {
+						smsDialog.dismiss();
+					}
+					dialogShowing = null;
+				}
+			});
+		} else if (HikePubSub.SMS_SYNC_START.equals(type)) {
+			dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
 		}
 	}
 
@@ -3383,6 +3431,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY,
 					tabHost.getCurrentTab());
 		}
+		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
+				dialogShowing != null ? dialogShowing.ordinal() : -1);
 		super.onSaveInstanceState(outState);
 	}
 

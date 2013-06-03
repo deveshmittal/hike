@@ -76,6 +76,13 @@ public class IconCheckBoxPreference extends CheckBoxPreference {
 						getContext()).edit();
 				editor.putBoolean(HikeConstants.SEND_SMS_PREF, false);
 				editor.commit();
+			} else {
+				if (!getContext().getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+						HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
+				}
 			}
 		}
 		super.notifyChanged();

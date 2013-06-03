@@ -234,6 +234,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String CHANGED_MESSAGE_TYPE = "changedMessageType";
 
+	public static final String SHOW_SMS_SYNC_DIALOG = "showSMSSyncDialog";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

@@ -1362,6 +1362,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				if (!triggeredFromToggle) {
 					sendAllUnsentMessagesAsSMS(true);
 				}
+				if (!context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+						HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
+				}
 			}
 		});
 
