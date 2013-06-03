@@ -1,5 +1,6 @@
 package com.bsb.hike.db;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,8 +9,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences.Editor;
+import android.preference.PreferenceManager;
+import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -29,6 +38,8 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 
 public class DbConversationListener implements Listener {
+	private static final String SMS_SENT_ACTION = "com.bsb.hike.SMS_SENT";
+
 	HikeConversationsDatabase mConversationDb;
 
 	HikeUserDatabase mUserDb;
@@ -51,6 +62,9 @@ public class DbConversationListener implements Listener {
 		dayRecorded = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(
 				HikeMessengerApp.DAY_RECORDED, 0);
+
+		context.registerReceiver(smsMessageStatusReceiver, new IntentFilter(
+				SMS_SENT_ACTION));
 
 		mPubSub.addListener(HikePubSub.MESSAGE_SENT, this);
 		mPubSub.addListener(HikePubSub.DELETE_MESSAGE, this);
@@ -96,8 +110,17 @@ public class DbConversationListener implements Listener {
 				Log.d("DBCONVERSATION LISTENER",
 						"Sending Message : " + convMessage.getMessage()
 								+ "	;	to : " + convMessage.getMsisdn());
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH,
-						convMessage.serialize());
+				if (!convMessage.isSMS()
+						|| !PreferenceManager.getDefaultSharedPreferences(
+								context).getBoolean(
+								HikeConstants.SEND_SMS_PREF, false)) {
+					mPubSub.publish(HikePubSub.MQTT_PUBLISH,
+							convMessage.serialize());
+				} else {
+					Log.d(getClass().getSimpleName(), "Messages Id: "
+							+ convMessage.getMsgID());
+					sendNativeSMS(convMessage);
+				}
 				if (convMessage.isGroupChat()) {
 					mPubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE,
 							convMessage.getMsisdn());
@@ -261,6 +284,27 @@ public class DbConversationListener implements Listener {
 		}
 	}
 
+	private void sendNativeSMS(ConvMessage convMessage) {
+		SmsManager smsManager = SmsManager.getDefault();
+
+		ArrayList<String> messages = smsManager.divideMessage(convMessage
+				.getMessage());
+
+		ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
+
+		for (int i = 0; i < messages.size(); i++) {
+			Intent intent = new Intent(SMS_SENT_ACTION);
+			intent.putExtra(HikeConstants.Extras.SMS_ID, convMessage.getMsgID());
+			pendingIntents.add(PendingIntent
+					.getBroadcast(context, 0, intent, 0));
+		}
+
+		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
+				messages, pendingIntents, null);
+
+		writeToNativeSMSDb(convMessage);
+	}
+
 	/*
 	 * Recording the event on fiksu if this was the first message of the day.
 	 */
@@ -311,4 +355,39 @@ public class DbConversationListener implements Listener {
 		 */
 		mConversationDb.updateMsgStatus(msgID, status, null);
 	}
+
+	private void writeToNativeSMSDb(ConvMessage convMessage) {
+
+		ContentValues values = new ContentValues();
+		values.put(HikeConstants.SMSNative.NUMBER, convMessage.getMsisdn());
+		values.put(HikeConstants.SMSNative.DATE,
+				convMessage.getTimestamp() * 1000);
+		values.put(HikeConstants.SMSNative.MESSAGE, convMessage.getMessage());
+
+		context.getContentResolver().insert(
+				HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);
+	}
+
+	private BroadcastReceiver smsMessageStatusReceiver = new BroadcastReceiver() {
+		public void onReceive(Context context, Intent intent) {
+			long msgId = intent.getLongExtra(HikeConstants.Extras.SMS_ID, -1);
+			switch (getResultCode()) {
+			case Activity.RESULT_OK:
+				mPubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
+
+				if (msgId != -1) {
+					persistence.removeMessage(msgId);
+				}
+				break;
+			case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+				break;
+			case SmsManager.RESULT_ERROR_NO_SERVICE:
+				break;
+			case SmsManager.RESULT_ERROR_NULL_PDU:
+				break;
+			case SmsManager.RESULT_ERROR_RADIO_OFF:
+				break;
+			}
+		}
+	};
 }
