@@ -461,10 +461,10 @@
 	<string name="sms_toggle_on_subtext">Now sending from my number</string>
 	<string name="sms_toggle_off_subtext">Now sending from a hike number</string>
 	<string name="hike_sms_preview">You have 1 unread message from %1$s</string>
-	<string name="hike_sms_info1">Send from a hike number</string>
-	<string name="hike_sms_info2">Free hike SMS</string>
-	<string name="native_sms_info1">Send from my own number</string>
-	<string name="native_sms_info2">Operator charges apply</string>
+	<string name="hike_sms_info1">Send as a hike SMS</string>
+	<string name="hike_sms_info2">Free</string>
+	<string name="native_sms_info1">Send as a regular SMS</string>
+	<string name="native_sms_info2">At operator rates</string>
 	<string name="use_hike_for_sms">Use hike for all SMS</string>
 	<string name="use_hike_for_sms_info">We need to make hike your default SMS inbox to send a regular SMS.</string>
 	<string name="find_more">Find out more</string>
