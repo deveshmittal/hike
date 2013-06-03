@@ -1444,9 +1444,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				 */
 				if ((mConversation instanceof GroupConversation)
 						&& lastReadIndex < messages.size() && lastReadIndex > 0) {
-					messages.add(lastReadIndex, new ConvMessage(null, null, 0,
+					mAdapter.addMessage(new ConvMessage(null, null, 0,
 							State.SENT_DELIVERED_READ,
-							MessagesAdapter.LAST_READ_CONV_MESSAGE_ID, 0));
+							MessagesAdapter.LAST_READ_CONV_MESSAGE_ID, 0),
+							lastReadIndex);
 					mAdapter.notifyDataSetChanged();
 				}
 				// Scroll to the last unread message
@@ -1964,7 +1965,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				messages.remove(messages.size() - 1);
 				wasShowingTypingItem = true;
 			}
-			messages.add(convMessage);
+			mAdapter.addMessage(convMessage);
 
 			// Reset this boolean to load more messages when the user scrolls to
 			// the top
@@ -1972,7 +1973,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 			if (convMessage != null && convMessage.isSent()
 					&& wasShowingTypingItem) {
-				messages.add(null);
+				mAdapter.addMessage(null);
 			}
 			mAdapter.notifyDataSetChanged();
 			// Smooth scroll by the minimum distance in the opposite direction,
@@ -1993,7 +1994,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				.equals(messages.get(messages.size() - 1));
 		mPubSub.publish(HikePubSub.DELETE_MESSAGE,
 				new Pair<ConvMessage, Boolean>(convMessage, lastMessage));
-		messages.remove(convMessage);
+		mAdapter.removeMessage(convMessage);
 		mAdapter.notifyDataSetChanged();
 	}
 
@@ -3643,7 +3644,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 							mConversation, messages.get(startIndex).getMsgID());
 
 			if (!olderMessages.isEmpty()) {
-				messages.addAll(0, olderMessages);
+				mAdapter.addMessages(olderMessages, startIndex);
 				mAdapter.notifyDataSetChanged();
 				mConversationsView.setSelection(firstVisibleItem
 						+ olderMessages.size());

@@ -11,6 +11,8 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -85,6 +87,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		View loadingThumb;
 		View poke;
 		View messageContainer;
+		TextView undeliveredMsgTextView;
 		CheckBox smsToggle;
 	}
 
@@ -93,6 +96,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private Context context;
 	private ChatThread chatThread;
 	private TextView smsToggleSubtext;
+	private ShowUndeliveredMessage showUndeliveredMessage;
+	private int lastSentMessagePosition = -1;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -100,6 +105,86 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		this.convMessages = objects;
 		this.conversation = conversation;
 		this.chatThread = chatThread;
+		setLastSentMessagePosition();
+	}
+
+	public void addMessage(ConvMessage convMessage) {
+		convMessages.add(convMessage);
+		if (convMessage != null && convMessage.isSent()) {
+			lastSentMessagePosition = convMessages.size() - 1;
+		}
+	}
+
+	public void addMessage(ConvMessage convMessage, int index) {
+		convMessages.add(index, convMessage);
+		if (index > lastSentMessagePosition) {
+			if (convMessage != null && convMessage.isSent()) {
+				lastSentMessagePosition = index;
+			}
+		} else {
+			lastSentMessagePosition++;
+		}
+	}
+
+	public void addMessages(List<ConvMessage> oldConvMessages, int index) {
+		convMessages.addAll(index, oldConvMessages);
+
+		if (lastSentMessagePosition >= index) {
+			lastSentMessagePosition += oldConvMessages.size();
+		}
+	}
+
+	public void removeMessage(ConvMessage convMessage) {
+		int index = convMessages.indexOf(convMessage);
+		convMessages.remove(convMessage);
+		/*
+		 * We need to update the last sent position
+		 */
+		if (index == lastSentMessagePosition) {
+			setLastSentMessagePosition();
+		} else if (index < lastSentMessagePosition) {
+			lastSentMessagePosition--;
+		}
+	}
+
+	public void removeMessage(int index) {
+		convMessages.remove(index);
+		/*
+		 * We need to update the last sent position
+		 */
+		if (index == lastSentMessagePosition) {
+			setLastSentMessagePosition();
+		} else if (index < lastSentMessagePosition) {
+			lastSentMessagePosition--;
+		}
+	}
+
+	private void setLastSentMessagePosition() {
+		new AsyncTask<Void, Void, Void>() {
+
+			@Override
+			protected Void doInBackground(Void... params) {
+				lastSentMessagePosition = -1;
+				for (int i = convMessages.size() - 1; i >= 0; i--) {
+					ConvMessage convMessage = convMessages.get(i);
+					if (convMessage.isSent()) {
+						lastSentMessagePosition = i;
+						break;
+					}
+				}
+				return null;
+			}
+
+			@Override
+			protected void onPostExecute(Void result) {
+				Log.d(getClass().getSimpleName(), "Last Postion: "
+						+ lastSentMessagePosition);
+				if (lastSentMessagePosition == -1) {
+					return;
+				}
+				notifyDataSetChanged();
+			}
+		}.execute();
 	}
 
 	/**
@@ -220,6 +305,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.message_send);
+
+				holder.undeliveredMsgTextView = (TextView) v
+						.findViewById(R.id.msg_not_sent);
+
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -801,6 +890,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.image.setAnimation(null);
 					holder.image.setVisibility(View.VISIBLE);
 				}
+				if (!convMessage.isSMS() && position == lastSentMessagePosition) {
+					if (convMessage.getState().ordinal() < State.SENT_DELIVERED
+							.ordinal()) {
+						View container = metadata != null
+								&& metadata.isPokeMessage() ? holder.poke
+								: holder.messageContainer;
+
+						scheduleUndeliveredText(holder.undeliveredMsgTextView,
+								container, convMessage.getTimestamp());
+					} else {
+						holder.undeliveredMsgTextView.setVisibility(View.GONE);
+					}
+				} else {
+					holder.undeliveredMsgTextView.setVisibility(View.GONE);
+				}
 			} else if (convMessage.isSent()) {
 				holder.image.setImageResource(0);
 			} else {
@@ -849,6 +953,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 		iv.setVisibility(View.VISIBLE);
 		iv.setImageResource(R.drawable.ic_retry_sending);
+	}
+
+	Handler handler = new Handler();
+
+	private void scheduleUndeliveredText(TextView tv, View container, long ts) {
+		if (showUndeliveredMessage != null) {
+			handler.removeCallbacks(showUndeliveredMessage);
+		}
+
+		long diff = (((long) System.currentTimeMillis() / 1000) - ts);
+
+		if (diff < 5) {
+			showUndeliveredMessage = new ShowUndeliveredMessage(tv, container);
+			handler.postDelayed(showUndeliveredMessage, (5 - diff) * 1000);
+		} else {
+			showUndeliveredTextAndSetClick(tv, container);
+		}
 	}
 
 	private void showFileTransferElements(ViewHolder holder, View v,
@@ -1044,6 +1165,57 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private void setSmsToggleSubtext(boolean isChecked) {
 		smsToggleSubtext.setText(isChecked ? R.string.sms_toggle_on_subtext
 				: R.string.sms_toggle_off_subtext);
+	}
+
+	private class ShowUndeliveredMessage implements Runnable {
+
+		TextView tv;
+		View container;
+
+		public ShowUndeliveredMessage(TextView tv, View container) {
+			this.tv = tv;
+			this.container = container;
+		}
+
+		@Override
+		public void run() {
+			if (lastSentMessagePosition >= convMessages.size()) {
+				return;
+			}
+			ConvMessage lastSentMessage = convMessages
+					.get(lastSentMessagePosition);
+			if (lastSentMessage.getState().ordinal() < State.SENT_DELIVERED
+					.ordinal()) {
+				showUndeliveredTextAndSetClick(tv, container);
+			}
+		}
+	}
+
+	private void showUndeliveredTextAndSetClick(TextView tv, View container) {
+		tv.setVisibility(View.VISIBLE);
+		tv.setText(getUndeliveredTextRes());
+
+		container.setTag(convMessages.get(lastSentMessagePosition));
+		container.setOnClickListener(this);
+	}
+
+	private int getUndeliveredTextRes() {
+		if (lastSentMessagePosition == 0) {
+			return R.string.msg_undelivered;
+		}
+		/*
+		 * Checking if more than one message were not delivered.
+		 */
+		ConvMessage secondLastSentMessage = convMessages
+				.get(lastSentMessagePosition - 1);
+		if (secondLastSentMessage.isSent()
+				&& !secondLastSentMessage.isSMS()
+				&& secondLastSentMessage.getState().ordinal() < State.SENT_DELIVERED
+						.ordinal()) {
+			return R.string.msg_undelivered_multiple;
+		} else {
+			return R.string.msg_undelivered;
+		}
 	}
 
 }
