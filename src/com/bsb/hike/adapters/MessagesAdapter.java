@@ -1037,7 +1037,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			if (convMessage.isSent()
 					&& convMessage.equals(convMessages
-							.get(lastSentMessagePosition))) {
+							.get(lastSentMessagePosition))
+					&& isMessageUndelivered(convMessage)) {
 				if (conversation.isOnhike()) {
 					if (!Utils.isUserOnline(context)) {
 						if (conversation instanceof GroupConversation) {
