@@ -23,6 +23,7 @@ import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentProviderOperation;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -1438,6 +1439,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 
 		if (isLastMsgReceivedAndUnread()) {
+			if (PreferenceManager.getDefaultSharedPreferences(
+					getApplicationContext()).getBoolean(
+					HikeConstants.RECEIVE_SMS_PREF, false)) {
+				setSMSReadInNative();
+			}
+
 			long convID = mConversation.getConvId();
 			JSONArray ids = mConversationDb
 					.updateStatusAndSendDeliveryReport(convID);
@@ -1477,6 +1484,25 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				mPubSub.publish(HikePubSub.MQTT_PUBLISH, object);
 			}
 		}
+	}
+
+	private void setSMSReadInNative() {
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				Log.d(getClass().getSimpleName(), "Marking message as read: "
+						+ mContactNumber);
+
+				ContentValues contentValues = new ContentValues();
+				contentValues.put(HikeConstants.SMSNative.READ, 1);
+
+				getContentResolver().update(
+						HikeConstants.SMSNative.INBOX_CONTENT_URI,
+						contentValues, HikeConstants.SMSNative.NUMBER + "=?",
+						new String[] { mContactNumber });
+			}
+		}).start();
 	}
 
 	private class SetTypingText implements Runnable {
