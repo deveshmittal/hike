@@ -726,21 +726,26 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ContactInfo> getContactsForComposeScreen(boolean freeSMSOn,
-			boolean fwdOrgroupChat, String userMsisdn) {
-		String selection = DBConstants.MSISDN
-				+ " != 'null' AND "
-				+ DBConstants.MSISDN
-				+ " != "
-				+ DatabaseUtils.sqlEscapeString(userMsisdn)
-				+ ((freeSMSOn && fwdOrgroupChat) ? " AND (("
-						+ DBConstants.ONHIKE + " = 0 AND " + DBConstants.MSISDN
-						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))"
-						: (fwdOrgroupChat ? " AND " + DBConstants.ONHIKE
-								+ " != 0" : ""));
+			boolean fwdOrgroupChat, String userMsisdn, boolean nativeSMSOn) {
+		StringBuilder selectionBuilder = new StringBuilder(DBConstants.MSISDN
+				+ " != 'null' AND " + DBConstants.MSISDN + " != "
+				+ DatabaseUtils.sqlEscapeString(userMsisdn));
+
+		if (!nativeSMSOn) {
+			if (freeSMSOn && fwdOrgroupChat) {
+				selectionBuilder.append(" AND ((" + DBConstants.ONHIKE
+						+ " = 0 AND " + DBConstants.MSISDN
+						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))");
+			} else if (fwdOrgroupChat) {
+				selectionBuilder.append(" AND " + DBConstants.ONHIKE + " != 0");
+			}
+		}
+
+		String selection = selectionBuilder.toString();
 
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 
-		boolean shouldSortInDB = !freeSMSOn || fwdOrgroupChat;
+		boolean shouldSortInDB = !freeSMSOn || fwdOrgroupChat || nativeSMSOn;
 
 		String orderBy = (shouldSortInDB) ? DBConstants.ONHIKE + " DESC, "
 				+ DBConstants.NAME + " COLLATE NOCASE" : "";
@@ -749,6 +754,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
 				DBConstants.HAS_CUSTOM_PHOTO };
+
 		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
 				null, null, null, orderBy);
 		List<ContactInfo> contactInfos = extractContactInfo(c);

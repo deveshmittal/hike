@@ -331,6 +331,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		private boolean isForwardingMessage;
 		private boolean isSharingFile;
 		private boolean freeSMSOn;
+		private boolean nativeSMSOn;
 		private String userMsisdn;
 		private String existingGroupId;
 		boolean loadOnUiThread;
@@ -378,9 +379,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						View.GONE);
 				findViewById(R.id.button_bar3).setVisibility(View.GONE);
 			}
-			freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
-					getApplicationContext()).getBoolean(
-					HikeConstants.FREE_SMS_PREF, true);
+			SharedPreferences appPref = PreferenceManager
+					.getDefaultSharedPreferences(getApplicationContext());
+
+			freeSMSOn = appPref.getBoolean(HikeConstants.FREE_SMS_PREF, true);
+
+			nativeSMSOn = appPref
+					.getBoolean(HikeConstants.SEND_SMS_PREF, false);
+
 			userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
 			loadOnUiThread = Utils.loadOnUiThread();
@@ -395,7 +401,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		protected List<ContactInfo> doInBackground(Void... params) {
 			if (!loadOnUiThread) {
 				return getContactsForComposeScreen(userMsisdn, freeSMSOn,
-						isGroupChat, isForwardingMessage, isSharingFile);
+						isGroupChat, isForwardingMessage, isSharingFile,
+						nativeSMSOn);
 			} else {
 				return null;
 			}
@@ -406,7 +413,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			if (contactList == null) {
 				contactList = getContactsForComposeScreen(userMsisdn,
 						freeSMSOn, isGroupChat, isForwardingMessage,
-						isSharingFile);
+						isSharingFile, nativeSMSOn);
 			}
 			/*
 			 * Hide the progress icon.
@@ -417,7 +424,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
 					ChatThread.this, contactList, mInputNumberView,
 					isGroupChat, titleBtn, existingGroupId, getIntent(),
-					freeSMSOn);
+					freeSMSOn, nativeSMSOn);
 			mContactSearchView.setAdapter(adapter);
 			mContactSearchView.setOnItemClickListener(adapter);
 			mInputNumberView.addTextChangedListener(adapter);
@@ -436,11 +443,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private List<ContactInfo> getContactsForComposeScreen(String userMsisdn,
 			boolean freeSMSOn, boolean isGroupChat,
-			boolean isForwardingMessage, boolean isSharingFile) {
+			boolean isForwardingMessage, boolean isSharingFile,
+			boolean nativeSMSOn) {
 		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
 				.getContactsForComposeScreen(freeSMSOn,
 						(isGroupChat || isForwardingMessage || isSharingFile),
-						userMsisdn);
+						userMsisdn, nativeSMSOn);
 
 		if (isForwardingMessage || isSharingFile) {
 			contactList.addAll(0, ChatThread.this.mConversationDb
@@ -1244,7 +1252,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		/*
 		 * Add another item which translates to the SMS toggle option.
 		 */
-		if (!mConversation.isOnhike()) {
+		if (!mConversation.isOnhike()
+				&& !Utils.isContactInternational(mContactNumber)) {
 			messages.add(0, new ConvMessage(null, null, -1,
 					State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
 		}

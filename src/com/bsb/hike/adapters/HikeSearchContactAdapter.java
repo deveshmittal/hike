@@ -63,11 +63,12 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 	private Map<String, GroupParticipant> groupParticipants;
 	private String countryCode;
 	private boolean freeSMSOn;
+	private boolean nativeSMSOn;
 
 	public HikeSearchContactAdapter(Activity context,
 			List<ContactInfo> contactList, EditText inputNumber,
 			boolean isGroupChat, Button topBarBtn, String groupId,
-			Intent presentIntent, boolean freeSMSOn) {
+			Intent presentIntent, boolean freeSMSOn, boolean nativeSMSOn) {
 		super(context, -1, contactList);
 		this.filteredList = contactList;
 		this.completeList = new ArrayList<ContactInfo>();
@@ -84,6 +85,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 				.getString(HikeMessengerApp.COUNTRY_CODE,
 						HikeConstants.INDIA_COUNTRY_CODE);
 		this.freeSMSOn = freeSMSOn;
+		this.nativeSMSOn = nativeSMSOn;
 		if (!TextUtils.isEmpty(groupId)) {
 			groupParticipants = HikeConversationsDatabase.getInstance()
 					.getGroupParticipants(groupId, true, false);
@@ -102,11 +104,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 
 		v.setTag(contactInfo);
 
-		boolean inviteOnly = contactInfo != null
-				&& ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
-						&& (!contactInfo.getMsisdn().startsWith(
-								HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
-							.isOnhike()));
+		boolean inviteOnly = isContactInviteOnly(contactInfo);
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo != null ? contactInfo.getName()
@@ -280,10 +278,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			isUnknownNumber = true;
 		}
 		if (!isGroupChat) {
-			boolean inviteOnly = ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
-					&& (!contactInfo.getMsisdn().startsWith(
-							HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
-						.isOnhike())) && !isUnknownNumber;
+			boolean inviteOnly = isContactInviteOnly(contactInfo);
 
 			if (inviteOnly) {
 				Log.d(getClass().getSimpleName(),
@@ -424,5 +419,14 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 		return !textInEditText
 				.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? textInEditText
 				: textInEditText.substring(indexTextToBeFiltered);
+	}
+
+	private boolean isContactInviteOnly(ContactInfo contactInfo) {
+		return contactInfo != null
+				&& !nativeSMSOn
+				&& ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
+						&& (!contactInfo.getMsisdn().startsWith(
+								HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
+							.isOnhike()));
 	}
 }
