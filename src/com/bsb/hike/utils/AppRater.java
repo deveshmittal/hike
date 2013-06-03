@@ -17,6 +17,7 @@ import com.bsb.hike.ui.MessagesList;
 public class AppRater {
 
 	private final static int[] LAUNCHES_UNTIL_PROMPT = { 5, 10, 25, 50, 100 };
+	private static boolean showingDialog = false;
 
 	public static void appLaunched(Context mContext) {
 		SharedPreferences prefs = mContext.getSharedPreferences(
@@ -32,6 +33,7 @@ public class AppRater {
 		editor.putInt(HikeMessengerApp.APP_LAUNCHES, launchCount);
 		editor.commit();
 
+		showingDialog = false;
 		for (int launch : LAUNCHES_UNTIL_PROMPT) {
 			if (launch == launchCount) {
 				showRateDialog(mContext, prefs.edit());
@@ -87,6 +89,11 @@ public class AppRater {
 					}
 				});
 
+		showingDialog = true;
 		builder.show();
+	}
+
+	public static boolean showingDialog() {
+		return showingDialog;
 	}
 }
