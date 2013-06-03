@@ -35,9 +35,11 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.utils.AccountUtils;
 
 public class DbConversationListener implements Listener {
 	private static final String SMS_SENT_ACTION = "com.bsb.hike.SMS_SENT";
@@ -355,8 +357,18 @@ public class DbConversationListener implements Listener {
 	private void sendNativeSMS(ConvMessage convMessage) {
 		SmsManager smsManager = SmsManager.getDefault();
 
-		ArrayList<String> messages = smsManager.divideMessage(convMessage
-				.getMessage());
+		ArrayList<String> messages;
+		/*
+		 * Sending the file url for file transfer messages
+		 */
+		if (convMessage.isFileTransferMessage()) {
+			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			messages = smsManager
+					.divideMessage(AccountUtils.fileTransferBaseViewUrl
+							+ hikeFile.getFileKey());
+		} else {
+			messages = smsManager.divideMessage(convMessage.getMessage());
+		}
 
 		ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
 
