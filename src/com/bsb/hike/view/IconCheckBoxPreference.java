@@ -1,8 +1,10 @@
 package com.bsb.hike.view;
 
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.Drawable;
 import android.preference.CheckBoxPreference;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -68,6 +70,13 @@ public class IconCheckBoxPreference extends CheckBoxPreference {
 		} else if (HikeConstants.SSL_PREF.equals(getKey())) {
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.SWITCHED_DATA_CONNECTION, null);
+		} else if (HikeConstants.RECEIVE_SMS_PREF.equals(getKey())) {
+			if (!isChecked()) {
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(
+						getContext()).edit();
+				editor.putBoolean(HikeConstants.SEND_SMS_PREF, false);
+				editor.commit();
+			}
 		}
 		super.notifyChanged();
 	}
