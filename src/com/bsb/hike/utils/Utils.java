@@ -1873,4 +1873,12 @@ public class Utils {
 			Log.w("Locale", "Invalid JSON", e);
 		}
 	}
+
+	public static void setReceiveSmsSetting(Context context, boolean value) {
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(context)
+				.edit();
+		editor.putBoolean(HikeConstants.RECEIVE_SMS_PREF, value);
+		editor.commit();
+
+	}
 }
