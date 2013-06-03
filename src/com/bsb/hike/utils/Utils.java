@@ -1890,4 +1890,8 @@ public class Utils {
 				value);
 		editor.commit();
 	}
+
+	public static boolean isContactInternational(String msisdn) {
+		return !msisdn.startsWith("+91");
+	}
 }
