@@ -382,7 +382,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 		}
 
-		if (!AppRater.showingDialog() && dialogShowing == null) {
+		if (accountPrefs.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)
+				&& !AppRater.showingDialog() && dialogShowing == null) {
 			if (!accountPrefs.getBoolean(
 					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
 				showSMSClientDialog();
