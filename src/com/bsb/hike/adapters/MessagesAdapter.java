@@ -1040,7 +1040,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.get(lastSentMessagePosition))) {
 				if (conversation.isOnhike()) {
 					if (!Utils.isUserOnline(context)) {
-						showSMSDialog(true);
+						if (conversation instanceof GroupConversation) {
+							Toast.makeText(context,
+									R.string.gc_fallback_offline,
+									Toast.LENGTH_LONG).show();
+						} else {
+							showSMSDialog(true);
+						}
 					} else {
 						showSMSDialog(false);
 					}
@@ -1252,11 +1258,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		View hikeSMS1 = dialog.findViewById(R.id.hike_sms_container1);
 		View hikeSMS2 = dialog.findViewById(R.id.hike_sms_container2);
+		View nativeSMS1 = dialog.findViewById(R.id.native_sms_container1);
+		View nativeSMS2 = dialog.findViewById(R.id.native_sms_container2);
 		View orContainer = dialog.findViewById(R.id.or_container);
 
 		hikeSMS1.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
 		hikeSMS2.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
 		orContainer.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+
+		if (conversation instanceof GroupConversation) {
+			nativeSMS1.setVisibility(View.GONE);
+			nativeSMS2.setVisibility(View.GONE);
+			orContainer.setVisibility(View.GONE);
+		}
 
 		TextView hikeSmsText = (TextView) dialog
 				.findViewById(R.id.hike_sms_text);
