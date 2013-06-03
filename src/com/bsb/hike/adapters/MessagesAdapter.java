@@ -1172,12 +1172,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		Editor editor = PreferenceManager.getDefaultSharedPreferences(context)
-				.edit();
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(context);
+		Editor editor = prefs.edit();
 		editor.putBoolean(HikeConstants.SEND_SMS_PREF, isChecked);
 		editor.commit();
 
 		setSmsToggleSubtext(isChecked);
+
+		if (isChecked
+				&& !prefs.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
+			showSMSClientDialog(true, buttonView);
+		}
 	}
 
 	private void setSmsToggleSubtext(boolean isChecked) {
@@ -1325,7 +1331,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				} else {
 					if (!PreferenceManager.getDefaultSharedPreferences(context)
 							.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
-						showSMSClientDialog();
+						showSMSClientDialog(false, null);
 					} else {
 						sendAllUnsentMessagesAsSMS(true);
 						Utils.setSendUndeliveredSmsSetting(context, true);
@@ -1338,7 +1344,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		dialog.show();
 	}
 
-	private void showSMSClientDialog() {
+	private void showSMSClientDialog(final boolean triggeredFromToggle,
+			final CompoundButton checkBox) {
 		final Dialog dialog = new Dialog(chatThread, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.enable_sms_client_popup);
 		dialog.setCancelable(false);
@@ -1352,7 +1359,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			public void onClick(View v) {
 				Utils.setReceiveSmsSetting(context, true);
 				dialog.dismiss();
-				sendAllUnsentMessagesAsSMS(true);
+				if (!triggeredFromToggle) {
+					sendAllUnsentMessagesAsSMS(true);
+				}
 			}
 		});
 
@@ -1362,6 +1371,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			public void onClick(View v) {
 				Utils.setReceiveSmsSetting(context, false);
 				dialog.dismiss();
+				if (triggeredFromToggle) {
+					checkBox.setChecked(false);
+				}
 			}
 		});
 
