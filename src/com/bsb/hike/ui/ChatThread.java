@@ -277,7 +277,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD,
 			HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE,
 			HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
-			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START };
+			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
+			HikePubSub.SHOWN_UNDELIVERED_MESSAGE };
 
 	private View currentEmoticonCategorySelected;
 
@@ -1869,6 +1870,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			});
 		} else if (HikePubSub.SMS_SYNC_START.equals(type)) {
 			dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
+		} else if (HikePubSub.SHOWN_UNDELIVERED_MESSAGE.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					mConversationsView.setSelection(messages.size() - 1);
+				}
+			});
 		}
 	}
 

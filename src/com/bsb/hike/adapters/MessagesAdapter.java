@@ -972,7 +972,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			showUndeliveredMessage = new ShowUndeliveredMessage(tv, container);
 			handler.postDelayed(showUndeliveredMessage, (5 - diff) * 1000);
 		} else {
-			showUndeliveredTextAndSetClick(tv, container);
+			showUndeliveredTextAndSetClick(tv, container, true);
 		}
 	}
 
@@ -1221,17 +1221,26 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			ConvMessage lastSentMessage = convMessages
 					.get(lastSentMessagePosition);
 			if (isMessageUndelivered(lastSentMessage)) {
-				showUndeliveredTextAndSetClick(tv, container);
+				showUndeliveredTextAndSetClick(tv, container, true);
 			}
 		}
 	}
 
-	private void showUndeliveredTextAndSetClick(TextView tv, View container) {
+	private void showUndeliveredTextAndSetClick(TextView tv, View container,
+			boolean fromHandler) {
 		tv.setVisibility(View.VISIBLE);
 		tv.setText(getUndeliveredTextRes());
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
+
+		/*
+		 * Make the list scroll to the end to show the text.
+		 */
+		if (fromHandler) {
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.SHOWN_UNDELIVERED_MESSAGE, null);
+		}
 	}
 
 	private int getUndeliveredTextRes() {

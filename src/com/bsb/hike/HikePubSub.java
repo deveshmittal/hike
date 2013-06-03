@@ -236,6 +236,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String SHOW_SMS_SYNC_DIALOG = "showSMSSyncDialog";
 
+	public static final String SHOWN_UNDELIVERED_MESSAGE = "shownUndeliveredMessage";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;
