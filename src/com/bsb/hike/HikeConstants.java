@@ -102,6 +102,7 @@ public class HikeConstants {
 	public static final String APP_VERSION = "app_version";
 	public static final String DEVICE_VERSION = "deviceversion";
 	public static final String CRICKET_MOODS = "cmoods";
+	public static final String COUNT = "c";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -426,6 +427,7 @@ public class HikeConstants {
 		public static final String NUX1_NUMBERS = "nux1Numbers";
 		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
 		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
+		public static final String SMS_ID = "smsId";
 	}
 
 	public static final class LogEvent {
@@ -574,6 +576,7 @@ public class HikeConstants {
 		public static final String DELETE_STATUS = "dsu";
 		public static final String POSTPONE_FAVORITE = "pf";
 		public static final String BATCH_STATUS_UPDATE = "bsu";
+		public static final String FORCE_SMS = "fsms";
 	}
 
 	public static final class SMSNative {

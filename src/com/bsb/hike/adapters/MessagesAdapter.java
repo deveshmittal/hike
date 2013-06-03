@@ -7,9 +7,11 @@ import java.util.Locale;
 
 import org.json.JSONArray;
 
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -29,6 +31,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -40,6 +43,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
@@ -1028,7 +1032,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	public void onClick(View v) {
 		try {
 			ConvMessage convMessage = (ConvMessage) v.getTag();
-			if (convMessage != null && convMessage.isFileTransferMessage()) {
+			if (convMessage == null) {
+				return;
+			}
+			if (convMessage.isSent()
+					&& convMessage.equals(convMessages
+							.get(lastSentMessagePosition))) {
+				if (!Utils.isUserOnline(context)) {
+					showSMSDialog(true);
+				} else {
+					showSMSDialog(false);
+				}
+				return;
+			}
+			if (convMessage.isFileTransferMessage()) {
 				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
 						.get(0);
 				if (Utils.getExternalStorageState() == ExternalStorageState.NONE
@@ -1096,7 +1113,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						notifyDataSetChanged();
 					}
 				}
-			} else if (convMessage != null
+			} else if (convMessage.getMetadata() != null
 					&& convMessage.getMetadata().getParticipantInfoState() == ParticipantInfoState.STATUS_MESSAGE) {
 				Intent intent = new Intent(context, ProfileActivity.class);
 				intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE,
@@ -1218,4 +1235,148 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 	}
 
+	private void showSMSDialog(final boolean nativeOnly) {
+		final Dialog dialog = new Dialog(chatThread, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.sms_undelivered_popup);
+		dialog.setCancelable(true);
+
+		View hikeSMS1 = dialog.findViewById(R.id.hike_sms_container1);
+		View hikeSMS2 = dialog.findViewById(R.id.hike_sms_container2);
+		View orContainer = dialog.findViewById(R.id.or_container);
+
+		hikeSMS1.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+		hikeSMS2.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+		orContainer.setVisibility(nativeOnly ? View.GONE : View.VISIBLE);
+
+		TextView hikeSmsText = (TextView) dialog
+				.findViewById(R.id.hike_sms_text);
+		final CheckBox sendHike = (CheckBox) dialog
+				.findViewById(R.id.hike_sms_checkbox);
+
+		TextView nativeSmsTextHead = (TextView) dialog
+				.findViewById(R.id.native_sms_head_text);
+		TextView nativeSmsText = (TextView) dialog
+				.findViewById(R.id.native_sms_text);
+		final CheckBox sendNative = (CheckBox) dialog
+				.findViewById(R.id.native_sms_checkbox);
+
+		final Button sendBtn = (Button) dialog.findViewById(R.id.btn_send);
+		sendBtn.setEnabled(false);
+
+		String username = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+				HikeMessengerApp.NAME_SETTING, "");
+
+		if (PreferenceManager.getDefaultSharedPreferences(context).contains(
+				HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF)) {
+			boolean nativeOn = PreferenceManager.getDefaultSharedPreferences(
+					context).getBoolean(
+					HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF, false);
+			if (nativeOn) {
+				sendNative.setChecked(true);
+				sendBtn.setEnabled(true);
+			} else if (!nativeOnly) {
+				sendHike.setChecked(true);
+				sendBtn.setEnabled(true);
+			}
+		}
+
+		hikeSmsText.setText(context.getString(R.string.hike_sms_preview,
+				username));
+		nativeSmsTextHead.setText(username);
+		nativeSmsText.setText(convMessages.get(lastSentMessagePosition)
+				.getMessage());
+
+		sendHike.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				sendHike.setChecked(true);
+				sendNative.setChecked(false);
+				sendBtn.setEnabled(true);
+			}
+		});
+
+		sendNative.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				sendHike.setChecked(false);
+				sendNative.setChecked(true);
+				sendBtn.setEnabled(true);
+			}
+		});
+
+		sendBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (sendHike.isChecked()) {
+					Utils.setSendUndeliveredSmsSetting(context, false);
+					sendAllUnsentMessagesAsSMS(false);
+				} else {
+					if (!PreferenceManager.getDefaultSharedPreferences(context)
+							.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
+						showSMSClientDialog();
+					} else {
+						sendAllUnsentMessagesAsSMS(true);
+						Utils.setSendUndeliveredSmsSetting(context, true);
+					}
+				}
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
+	}
+
+	private void showSMSClientDialog() {
+		final Dialog dialog = new Dialog(chatThread, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.enable_sms_client_popup);
+		dialog.setCancelable(false);
+
+		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		btnOk.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(context, true);
+				dialog.dismiss();
+				sendAllUnsentMessagesAsSMS(true);
+			}
+		});
+
+		btnCancel.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(context, false);
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
+	}
+
+	private void sendAllUnsentMessagesAsSMS(boolean nativeSMS) {
+		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
+		for (int i = lastSentMessagePosition; i >= 0; i--) {
+			ConvMessage convMessage = convMessages.get(i);
+			if (!convMessage.isSent() || convMessage.isSMS()) {
+				break;
+			}
+			if (convMessage.getState().ordinal() >= State.SENT_DELIVERED
+					.ordinal()) {
+				break;
+			}
+			unsentMessages.add(convMessage);
+		}
+		Log.d(getClass().getSimpleName(),
+				"Unsent messages: " + unsentMessages.size());
+		HikeMessengerApp.getPubSub().publish(
+				nativeSMS ? HikePubSub.SEND_NATIVE_SMS_FALLBACK
+						: HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
+	}
 }

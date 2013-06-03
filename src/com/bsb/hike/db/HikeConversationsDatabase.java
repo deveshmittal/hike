@@ -636,6 +636,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.endTransaction();
 	}
 
+	public void updateIsHikeMessageState(long id, boolean isHikeMessage) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.IS_HIKE_MESSAGE, isHikeMessage);
+
+		mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
+				DBConstants.MESSAGE_ID + "=?",
+				new String[] { Long.toString(id) });
+	}
+
 	private ContentValues getContentValueForConversationMessage(ConvMessage conv) {
 		ContentValues contentValues = new ContentValues();
 		contentValues.put(DBConstants.MESSAGE, conv.getMessage());

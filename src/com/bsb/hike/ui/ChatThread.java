@@ -269,7 +269,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikePubSub.MUTE_CONVERSATION_TOGGLED, HikePubSub.BLOCK_USER,
 			HikePubSub.UNBLOCK_USER,
 			HikePubSub.REMOVE_MESSAGE_FROM_CHAT_THREAD,
-			HikePubSub.GROUP_REVIVED };
+			HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE };
 
 	private View currentEmoticonCategorySelected;
 
@@ -1778,6 +1778,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					}
 				});
 			}
+		} else if (HikePubSub.CHANGED_MESSAGE_TYPE.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					mUpdateAdapter.run();
+				}
+			});
 		}
 	}
 

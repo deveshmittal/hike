@@ -224,6 +224,12 @@ public class HikePubSub implements Runnable {
 
 	public static final String REFRESH_CONVERSATIONS = "refreshConversations";
 
+	public static final String SEND_HIKE_SMS_FALLBACK = "sendHikeSMSFallback";
+
+	public static final String SEND_NATIVE_SMS_FALLBACK = "sendNativeSMSFallback";
+
+	public static final String CHANGED_MESSAGE_TYPE = "changedMessageType";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

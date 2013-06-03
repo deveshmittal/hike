@@ -2,6 +2,8 @@ package com.bsb.hike.db;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -79,6 +81,8 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.REJECT_FRIEND_REQUEST, this);
 		mPubSub.addListener(HikePubSub.DELETE_STATUS, this);
 		mPubSub.addListener(HikePubSub.HIKE_JOIN_TIME_OBTAINED, this);
+		mPubSub.addListener(HikePubSub.SEND_HIKE_SMS_FALLBACK, this);
+		mPubSub.addListener(HikePubSub.SEND_NATIVE_SMS_FALLBACK, this);
 	}
 
 	@Override
@@ -281,6 +285,70 @@ public class DbConversationListener implements Listener {
 			long hikeJoinTime = msisdnHikeJoinTimePair.second;
 
 			mUserDb.setHikeJoinTime(msisdn, hikeJoinTime);
+		} else if (HikePubSub.SEND_HIKE_SMS_FALLBACK.equals(type)) {
+			List<ConvMessage> messages = (List<ConvMessage>) object;
+			if (messages.isEmpty()) {
+				return;
+			}
+			ConvMessage convMessage = messages.get(0);
+
+			for (ConvMessage message : messages) {
+				message.setSMS(true);
+				mConversationDb.updateIsHikeMessageState(message.getMsgID(),
+						false);
+			}
+
+			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
+
+			try {
+				JSONObject jsonObject = new JSONObject();
+
+				jsonObject.put(HikeConstants.TYPE,
+						HikeConstants.MqttMessageTypes.FORCE_SMS);
+				jsonObject.put(HikeConstants.TO, convMessage.getMsisdn());
+				jsonObject.put(HikeConstants.COUNT, messages.size());
+				jsonObject
+						.put(HikeConstants.MESSAGE_ID, convMessage.getMsgID());
+
+				JSONObject data = new JSONObject();
+
+				JSONArray messagesArray = new JSONArray();
+
+				JSONObject messageJSON = new JSONObject();
+
+				messageJSON.put(HikeConstants.HIKE_MESSAGE,
+						convMessage.getMessage());
+				messageJSON.put(HikeConstants.ID, convMessage.getMsgID());
+
+				messagesArray.put(messageJSON);
+
+				data.put(HikeConstants.MESSAGE, messagesArray);
+
+				jsonObject.put(HikeConstants.DATA, data);
+
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, jsonObject);
+			} catch (JSONException e) {
+				Log.w(getClass().getSimpleName(), "Invalid json", e);
+			}
+
+		} else if (HikePubSub.SEND_NATIVE_SMS_FALLBACK.equals(type)) {
+			List<ConvMessage> messages = (List<ConvMessage>) object;
+			if (messages.isEmpty()) {
+				return;
+			}
+			/*
+			 * Reversing order since we want to send the oldest message first
+			 */
+			Collections.reverse(messages);
+
+			for (ConvMessage convMessage : messages) {
+				sendNativeSMS(convMessage);
+				convMessage.setSMS(true);
+				mConversationDb.updateIsHikeMessageState(
+						convMessage.getMsgID(), false);
+			}
+
+			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
 		}
 	}
 
