@@ -30,7 +30,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
 		 */
 		if (!context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0)
 				.contains(HikeMessengerApp.NAME_SETTING)
-				&& !PreferenceManager.getDefaultSharedPreferences(context)
+				|| !PreferenceManager.getDefaultSharedPreferences(context)
 						.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
 			return;
 		}
