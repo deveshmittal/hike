@@ -190,36 +190,49 @@
             android:button="@drawable/preference_radio_btn"
             android:clickable="true" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:layout_toLeftOf="@id/native_sms_checkbox"
-            android:background="@drawable/bg_native_sms_preview"
-            android:orientation="vertical" >
+            android:layout_toLeftOf="@id/native_sms_checkbox" >
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/native_sms_head_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
-                android:text="HIKE-SMS"
-                android:textColor="@color/contact_item_header"
-                android:textSize="11sp"
-                android:textStyle="bold|italic" />
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_avatar1" />
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/native_sms_text"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:text="You have 1 unread message from xyz."
-                android:textColor="@color/lightblack"
-                android:textSize="12sp" />
-        </LinearLayout>
+                android:layout_marginLeft="41dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_native_sms_preview"
+                android:orientation="vertical" >
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/native_sms_head_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="4dp"
+                    android:text="HIKE-SMS"
+                    android:textColor="@color/contact_item_header"
+                    android:textSize="11sp"
+                    android:textStyle="bold|italic" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/native_sms_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="You have 1 unread message from xyz."
+                    android:textColor="@color/lightblack"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </RelativeLayout>
     </RelativeLayout>
 
     <com.bsb.hike.view.CustomFontButton

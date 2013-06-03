@@ -11,6 +11,7 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -1259,13 +1260,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				.findViewById(R.id.native_sms_text);
 		final CheckBox sendNative = (CheckBox) dialog
 				.findViewById(R.id.native_sms_checkbox);
+		ImageView avatar = (ImageView) dialog.findViewById(R.id.avatar);
+
+		SharedPreferences prefs = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+
+		String userMsisdn = prefs
+				.getString(HikeMessengerApp.MSISDN_SETTING, "");
+		avatar.setImageDrawable(IconCacheManager.getInstance()
+				.getIconForMSISDN(userMsisdn));
 
 		final Button sendBtn = (Button) dialog.findViewById(R.id.btn_send);
 		sendBtn.setEnabled(false);
 
-		String username = context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
-				HikeMessengerApp.NAME_SETTING, "");
+		String username = prefs.getString(HikeMessengerApp.NAME_SETTING, "");
 
 		if (PreferenceManager.getDefaultSharedPreferences(context).contains(
 				HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF)) {
