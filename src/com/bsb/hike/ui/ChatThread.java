@@ -1241,6 +1241,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 */
 		messages = new ArrayList<ConvMessage>(mConversation.getMessages());
 
+		/*
+		 * Add another item which translates to the SMS toggle option.
+		 */
+		if (!mConversation.isOnhike()) {
+			messages.add(0, new ConvMessage(null, null, -1,
+					State.RECEIVED_READ, ConvMessage.SMS_TOGGLE_ID, -1));
+		}
+
 		mAdapter = new MessagesAdapter(this, messages, mConversation, this);
 		mConversationsView.setAdapter(mAdapter);
 		mConversationsView.setOnItemLongClickListener(this);
@@ -1348,6 +1356,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void updateUIForHikeStatus() {
 		if (mConversation.isOnhike()
 				|| (mConversation instanceof GroupConversation)) {
+
+			removeSMSToggle();
+
 			((ImageButton) findViewById(R.id.emo_btn))
 					.setImageResource(R.drawable.emoticon_hike_btn);
 			mSendBtn.setTextColor(getResources().getColorStateList(
@@ -1374,6 +1385,26 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn);
 			mComposeView.setHint(R.string.sms_msg);
 		}
+	}
+
+	private void removeSMSToggle() {
+		if (!messages.isEmpty() && hasSMSToggle()) {
+			mAdapter.removeMessage(0);
+		}
+	}
+
+	private boolean hasSMSToggle() {
+		ConvMessage convMessage = messages.get(0);
+		/*
+		 * Typing notification
+		 */
+		if (convMessage == null) {
+			return false;
+		}
+		if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID) {
+			return true;
+		}
+		return false;
 	}
 
 	/* returns TRUE iff the last message was received and unread */
@@ -3593,11 +3624,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				&& !messages.isEmpty()
 				&& firstVisibleItem <= HikeConstants.MIN_INDEX_TO_LOAD_MORE_MESSAGES) {
 
+			int startIndex = hasSMSToggle() ? 1 : 0;
 			/*
 			 * This should only happen in the case where the user starts a new
 			 * chat and gets a typing notification.
 			 */
-			if (messages.get(0) == null) {
+			if (messages.size() <= startIndex
+					|| messages.get(startIndex) == null) {
 				return;
 			}
 
@@ -3607,7 +3640,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					.getConversationThread(mContactNumber,
 							mConversation.getConvId(),
 							HikeConstants.MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME,
-							mConversation, messages.get(0).getMsgID());
+							mConversation, messages.get(startIndex).getMsgID());
 
 			if (!olderMessages.isEmpty()) {
 				messages.addAll(0, olderMessages);

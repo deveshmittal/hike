@@ -11,6 +11,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -26,6 +27,9 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -59,12 +63,12 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CircularProgress;
 
 public class MessagesAdapter extends BaseAdapter implements OnClickListener,
-		OnLongClickListener {
+		OnLongClickListener, OnCheckedChangeListener {
 
 	public static final int LAST_READ_CONV_MESSAGE_ID = -911;
 
 	private enum ViewType {
-		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, TYPING, LAST_READ, STATUS_MESSAGE
+		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, TYPING, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE
 	};
 
 	private class ViewHolder {
@@ -81,12 +85,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		View loadingThumb;
 		View poke;
 		View messageContainer;
+		CheckBox smsToggle;
 	}
 
 	private Conversation conversation;
 	private ArrayList<ConvMessage> convMessages;
 	private Context context;
 	private ChatThread chatThread;
+	private TextView smsToggleSubtext;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -106,6 +112,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ViewType type;
 		if (convMessage == null) {
 			type = ViewType.TYPING;
+		} else if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID) {
+			type = ViewType.SMS_TOGGLE;
 		} else if (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID) {
 			type = ViewType.LAST_READ;
 		} else if (convMessage.isFileTransferMessage()) {
@@ -140,6 +148,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	public View getView(int position, View convertView, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
 		final ConvMessage convMessage = getItem(position);
 		ViewHolder holder = null;
@@ -147,7 +156,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		if (v == null) {
 			holder = new ViewHolder();
 
-			switch (ViewType.values()[getItemViewType(position)]) {
+			switch (viewType) {
 			case TYPING:
 				v = inflater.inflate(R.layout.typing_layout, null);
 				break;
@@ -231,7 +240,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
 			case RECEIVE:
-			default:
 				if (v == null) {
 					v = inflater.inflate(R.layout.message_item_receive, parent,
 							false);
@@ -256,6 +264,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				holder.container.setVisibility(View.GONE);
 				break;
+			case SMS_TOGGLE:
+				v = inflater.inflate(R.layout.sms_toggle_item, parent, false);
+
+				holder.messageTextView = (TextView) v
+						.findViewById(R.id.sms_toggle_subtext);
+				holder.smsToggle = (CheckBox) v.findViewById(R.id.checkbox);
 			}
 			v.setTag(holder);
 		} else {
@@ -266,6 +280,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				|| (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID)) {
 			return v;
 		}
+
+		if (viewType == ViewType.SMS_TOGGLE) {
+			smsToggleSubtext = holder.messageTextView;
+
+			boolean smsToggleOn = PreferenceManager
+					.getDefaultSharedPreferences(context).getBoolean(
+							HikeConstants.SEND_SMS_PREF, false);
+			holder.smsToggle.setChecked(smsToggleOn);
+			setSmsToggleSubtext(smsToggleOn);
+
+			holder.smsToggle.setOnCheckedChangeListener(this);
+			return v;
+		}
+
 		if (shouldDisplayTimestamp(position)) {
 			String dateFormatted = convMessage.getTimestampFormatted(false);
 			holder.timestampTextView.setText(dateFormatted.toUpperCase());
@@ -1002,4 +1030,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	public boolean onLongClick(View view) {
 		return false;
 	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(context)
+				.edit();
+		editor.putBoolean(HikeConstants.SEND_SMS_PREF, isChecked);
+		editor.commit();
+
+		setSmsToggleSubtext(isChecked);
+	}
+
+	private void setSmsToggleSubtext(boolean isChecked) {
+		smsToggleSubtext.setText(isChecked ? R.string.sms_toggle_on_subtext
+				: R.string.sms_toggle_off_subtext);
+	}
+
 }

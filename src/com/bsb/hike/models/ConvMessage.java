@@ -21,6 +21,8 @@ import com.bsb.hike.utils.Utils;
 
 public class ConvMessage {
 
+	public static final int SMS_TOGGLE_ID = -119;
+
 	private long msgID; // this corresponds to msgID stored in sender's DB
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
