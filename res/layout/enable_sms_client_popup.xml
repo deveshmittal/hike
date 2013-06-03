@@ -19,21 +19,9 @@
     <com.bsb.hike.view.CustomFontTextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_margin="8dp"
         android:text="@string/use_hike_for_sms_info"
         android:textColor="#333333"
-        android:textSize="14sp" />
-
-    <com.bsb.hike.view.CustomFontTextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:text="@string/find_more"
-        android:textColor="@color/popup_header"
         android:textSize="14sp" />
 
     <include layout="@layout/sms_popup_divider" />
