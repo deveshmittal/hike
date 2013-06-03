@@ -93,6 +93,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -134,6 +135,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
@@ -301,6 +303,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private DialogShowing dialogShowing;
 
 	private Dialog smsDialog;
+
+	private Dialog nativeSmsDialog;
 
 	@Override
 	protected void onPause() {
@@ -491,6 +495,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (smsDialog != null) {
 			smsDialog.cancel();
 			smsDialog = null;
+		}
+		if (nativeSmsDialog != null) {
+			nativeSmsDialog.cancel();
+			nativeSmsDialog = null;
 		}
 	}
 
@@ -968,6 +976,58 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView.getText()));
 	}
 
+	private void showSendingNativeSMSPopup(final String message) {
+		nativeSmsDialog = new Dialog(this, R.style.Theme_CustomDialog);
+		nativeSmsDialog.setContentView(R.layout.sms_undelivered_popup);
+		nativeSmsDialog.setCancelable(true);
+
+		View hikeSMS1 = nativeSmsDialog.findViewById(R.id.hike_sms_container1);
+		View hikeSMS2 = nativeSmsDialog.findViewById(R.id.hike_sms_container2);
+		View orContainer = nativeSmsDialog.findViewById(R.id.or_container);
+
+		TextView nativeSmsTextHead = (TextView) nativeSmsDialog
+				.findViewById(R.id.native_sms_head_text);
+		TextView nativeSmsText = (TextView) nativeSmsDialog
+				.findViewById(R.id.native_sms_text);
+		CheckBox sendNative = (CheckBox) nativeSmsDialog
+				.findViewById(R.id.native_sms_checkbox);
+		ImageView avatar = (ImageView) nativeSmsDialog
+				.findViewById(R.id.avatar);
+		final Button sendBtn = (Button) nativeSmsDialog
+				.findViewById(R.id.btn_send);
+
+		String userMsisdn = prefs
+				.getString(HikeMessengerApp.MSISDN_SETTING, "");
+		avatar.setImageDrawable(IconCacheManager.getInstance()
+				.getIconForMSISDN(userMsisdn));
+
+		hikeSMS1.setVisibility(View.GONE);
+		hikeSMS2.setVisibility(View.GONE);
+		orContainer.setVisibility(View.GONE);
+		sendNative.setVisibility(View.GONE);
+
+		String username = prefs.getString(HikeMessengerApp.NAME_SETTING, "");
+
+		nativeSmsTextHead.setText(username);
+		nativeSmsText.setText(message);
+
+		sendBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Editor editor = prefs.edit();
+				editor.putBoolean(
+						HikeMessengerApp.SHOWN_SENDING_NATIVE_SMS_POPUP, true);
+				editor.commit();
+				nativeSmsDialog.dismiss();
+
+				onSendClick(null);
+			}
+		});
+
+		nativeSmsDialog.show();
+	}
+
 	public void onSendClick(View v) {
 		if ((!mConversation.isOnhike() && mCredits <= 0)
 				|| (TextUtils.isEmpty(mComposeView.getText()))) {
@@ -975,21 +1035,32 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 
 		String message = mComposeView.getText().toString();
-		mComposeView.setText("");
 
-		long time = (long) System.currentTimeMillis() / 1000;
-		ConvMessage convMessage = new ConvMessage(message, mContactNumber,
-				time, ConvMessage.State.SENT_UNCONFIRMED);
-		convMessage.setConversation(mConversation);
-		convMessage.setSMS(mConversation == null || !mConversation.isOnhike());
-		sendMessage(convMessage);
+		if (!mConversation.isOnhike()
+				&& PreferenceManager.getDefaultSharedPreferences(this)
+						.getBoolean(HikeConstants.SEND_SMS_PREF, false)
+				&& !prefs.getBoolean(
+						HikeMessengerApp.SHOWN_SENDING_NATIVE_SMS_POPUP, false)) {
+			showSendingNativeSMSPopup(message);
+		} else {
+			mComposeView.setText("");
 
-		if (mComposeViewWatcher != null) {
-			mComposeViewWatcher.onMessageSent();
-		}
-		if (emoticonLayout != null
-				&& emoticonLayout.getVisibility() == View.VISIBLE) {
-			onEmoticonBtnClicked(null, 0);
+			long time = (long) System.currentTimeMillis() / 1000;
+			ConvMessage convMessage = new ConvMessage(message, mContactNumber,
+					time, ConvMessage.State.SENT_UNCONFIRMED);
+			convMessage.setConversation(mConversation);
+			convMessage.setSMS(mConversation == null
+					|| !mConversation.isOnhike());
+
+			sendMessage(convMessage);
+
+			if (mComposeViewWatcher != null) {
+				mComposeViewWatcher.onMessageSent();
+			}
+			if (emoticonLayout != null
+					&& emoticonLayout.getVisibility() == View.VISIBLE) {
+				onEmoticonBtnClicked(null, 0);
+			}
 		}
 	}
 

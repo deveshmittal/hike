@@ -209,6 +209,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOWN_SMS_CLIENT_POPUP = "shownSMSClientPopup";
 	public static final String SHOWN_SMS_SYNC_POPUP = "shownSMSSyncPopup";
 
+	public static final String SHOWN_SENDING_NATIVE_SMS_POPUP = "shownSendingNativeSMSPopup";
+
 	private static Facebook facebook;
 
 	private static Twitter twitter;
