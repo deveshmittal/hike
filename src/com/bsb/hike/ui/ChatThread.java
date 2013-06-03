@@ -3616,6 +3616,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		ConvMessage convMessage = new ConvMessage(getString(R.string.poke_msg),
 				mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
+		convMessage.setSMS(mConversation == null || !mConversation.isOnhike());
 		convMessage.setConversation(mConversation);
 
 		JSONObject metadata = new JSONObject();
