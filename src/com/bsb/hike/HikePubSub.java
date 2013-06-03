@@ -222,7 +222,9 @@ public class HikePubSub implements Runnable {
 
 	public static final String DRAWER_ANIMATION_COMPLETE = "drawerAnimationComplete";
 
-	public static final String REFRESH_CONVERSATIONS = "refreshConversations";
+	public static final String SMS_SYNC_COMPLETE = "smsSyncComplete";
+
+	public static final String SMS_SYNC_FAIL = "smsSyncFail";
 
 	public static final String SEND_HIKE_SMS_FALLBACK = "sendHikeSMSFallback";
 

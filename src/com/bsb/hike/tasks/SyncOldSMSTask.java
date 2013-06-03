@@ -116,10 +116,12 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState> {
 	@Override
 	protected void onPostExecute(SMSSyncState result) {
 		if (result != SMSSyncState.SUCCESSFUL) {
+			HikeMessengerApp.getPubSub()
+					.publish(HikePubSub.SMS_SYNC_FAIL, null);
 			return;
 		}
-		HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_CONVERSATIONS,
-				null);
+		HikeMessengerApp.getPubSub()
+				.publish(HikePubSub.SMS_SYNC_COMPLETE, null);
 	}
 
 	private void extractCursorData(Cursor cursor, boolean inbox) {
