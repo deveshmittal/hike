@@ -738,7 +738,8 @@ public class MqttMessagesManager {
 					Log.w(getClass().getSimpleName(),
 							"Exception while posting ab", e);
 				}
-			} else if (data.optBoolean(HikeConstants.PUSH)) {
+			}
+			if (data.optBoolean(HikeConstants.PUSH)) {
 				Editor editor = settings.edit();
 				editor.putBoolean(HikeMessengerApp.GCM_ID_SENT, false);
 				editor.commit();
