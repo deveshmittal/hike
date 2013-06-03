@@ -37,7 +37,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -83,12 +86,16 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -109,6 +116,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
 import com.bsb.hike.tasks.CheckForUpdateTask;
+import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.ui.SignupActivity;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils.AccountInfo;
@@ -1893,5 +1901,66 @@ public class Utils {
 
 	public static boolean isContactInternational(String msisdn) {
 		return !msisdn.startsWith("+91");
+	}
+
+	public static Dialog showSMSSyncDialog(final Context context,
+			boolean syncConfirmation) {
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.pull_in_sms);
+
+		final View btnContainer = dialog.findViewById(R.id.button_container);
+
+		final ProgressBar syncProgress = (ProgressBar) dialog
+				.findViewById(R.id.sync_progress);
+		final TextView info = (TextView) dialog
+				.findViewById(R.id.import_sms_info);
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		setupSyncDialogLayout(syncConfirmation, btnContainer, syncProgress,
+				info);
+
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				HikeMessengerApp.getPubSub().publish(HikePubSub.SMS_SYNC_START,
+						null);
+
+				new SyncOldSMSTask(context).execute();
+
+				setupSyncDialogLayout(false, btnContainer, syncProgress, info);
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				Editor editor = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, true);
+				editor.commit();
+			}
+		});
+
+		dialog.show();
+		return dialog;
+	}
+
+	private static void setupSyncDialogLayout(boolean syncConfirmation,
+			View btnContainer, ProgressBar syncProgress, TextView info) {
+		btnContainer.setVisibility(syncConfirmation ? View.VISIBLE : View.GONE);
+		syncProgress.setVisibility(syncConfirmation ? View.GONE : View.VISIBLE);
+		info.setText(syncConfirmation ? R.string.import_sms_info
+				: R.string.importing_sms_info);
 	}
 }

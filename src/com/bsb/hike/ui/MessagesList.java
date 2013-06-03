@@ -54,7 +54,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,7 +74,6 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
-import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
@@ -131,7 +129,7 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.RESET_NOTIFICATION_COUNTER,
 			HikePubSub.DECREMENT_NOTIFICATION_COUNTER,
 			HikePubSub.DRAWER_ANIMATION_COMPLETE, HikePubSub.SMS_SYNC_COMPLETE,
-			HikePubSub.SMS_SYNC_FAIL };
+			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START };
 
 	private Dialog updateAlert;
 
@@ -449,66 +447,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION;
 		}
 
-		dialog = new Dialog(this, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.pull_in_sms);
-
-		final View btnContainer = dialog.findViewById(R.id.button_container);
-
-		final ProgressBar syncProgress = (ProgressBar) dialog
-				.findViewById(R.id.sync_progress);
-		final TextView info = (TextView) dialog
-				.findViewById(R.id.import_sms_info);
-		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
-		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
-
-		setupSyncDialogLayout(dialogShowing, btnContainer, syncProgress, info);
-
-		okBtn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				dialogShowing = DialogShowing.SMS_SYNCING;
-
-				new SyncOldSMSTask(MessagesList.this).execute();
-
-				setupSyncDialogLayout(dialogShowing, btnContainer,
-						syncProgress, info);
-			}
-		});
-
-		cancelBtn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
-
-		dialog.setOnDismissListener(new OnDismissListener() {
-
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				dialogShowing = null;
-
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, true);
-				editor.commit();
-			}
-		});
-		dialog.show();
-	}
-
-	private void setupSyncDialogLayout(DialogShowing dialogShowing,
-			View btnContainer, ProgressBar syncProgress, TextView info) {
-		btnContainer
-				.setVisibility(dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION ? View.VISIBLE
-						: View.GONE);
-		syncProgress
-				.setVisibility(dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION ? View.GONE
-						: View.VISIBLE);
-
-		info.setText(dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION ? R.string.import_sms_info
-				: R.string.importing_sms_info);
+		dialog = Utils.showSMSSyncDialog(this,
+				dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION);
 	}
 
 	private void fetchConversations(boolean addFooter) {
@@ -847,6 +787,7 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 		if (dialog != null) {
 			dialog.cancel();
+			dialog = null;
 		}
 		HikeMessengerApp.getPubSub().removeListeners(MessagesList.this,
 				pubSubListeners);
@@ -1233,6 +1174,8 @@ public class MessagesList extends DrawerBaseActivity implements
 					dialogShowing = null;
 				}
 			});
+		} else if (HikePubSub.SMS_SYNC_START.equals(type)) {
+			dialogShowing = DialogShowing.SMS_SYNCING;
 		}
 	}
 
