@@ -895,9 +895,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.image.setAnimation(null);
 					holder.image.setVisibility(View.VISIBLE);
 				}
-				if (!convMessage.isSMS() && position == lastSentMessagePosition) {
-					if (convMessage.getState().ordinal() < State.SENT_DELIVERED
-							.ordinal()) {
+				if (position == lastSentMessagePosition) {
+					if (isMessageUndelivered(convMessage)) {
 						View container = metadata != null
 								&& metadata.isPokeMessage() ? holder.poke
 								: holder.messageContainer;
@@ -1039,10 +1038,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (convMessage.isSent()
 					&& convMessage.equals(convMessages
 							.get(lastSentMessagePosition))) {
-				if (!Utils.isUserOnline(context)) {
-					showSMSDialog(true);
+				if (conversation.isOnhike()) {
+					if (!Utils.isUserOnline(context)) {
+						showSMSDialog(true);
+					} else {
+						showSMSDialog(false);
+					}
 				} else {
-					showSMSDialog(false);
+					sendAllUnsentMessagesAsSMS(PreferenceManager
+							.getDefaultSharedPreferences(context).getBoolean(
+									HikeConstants.SEND_SMS_PREF, false));
 				}
 				return;
 			}
@@ -1208,8 +1213,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			ConvMessage lastSentMessage = convMessages
 					.get(lastSentMessagePosition);
-			if (lastSentMessage.getState().ordinal() < State.SENT_DELIVERED
-					.ordinal()) {
+			if (isMessageUndelivered(lastSentMessage)) {
 				showUndeliveredTextAndSetClick(tv, container);
 			}
 		}
@@ -1232,13 +1236,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		 */
 		ConvMessage secondLastSentMessage = convMessages
 				.get(lastSentMessagePosition - 1);
-		if (secondLastSentMessage.isSent()
-				&& !secondLastSentMessage.isSMS()
-				&& secondLastSentMessage.getState().ordinal() < State.SENT_DELIVERED
-						.ordinal()) {
-			return R.string.msg_undelivered_multiple;
+		if (isMessageUndelivered(secondLastSentMessage)) {
+			return conversation.isOnhike() ? R.string.msg_undelivered_multiple
+					: R.string.sms_undelivered_multiple;
 		} else {
-			return R.string.msg_undelivered;
+			return conversation.isOnhike() ? R.string.msg_undelivered
+					: R.string.sms_undelivered;
 		}
 	}
 
@@ -1390,19 +1393,43 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
 		for (int i = lastSentMessagePosition; i >= 0; i--) {
 			ConvMessage convMessage = convMessages.get(i);
-			if (!convMessage.isSent() || convMessage.isSMS()) {
+			if (!convMessage.isSent()) {
 				break;
 			}
-			if (convMessage.getState().ordinal() >= State.SENT_DELIVERED
-					.ordinal()) {
+			if (!isMessageUndelivered(convMessage)) {
 				break;
+			}
+			if (convMessage.getState().ordinal() < State.SENT_CONFIRMED
+					.ordinal()) {
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 			}
 			unsentMessages.add(convMessage);
 		}
 		Log.d(getClass().getSimpleName(),
 				"Unsent messages: " + unsentMessages.size());
-		HikeMessengerApp.getPubSub().publish(
-				nativeSMS ? HikePubSub.SEND_NATIVE_SMS_FALLBACK
-						: HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
+
+		if (nativeSMS) {
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.SEND_NATIVE_SMS_FALLBACK, unsentMessages);
+		} else {
+			if (conversation.isOnhike()) {
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.SEND_HIKE_SMS_FALLBACK, unsentMessages);
+			} else {
+				for (ConvMessage convMessage : unsentMessages) {
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.MQTT_PUBLISH, convMessage.serialize());
+					convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+				}
+				notifyDataSetChanged();
+			}
+		}
+	}
+
+	private boolean isMessageUndelivered(ConvMessage convMessage) {
+		return (!convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_DELIVERED
+				.ordinal())
+				|| (convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_CONFIRMED
+						.ordinal());
 	}
 }

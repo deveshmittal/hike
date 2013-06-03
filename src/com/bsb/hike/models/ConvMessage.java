@@ -359,6 +359,10 @@ public class ConvMessage {
 		return mIsSent;
 	}
 
+	public void setTimestamp(long timeStamp) {
+		this.mTimestamp = timeStamp;
+	}
+
 	public long getTimestamp() {
 		return this.mTimestamp;
 	}
