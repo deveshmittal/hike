@@ -319,14 +319,9 @@ public class ConvMessage {
 
 	public void setMetadata(JSONObject metadata) throws JSONException {
 		if (metadata != null) {
-			Log.d(getClass().getSimpleName(),
-					"Metadata: " + metadata.toString());
-
 			this.metadata = new MessageMetadata(metadata);
 
 			isFileTransferMessage = this.metadata.getHikeFiles() != null;
-			Log.d(getClass().getSimpleName(), "File Transfer: "
-					+ isFileTransferMessage);
 
 			participantInfoState = this.metadata.getParticipantInfoState();
 		}
