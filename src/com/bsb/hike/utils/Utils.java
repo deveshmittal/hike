@@ -1881,4 +1881,13 @@ public class Utils {
 		editor.commit();
 
 	}
+
+	public static void setSendUndeliveredSmsSetting(Context context,
+			boolean value) {
+		Editor editor = PreferenceManager.getDefaultSharedPreferences(context)
+				.edit();
+		editor.putBoolean(HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF,
+				value);
+		editor.commit();
+	}
 }
