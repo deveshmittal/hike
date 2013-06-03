@@ -72,6 +72,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
+import com.bsb.hike.tasks.SyncOldSMSTask;
 import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
@@ -122,7 +123,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.RESET_NOTIFICATION_COUNTER,
 			HikePubSub.DECREMENT_NOTIFICATION_COUNTER,
-			HikePubSub.DRAWER_ANIMATION_COMPLETE };
+			HikePubSub.DRAWER_ANIMATION_COMPLETE, HikePubSub.SMS_SYNC_COMPLETE,
+			HikePubSub.SMS_SYNC_FAIL };
 
 	private Dialog updateAlert;
 
@@ -311,62 +313,13 @@ public class MessagesList extends DrawerBaseActivity implements
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		if (mAdapter == null || mConversationsByMSISDN == null
-				|| mConversationsAdded == null) {
-			HikeConversationsDatabase db = HikeConversationsDatabase
-					.getInstance();
-			List<Conversation> conversations = db.getConversations();
+		fetchConversations(true);
 
-			mConversationsByMSISDN = new HashMap<String, Conversation>(
-					conversations.size());
-			mConversationsAdded = new HashSet<String>();
-
-			/*
-			 * Use an iterator so we can remove conversations w/ no messages
-			 * from our list
-			 */
-			for (Iterator<Conversation> iter = conversations.iterator(); iter
-					.hasNext();) {
-				Conversation conv = (Conversation) iter.next();
-				mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-				if (conv.getMessages().isEmpty()
-						&& !(conv instanceof GroupConversation)) {
-					iter.remove();
-				} else {
-					mConversationsAdded.add(conv.getMsisdn());
-				}
-			}
-
-			mAdapter = new ConversationsAdapter(MessagesList.this,
-					R.layout.conversation_item, conversations, parentLayout);
-
-			HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
-					pubSubListeners);
-		}
 		/*
 		 * we need this object every time a message comes in, seems simplest to
 		 * just create it once
 		 */
 		mConversationsComparator = new Conversation.ConversationComparator();
-
-		/*
-		 * because notifyOnChange gets re-enabled whenever we call
-		 * notifyDataSetChanged it's simpler to assume it's set to false and
-		 * always notifyOnChange by hand
-		 */
-		mAdapter.setNotifyOnChange(false);
-
-		View footerView = getLayoutInflater().inflate(
-				R.layout.conversation_list_footer, null);
-		AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(
-				AbsListView.LayoutParams.MATCH_PARENT, (int) getResources()
-						.getDimension(R.dimen.conversation_footer_height));
-		footerView.setLayoutParams(layoutParams);
-		mConversationsView.addFooterView(footerView);
-
-		mConversationsView.setAdapter(mAdapter);
-
-		mConversationsView.setOnItemLongClickListener(this);
 
 		/*
 		 * Calling this manually since this method is not called when the
@@ -400,7 +353,63 @@ public class MessagesList extends DrawerBaseActivity implements
 			 * was just launched i.e not an orientation change
 			 */
 			AppRater.appLaunched(this);
+	}
+
+	private void fetchConversations(boolean addFooter) {
+		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
+		List<Conversation> conversations = db.getConversations();
+
+		mConversationsByMSISDN = new HashMap<String, Conversation>(
+				conversations.size());
+		mConversationsAdded = new HashSet<String>();
+
+		/*
+		 * Use an iterator so we can remove conversations w/ no messages from
+		 * our list
+		 */
+		for (Iterator<Conversation> iter = conversations.iterator(); iter
+				.hasNext();) {
+			Conversation conv = (Conversation) iter.next();
+			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+			if (conv.getMessages().isEmpty()
+					&& !(conv instanceof GroupConversation)) {
+				iter.remove();
+			} else {
+				mConversationsAdded.add(conv.getMsisdn());
+			}
 		}
+
+		if (mAdapter != null) {
+			mAdapter.clear();
+		}
+
+		mAdapter = new ConversationsAdapter(MessagesList.this,
+				R.layout.conversation_item, conversations, parentLayout);
+
+		/*
+		 * because notifyOnChange gets re-enabled whenever we call
+		 * notifyDataSetChanged it's simpler to assume it's set to false and
+		 * always notifyOnChange by hand
+		 */
+		mAdapter.setNotifyOnChange(false);
+
+		if (addFooter) {
+			View footerView = getLayoutInflater().inflate(
+					R.layout.conversation_list_footer, null);
+			AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(
+					AbsListView.LayoutParams.MATCH_PARENT, (int) getResources()
+							.getDimension(R.dimen.conversation_footer_height));
+			footerView.setLayoutParams(layoutParams);
+
+			mConversationsView.addFooterView(footerView);
+		}
+
+		mConversationsView.setAdapter(mAdapter);
+
+		mConversationsView.setOnItemLongClickListener(this);
+
+		HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
+				pubSubListeners);
 	}
 
 	public void onFavoriteIntroClick(View v) {
@@ -1032,6 +1041,35 @@ public class MessagesList extends DrawerBaseActivity implements
 				public void run() {
 					showReceivedMessages(receivedMsgWhileAnimating);
 					mAdapter.drawerAnimationComplete();
+				}
+			});
+		} else if (HikePubSub.SMS_SYNC_COMPLETE.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (dialog != null) {
+						dialog.dismiss();
+					}
+					dialogShowing = null;
+					/*
+					 * We don't want the activity to receive any pubsub event
+					 * while refreshing the list.
+					 */
+					HikeMessengerApp.getPubSub().removeListeners(
+							MessagesList.this, pubSubListeners);
+					fetchConversations(false);
+				}
+			});
+		} else if (HikePubSub.SMS_SYNC_FAIL.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (dialog != null) {
+						dialog.dismiss();
+					}
+					dialogShowing = null;
 				}
 			});
 		}
