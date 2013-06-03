@@ -11,13 +11,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
@@ -39,6 +36,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.service.SmsMessageStatusReceiver;
 import com.bsb.hike.utils.AccountUtils;
 
 public class DbConversationListener implements Listener {
@@ -66,9 +64,6 @@ public class DbConversationListener implements Listener {
 		dayRecorded = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getInt(
 				HikeMessengerApp.DAY_RECORDED, 0);
-
-		context.registerReceiver(smsMessageStatusReceiver, new IntentFilter(
-				SMS_SENT_ACTION));
 
 		mPubSub.addListener(HikePubSub.MESSAGE_SENT, this);
 		mPubSub.addListener(HikePubSub.DELETE_MESSAGE, this);
@@ -373,10 +368,11 @@ public class DbConversationListener implements Listener {
 		ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
 
 		for (int i = 0; i < messages.size(); i++) {
-			Intent intent = new Intent(SMS_SENT_ACTION);
+			Intent intent = new Intent(SMS_SENT_ACTION + convMessage.getMsgID());
+			intent.setClass(context, SmsMessageStatusReceiver.class);
 			intent.putExtra(HikeConstants.Extras.SMS_ID, convMessage.getMsgID());
-			pendingIntents.add(PendingIntent
-					.getBroadcast(context, 0, intent, 0));
+			pendingIntents.add(PendingIntent.getBroadcast(context, 0, intent,
+					PendingIntent.FLAG_CANCEL_CURRENT));
 		}
 
 		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
@@ -448,26 +444,4 @@ public class DbConversationListener implements Listener {
 				HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);
 	}
 
-	private BroadcastReceiver smsMessageStatusReceiver = new BroadcastReceiver() {
-		public void onReceive(Context context, Intent intent) {
-			long msgId = intent.getLongExtra(HikeConstants.Extras.SMS_ID, -1);
-			switch (getResultCode()) {
-			case Activity.RESULT_OK:
-				mPubSub.publish(HikePubSub.SERVER_RECEIVED_MSG, msgId);
-
-				if (msgId != -1) {
-					persistence.removeMessage(msgId);
-				}
-				break;
-			case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-				break;
-			case SmsManager.RESULT_ERROR_NO_SERVICE:
-				break;
-			case SmsManager.RESULT_ERROR_NULL_PDU:
-				break;
-			case SmsManager.RESULT_ERROR_RADIO_OFF:
-				break;
-			}
-		}
-	};
 }

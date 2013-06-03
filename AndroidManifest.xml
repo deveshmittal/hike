@@ -228,6 +228,9 @@
                   android:theme="@android:style/Theme.Translucent.NoTitleBar"
                   android:label="@string/app_name" />
 		<meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
+		
+		<receiver android:name=".service.SmsMessageStatusReceiver" />
+
     </application>
 
 </manifest>
