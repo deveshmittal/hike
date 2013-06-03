@@ -138,9 +138,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " INTEGER, " + DBConstants.MOOD_ID + " INTEGER, "
 				+ DBConstants.TIME_OF_DAY + " INTEGER" + " )";
 		db.execSQL(sql);
-		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.STATUS_INDEX
-				+ " ON " + DBConstants.STATUS_TABLE + " ( "
-				+ DBConstants.MSISDN + " ) ";
+		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.STATUS_INDEX + " ON "
+				+ DBConstants.STATUS_TABLE + " ( " + DBConstants.MSISDN + " ) ";
 		db.execSQL(sql);
 	}
 
@@ -413,12 +412,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn,
 			JSONArray msgIds) {
-		Cursor c = mDb.query(
-				DBConstants.MESSAGES_TABLE,
-				new String[] { DBConstants.MESSAGE_ID },
-				DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID
-						+ " FROM " + DBConstants.CONVERSATIONS_TABLE
-						+ " WHERE " + DBConstants.MSISDN + "=? ) AND "
+		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE,
+				new String[] { DBConstants.MESSAGE_ID }, DBConstants.CONV_ID
+						+ " = (SELECT " + DBConstants.CONV_ID + " FROM "
+						+ DBConstants.CONVERSATIONS_TABLE + " WHERE "
+						+ DBConstants.MSISDN + "=? ) AND "
 						+ DBConstants.MSG_STATUS + "<"
 						+ State.SENT_DELIVERED_READ.ordinal(),
 				new String[] { msisdn }, null, null, null);
