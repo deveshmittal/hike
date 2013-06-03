@@ -103,6 +103,7 @@ public class HikeConstants {
 	public static final String DEVICE_VERSION = "deviceversion";
 	public static final String CRICKET_MOODS = "cmoods";
 	public static final String COUNT = "c";
+	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -427,6 +428,7 @@ public class HikeConstants {
 		public static final String NUX1_NUMBERS = "nux1Numbers";
 		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
 		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
+		public static final String DIALOG_SHOWING = "dialogShowing";
 		public static final String SMS_ID = "smsId";
 	}
 

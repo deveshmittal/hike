@@ -18,6 +18,7 @@ import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -31,6 +32,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -52,6 +54,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -82,6 +85,10 @@ public class MessagesList extends DrawerBaseActivity implements
 		OnClickListener, OnItemClickListener, HikePubSub.Listener,
 		android.content.DialogInterface.OnClickListener, Runnable,
 		OnItemLongClickListener {
+	private enum DialogShowing {
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING
+	}
+
 	public static final Object COMPOSE = "compose";
 
 	private ConversationsAdapter mAdapter;
@@ -137,6 +144,10 @@ public class MessagesList extends DrawerBaseActivity implements
 	private int notificationCount;
 
 	private String userMsisdn;
+
+	private DialogShowing dialogShowing;
+
+	private Dialog dialog;
 
 	@Override
 	protected void onPause() {
@@ -260,6 +271,13 @@ public class MessagesList extends DrawerBaseActivity implements
 					.getBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED);
 			nuxNumbersInvited = savedInstanceState
 					.getBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED);
+			int dialogShowingOrdinal = savedInstanceState
+					.getInt(HikeConstants.Extras.DIALOG_SHOWING);
+			if (dialogShowingOrdinal != -1) {
+				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
+			} else {
+				dialogShowing = null;
+			}
 		}
 
 		int updateTypeAvailable = accountPrefs.getInt(
@@ -347,12 +365,150 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (!accountPrefs
 				.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)) {
 			findViewById(R.id.friend_intro).setVisibility(View.VISIBLE);
-		} else if (savedInstanceState == null) {
+		} else if (savedInstanceState == null && dialogShowing == null) {
 			/*
 			 * Only show app rater if the tutorial is not being shown an the app
 			 * was just launched i.e not an orientation change
 			 */
 			AppRater.appLaunched(this);
+		} else if (dialogShowing != null) {
+			switch (dialogShowing) {
+			case SMS_CLIENT:
+				showSMSClientDialog();
+				break;
+
+			case SMS_SYNC_CONFIRMATION:
+			case SMS_SYNCING:
+				showSMSSyncDialog();
+				break;
+			}
+		}
+
+		if (!AppRater.showingDialog() && dialogShowing == null) {
+			if (!accountPrefs.getBoolean(
+					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
+				showSMSClientDialog();
+			}
+		}
+	}
+
+	private void showSMSClientDialog() {
+		dialogShowing = DialogShowing.SMS_CLIENT;
+
+		dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.sms_with_hike_popup);
+		dialog.setCancelable(false);
+
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(getApplicationContext(), true);
+
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(
+						getApplicationContext()).edit();
+				editor.putBoolean(HikeConstants.SEND_SMS_PREF, true);
+				editor.commit();
+
+				dialogShowing = null;
+				dialog.dismiss();
+				if (!accountPrefs.getBoolean(
+						HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
+					showSMSSyncDialog();
+				}
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(getApplicationContext(), false);
+				dialogShowing = null;
+				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true);
+				editor.commit();
+			}
+		});
+		dialog.show();
+	}
+
+	private void showSMSSyncDialog() {
+		if (dialogShowing == null) {
+			dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION;
+		}
+
+		dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.pull_in_sms);
+
+		final View btnContainer = dialog.findViewById(R.id.button_container);
+
+		final ProgressBar syncProgress = (ProgressBar) dialog
+				.findViewById(R.id.sync_progress);
+		final TextView info = (TextView) dialog
+				.findViewById(R.id.import_sms_info);
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		setupSyncDialogLayout(dialogShowing, btnContainer, syncProgress, info);
+
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialogShowing = DialogShowing.SMS_SYNCING;
+
+				new SyncOldSMSTask(MessagesList.this).execute();
+
+				setupSyncDialogLayout(dialogShowing, btnContainer,
+						syncProgress, info);
+			}
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				dialogShowing = null;
+
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, true);
+				editor.commit();
+			}
+		});
+		dialog.show();
+	}
+
+	private void setupSyncDialogLayout(DialogShowing dialogShowing,
+			View btnContainer, ProgressBar syncProgress, TextView info) {
+		btnContainer
+				.setVisibility(dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION ? View.VISIBLE
+						: View.GONE);
+		syncProgress
+				.setVisibility(dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION ? View.GONE
+						: View.VISIBLE);
+
+		info.setText(dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION ? R.string.import_sms_info
+				: R.string.importing_sms_info);
 	}
 
 	private void fetchConversations(boolean addFooter) {
@@ -562,6 +718,8 @@ public class MessagesList extends DrawerBaseActivity implements
 				introMessageAdded);
 		outState.putBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED,
 				nuxNumbersInvited);
+		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
+				dialogShowing != null ? dialogShowing.ordinal() : -1);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -686,6 +844,9 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (accountPrefs != null) {
 			Utils.incrementNumTimesScreenOpen(accountPrefs,
 					HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+		}
+		if (dialog != null) {
+			dialog.cancel();
 		}
 		HikeMessengerApp.getPubSub().removeListeners(MessagesList.this,
 				pubSubListeners);

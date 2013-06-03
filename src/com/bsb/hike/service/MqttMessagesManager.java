@@ -480,6 +480,9 @@ public class MqttMessagesManager {
 						data.getString(HikeConstants.TOTAL_CREDITS_PER_MONTH));
 				inviteeNumChanged = true;
 			}
+			if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL)) {
+				setDefaultSMSClientTutorialSetting();
+			}
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
 				if (account.has(HikeConstants.ICON)) {
@@ -746,6 +749,9 @@ public class MqttMessagesManager {
 				context.sendBroadcast(new Intent(
 						HikeService.SEND_TO_SERVER_ACTION));
 			}
+			if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL)) {
+				setDefaultSMSClientTutorialSetting();
+			}
 		} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type)) {
 			StatusMessage statusMessage = new StatusMessage(jsonObj);
 			/*
@@ -835,6 +841,20 @@ public class MqttMessagesManager {
 			pubSub.publish(HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 					new Pair<String, String>(header, message));
 		}
+	}
+
+	private void setDefaultSMSClientTutorialSetting() {
+		/*
+		 * If settings already contains this key, no need to do anything since
+		 * this has already been handled.
+		 */
+		if (settings.contains(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP)) {
+			return;
+		}
+
+		Editor editor = settings.edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, false);
+		editor.commit();
 	}
 
 	private void removeOrPostponeFriendType(String msisdn) {
