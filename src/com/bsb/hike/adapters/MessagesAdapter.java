@@ -1192,9 +1192,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		setSmsToggleSubtext(isChecked);
 
-		if (isChecked
-				&& !prefs.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
-			showSMSClientDialog(true, buttonView);
+		if (isChecked) {
+			showSMSClientDialog(true, buttonView, true);
 		}
 	}
 
@@ -1358,7 +1357,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				} else {
 					if (!PreferenceManager.getDefaultSharedPreferences(context)
 							.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
-						showSMSClientDialog(false, null);
+						showSMSClientDialog(false, null, false);
 					} else {
 						sendAllUnsentMessagesAsSMS(true);
 						Utils.setSendUndeliveredSmsSetting(context, true);
@@ -1372,29 +1371,44 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	}
 
 	private void showSMSClientDialog(final boolean triggeredFromToggle,
-			final CompoundButton checkBox) {
+			final CompoundButton checkBox, final boolean showingNativeInfoDialog) {
 		final Dialog dialog = new Dialog(chatThread, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.enable_sms_client_popup);
 		dialog.setCancelable(false);
 
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		TextView body = (TextView) dialog.findViewById(R.id.body);
 		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
 		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		header.setText(showingNativeInfoDialog ? R.string.native_header
+				: R.string.use_hike_for_sms);
+		body.setText(showingNativeInfoDialog ? R.string.native_info
+				: R.string.use_hike_for_sms_info);
 
 		btnOk.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				Utils.setReceiveSmsSetting(context, true);
+				if (showingNativeInfoDialog) {
+					if (!PreferenceManager.getDefaultSharedPreferences(context)
+							.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
+						showSMSClientDialog(triggeredFromToggle, checkBox,
+								false);
+					}
+				} else {
+					Utils.setReceiveSmsSetting(context, true);
+					if (!triggeredFromToggle) {
+						sendAllUnsentMessagesAsSMS(true);
+					}
+					if (!context.getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+							HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
+					}
+				}
 				dialog.dismiss();
-				if (!triggeredFromToggle) {
-					sendAllUnsentMessagesAsSMS(true);
-				}
-				if (!context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
-						HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
-				}
 			}
 		});
 
@@ -1402,7 +1416,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			@Override
 			public void onClick(View v) {
-				Utils.setReceiveSmsSetting(context, false);
+				if (!showingNativeInfoDialog) {
+					Utils.setReceiveSmsSetting(context, false);
+				}
 				dialog.dismiss();
 				if (triggeredFromToggle) {
 					checkBox.setChecked(false);
