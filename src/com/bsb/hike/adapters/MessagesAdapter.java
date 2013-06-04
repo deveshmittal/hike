@@ -172,6 +172,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				lastSentMessagePosition = -1;
 				for (int i = convMessages.size() - 1; i >= 0; i--) {
 					ConvMessage convMessage = convMessages.get(i);
+					if (convMessage == null) {
+						continue;
+					}
 					if (convMessage.isSent()) {
 						lastSentMessagePosition = i;
 						break;
