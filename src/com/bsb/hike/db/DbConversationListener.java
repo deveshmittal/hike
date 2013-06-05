@@ -311,11 +311,8 @@ public class DbConversationListener implements Listener {
 
 				JSONArray messagesArray = new JSONArray();
 
-				JSONObject messageJSON = new JSONObject();
-
-				messageJSON.put(HikeConstants.HIKE_MESSAGE,
-						convMessage.getMessage());
-				messageJSON.put(HikeConstants.ID, convMessage.getMsgID());
+				JSONObject messageJSON = convMessage.serialize().getJSONObject(
+						HikeConstants.DATA);
 
 				messagesArray.put(messageJSON);
 
