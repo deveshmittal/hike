@@ -1324,8 +1324,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 		}
 
-		hikeSmsText.setText(context.getString(R.string.hike_sms_preview,
-				username));
+		hikeSmsText.setText(convMessages.get(lastSentMessagePosition)
+				.getMessage());
 		nativeSmsTextHead.setText(username);
 		nativeSmsText.setText(convMessages.get(lastSentMessagePosition)
 				.getMessage());
