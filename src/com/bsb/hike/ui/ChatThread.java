@@ -172,7 +172,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private ComposeViewWatcher mComposeViewWatcher;
 
 	/* View element */
-	private Button mSendBtn;
+	private ImageButton mSendBtn;
 
 	private int mCredits;
 
@@ -544,7 +544,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		mInputNumberContainer = (LinearLayout) findViewById(R.id.input_number_container);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
-		mSendBtn = (Button) findViewById(R.id.send_message);
+		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mLabelView = (TextView) findViewById(R.id.title);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
@@ -1465,9 +1465,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 			((ImageButton) findViewById(R.id.emo_btn))
 					.setImageResource(R.drawable.emoticon_hike_btn);
-			mSendBtn.setTextColor(getResources().getColorStateList(
-					R.color.send_hike));
-			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
+			mSendBtn.setImageResource(R.drawable.hike_msg_btn);
 			mComposeView
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
 							: R.string.hike_msg);
@@ -1484,9 +1482,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			updateChatMetadata();
 			((ImageButton) findViewById(R.id.emo_btn))
 					.setImageResource(R.drawable.emoticon_sms_btn);
-			mSendBtn.setTextColor(getResources().getColorStateList(
-					R.color.send_sms));
-			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn);
+			mSendBtn.setImageResource(R.drawable.sms_msg_btn);
 			mComposeView.setHint(R.string.sms_msg);
 		}
 	}

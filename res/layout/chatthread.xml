@@ -148,7 +148,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_compose_box"
-            android:padding="3dp" >
+            android:padding="4dp" >
 
             <RelativeLayout
                 android:id="@+id/compose_container"
@@ -156,21 +156,18 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/fg_compose_box" >
 
-                <com.bsb.hike.view.CustomFontButton
+                <ImageButton
                     android:id="@+id/send_message"
-                    android:layout_width="49dp"
-                    android:layout_height="33dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
                     android:layout_marginBottom="6dp"
                     android:layout_marginRight="4dp"
-                    android:background="@drawable/bg_send_hike_btn"
+                    android:src="@drawable/hike_msg_btn"
+                    android:background="@null"
                     android:onClick="onSendClick"
-                    android:state_enabled="false"
-                    android:text="@string/send"
-                    android:textColor="@drawable/send_hike_btn_txt"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:state_enabled="false" />
 
                 <ImageButton
                     android:id="@+id/emo_btn"

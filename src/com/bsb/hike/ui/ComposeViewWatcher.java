@@ -6,6 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -26,14 +27,14 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 
 	boolean mInitialized;
 
-	private Button mButton;
+	private ImageButton mButton;
 
 	private EditText mComposeView;
 
 	private int mCredits;
 
 	public ComposeViewWatcher(Conversation conversation, EditText composeView,
-			Button sendButton, int initialCredits) {
+			ImageButton sendButton, int initialCredits) {
 		this.mConversation = conversation;
 		this.mUIThreadHandler = new Handler();
 		this.mPubSub = HikeMessengerApp.getPubSub();
