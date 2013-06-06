@@ -525,6 +525,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			ChatThread.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
 		}
 
+		mHandler = new Handler();
+
 		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
 
@@ -2165,9 +2167,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	@Override
 	public void onShown() {
 		if (messages != null) {
-			if (mHandler == null) {
-				mHandler = new Handler();
-			}
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
