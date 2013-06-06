@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+
+    <View
+        android:id="@+id/divider_left"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/ic_button_divider" />
+
+    <ImageButton
+        android:id="@+id/category_btn"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_toRightOf="@id/divider_left"
+        android:background="@drawable/tab_selector"
+        android:gravity="center"
+        android:onClick="onStickerCategoryClick"
+        android:src="@drawable/ic_sticker_back" />
+
+</RelativeLayout>
