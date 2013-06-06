@@ -87,6 +87,7 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -608,7 +609,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.EMOTICON_SHOWING)) {
 				onEmoticonBtnClicked(null, savedInstanceState.getInt(
-						HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY, 0));
+						HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY, 0),
+						false);
 			}
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING)) {
@@ -707,7 +709,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 			finish();
 		} else {
-			onEmoticonBtnClicked(null, 0);
+			onEmoticonBtnClicked(null, 0, true);
 		}
 	}
 
@@ -1465,8 +1467,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 			removeSMSToggle();
 
-			((ImageButton) findViewById(R.id.emo_btn))
-					.setImageResource(R.drawable.emoticon_hike_btn);
+			setEmoticonButton();
 			mSendBtn.setImageResource(R.drawable.hike_msg_btn);
 			mComposeView
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
@@ -1482,8 +1483,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 		} else {
 			updateChatMetadata();
-			((ImageButton) findViewById(R.id.emo_btn))
-					.setImageResource(R.drawable.emoticon_sms_btn);
+			setEmoticonButton();
 			mSendBtn.setImageResource(R.drawable.sms_msg_btn);
 			mComposeView.setHint(R.string.sms_msg);
 		}
@@ -1492,6 +1492,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private void removeSMSToggle() {
 		if (!messages.isEmpty() && hasSMSToggle()) {
 			mAdapter.removeMessage(0);
+		}
+	}
+
+	private void setEmoticonButton() {
+		if (emoticonLayout != null
+				&& emoticonLayout.getVisibility() == View.VISIBLE) {
+			((ImageButton) findViewById(R.id.emo_btn))
+					.setImageResource(R.drawable.keyboard_btn);
+		} else {
+			((ImageButton) findViewById(R.id.emo_btn))
+					.setImageResource((mConversation.isOnhike() || (mConversation instanceof GroupConversation)) ? R.drawable.emoticon_hike_btn
+							: R.drawable.emoticon_sms_btn);
 		}
 	}
 
@@ -3514,10 +3526,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	public void onEmoticonBtnClicked(View v) {
-		onEmoticonBtnClicked(v, tabHost != null ? tabHost.getCurrentTab() : 0);
+		onEmoticonBtnClicked(v, tabHost != null ? tabHost.getCurrentTab() : 0,
+				false);
 	}
 
-	public void onEmoticonBtnClicked(View v, int whichSubcategory) {
+	public void onEmoticonBtnClicked(View v, int whichSubcategory,
+			boolean backPressed) {
 		// This will be -1 when the tab host was initialized, but not tabs were
 		// added to it.
 		if (whichSubcategory == -1) {
@@ -3603,7 +3617,19 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		if (emoticonLayout.getVisibility() == View.VISIBLE
 				&& !wasCategoryChanged) {
-			emoticonLayout.setVisibility(View.GONE);
+			mHandler.postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					emoticonLayout.setVisibility(View.GONE);
+					setEmoticonButton();
+				}
+			}, 65);
+			if (!backPressed) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+				imm.showSoftInput(mComposeView,
+						InputMethodManager.SHOW_IMPLICIT);
+			}
 		} else {
 			if (!wasCategoryChanged) {
 				Animation slideUp = AnimationUtils.loadAnimation(
@@ -3611,13 +3637,14 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				slideUp.setDuration(400);
 				emoticonLayout.setAnimation(slideUp);
 			}
-			new Handler().postDelayed(new Runnable() {
+			mHandler.postDelayed(new Runnable() {
 
 				@Override
 				public void run() {
 					emoticonLayout.setVisibility(View.VISIBLE);
+					setEmoticonButton();
 				}
-			}, 50);
+			}, 45);
 			Utils.hideSoftKeyboard(this, mComposeView);
 		}
 
@@ -3679,7 +3706,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		 */
 		tabHost.setCurrentTab(0);
 		tabHost.clearAllTabs();
-		onEmoticonBtnClicked(null, 0);
+		onEmoticonBtnClicked(null, 0, false);
 	}
 
 	private class TabFactory implements TabContentFactory {
