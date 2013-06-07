@@ -2599,7 +2599,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (recorder == null) {
 			recorder = new MediaRecorder();
 			recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
-			recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+			recorder.setOutputFormat(MediaRecorder.OutputFormat.RAW_AMR);
 			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 			recorder.setMaxDuration(HikeConstants.MAX_DURATION_RECORDING_SEC * 1000);
 			recorder.setMaxFileSize(HikeConstants.MAX_FILE_SIZE);
