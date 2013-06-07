@@ -40,9 +40,9 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.MoodAdapter;
-import com.bsb.hike.adapters.StatusEmojiAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
@@ -513,7 +513,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			if (whichSubcategory == 0) {
 				int startOffset = offset;
 				int endOffset = startOffset + emoticonsListSize;
-				int recentEmoticonsSizeReq = StatusEmojiAdapter.MAX_EMOTICONS_PER_ROW;
+				int recentEmoticonsSizeReq = EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT;
 				int[] recentEmoticons = HikeConversationsDatabase.getInstance()
 						.fetchEmoticonsOfType(EmoticonType.EMOJI, startOffset,
 								endOffset, recentEmoticonsSizeReq);
@@ -557,16 +557,19 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void setRecentlyUsedTextVisibility(int currentPage) {
-//		findViewById(R.id.recent_use_head).setVisibility(
-//				currentPage == 0 ? View.VISIBLE : View.GONE);
+		// findViewById(R.id.recent_use_head).setVisibility(
+		// currentPage == 0 ? View.VISIBLE : View.GONE);
 	}
 
 	private void setupEmoticonLayout(EmoticonType emoticonType,
 			int whichSubcategory, ViewPager emoticonViewPager,
 			EditText statusTxt) {
 
-		StatusEmojiAdapter statusEmojiAdapter = new StatusEmojiAdapter(this,
-				statusTxt);
+		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(
+				this,
+				statusTxt,
+				EmoticonType.EMOJI,
+				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		emoticonViewPager.setAdapter(statusEmojiAdapter);
 		emoticonViewPager.invalidate();
 	}
