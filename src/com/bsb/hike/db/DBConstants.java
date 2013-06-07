@@ -129,13 +129,13 @@ public class DBConstants {
 	public static final String TIME_OF_DAY = "timeOfDay";
 
 	public static final String IS_STATUS_MSG = "isStatusMsg";
-	
+
 	public static final String STATUS_INDEX = "statusIdx";
 
 	public static final String USER_INDEX = "userIdx";
-	
+
 	public static final String THUMBNAIL_INDEX = "thumbnailIdx";
-	
+
 	public static final String FAVORITE_INDEX = "favoriteIdx";
 
 	public static final String IS_HIKE_MESSAGE = "isHikeMessage";

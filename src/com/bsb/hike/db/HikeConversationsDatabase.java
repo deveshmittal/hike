@@ -1845,7 +1845,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ (endOffset != 0 ? " AND " + DBConstants.EMOTICON_NUM
 							+ "<" + (endOffset) : "");
 			Log.d(getClass().getSimpleName(), selection);
-			String orderBy = DBConstants.LAST_USED + " DESC LIMIT " + limit;
+			String orderBy = DBConstants.LAST_USED
+					+ (limit != -1 ? (" DESC LIMIT " + limit) : "");
 
 			c = mDb.query(DBConstants.EMOTICON_TABLE, columns, selection, null,
 					null, null, orderBy);
