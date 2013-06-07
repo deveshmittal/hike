@@ -5,7 +5,9 @@ import static org.acra.ACRA.LOG_TAG;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.acra.ACRA;
@@ -16,6 +18,8 @@ import org.acra.annotation.ReportsCrashes;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.acra.util.HttpRequest;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
@@ -40,6 +44,7 @@ import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -210,6 +215,10 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOWN_SMS_SYNC_POPUP = "shownSMSSyncPopup";
 
 	public static final String SHOWN_SENDING_NATIVE_SMS_POPUP = "shownSendingNativeSMSPopup";
+
+	public static final String REMOVED_CATGORY_IDS = "removedCategoryIds";
+
+	public static List<StickerCategory> stickerCategories;
 
 	private static Facebook facebook;
 
@@ -441,6 +450,9 @@ public class HikeMessengerApp extends Application implements Listener {
 		} catch (NameNotFoundException e) {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
+
+		setupStickerCategoryList(preferenceManager);
+
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
 	}
@@ -528,6 +540,38 @@ public class HikeMessengerApp extends Application implements Listener {
 			Utils.setupServerURL(
 					settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 					isWifiConnection);
+		}
+	}
+
+	public static void setupStickerCategoryList(SharedPreferences preferences) {
+		stickerCategories = new ArrayList<StickerCategory>();
+
+		/*
+		 * Adding a category for the back key
+		 */
+		stickerCategories.add(new StickerCategory(
+				StickerCategory.BACK_CATEGORY_ID,
+				StickerCategory.BACK_CATEGORY_RES_ID));
+
+		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
+			stickerCategories.add(new StickerCategory(
+					EmoticonConstants.STICKER_CATEGORY_IDS[i],
+					EmoticonConstants.STICKER_CATEGORY_RES_IDS[i]));
+		}
+		String removedIds = preferences.getString(
+				HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
+
+		try {
+			JSONArray removedIdArray = new JSONArray(removedIds);
+			for (int i = 0; i < removedIdArray.length(); i++) {
+				String removedCategoryId = removedIdArray.getString(i);
+				StickerCategory removedStickerCategory = new StickerCategory(
+						removedCategoryId, 0);
+
+				stickerCategories.remove(removedStickerCategory);
+			}
+		} catch (JSONException e) {
+			Log.w("HikeMessengerApp", "Invalid JSON", e);
 		}
 	}
 }

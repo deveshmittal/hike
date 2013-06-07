@@ -669,4 +669,11 @@ public class EmoticonConstants {
 			R.drawable.mood_22_gaming, R.drawable.mood_23_coding,
 			R.drawable.mood_24_television };
 
+	public static final String[] STICKER_CATEGORY_IDS = { "doggy", "kitty",
+			"rageface", "expressions", "bollywood" };
+
+	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.doggy,
+			R.drawable.kitty, R.drawable.rageface, R.drawable.expressions,
+			R.drawable.bollywood };
+
 }
