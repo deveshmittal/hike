@@ -1975,4 +1975,18 @@ public class Utils {
 		return context.getFilesDir().getPath() + "/Stickers/" + catId;
 	}
 
+	public static int getResolutionId() {
+		int densityMultiplierX100 = (int) (densityMultiplier * 100);
+		Log.d("Stickers", "Resolutions * 100: " + densityMultiplierX100);
+
+		if (densityMultiplierX100 > 150) {
+			return 1;
+		} else if (densityMultiplierX100 > 100) {
+			return 2;
+		} else if (densityMultiplierX100 > 75) {
+			return 3;
+		} else {
+			return 4;
+		}
+	}
 }
