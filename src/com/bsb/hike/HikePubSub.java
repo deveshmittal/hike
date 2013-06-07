@@ -238,6 +238,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String SHOWN_UNDELIVERED_MESSAGE = "shownUndeliveredMessage";
 
+	public static final String STICKER_DOWNLOADED = "stickerDownloaded";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

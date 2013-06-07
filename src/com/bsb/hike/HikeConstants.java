@@ -106,8 +106,11 @@ public class HikeConstants {
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
 	public static final String CATEGORY_ID = "catId";
 	public static final String STICKER_IDS = "stIds";
+	public static final String DATA_2 = "data";
 	public static final String REMOVE_STICKER = "remStk";
 	public static final String REMOVE_CATEGORY = "remCat";
+	public static final String STATUS = "stat";
+	public static final String OK = "ok";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

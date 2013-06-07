@@ -1989,4 +1989,17 @@ public class Utils {
 			return 4;
 		}
 	}
+
+	public static void saveBase64StringToFile(File file, String base64String)
+			throws IOException {
+		FileOutputStream fos = new FileOutputStream(file);
+
+		byte[] b = Base64.decode(base64String, Base64.DEFAULT);
+		if (b == null) {
+			throw new IOException();
+		}
+		fos.write(b);
+		fos.flush();
+		fos.close();
+	}
 }
