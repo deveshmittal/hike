@@ -1963,4 +1963,16 @@ public class Utils {
 		info.setText(syncConfirmation ? R.string.import_sms_info
 				: R.string.importing_sms_info);
 	}
+
+	public static String getExternalStickerDirectoryForCatgoryId(
+			Context context, String catId) {
+		return context.getExternalFilesDir(null).getPath() + "/Stickers/"
+				+ catId;
+	}
+
+	public static String getInternalStickerDirectoryForCatgoryId(
+			Context context, String catId) {
+		return context.getFilesDir().getPath() + "/Stickers/" + catId;
+	}
+
 }
