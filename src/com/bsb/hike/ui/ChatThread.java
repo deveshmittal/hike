@@ -99,7 +99,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -287,8 +286,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private EmoticonType emoticonType;
 
 	private EmoticonAdapter emoticonsAdapter;
-
-	private ViewGroup pageIndicatorContainer;
 
 	private boolean wasOrientationChanged = false;
 
@@ -2182,6 +2179,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				}
 			});
 		}
+		Log.d(getClass().getSimpleName(), "Keyboard shown");
+		if (emoticonLayout != null
+				&& emoticonLayout.getVisibility() == View.VISIBLE) {
+			onEmoticonBtnClicked(null);
+		}
 	}
 
 	@Override
@@ -3530,8 +3532,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				: emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
 				: emoticonViewPager;
-		pageIndicatorContainer = pageIndicatorContainer == null ? (ViewGroup) findViewById(R.id.page_indicator_container)
-				: pageIndicatorContainer;
 
 		boolean wasCategoryChanged = !isTabInitialised;
 
@@ -3608,7 +3608,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		if (emoticonLayout.getVisibility() == View.VISIBLE
 				&& !wasCategoryChanged) {
-			emoticonLayout.setVisibility(View.INVISIBLE);
+			emoticonLayout.setVisibility(View.GONE);
 		} else {
 			if (!wasCategoryChanged) {
 				Animation slideUp = AnimationUtils.loadAnimation(
@@ -3616,21 +3616,20 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				slideUp.setDuration(400);
 				emoticonLayout.setAnimation(slideUp);
 			}
-			emoticonLayout.setVisibility(View.VISIBLE);
+			new Handler().postDelayed(new Runnable() {
+
+				@Override
+				public void run() {
+					emoticonLayout.setVisibility(View.VISIBLE);
+				}
+			}, 50);
 			Utils.hideSoftKeyboard(this, mComposeView);
 		}
 
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {
 			@Override
 			public void onPageSelected(int pageNum) {
-				ImageView iv = (ImageView) pageIndicatorContainer
-						.findViewById(pageNum);
-
-				iv.setImageResource(R.drawable.page_indicator_selected_small);
-				pageSelected
-						.setImageResource(R.drawable.page_indicator_unselected_small);
-
-				pageSelected = iv;
+				tabHost.setCurrentTab(pageNum);
 			}
 
 			@Override
@@ -3645,7 +3644,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
 			@Override
 			public void onTabChanged(String tabId) {
-				setupEmoticonLayout(emoticonType, tabHost.getCurrentTab());
+				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab());
 			}
 		});
 
@@ -3658,38 +3657,15 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 	}
 
-	private void setupEmoticonLayout(EmoticonType emoticonType,
-			int whichSubcategory) {
-		findViewById(R.id.recent_use_head).setVisibility(
-				whichSubcategory == 0 ? View.VISIBLE : View.GONE);
-
+	private void setupEmoticonLayout(EmoticonType emoticonType, int pageNum) {
 		emoticonsAdapter = new EmoticonAdapter(
 				ChatThread.this,
 				mComposeView,
 				emoticonType,
-				whichSubcategory,
 				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		emoticonViewPager.setAdapter(emoticonsAdapter);
+		emoticonViewPager.setCurrentItem(pageNum);
 		emoticonViewPager.invalidate();
-
-		int rightMargin = (int) (5 * Utils.densityMultiplier);
-		pageIndicatorContainer.removeAllViews();
-		for (int i = 0; i < emoticonsAdapter.getCount(); i++) {
-			ImageView iv = new ImageView(this);
-			LayoutParams layoutParams = new LayoutParams(
-					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			if (i != emoticonsAdapter.getCount() - 1) {
-				layoutParams.rightMargin = rightMargin;
-			}
-			iv.setLayoutParams(layoutParams);
-			iv.setImageResource(i == 0 ? R.drawable.page_indicator_selected_small
-					: R.drawable.page_indicator_unselected_small);
-			if (i == 0) {
-				pageSelected = iv;
-			}
-			iv.setId(i);
-			pageIndicatorContainer.addView(iv);
-		}
 	}
 
 	public void onEmoticonCategoryClick(View v) {

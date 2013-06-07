@@ -521,8 +521,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 					whichSubcategory++;
 				}
 			}
-			setRecentlyUsedTextVisibility(whichSubcategory);
-
 			setupEmoticonLayout(EmoticonType.EMOJI, whichSubcategory,
 					emoticonViewPager, statusTxt);
 			tabHost.setCurrentTab(whichSubcategory);
@@ -535,7 +533,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			@Override
 			public void onPageSelected(int position) {
 				tabHost.setCurrentTab(position);
-				setRecentlyUsedTextVisibility(position);
 			}
 
 			@Override
@@ -551,7 +548,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			@Override
 			public void onTabChanged(String tabId) {
 				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab());
-				setRecentlyUsedTextVisibility(tabHost.getCurrentTab());
 			}
 		});
 	}
@@ -561,8 +557,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void setRecentlyUsedTextVisibility(int currentPage) {
-		findViewById(R.id.recent_use_head).setVisibility(
-				currentPage == 0 ? View.VISIBLE : View.GONE);
+//		findViewById(R.id.recent_use_head).setVisibility(
+//				currentPage == 0 ? View.VISIBLE : View.GONE);
 	}
 
 	private void setupEmoticonLayout(EmoticonType emoticonType,

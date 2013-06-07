@@ -127,16 +127,6 @@
                 android:textSize="14sp"
                 android:visibility="invisible" />
 
-            <RelativeLayout
-                android:id="@+id/emoticon_layout"
-                android:layout_width="match_parent"
-                android:layout_height="228dp"
-                android:layout_alignParentBottom="true"
-                android:visibility="invisible" >
-
-                <include layout="@layout/emoticon_layout" />
-            </RelativeLayout>
-            
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/conversation_mute"
                 android:layout_width="match_parent"
@@ -163,6 +153,7 @@
             android:padding="3dp" >
 
             <RelativeLayout
+                android:id="@+id/compose_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/fg_compose_box" >
@@ -275,6 +266,16 @@
                     android:layout_marginTop="3dp"
                     android:gravity="center_horizontal"
                     android:visibility="invisible" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/emoticon_layout"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/emoticon_pallete"
+                android:layout_below="@id/compose_container"
+                android:visibility="gone" >
+
+                <include layout="@layout/emoticon_layout" />
             </RelativeLayout>
         </RelativeLayout>
     </com.bsb.hike.view.CustomLinearLayout>
