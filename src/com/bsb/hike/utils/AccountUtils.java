@@ -752,4 +752,39 @@ public class AccountUtils {
 		return base;
 	}
 
+	public static JSONObject downloadSticker(String catId,
+			JSONArray existingStickerIds) throws NetworkErrorException,
+			IllegalStateException, JSONException {
+
+		JSONObject request = new JSONObject();
+		request.put(HikeConstants.CATEGORY_ID, catId);
+		request.put(HikeConstants.STICKER_IDS, existingStickerIds);
+		request.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
+		request.put(HikeConstants.NUMBER_OF_STICKERS,
+				HikeConstants.MAX_NUM_STICKER_REQUEST);
+
+		Log.d("Stickers", "Request: " + request);
+		GzipByteArrayEntity entity;
+		try {
+			entity = new GzipByteArrayEntity(request.toString().getBytes(),
+					HTTP.DEFAULT_CONTENT_CHARSET);
+
+			HttpPost httpPost = new HttpPost(base + "/stickers");
+			addToken(httpPost);
+			httpPost.setEntity(entity);
+
+			JSONObject obj = executeRequest(httpPost);
+			Log.d("Stickers", "Response: " + obj);
+
+			if (((obj == null) || (!"ok".equals(obj.optString("stat"))))) {
+				throw new NetworkErrorException("Unable to perform request");
+			}
+
+			return obj;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
 }
