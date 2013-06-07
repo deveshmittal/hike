@@ -141,6 +141,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.STATUS_INDEX + " ON "
 				+ DBConstants.STATUS_TABLE + " ( " + DBConstants.MSISDN + " ) ";
 		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKERS_TABLE + " ("
+				+ DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, "
+				+ DBConstants.TOTAL_NUMBER + " INTEGER, "
+				+ DBConstants.REACHED_END + " INTEGER,"
+				+ DBConstants.UPDATE_AVAILABLE + " INTEGER" + " )";
 	}
 
 	public void deleteAll() {
@@ -150,6 +155,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.delete(DBConstants.GROUP_INFO_TABLE, null, null);
 		mDb.delete(DBConstants.EMOTICON_TABLE, null, null);
 		mDb.delete(DBConstants.STATUS_TABLE, null, null);
+		mDb.delete(DBConstants.STICKERS_TABLE, null, null);
 	}
 
 	@Override
@@ -337,6 +343,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ " INTEGER DEFAULT -1";
 			db.execSQL(alter);
 		}
+		/*
+		 * Version 15 add the sticker table.
+		 */
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -2188,5 +2197,39 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			mDb.endTransaction();
 			c.close();
 		}
+	}
+
+	public void addOrUpdateStickerCategory(String categoryId, int totalNum) {
+		addOrUpdateStickerCategory(categoryId, totalNum, false);
+	}
+
+	public void addOrUpdateStickerCategory(String categoryId, int totalNum,
+			boolean reachedEnd) {
+		SQLiteStatement insertStatement = null;
+		try {
+			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO "
+					+ DBConstants.STICKERS_TABLE + " ( "
+					+ DBConstants.CATEGORY_ID + ", " + DBConstants.TOTAL_NUMBER
+					+ ", " + DBConstants.REACHED_END + " ) "
+					+ " VALUES (?, ?, ?)");
+
+			insertStatement.bindString(1, categoryId);
+			insertStatement.bindLong(2, totalNum);
+			insertStatement.bindLong(3, reachedEnd ? 1 : 0);
+
+			insertStatement.execute();
+		} finally {
+			if (insertStatement != null) {
+				insertStatement.close();
+			}
+		}
+	}
+
+	public void stickerUpdateAvailable(String categoryId) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.UPDATE_AVAILABLE, true);
+
+		mDb.update(DBConstants.STICKERS_TABLE, contentValues,
+				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 }

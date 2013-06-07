@@ -4,7 +4,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 14;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 15;
 
 	public static final int USERS_DATABASE_VERSION = 11;
 
@@ -139,4 +139,14 @@ public class DBConstants {
 	public static final String FAVORITE_INDEX = "favoriteIdx";
 
 	public static final String IS_HIKE_MESSAGE = "isHikeMessage";
+
+	public static final String STICKERS_TABLE = "stickersTable";
+
+	public static final String CATEGORY_ID = "categoryId";
+
+	public static final String TOTAL_NUMBER = "totalNum";
+
+	public static final String REACHED_END = "reachedEnd";
+
+	public static final String UPDATE_AVAILABLE = "updateAvailable";
 }
