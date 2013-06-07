@@ -303,9 +303,6 @@ public class DbConversationListener implements Listener {
 				jsonObject.put(HikeConstants.TYPE,
 						HikeConstants.MqttMessageTypes.FORCE_SMS);
 				jsonObject.put(HikeConstants.TO, convMessage.getMsisdn());
-				jsonObject.put(HikeConstants.COUNT, messages.size());
-				jsonObject
-						.put(HikeConstants.MESSAGE_ID, convMessage.getMsgID());
 
 				JSONObject data = new JSONObject();
 
@@ -316,6 +313,8 @@ public class DbConversationListener implements Listener {
 
 				messagesArray.put(messageJSON);
 
+				data.put(HikeConstants.COUNT, messages.size());
+				data.put(HikeConstants.MESSAGE_ID, convMessage.getMsgID());
 				data.put(HikeConstants.MESSAGE, messagesArray);
 
 				jsonObject.put(HikeConstants.DATA, data);
