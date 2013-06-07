@@ -1,5 +1,6 @@
 package com.bsb.hike.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -840,6 +841,58 @@ public class MqttMessagesManager {
 
 			pubSub.publish(HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 					new Pair<String, String>(header, message));
+		} else if (HikeConstants.MqttMessageTypes.STICKER.equals(type)) {
+			String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			if (HikeConstants.REMOVE_STICKER.equals(subType)
+					|| HikeConstants.REMOVE_CATEGORY.equals(subType)) {
+
+				String categoryId = data.getString(HikeConstants.CATEGORY_ID);
+
+				String categoryDirPath = Utils
+						.getExternalStickerDirectoryForCatgoryId(context,
+								categoryId);
+				File categoryDir = new File(categoryDirPath);
+
+				/*
+				 * If the category itself does not exist, then we have nothing
+				 * to delete
+				 */
+				if (!categoryDir.exists()) {
+					return;
+				}
+
+				if (HikeConstants.REMOVE_CATEGORY.equals(subType)) {
+
+					for (File sticker : categoryDir.listFiles()) {
+						sticker.delete();
+					}
+					categoryDir.delete();
+
+					String removedIds = settings.getString(
+							HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
+
+					JSONArray removedIdArray = new JSONArray(removedIds);
+					removedIdArray.put(categoryId);
+
+					Editor editor = settings.edit();
+					editor.putString(HikeMessengerApp.REMOVED_CATGORY_IDS,
+							removedIdArray.toString());
+					editor.commit();
+
+					HikeMessengerApp.setupStickerCategoryList(settings);
+
+				} else {
+					JSONArray stickerIds = data
+							.getJSONArray(HikeConstants.STICKER_IDS);
+
+					for (int i = 0; i < stickerIds.length(); i++) {
+						String stickerId = stickerIds.getString(i);
+						File sticker = new File(categoryDir, stickerId);
+						sticker.delete();
+					}
+				}
+			}
 		}
 	}
 

@@ -104,6 +104,10 @@ public class HikeConstants {
 	public static final String CRICKET_MOODS = "cmoods";
 	public static final String COUNT = "c";
 	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
+	public static final String CATEGORY_ID = "catId";
+	public static final String STICKER_IDS = "stIds";
+	public static final String REMOVE_STICKER = "remStk";
+	public static final String REMOVE_CATEGORY = "remCat";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -579,6 +583,7 @@ public class HikeConstants {
 		public static final String POSTPONE_FAVORITE = "pf";
 		public static final String BATCH_STATUS_UPDATE = "bsu";
 		public static final String FORCE_SMS = "fsms";
+		public static final String STICKER = "stk";
 	}
 
 	public static final class SMSNative {
