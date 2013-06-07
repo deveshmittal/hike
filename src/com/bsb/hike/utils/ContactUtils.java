@@ -317,12 +317,12 @@ public class ContactUtils {
 						}
 					}
 				} catch (Exception e) {
-					Log.e("ContactUtils",
+					Log.w("ContactUtils",
 							"Expection while adding sim contacts", e);
 				}
 			}
 		} catch (Exception e) {
-			Log.e("ContactUtils", "Expection while querying for sim contacts",
+			Log.w("ContactUtils", "Expection while querying for sim contacts",
 					e);
 		}
 
