@@ -107,6 +107,7 @@ public class HikeConstants {
 	public static final String CATEGORY_ID = "catId";
 	public static final String STICKER_IDS = "stIds";
 	public static final String DATA_2 = "data";
+	public static final String ADD_STICKER = "addStk";
 	public static final String REMOVE_STICKER = "remStk";
 	public static final String REMOVE_CATEGORY = "remCat";
 	public static final String STATUS = "stat";

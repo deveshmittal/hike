@@ -844,10 +844,11 @@ public class MqttMessagesManager {
 		} else if (HikeConstants.MqttMessageTypes.STICKER.equals(type)) {
 			String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
-			if (HikeConstants.REMOVE_STICKER.equals(subType)
+			String categoryId = data.getString(HikeConstants.CATEGORY_ID);
+			if (HikeConstants.ADD_STICKER.equals(subType)) {
+				convDb.stickerUpdateAvailable(categoryId);
+			} else if (HikeConstants.REMOVE_STICKER.equals(subType)
 					|| HikeConstants.REMOVE_CATEGORY.equals(subType)) {
-
-				String categoryId = data.getString(HikeConstants.CATEGORY_ID);
 
 				String categoryDirPath = Utils
 						.getExternalStickerDirectoryForCatgoryId(context,
