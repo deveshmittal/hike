@@ -2235,9 +2235,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
 	}
 
-<<<<<<< HEAD
-	private void insertFirstStickerCategory() {
-=======
 	public boolean isStickerUpdateAvailable(String categoryId) {
 		Cursor c = mDb.query(DBConstants.STICKERS_TABLE,
 				new String[] { DBConstants.UPDATE_AVAILABLE },
@@ -2262,7 +2259,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public void insertFirstStickerCategory() {
->>>>>>> 2469a30... fixup! Inserting the first sticker category on creation of the table since they are a part of the app bundle
 		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[0],
 				EmoticonConstants.LOCAL_STICKER_RES_IDS.length, true);
 	}
