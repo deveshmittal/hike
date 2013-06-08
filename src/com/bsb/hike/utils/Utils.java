@@ -2013,4 +2013,12 @@ public class Utils {
 		fos.flush();
 		fos.close();
 	}
+
+	public static String getCategoryIdForIndex(int index) {
+		if (index == -1
+				|| index >= EmoticonConstants.STICKER_CATEGORY_IDS.length) {
+			return "";
+		}
+		return EmoticonConstants.STICKER_CATEGORY_IDS[index];
+	}
 }
