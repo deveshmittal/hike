@@ -675,9 +675,10 @@ public class EmoticonConstants {
 			R.drawable.sticker_5_sorry, R.drawable.sticker_6_urgh,
 			R.drawable.sticker_7_confused, R.drawable.sticker_8_dreaming, };
 
-	public static final String[] LOCAL_STICKER_IDS = { "1_hi.png",
-			"2_thumbsup.png", "3_drooling.png", "4_devilsmile.png",
-			"5_sorry.png", "6_urgh.png", "7_confused.png", "8_dreaming.png", };
+	public static final String[] LOCAL_STICKER_IDS = { "001_hi.png",
+			"002_thumbsup.png", "003_drooling.png", "004_devilsmile.png",
+			"005_sorry.png", "006_urgh.png", "007_confused.png",
+			"008_dreaming.png", };
 
 	public static final String[] STICKER_CATEGORY_IDS = { "doggy", "kitty",
 			"rageface", "expressions", "bollywood" };
