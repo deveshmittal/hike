@@ -1990,6 +1990,17 @@ public class Utils {
 		}
 	}
 
+	public static boolean checkIfStickerCategoryExists(Context context,
+			String categoryId) {
+		String path = getExternalStickerDirectoryForCatgoryId(context,
+				categoryId);
+		File category = new File(path);
+		if (category.exists() && category.list().length > 0) {
+			return true;
+		}
+		return false;
+	}
+
 	public static void saveBase64StringToFile(File file, String base64String)
 			throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
