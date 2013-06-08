@@ -21,12 +21,23 @@ import com.bsb.hike.utils.Utils;
 
 public class DownloadStickerTask extends StickerTaskBase {
 
+	public static enum DownloadType {
+		NEW_CATEGORY, UPDATE, MORE_STICKERS
+	}
+
 	private Context context;
 	private String catId;
+	private DownloadType downloadType;
 
-	public DownloadStickerTask(Context context, String catId) {
+	public DownloadStickerTask(Context context,
+			DownloadType downloadType) {
 		this.context = context;
-		this.catId = catId;
+		this.catId = Utils.getCategoryIdForIndex(categoryIndex);
+		this.downloadType = downloadType;
+	}
+
+	public DownloadType getDownloadType() {
+		return downloadType;
 	}
 
 	@SuppressWarnings("unchecked")
