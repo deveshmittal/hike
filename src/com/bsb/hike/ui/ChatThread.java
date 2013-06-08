@@ -1052,12 +1052,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		} else {
 			mComposeView.setText("");
 
-			long time = (long) System.currentTimeMillis() / 1000;
-			ConvMessage convMessage = new ConvMessage(message, mContactNumber,
-					time, ConvMessage.State.SENT_UNCONFIRMED);
-			convMessage.setConversation(mConversation);
-			convMessage.setSMS(mConversation == null
-					|| !mConversation.isOnhike());
+			ConvMessage convMessage = makeConvMessage(message);
 
 			sendMessage(convMessage);
 
@@ -1069,6 +1064,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				onEmoticonBtnClicked(null, 0);
 			}
 		}
+	}
+
+	private ConvMessage makeConvMessage(String message) {
+		long time = (long) System.currentTimeMillis() / 1000;
+		ConvMessage convMessage = new ConvMessage(message, mContactNumber,
+				time, ConvMessage.State.SENT_UNCONFIRMED);
+		convMessage.setConversation(mConversation);
+		convMessage.setSMS(mConversation == null || !mConversation.isOnhike());
+
+		return convMessage;
 	}
 
 	/*
@@ -3746,12 +3751,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	public void sendPoke() {
-		long time = (long) System.currentTimeMillis() / 1000;
-
-		ConvMessage convMessage = new ConvMessage(getString(R.string.poke_msg),
-				mContactNumber, time, ConvMessage.State.SENT_UNCONFIRMED);
-		convMessage.setSMS(mConversation == null || !mConversation.isOnhike());
-		convMessage.setConversation(mConversation);
+		ConvMessage convMessage = makeConvMessage(getString(R.string.poke_msg));
 
 		JSONObject metadata = new JSONObject();
 		try {
