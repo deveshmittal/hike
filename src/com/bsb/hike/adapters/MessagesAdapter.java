@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -57,12 +58,15 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
+import com.bsb.hike.tasks.DownloadSingleStickerTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -90,7 +94,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		View marginView;
 		TextView participantNameFT;
 		View loadingThumb;
-		View poke;
+		ImageView poke;
 		View messageContainer;
 		TextView undeliveredMsgTextView;
 		CheckBox smsToggle;
@@ -307,7 +311,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.timestamp_container);
 				holder.timestampTextView = (TextView) v
 						.findViewById(R.id.timestamp);
-				holder.poke = v.findViewById(R.id.poke_sent);
+				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
 				holder.messageContainer = v
 						.findViewById(R.id.sent_message_container);
 
@@ -349,7 +353,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.messageTextView = (TextView) v
 							.findViewById(R.id.message_receive);
 				}
-				holder.poke = v.findViewById(R.id.poke_receive);
+				holder.poke = (ImageView) v.findViewById(R.id.poke_receive);
 				holder.messageContainer = v
 						.findViewById(R.id.receive_message_container);
 				holder.timestampContainer = (LinearLayout) v
@@ -834,6 +838,56 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} else if (metadata != null && metadata.isPokeMessage()) {
 			holder.messageContainer.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.VISIBLE);
+			holder.poke
+					.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
+							: R.drawable.ic_nudge_hike_received);
+		} else if (convMessage.isStickerMessage()) {
+			holder.messageContainer.setVisibility(View.GONE);
+			holder.poke.setVisibility(View.VISIBLE);
+
+			Sticker sticker = metadata.getSticker();
+
+			/*
+			 * If this is the first category, then the sticker are a part of the
+			 * app bundle itself
+			 */
+			if (sticker.getStickerIndex() != -1) {
+				holder.poke
+						.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS[sticker
+								.getStickerIndex()]);
+			} else {
+				String categoryId = sticker.getCategoryId();
+				String stickerId = sticker.getStickerId();
+
+				String categoryDirPath = Utils
+						.getExternalStickerDirectoryForCatgoryId(context,
+								categoryId);
+				File stickerImage = new File(categoryDirPath, stickerId);
+
+				String key = categoryId + stickerId;
+				boolean downloadingSticker = ChatThread.stickerTaskMap
+						.containsKey(key);
+
+				if (stickerImage.exists() && !downloadingSticker) {
+					holder.poke.setImageBitmap(BitmapFactory
+							.decodeFile(stickerImage.getPath()));
+				} else {
+					holder.poke
+							.setImageResource(R.drawable.sticker_placeholder);
+
+					/*
+					 * Download the sticker if not already downoading.
+					 */
+					if (!downloadingSticker) {
+						DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(
+								context, categoryId, stickerId);
+						ChatThread.stickerTaskMap.put(key,
+								downloadSingleStickerTask);
+						downloadSingleStickerTask.execute();
+					}
+				}
+			}
+
 		} else {
 			holder.messageContainer.setVisibility(View.VISIBLE);
 			holder.poke.setVisibility(View.GONE);
