@@ -146,6 +146,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.TOTAL_NUMBER + " INTEGER, "
 				+ DBConstants.REACHED_END + " INTEGER,"
 				+ DBConstants.UPDATE_AVAILABLE + " INTEGER" + " )";
+		db.execSQL(sql);
 	}
 
 	public void deleteAll() {
@@ -2232,5 +2233,37 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 		mDb.update(DBConstants.STICKERS_TABLE, contentValues,
 				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+	}
+
+<<<<<<< HEAD
+	private void insertFirstStickerCategory() {
+=======
+	public boolean isStickerUpdateAvailable(String categoryId) {
+		Cursor c = mDb.query(DBConstants.STICKERS_TABLE,
+				new String[] { DBConstants.UPDATE_AVAILABLE },
+				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId },
+				null, null, null);
+		if (!c.moveToFirst()) {
+			return false;
+		}
+		return c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
+	}
+
+	public boolean hasReachedStickerEnd(String categoryId) {
+		Cursor c = mDb.query(DBConstants.STICKERS_TABLE,
+				new String[] { DBConstants.REACHED_END },
+				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId },
+				null, null, null);
+		if (!c.moveToFirst()) {
+			Log.d(getClass().getSimpleName(), "Not entyr");
+			return false;
+		}
+		return c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
+	}
+
+	public void insertFirstStickerCategory() {
+>>>>>>> 2469a30... fixup! Inserting the first sticker category on creation of the table since they are a part of the app bundle
+		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[0],
+				EmoticonConstants.LOCAL_STICKER_RES_IDS.length, true);
 	}
 }

@@ -218,6 +218,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String REMOVED_CATGORY_IDS = "removedCategoryIds";
 
+	public static final String FIRST_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
+
 	public static List<StickerCategory> stickerCategories;
 
 	private static Facebook facebook;
@@ -452,6 +454,14 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 
 		setupStickerCategoryList(preferenceManager);
+
+		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
+			HikeConversationsDatabase.getInstance()
+					.insertFirstStickerCategory();
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(FIRST_CATEGORY_INSERT_TO_DB, true);
+			editor.commit();
+		}
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
