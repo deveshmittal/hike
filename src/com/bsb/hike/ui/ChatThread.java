@@ -254,6 +254,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	public static Map<Long, FileTransferTaskBase> fileTransferTaskMap;
 
+	public static Map<String, StickerTaskBase> stickerTaskMap;
+
 	private Handler recordingHandler;
 
 	private UpdateRecordingDuration updateRecordingDuration;
@@ -524,6 +526,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		if (ChatThread.fileTransferTaskMap == null) {
 			ChatThread.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
+		}
+
+		if (ChatThread.stickerTaskMap == null) {
+			ChatThread.stickerTaskMap = new HashMap<String, StickerTaskBase>();
 		}
 
 		mHandler = new Handler();
