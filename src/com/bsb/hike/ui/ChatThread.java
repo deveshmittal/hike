@@ -26,6 +26,7 @@ import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
@@ -100,6 +101,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -135,7 +137,11 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadStickerTask;
+import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
@@ -144,6 +150,7 @@ import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -305,6 +312,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	private Dialog smsDialog;
 
 	private Dialog nativeSmsDialog;
+
+	private LinearLayout stickerCatgoryContainer;
+
+	private View currentStickerCategorySelected;
 
 	@Override
 	protected void onPause() {
@@ -1061,7 +1072,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 			if (emoticonLayout != null
 					&& emoticonLayout.getVisibility() == View.VISIBLE) {
-				onEmoticonBtnClicked(null, 0);
+				onEmoticonBtnClicked(null, 0, false);
 			}
 		}
 	}
@@ -3585,6 +3596,18 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 				emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
 				break;
+			case R.id.sticker_btn:
+				tabDrawables = new int[] { R.drawable.ic_recents_emo };
+				emoticonType = EmoticonType.STICKERS;
+				offset = 0;
+				emoticonsListSize = EmoticonConstants.LOCAL_STICKER_RES_IDS.length;
+				if (!prefs.getBoolean(
+						HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+						false)) {
+					showStickerPreviewDialog(0);
+				}
+				setupBottomTab();
+				break;
 			}
 
 			LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -3610,7 +3633,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			 * Checking whether we have a few emoticons in the recents category.
 			 * If not we show the next tab emoticons.
 			 */
-			if (whichSubcategory == 0) {
+			if (whichSubcategory == 0 && emoticonType != EmoticonType.STICKERS) {
 				int startOffset = offset;
 				int endOffset = startOffset + emoticonsListSize;
 				int recentEmoticonsSizeReq = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT
@@ -3662,7 +3685,33 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {
 			@Override
 			public void onPageSelected(int pageNum) {
-				tabHost.setCurrentTab(pageNum);
+				Log.d("ViewPager", "Page number: " + pageNum);
+				if (emoticonType != EmoticonType.STICKERS) {
+					tabHost.setCurrentTab(pageNum);
+				} else {
+					if (currentStickerCategorySelected != null) {
+						currentStickerCategorySelected.setSelected(false);
+					}
+					if (stickerCatgoryContainer != null) {
+						currentStickerCategorySelected = stickerCatgoryContainer
+								.findViewWithTag(HikeMessengerApp.stickerCategories
+										.get(pageNum + 1));
+						currentStickerCategorySelected.setSelected(true);
+					}
+
+					if (pageNum == 0
+							&& !prefs
+									.getBoolean(
+											HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+											false)) {
+						showStickerPreviewDialog(0);
+					} else if (pageNum != 0
+							&& !Utils.checkIfStickerCategoryExists(
+									ChatThread.this,
+									Utils.getCategoryIdForIndex(pageNum))) {
+						showStickerPreviewDialog(pageNum);
+					}
+				}
 			}
 
 			@Override
@@ -3688,6 +3737,164 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
 			mComposeView.dispatchTouchEvent(null);
 		}
+	}
+
+	private void showStickerPreviewDialog(final int categoryIndex) {
+		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.sticker_preview_dialog);
+
+		final String categoryId = Utils.getCategoryIdForIndex(categoryIndex);
+		ImageView previewImage = (ImageView) dialog
+				.findViewById(R.id.preview_image);
+		previewImage
+				.setImageResource(EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[categoryIndex]);
+
+		TextView previewText = (TextView) dialog
+				.findViewById(R.id.preview_text);
+		previewText.setText(categoryId);
+
+		Button okBtn = (Button) dialog.findViewById(R.id.ok_btn);
+		okBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+				if (categoryIndex == 0) {
+					return;
+				}
+				DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
+						ChatThread.this, categoryIndex,
+						DownloadType.NEW_CATEGORY);
+				downloadStickerTask.execute();
+
+				ChatThread.stickerTaskMap.put(categoryId, downloadStickerTask);
+				updateStickerCategoryUI(categoryIndex, false, null);
+			}
+		});
+
+		dialog.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				if (categoryIndex != 0) {
+					emoticonViewPager.setCurrentItem(0);
+				}
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				if (categoryIndex == 0) {
+					Editor editor = prefs.edit();
+					editor.putBoolean(
+							HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+							true);
+					editor.commit();
+				}
+			}
+		});
+		dialog.show();
+	}
+
+	private void updateStickerCategoryUI(int categoryIndex, boolean failed,
+			DownloadType downloadTypeBeforeFail) {
+		if (emoticonsAdapter == null) {
+			return;
+		}
+		String categoryId = Utils.getCategoryIdForIndex(categoryIndex);
+
+		View emoticonPage = emoticonViewPager.findViewWithTag(categoryId);
+
+		if (emoticonPage == null) {
+			return;
+		}
+		emoticonsAdapter.setupStickerPage(emoticonPage, categoryIndex, failed,
+				downloadTypeBeforeFail);
+	}
+
+	private void setupBottomTab() {
+		View tabContainer = findViewById(android.R.id.tabs);
+		tabContainer.setVisibility(View.GONE);
+
+		stickerCatgoryContainer = (LinearLayout) findViewById(R.id.sticker_categories_container);
+		stickerCatgoryContainer.setVisibility(View.VISIBLE);
+		stickerCatgoryContainer.removeAllViews();
+
+		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		for (int i = 0; i < HikeMessengerApp.stickerCategories.size(); i++) {
+			StickerCategory stickerCategory = HikeMessengerApp.stickerCategories
+					.get(i);
+
+			View parent = layoutInflater.inflate(R.layout.sticker_btn, null);
+
+			if (i == 0) {
+				parent.findViewById(R.id.divider_left).setVisibility(View.GONE);
+			}
+
+			LayoutParams layoutParams = new LayoutParams(0,
+					LayoutParams.MATCH_PARENT, 1.0f);
+
+			ImageButton stickerCategoryButton = (ImageButton) parent
+					.findViewById(R.id.category_btn);
+			stickerCategoryButton
+					.setImageResource(stickerCategory.categoryResId);
+			stickerCategoryButton.setTag(stickerCategory);
+
+			if (i == 1) {
+				stickerCategoryButton.setSelected(true);
+				currentStickerCategorySelected = stickerCategoryButton;
+			}
+
+			parent.setLayoutParams(layoutParams);
+			stickerCatgoryContainer.addView(parent);
+		}
+	}
+
+	public void onStickerCategoryClick(View v) {
+		Log.d(getClass().getSimpleName(), "ID: " + v.getId());
+
+		StickerCategory tag = (StickerCategory) v.getTag();
+
+		for (int i = 0; i < HikeMessengerApp.stickerCategories.size(); i++) {
+			StickerCategory category = HikeMessengerApp.stickerCategories
+					.get(i);
+			if (category.equals(tag)) {
+				if (i == 0) {
+					onEmoticonCategoryClick(findViewById(R.id.emoji_btn));
+					hideStickerTabs();
+				} else {
+					setStickerCategorySelected(tag);
+					emoticonViewPager.setCurrentItem(i - 1);
+				}
+				break;
+			}
+		}
+	}
+
+	public int getCurrentPage() {
+		if (emoticonViewPager == null || emoticonType != EmoticonType.STICKERS) {
+			return -1;
+		}
+		return emoticonViewPager.getCurrentItem();
+	}
+
+	private void setStickerCategorySelected(StickerCategory tag) {
+		if (currentStickerCategorySelected != null) {
+			currentStickerCategorySelected.setSelected(false);
+		}
+		if (stickerCatgoryContainer != null) {
+			currentStickerCategorySelected = stickerCatgoryContainer
+					.findViewWithTag(tag);
+			currentStickerCategorySelected.setSelected(true);
+		}
+	}
+
+	private void hideStickerTabs() {
+		findViewById(android.R.id.tabs).setVisibility(View.VISIBLE);
+		findViewById(R.id.sticker_categories_container)
+				.setVisibility(View.GONE);
 	}
 
 	private void setupEmoticonLayout(EmoticonType emoticonType, int pageNum) {
@@ -3774,6 +3981,23 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}, 10);
 
 		Utils.vibrateNudgeReceived(this);
+	}
+
+	public void sendSticker(Sticker sticker) {
+		ConvMessage convMessage = makeConvMessage("Sticker");
+
+		JSONObject metadata = new JSONObject();
+		try {
+			metadata.put(HikeConstants.CATEGORY_ID, sticker.getCategoryId());
+
+			metadata.put(HikeConstants.STICKER_ID, sticker.getStickerId());
+
+			convMessage.setMetadata(metadata);
+			Log.d(getClass().getSimpleName(), "metadat: " + metadata.toString());
+		} catch (JSONException e) {
+			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+		sendMessage(convMessage);
 	}
 
 	@Override
