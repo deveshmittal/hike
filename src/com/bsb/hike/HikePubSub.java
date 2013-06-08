@@ -240,6 +240,10 @@ public class HikePubSub implements Runnable {
 
 	public static final String STICKER_DOWNLOADED = "stickerDownloaded";
 
+	public static final String STICKER_CATEGORY_DOWNLOADED = "stickerCategoryDownloaded";
+
+	public static final String STICKER_CATEGORY_DOWNLOAD_FAILED = "stickerCategoryDownloadFailed";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

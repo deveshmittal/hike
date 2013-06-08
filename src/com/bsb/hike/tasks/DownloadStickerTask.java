@@ -12,9 +12,14 @@ import org.json.JSONObject;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.FTResult;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
@@ -27,11 +32,13 @@ public class DownloadStickerTask extends StickerTaskBase {
 
 	private Context context;
 	private String catId;
+	private int categoryIndex;
 	private DownloadType downloadType;
 
-	public DownloadStickerTask(Context context,
+	public DownloadStickerTask(Context context, int categoryIndex,
 			DownloadType downloadType) {
 		this.context = context;
+		this.categoryIndex = categoryIndex;
 		this.catId = Utils.getCategoryIdForIndex(categoryIndex);
 		this.downloadType = downloadType;
 	}
@@ -111,4 +118,21 @@ public class DownloadStickerTask extends StickerTaskBase {
 				catId, totalNumber, reachedEnd);
 		return FTResult.SUCCESS;
 	}
+
+	@Override
+	protected void onPostExecute(FTResult result) {
+		ChatThread.stickerTaskMap.remove(catId);
+		if (result != FTResult.SUCCESS) {
+			HikeMessengerApp.getPubSub()
+					.publish(
+							HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
+							new Pair<Integer, DownloadType>(categoryIndex,
+									downloadType));
+			return;
+		}
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.STICKER_CATEGORY_DOWNLOADED,
+				new Pair<Integer, DownloadType>(categoryIndex, downloadType));
+	}
+
 }
