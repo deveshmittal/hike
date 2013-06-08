@@ -39,6 +39,7 @@ public class MessageMetadata {
 	private int credits;
 	private boolean isPokeMessage;
 	private StatusMessage statusMessage;
+	private Sticker sticker;
 
 	public MessageMetadata(JSONObject metadata) throws JSONException {
 		this.participantInfoState = metadata.has(HikeConstants.DND_USERS)
@@ -94,6 +95,11 @@ public class MessageMetadata {
 		}
 		this.isPokeMessage = metadata.optBoolean(HikeConstants.POKE);
 		this.json = metadata;
+		if (metadata.has(HikeConstants.STICKER_ID)) {
+			this.sticker = new Sticker(
+					metadata.optString(HikeConstants.CATEGORY_ID),
+					metadata.optString(HikeConstants.STICKER_ID));
+		}
 	}
 
 	private List<HikeFile> getHikeFileListFromJSONArray(JSONArray fileList) {
@@ -161,6 +167,10 @@ public class MessageMetadata {
 
 	public StatusMessage getStatusMessage() {
 		return statusMessage;
+	}
+
+	public Sticker getSticker() {
+		return sticker;
 	}
 
 	public Spannable getMessage(final Context context,

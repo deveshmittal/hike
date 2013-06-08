@@ -51,6 +51,8 @@ public class ConvMessage {
 
 	private boolean isFileTransferMessage;
 
+	private boolean isStickerMessage;
+
 	public boolean isInvite() {
 		return mInvite;
 	}
@@ -65,6 +67,14 @@ public class ConvMessage {
 
 	public void setIsFileTranferMessage(boolean isFileTransferMessage) {
 		this.isFileTransferMessage = isFileTransferMessage;
+	}
+
+	public boolean isStickerMessage() {
+		return isStickerMessage;
+	}
+
+	public void setIsStickerMessage(boolean isStickerMessage) {
+		this.isStickerMessage = isStickerMessage;
 	}
 
 	/* Adding entries to the beginning of this list is not backwards compatible */
@@ -208,6 +218,8 @@ public class ConvMessage {
 		if (data.has(HikeConstants.METADATA)) {
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
+		this.isStickerMessage = HikeConstants.STICKER.equals(obj
+				.optString(HikeConstants.SUB_TYPE));
 	}
 
 	public ConvMessage(JSONObject obj, Conversation conversation,
@@ -324,6 +336,8 @@ public class ConvMessage {
 			isFileTransferMessage = this.metadata.getHikeFiles() != null;
 
 			participantInfoState = this.metadata.getParticipantInfoState();
+
+			isStickerMessage = this.metadata.getSticker() != null;
 		}
 	}
 
@@ -437,7 +451,7 @@ public class ConvMessage {
 		JSONObject md = null;
 		try {
 			if (metadata != null) {
-				if (isFileTransferMessage) {
+				if (isFileTransferMessage || isStickerMessage) {
 					md = metadata.getJSON();
 					data.put(HikeConstants.METADATA, md);
 				} else if (metadata.isPokeMessage()) {
@@ -451,6 +465,9 @@ public class ConvMessage {
 
 			object.put(HikeConstants.TO, mMsisdn);
 			object.put(HikeConstants.DATA, data);
+			if (isStickerMessage) {
+				object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
+			}
 
 			object.put(HikeConstants.TYPE,
 					mInvite ? HikeConstants.MqttMessageTypes.INVITE
