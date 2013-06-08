@@ -48,6 +48,8 @@ public class DownloadStickerTask extends StickerTaskBase {
 		String directoryPath = Utils.getExternalStickerDirectoryForCatgoryId(
 				context, catId);
 		File stickerDir = new File(directoryPath);
+		int totalNumber = 0;
+		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
 
@@ -76,6 +78,9 @@ public class DownloadStickerTask extends StickerTaskBase {
 				return FTResult.FILE_TOO_LARGE;
 			}
 
+			totalNumber = response.optInt(HikeConstants.NUMBER_OF_STICKERS, -1);
+			reachedEnd = response.optBoolean(HikeConstants.REACHED_STICKER_END);
+			Log.d(getClass().getSimpleName(), "REached end? " + reachedEnd);
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 			for (Iterator<String> keys = data.keys(); keys.hasNext();) {
 				String stickerId = keys.next();
@@ -102,6 +107,8 @@ public class DownloadStickerTask extends StickerTaskBase {
 			return FTResult.DOWNLOAD_FAILED;
 		}
 
+		HikeConversationsDatabase.getInstance().addOrUpdateStickerCategory(
+				catId, totalNumber, reachedEnd);
 		return FTResult.SUCCESS;
 	}
 }
