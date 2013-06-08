@@ -564,8 +564,8 @@ public class HikeMessengerApp extends Application implements Listener {
 				StickerCategory.BACK_CATEGORY_RES_ID));
 
 		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
-			stickerCategories.add(new StickerCategory(
-					EmoticonConstants.STICKER_CATEGORY_IDS[i],
+			stickerCategories.add(new StickerCategory(Utils
+					.getCategoryIdForIndex(i),
 					EmoticonConstants.STICKER_CATEGORY_RES_IDS[i]));
 		}
 		String removedIds = preferences.getString(
