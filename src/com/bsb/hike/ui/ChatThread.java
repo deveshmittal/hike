@@ -289,7 +289,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			HikePubSub.GROUP_REVIVED, HikePubSub.CHANGED_MESSAGE_TYPE,
 			HikePubSub.SHOW_SMS_SYNC_DIALOG, HikePubSub.SMS_SYNC_COMPLETE,
 			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
-			HikePubSub.SHOWN_UNDELIVERED_MESSAGE };
+			HikePubSub.SHOWN_UNDELIVERED_MESSAGE,
+			HikePubSub.STICKER_DOWNLOADED,
+			HikePubSub.STICKER_CATEGORY_DOWNLOADED,
+			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED };
 
 	private View currentEmoticonCategorySelected;
 
@@ -1656,7 +1659,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	@Override
-	public void onEventReceived(String type, Object object) {
+	public void onEventReceived(final String type, final Object object) {
 		if (mContactNumber == null || mConversation == null) {
 			Log.w("ChatThread",
 					"received message when contactNumber is null type=" + type
@@ -1940,13 +1943,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				});
 			}
 		} else if (HikePubSub.CHANGED_MESSAGE_TYPE.equals(type)) {
-			runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					mUpdateAdapter.run();
-				}
-			});
+			updateAdapter();
 		} else if (HikePubSub.SHOW_SMS_SYNC_DIALOG.equals(type)) {
 			runOnUiThread(new Runnable() {
 
@@ -1978,7 +1975,36 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 					mConversationsView.setSelection(messages.size() - 1);
 				}
 			});
+		} else if (HikePubSub.STICKER_DOWNLOADED.equals(type)) {
+			updateAdapter();
+		} else if (HikePubSub.STICKER_CATEGORY_DOWNLOADED.equals(type)
+				|| HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED.equals(type)) {
+			if (emoticonType == EmoticonType.STICKERS) {
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						Pair<Integer, DownloadType> taskData = (Pair<Integer, DownloadType>) object;
+						int categoryIndex = taskData.first;
+						DownloadType downloadType = taskData.second;
+
+						updateStickerCategoryUI(categoryIndex,
+								HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED
+										.equals(type), downloadType);
+					}
+				});
+			}
 		}
+	}
+
+	private void updateAdapter() {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				mUpdateAdapter.run();
+			}
+		});
 	}
 
 	private ConvMessage findMessageById(long msgID) {
