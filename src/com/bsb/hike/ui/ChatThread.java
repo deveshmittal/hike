@@ -2455,7 +2455,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		optionsList.add(getString(R.string.choose_photo));
 		optionsList.add(getString(R.string.choose_video));
 		optionsList.add(getString(R.string.choose_audio));
-		optionsList.add(getString(R.string.audio_note));
 		if (canShareLocation) {
 			optionsList.add(getString(R.string.share_location));
 		}
@@ -2471,7 +2470,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		optionImagesList.add(R.drawable.ic_image_item);
 		optionImagesList.add(R.drawable.ic_video_item);
 		optionImagesList.add(R.drawable.ic_music_item);
-		optionImagesList.add(R.drawable.ic_record_item);
 		if (canShareLocation) {
 			optionImagesList.add(R.drawable.ic_share_location_item);
 		}
@@ -2551,16 +2549,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 						case 3:
 							requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
 							break;
-						case 4:
-							requestCode = HikeConstants.RECORD_AUDIO_TRANSFER_CODE;
-							break;
 
-						case 5:
+						case 4:
 							if (canShareLocation) {
 								requestCode = HikeConstants.SHARE_LOCATION_CODE;
 								break;
 							}
-						case 6:
+						case 5:
 							requestCode = HikeConstants.SHARE_CONTACT_CODE;
 							break;
 
@@ -2621,17 +2616,13 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 										new Intent[] { newMediaFileIntent });
 							}
 						}
-						if (requestCode != HikeConstants.RECORD_AUDIO_TRANSFER_CODE) {
-							Editor editor = prefs.edit();
-							editor.putString(HikeMessengerApp.TEMP_NUM,
-									mContactNumber);
-							editor.putString(HikeMessengerApp.TEMP_NAME,
-									mContactName);
-							editor.commit();
-							startActivityForResult(chooserIntent, requestCode);
-						} else {
-							showRecordingDialog(0);
-						}
+						Editor editor = prefs.edit();
+						editor.putString(HikeMessengerApp.TEMP_NUM,
+								mContactNumber);
+						editor.putString(HikeMessengerApp.TEMP_NAME,
+								mContactName);
+						editor.commit();
+						startActivityForResult(chooserIntent, requestCode);
 					}
 				});
 

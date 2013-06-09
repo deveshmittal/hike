@@ -218,7 +218,6 @@ public class HikeConstants {
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
 	public static final int AUDIO_TRANSFER_CODE = 1190;
-	public static final int RECORD_AUDIO_TRANSFER_CODE = 1191;
 	public static final int SHARE_LOCATION_CODE = 1192;
 	public static final int SHARE_CONTACT_CODE = 1193;
 
