@@ -142,10 +142,6 @@
             android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
         </activity>
-        <activity android:name=".ui.Rewards"
-            android:launchMode="singleTop"
-            android:theme="@style/NoTitleBar" >
-        </activity>
         <activity android:name=".ui.ShareLocation"
             android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
