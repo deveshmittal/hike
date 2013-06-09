@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
@@ -28,17 +29,17 @@ public class StatusMessage {
 	private int moodId;
 	private int timeOfDay;
 
-	public StatusMessage(JSONObject statusMessageJson) {
-		this.msisdn = statusMessageJson.optString(HikeConstants.FROM);
+	public StatusMessage(JSONObject statusMessageJson) throws JSONException {
+		this.msisdn = statusMessageJson.getString(HikeConstants.FROM);
 
-		this.timeStamp = statusMessageJson.optLong(HikeConstants.TIMESTAMP);
+		this.timeStamp = statusMessageJson.getLong(HikeConstants.TIMESTAMP);
 		/* prevent us from receiving a message from the future */
 		long now = System.currentTimeMillis() / 1000;
 		this.timeStamp = (this.timeStamp > now) ? now : this.timeStamp;
 
-		JSONObject data = statusMessageJson.optJSONObject(HikeConstants.DATA);
+		JSONObject data = statusMessageJson.getJSONObject(HikeConstants.DATA);
 
-		this.mappedId = data.optString(HikeConstants.STATUS_ID);
+		this.mappedId = data.getString(HikeConstants.STATUS_ID);
 
 		if (data.optBoolean(HikeConstants.PROFILE)) {
 			this.statusMessageType = StatusMessageType.PROFILE_PIC;
