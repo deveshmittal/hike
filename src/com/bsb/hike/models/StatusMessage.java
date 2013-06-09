@@ -30,8 +30,11 @@ public class StatusMessage {
 
 	public StatusMessage(JSONObject statusMessageJson) {
 		this.msisdn = statusMessageJson.optString(HikeConstants.FROM);
-		this.timeStamp = statusMessageJson.optLong(HikeConstants.TIMESTAMP,
-				System.currentTimeMillis() / 1000);
+
+		this.timeStamp = statusMessageJson.optLong(HikeConstants.TIMESTAMP);
+		/* prevent us from receiving a message from the future */
+		long now = System.currentTimeMillis() / 1000;
+		this.timeStamp = (this.timeStamp > now) ? now : this.timeStamp;
 
 		JSONObject data = statusMessageJson.optJSONObject(HikeConstants.DATA);
 
