@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
@@ -12,6 +11,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.R;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 
@@ -69,7 +69,12 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 		 */
 		boolean canSend = (!TextUtils.isEmpty(seq) && ((mConversation
 				.isOnhike() || mCredits > 0)));
-		mButton.setEnabled(canSend);
+		if (!canSend) {
+			mButton.setImageResource(R.drawable.ic_msg_record);
+		} else {
+			mButton.setImageResource(R.drawable.ic_msg_btn);
+		}
+		mButton.setEnabled(true);
 	}
 
 	public void onTextLastChanged() {

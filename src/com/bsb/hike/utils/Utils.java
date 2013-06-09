@@ -2023,4 +2023,13 @@ public class Utils {
 		}
 		return EmoticonConstants.STICKER_CATEGORY_IDS[index];
 	}
+
+	public static void setupFormattedTime(TextView tv, long timeElapsed) {
+		int totalSeconds = (int) (timeElapsed);
+		int minutesToShow = (int) (totalSeconds / 60);
+		int secondsToShow = totalSeconds % 60;
+
+		String time = String.format("%d:%02d", minutesToShow, secondsToShow);
+		tv.setText(time);
+	}
 }

@@ -45,16 +45,18 @@ public class UploadFileTask extends FileTransferTaskBase {
 	private Context context;
 	private ConvMessage convMessage;
 	private Uri picasaUri;
+	private long recordingDuration = -1;
 
 	public UploadFileTask(String msisdn, String filePath, String fileKey,
 			String fileType, HikeFileType hikeFileType, boolean wasFileSaved,
-			Context context) {
+			long recordingDuration, Context context) {
 		this.msisdn = msisdn;
 		this.filePath = filePath;
 		this.fileKey = fileKey;
 		this.fileType = fileType;
 		this.hikeFileType = hikeFileType;
 		this.wasFileSaved = wasFileSaved;
+		this.recordingDuration = recordingDuration;
 		this.context = context;
 	}
 
@@ -142,7 +144,8 @@ public class UploadFileTask extends FileTransferTaskBase {
 					}
 
 					JSONObject metadata = getFileTransferMetadata(fileName,
-							fileType, hikeFileType, null, null);
+							fileType, hikeFileType, null, null,
+							recordingDuration);
 
 					convMessage = createConvMessage(msisdn, fileName, metadata);
 
@@ -176,7 +179,8 @@ public class UploadFileTask extends FileTransferTaskBase {
 				}
 
 				JSONObject metadata = getFileTransferMetadata(fileName,
-						fileType, hikeFileType, thumbnailString, thumbnail);
+						fileType, hikeFileType, thumbnailString, thumbnail,
+						recordingDuration);
 
 				if (convMessage == null) {
 					convMessage = createConvMessage(msisdn, fileName, metadata);
@@ -263,12 +267,12 @@ public class UploadFileTask extends FileTransferTaskBase {
 
 	private JSONObject getFileTransferMetadata(String fileName,
 			String fileType, HikeFileType hikeFileType, String thumbnailString,
-			Bitmap thumbnail) throws JSONException {
+			Bitmap thumbnail, long recordingDuration) throws JSONException {
 		JSONArray files = new JSONArray();
 		files.put(new HikeFile(fileName,
 				TextUtils.isEmpty(fileType) ? HikeFileType
 						.toString(hikeFileType) : fileType, thumbnailString,
-				thumbnail).serialize());
+				thumbnail, recordingDuration).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 

@@ -490,4 +490,5 @@
 	<string name="updating_set">Updating the set</string>
 	<string name="downloading_category">Downloading %1$s</string>
 	<string name="download">Download</string>
+	<string name="hold_talk">HOLD AND TALK</string>
 </resources>

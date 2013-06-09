@@ -320,6 +320,10 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private View currentStickerCategorySelected;
 
+	private long recordStartTime;
+
+	private long recordedTime = -1;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -634,8 +638,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			}
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING)) {
-				showRecordingDialog(savedInstanceState
-						.getLong(HikeConstants.Extras.RECORDER_START_TIME));
+				recordStartTime = savedInstanceState
+						.getLong(HikeConstants.Extras.RECORDER_START_TIME);
+				recordedTime = savedInstanceState
+						.getLong(HikeConstants.Extras.RECORDED_TIME);
+
+				showRecordingDialog();
 			}
 
 			int dialogShowingOrdinal = savedInstanceState.getInt(
@@ -994,7 +1002,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		addMessage(convMessage);
 
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
-		mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView.getText()));
 	}
 
 	private void showSendingNativeSMSPopup(final String message) {
@@ -1050,8 +1057,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	public void onSendClick(View v) {
-		if ((!mConversation.isOnhike() && mCredits <= 0)
-				|| (TextUtils.isEmpty(mComposeView.getText()))) {
+		if (!mConversation.isOnhike() && mCredits <= 0) {
+			return;
+		}
+		if (TextUtils.isEmpty(mComposeView.getText())) {
+			showRecordingDialog();
 			return;
 		}
 
@@ -1187,7 +1197,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:"
 						+ fileType + " Path: " + filePath);
 				initialiseFileTransfer(filePath, hikeFileType, fileKey,
-						fileType, false);
+						fileType, false, -1);
 
 				// Making sure the file does not get forwarded again on
 				// orientation change.
@@ -1888,8 +1898,6 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				@Override
 				public void run() {
 					addMessage(convMessage);
-					mSendBtn.setEnabled(!TextUtils.isEmpty(mComposeView
-							.getText()));
 				}
 			});
 		} else if (HikePubSub.MUTE_CONVERSATION_TOGGLED.equals(type)) {
@@ -2710,7 +2718,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	 *            called, this parameter denotes the time the recording was
 	 *            started
 	 */
-	private void showRecordingDialog(long startTime) {
+	private void showRecordingDialog() {
 		recordingDialog = new Dialog(ChatThread.this,
 				R.style.Theme_CustomDialog);
 
@@ -2718,14 +2726,16 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		final TextView recordInfo = (TextView) recordingDialog
 				.findViewById(R.id.record_info);
-		final TextView duration = (TextView) recordingDialog
-				.findViewById(R.id.recording_duration);
+		final ImageView recordImage = (ImageView) recordingDialog
+				.findViewById(R.id.record_img);
 		final Button cancelBtn = (Button) recordingDialog
 				.findViewById(R.id.cancel_btn);
 		final Button sendBtn = (Button) recordingDialog
 				.findViewById(R.id.send_btn);
 		final ImageButton recordBtn = (ImageButton) recordingDialog
 				.findViewById(R.id.btn_record);
+
+		recordBtn.setEnabled(true);
 
 		recordBtn.setImageResource(R.drawable.ic_record);
 		sendBtn.setEnabled(false);
@@ -2735,87 +2745,121 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		recorderState = RecorderState.IDLE;
 		// Recording already onGoing
 		if (recorder != null) {
-			initialiseRecorder(recordBtn, recordInfo, duration, cancelBtn,
+			initialiseRecorder(recordBtn, recordInfo, recordImage, cancelBtn,
 					sendBtn);
-			setupRecordingView(recordBtn, recordInfo, duration, startTime);
+			setupRecordingView(recordInfo, recordImage, recordStartTime);
 		}
 		// Player is playing the recording
 		else if (player != null && selectedFile != null) {
 			try {
-				initialisePlayer(recordBtn, recordInfo, duration, sendBtn);
+				initialisePlayer(recordBtn, recordInfo, recordImage, sendBtn);
 			} catch (IOException e) {
 				Log.e(getClass().getSimpleName(),
 						"Error while playing the recording", e);
 				Toast.makeText(getApplicationContext(),
 						R.string.error_play_recording, Toast.LENGTH_SHORT)
 						.show();
-				setUpPreviewRecordingLayout(recordBtn, recordInfo, duration,
-						sendBtn);
+				setUpPreviewRecordingLayout(recordBtn, recordInfo, recordImage,
+						sendBtn, 0);
 				stopPlayer();
 			}
-			setUpPlayingRecordingLayout(recordBtn, recordInfo, duration,
-					sendBtn, startTime);
+			setUpPlayingRecordingLayout(recordBtn, recordInfo, recordImage,
+					sendBtn, recordStartTime);
 		}
 		// Recording has been stopped and we have a valid file to be sent
 		else if (recorder == null && selectedFile != null) {
-			setUpPreviewRecordingLayout(recordBtn, recordInfo, duration,
-					sendBtn);
+			setUpPreviewRecordingLayout(recordBtn, recordInfo, recordImage,
+					sendBtn, recordedTime);
 		}
 
-		recordBtn.setOnClickListener(new OnClickListener() {
+		recordBtn.setOnTouchListener(new OnTouchListener() {
+			boolean recording = false;
+
 			@Override
-			public void onClick(View v) {
-				switch (recorderState) {
-				case IDLE:
+			public boolean onTouch(View v, MotionEvent event) {
+				int action = event.getAction();
+				if (recorderState == RecorderState.RECORDED
+						|| recorderState == RecorderState.PLAYING) {
+					return false;
+				}
+				switch (action) {
+				case MotionEvent.ACTION_DOWN:
+					if (recording) {
+						return false;
+					}
+					recordBtn.setPressed(true);
 					// New recording
 					if (recorder == null) {
-						initialiseRecorder(recordBtn, recordInfo, duration,
+						initialiseRecorder(recordBtn, recordInfo, recordImage,
 								cancelBtn, sendBtn);
 					}
 					try {
 						recorder.prepare();
 						recorder.start();
-						setupRecordingView(recordBtn, recordInfo, duration,
-								System.currentTimeMillis());
+						recordStartTime = System.currentTimeMillis();
+						setupRecordingView(recordInfo, recordImage,
+								recordStartTime);
 					} catch (IOException e) {
 						stopRecorder();
 						recordingError(true);
 						Log.e(getClass().getSimpleName(),
 								"Failed to start recording", e);
 					}
-					break;
-				case RECORDING:
-					stopRecorder();
-					setUpPreviewRecordingLayout(recordBtn, recordInfo,
-							duration, sendBtn);
-					break;
-				case RECORDED:
-					try {
-						initialisePlayer(recordBtn, recordInfo, duration,
-								sendBtn);
-						player.prepare();
-						player.start();
-					} catch (IOException e) {
-						Log.e(getClass().getSimpleName(),
-								"Error while playing the recording", e);
-						Toast.makeText(getApplicationContext(),
-								R.string.error_play_recording,
-								Toast.LENGTH_SHORT).show();
-						setUpPreviewRecordingLayout(recordBtn, recordInfo,
-								duration, sendBtn);
-						stopPlayer();
+					recording = true;
+					setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+					return true;
+				case MotionEvent.ACTION_UP:
+					if (!recording) {
+						return false;
 					}
-					setUpPlayingRecordingLayout(recordBtn, recordInfo,
-							duration, sendBtn, System.currentTimeMillis());
-					break;
-				case PLAYING:
-					stopPlayer();
-					setUpPreviewRecordingLayout(recordBtn, recordInfo,
-							duration, sendBtn);
-					break;
+					mHandler.postDelayed(new Runnable() {
+
+						@Override
+						public void run() {
+							recordBtn.setPressed(false);
+							recording = false;
+							stopRecorder();
+							recordedTime = (System.currentTimeMillis() - recordStartTime) / 1000;
+							setUpPreviewRecordingLayout(recordBtn, recordInfo,
+									recordImage, sendBtn, recordedTime);
+							setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+						}
+					}, 1);
+
+					return true;
 				}
+				return false;
 			}
 		});
+		// recordBtn.setOnClickListener(new OnClickListener() {
+		// @Override
+		// public void onClick(View v) {
+		// switch (recorderState) {
+		// case RECORDED:
+		// try {
+		// initialisePlayer(recordBtn, recordImage, sendBtn);
+		// player.prepare();
+		// player.start();
+		// } catch (IOException e) {
+		// Log.e(getClass().getSimpleName(),
+		// "Error while playing the recording", e);
+		// Toast.makeText(getApplicationContext(),
+		// R.string.error_play_recording,
+		// Toast.LENGTH_SHORT).show();
+		// setUpPreviewRecordingLayout(recordBtn, recordImage,
+		// sendBtn);
+		// stopPlayer();
+		// }
+		// setUpPlayingRecordingLayout(recordBtn, recordInfo,
+		// recordImage, sendBtn, System.currentTimeMillis());
+		// break;
+		// case PLAYING:
+		// stopPlayer();
+		// setUpPreviewRecordingLayout(recordBtn, recordImage, sendBtn);
+		// break;
+		// }
+		// }
+		// });
 
 		cancelBtn.setOnClickListener(new OnClickListener() {
 			@Override
@@ -2829,7 +2873,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			public void onClick(View v) {
 				recordingDialog.dismiss();
 				initialiseFileTransfer(selectedFile.getPath(),
-						HikeFileType.AUDIO, null, "audio/voice", true);
+						HikeFileType.AUDIO_RECORDING, null, "audio/voice",
+						true, recordedTime);
 			}
 		});
 
@@ -2846,7 +2891,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void initialiseRecorder(final ImageButton recordBtn,
-			final TextView recordInfo, final TextView duration,
+			final TextView recordInfo, final ImageView recordImage,
 			final Button cancelBtn, final Button sendBtn) {
 		if (recorder == null) {
 			recorder = new MediaRecorder();
@@ -2855,8 +2900,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 			recorder.setMaxDuration(HikeConstants.MAX_DURATION_RECORDING_SEC * 1000);
 			recorder.setMaxFileSize(HikeConstants.MAX_FILE_SIZE);
-			selectedFile = Utils.getOutputMediaFile(HikeFileType.AUDIO, null,
-					null);
+			selectedFile = Utils.getOutputMediaFile(
+					HikeFileType.AUDIO_RECORDING, null, null);
 			recorder.setOutputFile(selectedFile.getPath());
 		}
 		recorder.setOnErrorListener(new OnErrorListener() {
@@ -2872,8 +2917,9 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				stopRecorder();
 				if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED
 						|| what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) {
+					recordedTime = (System.currentTimeMillis() - recordStartTime) / 1000;
 					setUpPreviewRecordingLayout(recordBtn, recordInfo,
-							duration, sendBtn);
+							recordImage, sendBtn, recordedTime);
 				} else {
 					recordingError(true);
 				}
@@ -2882,7 +2928,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 	}
 
 	private void initialisePlayer(final ImageButton recordBtn,
-			final TextView recordInfo, final TextView duration,
+			final TextView recordInfo, final ImageView recordImage,
 			final Button sendBtn) throws IOException {
 		if (player == null) {
 			player = new MediaPlayer();
@@ -2892,8 +2938,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		player.setOnCompletionListener(new OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
-				setUpPreviewRecordingLayout(recordBtn, recordInfo, duration,
-						sendBtn);
+				setUpPreviewRecordingLayout(recordBtn, recordInfo, recordImage,
+						sendBtn, recordedTime);
 				stopPlayer();
 			}
 		});
@@ -2912,61 +2958,53 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		}
 	}
 
-	private void setupRecordingView(ImageButton recordBtn, TextView recordInfo,
-			TextView duration, long startTime) {
+	private void setupRecordingView(TextView recordInfo, ImageView recordImage,
+			long startTime) {
 		recorderState = RecorderState.RECORDING;
-		recordBtn.setImageResource(R.drawable.ic_stop);
 
-		recordInfo.setTextColor(getResources().getColor(R.color.recording_txt));
-		recordInfo.setText(R.string.recording);
-		recordInfo.setCompoundDrawablesWithIntrinsicBounds(
-				R.drawable.ic_recording, 0, 0, 0);
-
-		duration.setVisibility(View.VISIBLE);
-		updateRecordingDuration = new UpdateRecordingDuration(duration,
-				startTime);
+		updateRecordingDuration = new UpdateRecordingDuration(recordInfo,
+				recordImage, startTime, R.drawable.ic_recording);
 		recordingHandler.post(updateRecordingDuration);
 	}
 
 	private void setUpPreviewRecordingLayout(ImageButton recordBtn,
-			TextView recordInfo, TextView duration, Button sendBtn) {
+			TextView recordText, ImageView recordImage, Button sendBtn,
+			long duration) {
 		recorderState = RecorderState.RECORDED;
-		recordBtn.setImageResource(R.drawable.ic_play);
 
-		recordInfo.setTextColor(getResources().getColor(R.color.record_txt));
-		recordInfo.setText(R.string.tap_to_play);
-		recordInfo.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+		recordBtn.setEnabled(false);
+		recordImage.setImageResource(R.drawable.ic_recorded);
+		Utils.setupFormattedTime(recordText, duration);
 
 		sendBtn.setEnabled(true);
-		duration.setVisibility(View.INVISIBLE);
 	}
 
 	private void setUpPlayingRecordingLayout(ImageButton recordBtn,
-			TextView recordInfo, TextView duration, Button sendBtn,
+			TextView recordInfo, ImageView recordImage, Button sendBtn,
 			long startTime) {
 		recorderState = RecorderState.PLAYING;
-		recordBtn.setImageResource(R.drawable.ic_stop);
-
-		recordInfo.setTextColor(getResources().getColor(R.color.record_txt));
-		recordInfo.setText(R.string.playing);
-		recordInfo.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 
 		sendBtn.setEnabled(true);
-		duration.setVisibility(View.VISIBLE);
 
-		updateRecordingDuration = new UpdateRecordingDuration(duration,
-				startTime);
+		updateRecordingDuration = new UpdateRecordingDuration(recordInfo,
+				recordImage, startTime, 0);
 		recordingHandler.post(updateRecordingDuration);
 	}
 
 	private class UpdateRecordingDuration implements Runnable {
 		private long startTime;
 		private TextView durationText;
+		private ImageView recordImage;
 		private boolean keepUpdating = true;
+		private boolean imageSet = false;
+		private int imageRes;
 
-		public UpdateRecordingDuration(TextView durationText, long startTime) {
+		public UpdateRecordingDuration(TextView durationText, ImageView iv,
+				long startTime, int imageRes) {
 			this.durationText = durationText;
+			this.recordImage = iv;
 			this.startTime = startTime;
+			this.imageRes = imageRes;
 		}
 
 		public void stopUpdating() {
@@ -2979,14 +3017,12 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 		@Override
 		public void run() {
-			long timeElapsed = System.currentTimeMillis() - startTime;
-			int totalSeconds = (int) (timeElapsed / 1000);
-			int minutesToShow = (int) (totalSeconds / 60);
-			int secondsToShow = totalSeconds % 60;
-
-			String time = String
-					.format("%d:%02d", minutesToShow, secondsToShow);
-			durationText.setText(time);
+			long timeElapsed = (System.currentTimeMillis() - startTime) / 1000;
+			Utils.setupFormattedTime(durationText, timeElapsed);
+			if (!imageSet) {
+				recordImage.setImageResource(imageRes);
+				imageSet = true;
+			}
 			if (keepUpdating) {
 				recordingHandler.postDelayed(updateRecordingDuration, 500);
 			}
@@ -3077,7 +3113,8 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				}
 			}
 
-			initialiseFileTransfer(filePath, hikeFileType, null, null, false);
+			initialiseFileTransfer(filePath, hikeFileType, null, null, false,
+					-1);
 		} else if (requestCode == HikeConstants.SHARE_LOCATION_CODE
 				&& resultCode == RESULT_OK) {
 			double latitude = data.getDoubleExtra(
@@ -3324,11 +3361,11 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 
 	private void initialiseFileTransfer(String filePath,
 			HikeFileType hikeFileType, String fileKey, String fileType,
-			boolean isRecording) {
+			boolean isRecording, long recordingDuration) {
 		clearTempData();
 		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber,
 				filePath, fileKey, fileType, hikeFileType, isRecording,
-				getApplicationContext());
+				recordingDuration, getApplicationContext());
 		uploadFileTask.execute();
 	}
 
@@ -3552,6 +3589,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				HikeConstants.Extras.RECORDER_START_TIME,
 				updateRecordingDuration != null ? updateRecordingDuration
 						.getStartTime() : 0);
+		outState.putLong(HikeConstants.Extras.RECORDED_TIME, recordedTime);
 		if (emoticonLayout != null
 				&& emoticonLayout.getVisibility() == View.VISIBLE) {
 			outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY,

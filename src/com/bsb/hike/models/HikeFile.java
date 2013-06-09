@@ -135,12 +135,14 @@ public class HikeFile {
 	}
 
 	public HikeFile(String fileName, String fileTypeString,
-			String thumbnailString, Bitmap thumbnail) {
+			String thumbnailString, Bitmap thumbnail, long recordingDuration) {
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
-		this.hikeFileType = HikeFileType.fromString(fileTypeString);
+		this.hikeFileType = HikeFileType.fromString(fileTypeString,
+				recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
 		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.recordingDuration = recordingDuration;
 	}
 
 	public HikeFile(double latitude, double longitude, int zoomLevel,
