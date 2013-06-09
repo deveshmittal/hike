@@ -164,9 +164,9 @@
                     android:layout_alignParentRight="true"
                     android:layout_marginBottom="6dp"
                     android:layout_marginRight="4dp"
-                    android:background="@null"
                     android:onClick="onSendClick"
-                    android:src="@drawable/send_hike_btn"
+                    android:background="@drawable/send_hike_btn"
+                    android:src="@drawable/ic_msg_btn"
                     android:state_enabled="false" />
 
                 <ImageButton

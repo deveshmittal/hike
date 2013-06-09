@@ -1493,7 +1493,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 			removeSMSToggle();
 
 			setEmoticonButton();
-			mSendBtn.setImageResource(R.drawable.send_hike_btn);
+			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
 			mComposeView
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
 							: R.string.hike_msg);
@@ -1509,7 +1509,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 		} else {
 			updateChatMetadata();
 			setEmoticonButton();
-			mSendBtn.setImageResource(R.drawable.send_sms_btn);
+			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn);
 			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
