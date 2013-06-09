@@ -32,8 +32,8 @@ import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 
-public class AuthSocialAccountBaseActivity extends Activity implements
-		DialogListener, TwitterAuthListener {
+public abstract class AuthSocialAccountBaseActivity extends HikeEntryBaseActivity
+		implements DialogListener, TwitterAuthListener {
 
 	public static final int FB_AUTH_REQUEST_CODE = 64206;
 	private static final String CALLBACK_URL = "http://get.hike.in/";

@@ -26,8 +26,9 @@ import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.view.DrawerLayout;
 import com.bsb.hike.view.DrawerLayout.CurrentState;
 
-public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
-		DrawerLayout.Listener, HikePubSub.Listener, OnItemLongClickListener {
+public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
+		implements DrawerLayout.Listener, HikePubSub.Listener,
+		OnItemLongClickListener {
 
 	public DrawerLayout parentLayout;
 	private SharedPreferences preferences;
