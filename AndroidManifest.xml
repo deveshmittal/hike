@@ -130,11 +130,6 @@
         </activity>
         <activity
             android:theme="@style/NoTitleBar"
-            android:name=".ui.FeedbackActivity"
-            android:windowSoftInputMode="adjustPan|stateHidden">
-        </activity>
-        <activity
-            android:theme="@style/NoTitleBar"
             android:name=".cropimage.CropImage"/>
         <activity android:name=".ui.CreditsActivity"
             android:theme="@style/NoTitleBar" >
