@@ -451,6 +451,7 @@ public class Utils {
 			case VIDEO:
 				orgFileName = "MOV_" + timeStamp + ".mp4";
 			case AUDIO:
+			case AUDIO_RECORDING:
 				orgFileName = "AUD_" + timeStamp + ".m4a";
 			}
 		}
@@ -474,6 +475,7 @@ public class Utils {
 			path.append(HikeConstants.VIDEO_ROOT);
 			break;
 		case AUDIO:
+		case AUDIO_RECORDING:
 			path.append(HikeConstants.AUDIO_ROOT);
 			break;
 		default:

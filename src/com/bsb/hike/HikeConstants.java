@@ -117,6 +117,7 @@ public class HikeConstants {
 	public static final String STATUS = "stat";
 	public static final String OK = "ok";
 	public static final String REACHED_STICKER_END = "st";
+	public static final String PLAYTIME = "pt";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";

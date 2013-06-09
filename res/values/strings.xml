@@ -246,11 +246,13 @@
 	<string name="audio_msg_received">Sent you an audio file</string>
 	<string name="location_msg_received">Shared a location</string>
 	<string name="contact_msg_received">Shared a contact</string>
+	<string name="audio_recording_msg_received">Sent you a voice message</string>
 	<string name="image_msg_sent">Photo</string>
 	<string name="video_msg_sent">Video</string>
 	<string name="audio_msg_sent">Audio</string>
 	<string name="location_msg_sent">Location</string>
 	<string name="contact_msg_sent">Contact</string>
+	<string name="audio_recording_msg_sent">Voice message</string>
 	<string name="unknown_msg">Unsupported file</string>
 	<string name="error_download">Error while downloading image</string>
 	<string name="downloading_image">Downloading image...</string>
