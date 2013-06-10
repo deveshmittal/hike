@@ -531,6 +531,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			nativeSmsDialog.cancel();
 			nativeSmsDialog = null;
 		}
+		if (mAdapter != null) {
+			mAdapter.resetPlayerIfRunning();
+		}
 	}
 
 	@Override

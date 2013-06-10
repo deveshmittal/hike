@@ -1,6 +1,7 @@
 package com.bsb.hike.adapters;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -13,7 +14,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ActivityInfo;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -38,6 +42,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
@@ -107,6 +112,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private TextView smsToggleSubtext;
 	private ShowUndeliveredMessage showUndeliveredMessage;
 	private int lastSentMessagePosition = -1;
+	private VoiceMessagePlayer voiceMessagePlayer;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -114,6 +120,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		this.convMessages = objects;
 		this.conversation = conversation;
 		this.chatThread = chatThread;
+		this.voiceMessagePlayer = new VoiceMessagePlayer();
 		setLastSentMessagePosition();
 	}
 
@@ -296,8 +303,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.file_transfer_progress);
 				holder.marginView = v.findViewById(R.id.margin_view);
 				holder.loadingThumb = v.findViewById(R.id.loading_thumb);
+				holder.showFileBtn = (ImageView) v
+						.findViewById(R.id.btn_open_file);
 
-				showFileTransferElements(holder, v, true);
+				showFileTransferElements(holder);
 			case SEND_HIKE:
 			case SEND_SMS:
 				if (v == null) {
@@ -337,7 +346,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.messageTextView.setVisibility(View.VISIBLE);
 
 				holder.circularProgress.setVisibility(View.INVISIBLE);
-				showFileTransferElements(holder, v, false);
+				showFileTransferElements(holder);
 
 				v.findViewById(R.id.message_receive).setVisibility(View.GONE);
 			case RECEIVE:
@@ -770,6 +779,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						holder.fileThumb
 								.setBackgroundResource(R.drawable.ic_default_contact);
 						break;
+					case AUDIO_RECORDING:
+						holder.fileThumb
+								.setBackgroundResource(R.drawable.ic_audio_msg_received);
+						break;
 					case UNKNOWN:
 						holder.fileThumb
 								.setBackgroundResource(R.drawable.ic_unknown_file);
@@ -792,10 +805,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			holder.messageTextView.setVisibility(!showThumbnail ? View.VISIBLE
 					: View.GONE);
-			holder.messageTextView
-					.setText(hikeFile.getHikeFileType() == HikeFileType.UNKNOWN ? context
-							.getString(R.string.unknown_msg) : hikeFile
-							.getFileName());
+
+			if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+				Utils.setupFormattedTime(holder.messageTextView,
+						hikeFile.getRecordingDuration());
+			} else if (hikeFile.getHikeFileType() == HikeFileType.UNKNOWN) {
+				holder.messageTextView.setText(context
+						.getString(R.string.unknown_msg));
+			} else {
+				holder.messageTextView.setText(hikeFile.getFileName());
+			}
 
 			if (holder.showFileBtn != null) {
 				if (hikeFile.wasFileDownloaded()
@@ -803,19 +822,51 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						&& !ChatThread.fileTransferTaskMap
 								.containsKey(convMessage.getMsgID())) {
 					holder.showFileBtn.setVisibility(View.GONE);
+
 				} else {
-					holder.showFileBtn.setVisibility(View.VISIBLE);
 					LayoutParams lp = (LayoutParams) holder.showFileBtn
 							.getLayoutParams();
 					lp.gravity = !showThumbnail ? Gravity.CENTER_VERTICAL
 							: Gravity.BOTTOM;
 					holder.showFileBtn.setLayoutParams(lp);
-					holder.showFileBtn
-							.setImageResource(ChatThread.fileTransferTaskMap
-									.containsKey(convMessage.getMsgID()) ? R.drawable.ic_open_file_disabled
-									: (hikeFile.wasFileDownloaded() && hikeFile
-											.getHikeFileType() != HikeFileType.CONTACT) ? R.drawable.ic_open_received_file
-											: R.drawable.ic_download_file);
+
+					if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+						holder.showFileBtn.setVisibility(View.VISIBLE);
+						holder.showFileBtn
+								.setBackgroundResource(R.drawable.bg_audio_btn);
+						holder.showFileBtn
+								.setScaleType(ScaleType.CENTER_INSIDE);
+						if (hikeFile.getFileKey().equals(
+								voiceMessagePlayer.getFileKey())) {
+
+							if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PLAYING) {
+								holder.showFileBtn
+										.setImageResource(R.drawable.ic_pause_audio);
+							} else {
+								holder.showFileBtn
+										.setImageResource(R.drawable.ic_play_audio);
+							}
+							holder.messageTextView
+									.setTag(hikeFile.getFileKey());
+							voiceMessagePlayer
+									.setDurationTxt(holder.messageTextView);
+						} else {
+							holder.showFileBtn
+									.setImageResource(R.drawable.ic_play_audio);
+						}
+
+					} else {
+						holder.showFileBtn
+								.setVisibility(convMessage.isSent() ? View.GONE
+										: View.VISIBLE);
+						holder.showFileBtn.setBackgroundResource(0);
+						holder.showFileBtn
+								.setImageResource(ChatThread.fileTransferTaskMap
+										.containsKey(convMessage.getMsgID()) ? R.drawable.ic_open_file_disabled
+										: (hikeFile.wasFileDownloaded() && hikeFile
+												.getHikeFileType() != HikeFileType.CONTACT) ? R.drawable.ic_open_received_file
+												: R.drawable.ic_download_file);
+					}
 				}
 			}
 			if (holder.marginView != null) {
@@ -1033,15 +1084,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 	}
 
-	private void showFileTransferElements(ViewHolder holder, View v,
-			boolean isSentMessage) {
+	private void showFileTransferElements(ViewHolder holder) {
 		holder.fileThumb.setVisibility(View.VISIBLE);
-		if (holder.showFileBtn != null) {
-			holder.showFileBtn.setVisibility(View.VISIBLE);
-			holder.showFileBtn
-					.setImageResource(isSentMessage ? R.drawable.ic_open_sent_file
-							: R.drawable.ic_open_received_file);
-		}
 	}
 
 	private boolean shouldDisplayTimestamp(int position) {
@@ -1152,7 +1196,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					}
 					// Else we open it for the use to see
 					else {
-						openFile(hikeFile, convMessage);
+						openFile(hikeFile, convMessage, v);
 					}
 				} else {
 					File receivedFile = hikeFile.getFile();
@@ -1166,7 +1210,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							&& ((hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 									|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || receivedFile
 										.exists())) {
-						openFile(hikeFile, convMessage);
+						openFile(hikeFile, convMessage, v);
 					} else if (!ChatThread.fileTransferTaskMap
 							.containsKey(convMessage.getMsgID())) {
 						Log.d(getClass().getSimpleName(),
@@ -1205,7 +1249,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	}
 
-	private void openFile(HikeFile hikeFile, ConvMessage convMessage) {
+	private void openFile(HikeFile hikeFile, ConvMessage convMessage,
+			View parent) {
 		File receivedFile = hikeFile.getFile();
 		Log.d(getClass().getSimpleName(), "Opening file");
 		Intent openFile = new Intent(Intent.ACTION_VIEW);
@@ -1216,6 +1261,42 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			openFile.setData(Uri.parse(uri));
 		} else if (hikeFile.getHikeFileType() == HikeFileType.CONTACT) {
 			saveContact(hikeFile);
+			return;
+		} else if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+			String fileKey = hikeFile.getFileKey();
+
+			ImageView showFileBtn = (ImageView) parent
+					.findViewById(R.id.btn_open_file);
+			TextView durationTxt = (TextView) parent.findViewById(convMessage
+					.isSent() ? R.id.message_send : R.id.message_receive_ft);
+
+			if (fileKey.equals(voiceMessagePlayer.getFileKey())) {
+
+				showFileBtn.setTag(fileKey);
+				voiceMessagePlayer.setFileBtn(showFileBtn);
+				durationTxt.setTag(fileKey);
+				voiceMessagePlayer.setDurationTxt(durationTxt);
+
+				if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PLAYING) {
+					voiceMessagePlayer.pausePlayer();
+				} else if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PAUSED) {
+					voiceMessagePlayer.resumePlayer();
+				} else if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.STOPPED) {
+					voiceMessagePlayer.playMessage(hikeFile);
+				}
+			} else {
+				if (voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PLAYING
+						|| voiceMessagePlayer.getPlayerState() == VoiceMessagePlayerState.PAUSED) {
+					voiceMessagePlayer.resetPlayer();
+				}
+
+				showFileBtn.setTag(fileKey);
+				voiceMessagePlayer.setFileBtn(showFileBtn);
+				durationTxt.setTag(fileKey);
+				voiceMessagePlayer.setDurationTxt(durationTxt);
+
+				voiceMessagePlayer.playMessage(hikeFile);
+			}
 			return;
 		} else {
 			openFile.setDataAndType(Uri.fromFile(receivedFile),
@@ -1528,5 +1609,169 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				.ordinal())
 				|| (convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_CONFIRMED
 						.ordinal());
+	}
+
+	enum VoiceMessagePlayerState {
+		PLAYING, PAUSED, STOPPED
+	};
+
+	private class VoiceMessagePlayer {
+		String fileKey;
+		MediaPlayer mediaPlayer;
+		ImageView fileBtn;
+		TextView durationTxt;
+		Handler handler;
+		VoiceMessagePlayerState playerState;
+
+		public VoiceMessagePlayer() {
+			handler = new Handler();
+		}
+
+		public void playMessage(HikeFile hikeFile) {
+			chatThread
+					.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+
+			playerState = VoiceMessagePlayerState.PLAYING;
+			fileKey = hikeFile.getFileKey();
+
+			try {
+				mediaPlayer = new MediaPlayer();
+				mediaPlayer.setDataSource(hikeFile.getFilePath());
+				mediaPlayer.prepare();
+				mediaPlayer.start();
+
+				setFileBtnResource();
+
+				mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+					@Override
+					public void onCompletion(MediaPlayer mp) {
+						resetPlayer();
+					}
+				});
+				handler.post(updateTimer);
+			} catch (IllegalArgumentException e) {
+				Log.w(getClass().getSimpleName(), e);
+			} catch (IllegalStateException e) {
+				Log.w(getClass().getSimpleName(), e);
+			} catch (IOException e) {
+				Log.w(getClass().getSimpleName(), e);
+			}
+		}
+
+		public void pausePlayer() {
+			chatThread
+					.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			if (mediaPlayer == null) {
+				return;
+			}
+			playerState = VoiceMessagePlayerState.PAUSED;
+			mediaPlayer.pause();
+			setTimer();
+			setFileBtnResource();
+		}
+
+		public void resumePlayer() {
+			if (mediaPlayer == null) {
+				return;
+			}
+			chatThread
+					.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+			playerState = VoiceMessagePlayerState.PLAYING;
+			mediaPlayer.start();
+			handler.post(updateTimer);
+			setFileBtnResource();
+		}
+
+		public void resetPlayer() {
+			chatThread
+					.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			playerState = VoiceMessagePlayerState.STOPPED;
+
+			setTimer();
+			setFileBtnResource();
+
+			if (mediaPlayer != null) {
+				mediaPlayer.stop();
+				mediaPlayer.reset();
+				mediaPlayer.release();
+				mediaPlayer = null;
+			}
+			fileBtn = null;
+			durationTxt = null;
+		}
+
+		public String getFileKey() {
+			return fileKey;
+		}
+
+		public VoiceMessagePlayerState getPlayerState() {
+			return playerState;
+		}
+
+		public void setDurationTxt(TextView durationTxt) {
+			this.durationTxt = durationTxt;
+			setTimer();
+		}
+
+		public void setFileBtn(ImageView fileBtn) {
+			this.fileBtn = fileBtn;
+		}
+
+		public void setFileBtnResource() {
+			if (fileBtn == null) {
+				return;
+			}
+			String btnFileKey = (String) fileBtn.getTag();
+			if (!fileKey.equals(btnFileKey)) {
+				return;
+			}
+			fileBtn.setImageResource(playerState != VoiceMessagePlayerState.PLAYING ? R.drawable.ic_play_audio
+					: R.drawable.ic_pause_audio);
+		}
+
+		Runnable updateTimer = new Runnable() {
+
+			@Override
+			public void run() {
+				setTimer();
+				if (playerState == VoiceMessagePlayerState.PLAYING) {
+					handler.postDelayed(updateTimer, 500);
+				}
+			}
+		};
+
+		private void setTimer() {
+			if (durationTxt == null || fileKey == null || mediaPlayer == null) {
+				return;
+			}
+			String txtFileKey = (String) durationTxt.getTag();
+			if (!fileKey.equals(txtFileKey)) {
+				return;
+			}
+			try {
+				switch (playerState) {
+				case PLAYING:
+				case PAUSED:
+					Utils.setupFormattedTime(durationTxt,
+							mediaPlayer.getCurrentPosition() / 1000);
+					break;
+				case STOPPED:
+					Utils.setupFormattedTime(durationTxt,
+							mediaPlayer.getDuration() / 1000);
+					break;
+
+				}
+			} catch (IllegalStateException e) {
+				/*
+				 * This can be thrown if we try to get the duration of the media
+				 * player when it has already stopped.
+				 */
+				Log.w(getClass().getSimpleName(), e);
+			}
+		}
+	}
+
+	public void resetPlayerIfRunning() {
+		voiceMessagePlayer.resetPlayer();
 	}
 }

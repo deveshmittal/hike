@@ -117,6 +117,18 @@
                     android:text="This is the message a much"
                     android:textColor="@color/chat_color"
                     android:textSize="16sp" />
+                
+                <ImageView
+                    android:id="@+id/btn_open_file"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:background="@drawable/bg_audio_btn"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_play_audio"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
             <ImageView
