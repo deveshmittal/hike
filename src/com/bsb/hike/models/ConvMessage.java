@@ -168,9 +168,9 @@ public class ConvMessage {
 				|| msgState == State.SENT_CONFIRMED
 				|| msgState == State.SENT_DELIVERED
 				|| msgState == State.SENT_DELIVERED_READ || msgState == State.SENT_FAILED);
-		setState(msgState);
 		this.groupParticipantMsisdn = groupParticipantMsisdn;
 		this.mIsSMS = isSMS;
+		setState(msgState);
 		this.participantInfoState = participantInfoState;
 	}
 
@@ -524,6 +524,14 @@ public class ConvMessage {
 			mState = state;
 		}
 
+		/*
+		 * If the state is greater than a SENT_CONFIRMED, it is definitely a
+		 * hike message
+		 */
+		if (mState.ordinal() > State.SENT_CONFIRMED.ordinal()
+				&& mState.ordinal() <= State.SENT_DELIVERED_READ.ordinal()) {
+			mIsSMS = false;
+		}
 		/*
 		 * We have a bug where a message is flipping from sent to received add
 		 * this assert to track down when/where it's happening assert(mIsSent ==
