@@ -73,7 +73,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, "
 				+ DBConstants.MSISDN_TYPE + " STRING, "
 				+ DBConstants.LAST_MESSAGED + " INTEGER, "
-				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0" + " )";
+				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0, "
+				+ DBConstants.LAST_SEEN + " INTEGER DEFAULT -1" + " )";
 
 		db.execSQL(create);
 
@@ -224,6 +225,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		 */
 		if (oldVersion < 11) {
 			onCreate(db);
+		}
+		/*
+		 * Version 12 for added last seen column
+		 */
+		if (oldVersion < 12) {
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
+					+ " ADD COLUMN " + DBConstants.LAST_SEEN
+					+ " INTEGER DEFAULT -1";
+			db.execSQL(alter);
 		}
 	}
 
@@ -1750,5 +1760,23 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	public int getFriendTableRowCount() {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
 				+ DBConstants.FAVORITES_TABLE, null);
+	}
+
+	public void updateLastSeenTime(String msisdn, long lastSeenTime) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.LAST_SEEN, lastSeenTime);
+
+		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
+				+ "=?", new String[] { msisdn });
+	}
+
+	public long getLastSeenTime(String msisdn) {
+		Cursor c = mDb.query(DBConstants.USERS_TABLE,
+				new String[] { DBConstants.LAST_SEEN }, DBConstants.MSISDN
+						+ "=?", new String[] { msisdn }, null, null, null);
+		if (!c.moveToFirst()) {
+			return -1;
+		}
+		return c.getLong(c.getColumnIndex(DBConstants.LAST_SEEN));
 	}
 }
