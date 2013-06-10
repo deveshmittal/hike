@@ -42,8 +42,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -101,13 +99,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	private Comparator<? super Conversation> mConversationsComparator;
 
-	private View mToolTip;
-
 	private SharedPreferences accountPrefs;
-
-	private View updateToolTipParent;
-
-	private View groupChatToolTipParent;
 
 	private boolean wasAlertCancelled = false;
 
@@ -649,8 +641,6 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING,
-				mToolTip != null && mToolTip.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT,
 				deviceDetailsSent);
 		outState.putBoolean(HikeConstants.Extras.ALERT_CANCELLED,
@@ -756,10 +746,6 @@ public class MessagesList extends DrawerBaseActivity implements
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.MENU);
-		if (groupChatToolTipParent != null
-				&& groupChatToolTipParent.getVisibility() == View.VISIBLE) {
-			onToolTipClosed(null);
-		}
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -1328,51 +1314,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				R.anim.slide_out_left_noalpha);
 	}
 
-	private void hideToolTip() {
-		if (mToolTip.getVisibility() == View.VISIBLE) {
-			Animation alphaOut = AnimationUtils.loadAnimation(
-					MessagesList.this, android.R.anim.fade_out);
-			alphaOut.setDuration(200);
-			mToolTip.setAnimation(alphaOut);
-			mToolTip.setVisibility(View.INVISIBLE);
-		}
-	}
-
-	private void setToolTipDismissed() {
-		hideToolTip();
-
-		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED,
-				true);
-		editor.commit();
-	}
-
-	public void onToolTipClosed(View v) {
-		if (updateToolTipParent != null
-				&& updateToolTipParent.getVisibility() == View.VISIBLE) {
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.HOME_UPDATE_TOOL_TIP_CLOSED);
-			Editor editor = accountPrefs.edit();
-			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP, false);
-			// Doing this so that we show this tip after the user has opened the
-			// home screen a few times.
-			editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
-			editor.commit();
-			hideToolTip();
-			return;
-		} else if (groupChatToolTipParent != null
-				&& groupChatToolTipParent.getVisibility() == View.VISIBLE) {
-			Editor editor = accountPrefs.edit();
-			editor.putBoolean(HikeMessengerApp.SHOW_GROUP_CHAT_TOOL_TIP, false);
-			editor.commit();
-			hideToolTip();
-			return;
-		}
-		Utils.logEvent(MessagesList.this,
-				HikeConstants.LogEvent.HOME_TOOL_TIP_CLOSED);
-		setToolTipDismissed();
-	}
-
 	private void updateApp(int updateType) {
 		if (TextUtils.isEmpty(this.accountPrefs.getString(
 				HikeConstants.Extras.UPDATE_URL, ""))) {
@@ -1398,15 +1339,6 @@ public class MessagesList extends DrawerBaseActivity implements
 					this, accountPrefs.getString(
 							HikeConstants.Extras.UPDATE_URL, ""));
 			downloadAndInstallUpdateAsyncTask.execute();
-		}
-	}
-
-	public void onToolTipClicked(View v) {
-		if (groupChatToolTipParent != null
-				&& groupChatToolTipParent.getVisibility() == View.VISIBLE) {
-			setToolTipDismissed();
-			openOptionsMenu();
-			return;
 		}
 	}
 

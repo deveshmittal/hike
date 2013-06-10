@@ -239,10 +239,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private boolean animatedOnce = false;
 
-	private ViewGroup toolTipLayout;
-
-	private boolean isToolTipShowing = false;
-
 	private boolean isOverlayShowing = false;
 
 	private ViewPager emoticonViewPager;
@@ -572,9 +568,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				MODE_PRIVATE);
 
 		wasOrientationChanged = savedInstanceState != null;
-		isToolTipShowing = savedInstanceState == null ? false
-				: savedInstanceState
-						.getBoolean(HikeConstants.Extras.TOOLTIP_SHOWING);
 		isOverlayShowing = savedInstanceState == null ? false
 				: savedInstanceState
 						.getBoolean(HikeConstants.Extras.OVERLAY_SHOWING);
@@ -2389,7 +2382,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	public void onTitleIconClick(View v) {
 
 		if (v.getId() == R.id.title_image_btn) {
-			dismissToolTip();
 			if (!(mConversation instanceof GroupConversation)) {
 				String userMsisdn = prefs.getString(
 						HikeMessengerApp.MSISDN_SETTING, "");
@@ -3553,90 +3545,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		return false;
 	}
 
-	private void changeInviteButtonVisibility() {
-		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
-		View btnBar = findViewById(R.id.button_bar);
-		titleIconView.setVisibility(mConversation.isOnhike()
-				&& !(mConversation instanceof GroupConversation) ? View.GONE
-				: View.VISIBLE);
-		titleIconView
-				.setImageResource(mConversation instanceof GroupConversation ? R.drawable.ic_i
-						: R.drawable.ic_invite_top);
-		btnBar.setVisibility(mConversation.isOnhike()
-				&& !(mConversation instanceof GroupConversation) ? View.GONE
-				: View.VISIBLE);
-
-		if (!prefs
-				.getBoolean(
-						(mConversation instanceof GroupConversation) ? HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED
-								: HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED,
-						false)
-				&& Utils.wasScreenOpenedNNumberOfTimes(
-						prefs,
-						(mConversation instanceof GroupConversation) ? HikeMessengerApp.NUM_TIMES_CHAT_THREAD_GROUP
-								: HikeMessengerApp.NUM_TIMES_CHAT_THREAD_INVITE)) {
-			showInviteToolTip();
-		} else {
-			// Fix for bug where the tool tip would remain visible in a hike
-			// thread.
-			hideToolTip();
-		}
-	}
-
-	private void showInviteToolTip() {
-		toolTipLayout = (ViewGroup) findViewById(R.id.credits_help_layout);
-		if (toolTipLayout.getVisibility() != View.VISIBLE && !isToolTipShowing) {
-			Animation fadeIn = AnimationUtils.loadAnimation(ChatThread.this,
-					android.R.anim.fade_in);
-			fadeIn.setStartOffset(1000);
-			toolTipLayout.setAnimation(fadeIn);
-		}
-		toolTipLayout.setVisibility(mConversation.isOnhike() ? View.GONE
-				: View.VISIBLE);
-		TextView toolTipTxt = (TextView) toolTipLayout
-				.findViewById(R.id.tool_tip);
-		String formatString = (mConversation instanceof GroupConversation) ? getString(R.string.tap_group_info)
-				: String.format(getString(R.string.press_btn_invite),
-						Utils.getFirstName(mLabel));
-		toolTipTxt.setText(formatString);
-	}
-
-	public void onToolTipClosed(View v) {
-		Utils.logEvent(ChatThread.this,
-				HikeConstants.LogEvent.CHAT_INVITE_TOOL_TIP_CLOSED);
-		dismissToolTip();
-	}
-
-	public void onToolTipClicked(View v) {
-	}
-
-	private void dismissToolTip() {
-		Editor editor = prefs.edit();
-		editor.putBoolean(
-				(mConversation instanceof GroupConversation) ? HikeMessengerApp.CHAT_GROUP_INFO_TOOL_TIP_DISMISSED
-						: HikeMessengerApp.CHAT_INVITE_TOOL_TIP_DISMISSED, true);
-		editor.commit();
-
-		hideToolTip();
-	}
-
-	private void hideToolTip() {
-		if (toolTipLayout != null
-				&& toolTipLayout.getVisibility() == View.VISIBLE) {
-			Animation fadeOut = AnimationUtils.loadAnimation(ChatThread.this,
-					android.R.anim.fade_out);
-			toolTipLayout.setAnimation(fadeOut);
-			toolTipLayout.setVisibility(View.INVISIBLE);
-		}
-	}
-
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		// For preventing the tool tip from animating again if its already
 		// showing
-		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING,
-				toolTipLayout != null
-						&& toolTipLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.OVERLAY_SHOWING,
 				mOverlayLayout.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.EMOTICON_SHOWING,
