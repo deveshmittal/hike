@@ -2032,4 +2032,10 @@ public class Utils {
 		String time = String.format("%d:%02d", minutesToShow, secondsToShow);
 		tv.setText(time);
 	}
+
+	public static boolean isUserAuthenticated(Context context) {
+		return !TextUtils.isEmpty(context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+				HikeMessengerApp.NAME_SETTING, null));
+	}
 }

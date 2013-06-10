@@ -9,13 +9,11 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -35,8 +33,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 			/*
 			 * If the user has not signed up yet, don't do anything.
 			 */
-			if (TextUtils.isEmpty(prefs.getString(
-					HikeMessengerApp.TOKEN_SETTING, null))) {
+			if (!Utils.isUserAuthenticated(context)) {
 				return;
 			}
 			/*

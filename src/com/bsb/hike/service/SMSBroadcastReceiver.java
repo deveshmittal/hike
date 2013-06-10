@@ -17,6 +17,7 @@ import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.utils.Utils;
 
 public class SMSBroadcastReceiver extends BroadcastReceiver {
 
@@ -28,8 +29,7 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
 		 * no name setting, so don't bother pulling in SMS's yet or The user
 		 * doesn't want us pulling in his SMS.
 		 */
-		if (!context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0)
-				.contains(HikeMessengerApp.NAME_SETTING)
+		if (!Utils.isUserAuthenticated(context)
 				|| !PreferenceManager.getDefaultSharedPreferences(context)
 						.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
 			return;
