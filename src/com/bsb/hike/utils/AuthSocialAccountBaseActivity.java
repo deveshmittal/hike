@@ -32,7 +32,7 @@ import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 
-public abstract class AuthSocialAccountBaseActivity extends HikeEntryBaseActivity
+public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseActivity
 		implements DialogListener, TwitterAuthListener {
 
 	public static final int FB_AUTH_REQUEST_CODE = 64206;

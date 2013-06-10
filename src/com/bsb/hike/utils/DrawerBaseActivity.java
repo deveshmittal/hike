@@ -148,6 +148,10 @@ public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
 
 	@Override
 	public void onBackPressed() {
+		if (parentLayout == null || parentLayout.getCurrentState() == null) {
+			super.onBackPressed();
+			return;
+		}
 		if (parentLayout.getCurrentState() != CurrentState.NONE) {
 			parentLayout.closeSidebar(false);
 		} else {
@@ -158,7 +162,7 @@ public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 				if (this instanceof CentralTimeline) {
-					finish();
+					super.onBackPressed();
 					overridePendingTransition(R.anim.no_animation,
 							R.anim.slide_down_noalpha);
 				} else {
@@ -166,7 +170,7 @@ public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
 							R.anim.slide_out_right_noalpha);
 				}
 			} else {
-				finish();
+				super.onBackPressed();
 			}
 		}
 	}

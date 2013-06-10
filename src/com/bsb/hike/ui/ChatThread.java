@@ -149,6 +149,7 @@ import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
+import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
@@ -156,10 +157,10 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 
-public class ChatThread extends Activity implements HikePubSub.Listener,
-		TextWatcher, OnEditorActionListener, OnSoftKeyboardListener,
-		View.OnKeyListener, FinishableEvent, OnTouchListener, OnScrollListener,
-		OnItemLongClickListener {
+public class ChatThread extends HikeAppStateBaseActivity implements
+		HikePubSub.Listener, TextWatcher, OnEditorActionListener,
+		OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent,
+		OnTouchListener, OnScrollListener, OnItemLongClickListener {
 
 	private enum DialogShowing {
 		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
@@ -698,7 +699,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				startActivity(intent);
 			} else if (getIntent().hasExtra(
 					HikeConstants.Extras.FORWARD_MESSAGE)) {
-				finish();
+				super.onBackPressed();
 				intent = new Intent(this, ChatThread.class);
 				intent.putExtra(HikeConstants.Extras.NAME, getIntent()
 						.getStringExtra(HikeConstants.Extras.PREV_NAME));
@@ -735,7 +736,7 @@ public class ChatThread extends Activity implements HikePubSub.Listener,
 				}
 				editor.commit();
 			}
-			finish();
+			super.onBackPressed();
 		} else {
 			onEmoticonBtnClicked(null, 0, true);
 		}

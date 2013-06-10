@@ -27,16 +27,16 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeAppStateBaseMapActivity;
 import com.bsb.hike.utils.Utils;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class ShareLocation extends MapActivity {
+public class ShareLocation extends HikeAppStateBaseMapActivity {
 
 	private static final int NO_LOCATION_DEVICE_ENABLED = 0;
 	private static final int GPS_DISABLED = 1;

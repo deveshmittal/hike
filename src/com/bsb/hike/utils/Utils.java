@@ -101,6 +101,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -2037,5 +2038,35 @@ public class Utils {
 		return !TextUtils.isEmpty(context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 				HikeMessengerApp.NAME_SETTING, null));
+	}
+
+	public static void sendAppState(Context context) {
+		if (!isUserAuthenticated(context)) {
+			return;
+		}
+
+		JSONObject object = new JSONObject();
+
+		try {
+			object.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.APP_STATE);
+			if (HikeMessengerApp.currentState == CurrentState.OPENED
+					|| HikeMessengerApp.currentState == CurrentState.RESUMED) {
+				object.put(HikeConstants.SUB_TYPE, HikeConstants.FOREGROUND);
+
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.JUST_OPENED,
+						HikeMessengerApp.currentState == CurrentState.OPENED);
+
+				object.put(HikeConstants.DATA, data);
+			} else {
+				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
+			}
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH_LOW,
+					object);
+		} catch (JSONException e) {
+			Log.w("AppState", "Invalid json", e);
+		}
+
 	}
 }

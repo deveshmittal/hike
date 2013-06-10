@@ -118,6 +118,9 @@ public class HikeConstants {
 	public static final String OK = "ok";
 	public static final String REACHED_STICKER_END = "st";
 	public static final String PLAYTIME = "pt";
+	public static final String FOREGROUND = "fg";
+	public static final String BACKGROUND = "bg";
+	public static final String JUST_OPENED = "justOpened";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -596,6 +599,7 @@ public class HikeConstants {
 		public static final String BATCH_STATUS_UPDATE = "bsu";
 		public static final String FORCE_SMS = "fsms";
 		public static final String STICKER = "stk";
+		public static final String APP_STATE = "app";
 	}
 
 	public static final class SMSNative {

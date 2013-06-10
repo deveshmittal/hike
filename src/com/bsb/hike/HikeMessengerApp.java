@@ -65,6 +65,11 @@ import com.facebook.android.Facebook;
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE,
 		ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
 public class HikeMessengerApp extends Application implements Listener {
+
+	public static enum CurrentState {
+		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY
+	}
+
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
 
 	public static final String MSISDN_SETTING = "msisdn";
@@ -223,6 +228,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String FIRST_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
 
 	public static List<StickerCategory> stickerCategories;
+
+	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Facebook facebook;
 

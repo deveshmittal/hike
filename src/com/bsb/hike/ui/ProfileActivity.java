@@ -748,11 +748,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						R.anim.slide_out_right_noalpha);
 			}
 		} else {
-			if (this.profileType == ProfileType.USER_PROFILE) {
-				super.onBackPressed();
-			} else {
-				finish();
-			}
+			super.onBackPressed();
 		}
 	}
 
@@ -999,7 +995,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			super.onBackPressed();
 			return;
 		}
-		finish();
+		super.onBackPressed();
 	}
 
 	protected String getLargerIconId() {

@@ -17,7 +17,6 @@ import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -34,10 +33,11 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
+import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.Utils;
 
-public class HikePreferences extends PreferenceActivity implements
-		OnPreferenceClickListener, Listener {
+public class HikePreferences extends HikeAppStateBasePreferenceActivity
+		implements OnPreferenceClickListener, Listener {
 
 	private enum DialogShowing {
 		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
