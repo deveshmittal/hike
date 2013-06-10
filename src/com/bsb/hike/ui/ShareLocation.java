@@ -122,7 +122,7 @@ public class ShareLocation extends HikeAppStateBaseMapActivity {
 	}
 
 	private void showLocationDialog() {
-		if(alert != null && alert.isShowing()) {
+		if (alert != null && alert.isShowing()) {
 			return;
 		}
 		boolean hasGps = getPackageManager().hasSystemFeature(

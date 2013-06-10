@@ -206,7 +206,8 @@ public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
 				}
 			});
 		} else if (HikePubSub.FREE_SMS_TOGGLED.equals(type)) {
-			HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_RECENTS, null);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_RECENTS,
+					null);
 			runOnUiThread(new Runnable() {
 
 				@Override
