@@ -121,6 +121,7 @@ public class HikeConstants {
 	public static final String FOREGROUND = "fg";
 	public static final String BACKGROUND = "bg";
 	public static final String JUST_OPENED = "justOpened";
+	public static final String LAST_SEEN_SETTING = "lastseen";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -132,6 +133,7 @@ public class HikeConstants {
 	public static final String SEND_SMS_PREF = "sendSmsPref";
 	public static final String RECEIVE_SMS_PREF = "receiveSmsPref";
 	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
+	public static final String LAST_SEEN_PREF = "lastSeenPref";
 	public static final String HIKEBOT = "TD-HIKE";
 
 	public static final String DONE = "Done";

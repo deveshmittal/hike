@@ -16,6 +16,7 @@ import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -35,6 +36,7 @@ import com.bsb.hike.tasks.ActivityCallableTask;
 import com.bsb.hike.tasks.DeleteAccountTask;
 import com.bsb.hike.utils.HikeAppStateBasePreferenceActivity;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.IconCheckBoxPreference;
 
 public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		implements OnPreferenceClickListener, Listener {
@@ -111,6 +113,41 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 				HikeConstants.RECEIVE_SMS_PREF);
 		if (smsClientPreference != null) {
 			HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+		}
+
+		final IconCheckBoxPreference lastSeenPreference = (IconCheckBoxPreference) getPreferenceScreen()
+				.findPreference(HikeConstants.LAST_SEEN_PREF);
+		if (lastSeenPreference != null) {
+			lastSeenPreference
+					.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+
+						@Override
+						public boolean onPreferenceChange(
+								Preference preference, Object newValue) {
+							boolean isChecked = (Boolean) newValue;
+							lastSeenPreference.setChecked(isChecked);
+
+							JSONObject object = new JSONObject();
+							try {
+								object.put(
+										HikeConstants.TYPE,
+										HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+								JSONObject data = new JSONObject();
+								data.put(HikeConstants.LAST_SEEN_SETTING,
+										isChecked);
+
+								object.put(HikeConstants.DATA, data);
+
+								HikeMessengerApp.getPubSub().publish(
+										HikePubSub.MQTT_PUBLISH, object);
+							} catch (JSONException e) {
+								Log.w(getClass().getSimpleName(),
+										"Invalid json", e);
+							}
+							return false;
+						}
+					});
 		}
 
 		if (savedInstanceState != null) {
