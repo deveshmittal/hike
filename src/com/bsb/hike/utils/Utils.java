@@ -2137,4 +2137,9 @@ public class Utils {
 			return "th";
 		}
 	}
+
+	public static long getServerTimeOffset(Context context) {
+		return context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+				0).getLong(HikeMessengerApp.SERVER_TIME_OFFSET, 0);
+	}
 }

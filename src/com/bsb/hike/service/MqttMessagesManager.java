@@ -170,6 +170,7 @@ public class MqttMessagesManager {
 			if (joined) {
 				long joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
 				if (joinTime > 0) {
+					joinTime += Utils.getServerTimeOffset(context);
 					userDb.setHikeJoinTime(msisdn, joinTime);
 				}
 
@@ -311,6 +312,11 @@ public class MqttMessagesManager {
 				Log.d(getClass().getSimpleName(), "Message already exists");
 				return;
 			}
+			/*
+			 * Applying the offset.
+			 */
+			convMessage.setTimestamp(convMessage.getTimestamp()
+					+ Utils.getServerTimeOffset(context));
 
 			convDb.addConversationMessages(convMessage);
 
@@ -765,6 +771,11 @@ public class MqttMessagesManager {
 					|| userDb.isBlocked(statusMessage.getMsisdn())) {
 				return;
 			}
+			/*
+			 * Applying the offset.
+			 */
+			statusMessage.setTimeStamp(statusMessage.getTimeStamp()
+					+ Utils.getServerTimeOffset(context));
 
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(
 					statusMessage.getMsisdn(), false);
@@ -898,11 +909,27 @@ public class MqttMessagesManager {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 			long lastSeenTime = data.getLong(HikeConstants.LAST_SEEN);
+			/*
+			 * Apply offset only if value is greater than 0
+			 */
+			if (lastSeenTime > 0) {
+				lastSeenTime += Utils.getServerTimeOffset(context);
+			}
 
 			userDb.updateLastSeenTime(msisdn, lastSeenTime);
 
 			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED,
 					new Pair<String, Long>(msisdn, lastSeenTime));
+		} else if (HikeConstants.MqttMessageTypes.SERVER_TIMESTAMP.equals(type)) {
+			long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
+			long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
+
+			Log.d(getClass().getSimpleName(), "Diff b/w server and client: "
+					+ diff);
+
+			Editor editor = settings.edit();
+			editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
+			editor.commit();
 		}
 	}
 

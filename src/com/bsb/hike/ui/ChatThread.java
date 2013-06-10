@@ -4316,6 +4316,15 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				 * Update current last seen value.
 				 */
 				currentLastSeenValue = result;
+				/*
+				 * We only apply the offset if the value is greater than 0 since
+				 * 0 and -1 are reserved.
+				 */
+				if (currentLastSeenValue > 0) {
+					currentLastSeenValue += Utils
+							.getServerTimeOffset(ChatThread.this);
+				}
+
 				HikeUserDatabase.getInstance().updateLastSeenTime(msisdn,
 						currentLastSeenValue);
 			}

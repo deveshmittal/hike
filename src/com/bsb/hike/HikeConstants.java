@@ -604,6 +604,7 @@ public class HikeConstants {
 		public static final String STICKER = "stk";
 		public static final String APP_STATE = "app";
 		public static final String LAST_SEEN = "ls";
+		public static final String SERVER_TIMESTAMP = "sts";
 	}
 
 	public static final class SMSNative {

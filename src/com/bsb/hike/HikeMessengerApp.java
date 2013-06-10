@@ -224,6 +224,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String FIRST_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
 
+	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;

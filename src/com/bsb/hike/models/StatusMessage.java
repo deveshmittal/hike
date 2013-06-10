@@ -108,6 +108,10 @@ public class StatusMessage {
 		return statusMessageType;
 	}
 
+	public void setTimeStamp(long timeStamp) {
+		this.timeStamp = timeStamp;
+	}
+
 	public long getTimeStamp() {
 		return timeStamp;
 	}
