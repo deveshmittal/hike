@@ -207,6 +207,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private TextView mLabelView;
 
+	private TextView mNameView;
+
+	private TextView mLastSeenView;
+
+	private View lastSeenContainer;
+
 	private LinearLayout mInputNumberContainer;
 
 	private boolean mUserIsBlocked;
@@ -298,7 +304,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			HikePubSub.SHOWN_UNDELIVERED_MESSAGE,
 			HikePubSub.STICKER_DOWNLOADED,
 			HikePubSub.STICKER_CATEGORY_DOWNLOADED,
-			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED };
+			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
+			HikePubSub.LAST_SEEN_TIME_UPDATED };
 
 	private View currentEmoticonCategorySelected;
 
@@ -583,6 +590,11 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		mOverlayLayout = findViewById(R.id.overlay_layout);
 		mInputNumberView = (EditText) findViewById(R.id.input_number);
 		mContactSearchView = (ListView) findViewById(R.id.contact_search_result);
+		mNameView = (TextView) findViewById(R.id.name_txt);
+		mLastSeenView = (TextView) findViewById(R.id.last_seen);
+		lastSeenContainer = findViewById(R.id.last_seen_container);
+
+		lastSeenContainer.setVisibility(View.GONE);
 
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
@@ -1375,7 +1387,19 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		btnBar.setVisibility(View.VISIBLE);
 
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
+
 		mLabelView.setText(mLabel);
+		if (!(mConversation instanceof GroupConversation)) {
+			mNameView.setText(mLabel);
+			boolean lastSeenOn = PreferenceManager.getDefaultSharedPreferences(
+					this).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+			if (lastSeenOn) {
+				/*
+				 * Fetching last seen value.
+				 */
+				new FetchLastSeenTask(mContactNumber, false).execute();
+			}
+		}
 
 		HikeUserDatabase db = HikeUserDatabase.getInstance();
 		mUserIsBlocked = db.isBlocked(getMsisdnMainUser());
@@ -1727,6 +1751,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					public void run() {
 						if (label != null) {
 							mLabelView.setText(label);
+							if (!(mConversation instanceof GroupConversation)) {
+								mNameView.setText(label);
+							}
 						}
 
 						addMessage(message);
@@ -1876,6 +1903,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					@Override
 					public void run() {
 						mLabelView.setText(mLabel);
+						mNameView.setText(mLabel);
 					}
 				});
 			}
@@ -2008,6 +2036,30 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					}
 				});
 			}
+		} else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type)) {
+			Pair<String, Long> lastSeenPair = (Pair<String, Long>) object;
+			String msisdn = lastSeenPair.first;
+			long lastSeenTime = lastSeenPair.second;
+
+			if (!mContactNumber.equals(msisdn)) {
+				return;
+			}
+			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
+					lastSeenTime);
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (lastSeenString == null) {
+						lastSeenContainer.setVisibility(View.GONE);
+						mLabelView.setVisibility(View.VISIBLE);
+					} else {
+						mLabelView.setVisibility(View.INVISIBLE);
+						lastSeenContainer.setVisibility(View.VISIBLE);
+						mLastSeenView.setText(lastSeenString);
+					}
+				}
+			});
 		}
 	}
 

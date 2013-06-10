@@ -491,6 +491,11 @@
 	<string name="downloading_category">Downloading %1$s</string>
 	<string name="download">Download</string>
 	<string name="hold_talk">HOLD AND TALK</string>
+	<string name="last_seen_today">Last seen at %1$s</string>
+	<string name="last_seen_yesterday">Last seen yesterday at %1$s</string>
+	<string name="last_seen_more">Last seen %1$s</string>
+	<string name="last_seen_while_ago">Last seen a while ago</string>
+	<string name="online">Online</string>
 	<string name="last_seen_header">Last Seen</string>
 	<string name="last_seen_info">See/show last online timestamp</string>
 </resources>

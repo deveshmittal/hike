@@ -16,8 +16,10 @@ import java.net.URL;
 import java.nio.CharBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -2068,5 +2070,71 @@ public class Utils {
 			Log.w("AppState", "Invalid json", e);
 		}
 
+	}
+
+	public static String getLastSeenTimeAsString(Context context,
+			long lastSeenTime) {
+		if (lastSeenTime == -1) {
+			return null;
+		}
+		if (lastSeenTime == 0) {
+			return context.getString(R.string.online);
+		}
+
+		long lastSeenTimeMillis = lastSeenTime * 1000;
+		Calendar lastSeenCalendar = Calendar.getInstance();
+		lastSeenCalendar.setTimeInMillis(lastSeenTimeMillis);
+
+		Date lastSeenDate = new Date(lastSeenTimeMillis);
+
+		Calendar nowCalendar = Calendar.getInstance();
+
+		int lastSeenYear = lastSeenCalendar.get(Calendar.YEAR);
+		int nowYear = nowCalendar.get(Calendar.YEAR);
+
+		int lastSeenDay = lastSeenCalendar.get(Calendar.DAY_OF_YEAR);
+		int nowDay = nowCalendar.get(Calendar.DAY_OF_YEAR);
+
+		int lastSeenDayOfMonth = lastSeenCalendar.get(Calendar.DAY_OF_MONTH);
+
+		/*
+		 * More than 7 days old.
+		 */
+		if ((lastSeenYear < nowYear) || ((nowDay - lastSeenDay) > 7)) {
+			return context.getString(R.string.last_seen_while_ago);
+		}
+
+		/*
+		 * More than 1 day old.
+		 */
+		if ((nowDay - lastSeenDay) > 1) {
+			String format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
+					+ "' MMM', h:mm aaa";
+			DateFormat df = new SimpleDateFormat(format);
+			return context.getString(R.string.last_seen_more,
+					df.format(lastSeenDate));
+		}
+
+		String format = "h:mm aaa";
+		DateFormat df = new SimpleDateFormat(format);
+		return context.getString(
+				(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
+						: R.string.last_seen_today, df.format(lastSeenDate));
+	}
+
+	private static String getDayOfMonthSuffix(int dayOfMonth) {
+		if (dayOfMonth >= 11 && dayOfMonth <= 13) {
+			return "th";
+		}
+		switch (dayOfMonth % 10) {
+		case 1:
+			return "st";
+		case 2:
+			return "nd";
+		case 3:
+			return "rd";
+		default:
+			return "th";
+		}
 	}
 }
