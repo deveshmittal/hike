@@ -244,6 +244,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String STICKER_CATEGORY_DOWNLOAD_FAILED = "stickerCategoryDownloadFailed";
 
+	public static final String LAST_SEEN_TIME_UPDATED = "lastSeenTimeUpdated";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

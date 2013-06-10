@@ -894,6 +894,15 @@ public class MqttMessagesManager {
 					}
 				}
 			}
+		} else if (HikeConstants.MqttMessageTypes.LAST_SEEN.equals(type)) {
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			long lastSeenTime = data.getLong(HikeConstants.LAST_SEEN);
+
+			userDb.updateLastSeenTime(msisdn, lastSeenTime);
+
+			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED,
+					new Pair<String, Long>(msisdn, lastSeenTime));
 		}
 	}
 
