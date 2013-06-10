@@ -2,12 +2,17 @@ package com.bsb.hike.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -139,6 +144,7 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.FinishableEvent;
@@ -4186,6 +4192,82 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			super.startActivity(intent);
 		} catch (ActivityNotFoundException e) {
 			super.startActivity(Intent.createChooser(intent, null));
+		}
+	}
+
+	private class FetchLastSeenTask extends AsyncTask<Void, Void, Long> {
+
+		long currentLastSeenValue;
+		boolean retriedOnce;
+		String msisdn;
+
+		public FetchLastSeenTask(String msisdn, boolean retriedOnce) {
+			this.msisdn = msisdn;
+			this.currentLastSeenValue = HikeUserDatabase.getInstance()
+					.getLastSeenTime(msisdn);
+			this.retriedOnce = retriedOnce;
+		}
+
+		@Override
+		protected Long doInBackground(Void... params) {
+			URL url;
+			try {
+				url = new URL(AccountUtils.base + "/user/lastseen/"
+						+ mContactNumber);
+
+				Log.d(getClass().getSimpleName(), "URL:  " + url);
+
+				URLConnection connection = url.openConnection();
+				connection.addRequestProperty("Cookie", "user="
+						+ AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
+
+				if (AccountUtils.ssl) {
+					((HttpsURLConnection) connection)
+							.setSSLSocketFactory(HikeSSLUtil
+									.getSSLSocketFactory());
+				}
+
+				JSONObject response = AccountUtils.getResponse(connection
+						.getInputStream());
+				Log.d(getClass().getSimpleName(), "Response: " + response);
+				if (!HikeConstants.OK.equals(response
+						.getString(HikeConstants.STATUS))) {
+					return null;
+				}
+				JSONObject data = response.getJSONObject(HikeConstants.DATA);
+				return data.getLong(HikeConstants.LAST_SEEN);
+
+			} catch (MalformedURLException e) {
+				Log.w(getClass().getSimpleName(), e);
+				return null;
+			} catch (IOException e) {
+				Log.w(getClass().getSimpleName(), e);
+				return null;
+			} catch (JSONException e) {
+				Log.w(getClass().getSimpleName(), e);
+				return null;
+			}
+
+		}
+
+		@Override
+		protected void onPostExecute(Long result) {
+			if (result == null) {
+				if (!retriedOnce) {
+					new FetchLastSeenTask(msisdn, true).execute();
+				}
+			} else {
+				/*
+				 * Update current last seen value.
+				 */
+				currentLastSeenValue = result;
+				HikeUserDatabase.getInstance().updateLastSeenTime(msisdn,
+						currentLastSeenValue);
+			}
+
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.LAST_SEEN_TIME_UPDATED,
+					new Pair<String, Long>(msisdn, currentLastSeenValue));
 		}
 	}
 }
