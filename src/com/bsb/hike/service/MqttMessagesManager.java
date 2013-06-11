@@ -910,17 +910,27 @@ public class MqttMessagesManager {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 			long lastSeenTime = data.getLong(HikeConstants.LAST_SEEN);
+			int isOffline;
 			/*
 			 * Apply offset only if value is greater than 0
 			 */
 			if (lastSeenTime > 0) {
+				isOffline = 1;
 				lastSeenTime += Utils.getServerTimeOffset(context);
+			} else {
+				/*
+				 * Otherwise the last seen time notifies that the user is either
+				 * online or has turned the setting off.
+				 */
+				isOffline = (int) lastSeenTime;
+				lastSeenTime = System.currentTimeMillis() / 1000;
 			}
-
 			userDb.updateLastSeenTime(msisdn, lastSeenTime);
+			userDb.updateIsOffline(msisdn, (int) isOffline);
 
 			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED,
-					new Pair<String, Long>(msisdn, lastSeenTime));
+					new Pair<String, Long>(msisdn,
+							isOffline == 1 ? lastSeenTime : isOffline));
 		} else if (HikeConstants.MqttMessageTypes.SERVER_TIMESTAMP.equals(type)) {
 			long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
 			long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;

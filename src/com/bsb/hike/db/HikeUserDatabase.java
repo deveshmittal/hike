@@ -74,7 +74,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSISDN_TYPE + " STRING, "
 				+ DBConstants.LAST_MESSAGED + " INTEGER, "
 				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0, "
-				+ DBConstants.LAST_SEEN + " INTEGER DEFAULT -1" + " )";
+				+ DBConstants.LAST_SEEN + " INTEGER DEFAULT -1, "
+				+ DBConstants.IS_OFFLINE + " INTEGER DEFAULT 1" + " )";
 
 		db.execSQL(create);
 
@@ -233,6 +234,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
 					+ " ADD COLUMN " + DBConstants.LAST_SEEN
 					+ " INTEGER DEFAULT -1";
+			db.execSQL(alter);
+		}
+		/*
+		 * Version 13 for is online column
+		 */
+		if (oldVersion < 13) {
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
+					+ " ADD COLUMN " + DBConstants.IS_OFFLINE
+					+ " INTEGER DEFAULT 1";
 			db.execSQL(alter);
 		}
 	}
@@ -1770,6 +1780,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ "=?", new String[] { msisdn });
 	}
 
+	public void updateIsOffline(String msisdn, int offline) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.IS_OFFLINE, offline);
+
+		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
+				+ "=?", new String[] { msisdn });
+	}
+
 	public long getLastSeenTime(String msisdn) {
 		Cursor c = mDb.query(DBConstants.USERS_TABLE,
 				new String[] { DBConstants.LAST_SEEN }, DBConstants.MSISDN
@@ -1778,5 +1796,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			return -1;
 		}
 		return c.getLong(c.getColumnIndex(DBConstants.LAST_SEEN));
+	}
+
+	public int getIsOffline(String msisdn) {
+		Cursor c = mDb.query(DBConstants.USERS_TABLE,
+				new String[] { DBConstants.IS_OFFLINE }, DBConstants.MSISDN
+						+ "=?", new String[] { msisdn }, null, null, null);
+		if (!c.moveToFirst()) {
+			return -1;
+		}
+		return c.getInt(c.getColumnIndex(DBConstants.IS_OFFLINE));
 	}
 }

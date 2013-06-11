@@ -4252,12 +4252,22 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 		long currentLastSeenValue;
 		boolean retriedOnce;
+		int isOffline;
 		String msisdn;
 
 		public FetchLastSeenTask(String msisdn, boolean retriedOnce) {
 			this.msisdn = msisdn;
 			this.currentLastSeenValue = HikeUserDatabase.getInstance()
 					.getLastSeenTime(msisdn);
+			this.isOffline = HikeUserDatabase.getInstance()
+					.getIsOffline(msisdn);
+			if (isOffline == 0) {
+				/*
+				 * We reset this to 1 since the user's online state is stale
+				 * here.
+				 */
+				isOffline = 1;
+			}
 			this.retriedOnce = retriedOnce;
 		}
 
@@ -4308,6 +4318,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			if (result == null) {
 				if (!retriedOnce) {
 					new FetchLastSeenTask(msisdn, true).execute();
+					return;
 				}
 			} else {
 				/*
@@ -4319,17 +4330,24 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				 * 0 and -1 are reserved.
 				 */
 				if (currentLastSeenValue > 0) {
+					isOffline = 1;
 					currentLastSeenValue += Utils
 							.getServerTimeOffset(ChatThread.this);
+				} else {
+					isOffline = (int) currentLastSeenValue;
+					currentLastSeenValue = System.currentTimeMillis() / 1000;
 				}
 
 				HikeUserDatabase.getInstance().updateLastSeenTime(msisdn,
 						currentLastSeenValue);
-			}
+				HikeUserDatabase.getInstance().updateIsOffline(msisdn,
+						isOffline);
 
+			}
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.LAST_SEEN_TIME_UPDATED,
-					new Pair<String, Long>(msisdn, currentLastSeenValue));
+					new Pair<String, Long>(msisdn,
+							isOffline == 1 ? currentLastSeenValue : isOffline));
 		}
 	}
 }
