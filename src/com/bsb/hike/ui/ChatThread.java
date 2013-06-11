@@ -1498,10 +1498,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			toggleConversationMuteViewVisibility(false);
 		}
 
-		if (!(mConversation instanceof GroupConversation)
-				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
-			showNudgeDialog();
-		}
 		if ((mConversation instanceof GroupConversation)
 				&& !((GroupConversation) mConversation).getIsGroupAlive()) {
 			toggleGroupLife(false);
@@ -1529,6 +1525,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				tipView = findViewById(R.id.walkie_talkie_tip);
 				Utils.showTip(this, TipType.WALKIE_TALKIE, tipView);
 			}
+		}
+		if (tipView != null && !(mConversation instanceof GroupConversation)
+				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
+			showNudgeDialog();
 		}
 	}
 
