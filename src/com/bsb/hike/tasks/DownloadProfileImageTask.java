@@ -13,6 +13,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -34,26 +35,37 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 
 	public DownloadProfileImageTask(Context context, String id,
 			String fileName, boolean hasCustomIcon, boolean statusImage) {
+		this(context, id, fileName, hasCustomIcon, statusImage, null);
+	}
+
+	public DownloadProfileImageTask(Context context, String id,
+			String fileName, boolean hasCustomIcon, boolean statusImage,
+			String url) {
 		this.context = context;
 		this.id = id;
 
-		if (statusImage) {
-			this.urlString = AccountUtils.base + "/user/status/" + id
-					+ "?only_image=true";
-		} else {
-			boolean isGroupConversation = Utils.isGroupConversation(id);
-
-			if (hasCustomIcon) {
-				this.urlString = AccountUtils.base
-						+ (isGroupConversation ? "/group/" + id + "/avatar"
-								: "/account/avatar/" + id) + "?fullsize=1";
+		if (TextUtils.isEmpty(url)) {
+			if (statusImage) {
+				this.urlString = AccountUtils.base + "/user/status/" + id
+						+ "?only_image=true";
 			} else {
-				this.urlString = (AccountUtils.ssl ? AccountUtils.HTTPS_STRING
-						: AccountUtils.HTTP_STRING)
-						+ AccountUtils.host
-						+ ":"
-						+ AccountUtils.port + "/static/avatars/" + fileName;
+				boolean isGroupConversation = Utils.isGroupConversation(id);
+
+				if (hasCustomIcon) {
+					this.urlString = AccountUtils.base
+							+ (isGroupConversation ? "/group/" + id + "/avatar"
+									: "/account/avatar/" + id) + "?fullsize=1";
+				} else {
+					this.urlString = (AccountUtils.ssl ? AccountUtils.HTTPS_STRING
+							: AccountUtils.HTTP_STRING)
+							+ AccountUtils.host
+							+ ":"
+							+ AccountUtils.port
+							+ "/static/avatars/" + fileName;
+				}
 			}
+		} else {
+			this.urlString = url;
 		}
 
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT

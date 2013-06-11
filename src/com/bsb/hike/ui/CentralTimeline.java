@@ -514,12 +514,22 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
 		mActivityState.imageViewId = v.getId();
 		mActivityState.mappedId = statusMessage.getMappedId();
+		String url = null;
+		if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
+			url = statusMessage.getProtip().getImageURL();
+		}
 		downloadOrShowProfileImage(true, false, mActivityState.mappedId,
-				v.getId());
+				v.getId(), url);
 	}
 
 	private void downloadOrShowProfileImage(boolean startNewDownload,
 			boolean justDownloaded, String mappedId, int viewId) {
+		downloadOrShowProfileImage(startNewDownload, justDownloaded, mappedId,
+				viewId, null);
+	}
+
+	private void downloadOrShowProfileImage(boolean startNewDownload,
+			boolean justDownloaded, String mappedId, int viewId, String url) {
 		if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 			Toast.makeText(getApplicationContext(),
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
@@ -554,7 +564,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					justDownloaded, viewId);
 			if (startNewDownload) {
 				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
-						getApplicationContext(), mappedId, fileName, true, true);
+						getApplicationContext(), mappedId, fileName, true,
+						true, url);
 				mActivityState.downloadProfileImageTask.execute();
 
 				mDialog = ProgressDialog.show(this, null, getResources()
