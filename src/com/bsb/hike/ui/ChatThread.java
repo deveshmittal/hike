@@ -1805,6 +1805,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
 			if (mContactNumber.equals(object)) {
 				runOnUiThread(new SetTypingText(true));
+				/*
+				 * Publishing an online event for this number.
+				 */
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.LAST_SEEN_TIME_UPDATED,
+						new Pair<String, Long>(mContactNumber, 0l));
 			}
 		}
 		// We only consider this case if there is a valid conversation in the
