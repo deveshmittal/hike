@@ -35,6 +35,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -146,6 +147,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.TOTAL_NUMBER + " INTEGER, "
 				+ DBConstants.REACHED_END + " INTEGER,"
 				+ DBConstants.UPDATE_AVAILABLE + " INTEGER" + " )";
+		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.PROTIP_TABLE + " ("
+				+ DBConstants.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+				+ DBConstants.PROTIP_MAPPED_ID + " TEXT UNIQUE, "
+				+ DBConstants.HEADER + " TEXT, " + DBConstants.PROTIP_TEXT
+				+ " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, "
+				+ DBConstants.IMAGE_URL + " TEXT, " + DBConstants.WAIT_TIME
+				+ " INTEGER" + " )";
 		db.execSQL(sql);
 	}
 
@@ -345,7 +354,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			db.execSQL(alter);
 		}
 		/*
-		 * Version 15 add the sticker table.
+		 * Version 15 adds the sticker table. Version 16 adds the protips table.
 		 */
 	}
 
@@ -2261,5 +2270,64 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	public void insertFirstStickerCategory() {
 		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[0],
 				EmoticonConstants.LOCAL_STICKER_RES_IDS.length, true);
+	}
+
+	public long addProtip(Protip protip) {
+		ContentValues contentValues = new ContentValues();
+
+		contentValues.put(DBConstants.PROTIP_MAPPED_ID, protip.getMappedId());
+		contentValues.put(DBConstants.HEADER, protip.getHeader());
+		contentValues.put(DBConstants.PROTIP_TEXT, protip.getText());
+		contentValues.put(DBConstants.IMAGE_URL, protip.getImageURL());
+		contentValues.put(DBConstants.WAIT_TIME, protip.getWaitTime());
+		contentValues.put(DBConstants.TIMESTAMP, protip.getTimeStamp());
+
+		return mDb.insert(DBConstants.PROTIP_TABLE, null, contentValues);
+	}
+
+	public Protip getLastProtip() {
+		String[] columns = {
+				"max(" + DBConstants.ID + ") as " + DBConstants.ID,
+				DBConstants.PROTIP_MAPPED_ID, DBConstants.HEADER,
+				DBConstants.PROTIP_TEXT, DBConstants.IMAGE_URL,
+				DBConstants.WAIT_TIME, DBConstants.TIMESTAMP };
+
+		return getProtip(columns, null, null);
+	}
+
+	public Protip getProtipForId(long id) {
+		String[] columns = { DBConstants.ID, DBConstants.PROTIP_MAPPED_ID,
+				DBConstants.HEADER, DBConstants.PROTIP_TEXT,
+				DBConstants.IMAGE_URL, DBConstants.WAIT_TIME,
+				DBConstants.TIMESTAMP };
+		String selection = DBConstants.ID + "=?";
+		String[] selectionArgs = { Long.toString(id) };
+
+		return getProtip(columns, selection, selectionArgs);
+	}
+
+	private Protip getProtip(String[] columns, String selection,
+			String[] selectionArgs) {
+		Cursor c = mDb.query(DBConstants.PROTIP_TABLE, columns, selection,
+				selectionArgs, null, null, null);
+		if (!c.moveToFirst()) {
+			return null;
+		}
+
+		long id = c.getLong(c.getColumnIndex(DBConstants.ID));
+		String mappedId = c.getString(c
+				.getColumnIndex(DBConstants.PROTIP_MAPPED_ID));
+		String header = c.getString(c.getColumnIndex(DBConstants.HEADER));
+		String text = c.getString(c.getColumnIndex(DBConstants.PROTIP_TEXT));
+		String url = c.getString(c.getColumnIndex(DBConstants.IMAGE_URL));
+		long waitTime = c.getLong(c.getColumnIndex(DBConstants.WAIT_TIME));
+		long timeStamp = c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+
+		return new Protip(id, mappedId, header, text, url, waitTime, timeStamp);
+	}
+
+	public void deleteProtip(String mappedId) {
+		mDb.delete(DBConstants.PROTIP_TABLE, DBConstants.PROTIP_MAPPED_ID
+				+ "=?", new String[] { mappedId });
 	}
 }

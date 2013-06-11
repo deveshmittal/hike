@@ -4,7 +4,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 15;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 16;
 
 	public static final int USERS_DATABASE_VERSION = 12;
 
@@ -151,4 +151,16 @@ public class DBConstants {
 	public static final String UPDATE_AVAILABLE = "updateAvailable";
 
 	public static final String LAST_SEEN = "lastSeen";
+
+	public static final String PROTIP_TABLE = "protipTable";
+
+	public static final String PROTIP_MAPPED_ID = "protipMappedId";
+
+	public static final String HEADER = "header";
+
+	public static final String PROTIP_TEXT = "protipText";
+
+	public static final String IMAGE_URL = "imageUrl";
+
+	public static final String WAIT_TIME = "waitTime";
 }
