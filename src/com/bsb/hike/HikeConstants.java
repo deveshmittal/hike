@@ -361,6 +361,8 @@ public class HikeConstants {
 
 	public static final int MAX_NUM_STICKER_REQUEST = 10;
 
+	/*In seconds*/
+	public static final int DEFAULT_PROTIP_WAIT_TIME = 300;
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

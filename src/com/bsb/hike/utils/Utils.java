@@ -117,6 +117,7 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
@@ -1846,6 +1847,17 @@ public class Utils {
 		}
 
 		return notificationCount;
+	}
+
+	public static boolean showProtip(Protip protip, SharedPreferences prefs) {
+		if (protip == null) {
+			return false;
+		}
+		long lastDismissTime = prefs.getLong(
+				HikeMessengerApp.PROTIP_DISMISS_TIME, 0);
+		long waitTime = prefs.getLong(HikeMessengerApp.PROTIP_WAIT_TIME,
+				HikeConstants.DEFAULT_PROTIP_WAIT_TIME);
+		return protip.getTimeStamp() > (lastDismissTime + waitTime);
 	}
 
 	/*
