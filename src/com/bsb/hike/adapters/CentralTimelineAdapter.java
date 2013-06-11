@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -116,6 +118,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.statusImg = (ImageView) convertView
 					.findViewById(R.id.status_pic);
 
+			viewHolder.buttonDivider = convertView
+					.findViewById(R.id.button_divider);
+
 			convertView.setTag(viewHolder);
 		} else {
 			viewHolder = (ViewHolder) convertView.getTag();
@@ -140,6 +145,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		viewHolder.statusImg.setVisibility(View.GONE);
 
 		viewHolder.detailsBtn.setVisibility(View.VISIBLE);
+
+		viewHolder.buttonDivider.setVisibility(View.VISIBLE);
+
+		int padding = context.getResources().getDimensionPixelSize(
+				R.dimen.status_btn_padding);
+		viewHolder.noBtn.setPadding(padding, viewHolder.noBtn.getPaddingTop(),
+				padding, viewHolder.noBtn.getPaddingTop());
+		viewHolder.noBtn.setText(R.string.not_now);
 
 		switch (statusMessage.getStatusMessageType()) {
 		case NO_STATUS:
@@ -206,6 +219,39 @@ public class CentralTimelineAdapter extends BaseAdapter {
 									: R.string.accepted_friend_request_info,
 							Utils.getFirstName(statusMessage.getNotNullName())));
 			break;
+		case PROTIP:
+			Protip protip = statusMessage.getProtip();
+
+			viewHolder.yesBtn.setVisibility(View.GONE);
+			viewHolder.buttonDivider.setVisibility(View.GONE);
+			viewHolder.timeStamp.setVisibility(View.GONE);
+			viewHolder.detailsBtn.setVisibility(View.GONE);
+
+			viewHolder.noBtn.setVisibility(View.VISIBLE);
+			viewHolder.noBtn.setText(R.string.dismiss);
+
+			int btnPadding = context.getResources().getDimensionPixelSize(
+					R.dimen.protip_btn_padding);
+			viewHolder.noBtn.setPadding(btnPadding,
+					viewHolder.noBtn.getPaddingTop(), btnPadding,
+					viewHolder.noBtn.getPaddingTop());
+
+			if (!TextUtils.isEmpty(protip.getText())) {
+				viewHolder.extraInfo.setVisibility(View.VISIBLE);
+				viewHolder.extraInfo.setText(protip.getText());
+			} else {
+				viewHolder.extraInfo.setVisibility(View.GONE);
+			}
+
+			if (!TextUtils.isEmpty(protip.getImageURL())) {
+				viewHolder.statusImg.setImageDrawable(IconCacheManager
+						.getInstance().getIconForMSISDN(protip.getMappedId()));
+				viewHolder.statusImg.setVisibility(View.VISIBLE);
+			} else {
+				viewHolder.statusImg.setVisibility(View.GONE);
+			}
+
+			break;
 		}
 
 		viewHolder.content
@@ -253,5 +299,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		ImageView divider;
 		ViewGroup content;
 		ImageView statusImg;
+		View buttonDivider;
 	}
 }

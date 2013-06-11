@@ -16,7 +16,7 @@ import com.bsb.hike.utils.Utils;
 public class StatusMessage {
 
 	public static enum StatusMessageType {
-		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED, NO_STATUS, USER_ACCEPTED_FRIEND_REQUEST
+		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED, NO_STATUS, USER_ACCEPTED_FRIEND_REQUEST, PROTIP
 	}
 
 	private long id;
@@ -28,6 +28,7 @@ public class StatusMessage {
 	private long timeStamp;
 	private int moodId;
 	private int timeOfDay;
+	private Protip protip;
 
 	public StatusMessage(JSONObject statusMessageJson) throws JSONException {
 		this.msisdn = statusMessageJson.getString(HikeConstants.FROM);
@@ -70,6 +71,15 @@ public class StatusMessage {
 		this.timeStamp = timeStamp;
 		this.moodId = moodId;
 		this.timeOfDay = timeOfDay;
+	}
+
+	public StatusMessage(Protip protip) {
+		this.protip = protip;
+		this.mappedId = protip.getMappedId();
+		this.name = HikeConstants.PROTIP_STATUS_NAME;
+		this.text = protip.getHeader();
+		this.timeStamp = protip.getTimeStamp();
+		this.statusMessageType = StatusMessageType.PROTIP;
 	}
 
 	public void setId(long id) {
@@ -126,6 +136,10 @@ public class StatusMessage {
 
 	public int getTimeOfDay() {
 		return timeOfDay;
+	}
+
+	public Protip getProtip() {
+		return protip;
 	}
 
 	public String getTimestampFormatted(boolean pretty) {

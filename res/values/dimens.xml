@@ -26,4 +26,6 @@
 	<dimen name="sub_text_size">14sp</dimen>
 	<dimen name="top_btn_padding">0dp</dimen>
 	<dimen name="emoticon_pallete">228dp</dimen>
+	<dimen name="protip_btn_padding">37dp</dimen>
+	<dimen name="status_btn_padding">20dp</dimen>
 </resources>
