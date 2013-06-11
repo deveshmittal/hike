@@ -69,6 +69,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
@@ -121,7 +122,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.RESET_NOTIFICATION_COUNTER,
 			HikePubSub.DECREMENT_NOTIFICATION_COUNTER,
 			HikePubSub.DRAWER_ANIMATION_COMPLETE, HikePubSub.SMS_SYNC_COMPLETE,
-			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START };
+			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
+			HikePubSub.PROTIP_ADDED };
 
 	private Dialog updateAlert;
 
@@ -1163,6 +1165,24 @@ public class MessagesList extends DrawerBaseActivity implements
 			});
 		} else if (HikePubSub.SMS_SYNC_START.equals(type)) {
 			dialogShowing = DialogShowing.SMS_SYNCING;
+		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
+			if (accountPrefs.getLong(HikeMessengerApp.CURRENT_PROTIP, -1) != -1) {
+				/*
+				 * Already showing a protip.
+				 */
+				return;
+			}
+			Protip protip = (Protip) object;
+			if (!Utils.showProtip(protip, accountPrefs)) {
+				return;
+			}
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setNotificationCounter(++notificationCount);
+				}
+			});
 		}
 	}
 
