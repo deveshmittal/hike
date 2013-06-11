@@ -1846,6 +1846,21 @@ public class Utils {
 					HikeMessengerApp.UNSEEN_USER_STATUS_COUNT, 0);
 		}
 
+		long currentProtipId = accountPrefs.getLong(
+				HikeMessengerApp.CURRENT_PROTIP, -1);
+
+		if (currentProtipId == -1) {
+			Protip protip = HikeConversationsDatabase.getInstance()
+					.getLastProtip();
+			if (protip != null) {
+				if (showProtip(protip, accountPrefs)) {
+					notificationCount++;
+				}
+			}
+		} else {
+			notificationCount++;
+		}
+
 		return notificationCount;
 	}
 
