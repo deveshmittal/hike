@@ -106,6 +106,18 @@
                 android:paddingBottom="@dimen/emoticon_pager_padding"
                 android:paddingTop="@dimen/emoticon_pager_padding" />
 
+            <LinearLayout
+                android:id="@+id/stickers_tip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/emoticons_categories_container"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="35dp"
+                android:visibility="gone" >
+
+                <include layout="@layout/tool_tip" />
+            </LinearLayout>
+            
             <FrameLayout
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
