@@ -246,6 +246,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String LAST_SEEN_TIME_UPDATED = "lastSeenTimeUpdated";
 
+	public static final String REMOVE_PROTIP = "removeProtip";
+
 	public static final String PROTIP_ADDED = "protipAdded";
 
 	private final Thread mThread;

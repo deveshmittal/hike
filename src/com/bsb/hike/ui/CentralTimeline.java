@@ -334,8 +334,27 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 	public void onNoBtnClick(View v) {
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
-		toggleFavoriteAndRemoveTimelineItem(statusMessage,
-				FavoriteType.REQUEST_RECEIVED_REJECTED);
+		if (statusMessage.getStatusMessageType() != StatusMessageType.PROTIP) {
+			toggleFavoriteAndRemoveTimelineItem(statusMessage,
+					FavoriteType.REQUEST_RECEIVED_REJECTED);
+		} else {
+			/*
+			 * Removing the protip
+			 */
+			statusMessages.remove(0);
+
+			centralTimelineAdapter.decrementUnseenCount();
+			centralTimelineAdapter.notifyDataSetChanged();
+
+			Editor editor = prefs.edit();
+			editor.putLong(HikeMessengerApp.PROTIP_DISMISS_TIME,
+					System.currentTimeMillis() / 1000);
+			editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
+			editor.commit();
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+					statusMessage.getProtip().getMappedId());
+		}
 	}
 
 	private void toggleFavoriteAndRemoveTimelineItem(

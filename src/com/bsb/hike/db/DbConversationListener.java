@@ -80,6 +80,7 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.HIKE_JOIN_TIME_OBTAINED, this);
 		mPubSub.addListener(HikePubSub.SEND_HIKE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.SEND_NATIVE_SMS_FALLBACK, this);
+		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
 	}
 
 	@Override
@@ -342,6 +343,10 @@ public class DbConversationListener implements Listener {
 			}
 
 			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
+		} else if (HikePubSub.REMOVE_PROTIP.equals(type)) {
+			String mappedId = (String) object;
+			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
+			mConversationDb.deleteProtip(mappedId);
 		}
 	}
 
