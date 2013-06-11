@@ -634,4 +634,8 @@ public class HikeConstants {
 	public static enum SMSSyncState {
 		SUCCESSFUL, NO_CHANGE, UNSUCCESSFUL
 	}
+
+	public static enum TipType {
+		EMOTICON, STICKER, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD
+	}
 }

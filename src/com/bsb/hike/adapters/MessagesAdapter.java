@@ -52,6 +52,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -113,6 +114,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private ShowUndeliveredMessage showUndeliveredMessage;
 	private int lastSentMessagePosition = -1;
 	private VoiceMessagePlayer voiceMessagePlayer;
+	private String statusIdForTip;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -723,6 +725,33 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			holder.container.setTag(convMessage);
 			holder.container.setOnClickListener(this);
+
+			boolean showTip = false;
+			boolean shownStatusTip = context.getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+					HikeMessengerApp.SHOWN_STATUS_TIP, false);
+
+			if (!shownStatusTip) {
+				if (chatThread.tipView == null) {
+					showTip = true;
+				} else {
+					TipType tipType = (TipType) chatThread.tipView.getTag();
+					if (tipType == TipType.STATUS
+							&& statusIdForTip.equals(statusMessage
+									.getMappedId())) {
+						showTip = true;
+					}
+				}
+			}
+
+			if (showTip) {
+				chatThread.tipView = v.findViewById(R.id.status_tip);
+				statusIdForTip = statusMessage.getMappedId();
+				Utils.showTip(chatThread, TipType.STATUS, chatThread.tipView,
+						Utils.getFirstName(conversation.getLabel()));
+			} else {
+				v.findViewById(R.id.status_tip).setVisibility(View.GONE);
+			}
 
 			return v;
 		}

@@ -28,6 +28,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabContentFactory;
@@ -38,6 +39,7 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
@@ -83,6 +85,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private Handler handler;
 	private TextView charCounter;
 	private TabHost tabHost;
+	private View tipView;
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
@@ -188,6 +191,25 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		}
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubsubListeners);
+
+		if (preferences.getInt(HikeMessengerApp.LAST_MOOD, -1) == -1
+				&& !preferences.getBoolean(HikeMessengerApp.SHOWN_MOODS_TIP,
+						false)) {
+			tipView = findViewById(R.id.mood_tip);
+
+			/*
+			 * Center aligning with the button.
+			 */
+			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) tipView
+					.getLayoutParams();
+			int screenWidth = getResources().getDisplayMetrics().widthPixels;
+			int buttonWidth = screenWidth / 4;
+			int marginRight = (int) ((buttonWidth / 2) - ((int) 22 * Utils.densityMultiplier));
+			layoutParams.rightMargin = marginRight;
+
+			tipView.setLayoutParams(layoutParams);
+			Utils.showTip(this, TipType.MOOD, tipView);
+		}
 	}
 
 	private Runnable cancelStatusPost = new Runnable() {
@@ -241,6 +263,9 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			Toast.makeText(getApplicationContext(), R.string.mood_tweet_error,
 					Toast.LENGTH_LONG).show();
 			return;
+		}
+		if (tipView != null) {
+			Utils.closeTip(TipType.MOOD, tipView, preferences);
 		}
 		showMoodSelector();
 	}

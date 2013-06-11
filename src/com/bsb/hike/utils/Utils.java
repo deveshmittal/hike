@@ -96,6 +96,7 @@ import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -103,6 +104,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.cropimage.CropImage;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -2141,5 +2143,90 @@ public class Utils {
 	public static long getServerTimeOffset(Context context) {
 		return context.getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				0).getLong(HikeMessengerApp.SERVER_TIME_OFFSET, 0);
+	}
+
+	public static void showTip(final Activity activity, final TipType tipType,
+			final View parentView) {
+		showTip(activity, tipType, parentView, null);
+	}
+
+	public static void showTip(final Activity activity, final TipType tipType,
+			final View parentView, String name) {
+		parentView.setVisibility(View.VISIBLE);
+
+		View container = parentView.findViewById(R.id.tip_container);
+		TextView tipText = (TextView) parentView.findViewById(R.id.tip_text);
+		ImageButton closeTip = (ImageButton) parentView
+				.findViewById(R.id.close);
+
+		switch (tipType) {
+		case EMOTICON:
+			container.setBackgroundResource(R.drawable.bg_tip_bottom_left);
+			tipText.setText(R.string.emoticons_stickers_tip);
+			break;
+		case LAST_SEEN:
+			container.setBackgroundResource(R.drawable.bg_tip_top_left);
+			tipText.setText(R.string.last_seen_tip);
+			break;
+		case MOOD:
+			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
+			tipText.setText(R.string.moods_tip);
+			break;
+		case STATUS:
+			container.setBackgroundResource(R.drawable.bg_tip_top_left);
+			tipText.setText(activity.getString(R.string.status_tip, name));
+			break;
+		case STICKER:
+			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
+			tipText.setText(R.string.stickers_tip);
+			break;
+		case WALKIE_TALKIE:
+			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
+			tipText.setText(R.string.walkie_talkie_tip);
+			break;
+		}
+		if (closeTip != null) {
+			closeTip.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					closeTip(tipType, parentView, activity
+							.getSharedPreferences(
+									HikeMessengerApp.ACCOUNT_SETTINGS, 0));
+				}
+			});
+		}
+
+		parentView.setTag(tipType);
+	}
+
+	public static void closeTip(TipType tipType, View parentView,
+			SharedPreferences preferences) {
+		parentView.setVisibility(View.GONE);
+
+		Editor editor = preferences.edit();
+
+		switch (tipType) {
+		case EMOTICON:
+			editor.putBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, true);
+			break;
+		case LAST_SEEN:
+			editor.putBoolean(HikeMessengerApp.SHOWN_LAST_SEEN_TIP, true);
+			break;
+		case MOOD:
+			editor.putBoolean(HikeMessengerApp.SHOWN_MOODS_TIP, true);
+			break;
+		case STATUS:
+			editor.putBoolean(HikeMessengerApp.SHOWN_STATUS_TIP, true);
+			break;
+		case STICKER:
+			editor.putBoolean(HikeMessengerApp.SHOWN_STICKERS_TIP, true);
+			break;
+		case WALKIE_TALKIE:
+			editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, true);
+			break;
+		}
+
+		editor.commit();
 	}
 }

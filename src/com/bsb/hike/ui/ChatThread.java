@@ -108,6 +108,7 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
@@ -118,6 +119,7 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
@@ -332,6 +334,11 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	private long recordStartTime;
 
 	private long recordedTime = -1;
+
+	/*
+	 * Made this public so that its accessible to this activity's adapter
+	 */
+	public View tipView;
 
 	@Override
 	protected void onPause() {
@@ -1075,6 +1082,24 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			return;
 		}
 		if (TextUtils.isEmpty(mComposeView.getText())) {
+			if (tipView != null) {
+				TipType viewTipType = (TipType) tipView.getTag();
+				if (viewTipType == TipType.WALKIE_TALKIE) {
+					Utils.closeTip(TipType.WALKIE_TALKIE, tipView, prefs);
+					tipView = null;
+				}
+			}
+			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP,
+					false)) {
+				/*
+				 * The user has already tapped on the walkie talkie button
+				 * without seeing the tip no need to show it now.
+				 */
+				Editor editor = prefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP,
+						true);
+				editor.commit();
+			}
 			showRecordingDialog();
 			return;
 		}
@@ -1488,6 +1513,22 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		if (HikeMessengerApp.getTypingNotificationSet().containsKey(
 				mContactNumber)) {
 			runOnUiThread(new SetTypingText(true));
+		}
+
+		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false)) {
+			tipView = findViewById(R.id.emoticon_tip);
+			Utils.showTip(this, TipType.EMOTICON, tipView);
+		} else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP,
+				false)) {
+			/*
+			 * Only show the tip if we currently do not have any drafts
+			 */
+			if (TextUtils.isEmpty(getSharedPreferences(
+					HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(
+					mContactNumber, ""))) {
+				tipView = findViewById(R.id.walkie_talkie_tip);
+				Utils.showTip(this, TipType.WALKIE_TALKIE, tipView);
+			}
 		}
 	}
 
@@ -2053,6 +2094,15 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 						mLabelView.setVisibility(View.INVISIBLE);
 						lastSeenContainer.setVisibility(View.VISIBLE);
 						mLastSeenView.setText(lastSeenString);
+
+						if (tipView == null
+								&& !prefs.getBoolean(
+										HikeMessengerApp.SHOWN_LAST_SEEN_TIP,
+										false)) {
+							tipView = findViewById(R.id.last_seen_tip);
+							Utils.showTip(ChatThread.this, TipType.LAST_SEEN,
+									tipView);
+						}
 					}
 				}
 			});
@@ -3587,6 +3637,15 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		if (whichSubcategory == -1) {
 			whichSubcategory = 0;
 		}
+
+		if (tipView != null) {
+			TipType viewTipType = (TipType) tipView.getTag();
+			if (viewTipType == TipType.EMOTICON) {
+				Utils.closeTip(TipType.EMOTICON, tipView, prefs);
+				tipView = null;
+			}
+		}
+
 		emoticonLayout = emoticonLayout == null ? (ViewGroup) findViewById(R.id.emoticon_layout)
 				: emoticonLayout;
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
@@ -3934,6 +3993,33 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		emoticonViewPager.setAdapter(emoticonsAdapter);
 		emoticonViewPager.setCurrentItem(pageNum);
 		emoticonViewPager.invalidate();
+
+		/*
+		 * show the tip if we are not currently on the stickers tab and we have
+		 * not shown this tip before and there is no other tip showing.
+		 */
+		if (tipView == null
+				&& emoticonType != EmoticonType.STICKERS
+				&& !prefs
+						.getBoolean(HikeMessengerApp.SHOWN_STICKERS_TIP, false)) {
+			tipView = findViewById(R.id.stickers_tip);
+
+			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) tipView
+					.getLayoutParams();
+			int screenWidth = getResources().getDisplayMetrics().widthPixels;
+			int buttonWidth = screenWidth / 3;
+			int marginRight = (int) (buttonWidth / 2 - ((int) 22 * Utils.densityMultiplier));
+			layoutParams.rightMargin = marginRight;
+
+			tipView.setLayoutParams(layoutParams);
+			Utils.showTip(this, TipType.STICKER, tipView);
+		} else if (emoticonType == EmoticonType.STICKERS && tipView != null) {
+			TipType viewTipType = (TipType) tipView.getTag();
+			if (viewTipType == TipType.STICKER) {
+				Utils.closeTip(TipType.STICKER, tipView, prefs);
+				tipView = null;
+			}
+		}
 	}
 
 	public void onEmoticonCategoryClick(View v) {
