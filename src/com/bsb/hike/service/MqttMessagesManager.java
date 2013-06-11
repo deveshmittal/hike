@@ -33,6 +33,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -930,6 +931,31 @@ public class MqttMessagesManager {
 			Editor editor = settings.edit();
 			editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
 			editor.commit();
+		} else if (HikeConstants.MqttMessageTypes.PROTIP.equals(type)) {
+			Protip protip = new Protip(jsonObj);
+			/*
+			 * Applying the offset.
+			 */
+			protip.setTimeStamp(protip.getTimeStamp()
+					+ Utils.getServerTimeOffset(context));
+
+			long id = convDb.addProtip(protip);
+			protip.setId(id);
+
+			if (id == -1) {
+				Log.d(getClass().getSimpleName(),
+						"This protip was already added");
+				return;
+			}
+
+			String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA)
+					.optString(HikeConstants.THUMBNAIL);
+			if (!TextUtils.isEmpty(iconBase64)) {
+				this.userDb.setIcon(protip.getMappedId(),
+						Base64.decode(iconBase64, Base64.DEFAULT), false);
+			}
+
+			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 		}
 	}
 
