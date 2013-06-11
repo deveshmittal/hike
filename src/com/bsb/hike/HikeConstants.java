@@ -123,6 +123,10 @@ public class HikeConstants {
 	public static final String JUST_OPENED = "justOpened";
 	public static final String LAST_SEEN = "ls";
 	public static final String LAST_SEEN_SETTING = "lastseen";
+	public static final String PROTIP_HEADER = "h";
+	public static final String PROTIP_TEXT = "t";
+	public static final String PROTIP_IMAGE_URL = "img";
+	public static final String PROTIP_WAIT_TIME = "wt";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -606,6 +610,7 @@ public class HikeConstants {
 		public static final String LAST_SEEN = "ls";
 		public static final String SERVER_TIMESTAMP = "sts";
 		public static final String REQUEST_SERVER_TIMESTAMP = "rsts";
+		public static final String PROTIP = "pt";
 	}
 
 	public static final class SMSNative {
