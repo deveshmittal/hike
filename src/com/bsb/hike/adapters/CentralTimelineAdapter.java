@@ -252,6 +252,11 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.statusImg.setVisibility(View.GONE);
 			}
 
+			Linkify.addLinks(viewHolder.mainInfo, Linkify.ALL);
+			viewHolder.mainInfo.setMovementMethod(null);
+
+			Linkify.addLinks(viewHolder.extraInfo, Linkify.ALL);
+			viewHolder.mainInfo.setMovementMethod(null);
 			break;
 		}
 
