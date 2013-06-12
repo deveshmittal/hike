@@ -4,4 +4,5 @@
     <dimen name="fav_tut_heading_marginTop">5dp</dimen>
     <dimen name="fav_tut_pager_height">235dp</dimen>
     <dimen name="fav_tut_pager_marginTop">10dp</dimen>
+    <dimen name="tutorial_button_margin">10dp</dimen>
 </resources>

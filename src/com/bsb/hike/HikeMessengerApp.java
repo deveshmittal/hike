@@ -246,6 +246,10 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String BUTTONS_OVERLAY_SHOWN = "buttonsOverlayShown";
 
+	public static final String SHOWN_FRIENDS_TUTORIAL = "shownFriendsTutorial";
+	
+	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;

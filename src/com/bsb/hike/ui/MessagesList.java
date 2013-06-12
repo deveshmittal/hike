@@ -238,14 +238,22 @@ public class MessagesList extends DrawerBaseActivity implements
 		boolean justSignedUp = accountPrefs.getBoolean(
 				HikeMessengerApp.JUST_SIGNED_UP, false);
 		if (justSignedUp
-				&& !accountPrefs.getBoolean(HikeMessengerApp.INTRO_DONE, false)) {
+				&& !accountPrefs.getBoolean(
+						HikeMessengerApp.SHOWN_FRIENDS_TUTORIAL, false)) {
 			i = new Intent(MessagesList.this, Tutorial.class);
+			i.putExtra(HikeConstants.Extras.SHOW_FRIENDS_TUTORIAL, true);
+		} else if (!accountPrefs.getBoolean(
+				HikeMessengerApp.SHOWN_STICKERS_TUTORIAL, false)) {
+			i = new Intent(MessagesList.this, Tutorial.class);
+			i.putExtra(HikeConstants.Extras.SHOW_FRIENDS_TUTORIAL, false);
+		}
+
+		if (i != null) {
 			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			finish();
 			return;
 		}
-
 		// TODO this is being called everytime this activity is created. Way too
 		// often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();

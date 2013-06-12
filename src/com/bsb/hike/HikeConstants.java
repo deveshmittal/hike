@@ -460,6 +460,7 @@ public class HikeConstants {
 		public static final String DIALOG_SHOWING = "dialogShowing";
 		public static final String SMS_ID = "smsId";
 		public static final String RECORDED_TIME = "recordedTime";
+		public static final String SHOW_FRIENDS_TUTORIAL = "showFriendsTutorial";
 	}
 
 	public static final class LogEvent {

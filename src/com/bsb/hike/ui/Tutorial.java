@@ -3,38 +3,47 @@ package com.bsb.hike.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 
 public class Tutorial extends Activity {
 
+	boolean friendsTutorial;
+
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.signup_tutorial_base);
+		setContentView(R.layout.tutorial);
 
-		Button titleBtn = (Button) findViewById(R.id.title_icon);
-		titleBtn.setText(R.string.next_signup);
-		titleBtn.setVisibility(View.VISIBLE);
-		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
+		friendsTutorial = getIntent().getBooleanExtra(
+				HikeConstants.Extras.SHOW_FRIENDS_TUTORIAL, false);
+		TextView header = (TextView) findViewById(R.id.tutorial_header);
+		TextView info = (TextView) findViewById(R.id.tutorial_info);
+		ImageView image = (ImageView) findViewById(R.id.tutorial_image);
 
-		TextView mTitleView = (TextView) findViewById(R.id.title);
-		mTitleView.setText(R.string.meet_hike);
-
-		boolean isLandscape = getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT;
-		findViewById(R.id.intro_img).setVisibility(
-				isLandscape ? View.GONE : View.VISIBLE);
+		if (friendsTutorial) {
+			header.setText(R.string.tutorial_friends_header);
+			info.setText(R.string.tutorial_friends_info);
+			image.setImageResource(R.drawable.friends_intro);
+		} else {
+			header.setText(R.string.tutorial_sticker_header);
+			info.setText(R.string.tutorial_sticker_info);
+			image.setImageResource(R.drawable.stickers_intro);
+		}
 	}
 
-	public void onTitleIconClick(View v) {
+	public void onClick(View v) {
+
 		Editor editor = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE).edit();
-		editor.putBoolean(HikeMessengerApp.INTRO_DONE, true);
+		editor.putBoolean(
+				friendsTutorial ? HikeMessengerApp.SHOWN_FRIENDS_TUTORIAL
+						: HikeMessengerApp.SHOWN_STICKERS_TUTORIAL, true);
 		editor.commit();
 
 		Intent i = new Intent(Tutorial.this, MessagesList.class);
