@@ -462,6 +462,12 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.commit();
 		}
 
+		if (!preferenceManager.contains(HikeConstants.RECEIVE_SMS_PREF)) {
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(HikeConstants.RECEIVE_SMS_PREF, false);
+			editor.commit();
+		}
+
 		Utils.setupServerURL(
 				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 				Utils.switchSSLOn(getApplicationContext()));
