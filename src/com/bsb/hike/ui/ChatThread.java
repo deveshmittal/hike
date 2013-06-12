@@ -2105,7 +2105,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			String msisdn = lastSeenPair.first;
 			long lastSeenTime = lastSeenPair.second;
 
-			if (!mContactNumber.equals(msisdn)) {
+			if (!mContactNumber.equals(msisdn)
+					|| (mConversation instanceof GroupConversation)) {
 				return;
 			}
 			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
