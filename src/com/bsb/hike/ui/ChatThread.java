@@ -1082,6 +1082,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			return;
 		}
 		if (TextUtils.isEmpty(mComposeView.getText())) {
+			if (Utils.getExternalStorageState() != ExternalStorageState.WRITEABLE) {
+				Toast.makeText(getApplicationContext(),
+						R.string.no_external_storage, Toast.LENGTH_SHORT)
+						.show();
+				return;
+			}
 			if (tipView != null) {
 				TipType viewTipType = (TipType) tipView.getTag();
 				if (viewTipType == TipType.WALKIE_TALKIE) {
