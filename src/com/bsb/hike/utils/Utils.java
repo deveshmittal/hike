@@ -2149,10 +2149,10 @@ public class Utils {
 			String format;
 			if (is24Hour) {
 				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
-						+ "' MMM', HH:mm";
+						+ "' MMM, HH:mm";
 			} else {
 				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
-						+ "' MMM', h:mm aaa";
+						+ "' MMM, h:mm aaa";
 			}
 			DateFormat df = new SimpleDateFormat(format);
 			return context.getString(R.string.last_seen_more,
