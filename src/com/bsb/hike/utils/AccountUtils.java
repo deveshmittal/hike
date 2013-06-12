@@ -625,18 +625,13 @@ public class AccountUtils {
 		RequestType requestType = hikeHttpRequest.getRequestType();
 		try {
 			switch (requestType) {
-			case STATUS_UPDATE:
-				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
-				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
-						HTTP.DEFAULT_CONTENT_CHARSET);
-				break;
-
 			case PROFILE_PIC:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new FileEntity(
 						new File(hikeHttpRequest.getFilePath()), "");
 				break;
 
+			case STATUS_UPDATE:
 			case OTHER:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
