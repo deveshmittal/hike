@@ -362,7 +362,7 @@ public class HikeConstants {
 
 	public static final int MAX_NUM_STICKER_REQUEST = 10;
 
-	/*In seconds*/
+	/* In seconds */
 	public static final int DEFAULT_PROTIP_WAIT_TIME = 300;
 	public static final String PROTIP_STATUS_NAME = "hike team";
 

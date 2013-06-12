@@ -385,10 +385,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		// Adding an item for the button
 		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_BUTTON_ID,
 				null, null, null, null, null, 0));
-		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND)
-				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
-				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
-				&& (contactInfo.isOnhike())) {
+		if (showContactsUpdates(contactInfo)) {
 			profileItems.addAll(HikeConversationsDatabase.getInstance()
 					.getStatusMessages(false,
 							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
@@ -398,6 +395,13 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_EMPTY_ID,
 					null, null, null, null, null, 0));
 		}
+	}
+
+	private boolean showContactsUpdates(ContactInfo contactInfo) {
+		return (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND)
+				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
+				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
+				&& (contactInfo.isOnhike());
 	}
 
 	private void setupGroupProfileScreen() {
