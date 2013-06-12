@@ -244,6 +244,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String CURRENT_PROTIP = "currentProtip";
 
+	public static final String SHOWN_NATIVE_SMS_INVITE_POPUP = "shownNativeSmsInvitePopup";
+
 	public static final String BUTTONS_OVERLAY_SHOWN = "buttonsOverlayShown";
 
 	public static final String SHOWN_FRIENDS_TUTORIAL = "shownFriendsTutorial";

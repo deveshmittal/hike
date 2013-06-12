@@ -1,5 +1,6 @@
 package com.bsb.hike.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,11 +10,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.app.Dialog;
+import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
@@ -29,6 +34,7 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -74,6 +80,14 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
 
+		if (type == Type.INVITE
+				&& !HikeMessengerApp.isIndianUser()
+				&& !getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+						MODE_PRIVATE).getBoolean(
+						HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP, false)) {
+			showNativeSMSPopup();
+		}
+
 		switch (type) {
 		case BLOCK:
 			titleBtn.setText(R.string.done);
@@ -87,6 +101,37 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 		}
 
 		new SetupContactList().execute();
+	}
+
+	private void showNativeSMSPopup() {
+		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.enable_sms_client_popup);
+		dialog.setCancelable(false);
+
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		TextView body = (TextView) dialog.findViewById(R.id.body);
+		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		btnCancel.setVisibility(View.GONE);
+		header.setText(R.string.native_header);
+		body.setText(R.string.native_info);
+
+		btnOk.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Editor editor = getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+				editor.putBoolean(
+						HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP, true);
+				editor.commit();
+
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
 	}
 
 	private class SetupContactList extends
@@ -169,14 +214,25 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 		if (type != Type.BLOCK) {
 			Iterator<String> iterator = selectedContacts.iterator();
 
+			SmsManager smsManager = SmsManager.getDefault();
+
 			while (iterator.hasNext()) {
 				String msisdn = iterator.next();
 				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
 
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH,
-						Utils.makeHike2SMSInviteMessage(msisdn, this)
-								.serialize());
+				ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(
+						msisdn, this);
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						convMessage.serialize());
+
+				if (!HikeMessengerApp.isIndianUser()) {
+					ArrayList<String> messages = smsManager
+							.divideMessage(convMessage.getMessage());
+
+					smsManager
+							.sendMultipartTextMessage(convMessage.getMsisdn(),
+									null, messages, null, null);
+				}
 			}
 
 			if (!selectedContacts.isEmpty()) {

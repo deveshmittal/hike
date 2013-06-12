@@ -469,6 +469,10 @@ public class ConvMessage {
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
 			}
 
+			if (mInvite && !HikeMessengerApp.isIndianUser()) {
+				object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
+			}
+
 			object.put(HikeConstants.TYPE,
 					mInvite ? HikeConstants.MqttMessageTypes.INVITE
 							: HikeConstants.MqttMessageTypes.MESSAGE);
