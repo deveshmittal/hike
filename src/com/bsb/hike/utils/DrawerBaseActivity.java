@@ -308,6 +308,9 @@ public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE,
 					myMsisdn));
+			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_SENT_REJECTED,
+					HikeConstants.BOTH_VALUE, myMsisdn));
 			runOnUiThread(new Runnable() {
 
 				@Override
