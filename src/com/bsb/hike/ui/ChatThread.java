@@ -2940,6 +2940,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 					setRequestedOrientation(isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 							: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+					getWindow().addFlags(
+							WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 					return true;
 				case MotionEvent.ACTION_UP:
 					if (!recording) {
@@ -2955,6 +2957,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 							recordedTime = (System.currentTimeMillis() - recordStartTime) / 1000;
 							setUpPreviewRecordingLayout(recordBtn, recordInfo,
 									recordImage, sendBtn, recordedTime);
+							getWindow()
+									.clearFlags(
+											WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 							setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
 						}
 					}, 1);
