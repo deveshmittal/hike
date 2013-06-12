@@ -390,6 +390,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 					.getStatusMessages(false,
 							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 							mLocalMSISDN));
+			if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() > 0) {
+				profileItems.add(getJoinedHikeStatus(contactInfo));
+			}
 		} else {
 			// Adding an item for the empty status
 			profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_EMPTY_ID,
@@ -615,6 +618,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.getStatusMessages(false,
 						HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 						mLocalMSISDN));
+		if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() > 0) {
+			profileItems.add(getJoinedHikeStatus(contactInfo));
+		}
 
 		profileAdapter = new ProfileAdapter(this, profileItems, null,
 				contactInfo, true);
@@ -1900,10 +1906,20 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 				@Override
 				public void run() {
+					if (showContactsUpdates(contactInfo)) {
+						profileItems.add(getJoinedHikeStatus(contactInfo));
+					}
+
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}
+	}
+
+	private StatusMessage getJoinedHikeStatus(ContactInfo contactInfo) {
+		return new StatusMessage(0, null, contactInfo.getMsisdn(),
+				contactInfo.getName(), getString(R.string.joined_hike_update),
+				StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime());
 	}
 
 	@Override

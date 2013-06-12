@@ -424,6 +424,7 @@ public class ProfileAdapter extends BaseAdapter {
 			viewHolder.image.setVisibility(View.GONE);
 			viewHolder.subText.setText(statusMessage.getTimestampFormatted(
 					true, context));
+			viewHolder.icon.setBackgroundResource(R.drawable.bg_status_type);
 			viewHolder.icon.setImageResource(R.drawable.ic_text_status);
 			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 				viewHolder.image.setVisibility(View.VISIBLE);
@@ -435,16 +436,22 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.image.setId(position);
 				viewHolder.image.setTag(statusMessage);
 				viewHolder.text.setText(R.string.changed_profile);
+			} else if (statusMessage.getStatusMessageType() == StatusMessageType.JOINED_HIKE) {
+				viewHolder.icon.setImageResource(R.drawable.ic_joined_hike);
+
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
 					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
 				viewHolder.icon
 						.setImageResource(R.drawable.ic_profile_pic_status);
 			}
-			if (statusMessage.hasMood()) {
+			if (statusMessage.hasMood()
+					|| statusMessage.getStatusMessageType() == StatusMessageType.JOINED_HIKE) {
 				viewHolder.icon.setBackgroundDrawable(null);
-				viewHolder.icon
-						.setImageResource(Utils.getMoodsResource()[statusMessage
-								.getMoodId()]);
+				if (statusMessage.hasMood()) {
+					viewHolder.icon
+							.setImageResource(Utils.getMoodsResource()[statusMessage
+									.getMoodId()]);
+				}
 			} else {
 				viewHolder.icon
 						.setBackgroundResource(R.drawable.bg_status_type);
