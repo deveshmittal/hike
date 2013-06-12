@@ -1636,10 +1636,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	}
 
 	private boolean isMessageUndelivered(ConvMessage convMessage) {
-		return (!convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_DELIVERED
-				.ordinal())
-				|| (convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_CONFIRMED
-						.ordinal());
+		boolean fileUploaded = true;
+		if (convMessage.isFileTransferMessage()) {
+			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			fileUploaded = !TextUtils.isEmpty(hikeFile.getFileKey());
+		}
+		return ((!convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_DELIVERED
+				.ordinal()) || (convMessage.isSMS() && convMessage.getState()
+				.ordinal() < State.SENT_CONFIRMED.ordinal()))
+				&& fileUploaded;
 	}
 
 	enum VoiceMessagePlayerState {
