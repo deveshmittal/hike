@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -155,6 +156,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				padding, viewHolder.noBtn.getPaddingTop());
 		viewHolder.noBtn.setText(R.string.not_now);
 
+		viewHolder.mainInfo.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
+
 		switch (statusMessage.getStatusMessageType()) {
 		case NO_STATUS:
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
@@ -254,6 +257,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			Linkify.addLinks(viewHolder.mainInfo, Linkify.ALL);
 			viewHolder.mainInfo.setMovementMethod(null);
+			viewHolder.mainInfo.setTypeface(Typeface.DEFAULT,
+					Typeface.BOLD_ITALIC);
 
 			Linkify.addLinks(viewHolder.extraInfo, Linkify.ALL);
 			viewHolder.mainInfo.setMovementMethod(null);
