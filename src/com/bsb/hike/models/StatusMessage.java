@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
@@ -142,13 +143,18 @@ public class StatusMessage {
 		return protip;
 	}
 
-	public String getTimestampFormatted(boolean pretty) {
+	public String getTimestampFormatted(boolean pretty, Context context) {
 		Date date = new Date(timeStamp * 1000);
 		if (pretty) {
 			PrettyTime p = new PrettyTime();
 			return p.format(date);
 		} else {
-			String format = "d MMM ''yy 'AT' h:mm aaa";
+			String format;
+			if (android.text.format.DateFormat.is24HourFormat(context)) {
+				format = "d MMM ''yy 'AT' HH:mm";
+			} else {
+				format = "d MMM ''yy 'AT' h:mm aaa";
+			}
 			DateFormat df = new SimpleDateFormat(format);
 			return df.format(date);
 		}

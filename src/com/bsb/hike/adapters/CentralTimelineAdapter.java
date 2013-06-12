@@ -140,7 +140,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		viewHolder.mainInfo.setText(statusMessage.getText());
 
-		viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(true));
+		viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(true,
+				context));
 
 		viewHolder.statusImg.setVisibility(View.GONE);
 

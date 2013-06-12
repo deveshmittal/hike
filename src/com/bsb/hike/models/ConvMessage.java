@@ -486,13 +486,19 @@ public class ConvMessage {
 		return mConversation;
 	}
 
-	public String getTimestampFormatted(boolean pretty) {
+	public String getTimestampFormatted(boolean pretty, Context context) {
 		Date date = new Date(mTimestamp * 1000);
 		if (pretty) {
 			PrettyTime p = new PrettyTime();
 			return p.format(date);
 		} else {
-			String format = "d MMM ''yy 'AT' h:mm aaa";
+			String format;
+			if (android.text.format.DateFormat.is24HourFormat(context)) {
+				format = "d MMM ''yy 'AT' HH:mm";
+			} else {
+				format = "d MMM ''yy 'AT' h:mm aaa";
+			}
+
 			DateFormat df = new SimpleDateFormat(format);
 			return df.format(date);
 		}

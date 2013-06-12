@@ -2140,18 +2140,32 @@ public class Utils {
 			return context.getString(R.string.last_seen_while_ago);
 		}
 
+		boolean is24Hour = android.text.format.DateFormat
+				.is24HourFormat(context);
 		/*
 		 * More than 1 day old.
 		 */
 		if ((nowDay - lastSeenDay) > 1) {
-			String format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
-					+ "' MMM', h:mm aaa";
+			String format;
+			if (is24Hour) {
+				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
+						+ "' MMM', HH:mm";
+			} else {
+				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
+						+ "' MMM', h:mm aaa";
+			}
 			DateFormat df = new SimpleDateFormat(format);
 			return context.getString(R.string.last_seen_more,
 					df.format(lastSeenDate));
 		}
 
-		String format = "h:mm aaa";
+		String format;
+		if (is24Hour) {
+			format = "HH:mm";
+		} else {
+			format = "h:mm aaa";
+		}
+
 		DateFormat df = new SimpleDateFormat(format);
 		return context.getString(
 				(nowDay > lastSeenDay) ? R.string.last_seen_yesterday

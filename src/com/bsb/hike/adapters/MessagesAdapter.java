@@ -407,7 +407,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		if (shouldDisplayTimestamp(position)) {
-			String dateFormatted = convMessage.getTimestampFormatted(false);
+			String dateFormatted = convMessage.getTimestampFormatted(false,
+					context);
 			holder.timestampTextView.setText(dateFormatted.toUpperCase());
 			holder.timestampContainer.setVisibility(View.VISIBLE);
 		} else {
@@ -715,7 +716,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.image.setBackgroundResource(R.drawable.bg_status_type);
 			}
 			holder.timestampTextView.setText(convMessage
-					.getTimestampFormatted(true));
+					.getTimestampFormatted(true, context));
 			holder.fileThumb.setVisibility(View.GONE);
 
 			int padding = (int) (10 * Utils.densityMultiplier);

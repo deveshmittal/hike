@@ -246,7 +246,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 			messageView.setText(markedUp);
 			TextView tsView = (TextView) v
 					.findViewById(R.id.last_message_timestamp);
-			tsView.setText(message.getTimestampFormatted(true));
+			tsView.setText(message.getTimestampFormatted(true, context));
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD) {
 				/* set unread messages to BLUE */
 				messageView.setTextColor(mMessagesList.getResources().getColor(

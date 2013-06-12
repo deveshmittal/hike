@@ -422,8 +422,8 @@ public class ProfileAdapter extends BaseAdapter {
 			viewHolder.text.setMovementMethod(null);
 
 			viewHolder.image.setVisibility(View.GONE);
-			viewHolder.subText.setText(statusMessage
-					.getTimestampFormatted(true));
+			viewHolder.subText.setText(statusMessage.getTimestampFormatted(
+					true, context));
 			viewHolder.icon.setImageResource(R.drawable.ic_text_status);
 			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
 				viewHolder.image.setVisibility(View.VISIBLE);
