@@ -36,6 +36,7 @@ import com.bsb.hike.models.Sticker;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -404,6 +405,9 @@ public class EmoticonAdapter extends PagerAdapter implements
 		int emoticonIndex = (Integer) arg1.getTag();
 		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(
 				emoticonIndex, System.currentTimeMillis());
+		if (activity instanceof StatusUpdate) {
+			((StatusUpdate) activity).hideEmoticonSelector();
+		}
 		// We don't add an emoticon if the compose box is near its maximum
 		// length of characters
 		if (composeBox.length() >= activity.getResources().getInteger(
