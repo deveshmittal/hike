@@ -2915,7 +2915,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 								"Failed to start recording", e);
 					}
 					recording = true;
-					setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+
+					boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+					setRequestedOrientation(isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+							: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 					return true;
 				case MotionEvent.ACTION_UP:
 					if (!recording) {
@@ -2931,7 +2934,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 							recordedTime = (System.currentTimeMillis() - recordStartTime) / 1000;
 							setUpPreviewRecordingLayout(recordBtn, recordInfo,
 									recordImage, sendBtn, recordedTime);
-							setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+							setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
 						}
 					}, 1);
 
