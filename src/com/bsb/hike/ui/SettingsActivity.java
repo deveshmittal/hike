@@ -37,6 +37,7 @@ public class SettingsActivity extends DrawerBaseActivity implements
 		items.add(getString(R.string.notifications));
 		items.add(getString(R.string.blocked_list));
 		items.add(getString(R.string.manage_account));
+		items.add(getString(R.string.sms));
 		items.add(getString(R.string.system_health));
 		items.add(getString(R.string.faq));
 		items.add(getString(R.string.contact));
@@ -45,6 +46,7 @@ public class SettingsActivity extends DrawerBaseActivity implements
 		itemIcons.add(R.drawable.ic_notifications);
 		itemIcons.add(R.drawable.ic_block);
 		itemIcons.add(R.drawable.ic_manage_account);
+		itemIcons.add(R.drawable.ic_sms_setting);
 		itemIcons.add(R.drawable.ic_system_health);
 		itemIcons.add(R.drawable.ic_faq);
 		itemIcons.add(R.drawable.ic_contact);
@@ -88,16 +90,20 @@ public class SettingsActivity extends DrawerBaseActivity implements
 					R.xml.privacy_preferences);
 			break;
 		case 3:
+			intent = new Intent(this, HikePreferences.class);
+			intent.putExtra(HikeConstants.Extras.PREF, R.xml.sms_preferences);
+			break;
+		case 4:
 			intent = new Intent(Intent.ACTION_VIEW);
 			intent.setData(Uri.parse(HikeConstants.SYSTEM_HEALTH_URL));
 			break;
-		case 4:
+		case 5:
 			intent = new Intent(this, WebViewActivity.class);
 			intent.putExtra(HikeConstants.Extras.URL_TO_LOAD,
 					HikeConstants.HELP_URL);
 			intent.putExtra(HikeConstants.Extras.TITLE, getString(R.string.faq));
 			break;
-		case 5:
+		case 6:
 			intent = new Intent(Intent.ACTION_SENDTO);
 			intent.setData(Uri.parse("mailto:" + HikeConstants.MAIL));
 

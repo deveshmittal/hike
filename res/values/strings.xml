@@ -520,4 +520,6 @@
 	<string name="posting_update_fail">Could not post update</string>
 	<string name="posted_update">Posted update</string>
 	<string name="joined_hike_update">Joined hike</string>
+	<string name="default_client_header">Default SMS Client</string>
+	<string name="default_client_info">Use hike to receive all SMS</string>
 </resources>

@@ -37,22 +37,4 @@
         android:title="@string/native_jingle"
         android:widgetLayout="@layout/checkbox_widget" />
 	
-	<com.bsb.hike.view.IconCheckBoxPreference
-        icon="ic_hike_jingle"
-        android:defaultValue="true"
-        android:key="receiveSmsPref"
-        android:layout="@layout/icon_preference"
-        android:summary="Pull in SMS"
-        android:title="Native SMS Client"
-        android:widgetLayout="@layout/checkbox_widget" />
-	
-	<com.bsb.hike.view.IconCheckBoxPreference
-        icon="ic_hike_jingle"
-        android:defaultValue="true"
-        android:key="sendUndeliveredAsNativeSmsPref"
-        android:layout="@layout/icon_preference"
-        android:summary="Send native sms"
-        android:title="Hike2Hike fallback"
-        android:widgetLayout="@layout/checkbox_widget" />
-	
 </PreferenceScreen>
