@@ -292,7 +292,8 @@ public class HikeNotification {
 			mBuilder.setSound(Uri.parse("android.resource://"
 					+ context.getPackageName() + "/" + R.raw.v1));
 		} else if (playSound != 0) {
-			mBuilder.setDefaults(playSound);
+			mBuilder.setDefaults(mBuilder.getNotification().defaults
+					| playSound);
 		}
 
 		if (led) {
