@@ -58,18 +58,6 @@
                 android:src="@drawable/ic_mood_btn" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/mood_tip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/bottom_bar"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="112dp"
-            android:visibility="gone" >
-
-            <include layout="@layout/tool_tip" />
-        </LinearLayout>
-            
         <View
             android:id="@+id/div2"
             android:layout_width="match_parent"
@@ -146,10 +134,22 @@
                 android:layout_marginTop="2dp"
                 android:src="@drawable/ic_remove_img"
                 android:visibility="gone" />
+            
         </RelativeLayout>
 
         <include layout="@layout/mood_selector_layout" />
 
+        <LinearLayout
+            android:id="@+id/mood_tip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/bottom_bar"
+            android:layout_alignParentRight="true"
+            android:visibility="visible" >
+
+            <include layout="@layout/tool_tip" />
+        </LinearLayout>
+            
         <LinearLayout
             android:id="@+id/emoji_container"
             android:layout_width="wrap_content"
