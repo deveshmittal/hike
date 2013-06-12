@@ -1,19 +1,18 @@
 package com.bsb.hike.ui;
 
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.auth.AccessToken;
-import twitter4j.auth.OAuthAuthorization;
-import twitter4j.conf.ConfigurationContext;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
@@ -25,12 +24,12 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
+import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
-import com.facebook.android.DialogError;
-import com.facebook.android.Facebook;
-import com.facebook.android.Facebook.DialogListener;
-import com.facebook.android.FacebookError;
 
 public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 
@@ -39,6 +38,8 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 	private SharedPreferences settings;
 
 	private String[] pubSubListeners = { HikePubSub.SOCIAL_AUTH_COMPLETED };
+
+	private ProgressDialog progressDialog;
 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,6 +88,11 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 					.getBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING)) {
 				onClick(findViewById(R.id.facebook));
 			}
+			if (savedInstanceState
+					.getBoolean(HikeConstants.Extras.DIALOG_SHOWING)) {
+				progressDialog = ProgressDialog.show(this, null,
+						getString(R.string.posting_update));
+			}
 		}
 	}
 
@@ -94,11 +100,17 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.FACEBOOK_POST_POPUP_SHOWING,
 				facebookPostPopupShowing);
+		outState.putBoolean(HikeConstants.Extras.DIALOG_SHOWING,
+				progressDialog != null && progressDialog.isShowing());
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	protected void onDestroy() {
+		if (progressDialog != null) {
+			progressDialog.dismiss();
+			progressDialog = null;
+		}
 		HikeMessengerApp.getPubSub().removeListeners(this, pubSubListeners);
 		super.onDestroy();
 	}
@@ -117,51 +129,7 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 					false)) {
 				startFBAuth(false);
 			} else {
-				facebookPostPopupShowing = true;
-				Facebook facebook = HikeMessengerApp.getFacebook();
-				Bundle parameters = new Bundle();
-				String inviteToken = settings.getString(
-						HikeConstants.INVITE_TOKEN, "");
-				inviteToken = "";
-				parameters.putString("link",
-						getString(R.string.default_invite_url, inviteToken));
-				parameters.putString("description",
-						getString(R.string.facebook_description));
-				parameters.putString("picture",
-						"http://get.hike.in/images/icon%20125x125.jpg");
-				facebook.dialog(this, "stream.publish", parameters,
-						new DialogListener() {
-
-							@Override
-							public void onFacebookError(FacebookError e) {
-								facebookPostPopupShowing = false;
-								Toast.makeText(TellAFriend.this,
-										R.string.fb_post_fail,
-										Toast.LENGTH_SHORT).show();
-								Log.e(getClass().getSimpleName(),
-										"Facebook error while posting", e);
-							}
-
-							@Override
-							public void onError(DialogError e) {
-								facebookPostPopupShowing = false;
-								Toast.makeText(TellAFriend.this,
-										R.string.fb_post_fail,
-										Toast.LENGTH_SHORT).show();
-								Log.e(getClass().getSimpleName(),
-										"Facebook error while posting", e);
-							}
-
-							@Override
-							public void onComplete(Bundle values) {
-								facebookPostPopupShowing = false;
-							}
-
-							@Override
-							public void onCancel() {
-								facebookPostPopupShowing = false;
-							}
-						});
+				postToSocialNetwork(true);
 			}
 			break;
 
@@ -170,51 +138,7 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 					false)) {
 				startActivity(new Intent(this, TwitterAuthActivity.class));
 			} else {
-				new AsyncTask<Void, Void, Boolean>() {
-
-					@Override
-					protected Boolean doInBackground(Void... params) {
-						String token = settings.getString(
-								HikeMessengerApp.TWITTER_TOKEN, "");
-						String tokenSecret = settings.getString(
-								HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
-						String tweet = Utils.getInviteMessage(TellAFriend.this,
-								R.string.twitter_msg);
-						AccessToken accessToken = new AccessToken(token,
-								tokenSecret);
-
-						OAuthAuthorization authorization = new OAuthAuthorization(
-								ConfigurationContext.getInstance());
-						authorization.setOAuthAccessToken(accessToken);
-						authorization.setOAuthConsumer(
-								HikeConstants.APP_TWITTER_ID,
-								HikeConstants.APP_TWITTER_SECRET);
-
-						Twitter twitter = new TwitterFactory()
-								.getInstance(authorization);
-						try {
-							twitter.updateStatus(tweet);
-						} catch (TwitterException e) {
-							Log.e(getClass().getSimpleName(),
-									"Twitter Exception while updating status",
-									e);
-							return Boolean.FALSE;
-
-						}
-						return Boolean.TRUE;
-					}
-
-					@Override
-					protected void onPostExecute(Boolean result) {
-						Toast.makeText(
-								TellAFriend.this,
-								result ? R.string.twitter_post_success
-										: R.string.twitter_post_fail,
-								Toast.LENGTH_SHORT).show();
-					}
-
-				}.execute();
-
+				postToSocialNetwork(false);
 			}
 			break;
 
@@ -256,6 +180,83 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 							: R.id.twitter));
 				}
 			});
+		}
+	}
+
+	private void postToSocialNetwork(final boolean facebook) {
+		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+				"/account/spread", RequestType.SOCIAL_POST,
+				new HikeHttpCallback() {
+
+					@Override
+					public void onSuccess(JSONObject response) {
+						if (progressDialog != null) {
+							progressDialog.dismiss();
+							progressDialog = null;
+						}
+						parseResponse(response, facebook);
+					}
+
+					@Override
+					public void onFailure() {
+						if (progressDialog != null) {
+							progressDialog.dismiss();
+							progressDialog = null;
+						}
+						Toast.makeText(getApplicationContext(),
+								R.string.posting_update_fail,
+								Toast.LENGTH_SHORT).show();
+					}
+
+				});
+		JSONObject data = new JSONObject();
+		try {
+			data.put(facebook ? HikeConstants.FACEBOOK_STATUS
+					: HikeConstants.TWITTER_STATUS, true);
+			hikeHttpRequest.setJSONData(data);
+			Log.d(getClass().getSimpleName(), "JSON: " + data);
+
+			progressDialog = ProgressDialog.show(this, null,
+					getString(R.string.posting_update));
+			
+			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
+			hikeHTTPTask.execute(hikeHttpRequest);
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+	}
+
+	private void parseResponse(JSONObject response, boolean facebook) {
+		String responseString = response
+				.optString(facebook ? HikeConstants.FACEBOOK_STATUS
+						: HikeConstants.TWITTER_STATUS);
+
+		if (TextUtils.isEmpty(responseString)) {
+			return;
+		}
+
+		if (HikeConstants.SocialPostResponse.SUCCESS.equals(responseString)) {
+			Toast.makeText(getApplicationContext(), R.string.posted_update,
+					Toast.LENGTH_SHORT).show();
+		} else if (HikeConstants.SocialPostResponse.FAILURE
+				.equals(responseString)) {
+			Toast.makeText(getApplicationContext(),
+					R.string.posting_update_fail, Toast.LENGTH_SHORT).show();
+		} else {
+			Editor editor = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).edit();
+			if (facebook) {
+				editor.remove(HikeMessengerApp.FACEBOOK_AUTH_COMPLETE);
+				editor.remove(HikeMessengerApp.FACEBOOK_TOKEN);
+				editor.remove(HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES);
+				editor.remove(HikeMessengerApp.FACEBOOK_USER_ID);
+			} else {
+				editor.remove(HikeMessengerApp.TWITTER_AUTH_COMPLETE);
+				editor.remove(HikeMessengerApp.TWITTER_TOKEN);
+				editor.remove(HikeMessengerApp.TWITTER_TOKEN_SECRET);
+			}
+			editor.commit();
+			onClick(findViewById(facebook ? R.id.facebook : R.id.twitter));
 		}
 	}
 }

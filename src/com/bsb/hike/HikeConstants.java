@@ -637,6 +637,13 @@ public class HikeConstants {
 
 	}
 
+	public static final class SocialPostResponse {
+		public static final String NO_TOKEN = "notoken";
+		public static final String INVALID_TOKEN = "invalidtoken";
+		public static final String FAILURE = "failure";
+		public static final String SUCCESS = "success";
+	}
+
 	public static enum FTResult {
 		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED
 	}

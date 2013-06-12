@@ -632,6 +632,7 @@ public class AccountUtils {
 				break;
 
 			case STATUS_UPDATE:
+			case SOCIAL_POST:
 			case OTHER:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
@@ -664,7 +665,8 @@ public class AccountUtils {
 			 */
 			if (requestType == RequestType.STATUS_UPDATE
 					|| requestType == RequestType.HIKE_JOIN_TIME
-					|| requestType == RequestType.PROFILE_PIC) {
+					|| requestType == RequestType.PROFILE_PIC
+					|| requestType == RequestType.SOCIAL_POST) {
 				hikeHttpRequest.setResponse(obj);
 			}
 		} catch (UnsupportedEncodingException e) {
