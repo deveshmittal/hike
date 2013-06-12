@@ -125,7 +125,7 @@
                 </RelativeLayout>
             </RelativeLayout>
 
-            <include layout="@layout/friend_btn_tutorial" />
+            <include layout="@layout/home_overlay" />
         </RelativeLayout>
     </RelativeLayout>
 

@@ -244,6 +244,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String CURRENT_PROTIP = "currentProtip";
 
+	public static final String BUTTONS_OVERLAY_SHOWN = "buttonsOverlayShown";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;

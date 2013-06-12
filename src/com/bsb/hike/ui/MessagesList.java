@@ -354,9 +354,9 @@ public class MessagesList extends DrawerBaseActivity implements
 			toggleTypingNotification(true, msisdn);
 		}
 
-		if (!accountPrefs
-				.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)) {
-			findViewById(R.id.friend_intro).setVisibility(View.VISIBLE);
+		if (!accountPrefs.getBoolean(HikeMessengerApp.BUTTONS_OVERLAY_SHOWN,
+				false)) {
+			findViewById(R.id.buttons_intro).setVisibility(View.VISIBLE);
 		} else if (savedInstanceState == null && dialogShowing == null) {
 			/*
 			 * Only show app rater if the tutorial is not being shown an the app
@@ -376,8 +376,8 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 		}
 
-		if (accountPrefs.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)
-				&& !AppRater.showingDialog() && dialogShowing == null) {
+		if (accountPrefs.getBoolean(HikeMessengerApp.BUTTONS_OVERLAY_SHOWN,
+				false) && !AppRater.showingDialog() && dialogShowing == null) {
 			if (!accountPrefs.getBoolean(
 					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
 				showSMSClientDialog();
@@ -511,11 +511,11 @@ public class MessagesList extends DrawerBaseActivity implements
 		editor.commit();
 	}
 
-	public void onFriendIntroClick(View v) {
-		findViewById(R.id.friend_intro).setVisibility(View.GONE);
+	public void onButtonsIntroClick(View v) {
+		findViewById(R.id.buttons_intro).setVisibility(View.GONE);
 
 		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, true);
+		editor.putBoolean(HikeMessengerApp.BUTTONS_OVERLAY_SHOWN, true);
 		editor.commit();
 	}
 
