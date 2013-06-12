@@ -1347,7 +1347,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	@Override
 	public boolean onLongClick(View view) {
-		return false;
+		return chatThread.showMessageContextMenu((ConvMessage) view.getTag());
 	}
 
 	@Override
@@ -1400,6 +1400,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		container.setTag(convMessages.get(lastSentMessagePosition));
 		container.setOnClickListener(this);
+		container.setOnLongClickListener(this);
 
 		/*
 		 * Make the list scroll to the end to show the text.

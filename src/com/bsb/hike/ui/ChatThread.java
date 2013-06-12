@@ -952,14 +952,17 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	@Override
 	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
-		ArrayList<String> optionsList = new ArrayList<String>();
+		ConvMessage message = mAdapter.getItem(position);
+		return showMessageContextMenu(message);
+	}
 
-		final ConvMessage message = mAdapter.getItem(position);
-
+	public boolean showMessageContextMenu(final ConvMessage message) {
 		if (message == null
 				|| message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
 			return false;
 		}
+
+		ArrayList<String> optionsList = new ArrayList<String>();
 
 		if (message.isFileTransferMessage()) {
 			HikeFile hikeFile = message.getMetadata().getHikeFiles().get(0);
