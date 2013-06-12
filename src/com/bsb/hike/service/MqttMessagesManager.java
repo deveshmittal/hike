@@ -606,6 +606,15 @@ public class MqttMessagesManager {
 						newTalkTime = talkTime;
 					}
 				}
+				if (account.has(HikeConstants.LAST_SEEN_SETTING)) {
+					SharedPreferences settings = PreferenceManager
+							.getDefaultSharedPreferences(context);
+					Editor settingEditor = settings.edit();
+					settingEditor.putBoolean(HikeConstants.LAST_SEEN_PREF,
+							account.optBoolean(HikeConstants.LAST_SEEN_SETTING,
+									true));
+					settingEditor.commit();
+				}
 			}
 			editor.commit();
 			if (inviteTokenAdded) {
