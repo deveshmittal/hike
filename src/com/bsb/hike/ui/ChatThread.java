@@ -133,6 +133,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfo;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ContactInfoData.DataType;
 import com.bsb.hike.models.ConvMessage;
@@ -1424,10 +1425,19 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			boolean lastSeenOn = PreferenceManager.getDefaultSharedPreferences(
 					this).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
 			if (lastSeenOn) {
+				ContactInfo contactInfo = HikeUserDatabase.getInstance()
+						.getContactInfoFromMSISDN(mContactNumber, false);
 				/*
-				 * Fetching last seen value.
+				 * Only fetch this for a contact publishing events to you.
 				 */
-				new FetchLastSeenTask(mContactNumber, false).execute();
+				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
+						|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED
+						|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
+					/*
+					 * Fetching last seen value.
+					 */
+					new FetchLastSeenTask(mContactNumber, false).execute();
+				}
 			}
 		}
 
