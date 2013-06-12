@@ -94,6 +94,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_above="@id/emoticons_categories_container"
+                android:layout_alignWithParentIfMissing="true"
                 android:background="@drawable/ic_emoticon_divider_2" />
 
             <android.support.v4.view.ViewPager
