@@ -180,13 +180,11 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 			}
 
 			if (!selectedContacts.isEmpty()) {
-				if (!selectedContacts.isEmpty()) {
-					Toast.makeText(
-							getApplicationContext(),
-							selectedContacts.size() > 1 ? R.string.invites_sent
-									: R.string.invite_sent, Toast.LENGTH_SHORT)
-							.show();
-				}
+				Toast.makeText(
+						getApplicationContext(),
+						selectedContacts.size() > 1 ? R.string.invites_sent
+								: R.string.invite_sent, Toast.LENGTH_SHORT)
+						.show();
 				finish();
 			} else {
 				Toast.makeText(getApplicationContext(),
