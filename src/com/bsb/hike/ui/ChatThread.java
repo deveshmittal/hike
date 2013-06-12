@@ -1588,6 +1588,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				} else {
 					nonZeroCredits();
 				}
+			} else {
+				nonZeroCredits();
 			}
 		} else {
 			updateChatMetadata();
