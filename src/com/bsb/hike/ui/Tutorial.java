@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -11,8 +10,9 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeAppStateBaseActivity;
 
-public class Tutorial extends Activity {
+public class Tutorial extends HikeAppStateBaseActivity {
 
 	boolean friendsTutorial;
 

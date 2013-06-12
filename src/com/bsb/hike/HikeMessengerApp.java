@@ -67,7 +67,7 @@ import com.facebook.android.Facebook;
 public class HikeMessengerApp extends Application implements Listener {
 
 	public static enum CurrentState {
-		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY
+		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED
 	}
 
 	public static final String ACCOUNT_SETTINGS = "accountsettings";

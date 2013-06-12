@@ -349,7 +349,7 @@ public class HikeConstants {
 	/* activityForResult IDs */
 	public static final int CAMERA_RESULT = 0;
 	public static final int GALLERY_RESULT = 1;
-	public static final int CROP_RESULT = 2;
+	public static final int CROP_RESULT = 2991;
 
 	public static final int MIN_STATUS_COUNT = 5;
 

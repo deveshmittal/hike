@@ -6,7 +6,6 @@ import java.net.URI;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -66,6 +65,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
+import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Request;
@@ -75,7 +75,7 @@ import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
 
-public class SignupActivity extends Activity implements
+public class SignupActivity extends HikeAppStateBaseActivity implements
 		SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener,
 		OnClickListener, FinishableEvent, OnCancelListener,
 		DialogInterface.OnClickListener, Listener {
