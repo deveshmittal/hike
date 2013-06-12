@@ -647,4 +647,7 @@ public class HikeConstants {
 	public static enum TipType {
 		EMOTICON, STICKER, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD
 	}
+
+	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
+			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
 }

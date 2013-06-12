@@ -505,4 +505,7 @@
 	<string name="walkie_talkie_tip">Tap here to use hike\'s new Walkie Talkie!</string>
 	<string name="last_seen_tip">Only your Circle of Friends can see when you were last seen</string>
 	<string name="dismiss">Dismiss</string>
+	<string name="native_sms_invite_1">Hey, I\'m using hike, and it has all these awesome stickers and emoticons which I want to share with you. Get it now http://hike.in/</string>
+	<string name="native_sms_invite_2">Hey, I\'m using hike, which lets us show our \"last seen\" status only to the friends we choose, and not everyone. Get it now http://hike.in/</string>
+	<string name="native_sms_invite_3">Hey, I\'m using hike; it comes with a cool Walkie-Talkie which lets me send you free voice messages. Get it now http://hike.in/</string>
 </resources>

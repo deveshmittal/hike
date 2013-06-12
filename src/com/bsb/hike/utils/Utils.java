@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1363,8 +1364,14 @@ public class Utils {
 			Context context) {
 		long time = (long) System.currentTimeMillis() / 1000;
 
+		/*
+		 * Randomising the invite text.
+		 */
+		Random random = new Random();
+		int index = random.nextInt(HikeConstants.INVITE_STRINGS.length);
+
 		ConvMessage convMessage = new ConvMessage(getInviteMessage(context,
-				R.string.invite_message), msisdn, time,
+				HikeConstants.INVITE_STRINGS[index]), msisdn, time,
 				ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setInvite(true);
 
