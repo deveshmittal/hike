@@ -25,6 +25,13 @@ public abstract class HikeAppStateBasePreferenceActivity extends
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		com.facebook.Settings.publishInstallAsync(this,
+				HikeConstants.APP_FACEBOOK_ID);
+	}
+
+	@Override
 	protected void onStart() {
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED
 				|| HikeMessengerApp.currentState == CurrentState.CLOSED) {
