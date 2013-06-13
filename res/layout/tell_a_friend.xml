@@ -280,7 +280,7 @@
                         android:shadowColor="#66ffffff"
                         android:shadowDy="0.5"
                         android:shadowRadius="0.5"
-                        android:text="@string/invite_earn"
+                        android:text="@string/invite_friends_earn_sms"
                         android:textColor="@color/subtext"
                         android:textSize="14sp"
                         android:textStyle="bold|italic" />

@@ -525,5 +525,9 @@
 	<string name="sms_undelivered">Tap to send as SMS</string>
 	<string name="status_notification_on">Status Update notifications are turned on</string>
 	<string name="status_notification_off">Status Update notifications are turned off</string>
+<<<<<<< HEAD
 >>>>>>> 29c7bb3... String changes to the unsent/undelivered messages
+=======
+	<string name="invite_friends_earn_sms">Invite friends, Earn free SMS</string>
+>>>>>>> 92b3770... String change
 </resources>
