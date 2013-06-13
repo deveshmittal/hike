@@ -436,6 +436,9 @@ public class CentralTimeline extends DrawerBaseActivity implements
 						favoriteAdded);
 
 		for (StatusMessage listItem : statusMessages) {
+			if (listItem.getMsisdn() == null) {
+				continue;
+			}
 			if (listItem.getMsisdn().equals(statusMessage.getMsisdn())
 					&& listItem.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) {
 				friendRequests--;
