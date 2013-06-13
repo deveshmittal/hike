@@ -83,9 +83,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
+                android:ellipsize="end"
+                android:maxLines="2"
                 android:text="You have 1 unread message from xyz."
                 android:textColor="@color/lightblack"
                 android:textSize="12sp" />
+
         </LinearLayout>
     </RelativeLayout>
 
