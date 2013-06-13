@@ -366,6 +366,9 @@ public class HikeConstants {
 	public static final int DEFAULT_PROTIP_WAIT_TIME = 300;
 	public static final String PROTIP_STATUS_NAME = "hike team";
 
+	/* In seconds */
+	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 20;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
