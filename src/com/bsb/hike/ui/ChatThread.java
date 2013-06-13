@@ -3851,7 +3851,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
 			@Override
 			public void onTabChanged(String tabId) {
-				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab());
+				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab(), false);
 			}
 		});
 
@@ -3898,7 +3898,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				if (categoryIndex != 0) {
-					emoticonViewPager.setCurrentItem(0);
+					emoticonViewPager.setCurrentItem(0, false);
 				}
 			}
 		});
@@ -4106,7 +4106,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					hideStickerTabs();
 				} else {
 					setStickerCategorySelected(tag);
-					emoticonViewPager.setCurrentItem(i - 1);
+					emoticonViewPager.setCurrentItem(i - 1, false);
 				}
 				break;
 			}
@@ -4144,7 +4144,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				emoticonType,
 				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		emoticonViewPager.setAdapter(emoticonsAdapter);
-		emoticonViewPager.setCurrentItem(pageNum);
+		emoticonViewPager.setCurrentItem(pageNum, false);
 		emoticonViewPager.invalidate();
 
 		/*
