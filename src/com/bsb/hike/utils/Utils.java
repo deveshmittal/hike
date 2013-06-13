@@ -1887,7 +1887,7 @@ public class Utils {
 				HikeMessengerApp.PROTIP_DISMISS_TIME, 0);
 		long waitTime = prefs.getLong(HikeMessengerApp.PROTIP_WAIT_TIME,
 				HikeConstants.DEFAULT_PROTIP_WAIT_TIME);
-		return protip.getTimeStamp() > (lastDismissTime + waitTime);
+		return System.currentTimeMillis() / 1000 > (lastDismissTime + waitTime);
 	}
 
 	/*
