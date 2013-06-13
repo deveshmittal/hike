@@ -28,4 +28,5 @@
 	<dimen name="emoticon_pallete">228dp</dimen>
 	<dimen name="protip_btn_padding">37dp</dimen>
 	<dimen name="status_btn_padding">20dp</dimen>
+	<dimen name="preview_corner_radius">2dp</dimen>
 </resources>

@@ -527,4 +527,9 @@
 	<string name="added_friend">Added you to Circle of Friends</string>
 	<string name="name_added_friend">%1$s added you to Circle of Friends</string>
 	<string name="confirmed_friend_2">You will now be able to see updates from %1$s</string>
+	<string name="dog_category">Snuggles</string>
+	<string name="kitty_category">Miley</string>
+	<string name="exp_category">Expressions</string>
+	<string name="bollywood_category">Bollywood</string>
+	<string name="rf_category">Rage faces</string>
 </resources>

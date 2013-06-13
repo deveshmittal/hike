@@ -681,15 +681,15 @@ public class EmoticonConstants {
 			"008_dreaming.png", };
 
 	public static final String[] STICKER_CATEGORY_IDS = { "doggy", "kitty",
-			"rageface", "expressions", "bollywood" };
+			"expressions", "bollywood", "rageface" };
 
 	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.doggy,
-			R.drawable.kitty, R.drawable.rageface, R.drawable.expressions,
-			R.drawable.bollywood };
+			R.drawable.kitty, R.drawable.expressions, R.drawable.bollywood,
+			R.drawable.rageface };
 
 	public static final int[] STICKER_CATEGORY_PREVIEW_RES_IDS = {
 			R.drawable.preview_doggy, R.drawable.preview_kitty,
-			R.drawable.preview_rageface, R.drawable.preview_expressions,
-			R.drawable.preview_bollywood };
+			R.drawable.preview_expressions, R.drawable.preview_bollywood,
+			R.drawable.preview_rageface };
 
 }

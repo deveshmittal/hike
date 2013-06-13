@@ -42,6 +42,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
@@ -3867,15 +3868,11 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.sticker_preview_dialog);
 
-		final String categoryId = Utils.getCategoryIdForIndex(categoryIndex);
-		ImageView previewImage = (ImageView) dialog
-				.findViewById(R.id.preview_image);
-		previewImage
-				.setImageResource(EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[categoryIndex]);
+		View parent = dialog.findViewById(R.id.preview_container);
 
-		TextView previewText = (TextView) dialog
-				.findViewById(R.id.preview_text);
-		previewText.setText(categoryId);
+		setupStickerPreviewDialog(parent, categoryIndex);
+
+		final String categoryId = Utils.getCategoryIdForIndex(categoryIndex);
 
 		Button okBtn = (Button) dialog.findViewById(R.id.ok_btn);
 		okBtn.setOnClickListener(new OnClickListener() {
@@ -3920,6 +3917,125 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			}
 		});
 		dialog.show();
+	}
+
+	private void setupStickerPreviewDialog(View parent, int categoryIndex) {
+		GradientDrawable parentDrawable = (GradientDrawable) parent
+				.getBackground();
+		Button stickerBtn = (Button) parent.findViewById(R.id.ok_btn);
+		TextView category = (TextView) parent.findViewById(R.id.preview_text);
+		View divider = parent.findViewById(R.id.divider);
+		ImageView sticker = (ImageView) parent.findViewById(R.id.preview_image);
+
+		int resParentBg = 0;
+		int stickerBtnBg = 0;
+		int stickerBtnText = 0;
+		int stickerBtnTextColor = 0;
+		int stickerBtnShadowColor = 0;
+		int categoryText = 0;
+		int categoryTextColor = 0;
+		int categoryTextShadowColor = 0;
+		int dividerBg = 0;
+
+		switch (categoryIndex) {
+		case 0:
+			resParentBg = getResources().getColor(R.color.doggy_bg);
+
+			stickerBtnBg = R.drawable.doggy_btn;
+			stickerBtnText = android.R.string.ok;
+			stickerBtnTextColor = getResources().getColor(
+					R.color.doggy_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.doggy_btn_text_shadow);
+
+			categoryText = R.string.dog_category;
+			categoryTextColor = getResources().getColor(R.color.doggy_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.doggy_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.doggy_div);
+			break;
+		case 1:
+			resParentBg = getResources().getColor(R.color.kitty_bg);
+
+			stickerBtnBg = R.drawable.kitty_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(
+					R.color.kitty_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.kitty_btn_text_shadow);
+
+			categoryText = R.string.kitty_category;
+			categoryTextColor = getResources().getColor(R.color.kitty_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.kitty_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.kitty_div);
+			break;
+		case 2:
+			resParentBg = getResources().getColor(R.color.exp_bg);
+
+			stickerBtnBg = R.drawable.exp_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(R.color.exp_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.exp_btn_text_shadow);
+
+			categoryText = R.string.exp_category;
+			categoryTextColor = getResources().getColor(R.color.exp_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.exp_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.exp_div);
+			break;
+		case 3:
+			resParentBg = getResources().getColor(R.color.bollywood_bg);
+
+			stickerBtnBg = R.drawable.bollywood_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(
+					R.color.bollywood_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.bollywood_btn_text_shadow);
+
+			categoryText = R.string.bollywood_category;
+			categoryTextColor = getResources().getColor(R.color.bollywood_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.bollywood_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.bollywood_div);
+			break;
+		case 4:
+			resParentBg = getResources().getColor(R.color.rf_bg);
+
+			stickerBtnBg = R.drawable.rf_btn;
+			stickerBtnText = R.string.download;
+			stickerBtnTextColor = getResources().getColor(R.color.rf_btn_text);
+			stickerBtnShadowColor = getResources().getColor(
+					R.color.rf_btn_text_shadow);
+
+			categoryText = R.string.rf_category;
+			categoryTextColor = getResources().getColor(R.color.rf_text);
+			categoryTextShadowColor = getResources().getColor(
+					R.color.rf_text_shadow);
+
+			dividerBg = getResources().getColor(R.color.rf_div);
+			break;
+		}
+
+		parentDrawable.setColor(resParentBg);
+		sticker.setImageResource(EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[categoryIndex]);
+
+		stickerBtn.setBackgroundResource(stickerBtnBg);
+		stickerBtn.setText(stickerBtnText);
+		stickerBtn.setTextColor(stickerBtnTextColor);
+		stickerBtn.setShadowLayer(0.7f, 0, 0.7f, stickerBtnShadowColor);
+
+		category.setText(categoryText);
+		category.setTextColor(categoryTextColor);
+		category.setShadowLayer(0.6f, 0, 0.6f, categoryTextShadowColor);
+
+		divider.setBackgroundColor(dividerBg);
 	}
 
 	private void updateStickerCategoryUI(int categoryIndex, boolean failed,
