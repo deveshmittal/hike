@@ -1865,7 +1865,15 @@ public class Utils {
 				}
 			}
 		} else {
-			notificationCount++;
+			Protip protip = HikeConversationsDatabase.getInstance()
+					.getProtipForId(currentProtipId);
+			if (protip == null) {
+				Editor editor = accountPrefs.edit();
+				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
+				editor.commit();
+			} else {
+				notificationCount++;
+			}
 		}
 
 		return notificationCount;
