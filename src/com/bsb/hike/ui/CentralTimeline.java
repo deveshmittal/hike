@@ -154,7 +154,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 		findViewById(R.id.button_bar).setVisibility(View.VISIBLE);
 
-		setMutePreference();
+		setMutePreference(false);
 
 		TextView titleTV = (TextView) findViewById(R.id.title);
 		titleTV.setText(R.string.recent_updates);
@@ -287,7 +287,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		}
 	}
 
-	private void setMutePreference() {
+	private void setMutePreference(boolean showToast) {
 		int preference = PreferenceManager.getDefaultSharedPreferences(this)
 				.getInt(HikeConstants.STATUS_PREF, 0);
 		if (preference == 0) {
@@ -295,11 +295,13 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		} else {
 			muteNotification.setSelected(true);
 		}
-		Toast.makeText(
-				getApplicationContext(),
-				preference == 0 ? R.string.status_notification_on
-						: R.string.status_notification_off, Toast.LENGTH_SHORT)
-				.show();
+		if (showToast) {
+			Toast.makeText(
+					getApplicationContext(),
+					preference == 0 ? R.string.status_notification_on
+							: R.string.status_notification_off,
+					Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	public void onTitleIconClick(View v) {
@@ -328,7 +330,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
 			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 					jsonObject);
-			setMutePreference();
+			setMutePreference(true);
 		} catch (JSONException e) {
 			Log.w(getClass().getSimpleName(), e);
 		}
