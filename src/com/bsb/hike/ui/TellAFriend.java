@@ -217,8 +217,9 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 			Log.d(getClass().getSimpleName(), "JSON: " + data);
 
 			progressDialog = ProgressDialog.show(this, null,
-					getString(R.string.posting_update));
-			
+					getString(facebook ? R.string.posting_update_facebook
+							: R.string.posting_update_twitter));
+
 			HikeHTTPTask hikeHTTPTask = new HikeHTTPTask(null, 0);
 			hikeHTTPTask.execute(hikeHttpRequest);
 		} catch (JSONException e) {
