@@ -127,7 +127,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
 
-		if (statusMessage.hasMood()) {
+		if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
+			viewHolder.avatar.setImageResource(R.drawable.ic_protip);
+		} else if (statusMessage.hasMood()) {
 			viewHolder.avatar
 					.setImageResource(Utils.getMoodsResource()[statusMessage
 							.getMoodId()]);
