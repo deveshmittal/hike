@@ -149,8 +149,8 @@ public class HikeNotification {
 
 		String message = context.getString(R.string.added_friend);
 
-		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
-				key, message));
+		Spanned text = Html.fromHtml(context.getString(
+				R.string.name_added_friend, key));
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);
@@ -198,8 +198,8 @@ public class HikeNotification {
 					.getString(R.string.status_profile_pic_notification);
 			text = key + " " + message;
 		} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED) {
-			message = context.getString(R.string.confirmed_friend_2);
-			text = key + " " + message;
+			message = context.getString(R.string.confirmed_friend_2, key);
+			text = message;
 		} else {
 			/*
 			 * We don't know how to display this type. Just return.

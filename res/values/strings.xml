@@ -361,7 +361,6 @@
 	<string name="waiting_for_accept">Waiting for %1$s to accept your friend request</string>
 	<string name="status_update">Status update</string>
 	<string name="remove_friend">Remove</string>
-	<string name="added_friend">I added you as a friend</string>
 	<string name="no_status">Looks like you haven\'t posted any status updates yet.</string>
 	<string name="update_status">Update status</string>
 	<string name="free_sms_txt">Free SMS</string>
@@ -441,7 +440,6 @@
 	<string name="confirmed_friend">Is now a friend</string>
 	<string name="confirmed_friend_info">You and %1$s can now see updates from each other.</string>
 	<string name="accepted_friend_request_info">You and %1$s can now see updates from each other.</string>
-	<string name="confirmed_friend_2">is now a friend</string>
 	<string name="no_hike">Invite more friends to hike?</string>
 	<string name="rename_group">Rename the group</string>
 	<string name="no_contacts_hike">You have no contacts on hike</string>
@@ -520,16 +518,13 @@
 	<string name="joined_hike_update">Joined hike</string>
 	<string name="default_client_header">Default SMS Client</string>
 	<string name="default_client_info">Use hike to receive all SMS</string>
-<<<<<<< HEAD
-=======
 	<string name="msg_undelivered">%1$s is offline. Tap to send as SMS.</string>
 	<string name="msg_unsent">You are currently offline. Tap to send as SMS.</string>
 	<string name="sms_undelivered">Tap to send as SMS</string>
 	<string name="status_notification_on">Status Update notifications are turned on</string>
 	<string name="status_notification_off">Status Update notifications are turned off</string>
-<<<<<<< HEAD
->>>>>>> 29c7bb3... String changes to the unsent/undelivered messages
-=======
 	<string name="invite_friends_earn_sms">Invite friends, Earn free SMS</string>
->>>>>>> 92b3770... String change
+	<string name="added_friend">Added you to Circle of Friends</string>
+	<string name="name_added_friend">%1$s added you to Circle of Friends</string>
+	<string name="confirmed_friend_2">You will now be able to see updates from %1$s</string>
 </resources>
