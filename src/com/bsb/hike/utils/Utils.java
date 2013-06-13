@@ -2015,13 +2015,14 @@ public class Utils {
 
 	public static String getExternalStickerDirectoryForCatgoryId(
 			Context context, String catId) {
-		return context.getExternalFilesDir(null).getPath() + "/Stickers/"
-				+ catId;
+		return context.getExternalFilesDir(null).getPath()
+				+ HikeConstants.STICKERS_ROOT + "/" + catId;
 	}
 
 	public static String getInternalStickerDirectoryForCatgoryId(
 			Context context, String catId) {
-		return context.getFilesDir().getPath() + "/Stickers/" + catId;
+		return context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT
+				+ "/" + catId;
 	}
 
 	public static int getResolutionId() {
