@@ -361,7 +361,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			int position, long id) {
 		StatusMessage statusMessage = centralTimelineAdapter.getItem(position);
 		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
-				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)) {
+				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)
+				|| (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)) {
 			return;
 		} else if (userMsisdn.equals(statusMessage.getMsisdn())) {
 			Intent intent = new Intent(this, ProfileActivity.class);
