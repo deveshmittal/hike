@@ -459,8 +459,6 @@
 	<string name="error_setting_profile">Error setting your profile image.</string>
 	<string name="mood_tweet_error">Posting a mood to twitter can have a maximum of 130 characters.</string>
 	<string name="new_string">New</string>
-	<string name="msg_undelivered">Undelivered Message. Tap it to switch to SMS.</string>
-	<string name="msg_undelivered_multiple">Undelivered Messagessss. Tap it to switch to SMS.</string>
 	<string name="sms_toggle_header">SMS from My Number</string>
 	<string name="sms_toggle_on_subtext">Now sending from my number</string>
 	<string name="sms_toggle_off_subtext">Now sending from a hike number</string>
@@ -479,8 +477,6 @@
 	<string name="import_sms">Import SMS</string>
 	<string name="import_sms_info">Would you like to import your existing messages into hike?</string>
 	<string name="importing_sms_info">Give us a minute while we import your messages into hike.</string>
-	<string name="sms_undelivered">Undelivered SMS. Tap it to resend.</string>
-	<string name="sms_undelivered_multiple">Undelivered SMSessss. Tap it to resend.</string>
 	<string name="gc_fallback_offline">You need to be online to send this message</string>
 	<string name="native_header">Send via Operator SMS</string>
 	<string name="native_info">You will now be sending SMS through your operator. Regular operator SMS charges will apply</string>
@@ -522,4 +518,12 @@
 	<string name="joined_hike_update">Joined hike</string>
 	<string name="default_client_header">Default SMS Client</string>
 	<string name="default_client_info">Use hike to receive all SMS</string>
+<<<<<<< HEAD
+=======
+	<string name="msg_undelivered">%1$s is offline. Tap to send as SMS.</string>
+	<string name="msg_unsent">You are currently offline. Tap to send as SMS.</string>
+	<string name="sms_undelivered">Tap to send as SMS</string>
+	<string name="status_notification_on">Status Update notifications are turned on</string>
+	<string name="status_notification_off">Status Update notifications are turned off</string>
+>>>>>>> 29c7bb3... String changes to the unsent/undelivered messages
 </resources>

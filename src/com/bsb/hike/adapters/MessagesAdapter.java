@@ -1411,22 +1411,19 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 	}
 
-	private int getUndeliveredTextRes() {
-		if (lastSentMessagePosition == 0) {
-			return R.string.msg_undelivered;
-		}
-		/*
-		 * Checking if more than one message were not delivered.
-		 */
-		ConvMessage secondLastSentMessage = convMessages
-				.get(lastSentMessagePosition - 1);
-		if (isMessageUndelivered(secondLastSentMessage)) {
-			return conversation.isOnhike() ? R.string.msg_undelivered_multiple
-					: R.string.sms_undelivered_multiple;
+	private String getUndeliveredTextRes() {
+		ConvMessage convMessage = convMessages.get(lastSentMessagePosition);
+
+		int res;
+		if (convMessage.getState() == State.SENT_UNCONFIRMED) {
+			res = conversation.isOnhike() ? R.string.msg_unsent
+					: R.string.sms_undelivered;
 		} else {
-			return conversation.isOnhike() ? R.string.msg_undelivered
+			res = conversation.isOnhike() ? R.string.msg_undelivered
 					: R.string.sms_undelivered;
 		}
+		return context.getString(res,
+				Utils.getFirstName(conversation.getLabel()));
 	}
 
 	private void showSMSDialog(final boolean nativeOnly) {
