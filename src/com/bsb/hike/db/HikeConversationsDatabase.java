@@ -2322,6 +2322,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		String url = c.getString(c.getColumnIndex(DBConstants.IMAGE_URL));
 		long waitTime = c.getLong(c.getColumnIndex(DBConstants.WAIT_TIME));
 		long timeStamp = c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+		if (mappedId == null) {
+			return null;
+		}
 
 		return new Protip(id, mappedId, header, text, url, waitTime, timeStamp);
 	}
