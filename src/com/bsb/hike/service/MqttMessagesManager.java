@@ -872,8 +872,7 @@ public class MqttMessagesManager {
 					|| HikeConstants.REMOVE_CATEGORY.equals(subType)) {
 
 				String categoryDirPath = Utils
-						.getExternalStickerDirectoryForCatgoryId(context,
-								categoryId);
+						.getStickerDirectoryForCategoryId(context, categoryId);
 				File categoryDir = new File(categoryDirPath);
 
 				/*

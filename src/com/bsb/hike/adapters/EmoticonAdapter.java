@@ -227,8 +227,8 @@ public class EmoticonAdapter extends PagerAdapter implements
 						}
 					}
 					File categoryDir = new File(
-							Utils.getExternalStickerDirectoryForCatgoryId(
-									activity, categoryId));
+							Utils.getStickerDirectoryForCategoryId(activity,
+									categoryId));
 
 					if (categoryDir.exists()) {
 						String[] stickerIds = categoryDir.list();

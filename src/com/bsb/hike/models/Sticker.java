@@ -72,8 +72,8 @@ public class Sticker implements Comparable<Sticker> {
 	}
 
 	public String getStickerPath(Context context) {
-		return Utils.getExternalStickerDirectoryForCatgoryId(context,
-				categoryId) + "/" + stickerId;
+		return Utils.getStickerDirectoryForCategoryId(context, categoryId)
+				+ "/" + stickerId;
 	}
 
 	@Override

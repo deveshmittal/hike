@@ -52,8 +52,8 @@ public class DownloadStickerTask extends StickerTaskBase {
 	protected FTResult doInBackground(Void... params) {
 		Log.d(getClass().getSimpleName(), "CategoryId: " + catId);
 
-		String directoryPath = Utils.getExternalStickerDirectoryForCatgoryId(
-				context, catId);
+		String directoryPath = Utils.getStickerDirectoryForCategoryId(context,
+				catId);
 		File stickerDir = new File(directoryPath);
 		int totalNumber = 0;
 		boolean reachedEnd = false;

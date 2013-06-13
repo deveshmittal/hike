@@ -2013,16 +2013,55 @@ public class Utils {
 				: R.string.importing_sms_info);
 	}
 
-	public static String getExternalStickerDirectoryForCatgoryId(
+	private static String getExternalStickerDirectoryForCategoryId(
 			Context context, String catId) {
 		return context.getExternalFilesDir(null).getPath()
 				+ HikeConstants.STICKERS_ROOT + "/" + catId;
 	}
 
-	public static String getInternalStickerDirectoryForCatgoryId(
+	private static String getInternalStickerDirectoryForCategoryId(
 			Context context, String catId) {
 		return context.getFilesDir().getPath() + HikeConstants.STICKERS_ROOT
 				+ "/" + catId;
+	}
+
+	/**
+	 * Returns the directory for a sticker category.
+	 * 
+	 * @param context
+	 * @param catId
+	 * @return
+	 */
+	public static String getStickerDirectoryForCategoryId(Context context,
+			String catId) {
+		/*
+		 * We give a higher priority to external storage. If we find an
+		 * exisiting directory in the external storage, we will return its path.
+		 * Otherwise if there is an exisiting directory in internal storage, we
+		 * return its path.
+		 * 
+		 * If the directory is not available in both cases, we return the
+		 * external storage's path if external storage is available. Else we
+		 * return the internal storage's path.
+		 */
+		boolean externalAvailable = false;
+		if (getExternalStorageState() == ExternalStorageState.WRITEABLE) {
+			externalAvailable = true;
+			File stickerDir = new File(
+					getExternalStickerDirectoryForCategoryId(context, catId));
+			if (stickerDir.exists()) {
+				return stickerDir.getPath();
+			}
+		}
+		File stickerDir = new File(getInternalStickerDirectoryForCategoryId(
+				context, catId));
+		if (stickerDir.exists()) {
+			return stickerDir.getPath();
+		}
+		if (externalAvailable) {
+			return getExternalStickerDirectoryForCategoryId(context, catId);
+		}
+		return getInternalStickerDirectoryForCategoryId(context, catId);
 	}
 
 	public static int getResolutionId() {
@@ -2042,8 +2081,7 @@ public class Utils {
 
 	public static boolean checkIfStickerCategoryExists(Context context,
 			String categoryId) {
-		String path = getExternalStickerDirectoryForCatgoryId(context,
-				categoryId);
+		String path = getStickerDirectoryForCategoryId(context, categoryId);
 		File category = new File(path);
 		if (category.exists() && category.list().length > 0) {
 			return true;

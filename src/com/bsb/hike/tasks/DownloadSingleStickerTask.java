@@ -36,8 +36,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 	public DownloadSingleStickerTask(Context context, String catId, String stId) {
 		this.key = catId + stId;
 		this.stId = stId;
-		this.dirPath = Utils.getExternalStickerDirectoryForCatgoryId(context,
-				catId);
+		this.dirPath = Utils.getStickerDirectoryForCategoryId(context, catId);
 		this.filePath = this.dirPath + "/" + stId;
 
 		this.urlString = AccountUtils.base + "/stickers?catId=" + catId
