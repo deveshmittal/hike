@@ -482,7 +482,7 @@
 	<string name="sticker_download_failed">Oops! The download failed. Tap to retry</string>
 	<string name="new_stickers_available">New stickers available!</string>
 	<string name="updating_set">Updating the set</string>
-	<string name="downloading_category">Downloading %1$s</string>
+	<string name="downloading_category">Downloading new stickers</string>
 	<string name="download">Download</string>
 	<string name="hold_talk">HOLD AND TALK</string>
 	<string name="last_seen_today">Last seen today at %1$s</string>
@@ -491,7 +491,7 @@
 	<string name="last_seen_while_ago">Last seen a while ago</string>
 	<string name="online">Online</string>
 	<string name="last_seen_header">Last Seen</string>
-	<string name="last_seen_info">See/show last online timestamp</string>
+	<string name="last_seen_info">Show last seen</string>
 	<string name="emoticons_stickers_tip">Tap here to share stickers and emoticons :)</string>
 	<string name="stickers_tip">New stickers!</string>
 	<string name="moods_tip">Tap here to attach a wonderful mood :)</string>
