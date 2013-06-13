@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -14,6 +17,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -28,6 +32,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -44,8 +49,8 @@ import com.bsb.hike.adapters.CentralTimelineAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -74,6 +79,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	private ActivityState mActivityState;
 	private ProgressDialog mDialog;
 	private String[] friendMsisdns;
+	private ImageButton muteNotification;
 
 	private class ActivityState {
 		public DownloadProfileImageTask downloadProfileImageTask;
@@ -141,6 +147,14 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		} else {
 			mActivityState = new ActivityState();
 		}
+
+		muteNotification = (ImageButton) findViewById(R.id.title_image_btn);
+		muteNotification.setVisibility(View.VISIBLE);
+		muteNotification.setImageResource(R.drawable.preference_status_mute);
+
+		findViewById(R.id.button_bar).setVisibility(View.VISIBLE);
+
+		setMutePreference();
 
 		TextView titleTV = (TextView) findViewById(R.id.title);
 		titleTV.setText(R.string.recent_updates);
@@ -270,6 +284,53 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		if (mActivityState.viewingProfileImage) {
 			downloadOrShowProfileImage(false, false, mActivityState.mappedId,
 					mActivityState.imageViewId);
+		}
+	}
+
+	private void setMutePreference() {
+		int preference = PreferenceManager.getDefaultSharedPreferences(this)
+				.getInt(HikeConstants.STATUS_PREF, 0);
+		if (preference == 0) {
+			muteNotification.setSelected(false);
+		} else {
+			muteNotification.setSelected(true);
+		}
+		Toast.makeText(
+				getApplicationContext(),
+				preference == 0 ? R.string.status_notification_on
+						: R.string.status_notification_off, Toast.LENGTH_SHORT)
+				.show();
+	}
+
+	public void onTitleIconClick(View v) {
+		SharedPreferences settingPref = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		int preference = settingPref.getInt(HikeConstants.STATUS_PREF, 0);
+
+		int newValue;
+
+		Editor editor = settingPref.edit();
+		if (preference == 0) {
+			newValue = -1;
+			editor.putInt(HikeConstants.STATUS_PREF, newValue);
+		} else {
+			newValue = 0;
+			editor.putInt(HikeConstants.STATUS_PREF, newValue);
+		}
+		editor.commit();
+
+		try {
+			JSONObject jsonObject = new JSONObject();
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.PUSH_SU, newValue);
+			jsonObject.put(HikeConstants.DATA, data);
+			jsonObject.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					jsonObject);
+			setMutePreference();
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), e);
 		}
 	}
 
