@@ -597,8 +597,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		mLastSeenView = (TextView) findViewById(R.id.last_seen);
 		lastSeenContainer = findViewById(R.id.last_seen_container);
 
-		lastSeenContainer.setVisibility(View.GONE);
-
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
 		tabHost.setup();
 		currentEmoticonCategorySelected = findViewById(savedInstanceState != null ? savedInstanceState
@@ -1101,6 +1099,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		View btnBar = findViewById(R.id.button_bar);
 		titleIconView.setVisibility(View.GONE);
 		btnBar.setVisibility(View.GONE);
+
+		mLabelView.setVisibility(View.VISIBLE);
+		lastSeenContainer.setVisibility(View.GONE);
 
 		String prevContactNumber = null;
 
