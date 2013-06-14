@@ -532,4 +532,8 @@
 	<string name="exp_category">Expressions</string>
 	<string name="bollywood_category">Bollywood</string>
 	<string name="rf_category">Rage faces</string>
+	<string name="free_hike_sms">Free hike SMS</string>
+	<string name="regular_sms">Regular SMS</string>
+	<string name="messaging_my_number">Messaging from %1$s</string>
+	<string name="messaging_hike_number">Messaging from a hike number</string>
 </resources>

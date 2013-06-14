@@ -11,11 +11,14 @@ import org.json.JSONArray;
 import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
@@ -26,6 +29,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.Gravity;
@@ -49,10 +53,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.models.ContactInfoData;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -104,6 +108,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		View messageContainer;
 		TextView undeliveredMsgTextView;
 		CheckBox smsToggle;
+		TextView hikeSmsText;
+		TextView regularSmsText;
 	}
 
 	private Conversation conversation;
@@ -111,6 +117,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private Context context;
 	private ChatThread chatThread;
 	private TextView smsToggleSubtext;
+	private TextView hikeSmsText;
+	private TextView regularSmsText;
 	private ShowUndeliveredMessage showUndeliveredMessage;
 	private int lastSentMessagePosition = -1;
 	private VoiceMessagePlayer voiceMessagePlayer;
@@ -385,6 +393,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.sms_toggle_subtext);
 				holder.smsToggle = (CheckBox) v.findViewById(R.id.checkbox);
+				holder.hikeSmsText = (TextView) v.findViewById(R.id.hike_text);
+				holder.regularSmsText = (TextView) v
+						.findViewById(R.id.sms_text);
 			}
 			v.setTag(holder);
 		} else {
@@ -398,6 +409,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (viewType == ViewType.SMS_TOGGLE) {
 			smsToggleSubtext = holder.messageTextView;
+			hikeSmsText = holder.hikeSmsText;
+			regularSmsText = holder.regularSmsText;
 
 			boolean smsToggleOn = PreferenceManager
 					.getDefaultSharedPreferences(context).getBoolean(
@@ -1362,13 +1375,40 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		setSmsToggleSubtext(isChecked);
 
 		if (isChecked) {
-			showSMSClientDialog(true, buttonView, true);
+			if (!preferences.getBoolean(
+					HikeMessengerApp.SHOWN_NATIVE_INFO_POPUP, false)) {
+				showSMSClientDialog(true, buttonView, true);
+			} else if (!prefs.getBoolean(HikeConstants.RECEIVE_SMS_PREF, false)) {
+				showSMSClientDialog(true, buttonView, false);
+			}
 		}
 	}
 
 	private void setSmsToggleSubtext(boolean isChecked) {
-		smsToggleSubtext.setText(isChecked ? R.string.sms_toggle_on_subtext
-				: R.string.sms_toggle_off_subtext);
+		String msisdn = preferences.getString(HikeMessengerApp.MSISDN_SETTING,
+				"");
+
+		String text = context.getString(
+				isChecked ? R.string.messaging_my_number
+						: R.string.messaging_hike_number, msisdn);
+		SpannableStringBuilder ssb = new SpannableStringBuilder(text);
+
+		if (isChecked) {
+			ssb.setSpan(new StyleSpan(Typeface.BOLD), text.indexOf(msisdn),
+					text.indexOf(msisdn) + msisdn.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+			hikeSmsText.setTextColor(context.getResources().getColor(
+					R.color.sms_choice_unselected));
+			regularSmsText.setTextColor(context.getResources().getColor(
+					R.color.sms_choice_selected));
+		} else {
+			hikeSmsText.setTextColor(context.getResources().getColor(
+					R.color.sms_choice_selected));
+			regularSmsText.setTextColor(context.getResources().getColor(
+					R.color.sms_choice_unselected));
+		}
+		smsToggleSubtext.setText(ssb);
 	}
 
 	private class ShowUndeliveredMessage implements Runnable {
@@ -1540,7 +1580,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			final CompoundButton checkBox, final boolean showingNativeInfoDialog) {
 		final Dialog dialog = new Dialog(chatThread, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.enable_sms_client_popup);
-		dialog.setCancelable(false);
+		dialog.setCancelable(showingNativeInfoDialog);
 
 		TextView header = (TextView) dialog.findViewById(R.id.header);
 		TextView body = (TextView) dialog.findViewById(R.id.body);
@@ -1551,6 +1591,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				: R.string.use_hike_for_sms);
 		body.setText(showingNativeInfoDialog ? R.string.native_info
 				: R.string.use_hike_for_sms_info);
+
+		if (showingNativeInfoDialog) {
+			btnCancel.setVisibility(View.GONE);
+		}
 
 		btnOk.setOnClickListener(new OnClickListener() {
 
@@ -1573,7 +1617,23 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
 					}
 				}
+				if (showingNativeInfoDialog) {
+					Editor editor = preferences.edit();
+					editor.putBoolean(HikeMessengerApp.SHOWN_NATIVE_INFO_POPUP,
+							true);
+					editor.commit();
+				}
 				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				if (showingNativeInfoDialog) {
+					checkBox.setChecked(false);
+				}
 			}
 		});
 

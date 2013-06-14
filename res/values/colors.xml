@@ -117,4 +117,6 @@
     <color name="exp_text_shadow">#4DFFFFFF</color>
     <color name="exp_btn_text_shadow">#4DFFFFFF</color>
     <color name="exp_div">#d9a62b</color>
+    <color name="sms_choice_unselected">#aeaeac</color>
+    <color name="sms_choice_selected">#999999</color>
 </resources>
