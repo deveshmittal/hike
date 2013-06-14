@@ -250,7 +250,7 @@ public class EmoticonAdapter extends PagerAdapter implements
 				}
 
 				@Override
-				protected void onPostExecute(List<Sticker> result) {
+				protected void onPostExecute(final List<Sticker> result) {
 					final List<ViewType> viewTypeList = new ArrayList<StickerAdapter.ViewType>();
 					if (updateAvailable
 							|| (currentStickerTask != null && currentStickerTask
@@ -295,7 +295,15 @@ public class EmoticonAdapter extends PagerAdapter implements
 								int firstVisibleItem, int visibleItemCount,
 								int totalItemCount) {
 							if (position == 0
+									|| result.isEmpty()
 									|| ((ChatThread) activity).getCurrentPage() != position
+									|| !activity
+											.getSharedPreferences(
+													HikeMessengerApp.ACCOUNT_SETTINGS,
+													0)
+											.getBoolean(
+													EmoticonConstants.STICKER_DOWNLOAD_PREF[position],
+													false)
 									|| HikeConversationsDatabase.getInstance()
 											.hasReachedStickerEnd(categoryId)) {
 								return;
