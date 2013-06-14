@@ -317,6 +317,7 @@ public class HikeConstants {
 	public static final String IMAGE_ROOT = "/hike Images";
 	public static final String VIDEO_ROOT = "/hike Videos";
 	public static final String AUDIO_ROOT = "/hike Audios";
+	public static final String AUDIO_RECORDING_ROOT = "/hike Voice Messages";
 	public static final String STICKERS_ROOT = "/stickers";
 
 	public static final String LARGE_STICKER_ROOT = "/large";

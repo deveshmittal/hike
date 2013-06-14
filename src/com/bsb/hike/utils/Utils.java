@@ -443,6 +443,18 @@ public class Utils {
 				Log.d("Hike", "failed to create directory");
 				return null;
 			}
+			/*
+			 * Making sure that audio recordings don't come up
+			 * in the music players.
+			 */
+			if (type == HikeFileType.AUDIO_RECORDING) {
+				File file = new File(mediaStorageDir, ".nomedia");
+				try {
+					file.createNewFile();
+				} catch (IOException e) {
+					Log.d("Hike", "failed to make nomedia file");
+				}
+			}
 		}
 
 		// Create a media file name
@@ -484,8 +496,10 @@ public class Utils {
 			path.append(HikeConstants.VIDEO_ROOT);
 			break;
 		case AUDIO:
-		case AUDIO_RECORDING:
 			path.append(HikeConstants.AUDIO_ROOT);
+			break;
+		case AUDIO_RECORDING:
+			path.append(HikeConstants.AUDIO_RECORDING_ROOT);
 			break;
 		default:
 			return null;
