@@ -100,7 +100,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -147,7 +146,6 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
-import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
@@ -1030,58 +1028,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		mPubSub.publish(HikePubSub.MESSAGE_SENT, convMessage);
 	}
 
-	private void showSendingNativeSMSPopup(final String message) {
-		nativeSmsDialog = new Dialog(this, R.style.Theme_CustomDialog);
-		nativeSmsDialog.setContentView(R.layout.sms_undelivered_popup);
-		nativeSmsDialog.setCancelable(true);
-
-		View hikeSMS1 = nativeSmsDialog.findViewById(R.id.hike_sms_container1);
-		View hikeSMS2 = nativeSmsDialog.findViewById(R.id.hike_sms_container2);
-		View orContainer = nativeSmsDialog.findViewById(R.id.or_container);
-
-		TextView nativeSmsTextHead = (TextView) nativeSmsDialog
-				.findViewById(R.id.native_sms_head_text);
-		TextView nativeSmsText = (TextView) nativeSmsDialog
-				.findViewById(R.id.native_sms_text);
-		CheckBox sendNative = (CheckBox) nativeSmsDialog
-				.findViewById(R.id.native_sms_checkbox);
-		ImageView avatar = (ImageView) nativeSmsDialog
-				.findViewById(R.id.avatar);
-		final Button sendBtn = (Button) nativeSmsDialog
-				.findViewById(R.id.btn_send);
-
-		String userMsisdn = prefs
-				.getString(HikeMessengerApp.MSISDN_SETTING, "");
-		avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(userMsisdn));
-
-		hikeSMS1.setVisibility(View.GONE);
-		hikeSMS2.setVisibility(View.GONE);
-		orContainer.setVisibility(View.GONE);
-		sendNative.setVisibility(View.GONE);
-
-		String username = prefs.getString(HikeMessengerApp.NAME_SETTING, "");
-
-		nativeSmsTextHead.setText(username);
-		nativeSmsText.setText(message);
-
-		sendBtn.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Editor editor = prefs.edit();
-				editor.putBoolean(
-						HikeMessengerApp.SHOWN_SENDING_NATIVE_SMS_POPUP, true);
-				editor.commit();
-				nativeSmsDialog.dismiss();
-
-				onSendClick(null);
-			}
-		});
-
-		nativeSmsDialog.show();
-	}
-
 	public void onSendClick(View v) {
 		if (!mConversation.isOnhike() && mCredits <= 0) {
 			return;
@@ -1117,26 +1063,18 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 		String message = mComposeView.getText().toString();
 
-		if (!mConversation.isOnhike()
-				&& PreferenceManager.getDefaultSharedPreferences(this)
-						.getBoolean(HikeConstants.SEND_SMS_PREF, false)
-				&& !prefs.getBoolean(
-						HikeMessengerApp.SHOWN_SENDING_NATIVE_SMS_POPUP, false)) {
-			showSendingNativeSMSPopup(message);
-		} else {
-			mComposeView.setText("");
+		mComposeView.setText("");
 
-			ConvMessage convMessage = makeConvMessage(message);
+		ConvMessage convMessage = makeConvMessage(message);
 
-			sendMessage(convMessage);
+		sendMessage(convMessage);
 
-			if (mComposeViewWatcher != null) {
-				mComposeViewWatcher.onMessageSent();
-			}
-			if (emoticonLayout != null
-					&& emoticonLayout.getVisibility() == View.VISIBLE) {
-				onEmoticonBtnClicked(null, 0, false);
-			}
+		if (mComposeViewWatcher != null) {
+			mComposeViewWatcher.onMessageSent();
+		}
+		if (emoticonLayout != null
+				&& emoticonLayout.getVisibility() == View.VISIBLE) {
+			onEmoticonBtnClicked(null, 0, false);
 		}
 	}
 
