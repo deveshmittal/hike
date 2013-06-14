@@ -302,7 +302,9 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 								: Intent.EXTRA_TEXT);
 				Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
-			} else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY)) {
+			} else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY)
+					|| presentIntent
+							.hasExtra(HikeConstants.Extras.FWD_CATEGORY_ID)) {
 				intent.putExtras(presentIntent);
 			} else if (type != null
 					&& (type.startsWith("image") || type.startsWith("audio") || type

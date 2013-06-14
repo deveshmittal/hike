@@ -798,6 +798,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					intent.putExtra(HikeConstants.Extras.FILE_TYPE,
 							hikeFile.getFileTypeString());
 				}
+			} else if (message.isStickerMessage()) {
+				Sticker sticker = message.getMetadata().getSticker();
+				intent.putExtra(HikeConstants.Extras.FWD_CATEGORY_ID,
+						sticker.getCategoryId());
+				intent.putExtra(HikeConstants.Extras.FWD_STICKER_ID,
+						sticker.getStickerId());
 			} else {
 				msg = message.getMessage();
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
@@ -1216,6 +1222,13 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
+			} else if (intent.hasExtra(HikeConstants.Extras.FWD_CATEGORY_ID)) {
+				String categoryId = intent
+						.getStringExtra(HikeConstants.Extras.FWD_CATEGORY_ID);
+				String stickerId = intent
+						.getStringExtra(HikeConstants.Extras.FWD_STICKER_ID);
+				Sticker sticker = new Sticker(categoryId, stickerId);
+				sendSticker(sticker);
 			}
 			/*
 			 * Since the message was not forwarded, we check if we have any
