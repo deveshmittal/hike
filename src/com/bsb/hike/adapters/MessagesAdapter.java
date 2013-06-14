@@ -115,6 +115,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private int lastSentMessagePosition = -1;
 	private VoiceMessagePlayer voiceMessagePlayer;
 	private String statusIdForTip;
+	private SharedPreferences preferences;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -123,6 +124,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		this.conversation = conversation;
 		this.chatThread = chatThread;
 		this.voiceMessagePlayer = new VoiceMessagePlayer();
+		this.preferences = context.getSharedPreferences(
+				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 		setLastSentMessagePosition();
 	}
 
@@ -567,8 +570,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			} else if ((infoState == ParticipantInfoState.CHANGED_GROUP_NAME)
 					|| (infoState == ParticipantInfoState.CHANGED_GROUP_IMAGE)) {
 				String msisdn = metadata.getMsisdn();
-				String userMsisdn = context.getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+				String userMsisdn = preferences.getString(
 						HikeMessengerApp.MSISDN_SETTING, "");
 
 				String participantName = userMsisdn.equals(msisdn) ? context
@@ -728,8 +730,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.container.setOnClickListener(this);
 
 			boolean showTip = false;
-			boolean shownStatusTip = context.getSharedPreferences(
-					HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+			boolean shownStatusTip = preferences.getBoolean(
 					HikeMessengerApp.SHOWN_STATUS_TIP, false);
 
 			if (!shownStatusTip) {
@@ -1460,8 +1461,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				.findViewById(R.id.native_sms_checkbox);
 		ImageView avatar = (ImageView) dialog.findViewById(R.id.avatar);
 
-		SharedPreferences prefs = context.getSharedPreferences(
-				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		SharedPreferences prefs = preferences;
 
 		String userMsisdn = prefs
 				.getString(HikeMessengerApp.MSISDN_SETTING, "");
@@ -1567,8 +1567,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					if (!triggeredFromToggle) {
 						sendAllUnsentMessagesAsSMS(true);
 					}
-					if (!context.getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+					if (!preferences.getBoolean(
 							HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
 						HikeMessengerApp.getPubSub().publish(
 								HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
