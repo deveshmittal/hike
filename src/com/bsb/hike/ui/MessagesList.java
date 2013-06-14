@@ -237,18 +237,9 @@ public class MessagesList extends DrawerBaseActivity implements
 		Intent i = null;
 		boolean justSignedUp = accountPrefs.getBoolean(
 				HikeMessengerApp.JUST_SIGNED_UP, false);
-		if (justSignedUp
-				&& !accountPrefs.getBoolean(
-						HikeMessengerApp.SHOWN_FRIENDS_TUTORIAL, false)) {
+		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_STICKERS_TUTORIAL,
+				false)) {
 			i = new Intent(MessagesList.this, Tutorial.class);
-			i.putExtra(HikeConstants.Extras.SHOW_FRIENDS_TUTORIAL, true);
-		} else if (!accountPrefs.getBoolean(
-				HikeMessengerApp.SHOWN_STICKERS_TUTORIAL, false)) {
-			i = new Intent(MessagesList.this, Tutorial.class);
-			i.putExtra(HikeConstants.Extras.SHOW_FRIENDS_TUTORIAL, false);
-		}
-
-		if (i != null) {
 			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(i);
 			finish();
