@@ -692,4 +692,7 @@ public class EmoticonConstants {
 			R.drawable.preview_expressions, R.drawable.preview_bollywood,
 			R.drawable.preview_rageface };
 
+	public static final String[] STICKER_DOWNLOAD_PREF = {
+			"doggyDownloadShown", "kittyDownloadShown", "expDownloadShown",
+			"bollywoodDownloadShown", "rfDownloadShown" };
 }

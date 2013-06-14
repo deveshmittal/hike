@@ -3761,6 +3761,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 						currentStickerCategorySelected.setSelected(true);
 					}
 
+					String categoryId = Utils.getCategoryIdForIndex(pageNum);
 					if (pageNum == 0
 							&& !prefs
 									.getBoolean(
@@ -3768,9 +3769,13 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 											false)) {
 						showStickerPreviewDialog(0);
 					} else if (pageNum != 0
-							&& !Utils.checkIfStickerCategoryExists(
-									ChatThread.this,
-									Utils.getCategoryIdForIndex(pageNum))) {
+							&& (!Utils.checkIfStickerCategoryExists(
+									ChatThread.this, categoryId) || !prefs
+									.getBoolean(
+											EmoticonConstants.STICKER_DOWNLOAD_PREF[pageNum],
+											false))
+							&& !ChatThread.stickerTaskMap
+									.containsKey(categoryId)) {
 						showStickerPreviewDialog(pageNum);
 					}
 				}
@@ -3844,13 +3849,17 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			@Override
 			public void onDismiss(DialogInterface dialog) {
+				Editor editor = prefs.edit();
 				if (categoryIndex == 0) {
-					Editor editor = prefs.edit();
 					editor.putBoolean(
 							HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
 							true);
-					editor.commit();
+				} else {
+					editor.putBoolean(
+							EmoticonConstants.STICKER_DOWNLOAD_PREF[categoryIndex],
+							true);
 				}
+				editor.commit();
 			}
 		});
 		dialog.show();
