@@ -28,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.StickerAdapter.ViewType;
@@ -228,7 +229,8 @@ public class EmoticonAdapter extends PagerAdapter implements
 					}
 					File categoryDir = new File(
 							Utils.getStickerDirectoryForCategoryId(activity,
-									categoryId));
+									categoryId)
+									+ HikeConstants.SMALL_STICKER_ROOT);
 
 					if (categoryDir.exists()) {
 						String[] stickerIds = categoryDir.list();

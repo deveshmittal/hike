@@ -3,6 +3,7 @@ package com.bsb.hike.models;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
 
@@ -73,7 +74,12 @@ public class Sticker implements Comparable<Sticker> {
 
 	public String getStickerPath(Context context) {
 		return Utils.getStickerDirectoryForCategoryId(context, categoryId)
-				+ "/" + stickerId;
+				+ HikeConstants.LARGE_STICKER_ROOT + "/" + stickerId;
+	}
+
+	public String getSmallStickerPath(Context context) {
+		return Utils.getStickerDirectoryForCategoryId(context, categoryId)
+				+ HikeConstants.SMALL_STICKER_ROOT + "/" + stickerId;
 	}
 
 	@Override

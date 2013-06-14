@@ -319,6 +319,9 @@ public class HikeConstants {
 	public static final String AUDIO_ROOT = "/hike Audios";
 	public static final String STICKERS_ROOT = "/stickers";
 
+	public static final String LARGE_STICKER_ROOT = "/large";
+	public static final String SMALL_STICKER_ROOT = "/small";
+
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
 	public static final String STATUS_MESSAGE_HEADER = "hike-status-message";

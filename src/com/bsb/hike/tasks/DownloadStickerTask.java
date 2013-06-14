@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.accounts.NetworkErrorException;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.Pair;
 
@@ -54,22 +55,26 @@ public class DownloadStickerTask extends StickerTaskBase {
 
 		String directoryPath = Utils.getStickerDirectoryForCategoryId(context,
 				catId);
-		File stickerDir = new File(directoryPath);
+		File largeStickerDir = new File(directoryPath
+				+ HikeConstants.LARGE_STICKER_ROOT);
+		File smallStickerDir = new File(directoryPath
+				+ HikeConstants.SMALL_STICKER_ROOT);
 		int totalNumber = 0;
 		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
 
-		if (stickerDir.exists()) {
-			String[] stickerIds = stickerDir.list();
+		if (largeStickerDir.exists()) {
+			String[] stickerIds = largeStickerDir.list();
 			for (String stickerId : stickerIds) {
 				existingStickerIds.put(stickerId);
 				Log.d(getClass().getSimpleName(), "Exising id: " + stickerId);
 			}
 		} else {
-			stickerDir.mkdirs();
+			largeStickerDir.mkdirs();
 			Log.d(getClass().getSimpleName(), "No existing sticker");
 		}
+		smallStickerDir.mkdirs();
 
 		try {
 			JSONObject response = AccountUtils.downloadSticker(catId,
@@ -94,8 +99,14 @@ public class DownloadStickerTask extends StickerTaskBase {
 				String stickerData = data.getString(stickerId);
 
 				try {
-					File f = new File(stickerDir, stickerId);
+					File f = new File(largeStickerDir, stickerId);
 					Utils.saveBase64StringToFile(f, stickerData);
+
+					Bitmap thumbnail = Utils.scaleDownImage(f.getPath(), -1,
+							false);
+
+					File smallImage = new File(smallStickerDir, stickerId);
+					Utils.saveBitmapToFile(smallImage, thumbnail);
 				} catch (FileNotFoundException e) {
 					Log.w(getClass().getSimpleName(), e);
 				} catch (IOException e) {

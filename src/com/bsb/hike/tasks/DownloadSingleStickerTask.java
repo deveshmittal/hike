@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
@@ -29,7 +30,8 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 
 	private String urlString;
 	private String dirPath;
-	private String filePath;
+	private String largeStickerPath;
+	private String smallStickerPath;
 	private String key;
 	private String stId;
 
@@ -37,7 +39,11 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 		this.key = catId + stId;
 		this.stId = stId;
 		this.dirPath = Utils.getStickerDirectoryForCategoryId(context, catId);
-		this.filePath = this.dirPath + "/" + stId;
+
+		this.largeStickerPath = this.dirPath + HikeConstants.LARGE_STICKER_ROOT
+				+ "/" + stId;
+		this.smallStickerPath = this.dirPath + HikeConstants.SMALL_STICKER_ROOT
+				+ "/" + stId;
 
 		this.urlString = AccountUtils.base + "/stickers?catId=" + catId
 				+ "&stId=" + stId + "&resId=" + Utils.getResolutionId();
@@ -47,9 +53,15 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 	protected FTResult doInBackground(Void... arg0) {
 		FileOutputStream fos = null;
 		try {
-			File dir = new File(dirPath);
-			if (!dir.exists()) {
-				if (!dir.mkdirs()) {
+			File largeDir = new File(dirPath + HikeConstants.LARGE_STICKER_ROOT);
+			if (!largeDir.exists()) {
+				if (!largeDir.mkdirs()) {
+					return FTResult.DOWNLOAD_FAILED;
+				}
+			}
+			File smallDir = new File(dirPath + HikeConstants.SMALL_STICKER_ROOT);
+			if (!smallDir.exists()) {
+				if (!smallDir.mkdirs()) {
 					return FTResult.DOWNLOAD_FAILED;
 				}
 			}
@@ -81,7 +93,15 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 
 			String stickerData = data.getString(stId);
 
-			Utils.saveBase64StringToFile(new File(filePath), stickerData);
+			Utils.saveBase64StringToFile(new File(largeStickerPath),
+					stickerData);
+
+			Bitmap thumbnail = Utils
+					.scaleDownImage(largeStickerPath, -1, false);
+
+			File smallImage = new File(smallStickerPath);
+			Utils.saveBitmapToFile(smallImage, thumbnail);
+
 		} catch (JSONException e) {
 			Log.e(getClass().getSimpleName(), "Invalid JSON", e);
 			return FTResult.DOWNLOAD_FAILED;
@@ -108,7 +128,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 	protected void onPostExecute(FTResult result) {
 		ChatThread.stickerTaskMap.remove(key);
 		if (result != FTResult.SUCCESS) {
-			(new File(filePath)).delete();
+			(new File(largeStickerPath)).delete();
 			return;
 		}
 		HikeMessengerApp.getPubSub().publish(HikePubSub.STICKER_DOWNLOADED,

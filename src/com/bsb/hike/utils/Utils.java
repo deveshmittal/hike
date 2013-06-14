@@ -53,6 +53,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -1083,6 +1084,11 @@ public class Utils {
 		currentHeight = options.outHeight;
 		currentWidth = options.outWidth;
 
+		if (dimensionLimit == -1) {
+			dimensionLimit = (currentHeight > currentWidth ? currentHeight
+					: currentWidth) / (2);
+		}
+
 		options.inSampleSize = Math
 				.round((currentHeight > currentWidth ? currentHeight
 						: currentWidth) / (dimensionLimit));
@@ -2083,7 +2089,7 @@ public class Utils {
 	public static boolean checkIfStickerCategoryExists(Context context,
 			String categoryId) {
 		String path = getStickerDirectoryForCategoryId(context, categoryId);
-		File category = new File(path);
+		File category = new File(path + HikeConstants.LARGE_STICKER_ROOT);
 		if (category.exists() && category.list().length > 0) {
 			return true;
 		}
@@ -2095,6 +2101,19 @@ public class Utils {
 		FileOutputStream fos = new FileOutputStream(file);
 
 		byte[] b = Base64.decode(base64String, Base64.DEFAULT);
+		if (b == null) {
+			throw new IOException();
+		}
+		fos.write(b);
+		fos.flush();
+		fos.close();
+	}
+
+	public static void saveBitmapToFile(File file, Bitmap bitmap)
+			throws IOException {
+		FileOutputStream fos = new FileOutputStream(file);
+
+		byte[] b = bitmapToBytes(bitmap, CompressFormat.PNG, 70);
 		if (b == null) {
 			throw new IOException();
 		}

@@ -154,7 +154,7 @@ public class StickerAdapter extends BaseAdapter implements OnClickListener {
 									.getStickerIndex()]);
 				} else {
 					imageView.setImageBitmap(BitmapFactory.decodeFile(sticker
-							.getStickerPath(activity)));
+							.getSmallStickerPath(activity)));
 				}
 				imageView.setTag(sticker);
 

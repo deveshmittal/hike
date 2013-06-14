@@ -955,7 +955,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				String stickerId = sticker.getStickerId();
 
 				String categoryDirPath = Utils
-						.getStickerDirectoryForCategoryId(context, categoryId);
+						.getStickerDirectoryForCategoryId(context, categoryId)
+						+ HikeConstants.LARGE_STICKER_ROOT;
 				File stickerImage = new File(categoryDirPath, stickerId);
 
 				String key = categoryId + stickerId;
