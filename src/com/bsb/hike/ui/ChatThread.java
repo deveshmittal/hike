@@ -3839,7 +3839,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				if (categoryIndex != 0) {
+				if (categoryIndex != 0
+						&& !Utils.checkIfStickerCategoryExists(ChatThread.this,
+								categoryId)) {
 					emoticonViewPager.setCurrentItem(0, false);
 				}
 			}
