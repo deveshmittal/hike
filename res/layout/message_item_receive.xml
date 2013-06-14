@@ -160,6 +160,24 @@
 	            android:gravity="center_vertical"
 	            android:visibility="gone"
 	            android:src="@drawable/ic_nudge_hike_received" />
+	        
+	        <LinearLayout
+                android:id="@+id/sticker_placeholder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/msg_status_indicator"
+                android:gravity="center"
+                android:background="@drawable/bg_sticker_placeholder"
+                android:visibility="gone" >
+
+                <ProgressBar
+                    android:id="@+id/loading_progress"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginLeft="7dp"
+                    android:indeterminateDrawable="@drawable/loading"
+                    android:visibility="visible" />
+            </LinearLayout>
 	    </RelativeLayout>
 
 	</RelativeLayout>

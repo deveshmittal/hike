@@ -109,6 +109,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		CheckBox smsToggle;
 		TextView hikeSmsText;
 		TextView regularSmsText;
+		View stickerPlaceholder;
 	}
 
 	private Conversation conversation;
@@ -342,6 +343,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.undeliveredMsgTextView = (TextView) v
 						.findViewById(R.id.msg_not_sent);
 
+				holder.stickerPlaceholder = v
+						.findViewById(R.id.sticker_placeholder);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -383,6 +386,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.timestamp);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
+				holder.stickerPlaceholder = v
+						.findViewById(R.id.sticker_placeholder);
 
 				holder.container.setVisibility(View.GONE);
 				break;
@@ -932,6 +937,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							: R.drawable.ic_nudge_hike_received);
 		} else if (convMessage.isStickerMessage()) {
 			holder.messageContainer.setVisibility(View.GONE);
+			holder.stickerPlaceholder.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.VISIBLE);
 
 			Sticker sticker = metadata.getSticker();
@@ -961,8 +967,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.poke.setImageBitmap(BitmapFactory
 							.decodeFile(stickerImage.getPath()));
 				} else {
-					holder.poke
-							.setImageResource(R.drawable.sticker_placeholder);
+					holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+					holder.poke.setVisibility(View.GONE);
 
 					/*
 					 * Download the sticker if not already downoading.
@@ -978,6 +984,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 
 		} else {
+			holder.stickerPlaceholder.setVisibility(View.GONE);
 			holder.messageContainer.setVisibility(View.VISIBLE);
 			holder.poke.setVisibility(View.GONE);
 
