@@ -730,8 +730,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			} else {
 				holder.image.setBackgroundResource(R.drawable.bg_status_type);
 			}
-			holder.timestampTextView.setText(convMessage
-					.getTimestampFormatted(true, context));
+			holder.timestampTextView.setText(convMessage.getTimestampFormatted(
+					true, context));
 			holder.fileThumb.setVisibility(View.GONE);
 
 			int padding = (int) (10 * Utils.densityMultiplier);
