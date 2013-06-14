@@ -1458,10 +1458,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		int res;
 		if (convMessage.getState() == State.SENT_UNCONFIRMED) {
-			res = conversation.isOnhike() ? R.string.msg_unsent
+			res = conversation.isOnhike()
+					&& !(conversation instanceof GroupConversation) ? R.string.msg_unsent
 					: R.string.sms_undelivered;
 		} else {
-			res = conversation.isOnhike() ? R.string.msg_undelivered
+			res = conversation.isOnhike()
+					&& !(conversation instanceof GroupConversation) ? R.string.msg_undelivered
 					: R.string.sms_undelivered;
 		}
 		return context.getString(res,
