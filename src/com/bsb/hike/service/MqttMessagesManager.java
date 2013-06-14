@@ -2,6 +2,8 @@ package com.bsb.hike.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,8 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
@@ -312,6 +316,32 @@ public class MqttMessagesManager {
 			{
 				Log.d(getClass().getSimpleName(), "Message already exists");
 				return;
+			}
+			/*
+			 * Need to rename every audio recording to a unique name since the
+			 * ios client is sending every file with the same name.
+			 */
+			if (convMessage.isFileTransferMessage()) {
+				MessageMetadata messageMetadata = convMessage.getMetadata();
+				HikeFile hikeFile = messageMetadata.getHikeFiles().get(0);
+
+				if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+					JSONObject metadataJson = messageMetadata.getJSON();
+					JSONArray fileArray = metadataJson
+							.optJSONArray(HikeConstants.FILES);
+					for (int i = 0; i < fileArray.length(); i++) {
+						JSONObject fileJson = fileArray.getJSONObject(i);
+						Log.d(getClass().getSimpleName(), "Previous json: "
+								+ fileJson);
+						String timeStamp = new SimpleDateFormat(
+								"yyyyMMdd_HHmmss").format(new Date());
+						fileJson.put(HikeConstants.FILE_NAME, "AUD_"
+								+ timeStamp + ".m4a");
+						Log.d(getClass().getSimpleName(), "New json: "
+								+ fileJson);
+					}
+				}
+
 			}
 			/*
 			 * Applying the offset.
