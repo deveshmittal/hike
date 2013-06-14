@@ -48,6 +48,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -110,6 +111,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		TextView hikeSmsText;
 		TextView regularSmsText;
 		View stickerPlaceholder;
+		ProgressBar stickerLoader;
+		TextView stickerParticipantName;
+		ImageView stickerImage;
 	}
 
 	private Conversation conversation;
@@ -345,6 +349,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				holder.stickerPlaceholder = v
 						.findViewById(R.id.sticker_placeholder);
+				holder.stickerLoader = (ProgressBar) v
+						.findViewById(R.id.loading_progress);
+				holder.stickerParticipantName = (TextView) v
+						.findViewById(R.id.participant_name);
+				holder.stickerImage = (ImageView) v
+						.findViewById(R.id.sticker_image);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -388,6 +398,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.participant_info_container);
 				holder.stickerPlaceholder = v
 						.findViewById(R.id.sticker_placeholder);
+				holder.stickerLoader = (ProgressBar) v
+						.findViewById(R.id.loading_progress);
+				holder.stickerParticipantName = (TextView) v
+						.findViewById(R.id.participant_name);
+				holder.stickerImage = (ImageView) v
+						.findViewById(R.id.sticker_image);
 
 				holder.container.setVisibility(View.GONE);
 				break;
@@ -775,6 +791,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			return v;
 		}
 
+		holder.stickerPlaceholder.setVisibility(View.GONE);
 		MessageMetadata metadata = convMessage.getMetadata();
 		if (convMessage.isFileTransferMessage()) {
 			HikeFile hikeFile = metadata.getHikeFiles().get(0);
@@ -937,17 +954,33 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							: R.drawable.ic_nudge_hike_received);
 		} else if (convMessage.isStickerMessage()) {
 			holder.messageContainer.setVisibility(View.GONE);
-			holder.stickerPlaceholder.setVisibility(View.GONE);
-			holder.poke.setVisibility(View.VISIBLE);
+			holder.poke.setVisibility(View.GONE);
+			holder.stickerPlaceholder.setVisibility(View.VISIBLE);
+			holder.stickerPlaceholder.setBackgroundResource(0);
+
+			holder.stickerImage.setVisibility(View.GONE);
+			holder.stickerLoader.setVisibility(View.GONE);
+			holder.stickerParticipantName.setVisibility(View.GONE);
 
 			Sticker sticker = metadata.getSticker();
 
+			if (convMessage.isGroupChat() && !convMessage.isSent()
+					&& convMessage.getGroupParticipantMsisdn() != null) {
+				holder.stickerParticipantName.setVisibility(View.VISIBLE);
+				holder.stickerParticipantName
+						.setText(((GroupConversation) conversation)
+								.getGroupParticipant(
+										convMessage.getGroupParticipantMsisdn())
+								.getContactInfo().getFirstName()
+								+ HikeConstants.SEPARATOR);
+			}
 			/*
 			 * If this is the first category, then the sticker are a part of the
 			 * app bundle itself
 			 */
 			if (sticker.getStickerIndex() != -1) {
-				holder.poke
+				holder.stickerImage.setVisibility(View.VISIBLE);
+				holder.stickerImage
 						.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS[sticker
 								.getStickerIndex()]);
 			} else {
@@ -964,11 +997,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.containsKey(key);
 
 				if (stickerImage.exists() && !downloadingSticker) {
-					holder.poke.setImageBitmap(BitmapFactory
+					holder.stickerImage.setVisibility(View.VISIBLE);
+					holder.stickerImage.setImageBitmap(BitmapFactory
 							.decodeFile(stickerImage.getPath()));
 				} else {
-					holder.stickerPlaceholder.setVisibility(View.VISIBLE);
-					holder.poke.setVisibility(View.GONE);
+					holder.stickerLoader.setVisibility(View.VISIBLE);
+					holder.stickerPlaceholder
+							.setBackgroundResource(R.drawable.bg_sticker_placeholder);
 
 					/*
 					 * Download the sticker if not already downoading.
