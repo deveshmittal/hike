@@ -508,9 +508,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	}
 
 	public void setMoodsResource() {
-		moodsResource = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				0).getBoolean(HikeMessengerApp.SHOW_CRICKET_MOODS, true) ? EmoticonConstants.MOOD_WITH_IPL_RES_IDS
-				: EmoticonConstants.MOOD_NO_IPL_RES_IDS;
+		moodsResource = EmoticonConstants.MOOD_WITH_IPL_RES_IDS;
 	}
 
 	public static int[] getMoodsResource() {
