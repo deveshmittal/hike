@@ -123,6 +123,7 @@ public class StickerAdapter extends BaseAdapter implements OnClickListener {
 			LinearLayout.LayoutParams childParams = new LinearLayout.LayoutParams(
 					sizeEachImage, LayoutParams.MATCH_PARENT);
 
+			((LinearLayout) convertView).removeAllViews();
 			/*
 			 * If this is the last item, its possible that the number of items
 			 * won't fill the complete row
