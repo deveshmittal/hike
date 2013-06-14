@@ -982,7 +982,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		} else if (message.getMetadata() == null
 				|| !message.getMetadata().isPokeMessage()) {
 			optionsList.add(getString(R.string.forward));
-			optionsList.add(getString(R.string.copy));
+			if (!message.isStickerMessage()) {
+				optionsList.add(getString(R.string.copy));
+			}
 		}
 
 		optionsList.add(getString(R.string.delete));
