@@ -294,9 +294,6 @@ public class EmoticonAdapter extends PagerAdapter implements
 						public void onScroll(AbsListView view,
 								int firstVisibleItem, int visibleItemCount,
 								int totalItemCount) {
-							Log.d(getClass().getSimpleName(), "reached end? "
-									+ HikeConversationsDatabase.getInstance()
-											.hasReachedStickerEnd(categoryId));
 							if (position == 0
 									|| ((ChatThread) activity).getCurrentPage() != position
 									|| HikeConversationsDatabase.getInstance()

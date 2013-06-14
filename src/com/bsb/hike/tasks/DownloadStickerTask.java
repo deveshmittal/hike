@@ -93,6 +93,7 @@ public class DownloadStickerTask extends StickerTaskBase {
 			totalNumber = response.optInt(HikeConstants.NUMBER_OF_STICKERS, -1);
 			reachedEnd = response.optBoolean(HikeConstants.REACHED_STICKER_END);
 			Log.d(getClass().getSimpleName(), "REached end? " + reachedEnd);
+			Log.d(getClass().getSimpleName(), "Sticker count: " + totalNumber);
 			JSONObject data = response.getJSONObject(HikeConstants.DATA_2);
 			for (Iterator<String> keys = data.keys(); keys.hasNext();) {
 				String stickerId = keys.next();

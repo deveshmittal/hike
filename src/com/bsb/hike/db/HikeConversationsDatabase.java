@@ -2261,7 +2261,6 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId },
 				null, null, null);
 		if (!c.moveToFirst()) {
-			Log.d(getClass().getSimpleName(), "Not entyr");
 			return false;
 		}
 		return c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
