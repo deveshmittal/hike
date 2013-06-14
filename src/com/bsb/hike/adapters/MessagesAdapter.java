@@ -1720,8 +1720,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		public void playMessage(HikeFile hikeFile) {
-			chatThread
-					.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+			Utils.blockOrientationChange(chatThread);
 
 			playerState = VoiceMessagePlayerState.PLAYING;
 			fileKey = hikeFile.getFileKey();
@@ -1751,8 +1750,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		public void pausePlayer() {
-			chatThread
-					.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			Utils.unblockOrientationChange(chatThread);
 			if (mediaPlayer == null) {
 				return;
 			}
@@ -1766,8 +1764,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (mediaPlayer == null) {
 				return;
 			}
-			chatThread
-					.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+			Utils.blockOrientationChange(chatThread);
 			playerState = VoiceMessagePlayerState.PLAYING;
 			mediaPlayer.start();
 			handler.post(updateTimer);
@@ -1775,8 +1772,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		public void resetPlayer() {
-			chatThread
-					.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			Utils.unblockOrientationChange(chatThread);
 			playerState = VoiceMessagePlayerState.STOPPED;
 
 			setTimer();

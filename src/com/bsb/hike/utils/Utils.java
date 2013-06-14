@@ -47,6 +47,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -2323,5 +2324,15 @@ public class Utils {
 		}
 
 		editor.commit();
+	}
+
+	public static void blockOrientationChange(Activity activity) {
+		boolean isPortrait = activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+		activity.setRequestedOrientation(isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+				: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+	}
+
+	public static void unblockOrientationChange(Activity activity) {
+		activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
 	}
 }

@@ -2877,9 +2877,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					}
 					recording = true;
 
-					boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-					setRequestedOrientation(isPortrait ? ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-							: ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+					Utils.blockOrientationChange(ChatThread.this);
 					getWindow().addFlags(
 							WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 					return true;
@@ -2900,7 +2898,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 							getWindow()
 									.clearFlags(
 											WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-							setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+							Utils.unblockOrientationChange(ChatThread.this);
 						}
 					}, 1);
 
