@@ -875,8 +875,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 					if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
 						holder.showFileBtn.setVisibility(View.VISIBLE);
-						holder.showFileBtn
-								.setBackgroundResource(R.drawable.bg_audio_btn);
+						holder.showFileBtn.setBackgroundResource(0);
 						holder.showFileBtn
 								.setScaleType(ScaleType.CENTER_INSIDE);
 						if (hikeFile.getFileKey().equals(
@@ -887,15 +886,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 										.setImageResource(R.drawable.ic_pause_audio);
 							} else {
 								holder.showFileBtn
-										.setImageResource(R.drawable.ic_play_audio);
+										.setImageResource(R.drawable.ic_open_received_file);
 							}
 							holder.messageTextView
 									.setTag(hikeFile.getFileKey());
 							voiceMessagePlayer
 									.setDurationTxt(holder.messageTextView);
 						} else {
-							holder.showFileBtn
-									.setImageResource(R.drawable.ic_play_audio);
+							setFileButtonResource(holder.showFileBtn,
+									convMessage, hikeFile);
 						}
 
 					} else {
@@ -903,12 +902,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								.setVisibility(convMessage.isSent() ? View.GONE
 										: View.VISIBLE);
 						holder.showFileBtn.setBackgroundResource(0);
-						holder.showFileBtn
-								.setImageResource(ChatThread.fileTransferTaskMap
-										.containsKey(convMessage.getMsgID()) ? R.drawable.ic_open_file_disabled
-										: (hikeFile.wasFileDownloaded() && hikeFile
-												.getHikeFileType() != HikeFileType.CONTACT) ? R.drawable.ic_open_received_file
-												: R.drawable.ic_download_file);
+						setFileButtonResource(holder.showFileBtn, convMessage,
+								hikeFile);
 					}
 				}
 			}
@@ -1082,6 +1077,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		return v;
+	}
+
+	private void setFileButtonResource(ImageView button,
+			ConvMessage convMessage, HikeFile hikeFile) {
+		button.setImageResource(ChatThread.fileTransferTaskMap
+				.containsKey(convMessage.getMsgID()) ? R.drawable.ic_open_file_disabled
+				: (hikeFile.wasFileDownloaded() && hikeFile.getHikeFileType() != HikeFileType.CONTACT) ? R.drawable.ic_open_received_file
+						: R.drawable.ic_download_file);
 	}
 
 	private void setTextAndIconForSystemMessages(TextView textView,
@@ -1815,7 +1818,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (!fileKey.equals(btnFileKey)) {
 				return;
 			}
-			fileBtn.setImageResource(playerState != VoiceMessagePlayerState.PLAYING ? R.drawable.ic_play_audio
+			fileBtn.setImageResource(playerState != VoiceMessagePlayerState.PLAYING ? R.drawable.ic_open_received_file
 					: R.drawable.ic_pause_audio);
 		}
 
