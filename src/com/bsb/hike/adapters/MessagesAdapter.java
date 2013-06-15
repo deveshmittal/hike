@@ -1577,10 +1577,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			boolean nativeOn = PreferenceManager.getDefaultSharedPreferences(
 					context).getBoolean(
 					HikeConstants.SEND_UNDELIVERED_AS_NATIVE_SMS_PREF, false);
-			if (nativeOn) {
+			if (nativeOn || nativeOnly) {
 				sendNative.setChecked(true);
 				sendBtn.setEnabled(true);
-			} else if (!nativeOnly) {
+			} else if (!nativeOnly
+					|| (conversation instanceof GroupConversation)) {
 				sendHike.setChecked(true);
 				sendBtn.setEnabled(true);
 			}
