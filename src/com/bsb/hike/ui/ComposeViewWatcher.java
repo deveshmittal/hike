@@ -13,6 +13,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 
 public class ComposeViewWatcher extends EmoticonTextWatcher implements
@@ -74,7 +75,12 @@ public class ComposeViewWatcher extends EmoticonTextWatcher implements
 		} else {
 			mButton.setImageResource(R.drawable.ic_msg_btn);
 		}
-		mButton.setEnabled(true);
+		if (mConversation instanceof GroupConversation) {
+			mButton.setEnabled(((GroupConversation) mConversation)
+					.getIsGroupAlive());
+		} else {
+			mButton.setEnabled(true);
+		}
 	}
 
 	public void onTextLastChanged() {
