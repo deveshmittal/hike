@@ -1475,24 +1475,33 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			runOnUiThread(new SetTypingText(true));
 		}
 
-		if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false)) {
-			tipView = findViewById(R.id.emoticon_tip);
-			Utils.showTip(this, TipType.EMOTICON, tipView);
-		} else if (!prefs.getBoolean(HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP,
-				false)) {
-			/*
-			 * Only show the tip if we currently do not have any drafts
-			 */
-			if (TextUtils.isEmpty(getSharedPreferences(
-					HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(
-					mContactNumber, ""))) {
-				tipView = findViewById(R.id.walkie_talkie_tip);
-				Utils.showTip(this, TipType.WALKIE_TALKIE, tipView);
+		/*
+		 * Only show these tips in a live group conversation or other
+		 * conversations.
+		 */
+		if (!(mConversation instanceof GroupConversation)
+				|| ((GroupConversation) mConversation).getIsGroupAlive()) {
+			if (!prefs.getBoolean(HikeMessengerApp.SHOWN_EMOTICON_TIP, false)) {
+				tipView = findViewById(R.id.emoticon_tip);
+				Utils.showTip(this, TipType.EMOTICON, tipView);
+			} else if (!prefs.getBoolean(
+					HikeMessengerApp.SHOWN_WALKIE_TALKIE_TIP, false)) {
+				/*
+				 * Only show the tip if we currently do not have any drafts
+				 */
+				if (TextUtils.isEmpty(getSharedPreferences(
+						HikeConstants.DRAFT_SETTING, MODE_PRIVATE).getString(
+						mContactNumber, ""))) {
+					tipView = findViewById(R.id.walkie_talkie_tip);
+					Utils.showTip(this, TipType.WALKIE_TALKIE, tipView);
+				}
 			}
-		}
-		if (tipView == null && !(mConversation instanceof GroupConversation)
-				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
-			showNudgeDialog();
+			if (tipView == null
+					&& !(mConversation instanceof GroupConversation)
+					&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN,
+							false)) {
+				showNudgeDialog();
+			}
 		}
 	}
 
