@@ -146,7 +146,7 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 		}
 		freeSms50.setText(ssb);
 
-		mTitleView.setText(R.string.free_messaging_txt);
+		mTitleView.setText(R.string.free_sms_txt);
 
 		updateCredits();
 		setupSocialButtons();
