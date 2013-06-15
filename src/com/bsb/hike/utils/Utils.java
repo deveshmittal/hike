@@ -79,6 +79,7 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.provider.Settings.Secure;
+import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.Spannable;
@@ -1401,6 +1402,23 @@ public class Utils {
 		convMessage.setInvite(true);
 
 		return convMessage;
+	}
+
+	public static void sendInvite(String msisdn, Context context) {
+		SmsManager smsManager = SmsManager.getDefault();
+
+		ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(msisdn,
+				context);
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+				convMessage.serialize());
+
+		if (!HikeMessengerApp.isIndianUser()) {
+			ArrayList<String> messages = smsManager.divideMessage(convMessage
+					.getMessage());
+
+			smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
+					messages, null, null);
+		}
 	}
 
 	public static String getAddressFromGeoPoint(GeoPoint geoPoint,

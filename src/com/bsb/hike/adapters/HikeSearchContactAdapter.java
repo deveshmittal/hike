@@ -283,10 +283,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			if (inviteOnly) {
 				Log.d(getClass().getSimpleName(),
 						"Inviting " + contactInfo.toString());
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH,
-						Utils.makeHike2SMSInviteMessage(
-								contactInfo.getMsisdn(), context).serialize());
+				Utils.sendInvite(contactInfo.getMsisdn(), context);
 				Toast.makeText(context, R.string.invite_sent,
 						Toast.LENGTH_SHORT).show();
 				return;

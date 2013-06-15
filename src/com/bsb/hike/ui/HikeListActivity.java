@@ -1,6 +1,5 @@
 package com.bsb.hike.ui;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,7 +13,6 @@ import android.app.Dialog;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.telephony.SmsManager;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -34,7 +32,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.HikeInviteAdapter;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.Utils;
 
@@ -214,25 +211,11 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 		if (type != Type.BLOCK) {
 			Iterator<String> iterator = selectedContacts.iterator();
 
-			SmsManager smsManager = SmsManager.getDefault();
 
 			while (iterator.hasNext()) {
 				String msisdn = iterator.next();
 				Log.d(getClass().getSimpleName(), "Inviting " + msisdn);
-
-				ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(
-						msisdn, this);
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-						convMessage.serialize());
-
-				if (!HikeMessengerApp.isIndianUser()) {
-					ArrayList<String> messages = smsManager
-							.divideMessage(convMessage.getMessage());
-
-					smsManager
-							.sendMultipartTextMessage(convMessage.getMsisdn(),
-									null, messages, null, null);
-				}
+				Utils.sendInvite(msisdn, this);
 			}
 
 			if (!selectedContacts.isEmpty()) {
