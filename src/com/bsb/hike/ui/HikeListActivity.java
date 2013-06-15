@@ -77,14 +77,6 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		listView.setOnItemClickListener(this);
 
-		if (type == Type.INVITE
-				&& !HikeMessengerApp.isIndianUser()
-				&& !getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-						MODE_PRIVATE).getBoolean(
-						HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP, false)) {
-			showNativeSMSPopup();
-		}
-
 		switch (type) {
 		case BLOCK:
 			titleBtn.setText(R.string.done);
@@ -103,7 +95,7 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 	private void showNativeSMSPopup() {
 		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
 		dialog.setContentView(R.layout.enable_sms_client_popup);
-		dialog.setCancelable(false);
+		dialog.setCancelable(true);
 
 		TextView header = (TextView) dialog.findViewById(R.id.header);
 		TextView body = (TextView) dialog.findViewById(R.id.body);
@@ -211,6 +203,14 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 		if (type != Type.BLOCK) {
 			Iterator<String> iterator = selectedContacts.iterator();
 
+			if (type == Type.INVITE
+					&& !HikeMessengerApp.isIndianUser()
+					&& !getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
+							MODE_PRIVATE).getBoolean(
+							HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP,
+							false)) {
+				showNativeSMSPopup();
+			}
 
 			while (iterator.hasNext()) {
 				String msisdn = iterator.next();
