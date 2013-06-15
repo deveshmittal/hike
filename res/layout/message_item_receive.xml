@@ -68,6 +68,7 @@
 	        android:src="@drawable/ic_avatar1" />
 
 	    <RelativeLayout
+	        android:id="@+id/bubble_container"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:minWidth="50dp"

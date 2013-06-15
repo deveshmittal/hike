@@ -114,6 +114,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ProgressBar stickerLoader;
 		TextView stickerParticipantName;
 		ImageView stickerImage;
+		View bubbleContainer;
 	}
 
 	private Conversation conversation;
@@ -355,6 +356,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.participant_name);
 				holder.stickerImage = (ImageView) v
 						.findViewById(R.id.sticker_image);
+				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -404,6 +406,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.participant_name);
 				holder.stickerImage = (ImageView) v
 						.findViewById(R.id.sticker_image);
+				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 
 				holder.container.setVisibility(View.GONE);
 				break;
@@ -1092,9 +1095,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 				if (position == lastSentMessagePosition) {
 					if (isMessageUndelivered(convMessage)) {
-						View container = metadata != null
-								&& metadata.isPokeMessage() ? holder.poke
-								: holder.messageContainer;
+						View container = holder.bubbleContainer;
 
 						scheduleUndeliveredText(holder.undeliveredMsgTextView,
 								container, convMessage.getTimestamp());
