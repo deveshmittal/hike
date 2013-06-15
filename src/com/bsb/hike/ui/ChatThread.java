@@ -185,6 +185,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private Conversation mConversation;
 
+	private FavoriteType favoriteType;
+
 	private ComposeViewWatcher mComposeViewWatcher;
 
 	/* View element */
@@ -1377,22 +1379,16 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		mLabelView.setText(mLabel);
 		if (!(mConversation instanceof GroupConversation)) {
 			mNameView.setText(mLabel);
-			boolean lastSeenOn = PreferenceManager.getDefaultSharedPreferences(
-					this).getBoolean(HikeConstants.LAST_SEEN_PREF, true);
-			if (lastSeenOn) {
-				ContactInfo contactInfo = HikeUserDatabase.getInstance()
-						.getContactInfoFromMSISDN(mContactNumber, false);
+
+			favoriteType = HikeUserDatabase.getInstance()
+					.getContactInfoFromMSISDN(mContactNumber, false)
+					.getFavoriteType();
+
+			if (shouldShowLastSeen()) {
 				/*
-				 * Only fetch this for a contact publishing events to you.
+				 * Fetching last seen value.
 				 */
-				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
-						|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED
-						|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
-					/*
-					 * Fetching last seen value.
-					 */
-					new FetchLastSeenTask(mContactNumber, false).execute();
-				}
+				new FetchLastSeenTask(mContactNumber, false).execute();
 			}
 		}
 
@@ -1504,6 +1500,16 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
 			showNudgeDialog();
 		}
+	}
+
+	private boolean shouldShowLastSeen() {
+		if ((favoriteType == FavoriteType.FRIEND
+				|| favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED)
+				&& mConversation.isOnhike()) {
+			return PreferenceManager.getDefaultSharedPreferences(this)
+					.getBoolean(HikeConstants.LAST_SEEN_PREF, true);
+		}
+		return false;
 	}
 
 	private void showNudgeDialog() {
@@ -1781,12 +1787,14 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
 			if (mContactNumber.equals(object)) {
 				runOnUiThread(new SetTypingText(true));
-				/*
-				 * Publishing an online event for this number.
-				 */
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.LAST_SEEN_TIME_UPDATED,
-						new Pair<String, Long>(mContactNumber, 0l));
+				if (shouldShowLastSeen()) {
+					/*
+					 * Publishing an online event for this number.
+					 */
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.LAST_SEEN_TIME_UPDATED,
+							new Pair<String, Long>(mContactNumber, 0l));
+				}
 			}
 		}
 		// We only consider this case if there is a valid conversation in the
@@ -2061,7 +2069,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			long lastSeenTime = lastSeenPair.second;
 
 			if (!mContactNumber.equals(msisdn)
-					|| (mConversation instanceof GroupConversation)) {
+					|| (mConversation instanceof GroupConversation)
+					|| !shouldShowLastSeen()) {
 				return;
 			}
 			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
