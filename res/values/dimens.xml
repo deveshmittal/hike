@@ -31,4 +31,5 @@
 	<dimen name="protip_btn_padding">37dp</dimen>
 	<dimen name="status_btn_padding">20dp</dimen>
 	<dimen name="preview_corner_radius">2dp</dimen>
+	<dimen name="free_sms_width">130dp</dimen>
 </resources>

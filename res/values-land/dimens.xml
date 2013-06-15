@@ -2,4 +2,5 @@
 <resources>
     <dimen name="tip_bottom_margin">26dp</dimen>
     <dimen name="emoticon_pallete">190dp</dimen>
+    <dimen name="free_sms_width">150dp</dimen>
 </resources>
