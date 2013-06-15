@@ -525,4 +525,5 @@
 	<string name="confirmed_friend_2">Agora você poderá ver as atualizações de  %1$s</string>
 	<string name="native_sms_invite_header">Convide por SMS</string>
 	<string name="native_sms_invite_info">Esses convites serão enviados como SMS comum. Serão aplicadas as tarifas padrão de SMS da operadora.</string>
+	<string name="fun_free_messaging">Mensagens divertidas e grátis a vida toda</string>
 </resources>

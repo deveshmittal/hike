@@ -36,9 +36,9 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 	private ViewGroup booBooLayout;
 	private Button tryAgainBtn;
 	private View hiLogoView;
-	private ImageView hikeWelcomeView;
 	private ViewGroup headerLayout;
 	private ImageView errorImage;
+	private View hikeLogoContainer;
 
 	@Override
 	public void onCreate(Bundle savedState) {
@@ -54,7 +54,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 		loadingLayout = (ViewGroup) findViewById(R.id.loading_layout);
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
 		hiLogoView = findViewById(R.id.ic_hi_logo);
-		hikeWelcomeView = (ImageView) findViewById(R.id.ic_hike_welcome_image);
+		hikeLogoContainer = findViewById(R.id.hike_logo_container);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
@@ -67,7 +67,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 
 		if (getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS, 0)
 				.getBoolean(HikeMessengerApp.SPLASH_SEEN, false)) {
-			hikeWelcomeView.setVisibility(View.VISIBLE);
+			hikeLogoContainer.setVisibility(View.VISIBLE);
 			tcContinueLayout.setVisibility(View.VISIBLE);
 			hiLogoView.setVisibility(View.GONE);
 		} else {
@@ -168,7 +168,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
-								hikeWelcomeView.setVisibility(View.VISIBLE);
+								hikeLogoContainer.setVisibility(View.VISIBLE);
 							}
 						});
 				tcContinueLayout.startAnimation(fadeInAnimation);
@@ -178,7 +178,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 				editor.commit();
 			}
 		});
-		hikeWelcomeView.startAnimation(slideUpAlphaIn);
+		hikeLogoContainer.startAnimation(slideUpAlphaIn);
 		hiLogoView.startAnimation(slideUpAlphaout);
 	}
 
@@ -200,7 +200,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 			SignupTask.startTask(this);
 		} else if (v.getId() == tryAgainBtn.getId()) {
 			tcContinueLayout.setVisibility(View.VISIBLE);
-			hikeWelcomeView.setImageResource(R.drawable.hike_welcome_image);
+			hikeLogoContainer.setVisibility(View.VISIBLE);
 			booBooLayout.setVisibility(View.GONE);
 			onClick(mAcceptButton);
 		}
@@ -213,7 +213,7 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 	private void showError() {
 		Log.d("WelcomeActivity", "showError");
 		tcContinueLayout.setVisibility(View.GONE);
-		hikeWelcomeView.setImageDrawable(null);
+		hikeLogoContainer.setVisibility(View.INVISIBLE);
 		booBooLayout.setVisibility(View.VISIBLE);
 	}
 

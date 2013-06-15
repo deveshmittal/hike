@@ -515,5 +515,6 @@
 	<string name="name_added_friend">%1$s hat dich zum Freundeskreis hinzugefügt.</string>
 	<string name="confirmed_friend_2">Du wirst nun Updates von %1$s sehen können.</string>
 	<string name="native_sms_invite_header">Per SMS einladen</string>
-	<string name="native_sms_invite_info">Diese Einladungen werden als reguläre SMS gesendet. Standard Anbieterpreise für SMS werden fällig.</string>	
+	<string name="native_sms_invite_info">Diese Einladungen werden als reguläre SMS gesendet. Standard Anbieterpreise für SMS werden fällig.</string>
+	<string name="fun_free_messaging">Gratis Messaging mit Spaß, ein Leben lang</string>	
 </resources>

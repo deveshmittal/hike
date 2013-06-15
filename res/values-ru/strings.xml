@@ -526,4 +526,5 @@
 	<string name="confirmed_friend_2">Теперь вы сможете видеть обновления статуса %1$s</string>
 	<string name="native_sms_invite_header">Пригласить по SMS</string>
 	<string name="native_sms_invite_info">Эти приглашения будут отправлены как обычные SMS по стандартным тарифам оператора</string>
+	<string name="fun_free_messaging">Удобный бесплатный чат для живого общения</string>
 </resources>
