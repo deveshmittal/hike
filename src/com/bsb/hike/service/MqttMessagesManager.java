@@ -175,7 +175,7 @@ public class MqttMessagesManager {
 			if (joined) {
 				long joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
 				if (joinTime > 0) {
-					joinTime += Utils.getServerTimeOffset(context);
+					joinTime = Utils.applyServerTimeOffset(context, joinTime);
 					userDb.setHikeJoinTime(msisdn, joinTime);
 				}
 
@@ -349,8 +349,8 @@ public class MqttMessagesManager {
 			/*
 			 * Applying the offset.
 			 */
-			convMessage.setTimestamp(convMessage.getTimestamp()
-					+ Utils.getServerTimeOffset(context));
+			convMessage.setTimestamp(Utils.applyServerTimeOffset(context,
+					convMessage.getTimestamp()));
 
 			convDb.addConversationMessages(convMessage);
 
@@ -817,8 +817,8 @@ public class MqttMessagesManager {
 			/*
 			 * Applying the offset.
 			 */
-			statusMessage.setTimeStamp(statusMessage.getTimeStamp()
-					+ Utils.getServerTimeOffset(context));
+			statusMessage.setTimeStamp(Utils.applyServerTimeOffset(context,
+					statusMessage.getTimeStamp()));
 
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(
 					statusMessage.getMsisdn(), false);
@@ -957,7 +957,8 @@ public class MqttMessagesManager {
 			 */
 			if (lastSeenTime > 0) {
 				isOffline = 1;
-				lastSeenTime += Utils.getServerTimeOffset(context);
+				lastSeenTime = Utils.applyServerTimeOffset(context,
+						lastSeenTime);
 			} else {
 				/*
 				 * Otherwise the last seen time notifies that the user is either
@@ -987,8 +988,8 @@ public class MqttMessagesManager {
 			/*
 			 * Applying the offset.
 			 */
-			protip.setTimeStamp(protip.getTimeStamp()
-					+ Utils.getServerTimeOffset(context));
+			protip.setTimeStamp(Utils.applyServerTimeOffset(context,
+					protip.getTimeStamp()));
 
 			long id = convDb.addProtip(protip);
 			protip.setId(id);

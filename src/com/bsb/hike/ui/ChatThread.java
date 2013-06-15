@@ -4459,8 +4459,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				 */
 				if (currentLastSeenValue > 0) {
 					isOffline = 1;
-					currentLastSeenValue += Utils
-							.getServerTimeOffset(ChatThread.this);
+					currentLastSeenValue = Utils.applyServerTimeOffset(
+							ChatThread.this, currentLastSeenValue);
 				} else {
 					isOffline = (int) currentLastSeenValue;
 					currentLastSeenValue = System.currentTimeMillis() / 1000;

@@ -360,8 +360,8 @@ public class ProfileActivity extends DrawerBaseActivity implements
 										.getJSONObject(HikeConstants.PROFILE);
 								long hikeJoinTime = profile.optLong(
 										HikeConstants.JOIN_TIME, 0);
-								hikeJoinTime += Utils
-										.getServerTimeOffset(ProfileActivity.this);
+								hikeJoinTime = Utils.applyServerTimeOffset(
+										ProfileActivity.this, hikeJoinTime);
 
 								HikeMessengerApp.getPubSub().publish(
 										HikePubSub.HIKE_JOIN_TIME_OBTAINED,

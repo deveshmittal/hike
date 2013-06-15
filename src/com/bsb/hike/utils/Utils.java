@@ -2315,6 +2315,24 @@ public class Utils {
 				0).getLong(HikeMessengerApp.SERVER_TIME_OFFSET, 0);
 	}
 
+	/**
+	 * Applies the server time offset and ensures that the time does not go into
+	 * the future
+	 * 
+	 * @param context
+	 * @param time
+	 * @return
+	 */
+	public static long applyServerTimeOffset(Context context, long time) {
+		time += getServerTimeOffset(context);
+		long now = System.currentTimeMillis() / 1000;
+		if (time > now) {
+			return now;
+		} else {
+			return time;
+		}
+	}
+
 	public static void showTip(final Activity activity, final TipType tipType,
 			final View parentView) {
 		showTip(activity, tipType, parentView, null);
