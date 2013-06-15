@@ -915,8 +915,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							voiceMessagePlayer
 									.setDurationTxt(holder.messageTextView);
 						} else {
-							setFileButtonResource(holder.showFileBtn,
-									convMessage, hikeFile);
+							if (!convMessage.isSent()
+									|| !ChatThread.fileTransferTaskMap
+											.containsKey(convMessage.getMsgID())) {
+								holder.showFileBtn.setVisibility(View.VISIBLE);
+								setFileButtonResource(holder.showFileBtn,
+										convMessage, hikeFile);
+							} else {
+								holder.showFileBtn.setVisibility(View.GONE);
+							}
 						}
 
 					} else {
