@@ -24,6 +24,7 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.State;
+import com.bsb.hike.utils.Utils;
 
 public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState> {
 
@@ -145,7 +146,18 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState> {
 					continue;
 				}
 
+				/*
+				 * Normalizing the number
+				 */
+				number = Utils.normalizeNumber(
+						number,
+						context.getSharedPreferences(
+								HikeMessengerApp.ACCOUNT_SETTINGS, 0)
+								.getString(HikeMessengerApp.COUNTRY_CODE,
+										HikeConstants.INDIA_COUNTRY_CODE));
+
 				Log.d(getClass().getSimpleName(), "Checking contact: " + number);
+
 				/*
 				 * Check if contact exists
 				 */
