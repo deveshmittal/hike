@@ -1980,19 +1980,25 @@ public class Utils {
 	public static Dialog showSMSSyncDialog(final Context context,
 			boolean syncConfirmation) {
 		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
-		dialog.setContentView(R.layout.pull_in_sms);
+		dialog.setContentView(R.layout.enable_sms_client_popup);
 
 		final View btnContainer = dialog.findViewById(R.id.button_container);
 
 		final ProgressBar syncProgress = (ProgressBar) dialog
-				.findViewById(R.id.sync_progress);
-		final TextView info = (TextView) dialog
-				.findViewById(R.id.import_sms_info);
+				.findViewById(R.id.loading_progress);
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		final TextView info = (TextView) dialog.findViewById(R.id.body);
 		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
 		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+		final View btnDivider = dialog.findViewById(R.id.sms_divider);
+
+		header.setText(R.string.import_sms);
+		info.setText(R.string.import_sms_info);
+		okBtn.setText(R.string.yes);
+		cancelBtn.setText(R.string.no);
 
 		setupSyncDialogLayout(syncConfirmation, btnContainer, syncProgress,
-				info);
+				info, btnDivider);
 
 		okBtn.setOnClickListener(new OnClickListener() {
 
@@ -2003,7 +2009,8 @@ public class Utils {
 
 				new SyncOldSMSTask(context).execute();
 
-				setupSyncDialogLayout(false, btnContainer, syncProgress, info);
+				setupSyncDialogLayout(false, btnContainer, syncProgress, info,
+						btnDivider);
 			}
 		});
 
@@ -2031,9 +2038,11 @@ public class Utils {
 	}
 
 	private static void setupSyncDialogLayout(boolean syncConfirmation,
-			View btnContainer, ProgressBar syncProgress, TextView info) {
+			View btnContainer, ProgressBar syncProgress, TextView info,
+			View btnDivider) {
 		btnContainer.setVisibility(syncConfirmation ? View.VISIBLE : View.GONE);
 		syncProgress.setVisibility(syncConfirmation ? View.GONE : View.VISIBLE);
+		btnDivider.setVisibility(syncConfirmation ? View.VISIBLE : View.GONE);
 		info.setText(syncConfirmation ? R.string.import_sms_info
 				: R.string.importing_sms_info);
 	}

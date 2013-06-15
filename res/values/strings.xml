@@ -354,7 +354,6 @@
 	<string name="added_as_hike_friend">Added you as a friend</string>
 	<string name="confirm">Confirm</string>
 	<string name="recent_updates">Recent Updates</string>
-	<string name="manage_account">Manage Account</string>
 	<string name="whats_up_user">What\'s up, %1$s?</string>
 	<string name="status">Status</string>
 	<string name="post">Post</string>
@@ -465,8 +464,6 @@
 	<string name="hike_sms_info2">Free</string>
 	<string name="native_sms_info1">Send as a regular SMS</string>
 	<string name="native_sms_info2">At operator rates</string>
-	<string name="use_hike_for_sms">Use hike for all SMS</string>
-	<string name="use_hike_for_sms_info">We need to make hike your default SMS inbox to send a regular SMS.</string>
 	<string name="find_more">Find out more</string>
 	<string name="continue_txt">Continue</string>
 	<string name="sms_with_hike">SMS with hike</string>
@@ -476,8 +473,6 @@
 	<string name="import_sms_info">Would you like to import your existing messages into hike?</string>
 	<string name="importing_sms_info">Give us a minute while we import your messages into hike.</string>
 	<string name="gc_fallback_offline">You need to be online to send this message</string>
-	<string name="native_header">Send via Operator SMS</string>
-	<string name="native_info">You will now be sending SMS through your operator. Regular operator SMS charges will apply</string>
 	<string name="stickers">Stickers</string>
 	<string name="sticker_download_failed">Oops! The download failed. Tap to retry</string>
 	<string name="new_stickers_available">New stickers available!</string>
@@ -514,8 +509,6 @@
 	<string name="posting_update_fail">Unable to post. Please retry again later.</string>
 	<string name="posted_update">Posted successfully</string>
 	<string name="joined_hike_update">Joined hike</string>
-	<string name="default_client_header">Default SMS Client</string>
-	<string name="default_client_info">Use hike to receive all SMS</string>
 	<string name="msg_undelivered">%1$s is offline. Tap to send as SMS.</string>
 	<string name="msg_unsent">You are currently offline. Tap to send as SMS.</string>
 	<string name="sms_undelivered">Tap to send as SMS</string>
@@ -536,4 +529,13 @@
 	<string name="regular_sms">Regular SMS</string>
 	<string name="messaging_my_number">Messaging from %1$s</string>
 	<string name="messaging_hike_number">Messaging from +918451043280</string>
+	<string name="native_sms_info1_multiple">Send as %1$s regular SMS</string>
+	<string name="manage_account">Account</string>
+	<string name="default_client_header">Unified Inbox</string>
+	<string name="default_client_info">Receive regular SMS within hike</string>
+	<string name="native_header">Send via Regular SMS</string>
+	<string name="native_info">You will now send a regular SMS through hike. Operator rates will apply.</string>
+	<string name="use_hike_for_sms">Unified Inbox</string>
+	<string name="use_hike_for_sms_info">To send a regular SMS, you need to make hike your primary SMS inbox</string>
+	<string name="allow">Allow</string>
 </resources>

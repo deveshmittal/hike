@@ -1555,6 +1555,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		final CheckBox sendNative = (CheckBox) dialog
 				.findViewById(R.id.native_sms_checkbox);
 		ImageView avatar = (ImageView) dialog.findViewById(R.id.avatar);
+		TextView nativeSMSInfo = (TextView) dialog
+				.findViewById(R.id.native_sms_info);
 
 		SharedPreferences prefs = preferences;
 
@@ -1583,6 +1585,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		nativeSmsTextHead.setText(username);
+
+		int numUnsentMessages = getAllUnsentMessages().size();
+		if (numUnsentMessages == 1) {
+			nativeSMSInfo.setText(R.string.native_sms_info1);
+		} else {
+			nativeSMSInfo.setText(context.getString(
+					R.string.native_sms_info1_multiple,
+					Integer.toString(numUnsentMessages)));
+		}
 
 		ConvMessage convMessage = convMessages.get(lastSentMessagePosition);
 		hikeSmsText.setText(Utils.getMessageDisplayText(convMessage));
@@ -1649,6 +1660,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (showingNativeInfoDialog) {
 			btnCancel.setVisibility(View.GONE);
+			btnOk.setText(R.string.continue_txt);
+		} else {
+			btnCancel.setText(R.string.cancel);
+			btnOk.setText(R.string.allow);
 		}
 
 		btnOk.setOnClickListener(new OnClickListener() {
@@ -1709,7 +1724,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		dialog.show();
 	}
 
-	private void sendAllUnsentMessagesAsSMS(boolean nativeSMS) {
+	private List<ConvMessage> getAllUnsentMessages() {
 		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
 		for (int i = lastSentMessagePosition; i >= 0; i--) {
 			ConvMessage convMessage = convMessages.get(i);
@@ -1725,6 +1740,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			unsentMessages.add(convMessage);
 		}
+		return unsentMessages;
+	}
+
+	private void sendAllUnsentMessagesAsSMS(boolean nativeSMS) {
+		List<ConvMessage> unsentMessages = getAllUnsentMessages();
 		Log.d(getClass().getSimpleName(),
 				"Unsent messages: " + unsentMessages.size());
 

@@ -152,6 +152,7 @@
         android:layout_marginTop="8dp" >
 
         <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/native_sms_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
