@@ -29,7 +29,6 @@ import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.DrawerLayout;
-import com.bsb.hike.view.DrawerLayout.Listener;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
@@ -183,10 +182,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 							Utils.getFirstName(conversation.getLabel()));
 				}
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
-				markedUp = TextUtils.isEmpty(message.getMessage()) ? String
-						.format(context.getString(R.string.joined_hike_new),
-								Utils.getFirstName(conversation.getLabel()))
-						: message.getMessage();
+				markedUp = String
+						.format(context.getString(metadata.isOldUser() ? R.string.user_back_on_hike
+								: R.string.joined_hike_new), Utils
+								.getFirstName(conversation.getLabel()));
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
 					|| message.getParticipantInfoState() == ParticipantInfoState.GROUP_END) {
 

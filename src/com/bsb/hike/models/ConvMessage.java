@@ -271,8 +271,9 @@ public class ConvMessage {
 				} else {
 					name = Utils.getFirstName(conversation.getLabel());
 				}
-				this.mMessage = String.format(
-						context.getString(R.string.joined_hike_new), name);
+				this.mMessage = String.format(context.getString(metadata
+						.isOldUser() ? R.string.user_back_on_hike
+						: R.string.joined_hike_new), name);
 			}
 			break;
 		case USER_OPT_IN:

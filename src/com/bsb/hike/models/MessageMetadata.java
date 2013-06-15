@@ -40,6 +40,7 @@ public class MessageMetadata {
 	private boolean isPokeMessage;
 	private StatusMessage statusMessage;
 	private Sticker sticker;
+	private boolean oldUser;
 
 	public MessageMetadata(JSONObject metadata) throws JSONException {
 		this.participantInfoState = metadata.has(HikeConstants.DND_USERS)
@@ -73,6 +74,8 @@ public class MessageMetadata {
 					HikeConstants.MSISDN);
 			this.credits = metadata.getJSONObject(HikeConstants.DATA).optInt(
 					HikeConstants.CREDITS, -1);
+			this.oldUser = HikeConstants.RETURNING_USER.equals(metadata
+					.optString(HikeConstants.SUB_TYPE));
 			break;
 
 		case CHANGED_GROUP_IMAGE:
@@ -171,6 +174,10 @@ public class MessageMetadata {
 
 	public Sticker getSticker() {
 		return sticker;
+	}
+
+	public boolean isOldUser() {
+		return oldUser;
 	}
 
 	public Spannable getMessage(final Context context,

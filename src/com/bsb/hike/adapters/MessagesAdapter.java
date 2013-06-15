@@ -561,7 +561,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					name = Utils.getFirstName(conversation.getLabel());
 					message = context
 							.getString(
-									infoState == ParticipantInfoState.USER_JOIN ? R.string.joined_hike_new
+									infoState == ParticipantInfoState.USER_JOIN ? (metadata
+											.isOldUser() ? R.string.user_back_on_hike
+											: R.string.joined_hike_new)
 											: R.string.optin_one_to_one, name);
 				}
 

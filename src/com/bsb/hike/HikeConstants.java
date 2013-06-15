@@ -128,6 +128,7 @@ public class HikeConstants {
 	public static final String PROTIP_IMAGE_URL = "img";
 	public static final String PROTIP_WAIT_TIME = "wt";
 	public static final String NO_SMS = "nosms";
+	public static final String RETURNING_USER = "ru";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
