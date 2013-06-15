@@ -303,6 +303,9 @@ public class UploadFileTask extends FileTransferTaskBase {
 	@Override
 	protected void onPostExecute(FTResult result) {
 		if (convMessage != null) {
+			if (result == FTResult.SUCCESS) {
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
 			ChatThread.fileTransferTaskMap.remove(convMessage.getMsgID());
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
