@@ -61,7 +61,7 @@
             android:layout_height="45dp"
             android:layout_marginLeft="8dp"
             android:layout_weight="1"
-            android:text="@string/continue_txt"
+            android:text="@string/allow"
             android:textSize="16sp" />
     </LinearLayout>
 

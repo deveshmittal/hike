@@ -466,8 +466,6 @@
 	<string name="native_sms_info2">At operator rates</string>
 	<string name="find_more">Find out more</string>
 	<string name="continue_txt">Continue</string>
-	<string name="sms_with_hike">SMS with hike</string>
-	<string name="sms_with_hike_info">Now use hike to send and receive all your SMS along with free hike messages.</string>
 	<string name="tap_here_find_out_more">Tap here to find out more</string>
 	<string name="import_sms">Import SMS</string>
 	<string name="import_sms_info">Would you like to import your existing messages into hike?</string>
@@ -485,8 +483,6 @@
 	<string name="last_seen_more">Last seen %1$s</string>
 	<string name="last_seen_while_ago">Last seen a while ago</string>
 	<string name="online">Online</string>
-	<string name="last_seen_header">Last Seen</string>
-	<string name="last_seen_info">Show last seen</string>
 	<string name="emoticons_stickers_tip">Tap here to share stickers and emoticons :)</string>
 	<string name="stickers_tip">New stickers!</string>
 	<string name="moods_tip">Tap here to attach a wonderful mood :)</string>
@@ -538,4 +534,9 @@
 	<string name="use_hike_for_sms">Unified Inbox</string>
 	<string name="use_hike_for_sms_info">To send a regular SMS, you need to make hike your primary SMS inbox</string>
 	<string name="allow">Allow</string>
+	<string name="sms_with_hike">Unified Inbox</string>
+	<string name="sms_with_hike_info">You can now send and receive regular SMS with hike. To do so, you\'ll need to make hike your primary SMS inbox.</string>
+	<string name="last_seen_header">Show Last Seen</string>
+	<string name="last_seen_info">Turning off last seen will hide your friend\'s status from you as well</string>
+	<string name="user_back_on_hike">%1$s is back on hike. Say hi :)</string>
 </resources>
