@@ -37,6 +37,7 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikePubSub.Listener;
@@ -251,6 +252,8 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
 
 	public static final String SHOWN_NATIVE_INFO_POPUP = "shownNativeInfoPopup";
+
+	public static final String SHOW_BOLLYWOOD_STICKERS = "showBollywoodStickers";
 
 	public static List<StickerCategory> stickerCategories;
 
@@ -493,6 +496,9 @@ public class HikeMessengerApp extends Application implements Listener {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
 
+		if (!settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
+			setupBollywoodCategoryVisibility(settings);
+		}
 		setupStickerCategoryList(preferenceManager);
 
 		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
@@ -505,6 +511,39 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
+	}
+
+	private static void setupBollywoodCategoryVisibility(SharedPreferences prefs) {
+		String countryCode = prefs.getString(COUNTRY_CODE, "");
+
+		if (TextUtils.isEmpty(countryCode)) {
+			return;
+		}
+
+		boolean showBollywoodCategory = false;
+		for (String bollywoodCountryCode : HikeConstants.BOLLYWOOD_COUNTRY_CODES) {
+			if (bollywoodCountryCode.equals(countryCode)) {
+				showBollywoodCategory = true;
+				break;
+			}
+		}
+		Editor editor = prefs.edit();
+		editor.putBoolean(SHOW_BOLLYWOOD_STICKERS, showBollywoodCategory);
+		if (!showBollywoodCategory) {
+			try {
+				JSONArray removedIdArray = new JSONArray(prefs.getString(
+						REMOVED_CATGORY_IDS, "[]"));
+				removedIdArray.put(HikeConstants.BOLLYWOOD_CATEGORY);
+				editor.putString(REMOVED_CATGORY_IDS, removedIdArray.toString());
+			} catch (JSONException e) {
+				editor.remove(REMOVED_CATGORY_IDS);
+				Log.w("HikeMessengerApp", "Removed id array pref corrupted", e);
+			}
+		}
+		editor.commit();
+		if (!showBollywoodCategory) {
+			setupStickerCategoryList(prefs);
+		}
 	}
 
 	public void setMoodsResource() {
@@ -527,8 +566,12 @@ public class HikeMessengerApp extends Application implements Listener {
 		this.mService = service;
 	}
 
-	public static void setIndianUser(boolean isIndianUser) {
+	public static void setIndianUser(boolean isIndianUser,
+			SharedPreferences prefs) {
 		HikeMessengerApp.isIndianUser = isIndianUser;
+		if (!prefs.contains(SHOW_BOLLYWOOD_STICKERS)) {
+			setupBollywoodCategoryVisibility(prefs);
+		}
 	}
 
 	public static boolean isIndianUser() {

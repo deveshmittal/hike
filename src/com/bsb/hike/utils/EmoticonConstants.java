@@ -1,5 +1,6 @@
 package com.bsb.hike.utils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class EmoticonConstants {
@@ -662,7 +663,7 @@ public class EmoticonConstants {
 			"008_dreaming.png", };
 
 	public static final String[] STICKER_CATEGORY_IDS = { "doggy", "kitty",
-			"expressions", "bollywood", "rageface" };
+			"expressions", HikeConstants.BOLLYWOOD_CATEGORY, "rageface" };
 
 	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.doggy,
 			R.drawable.kitty, R.drawable.expressions, R.drawable.bollywood,

@@ -93,7 +93,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				editor.putString(HikeMessengerApp.COUNTRY_CODE,
 						HikeConstants.INDIA_COUNTRY_CODE);
 				editor.commit();
-				HikeMessengerApp.setIndianUser(true);
+				HikeMessengerApp.setIndianUser(true, prefs);
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.REFRESH_RECENTS, null);
 			}

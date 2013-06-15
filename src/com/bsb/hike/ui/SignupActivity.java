@@ -265,8 +265,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 				 */
 				String countryCode = accountPrefs.getString(
 						HikeMessengerApp.COUNTRY_CODE, "");
-				HikeMessengerApp.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE
-						.equals(countryCode));
+				HikeMessengerApp.setIndianUser(
+						HikeConstants.INDIA_COUNTRY_CODE.equals(countryCode),
+						accountPrefs);
 
 				Editor accountEditor = accountPrefs.edit();
 				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
