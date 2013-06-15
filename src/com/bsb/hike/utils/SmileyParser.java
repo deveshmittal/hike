@@ -19,7 +19,7 @@ import com.bsb.hike.R;
  * to graphical ones.
  */
 public class SmileyParser {
-	private static int MAX_EMOTICONS = 20;
+	private static int MAX_EMOTICONS = 100;
 
 	public static final int[] HIKE_EMOTICONS_SUBCATEGORIES = { 80, 30, 39 };
 
