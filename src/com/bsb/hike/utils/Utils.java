@@ -121,6 +121,7 @@ import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.Protip;
+import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.JSONSerializable;
 import com.bsb.hike.service.HikeService;
@@ -1343,6 +1344,9 @@ public class Utils {
 				+ (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE
 						: AccountUtils.REWARDS_STAGING_BASE);
 
+		AccountUtils.stickersUrl = httpString
+				+ (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE
+						: AccountUtils.STICKERS_STAGING_BASE);
 		Log.d("SSL", "Base: " + AccountUtils.base);
 		Log.d("SSL", "FTHost: " + AccountUtils.fileTransferHost);
 		Log.d("SSL", "FTUploadBase: " + AccountUtils.fileTransferUploadBase);
@@ -2367,5 +2371,18 @@ public class Utils {
 
 	public static void unblockOrientationChange(Activity activity) {
 		activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+	}
+
+	public static String getMessageDisplayText(ConvMessage convMessage) {
+		if (convMessage.isFileTransferMessage()) {
+			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
+			return AccountUtils.fileTransferBaseViewUrl + hikeFile.getFileKey();
+
+		} else if (convMessage.isStickerMessage()) {
+			Sticker sticker = convMessage.getMetadata().getSticker();
+			return String.format(AccountUtils.stickersUrl,
+					sticker.getCategoryId(), sticker.getStickerId());
+		}
+		return convMessage.getMessage();
 	}
 }

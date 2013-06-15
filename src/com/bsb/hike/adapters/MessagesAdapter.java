@@ -1581,11 +1581,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 		}
 
-		hikeSmsText.setText(convMessages.get(lastSentMessagePosition)
-				.getMessage());
 		nativeSmsTextHead.setText(username);
-		nativeSmsText.setText(convMessages.get(lastSentMessagePosition)
-				.getMessage());
+
+		ConvMessage convMessage = convMessages.get(lastSentMessagePosition);
+		hikeSmsText.setText(Utils.getMessageDisplayText(convMessage));
+		nativeSmsText.setText(Utils.getMessageDisplayText(convMessage));
 
 		sendHike.setOnClickListener(new OnClickListener() {
 
