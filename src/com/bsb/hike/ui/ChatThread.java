@@ -1080,10 +1080,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		if (mComposeViewWatcher != null) {
 			mComposeViewWatcher.onMessageSent();
 		}
-		if (emoticonLayout != null
-				&& emoticonLayout.getVisibility() == View.VISIBLE) {
-			onEmoticonBtnClicked(null, 0, false);
-		}
 	}
 
 	private ConvMessage makeConvMessage(String message) {
