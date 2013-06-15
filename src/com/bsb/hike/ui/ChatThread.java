@@ -1269,11 +1269,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		}
 
 		if (!mConversation.isOnhike()) {
-			ConvMessage convMessage = Utils.makeHike2SMSInviteMessage(
-					mContactNumber, this);
-			convMessage.setConversation(mConversation);
-
-			sendMessage(convMessage);
+			Utils.sendInvite(mContactNumber, this);
+			Toast.makeText(this, R.string.invite_sent, Toast.LENGTH_SHORT)
+					.show();
 		} else if (mConversation instanceof GroupConversation) {
 			startActivity(new Intent(ChatThread.this, HikeListActivity.class));
 		} else {
