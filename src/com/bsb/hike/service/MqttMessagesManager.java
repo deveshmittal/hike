@@ -343,6 +343,9 @@ public class MqttMessagesManager {
 				}
 
 			}
+			if (convMessage.isStickerMessage()) {
+				convMessage.setMessage(context.getString(R.string.sticker));
+			}
 			/*
 			 * Applying the offset.
 			 */

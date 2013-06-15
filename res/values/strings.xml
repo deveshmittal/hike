@@ -539,4 +539,5 @@
 	<string name="last_seen_header">Show Last Seen</string>
 	<string name="last_seen_info">Turning off last seen will hide your friend\'s status from you as well</string>
 	<string name="user_back_on_hike">%1$s is back on hike. Say hi :)</string>
+	<string name="sticker">Sticker</string>
 </resources>
