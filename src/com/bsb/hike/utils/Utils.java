@@ -2254,6 +2254,8 @@ public class Utils {
 
 		boolean is24Hour = android.text.format.DateFormat
 				.is24HourFormat(context);
+
+		String lastSeen;
 		/*
 		 * More than 1 day old.
 		 */
@@ -2264,24 +2266,32 @@ public class Utils {
 						+ "' MMM, HH:mm";
 			} else {
 				format = "d'" + getDayOfMonthSuffix(lastSeenDayOfMonth)
-						+ "' MMM, h:mm aaa";
+						+ "' MMM, h:mmaaa";
 			}
 			DateFormat df = new SimpleDateFormat(format);
-			return context.getString(R.string.last_seen_more,
+			lastSeen = context.getString(R.string.last_seen_more,
 					df.format(lastSeenDate));
-		}
-
-		String format;
-		if (is24Hour) {
-			format = "HH:mm";
 		} else {
-			format = "h:mm aaa";
+			String format;
+			if (is24Hour) {
+				format = "HH:mm";
+			} else {
+				format = "h:mmaaa";
+			}
+
+			DateFormat df = new SimpleDateFormat(format);
+			lastSeen = context
+					.getString(
+							(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
+									: R.string.last_seen_today, df
+									.format(lastSeenDate));
 		}
 
-		DateFormat df = new SimpleDateFormat(format);
-		return context.getString(
-				(nowDay > lastSeenDay) ? R.string.last_seen_yesterday
-						: R.string.last_seen_today, df.format(lastSeenDate));
+		lastSeen = lastSeen.replace("AM", "am");
+		lastSeen = lastSeen.replace("PM", "pm");
+
+		return lastSeen;
+
 	}
 
 	private static String getDayOfMonthSuffix(int dayOfMonth) {
