@@ -2247,25 +2247,39 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	}
 
 	public boolean isStickerUpdateAvailable(String categoryId) {
-		Cursor c = mDb.query(DBConstants.STICKERS_TABLE,
-				new String[] { DBConstants.UPDATE_AVAILABLE },
-				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId },
-				null, null, null);
-		if (!c.moveToFirst()) {
-			return false;
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.STICKERS_TABLE,
+					new String[] { DBConstants.UPDATE_AVAILABLE },
+					DBConstants.CATEGORY_ID + "=?",
+					new String[] { categoryId }, null, null, null);
+			if (!c.moveToFirst()) {
+				return false;
+			}
+			return c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
 		}
-		return c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
 	}
 
 	public boolean hasReachedStickerEnd(String categoryId) {
-		Cursor c = mDb.query(DBConstants.STICKERS_TABLE,
-				new String[] { DBConstants.REACHED_END },
-				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId },
-				null, null, null);
-		if (!c.moveToFirst()) {
-			return false;
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.STICKERS_TABLE,
+					new String[] { DBConstants.REACHED_END },
+					DBConstants.CATEGORY_ID + "=?",
+					new String[] { categoryId }, null, null, null);
+			if (!c.moveToFirst()) {
+				return false;
+			}
+			return c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
 		}
-		return c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
 	}
 
 	public void insertFirstStickerCategory() {
@@ -2309,25 +2323,34 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	private Protip getProtip(String[] columns, String selection,
 			String[] selectionArgs) {
-		Cursor c = mDb.query(DBConstants.PROTIP_TABLE, columns, selection,
-				selectionArgs, null, null, null);
-		if (!c.moveToFirst()) {
-			return null;
-		}
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.PROTIP_TABLE, columns, selection,
+					selectionArgs, null, null, null);
+			if (!c.moveToFirst()) {
+				return null;
+			}
 
-		long id = c.getLong(c.getColumnIndex(DBConstants.ID));
-		String mappedId = c.getString(c
-				.getColumnIndex(DBConstants.PROTIP_MAPPED_ID));
-		String header = c.getString(c.getColumnIndex(DBConstants.HEADER));
-		String text = c.getString(c.getColumnIndex(DBConstants.PROTIP_TEXT));
-		String url = c.getString(c.getColumnIndex(DBConstants.IMAGE_URL));
-		long waitTime = c.getLong(c.getColumnIndex(DBConstants.WAIT_TIME));
-		long timeStamp = c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
-		if (mappedId == null) {
-			return null;
-		}
+			long id = c.getLong(c.getColumnIndex(DBConstants.ID));
+			String mappedId = c.getString(c
+					.getColumnIndex(DBConstants.PROTIP_MAPPED_ID));
+			String header = c.getString(c.getColumnIndex(DBConstants.HEADER));
+			String text = c
+					.getString(c.getColumnIndex(DBConstants.PROTIP_TEXT));
+			String url = c.getString(c.getColumnIndex(DBConstants.IMAGE_URL));
+			long waitTime = c.getLong(c.getColumnIndex(DBConstants.WAIT_TIME));
+			long timeStamp = c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+			if (mappedId == null) {
+				return null;
+			}
 
-		return new Protip(id, mappedId, header, text, url, waitTime, timeStamp);
+			return new Protip(id, mappedId, header, text, url, waitTime,
+					timeStamp);
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
 	}
 
 	public void deleteProtip(String mappedId) {
