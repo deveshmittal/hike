@@ -2221,12 +2221,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO "
 					+ DBConstants.STICKERS_TABLE + " ( "
 					+ DBConstants.CATEGORY_ID + ", " + DBConstants.TOTAL_NUMBER
-					+ ", " + DBConstants.REACHED_END + " ) "
-					+ " VALUES (?, ?, ?)");
+					+ ", " + DBConstants.REACHED_END + ", "
+					+ DBConstants.UPDATE_AVAILABLE + " ) "
+					+ " VALUES (?, ?, ?, ?)");
 
 			insertStatement.bindString(1, categoryId);
 			insertStatement.bindLong(2, totalNum);
 			insertStatement.bindLong(3, reachedEnd ? 1 : 0);
+			insertStatement.bindLong(4, 0);
 
 			insertStatement.execute();
 		} finally {
