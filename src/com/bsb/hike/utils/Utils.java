@@ -445,8 +445,8 @@ public class Utils {
 				return null;
 			}
 			/*
-			 * Making sure that audio recordings don't come up
-			 * in the music players.
+			 * Making sure that audio recordings don't come up in the music
+			 * players.
 			 */
 			if (type == HikeFileType.AUDIO_RECORDING) {
 				File file = new File(mediaStorageDir, ".nomedia");
