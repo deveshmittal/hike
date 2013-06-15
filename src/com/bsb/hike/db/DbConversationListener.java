@@ -288,37 +288,37 @@ public class DbConversationListener implements Listener {
 			if (messages.isEmpty()) {
 				return;
 			}
-			ConvMessage convMessage = messages.get(0);
-
-			for (ConvMessage message : messages) {
-				message.setSMS(true);
-				mConversationDb.updateIsHikeMessageState(message.getMsgID(),
-						false);
-			}
-
-			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
 
 			try {
 				JSONObject jsonObject = new JSONObject();
 
 				jsonObject.put(HikeConstants.TYPE,
 						HikeConstants.MqttMessageTypes.FORCE_SMS);
-				jsonObject.put(HikeConstants.TO, convMessage.getMsisdn());
+				jsonObject.put(HikeConstants.TO, messages.get(0).getMsisdn());
 
 				JSONObject data = new JSONObject();
 
 				JSONArray messagesArray = new JSONArray();
 
-				JSONObject messageJSON = convMessage.serialize().getJSONObject(
-						HikeConstants.DATA);
+				for (ConvMessage convMessage : messages) {
+					convMessage.setSMS(true);
 
-				messagesArray.put(messageJSON);
+					JSONObject messageJSON = convMessage.serialize()
+							.getJSONObject(HikeConstants.DATA);
 
+					messagesArray.put(messageJSON);
+
+					mConversationDb.updateIsHikeMessageState(
+							convMessage.getMsgID(), false);
+				}
+
+				data.put(HikeConstants.BATCH_MESSAGE, messagesArray);
 				data.put(HikeConstants.COUNT, messages.size());
-				data.put(HikeConstants.MESSAGE_ID, convMessage.getMsgID());
-				data.put(HikeConstants.MESSAGE, messagesArray);
+				data.put(HikeConstants.MESSAGE_ID, messages.get(0).getMsgID());
 
 				jsonObject.put(HikeConstants.DATA, data);
+
+				mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
 
 				mPubSub.publish(HikePubSub.MQTT_PUBLISH, jsonObject);
 			} catch (JSONException e) {
