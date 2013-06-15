@@ -1492,7 +1492,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				Utils.showTip(this, TipType.WALKIE_TALKIE, tipView);
 			}
 		}
-		if (tipView != null && !(mConversation instanceof GroupConversation)
+		if (tipView == null && !(mConversation instanceof GroupConversation)
 				&& !prefs.getBoolean(HikeMessengerApp.NUDGE_INTRO_SHOWN, false)) {
 			showNudgeDialog();
 		}
