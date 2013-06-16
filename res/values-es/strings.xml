@@ -133,7 +133,7 @@
 	<string name="recent_icon_text">Esta sección guarda automáticamente\nlos iconos que vayas usando.</string>
 	<string name="recently_used">Iconos recientes</string>
 	<string name="free_sms_left">de hike a SMS</string>
-	<string name="normal_update">Nueva versión de hike disponible. ¿Quieres actualizar la app?</string>
+	<string name="normal_update">Actualiza a la nueva versión de hike para descubrir nuevas formas increíbles de enviar mensajes</string>
 	<string name="critical_update">Para seguir usando hike, debes actualizarlo.</string>
 	<string name="normal_update_head">Actualización disponible</string>
 	<string name="critical_update_head">Actualización importante</string>

@@ -133,7 +133,7 @@
 	<string name="recent_icon_text">Этот раздел содержит недавно\nиспользованные вами значки.</string>
 	<string name="recently_used">Недавние</string>
 	<string name="free_sms_left">hike - SMS</string>
-	<string name="normal_update">Доступна новая версия hike. Обновить?</string>
+	<string name="normal_update">Обновите hike, чтобы обогатить возможности своего общения</string>
 	<string name="critical_update">Это обновление hike обязательно.</string>
 	<string name="normal_update_head">Доступно обновление</string>
 	<string name="critical_update_head">Важное обновление</string>

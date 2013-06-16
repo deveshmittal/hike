@@ -133,7 +133,7 @@
 	<string name="recent_icon_text">Hier werden automatisch deine zuletzt\nbenutzten Icons gesammelt.</string>
 	<string name="recently_used">Zuletzt benutzt</string>
 	<string name="free_sms_left">hike zu SMS</string>
-	<string name="normal_update">Es gibt eine neue Version von hike. Möchtest du updaten?</string>
+	<string name="normal_update">Update auf die neue Version von hike, um tolle neue Arten des Messaging zu entdecken.</string>
 	<string name="critical_update">Um hike weiterhin zu verwenden, ist ein Update notwendig.</string>
 	<string name="normal_update_head">Update erhältlich</string>
 	<string name="critical_update_head">Wichtiges Update</string>
