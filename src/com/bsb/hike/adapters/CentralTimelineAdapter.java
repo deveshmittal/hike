@@ -217,13 +217,11 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		case USER_ACCEPTED_FRIEND_REQUEST:
 			viewHolder.yesBtn.setVisibility(View.GONE);
 			viewHolder.noBtn.setVisibility(View.GONE);
-			viewHolder.extraInfo.setVisibility(View.VISIBLE);
+			viewHolder.extraInfo.setVisibility(View.GONE);
 
-			viewHolder.extraInfo
-					.setText(context.getString(
-							statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED ? R.string.confirmed_friend_info
-									: R.string.accepted_friend_request_info,
-							Utils.getFirstName(statusMessage.getNotNullName())));
+			viewHolder.mainInfo.setText(context.getString(
+					R.string.friend_request_accepted_name,
+					Utils.getFirstName(statusMessage.getNotNullName())));
 			break;
 		case PROTIP:
 			Protip protip = statusMessage.getProtip();

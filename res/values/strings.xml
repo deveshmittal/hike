@@ -340,7 +340,6 @@
 	<string name="my_profile">My Profile</string>
 	<string name="not_on_hike">%1$s is missing all the action. Help %1$s upgrade to hike.</string>
 	<string name="add_as_friend_info">You need to be friends with %1$s to be able to get %1$s\'s status updates.</string>
-	<string name="add_as_friend">Add as friend</string>
 	<string name="updating_status">Updating status</string>
 	<string name="add_member">Add a member</string>
 	<string name="invite_all_members">Invite SMS members to hike</string>
@@ -351,7 +350,6 @@
 	<string name="contacts_on_hike">CONTACTS ON HIKE (%1$d)</string>
 	<string name="team_hike">team hike</string>
 	<string name="hey_name">Hey %1$s!</string>
-	<string name="added_as_hike_friend">Added you as a friend</string>
 	<string name="confirm">Confirm</string>
 	<string name="recent_updates">Recent Updates</string>
 	<string name="whats_up_user">What\'s up, %1$s?</string>
@@ -402,7 +400,6 @@
 	<string name="call_not_free_head">Operator Rates Apply</string>
 	<string name="call_not_free_body">Your telecom operator may charge you for this call.</string>
 	<string name="no_credits_gc">You\'ve run out of free SMS.  SMS users will no longer receive your messages.</string>
-	<string name="added_as_friend">%1$s added you as a friend.</string>
 	<string name="not_now">Not now</string>
 	<string name="delete_status">Delete update</string>
 	<string name="delete_status_confirmation">Are you sure you want to delete this update?</string>
@@ -435,7 +432,6 @@
 	<string name="changed_profile">Changed profile picture</string>
 	<string name="add_friend_info">You can see updates from your circle of friends here.</string>
 	<string name="no_friends">Tap on plus to add a contact to your circle of friends</string>
-	<string name="added_as_hike_friend_info">You can now see updates from %1$s. Would you like to do the same?</string>
 	<string name="confirmed_friend">Is now a friend</string>
 	<string name="confirmed_friend_info">You and %1$s can now see updates from each other.</string>
 	<string name="accepted_friend_request_info">You and %1$s can now see updates from each other.</string>
@@ -544,4 +540,10 @@
 	<string name="invite_sms">Invite via SMS</string>
 	<string name="system_health_error">Please enable your phone browser to to view System Health</string>
 	<string name="email_error">Hike requies an email application installed on your device to proceed</string>
+	<string name="added_as_hike_friend_info">Would you like to do the same?</string>
+	<string name="added_as_hike_friend">Added you to Circle of Friends</string>
+	<string name="friend_request_accepted">You will now be able to see updates from each other.</string>
+	<string name="friend_request_accepted_name">You will now be able to see updates from %1$s here.</string>
+	<string name="added_as_friend">%1$s added you to Circle of Friends</string>
+	<string name="add_as_friend">Add to Circle of Friends</string>
 </resources>

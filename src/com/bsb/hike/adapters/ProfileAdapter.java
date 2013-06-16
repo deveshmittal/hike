@@ -441,6 +441,7 @@ public class ProfileAdapter extends BaseAdapter {
 
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
 					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
+				viewHolder.text.setText(R.string.friend_request_accepted);
 				viewHolder.icon
 						.setImageResource(R.drawable.ic_profile_pic_status);
 			}

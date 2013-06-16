@@ -337,7 +337,6 @@
 	<string name="my_profile">Мой профиль</string>
 	<string name="not_on_hike">%1$s пропускает все интересное. Помогите %1$s перейти на hike.</string>
 	<string name="add_as_friend_info">Вы должны быть другом %1$s, чтобы получать обновления статуса %1$s.</string>
-	<string name="add_as_friend">Добавить в друзья</string>
 	<string name="updating_status">Обновление статуса</string>
 	<string name="add_member">Доб. участника</string>
 	<string name="invite_all_members">Пригласить SMS-контакты в hike</string>
@@ -348,7 +347,6 @@
 	<string name="contacts_on_hike">КОНТАКТЫ HIKE (%1$d)</string>
 	<string name="team_hike">команда hike</string>
 	<string name="hey_name">Эй, %1$s!</string>
-	<string name="added_as_hike_friend">Добавил(а) вас в друзья</string>
 	<string name="confirm">Подтв.</string>
 	<string name="recent_updates">Недавние обновления</string>
 	<string name="manage_account">Упр. аккаунтом</string>
@@ -401,7 +399,6 @@
 	<string name="call_not_free_head">Могут действ. тарифы оператора</string>
 	<string name="call_not_free_body">Оператор связи может взимать плату за этот звонок.</string>
 	<string name="no_credits_gc">У вас закончились бесплатные SMS. SMS-контакты больше не будут получать ваши SMS</string>
-	<string name="added_as_friend">%1$s добавил(а) вас в друзья.</string>
 	<string name="not_now">Не сейчас</string>
 	<string name="delete_status">Удалить обновление</string>
 	<string name="delete_status_confirmation">Вы действительно хотите удалить это обновление?</string>
@@ -434,7 +431,6 @@
 	<string name="changed_profile">Аватар изменен</string>
 	<string name="add_friend_info">Здесь можно видеть обновления из круга друзей.</string>
 	<string name="no_friends">Нажмите знак плюс, чтобы добавить контакт в круг друзей</string>
-	<string name="added_as_hike_friend_info">Теперь вы можете видеть обновления %1$s. Хотите сделать то же самое?</string>
 	<string name="confirmed_friend">Стал(а) вашим другом</string>
 	<string name="confirmed_friend_info">Вы и %1$s видите обновления статуса друг друга.</string>
 	<string name="accepted_friend_request_info">Вы и %1$s видите обновления статуса друг друга.</string>
@@ -527,4 +523,10 @@
 	<string name="native_sms_invite_header">Пригласить по SMS</string>
 	<string name="native_sms_invite_info">Эти приглашения будут отправлены как обычные SMS по стандартным тарифам оператора</string>
 	<string name="fun_free_messaging">Удобный бесплатный чат для живого общения</string>
+	<string name="added_as_hike_friend_info">Хотите сделать то же самое?</string>
+	<string name="added_as_hike_friend">Добавил(а) вас в свой круг друзей</string>
+	<string name="friend_request_accepted">Теперь вы сможете видеть обновления статуса друг друга.</string>
+	<string name="friend_request_accepted_name">Теперь вы сможете видеть обновления статуса %1$s.</string>
+	<string name="added_as_friend">%1$s Добавил(а) вас в свой круг друзей</string>
+	<string name="add_as_friend">и в круг друзей</string>
 </resources>

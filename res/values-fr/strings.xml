@@ -337,7 +337,6 @@
 	<string name="my_profile">Mon profil</string>
 	<string name="not_on_hike">%1$s passe à côté de quelque chose. Aide %1$s à découvrir hike.</string>
 	<string name="add_as_friend_info">Tu dois être ami(e) avec %1$s pour voir les mises à jour du statut de %1$s.</string>
-	<string name="add_as_friend">Ajouter aux amis</string>
 	<string name="updating_status">Mise à jour du statut</string>
 	<string name="add_member">Ajouter membre</string>
 	<string name="invite_all_members">Inviter des membres SMS sur hike</string>
@@ -348,7 +347,6 @@
 	<string name="contacts_on_hike">CONTACTS SUR HIKE (%1$d)</string>
 	<string name="team_hike">l\'équipe hike</string>
 	<string name="hey_name">Hé, %1$s !</string>
-	<string name="added_as_hike_friend">T\'a ajouté(e) comme ami(e)</string>
 	<string name="confirm">Confirmer</string>
 	<string name="recent_updates">Mises à jour récentes</string>
 	<string name="manage_account">Gérer compte</string>
@@ -401,7 +399,6 @@
 	<string name="call_not_free_head">Frais opérateur éventuels</string>
 	<string name="call_not_free_body">Il se peut que ton opérateur te facture cet appel.</string>
 	<string name="no_credits_gc">Fin des SMS gratuits. Les utilisateurs de SMS ne recevront plus tes messages.</string>
-	<string name="added_as_friend">%1$s t\'a ajouté(e) à ses amis.</string>
 	<string name="not_now">Plus tard</string>
 	<string name="delete_status">Suppr. mise à jour</string>
 	<string name="delete_status_confirmation">Veux-tu vraiment supprimer cette mise à jour ?</string>
@@ -434,7 +431,6 @@
 	<string name="changed_profile">Image de profil modifiée</string>
 	<string name="add_friend_info">Retrouve ici les mises à jour de ton cercle d\'amis.</string>
 	<string name="no_friends">Touche + pour ajouter un contact à ton cercle d\'amis</string>
-	<string name="added_as_hike_friend_info">Tu peux voir les mises à jour de %1$s. Peut-il/elle voir les tiennes ?</string>
 	<string name="confirmed_friend">a rejoint tes amis</string>
 	<string name="confirmed_friend_info">Tu vois les mises à jour de %1$s, et réciproquement.</string>
 	<string name="accepted_friend_request_info">Tu vois les mises à jour de %1$s, et réciproquement.</string>
@@ -527,4 +523,10 @@
 	<string name="native_sms_invite_header">Inviter par SMS</string>
 	<string name="native_sms_invite_info">Ces invitations sont envoyées sous forme de SMS normaux. Le tarif SMS ordinaire s\'applique.</string>
 	<string name="fun_free_messaging">Une messagerie fun et gratuite pour la vie</string>
+	<string name="added_as_hike_friend_info">Veux-tu l\'ajouter au tien ?</string>
+	<string name="added_as_hike_friend">T\'a ajouté(e) au cercle d\'amis</string>
+	<string name="friend_request_accepted">Vous pourrez voir vos mises à jour respectives.</string>
+	<string name="friend_request_accepted_name">Tu verras ici les mises à jour de %1$s.</string>
+	<string name="added_as_friend">%1$s t\'a ajouté(e) au cercle d\'amis</string>
+	<string name="add_as_friend">ajouter au cercle d\'amis</string>
 </resources>
