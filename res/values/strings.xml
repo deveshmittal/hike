@@ -464,7 +464,7 @@
 	<string name="tap_here_find_out_more">Tap here to find out more</string>
 	<string name="import_sms">Import SMS</string>
 	<string name="import_sms_info">Would you like to import your existing messages into hike?</string>
-	<string name="importing_sms_info">Give us a minute while we import your messages into hike.</string>
+	<string name="importing_sms_info">Give us a moment while we import your messages into hike.</string>
 	<string name="gc_fallback_offline">You need to be online to send this message</string>
 	<string name="stickers">Stickers</string>
 	<string name="sticker_download_failed">Oops! The download failed. Tap to retry</string>
@@ -532,7 +532,7 @@
 	<string name="sms_with_hike">Unified Inbox</string>
 	<string name="sms_with_hike_info">You can now send and receive regular SMS with hike. To do so, you\'ll need to make hike your primary SMS inbox.</string>
 	<string name="last_seen_header">Show Last Seen</string>
-	<string name="last_seen_info">Turning off last seen will hide your friend\'s status from you as well</string>
+	<string name="last_seen_info">Turning off last seen will hide your friends\' status from you as well</string>
 	<string name="user_back_on_hike">%1$s is back on hike. Say hi :)</string>
 	<string name="sticker">Sticker</string>
 	<string name="fun_free_messaging">Fun, free messaging for life</string>
