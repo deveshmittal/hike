@@ -117,6 +117,8 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 				editor.commit();
 
 				dialog.dismiss();
+
+				onTitleIconClick(null);
 			}
 		});
 
@@ -210,6 +212,7 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 							HikeMessengerApp.SHOWN_NATIVE_SMS_INVITE_POPUP,
 							false)) {
 				showNativeSMSPopup();
+				return;
 			}
 
 			while (iterator.hasNext()) {
