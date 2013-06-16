@@ -541,6 +541,7 @@
 	<string name="user_back_on_hike">%1$s is back on hike. Say hi :)</string>
 	<string name="sticker">Sticker</string>
 	<string name="fun_free_messaging">Fun, free messaging for life</string>
+	<string name="invite_sms">Invite via SMS</string>
 	<string name="system_health_error">Please enable your phone browser to to view System Health</string>
 	<string name="email_error">Hike requies an email application installed on your device to proceed</string>
 </resources>

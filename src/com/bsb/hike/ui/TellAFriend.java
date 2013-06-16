@@ -81,6 +81,19 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 			findViewById(ids[i]).setOnClickListener(this);
 		}
 
+		View smsContainer = findViewById(R.id.sms);
+		TextView smsMainText = (TextView) smsContainer
+				.findViewById(R.id.item_txt);
+		TextView smsSubText = (TextView) smsContainer
+				.findViewById(R.id.item_subtxt);
+
+		smsMainText
+				.setText(HikeMessengerApp.isIndianUser() ? R.string.free_sms_txt
+						: R.string.sms);
+		smsSubText
+				.setText(HikeMessengerApp.isIndianUser() ? R.string.invite_free_sms
+						: R.string.invite_sms);
+
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 
 		if (savedInstanceState != null) {
