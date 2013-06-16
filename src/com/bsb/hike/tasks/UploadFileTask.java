@@ -99,25 +99,19 @@ public class UploadFileTask extends FileTransferTaskBase {
 					// We don't need to save the file if its a recording since
 					// its already saved in the hike folder
 					if (TextUtils.isEmpty(fileKey) && !wasFileSaved) {
+
 						selectedFile = Utils.getOutputMediaFile(hikeFileType,
 								fileName, null);
 						Log.d(getClass().getSimpleName(), "Copying file: "
 								+ filePath + " to " + selectedFile.getPath());
-						/*
-						 * Checking if this file already exists in the hike
-						 * folder.
-						 */
-						if (!filePath.contains(Utils
-								.getFileParent(hikeFileType))) {
-							// Saving the file to hike local folder
-							if (!Utils.copyFile(filePath,
-									selectedFile.getPath(), hikeFileType)) {
-								return FTResult.READ_FAIL;
-							}
-							filePath = selectedFile.getPath();
-						} else {
-							selectedFile = file;
+
+						// Saving the file to hike local folder
+						if (!Utils.copyFile(filePath, selectedFile.getPath(),
+								hikeFileType)) {
+							return FTResult.READ_FAIL;
 						}
+
+						filePath = selectedFile.getPath();
 					} else {
 						selectedFile = new File(filePath);
 					}
