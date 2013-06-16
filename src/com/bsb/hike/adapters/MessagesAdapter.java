@@ -1250,7 +1250,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							showSMSDialog(true);
 						}
 					} else {
-						showSMSDialog(false);
+						/*
+						 * Only show the H2S fallback option if messaging indian
+						 * numbers.
+						 */
+						showSMSDialog(!conversation.getMsisdn().startsWith(
+								HikeConstants.INDIA_COUNTRY_CODE));
 					}
 				} else {
 					sendAllUnsentMessagesAsSMS(PreferenceManager
@@ -1772,14 +1777,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	private boolean isMessageUndelivered(ConvMessage convMessage) {
 		boolean fileUploaded = true;
+		boolean isGroupChatInternational = false;
 		if (convMessage.isFileTransferMessage()) {
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
 			fileUploaded = !TextUtils.isEmpty(hikeFile.getFileKey());
 		}
+		if (conversation instanceof GroupConversation) {
+			isGroupChatInternational = !HikeMessengerApp.isIndianUser();
+		}
 		return ((!convMessage.isSMS() && convMessage.getState().ordinal() < State.SENT_DELIVERED
 				.ordinal()) || (convMessage.isSMS() && convMessage.getState()
 				.ordinal() < State.SENT_CONFIRMED.ordinal()))
-				&& fileUploaded;
+				&& fileUploaded && !isGroupChatInternational;
 	}
 
 	enum VoiceMessagePlayerState {
