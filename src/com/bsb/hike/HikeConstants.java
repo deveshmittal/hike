@@ -379,6 +379,10 @@ public class HikeConstants {
 
 	public static final int MAX_FALLBACK_NATIVE_SMS = 19;
 
+	public static final int MAX_SMS_PULL_IN_INBOX = 2000;
+
+	public static final int MAX_SMS_PULL_IN_SENTBOX = 1000;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

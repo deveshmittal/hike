@@ -55,13 +55,13 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState> {
 
 			inboxCursor = context.getContentResolver().query(
 					HikeConstants.SMSNative.INBOX_CONTENT_URI, COLUMNS, null,
-					null, null);
+					null, HikeConstants.SMSNative.DATE + " DESC");
 
 			extractCursorData(inboxCursor, true);
 
 			sentboxCursor = context.getContentResolver().query(
 					HikeConstants.SMSNative.SENTBOX_CONTENT_URI, COLUMNS, null,
-					null, null);
+					null, HikeConstants.SMSNative.DATE + " DESC");
 
 			extractCursorData(sentboxCursor, false);
 
@@ -131,6 +131,10 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState> {
 		int dateIdx = cursor.getColumnIndex(HikeConstants.SMSNative.DATE);
 		int readIdx = cursor.getColumnIndex(HikeConstants.SMSNative.READ);
 
+		int pulledInSms = 0;
+		int maxSmsToPullIn = inbox ? HikeConstants.MAX_SMS_PULL_IN_INBOX
+				: HikeConstants.MAX_SMS_PULL_IN_SENTBOX;
+
 		while (cursor.moveToNext()) {
 			String number = cursor.getString(numberIdx);
 			/*
@@ -187,6 +191,9 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState> {
 
 			List<ConvMessage> messageList = smsMap.get(number);
 			messageList.add(convMessage);
+			if (++pulledInSms >= maxSmsToPullIn) {
+				break;
+			}
 		}
 	}
 }
