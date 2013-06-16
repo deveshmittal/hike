@@ -300,7 +300,6 @@ public class DbConversationListener implements Listener {
 				JSONArray messagesArray = new JSONArray();
 
 				for (ConvMessage convMessage : messages) {
-					convMessage.setSMS(true);
 
 					JSONObject messageJSON = convMessage.serialize()
 							.getJSONObject(HikeConstants.DATA);
@@ -309,6 +308,8 @@ public class DbConversationListener implements Listener {
 
 					mConversationDb.updateIsHikeMessageState(
 							convMessage.getMsgID(), false);
+
+					convMessage.setSMS(true);
 				}
 
 				data.put(HikeConstants.BATCH_MESSAGE, messagesArray);
