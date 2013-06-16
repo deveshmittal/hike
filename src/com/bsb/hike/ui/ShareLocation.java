@@ -19,6 +19,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -263,18 +264,23 @@ public class ShareLocation extends HikeAppStateBaseMapActivity {
 			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 			}
 		};
-		locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-				locListener);
-		locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0,
-				0, locListener);
+		try {
+			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+					0, locListener);
+			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+					0, 0, locListener);
 
-		if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
-			createAndShowMyItemizedOverlay(locManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-		} else if (locManager
-				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
-			createAndShowMyItemizedOverlay(locManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+			if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+				createAndShowMyItemizedOverlay(locManager
+						.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+			} else if (locManager
+					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
+				createAndShowMyItemizedOverlay(locManager
+						.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+			}
+		} catch (IllegalStateException e) {
+			Log.d(getClass().getSimpleName(), "No listener found");
+			showLocationDialog();
 		}
 	}
 
