@@ -529,4 +529,5 @@
 	<string name="friend_request_accepted_name">Теперь вы сможете видеть обновления статуса %1$s.</string>
 	<string name="added_as_friend">%1$s Добавил(а) вас в свой круг друзей</string>
 	<string name="add_as_friend">и в круг друзей</string>
+	<string name="audio_recording_msg_received">Отправил(а) вам голосовое сообщение</string>
 </resources>

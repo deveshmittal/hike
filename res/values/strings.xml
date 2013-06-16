@@ -246,7 +246,6 @@
 	<string name="audio_msg_received">Sent you an audio file</string>
 	<string name="location_msg_received">Shared a location</string>
 	<string name="contact_msg_received">Shared a contact</string>
-	<string name="audio_recording_msg_received">Sent you a voice message</string>
 	<string name="image_msg_sent">Photo</string>
 	<string name="video_msg_sent">Video</string>
 	<string name="audio_msg_sent">Audio</string>
@@ -546,4 +545,5 @@
 	<string name="friend_request_accepted_name">You will now be able to see updates from %1$s here.</string>
 	<string name="added_as_friend">%1$s added you to Circle of Friends</string>
 	<string name="add_as_friend">Add to Circle of Friends</string>
+	<string name="audio_recording_msg_received">Sent you a voice message</string>
 </resources>

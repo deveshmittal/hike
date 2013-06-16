@@ -528,4 +528,5 @@
 	<string name="friend_request_accepted_name">Agora você poderá ver aqui as atualizações de %1$s.</string>
 	<string name="added_as_friend">%1$s adicionou você ao círculo de amigos</string>
 	<string name="add_as_friend">adicionar ao círculo de amigos</string>
+	<string name="audio_recording_msg_received">Enviou a você uma mensagem de voz</string>
 </resources>
