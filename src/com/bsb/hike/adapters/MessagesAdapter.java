@@ -1177,7 +1177,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		if (Utils.isUserOnline(context)
 				&& diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME) {
 			showUndeliveredMessage = new ShowUndeliveredMessage(tv, container);
-			handler.postDelayed(showUndeliveredMessage, (5 - diff) * 1000);
+			handler.postDelayed(showUndeliveredMessage,
+					(HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
 		} else {
 			showUndeliveredTextAndSetClick(tv, container, true);
 		}
