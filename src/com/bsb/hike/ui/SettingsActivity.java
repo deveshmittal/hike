@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import java.util.ArrayList;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
@@ -133,6 +135,17 @@ public class SettingsActivity extends DrawerBaseActivity implements
 			intent.putExtra(Intent.EXTRA_TEXT, message.toString());
 			break;
 		}
-		startActivity(intent);
+		try {
+			startActivity(intent);
+		} catch (ActivityNotFoundException e) {
+			if (position == 4) {
+				Toast.makeText(getApplicationContext(),
+						R.string.system_health_error, Toast.LENGTH_SHORT)
+						.show();
+			} else if (position == 6) {
+				Toast.makeText(getApplicationContext(), R.string.email_error,
+						Toast.LENGTH_SHORT).show();
+			}
+		}
 	}
 }
