@@ -2309,6 +2309,17 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				mAdapter.addMessage(null);
 			}
 			mAdapter.notifyDataSetChanged();
+
+			/*
+			 * Don't scroll to bottom if the user is at older messages. It's
+			 * possible that the user might be reading them.
+			 */
+			if (((convMessage != null && !convMessage.isSent()) || convMessage == null)
+					&& mConversationsView.getLastVisiblePosition() < messages
+							.size() - 4) {
+				return;
+			}
+
 			// Smooth scroll by the minimum distance in the opposite direction,
 			// to fix the bug where the list does not scroll at all.
 			mConversationsView.smoothScrollBy(-1, 1);
