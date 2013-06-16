@@ -546,4 +546,5 @@
 	<string name="added_as_friend">%1$s added you to Circle of Friends</string>
 	<string name="add_as_friend">Add to Circle of Friends</string>
 	<string name="audio_recording_msg_received">Sent you a voice message</string>
+	<string name="sent_sticker">Sent you a sticker</string>
 </resources>

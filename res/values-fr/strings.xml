@@ -530,4 +530,5 @@
 	<string name="added_as_friend">%1$s t\'a ajouté(e) au cercle d\'amis</string>
 	<string name="add_as_friend">ajouter au cercle d\'amis</string>
 	<string name="audio_recording_msg_received">T\'a envoyé un message vocal</string>
+	<string name="sent_sticker">t\'a envoyé un sticker</string>
 </resources>
