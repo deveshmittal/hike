@@ -1735,6 +1735,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	private List<ConvMessage> getAllUnsentMessages() {
 		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
+		int count = 0;
 		for (int i = lastSentMessagePosition; i >= 0; i--) {
 			ConvMessage convMessage = convMessages.get(i);
 			if (!convMessage.isSent()) {
@@ -1748,6 +1749,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 			}
 			unsentMessages.add(convMessage);
+			if (++count >= HikeConstants.MAX_FALLBACK_NATIVE_SMS) {
+				break;
+			}
 		}
 		return unsentMessages;
 	}

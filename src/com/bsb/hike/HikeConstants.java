@@ -377,6 +377,8 @@ public class HikeConstants {
 	/* In seconds */
 	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 20;
 
+	public static final int MAX_FALLBACK_NATIVE_SMS = 19;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
