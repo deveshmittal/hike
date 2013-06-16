@@ -142,7 +142,7 @@ public class StickerAdapter extends BaseAdapter implements OnClickListener {
 			for (int i = 0; i < maxCount; i++) {
 				ImageView imageView = new ImageView(activity);
 				imageView.setLayoutParams(childParams);
-				imageView.setScaleType(ScaleType.CENTER_INSIDE);
+				imageView.setScaleType(ScaleType.FIT_CENTER);
 				imageView.setPadding(padding, padding, padding, padding);
 
 				int index = (startPosition * numItemsRow) + i;
