@@ -4190,6 +4190,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private void toggleGroupLife(boolean alive) {
 		((GroupConversation) mConversation).setGroupAlive(alive);
+		this.mSendBtn.setEnabled(false);
 		this.mComposeView.setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
 		this.titleIconView.setEnabled(alive ? true : false);
 		findViewById(R.id.emo_btn).setEnabled(alive ? true : false);
