@@ -3870,6 +3870,18 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 				ChatThread.stickerTaskMap.put(categoryId, downloadStickerTask);
 				updateStickerCategoryUI(categoryIndex, false, null);
+
+				Editor editor = prefs.edit();
+				if (categoryIndex == 0) {
+					editor.putBoolean(
+							HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+							true);
+				} else {
+					editor.putBoolean(
+							EmoticonConstants.STICKER_DOWNLOAD_PREF[categoryIndex],
+							true);
+				}
+				editor.commit();
 			}
 		});
 
@@ -3885,23 +3897,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			}
 		});
 
-		dialog.setOnDismissListener(new OnDismissListener() {
-
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				Editor editor = prefs.edit();
-				if (categoryIndex == 0) {
-					editor.putBoolean(
-							HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
-							true);
-				} else {
-					editor.putBoolean(
-							EmoticonConstants.STICKER_DOWNLOAD_PREF[categoryIndex],
-							true);
-				}
-				editor.commit();
-			}
-		});
 		dialog.show();
 	}
 
