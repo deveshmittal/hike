@@ -151,7 +151,7 @@ public class StickerAdapter extends BaseAdapter implements OnClickListener {
 
 				if (sticker.getStickerIndex() != -1) {
 					imageView
-							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS[sticker
+							.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS[sticker
 									.getStickerIndex()]);
 				} else {
 					imageView.setImageBitmap(BitmapFactory.decodeFile(sticker
