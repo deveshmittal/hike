@@ -13,14 +13,13 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.utils.Utils;
 
 public class SMSBroadcastReceiver extends BroadcastReceiver {
-
-	private static final String HIKE_VMN_CONTACT = "+hike+";
 
 	HikeUserDatabase mDb;
 
@@ -56,29 +55,18 @@ public class SMSBroadcastReceiver extends BroadcastReceiver {
 				String from = sms.getOriginatingAddress();
 				ContactInfo contactInfo = mDb.getContactInfoFromMSISDN(from,
 						true);
-
 				if (contactInfo == null) {
-					boolean hikeVmn = false;
-					for (String vmn : HikeConstants.HIKE_VMNS) {
-						if (vmn.equals(from)) {
-							hikeVmn = true;
-							from = HIKE_VMN_CONTACT;
-							break;
-						}
-					}
-					if (!hikeVmn) {
-						Log.d(getClass().getSimpleName(),
-								"Ignoring SMS message because contact not in addressbook phone_no="
-										+ from);
-						return;
-					}
+					Log.d(getClass().getSimpleName(),
+							"Ignoring SMS message because contact not in addressbook phone_no="
+									+ from);
+					return;
 				}
 				try {
 
 					JSONObject msg = new JSONObject();
 					msg.put(HikeConstants.TYPE,
 							HikeConstants.MqttMessageTypes.MESSAGE);
-					msg.put(HikeConstants.FROM, from);
+					msg.put(HikeConstants.FROM, contactInfo.getMsisdn());
 
 					JSONObject data = new JSONObject();
 					data.put(HikeConstants.SMS_MESSAGE, body);
