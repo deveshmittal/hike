@@ -354,7 +354,7 @@ public class DbConversationListener implements Listener {
 		SmsManager smsManager = SmsManager.getDefault();
 
 		ArrayList<String> messages = smsManager.divideMessage(Utils
-				.getMessageDisplayText(convMessage));
+				.getMessageDisplayText(convMessage, context));
 
 		ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
 
