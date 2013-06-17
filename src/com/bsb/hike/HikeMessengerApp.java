@@ -499,7 +499,7 @@ public class HikeMessengerApp extends Application implements Listener {
 		if (!settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
 			setupBollywoodCategoryVisibility(settings);
 		}
-		setupStickerCategoryList(preferenceManager);
+		setupStickerCategoryList(settings);
 
 		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
 			HikeConversationsDatabase.getInstance()
@@ -637,17 +637,12 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static void setupStickerCategoryList(SharedPreferences preferences) {
 		stickerCategories = new ArrayList<StickerCategory>();
 
-		/*
-		 * Adding a category for the back key
-		 */
-		stickerCategories.add(new StickerCategory(
-				StickerCategory.BACK_CATEGORY_ID,
-				StickerCategory.BACK_CATEGORY_RES_ID));
-
 		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
-			stickerCategories.add(new StickerCategory(Utils
-					.getCategoryIdForIndex(i),
-					EmoticonConstants.STICKER_CATEGORY_RES_IDS[i]));
+			stickerCategories.add(new StickerCategory(
+					EmoticonConstants.STICKER_CATEGORY_IDS[i],
+					EmoticonConstants.STICKER_CATEGORY_RES_IDS[i],
+					EmoticonConstants.STICKER_DOWNLOAD_PREF[i],
+					EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[i]));
 		}
 		String removedIds = preferences.getString(
 				HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
@@ -657,7 +652,7 @@ public class HikeMessengerApp extends Application implements Listener {
 			for (int i = 0; i < removedIdArray.length(); i++) {
 				String removedCategoryId = removedIdArray.getString(i);
 				StickerCategory removedStickerCategory = new StickerCategory(
-						removedCategoryId, 0);
+						removedCategoryId, 0, null, 0);
 
 				stickerCategories.remove(removedStickerCategory);
 			}

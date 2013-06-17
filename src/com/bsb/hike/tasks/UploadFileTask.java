@@ -26,6 +26,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.ChatThread;
@@ -46,10 +47,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 	private ConvMessage convMessage;
 	private Uri picasaUri;
 	private long recordingDuration = -1;
+	private Conversation conversation;
 
 	public UploadFileTask(String msisdn, String filePath, String fileKey,
 			String fileType, HikeFileType hikeFileType, boolean wasFileSaved,
-			long recordingDuration, Context context) {
+			long recordingDuration, Context context, Conversation conversation) {
 		this.msisdn = msisdn;
 		this.filePath = filePath;
 		this.fileKey = fileKey;
@@ -58,19 +60,23 @@ public class UploadFileTask extends FileTransferTaskBase {
 		this.wasFileSaved = wasFileSaved;
 		this.recordingDuration = recordingDuration;
 		this.context = context;
+		this.conversation = conversation;
 	}
 
-	public UploadFileTask(ConvMessage convMessage, Context context) {
+	public UploadFileTask(ConvMessage convMessage, Context context,
+			Conversation conversation) {
 		this.convMessage = convMessage;
 		this.context = context;
+		this.conversation = conversation;
 	}
 
 	public UploadFileTask(Uri picasaUri, HikeFileType hikeFileType,
-			String msisdn, Context context) {
+			String msisdn, Context context, Conversation conversation) {
 		this.picasaUri = picasaUri;
 		this.hikeFileType = hikeFileType;
 		this.msisdn = msisdn;
 		this.context = context;
+		this.conversation = conversation;
 	}
 
 	@Override
@@ -279,6 +285,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time,
 				ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setMetadata(metadata);
+		convMessage.setSMS(!conversation.isOnhike());
 		HikeConversationsDatabase.getInstance().addConversationMessages(
 				convMessage);
 

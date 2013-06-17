@@ -108,7 +108,7 @@ public class EmoticonAdapter extends PagerAdapter implements
 		case HIKE_EMOTICON:
 			return SmileyParser.HIKE_EMOTICONS_SUBCATEGORIES.length + 1;
 		case STICKERS:
-			return HikeMessengerApp.stickerCategories.size() - 1;
+			return HikeMessengerApp.stickerCategories.size();
 		}
 		return 0;
 	}

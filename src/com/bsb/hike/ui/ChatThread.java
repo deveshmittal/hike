@@ -3209,7 +3209,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					// Picasa image
 					UploadFileTask uploadFileTask = new UploadFileTask(
 							selectedFileUri, hikeFileType, mContactNumber,
-							getApplicationContext());
+							getApplicationContext(), mConversation);
 					uploadFileTask.execute();
 					return;
 				} else {
@@ -3481,7 +3481,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		clearTempData();
 		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber,
 				filePath, fileKey, fileType, hikeFileType, isRecording,
-				recordingDuration, getApplicationContext());
+				recordingDuration, getApplicationContext(), mConversation);
 		uploadFileTask.execute();
 	}
 
@@ -3795,7 +3795,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					if (stickerCatgoryContainer != null) {
 						currentStickerCategorySelected = stickerCatgoryContainer
 								.findViewWithTag(HikeMessengerApp.stickerCategories
-										.get(pageNum + 1));
+										.get(pageNum));
 						currentStickerCategorySelected.setSelected(true);
 					}
 
@@ -3808,10 +3808,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 						showStickerPreviewDialog(0);
 					} else if (pageNum != 0
 							&& (!Utils.checkIfStickerCategoryExists(
-									ChatThread.this, categoryId) || !prefs
-									.getBoolean(
-											EmoticonConstants.STICKER_DOWNLOAD_PREF[pageNum],
-											false))
+									ChatThread.this, categoryId) || !prefs.getBoolean(
+									HikeMessengerApp.stickerCategories
+											.get(pageNum).downloadDialogPref,
+									false))
 							&& !ChatThread.stickerTaskMap
 									.containsKey(categoryId)) {
 						showStickerPreviewDialog(pageNum);
@@ -3878,9 +3878,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					updateStickerCategoryUI(categoryIndex, false, null);
 
 					if (categoryIndex != 0) {
-						editor.putBoolean(
-								EmoticonConstants.STICKER_DOWNLOAD_PREF[categoryIndex],
-								true);
+						editor.putBoolean(HikeMessengerApp.stickerCategories
+								.get(categoryIndex).downloadDialogPref, true);
 					}
 				} finally {
 					editor.commit();
@@ -3921,8 +3920,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		int categoryTextShadowColor = 0;
 		int dividerBg = 0;
 
-		switch (categoryIndex) {
-		case 0:
+		switch (HikeMessengerApp.stickerCategories.get(categoryIndex).categoryResId) {
+		case R.drawable.doggy:
 			resParentBg = getResources().getColor(R.color.doggy_bg);
 
 			stickerBtnBg = R.drawable.doggy_btn;
@@ -3939,7 +3938,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			dividerBg = getResources().getColor(R.color.doggy_div);
 			break;
-		case 1:
+		case R.drawable.kitty:
 			resParentBg = getResources().getColor(R.color.kitty_bg);
 
 			stickerBtnBg = R.drawable.kitty_btn;
@@ -3956,7 +3955,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			dividerBg = getResources().getColor(R.color.kitty_div);
 			break;
-		case 2:
+		case R.drawable.expressions:
 			resParentBg = getResources().getColor(R.color.exp_bg);
 
 			stickerBtnBg = R.drawable.exp_btn;
@@ -3972,7 +3971,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			dividerBg = getResources().getColor(R.color.exp_div);
 			break;
-		case 3:
+		case R.drawable.bollywood:
 			resParentBg = getResources().getColor(R.color.bollywood_bg);
 
 			stickerBtnBg = R.drawable.bollywood_btn;
@@ -3989,7 +3988,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			dividerBg = getResources().getColor(R.color.bollywood_div);
 			break;
-		case 4:
+		case R.drawable.rageface:
 			resParentBg = getResources().getColor(R.color.rf_bg);
 
 			stickerBtnBg = R.drawable.rf_btn;
@@ -4008,7 +4007,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		}
 
 		parentDrawable.setColor(resParentBg);
-		sticker.setImageResource(EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[categoryIndex]);
+		sticker.setImageResource(HikeMessengerApp.stickerCategories
+				.get(categoryIndex).categoryPreviewResId);
 
 		stickerBtn.setBackgroundResource(stickerBtnBg);
 		stickerBtn.setText(stickerBtnText);
@@ -4047,9 +4047,16 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		stickerCatgoryContainer.removeAllViews();
 
 		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		for (int i = 0; i < HikeMessengerApp.stickerCategories.size(); i++) {
-			StickerCategory stickerCategory = HikeMessengerApp.stickerCategories
-					.get(i);
+
+		List<StickerCategory> stickerCatgoryTabList = new ArrayList<StickerCategory>(
+				HikeMessengerApp.stickerCategories);
+
+		stickerCatgoryTabList.add(0, new StickerCategory(
+				StickerCategory.BACK_CATEGORY_ID,
+				StickerCategory.BACK_CATEGORY_RES_ID, null, 0));
+
+		for (int i = 0; i < stickerCatgoryTabList.size(); i++) {
+			StickerCategory stickerCategory = stickerCatgoryTabList.get(i);
 
 			View parent = layoutInflater.inflate(R.layout.sticker_btn, null);
 
@@ -4081,17 +4088,21 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 		StickerCategory tag = (StickerCategory) v.getTag();
 
+		StickerCategory backCategory = new StickerCategory(
+				StickerCategory.BACK_CATEGORY_ID,
+				StickerCategory.BACK_CATEGORY_RES_ID, null, 0);
+		if (backCategory.equals(tag)) {
+			onEmoticonCategoryClick(findViewById(R.id.emoji_btn));
+			hideStickerTabs();
+			return;
+		}
+
 		for (int i = 0; i < HikeMessengerApp.stickerCategories.size(); i++) {
 			StickerCategory category = HikeMessengerApp.stickerCategories
 					.get(i);
 			if (category.equals(tag)) {
-				if (i == 0) {
-					onEmoticonCategoryClick(findViewById(R.id.emoji_btn));
-					hideStickerTabs();
-				} else {
-					setStickerCategorySelected(tag);
-					emoticonViewPager.setCurrentItem(i - 1, false);
-				}
+				setStickerCategorySelected(tag);
+				emoticonViewPager.setCurrentItem(i, false);
 				break;
 			}
 		}

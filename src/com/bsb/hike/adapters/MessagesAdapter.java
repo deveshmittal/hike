@@ -1291,7 +1291,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						if ((hikeFile.getHikeFileType() != HikeFileType.LOCATION)
 								&& (hikeFile.getHikeFileType() != HikeFileType.CONTACT)) {
 							uploadTask = new UploadFileTask(convMessage,
-									context);
+									context, conversation);
 						} else {
 							uploadTask = new UploadContactOrLocationTask(
 									convMessage,

@@ -2170,11 +2170,10 @@ public class Utils {
 	}
 
 	public static String getCategoryIdForIndex(int index) {
-		if (index == -1
-				|| index >= EmoticonConstants.STICKER_CATEGORY_IDS.length) {
+		if (index == -1 || index >= HikeMessengerApp.stickerCategories.size()) {
 			return "";
 		}
-		return EmoticonConstants.STICKER_CATEGORY_IDS[index];
+		return HikeMessengerApp.stickerCategories.get(index).categoryId;
 	}
 
 	public static void setupFormattedTime(TextView tv, long timeElapsed) {

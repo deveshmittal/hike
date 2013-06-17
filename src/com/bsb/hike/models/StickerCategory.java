@@ -9,10 +9,15 @@ public class StickerCategory {
 
 	public String categoryId;
 	public int categoryResId;
+	public String downloadDialogPref;
+	public int categoryPreviewResId;
 
-	public StickerCategory(String categoryId, int categoryResId) {
+	public StickerCategory(String categoryId, int categoryResId,
+			String downloadDialogPref, int categoryPreviewResId) {
 		this.categoryId = categoryId;
 		this.categoryResId = categoryResId;
+		this.downloadDialogPref = downloadDialogPref;
+		this.categoryPreviewResId = categoryPreviewResId;
 	}
 
 	@Override
