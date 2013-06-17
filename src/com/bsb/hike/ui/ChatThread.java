@@ -3706,7 +3706,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 						false)) {
 					showStickerPreviewDialog(0);
 				}
-				setupBottomTab();
+				setupBottomTab(0);
 				break;
 			}
 
@@ -4036,9 +4036,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		}
 		emoticonsAdapter.setupStickerPage(emoticonPage, categoryIndex, failed,
 				downloadTypeBeforeFail);
+		if (downloadTypeBeforeFail == DownloadType.UPDATE && !failed) {
+			setupBottomTab(categoryIndex);
+		}
 	}
 
-	private void setupBottomTab() {
+	private void setupBottomTab(int preselectedCategoryIndex) {
 		View tabContainer = findViewById(android.R.id.tabs);
 		tabContainer.setVisibility(View.GONE);
 
@@ -4064,8 +4067,16 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				parent.findViewById(R.id.divider_left).setVisibility(View.GONE);
 			}
 
+			boolean updateAvailable = HikeConversationsDatabase.getInstance()
+					.isStickerUpdateAvailable(stickerCategory.categoryId);
+
 			LayoutParams layoutParams = new LayoutParams(0,
 					LayoutParams.MATCH_PARENT, 1.0f);
+
+			ImageView updateAvailableView = (ImageView) parent
+					.findViewById(R.id.update_available);
+			updateAvailableView.setVisibility(updateAvailable ? View.VISIBLE
+					: View.GONE);
 
 			ImageButton stickerCategoryButton = (ImageButton) parent
 					.findViewById(R.id.category_btn);
@@ -4073,7 +4084,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					.setImageResource(stickerCategory.categoryResId);
 			stickerCategoryButton.setTag(stickerCategory);
 
-			if (i == 1) {
+			if (i == preselectedCategoryIndex + 1) {
 				stickerCategoryButton.setSelected(true);
 				currentStickerCategorySelected = stickerCategoryButton;
 			}

@@ -165,6 +165,7 @@ public class StickerAdapter extends BaseAdapter implements OnClickListener {
 			}
 			break;
 		case UPDATING_STICKER:
+			View button = convertView.findViewById(R.id.update_btn);
 			TextView updateText = (TextView) convertView.findViewById(R.id.txt);
 			ProgressBar progressBar = (ProgressBar) convertView
 					.findViewById(R.id.download_progress);
@@ -173,14 +174,12 @@ public class StickerAdapter extends BaseAdapter implements OnClickListener {
 				progressBar.setVisibility(View.VISIBLE);
 				updateText.setText(R.string.updating_set);
 				convertView.setClickable(false);
-				convertView
-						.setBackgroundResource(R.drawable.invite_to_hike_pressed);
+				button.setBackgroundResource(R.drawable.invite_to_hike_pressed);
 			} else {
-				progressBar.setVisibility(View.VISIBLE);
+				progressBar.setVisibility(View.GONE);
 				updateText.setText(R.string.new_stickers_available);
 				convertView.setClickable(true);
-				convertView
-						.setBackgroundResource(R.drawable.invite_chatthread_button);
+				button.setBackgroundResource(R.drawable.invite_chatthread_button);
 				convertView.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
