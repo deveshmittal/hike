@@ -919,10 +919,7 @@ public class MqttMessagesManager {
 
 				if (HikeConstants.REMOVE_CATEGORY.equals(subType)) {
 
-					for (File sticker : categoryDir.listFiles()) {
-						sticker.delete();
-					}
-					categoryDir.delete();
+					Utils.deleteFile(categoryDir);
 
 					String removedIds = settings.getString(
 							HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
@@ -943,8 +940,12 @@ public class MqttMessagesManager {
 
 					for (int i = 0; i < stickerIds.length(); i++) {
 						String stickerId = stickerIds.getString(i);
-						File sticker = new File(categoryDir, stickerId);
+						File sticker = new File(categoryDir
+								+ HikeConstants.LARGE_STICKER_ROOT, stickerId);
+						File stickerSmall = new File(categoryDir
+								+ HikeConstants.SMALL_STICKER_ROOT, stickerId);
 						sticker.delete();
+						stickerSmall.delete();
 					}
 				}
 			}

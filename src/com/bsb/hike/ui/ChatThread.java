@@ -30,7 +30,6 @@ import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
