@@ -137,28 +137,28 @@ public class SyncOldSMSTask extends AsyncTask<Void, Void, SMSSyncState> {
 
 		while (cursor.moveToNext()) {
 			String number = cursor.getString(numberIdx);
+			number = number.replaceAll(" ", "").replaceAll("-", "");
+
+			/*
+			 * Normalizing the number
+			 */
+			number = Utils.normalizeNumber(
+					number,
+					context.getSharedPreferences(
+							HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
+							HikeMessengerApp.COUNTRY_CODE,
+							HikeConstants.INDIA_COUNTRY_CODE));
 			/*
 			 * If this number has not been added to the map, we should check
 			 * whether the contact exists first.
 			 */
 			if (!smsMap.containsKey(number)) {
-				number = number.replaceAll(" ", "").replaceAll("-", "");
 
 				if (rejectedNumbers.contains(number)) {
 					Log.d(getClass().getSimpleName(), "Already rejected: "
 							+ number);
 					continue;
 				}
-
-				/*
-				 * Normalizing the number
-				 */
-				number = Utils.normalizeNumber(
-						number,
-						context.getSharedPreferences(
-								HikeMessengerApp.ACCOUNT_SETTINGS, 0)
-								.getString(HikeMessengerApp.COUNTRY_CODE,
-										HikeConstants.INDIA_COUNTRY_CODE));
 
 				Log.d(getClass().getSimpleName(), "Checking contact: " + number);
 
