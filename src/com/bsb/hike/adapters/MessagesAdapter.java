@@ -697,7 +697,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						ssb.setSpan(new ForegroundColorSpan(0xff666666),
 								convMessage.getMessage().indexOf(dndNames),
 								convMessage.getMessage().indexOf(dndNames)
-										+ dndNames.length() + 1,
+										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					} else {
 						ssb = new SpannableStringBuilder(
@@ -705,12 +705,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						ssb.setSpan(new ForegroundColorSpan(0xff666666),
 								convMessage.getMessage().indexOf(dndNames),
 								convMessage.getMessage().indexOf(dndNames)
-										+ dndNames.length() + 1,
+										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 						ssb.setSpan(new ForegroundColorSpan(0xff666666),
 								convMessage.getMessage().lastIndexOf(dndNames),
 								convMessage.getMessage().lastIndexOf(dndNames)
-										+ dndNames.length() + 1,
+										+ dndNames.length(),
 								Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 					}
 
