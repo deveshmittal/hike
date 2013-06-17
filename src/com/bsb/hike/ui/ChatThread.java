@@ -3860,28 +3860,31 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			@Override
 			public void onClick(View v) {
 				dialog.dismiss();
-				if (categoryIndex == 0) {
-					return;
-				}
-				DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
-						ChatThread.this, categoryIndex,
-						DownloadType.NEW_CATEGORY);
-				downloadStickerTask.execute();
-
-				ChatThread.stickerTaskMap.put(categoryId, downloadStickerTask);
-				updateStickerCategoryUI(categoryIndex, false, null);
-
 				Editor editor = prefs.edit();
-				if (categoryIndex == 0) {
-					editor.putBoolean(
-							HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
-							true);
-				} else {
-					editor.putBoolean(
-							EmoticonConstants.STICKER_DOWNLOAD_PREF[categoryIndex],
-							true);
+				try {
+					if (categoryIndex == 0) {
+						editor.putBoolean(
+								HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+								true);
+						return;
+					}
+					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
+							ChatThread.this, categoryIndex,
+							DownloadType.NEW_CATEGORY);
+					downloadStickerTask.execute();
+
+					ChatThread.stickerTaskMap.put(categoryId,
+							downloadStickerTask);
+					updateStickerCategoryUI(categoryIndex, false, null);
+
+					if (categoryIndex != 0) {
+						editor.putBoolean(
+								EmoticonConstants.STICKER_DOWNLOAD_PREF[categoryIndex],
+								true);
+					}
+				} finally {
+					editor.commit();
 				}
-				editor.commit();
 			}
 		});
 
