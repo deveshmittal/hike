@@ -538,7 +538,7 @@
 	<string name="fun_free_messaging">Fun, free messaging for life</string>
 	<string name="invite_sms">Invite via SMS</string>
 	<string name="system_health_error">Please enable your phone browser to to view System Health</string>
-	<string name="email_error">Hike requies an email application installed on your device to proceed</string>
+	<string name="email_error">Hike requires an email application installed on your device to proceed</string>
 	<string name="added_as_hike_friend_info">Would you like to do the same?</string>
 	<string name="added_as_hike_friend">Added you to Circle of Friends</string>
 	<string name="friend_request_accepted">You will now be able to see updates from each other.</string>
