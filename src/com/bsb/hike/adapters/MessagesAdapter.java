@@ -1609,8 +1609,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		ConvMessage convMessage = convMessages.get(lastSentMessagePosition);
-		hikeSmsText.setText(Utils.getMessageDisplayText(convMessage));
-		nativeSmsText.setText(Utils.getMessageDisplayText(convMessage));
+		hikeSmsText.setText(Utils.getMessageDisplayText(convMessage, context));
+		nativeSmsText
+				.setText(Utils.getMessageDisplayText(convMessage, context));
 
 		sendHike.setOnClickListener(new OnClickListener() {
 

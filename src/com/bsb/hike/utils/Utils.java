@@ -2429,15 +2429,25 @@ public class Utils {
 		activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
 	}
 
-	public static String getMessageDisplayText(ConvMessage convMessage) {
+	public static String getMessageDisplayText(ConvMessage convMessage,
+			Context context) {
 		if (convMessage.isFileTransferMessage()) {
 			HikeFile hikeFile = convMessage.getMetadata().getHikeFiles().get(0);
-			return AccountUtils.fileTransferBaseViewUrl + hikeFile.getFileKey();
+
+			String message = HikeFileType.getFileTypeMessage(context,
+					hikeFile.getHikeFileType(), false)
+					+ ". "
+					+ AccountUtils.fileTransferBaseViewUrl
+					+ hikeFile.getFileKey();
+			return message;
 
 		} else if (convMessage.isStickerMessage()) {
 			Sticker sticker = convMessage.getMetadata().getSticker();
-			return String.format(AccountUtils.stickersUrl,
-					sticker.getCategoryId(), sticker.getStickerId());
+			String message = context.getString(R.string.sent_sticker)
+					+ ". "
+					+ String.format(AccountUtils.stickersUrl,
+							sticker.getCategoryId(), sticker.getStickerId());
+			return message;
 		}
 		return convMessage.getMessage();
 	}
