@@ -18,6 +18,16 @@
         android:background="@drawable/tab_selector"
         android:gravity="center"
         android:onClick="onStickerCategoryClick"
-        android:src="@drawable/ic_sticker_back" />
+        android:src="@drawable/kitty" />
+
+    <ImageView
+        android:id="@+id/update_available"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingBottom="15dp"
+        android:paddingLeft="29dp"
+        android:src="@drawable/ic_sticker_update"
+        android:visibility="gone" />
 
 </RelativeLayout>
