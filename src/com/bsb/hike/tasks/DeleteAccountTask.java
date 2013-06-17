@@ -90,7 +90,7 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 				+ HikeConstants.STICKERS_ROOT;
 		File dir = new File(dirPath);
 		if (dir.exists()) {
-			deleteFile(dir);
+			Utils.deleteFile(dir);
 		}
 
 		/*
@@ -103,17 +103,8 @@ public class DeleteAccountTask extends AsyncTask<Void, Void, Boolean> implements
 				+ HikeConstants.STICKERS_ROOT;
 		File extDir = new File(extDirPath);
 		if (extDir.exists()) {
-			deleteFile(extDir);
+			Utils.deleteFile(extDir);
 		}
-	}
-
-	private void deleteFile(File file) {
-		if (file.isDirectory()) {
-			for (File f : file.listFiles()) {
-				deleteFile(f);
-			}
-		}
-		file.delete();
 	}
 
 	@Override

@@ -2441,4 +2441,13 @@ public class Utils {
 		}
 		return convMessage.getMessage();
 	}
+
+	public static void deleteFile(File file) {
+		if (file.isDirectory()) {
+			for (File f : file.listFiles()) {
+				deleteFile(f);
+			}
+		}
+		file.delete();
+	}
 }
