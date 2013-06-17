@@ -1250,12 +1250,16 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							showSMSDialog(true);
 						}
 					} else {
-						/*
-						 * Only show the H2S fallback option if messaging indian
-						 * numbers.
-						 */
-						showSMSDialog(!conversation.getMsisdn().startsWith(
-								HikeConstants.INDIA_COUNTRY_CODE));
+						if (conversation instanceof GroupConversation) {
+							showSMSDialog(false);
+						} else {
+							/*
+							 * Only show the H2S fallback option if messaging
+							 * indian numbers.
+							 */
+							showSMSDialog(!conversation.getMsisdn().startsWith(
+									HikeConstants.INDIA_COUNTRY_CODE));
+						}
 					}
 				} else {
 					sendAllUnsentMessagesAsSMS(PreferenceManager
