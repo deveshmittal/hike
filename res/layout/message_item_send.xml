@@ -182,6 +182,7 @@
             android:layout_below="@id/bubble_container"
             android:layout_alignParentRight="true"
             android:layout_marginTop="4dp"
+            android:gravity="right"
             android:text="@string/msg_undelivered"
             android:textColor="#999999"
             android:textSize="12sp"
