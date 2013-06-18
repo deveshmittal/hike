@@ -341,6 +341,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private long recordedTime = -1;
 
+	private static boolean recording = false;
+
 	/*
 	 * Made this public so that its accessible to this activity's adapter
 	 */
@@ -2932,7 +2934,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		}
 
 		recordBtn.setOnTouchListener(new OnTouchListener() {
-			boolean recording = false;
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
@@ -3205,6 +3206,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			recorder.release();
 			recorder = null;
 		}
+		recording = false;
 	}
 
 	private void recordingError(boolean showError) {
