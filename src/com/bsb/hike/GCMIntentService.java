@@ -31,11 +31,13 @@ public class GCMIntentService extends GCMBaseIntentService {
 		prefs = prefs == null ? context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0) : prefs;
 		if (!Utils.isUserAuthenticated(context)) {
-			HikeMessengerApp app = (HikeMessengerApp) context
-					.getApplicationContext();
-			app.connectToService();
-			context.sendBroadcast(new Intent(HikeService.MQTT_PING_ACTION));
+			return;
 		}
+
+		HikeMessengerApp app = (HikeMessengerApp) context
+				.getApplicationContext();
+		app.connectToService();
+		context.sendBroadcast(new Intent(HikeService.MQTT_PING_ACTION));
 	}
 
 	@Override
