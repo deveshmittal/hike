@@ -34,7 +34,6 @@
             android:gravity="center"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:paddingTop="1dp"
             android:text="@string/hike_sms_info2"
             android:textColor="@color/white"
             android:textSize="12sp"
@@ -153,7 +152,7 @@
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/native_sms_info"
-            android:layout_width="140dp"
+            android:layout_width="130dp"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
@@ -171,7 +170,6 @@
             android:gravity="center"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:paddingTop="1dp"
             android:text="@string/native_sms_info2"
             android:textColor="@color/white"
             android:textSize="12sp"
