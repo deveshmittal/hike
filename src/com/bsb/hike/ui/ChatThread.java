@@ -130,6 +130,9 @@ import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.http.HikeHttpRequest;
+import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
+import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.AccountData;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
@@ -149,10 +152,12 @@ import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.tasks.FinishableEvent;
+import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.UploadContactOrLocationTask;
 import com.bsb.hike.tasks.UploadFileTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ContactDialog;
+import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.HikeAppStateBaseActivity;
@@ -1376,6 +1381,50 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			favoriteType = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN(mContactNumber, false)
 					.getFavoriteType();
+
+			if (!mConversation.isOnhike()) {
+				HikeHttpRequest hikeHttpRequest = new HikeHttpRequest(
+						"/account/profile/" + mContactNumber,
+						RequestType.HIKE_JOIN_TIME, new HikeHttpCallback() {
+							@Override
+							public void onSuccess(JSONObject response) {
+								Log.d(getClass().getSimpleName(), "Response: "
+										+ response.toString());
+								try {
+									JSONObject profile = response
+											.getJSONObject(HikeConstants.PROFILE);
+									long hikeJoinTime = profile.optLong(
+											HikeConstants.JOIN_TIME, 0);
+									if (hikeJoinTime > 0) {
+										hikeJoinTime = Utils
+												.applyServerTimeOffset(
+														ChatThread.this,
+														hikeJoinTime);
+
+										HikeMessengerApp
+												.getPubSub()
+												.publish(
+														HikePubSub.HIKE_JOIN_TIME_OBTAINED,
+														new Pair<String, Long>(
+																mContactNumber,
+																hikeJoinTime));
+										ContactUtils.updateHikeStatus(
+												ChatThread.this,
+												mContactNumber, true);
+										mConversationDb.updateOnHikeStatus(
+												mContactNumber, true);
+										HikeMessengerApp.getPubSub().publish(
+												HikePubSub.USER_JOINED,
+												mContactNumber);
+									}
+								} catch (JSONException e) {
+									e.printStackTrace();
+								}
+							}
+						});
+				HikeHTTPTask getHikeJoinTimeTask = new HikeHTTPTask(null, -1);
+				getHikeJoinTimeTask.execute(hikeHttpRequest);
+			}
 
 			if (shouldShowLastSeen()) {
 				/*
