@@ -32,6 +32,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	private String urlString;
 	private String fileName;
 	private String filePath;
+	private boolean isSslON;
 
 	public DownloadProfileImageTask(Context context, String id,
 			String fileName, boolean hasCustomIcon, boolean statusImage) {
@@ -63,9 +64,11 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 							+ AccountUtils.port
 							+ "/static/avatars/" + fileName;
 				}
+				this.isSslON = AccountUtils.ssl;
 			}
 		} else {
 			this.urlString = url;
+			this.isSslON = url.startsWith(AccountUtils.HTTPS_STRING);
 		}
 
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
@@ -93,7 +96,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 			connection.addRequestProperty("Cookie", "user="
 					+ AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 
-			if (AccountUtils.ssl) {
+			if (isSslON) {
 				((HttpsURLConnection) connection)
 						.setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
