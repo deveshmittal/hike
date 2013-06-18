@@ -459,7 +459,6 @@
 	<string name="hike_sms_info1">Als hike-SMS senden</string>
 	<string name="hike_sms_info2">Kostenlos</string>
 	<string name="native_sms_info1">Als reguläre SMS senden</string>
-	<string name="native_sms_info2">Zu Preisen des Netzanbieters</string>
 	<string name="use_hike_for_sms">hike für alle SMS verwenden</string>
 	<string name="use_hike_for_sms_info">Wir müssen hike als deinen Standard-Posteingang einrichten, um  reguläre SMS zu senden.</string>
 	<string name="find_more">Weitere Infos</string>
