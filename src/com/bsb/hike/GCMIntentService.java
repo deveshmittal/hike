@@ -3,10 +3,10 @@ package com.bsb.hike;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.service.HikeService;
+import com.bsb.hike.utils.Utils;
 import com.google.android.gcm.GCMBaseIntentService;
 
 public class GCMIntentService extends GCMBaseIntentService {
@@ -30,13 +30,14 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 		prefs = prefs == null ? context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0) : prefs;
-		if (!TextUtils.isEmpty(prefs.getString(HikeMessengerApp.TOKEN_SETTING,
-				null)) && prefs.getBoolean(HikeMessengerApp.NUX2_DONE, false)) {
-			HikeMessengerApp app = (HikeMessengerApp) context
-					.getApplicationContext();
-			app.connectToService();
-			context.sendBroadcast(new Intent(HikeService.MQTT_PING_ACTION));
+		if (!Utils.isUserAuthenticated(context)) {
+			return;
 		}
+
+		HikeMessengerApp app = (HikeMessengerApp) context
+				.getApplicationContext();
+		app.connectToService();
+		context.sendBroadcast(new Intent(HikeService.MQTT_PING_ACTION));
 	}
 
 	@Override

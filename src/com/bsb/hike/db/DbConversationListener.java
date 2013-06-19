@@ -1,6 +1,9 @@
 package com.bsb.hike.db;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -8,8 +11,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.preference.PreferenceManager;
+import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -17,19 +25,22 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.R;
 import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
-import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.models.GroupParticipant;
-import com.fiksu.asotracking.FiksuTrackingManager;
+import com.bsb.hike.service.SmsMessageStatusReceiver;
+import com.bsb.hike.utils.Utils;
 
 public class DbConversationListener implements Listener {
+	private static final String SMS_SENT_ACTION = "com.bsb.hike.SMS_SENT";
+
 	HikeConversationsDatabase mConversationDb;
 
 	HikeUserDatabase mUserDb;
@@ -66,6 +77,9 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.REJECT_FRIEND_REQUEST, this);
 		mPubSub.addListener(HikePubSub.DELETE_STATUS, this);
 		mPubSub.addListener(HikePubSub.HIKE_JOIN_TIME_OBTAINED, this);
+		mPubSub.addListener(HikePubSub.SEND_HIKE_SMS_FALLBACK, this);
+		mPubSub.addListener(HikePubSub.SEND_NATIVE_SMS_FALLBACK, this);
+		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
 	}
 
 	@Override
@@ -97,8 +111,17 @@ public class DbConversationListener implements Listener {
 				Log.d("DBCONVERSATION LISTENER",
 						"Sending Message : " + convMessage.getMessage()
 								+ "	;	to : " + convMessage.getMsisdn());
-				mPubSub.publish(HikePubSub.MQTT_PUBLISH,
-						convMessage.serialize());
+				if (!convMessage.isSMS()
+						|| !PreferenceManager.getDefaultSharedPreferences(
+								context).getBoolean(
+								HikeConstants.SEND_SMS_PREF, false)) {
+					mPubSub.publish(HikePubSub.MQTT_PUBLISH,
+							convMessage.serialize());
+				} else {
+					Log.d(getClass().getSimpleName(), "Messages Id: "
+							+ convMessage.getMsgID());
+					sendNativeSMS(convMessage);
+				}
 				if (convMessage.isGroupChat()) {
 					mPubSub.publish(HikePubSub.SHOW_PARTICIPANT_STATUS_MESSAGE,
 							convMessage.getMsisdn());
@@ -259,7 +282,94 @@ public class DbConversationListener implements Listener {
 			long hikeJoinTime = msisdnHikeJoinTimePair.second;
 
 			mUserDb.setHikeJoinTime(msisdn, hikeJoinTime);
+		} else if (HikePubSub.SEND_HIKE_SMS_FALLBACK.equals(type)) {
+			List<ConvMessage> messages = (List<ConvMessage>) object;
+			if (messages.isEmpty()) {
+				return;
+			}
+
+			try {
+				JSONObject jsonObject = new JSONObject();
+
+				jsonObject.put(HikeConstants.TYPE,
+						HikeConstants.MqttMessageTypes.FORCE_SMS);
+				jsonObject.put(HikeConstants.TO, messages.get(0).getMsisdn());
+
+				JSONObject data = new JSONObject();
+
+				JSONArray messagesArray = new JSONArray();
+
+				for (ConvMessage convMessage : messages) {
+
+					JSONObject messageJSON = convMessage.serialize()
+							.getJSONObject(HikeConstants.DATA);
+
+					messagesArray.put(messageJSON);
+
+					mConversationDb.updateIsHikeMessageState(
+							convMessage.getMsgID(), false);
+
+					convMessage.setSMS(true);
+				}
+
+				data.put(HikeConstants.BATCH_MESSAGE, messagesArray);
+				data.put(HikeConstants.COUNT, messages.size());
+				data.put(HikeConstants.MESSAGE_ID, messages.get(0).getMsgID());
+
+				jsonObject.put(HikeConstants.DATA, data);
+
+				mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
+
+				mPubSub.publish(HikePubSub.MQTT_PUBLISH, jsonObject);
+			} catch (JSONException e) {
+				Log.w(getClass().getSimpleName(), "Invalid json", e);
+			}
+
+		} else if (HikePubSub.SEND_NATIVE_SMS_FALLBACK.equals(type)) {
+			List<ConvMessage> messages = (List<ConvMessage>) object;
+			if (messages.isEmpty()) {
+				return;
+			}
+			/*
+			 * Reversing order since we want to send the oldest message first
+			 */
+			Collections.reverse(messages);
+
+			for (ConvMessage convMessage : messages) {
+				sendNativeSMS(convMessage);
+				convMessage.setSMS(true);
+				mConversationDb.updateIsHikeMessageState(
+						convMessage.getMsgID(), false);
+			}
+
+			mPubSub.publish(HikePubSub.CHANGED_MESSAGE_TYPE, null);
+		} else if (HikePubSub.REMOVE_PROTIP.equals(type)) {
+			String mappedId = (String) object;
+			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
+			mConversationDb.deleteProtip(mappedId);
 		}
+	}
+
+	private void sendNativeSMS(ConvMessage convMessage) {
+		SmsManager smsManager = SmsManager.getDefault();
+
+		ArrayList<String> messages = smsManager.divideMessage(Utils
+				.getMessageDisplayText(convMessage, context));
+
+		ArrayList<PendingIntent> pendingIntents = new ArrayList<PendingIntent>();
+
+		for (int i = 0; i < messages.size(); i++) {
+			Intent intent = new Intent(SMS_SENT_ACTION + convMessage.getMsgID());
+			intent.setClass(context, SmsMessageStatusReceiver.class);
+			intent.putExtra(HikeConstants.Extras.SMS_ID, convMessage.getMsgID());
+			pendingIntents.add(PendingIntent.getBroadcast(context, 0, intent,
+					PendingIntent.FLAG_CANCEL_CURRENT));
+		}
+
+		smsManager.sendMultipartTextMessage(convMessage.getMsisdn(), null,
+				messages, pendingIntents, null);
+
+		writeToNativeSMSDb(convMessage);
 	}
 
 	/*
@@ -268,9 +378,6 @@ public class DbConversationListener implements Listener {
 	private void uploadFiksuPerDayMessageEvent() {
 		int today = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
 		if (today != dayRecorded) {
-			FiksuTrackingManager.uploadPurchaseEvent(context,
-					HikeConstants.FIRST_MESSAGE,
-					HikeConstants.FIRST_MSG_IN_DAY, HikeConstants.CURRENCY);
 			dayRecorded = today;
 			Editor editor = context.getSharedPreferences(
 					HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
@@ -315,4 +422,17 @@ public class DbConversationListener implements Listener {
 		 */
 		mConversationDb.updateMsgStatus(msgID, status, null);
 	}
+
+	private void writeToNativeSMSDb(ConvMessage convMessage) {
+
+		ContentValues values = new ContentValues();
+		values.put(HikeConstants.SMSNative.NUMBER, convMessage.getMsisdn());
+		values.put(HikeConstants.SMSNative.DATE,
+				convMessage.getTimestamp() * 1000);
+		values.put(HikeConstants.SMSNative.MESSAGE, convMessage.getMessage());
+
+		context.getContentResolver().insert(
+				HikeConstants.SMSNative.SENTBOX_CONTENT_URI, values);
+	}
+
 }

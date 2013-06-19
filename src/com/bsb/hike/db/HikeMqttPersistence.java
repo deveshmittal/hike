@@ -66,6 +66,7 @@ public class HikeMqttPersistence extends SQLiteOpenHelper {
 			if (rowid < 0) {
 				throw new MqttPersistenceException("Unable to persist message");
 			}
+			packet.setPacketId(rowid);
 		} finally {
 			if (ih != null) {
 				ih.close();
@@ -80,19 +81,21 @@ public class HikeMqttPersistence extends SQLiteOpenHelper {
 
 	public List<HikePacket> getAllSentMessages() {
 		Cursor c = mDb.query(MQTT_DATABASE_TABLE, new String[] { MQTT_MESSAGE,
-				MQTT_MESSAGE_ID, MQTT_TIME_STAMP }, null, null, null, null,
+				MQTT_MESSAGE_ID, MQTT_TIME_STAMP, MQTT_PACKET_ID }, null, null, null, null,
 				MQTT_TIME_STAMP);
 		try {
 			List<HikePacket> vals = new ArrayList<HikePacket>(c.getCount());
 			int dataIdx = c.getColumnIndex(MQTT_MESSAGE);
 			int idIdx = c.getColumnIndex(MQTT_MESSAGE_ID);
 			int tsIdx = c.getColumnIndex(MQTT_TIME_STAMP);
-			while (c.moveToNext()) {
-				vals.add(new HikePacket(c.getBlob(dataIdx), c.getLong(idIdx), c
-						.getLong(tsIdx)));
-			}
+			int packetIdIdx = c.getColumnIndex(MQTT_PACKET_ID);
 
-			mDb.delete(MQTT_DATABASE_TABLE, null, null);
+			while (c.moveToNext()) {
+				HikePacket hikePacket = new HikePacket(c.getBlob(dataIdx),
+						c.getLong(idIdx), c.getLong(tsIdx),
+						c.getLong(packetIdIdx));
+				vals.add(hikePacket);
+			}
 
 			return vals;
 		} finally {
@@ -132,5 +135,13 @@ public class HikeMqttPersistence extends SQLiteOpenHelper {
 				bindArgs);
 		Log.d("HikeMqttPersistence", "Removed " + numRows + " Rows from "
 				+ MQTT_DATABASE_TABLE + " with Msg ID: " + msgId);
+	}
+
+	public void removeMessageForPacketId(long packetId) {
+		String[] bindArgs = new String[] { Long.toString(packetId) };
+		int numRows = mDb.delete(MQTT_DATABASE_TABLE, MQTT_PACKET_ID + "=?",
+				bindArgs);
+		Log.d("HikeMqttPersistence", "Removed " + numRows + " Rows from "
+				+ MQTT_DATABASE_TABLE + " with Packet ID: " + packetId);
 	}
 }

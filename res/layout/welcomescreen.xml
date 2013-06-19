@@ -69,16 +69,42 @@
         android:paddingBottom="20dp"
         android:src="@drawable/hi_logo_big" />
 
-    <ImageView
-        android:id="@+id/ic_hike_welcome_image"
+    <LinearLayout
+        android:id="@+id/hike_logo_container"
         style="@style/WelcomeHikeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:clickable="true"
+        android:gravity="center_horizontal"
         android:onClick="onHikeIconClicked"
-        android:src="@drawable/hike_welcome_image"
-        android:visibility="invisible" />
+        android:orientation="vertical"
+        android:visibility="invisible" >
+
+        <ImageView
+            android:id="@+id/ic_hike_welcome_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/hike_welcome_image" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/hike_logo"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:shadowColor="#5A000000"
+            android:shadowDy="1.3"
+            android:shadowRadius="1.3"
+            android:text="@string/fun_free_messaging"
+            android:textColor="#e9e8e1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            hike:font="omnes" />
+    </LinearLayout>
 
     <include
         android:layout_below="@id/header_dropshadow"

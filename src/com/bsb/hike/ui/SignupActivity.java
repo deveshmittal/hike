@@ -6,7 +6,6 @@ import java.net.URI;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -66,6 +65,7 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
 import com.bsb.hike.tasks.SignupTask.State;
 import com.bsb.hike.tasks.SignupTask.StateValue;
+import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.facebook.Request;
@@ -74,9 +74,8 @@ import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
 import com.facebook.model.GraphUser;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
-public class SignupActivity extends Activity implements
+public class SignupActivity extends HikeAppStateBaseActivity implements
 		SignupTask.OnSignupTaskProgressUpdate, OnEditorActionListener,
 		OnClickListener, FinishableEvent, OnCancelListener,
 		DialogInterface.OnClickListener, Listener {
@@ -151,6 +150,8 @@ public class SignupActivity extends Activity implements
 		public String userName = null;
 
 		public long timeLeft = 0;
+
+		public boolean fbConnected = false;
 	}
 
 	@Override
@@ -264,8 +265,9 @@ public class SignupActivity extends Activity implements
 				 */
 				String countryCode = accountPrefs.getString(
 						HikeMessengerApp.COUNTRY_CODE, "");
-				HikeMessengerApp.setIndianUser(HikeConstants.INDIA_COUNTRY_CODE
-						.equals(countryCode));
+				HikeMessengerApp.setIndianUser(
+						HikeConstants.INDIA_COUNTRY_CODE.equals(countryCode),
+						accountPrefs);
 
 				Editor accountEditor = accountPrefs.edit();
 				accountEditor.putBoolean(HikeMessengerApp.JUST_SIGNED_UP, true);
@@ -286,12 +288,6 @@ public class SignupActivity extends Activity implements
 				 */
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.SWITCHED_DATA_CONNECTION, null);
-
-				if (!HikeMessengerApp.isIndianUser()) {
-					FiksuTrackingManager.initialize(getApplication());
-				}
-				// Tracking the registration event for Fiksu
-				FiksuTrackingManager.uploadRegistrationEvent(this, "");
 
 				mHandler.removeCallbacks(startWelcomeScreen);
 				mHandler.postDelayed(startWelcomeScreen, 2500);
@@ -613,9 +609,12 @@ public class SignupActivity extends Activity implements
 		String tapHereString = getString(R.string.wrong_num_signup);
 
 		SpannableStringBuilder ssb = new SpannableStringBuilder(tapHereString);
-		ssb.setSpan(new ForegroundColorSpan(0xff6edcff),
-				tapHereString.indexOf(tapHere), tapHereString.indexOf(tapHere)
-						+ tapHere.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		if (tapHereString.indexOf(tapHere) != -1) {
+			ssb.setSpan(new ForegroundColorSpan(0xff6edcff),
+					tapHereString.indexOf(tapHere),
+					tapHereString.indexOf(tapHere) + tapHere.length(),
+					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
 
 		tapHereText.setText(ssb);
 
@@ -706,6 +705,12 @@ public class SignupActivity extends Activity implements
 					.getIconForMSISDN(msisdn));
 		} else {
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
+		}
+
+		if (mActivityState.fbConnected) {
+			Button fbBtn = (Button) findViewById(R.id.connect_fb);
+			fbBtn.setEnabled(false);
+			fbBtn.setText(R.string.connected);
 		}
 	}
 
@@ -1021,11 +1026,9 @@ public class SignupActivity extends Activity implements
 									}
 								});
 						mActivityState.downloadImageTask.execute();
-						dialog = ProgressDialog.show(
-								SignupActivity.this,
-								null,
-								getResources().getString(
-										R.string.fetching_info));
+						dialog = ProgressDialog.show(SignupActivity.this, null,
+								getResources()
+										.getString(R.string.fetching_info));
 					}
 				}
 			});
@@ -1248,6 +1251,7 @@ public class SignupActivity extends Activity implements
 					if (fbBtn != null) {
 						fbBtn.setEnabled(false);
 						fbBtn.setText(R.string.connected);
+						mActivityState.fbConnected = true;
 					}
 				}
 			});

@@ -222,6 +222,34 @@ public class HikePubSub implements Runnable {
 
 	public static final String DRAWER_ANIMATION_COMPLETE = "drawerAnimationComplete";
 
+	public static final String SMS_SYNC_START = "smsSyncStart";
+
+	public static final String SMS_SYNC_COMPLETE = "smsSyncComplete";
+
+	public static final String SMS_SYNC_FAIL = "smsSyncFail";
+
+	public static final String SEND_HIKE_SMS_FALLBACK = "sendHikeSMSFallback";
+
+	public static final String SEND_NATIVE_SMS_FALLBACK = "sendNativeSMSFallback";
+
+	public static final String CHANGED_MESSAGE_TYPE = "changedMessageType";
+
+	public static final String SHOW_SMS_SYNC_DIALOG = "showSMSSyncDialog";
+
+	public static final String SHOWN_UNDELIVERED_MESSAGE = "shownUndeliveredMessage";
+
+	public static final String STICKER_DOWNLOADED = "stickerDownloaded";
+
+	public static final String STICKER_CATEGORY_DOWNLOADED = "stickerCategoryDownloaded";
+
+	public static final String STICKER_CATEGORY_DOWNLOAD_FAILED = "stickerCategoryDownloadFailed";
+
+	public static final String LAST_SEEN_TIME_UPDATED = "lastSeenTimeUpdated";
+
+	public static final String REMOVE_PROTIP = "removeProtip";
+
+	public static final String PROTIP_ADDED = "protipAdded";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

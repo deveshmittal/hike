@@ -9,13 +9,11 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.utils.Utils;
 
 /**
@@ -35,8 +33,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 			/*
 			 * If the user has not signed up yet, don't do anything.
 			 */
-			if (TextUtils.isEmpty(prefs.getString(
-					HikeMessengerApp.TOKEN_SETTING, null))) {
+			if (!Utils.isUserAuthenticated(context)) {
 				return;
 			}
 			/*
@@ -87,18 +84,6 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				editor.commit();
 			}
 			/*
-			 * Adding auto recommended favorites based on the recency of the
-			 * contact. One time thing only
-			 */
-			if (!prefs.getBoolean(
-					HikeMessengerApp.AUTO_RECOMMENDED_FAVORITES_ADDED, false)) {
-				HikeUserDatabase.getInstance().addAutoRecommendedFavorites();
-				Editor editor = prefs.edit();
-				editor.putBoolean(
-						HikeMessengerApp.AUTO_RECOMMENDED_FAVORITES_ADDED, true);
-				editor.commit();
-			}
-			/*
 			 * This will happen for builds older than 1.1.15
 			 */
 			if (!prefs.contains(HikeMessengerApp.COUNTRY_CODE)
@@ -108,7 +93,7 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 				editor.putString(HikeMessengerApp.COUNTRY_CODE,
 						HikeConstants.INDIA_COUNTRY_CODE);
 				editor.commit();
-				HikeMessengerApp.setIndianUser(true);
+				HikeMessengerApp.setIndianUser(true, prefs);
 				HikeMessengerApp.getPubSub().publish(
 						HikePubSub.REFRESH_RECENTS, null);
 			}

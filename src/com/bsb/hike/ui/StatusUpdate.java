@@ -28,6 +28,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabContentFactory;
@@ -38,11 +39,12 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.MoodAdapter;
-import com.bsb.hike.adapters.StatusEmojiAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.HikeHttpCallback;
@@ -83,6 +85,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private Handler handler;
 	private TextView charCounter;
 	private TabHost tabHost;
+	private View tipView;
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
@@ -188,6 +191,25 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		}
 
 		HikeMessengerApp.getPubSub().addListeners(this, pubsubListeners);
+
+		if (preferences.getInt(HikeMessengerApp.LAST_MOOD, -1) == -1
+				&& !preferences.getBoolean(HikeMessengerApp.SHOWN_MOODS_TIP,
+						false)) {
+			tipView = findViewById(R.id.mood_tip);
+
+			/*
+			 * Center aligning with the button.
+			 */
+			RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) tipView
+					.getLayoutParams();
+			int screenWidth = getResources().getDisplayMetrics().widthPixels;
+			int buttonWidth = screenWidth / 4;
+			int marginRight = (int) ((buttonWidth / 2) - ((int) 22 * Utils.densityMultiplier));
+			layoutParams.rightMargin = marginRight;
+
+			tipView.setLayoutParams(layoutParams);
+			Utils.showTip(this, TipType.MOOD, tipView);
+		}
 	}
 
 	private Runnable cancelStatusPost = new Runnable() {
@@ -241,6 +263,9 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			Toast.makeText(getApplicationContext(), R.string.mood_tweet_error,
 					Toast.LENGTH_LONG).show();
 			return;
+		}
+		if (tipView != null) {
+			Utils.closeTip(TipType.MOOD, tipView, preferences);
 		}
 		showMoodSelector();
 	}
@@ -513,7 +538,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			if (whichSubcategory == 0) {
 				int startOffset = offset;
 				int endOffset = startOffset + emoticonsListSize;
-				int recentEmoticonsSizeReq = StatusEmojiAdapter.MAX_EMOTICONS_PER_ROW;
+				int recentEmoticonsSizeReq = EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT;
 				int[] recentEmoticons = HikeConversationsDatabase.getInstance()
 						.fetchEmoticonsOfType(EmoticonType.EMOJI, startOffset,
 								endOffset, recentEmoticonsSizeReq);
@@ -521,8 +546,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 					whichSubcategory++;
 				}
 			}
-			setRecentlyUsedTextVisibility(whichSubcategory);
-
 			setupEmoticonLayout(EmoticonType.EMOJI, whichSubcategory,
 					emoticonViewPager, statusTxt);
 			tabHost.setCurrentTab(whichSubcategory);
@@ -535,7 +558,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			@Override
 			public void onPageSelected(int position) {
 				tabHost.setCurrentTab(position);
-				setRecentlyUsedTextVisibility(position);
 			}
 
 			@Override
@@ -551,7 +573,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			@Override
 			public void onTabChanged(String tabId) {
 				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab());
-				setRecentlyUsedTextVisibility(tabHost.getCurrentTab());
 			}
 		});
 	}
@@ -561,16 +582,19 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void setRecentlyUsedTextVisibility(int currentPage) {
-		findViewById(R.id.recent_use_head).setVisibility(
-				currentPage == 0 ? View.VISIBLE : View.GONE);
+		// findViewById(R.id.recent_use_head).setVisibility(
+		// currentPage == 0 ? View.VISIBLE : View.GONE);
 	}
 
 	private void setupEmoticonLayout(EmoticonType emoticonType,
 			int whichSubcategory, ViewPager emoticonViewPager,
 			EditText statusTxt) {
 
-		StatusEmojiAdapter statusEmojiAdapter = new StatusEmojiAdapter(this,
-				statusTxt);
+		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(
+				this,
+				statusTxt,
+				EmoticonType.EMOJI,
+				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		emoticonViewPager.setAdapter(statusEmojiAdapter);
 		emoticonViewPager.invalidate();
 	}

@@ -73,7 +73,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.OVERLAY_DISMISSED + " INTEGER, "
 				+ DBConstants.MSISDN_TYPE + " STRING, "
 				+ DBConstants.LAST_MESSAGED + " INTEGER, "
-				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0" + " )";
+				+ DBConstants.HIKE_JOIN_TIME + " INTEGER DEFAULT 0, "
+				+ DBConstants.LAST_SEEN + " INTEGER DEFAULT -1, "
+				+ DBConstants.IS_OFFLINE + " INTEGER DEFAULT 1" + " )";
 
 		db.execSQL(create);
 
@@ -90,6 +92,22 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ " ( " + DBConstants.MSISDN + " TEXT PRIMARY KEY, "
 				+ DBConstants.FAVORITE_TYPE + " INTEGER" + " ) ";
 		db.execSQL(create);
+
+		create = "CREATE INDEX IF NOT EXISTS " + DBConstants.USER_INDEX
+				+ " ON " + DBConstants.USERS_TABLE + " (" + DBConstants.MSISDN
+				+ ")";
+		db.execSQL(create);
+
+		create = "CREATE INDEX IF NOT EXISTS " + DBConstants.THUMBNAIL_INDEX
+				+ " ON " + DBConstants.THUMBNAILS_TABLE + " ("
+				+ DBConstants.MSISDN + ")";
+		db.execSQL(create);
+
+		create = "CREATE INDEX IF NOT EXISTS " + DBConstants.FAVORITE_INDEX
+				+ " ON " + DBConstants.FAVORITES_TABLE + " ("
+				+ DBConstants.MSISDN + ")";
+		db.execSQL(create);
+
 	}
 
 	private HikeUserDatabase(Context context) {
@@ -195,13 +213,37 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					+ " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
-		if (oldVersion < 9) {
+		if (oldVersion < 10) {
 			/*
 			 * Removing all auto recommended favorites.
 			 */
 			db.delete(DBConstants.FAVORITES_TABLE, DBConstants.FAVORITE_TYPE
 					+ "=" + FavoriteType.AUTO_RECOMMENDED_FAVORITE.ordinal(),
 					null);
+		}
+		/*
+		 * Version 11 for adding indexes.
+		 */
+		if (oldVersion < 11) {
+			onCreate(db);
+		}
+		/*
+		 * Version 12 for added last seen column
+		 */
+		if (oldVersion < 12) {
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
+					+ " ADD COLUMN " + DBConstants.LAST_SEEN
+					+ " INTEGER DEFAULT -1";
+			db.execSQL(alter);
+		}
+		/*
+		 * Version 13 for is online column
+		 */
+		if (oldVersion < 13) {
+			String alter = "ALTER TABLE " + DBConstants.USERS_TABLE
+					+ " ADD COLUMN " + DBConstants.IS_OFFLINE
+					+ " INTEGER DEFAULT 1";
+			db.execSQL(alter);
 		}
 	}
 
@@ -704,21 +746,26 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	}
 
 	public List<ContactInfo> getContactsForComposeScreen(boolean freeSMSOn,
-			boolean fwdOrgroupChat, String userMsisdn) {
-		String selection = DBConstants.MSISDN
-				+ " != 'null' AND "
-				+ DBConstants.MSISDN
-				+ " != "
-				+ DatabaseUtils.sqlEscapeString(userMsisdn)
-				+ ((freeSMSOn && fwdOrgroupChat) ? " AND (("
-						+ DBConstants.ONHIKE + " = 0 AND " + DBConstants.MSISDN
-						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))"
-						: (fwdOrgroupChat ? " AND " + DBConstants.ONHIKE
-								+ " != 0" : ""));
+			boolean fwdOrgroupChat, String userMsisdn, boolean nativeSMSOn) {
+		StringBuilder selectionBuilder = new StringBuilder(DBConstants.MSISDN
+				+ " != 'null' AND " + DBConstants.MSISDN + " != "
+				+ DatabaseUtils.sqlEscapeString(userMsisdn));
+
+		if (!nativeSMSOn) {
+			if (freeSMSOn && fwdOrgroupChat) {
+				selectionBuilder.append(" AND ((" + DBConstants.ONHIKE
+						+ " = 0 AND " + DBConstants.MSISDN
+						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))");
+			} else if (fwdOrgroupChat) {
+				selectionBuilder.append(" AND " + DBConstants.ONHIKE + " != 0");
+			}
+		}
+
+		String selection = selectionBuilder.toString();
 
 		Log.d(getClass().getSimpleName(), "Selection: " + selection);
 
-		boolean shouldSortInDB = !freeSMSOn || fwdOrgroupChat;
+		boolean shouldSortInDB = !freeSMSOn || fwdOrgroupChat || nativeSMSOn;
 
 		String orderBy = (shouldSortInDB) ? DBConstants.ONHIKE + " DESC, "
 				+ DBConstants.NAME + " COLLATE NOCASE" : "";
@@ -727,6 +774,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				DBConstants.NAME, DBConstants.ONHIKE, DBConstants.PHONE,
 				DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
 				DBConstants.HAS_CUSTOM_PHOTO };
+
 		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
 				null, null, null, orderBy);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
@@ -857,6 +905,23 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO },
 				DBConstants.PHONE + "=?", new String[] { number }, null, null,
 				null);
+		List<ContactInfo> contactInfos = extractContactInfo(c);
+		c.close();
+		if (contactInfos.isEmpty()) {
+			return null;
+		}
+
+		return contactInfos.get(0);
+	}
+
+	public ContactInfo getContactInfoFromPhoneNoOrMsisdn(String number) {
+		Cursor c = mReadDb.query(DBConstants.USERS_TABLE, new String[] {
+				DBConstants.MSISDN, DBConstants.ID, DBConstants.NAME,
+				DBConstants.ONHIKE, DBConstants.PHONE, DBConstants.MSISDN_TYPE,
+				DBConstants.LAST_MESSAGED, DBConstants.HAS_CUSTOM_PHOTO }, "("
+				+ DBConstants.PHONE + "=? OR " + DBConstants.MSISDN
+				+ "=?) AND " + DBConstants.MSISDN + "!='null'", new String[] {
+				number, number }, null, null, null);
 		List<ContactInfo> contactInfos = extractContactInfo(c);
 		c.close();
 		if (contactInfos.isEmpty()) {
@@ -1186,53 +1251,6 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			}
 			mDb.setTransactionSuccessful();
 			mDb.endTransaction();
-		}
-	}
-
-	public void addAutoRecommendedFavorites() {
-
-		String selection = DBConstants.LAST_MESSAGED + ">0" + " AND "
-				+ DBConstants.MSISDN + " NOT IN (SELECT " + DBConstants.MSISDN
-				+ " FROM " + DBConstants.FAVORITES_TABLE + ")";
-		String orderBy = DBConstants.LAST_MESSAGED + " DESC LIMIT "
-				+ HikeConstants.MAX_AUTO_RECOMMENDED_FAVORITE;
-
-		Cursor c = mDb.query(true, DBConstants.USERS_TABLE,
-				new String[] { DBConstants.MSISDN }, selection, null, null,
-				null, orderBy, null);
-
-		int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
-
-		SQLiteStatement insertStatement = null;
-		InsertHelper ih = null;
-		try {
-			ih = new InsertHelper(mDb, DBConstants.FAVORITES_TABLE);
-			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO "
-					+ DBConstants.FAVORITES_TABLE + " ( " + DBConstants.MSISDN
-					+ ", " + DBConstants.FAVORITE_TYPE + " ) " + " VALUES (?, "
-					+ FavoriteType.AUTO_RECOMMENDED_FAVORITE.ordinal() + ")");
-			mDb.beginTransaction();
-			while (c.moveToNext()) {
-				String msisdn = c.getString(msisdnIdx);
-				insertStatement.bindString(
-						ih.getColumnIndex(DBConstants.MSISDN), msisdn);
-				insertStatement.executeInsert();
-			}
-		} finally {
-			if (insertStatement != null) {
-				insertStatement.close();
-			}
-			if (ih != null) {
-				ih.close();
-			}
-			c.close();
-			mDb.setTransactionSuccessful();
-			mDb.endTransaction();
-
-			Log.d(getClass().getSimpleName(),
-					"Auto rec fav added: " + c.getCount());
-			// HikeMessengerApp.getPubSub().publish(
-			// HikePubSub.AUTO_RECOMMENDED_FAVORITES_ADDED, null);
 		}
 	}
 
@@ -1752,5 +1770,41 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 	public int getFriendTableRowCount() {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
 				+ DBConstants.FAVORITES_TABLE, null);
+	}
+
+	public void updateLastSeenTime(String msisdn, long lastSeenTime) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.LAST_SEEN, lastSeenTime);
+
+		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
+				+ "=?", new String[] { msisdn });
+	}
+
+	public void updateIsOffline(String msisdn, int offline) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.IS_OFFLINE, offline);
+
+		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
+				+ "=?", new String[] { msisdn });
+	}
+
+	public long getLastSeenTime(String msisdn) {
+		Cursor c = mDb.query(DBConstants.USERS_TABLE,
+				new String[] { DBConstants.LAST_SEEN }, DBConstants.MSISDN
+						+ "=?", new String[] { msisdn }, null, null, null);
+		if (!c.moveToFirst()) {
+			return -1;
+		}
+		return c.getLong(c.getColumnIndex(DBConstants.LAST_SEEN));
+	}
+
+	public int getIsOffline(String msisdn) {
+		Cursor c = mDb.query(DBConstants.USERS_TABLE,
+				new String[] { DBConstants.IS_OFFLINE }, DBConstants.MSISDN
+						+ "=?", new String[] { msisdn }, null, null, null);
+		if (!c.moveToFirst()) {
+			return -1;
+		}
+		return c.getInt(c.getColumnIndex(DBConstants.IS_OFFLINE));
 	}
 }

@@ -112,8 +112,6 @@
                 android:background="@drawable/thatch_repeat"
                 android:visibility="visible" >
 
-                <include layout="@layout/tool_tip" />
-
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -127,17 +125,7 @@
                 </RelativeLayout>
             </RelativeLayout>
 
-            <LinearLayout
-                android:id="@+id/tool_tip_on_top"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/top_panel"
-                android:visibility="visible" >
-
-                <include layout="@layout/tool_tip" />
-            </LinearLayout>
-
-            <include layout="@layout/friend_btn_tutorial" />
+            <include layout="@layout/home_overlay" />
         </RelativeLayout>
     </RelativeLayout>
 

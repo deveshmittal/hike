@@ -18,10 +18,11 @@ package com.bsb.hike.cropimage;
 
 import java.util.ArrayList;
 
-import android.app.Activity;
 import android.os.Bundle;
 
-public class MonitoredActivity extends Activity {
+import com.bsb.hike.utils.HikeAppStateBaseActivity;
+
+public class MonitoredActivity extends HikeAppStateBaseActivity {
 
 	private final ArrayList<LifeCycleListener> mListeners = new ArrayList<LifeCycleListener>();
 

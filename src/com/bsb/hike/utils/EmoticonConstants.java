@@ -1,5 +1,6 @@
 package com.bsb.hike.utils;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
 public class EmoticonConstants {
@@ -648,25 +649,40 @@ public class EmoticonConstants {
 			R.drawable.mood_17_insomniac, R.drawable.mood_18_driving,
 			R.drawable.mood_19_traffic, R.drawable.mood_20_late,
 			R.drawable.mood_21_shopping, R.drawable.mood_22_gaming,
-			R.drawable.mood_23_coding, R.drawable.mood_24_television,
-			R.drawable.mood_25_bangalore, R.drawable.mood_26_chennai,
-			R.drawable.mood_27_delhi, R.drawable.mood_28_hyderabad,
-			R.drawable.mood_29_kolkata, R.drawable.mood_30_mumbai,
-			R.drawable.mood_31_pune, R.drawable.mood_32_punjab,
-			R.drawable.mood_33_rajasthan, };
+			R.drawable.mood_23_coding, R.drawable.mood_24_television };
 
-	public static final int[] MOOD_NO_IPL_RES_IDS = { R.drawable.mood_01_happy,
-			R.drawable.mood_02_sad, R.drawable.mood_03_in_love,
-			R.drawable.mood_04_surprised, R.drawable.mood_05_confused,
-			R.drawable.mood_06_angry, R.drawable.mood_07_sleepy,
-			R.drawable.mood_08_hungover, R.drawable.mood_09_chilling,
-			R.drawable.mood_10_studying, R.drawable.mood_11_busy,
-			R.drawable.mood_12_love, R.drawable.mood_13_middle_finger,
-			R.drawable.mood_14_boozing, R.drawable.mood_15_movie,
-			R.drawable.mood_16_caffeinated, R.drawable.mood_17_insomniac,
-			R.drawable.mood_18_driving, R.drawable.mood_19_traffic,
-			R.drawable.mood_20_late, R.drawable.mood_21_shopping,
-			R.drawable.mood_22_gaming, R.drawable.mood_23_coding,
-			R.drawable.mood_24_television };
+	public static final int[] LOCAL_STICKER_RES_IDS = {
+			R.drawable.sticker_1_hi, R.drawable.sticker_2_thumbsup,
+			R.drawable.sticker_3_drooling, R.drawable.sticker_4_devilsmile,
+			R.drawable.sticker_5_sorry, R.drawable.sticker_6_urgh,
+			R.drawable.sticker_7_confused, R.drawable.sticker_8_dreaming, };
 
+	public static final int[] LOCAL_STICKER_SMALL_RES_IDS = {
+			R.drawable.sticker_small_1_hi, R.drawable.sticker_small_2_thumbsup,
+			R.drawable.sticker_small_3_drooling,
+			R.drawable.sticker_small_4_devilsmile,
+			R.drawable.sticker_small_5_sorry, R.drawable.sticker_small_6_urgh,
+			R.drawable.sticker_small_7_confused,
+			R.drawable.sticker_small_8_dreaming };
+
+	public static final String[] LOCAL_STICKER_IDS = { "001_hi.png",
+			"002_thumbsup.png", "003_drooling.png", "004_devilsmile.png",
+			"005_sorry.png", "006_urgh.png", "007_confused.png",
+			"008_dreaming.png", };
+
+	public static final String[] STICKER_CATEGORY_IDS = { "doggy", "kitty",
+			"expressions", HikeConstants.BOLLYWOOD_CATEGORY, "rageface" };
+
+	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.doggy,
+			R.drawable.kitty, R.drawable.expressions, R.drawable.bollywood,
+			R.drawable.rageface };
+
+	public static final int[] STICKER_CATEGORY_PREVIEW_RES_IDS = {
+			R.drawable.preview_doggy, R.drawable.preview_kitty,
+			R.drawable.preview_expressions, R.drawable.preview_bollywood,
+			R.drawable.preview_rageface };
+
+	public static final String[] STICKER_DOWNLOAD_PREF = {
+			"doggyDownloadShown", "kittyDownloadShown", "expDownloadShown",
+			"bollywoodDownloadShown", "rfDownloadShown" };
 }

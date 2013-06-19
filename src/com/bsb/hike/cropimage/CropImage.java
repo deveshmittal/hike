@@ -190,7 +190,7 @@ public class CropImage extends MonitoredActivity {
 	@Override
 	public void onBackPressed() {
 		setResult(RESULT_CANCELED);
-		finish();
+		super.onBackPressed();
 	}
 
 	private Uri getImageUri(String path) {

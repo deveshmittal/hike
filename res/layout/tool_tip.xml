@@ -1,44 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tool_tip_parent_layout"
-    android:layout_width="match_parent"
+    android:id="@+id/tip_container"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:gravity="right"
-    android:orientation="vertical" >
+    android:background="@drawable/bg_tip_top_left"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:weightSum="10" >
 
-    <LinearLayout
-        android:id="@+id/credits_help_layout"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/tip_text"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginRight="5dp"
-        android:background="@drawable/credits_help_bckg"
-        android:gravity="center_vertical"
-        android:onClick="onToolTipClicked"
-        android:visibility="gone" >
+        android:layout_weight="10"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp"
+        android:shadowColor="#4D000000"
+        android:shadowDy="0.6"
+        android:shadowRadius="0.6"
+        android:text="@string/moods_tip"
+        android:textColor="@color/profile_item_bckg"
+        android:textSize="14sp" />
 
-        <ImageButton
-            android:id="@+id/close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@null"
-            android:onClick="onToolTipClosed"
-            android:paddingBottom="15dp"
-            android:paddingLeft="11dp"
-            android:paddingRight="11dp"
-            android:paddingTop="15dp"
-            android:src="@drawable/ic_close" />
-        	
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/tool_tip"
-            style="@style/Text.Shadow.White"
-            android:shadowColor="#4c000000"
-            android:shadowDx="0.4"
-            android:shadowDy="0.4"
-            android:shadowRadius="0.3"
-            android:text="@string/earn_200_sms"
-            android:textSize="14sp"
-            android:paddingRight="15dp" />
-
-    </LinearLayout>
+    <ImageButton
+        android:id="@+id/close"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@null"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_close_tip" />
 
 </LinearLayout>

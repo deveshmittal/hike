@@ -35,6 +35,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.utils.EmoticonConstants;
@@ -79,7 +80,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MAPPED_MSG_ID + " INTEGER, "
 				+ DBConstants.CONV_ID + " INTEGER,"
 				+ DBConstants.MESSAGE_METADATA + " TEXT, "
-				+ DBConstants.GROUP_PARTICIPANT + " TEXT" + " ) ";
+				+ DBConstants.GROUP_PARTICIPANT + " TEXT, "
+				+ DBConstants.IS_HIKE_MESSAGE + " INTEGER DEFAULT -1" + " ) ";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CONVERSATION_INDEX
@@ -136,7 +138,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " INTEGER DEFAULT 0, " + DBConstants.SHOW_IN_TIMELINE
 				+ " INTEGER, " + DBConstants.MOOD_ID + " INTEGER, "
 				+ DBConstants.TIME_OF_DAY + " INTEGER" + " )";
-		;
+		db.execSQL(sql);
+		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.STATUS_INDEX + " ON "
+				+ DBConstants.STATUS_TABLE + " ( " + DBConstants.MSISDN + " ) ";
+		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.STICKERS_TABLE + " ("
+				+ DBConstants.CATEGORY_ID + " TEXT PRIMARY KEY, "
+				+ DBConstants.TOTAL_NUMBER + " INTEGER, "
+				+ DBConstants.REACHED_END + " INTEGER,"
+				+ DBConstants.UPDATE_AVAILABLE + " INTEGER" + " )";
+		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.PROTIP_TABLE + " ("
+				+ DBConstants.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+				+ DBConstants.PROTIP_MAPPED_ID + " TEXT UNIQUE, "
+				+ DBConstants.HEADER + " TEXT, " + DBConstants.PROTIP_TEXT
+				+ " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, "
+				+ DBConstants.IMAGE_URL + " TEXT, " + DBConstants.WAIT_TIME
+				+ " INTEGER" + " )";
 		db.execSQL(sql);
 	}
 
@@ -147,6 +165,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.delete(DBConstants.GROUP_INFO_TABLE, null, null);
 		mDb.delete(DBConstants.EMOTICON_TABLE, null, null);
 		mDb.delete(DBConstants.STATUS_TABLE, null, null);
+		mDb.delete(DBConstants.STICKERS_TABLE, null, null);
 	}
 
 	@Override
@@ -320,6 +339,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 			denormaliseConversations(db);
 		}
+		/*
+		 * Version 13 for creating status index. Will be done by the onCreate
+		 * method.
+		 */
+
+		/*
+		 * Adding a column to keep a track of the message type i.e hike or sms.
+		 */
+		if (oldVersion < 14) {
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE
+					+ " ADD COLUMN " + DBConstants.IS_HIKE_MESSAGE
+					+ " INTEGER DEFAULT -1";
+			db.execSQL(alter);
+		}
+		/*
+		 * Version 15 adds the sticker table. Version 16 adds the protips table.
+		 */
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -395,12 +431,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public long[] setAllDeliveredMessagesReadForMsisdn(String msisdn,
 			JSONArray msgIds) {
-		Cursor c = mDb.query(
-				DBConstants.MESSAGES_TABLE,
-				new String[] { DBConstants.MESSAGE_ID },
-				DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID
-						+ " FROM " + DBConstants.CONVERSATIONS_TABLE
-						+ " WHERE " + DBConstants.MSISDN + "=? ) AND "
+		Cursor c = mDb.query(DBConstants.MESSAGES_TABLE,
+				new String[] { DBConstants.MESSAGE_ID }, DBConstants.CONV_ID
+						+ " = (SELECT " + DBConstants.CONV_ID + " FROM "
+						+ DBConstants.CONVERSATIONS_TABLE + " WHERE "
+						+ DBConstants.MSISDN + "=? ) AND "
 						+ DBConstants.MSG_STATUS + "<"
 						+ State.SENT_DELIVERED_READ.ordinal(),
 				new String[] { msisdn }, null, null, null);
@@ -517,7 +552,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		final int mappedMsgIdColumn = 4;
 		final int messageMetadataColumn = 5;
 		final int groupParticipant = 6;
-		final int msisdnColumn = 7;
+		final int isHikeMessageColumn = 7;
+		final int msisdnColumn = 8;
 
 		insertStatement.clearBindings();
 		insertStatement.bindString(messageColumn, conv.getMessage());
@@ -530,6 +566,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		insertStatement.bindString(messageMetadataColumn,
 				conv.getMetadata() != null ? conv.getMetadata().serialize()
 						: "");
+		insertStatement.bindLong(isHikeMessageColumn, conv.isSMS() ? 0 : 1);
 		insertStatement.bindString(
 				groupParticipant,
 				conv.getGroupParticipantMsisdn() != null ? conv
@@ -566,8 +603,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ "," + DBConstants.MAPPED_MSG_ID + " ,"
 				+ DBConstants.MESSAGE_METADATA + ","
 				+ DBConstants.GROUP_PARTICIPANT + "," + DBConstants.CONV_ID
-				+ " ) " + " SELECT ?, ?, ?, ?, ?, ?," + DBConstants.CONV_ID
-				+ " FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE "
+				+ ", " + DBConstants.IS_HIKE_MESSAGE + " ) "
+				+ " SELECT ?, ?, ?, ?, ?, ?, " + DBConstants.CONV_ID
+				+ ", ? FROM " + DBConstants.CONVERSATIONS_TABLE + " WHERE "
 				+ DBConstants.CONVERSATIONS_TABLE + "." + DBConstants.MSISDN
 				+ "=?");
 		mDb.beginTransaction();
@@ -613,6 +651,15 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		insertStatement.close();
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
+	}
+
+	public void updateIsHikeMessageState(long id, boolean isHikeMessage) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.IS_HIKE_MESSAGE, isHikeMessage);
+
+		mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
+				DBConstants.MESSAGE_ID + "=?",
+				new String[] { Long.toString(id) });
 	}
 
 	private ContentValues getContentValueForConversationMessage(ConvMessage conv) {
@@ -763,8 +810,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.MESSAGE, DBConstants.MSG_STATUS,
 				DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
 				DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA,
-				DBConstants.GROUP_PARTICIPANT }, selection,
-				new String[] { Long.toString(convid) }, null, null,
+				DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE },
+				selection, new String[] { Long.toString(convid) }, null, null,
 				DBConstants.MESSAGE_ID + " DESC", limitStr);
 
 		final int msgColumn = c.getColumnIndex(DBConstants.MESSAGE);
@@ -777,13 +824,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				.getColumnIndex(DBConstants.MESSAGE_METADATA);
 		final int groupParticipantColumn = c
 				.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+		final int isHikeMessageColumn = c
+				.getColumnIndex(DBConstants.IS_HIKE_MESSAGE);
+
 		List<ConvMessage> elements = new ArrayList<ConvMessage>(c.getCount());
+
 		while (c.moveToNext()) {
+			int hikeMessage = c.getInt(isHikeMessageColumn);
+			boolean isHikeMessage = hikeMessage == -1 ? conversation.isOnhike()
+					: (hikeMessage == 0 ? false : true);
+
 			ConvMessage message = new ConvMessage(c.getString(msgColumn),
 					msisdn, c.getInt(tsColumn), ConvMessage.stateValue(c
 							.getInt(msgStatusColumn)), c.getLong(msgIdColumn),
 					c.getLong(mappedMsgIdColumn),
-					c.getString(groupParticipantColumn));
+					c.getString(groupParticipantColumn), !isHikeMessage);
 			String metadata = c.getString(metadataColumn);
 			try {
 				message.setMetadata(metadata);
@@ -1800,7 +1855,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ (endOffset != 0 ? " AND " + DBConstants.EMOTICON_NUM
 							+ "<" + (endOffset) : "");
 			Log.d(getClass().getSimpleName(), selection);
-			String orderBy = DBConstants.LAST_USED + " DESC LIMIT " + limit;
+			String orderBy = DBConstants.LAST_USED
+					+ (limit != -1 ? (" DESC LIMIT " + limit) : "");
 
 			c = mDb.query(DBConstants.EMOTICON_TABLE, columns, selection, null,
 					null, null, orderBy);
@@ -2041,6 +2097,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
+	public void deleteStatusMessagesForMsisdn(String msisdn) {
+		String selection = DBConstants.MSISDN + "=?";
+		String[] selectionArgs = { msisdn };
+
+		mDb.delete(DBConstants.STATUS_TABLE, selection, selectionArgs);
+	}
+
 	public int getTimelineStatusMessageCount() {
 		return (int) DatabaseUtils.longForQuery(mDb, "SELECT COUNT(*) FROM "
 				+ DBConstants.STATUS_TABLE + " WHERE "
@@ -2145,5 +2208,153 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			mDb.endTransaction();
 			c.close();
 		}
+	}
+
+	public void addOrUpdateStickerCategory(String categoryId, int totalNum) {
+		addOrUpdateStickerCategory(categoryId, totalNum, false);
+	}
+
+	public void addOrUpdateStickerCategory(String categoryId, int totalNum,
+			boolean reachedEnd) {
+		SQLiteStatement insertStatement = null;
+		try {
+			insertStatement = mDb.compileStatement("INSERT OR REPLACE INTO "
+					+ DBConstants.STICKERS_TABLE + " ( "
+					+ DBConstants.CATEGORY_ID + ", " + DBConstants.TOTAL_NUMBER
+					+ ", " + DBConstants.REACHED_END + ", "
+					+ DBConstants.UPDATE_AVAILABLE + " ) "
+					+ " VALUES (?, ?, ?, ?)");
+
+			insertStatement.bindString(1, categoryId);
+			insertStatement.bindLong(2, totalNum);
+			insertStatement.bindLong(3, reachedEnd ? 1 : 0);
+			insertStatement.bindLong(4, 0);
+
+			insertStatement.execute();
+		} finally {
+			if (insertStatement != null) {
+				insertStatement.close();
+			}
+		}
+	}
+
+	public void stickerUpdateAvailable(String categoryId) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.UPDATE_AVAILABLE, true);
+
+		mDb.update(DBConstants.STICKERS_TABLE, contentValues,
+				DBConstants.CATEGORY_ID + "=?", new String[] { categoryId });
+	}
+
+	public boolean isStickerUpdateAvailable(String categoryId) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.STICKERS_TABLE,
+					new String[] { DBConstants.UPDATE_AVAILABLE },
+					DBConstants.CATEGORY_ID + "=?",
+					new String[] { categoryId }, null, null, null);
+			if (!c.moveToFirst()) {
+				return false;
+			}
+			return c.getInt(c.getColumnIndex(DBConstants.UPDATE_AVAILABLE)) == 1;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public boolean hasReachedStickerEnd(String categoryId) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.STICKERS_TABLE,
+					new String[] { DBConstants.REACHED_END },
+					DBConstants.CATEGORY_ID + "=?",
+					new String[] { categoryId }, null, null, null);
+			if (!c.moveToFirst()) {
+				return false;
+			}
+			return c.getInt(c.getColumnIndex(DBConstants.REACHED_END)) == 1;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public void insertFirstStickerCategory() {
+		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[0],
+				EmoticonConstants.LOCAL_STICKER_RES_IDS.length, true);
+	}
+
+	public long addProtip(Protip protip) {
+		ContentValues contentValues = new ContentValues();
+
+		contentValues.put(DBConstants.PROTIP_MAPPED_ID, protip.getMappedId());
+		contentValues.put(DBConstants.HEADER, protip.getHeader());
+		contentValues.put(DBConstants.PROTIP_TEXT, protip.getText());
+		contentValues.put(DBConstants.IMAGE_URL, protip.getImageURL());
+		contentValues.put(DBConstants.WAIT_TIME, protip.getWaitTime());
+		contentValues.put(DBConstants.TIMESTAMP, protip.getTimeStamp());
+
+		return mDb.insert(DBConstants.PROTIP_TABLE, null, contentValues);
+	}
+
+	public Protip getLastProtip() {
+		String[] columns = {
+				"max(" + DBConstants.ID + ") as " + DBConstants.ID,
+				DBConstants.PROTIP_MAPPED_ID, DBConstants.HEADER,
+				DBConstants.PROTIP_TEXT, DBConstants.IMAGE_URL,
+				DBConstants.WAIT_TIME, DBConstants.TIMESTAMP };
+
+		return getProtip(columns, null, null);
+	}
+
+	public Protip getProtipForId(long id) {
+		String[] columns = { DBConstants.ID, DBConstants.PROTIP_MAPPED_ID,
+				DBConstants.HEADER, DBConstants.PROTIP_TEXT,
+				DBConstants.IMAGE_URL, DBConstants.WAIT_TIME,
+				DBConstants.TIMESTAMP };
+		String selection = DBConstants.ID + "=?";
+		String[] selectionArgs = { Long.toString(id) };
+
+		return getProtip(columns, selection, selectionArgs);
+	}
+
+	private Protip getProtip(String[] columns, String selection,
+			String[] selectionArgs) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.PROTIP_TABLE, columns, selection,
+					selectionArgs, null, null, null);
+			if (!c.moveToFirst()) {
+				return null;
+			}
+
+			long id = c.getLong(c.getColumnIndex(DBConstants.ID));
+			String mappedId = c.getString(c
+					.getColumnIndex(DBConstants.PROTIP_MAPPED_ID));
+			String header = c.getString(c.getColumnIndex(DBConstants.HEADER));
+			String text = c
+					.getString(c.getColumnIndex(DBConstants.PROTIP_TEXT));
+			String url = c.getString(c.getColumnIndex(DBConstants.IMAGE_URL));
+			long waitTime = c.getLong(c.getColumnIndex(DBConstants.WAIT_TIME));
+			long timeStamp = c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+			if (mappedId == null) {
+				return null;
+			}
+
+			return new Protip(id, mappedId, header, text, url, waitTime,
+					timeStamp);
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public void deleteProtip(String mappedId) {
+		mDb.delete(DBConstants.PROTIP_TABLE, DBConstants.PROTIP_MAPPED_ID
+				+ "=?", new String[] { mappedId });
 	}
 }

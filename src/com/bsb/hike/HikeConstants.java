@@ -1,5 +1,6 @@
 package com.bsb.hike;
 
+import android.net.Uri;
 import android.os.Environment;
 
 public class HikeConstants {
@@ -101,6 +102,33 @@ public class HikeConstants {
 	public static final String APP_VERSION = "app_version";
 	public static final String DEVICE_VERSION = "deviceversion";
 	public static final String CRICKET_MOODS = "cmoods";
+	public static final String COUNT = "c";
+	public static final String DEFAULT_SMS_CLIENT_TUTORIAL = "dsctutorial";
+	public static final String CATEGORY_ID = "catId";
+	public static final String STICKER_ID = "stId";
+	public static final String STICKER_IDS = "stIds";
+	public static final String STICKER = "stk";
+	public static final String RESOLUTION_ID = "resId";
+	public static final String NUMBER_OF_STICKERS = "nos";
+	public static final String DATA_2 = "data";
+	public static final String ADD_STICKER = "addStk";
+	public static final String REMOVE_STICKER = "remStk";
+	public static final String REMOVE_CATEGORY = "remCat";
+	public static final String STATUS = "stat";
+	public static final String OK = "ok";
+	public static final String REACHED_STICKER_END = "st";
+	public static final String PLAYTIME = "pt";
+	public static final String FOREGROUND = "fg";
+	public static final String BACKGROUND = "bg";
+	public static final String JUST_OPENED = "justOpened";
+	public static final String LAST_SEEN = "ls";
+	public static final String LAST_SEEN_SETTING = "lastseen";
+	public static final String PROTIP_HEADER = "h";
+	public static final String PROTIP_TEXT = "t";
+	public static final String PROTIP_IMAGE_URL = "img";
+	public static final String PROTIP_WAIT_TIME = "wt";
+	public static final String NO_SMS = "nosms";
+	public static final String RETURNING_USER = "ru";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -109,6 +137,10 @@ public class HikeConstants {
 	public static final String NATIVE_JINGLE_PREF = "jinglePref";
 	public static final String SSL_PREF = "sslPref";
 	public static final String STATUS_PREF = "statusPref";
+	public static final String SEND_SMS_PREF = "sendSmsPref";
+	public static final String RECEIVE_SMS_PREF = "receiveSmsPref";
+	public static final String SEND_UNDELIVERED_AS_NATIVE_SMS_PREF = "sendUndeliveredAsNativeSmsPref";
+	public static final String LAST_SEEN_PREF = "lastSeenPref";
 	public static final String HIKEBOT = "TD-HIKE";
 
 	public static final String DONE = "Done";
@@ -120,7 +152,7 @@ public class HikeConstants {
 	public static final String GROUP_PARTICIPANT_SEPARATOR = ", ";
 
 	public static final String HELP_URL = "http://www.hike.in/help/android";
-	public static final String T_AND_C_URL = "http://www.hike.in/terms";
+	public static final String T_AND_C_URL = "http://www.hike.in/terms/android";
 	public static final String SYSTEM_HEALTH_URL = "http://www.twitter.com/hikestatus";
 
 	public static final String IS_TYPING = "is typing...";
@@ -199,11 +231,10 @@ public class HikeConstants {
 	public static final int IMAGE_TRANSFER_CODE = 1188;
 	public static final int VIDEO_TRANSFER_CODE = 1189;
 	public static final int AUDIO_TRANSFER_CODE = 1190;
-	public static final int RECORD_AUDIO_TRANSFER_CODE = 1191;
 	public static final int SHARE_LOCATION_CODE = 1192;
 	public static final int SHARE_CONTACT_CODE = 1193;
 
-	public static final int MAX_DURATION_RECORDING_SEC = 120;
+	public static final int MAX_DURATION_RECORDING_SEC = 360;
 
 	public static final int MAX_DIMENSION_THUMBNAIL_PX = 180;
 
@@ -272,12 +303,12 @@ public class HikeConstants {
 	// Picasa URI start for other devices
 	public static final String OTHER_PICASA_URI_START = "content://com.google.android.gallery3d";
 
-	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 100;
-	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 50;
-	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 15;
+	public static final int MAX_MESSAGES_TO_LOAD_INITIALLY = 40;
+	public static final int MAX_OLDER_MESSAGES_TO_LOAD_EACH_TIME = 20;
+	public static final int MIN_INDEX_TO_LOAD_MORE_MESSAGES = 10;
 
-	public static final int MAX_STATUSES_TO_LOAD_INITIALLY = 50;
-	public static final int MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME = 25;
+	public static final int MAX_STATUSES_TO_LOAD_INITIALLY = 30;
+	public static final int MAX_OLDER_STATUSES_TO_LOAD_EACH_TIME = 20;
 
 	public static final int SHOW_CREDITS_AFTER_NUM = 10;
 
@@ -287,10 +318,17 @@ public class HikeConstants {
 	public static final String IMAGE_ROOT = "/hike Images";
 	public static final String VIDEO_ROOT = "/hike Videos";
 	public static final String AUDIO_ROOT = "/hike Audios";
+	public static final String AUDIO_RECORDING_ROOT = "/hike Voice Messages";
+	public static final String STICKERS_ROOT = "/stickers";
+
+	public static final String LARGE_STICKER_ROOT = "/large";
+	public static final String SMALL_STICKER_ROOT = "/small";
 
 	public static final String HIKE_FILE_LIST_NAME = "hikeFiles";
 
 	public static final String STATUS_MESSAGE_HEADER = "hike-status-message";
+
+	public static final String BOLLYWOOD_CATEGORY = "bollywood";
 	/*
 	 * Contact Type
 	 */
@@ -320,7 +358,7 @@ public class HikeConstants {
 	/* activityForResult IDs */
 	public static final int CAMERA_RESULT = 0;
 	public static final int GALLERY_RESULT = 1;
-	public static final int CROP_RESULT = 2;
+	public static final int CROP_RESULT = 2991;
 
 	public static final int MIN_STATUS_COUNT = 5;
 
@@ -329,6 +367,21 @@ public class HikeConstants {
 
 	public static final int MAX_TWITTER_POST_LENGTH = 140;
 	public static final int MAX_MOOD_TWITTER_POST_LENGTH = 130;
+
+	public static final int MAX_NUM_STICKER_REQUEST = 10;
+
+	/* In seconds */
+	public static final int DEFAULT_PROTIP_WAIT_TIME = 300;
+	public static final String PROTIP_STATUS_NAME = "hike team";
+
+	/* In seconds */
+	public static final int DEFAULT_UNDELIVERED_WAIT_TIME = 20;
+
+	public static final int MAX_FALLBACK_NATIVE_SMS = 19;
+
+	public static final int MAX_SMS_PULL_IN_INBOX = 2000;
+
+	public static final int MAX_SMS_PULL_IN_SENTBOX = 1000;
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
@@ -416,15 +469,18 @@ public class HikeConstants {
 		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
 		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
 		public static final String OPEN_FAVORITES = "openFavorites";
-		public static final String SHOW_MOST_CONTACTED = "showMostContacted";
 		public static final String CONTACT_METADATA = "contactMetadata";
 		public static final String FROM_CENTRAL_TIMELINE = "fromCentralTimeline";
 		public static final String BLOCKED_LIST = "blockedList";
-		public static final String SHOW_FAMILY = "showFamily";
 		public static final String NUX1_NUMBERS = "nux1Numbers";
 		public static final String NUX_NUMBERS_INVITED = "nuxNumbersInvited";
 		public static final String FROM_CONVERSATIONS_SCREEN = "fromConversationsScreen";
-		public static final String FROM_NUX_SCREEN = "fromNuxScreen";
+		public static final String DIALOG_SHOWING = "dialogShowing";
+		public static final String SMS_ID = "smsId";
+		public static final String RECORDED_TIME = "recordedTime";
+		public static final String SHOW_FRIENDS_TUTORIAL = "showFriendsTutorial";
+		public static final String FWD_STICKER_ID = "fwdStickerId";
+		public static final String FWD_CATEGORY_ID = "fwdCategoryId";
 	}
 
 	public static final class LogEvent {
@@ -536,11 +592,6 @@ public class HikeConstants {
 		public static final String HELP_CONTACT = "helpSconT";
 		public static final String HELP_FAQ = "helpSfaQ";
 
-		/*
-		 * Nux screen
-		 */
-		public static final String NUX_SKIP1 = "nuxSkip1";
-		public static final String NUX_SKIP2 = "nuxSkip2";
 	}
 
 	public static final class MqttMessageTypes {
@@ -578,9 +629,57 @@ public class HikeConstants {
 		public static final String DELETE_STATUS = "dsu";
 		public static final String POSTPONE_FAVORITE = "pf";
 		public static final String BATCH_STATUS_UPDATE = "bsu";
+		public static final String FORCE_SMS = "fsms";
+		public static final String STICKER = "stk";
+		public static final String APP_STATE = "app";
+		public static final String LAST_SEEN = "ls";
+		public static final String SERVER_TIMESTAMP = "sts";
+		public static final String REQUEST_SERVER_TIMESTAMP = "rsts";
+		public static final String PROTIP = "pt";
+	}
+
+	public static final class SMSNative {
+		/*
+		 * SMS URIs
+		 */
+		public static final Uri CONTENT_URI = Uri.parse("content://sms");
+
+		public static final Uri INBOX_CONTENT_URI = Uri.withAppendedPath(
+				CONTENT_URI, "inbox");
+
+		public static final Uri SENTBOX_CONTENT_URI = Uri.withAppendedPath(
+				CONTENT_URI, "sent");
+
+		public static final String NUMBER = "address";
+		public static final String DATE = "date";
+		public static final String MESSAGE = "body";
+		public static final String READ = "read";
+
+	}
+
+	public static final class SocialPostResponse {
+		public static final String NO_TOKEN = "notoken";
+		public static final String INVALID_TOKEN = "invalidtoken";
+		public static final String FAILURE = "failure";
+		public static final String SUCCESS = "success";
 	}
 
 	public static enum FTResult {
 		SUCCESS, UPLOAD_FAILED, FILE_TOO_LARGE, READ_FAIL, DOWNLOAD_FAILED, CANCELLED, FILE_EXPIRED
 	}
+
+	public static enum SMSSyncState {
+		SUCCESSFUL, NO_CHANGE, UNSUCCESSFUL
+	}
+
+	public static enum TipType {
+		EMOTICON, STICKER, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD
+	}
+
+	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
+			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
+
+	public static final String[] BOLLYWOOD_COUNTRY_CODES = { "+91", "+94",
+			"+880", "+977", "+93", "+92", "+975", "+960", "+968", "+966",
+			"+961", "+962", "+965", "+973", "+971", "+974" };
 }

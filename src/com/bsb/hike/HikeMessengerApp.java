@@ -5,7 +5,9 @@ import static org.acra.ACRA.LOG_TAG;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.acra.ACRA;
@@ -16,6 +18,8 @@ import org.acra.annotation.ReportsCrashes;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.acra.util.HttpRequest;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
@@ -41,6 +45,7 @@ import com.bsb.hike.db.DbConversationListener;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -54,7 +59,6 @@ import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.Utils;
 import com.facebook.android.Facebook;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 @ReportsCrashes(formKey = "", customReportContent = {
 		ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
@@ -62,6 +66,11 @@ import com.fiksu.asotracking.FiksuTrackingManager;
 		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE,
 		ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
 public class HikeMessengerApp extends Application implements Listener {
+
+	public static enum CurrentState {
+		OPENED, RESUMED, BACKGROUNDED, CLOSED, NEW_ACTIVITY, BACK_PRESSED
+	}
+
 	public static final String ACCOUNT_SETTINGS = "accountsettings";
 
 	public static final String MSISDN_SETTING = "msisdn";
@@ -132,8 +141,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String COUNTRY_CODE = "countryCode";
 
-	public static final String AUTO_RECOMMENDED_FAVORITES_ADDED = "autoRecommendedFavoritesAdded";
-
 	public static final String FILE_PATH = "filePath";
 
 	public static final String TEMP_NAME = "tempName";
@@ -144,9 +151,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String GCM_ID_SENT = "gcmIdSent";
 
-	public static final String NUX1_DONE = "nux1Done";
-
-	public static final String NUX2_DONE = "nux2Done";
 	/*
 	 * Setting name for the day the was logged on fiksu for
 	 * "First message sent in day"
@@ -209,6 +213,51 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String STATUS_NOTIFICATION_SETTING = "statusNotificationSetting";
 
 	public static final String STATUS_IDS = "statusIds";
+
+	public static final String SHOWN_SMS_CLIENT_POPUP = "shownSMSClientPopup";
+	public static final String SHOWN_SMS_SYNC_POPUP = "shownSMSSyncPopup";
+
+	public static final String REMOVED_CATGORY_IDS = "removedCategoryIds";
+
+	public static final String SHOWN_DEFAULT_STICKER_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
+
+	public static final String FIRST_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
+
+	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
+
+	public static final String SHOWN_EMOTICON_TIP = "shownEmoticonTip";
+
+	public static final String SHOWN_STICKERS_TIP = "shownStickerTip";
+
+	public static final String SHOWN_MOODS_TIP = "shownMoodsTip";
+
+	public static final String SHOWN_WALKIE_TALKIE_TIP = "shownWalkieTalkieTip";
+
+	public static final String SHOWN_STATUS_TIP = "shownStatusTip";
+
+	public static final String SHOWN_LAST_SEEN_TIP = "shownLastSeenTip";
+
+	public static final String PROTIP_DISMISS_TIME = "protipDismissTime";
+
+	public static final String PROTIP_WAIT_TIME = "protipWaitTime";
+
+	public static final String CURRENT_PROTIP = "currentProtip";
+
+	public static final String SHOWN_NATIVE_SMS_INVITE_POPUP = "shownNativeSmsInvitePopup";
+
+	public static final String BUTTONS_OVERLAY_SHOWN = "buttonsOverlayShown";
+
+	public static final String SHOWN_FRIENDS_TUTORIAL = "shownFriendsTutorial";
+
+	public static final String SHOWN_STICKERS_TUTORIAL = "shownStickersTutorial";
+
+	public static final String SHOWN_NATIVE_INFO_POPUP = "shownNativeInfoPopup";
+
+	public static final String SHOW_BOLLYWOOD_STICKERS = "showBollywoodStickers";
+
+	public static List<StickerCategory> stickerCategories;
+
+	public static CurrentState currentState = CurrentState.CLOSED;
 
 	private static Facebook facebook;
 
@@ -416,15 +465,17 @@ public class HikeMessengerApp extends Application implements Listener {
 			editor.commit();
 		}
 
+		if (!preferenceManager.contains(HikeConstants.RECEIVE_SMS_PREF)) {
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(HikeConstants.RECEIVE_SMS_PREF, false);
+			editor.commit();
+		}
+
 		Utils.setupServerURL(
 				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 				Utils.switchSSLOn(getApplicationContext()));
 
 		typingNotificationMap = new HashMap<String, ClearTypingNotification>();
-
-		if (!TextUtils.isEmpty(msisdn) && !isIndianUser) {
-			FiksuTrackingManager.initialize(this);
-		}
 
 		initialiseListeners();
 
@@ -444,14 +495,59 @@ public class HikeMessengerApp extends Application implements Listener {
 		} catch (NameNotFoundException e) {
 			Log.e(getClass().getSimpleName(), "Invalid package", e);
 		}
+
+		if (!settings.contains(SHOW_BOLLYWOOD_STICKERS)) {
+			setupBollywoodCategoryVisibility(settings);
+		}
+		setupStickerCategoryList(settings);
+
+		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
+			HikeConversationsDatabase.getInstance()
+					.insertFirstStickerCategory();
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(FIRST_CATEGORY_INSERT_TO_DB, true);
+			editor.commit();
+		}
+
 		HikeMessengerApp.getPubSub().addListener(
 				HikePubSub.SWITCHED_DATA_CONNECTION, this);
 	}
 
+	private static void setupBollywoodCategoryVisibility(SharedPreferences prefs) {
+		String countryCode = prefs.getString(COUNTRY_CODE, "");
+
+		if (TextUtils.isEmpty(countryCode)) {
+			return;
+		}
+
+		boolean showBollywoodCategory = false;
+		for (String bollywoodCountryCode : HikeConstants.BOLLYWOOD_COUNTRY_CODES) {
+			if (bollywoodCountryCode.equals(countryCode)) {
+				showBollywoodCategory = true;
+				break;
+			}
+		}
+		Editor editor = prefs.edit();
+		editor.putBoolean(SHOW_BOLLYWOOD_STICKERS, showBollywoodCategory);
+		if (!showBollywoodCategory) {
+			try {
+				JSONArray removedIdArray = new JSONArray(prefs.getString(
+						REMOVED_CATGORY_IDS, "[]"));
+				removedIdArray.put(HikeConstants.BOLLYWOOD_CATEGORY);
+				editor.putString(REMOVED_CATGORY_IDS, removedIdArray.toString());
+			} catch (JSONException e) {
+				editor.remove(REMOVED_CATGORY_IDS);
+				Log.w("HikeMessengerApp", "Removed id array pref corrupted", e);
+			}
+		}
+		editor.commit();
+		if (!showBollywoodCategory) {
+			setupStickerCategoryList(prefs);
+		}
+	}
+
 	public void setMoodsResource() {
-		moodsResource = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
-				0).getBoolean(HikeMessengerApp.SHOW_CRICKET_MOODS, true) ? EmoticonConstants.MOOD_WITH_IPL_RES_IDS
-				: EmoticonConstants.MOOD_NO_IPL_RES_IDS;
+		moodsResource = EmoticonConstants.MOOD_WITH_IPL_RES_IDS;
 	}
 
 	public static int[] getMoodsResource() {
@@ -470,8 +566,12 @@ public class HikeMessengerApp extends Application implements Listener {
 		this.mService = service;
 	}
 
-	public static void setIndianUser(boolean isIndianUser) {
+	public static void setIndianUser(boolean isIndianUser,
+			SharedPreferences prefs) {
 		HikeMessengerApp.isIndianUser = isIndianUser;
+		if (!prefs.contains(SHOW_BOLLYWOOD_STICKERS)) {
+			setupBollywoodCategoryVisibility(prefs);
+		}
 	}
 
 	public static boolean isIndianUser() {
@@ -531,6 +631,33 @@ public class HikeMessengerApp extends Application implements Listener {
 			Utils.setupServerURL(
 					settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 					isWifiConnection);
+		}
+	}
+
+	public static void setupStickerCategoryList(SharedPreferences preferences) {
+		stickerCategories = new ArrayList<StickerCategory>();
+
+		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
+			stickerCategories.add(new StickerCategory(
+					EmoticonConstants.STICKER_CATEGORY_IDS[i],
+					EmoticonConstants.STICKER_CATEGORY_RES_IDS[i],
+					EmoticonConstants.STICKER_DOWNLOAD_PREF[i],
+					EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[i]));
+		}
+		String removedIds = preferences.getString(
+				HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
+
+		try {
+			JSONArray removedIdArray = new JSONArray(removedIds);
+			for (int i = 0; i < removedIdArray.length(); i++) {
+				String removedCategoryId = removedIdArray.getString(i);
+				StickerCategory removedStickerCategory = new StickerCategory(
+						removedCategoryId, 0, null, 0);
+
+				stickerCategories.remove(removedStickerCategory);
+			}
+		} catch (JSONException e) {
+			Log.w("HikeMessengerApp", "Invalid JSON", e);
 		}
 	}
 }

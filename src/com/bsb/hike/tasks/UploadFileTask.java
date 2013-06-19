@@ -26,6 +26,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.ui.ChatThread;
@@ -45,30 +46,37 @@ public class UploadFileTask extends FileTransferTaskBase {
 	private Context context;
 	private ConvMessage convMessage;
 	private Uri picasaUri;
+	private long recordingDuration = -1;
+	private Conversation conversation;
 
 	public UploadFileTask(String msisdn, String filePath, String fileKey,
 			String fileType, HikeFileType hikeFileType, boolean wasFileSaved,
-			Context context) {
+			long recordingDuration, Context context, Conversation conversation) {
 		this.msisdn = msisdn;
 		this.filePath = filePath;
 		this.fileKey = fileKey;
 		this.fileType = fileType;
 		this.hikeFileType = hikeFileType;
 		this.wasFileSaved = wasFileSaved;
+		this.recordingDuration = recordingDuration;
 		this.context = context;
+		this.conversation = conversation;
 	}
 
-	public UploadFileTask(ConvMessage convMessage, Context context) {
+	public UploadFileTask(ConvMessage convMessage, Context context,
+			Conversation conversation) {
 		this.convMessage = convMessage;
 		this.context = context;
+		this.conversation = conversation;
 	}
 
 	public UploadFileTask(Uri picasaUri, HikeFileType hikeFileType,
-			String msisdn, Context context) {
+			String msisdn, Context context, Conversation conversation) {
 		this.picasaUri = picasaUri;
 		this.hikeFileType = hikeFileType;
 		this.msisdn = msisdn;
 		this.context = context;
+		this.conversation = conversation;
 	}
 
 	@Override
@@ -97,25 +105,19 @@ public class UploadFileTask extends FileTransferTaskBase {
 					// We don't need to save the file if its a recording since
 					// its already saved in the hike folder
 					if (TextUtils.isEmpty(fileKey) && !wasFileSaved) {
+
 						selectedFile = Utils.getOutputMediaFile(hikeFileType,
 								fileName, null);
 						Log.d(getClass().getSimpleName(), "Copying file: "
 								+ filePath + " to " + selectedFile.getPath());
-						/*
-						 * Checking if this file already exists in the hike
-						 * folder.
-						 */
-						if (!filePath.contains(Utils
-								.getFileParent(hikeFileType))) {
-							// Saving the file to hike local folder
-							if (!Utils.copyFile(filePath,
-									selectedFile.getPath(), hikeFileType)) {
-								return FTResult.READ_FAIL;
-							}
-							filePath = selectedFile.getPath();
-						} else {
-							selectedFile = file;
+
+						// Saving the file to hike local folder
+						if (!Utils.copyFile(filePath, selectedFile.getPath(),
+								hikeFileType)) {
+							return FTResult.READ_FAIL;
 						}
+
+						filePath = selectedFile.getPath();
 					} else {
 						selectedFile = new File(filePath);
 					}
@@ -142,7 +144,8 @@ public class UploadFileTask extends FileTransferTaskBase {
 					}
 
 					JSONObject metadata = getFileTransferMetadata(fileName,
-							fileType, hikeFileType, null, null);
+							fileType, hikeFileType, null, null,
+							recordingDuration);
 
 					convMessage = createConvMessage(msisdn, fileName, metadata);
 
@@ -176,7 +179,8 @@ public class UploadFileTask extends FileTransferTaskBase {
 				}
 
 				JSONObject metadata = getFileTransferMetadata(fileName,
-						fileType, hikeFileType, thumbnailString, thumbnail);
+						fileType, hikeFileType, thumbnailString, thumbnail,
+						recordingDuration);
 
 				if (convMessage == null) {
 					convMessage = createConvMessage(msisdn, fileName, metadata);
@@ -263,12 +267,12 @@ public class UploadFileTask extends FileTransferTaskBase {
 
 	private JSONObject getFileTransferMetadata(String fileName,
 			String fileType, HikeFileType hikeFileType, String thumbnailString,
-			Bitmap thumbnail) throws JSONException {
+			Bitmap thumbnail, long recordingDuration) throws JSONException {
 		JSONArray files = new JSONArray();
 		files.put(new HikeFile(fileName,
 				TextUtils.isEmpty(fileType) ? HikeFileType
 						.toString(hikeFileType) : fileType, thumbnailString,
-				thumbnail).serialize());
+				thumbnail, recordingDuration).serialize());
 		JSONObject metadata = new JSONObject();
 		metadata.put(HikeConstants.FILES, files);
 
@@ -281,6 +285,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 		ConvMessage convMessage = new ConvMessage(fileName, msisdn, time,
 				ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setMetadata(metadata);
+		convMessage.setSMS(!conversation.isOnhike());
 		HikeConversationsDatabase.getInstance().addConversationMessages(
 				convMessage);
 
@@ -299,6 +304,9 @@ public class UploadFileTask extends FileTransferTaskBase {
 	@Override
 	protected void onPostExecute(FTResult result) {
 		if (convMessage != null) {
+			if (result == FTResult.SUCCESS) {
+				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
+			}
 			ChatThread.fileTransferTaskMap.remove(convMessage.getMsgID());
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);

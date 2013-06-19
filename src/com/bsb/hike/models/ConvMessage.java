@@ -21,6 +21,8 @@ import com.bsb.hike.utils.Utils;
 
 public class ConvMessage {
 
+	public static final int SMS_TOGGLE_ID = -119;
+
 	private long msgID; // this corresponds to msgID stored in sender's DB
 	private long mappedMsgId; // this corresponds to msgID stored in receiver's
 								// DB
@@ -49,6 +51,8 @@ public class ConvMessage {
 
 	private boolean isFileTransferMessage;
 
+	private boolean isStickerMessage;
+
 	public boolean isInvite() {
 		return mInvite;
 	}
@@ -63,6 +67,14 @@ public class ConvMessage {
 
 	public void setIsFileTranferMessage(boolean isFileTransferMessage) {
 		this.isFileTransferMessage = isFileTransferMessage;
+	}
+
+	public boolean isStickerMessage() {
+		return isStickerMessage;
+	}
+
+	public void setIsStickerMessage(boolean isStickerMessage) {
+		this.isStickerMessage = isStickerMessage;
 	}
 
 	/* Adding entries to the beginning of this list is not backwards compatible */
@@ -132,12 +144,19 @@ public class ConvMessage {
 			State msgState, long msgid, long mappedMsgId,
 			String groupParticipantMsisdn) {
 		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId,
-				groupParticipantMsisdn, ParticipantInfoState.NO_INFO);
+				groupParticipantMsisdn, false);
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp,
 			State msgState, long msgid, long mappedMsgId,
-			String groupParticipantMsisdn,
+			String groupParticipantMsisdn, boolean isSMS) {
+		this(message, msisdn, timestamp, msgState, msgid, mappedMsgId,
+				groupParticipantMsisdn, isSMS, ParticipantInfoState.NO_INFO);
+	}
+
+	public ConvMessage(String message, String msisdn, long timestamp,
+			State msgState, long msgid, long mappedMsgId,
+			String groupParticipantMsisdn, boolean isSMS,
 			ParticipantInfoState participantInfoState) {
 		assert (msisdn != null);
 		this.mMsisdn = msisdn;
@@ -149,8 +168,9 @@ public class ConvMessage {
 				|| msgState == State.SENT_CONFIRMED
 				|| msgState == State.SENT_DELIVERED
 				|| msgState == State.SENT_DELIVERED_READ || msgState == State.SENT_FAILED);
-		setState(msgState);
 		this.groupParticipantMsisdn = groupParticipantMsisdn;
+		this.mIsSMS = isSMS;
+		setState(msgState);
 		this.participantInfoState = participantInfoState;
 	}
 
@@ -198,6 +218,8 @@ public class ConvMessage {
 		if (data.has(HikeConstants.METADATA)) {
 			setMetadata(data.getJSONObject(HikeConstants.METADATA));
 		}
+		this.isStickerMessage = HikeConstants.STICKER.equals(obj
+				.optString(HikeConstants.SUB_TYPE));
 	}
 
 	public ConvMessage(JSONObject obj, Conversation conversation,
@@ -249,8 +271,9 @@ public class ConvMessage {
 				} else {
 					name = Utils.getFirstName(conversation.getLabel());
 				}
-				this.mMessage = String.format(
-						context.getString(R.string.joined_hike_new), name);
+				this.mMessage = String.format(context.getString(metadata
+						.isOldUser() ? R.string.user_back_on_hike
+						: R.string.joined_hike_new), name);
 			}
 			break;
 		case USER_OPT_IN:
@@ -309,16 +332,13 @@ public class ConvMessage {
 
 	public void setMetadata(JSONObject metadata) throws JSONException {
 		if (metadata != null) {
-			Log.d(getClass().getSimpleName(),
-					"Metadata: " + metadata.toString());
-
 			this.metadata = new MessageMetadata(metadata);
 
 			isFileTransferMessage = this.metadata.getHikeFiles() != null;
-			Log.d(getClass().getSimpleName(), "File Transfer: "
-					+ isFileTransferMessage);
 
 			participantInfoState = this.metadata.getParticipantInfoState();
+
+			isStickerMessage = this.metadata.getSticker() != null;
 		}
 	}
 
@@ -352,6 +372,10 @@ public class ConvMessage {
 
 	public boolean isSent() {
 		return mIsSent;
+	}
+
+	public void setTimestamp(long timeStamp) {
+		this.mTimestamp = timeStamp;
 	}
 
 	public long getTimestamp() {
@@ -428,21 +452,27 @@ public class ConvMessage {
 		JSONObject md = null;
 		try {
 			if (metadata != null) {
-				if (isFileTransferMessage) {
+				if (isFileTransferMessage || isStickerMessage) {
 					md = metadata.getJSON();
 					data.put(HikeConstants.METADATA, md);
 				} else if (metadata.isPokeMessage()) {
 					data.put(HikeConstants.POKE, true);
 				}
 			}
-			data.put(
-					mConversation != null && mConversation.isOnhike() ? HikeConstants.HIKE_MESSAGE
-							: HikeConstants.SMS_MESSAGE, mMessage);
+			data.put(!mIsSMS ? HikeConstants.HIKE_MESSAGE
+					: HikeConstants.SMS_MESSAGE, mMessage);
 			data.put(HikeConstants.TIMESTAMP, mTimestamp);
 			data.put(HikeConstants.MESSAGE_ID, msgID);
 
 			object.put(HikeConstants.TO, mMsisdn);
 			object.put(HikeConstants.DATA, data);
+			if (isStickerMessage) {
+				object.put(HikeConstants.SUB_TYPE, HikeConstants.STICKER);
+			}
+
+			if (mInvite && !HikeMessengerApp.isIndianUser()) {
+				object.put(HikeConstants.SUB_TYPE, HikeConstants.NO_SMS);
+			}
 
 			object.put(HikeConstants.TYPE,
 					mInvite ? HikeConstants.MqttMessageTypes.INVITE
@@ -461,13 +491,19 @@ public class ConvMessage {
 		return mConversation;
 	}
 
-	public String getTimestampFormatted(boolean pretty) {
+	public String getTimestampFormatted(boolean pretty, Context context) {
 		Date date = new Date(mTimestamp * 1000);
 		if (pretty) {
 			PrettyTime p = new PrettyTime();
 			return p.format(date);
 		} else {
-			String format = "d MMM ''yy 'AT' h:mm aaa";
+			String format;
+			if (android.text.format.DateFormat.is24HourFormat(context)) {
+				format = "d MMM ''yy 'AT' HH:mm";
+			} else {
+				format = "d MMM ''yy 'AT' h:mm aaa";
+			}
+
 			DateFormat df = new SimpleDateFormat(format);
 			return df.format(date);
 		}
@@ -540,10 +576,6 @@ public class ConvMessage {
 		/* failed is handled separately, since it's applicable to SMS messages */
 		if (mState == State.SENT_FAILED) {
 			return R.drawable.ic_failed;
-		}
-
-		if (isSMS()) {
-			return -1;
 		}
 
 		switch (mState) {

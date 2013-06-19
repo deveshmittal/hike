@@ -26,8 +26,9 @@ import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.view.DrawerLayout;
 import com.bsb.hike.view.DrawerLayout.CurrentState;
 
-public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
-		DrawerLayout.Listener, HikePubSub.Listener, OnItemLongClickListener {
+public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
+		implements DrawerLayout.Listener, HikePubSub.Listener,
+		OnItemLongClickListener {
 
 	public DrawerLayout parentLayout;
 	private SharedPreferences preferences;
@@ -147,6 +148,10 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 
 	@Override
 	public void onBackPressed() {
+		if (parentLayout == null || parentLayout.getCurrentState() == null) {
+			super.onBackPressed();
+			return;
+		}
 		if (parentLayout.getCurrentState() != CurrentState.NONE) {
 			parentLayout.closeSidebar(false);
 		} else {
@@ -157,7 +162,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 				if (this instanceof CentralTimeline) {
-					finish();
+					super.onBackPressed();
 					overridePendingTransition(R.anim.no_animation,
 							R.anim.slide_down_noalpha);
 				} else {
@@ -165,7 +170,7 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 							R.anim.slide_out_right_noalpha);
 				}
 			} else {
-				finish();
+				super.onBackPressed();
 			}
 		}
 	}
@@ -201,7 +206,8 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 				}
 			});
 		} else if (HikePubSub.FREE_SMS_TOGGLED.equals(type)) {
-			HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_RECENTS, null);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REFRESH_RECENTS,
+					null);
 			runOnUiThread(new Runnable() {
 
 				@Override
@@ -302,6 +308,9 @@ public class DrawerBaseActivity extends AuthSocialAccountBaseActivity implements
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE,
 					myMsisdn));
+			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_SENT_REJECTED,
+					HikeConstants.BOTH_VALUE, myMsisdn));
 			runOnUiThread(new Runnable() {
 
 				@Override

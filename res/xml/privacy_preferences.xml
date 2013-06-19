@@ -4,12 +4,12 @@
     android:title="@string/manage_account">
 
     <com.bsb.hike.view.IconCheckBoxPreference
-        icon="preference_free_sms"
+        icon="preference_last_seen"
         android:defaultValue="true"
-        android:key="freeSmsPref"
+        android:key="lastSeenPref"
         android:layout="@layout/icon_preference"
-        android:summary="@string/free_sms_msg"
-        android:title="@string/free_sms"
+        android:summary="@string/last_seen_info"
+        android:title="@string/last_seen_header"
         android:widgetLayout="@layout/checkbox_widget" />
     
     <com.bsb.hike.view.IconCheckBoxPreference

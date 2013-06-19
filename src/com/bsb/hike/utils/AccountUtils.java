@@ -3,6 +3,7 @@ package com.bsb.hike.utils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
@@ -119,6 +120,12 @@ public class AccountUtils {
 
 	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
 
+	public static final String STICKERS_PRODUCTION_BASE = "hike.in/sticker?catId=%1$s&stId=%2$s";
+
+	public static final String STICKERS_STAGING_BASE = "staging.im.in/sticker?catId=%1$s&stId=%2$s";
+
+	public static String stickersUrl = HTTP_STRING + STICKERS_PRODUCTION_BASE;
+
 	public static boolean ssl = false;
 
 	public static final String NETWORK_PREFS_NAME = "NetworkPrefs";
@@ -201,27 +208,31 @@ public class AccountUtils {
 			}
 
 			HttpEntity entity = response.getEntity();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					entity.getContent()));
-			StringBuilder builder = new StringBuilder();
-			CharBuffer target = CharBuffer.allocate(10000);
-			int read = reader.read(target);
-			while (read >= 0) {
-				builder.append(target.array(), 0, read);
-				target.clear();
-				read = reader.read(target);
-			}
-			Log.d("HTTP", "request finished");
-			try {
-				return new JSONObject(builder.toString());
-			} catch (JSONException e) {
-				Log.e("HTTP", "Invalid JSON Response", e);
-			}
+			return getResponse(entity.getContent());
 		} catch (ClientProtocolException e) {
 			Log.e("HTTP", "Invalid Response", e);
 			e.printStackTrace();
 		} catch (IOException e) {
 			Log.e("HTTP", "Unable to perform request", e);
+		}
+		return null;
+	}
+
+	public static JSONObject getResponse(InputStream is) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		StringBuilder builder = new StringBuilder();
+		CharBuffer target = CharBuffer.allocate(10000);
+		int read = reader.read(target);
+		while (read >= 0) {
+			builder.append(target.array(), 0, read);
+			target.clear();
+			read = reader.read(target);
+		}
+		Log.d("HTTP", "request finished");
+		try {
+			return new JSONObject(builder.toString());
+		} catch (JSONException e) {
+			Log.e("HTTP", "Invalid JSON Response", e);
 		}
 		return null;
 	}
@@ -620,18 +631,14 @@ public class AccountUtils {
 		RequestType requestType = hikeHttpRequest.getRequestType();
 		try {
 			switch (requestType) {
-			case STATUS_UPDATE:
-				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
-				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
-						HTTP.DEFAULT_CONTENT_CHARSET);
-				break;
-
 			case PROFILE_PIC:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new FileEntity(
 						new File(hikeHttpRequest.getFilePath()), "");
 				break;
 
+			case STATUS_UPDATE:
+			case SOCIAL_POST:
 			case OTHER:
 				requestBase = new HttpPost(base + hikeHttpRequest.getPath());
 				entity = new GzipByteArrayEntity(hikeHttpRequest.getPostData(),
@@ -664,7 +671,8 @@ public class AccountUtils {
 			 */
 			if (requestType == RequestType.STATUS_UPDATE
 					|| requestType == RequestType.HIKE_JOIN_TIME
-					|| requestType == RequestType.PROFILE_PIC) {
+					|| requestType == RequestType.PROFILE_PIC
+					|| requestType == RequestType.SOCIAL_POST) {
 				hikeHttpRequest.setResponse(obj);
 			}
 		} catch (UnsupportedEncodingException e) {
@@ -747,4 +755,39 @@ public class AccountUtils {
 		return base;
 	}
 
+	public static JSONObject downloadSticker(String catId,
+			JSONArray existingStickerIds) throws NetworkErrorException,
+			IllegalStateException, JSONException {
+
+		JSONObject request = new JSONObject();
+		request.put(HikeConstants.CATEGORY_ID, catId);
+		request.put(HikeConstants.STICKER_IDS, existingStickerIds);
+		request.put(HikeConstants.RESOLUTION_ID, Utils.getResolutionId());
+		request.put(HikeConstants.NUMBER_OF_STICKERS,
+				HikeConstants.MAX_NUM_STICKER_REQUEST);
+
+		Log.d("Stickers", "Request: " + request);
+		GzipByteArrayEntity entity;
+		try {
+			entity = new GzipByteArrayEntity(request.toString().getBytes(),
+					HTTP.DEFAULT_CONTENT_CHARSET);
+
+			HttpPost httpPost = new HttpPost(base + "/stickers");
+			addToken(httpPost);
+			httpPost.setEntity(entity);
+
+			JSONObject obj = executeRequest(httpPost);
+			Log.d("Stickers", "Response: " + obj);
+
+			if (((obj == null) || (!"ok".equals(obj.optString("stat"))))) {
+				throw new NetworkErrorException("Unable to perform request");
+			}
+
+			return obj;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
 }
