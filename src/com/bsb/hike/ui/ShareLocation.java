@@ -19,6 +19,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -27,16 +28,16 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeAppStateBaseMapActivity;
 import com.bsb.hike.utils.Utils;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 import com.google.android.maps.Overlay;
 import com.google.android.maps.OverlayItem;
 
-public class ShareLocation extends MapActivity {
+public class ShareLocation extends HikeAppStateBaseMapActivity {
 
 	private static final int NO_LOCATION_DEVICE_ENABLED = 0;
 	private static final int GPS_DISABLED = 1;
@@ -122,7 +123,7 @@ public class ShareLocation extends MapActivity {
 	}
 
 	private void showLocationDialog() {
-		if(alert != null && alert.isShowing()) {
+		if (alert != null && alert.isShowing()) {
 			return;
 		}
 		boolean hasGps = getPackageManager().hasSystemFeature(
@@ -263,18 +264,23 @@ public class ShareLocation extends MapActivity {
 			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 			}
 		};
-		locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
-				locListener);
-		locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0,
-				0, locListener);
+		try {
+			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+					0, locListener);
+			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+					0, 0, locListener);
 
-		if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
-			createAndShowMyItemizedOverlay(locManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-		} else if (locManager
-				.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
-			createAndShowMyItemizedOverlay(locManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+			if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
+				createAndShowMyItemizedOverlay(locManager
+						.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+			} else if (locManager
+					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
+				createAndShowMyItemizedOverlay(locManager
+						.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+			}
+		} catch (IllegalStateException e) {
+			Log.d(getClass().getSimpleName(), "No listener found");
+			showLocationDialog();
 		}
 	}
 

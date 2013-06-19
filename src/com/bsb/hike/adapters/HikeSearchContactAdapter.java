@@ -45,7 +45,6 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.MyDrawable;
 import com.bsb.hike.utils.Utils;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 @SuppressWarnings("unchecked")
 public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
@@ -64,11 +63,12 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 	private Map<String, GroupParticipant> groupParticipants;
 	private String countryCode;
 	private boolean freeSMSOn;
+	private boolean nativeSMSOn;
 
 	public HikeSearchContactAdapter(Activity context,
 			List<ContactInfo> contactList, EditText inputNumber,
 			boolean isGroupChat, Button topBarBtn, String groupId,
-			Intent presentIntent, boolean freeSMSOn) {
+			Intent presentIntent, boolean freeSMSOn, boolean nativeSMSOn) {
 		super(context, -1, contactList);
 		this.filteredList = contactList;
 		this.completeList = new ArrayList<ContactInfo>();
@@ -85,6 +85,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 				.getString(HikeMessengerApp.COUNTRY_CODE,
 						HikeConstants.INDIA_COUNTRY_CODE);
 		this.freeSMSOn = freeSMSOn;
+		this.nativeSMSOn = nativeSMSOn;
 		if (!TextUtils.isEmpty(groupId)) {
 			groupParticipants = HikeConversationsDatabase.getInstance()
 					.getGroupParticipants(groupId, true, false);
@@ -103,11 +104,7 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 
 		v.setTag(contactInfo);
 
-		boolean inviteOnly = contactInfo != null
-				&& ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
-						&& (!contactInfo.getMsisdn().startsWith(
-								HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
-							.isOnhike()));
+		boolean inviteOnly = isContactInviteOnly(contactInfo);
 
 		TextView textView = (TextView) v.findViewById(R.id.name);
 		textView.setText(contactInfo != null ? contactInfo.getName()
@@ -134,9 +131,15 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 				: 0);
 
 		ImageView avatar = (ImageView) v.findViewById(R.id.user_img);
-		avatar.setImageDrawable(contactInfo != null ? IconCacheManager
-				.getInstance().getIconForMSISDN(contactInfo.getMsisdn())
-				: context.getResources().getDrawable(R.drawable.ic_avatar1));
+		if (contactInfo != null
+				&& contactInfo.getId().equals(contactInfo.getPhoneNum())) {
+			avatar.setImageDrawable(IconCacheManager.getInstance()
+					.getIconForMSISDN(contactInfo.getPhoneNum()));
+		} else {
+			avatar.setImageDrawable(contactInfo != null ? IconCacheManager
+					.getInstance().getIconForMSISDN(contactInfo.getMsisdn())
+					: context.getResources().getDrawable(R.drawable.ic_avatar1));
+		}
 
 		numberTextView.setVisibility(isEnabled(position) ? View.VISIBLE
 				: View.INVISIBLE);
@@ -275,21 +278,12 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			isUnknownNumber = true;
 		}
 		if (!isGroupChat) {
-			boolean inviteOnly = ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
-					&& (!contactInfo.getMsisdn().startsWith(
-							HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
-						.isOnhike())) && !isUnknownNumber;
+			boolean inviteOnly = isContactInviteOnly(contactInfo);
 
 			if (inviteOnly) {
 				Log.d(getClass().getSimpleName(),
 						"Inviting " + contactInfo.toString());
-				FiksuTrackingManager.uploadPurchaseEvent(context,
-						HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-						HikeConstants.CURRENCY);
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MQTT_PUBLISH,
-						Utils.makeHike2SMSInviteMessage(
-								contactInfo.getMsisdn(), context).serialize());
+				Utils.sendInvite(contactInfo.getMsisdn(), context);
 				Toast.makeText(context, R.string.invite_sent,
 						Toast.LENGTH_SHORT).show();
 				return;
@@ -305,7 +299,9 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 								: Intent.EXTRA_TEXT);
 				Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
 				intent.putExtra(HikeConstants.Extras.MSG, msg);
-			} else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY)) {
+			} else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY)
+					|| presentIntent
+							.hasExtra(HikeConstants.Extras.FWD_CATEGORY_ID)) {
 				intent.putExtras(presentIntent);
 			} else if (type != null
 					&& (type.startsWith("image") || type.startsWith("audio") || type
@@ -422,5 +418,14 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 		return !textInEditText
 				.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? textInEditText
 				: textInEditText.substring(indexTextToBeFiltered);
+	}
+
+	private boolean isContactInviteOnly(ContactInfo contactInfo) {
+		return contactInfo != null
+				&& !nativeSMSOn
+				&& ((!freeSMSOn && !contactInfo.isOnhike()) || (freeSMSOn
+						&& (!contactInfo.getMsisdn().startsWith(
+								HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
+							.isOnhike()));
 	}
 }

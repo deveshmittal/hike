@@ -82,7 +82,7 @@
                                 android:textStyle="bold" />
 
                             <com.bsb.hike.view.CustomFontTextView
-                                android:layout_width="wrap_content"
+                                android:layout_width="@dimen/free_hike_width"
                                 android:layout_height="wrap_content"
                                 android:layout_alignBottom="@+id/hike_txt"
                                 android:layout_toRightOf="@+id/hike_txt"
@@ -133,7 +133,7 @@
                                 android:textStyle="bold" />
 
                             <com.bsb.hike.view.CustomFontTextView
-                                android:layout_width="130dp"
+                                android:layout_width="@dimen/free_sms_width"
                                 android:layout_height="wrap_content"
                                 android:layout_alignBottom="@id/free_sms_txt"
                                 android:layout_toRightOf="@id/free_sms_txt"

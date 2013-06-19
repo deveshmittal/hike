@@ -20,13 +20,19 @@ import com.bsb.hike.utils.Utils.ExternalStorageState;
 
 public class HikeFile {
 	public static enum HikeFileType {
-		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION, CONTACT, UNKNOWN;
+		PROFILE, IMAGE, VIDEO, AUDIO, LOCATION, CONTACT, AUDIO_RECORDING, UNKNOWN;
 
 		public static HikeFileType fromString(String fileTypeString) {
+			return fromString(fileTypeString, false);
+		}
+
+		public static HikeFileType fromString(String fileTypeString,
+				boolean isRecording) {
 			if (fileTypeString.startsWith("video")) {
 				return HikeFileType.VIDEO;
 			} else if (fileTypeString.startsWith("audio")) {
-				return HikeFileType.AUDIO;
+				return isRecording ? HikeFileType.AUDIO_RECORDING
+						: HikeFileType.AUDIO;
 			} else if (fileTypeString
 					.startsWith(HikeConstants.LOCATION_CONTENT_TYPE)) {
 				return HikeFileType.LOCATION;
@@ -44,7 +50,7 @@ public class HikeFile {
 				return "image/*";
 			} else if (hikeFileType == VIDEO) {
 				return "video/*";
-			} else if (hikeFileType == AUDIO) {
+			} else if (hikeFileType == AUDIO || hikeFileType == AUDIO_RECORDING) {
 				return "audio/*";
 			} else if (hikeFileType == LOCATION) {
 				return HikeConstants.LOCATION_CONTENT_TYPE;
@@ -71,6 +77,10 @@ public class HikeFile {
 			} else if (hikeFileType == CONTACT) {
 				return isSent ? context.getString(R.string.contact_msg_sent)
 						: context.getString(R.string.contact_msg_received);
+			} else if (hikeFileType == AUDIO_RECORDING) {
+				return isSent ? context
+						.getString(R.string.audio_recording_msg_sent) : context
+						.getString(R.string.audio_recording_msg_received);
 			}
 			return context.getString(R.string.unknown_msg);
 		}
@@ -83,6 +93,7 @@ public class HikeFile {
 	private String fileKey;
 	private HikeFileType hikeFileType;
 	private File file;
+	private long recordingDuration = -1;
 
 	private double latitude;
 	private double longitude;
@@ -102,14 +113,11 @@ public class HikeFile {
 		this.thumbnail = thumbnail == null ? Utils
 				.stringToDrawable(thumbnailString) : thumbnail;
 		this.fileKey = fileJSON.optString(HikeConstants.FILE_KEY);
-		this.hikeFileType = HikeFileType.fromString(fileTypeString);
 		this.latitude = fileJSON.optDouble(HikeConstants.LATITUDE);
 		this.longitude = fileJSON.optDouble(HikeConstants.LONGITUDE);
 		this.zoomLevel = fileJSON.optInt(HikeConstants.ZOOM_LEVEL,
 				HikeConstants.DEFAULT_ZOOM_LEVEL);
 		this.address = fileJSON.optString(HikeConstants.ADDRESS);
-		this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
-				.getOutputMediaFile(hikeFileType, fileName, fileKey);
 		if (this.file != null) {
 			// Update the file name to prevent duplicacy
 			this.fileName = this.file.getName();
@@ -119,15 +127,22 @@ public class HikeFile {
 		this.emails = fileJSON.optJSONArray(HikeConstants.EMAILS);
 		this.addresses = fileJSON.optJSONArray(HikeConstants.ADDRESSES);
 		this.events = fileJSON.optJSONArray(HikeConstants.EVENTS);
+		this.recordingDuration = fileJSON.optLong(HikeConstants.PLAYTIME, -1);
+		this.hikeFileType = HikeFileType.fromString(fileTypeString,
+				recordingDuration != -1);
+		this.file = TextUtils.isEmpty(this.fileKey) ? null : Utils
+				.getOutputMediaFile(hikeFileType, fileName, fileKey);
 	}
 
 	public HikeFile(String fileName, String fileTypeString,
-			String thumbnailString, Bitmap thumbnail) {
+			String thumbnailString, Bitmap thumbnail, long recordingDuration) {
 		this.fileName = fileName;
 		this.fileTypeString = fileTypeString;
-		this.hikeFileType = HikeFileType.fromString(fileTypeString);
+		this.hikeFileType = HikeFileType.fromString(fileTypeString,
+				recordingDuration != -1);
 		this.thumbnailString = thumbnailString;
 		this.thumbnail = new BitmapDrawable(thumbnail);
+		this.recordingDuration = recordingDuration;
 	}
 
 	public HikeFile(double latitude, double longitude, int zoomLevel,
@@ -150,6 +165,9 @@ public class HikeFile {
 			fileJSON.putOpt(HikeConstants.FILE_NAME, fileName);
 			fileJSON.putOpt(HikeConstants.FILE_KEY, fileKey);
 			fileJSON.putOpt(HikeConstants.THUMBNAIL, thumbnailString);
+			if (recordingDuration != -1) {
+				fileJSON.put(HikeConstants.PLAYTIME, recordingDuration);
+			}
 			if (HikeConstants.LOCATION_CONTENT_TYPE.equals(fileTypeString)) {
 				fileJSON.putOpt(HikeConstants.LATITUDE, latitude);
 				fileJSON.putOpt(HikeConstants.LONGITUDE, longitude);
@@ -177,7 +195,8 @@ public class HikeFile {
 
 	public void setFileTypeString(String fileTypeString) {
 		this.fileTypeString = fileTypeString;
-		this.hikeFileType = HikeFileType.fromString(fileTypeString);
+		this.hikeFileType = HikeFileType.fromString(fileTypeString,
+				recordingDuration != -1);
 	}
 
 	public String getFileTypeString() {
@@ -223,6 +242,10 @@ public class HikeFile {
 
 	public String getAddress() {
 		return address;
+	}
+
+	public long getRecordingDuration() {
+		return recordingDuration;
 	}
 
 	public boolean wasFileDownloaded() {

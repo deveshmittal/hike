@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -89,7 +90,6 @@ import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class ProfileActivity extends DrawerBaseActivity implements
 		FinishableEvent, android.content.DialogInterface.OnClickListener,
@@ -303,6 +303,12 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		this.mLocalMSISDN = getIntent().getStringExtra(
 				HikeConstants.Extras.CONTACT_INFO);
 
+		/*
+		 * Cancel any friend request/status notification from this number.
+		 */
+		NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+		notificationManager.cancel(mLocalMSISDN.hashCode());
+
 		contactInfo = HikeUserDatabase.getInstance().getContactInfoFromMSISDN(
 				mLocalMSISDN, false);
 
@@ -354,6 +360,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 										.getJSONObject(HikeConstants.PROFILE);
 								long hikeJoinTime = profile.optLong(
 										HikeConstants.JOIN_TIME, 0);
+								hikeJoinTime = Utils.applyServerTimeOffset(
+										ProfileActivity.this, hikeJoinTime);
+
 								HikeMessengerApp.getPubSub().publish(
 										HikePubSub.HIKE_JOIN_TIME_OBTAINED,
 										new Pair<String, Long>(mLocalMSISDN,
@@ -376,19 +385,26 @@ public class ProfileActivity extends DrawerBaseActivity implements
 		// Adding an item for the button
 		profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_BUTTON_ID,
 				null, null, null, null, null, 0));
-		if ((contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND)
-				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
-				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
-				&& (contactInfo.isOnhike())) {
+		if (showContactsUpdates(contactInfo)) {
 			profileItems.addAll(HikeConversationsDatabase.getInstance()
 					.getStatusMessages(false,
 							HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 							mLocalMSISDN));
+			if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() > 0) {
+				profileItems.add(getJoinedHikeStatus(contactInfo));
+			}
 		} else {
 			// Adding an item for the empty status
 			profileItems.add(new StatusMessage(ProfileAdapter.PROFILE_EMPTY_ID,
 					null, null, null, null, null, 0));
 		}
+	}
+
+	private boolean showContactsUpdates(ContactInfo contactInfo) {
+		return (contactInfo.getFavoriteType() != FavoriteType.NOT_FRIEND)
+				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT)
+				&& (contactInfo.getFavoriteType() != FavoriteType.REQUEST_SENT_REJECTED)
+				&& (contactInfo.isOnhike());
 	}
 
 	private void setupGroupProfileScreen() {
@@ -602,6 +618,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 				.getStatusMessages(false,
 						HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 						mLocalMSISDN));
+		if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() > 0) {
+			profileItems.add(getJoinedHikeStatus(contactInfo));
+		}
 
 		profileAdapter = new ProfileAdapter(this, profileItems, null,
 				contactInfo, true);
@@ -742,11 +761,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 						R.anim.slide_out_right_noalpha);
 			}
 		} else {
-			if (this.profileType == ProfileType.USER_PROFILE) {
-				super.onBackPressed();
-			} else {
-				finish();
-			}
+			super.onBackPressed();
 		}
 	}
 
@@ -993,7 +1008,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			super.onBackPressed();
 			return;
 		}
-		finish();
+		super.onBackPressed();
 	}
 
 	protected String getLargerIconId() {
@@ -1012,6 +1027,7 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		String path = null;
 		if (resultCode != RESULT_OK) {
 			return;
@@ -1118,8 +1134,9 @@ public class ProfileActivity extends DrawerBaseActivity implements
 			mActivityState.destFilePath = data
 					.getStringExtra(MediaStore.EXTRA_OUTPUT);
 			if (mActivityState.destFilePath == null) {
-				Toast.makeText(getApplicationContext(), R.string.error_setting_profile,
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(),
+						R.string.error_setting_profile, Toast.LENGTH_SHORT)
+						.show();
 				return;
 			}
 			if ((this.profileType == ProfileType.USER_PROFILE)
@@ -1637,8 +1654,6 @@ public class ProfileActivity extends DrawerBaseActivity implements
 	}
 
 	private void inviteToHike(String msisdn) {
-		FiksuTrackingManager.uploadPurchaseEvent(this, HikeConstants.INVITE,
-				HikeConstants.INVITE_SENT, HikeConstants.CURRENCY);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
 				Utils.makeHike2SMSInviteMessage(msisdn, this).serialize());
 
@@ -1891,10 +1906,20 @@ public class ProfileActivity extends DrawerBaseActivity implements
 
 				@Override
 				public void run() {
+					if (showContactsUpdates(contactInfo)) {
+						profileItems.add(getJoinedHikeStatus(contactInfo));
+					}
+
 					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		}
+	}
+
+	private StatusMessage getJoinedHikeStatus(ContactInfo contactInfo) {
+		return new StatusMessage(0, null, contactInfo.getMsisdn(),
+				contactInfo.getName(), getString(R.string.joined_hike_update),
+				StatusMessageType.JOINED_HIKE, contactInfo.getHikeJoinTime());
 	}
 
 	@Override

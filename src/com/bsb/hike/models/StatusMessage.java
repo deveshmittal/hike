@@ -4,9 +4,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
@@ -15,7 +17,7 @@ import com.bsb.hike.utils.Utils;
 public class StatusMessage {
 
 	public static enum StatusMessageType {
-		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED, NO_STATUS, USER_ACCEPTED_FRIEND_REQUEST
+		TEXT, IMAGE, TEXT_IMAGE, PROFILE_PIC, FRIEND_REQUEST, FRIEND_REQUEST_ACCEPTED, NO_STATUS, USER_ACCEPTED_FRIEND_REQUEST, PROTIP, JOINED_HIKE
 	}
 
 	private long id;
@@ -27,15 +29,19 @@ public class StatusMessage {
 	private long timeStamp;
 	private int moodId;
 	private int timeOfDay;
+	private Protip protip;
 
-	public StatusMessage(JSONObject statusMessageJson) {
-		this.msisdn = statusMessageJson.optString(HikeConstants.FROM);
-		this.timeStamp = statusMessageJson.optLong(HikeConstants.TIMESTAMP,
-				System.currentTimeMillis() / 1000);
+	public StatusMessage(JSONObject statusMessageJson) throws JSONException {
+		this.msisdn = statusMessageJson.getString(HikeConstants.FROM);
 
-		JSONObject data = statusMessageJson.optJSONObject(HikeConstants.DATA);
+		this.timeStamp = statusMessageJson.getLong(HikeConstants.TIMESTAMP);
+		/* prevent us from receiving a message from the future */
+		long now = System.currentTimeMillis() / 1000;
+		this.timeStamp = (this.timeStamp > now) ? now : this.timeStamp;
 
-		this.mappedId = data.optString(HikeConstants.STATUS_ID);
+		JSONObject data = statusMessageJson.getJSONObject(HikeConstants.DATA);
+
+		this.mappedId = data.getString(HikeConstants.STATUS_ID);
 
 		if (data.optBoolean(HikeConstants.PROFILE)) {
 			this.statusMessageType = StatusMessageType.PROFILE_PIC;
@@ -66,6 +72,15 @@ public class StatusMessage {
 		this.timeStamp = timeStamp;
 		this.moodId = moodId;
 		this.timeOfDay = timeOfDay;
+	}
+
+	public StatusMessage(Protip protip) {
+		this.protip = protip;
+		this.mappedId = protip.getMappedId();
+		this.name = HikeConstants.PROTIP_STATUS_NAME;
+		this.text = protip.getHeader();
+		this.timeStamp = protip.getTimeStamp();
+		this.statusMessageType = StatusMessageType.PROTIP;
 	}
 
 	public void setId(long id) {
@@ -104,6 +119,10 @@ public class StatusMessage {
 		return statusMessageType;
 	}
 
+	public void setTimeStamp(long timeStamp) {
+		this.timeStamp = timeStamp;
+	}
+
 	public long getTimeStamp() {
 		return timeStamp;
 	}
@@ -120,13 +139,22 @@ public class StatusMessage {
 		return timeOfDay;
 	}
 
-	public String getTimestampFormatted(boolean pretty) {
+	public Protip getProtip() {
+		return protip;
+	}
+
+	public String getTimestampFormatted(boolean pretty, Context context) {
 		Date date = new Date(timeStamp * 1000);
 		if (pretty) {
 			PrettyTime p = new PrettyTime();
 			return p.format(date);
 		} else {
-			String format = "d MMM ''yy 'AT' h:mm aaa";
+			String format;
+			if (android.text.format.DateFormat.is24HourFormat(context)) {
+				format = "d MMM ''yy 'AT' HH:mm";
+			} else {
+				format = "d MMM ''yy 'AT' h:mm aaa";
+			}
 			DateFormat df = new SimpleDateFormat(format);
 			return df.format(date);
 		}

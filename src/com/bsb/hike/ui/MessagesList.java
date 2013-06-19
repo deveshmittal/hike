@@ -18,6 +18,7 @@ import android.app.NotificationManager;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -31,6 +32,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -40,8 +42,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -69,6 +69,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadAndInstallUpdateAsyncTask;
@@ -76,12 +77,15 @@ import com.bsb.hike.utils.AppRater;
 import com.bsb.hike.utils.DrawerBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.DrawerLayout;
-import com.fiksu.asotracking.FiksuTrackingManager;
 
 public class MessagesList extends DrawerBaseActivity implements
 		OnClickListener, OnItemClickListener, HikePubSub.Listener,
 		android.content.DialogInterface.OnClickListener, Runnable,
 		OnItemLongClickListener {
+	private enum DialogShowing {
+		SMS_CLIENT, SMS_SYNC_CONFIRMATION, SMS_SYNCING
+	}
+
 	public static final Object COMPOSE = "compose";
 
 	private ConversationsAdapter mAdapter;
@@ -96,13 +100,7 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	private Comparator<? super Conversation> mConversationsComparator;
 
-	private View mToolTip;
-
 	private SharedPreferences accountPrefs;
-
-	private View updateToolTipParent;
-
-	private View groupChatToolTipParent;
 
 	private boolean wasAlertCancelled = false;
 
@@ -123,7 +121,9 @@ public class MessagesList extends DrawerBaseActivity implements
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.RESET_NOTIFICATION_COUNTER,
 			HikePubSub.DECREMENT_NOTIFICATION_COUNTER,
-			HikePubSub.DRAWER_ANIMATION_COMPLETE };
+			HikePubSub.DRAWER_ANIMATION_COMPLETE, HikePubSub.SMS_SYNC_COMPLETE,
+			HikePubSub.SMS_SYNC_FAIL, HikePubSub.SMS_SYNC_START,
+			HikePubSub.PROTIP_ADDED };
 
 	private Dialog updateAlert;
 
@@ -136,6 +136,10 @@ public class MessagesList extends DrawerBaseActivity implements
 	private int notificationCount;
 
 	private String userMsisdn;
+
+	private DialogShowing dialogShowing;
+
+	private Dialog dialog;
 
 	@Override
 	protected void onPause() {
@@ -233,34 +237,14 @@ public class MessagesList extends DrawerBaseActivity implements
 		Intent i = null;
 		boolean justSignedUp = accountPrefs.getBoolean(
 				HikeMessengerApp.JUST_SIGNED_UP, false);
-		if (justSignedUp
-				&& !accountPrefs.getBoolean(HikeMessengerApp.INTRO_DONE, false)) {
+		if (!accountPrefs.getBoolean(HikeMessengerApp.SHOWN_STICKERS_TUTORIAL,
+				false)) {
 			i = new Intent(MessagesList.this, Tutorial.class);
-		} else if (!accountPrefs.getBoolean(HikeMessengerApp.NUX1_DONE, false)) {
-			i = new Intent(MessagesList.this, HikeListActivity.class);
-			i.putExtra(HikeConstants.Extras.SHOW_MOST_CONTACTED, true);
-		} else if (!accountPrefs.getBoolean(HikeMessengerApp.NUX2_DONE, false)) {
-			i = new Intent(MessagesList.this, HikeListActivity.class);
-			i.putExtra(HikeConstants.Extras.SHOW_FAMILY, true);
+			i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(i);
+			finish();
+			return;
 		}
-		if (i != null) {
-			boolean startNux = true;
-			if (!justSignedUp) {
-				startNux = HikeUserDatabase.getInstance().getHikeContactCount() < 10;
-			}
-			if (startNux) {
-				i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				startActivity(i);
-				finish();
-				return;
-			} else {
-				Editor editor = accountPrefs.edit();
-				editor.putBoolean(HikeMessengerApp.NUX1_DONE, true);
-				editor.putBoolean(HikeMessengerApp.NUX2_DONE, true);
-				editor.commit();
-			}
-		}
-
 		// TODO this is being called everytime this activity is created. Way too
 		// often
 		HikeMessengerApp app = (HikeMessengerApp) getApplicationContext();
@@ -269,18 +253,23 @@ public class MessagesList extends DrawerBaseActivity implements
 		setContentView(R.layout.main);
 		afterSetContentView(savedInstanceState);
 
-		wasAlertCancelled = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
-		deviceDetailsSent = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
-		introMessageAdded = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED);
-		nuxNumbersInvited = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED);
+		if (savedInstanceState != null) {
+			wasAlertCancelled = savedInstanceState
+					.getBoolean(HikeConstants.Extras.ALERT_CANCELLED);
+			deviceDetailsSent = savedInstanceState
+					.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
+			introMessageAdded = savedInstanceState
+					.getBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED);
+			nuxNumbersInvited = savedInstanceState
+					.getBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED);
+			int dialogShowingOrdinal = savedInstanceState
+					.getInt(HikeConstants.Extras.DIALOG_SHOWING);
+			if (dialogShowingOrdinal != -1) {
+				dialogShowing = DialogShowing.values()[dialogShowingOrdinal];
+			} else {
+				dialogShowing = null;
+			}
+		}
 
 		int updateTypeAvailable = accountPrefs.getInt(
 				HikeConstants.Extras.UPDATE_AVAILABLE, HikeConstants.NO_UPDATE);
@@ -314,14 +303,6 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 		}
 
-		if (getIntent().getBooleanExtra(HikeConstants.Extras.FROM_NUX_SCREEN,
-				false)) {
-			if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)
-					|| accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP1)) {
-				sendNuxEvents();
-			}
-		}
-
 		userMsisdn = accountPrefs
 				.getString(HikeMessengerApp.MSISDN_SETTING, "");
 
@@ -341,62 +322,13 @@ public class MessagesList extends DrawerBaseActivity implements
 		mConversationsView.setEmptyView(mEmptyView);
 		mConversationsView.setOnItemClickListener(this);
 
-		if (mAdapter == null || mConversationsByMSISDN == null
-				|| mConversationsAdded == null) {
-			HikeConversationsDatabase db = HikeConversationsDatabase
-					.getInstance();
-			List<Conversation> conversations = db.getConversations();
+		fetchConversations(true);
 
-			mConversationsByMSISDN = new HashMap<String, Conversation>(
-					conversations.size());
-			mConversationsAdded = new HashSet<String>();
-
-			/*
-			 * Use an iterator so we can remove conversations w/ no messages
-			 * from our list
-			 */
-			for (Iterator<Conversation> iter = conversations.iterator(); iter
-					.hasNext();) {
-				Conversation conv = (Conversation) iter.next();
-				mConversationsByMSISDN.put(conv.getMsisdn(), conv);
-				if (conv.getMessages().isEmpty()
-						&& !(conv instanceof GroupConversation)) {
-					iter.remove();
-				} else {
-					mConversationsAdded.add(conv.getMsisdn());
-				}
-			}
-
-			mAdapter = new ConversationsAdapter(MessagesList.this,
-					R.layout.conversation_item, conversations, parentLayout);
-
-			HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
-					pubSubListeners);
-		}
 		/*
 		 * we need this object every time a message comes in, seems simplest to
 		 * just create it once
 		 */
 		mConversationsComparator = new Conversation.ConversationComparator();
-
-		/*
-		 * because notifyOnChange gets re-enabled whenever we call
-		 * notifyDataSetChanged it's simpler to assume it's set to false and
-		 * always notifyOnChange by hand
-		 */
-		mAdapter.setNotifyOnChange(false);
-
-		View footerView = getLayoutInflater().inflate(
-				R.layout.conversation_list_footer, null);
-		AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(
-				AbsListView.LayoutParams.MATCH_PARENT, (int) getResources()
-						.getDimension(R.dimen.conversation_footer_height));
-		footerView.setLayoutParams(layoutParams);
-		mConversationsView.addFooterView(footerView);
-
-		mConversationsView.setAdapter(mAdapter);
-
-		mConversationsView.setOnItemLongClickListener(this);
 
 		/*
 		 * Calling this manually since this method is not called when the
@@ -421,55 +353,153 @@ public class MessagesList extends DrawerBaseActivity implements
 			toggleTypingNotification(true, msisdn);
 		}
 
-		if (!accountPrefs.getBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, false)) {
-			findViewById(R.id.friend_intro).setVisibility(View.VISIBLE);
-		} else if (savedInstanceState == null) {
+		if (!accountPrefs.getBoolean(HikeMessengerApp.BUTTONS_OVERLAY_SHOWN,
+				false)) {
+			findViewById(R.id.buttons_intro).setVisibility(View.VISIBLE);
+		} else if (savedInstanceState == null && dialogShowing == null) {
 			/*
 			 * Only show app rater if the tutorial is not being shown an the app
 			 * was just launched i.e not an orientation change
 			 */
 			AppRater.appLaunched(this);
+		} else if (dialogShowing != null) {
+			switch (dialogShowing) {
+			case SMS_CLIENT:
+				showSMSClientDialog();
+				break;
+
+			case SMS_SYNC_CONFIRMATION:
+			case SMS_SYNCING:
+				showSMSSyncDialog();
+				break;
+			}
+		}
+
+		if (accountPrefs.getBoolean(HikeMessengerApp.BUTTONS_OVERLAY_SHOWN,
+				false) && !AppRater.showingDialog() && dialogShowing == null) {
+			if (!accountPrefs.getBoolean(
+					HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true)) {
+				showSMSClientDialog();
+			}
 		}
 	}
 
-	private void sendNuxEvents() {
-		(new Handler()).postDelayed(new Runnable() {
+	private void showSMSClientDialog() {
+		dialogShowing = DialogShowing.SMS_CLIENT;
+
+		dialog = new Dialog(this, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.sms_with_hike_popup);
+		dialog.setCancelable(false);
+
+		Button okBtn = (Button) dialog.findViewById(R.id.btn_ok);
+		Button cancelBtn = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		okBtn.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void run() {
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(getApplicationContext(), true);
 
-				JSONObject data = new JSONObject();
-				JSONObject obj = new JSONObject();
-
-				try {
-					if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP1)) {
-						data.put(HikeConstants.LogEvent.NUX_SKIP1, accountPrefs
-								.getBoolean(HikeConstants.LogEvent.NUX_SKIP1,
-										false) ? 1 : 0);
-					}
-					if (accountPrefs.contains(HikeConstants.LogEvent.NUX_SKIP2)) {
-						data.put(HikeConstants.LogEvent.NUX_SKIP2, accountPrefs
-								.getBoolean(HikeConstants.LogEvent.NUX_SKIP2,
-										false) ? 1 : 0);
-					}
-					data.put(HikeConstants.LogEvent.TAG, "mob");
-
-					obj.put(HikeConstants.TYPE,
-							HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
-					obj.put(HikeConstants.DATA, data);
-				} catch (JSONException e) {
-					Log.e(getClass().getSimpleName(), "Invalid JSON", e);
-				}
-
-				Editor editor = accountPrefs.edit();
-				editor.remove(HikeConstants.LogEvent.NUX_SKIP1);
-				editor.remove(HikeConstants.LogEvent.NUX_SKIP2);
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(
+						getApplicationContext()).edit();
+				editor.putBoolean(HikeConstants.SEND_SMS_PREF, true);
 				editor.commit();
 
-				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
-						obj);
+				dialogShowing = null;
+				dialog.dismiss();
+				if (!accountPrefs.getBoolean(
+						HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
+					showSMSSyncDialog();
+				}
 			}
-		}, 5 * 1000);
+		});
+
+		cancelBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Utils.setReceiveSmsSetting(getApplicationContext(), false);
+				dialogShowing = null;
+				dialog.dismiss();
+			}
+		});
+
+		dialog.setOnDismissListener(new OnDismissListener() {
+
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				Editor editor = accountPrefs.edit();
+				editor.putBoolean(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, true);
+				editor.commit();
+			}
+		});
+		dialog.show();
+	}
+
+	private void showSMSSyncDialog() {
+		if (dialogShowing == null) {
+			dialogShowing = DialogShowing.SMS_SYNC_CONFIRMATION;
+		}
+
+		dialog = Utils.showSMSSyncDialog(this,
+				dialogShowing == DialogShowing.SMS_SYNC_CONFIRMATION);
+	}
+
+	private void fetchConversations(boolean addFooter) {
+		HikeConversationsDatabase db = HikeConversationsDatabase.getInstance();
+		List<Conversation> conversations = db.getConversations();
+
+		mConversationsByMSISDN = new HashMap<String, Conversation>(
+				conversations.size());
+		mConversationsAdded = new HashSet<String>();
+
+		/*
+		 * Use an iterator so we can remove conversations w/ no messages from
+		 * our list
+		 */
+		for (Iterator<Conversation> iter = conversations.iterator(); iter
+				.hasNext();) {
+			Conversation conv = (Conversation) iter.next();
+			mConversationsByMSISDN.put(conv.getMsisdn(), conv);
+			if (conv.getMessages().isEmpty()
+					&& !(conv instanceof GroupConversation)) {
+				iter.remove();
+			} else {
+				mConversationsAdded.add(conv.getMsisdn());
+			}
+		}
+
+		if (mAdapter != null) {
+			mAdapter.clear();
+		}
+
+		mAdapter = new ConversationsAdapter(MessagesList.this,
+				R.layout.conversation_item, conversations, parentLayout);
+
+		/*
+		 * because notifyOnChange gets re-enabled whenever we call
+		 * notifyDataSetChanged it's simpler to assume it's set to false and
+		 * always notifyOnChange by hand
+		 */
+		mAdapter.setNotifyOnChange(false);
+
+		if (addFooter) {
+			View footerView = getLayoutInflater().inflate(
+					R.layout.conversation_list_footer, null);
+			AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(
+					AbsListView.LayoutParams.MATCH_PARENT, (int) getResources()
+							.getDimension(R.dimen.conversation_footer_height));
+			footerView.setLayoutParams(layoutParams);
+
+			mConversationsView.addFooterView(footerView);
+		}
+
+		mConversationsView.setAdapter(mAdapter);
+
+		mConversationsView.setOnItemLongClickListener(this);
+
+		HikeMessengerApp.getPubSub().addListeners(MessagesList.this,
+				pubSubListeners);
 	}
 
 	public void onFavoriteIntroClick(View v) {
@@ -480,11 +510,11 @@ public class MessagesList extends DrawerBaseActivity implements
 		editor.commit();
 	}
 
-	public void onFriendIntroClick(View v) {
-		findViewById(R.id.friend_intro).setVisibility(View.GONE);
+	public void onButtonsIntroClick(View v) {
+		findViewById(R.id.buttons_intro).setVisibility(View.GONE);
 
 		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeMessengerApp.FRIEND_INTRO_SHOWN, true);
+		editor.putBoolean(HikeMessengerApp.BUTTONS_OVERLAY_SHOWN, true);
 		editor.commit();
 	}
 
@@ -500,6 +530,7 @@ public class MessagesList extends DrawerBaseActivity implements
 							HikePubSub.MQTT_PUBLISH, obj);
 				}
 				Utils.requestAccountInfo(false);
+				Utils.sendLocaleToServer(MessagesList.this);
 			}
 		}, 5 * 1000);
 		deviceDetailsSent = true;
@@ -516,9 +547,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				}
 				String[] invitedNumbersArray = invitedNumbers.split(",");
 				for (String msisdn : invitedNumbersArray) {
-					FiksuTrackingManager.uploadPurchaseEvent(MessagesList.this,
-							HikeConstants.INVITE, HikeConstants.INVITE_SENT,
-							HikeConstants.CURRENCY);
 					HikeMessengerApp.getPubSub().publish(
 							HikePubSub.MQTT_PUBLISH,
 							Utils.makeHike2SMSInviteMessage(msisdn,
@@ -614,8 +642,6 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.TOOLTIP_SHOWING,
-				mToolTip != null && mToolTip.getVisibility() == View.VISIBLE);
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT,
 				deviceDetailsSent);
 		outState.putBoolean(HikeConstants.Extras.ALERT_CANCELLED,
@@ -624,6 +650,8 @@ public class MessagesList extends DrawerBaseActivity implements
 				introMessageAdded);
 		outState.putBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED,
 				nuxNumbersInvited);
+		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
+				dialogShowing != null ? dialogShowing.ordinal() : -1);
 		super.onSaveInstanceState(outState);
 	}
 
@@ -719,10 +747,6 @@ public class MessagesList extends DrawerBaseActivity implements
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		Utils.logEvent(MessagesList.this, HikeConstants.LogEvent.MENU);
-		if (groupChatToolTipParent != null
-				&& groupChatToolTipParent.getVisibility() == View.VISIBLE) {
-			onToolTipClosed(null);
-		}
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -748,6 +772,10 @@ public class MessagesList extends DrawerBaseActivity implements
 		if (accountPrefs != null) {
 			Utils.incrementNumTimesScreenOpen(accountPrefs,
 					HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
+		}
+		if (dialog != null) {
+			dialog.cancel();
+			dialog = null;
 		}
 		HikeMessengerApp.getPubSub().removeListeners(MessagesList.this,
 				pubSubListeners);
@@ -1105,6 +1133,55 @@ public class MessagesList extends DrawerBaseActivity implements
 					mAdapter.drawerAnimationComplete();
 				}
 			});
+		} else if (HikePubSub.SMS_SYNC_COMPLETE.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (dialog != null) {
+						dialog.dismiss();
+					}
+					dialogShowing = null;
+					/*
+					 * We don't want the activity to receive any pubsub event
+					 * while refreshing the list.
+					 */
+					HikeMessengerApp.getPubSub().removeListeners(
+							MessagesList.this, pubSubListeners);
+					fetchConversations(false);
+				}
+			});
+		} else if (HikePubSub.SMS_SYNC_FAIL.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (dialog != null) {
+						dialog.dismiss();
+					}
+					dialogShowing = null;
+				}
+			});
+		} else if (HikePubSub.SMS_SYNC_START.equals(type)) {
+			dialogShowing = DialogShowing.SMS_SYNCING;
+		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
+			if (accountPrefs.getLong(HikeMessengerApp.CURRENT_PROTIP, -1) != -1) {
+				/*
+				 * Already showing a protip.
+				 */
+				return;
+			}
+			Protip protip = (Protip) object;
+			if (!Utils.showProtip(protip, accountPrefs)) {
+				return;
+			}
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					setNotificationCounter(++notificationCount);
+				}
+			});
 		}
 	}
 
@@ -1256,51 +1333,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				R.anim.slide_out_left_noalpha);
 	}
 
-	private void hideToolTip() {
-		if (mToolTip.getVisibility() == View.VISIBLE) {
-			Animation alphaOut = AnimationUtils.loadAnimation(
-					MessagesList.this, android.R.anim.fade_out);
-			alphaOut.setDuration(200);
-			mToolTip.setAnimation(alphaOut);
-			mToolTip.setVisibility(View.INVISIBLE);
-		}
-	}
-
-	private void setToolTipDismissed() {
-		hideToolTip();
-
-		Editor editor = accountPrefs.edit();
-		editor.putBoolean(HikeMessengerApp.MESSAGES_LIST_TOOLTIP_DISMISSED,
-				true);
-		editor.commit();
-	}
-
-	public void onToolTipClosed(View v) {
-		if (updateToolTipParent != null
-				&& updateToolTipParent.getVisibility() == View.VISIBLE) {
-			Utils.logEvent(MessagesList.this,
-					HikeConstants.LogEvent.HOME_UPDATE_TOOL_TIP_CLOSED);
-			Editor editor = accountPrefs.edit();
-			editor.putBoolean(HikeConstants.Extras.SHOW_UPDATE_TOOL_TIP, false);
-			// Doing this so that we show this tip after the user has opened the
-			// home screen a few times.
-			editor.remove(HikeMessengerApp.NUM_TIMES_HOME_SCREEN);
-			editor.commit();
-			hideToolTip();
-			return;
-		} else if (groupChatToolTipParent != null
-				&& groupChatToolTipParent.getVisibility() == View.VISIBLE) {
-			Editor editor = accountPrefs.edit();
-			editor.putBoolean(HikeMessengerApp.SHOW_GROUP_CHAT_TOOL_TIP, false);
-			editor.commit();
-			hideToolTip();
-			return;
-		}
-		Utils.logEvent(MessagesList.this,
-				HikeConstants.LogEvent.HOME_TOOL_TIP_CLOSED);
-		setToolTipDismissed();
-	}
-
 	private void updateApp(int updateType) {
 		if (TextUtils.isEmpty(this.accountPrefs.getString(
 				HikeConstants.Extras.UPDATE_URL, ""))) {
@@ -1326,15 +1358,6 @@ public class MessagesList extends DrawerBaseActivity implements
 					this, accountPrefs.getString(
 							HikeConstants.Extras.UPDATE_URL, ""));
 			downloadAndInstallUpdateAsyncTask.execute();
-		}
-	}
-
-	public void onToolTipClicked(View v) {
-		if (groupChatToolTipParent != null
-				&& groupChatToolTipParent.getVisibility() == View.VISIBLE) {
-			setToolTipDismissed();
-			openOptionsMenu();
-			return;
 		}
 	}
 

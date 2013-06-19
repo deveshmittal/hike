@@ -121,11 +121,15 @@
                 android:paddingRight="20dp"
                 android:paddingBottom="2dp"
                 android:text="@string/confirm" />
+            
+            <View
+                android:id="@+id/button_divider"
+                android:layout_width="10dp"
+                android:layout_height="1dp" />
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/no_btn"
                 style="@style/StatusNoBtn"
-                android:layout_marginLeft="10dp"
                 android:focusable="false"
                 android:onClick="onNoBtnClick"
                 android:paddingLeft="20dp"

@@ -18,7 +18,7 @@ public class HikeHttpRequest {
 	};
 
 	public static enum RequestType {
-		STATUS_UPDATE, PROFILE_PIC, OTHER, DELETE_STATUS, HIKE_JOIN_TIME
+		STATUS_UPDATE, PROFILE_PIC, OTHER, DELETE_STATUS, HIKE_JOIN_TIME, SOCIAL_POST
 	}
 
 	private String mPath;

@@ -4,9 +4,9 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 12;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 16;
 
-	public static final int USERS_DATABASE_VERSION = 9;
+	public static final int USERS_DATABASE_VERSION = 13;
 
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 
@@ -129,4 +129,40 @@ public class DBConstants {
 	public static final String TIME_OF_DAY = "timeOfDay";
 
 	public static final String IS_STATUS_MSG = "isStatusMsg";
+
+	public static final String STATUS_INDEX = "statusIdx";
+
+	public static final String USER_INDEX = "userIdx";
+
+	public static final String THUMBNAIL_INDEX = "thumbnailIdx";
+
+	public static final String FAVORITE_INDEX = "favoriteIdx";
+
+	public static final String IS_HIKE_MESSAGE = "isHikeMessage";
+
+	public static final String STICKERS_TABLE = "stickersTable";
+
+	public static final String CATEGORY_ID = "categoryId";
+
+	public static final String TOTAL_NUMBER = "totalNum";
+
+	public static final String REACHED_END = "reachedEnd";
+
+	public static final String UPDATE_AVAILABLE = "updateAvailable";
+
+	public static final String LAST_SEEN = "lastSeen";
+
+	public static final String PROTIP_TABLE = "protipTable";
+
+	public static final String PROTIP_MAPPED_ID = "protipMappedId";
+
+	public static final String HEADER = "header";
+
+	public static final String PROTIP_TEXT = "protipText";
+
+	public static final String IMAGE_URL = "imageUrl";
+
+	public static final String WAIT_TIME = "waitTime";
+
+	public static final String IS_OFFLINE = "isOffline";
 }

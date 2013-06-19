@@ -22,9 +22,7 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.db.MqttPersistenceException;
 import com.bsb.hike.models.HikePacket;
 import com.bsb.hike.mqtt.client.Buffer;
@@ -115,6 +113,10 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 				Log.w("HikeMqttManager",
 						"Received 'success' for message that's already been triggered");
 			}
+			/*
+			 * Remove the message from the db.
+			 */
+			persistence.removeMessageForPacketId(packet.getPacketId());
 
 			called = true;
 			handler.removeCallbacks(this);
@@ -138,13 +140,7 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			handler.removeCallbacks(this);
 			Log.d("HikeMqttManager", "unable to send packet");
 			ping();
-			try {
-				HikeMqttManager.this.haveUnsentMessages = true;
-				persistence.addSentMessage(packet);
-			} catch (MqttPersistenceException e) {
-				Log.e("HikeMqttManager",
-						"Unable to persist message" + packet.toString(), e);
-			}
+			HikeMqttManager.this.haveUnsentMessages = true;
 		}
 	}
 
@@ -209,8 +205,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 
 	private String password;
 
-	private HikeConversationsDatabase convDb;
-
 	private Map<Integer, HikePacket> mqttIdToPacket;
 
 	private MQTT mqtt;
@@ -223,8 +217,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 
 	private String uid;
 
-	private HikeUserDatabase userDb;
-
 	private Runnable mConnectTimeoutHandler;
 
 	private SharedPreferences settings;
@@ -235,8 +227,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 
 	public HikeMqttManager(HikeService hikeService, Handler handler) {
 		this.mHikeService = hikeService;
-		this.convDb = HikeConversationsDatabase.getInstance();
-		this.userDb = HikeUserDatabase.getInstance();
 		mqttIdToPacket = Collections
 				.synchronizedMap(new HashMap<Integer, HikePacket>());
 		this.handler = handler;
@@ -613,41 +603,49 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 	}
 
 	public void connect() {
-		if (isConnected()) {
-			Log.d("HikeMqttManager", "already connected");
-			return;
-		}
-		if (TextUtils.isEmpty(settings.getString(
-				HikeMessengerApp.TOKEN_SETTING, null))) {
-			return;
-		}
+		PowerManager pm = (PowerManager) this.mHikeService
+				.getSystemService(Context.POWER_SERVICE);
+		WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MQTT");
+		try {
+			wl.acquire();
+			if (isConnected()) {
+				Log.d("HikeMqttManager", "already connected");
+				return;
+			}
+			if (TextUtils.isEmpty(settings.getString(
+					HikeMessengerApp.TOKEN_SETTING, null))) {
+				return;
+			}
 
-		if (Utils.isUserOnline(mHikeService)) {
-			Log.d("HikeMqttManager", "netconnection valid, try to connect");
-			// set the status to show we're trying to connect
-			connectToBroker();
-		} else {
-			// we can't do anything now because we don't have a working
-			// data connection
-			setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
+			if (Utils.isUserOnline(mHikeService)) {
+				Log.d("HikeMqttManager", "netconnection valid, try to connect");
+				// set the status to show we're trying to connect
+				connectToBroker();
+			} else {
+				// we can't do anything now because we don't have a working
+				// data connection
+				setConnectionStatus(MQTTConnectionStatus.NOTCONNECTED_WAITINGFORINTERNET);
+			}
+		} finally {
+			wl.release();
 		}
 	}
 
 	public void send(HikePacket packet, int qos) {
+		/* only care about failures for messages we care about. */
+		if (qos > 0 && packet.getPacketId() == -1) {
+			try {
+				persistence.addSentMessage(packet);
+			} catch (MqttPersistenceException e) {
+				Log.e("HikeMqttManager", "Unable to persist message");
+			}
+		}
+
 		if (!isConnected()) {
 			Log.d("HikeMqttManager",
 					"trying to send "
 							+ new String(packet.getMessage())
 							+ " but not connected. Try to connect but fail this message");
-
-			/* only care about failures for messages we care about. */
-			if (qos > 0) {
-				try {
-					persistence.addSentMessage(packet);
-				} catch (MqttPersistenceException e) {
-					Log.e("HikeMqttManager", "Unable to persist message");
-				}
-			}
 
 			this.connect();
 			return;
@@ -714,9 +712,15 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 		try {
 			wl.acquire();
 
+			// receiving this message will have kept the connection alive for
+			// us, so
+			// we take advantage of this to postpone the next scheduled ping
+			this.mHikeService.scheduleNextPing();
+
 			String messageBody = new String(body.toByteArray());
 
 			Log.d("HikeMqttManager", "onPublish called " + messageBody);
+
 			JSONObject jsonObj = new JSONObject(messageBody);
 
 			/*
@@ -724,16 +728,6 @@ public class HikeMqttManager implements Listener, HikePubSub.Listener {
 			 * the app is not open.
 			 */
 			mqttMessageManager.saveMqttMessage(jsonObj);
-
-			/* don't bother saving messages for the UI topic */
-			if ((topic != null) && (topic.getString().endsWith(("/u")))) {
-				return;
-			}
-
-			// receiving this message will have kept the connection alive for
-			// us, so
-			// we take advantage of this to postpone the next scheduled ping
-			this.mHikeService.scheduleNextPing();
 
 			// we're finished - if the phone is switched off, it's okay for the
 			// CPU

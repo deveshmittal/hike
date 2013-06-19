@@ -1,6 +1,9 @@
 package com.bsb.hike.service;
 
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +35,9 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.MessageMetadata;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -169,6 +175,7 @@ public class MqttMessagesManager {
 			if (joined) {
 				long joinTime = jsonObj.optLong(HikeConstants.TIMESTAMP);
 				if (joinTime > 0) {
+					joinTime = Utils.applyServerTimeOffset(context, joinTime);
 					userDb.setHikeJoinTime(msisdn, joinTime);
 				}
 
@@ -186,9 +193,11 @@ public class MqttMessagesManager {
 			}
 
 			/*
-			 * Change the friend type since the user has now left hike
+			 * Change the friend type since the user has now left hike and
+			 * delete this contact's status messages.
 			 */
 			if (!joined) {
+				convDb.deleteStatusMessagesForMsisdn(msisdn);
 				removeOrPostponeFriendType(msisdn);
 			}
 
@@ -308,6 +317,41 @@ public class MqttMessagesManager {
 				Log.d(getClass().getSimpleName(), "Message already exists");
 				return;
 			}
+			/*
+			 * Need to rename every audio recording to a unique name since the
+			 * ios client is sending every file with the same name.
+			 */
+			if (convMessage.isFileTransferMessage()) {
+				MessageMetadata messageMetadata = convMessage.getMetadata();
+				HikeFile hikeFile = messageMetadata.getHikeFiles().get(0);
+
+				if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+					JSONObject metadataJson = messageMetadata.getJSON();
+					JSONArray fileArray = metadataJson
+							.optJSONArray(HikeConstants.FILES);
+					for (int i = 0; i < fileArray.length(); i++) {
+						JSONObject fileJson = fileArray.getJSONObject(i);
+						Log.d(getClass().getSimpleName(), "Previous json: "
+								+ fileJson);
+						String timeStamp = new SimpleDateFormat(
+								"yyyyMMdd_HHmmss").format(new Date());
+						fileJson.put(HikeConstants.FILE_NAME, "AUD_"
+								+ timeStamp + ".m4a");
+						Log.d(getClass().getSimpleName(), "New json: "
+								+ fileJson);
+					}
+				}
+
+			}
+			if (convMessage.isStickerMessage()) {
+				convMessage
+						.setMessage(context.getString(R.string.sent_sticker));
+			}
+			/*
+			 * Applying the offset.
+			 */
+			convMessage.setTimestamp(Utils.applyServerTimeOffset(context,
+					convMessage.getTimestamp()));
 
 			convDb.addConversationMessages(convMessage);
 
@@ -478,6 +522,9 @@ public class MqttMessagesManager {
 						data.getString(HikeConstants.TOTAL_CREDITS_PER_MONTH));
 				inviteeNumChanged = true;
 			}
+			if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL)) {
+				setDefaultSMSClientTutorialSetting();
+			}
 			if (data.has(HikeConstants.ACCOUNT)) {
 				JSONObject account = data.getJSONObject(HikeConstants.ACCOUNT);
 				if (account.has(HikeConstants.ICON)) {
@@ -592,6 +639,15 @@ public class MqttMessagesManager {
 						talkTimeChanged = true;
 						newTalkTime = talkTime;
 					}
+				}
+				if (account.has(HikeConstants.LAST_SEEN_SETTING)) {
+					SharedPreferences settings = PreferenceManager
+							.getDefaultSharedPreferences(context);
+					Editor settingEditor = settings.edit();
+					settingEditor.putBoolean(HikeConstants.LAST_SEEN_PREF,
+							account.optBoolean(HikeConstants.LAST_SEEN_SETTING,
+									true));
+					settingEditor.commit();
 				}
 			}
 			editor.commit();
@@ -736,12 +792,16 @@ public class MqttMessagesManager {
 					Log.w(getClass().getSimpleName(),
 							"Exception while posting ab", e);
 				}
-			} else if (data.optBoolean(HikeConstants.PUSH)) {
+			}
+			if (data.optBoolean(HikeConstants.PUSH)) {
 				Editor editor = settings.edit();
 				editor.putBoolean(HikeMessengerApp.GCM_ID_SENT, false);
 				editor.commit();
 				context.sendBroadcast(new Intent(
 						HikeService.SEND_TO_SERVER_ACTION));
+			}
+			if (data.optBoolean(HikeConstants.DEFAULT_SMS_CLIENT_TUTORIAL)) {
+				setDefaultSMSClientTutorialSetting();
 			}
 		} else if (HikeConstants.MqttMessageTypes.STATUS_UPDATE.equals(type)) {
 			StatusMessage statusMessage = new StatusMessage(jsonObj);
@@ -755,6 +815,11 @@ public class MqttMessagesManager {
 					|| userDb.isBlocked(statusMessage.getMsisdn())) {
 				return;
 			}
+			/*
+			 * Applying the offset.
+			 */
+			statusMessage.setTimeStamp(Utils.applyServerTimeOffset(context,
+					statusMessage.getTimeStamp()));
 
 			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(
 					statusMessage.getMsisdn(), false);
@@ -831,7 +896,135 @@ public class MqttMessagesManager {
 
 			pubSub.publish(HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 					new Pair<String, String>(header, message));
+		} else if (HikeConstants.MqttMessageTypes.STICKER.equals(type)) {
+			String subType = jsonObj.getString(HikeConstants.SUB_TYPE);
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			String categoryId = data.getString(HikeConstants.CATEGORY_ID);
+			if (HikeConstants.ADD_STICKER.equals(subType)) {
+				convDb.stickerUpdateAvailable(categoryId);
+			} else if (HikeConstants.REMOVE_STICKER.equals(subType)
+					|| HikeConstants.REMOVE_CATEGORY.equals(subType)) {
+
+				String categoryDirPath = Utils
+						.getStickerDirectoryForCategoryId(context, categoryId);
+				File categoryDir = new File(categoryDirPath);
+
+				/*
+				 * If the category itself does not exist, then we have nothing
+				 * to delete
+				 */
+				if (!categoryDir.exists()) {
+					return;
+				}
+
+				if (HikeConstants.REMOVE_CATEGORY.equals(subType)) {
+
+					Utils.deleteFile(categoryDir);
+
+					String removedIds = settings.getString(
+							HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
+
+					JSONArray removedIdArray = new JSONArray(removedIds);
+					removedIdArray.put(categoryId);
+
+					Editor editor = settings.edit();
+					editor.putString(HikeMessengerApp.REMOVED_CATGORY_IDS,
+							removedIdArray.toString());
+					editor.commit();
+
+					HikeMessengerApp.setupStickerCategoryList(settings);
+
+				} else {
+					JSONArray stickerIds = data
+							.getJSONArray(HikeConstants.STICKER_IDS);
+
+					for (int i = 0; i < stickerIds.length(); i++) {
+						String stickerId = stickerIds.getString(i);
+						File sticker = new File(categoryDir
+								+ HikeConstants.LARGE_STICKER_ROOT, stickerId);
+						File stickerSmall = new File(categoryDir
+								+ HikeConstants.SMALL_STICKER_ROOT, stickerId);
+						sticker.delete();
+						stickerSmall.delete();
+					}
+				}
+			}
+		} else if (HikeConstants.MqttMessageTypes.LAST_SEEN.equals(type)) {
+			String msisdn = jsonObj.getString(HikeConstants.FROM);
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			long lastSeenTime = data.getLong(HikeConstants.LAST_SEEN);
+			int isOffline;
+			/*
+			 * Apply offset only if value is greater than 0
+			 */
+			if (lastSeenTime > 0) {
+				isOffline = 1;
+				lastSeenTime = Utils.applyServerTimeOffset(context,
+						lastSeenTime);
+			} else {
+				/*
+				 * Otherwise the last seen time notifies that the user is either
+				 * online or has turned the setting off.
+				 */
+				isOffline = (int) lastSeenTime;
+				lastSeenTime = System.currentTimeMillis() / 1000;
+			}
+			userDb.updateLastSeenTime(msisdn, lastSeenTime);
+			userDb.updateIsOffline(msisdn, (int) isOffline);
+
+			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED,
+					new Pair<String, Long>(msisdn,
+							isOffline == 1 ? lastSeenTime : isOffline));
+		} else if (HikeConstants.MqttMessageTypes.SERVER_TIMESTAMP.equals(type)) {
+			long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
+			long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
+
+			Log.d(getClass().getSimpleName(), "Diff b/w server and client: "
+					+ diff);
+
+			Editor editor = settings.edit();
+			editor.putLong(HikeMessengerApp.SERVER_TIME_OFFSET, diff);
+			editor.commit();
+		} else if (HikeConstants.MqttMessageTypes.PROTIP.equals(type)) {
+			Protip protip = new Protip(jsonObj);
+			/*
+			 * Applying the offset.
+			 */
+			protip.setTimeStamp(Utils.applyServerTimeOffset(context,
+					protip.getTimeStamp()));
+
+			long id = convDb.addProtip(protip);
+			protip.setId(id);
+
+			if (id == -1) {
+				Log.d(getClass().getSimpleName(),
+						"This protip was already added");
+				return;
+			}
+
+			String iconBase64 = jsonObj.getJSONObject(HikeConstants.DATA)
+					.optString(HikeConstants.THUMBNAIL);
+			if (!TextUtils.isEmpty(iconBase64)) {
+				this.userDb.setIcon(protip.getMappedId(),
+						Base64.decode(iconBase64, Base64.DEFAULT), false);
+			}
+
+			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 		}
+	}
+
+	private void setDefaultSMSClientTutorialSetting() {
+		/*
+		 * If settings already contains this key, no need to do anything since
+		 * this has already been handled.
+		 */
+		if (settings.contains(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP)) {
+			return;
+		}
+
+		Editor editor = settings.edit();
+		editor.putBoolean(HikeMessengerApp.SHOWN_SMS_CLIENT_POPUP, false);
+		editor.commit();
 	}
 
 	private void removeOrPostponeFriendType(String msisdn) {

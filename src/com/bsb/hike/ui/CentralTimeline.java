@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -14,6 +17,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -28,6 +32,7 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -45,6 +50,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -73,6 +79,7 @@ public class CentralTimeline extends DrawerBaseActivity implements
 	private ActivityState mActivityState;
 	private ProgressDialog mDialog;
 	private String[] friendMsisdns;
+	private ImageButton muteNotification;
 
 	private class ActivityState {
 		public DownloadProfileImageTask downloadProfileImageTask;
@@ -141,6 +148,14 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			mActivityState = new ActivityState();
 		}
 
+		muteNotification = (ImageButton) findViewById(R.id.title_image_btn);
+		muteNotification.setVisibility(View.VISIBLE);
+		muteNotification.setImageResource(R.drawable.preference_status_mute);
+
+		findViewById(R.id.button_bar).setVisibility(View.VISIBLE);
+
+		setMutePreference(false);
+
 		TextView titleTV = (TextView) findViewById(R.id.title);
 		titleTV.setText(R.string.recent_updates);
 
@@ -190,6 +205,34 @@ public class CentralTimeline extends DrawerBaseActivity implements
 									getString(R.string.added_as_hike_friend),
 									StatusMessageType.FRIEND_REQUEST, System
 											.currentTimeMillis() / 1000));
+		}
+
+		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
+				-1);
+
+		Protip protip = null;
+		boolean showProtip = false;
+		if (currentProtipId == -1) {
+			protip = HikeConversationsDatabase.getInstance().getLastProtip();
+			if (protip != null) {
+				if (Utils.showProtip(protip, prefs)) {
+					showProtip = true;
+					Editor editor = prefs.edit();
+					editor.putLong(HikeMessengerApp.CURRENT_PROTIP,
+							protip.getId());
+					editor.putLong(HikeMessengerApp.PROTIP_WAIT_TIME,
+							protip.getWaitTime());
+					editor.commit();
+				}
+			}
+		} else {
+			showProtip = true;
+			protip = HikeConversationsDatabase.getInstance().getProtipForId(
+					currentProtipId);
+		}
+
+		if (showProtip && protip != null) {
+			statusMessages.add(0, new StatusMessage(protip));
 		}
 
 		String name = Utils.getFirstName(prefs.getString(
@@ -244,6 +287,55 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		}
 	}
 
+	private void setMutePreference(boolean showToast) {
+		int preference = PreferenceManager.getDefaultSharedPreferences(this)
+				.getInt(HikeConstants.STATUS_PREF, 0);
+		if (preference == 0) {
+			muteNotification.setSelected(false);
+		} else {
+			muteNotification.setSelected(true);
+		}
+		if (showToast) {
+			Toast.makeText(
+					getApplicationContext(),
+					preference == 0 ? R.string.status_notification_on
+							: R.string.status_notification_off,
+					Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	public void onTitleIconClick(View v) {
+		SharedPreferences settingPref = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		int preference = settingPref.getInt(HikeConstants.STATUS_PREF, 0);
+
+		int newValue;
+
+		Editor editor = settingPref.edit();
+		if (preference == 0) {
+			newValue = -1;
+			editor.putInt(HikeConstants.STATUS_PREF, newValue);
+		} else {
+			newValue = 0;
+			editor.putInt(HikeConstants.STATUS_PREF, newValue);
+		}
+		editor.commit();
+
+		try {
+			JSONObject jsonObject = new JSONObject();
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.PUSH_SU, newValue);
+			jsonObject.put(HikeConstants.DATA, data);
+			jsonObject.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					jsonObject);
+			setMutePreference(true);
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), e);
+		}
+	}
+
 	public void onBackPressed() {
 		if (mActivityState.viewingProfileImage) {
 			View profileContainer = findViewById(R.id.profile_image_container);
@@ -269,7 +361,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			int position, long id) {
 		StatusMessage statusMessage = centralTimelineAdapter.getItem(position);
 		if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
-				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)) {
+				|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)
+				|| (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)) {
 			return;
 		} else if (userMsisdn.equals(statusMessage.getMsisdn())) {
 			Intent intent = new Intent(this, ProfileActivity.class);
@@ -305,8 +398,27 @@ public class CentralTimeline extends DrawerBaseActivity implements
 
 	public void onNoBtnClick(View v) {
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
-		toggleFavoriteAndRemoveTimelineItem(statusMessage,
-				FavoriteType.REQUEST_RECEIVED_REJECTED);
+		if (statusMessage.getStatusMessageType() != StatusMessageType.PROTIP) {
+			toggleFavoriteAndRemoveTimelineItem(statusMessage,
+					FavoriteType.REQUEST_RECEIVED_REJECTED);
+		} else {
+			/*
+			 * Removing the protip
+			 */
+			statusMessages.remove(0);
+
+			centralTimelineAdapter.decrementUnseenCount();
+			centralTimelineAdapter.notifyDataSetChanged();
+
+			Editor editor = prefs.edit();
+			editor.putLong(HikeMessengerApp.PROTIP_DISMISS_TIME,
+					System.currentTimeMillis() / 1000);
+			editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
+			editor.commit();
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+					statusMessage.getProtip().getMappedId());
+		}
 	}
 
 	private void toggleFavoriteAndRemoveTimelineItem(
@@ -324,6 +436,9 @@ public class CentralTimeline extends DrawerBaseActivity implements
 						favoriteAdded);
 
 		for (StatusMessage listItem : statusMessages) {
+			if (listItem.getMsisdn() == null) {
+				continue;
+			}
 			if (listItem.getMsisdn().equals(statusMessage.getMsisdn())
 					&& listItem.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) {
 				friendRequests--;
@@ -466,12 +581,22 @@ public class CentralTimeline extends DrawerBaseActivity implements
 		StatusMessage statusMessage = (StatusMessage) v.getTag();
 		mActivityState.imageViewId = v.getId();
 		mActivityState.mappedId = statusMessage.getMappedId();
+		String url = null;
+		if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
+			url = statusMessage.getProtip().getImageURL();
+		}
 		downloadOrShowProfileImage(true, false, mActivityState.mappedId,
-				v.getId());
+				v.getId(), url);
 	}
 
 	private void downloadOrShowProfileImage(boolean startNewDownload,
 			boolean justDownloaded, String mappedId, int viewId) {
+		downloadOrShowProfileImage(startNewDownload, justDownloaded, mappedId,
+				viewId, null);
+	}
+
+	private void downloadOrShowProfileImage(boolean startNewDownload,
+			boolean justDownloaded, String mappedId, int viewId, String url) {
 		if (Utils.getExternalStorageState() == ExternalStorageState.NONE) {
 			Toast.makeText(getApplicationContext(),
 					R.string.no_external_storage, Toast.LENGTH_SHORT).show();
@@ -506,7 +631,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 					justDownloaded, viewId);
 			if (startNewDownload) {
 				mActivityState.downloadProfileImageTask = new DownloadProfileImageTask(
-						getApplicationContext(), mappedId, fileName, true, true);
+						getApplicationContext(), mappedId, fileName, true,
+						true, url);
 				mActivityState.downloadProfileImageTask.execute();
 
 				mDialog = ProgressDialog.show(this, null, getResources()

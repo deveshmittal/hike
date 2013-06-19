@@ -13,6 +13,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -31,29 +32,43 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	private String urlString;
 	private String fileName;
 	private String filePath;
+	private boolean isSslON;
 
 	public DownloadProfileImageTask(Context context, String id,
 			String fileName, boolean hasCustomIcon, boolean statusImage) {
+		this(context, id, fileName, hasCustomIcon, statusImage, null);
+	}
+
+	public DownloadProfileImageTask(Context context, String id,
+			String fileName, boolean hasCustomIcon, boolean statusImage,
+			String url) {
 		this.context = context;
 		this.id = id;
 
-		if (statusImage) {
-			this.urlString = AccountUtils.base + "/user/status/" + id
-					+ "?only_image=true";
-		} else {
-			boolean isGroupConversation = Utils.isGroupConversation(id);
-
-			if (hasCustomIcon) {
-				this.urlString = AccountUtils.base
-						+ (isGroupConversation ? "/group/" + id + "/avatar"
-								: "/account/avatar/" + id) + "?fullsize=1";
+		if (TextUtils.isEmpty(url)) {
+			if (statusImage) {
+				this.urlString = AccountUtils.base + "/user/status/" + id
+						+ "?only_image=true";
 			} else {
-				this.urlString = (AccountUtils.ssl ? AccountUtils.HTTPS_STRING
-						: AccountUtils.HTTP_STRING)
-						+ AccountUtils.host
-						+ ":"
-						+ AccountUtils.port + "/static/avatars/" + fileName;
+				boolean isGroupConversation = Utils.isGroupConversation(id);
+
+				if (hasCustomIcon) {
+					this.urlString = AccountUtils.base
+							+ (isGroupConversation ? "/group/" + id + "/avatar"
+									: "/account/avatar/" + id) + "?fullsize=1";
+				} else {
+					this.urlString = (AccountUtils.ssl ? AccountUtils.HTTPS_STRING
+							: AccountUtils.HTTP_STRING)
+							+ AccountUtils.host
+							+ ":"
+							+ AccountUtils.port
+							+ "/static/avatars/" + fileName;
+				}
+				this.isSslON = AccountUtils.ssl;
 			}
+		} else {
+			this.urlString = url;
+			this.isSslON = url.startsWith(AccountUtils.HTTPS_STRING);
 		}
 
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
@@ -81,7 +96,7 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 			connection.addRequestProperty("Cookie", "user="
 					+ AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 
-			if (AccountUtils.ssl) {
+			if (isSslON) {
 				((HttpsURLConnection) connection)
 						.setSSLSocketFactory(HikeSSLUtil.getSSLSocketFactory());
 			}
