@@ -309,6 +309,10 @@ public class MqttMessagesManager {
 		{
 			Log.d(getClass().getSimpleName(), "Checking if message exists");
 			ConvMessage convMessage = new ConvMessage(jsonObj);
+			if (convMessage.isStickerMessage()) {
+				convMessage
+						.setMessage(context.getString(R.string.sent_sticker));
+			}
 			if (this.convDb.wasMessageReceived(convMessage)) // Check if message
 																// was already
 																// received by
@@ -342,10 +346,6 @@ public class MqttMessagesManager {
 					}
 				}
 
-			}
-			if (convMessage.isStickerMessage()) {
-				convMessage
-						.setMessage(context.getString(R.string.sent_sticker));
 			}
 			/*
 			 * Applying the offset.
