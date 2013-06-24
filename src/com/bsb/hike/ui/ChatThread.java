@@ -4505,8 +4505,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				JSONObject response = AccountUtils.getResponse(connection
 						.getInputStream());
 				Log.d(getClass().getSimpleName(), "Response: " + response);
-				if (!HikeConstants.OK.equals(response
-						.getString(HikeConstants.STATUS))) {
+				if (response == null
+						|| !HikeConstants.OK.equals(response
+								.getString(HikeConstants.STATUS))) {
 					return null;
 				}
 				JSONObject data = response.getJSONObject(HikeConstants.DATA);
