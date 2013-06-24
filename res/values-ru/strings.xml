@@ -349,14 +349,12 @@
 	<string name="hey_name">Эй, %1$s!</string>
 	<string name="confirm">Подтв.</string>
 	<string name="recent_updates">Недавние обновления</string>
-	<string name="manage_account">Упр. аккаунтом</string>
 	<string name="whats_up_user">Как дела, %1$s?</string>
 	<string name="status">Статус</string>
 	<string name="post">Опубл.</string>
 	<string name="waiting_for_accept">Ожидание принятия пользов. %1$s запроса в друзья</string>
 	<string name="status_update">Обновление статуса</string>
 	<string name="remove_friend">Удалить</string>
-	<string name="added_friend">Я добавил(а) вас в друзья</string>
 	<string name="no_status">Вы еще не публиковали обновления статуса</string>
 	<string name="update_status">Обновить статус</string>
 	<string name="free_sms_txt">Беспл. SMS</string>
@@ -434,7 +432,6 @@
 	<string name="confirmed_friend">Стал(а) вашим другом</string>
 	<string name="confirmed_friend_info">Вы и %1$s видите обновления статуса друг друга.</string>
 	<string name="accepted_friend_request_info">Вы и %1$s видите обновления статуса друг друга.</string>
-	<string name="confirmed_friend_2">стал(а) вашим другом</string>
 	<string name="no_hike">Пригласить других друзей в hike?</string>
 	<string name="rename_group">Переименовать группу</string>
 	<string name="no_contacts_hike">У вас нет контактов в hike</string>
