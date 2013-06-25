@@ -203,7 +203,9 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 
 	public void onTwitterClick(View v) {
 		if (!settings.getBoolean(HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
-			startActivity(new Intent(this, TwitterAuthActivity.class));
+			Intent intent = new Intent(this, TwitterAuthActivity.class);
+			intent.putExtra(HikeConstants.Extras.POST_TO_TWITTER, true);
+			startActivity(intent);
 		} else {
 			showCredentialUnlinkAlert(false);
 		}

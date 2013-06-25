@@ -481,6 +481,7 @@ public class HikeConstants {
 		public static final String SHOW_FRIENDS_TUTORIAL = "showFriendsTutorial";
 		public static final String FWD_STICKER_ID = "fwdStickerId";
 		public static final String FWD_CATEGORY_ID = "fwdCategoryId";
+		public static final String POST_TO_TWITTER = "postToTwitter";
 	}
 
 	public static final class LogEvent {

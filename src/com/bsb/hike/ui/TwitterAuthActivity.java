@@ -2,6 +2,7 @@ package com.bsb.hike.ui;
 
 import android.os.Bundle;
 
+import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
@@ -16,7 +17,8 @@ public class TwitterAuthActivity extends AuthSocialAccountBaseActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		startTwitterAuth(false);
+		startTwitterAuth(getIntent().getBooleanExtra(
+				HikeConstants.Extras.POST_TO_TWITTER, false));
 		HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
 	}
 
