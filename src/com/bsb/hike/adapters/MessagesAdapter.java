@@ -1489,7 +1489,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		@Override
 		public void run() {
-			if (lastSentMessagePosition >= convMessages.size()) {
+			if (lastSentMessagePosition >= convMessages.size()
+					|| lastSentMessagePosition == -1) {
 				return;
 			}
 			ConvMessage lastSentMessage = convMessages
