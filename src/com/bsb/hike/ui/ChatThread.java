@@ -1638,6 +1638,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			((ImageButton) findViewById(R.id.emo_btn))
 					.setImageResource(R.drawable.keyboard_btn);
 		} else {
+			if (mConversation == null) {
+				return;
+			}
 			((ImageButton) findViewById(R.id.emo_btn))
 					.setImageResource((mConversation.isOnhike() || (mConversation instanceof GroupConversation)) ? R.drawable.emoticon_hike_btn
 							: R.drawable.emoticon_sms_btn);
