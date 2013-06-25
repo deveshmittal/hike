@@ -23,6 +23,7 @@ import com.bsb.hike.HikeConstants.FTResult;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
@@ -35,13 +36,15 @@ public class DownloadFileTask extends FileTransferTaskBase {
 	private String fileKey;
 	private Context context;
 	private long msgId;
+	private HikeFileType hikeFileType;
 
 	public DownloadFileTask(Context context, File destinationFile,
-			String fileKey, long msgId) {
+			String fileKey, long msgId, HikeFileType hikeFileType) {
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
 		this.context = context;
 		this.msgId = msgId;
+		this.hikeFileType = hikeFileType;
 	}
 
 	@Override
@@ -126,7 +129,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 			destinationFile.delete();
 		}
 
-		if (destinationFile.exists()) {
+		if (destinationFile.exists()
+				&& hikeFileType != HikeFileType.AUDIO_RECORDING) {
 			context.sendBroadcast(new Intent(
 					Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
 							.fromFile(destinationFile)));

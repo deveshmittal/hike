@@ -210,6 +210,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 				filePath = hikeFile.getFilePath();
 				fileName = hikeFile.getFileName();
 				fileType = hikeFile.getFileTypeString();
+				hikeFileType = hikeFile.getHikeFileType();
 			}
 			boolean fileWasAlreadyUploaded = true;
 
@@ -323,7 +324,8 @@ public class UploadFileTask extends FileTransferTaskBase {
 			}
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
 		}
-		if (selectedFile != null) {
+		if (selectedFile != null
+				&& hikeFileType != HikeFileType.AUDIO_RECORDING) {
 			context.sendBroadcast(new Intent(
 					Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
 							.fromFile(selectedFile)));
