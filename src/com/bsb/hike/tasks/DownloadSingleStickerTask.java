@@ -71,6 +71,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 			URL url = new URL(urlString);
 
 			URLConnection connection = url.openConnection();
+			AccountUtils.addUserAgent(connection);
 			connection.addRequestProperty("Cookie", "user="
 					+ AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 

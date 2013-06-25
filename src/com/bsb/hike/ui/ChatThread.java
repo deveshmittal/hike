@@ -4496,6 +4496,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				Log.d(getClass().getSimpleName(), "URL:  " + url);
 
 				URLConnection connection = url.openConnection();
+				AccountUtils.addUserAgent(connection);
 				connection.addRequestProperty("Cookie", "user="
 						+ AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 
