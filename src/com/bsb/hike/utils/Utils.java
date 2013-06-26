@@ -802,7 +802,7 @@ public class Utils {
 					editor.remove(key);
 				}
 				editor.commit();
-				data.put(HikeConstants.LogEvent.TAG, "mob");
+				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 
 				obj.put(HikeConstants.TYPE,
 						HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
@@ -1980,6 +1980,7 @@ public class Utils {
 		editor.putBoolean(HikeConstants.RECEIVE_SMS_PREF, value);
 		editor.commit();
 
+		sendDefaultSMSClientLogEvent(value);
 	}
 
 	public static void setSendUndeliveredSmsSetting(Context context,
@@ -2029,6 +2030,8 @@ public class Utils {
 
 				setupSyncDialogLayout(false, btnContainer, syncProgress, info,
 						btnDivider);
+
+				sendSMSSyncLogEvent(true);
 			}
 		});
 
@@ -2037,6 +2040,8 @@ public class Utils {
 			@Override
 			public void onClick(View v) {
 				dialog.dismiss();
+
+				sendSMSSyncLogEvent(false);
 			}
 		});
 
@@ -2462,5 +2467,89 @@ public class Utils {
 			}
 		}
 		file.delete();
+	}
+
+	public static void sendLogEvent(JSONObject data) {
+		JSONObject object = new JSONObject();
+		try {
+			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
+
+			object.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+			object.put(HikeConstants.DATA, data);
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					object);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+	}
+
+	private static void sendSMSSyncLogEvent(boolean syncing) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try {
+			metadata.put(HikeConstants.PULL_OLD_SMS, syncing);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+
+	}
+
+	public static void sendDefaultSMSClientLogEvent(boolean defaultClient) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try {
+			metadata.put(HikeConstants.UNIFIED_INBOX, defaultClient);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+
+	}
+
+	public static void sendFreeSmsLogEvent(boolean freeSmsOn) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try {
+			metadata.put(HikeConstants.FREE_SMS_ON, freeSmsOn);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+
+	}
+
+	public static void sendNativeSmsLogEvent(boolean nativeSmsOn) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try {
+			metadata.put(HikeConstants.NATIVE_SMS, nativeSmsOn);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+
 	}
 }

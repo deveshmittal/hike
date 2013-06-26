@@ -1442,6 +1442,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		setSmsToggleSubtext(isChecked);
 
+		Utils.sendNativeSmsLogEvent(isChecked);
+
 		if (isChecked) {
 			if (!preferences.getBoolean(
 					HikeMessengerApp.SHOWN_NATIVE_INFO_POPUP, false)) {

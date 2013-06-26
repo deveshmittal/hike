@@ -268,6 +268,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		((IconCheckBoxPreference) preference).setChecked(isChecked);
 
 		if (HikeConstants.RECEIVE_SMS_PREF.equals(preference.getKey())) {
+			Utils.sendDefaultSMSClientLogEvent(isChecked);
 
 			if (!isChecked) {
 				Editor editor = PreferenceManager.getDefaultSharedPreferences(
@@ -303,6 +304,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			HikeMessengerApp.getPubSub().publish(HikePubSub.FREE_SMS_TOGGLED,
 					isChecked);
 
+			Utils.sendFreeSmsLogEvent(isChecked);
 		} else if (HikeConstants.SSL_PREF.equals(preference.getKey())) {
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.SWITCHED_DATA_CONNECTION, null);

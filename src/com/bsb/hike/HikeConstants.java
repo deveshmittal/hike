@@ -129,6 +129,19 @@ public class HikeConstants {
 	public static final String PROTIP_WAIT_TIME = "wt";
 	public static final String NO_SMS = "nosms";
 	public static final String RETURNING_USER = "ru";
+	public static final String NUMBER_OF_SMS = "no_of_sms";
+	public static final String OFFLINE = "offline";
+	public static final String SENDER = "sender";
+	public static final String RECIPIENT = "recipient";
+	public static final String IS_H2H = "is_h2h";
+	public static final String NATIVE_SMS = "native_sms";
+	public static final String UNIFIED_INBOX = "unified_inbox";
+	public static final String PULL_OLD_SMS = "pull_old_sms";
+	public static final String TIP_ID = "tip_id";
+	public static final String SMS = "sms";
+	public static final String UI_EVENT = "uiEvent";
+	public static final String LOGEVENT_TAG = "mob";
+	public static final String FREE_SMS_ON = "free_sms_on";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
