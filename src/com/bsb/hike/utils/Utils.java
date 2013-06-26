@@ -1101,8 +1101,8 @@ public class Utils {
 		currentWidth = options.outWidth;
 
 		if (dimensionLimit == -1) {
-			dimensionLimit = (currentHeight > currentWidth ? currentHeight
-					: currentWidth) / (2);
+			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight
+					: currentWidth));
 		}
 
 		options.inSampleSize = Math
