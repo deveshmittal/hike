@@ -182,10 +182,20 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 							Utils.getFirstName(conversation.getLabel()));
 				}
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.USER_JOIN) {
-				markedUp = String
-						.format(context.getString(metadata.isOldUser() ? R.string.user_back_on_hike
-								: R.string.joined_hike_new), Utils
-								.getFirstName(conversation.getLabel()));
+				String participantName;
+				if (conversation instanceof GroupConversation) {
+					String participantMsisdn = metadata.getMsisdn();
+					participantName = ((GroupConversation) conversation)
+							.getGroupParticipant(participantMsisdn)
+							.getContactInfo().getFirstName();
+				} else {
+					participantName = Utils.getFirstName(conversation
+							.getLabel());
+				}
+				markedUp = context.getString(
+						metadata.isOldUser() ? R.string.user_back_on_hike
+								: R.string.joined_hike_new, participantName);
+
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_LEFT
 					|| message.getParticipantInfoState() == ParticipantInfoState.GROUP_END) {
 
