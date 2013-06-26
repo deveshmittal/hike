@@ -1,5 +1,7 @@
 package com.bsb.hike.utils;
 
+import java.util.Date;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.ui.MessagesList;
+import com.mobileapptracker.*;
 
 /**
  * @author Rishabh Using this to notify the server when the app comes to the
@@ -18,7 +21,9 @@ import com.bsb.hike.ui.MessagesList;
 public abstract class HikeAppStateBaseActivity extends Activity {
 
 	private static final String TAG = "HikeAppState";
-
+	public MobileAppTracker mobileAppTracker = null; 
+	public MatResponse matResponse = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED
@@ -27,7 +32,17 @@ public abstract class HikeAppStateBaseActivity extends Activity {
 			HikeMessengerApp.currentState = CurrentState.OPENED;
 			Utils.sendAppState(this);
 		}
-		super.onCreate(savedInstanceState);
+	  
+	   super.onCreate(savedInstanceState);
+	   
+	   TrackerUtil tUtil = TrackerUtil.getInstance();
+	   if(tUtil!=null)
+		{
+			tUtil.init(this.getApplicationContext());
+			tUtil.setTrackOptions(true);
+			Log.d(TAG + getClass().getSimpleName(), "Init for apptracker sdk finished");
+		}
+
 	}
 
 	@Override
@@ -102,5 +117,6 @@ public abstract class HikeAppStateBaseActivity extends Activity {
 			Utils.sendAppState(this);
 		}
 	}
-
+	
+	
 }
