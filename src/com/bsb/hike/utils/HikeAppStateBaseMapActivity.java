@@ -8,11 +8,13 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.google.android.maps.MapActivity;
+import com.mobileapptracker.MobileAppTracker;
 
 public abstract class HikeAppStateBaseMapActivity extends MapActivity {
 
 	private static final String TAG = "HikeAppState";
-
+	public MobileAppTracker mobileAppTracker = null; 
+	public MatResponse matResponse = null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED
@@ -22,6 +24,14 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity {
 			Utils.sendAppState(this);
 		}
 		super.onCreate(savedInstanceState);
+		
+		TrackerUtil tUtil = TrackerUtil.getInstance();
+		if(tUtil!=null)
+		{
+			tUtil.init(this.getApplicationContext());
+			tUtil.setTrackOptions(true);
+			Log.d(TAG + getClass().getSimpleName(), "Init for apptracker sdk finished");
+		}
 	}
 
 	@Override
