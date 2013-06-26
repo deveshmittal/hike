@@ -115,9 +115,9 @@ public class AppUpdatedReceiver extends BroadcastReceiver {
 			
 		}
 		//Call the MAT api on update  flag here :
-		TrackerUtil tUtil = TrackerUtil.getInstance();
+		TrackerUtil tUtil = TrackerUtil.getInstance(context.getApplicationContext());
 		if (tUtil != null) {
-			tUtil.init(context.getApplicationContext());
+			//tUtil.init();
 			tUtil.setTrackOptions(false);
 		}
 	}
