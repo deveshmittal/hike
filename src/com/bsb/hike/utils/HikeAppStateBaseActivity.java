@@ -35,10 +35,10 @@ public abstract class HikeAppStateBaseActivity extends Activity {
 	  
 	   super.onCreate(savedInstanceState);
 	   
-	   TrackerUtil tUtil = TrackerUtil.getInstance();
+	   TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
 	   if(tUtil!=null)
 		{
-			tUtil.init(this.getApplicationContext());
+			//tUtil.init();
 			tUtil.setTrackOptions(true);
 			Log.d(TAG + getClass().getSimpleName(), "Init for apptracker sdk finished");
 		}

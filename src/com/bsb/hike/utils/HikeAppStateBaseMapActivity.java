@@ -13,8 +13,6 @@ import com.mobileapptracker.MobileAppTracker;
 public abstract class HikeAppStateBaseMapActivity extends MapActivity {
 
 	private static final String TAG = "HikeAppState";
-	public MobileAppTracker mobileAppTracker = null; 
-	public MatResponse matResponse = null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED
@@ -25,10 +23,10 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity {
 		}
 		super.onCreate(savedInstanceState);
 		
-		TrackerUtil tUtil = TrackerUtil.getInstance();
+		TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
 		if(tUtil!=null)
 		{
-			tUtil.init(this.getApplicationContext());
+			//tUtil.init();
 			tUtil.setTrackOptions(true);
 			Log.d(TAG + getClass().getSimpleName(), "Init for apptracker sdk finished");
 		}
