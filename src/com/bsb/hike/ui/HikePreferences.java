@@ -9,9 +9,11 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.SharedPreferences.Editor;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.util.Log;
@@ -29,7 +31,8 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.IconCheckBoxPreference;
 
 public class HikePreferences extends HikeAppStateBasePreferenceActivity
-		implements OnPreferenceClickListener, Listener {
+		implements OnPreferenceClickListener, OnPreferenceChangeListener,
+		Listener {
 
 	private enum DialogShowing {
 		SMS_SYNC_CONFIRMATION_DIALOG, SMS_SYNCING_DIALOG
@@ -90,45 +93,29 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 			unlinkPreference.setOnPreferenceClickListener(this);
 		}
 
-		Preference smsClientPreference = getPreferenceScreen().findPreference(
-				HikeConstants.RECEIVE_SMS_PREF);
+		final IconCheckBoxPreference smsClientPreference = (IconCheckBoxPreference) getPreferenceScreen()
+				.findPreference(HikeConstants.RECEIVE_SMS_PREF);
 		if (smsClientPreference != null) {
 			HikeMessengerApp.getPubSub().addListeners(this, pubSubListeners);
+			smsClientPreference.setOnPreferenceChangeListener(this);
 		}
 
 		final IconCheckBoxPreference lastSeenPreference = (IconCheckBoxPreference) getPreferenceScreen()
 				.findPreference(HikeConstants.LAST_SEEN_PREF);
 		if (lastSeenPreference != null) {
-			lastSeenPreference
-					.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			lastSeenPreference.setOnPreferenceChangeListener(this);
+		}
 
-						@Override
-						public boolean onPreferenceChange(
-								Preference preference, Object newValue) {
-							boolean isChecked = (Boolean) newValue;
-							lastSeenPreference.setChecked(isChecked);
+		final IconCheckBoxPreference freeSmsPreference = (IconCheckBoxPreference) getPreferenceScreen()
+				.findPreference(HikeConstants.FREE_SMS_PREF);
+		if (freeSmsPreference != null) {
+			freeSmsPreference.setOnPreferenceChangeListener(this);
+		}
 
-							JSONObject object = new JSONObject();
-							try {
-								object.put(
-										HikeConstants.TYPE,
-										HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
-
-								JSONObject data = new JSONObject();
-								data.put(HikeConstants.LAST_SEEN_SETTING,
-										isChecked);
-
-								object.put(HikeConstants.DATA, data);
-
-								HikeMessengerApp.getPubSub().publish(
-										HikePubSub.MQTT_PUBLISH, object);
-							} catch (JSONException e) {
-								Log.w(getClass().getSimpleName(),
-										"Invalid json", e);
-							}
-							return false;
-						}
-					});
+		final IconCheckBoxPreference sslPreference = (IconCheckBoxPreference) getPreferenceScreen()
+				.findPreference(HikeConstants.SSL_PREF);
+		if (sslPreference != null) {
+			sslPreference.setOnPreferenceChangeListener(this);
 		}
 
 		if (savedInstanceState != null) {
@@ -273,5 +260,53 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		} else if (HikePubSub.SMS_SYNC_START.equals(type)) {
 			dialogShowing = DialogShowing.SMS_SYNCING_DIALOG;
 		}
+	}
+
+	@Override
+	public boolean onPreferenceChange(Preference preference, Object newValue) {
+		boolean isChecked = (Boolean) newValue;
+		((IconCheckBoxPreference) preference).setChecked(isChecked);
+
+		if (HikeConstants.RECEIVE_SMS_PREF.equals(preference.getKey())) {
+
+			if (!isChecked) {
+				Editor editor = PreferenceManager.getDefaultSharedPreferences(
+						HikePreferences.this).edit();
+				editor.putBoolean(HikeConstants.SEND_SMS_PREF, false);
+				editor.commit();
+			} else {
+				if (!HikePreferences.this.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getBoolean(
+						HikeMessengerApp.SHOWN_SMS_SYNC_POPUP, false)) {
+					HikeMessengerApp.getPubSub().publish(
+							HikePubSub.SHOW_SMS_SYNC_DIALOG, null);
+				}
+			}
+		} else if (HikeConstants.LAST_SEEN_PREF.equals(preference.getKey())) {
+			JSONObject object = new JSONObject();
+			try {
+				object.put(HikeConstants.TYPE,
+						HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+
+				JSONObject data = new JSONObject();
+				data.put(HikeConstants.LAST_SEEN_SETTING, isChecked);
+
+				object.put(HikeConstants.DATA, data);
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+						object);
+			} catch (JSONException e) {
+				Log.w(getClass().getSimpleName(), "Invalid json", e);
+			}
+		} else if (HikeConstants.FREE_SMS_PREF.equals(preference.getKey())) {
+			Log.d(getClass().getSimpleName(), "Free SMS toggled");
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FREE_SMS_TOGGLED,
+					isChecked);
+
+		} else if (HikeConstants.SSL_PREF.equals(preference.getKey())) {
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.SWITCHED_DATA_CONNECTION, null);
+		}
+		return false;
 	}
 }
