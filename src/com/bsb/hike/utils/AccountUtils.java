@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
@@ -192,6 +193,10 @@ public class AccountUtils {
 		mClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT,
 				"android-" + appVersion);
 		return mClient;
+	}
+
+	public static void addUserAgent(URLConnection urlConnection) {
+		urlConnection.addRequestProperty("User-Agent", "android-" + appVersion);
 	}
 
 	public static JSONObject executeRequest(HttpRequestBase request) {

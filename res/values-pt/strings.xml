@@ -349,14 +349,12 @@
 	<string name="hey_name">Ei, %1$s!</string>
 	<string name="confirm">Confirmar</string>
 	<string name="recent_updates">Atualiz. recentes</string>
-	<string name="manage_account">Gerenciar conta</string>
 	<string name="whats_up_user">Como vai, %1$s?</string>
 	<string name="status">Status</string>
 	<string name="post">Publicar</string>
 	<string name="waiting_for_accept">Aguardando que %1$s aceite a solicitação de amigo</string>
 	<string name="status_update">Atualiz. de status</string>
 	<string name="remove_friend">Remover</string>
-	<string name="added_friend">Adicionei você como amigo</string>
 	<string name="no_status">Parece que você não publicou atualizações de status ainda.</string>
 	<string name="update_status">Atualizar status</string>
 	<string name="free_sms_txt">SMS grátis</string>
@@ -434,7 +432,6 @@
 	<string name="confirmed_friend">Agora é um amigo</string>
 	<string name="confirmed_friend_info">Você e %1$s podem ver atualizações um do outro.</string>
 	<string name="accepted_friend_request_info">Você e %1$s podem ver atualizações um do outro.</string>
-	<string name="confirmed_friend_2">agora é um amigo</string>
 	<string name="no_hike">Convidar mais amigos para o hike?</string>
 	<string name="rename_group">Renomear o grupo</string>
 	<string name="no_contacts_hike">Você não tem contatos no hike</string>

@@ -37,7 +37,8 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 
 	private SharedPreferences settings;
 
-	private String[] pubSubListeners = { HikePubSub.SOCIAL_AUTH_COMPLETED };
+	private String[] pubSubListeners = { HikePubSub.SOCIAL_AUTH_COMPLETED,
+			HikePubSub.DISMISS_POSTING_DIALOG };
 
 	private ProgressDialog progressDialog;
 
@@ -193,6 +194,17 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 							: R.id.twitter));
 				}
 			});
+		} else if (HikePubSub.DISMISS_POSTING_DIALOG.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (progressDialog != null) {
+						progressDialog.dismiss();
+						progressDialog = null;
+					}
+				}
+			});
 		}
 	}
 
@@ -203,19 +215,15 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 
 					@Override
 					public void onSuccess(JSONObject response) {
-						if (progressDialog != null) {
-							progressDialog.dismiss();
-							progressDialog = null;
-						}
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.DISMISS_POSTING_DIALOG, null);
 						parseResponse(response, facebook);
 					}
 
 					@Override
 					public void onFailure() {
-						if (progressDialog != null) {
-							progressDialog.dismiss();
-							progressDialog = null;
-						}
+						HikeMessengerApp.getPubSub().publish(
+								HikePubSub.DISMISS_POSTING_DIALOG, null);
 						Toast.makeText(getApplicationContext(),
 								R.string.posting_update_fail,
 								Toast.LENGTH_SHORT).show();

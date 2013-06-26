@@ -250,6 +250,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String PROTIP_ADDED = "protipAdded";
 
+	public static final String DISMISS_POSTING_DIALOG = "dismissPostingDialog";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

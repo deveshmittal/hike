@@ -35,6 +35,8 @@ public class StickerAdapter extends BaseAdapter implements OnClickListener {
 		STICKER, UPDATING_STICKER, DOWNLOADING_MORE
 	}
 
+	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
+
 	private int numItemsRow;
 	private int sizeEachImage;
 	private Activity activity;
@@ -48,26 +50,49 @@ public class StickerAdapter extends BaseAdapter implements OnClickListener {
 	private boolean updateAvailable;
 
 	public StickerAdapter(Activity activity, List<Sticker> stickerList,
-			List<ViewType> viewTypeList, int categoryIndex, int numItemsRow,
-			int numStickerRows, boolean updateAvailable) {
+			List<ViewType> viewTypeList, int categoryIndex,
+			boolean updateAvailable) {
 		this.activity = activity;
-
-		this.numItemsRow = numItemsRow;
-
-		this.sizeEachImage = (int) ((activity.getResources()
-				.getDisplayMetrics().widthPixels
-				- (2 * activity.getResources().getDimension(
-						R.dimen.sticker_padding)) - (2 * activity
-				.getResources().getDimension(R.dimen.emoticon_pager_padding))) / numItemsRow);
-
 		this.stickerList = stickerList;
 		this.numStickers = stickerList.size();
 		this.viewTypeList = viewTypeList;
 		this.categoryIndex = categoryIndex;
 		this.categoryId = Utils.getCategoryIdForIndex(categoryIndex);
-		this.numStickerRows = numStickerRows;
 		this.updateAvailable = updateAvailable;
 		this.inflater = LayoutInflater.from(activity);
+
+		calculateNumRowsAndSize();
+	}
+
+	private void calculateNumRowsAndSize() {
+		int screenWidth = activity.getResources().getDisplayMetrics().widthPixels;
+
+		this.numItemsRow = (int) (screenWidth / SIZE_IMAGE);
+
+		int emoticonPagerPadding = (int) 2
+				* activity.getResources().getDimensionPixelSize(
+						R.dimen.emoticon_pager_padding);
+		int stickerPadding = (int) 2
+				* activity.getResources().getDimensionPixelSize(
+						R.dimen.sticker_padding);
+
+		int remainingSpace = (screenWidth - emoticonPagerPadding - stickerPadding)
+				- (this.numItemsRow * SIZE_IMAGE);
+
+		this.sizeEachImage = SIZE_IMAGE
+				+ ((int) (remainingSpace / this.numItemsRow));
+
+		if (numStickers != 0) {
+			if (numStickers % numItemsRow == 0) {
+				this.numStickerRows = numStickers / numItemsRow;
+			} else {
+				this.numStickerRows = numStickers / numItemsRow + 1;
+			}
+
+			for (int i = 0; i < numStickerRows; i++) {
+				viewTypeList.add(updateAvailable ? 1 : 0, ViewType.STICKER);
+			}
+		}
 	}
 
 	@Override

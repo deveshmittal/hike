@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
-import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -256,23 +255,7 @@ public class EmoticonAdapter extends PagerAdapter implements
 							|| (currentStickerTask != null && currentStickerTask
 									.getDownloadType() == DownloadType.UPDATE)) {
 						viewTypeList.add(ViewType.UPDATING_STICKER);
-					}
-					int numItemsRow = activity.getResources()
-							.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? StickerAdapter.MAX_STICKER_PER_ROW_PORTRAIT
-							: StickerAdapter.MAX_STICKER_PER_ROW_LANDSCAPE;
-
-					int numStickerRows = 0;
-					if (!result.isEmpty()) {
-						int stickerNum = result.size();
-						if (stickerNum % numItemsRow == 0) {
-							numStickerRows = stickerNum / numItemsRow;
-						} else {
-							numStickerRows = stickerNum / numItemsRow + 1;
-						}
-
-						for (int i = 0; i < numStickerRows; i++) {
-							viewTypeList.add(ViewType.STICKER);
-						}
+						updateAvailable = true;
 					}
 					if (currentStickerTask != null
 							&& currentStickerTask.getDownloadType() == DownloadType.MORE_STICKERS) {
@@ -280,7 +263,7 @@ public class EmoticonAdapter extends PagerAdapter implements
 					}
 					final StickerAdapter stickerAdapter = new StickerAdapter(
 							activity, result, viewTypeList, position,
-							numItemsRow, numStickerRows, updateAvailable);
+							updateAvailable);
 
 					stickerList.setAdapter(stickerAdapter);
 					stickerList.setOnScrollListener(new OnScrollListener() {

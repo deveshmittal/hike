@@ -71,6 +71,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 			URL url = new URL(urlString);
 
 			URLConnection connection = url.openConnection();
+			AccountUtils.addUserAgent(connection);
 			connection.addRequestProperty("Cookie", "user="
 					+ AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 
@@ -84,8 +85,9 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 			JSONObject response = AccountUtils.getResponse(connection
 					.getInputStream());
 
-			if (!HikeConstants.OK.equals(response
-					.getString(HikeConstants.STATUS))) {
+			if (response == null
+					|| !HikeConstants.OK.equals(response
+							.getString(HikeConstants.STATUS))) {
 				return FTResult.DOWNLOAD_FAILED;
 			}
 

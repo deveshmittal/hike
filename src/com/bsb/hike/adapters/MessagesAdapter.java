@@ -554,7 +554,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							.getContactInfo().getFirstName();
 					message = context
 							.getString(
-									infoState == ParticipantInfoState.USER_JOIN ? R.string.joined_hike_new
+									infoState == ParticipantInfoState.USER_JOIN ? (metadata
+											.isOldUser() ? R.string.user_back_on_hike
+											: R.string.joined_hike_new)
 											: R.string.joined_conversation,
 									name);
 				} else {
@@ -1329,7 +1331,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 										+ hikeFile.getFileTypeString());
 						DownloadFileTask downloadFile = new DownloadFileTask(
 								context, receivedFile, hikeFile.getFileKey(),
-								convMessage.getMsgID());
+								convMessage.getMsgID(),
+								hikeFile.getHikeFileType());
 						downloadFile.execute();
 						ChatThread.fileTransferTaskMap.put(
 								convMessage.getMsgID(), downloadFile);
@@ -1488,7 +1491,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		@Override
 		public void run() {
-			if (lastSentMessagePosition >= convMessages.size()) {
+			if (lastSentMessagePosition >= convMessages.size()
+					|| lastSentMessagePosition == -1) {
 				return;
 			}
 			ConvMessage lastSentMessage = convMessages

@@ -2426,6 +2426,9 @@ public class Utils {
 	}
 
 	public static void unblockOrientationChange(Activity activity) {
+		if (activity == null) {
+			return;
+		}
 		activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
 	}
 

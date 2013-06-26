@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.R;
 import com.bsb.hike.ui.MessagesList;
+import com.bsb.hike.utils.AccountUtils;
 
 public class DownloadAndInstallUpdateAsyncTask extends
 		AsyncTask<Void, Integer, Boolean> {

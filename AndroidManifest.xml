@@ -186,14 +186,11 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name="com.fiksu.asotracking.InstallTracking"
+            android:name=".service.ReferralReceiver"
             android:exported="true" >
             <intent-filter>
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
-            <meta-data
-                android:name="forward.1"
-                android:value="com.bsb.hike.service.ReferralReceiver" />
         </receiver>
 		
 		<receiver

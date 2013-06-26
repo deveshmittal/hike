@@ -1638,6 +1638,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			((ImageButton) findViewById(R.id.emo_btn))
 					.setImageResource(R.drawable.keyboard_btn);
 		} else {
+			if (mConversation == null) {
+				return;
+			}
 			((ImageButton) findViewById(R.id.emo_btn))
 					.setImageResource((mConversation.isOnhike() || (mConversation instanceof GroupConversation)) ? R.drawable.emoticon_hike_btn
 							: R.drawable.emoticon_sms_btn);
@@ -3062,7 +3065,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		if (recorder == null) {
 			recorder = new MediaRecorder();
 			recorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
-			recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+			recorder.setOutputFormat(MediaRecorder.OutputFormat.RAW_AMR);
 			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 			recorder.setMaxDuration(HikeConstants.MAX_DURATION_RECORDING_SEC * 1000);
 			recorder.setMaxFileSize(HikeConstants.MAX_FILE_SIZE);
@@ -4493,6 +4496,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				Log.d(getClass().getSimpleName(), "URL:  " + url);
 
 				URLConnection connection = url.openConnection();
+				AccountUtils.addUserAgent(connection);
 				connection.addRequestProperty("Cookie", "user="
 						+ AccountUtils.mToken + "; UID=" + AccountUtils.mUid);
 
@@ -4505,8 +4509,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				JSONObject response = AccountUtils.getResponse(connection
 						.getInputStream());
 				Log.d(getClass().getSimpleName(), "Response: " + response);
-				if (!HikeConstants.OK.equals(response
-						.getString(HikeConstants.STATUS))) {
+				if (response == null
+						|| !HikeConstants.OK.equals(response
+								.getString(HikeConstants.STATUS))) {
 					return null;
 				}
 				JSONObject data = response.getJSONObject(HikeConstants.DATA);
