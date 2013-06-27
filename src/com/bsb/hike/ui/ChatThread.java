@@ -1197,8 +1197,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:"
 						+ fileType + " Path: " + filePath);
-				initialiseFileTransfer(filePath, hikeFileType, fileKey,
-						fileType, false, -1);
+				initialiseFileTransfer(filePath, hikeFileType, fileType,
+						fileType, false, -1, true);
 
 				// Making sure the file does not get forwarded again on
 				// orientation change.
@@ -1212,8 +1212,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				int zoomLevel = intent.getIntExtra(
 						HikeConstants.Extras.ZOOM_LEVEL, 0);
 
-				initialiseLocationTransfer(latitude, longitude, zoomLevel,
-						fileKey);
+				initialiseLocationTransfer(latitude, longitude, zoomLevel);
 				// Making sure the file does not get forwarded again on
 				// orientation change.
 				intent.removeExtra(HikeConstants.Extras.LATITUDE);
@@ -3044,7 +3043,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				initialiseFileTransfer(selectedFile.getPath(),
 						HikeFileType.AUDIO_RECORDING,
 						HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true,
-						recordedTime);
+						recordedTime, false);
 			}
 		});
 
@@ -3285,8 +3284,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				}
 			}
 
-			initialiseFileTransfer(filePath, hikeFileType, null, null, false,
-					-1);
+			initialiseFileTransfer(filePath, hikeFileType, null, false, -1,
+					false);
 		} else if (requestCode == HikeConstants.SHARE_LOCATION_CODE
 				&& resultCode == RESULT_OK) {
 			double latitude = data.getDoubleExtra(
@@ -3298,7 +3297,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude
 					+ " long:" + longitude + " zoom: " + zoomLevel);
-			initialiseLocationTransfer(latitude, longitude, zoomLevel, null);
+			initialiseLocationTransfer(latitude, longitude, zoomLevel);
 		} else if (requestCode == HikeConstants.SHARE_CONTACT_CODE
 				&& resultCode == RESULT_OK) {
 			String id = data.getData().getLastPathSegment();
@@ -3532,20 +3531,21 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	}
 
 	private void initialiseFileTransfer(String filePath,
-			HikeFileType hikeFileType, String fileKey, String fileType,
-			boolean isRecording, long recordingDuration) {
+			HikeFileType hikeFileType, String fileType, boolean isRecording,
+			long recordingDuration, boolean isForwardingFile) {
 		clearTempData();
 		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber,
-				filePath, fileKey, fileType, hikeFileType, isRecording,
-				recordingDuration, getApplicationContext(), mConversation);
+				filePath, fileType, hikeFileType, isRecording
+						&& !isForwardingFile, recordingDuration,
+				getApplicationContext(), mConversation);
 		uploadFileTask.execute();
 	}
 
 	private void initialiseLocationTransfer(double latitude, double longitude,
-			int zoomLevel, String fileKey) {
+			int zoomLevel) {
 		clearTempData();
 		UploadContactOrLocationTask uploadLocationTask = new UploadContactOrLocationTask(
-				mContactNumber, latitude, longitude, zoomLevel, fileKey,
+				mContactNumber, latitude, longitude, zoomLevel,
 				getApplicationContext(), mConversation);
 		uploadLocationTask.execute();
 	}

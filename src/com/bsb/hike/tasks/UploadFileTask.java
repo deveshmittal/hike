@@ -49,12 +49,11 @@ public class UploadFileTask extends FileTransferTaskBase {
 	private long recordingDuration = -1;
 	private Conversation conversation;
 
-	public UploadFileTask(String msisdn, String filePath, String fileKey,
-			String fileType, HikeFileType hikeFileType, boolean wasFileSaved,
+	public UploadFileTask(String msisdn, String filePath, String fileType,
+			HikeFileType hikeFileType, boolean wasFileSaved,
 			long recordingDuration, Context context, Conversation conversation) {
 		this.msisdn = msisdn;
 		this.filePath = filePath;
-		this.fileKey = fileKey;
 		this.fileType = fileType;
 		this.hikeFileType = hikeFileType;
 		this.wasFileSaved = wasFileSaved;
