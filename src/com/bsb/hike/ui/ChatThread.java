@@ -805,6 +805,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 							hikeFile.getFilePath());
 					intent.putExtra(HikeConstants.Extras.FILE_TYPE,
 							hikeFile.getFileTypeString());
+					if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+						intent.putExtra(HikeConstants.Extras.RECORDING_TIME,
+								hikeFile.getRecordingDuration());
+					}
 				}
 			} else if (message.isStickerMessage()) {
 				Sticker sticker = message.getMetadata().getSticker();
@@ -1193,12 +1197,23 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 						.getStringExtra(HikeConstants.Extras.FILE_PATH);
 				String fileType = intent
 						.getStringExtra(HikeConstants.Extras.FILE_TYPE);
-				HikeFileType hikeFileType = HikeFileType.fromString(fileType);
+
+				boolean isRecording = false;
+				long recordingDuration = -1;
+				if (intent.hasExtra(HikeConstants.Extras.RECORDING_TIME)) {
+					recordingDuration = intent.getLongExtra(
+							HikeConstants.Extras.RECORDING_TIME, -1);
+					isRecording = true;
+					fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
+				}
+
+				HikeFileType hikeFileType = HikeFileType.fromString(fileType,
+						isRecording);
 
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:"
 						+ fileType + " Path: " + filePath);
 				initialiseFileTransfer(filePath, hikeFileType, fileType,
-						fileType, false, -1, true);
+						isRecording, recordingDuration, true);
 
 				// Making sure the file does not get forwarded again on
 				// orientation change.
