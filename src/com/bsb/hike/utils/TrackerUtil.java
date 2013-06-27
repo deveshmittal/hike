@@ -42,8 +42,8 @@ public class TrackerUtil {
 		_mobileAppTracker.setUserId(HikeConstants.MA_TRACKER_USERID);
 		_mobileAppTracker.setRefId(HikeConstants.MA_TRACKER_REF_ID_PREFIX
 				+ System.currentTimeMillis());
-		_mobileAppTracker.setSiteId("27576");
-	
+		_mobileAppTracker.setSiteId(HikeConstants.MA_SITE_ID);
+
 	}
 
 	public void setTrackOptions(boolean isNewInstall) {
