@@ -3546,13 +3546,14 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		clearTempData();
 		UploadContactOrLocationTask uploadLocationTask = new UploadContactOrLocationTask(
 				mContactNumber, latitude, longitude, zoomLevel, fileKey,
-				getApplicationContext());
+				getApplicationContext(), mConversation);
 		uploadLocationTask.execute();
 	}
 
 	private void initialiseContactTransfer(JSONObject contactJson) {
 		UploadContactOrLocationTask contactOrLocationTask = new UploadContactOrLocationTask(
-				mContactNumber, contactJson, getApplicationContext());
+				mContactNumber, contactJson, getApplicationContext(),
+				mConversation);
 		contactOrLocationTask.execute();
 	}
 
