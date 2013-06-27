@@ -1345,7 +1345,7 @@ public class Utils {
 				+ (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE
 						: AccountUtils.REWARDS_STAGING_BASE);
 
-		AccountUtils.stickersUrl = httpString
+		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE
 						: AccountUtils.STICKERS_STAGING_BASE);
 		Log.d("SSL", "Base: " + AccountUtils.base);
@@ -2451,10 +2451,15 @@ public class Utils {
 
 		} else if (convMessage.isStickerMessage()) {
 			Sticker sticker = convMessage.getMetadata().getSticker();
+
+			String stickerId = sticker.getStickerId();
+			String stickerUrlId = stickerId
+					.substring(0, stickerId.indexOf("_"));
+
 			String message = context.getString(R.string.sent_sticker)
 					+ ". "
 					+ String.format(AccountUtils.stickersUrl,
-							sticker.getCategoryId(), sticker.getStickerId());
+							sticker.getCategoryId(), stickerUrlId);
 			return message;
 		}
 		return convMessage.getMessage();

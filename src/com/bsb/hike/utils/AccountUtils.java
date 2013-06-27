@@ -121,9 +121,9 @@ public class AccountUtils {
 
 	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
 
-	public static final String STICKERS_PRODUCTION_BASE = "hike.in/sticker?catId=%1$s&stId=%2$s";
+	public static final String STICKERS_PRODUCTION_BASE = "hike.in/s/%1$s/%2$s";
 
-	public static final String STICKERS_STAGING_BASE = "staging.im.in/sticker?catId=%1$s&stId=%2$s";
+	public static final String STICKERS_STAGING_BASE = "staging.im.hike.in/s/%1$s/%2$s";
 
 	public static String stickersUrl = HTTP_STRING + STICKERS_PRODUCTION_BASE;
 
