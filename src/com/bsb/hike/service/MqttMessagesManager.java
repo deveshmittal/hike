@@ -344,6 +344,10 @@ public class MqttMessagesManager {
 						Log.d(getClass().getSimpleName(), "New json: "
 								+ fileJson);
 					}
+					/*
+					 * Resetting the metadata
+					 */
+					convMessage.setMetadata(metadataJson);
 				}
 
 			}
