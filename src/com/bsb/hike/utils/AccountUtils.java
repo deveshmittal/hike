@@ -334,7 +334,6 @@ public class AccountUtils {
 			try {
 				deviceId = Utils.getHashedDeviceId(Secure.getString(
 						context.getContentResolver(), Secure.ANDROID_ID));
-				Log.d("AccountUtils", "Android ID is "+ Secure.ANDROID_ID);
 			} catch (NoSuchAlgorithmException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
