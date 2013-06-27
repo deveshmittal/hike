@@ -12,7 +12,6 @@ import com.google.android.maps.MapActivity;
 public abstract class HikeAppStateBaseMapActivity extends MapActivity {
 
 	private static final String TAG = "HikeAppState";
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED

@@ -12,13 +12,11 @@ import com.bsb.hike.ui.MessagesList;
 
 /**
  * @author Rishabh Using this to notify the server when the app comes to the
- *         foreground or background. Extending PreferenceActivity to ensure all
- *         our activities can extend this class
+ *         foreground or background.
  */
 public abstract class HikeAppStateBaseActivity extends Activity {
 
 	private static final String TAG = "HikeAppState";
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED
@@ -27,7 +25,8 @@ public abstract class HikeAppStateBaseActivity extends Activity {
 			HikeMessengerApp.currentState = CurrentState.OPENED;
 			Utils.sendAppState(this);
 		}
-		super.onCreate(savedInstanceState);
+	   super.onCreate(savedInstanceState);
+
 	}
 
 	@Override
@@ -102,5 +101,6 @@ public abstract class HikeAppStateBaseActivity extends Activity {
 			Utils.sendAppState(this);
 		}
 	}
-
+	
+	
 }
