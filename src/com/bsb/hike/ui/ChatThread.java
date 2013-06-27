@@ -3042,8 +3042,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			public void onClick(View v) {
 				recordingDialog.dismiss();
 				initialiseFileTransfer(selectedFile.getPath(),
-						HikeFileType.AUDIO_RECORDING, null, "audio/voice",
-						true, recordedTime);
+						HikeFileType.AUDIO_RECORDING,
+						HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true,
+						recordedTime);
 			}
 		});
 
