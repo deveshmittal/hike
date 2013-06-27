@@ -10,7 +10,7 @@ public class TrackerUtil {
 	private MobileAppTracker _mobileAppTracker = null;
 	private MatResponse _matResponse = null;
 	private Context _ctx;
-	private boolean DEBUG = false; // toggle this field to switch between test
+	private boolean DEBUG = true; // toggle this field to switch between test
 	// mode and live mode
 	private static TrackerUtil _trackerUtil = null;
 
@@ -33,12 +33,17 @@ public class TrackerUtil {
 
 		// initialize the MobileAppTracker framework
 		_mobileAppTracker = new MobileAppTracker(this._ctx,
-				HikeConstants.MA_TRACKER_AD_ID, HikeConstants.MA_TRACKER_KEY);
+				HikeConstants.MA_TRACKER_AD_ID, HikeConstants.MA_TRACKER_KEY,true,false);
+		//new MobileAppTracker
+	
+		//_mobileAppTracker = new MobileAppTracker(this._ctx, true, false, HikeConstants.MA_TRACKER_KEY,true);
 		_matResponse = new MatResponse();
 		_mobileAppTracker.setMATResponse(_matResponse);
 		_mobileAppTracker.setUserId(HikeConstants.MA_TRACKER_USERID);
 		_mobileAppTracker.setRefId(HikeConstants.MA_TRACKER_REF_ID_PREFIX
 				+ System.currentTimeMillis());
+		_mobileAppTracker.setSiteId("27576");
+	
 	}
 
 	public void setTrackOptions(boolean isNewInstall) {
