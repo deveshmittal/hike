@@ -24,7 +24,6 @@
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
 	<!-- C2DM -->
 	<permission android:name="com.bsb.hike.permission.C2D_MESSAGE" android:protectionLevel="signature" />
 	<uses-permission android:name="com.bsb.hike.permission.C2D_MESSAGE" /> 
@@ -185,14 +184,7 @@
 				<action android:name="android.intent.action.LOCALE_CHANGED"/>
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".service.ReferralReceiver"
-            android:exported="true" >
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
-            </intent-filter>
-        </receiver>
-		
+       
 		<receiver
 		    android:name="com.google.android.gcm.GCMBroadcastReceiver"
 		    android:permission="com.google.android.c2dm.permission.SEND" >
@@ -224,6 +216,12 @@
 		<meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/fb_app_id" />
 		
 		<receiver android:name=".service.SmsMessageStatusReceiver" />
+		
+		<receiver android:name=".service.AppTrackerReceiver" android:exported="true">
+    		<intent-filter>
+        		<action android:name="com.android.vending.INSTALL_REFERRER" />
+    		</intent-filter>
+		</receiver>
 
     </application>
 

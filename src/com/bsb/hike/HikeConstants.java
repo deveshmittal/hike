@@ -12,6 +12,11 @@ public class HikeConstants {
 	public static final String MAP_API_KEY_DEBUG = "0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA";
 	public static final String MAP_API_KEY_PROD = "0Luu6V6IYSC3olBhRm5jHLKDIn5_CA3P17l_3Mw";
 
+	public static final String MA_TRACKER_AD_ID = "9198";
+	public static final String MA_TRACKER_KEY = "00774f47f97b5173432b958a986f0061";
+	public static final String MA_TRACKER_USERID = "bsb_hike";
+	public static final String MA_TRACKER_REF_ID_PREFIX = "bsb_hike_";
+	
 	public static final String ANDROID = "android";
 
 	public static final String MESSAGE = "msg";
