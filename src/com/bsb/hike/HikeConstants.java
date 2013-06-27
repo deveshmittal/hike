@@ -316,6 +316,8 @@ public class HikeConstants {
 
 	public static final int DEFAULT_ZOOM_LEVEL = 12;
 
+	public static final String VOICE_MESSAGE_CONTENT_TYPE = "audio/voice";
+
 	// Picasa URI start for JB devices
 	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
 	// Picasa URI start for other devices
