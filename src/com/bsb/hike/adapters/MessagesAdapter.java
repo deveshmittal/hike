@@ -1302,7 +1302,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							uploadTask = new UploadContactOrLocationTask(
 									convMessage,
 									context,
-									(hikeFile.getHikeFileType() == HikeFileType.CONTACT));
+									(hikeFile.getHikeFileType() == HikeFileType.CONTACT),
+									conversation);
 						}
 						uploadTask.execute();
 						ChatThread.fileTransferTaskMap.put(
