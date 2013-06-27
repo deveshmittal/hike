@@ -48,12 +48,11 @@ public class UploadContactOrLocationTask extends FileTransferTaskBase {
 	private Conversation conversation;
 
 	public UploadContactOrLocationTask(String msisdn, double latitude,
-			double longitude, int zoomLevel, String filekey, Context context,
+			double longitude, int zoomLevel, Context context,
 			Conversation conversation) {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.zoomLevel = zoomLevel;
-		this.fileKey = fileKey;
 		this.msisdn = msisdn;
 		this.context = context;
 		this.uploadingContact = false;
