@@ -8,7 +8,6 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
-import com.mobileapptracker.MobileAppTracker;
 
 public abstract class HikeAppStateBasePreferenceActivity extends
 		PreferenceActivity {
@@ -24,15 +23,6 @@ public abstract class HikeAppStateBasePreferenceActivity extends
 			Utils.sendAppState(this);
 		}
 		super.onCreate(savedInstanceState);
-		
-		TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
-		if(tUtil!=null)
-		{
-			//tUtil.init();
-			tUtil.setTrackOptions(true);
-			Log.d(TAG + getClass().getSimpleName(), "Init for apptracker sdk finished");
-		}
-		
 	}
 
 	@Override

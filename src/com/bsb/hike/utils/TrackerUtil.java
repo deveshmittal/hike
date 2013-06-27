@@ -10,7 +10,7 @@ public class TrackerUtil {
 	private MobileAppTracker _mobileAppTracker = null;
 	private MatResponse _matResponse = null;
 	private Context _ctx;
-	private boolean DEBUG = true; // toggle this field to switch between test
+	private boolean DEBUG = false; // toggle this field to switch between test
 	// mode and live mode
 	private static TrackerUtil _trackerUtil = null;
 

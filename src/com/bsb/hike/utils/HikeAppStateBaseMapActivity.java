@@ -8,7 +8,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.google.android.maps.MapActivity;
-import com.mobileapptracker.MobileAppTracker;
 
 public abstract class HikeAppStateBaseMapActivity extends MapActivity {
 
@@ -22,14 +21,6 @@ public abstract class HikeAppStateBaseMapActivity extends MapActivity {
 			Utils.sendAppState(this);
 		}
 		super.onCreate(savedInstanceState);
-		
-		TrackerUtil tUtil = TrackerUtil.getInstance(this.getApplicationContext());
-		if(tUtil!=null)
-		{
-			//tUtil.init();
-			tUtil.setTrackOptions(true);
-			Log.d(TAG + getClass().getSimpleName(), "Init for apptracker sdk finished");
-		}
 	}
 
 	@Override
