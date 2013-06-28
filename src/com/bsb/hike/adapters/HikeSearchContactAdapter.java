@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -282,9 +284,11 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 			if (inviteOnly) {
 				Log.d(getClass().getSimpleName(),
 						"Inviting " + contactInfo.toString());
-				Utils.sendInvite(contactInfo.getMsisdn(), context);
-				Toast.makeText(context, R.string.invite_sent,
-						Toast.LENGTH_SHORT).show();
+				if (HikeMessengerApp.isIndianUser()) {
+					sendInvite(contactInfo.getMsisdn());
+				} else {
+					showInviteSMSInternationalPopup(contactInfo.getMsisdn());
+				}
 				return;
 			}
 			Intent intent = Utils.createIntentFromContactInfo(contactInfo);
@@ -426,5 +430,44 @@ public class HikeSearchContactAdapter extends ArrayAdapter<ContactInfo>
 						&& (!contactInfo.getMsisdn().startsWith(
 								HikeConstants.INDIA_COUNTRY_CODE)) && !contactInfo
 							.isOnhike()));
+	}
+
+	private void showInviteSMSInternationalPopup(final String msisdn) {
+		final Dialog dialog = new Dialog(context, R.style.Theme_CustomDialog);
+		dialog.setContentView(R.layout.enable_sms_client_popup);
+		dialog.setCancelable(true);
+
+		TextView header = (TextView) dialog.findViewById(R.id.header);
+		TextView body = (TextView) dialog.findViewById(R.id.body);
+		Button btnOk = (Button) dialog.findViewById(R.id.btn_ok);
+		Button btnCancel = (Button) dialog.findViewById(R.id.btn_cancel);
+
+		header.setText(R.string.invite_via_sms);
+		body.setText(R.string.native_sms_invite_info);
+
+		btnOk.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+				sendInvite(msisdn);
+			}
+		});
+
+		btnCancel.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+
+		dialog.show();
+	}
+
+	private void sendInvite(String msisdn) {
+		Utils.sendInvite(msisdn, context);
+		Toast.makeText(context, R.string.invite_sent, Toast.LENGTH_SHORT)
+				.show();
 	}
 }
