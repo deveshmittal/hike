@@ -1246,33 +1246,44 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					&& convMessage.equals(convMessages
 							.get(lastSentMessagePosition))
 					&& isMessageUndelivered(convMessage)) {
-				if (conversation.isOnhike()) {
-					if (!Utils.isUserOnline(context)) {
-						if (conversation instanceof GroupConversation) {
-							Toast.makeText(context,
-									R.string.gc_fallback_offline,
-									Toast.LENGTH_LONG).show();
+				long diff = (((long) System.currentTimeMillis() / 1000) - convMessage
+						.getTimestamp());
+				/*
+				 * Only show fallback if the message has not been sent for our
+				 * max wait time.
+				 */
+				if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME) {
+
+					if (conversation.isOnhike()) {
+						if (!Utils.isUserOnline(context)) {
+							if (conversation instanceof GroupConversation) {
+								Toast.makeText(context,
+										R.string.gc_fallback_offline,
+										Toast.LENGTH_LONG).show();
+							} else {
+								showSMSDialog(true);
+							}
 						} else {
-							showSMSDialog(true);
+							if (conversation instanceof GroupConversation) {
+								showSMSDialog(false);
+							} else {
+								/*
+								 * Only show the H2S fallback option if
+								 * messaging indian numbers.
+								 */
+								showSMSDialog(!conversation
+										.getMsisdn()
+										.startsWith(
+												HikeConstants.INDIA_COUNTRY_CODE));
+							}
 						}
 					} else {
-						if (conversation instanceof GroupConversation) {
-							showSMSDialog(false);
-						} else {
-							/*
-							 * Only show the H2S fallback option if messaging
-							 * indian numbers.
-							 */
-							showSMSDialog(!conversation.getMsisdn().startsWith(
-									HikeConstants.INDIA_COUNTRY_CODE));
-						}
+						sendAllUnsentMessagesAsSMS(PreferenceManager
+								.getDefaultSharedPreferences(context)
+								.getBoolean(HikeConstants.SEND_SMS_PREF, false));
 					}
-				} else {
-					sendAllUnsentMessagesAsSMS(PreferenceManager
-							.getDefaultSharedPreferences(context).getBoolean(
-									HikeConstants.SEND_SMS_PREF, false));
+					return;
 				}
-				return;
 			}
 			if (convMessage.isFileTransferMessage()) {
 				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
