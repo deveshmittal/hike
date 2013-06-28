@@ -15,7 +15,6 @@ public class TrackerUtil {
 	private static TrackerUtil _trackerUtil = null;
 
 	public TrackerUtil(Context context) {
-		// TODO Auto-generated constructor stub
 		this._ctx = context;
 		init(context);
 	}
@@ -33,11 +32,11 @@ public class TrackerUtil {
 
 		// initialize the MobileAppTracker framework
 		_mobileAppTracker = new MobileAppTracker(this._ctx,
-				HikeConstants.MA_TRACKER_AD_ID, HikeConstants.MA_TRACKER_KEY,true,false);
-		//new MobileAppTracker
-	
-		//_mobileAppTracker = new MobileAppTracker(this._ctx, true, false, HikeConstants.MA_TRACKER_KEY,true);
+				HikeConstants.MA_TRACKER_AD_ID, HikeConstants.MA_TRACKER_KEY,
+				true, false);
+
 		_matResponse = new MatResponse();
+
 		_mobileAppTracker.setMATResponse(_matResponse);
 		_mobileAppTracker.setUserId(HikeConstants.MA_TRACKER_USERID);
 		_mobileAppTracker.setRefId(HikeConstants.MA_TRACKER_REF_ID_PREFIX
