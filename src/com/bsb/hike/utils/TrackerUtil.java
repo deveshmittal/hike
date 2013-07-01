@@ -38,7 +38,6 @@ public class TrackerUtil {
 		_matResponse = new MatResponse();
 
 		_mobileAppTracker.setMATResponse(_matResponse);
-		_mobileAppTracker.setUserId(HikeConstants.MA_TRACKER_USERID);
 		_mobileAppTracker.setRefId(HikeConstants.MA_TRACKER_REF_ID_PREFIX
 				+ System.currentTimeMillis());
 		_mobileAppTracker.setSiteId(HikeConstants.MA_SITE_ID);
