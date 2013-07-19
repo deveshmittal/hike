@@ -41,7 +41,7 @@
 
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_cancel"
-            style="@style/StatusNoBtn"
+            style="@style/UpdateText.StatusNoBtn"
             android:layout_width="0dp"
             android:layout_height="45dp"
             android:layout_weight="1"
@@ -50,7 +50,7 @@
 
         <com.bsb.hike.view.CustomFontButton
             android:id="@+id/btn_ok"
-            style="@style/StatusYesBtn"
+            style="@style/UpdateText.StatusYesBtn"
             android:layout_width="0dp"
             android:layout_height="45dp"
             android:layout_marginLeft="8dp"

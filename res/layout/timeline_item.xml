@@ -114,7 +114,7 @@
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/yes_btn"
-                style="@style/StatusYesBtn"
+                style="@style/UpdateText.StatusYesBtn"
                 android:focusable="false"
                 android:onClick="onYesBtnClick"
                 android:paddingLeft="20dp"
@@ -129,7 +129,7 @@
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/no_btn"
-                style="@style/StatusNoBtn"
+                style="@style/UpdateText.StatusNoBtn"
                 android:focusable="false"
                 android:onClick="onNoBtnClick"
                 android:paddingLeft="20dp"
