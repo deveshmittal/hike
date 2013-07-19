@@ -287,10 +287,11 @@ public class ContactUtils {
 		 * We will catch exceptions here since we do not know which devices
 		 * support this URI.
 		 */
+		Cursor cursorSim = null;
 		try {
 			Uri simUri = Uri.parse("content://icc/adn");
-			Cursor cursorSim = ctx.getContentResolver().query(simUri, null,
-					null, null, null);
+			cursorSim = ctx.getContentResolver().query(simUri, null, null,
+					null, null);
 
 			while (cursorSim.moveToNext()) {
 				try {
@@ -324,6 +325,10 @@ public class ContactUtils {
 		} catch (Exception e) {
 			Log.w("ContactUtils", "Expection while querying for sim contacts",
 					e);
+		} finally {
+			if (cursorSim != null) {
+				cursorSim.close();
+			}
 		}
 
 		return contactinfos;
