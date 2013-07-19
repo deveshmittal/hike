@@ -42,6 +42,10 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 	private long hikeJoinTime;
 
+	private long lastSeenTime;
+
+	private int offline;
+
 	public String getName() {
 		return name;
 	}
@@ -135,6 +139,22 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		 * For unknown contacts, we make the id and msisdn equal.
 		 */
 		return msisdn.equals(id);
+	}
+
+	public long getLastSeenTime() {
+		return lastSeenTime;
+	}
+
+	public void setLastSeenTime(long lastSeenTime) {
+		this.lastSeenTime = lastSeenTime;
+	}
+
+	public int getOffline() {
+		return offline;
+	}
+
+	public void setOffline(int offline) {
+		this.offline = offline;
 	}
 
 	public String getFormattedHikeJoinTime() {
