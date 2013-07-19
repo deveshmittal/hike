@@ -1856,16 +1856,19 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			}
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
 			if (mContactNumber.equals(object)) {
+
+				ContactInfo contactInfo = HikeUserDatabase.getInstance()
+						.getContactInfoFromMSISDN(mContactNumber, false);
+
 				runOnUiThread(new SetTypingText(true));
-				if (shouldShowLastSeen()
-						&& HikeUserDatabase.getInstance().getIsOffline(
-								mContactNumber) != -1) {
+
+				if (shouldShowLastSeen() && contactInfo.getOffline() != -1) {
 					/*
 					 * Publishing an online event for this number.
 					 */
+					contactInfo.setOffline(0);
 					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.LAST_SEEN_TIME_UPDATED,
-							new Pair<String, Long>(mContactNumber, 0l));
+							HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 				}
 			}
 		}
@@ -2136,17 +2139,15 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				});
 			}
 		} else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type)) {
-			Pair<String, Long> lastSeenPair = (Pair<String, Long>) object;
-			String msisdn = lastSeenPair.first;
-			long lastSeenTime = lastSeenPair.second;
+			ContactInfo contactInfo = (ContactInfo) object;
 
-			if (!mContactNumber.equals(msisdn)
+			if (!mContactNumber.equals(contactInfo.getMsisdn())
 					|| (mConversation instanceof GroupConversation)
 					|| !shouldShowLastSeen()) {
 				return;
 			}
 			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
-					lastSeenTime);
+					contactInfo.getLastSeenTime(), contactInfo.getOffline());
 			runOnUiThread(new Runnable() {
 
 				@Override
@@ -4482,23 +4483,20 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private class FetchLastSeenTask extends AsyncTask<Void, Void, Long> {
 
-		long currentLastSeenValue;
+		ContactInfo contactInfo;
 		boolean retriedOnce;
-		int isOffline;
 		String msisdn;
 
 		public FetchLastSeenTask(String msisdn, boolean retriedOnce) {
 			this.msisdn = msisdn;
-			this.currentLastSeenValue = HikeUserDatabase.getInstance()
-					.getLastSeenTime(msisdn);
-			this.isOffline = HikeUserDatabase.getInstance()
-					.getIsOffline(msisdn);
-			if (isOffline == 0) {
+			this.contactInfo = HikeUserDatabase.getInstance()
+					.getContactInfoFromMSISDN(msisdn, false);
+			if (contactInfo.getOffline() == 0) {
 				/*
 				 * We reset this to 1 since the user's online state is stale
 				 * here.
 				 */
-				isOffline = 1;
+				contactInfo.setOffline(1);
 			}
 			this.retriedOnce = retriedOnce;
 		}
@@ -4558,30 +4556,29 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				/*
 				 * Update current last seen value.
 				 */
-				currentLastSeenValue = result;
+				long currentLastSeenValue = result;
 				/*
 				 * We only apply the offset if the value is greater than 0 since
 				 * 0 and -1 are reserved.
 				 */
 				if (currentLastSeenValue > 0) {
-					isOffline = 1;
-					currentLastSeenValue = Utils.applyServerTimeOffset(
-							ChatThread.this, currentLastSeenValue);
+					contactInfo.setOffline(1);
+					contactInfo.setLastSeenTime(Utils.applyServerTimeOffset(
+							ChatThread.this, currentLastSeenValue));
 				} else {
-					isOffline = (int) currentLastSeenValue;
-					currentLastSeenValue = System.currentTimeMillis() / 1000;
+					contactInfo.setOffline((int) currentLastSeenValue);
+					contactInfo
+							.setLastSeenTime(System.currentTimeMillis() / 1000);
 				}
 
 				HikeUserDatabase.getInstance().updateLastSeenTime(msisdn,
-						currentLastSeenValue);
+						contactInfo.getLastSeenTime());
 				HikeUserDatabase.getInstance().updateIsOffline(msisdn,
-						isOffline);
+						contactInfo.getOffline());
 
 			}
 			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.LAST_SEEN_TIME_UPDATED,
-					new Pair<String, Long>(msisdn,
-							isOffline == 1 ? currentLastSeenValue : isOffline));
+					HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 		}
 	}
 }

@@ -976,9 +976,10 @@ public class MqttMessagesManager {
 			userDb.updateLastSeenTime(msisdn, lastSeenTime);
 			userDb.updateIsOffline(msisdn, (int) isOffline);
 
-			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED,
-					new Pair<String, Long>(msisdn,
-							isOffline == 1 ? lastSeenTime : isOffline));
+			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
+					false);
+
+			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 		} else if (HikeConstants.MqttMessageTypes.SERVER_TIMESTAMP.equals(type)) {
 			long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
 			long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;

@@ -2227,11 +2227,17 @@ public class Utils {
 	}
 
 	public static String getLastSeenTimeAsString(Context context,
-			long lastSeenTime) {
-		if (lastSeenTime == -1) {
+			long lastSeenTime, int offline) {
+		/*
+		 * This refers to the setting being turned off
+		 */
+		if (offline == -1) {
 			return null;
 		}
-		if (lastSeenTime == 0) {
+		/*
+		 * This refers to the user being online
+		 */
+		if (offline == 0) {
 			return context.getString(R.string.online);
 		}
 

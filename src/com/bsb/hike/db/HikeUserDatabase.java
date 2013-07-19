@@ -434,8 +434,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					DBConstants.MSISDN_TYPE, DBConstants.LAST_MESSAGED,
 					DBConstants.HAS_CUSTOM_PHOTO,
 					DBConstants.FAVORITE_TYPE_SELECTION,
-					DBConstants.HIKE_JOIN_TIME
-					}, DBConstants.MSISDN + "=?",
+					DBConstants.HIKE_JOIN_TIME, DBConstants.IS_OFFLINE,
+					DBConstants.LAST_SEEN }, DBConstants.MSISDN + "=?",
 					new String[] { msisdn }, null, null, null);
 
 			contactInfos = extractContactInfo(c);
@@ -498,6 +498,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		int hasCustomPhotoIdx = c.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
 		int favoriteIdx = c.getColumnIndex(DBConstants.FAVORITE_TYPE);
 		int hikeJoinTimeIdx = c.getColumnIndex(DBConstants.HIKE_JOIN_TIME);
+		int isOfflineIdx = c.getColumnIndex(DBConstants.IS_OFFLINE);
+		int lastSeenTimeIdx = c.getColumnIndex(DBConstants.LAST_SEEN);
 
 		Set<String> msisdnSet = null;
 
@@ -527,6 +529,15 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			} else {
 				contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
 			}
+
+			if (isOfflineIdx != -1) {
+				contactInfo.setOffline(c.getInt(isOfflineIdx));
+			}
+
+			if (lastSeenTimeIdx != -1) {
+				contactInfo.setLastSeenTime(c.getLong(lastSeenTimeIdx));
+			}
+
 			contactInfos.add(contactInfo);
 		}
 		return contactInfos;
@@ -683,7 +694,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.ID + ", " + DBConstants.NAME + ", "
 				+ DBConstants.ONHIKE + ", " + DBConstants.PHONE + ", "
 				+ DBConstants.MSISDN_TYPE + ", " + DBConstants.HAS_CUSTOM_PHOTO
-				+ ", " + DBConstants.LAST_MESSAGED);
+				+ ", " + DBConstants.LAST_MESSAGED + ", "
+				+ DBConstants.LAST_SEEN + ", " + DBConstants.IS_OFFLINE);
 		if (favoriteType != null) {
 			if (favoriteType == FavoriteType.NOT_FRIEND) {
 				queryBuilder.append(" FROM " + DBConstants.USERS_TABLE
@@ -738,6 +750,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
 			int hasCustomPhotoIdx = c
 					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+			int lastSeenIdx = c.getColumnIndex(DBConstants.LAST_SEEN);
+			int isOfflineIdx = c.getColumnIndex(DBConstants.IS_OFFLINE);
 
 			Set<String> msisdnSet = null;
 
@@ -769,6 +783,8 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				}
 
 				contactInfo.setFavoriteType(favoriteType);
+				contactInfo.setOffline(c.getInt(isOfflineIdx));
+				contactInfo.setLastSeenTime(c.getLong(lastSeenIdx));
 
 				contactInfos.add(contactInfo);
 			}
@@ -1765,25 +1781,5 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
 				+ "=?", new String[] { msisdn });
-	}
-
-	public long getLastSeenTime(String msisdn) {
-		Cursor c = mDb.query(DBConstants.USERS_TABLE,
-				new String[] { DBConstants.LAST_SEEN }, DBConstants.MSISDN
-						+ "=?", new String[] { msisdn }, null, null, null);
-		if (!c.moveToFirst()) {
-			return -1;
-		}
-		return c.getLong(c.getColumnIndex(DBConstants.LAST_SEEN));
-	}
-
-	public int getIsOffline(String msisdn) {
-		Cursor c = mDb.query(DBConstants.USERS_TABLE,
-				new String[] { DBConstants.IS_OFFLINE }, DBConstants.MSISDN
-						+ "=?", new String[] { msisdn }, null, null, null);
-		if (!c.moveToFirst()) {
-			return -1;
-		}
-		return c.getInt(c.getColumnIndex(DBConstants.IS_OFFLINE));
 	}
 }
