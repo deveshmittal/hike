@@ -4,7 +4,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 16;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 17;
 
 	public static final int USERS_DATABASE_VERSION = 13;
 
@@ -165,4 +165,6 @@ public class DBConstants {
 	public static final String WAIT_TIME = "waitTime";
 
 	public static final String IS_OFFLINE = "isOffline";
+
+	public static final String UNREAD_COUNT = "unreadCount";
 }

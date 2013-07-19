@@ -101,7 +101,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MAPPED_MSG_ID + " INTEGER, "
 				+ DBConstants.MESSAGE_METADATA + " TEXT, "
 				+ DBConstants.GROUP_PARTICIPANT + " TEXT, "
-				+ DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0" + " )";
+				+ DBConstants.IS_STATUS_MSG + " INTEGER DEFAULT 0, "
+				+ DBConstants.UNREAD_COUNT + " INTEGER DEFAULT 0" + " )";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.GROUP_MEMBERS_TABLE
 				+ " ( " + DBConstants.GROUP_ID + " STRING, "
@@ -356,6 +357,16 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		/*
 		 * Version 15 adds the sticker table. Version 16 adds the protips table.
 		 */
+
+		/*
+		 * Version 17 add the unread column.
+		 */
+		if (oldVersion < 17) {
+			String alter = "ALTER TABLE " + DBConstants.CONVERSATIONS_TABLE
+					+ " ADD COLUMN " + DBConstants.UNREAD_COUNT
+					+ " INTEGER DEFAULT 0";
+			db.execSQL(alter);
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -657,6 +668,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		insertStatement.close();
 		mDb.setTransactionSuccessful();
 		mDb.endTransaction();
+
+		incrementUnreadCounter(convMessages.get(0).getMsisdn(),
+				convMessages.size());
 	}
 
 	public void updateIsHikeMessageState(long id, boolean isHikeMessage) {
@@ -1010,8 +1024,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				DBConstants.MSISDN, DBConstants.CONV_ID, DBConstants.MESSAGE,
 				DBConstants.MSG_STATUS, DBConstants.TIMESTAMP,
 				DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_ID,
-				DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT },
-				null, null, null, null, null);
+				DBConstants.MESSAGE_METADATA, DBConstants.GROUP_PARTICIPANT,
+				DBConstants.UNREAD_COUNT }, null, null, null, null, null);
 
 		Map<String, Conversation> conversationMap = new HashMap<String, Conversation>(
 				c.getCount());
@@ -1032,6 +1046,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				.getColumnIndex(DBConstants.MESSAGE_METADATA);
 		final int groupParticipantColumn = c
 				.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
+		final int unreadCountColumn = c
+				.getColumnIndex(DBConstants.UNREAD_COUNT);
 
 		HikeUserDatabase huDb = null;
 
@@ -1053,6 +1069,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					msisdns.append(DatabaseUtils.sqlEscapeString(msisdn) + ",");
 				}
 				conv = new Conversation(msisdn, convid);
+				conv.setUnreadCount(c.getInt(unreadCountColumn));
 
 				/*
 				 * If the message does not contain any text or metadata, its an
@@ -1133,6 +1150,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						groupOwner, isGroupAlive);
 				groupConversation.setGroupParticipantList(groupParticipants);
 				groupConversation.setMessages(conversation.getMessages());
+				groupConversation.setUnreadCount(conversation.getUnreadCount());
 
 				/*
 				 * Setting the conversation for the message.
@@ -2439,5 +2457,18 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	public void deleteProtip(String mappedId) {
 		mDb.delete(DBConstants.PROTIP_TABLE, DBConstants.PROTIP_MAPPED_ID
 				+ "=?", new String[] { mappedId });
+	}
+
+	public void incrementUnreadCounter(String msisdn) {
+		incrementUnreadCounter(msisdn, 1);
+	}
+
+	public void incrementUnreadCounter(String msisdn, int incrementValue) {
+		String sqlString = "UPDATE " + DBConstants.CONVERSATIONS_TABLE
+				+ " SET " + DBConstants.UNREAD_COUNT + "="
+				+ DBConstants.UNREAD_COUNT + " + " + incrementValue + " WHERE "
+				+ DBConstants.MSISDN + "="
+				+ DatabaseUtils.sqlEscapeString(msisdn);
+		mDb.execSQL(sqlString);
 	}
 }
