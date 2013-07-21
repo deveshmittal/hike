@@ -126,4 +126,5 @@
     <color name="conversation_pressed">#ffffff</color>
     <color name="list_divider">#e8e6e1</color>
     <color name="home_bg">#faf7f2</color>
+    <color name="update_no_btn">#73716d</color>
 </resources>

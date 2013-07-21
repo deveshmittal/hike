@@ -40,6 +40,7 @@
 	<dimen name="larger_avatar">48dp</dimen>
 	<dimen name="medium_avatar">42dp</dimen>
 	<dimen name="small_avatar">33dp</dimen>
+	<dimen name="update_line_width">4dp</dimen>
 	
 
 </resources>

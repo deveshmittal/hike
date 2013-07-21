@@ -548,4 +548,5 @@
 	<string name="audio_recording_msg_received">Sent you a voice message</string>
 	<string name="sent_sticker">Sent you a sticker</string>
 	<string name="new_chat">New chat</string>
+	<string name="new_update">New update</string>
 </resources>

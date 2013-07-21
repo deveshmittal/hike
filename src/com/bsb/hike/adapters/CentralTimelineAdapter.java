@@ -3,7 +3,6 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
@@ -11,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.R;
@@ -104,17 +104,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.timeStamp = (TextView) convertView
 					.findViewById(R.id.timestamp);
 
-			viewHolder.detailsBtn = (ImageView) convertView
-					.findViewById(R.id.details_btn);
 			viewHolder.yesBtn = (TextView) convertView
 					.findViewById(R.id.yes_btn);
 			viewHolder.noBtn = (TextView) convertView.findViewById(R.id.no_btn);
 
-			viewHolder.divider = (ImageView) convertView
-					.findViewById(R.id.divider);
-
-			viewHolder.content = (ViewGroup) convertView
-					.findViewById(R.id.main_content);
+			viewHolder.avatarFrame = (ImageView) convertView
+					.findViewById(R.id.avatar_frame);
 
 			viewHolder.statusImg = (ImageView) convertView
 					.findViewById(R.id.status_pic);
@@ -148,8 +143,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		viewHolder.statusImg.setVisibility(View.GONE);
 
-		viewHolder.detailsBtn.setVisibility(View.VISIBLE);
-
 		viewHolder.buttonDivider.setVisibility(View.VISIBLE);
 
 		int padding = context.getResources().getDimensionPixelSize(
@@ -157,8 +150,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		viewHolder.noBtn.setPadding(padding, viewHolder.noBtn.getPaddingTop(),
 				padding, viewHolder.noBtn.getPaddingTop());
 		viewHolder.noBtn.setText(R.string.not_now);
-
-		viewHolder.mainInfo.setTypeface(Typeface.DEFAULT, Typeface.ITALIC);
 
 		switch (statusMessage.getStatusMessageType()) {
 		case NO_STATUS:
@@ -177,7 +168,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.extraInfo.setText(R.string.no_status_recently);
 				viewHolder.yesBtn.setText(R.string.update_status);
 			}
-			viewHolder.detailsBtn.setVisibility(View.GONE);
 			break;
 		case FRIEND_REQUEST:
 			viewHolder.extraInfo.setVisibility(View.VISIBLE);
@@ -229,7 +219,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.yesBtn.setVisibility(View.GONE);
 			viewHolder.buttonDivider.setVisibility(View.GONE);
 			viewHolder.timeStamp.setVisibility(View.GONE);
-			viewHolder.detailsBtn.setVisibility(View.GONE);
 
 			viewHolder.noBtn.setVisibility(View.VISIBLE);
 			viewHolder.noBtn.setText(R.string.dismiss);
@@ -257,23 +246,34 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			Linkify.addLinks(viewHolder.mainInfo, Linkify.ALL);
 			viewHolder.mainInfo.setMovementMethod(null);
-			viewHolder.mainInfo.setTypeface(Typeface.DEFAULT,
-					Typeface.BOLD_ITALIC);
 
 			Linkify.addLinks(viewHolder.extraInfo, Linkify.ALL);
 			viewHolder.mainInfo.setMovementMethod(null);
 			break;
 		}
 
-		viewHolder.content
-				.setBackgroundResource(position >= unseenCount ? R.drawable.seen_timeline_selector
-						: R.drawable.timeline_selector);
+		int avatarDimension;
+		if (position < unseenCount) {
+			avatarDimension = context.getResources().getDimensionPixelSize(
+					R.dimen.medium_avatar);
 
-		viewHolder.divider
-				.setBackgroundResource(isLastUnseenStatus(position) ? R.drawable.new_update_repeat
-						: R.drawable.ic_thread_divider_profile);
+			viewHolder.avatarFrame
+					.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
+		} else {
+			avatarDimension = context.getResources().getDimensionPixelSize(
+					R.dimen.small_avatar);
 
-		viewHolder.detailsBtn.setTag(statusMessage);
+			viewHolder.avatarFrame
+					.setImageResource(R.drawable.frame_avatar_small_selector);
+		}
+
+		LayoutParams layoutParams = (LayoutParams) viewHolder.avatar
+				.getLayoutParams();
+		layoutParams.height = avatarDimension;
+		layoutParams.width = avatarDimension;
+
+		viewHolder.avatar.setLayoutParams(layoutParams);
+
 		viewHolder.yesBtn.setTag(statusMessage);
 		viewHolder.noBtn.setTag(statusMessage);
 		viewHolder.statusImg.setTag(statusMessage);
@@ -304,11 +304,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		TextView mainInfo;
 		TextView extraInfo;
 		TextView timeStamp;
-		ImageView detailsBtn;
 		TextView yesBtn;
 		TextView noBtn;
-		ImageView divider;
-		ViewGroup content;
+		ImageView avatarFrame;
 		ImageView statusImg;
 		View buttonDivider;
 	}
