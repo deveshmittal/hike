@@ -25,41 +25,17 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.DrawerLayout;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 	private int mResourceId;
-	private MessagesList mMessagesList;
-	private DrawerLayout drawerLayout;
-	private boolean shouldRefresh;
 
-	public ConversationsAdapter(MessagesList messagesList,
-			int textViewResourceId, List<Conversation> objects,
-			DrawerLayout drawerLayout) {
-		super(messagesList, textViewResourceId, objects);
+	public ConversationsAdapter(Context context, int textViewResourceId,
+			List<Conversation> objects) {
+		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
-		mMessagesList = messagesList;
-		this.drawerLayout = drawerLayout;
-	}
-
-	@Override
-	public void notifyDataSetChanged() {
-		if (drawerLayout.isAnimating()) {
-			shouldRefresh = true;
-			return;
-		}
-		super.notifyDataSetChanged();
-	}
-
-	public void drawerAnimationComplete() {
-		if (shouldRefresh) {
-			super.notifyDataSetChanged();
-			shouldRefresh = false;
-		}
 	}
 
 	@Override
@@ -82,8 +58,15 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		if (!messages.isEmpty()) {
 			ConvMessage message = messages.get(messages.size() - 1);
 
+			ImageView avatarframe = (ImageView) v
+					.findViewById(R.id.avatar_frame);
+
 			ImageView imgStatus = (ImageView) v
 					.findViewById(R.id.msg_status_indicator);
+
+			TextView unreadIndicator = (TextView) v
+					.findViewById(R.id.unread_indicator);
+			unreadIndicator.setVisibility(View.GONE);
 			/*
 			 * If the message is a status message, we only show an indicator if
 			 * the status of the message is unread.
@@ -92,13 +75,26 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					|| message.getState() == State.RECEIVED_UNREAD) {
 				int resId = message.getImageState();
 				if (resId > 0) {
+					avatarframe
+							.setImageResource(R.drawable.frame_avatar_large_selector);
 					imgStatus.setImageResource(resId);
 					imgStatus.setVisibility(View.VISIBLE);
 				} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
 						&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
-					imgStatus.setImageResource(R.drawable.ic_unread);
-					imgStatus.setVisibility(View.VISIBLE);
+					avatarframe
+							.setImageResource(R.drawable.frame_avatar_large_highlight_selector);
+					imgStatus.setVisibility(View.GONE);
+					unreadIndicator.setVisibility(View.VISIBLE);
+
+					if (conversation.getUnreadCount() == 0) {
+						unreadIndicator.setText("");
+					} else {
+						unreadIndicator.setText(Integer.toString(conversation
+								.getUnreadCount()));
+					}
 				} else {
+					avatarframe
+							.setImageResource(R.drawable.frame_avatar_large_selector);
 					imgStatus.setImageResource(0);
 					imgStatus.setVisibility(View.GONE);
 				}
@@ -258,10 +254,10 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 			tsView.setText(message.getTimestampFormatted(true, context));
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD) {
 				/* set unread messages to BLUE */
-				messageView.setTextColor(mMessagesList.getResources().getColor(
-						R.color.unread_message_blue));
+				messageView.setTextColor(context.getResources().getColor(
+						R.color.unread_message));
 			} else {
-				messageView.setTextColor(mMessagesList.getResources().getColor(
+				messageView.setTextColor(context.getResources().getColor(
 						R.color.grey));
 			}
 		}

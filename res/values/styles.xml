@@ -306,4 +306,16 @@
         <item name="android:shadowDy">0.7</item>
         <item name="android:shadowRadius">0.7</item>
     </style>
+
+    <style name="HomeList">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_marginLeft">@dimen/list_margin</item>
+        <item name="android:layout_marginRight">@dimen/list_margin</item>
+        <item name="android:cacheColorHint">#00000000</item>
+        <item name="android:divider">@color/list_divider</item>
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:drawSelectorOnTop">false</item>
+        <item name="android:listSelector">#00000000</item>
+    </style>
 </resources>

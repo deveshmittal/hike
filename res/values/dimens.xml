@@ -19,8 +19,8 @@
 	<dimen name="contact_info_width">300dp</dimen>
 	<dimen name="conversation_footer_height">66dp</dimen>
 	<dimen name="avatar_top_bottom">11dp</dimen>
-	<dimen name="avatar_left_right">12dp</dimen>
 	<dimen name="avatar_width_height">48dp</dimen>
+	<dimen name="avatar_left_right">4dp</dimen>
 	<dimen name="text_subtext_spacing">2dp</dimen>
 	<dimen name="main_text_size">18sp</dimen>
 	<dimen name="sub_text_size">14sp</dimen>
@@ -36,4 +36,11 @@
 	<dimen name="micromax_margin">40dp</dimen>
 	<dimen name="hike_tag_width">270dp</dimen>
 	<dimen name="hike_logo_margin">90dp</dimen>
+	<dimen name="list_margin">16dp</dimen>
+	<dimen name="divider_height">1dp</dimen>
+	<dimen name="larger_avatar">48dp</dimen>
+	<dimen name="medium_avatar">42dp</dimen>
+	<dimen name="small_avatar">33dp</dimen>
+	
+
 </resources>
