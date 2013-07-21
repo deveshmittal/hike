@@ -304,7 +304,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	Runnable startWelcomeScreen = new Runnable() {
 		@Override
 		public void run() {
-			Intent i = new Intent(SignupActivity.this, MessagesList.class);
+			Intent i = new Intent(SignupActivity.this, HomeActivity.class);
 			startActivity(i);
 			finish();
 		}

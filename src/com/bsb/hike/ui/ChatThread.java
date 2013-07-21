@@ -720,7 +720,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)
 					&& !getIntent().getBooleanExtra(
 							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)) {
-				intent = new Intent(this, MessagesList.class);
+				intent = new Intent(this, HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			} else if (getIntent().hasExtra(
