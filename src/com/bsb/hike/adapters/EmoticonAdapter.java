@@ -237,11 +237,10 @@ public class EmoticonAdapter extends PagerAdapter implements
 							stickerList.add(new Sticker(position, stickerId));
 						}
 
-						HikeConversationsDatabase hCDB = HikeConversationsDatabase
-								.getInstance();
-						updateAvailable = hCDB
-								.isStickerUpdateAvailable(categoryId);
 					}
+					HikeConversationsDatabase hCDB = HikeConversationsDatabase
+							.getInstance();
+					updateAvailable = hCDB.isStickerUpdateAvailable(categoryId);
 
 					Collections.sort(stickerList);
 

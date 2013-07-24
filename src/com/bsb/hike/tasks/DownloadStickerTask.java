@@ -22,6 +22,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
 
@@ -63,6 +64,16 @@ public class DownloadStickerTask extends StickerTaskBase {
 		boolean reachedEnd = false;
 
 		JSONArray existingStickerIds = new JSONArray();
+
+		/*
+		 * If the category is the default one, we should add the default
+		 * stickers as well.
+		 */
+		if (categoryIndex == 0) {
+			for (String stickerId : EmoticonConstants.LOCAL_STICKER_IDS) {
+				existingStickerIds.put(stickerId);
+			}
+		}
 
 		if (largeStickerDir.exists()) {
 			String[] stickerIds = largeStickerDir.list();
