@@ -349,6 +349,8 @@ public class AccountUtils {
 				Log.e("AccountUtils", "Unable to get app version");
 			}
 
+			String deviceKey = manager.getDeviceId();
+
 			data.put("set_cookie", "0");
 			data.put("devicetype", os);
 			data.put(HikeConstants.LogEvent.OS, os);
@@ -356,6 +358,7 @@ public class AccountUtils {
 			data.put("deviceid", deviceId);
 			data.put("devicetoken", deviceId);
 			data.put("deviceversion", device);
+			data.put("device_key", deviceKey);
 			data.put("appversion", appVersion);
 			data.put(
 					"invite_token",
