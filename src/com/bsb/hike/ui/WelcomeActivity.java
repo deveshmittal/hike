@@ -72,10 +72,10 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 			model = model.toUpperCase();
 
 			if (HikeConstants.MICROMAX.equalsIgnoreCase(manufacturer)) {
-				isMicromaxDevice = isMicromaxModel(model);
+				isMicromaxDevice = true;
 			} else {
 				if (model.contains(HikeConstants.MICROMAX)) {
-					isMicromaxDevice = isMicromaxModel(model);
+					isMicromaxDevice = true;
 				}
 			}
 		}
@@ -130,15 +130,6 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 
 		errorImage.setImageDrawable(ad);
 		ad.start();
-	}
-
-	private boolean isMicromaxModel(String model) {
-		for (String micromaxModel : HikeConstants.MICROMAX_MODELS) {
-			if (model.endsWith(micromaxModel)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	public void onHikeIconClicked(View v) {
