@@ -144,10 +144,12 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
@@ -1536,7 +1538,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		 */
 		if (HikeMessengerApp.getTypingNotificationSet().containsKey(
 				mContactNumber)) {
-			runOnUiThread(new SetTypingText(true));
+			runOnUiThread(new SetTypingText(true, HikeMessengerApp
+					.getTypingNotificationSet().get(mContactNumber)));
 		}
 
 		/*
@@ -1764,8 +1767,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	}
 
 	private class SetTypingText implements Runnable {
-		public SetTypingText(boolean direction) {
+		TypingNotification typingNotification;
+
+		public SetTypingText(boolean direction,
+				TypingNotification typingNotification) {
 			this.direction = direction;
+			this.typingNotification = typingNotification;
 		}
 
 		boolean direction;
@@ -1774,13 +1781,36 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		public void run() {
 			if (direction) {
 				if (messages.isEmpty()
-						|| messages.get(messages.size() - 1) != null) {
-					addMessage(null);
+						|| messages.get(messages.size() - 1)
+								.getTypingNotification() == null) {
+					addMessage(new ConvMessage(typingNotification));
+				} else if (messages.get(messages.size() - 1)
+						.getTypingNotification() != null) {
+					ConvMessage convMessage = messages.get(messages.size() - 1);
+					convMessage.setTypingNotification(typingNotification);
+
+					mAdapter.notifyDataSetChanged();
 				}
 			} else {
 				if (!messages.isEmpty()
-						&& messages.get(messages.size() - 1) == null) {
-					messages.remove(messages.size() - 1);
+						&& messages.get(messages.size() - 1)
+								.getTypingNotification() != null) {
+					/*
+					 * We only remove the typing notification if the
+					 * conversation in a one to one conversation or it no one is
+					 * typing in the group.
+					 */
+					if (!(mConversation instanceof GroupConversation)) {
+						messages.remove(messages.size() - 1);
+					} else {
+						GroupTypingNotification groupTypingNotification = (GroupTypingNotification) messages
+								.get(messages.size() - 1)
+								.getTypingNotification();
+						if (groupTypingNotification.getGroupParticipantList()
+								.isEmpty()) {
+							messages.remove(messages.size() - 1);
+						}
+					}
 					mAdapter.notifyDataSetChanged();
 				}
 			}
@@ -1851,16 +1881,24 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			}
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
-			if (mContactNumber.equals(object)) {
-				runOnUiThread(new SetTypingText(false));
+			TypingNotification typingNotification = (TypingNotification) object;
+			if (typingNotification == null) {
+				return;
+			}
+			if (mContactNumber.equals(typingNotification.getId())) {
+				runOnUiThread(new SetTypingText(false, typingNotification));
 			}
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
-			if (mContactNumber.equals(object)) {
+			TypingNotification typingNotification = (TypingNotification) object;
+			if (typingNotification == null) {
+				return;
+			}
+			if (mContactNumber.equals(typingNotification.getId())) {
 
 				ContactInfo contactInfo = HikeUserDatabase.getInstance()
 						.getContactInfoFromMSISDN(mContactNumber, false);
 
-				runOnUiThread(new SetTypingText(true));
+				runOnUiThread(new SetTypingText(true, typingNotification));
 
 				if (shouldShowLastSeen() && contactInfo.getOffline() != -1) {
 					/*
@@ -2358,15 +2396,17 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private void addMessage(ConvMessage convMessage) {
 		if (messages != null && mAdapter != null) {
-			boolean wasShowingTypingItem = false;
+			TypingNotification typingNotification = null;
 			/*
 			 * If we were showing the typing bubble, we remove it from the add
 			 * the new message and add the typing bubble back again
 			 */
 			if (!messages.isEmpty()
-					&& messages.get(messages.size() - 1) == null) {
+					&& messages.get(messages.size() - 1)
+							.getTypingNotification() != null) {
+				typingNotification = messages.get(messages.size() - 1)
+						.getTypingNotification();
 				messages.remove(messages.size() - 1);
-				wasShowingTypingItem = true;
 			}
 			mAdapter.addMessage(convMessage);
 
@@ -2374,9 +2414,25 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			// the top
 			reachedEnd = false;
 
-			if (convMessage != null && convMessage.isSent()
-					&& wasShowingTypingItem) {
-				mAdapter.addMessage(null);
+			/*
+			 * We add the typing notification back if the message was sent by
+			 * the user or someone in the group is still typing.
+			 */
+			if (convMessage.getTypingNotification() == null
+					&& typingNotification != null) {
+				if (convMessage.isSent()) {
+					mAdapter.addMessage(new ConvMessage(typingNotification));
+				} else if (mConversation instanceof GroupConversation) {
+					if (!((GroupTypingNotification) typingNotification)
+							.getGroupParticipantList().isEmpty()) {
+						Log.d("TypingNotification",
+								"Size in chat thread: "
+										+ ((GroupTypingNotification) typingNotification)
+												.getGroupParticipantList()
+												.size());
+						mAdapter.addMessage(new ConvMessage(typingNotification));
+					}
+				}
 			}
 			mAdapter.notifyDataSetChanged();
 

@@ -66,6 +66,7 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
@@ -92,7 +93,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	public static final int LAST_READ_CONV_MESSAGE_ID = -911;
 
 	private enum ViewType {
-		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, TYPING, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE
+		RECEIVE, SEND_SMS, SEND_HIKE, PARTICIPANT_INFO, FILE_TRANSFER_SEND, FILE_TRANSFER_RECEIVE, LAST_READ, STATUS_MESSAGE, SMS_TOGGLE
 	};
 
 	private class ViewHolder {
@@ -119,6 +120,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		ImageView stickerImage;
 		View bubbleContainer;
 		ImageView sending;
+		ImageView typing;
+		ViewGroup avatarContainer;
 	}
 
 	private Conversation conversation;
@@ -238,8 +241,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	public int getItemViewType(int position) {
 		ConvMessage convMessage = getItem(position);
 		ViewType type;
-		if (convMessage == null) {
-			type = ViewType.TYPING;
+		if (convMessage.getTypingNotification() != null) {
+			type = ViewType.RECEIVE;
 		} else if (convMessage.getMsgID() == ConvMessage.SMS_TOGGLE_ID) {
 			type = ViewType.SMS_TOGGLE;
 		} else if (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID) {
@@ -285,9 +288,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder = new ViewHolder();
 
 			switch (viewType) {
-			case TYPING:
-				v = inflater.inflate(R.layout.typing_layout, null);
-				break;
 			case LAST_READ:
 				v = inflater.inflate(R.layout.last_read_line, null);
 				break;
@@ -412,10 +412,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.sticker_image);
 				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 
-				holder.messageInfo = (TextView) v
-						.findViewById(R.id.msg_info);
+				holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
 
+				holder.typing = (ImageView) v.findViewById(R.id.typing);
 
+				holder.avatarContainer = (ViewGroup) v
+						.findViewById(R.id.avatar_container);
 
 				holder.container.setVisibility(View.GONE);
 
@@ -435,8 +437,48 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder = (ViewHolder) v.getTag();
 		}
 
-		if (convMessage == null
-				|| (convMessage.getMsgID() == LAST_READ_CONV_MESSAGE_ID)) {
+		if (viewType == ViewType.RECEIVE) {
+			holder.typing.setVisibility(View.GONE);
+			holder.avatarContainer.setVisibility(View.GONE);
+		}
+		if (convMessage.getTypingNotification() != null) {
+			holder.image.setVisibility(View.GONE);
+			holder.typing.setVisibility(View.VISIBLE);
+			holder.messageContainer.setVisibility(View.GONE);
+			holder.dayContainer.setVisibility(View.GONE);
+			holder.stickerPlaceholder.setVisibility(View.GONE);
+			holder.poke.setVisibility(View.GONE);
+
+			holder.messageInfo.setVisibility(View.INVISIBLE);
+
+			AnimationDrawable ad = (AnimationDrawable) holder.typing
+					.getDrawable();
+			ad.setCallback(holder.typing);
+			ad.setVisible(true, true);
+			ad.start();
+
+			if (isGroupChat) {
+				holder.avatarContainer.setVisibility(View.VISIBLE);
+
+				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) convMessage
+						.getTypingNotification();
+				List<String> participantList = groupTypingNotification
+						.getGroupParticipantList();
+
+				LayoutParams layoutParams = new LayoutParams(
+						(int) (40 * Utils.densityMultiplier),
+						(int) (40 * Utils.densityMultiplier));
+
+				holder.avatarContainer.removeAllViews();
+				for (int i = participantList.size() - 1; i >= 0; i--) {
+					ImageView imageView = new ImageView(context);
+					imageView.setImageDrawable(IconCacheManager.getInstance()
+							.getIconForMSISDN(participantList.get(i)));
+					imageView.setLayoutParams(layoutParams);
+
+					holder.avatarContainer.addView(imageView);
+				}
+			}
 			return v;
 		}
 

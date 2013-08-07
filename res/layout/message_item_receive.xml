@@ -162,6 +162,22 @@
 	            android:visibility="gone"
 	            android:src="@drawable/ic_nudge_hike_received" />
 	        
+	        <LinearLayout
+	            android:id="@+id/avatar_container"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:orientation="horizontal"
+	            android:visibility="gone" />
+
+	        <ImageView
+	            android:id="@+id/typing"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:src="@drawable/typing"
+	            android:background="@drawable/ic_bubble_white"
+	            android:visibility="gone"
+	            android:layout_toRightOf="@+id/avatar_container" />
+	        
 	        <RelativeLayout
 	            android:id="@+id/sticker_placeholder"
 	            android:layout_width="wrap_content"

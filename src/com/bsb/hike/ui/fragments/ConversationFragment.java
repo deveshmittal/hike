@@ -45,6 +45,7 @@ import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
@@ -127,11 +128,9 @@ public class ConversationFragment extends SherlockListFragment implements
 		mConversationsComparator = new Conversation.ConversationComparator();
 		fetchConversations();
 
-		Iterator<String> iterator = HikeMessengerApp.getTypingNotificationSet()
-				.keySet().iterator();
-		while (iterator.hasNext()) {
-			String msisdn = iterator.next();
-			toggleTypingNotification(true, msisdn);
+		for (TypingNotification typingNotification : HikeMessengerApp
+				.getTypingNotificationSet().values()) {
+			toggleTypingNotification(true, typingNotification);
 		}
 	}
 
@@ -309,10 +308,12 @@ public class ConversationFragment extends SherlockListFragment implements
 		task.execute(conv);
 	}
 
-	private void toggleTypingNotification(boolean isTyping, String msisdn) {
+	private void toggleTypingNotification(boolean isTyping,
+			TypingNotification typingNotification) {
 		if (mConversationsByMSISDN == null) {
 			return;
 		}
+		String msisdn = typingNotification.getId();
 		Conversation conversation = mConversationsByMSISDN.get(msisdn);
 		if (conversation == null) {
 			Log.d(getClass().getSimpleName(), "Conversation Does not exist");
@@ -584,11 +585,15 @@ public class ConversationFragment extends SherlockListFragment implements
 				conversation.setContactName(contactInfo.getName());
 				getActivity().runOnUiThread(this);
 			}
-		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
-			String msisdn = (String) object;
-			toggleTypingNotification(true, msisdn);
-		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
-			toggleTypingNotification(false, (String) object);
+		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)
+				|| HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
+			if (object == null) {
+				return;
+			}
+
+			toggleTypingNotification(
+					HikePubSub.TYPING_CONVERSATION.equals(type),
+					(TypingNotification) object);
 		}
 	}
 

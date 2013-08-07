@@ -53,6 +53,8 @@ public class ConvMessage {
 
 	private boolean isStickerMessage;
 
+	private TypingNotification typingNotification;
+
 	public boolean isInvite() {
 		return mInvite;
 	}
@@ -128,6 +130,10 @@ public class ConvMessage {
 			}
 			return NO_INFO;
 		}
+	}
+
+	public ConvMessage(TypingNotification typingNotification) {
+		this.typingNotification = typingNotification;
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp,
@@ -578,6 +584,14 @@ public class ConvMessage {
 
 	public boolean isSMS() {
 		return mIsSMS;
+	}
+
+	public TypingNotification getTypingNotification() {
+		return typingNotification;
+	}
+
+	public void setTypingNotification(TypingNotification typingNotification) {
+		this.typingNotification = typingNotification;
 	}
 
 	public int getImageState() {

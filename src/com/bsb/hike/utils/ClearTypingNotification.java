@@ -2,19 +2,21 @@ package com.bsb.hike.utils;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.models.TypingNotification;
 
 public class ClearTypingNotification implements Runnable {
-	String msisdn;
+	String id;
 
-	public ClearTypingNotification(String msisdn) {
-		this.msisdn = msisdn;
+	public ClearTypingNotification(String id) {
+		this.id = id;
 	}
 
 	@Override
 	public void run() {
-		HikeMessengerApp.getTypingNotificationSet().remove(msisdn);
+		TypingNotification typingNotification = HikeMessengerApp
+				.getTypingNotificationSet().remove(id);
 
 		HikeMessengerApp.getPubSub().publish(
-				HikePubSub.END_TYPING_CONVERSATION, msisdn);
+				HikePubSub.END_TYPING_CONVERSATION, typingNotification);
 	}
 };

@@ -34,15 +34,18 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -68,7 +71,7 @@ public class MqttMessagesManager {
 
 	private HikePubSub pubSub;
 
-	private Map<String, ClearTypingNotification> typingNotificationMap;
+	private Map<String, TypingNotification> typingNotificationMap;
 
 	private Handler clearTypingNotificationHandler;
 
@@ -415,7 +418,6 @@ public class MqttMessagesManager {
 						convMessage.getMsisdn());
 			}
 
-			removeTypingNotification(convMessage.getMsisdn());
 			/*
 			 * Start auto download
 			 */
@@ -428,6 +430,8 @@ public class MqttMessagesManager {
 						convMessage.getMsgID(), hikeFile.getHikeFileType());
 				downloadFile.execute();
 			}
+			removeTypingNotification(convMessage.getMsisdn(),
+					convMessage.getGroupParticipantMsisdn());
 		} else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) // Message
 																				// delivered
 																				// to
@@ -484,25 +488,19 @@ public class MqttMessagesManager {
 			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, ids);
 
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
-		} else if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)) // Start
-																				// Typing
-																				// event
-																				// received
-		{
-			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
+		} else if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)
+				|| HikeConstants.MqttMessageTypes.END_TYPING.equals(type)) {
+			String id = jsonObj.has(HikeConstants.TO) ? jsonObj
 					.getString(HikeConstants.TO) : jsonObj
 					.getString(HikeConstants.FROM);
-			addTypingNotification(msisdn);
+			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
+					.getString(HikeConstants.FROM) : null;
 
-		} else if (HikeConstants.MqttMessageTypes.END_TYPING.equals(type)) // End
-																			// Typing
-																			// event
-																			// received
-		{
-			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
-					.getString(HikeConstants.TO) : jsonObj
-					.getString(HikeConstants.FROM);
-			removeTypingNotification(msisdn);
+			if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)) {
+				addTypingNotification(id, participantMsisdn);
+			} else {
+				removeTypingNotification(id, participantMsisdn);
+			}
 
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_AVAILABLE.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
@@ -1124,30 +1122,86 @@ public class MqttMessagesManager {
 		return convMessage;
 	}
 
-	private void addTypingNotification(String msisdn) {
-		this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
-
+	private void addTypingNotification(String id, String participant) {
+		TypingNotification typingNotification;
 		ClearTypingNotification clearTypingNotification;
-		if (!typingNotificationMap.containsKey(msisdn)) {
-			clearTypingNotification = new ClearTypingNotification(msisdn);
-			typingNotificationMap.put(msisdn, clearTypingNotification);
+		boolean isGroupConversation = !TextUtils.isEmpty(participant);
+
+		if (!typingNotificationMap.containsKey(id)) {
+			if (isGroupConversation) {
+				clearTypingNotification = new ClearGroupTypingNotification(id,
+						participant);
+				typingNotification = new GroupTypingNotification(id,
+						participant,
+						(ClearGroupTypingNotification) clearTypingNotification);
+			} else {
+				clearTypingNotification = new ClearTypingNotification(id);
+
+				typingNotification = new TypingNotification(id,
+						clearTypingNotification);
+			}
+
+			typingNotificationMap.put(id, typingNotification);
 		} else {
-			clearTypingNotification = typingNotificationMap.get(msisdn);
+			typingNotification = typingNotificationMap.get(id);
+
+			if (isGroupConversation) {
+				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) typingNotification;
+				if (!groupTypingNotification.hasParticipant(participant)) {
+					clearTypingNotification = new ClearGroupTypingNotification(
+							id, participant);
+
+					groupTypingNotification.addParticipant(participant);
+					groupTypingNotification
+							.addClearTypingNotification((ClearGroupTypingNotification) clearTypingNotification);
+				} else {
+					clearTypingNotification = groupTypingNotification
+							.getClearTypingNotification(participant);
+				}
+			} else {
+				clearTypingNotification = typingNotification
+						.getClearTypingNotification();
+			}
 			clearTypingNotificationHandler
 					.removeCallbacks(clearTypingNotification);
 		}
 		clearTypingNotificationHandler.postDelayed(clearTypingNotification,
 				HikeConstants.LOCAL_CLEAR_TYPING_TIME);
+
+		this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, typingNotification);
 	}
 
-	private void removeTypingNotification(String msisdn) {
-		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
+	private void removeTypingNotification(String id, String participant) {
 
-		ClearTypingNotification clearTypingNotification = typingNotificationMap
-				.remove(msisdn);
-		if (clearTypingNotification != null) {
+		boolean isGroupConversation = !TextUtils.isEmpty(participant);
+
+		TypingNotification typingNotification = typingNotificationMap.get(id);
+
+		ClearTypingNotification clearTypingNotification;
+
+		if (typingNotification != null) {
+			if (isGroupConversation) {
+				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) typingNotification;
+				groupTypingNotification.removeParticipant(participant);
+				Log.d("TypingNotification", "Particpant size: "
+						+ groupTypingNotification.getGroupParticipantList()
+								.size());
+				if (groupTypingNotification.getGroupParticipantList().isEmpty()) {
+					typingNotificationMap.remove(id);
+				}
+				clearTypingNotification = groupTypingNotification
+						.getClearTypingNotification(participant);
+			} else {
+				typingNotificationMap.remove(id);
+				clearTypingNotification = typingNotification
+						.getClearTypingNotification();
+			}
+
 			clearTypingNotificationHandler
 					.removeCallbacks(clearTypingNotification);
 		}
+
+		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION,
+				typingNotification);
 	}
 }
