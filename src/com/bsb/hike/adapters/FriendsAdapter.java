@@ -248,7 +248,8 @@ public class FriendsAdapter extends BaseExpandableListAdapter implements
 
 		avatar.setImageDrawable(IconCacheManager.getInstance()
 				.getIconForMSISDN(contactInfo.getMsisdn()));
-		name.setText(contactInfo.getName());
+		name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
+				.getMsisdn() : contactInfo.getName());
 
 		if (childType == ChildType.FRIEND) {
 			TextView lastSeen = (TextView) convertView
