@@ -159,6 +159,10 @@ public class FriendsAdapter extends BaseExpandableListAdapter implements
 	public void addToGroup(ContactInfo contactInfo, int groupIndex) {
 		removeContact(contactInfo);
 
+		if (getGroupCount() == 0) {
+			return;
+		}
+
 		List<ContactInfo> groupList = contactList.get(groupIndex);
 		if (groupIndex != RECENT_INDEX) {
 			groupList.add(contactInfo);
