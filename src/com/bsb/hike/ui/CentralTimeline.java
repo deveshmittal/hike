@@ -273,8 +273,8 @@ public class CentralTimeline extends DrawerBaseActivity implements
 			statusMessages.add(0, noFriendMessage);
 		}
 
-		centralTimelineAdapter = new CentralTimelineAdapter(this,
-				statusMessages, userMsisdn, unseenCount);
+		// centralTimelineAdapter = new CentralTimelineAdapter(this,
+		// statusMessages, userMsisdn, unseenCount);
 		timelineContent.setAdapter(centralTimelineAdapter);
 		timelineContent.setOnItemClickListener(this);
 		timelineContent.setOnScrollListener(this);
