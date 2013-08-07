@@ -1186,18 +1186,21 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.image.setAnimation(null);
 					holder.image.setVisibility(View.VISIBLE);
 				}
-				if (position == lastSentMessagePosition) {
-					if (isMessageUndelivered(convMessage)) {
-						View container = holder.bubbleContainer;
-
-						scheduleUndeliveredText(holder.undeliveredMsgTextView,
-								container, convMessage.getTimestamp());
-					} else {
-						holder.undeliveredMsgTextView.setVisibility(View.GONE);
-					}
-				} else {
-					holder.undeliveredMsgTextView.setVisibility(View.GONE);
-				}
+				/*
+				 * Commenting this out for now.
+				 */
+				// if (position == lastSentMessagePosition) {
+				// if (isMessageUndelivered(convMessage)) {
+				// View container = holder.bubbleContainer;
+				//
+				// scheduleUndeliveredText(holder.undeliveredMsgTextView,
+				// container, convMessage.getTimestamp());
+				// } else {
+				// holder.undeliveredMsgTextView.setVisibility(View.GONE);
+				// }
+				// } else {
+				// holder.undeliveredMsgTextView.setVisibility(View.GONE);
+				// }
 			} else if (convMessage.isSent()) {
 				holder.image.setImageResource(0);
 			} else {
