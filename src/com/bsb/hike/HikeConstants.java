@@ -506,6 +506,9 @@ public class HikeConstants {
 		public static final String FWD_CATEGORY_ID = "fwdCategoryId";
 		public static final String POST_TO_TWITTER = "postToTwitter";
 		public static final String RECORDING_TIME = "recordingTime";
+		public static final String MAPPED_ID = "mappedId";
+		public static final String IS_STATUS_IMAGE = "isStatusImage";
+		public static final String URL = "url";
 	}
 
 	public static final class LogEvent {
