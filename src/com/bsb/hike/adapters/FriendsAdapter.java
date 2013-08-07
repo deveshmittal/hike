@@ -88,7 +88,8 @@ public class FriendsAdapter extends BaseExpandableListAdapter implements
 						.getContactsOfFavoriteType(
 								FavoriteType.REQUEST_SENT_REJECTED,
 								HikeConstants.BOTH_VALUE, myMsisdn));
-				Collections.sort(favoriteTaskList);
+				Collections.sort(favoriteTaskList,
+						ContactInfo.lastSeenTimeComparator);
 
 				onHikeTaskList = hikeUserDatabase.getContactsOfFavoriteType(
 						FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE,
@@ -161,7 +162,11 @@ public class FriendsAdapter extends BaseExpandableListAdapter implements
 		List<ContactInfo> groupList = contactList.get(groupIndex);
 		if (groupIndex != RECENT_INDEX) {
 			groupList.add(contactInfo);
-			Collections.sort(groupList);
+			if (groupIndex != 0) {
+				Collections.sort(groupList);
+			} else {
+				Collections.sort(groupList, ContactInfo.lastSeenTimeComparator);
+			}
 		} else {
 			groupList.add(0, contactInfo);
 			if (groupList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE) {

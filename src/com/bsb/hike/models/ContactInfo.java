@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -239,6 +240,21 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		json.put("id", this.id);
 		return json;
 	}
+
+	public static Comparator<ContactInfo> lastSeenTimeComparator = new Comparator<ContactInfo>() {
+
+		@Override
+		public int compare(ContactInfo lhs, ContactInfo rhs) {
+			if (lhs.getOffline() != rhs.getOffline()) {
+				if (lhs.getOffline() == 0) {
+					return -1;
+				} else if (rhs.getOffline() == 0) {
+					return 1;
+				}
+			}
+			return lhs.compareTo(rhs);
+		}
+	};
 
 	@Override
 	public int compareTo(ContactInfo rhs) {

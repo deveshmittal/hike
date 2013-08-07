@@ -1,5 +1,6 @@
 package com.bsb.hike.ui.fragments;
 
+import java.util.Collections;
 import java.util.List;
 
 import android.content.Intent;
@@ -195,6 +196,7 @@ public class FriendsFragment extends SherlockFragment implements
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_SENT_REJECTED,
 					HikeConstants.BOTH_VALUE, myMsisdn));
+			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
 			getActivity().runOnUiThread(new Runnable() {
 
 				@Override
