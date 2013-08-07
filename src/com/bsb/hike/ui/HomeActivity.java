@@ -14,7 +14,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -140,7 +139,8 @@ public class HomeActivity extends SherlockFragmentActivity implements Listener {
 
 	private void initialiseTabs() {
 		TabPageIndicator TabIndicator = (TabPageIndicator) findViewById(R.id.titles);
-		TabIndicator.setViewPager(viewPager, 1);
+		TabIndicator.setViewPager(viewPager,
+				getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1));
 	}
 
 	private void initialiseViewPager() {

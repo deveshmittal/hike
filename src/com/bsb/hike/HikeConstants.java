@@ -509,6 +509,7 @@ public class HikeConstants {
 		public static final String MAPPED_ID = "mappedId";
 		public static final String IS_STATUS_IMAGE = "isStatusImage";
 		public static final String URL = "url";
+		public static final String TAB_INDEX = "tabIndex";
 	}
 
 	public static final class LogEvent {
