@@ -3,21 +3,27 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -278,6 +284,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		viewHolder.noBtn.setTag(statusMessage);
 		viewHolder.statusImg.setTag(statusMessage);
 		viewHolder.avatar.setTag(statusMessage);
+		viewHolder.statusImg.setOnClickListener(imageClickListener);
 
 		return convertView;
 	}
@@ -310,4 +317,27 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		ImageView statusImg;
 		View buttonDivider;
 	}
+
+	private OnClickListener imageClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			StatusMessage statusMessage = (StatusMessage) v.getTag();
+			String mappedId = statusMessage.getMappedId();
+			String url = null;
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
+				url = statusMessage.getProtip().getImageURL();
+			}
+
+			Bundle arguments = new Bundle();
+			arguments.putString(HikeConstants.Extras.MAPPED_ID, mappedId);
+			arguments.putString(HikeConstants.Extras.URL, url);
+			arguments.putBoolean(HikeConstants.Extras.IS_STATUS_IMAGE, true);
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_IMAGE,
+					arguments);
+
+		}
+	};
+
 }

@@ -12,22 +12,28 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
+import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.fragments.ConversationFragment;
 import com.bsb.hike.ui.fragments.FriendsFragment;
+import com.bsb.hike.ui.fragments.ImageViewerFragment;
 import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 
-public class HomeActivity extends SherlockFragmentActivity {
+public class HomeActivity extends SherlockFragmentActivity implements Listener {
+
+	private static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 
 	private ViewPager viewPager;
 
@@ -81,10 +87,37 @@ public class HomeActivity extends SherlockFragmentActivity {
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		HikeMessengerApp.getPubSub()
+				.removeListener(HikePubSub.SHOW_IMAGE, this);
+	}
+
+	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT,
 				deviceDetailsSent);
 		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onBackPressed() {
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(
+				IMAGE_FRAGMENT_TAG);
+		if (fragment != null && fragment.isVisible()) {
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+					.beginTransaction();
+			fragmentTransaction.remove(fragment);
+			fragmentTransaction.commit();
+		} else {
+			super.onBackPressed();
+		}
 	}
 
 	private void sendDeviceDetails() {
@@ -174,6 +207,28 @@ public class HomeActivity extends SherlockFragmentActivity {
 			return tabIcons[index];
 		}
 
+	}
+
+	@Override
+	public void onEventReceived(String type, final Object object) {
+		if (HikePubSub.SHOW_IMAGE.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					Bundle arguments = (Bundle) object;
+
+					ImageViewerFragment imageViewerFragment = new ImageViewerFragment();
+					imageViewerFragment.setArguments(arguments);
+
+					FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+							.beginTransaction();
+					fragmentTransaction.add(R.id.parent_layout,
+							imageViewerFragment, IMAGE_FRAGMENT_TAG);
+					fragmentTransaction.commit();
+				}
+			});
+		}
 	}
 
 }
