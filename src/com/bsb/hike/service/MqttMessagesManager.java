@@ -41,6 +41,7 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadFileTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
@@ -415,6 +416,18 @@ public class MqttMessagesManager {
 			}
 
 			removeTypingNotification(convMessage.getMsisdn());
+			/*
+			 * Start auto download
+			 */
+			if (convMessage.isFileTransferMessage()) {
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
+						.get(0);
+
+				DownloadFileTask downloadFile = new DownloadFileTask(context,
+						hikeFile.getFile(), hikeFile.getFileKey(),
+						convMessage.getMsgID(), hikeFile.getHikeFileType());
+				downloadFile.execute();
+			}
 		} else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) // Message
 																				// delivered
 																				// to
