@@ -1716,17 +1716,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			 */
 			if (ids != null) {
 				int lastReadIndex = messages.size() - ids.length();
-				/*
-				 * Showing an indicator as to which are the unread messages.
-				 */
-				if ((mConversation instanceof GroupConversation)
-						&& lastReadIndex < messages.size() && lastReadIndex > 0) {
-					mAdapter.addMessage(new ConvMessage(null, null, 0,
-							State.SENT_DELIVERED_READ,
-							MessagesAdapter.LAST_READ_CONV_MESSAGE_ID, 0),
-							lastReadIndex);
-					mAdapter.notifyDataSetChanged();
-				}
 				// Scroll to the last unread message
 				mConversationsView.setSelection(lastReadIndex - 1);
 
