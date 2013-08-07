@@ -11,7 +11,7 @@
 	    android:orientation="horizontal"
 	    android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:id="@+id/timestamp_container"
+		android:id="@+id/day_container"
 		android:gravity="center_vertical"
 		android:layout_marginTop="10dp">
 
@@ -23,7 +23,7 @@
 		    android:background="@drawable/ic_chatthread_divider"/>
 		    
 	    <com.bsb.hike.view.CustomFontTextView
-	        android:id="@+id/timestamp"
+	        android:id="@+id/day"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:layout_marginLeft="7dp"
@@ -47,7 +47,7 @@
 	
 	<LinearLayout 
     android:id="@+id/participant_info_container"
-    android:layout_below="@id/timestamp_container"
+    android:layout_below="@id/day_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@android:color/transparent"
@@ -57,7 +57,7 @@
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:layout_alignParentLeft="true"
-	    android:layout_below="@id/timestamp_container" >
+	    android:layout_below="@id/day_container" >
 
 	    <ImageView
 	        android:id="@+id/avatar"
@@ -200,6 +200,19 @@
 
 	    </RelativeLayout>
 
+	    <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/msg_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/bubble_container"
+            android:layout_alignLeft="@id/bubble_container"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="10dp"
+            android:gravity="right"
+            android:textColor="#999999"
+            android:textSize="12sp"
+            android:visibility="invisible" />
+	    
 	</RelativeLayout>
 
 </RelativeLayout>

@@ -19,6 +19,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -95,9 +96,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	};
 
 	private class ViewHolder {
-		LinearLayout timestampContainer;
+		LinearLayout dayContainer;
 		TextView messageTextView;
-		TextView timestampTextView;
+		TextView dayTextView;
 		ImageView image;
 		ViewGroup container;
 		ImageView fileThumb;
@@ -108,7 +109,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		View loadingThumb;
 		ImageView poke;
 		View messageContainer;
-		TextView undeliveredMsgTextView;
+		TextView messageInfo;
 		CheckBox smsToggle;
 		TextView hikeSmsText;
 		TextView regularSmsText;
@@ -117,6 +118,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		TextView stickerParticipantName;
 		ImageView stickerImage;
 		View bubbleContainer;
+		ImageView sending;
 	}
 
 	private Conversation conversation;
@@ -296,7 +298,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.status_text);
 				holder.fileThumb = (ImageView) v.findViewById(R.id.status_pic);
-				holder.timestampTextView = (TextView) v.findViewById(R.id.time);
+				holder.dayTextView = (TextView) v.findViewById(R.id.time);
 				holder.marginView = v.findViewById(R.id.empty_view);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.content_container);
@@ -305,10 +307,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				v = inflater.inflate(R.layout.message_item_receive, null);
 
 				holder.image = (ImageView) v.findViewById(R.id.avatar);
-				holder.timestampContainer = (LinearLayout) v
-						.findViewById(R.id.timestamp_container);
-				holder.timestampTextView = (TextView) v
-						.findViewById(R.id.timestamp);
+				holder.dayContainer = (LinearLayout) v
+						.findViewById(R.id.day_container);
+				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
 
@@ -338,10 +339,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 				holder.image = (ImageView) v
 						.findViewById(R.id.msg_status_indicator);
-				holder.timestampContainer = (LinearLayout) v
-						.findViewById(R.id.timestamp_container);
-				holder.timestampTextView = (TextView) v
-						.findViewById(R.id.timestamp);
+				holder.dayContainer = (LinearLayout) v
+						.findViewById(R.id.day_container);
+				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.poke = (ImageView) v.findViewById(R.id.poke_sent);
 				holder.messageContainer = v
 						.findViewById(R.id.sent_message_container);
@@ -349,8 +349,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.message_send);
 
-				holder.undeliveredMsgTextView = (TextView) v
-						.findViewById(R.id.msg_not_sent);
+				holder.messageInfo = (TextView) v
+						.findViewById(R.id.msg_info);
 
 				holder.stickerPlaceholder = v
 						.findViewById(R.id.sticker_placeholder);
@@ -361,6 +361,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.stickerImage = (ImageView) v
 						.findViewById(R.id.sticker_image);
 				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
+				holder.sending = (ImageView) v.findViewById(R.id.sending_anim);
 				break;
 
 			case FILE_TRANSFER_RECEIVE:
@@ -396,10 +397,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.poke = (ImageView) v.findViewById(R.id.poke_receive);
 				holder.messageContainer = v
 						.findViewById(R.id.receive_message_container);
-				holder.timestampContainer = (LinearLayout) v
-						.findViewById(R.id.timestamp_container);
-				holder.timestampTextView = (TextView) v
-						.findViewById(R.id.timestamp);
+				holder.dayContainer = (LinearLayout) v
+						.findViewById(R.id.day_container);
+				holder.dayTextView = (TextView) v.findViewById(R.id.day);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.participant_info_container);
 				holder.stickerPlaceholder = v
@@ -412,7 +412,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.sticker_image);
 				holder.bubbleContainer = v.findViewById(R.id.bubble_container);
 
+				holder.messageInfo = (TextView) v
+						.findViewById(R.id.msg_info);
+
+
+
 				holder.container.setVisibility(View.GONE);
+
 				break;
 			case SMS_TOGGLE:
 				v = inflater.inflate(R.layout.sms_toggle_item, parent, false);
@@ -449,14 +455,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			return v;
 		}
 
-		if (shouldDisplayTimestamp(position)) {
-			String dateFormatted = convMessage.getTimestampFormatted(false,
-					context);
-			holder.timestampTextView.setText(dateFormatted.toUpperCase());
-			holder.timestampContainer.setVisibility(View.VISIBLE);
+		if (showDayIndicator(position)) {
+			String dateFormatted = convMessage.getMessageDate(context);
+			holder.dayTextView.setText(dateFormatted.toUpperCase());
+			holder.dayContainer.setVisibility(View.VISIBLE);
 		} else {
-			if (holder.timestampContainer != null) {
-				holder.timestampContainer.setVisibility(View.GONE);
+			if (holder.dayContainer != null) {
+				holder.dayContainer.setVisibility(View.GONE);
 			}
 		}
 
@@ -761,8 +766,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			} else {
 				holder.image.setBackgroundResource(R.drawable.bg_status_type);
 			}
-			holder.timestampTextView.setText(convMessage.getTimestampFormatted(
-					true, context));
+			holder.dayTextView.setText(convMessage.getTimestampFormatted(true,
+					context));
 			holder.fileThumb.setVisibility(View.GONE);
 
 			int padding = (int) (10 * Utils.densityMultiplier);
@@ -1160,6 +1165,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						: IconCacheManager.getInstance().getIconForMSISDN(
 								convMessage.getMsisdn()));
 			}
+			setSDRAndTimestamp(position, holder.messageInfo,
+					holder.sending);
 		}
 
 		if (convMessage.isSent() && holder.messageContainer != null) {
@@ -1233,7 +1240,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		holder.fileThumb.setVisibility(View.VISIBLE);
 	}
 
-	private boolean shouldDisplayTimestamp(int position) {
+	private boolean showDayIndicator(int position) {
 		/*
 		 * We show the time stamp in the status message separately so no need to
 		 * show this time stamp.
@@ -1252,7 +1259,57 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} else if (previous.getMsgID() == LAST_READ_CONV_MESSAGE_ID) {
 			return false;
 		}
-		return (current.getTimestamp() - previous.getTimestamp() > 60 * 5);
+		return (current.getTimestamp() - previous.getTimestamp() > 60 * 60 * 24);
+	}
+
+	private void setSDRAndTimestamp(int position, TextView tv, ImageView iv) {
+		/*
+		 * We show the time stamp in the status message separately so no need to
+		 * show this time stamp.
+		 */
+		if (ViewType.values()[getItemViewType(position)] == ViewType.STATUS_MESSAGE) {
+			return;
+		}
+		tv.setVisibility(View.VISIBLE);
+		if (iv != null) {
+			iv.setVisibility(View.GONE);
+		}
+
+		ConvMessage current = getItem(position);
+		if (current.isSent() && (position == getCount() - 1)) {
+			switch (current.getState()) {
+			case SENT_UNCONFIRMED:
+				tv.setVisibility(View.GONE);
+				iv.setVisibility(View.VISIBLE);
+
+				AnimationDrawable ad = (AnimationDrawable) iv.getDrawable();
+				ad.setCallback(iv);
+				ad.setVisible(true, true);
+				ad.start();
+				break;
+			case SENT_CONFIRMED:
+				tv.setText("Sent, "
+						+ current.getTimestampFormatted(false, context));
+				break;
+			case SENT_DELIVERED:
+				tv.setText("Delivered");
+				break;
+			case SENT_DELIVERED_READ:
+				tv.setText("Read");
+				break;
+			}
+		} else {
+
+			ConvMessage next = position == getCount() - 1 ? null
+					: getItem(position + 1);
+
+			if (next == null || (next.isSent() != current.isSent())
+					|| (next.getTimestamp() - current.getTimestamp() > 2 * 60)) {
+				tv.setText(current.getTimestampFormatted(false, context));
+				return;
+			}
+			tv.setVisibility(View.GONE);
+		}
 	}
 
 	@Override

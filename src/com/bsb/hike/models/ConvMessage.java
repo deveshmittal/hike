@@ -499,14 +499,27 @@ public class ConvMessage {
 		} else {
 			String format;
 			if (android.text.format.DateFormat.is24HourFormat(context)) {
-				format = "d MMM ''yy 'AT' HH:mm";
+				format = "HH:mm";
 			} else {
-				format = "d MMM ''yy 'AT' h:mm aaa";
+				format = "h:mm aaa";
 			}
 
 			DateFormat df = new SimpleDateFormat(format);
 			return df.format(date);
 		}
+	}
+
+	public String getMessageDate(Context context) {
+		Date date = new Date(mTimestamp * 1000);
+		String format;
+		if (android.text.format.DateFormat.is24HourFormat(context)) {
+			format = "d MMM ''yy";
+		} else {
+			format = "d MMM ''yy";
+		}
+
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(date);
 	}
 
 	public void setMsgID(long msgID) {
