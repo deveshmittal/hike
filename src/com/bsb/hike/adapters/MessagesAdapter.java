@@ -18,6 +18,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
@@ -801,7 +803,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		holder.stickerPlaceholder.setVisibility(View.GONE);
 		MessageMetadata metadata = convMessage.getMetadata();
 		if (convMessage.isFileTransferMessage()) {
-			HikeFile hikeFile = metadata.getHikeFiles().get(0);
+			final HikeFile hikeFile = metadata.getHikeFiles().get(0);
 
 			boolean showThumbnail = ((convMessage.isSent())
 					|| (conversation instanceof GroupConversation)
@@ -810,6 +812,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					.containsKey(convMessage.getMsgID())))
 					&& (hikeFile.getThumbnail() != null)
 					&& (hikeFile.getHikeFileType() != HikeFileType.UNKNOWN);
+
+			boolean showingLargerImage = false;
 
 			if (convMessage.isSent()
 					&& (hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile
@@ -831,8 +835,39 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 
 				if (showThumbnail) {
-					holder.fileThumb.setBackgroundDrawable(hikeFile
-							.getThumbnail());
+					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
+							&& hikeFile.wasFileDownloaded()
+							&& !ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID())) {
+						showingLargerImage = true;
+						final ImageView imageView = holder.fileThumb;
+						holder.fileThumb.setScaleType(ScaleType.CENTER_INSIDE);
+						holder.fileThumb
+								.setMaxHeight((int) (250 * Utils.densityMultiplier));
+						holder.fileThumb
+								.setMaxWidth((int) (250 * Utils.densityMultiplier));
+						holder.fileThumb.setAdjustViewBounds(true);
+						new AsyncTask<Void, Void, Drawable>() {
+
+							protected void onPreExecute() {
+								imageView.setImageDrawable(hikeFile
+										.getThumbnail());
+							};
+
+							@Override
+							protected Drawable doInBackground(Void... params) {
+								return BitmapDrawable.createFromPath(hikeFile
+										.getFilePath());
+							}
+
+							protected void onPostExecute(Drawable result) {
+								imageView.setImageDrawable(result);
+							};
+						}.execute();
+					} else {
+						holder.fileThumb.setBackgroundDrawable(hikeFile
+								.getThumbnail());
+					}
+
 				} else {
 					switch (hikeFile.getHikeFileType()) {
 					case IMAGE:
@@ -863,17 +898,22 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 			}
 
-			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb
-					.getLayoutParams();
-			fileThumbParams.width = (int) (showThumbnail ? (100 * Utils.densityMultiplier)
-					: LayoutParams.WRAP_CONTENT);
-			fileThumbParams.height = (int) (showThumbnail ? (100 * Utils.densityMultiplier)
-					: LayoutParams.WRAP_CONTENT);
-			holder.fileThumb.setLayoutParams(fileThumbParams);
-
 			holder.fileThumb
 					.setImageResource(((hikeFile.getHikeFileType() == HikeFileType.VIDEO) && (showThumbnail)) ? R.drawable.ic_video_play
 							: 0);
+
+			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb
+					.getLayoutParams();
+			fileThumbParams.width = (int) (showThumbnail && !showingLargerImage ? (100 * Utils.densityMultiplier)
+					: LayoutParams.WRAP_CONTENT);
+			fileThumbParams.height = (int) (showThumbnail
+					&& !showingLargerImage ? (100 * Utils.densityMultiplier)
+					: LayoutParams.WRAP_CONTENT);
+			holder.fileThumb.setLayoutParams(fileThumbParams);
+			holder.fileThumb
+					.setMaxHeight((int) (250 * Utils.densityMultiplier));
+			holder.fileThumb.setMaxWidth((int) (250 * Utils.densityMultiplier));
+			holder.fileThumb.setAdjustViewBounds(true);
 
 			holder.messageTextView.setVisibility(!showThumbnail ? View.VISIBLE
 					: View.GONE);
