@@ -1159,11 +1159,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			} else if (convMessage.isSent()) {
 				holder.image.setImageResource(0);
 			} else {
-				holder.image.setImageDrawable(isGroupChat ? IconCacheManager
-						.getInstance().getIconForMSISDN(
-								convMessage.getGroupParticipantMsisdn())
-						: IconCacheManager.getInstance().getIconForMSISDN(
-								convMessage.getMsisdn()));
+				holder.image.setVisibility(View.GONE);
+				if (isGroupChat) {
+					holder.image.setVisibility(View.VISIBLE);
+					holder.image.setImageDrawable(IconCacheManager
+							.getInstance().getIconForMSISDN(
+									convMessage.getGroupParticipantMsisdn()));
+				}
 			}
 			setSDRAndTimestamp(position, holder.messageInfo,
 					holder.sending);
