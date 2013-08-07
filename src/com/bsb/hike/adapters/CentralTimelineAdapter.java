@@ -3,6 +3,8 @@ package com.bsb.hike.adapters;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
@@ -19,11 +21,13 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -35,15 +39,18 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	public static final long EMPTY_STATUS_NO_FRIEND_NO_STATUS_ID = -4;
 	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
 
+	private UpdatesFragment updatesFragment;
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
 	private int unseenCount;
 
 	public CentralTimelineAdapter(Context context,
+			UpdatesFragment updatesFragment,
 			List<StatusMessage> statusMessages, String userMsisdn,
 			int unseenCount) {
 		this.context = context;
+		this.updatesFragment = updatesFragment;
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
 		this.unseenCount = unseenCount;
@@ -279,11 +286,15 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		layoutParams.width = avatarDimension;
 
 		viewHolder.avatar.setLayoutParams(layoutParams);
+		viewHolder.avatar.setTag(statusMessage);
 
 		viewHolder.yesBtn.setTag(statusMessage);
+		viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
+
 		viewHolder.noBtn.setTag(statusMessage);
+		viewHolder.noBtn.setOnClickListener(noBtnClickListener);
+
 		viewHolder.statusImg.setTag(statusMessage);
-		viewHolder.avatar.setTag(statusMessage);
 		viewHolder.statusImg.setOnClickListener(imageClickListener);
 
 		return convertView;
@@ -337,6 +348,56 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			HikeMessengerApp.getPubSub().publish(HikePubSub.SHOW_IMAGE,
 					arguments);
 
+		}
+	};
+
+	private OnClickListener yesBtnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			StatusMessage statusMessage = (StatusMessage) v.getTag();
+
+			if (CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID == statusMessage
+					.getId()) {
+			} else if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
+					.getId()
+					|| CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
+							.getId()) {
+				context.startActivity(new Intent(context, StatusUpdate.class));
+			} else {
+				updatesFragment.toggleFavoriteAndRemoveTimelineItem(
+						statusMessage, FavoriteType.FRIEND);
+			}
+		}
+	};
+
+	private OnClickListener noBtnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			StatusMessage statusMessage = (StatusMessage) v.getTag();
+			if (statusMessage.getStatusMessageType() != StatusMessageType.PROTIP) {
+				updatesFragment.toggleFavoriteAndRemoveTimelineItem(
+						statusMessage, FavoriteType.REQUEST_RECEIVED_REJECTED);
+			} else {
+				/*
+				 * Removing the protip
+				 */
+				statusMessages.remove(0);
+
+				decrementUnseenCount();
+				notifyDataSetChanged();
+
+				Editor editor = context.getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, 0).edit();
+				editor.putLong(HikeMessengerApp.PROTIP_DISMISS_TIME,
+						System.currentTimeMillis() / 1000);
+				editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
+				editor.commit();
+
+				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+						statusMessage.getProtip().getMappedId());
+			}
 		}
 	};
 

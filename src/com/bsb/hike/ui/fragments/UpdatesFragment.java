@@ -228,7 +228,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 		}
 
 		centralTimelineAdapter = new CentralTimelineAdapter(getActivity(),
-				statusMessages, userMsisdn, unseenCount);
+				this, statusMessages, userMsisdn, unseenCount);
 		setListAdapter(centralTimelineAdapter);
 		getListView().setOnScrollListener(this);
 
@@ -317,48 +317,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
 	}
 
-	public void onYesBtnClick(View v) {
-		StatusMessage statusMessage = (StatusMessage) v.getTag();
-
-		if (CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID == statusMessage
-				.getId()) {
-		} else if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
-				.getId()
-				|| CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
-						.getId()) {
-			startActivity(new Intent(getActivity(), StatusUpdate.class));
-		} else {
-			toggleFavoriteAndRemoveTimelineItem(statusMessage,
-					FavoriteType.FRIEND);
-		}
-	}
-
-	public void onNoBtnClick(View v) {
-		StatusMessage statusMessage = (StatusMessage) v.getTag();
-		if (statusMessage.getStatusMessageType() != StatusMessageType.PROTIP) {
-			toggleFavoriteAndRemoveTimelineItem(statusMessage,
-					FavoriteType.REQUEST_RECEIVED_REJECTED);
-		} else {
-			/*
-			 * Removing the protip
-			 */
-			statusMessages.remove(0);
-
-			centralTimelineAdapter.decrementUnseenCount();
-			centralTimelineAdapter.notifyDataSetChanged();
-
-			Editor editor = prefs.edit();
-			editor.putLong(HikeMessengerApp.PROTIP_DISMISS_TIME,
-					System.currentTimeMillis() / 1000);
-			editor.putLong(HikeMessengerApp.CURRENT_PROTIP, -1);
-			editor.commit();
-
-			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
-					statusMessage.getProtip().getMappedId());
-		}
-	}
-
-	private void toggleFavoriteAndRemoveTimelineItem(
+	public void toggleFavoriteAndRemoveTimelineItem(
 			StatusMessage statusMessage, FavoriteType favoriteType) {
 		ContactInfo contactInfo = HikeUserDatabase.getInstance()
 				.getContactInfoFromMSISDN(statusMessage.getMsisdn(), false);
