@@ -16,11 +16,14 @@
  */
 package com.viewpagerindicator;
 
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,9 +31,6 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
  * This widget implements the dynamic action bar tab behavior that can change
@@ -76,6 +76,8 @@ public class TabPageIndicator extends HorizontalScrollView implements
 	private int mMaxTabWidth;
 	private int mSelectedTabIndex;
 
+	private float densityMultiplier;
+
 	private OnTabReselectedListener mTabReselectedListener;
 
 	public TabPageIndicator(Context context) {
@@ -88,6 +90,10 @@ public class TabPageIndicator extends HorizontalScrollView implements
 
 		mTabLayout = new IcsLinearLayout(context,
 				R.attr.vpiTabPageIndicatorStyle);
+
+		DisplayMetrics metrics = getResources().getDisplayMetrics();
+		densityMultiplier = metrics.scaledDensity;
+
 		addView(mTabLayout, new ViewGroup.LayoutParams(WRAP_CONTENT,
 				MATCH_PARENT));
 	}
@@ -159,6 +165,10 @@ public class TabPageIndicator extends HorizontalScrollView implements
 
 	private void addTab(int index, CharSequence text, int iconResId) {
 		TabView tabView = new TabView(getContext());
+
+		tabView.setBackgroundResource(R.drawable.home_tab_indicator);
+		tabView.setPadding((int) (8 * densityMultiplier), 0,
+				(int) (8 * densityMultiplier), 0);
 		tabView.mIndex = index;
 		tabView.setGravity(Gravity.CENTER);
 		tabView.setOrientation(LinearLayout.HORIZONTAL);
@@ -281,7 +291,7 @@ public class TabPageIndicator extends HorizontalScrollView implements
 		private int mIndex;
 
 		public TabView(Context context) {
-			super(context, null, R.attr.vpiTabPageIndicatorStyle);
+			super(context, null);
 		}
 
 		@Override
