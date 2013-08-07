@@ -131,6 +131,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private VoiceMessagePlayer voiceMessagePlayer;
 	private String statusIdForTip;
 	private SharedPreferences preferences;
+	private boolean isGroupChat;
 
 	public MessagesAdapter(Context context, ArrayList<ConvMessage> objects,
 			Conversation conversation, ChatThread chatThread) {
@@ -141,6 +142,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		this.voiceMessagePlayer = new VoiceMessagePlayer();
 		this.preferences = context.getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
+		this.isGroupChat = Utils.isGroupConversation(conversation.getMsisdn());
 		setLastSentMessagePosition();
 	}
 
@@ -1018,7 +1020,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			Sticker sticker = metadata.getSticker();
 
-			if (convMessage.isGroupChat() && !convMessage.isSent()
+			if (isGroupChat && !convMessage.isSent()
 					&& convMessage.getGroupParticipantMsisdn() != null) {
 				holder.stickerParticipantName.setVisibility(View.VISIBLE);
 				holder.stickerParticipantName
@@ -1080,7 +1082,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			CharSequence markedUp = convMessage.getMessage();
 			// Fix for bug where if a participant leaves the group chat, the
 			// participant's name is never shown
-			if (convMessage.isGroupChat() && !convMessage.isSent()
+			if (isGroupChat && !convMessage.isSent()
 					&& convMessage.getGroupParticipantMsisdn() != null) {
 				markedUp = Utils
 						.addContactName(
@@ -1152,14 +1154,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			} else if (convMessage.isSent()) {
 				holder.image.setImageResource(0);
 			} else {
-				holder.image
-						.setImageDrawable(convMessage.isGroupChat() ? IconCacheManager
-								.getInstance()
-								.getIconForMSISDN(
-										convMessage.getGroupParticipantMsisdn())
-								: IconCacheManager.getInstance()
-										.getIconForMSISDN(
-												convMessage.getMsisdn()));
+				holder.image.setImageDrawable(isGroupChat ? IconCacheManager
+						.getInstance().getIconForMSISDN(
+								convMessage.getGroupParticipantMsisdn())
+						: IconCacheManager.getInstance().getIconForMSISDN(
+								convMessage.getMsisdn()));
 			}
 		}
 
