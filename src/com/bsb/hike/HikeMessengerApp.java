@@ -469,8 +469,12 @@ public class HikeMessengerApp extends Application implements Listener {
 		TrackerUtil tUtil = TrackerUtil.getInstance(this
 				.getApplicationContext());
 		if (tUtil != null) {
-			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
-			Log.d(getClass().getSimpleName(),"Init for apptracker sdk finished"+ !preferenceManager.contains(HikeConstants.SSL_PREF));
+			tUtil.setTrackOptions(!preferenceManager
+					.contains(HikeConstants.SSL_PREF));
+			Log.d(getClass().getSimpleName(),
+					"Init for apptracker sdk finished"
+							+ !preferenceManager
+									.contains(HikeConstants.SSL_PREF));
 		}
 
 		if (!preferenceManager.contains(HikeConstants.SSL_PREF)) {

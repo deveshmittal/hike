@@ -17,7 +17,7 @@ public class HikeConstants {
 	public static final String MA_TRACKER_USERID = "bsb_hike";
 	public static final String MA_TRACKER_REF_ID_PREFIX = "bsb_hike_";
 	public static final String MA_SITE_ID = "27576";
-	
+
 	public static final String ANDROID = "android";
 
 	public static final String MESSAGE = "msg";

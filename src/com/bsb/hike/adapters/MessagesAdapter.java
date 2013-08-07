@@ -349,8 +349,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.message_send);
 
-				holder.messageInfo = (TextView) v
-						.findViewById(R.id.msg_info);
+				holder.messageInfo = (TextView) v.findViewById(R.id.msg_info);
 
 				holder.stickerPlaceholder = v
 						.findViewById(R.id.sticker_placeholder);
@@ -886,7 +885,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				if (showThumbnail) {
 					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
 							&& hikeFile.wasFileDownloaded()
-							&& !ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID())) {
+							&& !ChatThread.fileTransferTaskMap
+									.containsKey(convMessage.getMsgID())) {
 						showingLargerImage = true;
 						final ImageView imageView = holder.fileThumb;
 						holder.fileThumb.setScaleType(ScaleType.CENTER_INSIDE);
@@ -1209,8 +1209,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 									convMessage.getGroupParticipantMsisdn()));
 				}
 			}
-			setSDRAndTimestamp(position, holder.messageInfo,
-					holder.sending);
+			setSDRAndTimestamp(position, holder.messageInfo, holder.sending);
 		}
 
 		if (convMessage.isSent() && holder.messageContainer != null) {
