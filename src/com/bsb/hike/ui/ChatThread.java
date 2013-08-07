@@ -976,7 +976,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	public boolean showMessageContextMenu(final ConvMessage message) {
 		if (message == null
-				|| message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
+				|| message.getParticipantInfoState() != ParticipantInfoState.NO_INFO
+				|| message.getTypingNotification() != null) {
 			return false;
 		}
 
