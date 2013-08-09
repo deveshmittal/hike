@@ -301,7 +301,7 @@ public class HikeConstants {
 	public static final String CONTACT_CONTENT_TYPE = "contact/share";
 	public static final String CONTACT_FILE_NAME = "Contact";
 
-	public static final int DEFAULT_ZOOM_LEVEL = 12;
+	public static final int DEFAULT_ZOOM_LEVEL = 16;
 
 	// Picasa URI start for JB devices
 	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
@@ -487,6 +487,8 @@ public class HikeConstants {
 		public static final String FWD_STICKER_ID = "fwdStickerId";
 		public static final String FWD_CATEGORY_ID = "fwdCategoryId";
 		public static final String POST_TO_TWITTER = "postToTwitter";
+		public static final String IS_TEXT_SEARCH = "isTextSearch";
+		public static final String HTTP_SEARCH_STR = "searchStr";
 	}
 
 	public static final class LogEvent {

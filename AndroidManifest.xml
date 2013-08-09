@@ -152,6 +152,8 @@
         </activity>
         <activity android:name=".ui.ShareLocation"
             android:launchMode="singleTop"
+            android:windowSoftInputMode="stateHidden"
+            android:configChanges="orientation|keyboardHidden"
             android:theme="@style/NoTitleBar" >
         </activity>
         <activity android:name=".ui.TellAFriend"

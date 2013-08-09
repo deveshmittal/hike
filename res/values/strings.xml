@@ -547,4 +547,6 @@
 	<string name="add_as_friend">Add to Circle of Friends</string>
 	<string name="audio_recording_msg_received">Sent you a voice message</string>
 	<string name="sent_sticker">Sent you a sticker</string>
+    <string name="search_hint">Search</string>
+    <string name="send_invite">Invite(%1$d)</string>
 </resources>

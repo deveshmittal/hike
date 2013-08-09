@@ -1,9 +1,27 @@
 package com.bsb.hike.ui;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -11,95 +29,193 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Canvas;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.MotionEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.HikeAppStateBaseMapActivity;
-import com.bsb.hike.utils.Utils;
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.ItemizedOverlay;
-import com.google.android.maps.MapController;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
-import com.google.android.maps.OverlayItem;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class ShareLocation extends HikeAppStateBaseMapActivity {
+public class ShareLocation extends FragmentActivity {
 
-	private static final int NO_LOCATION_DEVICE_ENABLED = 0;
-	private static final int GPS_DISABLED = 1;
-	private static final int GPS_ENABLED = 2;
-
-	private int currentLocationDevice = NO_LOCATION_DEVICE_ENABLED;
-	private MapView myMap;
+	private GoogleMap map;
+	private SupportMapFragment MapFragment;
+	private boolean fullScreenFlag = true;
 	private LocationManager locManager;
 	private LocationListener locListener;
-
-	private View currentSelection;
-	private TextView locationAddress;
+	private Location myLocation = null;
+	private boolean gpsDialogShown = false;
+	private Marker userMarker;
+	private Marker lastMarker;
+	// places of interest
+	private Marker[] placeMarkers;
+	private String searchStr;
+	// max
+	private final int MAX_PLACES = 20;// most returned from google
+	// marker options
+	private MarkerOptions[] places;
+	private ArrayList<ItemDetails> list;
+	private ListView listview;
+	private ItemListBaseAdapter adapter;
+	private Dialog alert;
+	private int currentLocationDevice;
+	private boolean isTextSearch = false;
+	private final int GPS_ENABLED = 1;
+	private final int GPS_DISABLED = 2;
+	private final int NO_LOCATION_DEVICE_ENABLED = 0;
 	private Button titleBtn;
 	private TextView labelView;
+	private static final String places_api_key = "AIzaSyCBrHWTSgFNu3NKEodf2FZugtrFDqMpDV8";
 
-	private GeoPoint selectedGeoPoint;
-	private boolean gpsDialogShown = false;
-	private Dialog alert;
-	/*
-	 * The max distance the finger can move while placing a pointer
-	 */
-	private static final int MAX_DISTANCE = 20;
-
-	/** Called when the activity is first created. */
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.share_location);
-
-		int zoomLevel = savedInstanceState != null ? savedInstanceState.getInt(
-				HikeConstants.Extras.ZOOM_LEVEL,
-				HikeConstants.DEFAULT_ZOOM_LEVEL)
-				: HikeConstants.DEFAULT_ZOOM_LEVEL;
-		initMap(zoomLevel);
-
 		gpsDialogShown = savedInstanceState != null
 				&& savedInstanceState
 						.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
-
-		locationAddress = (TextView) findViewById(R.id.address);
-
-		boolean isCustomLocation = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.CUSTOM_LOCATION_SELECTED);
-
-		if (isCustomLocation) {
-			if (savedInstanceState
-					.containsKey(HikeConstants.Extras.CUSTOM_LOCATION_LAT)) {
-				int lat = savedInstanceState
-						.getInt(HikeConstants.Extras.CUSTOM_LOCATION_LAT);
-				int longi = savedInstanceState
-						.getInt(HikeConstants.Extras.CUSTOM_LOCATION_LONG);
-				selectedGeoPoint = new GeoPoint(lat, longi);
-				placeMarker(selectedGeoPoint);
+		initMyLocationManager();
+		listview = (ListView) findViewById(R.id.itemListView);
+		list = new ArrayList<ItemDetails>();
+		adapter = new ItemListBaseAdapter(this, list);
+		listview.setAdapter(adapter);
+		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, final View view,
+					int position, long id) {
+				lastMarker.setVisible(false);
+				Marker currentMarker = adapter.getMarker(position);
+				currentMarker.setVisible(true);
+				currentMarker.setIcon(BitmapDescriptorFactory
+						.fromResource(R.drawable.yellow_point));
+				lastMarker = currentMarker;
+				map.animateCamera(CameraUpdateFactory.newLatLng(currentMarker
+						.getPosition()));
 			}
-			currentSelection = findViewById(R.id.custom_position);
-		} else {
+		});
+		if (map == null) {
+			/*
+			 * if isGooglePlayServicesAvailable method returns
+			 * 2=ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED this implies
+			 * we need to update our playservice library if it returns
+			 * 0=ConnectionResult.SUCCESS this implies we have correct version
+			 * and working playservice api
+			 */
+			Log.d("is play service available",
+					Integer.valueOf(
+							GooglePlayServicesUtil
+									.isGooglePlayServicesAvailable(this))
+							.toString());
 
-			initMyLocationManager();
+			MapFragment = (SupportMapFragment) getSupportFragmentManager()
+					.findFragmentById(R.id.map);
+			map = MapFragment.getMap();
 
-			currentSelection = findViewById(R.id.my_position);
+			map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+			map.getUiSettings().setZoomControlsEnabled(false);
+			map.getUiSettings().setCompassEnabled(false);
+			map.getUiSettings().setMyLocationButtonEnabled(true);
+			map.setTrafficEnabled(true);
+
+			places = new MarkerOptions[MAX_PLACES];
+			placeMarkers = new Marker[MAX_PLACES + 1];
+			updateMyLocation();
+
+			if (savedInstanceState != null) {
+				Log.d("test", "inside if");
+				isTextSearch = savedInstanceState
+						.getBoolean(HikeConstants.Extras.IS_TEXT_SEARCH);
+				searchStr = savedInstanceState
+						.getString(HikeConstants.Extras.HTTP_SEARCH_STR);
+				new GetPlaces().execute(searchStr);
+				Log.d("test", "if is over");
+			} else {
+				Log.d("test", "inside else");
+				updateNearbyPlaces();
+				Log.d("test", "else is over");
+			}
+
 		}
+
+		Button fullScreenButton = (Button) findViewById(R.id.full_screen_button);
+		fullScreenButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// View mapView = (View) findViewById(R.id.map);
+				if (fullScreenFlag) {
+					fullScreenFlag = false;
+					((View) findViewById(R.id.frame))
+							.setLayoutParams(new TableLayout.LayoutParams(
+									LayoutParams.MATCH_PARENT,
+									LayoutParams.MATCH_PARENT, 0f));
+				} else {
+					fullScreenFlag = true;
+					((View) findViewById(R.id.frame))
+							.setLayoutParams(new TableLayout.LayoutParams(
+									LayoutParams.MATCH_PARENT,
+									LayoutParams.MATCH_PARENT, 1.5f));
+				}
+			}
+		});
+
+		Button searchButton = (Button) findViewById(R.id.search_button);
+		searchButton.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				try {
+					String searchString = ((EditText) findViewById(R.id.search))
+							.getText().toString();
+					searchString = URLEncoder.encode(searchString, "UTF-8");
+					double lat = myLocation.getLatitude();
+					double lng = myLocation.getLongitude();
+					searchStr = "https://maps.googleapis.com/maps/api/place/textsearch/"
+							+ "json?query="
+							+ searchString
+							+ "&location="
+							+ lat
+							+ ","
+							+ lng
+							+ "radius=2000&sensor=true"
+							+ "&key="
+							+ places_api_key;// ADD KEY
+
+					isTextSearch = true;
+
+					new GetPlaces().execute(searchStr);
+				} catch (UnsupportedEncodingException e) {
+					Log.w("ShareLocation", "in nearby search url encoding", e);
+				}
+			}
+		});
 
 		titleBtn = (Button) findViewById(R.id.title_icon);
 		labelView = (TextView) findViewById(R.id.title);
@@ -111,14 +227,332 @@ public class ShareLocation extends HikeAppStateBaseMapActivity {
 
 		labelView.setText(R.string.share_location);
 
-		currentSelection.setSelected(true);
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		if (currentSelection.getId() == R.id.my_position) {
-			showLocationDialog();
+	protected void onSaveInstanceState(Bundle outState) {
+
+		outState.putBoolean(HikeConstants.Extras.IS_TEXT_SEARCH, isTextSearch);
+		outState.putString(HikeConstants.Extras.HTTP_SEARCH_STR, searchStr);
+		outState.putBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN,
+				gpsDialogShown);
+		super.onSaveInstanceState(outState);
+	}
+
+	public void onTitleIconClick(View v) {
+		if (myLocation == null) {
+			Toast.makeText(getApplicationContext(), getString(R.string.select_location),
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		Intent result = new Intent();
+		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, 15);
+		result.putExtra(HikeConstants.Extras.LATITUDE,
+				lastMarker.getPosition().latitude);
+		result.putExtra(HikeConstants.Extras.LONGITUDE,
+				lastMarker.getPosition().longitude);
+		setResult(RESULT_OK, result);
+
+		finish();
+	}
+
+	private void initMyLocationManager() {
+		locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+		locListener = new LocationListener() {
+			public void onLocationChanged(Location newLocation) {
+
+				userMarker.setPosition(new LatLng(newLocation.getLatitude(),
+						newLocation.getLongitude()));
+				Log.d("is Location changed",
+						Double.valueOf(myLocation.distanceTo(newLocation))
+								.toString());
+				if ((currentLocationDevice == GPS_ENABLED && myLocation
+						.distanceTo(newLocation) > 300)
+						|| (currentLocationDevice == GPS_DISABLED && myLocation
+								.distanceTo(newLocation) > 1000)) {
+
+					myLocation = newLocation;
+					userMarker.setPosition(new LatLng(
+							newLocation.getLatitude(), newLocation
+									.getLongitude()));
+					updateLocationAddress(myLocation.getLongitude(),
+							myLocation.getLatitude(), userMarker);
+					// do something on location change
+					Log.d("my longi in loc listener",
+							Double.valueOf(newLocation.getLongitude())
+									.toString());
+					Log.d("my lati in loc listener",
+							Double.valueOf(newLocation.getLatitude())
+									.toString());
+					if (!isTextSearch)
+						updateNearbyPlaces();
+				}
+
+			}
+
+			public void onProviderDisabled(String arg0) {
+			}
+
+			public void onProviderEnabled(String provider) {
+
+			}
+
+			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
+			}
+		};
+	}
+
+	private void updateMyLocation() {
+		// get location manager
+		showLocationDialog();
+		myLocation = null;
+		Log.d("before gps provider", "and getting location");
+
+		if (currentLocationDevice == GPS_ENABLED) {
+			Log.d("gps provider", "getting location");
+			myLocation = locManager
+					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+					50, locListener);
+			if (myLocation == null) {
+				Log.d("gps enabled but", "gps not working properly");
+				currentLocationDevice = GPS_DISABLED;
+			}
+		}
+		if (currentLocationDevice == GPS_DISABLED) {
+			myLocation = locManager
+					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+					0, 1000, locListener);
+			if (myLocation == null) {
+				currentLocationDevice = NO_LOCATION_DEVICE_ENABLED;
+			}
+		}
+		if (currentLocationDevice == NO_LOCATION_DEVICE_ENABLED) {
+			// TODO
+		}
+
+		setMyLocation(myLocation);
+	}
+
+	private void setMyLocation(Location loc) {
+		double lat = loc.getLatitude();
+		double lng = loc.getLongitude();
+		// create LatLng
+		LatLng myLatLng = new LatLng(lat, lng);
+
+		// remove any existing marker
+		if (userMarker != null)
+			userMarker.remove();
+		// create and set marker properties
+		userMarker = map.addMarker(new MarkerOptions()
+				.position(myLatLng)
+				.title("My Location")
+				.icon(BitmapDescriptorFactory
+						.fromResource(R.drawable.yellow_point)));
+
+		lastMarker = userMarker;
+		updateLocationAddress(lat, lng, userMarker);
+
+		CameraPosition cameraPosition = new CameraPosition.Builder()
+				.target(myLatLng) // Sets the center of the map to Mountain View
+				.zoom(HikeConstants.DEFAULT_ZOOM_LEVEL) // Sets the zoom
+				.build(); // Creates a CameraPosition from the builder
+		Log.d("set my location", "setting up camera");
+		map.animateCamera(
+				CameraUpdateFactory.newCameraPosition(cameraPosition), 3000,
+				null);
+
+	}
+
+	private void updateNearbyPlaces() {
+		// build places query string
+		String types = "shopping_mall|airport|bank|bus_station|gas_station|hospital|museum|police|post_office|school|zoo|restaurant";
+
+		String typesStr;
+		try {
+			typesStr = URLEncoder.encode(types, "UTF-8");
+			if (searchStr == null) {
+				searchStr = "https://maps.googleapis.com/maps/api/place/nearbysearch/"
+						+ "json?location="
+						+ myLocation.getLatitude()
+						+ ","
+						+ myLocation.getLongitude()
+						+ "&types="
+						+ typesStr
+						+ "&radius=1000&sensor=true" + "&key=" + places_api_key;
+				isTextSearch = false;
+			}
+			new GetPlaces().execute(searchStr);
+
+		} catch (UnsupportedEncodingException e) {
+			Log.w("ShareLocation", "in text search url encoding", e);
+		}
+	}
+
+	private class GetPlaces extends AsyncTask<String, Void, Integer> {
+
+		@Override
+		protected Integer doInBackground(String... placesURL) {
+			// fetch places
+			Log.d("place", "I m inside do in background");
+			// build result as string
+			StringBuilder placesBuilder = new StringBuilder();
+			// process search parameter string(s)
+			for (String placeSearchURL : placesURL) {
+				HttpClient placesClient = new DefaultHttpClient();
+				try {
+					// try to fetch the data
+					Log.d("place", "I m inside for loop");
+					Log.d("placeSearchURL", placeSearchURL);
+					// HTTP Get receives URL string
+					HttpGet placesGet = new HttpGet(placeSearchURL);
+					// execute GET with Client - return response
+					HttpResponse placesResponse = placesClient
+							.execute(placesGet);
+					// check response status
+					StatusLine placeSearchStatus = placesResponse
+							.getStatusLine();
+					// only carry on if response is OK
+					if (placeSearchStatus.getStatusCode() == 200) {
+						// get response entity
+
+						HttpEntity placesEntity = placesResponse.getEntity();
+						// get input stream setup
+						InputStream placesContent = placesEntity.getContent();
+						// create reader
+						InputStreamReader placesInput = new InputStreamReader(
+								placesContent);
+						// use buffered reader to process
+						BufferedReader placesReader = new BufferedReader(
+								placesInput);
+						// read a line at a time, append to string builder
+						String lineIn;
+						while ((lineIn = placesReader.readLine()) != null) {
+							placesBuilder.append(lineIn);
+							// Log.d("place", lineIn);
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			String result = placesBuilder.toString();
+			// parse place data returned from Google Places
+			JSONArray placesArray = null;
+			try {
+				// parse JSON
+				// create JSONObject, pass stinrg returned from doInBackground
+				JSONObject resultObject = new JSONObject(result);
+				// get "results" array
+				placesArray = resultObject.getJSONArray("results");
+				// marker options for each place returned
+
+				// loop through places
+				for (int p = 0; p < placesArray.length(); p++) {
+					// parse each place
+					// if any values are missing we won't show the marker
+					boolean missingValue = false;
+					LatLng placeLL = null;
+					String placeName = "";
+					String address = "";
+					try {
+						// attempt to retrieve place data values
+						missingValue = false;
+						// get place at this index
+						JSONObject placeObject = placesArray.getJSONObject(p);
+						// get location section
+						JSONObject loc = placeObject.getJSONObject("geometry")
+								.getJSONObject("location");
+						// read lat lng
+						placeLL = new LatLng(Double.valueOf(loc
+								.getString("lat")), Double.valueOf(loc
+								.getString("lng")));
+						// loop through types
+						Log.d(Integer.valueOf(p).toString(),
+								(String) placeObject.get("name"));
+
+						// vicinity
+						if (!isTextSearch)
+							address = placeObject.getString("vicinity");
+						else
+							address = placeObject
+									.getString("formatted_address");
+
+						// name
+						placeName = placeObject.getString("name");
+					} catch (JSONException jse) {
+						Log.v("PLACES", "missing value");
+						missingValue = true;
+						jse.printStackTrace();
+					}
+					// if values missing we don't display
+					if (missingValue)
+						places[p] = null;
+					else {
+						places[p] = new MarkerOptions()
+								.position(placeLL)
+								.title(placeName)
+								.icon(BitmapDescriptorFactory
+										.fromResource(R.drawable.yellow_point))
+								.snippet(address);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			return placesArray == null ? 0 : placesArray.length();
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			findViewById(R.id.progress_dialog).setVisibility(View.VISIBLE);
+		}
+
+		// process data retrieved from doInBackground
+		protected void onPostExecute(Integer totalPlaces) {
+			for (int pm = 1; pm < placeMarkers.length; pm++) {
+				if (placeMarkers[pm] != null) {
+					placeMarkers[pm].remove();
+				}
+			}
+			Log.d("list length before = ", Integer.valueOf(list.size())
+					.toString());
+			int listSize = list.size();
+			for (int i = listSize - 1; i > 0; i--) {
+				Log.d(Integer.valueOf(i).toString(), list.get(i).getName());
+				list.remove(i);
+			}
+			adapter.notifyDataSetChanged();
+			Log.d("list length after = ", Integer.valueOf(list.size())
+					.toString());
+			for (int p = 0; p < totalPlaces; p++) {
+				if (places[p] != null) {
+					placeMarkers[p] = map.addMarker(places[p]);
+					addItemToAdapter(places[p].getTitle(),
+							places[p].getSnippet(), placeMarkers[p], false);
+					placeMarkers[p].setVisible(false);
+					adapter.notifyDataSetChanged();
+				}
+			}
+			findViewById(R.id.progress_dialog).setVisibility(View.GONE);
+		}
+	}
+
+	private void addItemToAdapter(String str1, String str2, Marker mark,
+			boolean isMyLocation) {
+		ItemDetails item = new ItemDetails();
+		item.setName(str1);
+		item.setItemDescription(str2);
+		if (isMyLocation) {
+			adapter.setMarker(0, mark);
+			list.add(0, item);
+		} else {
+			adapter.setMarker(adapter.getCount(), mark);
+			list.add(item);
 		}
 	}
 
@@ -168,9 +602,7 @@ public class ShareLocation extends HikeAppStateBaseMapActivity {
 		alertDialogBuilder.setNegativeButton(R.string.cancel,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						if (currentLocationDevice == NO_LOCATION_DEVICE_ENABLED) {
-							onChangeMarkerClicked(findViewById(R.id.custom_position));
-						}
+						gpsDialogShown = currentLocationDevice == GPS_DISABLED;
 						dialog.cancel();
 					}
 				});
@@ -180,316 +612,132 @@ public class ShareLocation extends HikeAppStateBaseMapActivity {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				gpsDialogShown = currentLocationDevice == GPS_DISABLED;
-				if (currentLocationDevice == NO_LOCATION_DEVICE_ENABLED) {
-					onChangeMarkerClicked(findViewById(R.id.custom_position));
-				}
+
 			}
 		});
 		alert = alertDialogBuilder.create();
-		alert.show();
+		if (!ShareLocation.this.isFinishing())
+			alert.show();
+
 	}
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(HikeConstants.Extras.CUSTOM_LOCATION_SELECTED,
-				currentSelection.getId() == R.id.custom_position);
-		if (currentSelection.getId() == R.id.custom_position
-				&& selectedGeoPoint != null) {
-			outState.putInt(HikeConstants.Extras.CUSTOM_LOCATION_LAT,
-					selectedGeoPoint.getLatitudeE6());
-			outState.putInt(HikeConstants.Extras.CUSTOM_LOCATION_LONG,
-					selectedGeoPoint.getLongitudeE6());
+	public class ItemDetails {
+
+		private String name;
+		private String itemDescription;
+
+		public String getName() {
+			return name;
 		}
-		outState.putInt(HikeConstants.Extras.ZOOM_LEVEL, myMap.getZoomLevel());
-		outState.putBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN,
-				gpsDialogShown);
-		super.onSaveInstanceState(outState);
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getItemDescription() {
+			return itemDescription;
+		}
+
+		public void setItemDescription(String itemDescription) {
+			this.itemDescription = itemDescription;
+		}
 	}
 
-	public void onTitleIconClick(View v) {
-		if (selectedGeoPoint == null) {
-			Toast.makeText(getApplicationContext(), R.string.select_location,
-					Toast.LENGTH_SHORT).show();
+	@SuppressLint("UseSparseArrays")
+	public class ItemListBaseAdapter extends BaseAdapter {
+		private ArrayList<ItemDetails> itemDetailsrrayList;
+		HashMap<Integer, Marker> positionToLocationMap = new HashMap<Integer, Marker>();
+
+		private LayoutInflater l_Inflater;
+
+		public ItemListBaseAdapter(Context context,
+				ArrayList<ItemDetails> results) {
+			itemDetailsrrayList = results;
+			l_Inflater = LayoutInflater.from(context);
+
+		}
+
+		public int getCount() {
+			return itemDetailsrrayList.size();
+		}
+
+		public Object getItem(int position) {
+			return itemDetailsrrayList.get(position);
+		}
+
+		public long getItemId(int position) {
+			return position;
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder holder;
+
+			if (convertView == null) {
+				convertView = l_Inflater.inflate(R.layout.item_details_view,
+						null);
+				holder = new ViewHolder();
+				holder.txt_itemName = (TextView) convertView
+						.findViewById(R.id.name);
+
+				holder.txt_itemDescription = (TextView) convertView
+						.findViewById(R.id.itemDescription);
+				// holder.itemImage = (ImageView)
+				// convertView.findViewById(R.id.photo);
+
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+
+			holder.txt_itemName.setText(itemDetailsrrayList.get(position)
+					.getName());
+			// if it is My Location than set my location image to the left
+			if (position == 0) {
+				Drawable dr = (Drawable) getResources().getDrawable(
+						R.drawable.my_location);
+				Bitmap bitmap = ((BitmapDrawable) dr).getBitmap();
+				// Scale it to required size
+				int width = (int) getResources().getDimension(
+						R.dimen.share_my_location_drawable_width);
+				Drawable scaled_dr = new BitmapDrawable(getResources(),
+						Bitmap.createScaledBitmap(bitmap, width, width, true));
+
+				holder.txt_itemName.setCompoundDrawablesWithIntrinsicBounds(
+						scaled_dr, null, null, null);
+				holder.txt_itemName
+						.setCompoundDrawablePadding((int) getResources()
+								.getDimension(
+										R.dimen.share_my_location_drawable_padding));
+			} else
+				holder.txt_itemName.setCompoundDrawablesWithIntrinsicBounds(0,
+						0, 0, 0);
+
+			holder.txt_itemDescription.setText(itemDetailsrrayList
+					.get(position).getItemDescription());
+			// holder.itemImage.setImageResource(itemDetailsrrayList.get(position).getImageNumber());
+
+			return convertView;
+		}
+
+		public void setMarker(int position, Marker mark) {
+			positionToLocationMap.put(position, mark);
 			return;
 		}
-		Intent result = new Intent();
-		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, myMap.getZoomLevel());
-		result.putExtra(HikeConstants.Extras.LATITUDE,
-				selectedGeoPoint.getLatitudeE6() / 1E6);
-		result.putExtra(HikeConstants.Extras.LONGITUDE,
-				selectedGeoPoint.getLongitudeE6() / 1E6);
-		setResult(RESULT_OK, result);
 
-		finish();
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		removeMyLocationListeners();
-		myMap.setBuiltInZoomControls(false);
-	}
-
-	/**
-	 * Initialize the map.
-	 */
-	private void initMap(int zoomLevel) {
-		myMap = (MapView) findViewById(R.id.map);
-		myMap.setBuiltInZoomControls(true);
-		myMap.getController().setZoom(zoomLevel);
-		/*
-		 * Adding this overlay to listen for touch events. Required when placing
-		 * custom pointers.
-		 */
-		myMap.getOverlays().add(new CustomPointerOverlay());
-	}
-
-	/**
-	 * Initialize the location manager to update us with the current location.
-	 */
-	private void initMyLocationManager() {
-		locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-		locListener = new LocationListener() {
-			public void onLocationChanged(Location newLocation) {
-				createAndShowMyItemizedOverlay(newLocation);
-			}
-
-			public void onProviderDisabled(String arg0) {
-			}
-
-			public void onProviderEnabled(String arg0) {
-			}
-
-			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
-			}
-		};
-		try {
-			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-					0, locListener);
-			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-					0, 0, locListener);
-
-			if (locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) != null) {
-				createAndShowMyItemizedOverlay(locManager
-						.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-			} else if (locManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) != null) {
-				createAndShowMyItemizedOverlay(locManager
-						.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
-			}
-		} catch (IllegalStateException e) {
-			Log.d(getClass().getSimpleName(), "No listener found");
-			showLocationDialog();
-		}
-	}
-
-	/**
-	 * Removes the listener that updates us with the current location.
-	 */
-	private void removeMyLocationListeners() {
-		if (locManager != null) {
-			locManager.removeUpdates(locListener);
-		}
-	}
-
-	/**
-	 * This method will be called whenever a change of the current position is
-	 * submitted via the GPS.
-	 * 
-	 * @param newLocation
-	 */
-	protected void createAndShowMyItemizedOverlay(Location newLocation) {
-		// transform the location to a geopoint
-		GeoPoint geoPoint = new GeoPoint(
-				(int) (newLocation.getLatitude() * 1E6),
-				(int) (newLocation.getLongitude() * 1E6));
-
-		placeMarker(geoPoint);
-	}
-
-	/**
-	 * Remove the older overlay. Ideally there should only be one.
-	 */
-	private void removeOlderOverlays() {
-		selectedGeoPoint = null;
-		List<Overlay> overlays = myMap.getOverlays();
-
-		if (!overlays.isEmpty()) {
-			for (Iterator<Overlay> iterator = overlays.iterator(); iterator
-					.hasNext();) {
-				if (!(iterator.next() instanceof CustomPointerOverlay)) {
-					iterator.remove();
-				}
-			}
+		public Marker getMarker(int position) {
+			return positionToLocationMap.get(position);
 		}
 
-		myMap.postInvalidate();
-	}
-
-	@Override
-	protected boolean isRouteDisplayed() {
-		return false;
-	}
-
-	private class MyItemizedOverlay extends ItemizedOverlay<OverlayItem> {
-		private List<OverlayItem> items;
-		private Drawable marker;
-
-		public MyItemizedOverlay(Drawable defaultMarker) {
-			super(defaultMarker);
-			items = new ArrayList<OverlayItem>();
-			marker = defaultMarker;
-		}
-
-		@Override
-		protected OverlayItem createItem(int index) {
-			return items.get(index);
-		}
-
-		@Override
-		public int size() {
-			return items.size();
-		}
-
-		@Override
-		public void draw(Canvas canvas, MapView mapView, boolean shadow) {
-			boundCenterBottom(marker);
-			super.draw(canvas, mapView, shadow);
-		}
-
-		public void addItem(OverlayItem item) {
-			items.add(item);
-			populate();
+		class ViewHolder {
+			TextView txt_itemName;
+			TextView txt_itemDescription;
+			ImageView itemImage;
 		}
 
 	}
 
-	public class CustomPointerOverlay extends Overlay {
-
-		int initialPosY;
-		int initialPosX;
-
-		int deltaX;
-		int deltaY;
-
-		int actX;
-		int actY;
-
-		long firstTapTime;
-		long secondTapTime;
-
-		Handler markerHandler = new Handler();
-		Runnable placeMarkerRunnable = new Runnable() {
-
-			@Override
-			public void run() {
-				/*
-				 * We are accounting for movement of the finger by a small
-				 * amount.
-				 */
-				boolean showShowMarker = (deltaX < MAX_DISTANCE)
-						&& (deltaY < MAX_DISTANCE);
-				if (currentSelection.getId() == R.id.custom_position
-						&& showShowMarker) {
-					final GeoPoint geoPoint = myMap.getProjection().fromPixels(
-							actX, actY);
-
-					placeMarker(geoPoint);
-				}
-			}
-		};
-
-		@Override
-		public boolean onTouchEvent(MotionEvent e, MapView mapView) {
-			switch (e.getAction()) {
-			case MotionEvent.ACTION_UP:
-				firstTapTime = System.currentTimeMillis();
-
-				actX = (int) e.getX();
-				actY = (int) e.getY();
-
-				if (Math.abs(firstTapTime - secondTapTime) > 200L) {
-					deltaX = (int) Math.abs(initialPosX - e.getX());
-
-					deltaY = (int) Math.abs(initialPosY - e.getY());
-
-					markerHandler.postDelayed(placeMarkerRunnable, 250);
-				} else {
-					markerHandler.removeCallbacks(placeMarkerRunnable);
-					MapController mapController = myMap.getController();
-					mapController.animateTo(myMap.getProjection().fromPixels(
-							actX, actY));
-					mapController.zoomIn();
-				}
-				secondTapTime = firstTapTime;
-				return false;
-			case MotionEvent.ACTION_DOWN:
-				initialPosX = (int) e.getX();
-				initialPosY = (int) e.getY();
-				return false;
-			}
-			return false;
-		}
-	}
-
-	public void onChangeMarkerClicked(View v) {
-		if (v.getId() != currentSelection.getId()) {
-			// first remove old overlay
-			removeOlderOverlays();
-			if (v.getId() == R.id.my_position) {
-				initMyLocationManager();
-				showLocationDialog();
-			} else {
-				removeMyLocationListeners();
-				Toast.makeText(this, R.string.tap_to_place, Toast.LENGTH_SHORT)
-						.show();
-			}
-			currentSelection.setSelected(false);
-			currentSelection = v;
-			currentSelection.setSelected(true);
-		} else {
-			if (selectedGeoPoint != null) {
-				myMap.getController().animateTo(selectedGeoPoint);
-			}
-		}
-	}
-
-	/**
-	 * Called when we want to place a marker on the map.
-	 * 
-	 * @param geoPoint
-	 *            Where the marker should be placed.
-	 */
-	private void placeMarker(GeoPoint geoPoint) {
-		removeOlderOverlays();
-
-		Drawable icon = getResources().getDrawable(R.drawable.ic_marker);
-		icon.setBounds(0, 0, icon.getIntrinsicWidth(),
-				icon.getIntrinsicHeight());
-
-		// create my overlay and show it
-		MyItemizedOverlay overlay = new MyItemizedOverlay(icon);
-		OverlayItem item = new OverlayItem(geoPoint, "My Location", null);
-		overlay.addItem(item);
-		myMap.getOverlays().add(overlay);
-
-		myMap.invalidate();
-		myMap.dispatchTouchEvent(MotionEvent.obtain(1, 1,
-				MotionEvent.ACTION_DOWN, 0, 0, 0));
-
-		myMap.getController().animateTo(geoPoint);
-		getAddress(geoPoint);
-
-		selectedGeoPoint = geoPoint;
-	}
-
-	/**
-	 * Get the address of the current pointer
-	 * 
-	 * @param geoPoint
-	 */
-	private void getAddress(final GeoPoint geoPoint) {
+	private void updateLocationAddress(final double lat, final double lng,
+			final Marker userMarker) {
 		/*
 		 * Getting the address blocks the UI so we run this code in a background
 		 * thread.
@@ -498,14 +746,37 @@ public class ShareLocation extends HikeAppStateBaseMapActivity {
 
 			@Override
 			protected String doInBackground(Void... params) {
-				return Utils.getAddressFromGeoPoint(geoPoint,
-						ShareLocation.this);
+				return getAddressFromPosition(lat, lng, ShareLocation.this);
 			}
 
 			@Override
-			protected void onPostExecute(String result) {
-				locationAddress.setText(result);
+			protected void onPostExecute(String address) {
+				userMarker.setSnippet(address);
+				if (list.size() > 0)
+					list.remove(0);
+				addItemToAdapter(userMarker.getTitle(), address, userMarker,
+						true);
+				adapter.notifyDataSetChanged();
 			}
 		}).execute();
+	}
+
+	public static String getAddressFromPosition(double lat, double lng,
+			Context context) {
+		try {
+			Geocoder geoCoder = new Geocoder(context, Locale.getDefault());
+			List<Address> addresses = geoCoder.getFromLocation(lat, lng, 1);
+
+			final StringBuilder address = new StringBuilder();
+			if (!addresses.isEmpty()) {
+				for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++)
+					address.append(addresses.get(0).getAddressLine(i) + "\n");
+			}
+
+			return address.toString();
+		} catch (IOException e) {
+			Log.e("GetPlaces", "getAddressFromPostion Exception", e);
+			return "";
+		}
 	}
 }
