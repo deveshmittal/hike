@@ -547,6 +547,14 @@
 	<string name="add_as_friend">Add to Circle of Friends</string>
 	<string name="audio_recording_msg_received">Sent you a voice message</string>
 	<string name="sent_sticker">Sent you a sticker</string>
+	<string name="invite_via_facebook">Invite Via Facebook</string>
+    <string name="invite_via_twitter">Invite Via Twitter</string>
     <string name="search_hint">Search</string>
     <string name="send_invite">Invite(%1$d)</string>
+    <string name="fb_invite_success">Request Sent</string>
+    <string name="fb_invite_failed">Request Canceled</string>
+    <string name="social_invite_network_error">Could not sent invite. Check network settings.</string>
+    <string name="not_connected_to_internet">Unable to connect to the internet</string>
+    <string name="limited_requests">Cannot send request to more than 50 Friends At a time</string>
+
 </resources>

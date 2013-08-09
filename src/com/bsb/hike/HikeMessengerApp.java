@@ -256,6 +256,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SHOW_BOLLYWOOD_STICKERS = "showBollywoodStickers";
 
+	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
@@ -613,6 +615,18 @@ public class HikeMessengerApp extends Application implements Listener {
 		} catch (IllegalArgumentException e) {
 			Log.w("HikeMessengerApp", "Invalid format", e);
 			return;
+		}
+	}
+
+	public static Twitter getTwitterInstance(String token, String tokenSecret) {
+
+		try {
+			makeTwitterInstance(token, tokenSecret);
+
+			return twitter;
+		} catch (IllegalArgumentException e) {
+			Log.w("HikeMessengerApp", "Invalid format", e);
+			return null;
 		}
 	}
 

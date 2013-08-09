@@ -489,6 +489,7 @@ public class HikeConstants {
 		public static final String POST_TO_TWITTER = "postToTwitter";
 		public static final String IS_TEXT_SEARCH = "isTextSearch";
 		public static final String HTTP_SEARCH_STR = "searchStr";
+		public static final String IS_FACEBOOK = "isFacebook";
 	}
 
 	public static final class LogEvent {

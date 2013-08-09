@@ -173,6 +173,12 @@
             android:theme="@style/NoTitleBar"
             android:windowSoftInputMode="adjustResize" >
         </activity>
+        
+        <activity
+            android:name="com.bsb.hike.ui.SocialNetInviteActivity"
+            android:configChanges="orientation|keyboardHidden" >
+        </activity>
+        
         <receiver android:name=".service.BootService" >
             <intent-filter >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
