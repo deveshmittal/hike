@@ -551,6 +551,8 @@
 	<string name="recents">Recents</string>
 	<string name="contacts">Contacts</string>
 	<string name="friend_request_sent">Friend request sent</string>
-	<string name="new_chat">New chat</string>
-	<string name="new_update">New update</string>
+	<string name="new_chat">Start a new chat</string>
+	<string name="new_update">Post a new update</string>
+	<string name="chats">Chats</string>
+	<string name="updates">Updates</string>
 </resources>

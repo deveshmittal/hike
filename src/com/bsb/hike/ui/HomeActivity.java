@@ -36,7 +36,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 	private ViewPager viewPager;
 
-	private String[] headers = { "Updates", "Messages", "Friends" };
+	private int[] headers = { R.string.updates, R.string.chats,
+			R.string.friends };
 
 	private int[] tabIcons = { R.drawable.ic_updates, R.drawable.ic_chats,
 			R.drawable.ic_friends };
@@ -199,7 +200,7 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Li
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return headers[position];
+			return getString(headers[position]);
 		}
 
 		@Override
