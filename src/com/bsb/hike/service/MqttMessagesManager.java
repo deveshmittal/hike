@@ -425,10 +425,13 @@ public class MqttMessagesManager {
 				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
 						.get(0);
 
-				DownloadFileTask downloadFile = new DownloadFileTask(context,
-						hikeFile.getFile(), hikeFile.getFileKey(),
-						convMessage.getMsgID(), hikeFile.getHikeFileType());
-				downloadFile.execute();
+				if (!(hikeFile.getHikeFileType() == HikeFileType.LOCATION)
+						|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT)) {
+					DownloadFileTask downloadFile = new DownloadFileTask(
+							context, hikeFile.getFile(), hikeFile.getFileKey(),
+							convMessage.getMsgID(), hikeFile.getHikeFileType());
+					downloadFile.execute();
+				}
 			}
 			removeTypingNotification(convMessage.getMsisdn(),
 					convMessage.getGroupParticipantMsisdn());
