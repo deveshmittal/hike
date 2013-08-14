@@ -335,6 +335,9 @@ public class DbConversationListener implements Listener {
 			 */
 			Collections.reverse(messages);
 
+			sendNativeSMSFallbackLogEvent(messages.get(0).getConversation().isOnhike(),
+					Utils.isUserOnline(context), messages.size());
+
 			for (ConvMessage convMessage : messages) {
 				sendNativeSMS(convMessage);
 				convMessage.setSMS(true);
@@ -347,6 +350,42 @@ public class DbConversationListener implements Listener {
 			String mappedId = (String) object;
 			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
 			mConversationDb.deleteProtip(mappedId);
+
+			sendDismissTipLogEvent(mappedId);
+		}
+	}
+
+	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline,
+			int numMessages) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+		try {
+			metadata.put(HikeConstants.IS_H2H, onHike);
+			metadata.put(HikeConstants.OFFLINE,
+					userOnline ? HikeConstants.RECIPIENT : HikeConstants.SENDER);
+			metadata.put(HikeConstants.NUMBER_OF_SMS, numMessages);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			Utils.sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+		}
+	}
+
+	private void sendDismissTipLogEvent(String tipId) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+		try {
+			metadata.put(HikeConstants.TIP_ID, tipId);
+
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
+			data.put(HikeConstants.METADATA, metadata);
+
+			Utils.sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 	}
 

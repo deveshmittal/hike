@@ -16,6 +16,8 @@ public class HikeConstants {
 	public static final String MA_TRACKER_KEY = "00774f47f97b5173432b958a986f0061";
 	public static final String MA_TRACKER_USERID = "bsb_hike";
 	public static final String MA_TRACKER_REF_ID_PREFIX = "bsb_hike_";
+	public static final String MA_SITE_ID = "27576";
+
 	
 	public static final String ANDROID = "android";
 
@@ -134,6 +136,19 @@ public class HikeConstants {
 	public static final String PROTIP_WAIT_TIME = "wt";
 	public static final String NO_SMS = "nosms";
 	public static final String RETURNING_USER = "ru";
+	public static final String NUMBER_OF_SMS = "no_of_sms";
+	public static final String OFFLINE = "offline";
+	public static final String SENDER = "sender";
+	public static final String RECIPIENT = "recipient";
+	public static final String IS_H2H = "is_h2h";
+	public static final String NATIVE_SMS = "native_sms";
+	public static final String UNIFIED_INBOX = "unified_inbox";
+	public static final String PULL_OLD_SMS = "pull_old_sms";
+	public static final String TIP_ID = "tip_id";
+	public static final String SMS = "sms";
+	public static final String UI_EVENT = "uiEvent";
+	public static final String LOGEVENT_TAG = "mob";
+	public static final String FREE_SMS_ON = "free_sms_on";
 
 	public static final String SOUND_PREF = "soundPref";
 	public static final String VIBRATE_PREF = "vibratePref";
@@ -303,6 +318,8 @@ public class HikeConstants {
 
 	public static final int DEFAULT_ZOOM_LEVEL = 16;
 
+	public static final String VOICE_MESSAGE_CONTENT_TYPE = "audio/voice";
+
 	// Picasa URI start for JB devices
 	public static final String JB_PICASA_URI_START = "content://com.sec.android.gallery3d";
 	// Picasa URI start for other devices
@@ -387,6 +404,8 @@ public class HikeConstants {
 	public static final int MAX_SMS_PULL_IN_INBOX = 2000;
 
 	public static final int MAX_SMS_PULL_IN_SENTBOX = 1000;
+
+	public static final String MICROMAX = "MICROMAX";
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
@@ -487,6 +506,11 @@ public class HikeConstants {
 		public static final String FWD_STICKER_ID = "fwdStickerId";
 		public static final String FWD_CATEGORY_ID = "fwdCategoryId";
 		public static final String POST_TO_TWITTER = "postToTwitter";
+		public static final String RECORDING_TIME = "recordingTime";
+		public static final String MAPPED_ID = "mappedId";
+		public static final String IS_STATUS_IMAGE = "isStatusImage";
+		public static final String URL = "url";
+		public static final String TAB_INDEX = "tabIndex";
 		public static final String IS_TEXT_SEARCH = "isTextSearch";
 		public static final String HTTP_SEARCH_STR = "searchStr";
 		public static final String IS_FACEBOOK = "isFacebook";

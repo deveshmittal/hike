@@ -108,8 +108,6 @@ public class MessagesList extends DrawerBaseActivity implements
 
 	private boolean introMessageAdded = false;
 
-	private boolean nuxNumbersInvited = false;
-
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.SERVER_RECEIVED_MSG, HikePubSub.MESSAGE_DELIVERED_READ,
 			HikePubSub.MESSAGE_DELIVERED, HikePubSub.MESSAGE_FAILED,
@@ -260,8 +258,6 @@ public class MessagesList extends DrawerBaseActivity implements
 					.getBoolean(HikeConstants.Extras.DEVICE_DETAILS_SENT);
 			introMessageAdded = savedInstanceState
 					.getBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED);
-			nuxNumbersInvited = savedInstanceState
-					.getBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED);
 			int dialogShowingOrdinal = savedInstanceState
 					.getInt(HikeConstants.Extras.DIALOG_SHOWING);
 			if (dialogShowingOrdinal != -1) {
@@ -295,11 +291,6 @@ public class MessagesList extends DrawerBaseActivity implements
 					}
 				}, 500);
 				introMessageAdded = true;
-			}
-		}
-		if (!nuxNumbersInvited) {
-			if (accountPrefs.contains(HikeMessengerApp.INVITED_NUMBERS)) {
-				inviteNuxNumbers();
 			}
 		}
 
@@ -474,7 +465,7 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 
 		mAdapter = new ConversationsAdapter(MessagesList.this,
-				R.layout.conversation_item, conversations, parentLayout);
+				R.layout.conversation_item, conversations);
 
 		/*
 		 * because notifyOnChange gets re-enabled whenever we call
@@ -534,30 +525,6 @@ public class MessagesList extends DrawerBaseActivity implements
 			}
 		}, 5 * 1000);
 		deviceDetailsSent = true;
-	}
-
-	private void inviteNuxNumbers() {
-		(new Handler()).postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				String invitedNumbers = accountPrefs.getString(
-						HikeMessengerApp.INVITED_NUMBERS, "");
-				if (TextUtils.isEmpty(invitedNumbers)) {
-					return;
-				}
-				String[] invitedNumbersArray = invitedNumbers.split(",");
-				for (String msisdn : invitedNumbersArray) {
-					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.MQTT_PUBLISH,
-							Utils.makeHike2SMSInviteMessage(msisdn,
-									MessagesList.this).serialize());
-				}
-				Editor editor = accountPrefs.edit();
-				editor.remove(HikeMessengerApp.INVITED_NUMBERS);
-				editor.commit();
-			}
-		}, 5 * 1000);
-		nuxNumbersInvited = true;
 	}
 
 	private void createNewConversationsForFirstTimeUser() {
@@ -648,8 +615,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				wasAlertCancelled);
 		outState.putBoolean(HikeConstants.Extras.INTRO_MESSAGE_ADDED,
 				introMessageAdded);
-		outState.putBoolean(HikeConstants.Extras.NUX_NUMBERS_INVITED,
-				nuxNumbersInvited);
 		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
 				dialogShowing != null ? dialogShowing.ordinal() : -1);
 		super.onSaveInstanceState(outState);
@@ -1130,7 +1095,6 @@ public class MessagesList extends DrawerBaseActivity implements
 				@Override
 				public void run() {
 					showReceivedMessages(receivedMsgWhileAnimating);
-					mAdapter.drawerAnimationComplete();
 				}
 			});
 		} else if (HikePubSub.SMS_SYNC_COMPLETE.equals(type)) {

@@ -23,6 +23,7 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
@@ -44,31 +45,35 @@ public class UploadContactOrLocationTask extends FileTransferTaskBase {
 	private Context context;
 	private JSONObject contactJson;
 	private boolean uploadingContact;
+	private Conversation conversation;
 
 	public UploadContactOrLocationTask(String msisdn, double latitude,
-			double longitude, int zoomLevel, String fileKey, Context context) {
+			double longitude, int zoomLevel, Context context,
+			Conversation conversation) {
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.zoomLevel = zoomLevel;
-		this.fileKey = fileKey;
 		this.msisdn = msisdn;
 		this.context = context;
 		this.uploadingContact = false;
+		this.conversation = conversation;
 	}
 
 	public UploadContactOrLocationTask(String msisdn, JSONObject contactJson,
-			Context context) {
+			Context context, Conversation conversation) {
 		this.msisdn = msisdn;
 		this.contactJson = contactJson;
 		this.context = context;
 		this.uploadingContact = true;
+		this.conversation = conversation;
 	}
 
 	public UploadContactOrLocationTask(ConvMessage convMessage,
-			Context context, boolean uploadingContact) {
+			Context context, boolean uploadingContact, Conversation conversation) {
 		this.convMessage = convMessage;
 		this.context = context;
 		this.uploadingContact = uploadingContact;
+		this.conversation = conversation;
 	}
 
 	@Override
@@ -204,6 +209,7 @@ public class UploadContactOrLocationTask extends FileTransferTaskBase {
 				HikeConstants.LOCATION_FILE_NAME, msisdn, time,
 				ConvMessage.State.SENT_UNCONFIRMED);
 		convMessage.setMetadata(metadata);
+		convMessage.setSMS(!conversation.isOnhike());
 		HikeConversationsDatabase.getInstance().addConversationMessages(
 				convMessage);
 

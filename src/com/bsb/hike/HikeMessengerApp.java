@@ -46,6 +46,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -272,7 +273,7 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	private static Messenger mMessenger;
 
-	private static Map<String, ClearTypingNotification> typingNotificationMap;
+	private static Map<String, TypingNotification> typingNotificationMap;
 
 	private static int[] moodsResource;
 
@@ -470,8 +471,12 @@ public class HikeMessengerApp extends Application implements Listener {
 		TrackerUtil tUtil = TrackerUtil.getInstance(this
 				.getApplicationContext());
 		if (tUtil != null) {
-			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
-			Log.d(getClass().getSimpleName(),"Init for apptracker sdk finished"+ !preferenceManager.contains(HikeConstants.SSL_PREF));
+			tUtil.setTrackOptions(!preferenceManager
+					.contains(HikeConstants.SSL_PREF));
+			Log.d(getClass().getSimpleName(),
+					"Init for apptracker sdk finished"
+							+ !preferenceManager
+									.contains(HikeConstants.SSL_PREF));
 		}
 
 		if (!preferenceManager.contains(HikeConstants.SSL_PREF)) {
@@ -490,7 +495,7 @@ public class HikeMessengerApp extends Application implements Listener {
 				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 				Utils.switchSSLOn(getApplicationContext()));
 
-		typingNotificationMap = new HashMap<String, ClearTypingNotification>();
+		typingNotificationMap = new HashMap<String, TypingNotification>();
 
 		initialiseListeners();
 
@@ -630,7 +635,7 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 	}
 
-	public static Map<String, ClearTypingNotification> getTypingNotificationSet() {
+	public static Map<String, TypingNotification> getTypingNotificationSet() {
 		return typingNotificationMap;
 	}
 

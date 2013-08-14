@@ -1,30 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/seen_timeline_item" >
-
-    <RelativeLayout
-        android:id="@+id/main_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/seen_timeline_selector"
-        android:padding="10dp" >
+        android:background="@drawable/list_item"
+        android:paddingBottom="10dp"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp" >
 
-        <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="10dp"
-            android:src="@drawable/ic_avatar1" />
+        <RelativeLayout
+            android:id="@+id/avatar_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="10dp" >
+
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="@dimen/medium_avatar"
+                android:layout_height="@dimen/medium_avatar"
+                android:layout_marginTop="13dp"
+                android:layout_marginLeft="3dp"
+                android:src="@drawable/ic_avatar1" />
+
+            <ImageView
+                android:id="@+id/avatar_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/frame_avatar_medium_highlight_selector" />
+            
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/side_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignTop="@id/avatar"
+            android:layout_alignTop="@id/avatar_container"
+            android:layout_marginTop="10dp"
             android:gravity="right"
             android:orientation="vertical" >
 
@@ -35,30 +48,17 @@
                 android:text="2 mins ago"
                 android:textColor="@color/timestampcolor"
                 android:textSize="12sp"
-                android:textStyle="italic" />
-
+                android:textStyle="bold|italic" />
         </LinearLayout>
-        
-        <ImageView
-            android:id="@+id/details_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/side_content"
-            android:layout_alignRight="@id/side_content"
-            android:background="@null"
-            android:focusable="false"
-            android:onClick="onDetailsBtnClick"
-            android:paddingTop="3dp"
-            android:src="@drawable/details_btn" />
 
         <LinearLayout
             android:id="@+id/details_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_alignTop="@id/avatar_container"
             android:layout_marginRight="5dp"
-            android:layout_alignTop="@id/avatar"
-            android:layout_toLeftOf="@id/details_btn"
-            android:layout_toRightOf="@id/avatar"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@id/avatar_container"
             android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
@@ -68,9 +68,9 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="Rishabh Sharma"
-                android:textColor="@color/lightblack"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textColor="@color/list_item_header"
+                android:textSize="14sp"
+                android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/main_info"
@@ -78,9 +78,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
-                android:textColor="@color/group_item"
-                android:textSize="14sp"
-                android:textStyle="italic" />
+                android:textColor="@color/list_item_subtext"
+                android:textSize="16sp"
+                android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/details"
@@ -88,17 +88,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="I just added you aas  a firend . do the same?"
-                android:textColor="@color/group_item"
-                android:textSize="12sp"
-                android:textStyle="italic" />
-            
+                android:textColor="@color/list_item_subtext"
+                android:textSize="14sp" />
+
             <ImageView
                 android:id="@+id/status_pic"
                 android:layout_width="@dimen/timeline_pic"
                 android:layout_height="@dimen/timeline_pic"
                 android:layout_marginTop="5dp"
-                android:scaleType="fitCenter"
                 android:onClick="onViewImageClicked"
+                android:scaleType="fitCenter"
                 android:visibility="visible" />
         </LinearLayout>
 
@@ -108,20 +107,20 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/details_content"
             android:layout_marginTop="5dp"
-            android:layout_toRightOf="@id/avatar"
+            android:layout_toRightOf="@id/avatar_container"
             android:gravity="center"
             android:orientation="horizontal" >
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/yes_btn"
-                style="@style/StatusYesBtn"
+                style="@style/UpdateText.StatusYesBtn"
                 android:focusable="false"
                 android:onClick="onYesBtnClick"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
                 android:paddingBottom="2dp"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
                 android:text="@string/confirm" />
-            
+
             <View
                 android:id="@+id/button_divider"
                 android:layout_width="10dp"
@@ -129,20 +128,13 @@
 
             <com.bsb.hike.view.CustomFontButton
                 android:id="@+id/no_btn"
-                style="@style/StatusNoBtn"
+                style="@style/UpdateText.StatusNoBtn"
                 android:focusable="false"
                 android:onClick="onNoBtnClick"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
                 android:paddingBottom="2dp"
+                android:paddingLeft="25dp"
+                android:paddingRight="25dp"
                 android:text="@string/not_now" />
         </LinearLayout>
-    </RelativeLayout>
 
-    <ImageView
-        android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/ic_thread_divider_profile" />
-
-</LinearLayout>
+</RelativeLayout>

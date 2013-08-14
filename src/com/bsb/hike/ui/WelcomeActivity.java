@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.AnimationDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -39,6 +40,8 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 	private ViewGroup headerLayout;
 	private ImageView errorImage;
 	private View hikeLogoContainer;
+	private ImageView micromaxImage;
+	private boolean isMicromaxDevice;
 
 	@Override
 	public void onCreate(Bundle savedState) {
@@ -55,11 +58,27 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 		tcText = (Button) findViewById(R.id.terms_and_conditions);
 		hiLogoView = findViewById(R.id.ic_hi_logo);
 		hikeLogoContainer = findViewById(R.id.hike_logo_container);
+		micromaxImage = (ImageView) findViewById(R.id.ic_micromax);
 
 		tcContinueLayout = (ViewGroup) findViewById(R.id.tc_continue_layout);
 		booBooLayout = (ViewGroup) findViewById(R.id.boo_boo_layout);
 		tryAgainBtn = (Button) findViewById(R.id.btn_try_again);
 		errorImage = (ImageView) findViewById(R.id.error_img);
+
+		String model = Build.MODEL;
+		String manufacturer = Build.MANUFACTURER;
+
+		if (model != null) {
+			model = model.toUpperCase();
+
+			if (HikeConstants.MICROMAX.equalsIgnoreCase(manufacturer)) {
+				isMicromaxDevice = true;
+			} else {
+				if (model.contains(HikeConstants.MICROMAX)) {
+					isMicromaxDevice = true;
+				}
+			}
+		}
 
 		headerLayout = (ViewGroup) booBooLayout
 				.findViewById(R.id.header_layout);
@@ -69,6 +88,8 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 				.getBoolean(HikeMessengerApp.SPLASH_SEEN, false)) {
 			hikeLogoContainer.setVisibility(View.VISIBLE);
 			tcContinueLayout.setVisibility(View.VISIBLE);
+			micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE
+					: View.GONE);
 			hiLogoView.setVisibility(View.GONE);
 		} else {
 			(new Handler()).postDelayed(new Runnable() {
@@ -169,6 +190,9 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 							@Override
 							public void onAnimationEnd(Animation animation) {
 								hikeLogoContainer.setVisibility(View.VISIBLE);
+								micromaxImage
+										.setVisibility(isMicromaxDevice ? View.VISIBLE
+												: View.GONE);
 							}
 						});
 				tcContinueLayout.startAnimation(fadeInAnimation);
@@ -201,6 +225,8 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 		} else if (v.getId() == tryAgainBtn.getId()) {
 			tcContinueLayout.setVisibility(View.VISIBLE);
 			hikeLogoContainer.setVisibility(View.VISIBLE);
+			micromaxImage.setVisibility(isMicromaxDevice ? View.VISIBLE
+					: View.GONE);
 			booBooLayout.setVisibility(View.GONE);
 			onClick(mAcceptButton);
 		}
@@ -215,6 +241,8 @@ public class WelcomeActivity extends HikeAppStateBaseActivity implements
 		tcContinueLayout.setVisibility(View.GONE);
 		hikeLogoContainer.setVisibility(View.INVISIBLE);
 		booBooLayout.setVisibility(View.VISIBLE);
+		micromaxImage.setVisibility(isMicromaxDevice ? View.INVISIBLE
+				: View.GONE);
 	}
 
 	@Override

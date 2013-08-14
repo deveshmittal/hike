@@ -802,7 +802,7 @@ public class Utils {
 					editor.remove(key);
 				}
 				editor.commit();
-				data.put(HikeConstants.LogEvent.TAG, "mob");
+				data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
 
 				obj.put(HikeConstants.TYPE,
 						HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
@@ -1101,8 +1101,8 @@ public class Utils {
 		currentWidth = options.outWidth;
 
 		if (dimensionLimit == -1) {
-			dimensionLimit = (currentHeight > currentWidth ? currentHeight
-					: currentWidth) / (2);
+			dimensionLimit = (int) (0.75 * (currentHeight > currentWidth ? currentHeight
+					: currentWidth));
 		}
 
 		options.inSampleSize = Math
@@ -1345,7 +1345,7 @@ public class Utils {
 				+ (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE
 						: AccountUtils.REWARDS_STAGING_BASE);
 
-		AccountUtils.stickersUrl = httpString
+		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE
 						: AccountUtils.STICKERS_STAGING_BASE);
 		Log.d("SSL", "Base: " + AccountUtils.base);
@@ -1980,6 +1980,7 @@ public class Utils {
 		editor.putBoolean(HikeConstants.RECEIVE_SMS_PREF, value);
 		editor.commit();
 
+		sendDefaultSMSClientLogEvent(value);
 	}
 
 	public static void setSendUndeliveredSmsSetting(Context context,
@@ -2029,6 +2030,8 @@ public class Utils {
 
 				setupSyncDialogLayout(false, btnContainer, syncProgress, info,
 						btnDivider);
+
+				sendSMSSyncLogEvent(true);
 			}
 		});
 
@@ -2037,6 +2040,8 @@ public class Utils {
 			@Override
 			public void onClick(View v) {
 				dialog.dismiss();
+
+				sendSMSSyncLogEvent(false);
 			}
 		});
 
@@ -2222,11 +2227,17 @@ public class Utils {
 	}
 
 	public static String getLastSeenTimeAsString(Context context,
-			long lastSeenTime) {
-		if (lastSeenTime == -1) {
+			long lastSeenTime, int offline) {
+		/*
+		 * This refers to the setting being turned off
+		 */
+		if (offline == -1) {
 			return null;
 		}
-		if (lastSeenTime == 0) {
+		/*
+		 * This refers to the user being online
+		 */
+		if (offline == 0) {
 			return context.getString(R.string.online);
 		}
 
@@ -2446,10 +2457,15 @@ public class Utils {
 
 		} else if (convMessage.isStickerMessage()) {
 			Sticker sticker = convMessage.getMetadata().getSticker();
+
+			String stickerId = sticker.getStickerId();
+			String stickerUrlId = stickerId
+					.substring(0, stickerId.indexOf("_"));
+
 			String message = context.getString(R.string.sent_sticker)
 					+ ". "
 					+ String.format(AccountUtils.stickersUrl,
-							sticker.getCategoryId(), sticker.getStickerId());
+							sticker.getCategoryId(), stickerUrlId);
 			return message;
 		}
 		return convMessage.getMessage();
@@ -2462,5 +2478,89 @@ public class Utils {
 			}
 		}
 		file.delete();
+	}
+
+	public static void sendLogEvent(JSONObject data) {
+		JSONObject object = new JSONObject();
+		try {
+			data.put(HikeConstants.LogEvent.TAG, HikeConstants.LOGEVENT_TAG);
+
+			object.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.ANALYTICS_EVENT);
+			object.put(HikeConstants.DATA, data);
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					object);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+	}
+
+	private static void sendSMSSyncLogEvent(boolean syncing) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try {
+			metadata.put(HikeConstants.PULL_OLD_SMS, syncing);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+
+	}
+
+	public static void sendDefaultSMSClientLogEvent(boolean defaultClient) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try {
+			metadata.put(HikeConstants.UNIFIED_INBOX, defaultClient);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+
+	}
+
+	public static void sendFreeSmsLogEvent(boolean freeSmsOn) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try {
+			metadata.put(HikeConstants.FREE_SMS_ON, freeSmsOn);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+
+	}
+
+	public static void sendNativeSmsLogEvent(boolean nativeSmsOn) {
+		JSONObject data = new JSONObject();
+		JSONObject metadata = new JSONObject();
+
+		try {
+			metadata.put(HikeConstants.NATIVE_SMS, nativeSmsOn);
+
+			data.put(HikeConstants.METADATA, metadata);
+			data.put(HikeConstants.SUB_TYPE, HikeConstants.SMS);
+
+			sendLogEvent(data);
+		} catch (JSONException e) {
+			Log.w("LogEvent", e);
+		}
+
 	}
 }

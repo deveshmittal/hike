@@ -28,8 +28,8 @@ import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
-import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.HomeActivity;
 
 public class HikeNotification {
 	public static final int HIKE_NOTIFICATION = 0;
@@ -139,7 +139,7 @@ public class HikeNotification {
 
 		long timeStamp = System.currentTimeMillis() / 1000;
 
-		Intent notificationIntent = new Intent(context, CentralTimeline.class);
+		Intent notificationIntent = getHomeActivityIntent(0);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		int icon = R.drawable.ic_contact_logo;
@@ -171,7 +171,7 @@ public class HikeNotification {
 
 		long timeStamp = statusMessage.getTimeStamp();
 
-		Intent notificationIntent = new Intent(context, CentralTimeline.class);
+		Intent notificationIntent = getHomeActivityIntent(0);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		int icon = R.drawable.ic_contact_logo;
@@ -217,7 +217,7 @@ public class HikeNotification {
 
 		int notificationId = (int) timeStamp;
 
-		Intent notificationIntent = new Intent(context, CentralTimeline.class);
+		Intent notificationIntent = getHomeActivityIntent(0);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		int icon = R.drawable.ic_contact_logo;
@@ -229,6 +229,13 @@ public class HikeNotification {
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message);
 		addNotificationId(notificationId);
+	}
+
+	private Intent getHomeActivityIntent(int tabIndex) {
+		Intent intent = new Intent(context, HomeActivity.class);
+		intent.putExtra(HikeConstants.Extras.TAB_INDEX, tabIndex);
+
+		return intent;
 	}
 
 	private void addNotificationId(int id) {

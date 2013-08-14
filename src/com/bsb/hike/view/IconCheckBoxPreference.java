@@ -4,13 +4,9 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.preference.CheckBoxPreference;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeMessengerApp;
-import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 
 public class IconCheckBoxPreference extends CheckBoxPreference {

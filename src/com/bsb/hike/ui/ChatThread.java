@@ -144,10 +144,12 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
@@ -720,7 +722,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)
 					&& !getIntent().getBooleanExtra(
 							HikeConstants.Extras.FROM_CENTRAL_TIMELINE, false)) {
-				intent = new Intent(this, MessagesList.class);
+				intent = new Intent(this, HomeActivity.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
 			} else if (getIntent().hasExtra(
@@ -805,6 +807,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 							hikeFile.getFilePath());
 					intent.putExtra(HikeConstants.Extras.FILE_TYPE,
 							hikeFile.getFileTypeString());
+					if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+						intent.putExtra(HikeConstants.Extras.RECORDING_TIME,
+								hikeFile.getRecordingDuration());
+					}
 				}
 			} else if (message.isStickerMessage()) {
 				Sticker sticker = message.getMetadata().getSticker();
@@ -970,7 +976,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	public boolean showMessageContextMenu(final ConvMessage message) {
 		if (message == null
-				|| message.getParticipantInfoState() != ParticipantInfoState.NO_INFO) {
+				|| message.getParticipantInfoState() != ParticipantInfoState.NO_INFO
+				|| message.getTypingNotification() != null) {
 			return false;
 		}
 
@@ -1193,12 +1200,23 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 						.getStringExtra(HikeConstants.Extras.FILE_PATH);
 				String fileType = intent
 						.getStringExtra(HikeConstants.Extras.FILE_TYPE);
-				HikeFileType hikeFileType = HikeFileType.fromString(fileType);
+
+				boolean isRecording = false;
+				long recordingDuration = -1;
+				if (intent.hasExtra(HikeConstants.Extras.RECORDING_TIME)) {
+					recordingDuration = intent.getLongExtra(
+							HikeConstants.Extras.RECORDING_TIME, -1);
+					isRecording = true;
+					fileType = HikeConstants.VOICE_MESSAGE_CONTENT_TYPE;
+				}
+
+				HikeFileType hikeFileType = HikeFileType.fromString(fileType,
+						isRecording);
 
 				Log.d(getClass().getSimpleName(), "Forwarding file- Type:"
 						+ fileType + " Path: " + filePath);
-				initialiseFileTransfer(filePath, hikeFileType, fileKey,
-						fileType, false, -1);
+				initialiseFileTransfer(filePath, hikeFileType, fileType,
+						isRecording, recordingDuration, true);
 
 				// Making sure the file does not get forwarded again on
 				// orientation change.
@@ -1212,8 +1230,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				int zoomLevel = intent.getIntExtra(
 						HikeConstants.Extras.ZOOM_LEVEL, 0);
 
-				initialiseLocationTransfer(latitude, longitude, zoomLevel,
-						fileKey);
+				initialiseLocationTransfer(latitude, longitude, zoomLevel);
 				// Making sure the file does not get forwarded again on
 				// orientation change.
 				intent.removeExtra(HikeConstants.Extras.LATITUDE);
@@ -1522,7 +1539,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		 */
 		if (HikeMessengerApp.getTypingNotificationSet().containsKey(
 				mContactNumber)) {
-			runOnUiThread(new SetTypingText(true));
+			runOnUiThread(new SetTypingText(true, HikeMessengerApp
+					.getTypingNotificationSet().get(mContactNumber)));
 		}
 
 		/*
@@ -1699,17 +1717,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			 */
 			if (ids != null) {
 				int lastReadIndex = messages.size() - ids.length();
-				/*
-				 * Showing an indicator as to which are the unread messages.
-				 */
-				if ((mConversation instanceof GroupConversation)
-						&& lastReadIndex < messages.size() && lastReadIndex > 0) {
-					mAdapter.addMessage(new ConvMessage(null, null, 0,
-							State.SENT_DELIVERED_READ,
-							MessagesAdapter.LAST_READ_CONV_MESSAGE_ID, 0),
-							lastReadIndex);
-					mAdapter.notifyDataSetChanged();
-				}
 				// Scroll to the last unread message
 				mConversationsView.setSelection(lastReadIndex - 1);
 
@@ -1750,8 +1757,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	}
 
 	private class SetTypingText implements Runnable {
-		public SetTypingText(boolean direction) {
+		TypingNotification typingNotification;
+
+		public SetTypingText(boolean direction,
+				TypingNotification typingNotification) {
 			this.direction = direction;
+			this.typingNotification = typingNotification;
 		}
 
 		boolean direction;
@@ -1760,13 +1771,36 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		public void run() {
 			if (direction) {
 				if (messages.isEmpty()
-						|| messages.get(messages.size() - 1) != null) {
-					addMessage(null);
+						|| messages.get(messages.size() - 1)
+								.getTypingNotification() == null) {
+					addMessage(new ConvMessage(typingNotification));
+				} else if (messages.get(messages.size() - 1)
+						.getTypingNotification() != null) {
+					ConvMessage convMessage = messages.get(messages.size() - 1);
+					convMessage.setTypingNotification(typingNotification);
+
+					mAdapter.notifyDataSetChanged();
 				}
 			} else {
 				if (!messages.isEmpty()
-						&& messages.get(messages.size() - 1) == null) {
-					messages.remove(messages.size() - 1);
+						&& messages.get(messages.size() - 1)
+								.getTypingNotification() != null) {
+					/*
+					 * We only remove the typing notification if the
+					 * conversation in a one to one conversation or it no one is
+					 * typing in the group.
+					 */
+					if (!(mConversation instanceof GroupConversation)) {
+						messages.remove(messages.size() - 1);
+					} else {
+						GroupTypingNotification groupTypingNotification = (GroupTypingNotification) messages
+								.get(messages.size() - 1)
+								.getTypingNotification();
+						if (groupTypingNotification.getGroupParticipantList()
+								.isEmpty()) {
+							messages.remove(messages.size() - 1);
+						}
+					}
 					mAdapter.notifyDataSetChanged();
 				}
 			}
@@ -1837,21 +1871,32 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			}
 		} else if (HikePubSub.END_TYPING_CONVERSATION.equals(type)) {
-			if (mContactNumber.equals(object)) {
-				runOnUiThread(new SetTypingText(false));
+			TypingNotification typingNotification = (TypingNotification) object;
+			if (typingNotification == null) {
+				return;
+			}
+			if (mContactNumber.equals(typingNotification.getId())) {
+				runOnUiThread(new SetTypingText(false, typingNotification));
 			}
 		} else if (HikePubSub.TYPING_CONVERSATION.equals(type)) {
-			if (mContactNumber.equals(object)) {
-				runOnUiThread(new SetTypingText(true));
-				if (shouldShowLastSeen()
-						&& HikeUserDatabase.getInstance().getIsOffline(
-								mContactNumber) != -1) {
+			TypingNotification typingNotification = (TypingNotification) object;
+			if (typingNotification == null) {
+				return;
+			}
+			if (mContactNumber.equals(typingNotification.getId())) {
+
+				ContactInfo contactInfo = HikeUserDatabase.getInstance()
+						.getContactInfoFromMSISDN(mContactNumber, false);
+
+				runOnUiThread(new SetTypingText(true, typingNotification));
+
+				if (shouldShowLastSeen() && contactInfo.getOffline() != -1) {
 					/*
 					 * Publishing an online event for this number.
 					 */
+					contactInfo.setOffline(0);
 					HikeMessengerApp.getPubSub().publish(
-							HikePubSub.LAST_SEEN_TIME_UPDATED,
-							new Pair<String, Long>(mContactNumber, 0l));
+							HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 				}
 			}
 		}
@@ -2122,17 +2167,15 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				});
 			}
 		} else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type)) {
-			Pair<String, Long> lastSeenPair = (Pair<String, Long>) object;
-			String msisdn = lastSeenPair.first;
-			long lastSeenTime = lastSeenPair.second;
+			ContactInfo contactInfo = (ContactInfo) object;
 
-			if (!mContactNumber.equals(msisdn)
+			if (!mContactNumber.equals(contactInfo.getMsisdn())
 					|| (mConversation instanceof GroupConversation)
 					|| !shouldShowLastSeen()) {
 				return;
 			}
 			final String lastSeenString = Utils.getLastSeenTimeAsString(this,
-					lastSeenTime);
+					contactInfo.getLastSeenTime(), contactInfo.getOffline());
 			runOnUiThread(new Runnable() {
 
 				@Override
@@ -2343,15 +2386,17 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private void addMessage(ConvMessage convMessage) {
 		if (messages != null && mAdapter != null) {
-			boolean wasShowingTypingItem = false;
+			TypingNotification typingNotification = null;
 			/*
 			 * If we were showing the typing bubble, we remove it from the add
 			 * the new message and add the typing bubble back again
 			 */
 			if (!messages.isEmpty()
-					&& messages.get(messages.size() - 1) == null) {
+					&& messages.get(messages.size() - 1)
+							.getTypingNotification() != null) {
+				typingNotification = messages.get(messages.size() - 1)
+						.getTypingNotification();
 				messages.remove(messages.size() - 1);
-				wasShowingTypingItem = true;
 			}
 			mAdapter.addMessage(convMessage);
 
@@ -2359,9 +2404,25 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			// the top
 			reachedEnd = false;
 
-			if (convMessage != null && convMessage.isSent()
-					&& wasShowingTypingItem) {
-				mAdapter.addMessage(null);
+			/*
+			 * We add the typing notification back if the message was sent by
+			 * the user or someone in the group is still typing.
+			 */
+			if (convMessage.getTypingNotification() == null
+					&& typingNotification != null) {
+				if (convMessage.isSent()) {
+					mAdapter.addMessage(new ConvMessage(typingNotification));
+				} else if (mConversation instanceof GroupConversation) {
+					if (!((GroupTypingNotification) typingNotification)
+							.getGroupParticipantList().isEmpty()) {
+						Log.d("TypingNotification",
+								"Size in chat thread: "
+										+ ((GroupTypingNotification) typingNotification)
+												.getGroupParticipantList()
+												.size());
+						mAdapter.addMessage(new ConvMessage(typingNotification));
+					}
+				}
 			}
 			mAdapter.notifyDataSetChanged();
 
@@ -3042,8 +3103,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			public void onClick(View v) {
 				recordingDialog.dismiss();
 				initialiseFileTransfer(selectedFile.getPath(),
-						HikeFileType.AUDIO_RECORDING, null, "audio/voice",
-						true, recordedTime);
+						HikeFileType.AUDIO_RECORDING,
+						HikeConstants.VOICE_MESSAGE_CONTENT_TYPE, true,
+						recordedTime, false);
 			}
 		});
 
@@ -3284,8 +3346,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				}
 			}
 
-			initialiseFileTransfer(filePath, hikeFileType, null, null, false,
-					-1);
+			initialiseFileTransfer(filePath, hikeFileType, null, false, -1,
+					false);
 		} else if (requestCode == HikeConstants.SHARE_LOCATION_CODE
 				&& resultCode == RESULT_OK) {
 			double latitude = data.getDoubleExtra(
@@ -3297,7 +3359,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 			Log.d(getClass().getSimpleName(), "Share Location Lat: " + latitude
 					+ " long:" + longitude + " zoom: " + zoomLevel);
-			initialiseLocationTransfer(latitude, longitude, zoomLevel, null);
+			initialiseLocationTransfer(latitude, longitude, zoomLevel);
 		} else if (requestCode == HikeConstants.SHARE_CONTACT_CODE
 				&& resultCode == RESULT_OK) {
 			String id = data.getData().getLastPathSegment();
@@ -3531,27 +3593,29 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	}
 
 	private void initialiseFileTransfer(String filePath,
-			HikeFileType hikeFileType, String fileKey, String fileType,
-			boolean isRecording, long recordingDuration) {
+			HikeFileType hikeFileType, String fileType, boolean isRecording,
+			long recordingDuration, boolean isForwardingFile) {
 		clearTempData();
 		UploadFileTask uploadFileTask = new UploadFileTask(mContactNumber,
-				filePath, fileKey, fileType, hikeFileType, isRecording,
-				recordingDuration, getApplicationContext(), mConversation);
+				filePath, fileType, hikeFileType, isRecording
+						&& !isForwardingFile, recordingDuration,
+				getApplicationContext(), mConversation);
 		uploadFileTask.execute();
 	}
 
 	private void initialiseLocationTransfer(double latitude, double longitude,
-			int zoomLevel, String fileKey) {
+			int zoomLevel) {
 		clearTempData();
 		UploadContactOrLocationTask uploadLocationTask = new UploadContactOrLocationTask(
-				mContactNumber, latitude, longitude, zoomLevel, fileKey,
-				getApplicationContext());
+				mContactNumber, latitude, longitude, zoomLevel,
+				getApplicationContext(), mConversation);
 		uploadLocationTask.execute();
 	}
 
 	private void initialiseContactTransfer(JSONObject contactJson) {
 		UploadContactOrLocationTask contactOrLocationTask = new UploadContactOrLocationTask(
-				mContactNumber, contactJson, getApplicationContext());
+				mContactNumber, contactJson, getApplicationContext(),
+				mConversation);
 		contactOrLocationTask.execute();
 	}
 
@@ -4465,23 +4529,20 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private class FetchLastSeenTask extends AsyncTask<Void, Void, Long> {
 
-		long currentLastSeenValue;
+		ContactInfo contactInfo;
 		boolean retriedOnce;
-		int isOffline;
 		String msisdn;
 
 		public FetchLastSeenTask(String msisdn, boolean retriedOnce) {
 			this.msisdn = msisdn;
-			this.currentLastSeenValue = HikeUserDatabase.getInstance()
-					.getLastSeenTime(msisdn);
-			this.isOffline = HikeUserDatabase.getInstance()
-					.getIsOffline(msisdn);
-			if (isOffline == 0) {
+			this.contactInfo = HikeUserDatabase.getInstance()
+					.getContactInfoFromMSISDN(msisdn, false);
+			if (contactInfo.getOffline() == 0) {
 				/*
 				 * We reset this to 1 since the user's online state is stale
 				 * here.
 				 */
-				isOffline = 1;
+				contactInfo.setOffline(1);
 			}
 			this.retriedOnce = retriedOnce;
 		}
@@ -4541,30 +4602,29 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				/*
 				 * Update current last seen value.
 				 */
-				currentLastSeenValue = result;
+				long currentLastSeenValue = result;
 				/*
 				 * We only apply the offset if the value is greater than 0 since
 				 * 0 and -1 are reserved.
 				 */
 				if (currentLastSeenValue > 0) {
-					isOffline = 1;
-					currentLastSeenValue = Utils.applyServerTimeOffset(
-							ChatThread.this, currentLastSeenValue);
+					contactInfo.setOffline(1);
+					contactInfo.setLastSeenTime(Utils.applyServerTimeOffset(
+							ChatThread.this, currentLastSeenValue));
 				} else {
-					isOffline = (int) currentLastSeenValue;
-					currentLastSeenValue = System.currentTimeMillis() / 1000;
+					contactInfo.setOffline((int) currentLastSeenValue);
+					contactInfo
+							.setLastSeenTime(System.currentTimeMillis() / 1000);
 				}
 
 				HikeUserDatabase.getInstance().updateLastSeenTime(msisdn,
-						currentLastSeenValue);
+						contactInfo.getLastSeenTime());
 				HikeUserDatabase.getInstance().updateIsOffline(msisdn,
-						isOffline);
+						contactInfo.getOffline());
 
 			}
 			HikeMessengerApp.getPubSub().publish(
-					HikePubSub.LAST_SEEN_TIME_UPDATED,
-					new Pair<String, Long>(msisdn,
-							isOffline == 1 ? currentLastSeenValue : isOffline));
+					HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 		}
 	}
 }

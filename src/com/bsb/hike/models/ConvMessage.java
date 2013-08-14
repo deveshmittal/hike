@@ -53,6 +53,8 @@ public class ConvMessage {
 
 	private boolean isStickerMessage;
 
+	private TypingNotification typingNotification;
+
 	public boolean isInvite() {
 		return mInvite;
 	}
@@ -128,6 +130,10 @@ public class ConvMessage {
 			}
 			return NO_INFO;
 		}
+	}
+
+	public ConvMessage(TypingNotification typingNotification) {
+		this.typingNotification = typingNotification;
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp,
@@ -499,14 +505,27 @@ public class ConvMessage {
 		} else {
 			String format;
 			if (android.text.format.DateFormat.is24HourFormat(context)) {
-				format = "d MMM ''yy 'AT' HH:mm";
+				format = "HH:mm";
 			} else {
-				format = "d MMM ''yy 'AT' h:mm aaa";
+				format = "h:mm aaa";
 			}
 
 			DateFormat df = new SimpleDateFormat(format);
 			return df.format(date);
 		}
+	}
+
+	public String getMessageDate(Context context) {
+		Date date = new Date(mTimestamp * 1000);
+		String format;
+		if (android.text.format.DateFormat.is24HourFormat(context)) {
+			format = "d MMM ''yy";
+		} else {
+			format = "d MMM ''yy";
+		}
+
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(date);
 	}
 
 	public void setMsgID(long msgID) {
@@ -565,6 +584,14 @@ public class ConvMessage {
 
 	public boolean isSMS() {
 		return mIsSMS;
+	}
+
+	public TypingNotification getTypingNotification() {
+		return typingNotification;
+	}
+
+	public void setTypingNotification(TypingNotification typingNotification) {
+		this.typingNotification = typingNotification;
 	}
 
 	public int getImageState() {

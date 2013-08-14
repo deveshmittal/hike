@@ -3,82 +3,123 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/conversation_item"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="70dp"
         android:background="@drawable/list_item"
-        android:paddingBottom="@dimen/avatar_top_bottom"
-        android:paddingTop="@dimen/avatar_top_bottom" >
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp" >
 
-        <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="@dimen/avatar_width_height"
-            android:layout_height="@dimen/avatar_width_height"
-            android:layout_centerVertical="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="@dimen/avatar_left_right"
-            android:layout_marginRight="@dimen/avatar_left_right"
-            android:src="@drawable/ic_avatar1" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/contact"
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@+id/last_message_timestamp"
-            android:layout_toRightOf="@id/avatar"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:text="Kavin Mittal"
-            android:textSize="@dimen/main_text_size"
-            android:textColor="@color/lightblack"
-            android:layout_alignTop="@id/avatar" />
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/last_message_timestamp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="17dp"
-            android:text="9:35AM"
-            android:textSize="12sp"
-            android:textColor="#aaaaaa"
-            android:layout_marginTop="4dp"
-            android:textStyle="italic" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_alignLeft="@id/contact"
-            android:layout_below="@id/last_message_timestamp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical" >
+            android:layout_height="wrap_content" >
 
             <ImageView
-                android:id="@+id/msg_status_indicator"
+                android:id="@+id/avatar"
+                android:layout_width="@dimen/larger_avatar"
+                android:layout_height="@dimen/larger_avatar"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/avatar_left_right"
+                android:layout_marginTop="3dp"
+                android:src="@drawable/ic_avatar1" />
+
+            <ImageView
+                android:id="@+id/avatar_frame"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="1dp"
-                android:layout_gravity="center_vertical"
-                android:visibility="visible" />
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/frame_avatar_large_selector" />
+        </FrameLayout>
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/last_message"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginRight="10dp"
-                android:layout_toRightOf="@+id/msg_status_indicator"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
-                android:textSize="@dimen/sub_text_size"
-                android:textColor="@color/lightblack" 
-                android:textStyle="italic"
-                android:visibility="invisible"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/last_message_timestamp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:text="9:35AM"
+                    android:textColor="@color/conversation_timestamp"
+                    android:textSize="12sp"
+                    android:textStyle="bold|italic" />
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/contact"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="5dp"
+                    android:layout_toLeftOf="@id/last_message_timestamp"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="Kavin Mittal kja skldlkas daskd asdjlasj dlasdl asdj las das d"
+                    android:textColor="@color/list_item_header"
+                    android:textSize="14sp"
+                    android:textStyle="bold|italic" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <FrameLayout
+                    android:id="@+id/indicator_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="5dp" >
+
+                    <ImageView
+                        android:id="@+id/msg_status_indicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="visible" />
+
+                    <com.bsb.hike.view.CustomFontTextView
+                        android:id="@+id/unread_indicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_unread_counter"
+                        android:gravity="center"
+                        android:text="99"
+                        android:textColor="@color/white"
+                        android:textSize="12dp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <com.bsb.hike.view.CustomFontTextView
+                    android:id="@+id/last_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/indicator_container"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:text="what&apos;s up dude?  I really like cookies.  They taste so good and fresh.  I like pie as well.  I&apos;m so fat"
+                    android:textColor="@color/list_item_subtext"
+                    android:textSize="16sp"
+                    android:textStyle="bold|italic"
+                    android:visibility="invisible" />
+            </RelativeLayout>
         </LinearLayout>
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

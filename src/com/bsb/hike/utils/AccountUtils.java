@@ -121,9 +121,9 @@ public class AccountUtils {
 
 	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
 
-	public static final String STICKERS_PRODUCTION_BASE = "hike.in/sticker?catId=%1$s&stId=%2$s";
+	public static final String STICKERS_PRODUCTION_BASE = "hike.in/s/%1$s/%2$s";
 
-	public static final String STICKERS_STAGING_BASE = "staging.im.in/sticker?catId=%1$s&stId=%2$s";
+	public static final String STICKERS_STAGING_BASE = "staging.im.hike.in/s/%1$s/%2$s";
 
 	public static String stickersUrl = HTTP_STRING + STICKERS_PRODUCTION_BASE;
 
@@ -350,6 +350,8 @@ public class AccountUtils {
 				Log.e("AccountUtils", "Unable to get app version");
 			}
 
+			String deviceKey = manager.getDeviceId();
+
 			data.put("set_cookie", "0");
 			data.put("devicetype", os);
 			data.put(HikeConstants.LogEvent.OS, os);
@@ -357,6 +359,7 @@ public class AccountUtils {
 			data.put("deviceid", deviceId);
 			data.put("devicetoken", deviceId);
 			data.put("deviceversion", device);
+			data.put("device_key", deviceKey);
 			data.put("appversion", appVersion);
 			data.put(
 					"invite_token",
