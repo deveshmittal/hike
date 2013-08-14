@@ -575,8 +575,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					}
 					String participantMsisdn = metadata.getMsisdn();
 					String name = ((GroupConversation) conversation)
-							.getGroupParticipant(participantMsisdn)
-							.getContactInfo().getFirstName();
+							.getGroupParticipantFirstName(participantMsisdn);
 					message = Utils.getFormattedParticipantInfo(
 							String.format(context
 									.getString(R.string.left_conversation),
@@ -600,8 +599,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				if (conversation instanceof GroupConversation) {
 					String participantMsisdn = metadata.getMsisdn();
 					name = ((GroupConversation) conversation)
-							.getGroupParticipant(participantMsisdn)
-							.getContactInfo().getFirstName();
+							.getGroupParticipantFirstName(participantMsisdn);
 					message = context
 							.getString(
 									infoState == ParticipantInfoState.USER_JOIN ? (metadata
@@ -666,8 +664,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				String participantName = userMsisdn.equals(msisdn) ? context
 						.getString(R.string.you)
 						: ((GroupConversation) conversation)
-								.getGroupParticipant(msisdn).getContactInfo()
-								.getFirstName();
+								.getGroupParticipantFirstName(msisdn);
 				String message = String
 						.format(context.getString(convMessage
 								.getParticipantInfoState() == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
@@ -724,9 +721,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					StringBuilder dndNamesSB = new StringBuilder();
 					for (int i = 0; i < dndNumbers.length(); i++) {
 						String name = conversation instanceof GroupConversation ? ((GroupConversation) conversation)
-								.getGroupParticipant(dndNumbers.optString(i))
-								.getContactInfo().getFirstName()
-								: Utils.getFirstName(conversation.getLabel());
+								.getGroupParticipantFirstName(dndNumbers
+										.optString(i)) : Utils
+								.getFirstName(conversation.getLabel());
 						if (i < dndNumbers.length() - 2) {
 							dndNamesSB.append(name + ", ");
 						} else if (i < dndNumbers.length() - 1) {
@@ -1040,9 +1037,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					&& (conversation instanceof GroupConversation)) {
 				holder.participantNameFT
 						.setText(((GroupConversation) conversation)
-								.getGroupParticipant(
-										convMessage.getGroupParticipantMsisdn())
-								.getContactInfo().getFirstName()
+								.getGroupParticipantName(convMessage
+										.getGroupParticipantMsisdn())
 								+ HikeConstants.SEPARATOR);
 				holder.participantNameFT.setVisibility(View.VISIBLE);
 			}
@@ -1072,9 +1068,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.stickerParticipantName.setVisibility(View.VISIBLE);
 				holder.stickerParticipantName
 						.setText(((GroupConversation) conversation)
-								.getGroupParticipant(
-										convMessage.getGroupParticipantMsisdn())
-								.getContactInfo().getFirstName()
+								.getGroupParticipantName(convMessage
+										.getGroupParticipantMsisdn())
 								+ HikeConstants.SEPARATOR);
 			}
 			/*
@@ -1132,13 +1127,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (isGroupChat && !convMessage.isSent()
 					&& convMessage.getGroupParticipantMsisdn() != null) {
 				markedUp = Utils
-						.addContactName(
-								((GroupConversation) conversation)
-										.getGroupParticipant(
-												convMessage
-														.getGroupParticipantMsisdn())
-										.getContactInfo().getFirstName(),
-								markedUp);
+						.addContactName(((GroupConversation) conversation)
+								.getGroupParticipantName(convMessage
+										.getGroupParticipantMsisdn()), markedUp);
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp, false);

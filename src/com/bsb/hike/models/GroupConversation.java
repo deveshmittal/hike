@@ -83,6 +83,10 @@ public class GroupConversation extends Conversation {
 				msisdn, msisdn, msisdn));
 	}
 
+	public String getGroupParticipantFirstName(String msisdn) {
+		return getGroupParticipant(msisdn).getContactInfo().getFirstName();
+	}
+
 	public String getLabel() {
 		return !TextUtils.isEmpty(getContactName()) ? getContactName() : Utils
 				.defaultGroupName(groupParticipantList);

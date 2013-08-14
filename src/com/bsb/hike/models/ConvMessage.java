@@ -258,11 +258,10 @@ public class ConvMessage {
 									(GroupConversation) conversation));
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = String.format(
-					context.getString(R.string.left_conversation),
+			this.mMessage = String.format(context
+					.getString(R.string.left_conversation),
 					((GroupConversation) conversation)
-							.getGroupParticipant(metadata.getMsisdn())
-							.getContactInfo().getFirstName());
+							.getGroupParticipantFirstName(metadata.getMsisdn()));
 			break;
 		case GROUP_END:
 			this.mMessage = context.getString(R.string.group_chat_end);
@@ -272,8 +271,7 @@ public class ConvMessage {
 				String name;
 				if (conversation instanceof GroupConversation) {
 					name = ((GroupConversation) conversation)
-							.getGroupParticipant(metadata.getMsisdn())
-							.getContactInfo().getFirstName();
+							.getGroupParticipantFirstName(metadata.getMsisdn());
 				} else {
 					name = Utils.getFirstName(conversation.getLabel());
 				}
@@ -286,8 +284,7 @@ public class ConvMessage {
 			String name;
 			if (conversation instanceof GroupConversation) {
 				name = ((GroupConversation) conversation)
-						.getGroupParticipant(metadata.getMsisdn())
-						.getContactInfo().getFirstName();
+						.getGroupParticipantFirstName(metadata.getMsisdn());
 			} else {
 				name = Utils.getFirstName(conversation.getLabel());
 			}
@@ -306,8 +303,7 @@ public class ConvMessage {
 			String participantName = userMsisdn.equals(msisdn) ? context
 					.getString(R.string.you)
 					: ((GroupConversation) conversation)
-							.getGroupParticipant(msisdn).getContactInfo()
-							.getFirstName();
+							.getGroupParticipantFirstName(msisdn);
 			this.mMessage = String
 					.format(context
 							.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name

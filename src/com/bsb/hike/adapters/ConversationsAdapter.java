@@ -114,13 +114,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						message.isSent());
 				if ((conversation instanceof GroupConversation)
 						&& !message.isSent()) {
-					markedUp = Utils
-							.addContactName(
-									((GroupConversation) conversation)
-											.getGroupParticipant(
-													message.getGroupParticipantMsisdn())
-											.getContactInfo().getFirstName(),
-									markedUp);
+					markedUp = Utils.addContactName(
+							((GroupConversation) conversation)
+									.getGroupParticipantFirstName(message
+											.getGroupParticipantMsisdn()),
+							markedUp);
 				}
 				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null
 						&& ChatThread.fileTransferTaskMap.containsKey(message
@@ -148,9 +146,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					for (int i = 0; i < dndNumbers.length(); i++) {
 						String dndName;
 						dndName = conversation instanceof GroupConversation ? ((GroupConversation) conversation)
-								.getGroupParticipant(dndNumbers.optString(i))
-								.getContactInfo().getFirstName()
-								: Utils.getFirstName(conversation.getLabel());
+								.getGroupParticipantFirstName(dndNumbers
+										.optString(i)) : Utils
+								.getFirstName(conversation.getLabel());
 						if (i < dndNumbers.length() - 2) {
 							dndNames.append(dndName + ", ");
 						} else if (i < dndNumbers.length() - 1) {
@@ -182,8 +180,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 				if (conversation instanceof GroupConversation) {
 					String participantMsisdn = metadata.getMsisdn();
 					participantName = ((GroupConversation) conversation)
-							.getGroupParticipant(participantMsisdn)
-							.getContactInfo().getFirstName();
+							.getGroupParticipantFirstName(participantMsisdn);
 				} else {
 					participantName = Utils.getFirstName(conversation
 							.getLabel());
@@ -200,8 +197,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					// booted because of that reason
 					String participantMsisdn = metadata.getMsisdn();
 					String participantName = ((GroupConversation) conversation)
-							.getGroupParticipant(participantMsisdn)
-							.getContactInfo().getFirstName();
+							.getGroupParticipantFirstName(participantMsisdn);
 					markedUp = String.format(
 							context.getString(R.string.left_conversation),
 							participantName);
@@ -218,8 +214,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 				String participantName = userMsisdn.equals(msisdn) ? context
 						.getString(R.string.you)
 						: ((GroupConversation) conversation)
-								.getGroupParticipant(msisdn).getContactInfo()
-								.getFirstName();
+								.getGroupParticipantFirstName(msisdn);
 
 				markedUp = String.format(
 						context.getString(R.string.change_group_name),
@@ -239,9 +234,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					markedUp = Utils
 							.addContactName(
 									((GroupConversation) conversation)
-											.getGroupParticipant(
-													message.getGroupParticipantMsisdn())
-											.getContactInfo().getFirstName(),
+											.getGroupParticipantFirstName(
+													message.getGroupParticipantMsisdn()),
 									markedUp);
 				}
 				SmileyParser smileyParser = SmileyParser.getInstance();

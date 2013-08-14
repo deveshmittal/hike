@@ -690,16 +690,14 @@ public class Utils {
 			JSONArray participantInfoArray, GroupConversation conversation) {
 		JSONObject participant = (JSONObject) participantInfoArray.opt(0);
 		String highlight = ((GroupConversation) conversation)
-				.getGroupParticipant(
-						participant.optString(HikeConstants.MSISDN))
-				.getContactInfo().getFirstName();
+				.getGroupParticipantFirstName(participant
+						.optString(HikeConstants.MSISDN));
 
 		if (participantInfoArray.length() == 2) {
 			JSONObject participant2 = (JSONObject) participantInfoArray.opt(1);
 			String name2 = ((GroupConversation) conversation)
-					.getGroupParticipant(
-							participant2.optString(HikeConstants.MSISDN))
-					.getContactInfo().getFirstName();
+					.getGroupParticipantFirstName(participant2
+							.optString(HikeConstants.MSISDN));
 
 			highlight += " and " + name2;
 		} else if (participantInfoArray.length() > 2) {

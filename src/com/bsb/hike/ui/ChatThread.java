@@ -2511,9 +2511,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 		mComposeView.setEnabled(false);
 		String label = mConversation instanceof GroupConversation ? ((GroupConversation) mConversation)
-				.getGroupParticipant(getMsisdnMainUser()).getContactInfo()
-				.getFirstName()
-				: mLabel;
+				.getGroupParticipantFirstName(getMsisdnMainUser()) : mLabel;
 		String formatString;
 		if (blockOverlay) {
 			overlayImg.setImageResource(R.drawable.ic_no);
