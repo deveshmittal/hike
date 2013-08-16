@@ -6,16 +6,13 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,48 +26,41 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
 
-public class FriendsAdapter extends BaseExpandableListAdapter implements
-		OnClickListener {
+public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 
 	public static final int FRIEND_INDEX = 0;
-	public static final int RECENT_INDEX = 1;
-	public static final int HIKE_INDEX = 2;
+	public static final int HIKE_INDEX = 1;
 
-	private final int[] headerRes = { R.string.friends, R.string.recents,
-			R.string.contacts };
+	public static final String SECTION_ID = "-911";
 
-	private enum ChildType {
-		FRIEND, NOT_FRIEND
+	private enum ViewType {
+		SECTION, FRIEND, NOT_FRIEND
 	}
 
 	private LayoutInflater layoutInflater;
-	private List<List<ContactInfo>> contactList;
-	private boolean freeSMSOn;
+	private List<ContactInfo> completeList;
+	private List<ContactInfo> friendsList;
+	private List<ContactInfo> otherContactsList;
 	private Context context;
-	private ExpandableListView parentView;
+	private ContactInfo friendsSection;
+	private ContactInfo contactsSection;
 
-	public FriendsAdapter(final Context context, ExpandableListView parent) {
+	public FriendsAdapter(final Context context) {
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
-		this.parentView = parent;
 
-		freeSMSOn = PreferenceManager.getDefaultSharedPreferences(context)
-				.getBoolean(HikeConstants.FREE_SMS_PREF, false);
+		completeList = new ArrayList<ContactInfo>();
 
-		contactList = new ArrayList<List<ContactInfo>>(0);
+		friendsList = new ArrayList<ContactInfo>(0);
+		otherContactsList = new ArrayList<ContactInfo>(0);
 
-		new AsyncTask<Void, Void, List<List<ContactInfo>>>() {
+		new AsyncTask<Void, Void, Void>() {
 
 			List<ContactInfo> favoriteTaskList;
-			List<ContactInfo> onHikeTaskList;
-			List<ContactInfo> recentTaskList;
+			List<ContactInfo> otherTaskList;
 
 			@Override
-			protected List<List<ContactInfo>> doInBackground(Void... params) {
-				Log.d(getClass().getSimpleName(),
-						"Favorite List started fetching");
-				List<List<ContactInfo>> friendsList = new ArrayList<List<ContactInfo>>();
-
+			protected Void doInBackground(Void... params) {
 				String myMsisdn = context.getSharedPreferences(
 						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 						HikeMessengerApp.MSISDN_SETTING, "");
@@ -91,146 +81,170 @@ public class FriendsAdapter extends BaseExpandableListAdapter implements
 				Collections.sort(favoriteTaskList,
 						ContactInfo.lastSeenTimeComparator);
 
-				onHikeTaskList = hikeUserDatabase.getContactsOfFavoriteType(
-						FavoriteType.NOT_FRIEND, HikeConstants.ON_HIKE_VALUE,
+				otherTaskList = hikeUserDatabase.getContactsOfFavoriteType(
+						FavoriteType.NOT_FRIEND, HikeConstants.BOTH_VALUE,
 						myMsisdn);
-				onHikeTaskList.addAll(hikeUserDatabase
+				otherTaskList.addAll(hikeUserDatabase
 						.getContactsOfFavoriteType(
 								FavoriteType.REQUEST_RECEIVED,
-								HikeConstants.ON_HIKE_VALUE, myMsisdn));
-				onHikeTaskList.addAll(hikeUserDatabase
+								HikeConstants.BOTH_VALUE, myMsisdn, true));
+				otherTaskList.addAll(hikeUserDatabase
 						.getContactsOfFavoriteType(
 								FavoriteType.REQUEST_RECEIVED_REJECTED,
-								HikeConstants.ON_HIKE_VALUE, myMsisdn));
-				Collections.sort(onHikeTaskList);
+								HikeConstants.BOTH_VALUE, myMsisdn, true));
+				Collections.sort(otherTaskList);
 
-				recentTaskList = hikeUserDatabase.getRecentContacts(
-						HikeConstants.RECENT_COUNT_IN_FAVORITE, false,
-						FavoriteType.NOT_FRIEND, freeSMSOn ? 1 : 0, myMsisdn);
-
-				friendsList.add(favoriteTaskList);
-				friendsList.add(recentTaskList);
-				friendsList.add(onHikeTaskList);
-
-				return friendsList;
+				return null;
 			}
 
 			@Override
-			protected void onPostExecute(List<List<ContactInfo>> result) {
-				Log.d(getClass().getSimpleName(), "Favorite List fetched");
-				contactList = result;
-				notifyDataSetChanged();
+			protected void onPostExecute(Void result) {
+				friendsList = favoriteTaskList;
+				otherContactsList = otherTaskList;
 
-				for (int i = 0; i < getGroupCount(); i++) {
-					parentView.expandGroup(i);
-				}
+				makeCompleteList();
 			}
 
 		}.execute();
 	}
 
-	public void removeContact(ContactInfo contactInfo) {
+	public void makeCompleteList() {
+		completeList.clear();
+
+		friendsSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				Integer.toString(friendsList.size()),
+				context.getString(R.string.friends), null);
+		completeList.add(friendsSection);
+
+		completeList.addAll(friendsList);
+
+		contactsSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+				Integer.toString(otherContactsList.size()),
+				context.getString(R.string.contacts), null);
+		completeList.add(contactsSection);
+
+		completeList.addAll(otherContactsList);
+
+		notifyDataSetChanged();
+	}
+
+	private void removeContactByMatchingMsisdn(List<ContactInfo> contactList,
+			ContactInfo contactInfo) {
 		for (int i = 0; i < contactList.size(); i++) {
-
-			List<ContactInfo> groupList = contactList.get(i);
-
-			boolean elementRemoved = false;
-
-			for (int j = 0; j < groupList.size(); j++) {
-				ContactInfo groupListContact = groupList.get(j);
-				if (groupListContact.getMsisdn()
-						.equals(contactInfo.getMsisdn())) {
-					groupList.remove(j);
-					elementRemoved = true;
-					break;
-				}
-			}
-
-			/*
-			 * If a contact is present in the friends list, we can be sure its
-			 * not present in the other lists.
-			 */
-			if (elementRemoved && i == FRIEND_INDEX) {
+			ContactInfo listContactInfo = contactList.get(i);
+			if (listContactInfo.getMsisdn().equals(contactInfo.getMsisdn())) {
+				contactList.remove(i);
 				break;
 			}
 		}
 	}
 
-	public void addToGroup(ContactInfo contactInfo, int groupIndex) {
-		removeContact(contactInfo);
+	public void removeContact(ContactInfo contactInfo,
+			boolean remakeCompleteList) {
+		removeContactByMatchingMsisdn(friendsList, contactInfo);
 
-		if (getGroupCount() == 0) {
+		removeContactByMatchingMsisdn(otherContactsList, contactInfo);
+
+		if (remakeCompleteList) {
+			makeCompleteList();
+		}
+	}
+
+	public void addToGroup(ContactInfo contactInfo, int groupIndex) {
+		removeContact(contactInfo, false);
+
+		if (getCount() == 0) {
 			return;
 		}
 
-		List<ContactInfo> groupList = contactList.get(groupIndex);
-		if (groupIndex != RECENT_INDEX) {
-			groupList.add(contactInfo);
-			if (groupIndex != 0) {
-				Collections.sort(groupList);
-			} else {
-				Collections.sort(groupList, ContactInfo.lastSeenTimeComparator);
-			}
-		} else {
-			groupList.add(0, contactInfo);
-			if (groupList.size() > HikeConstants.RECENT_COUNT_IN_FAVORITE) {
-				groupList.remove(groupList.size() - 1);
-			}
+		switch (groupIndex) {
+		case FRIEND_INDEX:
+			friendsList.add(contactInfo);
+			Collections.sort(friendsList, ContactInfo.lastSeenTimeComparator);
+			break;
+		case HIKE_INDEX:
+			otherContactsList.add(contactInfo);
+			Collections.sort(otherContactsList);
 		}
 
-		notifyDataSetChanged();
+		makeCompleteList();
 	}
 
 	public void refreshGroupList(List<ContactInfo> newGroupList, int groupIndex) {
-		List<ContactInfo> groupList = contactList.get(groupIndex);
+		List<ContactInfo> groupList = null;
+		switch (groupIndex) {
+		case FRIEND_INDEX:
+			groupList = friendsList;
+			break;
+		case HIKE_INDEX:
+			groupList = otherContactsList;
+			break;
+		}
 		groupList.clear();
 
 		groupList.addAll(newGroupList);
-		notifyDataSetChanged();
+
+		makeCompleteList();
 	}
 
 	public void removeFromGroup(ContactInfo contactInfo, int groupIndex) {
-		List<ContactInfo> groupList = contactList.get(groupIndex);
-		groupList.remove(contactInfo);
-
-		notifyDataSetChanged();
-	}
-
-	@Override
-	public ContactInfo getChild(int groupPosition, int childPosition) {
-		List<ContactInfo> groupList = contactList.get(groupPosition);
-		return groupList.get(childPosition);
-	}
-
-	@Override
-	public long getChildId(int groupPosition, int childPosition) {
-		return childPosition + (groupPosition * 10000);
-	}
-
-	@Override
-	public int getChildType(int groupPosition, int childPosition) {
-		if (groupPosition == FRIEND_INDEX) {
-			return ChildType.FRIEND.ordinal();
+		switch (groupIndex) {
+		case FRIEND_INDEX:
+			removeContactByMatchingMsisdn(friendsList, contactInfo);
+			break;
+		case HIKE_INDEX:
+			removeContactByMatchingMsisdn(otherContactsList, contactInfo);
+			break;
 		}
-		return ChildType.NOT_FRIEND.ordinal();
+		makeCompleteList();
 	}
 
 	@Override
-	public int getChildTypeCount() {
-		return ChildType.values().length;
+	public int getCount() {
+		return completeList.size();
 	}
 
 	@Override
-	public View getChildView(int groupPosition, int childPosition,
-			boolean isLastChild, View convertView, ViewGroup parent) {
+	public ContactInfo getItem(int position) {
+		return completeList.get(position);
+	}
 
-		ChildType childType = ChildType.values()[getChildType(groupPosition,
-				childPosition)];
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
 
-		ContactInfo contactInfo = getChild(groupPosition, childPosition);
+	@Override
+	public int getViewTypeCount() {
+		return ViewType.values().length;
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		ContactInfo contactInfo = getItem(position);
+		if (SECTION_ID.equals(contactInfo.getId())) {
+			return ViewType.SECTION.ordinal();
+		} else {
+			FavoriteType favoriteType = contactInfo.getFavoriteType();
+			if (favoriteType == FavoriteType.FRIEND
+					|| favoriteType == FavoriteType.REQUEST_SENT
+					|| favoriteType == FavoriteType.REQUEST_SENT_REJECTED) {
+				return ViewType.FRIEND.ordinal();
+			} else {
+				return ViewType.NOT_FRIEND.ordinal();
+			}
+		}
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+
+		ViewType viewType = ViewType.values()[getItemViewType(position)];
+
+		ContactInfo contactInfo = getItem(position);
 
 		if (convertView == null) {
-			switch (childType) {
+			switch (viewType) {
 			case FRIEND:
 				convertView = layoutInflater.inflate(
 						R.layout.friends_child_view, null);
@@ -240,119 +254,77 @@ public class FriendsAdapter extends BaseExpandableListAdapter implements
 				convertView = layoutInflater.inflate(
 						R.layout.contact_child_view, null);
 				break;
+
+			case SECTION:
+				convertView = layoutInflater.inflate(
+						R.layout.friends_group_view, null);
+				break;
 			}
 		}
 
-		ImageView avatar = (ImageView) convertView.findViewById(R.id.avatar);
-		TextView name = (TextView) convertView.findViewById(R.id.contact);
+		if (viewType == ViewType.FRIEND || viewType == ViewType.NOT_FRIEND) {
+			ImageView avatar = (ImageView) convertView
+					.findViewById(R.id.avatar);
+			TextView name = (TextView) convertView.findViewById(R.id.contact);
 
-		avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(contactInfo.getMsisdn()));
-		name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
-				.getMsisdn() : contactInfo.getName());
+			avatar.setImageDrawable(IconCacheManager.getInstance()
+					.getIconForMSISDN(contactInfo.getMsisdn()));
+			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
+					.getMsisdn() : contactInfo.getName());
 
-		if (childType == ChildType.FRIEND) {
-			TextView lastSeen = (TextView) convertView
-					.findViewById(R.id.last_seen);
-			ImageView avatarFrame = (ImageView) convertView
-					.findViewById(R.id.avatar_frame);
+			if (viewType == ViewType.FRIEND) {
+				TextView lastSeen = (TextView) convertView
+						.findViewById(R.id.last_seen);
+				ImageView avatarFrame = (ImageView) convertView
+						.findViewById(R.id.avatar_frame);
 
-			lastSeen.setTextColor(context.getResources().getColor(
-					R.color.conversation_timestamp));
-			lastSeen.setVisibility(View.GONE);
+				lastSeen.setTextColor(context.getResources().getColor(
+						R.color.conversation_timestamp));
+				lastSeen.setVisibility(View.GONE);
 
-			avatarFrame
-					.setImageResource(R.drawable.frame_avatar_medium_selector);
+				avatarFrame
+						.setImageResource(R.drawable.frame_avatar_medium_selector);
 
-			if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
-					|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED
-					|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
-				String lastSeenString = Utils
-						.getLastSeenTimeAsString(context,
-								contactInfo.getLastSeenTime(),
-								contactInfo.getOffline());
-				if (!TextUtils.isEmpty(lastSeenString)) {
-					if (contactInfo.getOffline() == 0) {
-						lastSeen.setTextColor(context.getResources().getColor(
-								R.color.unread_message));
-						avatarFrame
-								.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
+				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
+						|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED
+						|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
+					String lastSeenString = Utils.getLastSeenTimeAsString(
+							context, contactInfo.getLastSeenTime(),
+							contactInfo.getOffline());
+					if (!TextUtils.isEmpty(lastSeenString)) {
+						if (contactInfo.getOffline() == 0) {
+							lastSeen.setTextColor(context.getResources()
+									.getColor(R.color.unread_message));
+							avatarFrame
+									.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
+						}
+						lastSeen.setVisibility(View.VISIBLE);
+						lastSeen.setText(lastSeenString);
 					}
-					lastSeen.setVisibility(View.VISIBLE);
-					lastSeen.setText(lastSeenString);
+				} else {
+					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
+						lastSeen.setVisibility(View.VISIBLE);
+						lastSeen.setText(R.string.friend_request_sent);
+					}
 				}
 			} else {
-				if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
-					lastSeen.setVisibility(View.VISIBLE);
-					lastSeen.setText(R.string.friend_request_sent);
-				}
+				ImageView addFriend = (ImageView) convertView
+						.findViewById(R.id.add_friend);
+				addFriend.setTag(contactInfo);
+				addFriend.setOnClickListener(this);
 			}
-		} else {
-			ImageView addFriend = (ImageView) convertView
-					.findViewById(R.id.add_friend);
-			addFriend.setTag(contactInfo);
-			addFriend.setOnClickListener(this);
-		}
 
-		convertView.findViewById(R.id.divider).setVisibility(
-				isLastChild ? View.GONE : View.VISIBLE);
+		} else {
+			TextView headerName = (TextView) convertView
+					.findViewById(R.id.name);
+			TextView headerCount = (TextView) convertView
+					.findViewById(R.id.count);
+
+			headerName.setText(contactInfo.getName());
+			headerCount.setText(contactInfo.getMsisdn());
+		}
 
 		return convertView;
-	}
-
-	@Override
-	public int getChildrenCount(int groupPosition) {
-		return contactList.get(groupPosition).size();
-	}
-
-	@Override
-	public List<ContactInfo> getGroup(int groupPosition) {
-		return contactList.get(groupPosition);
-	}
-
-	@Override
-	public int getGroupCount() {
-		return contactList.size();
-	}
-
-	@Override
-	public long getGroupId(int groupPosition) {
-		return groupPosition;
-	}
-
-	@Override
-	public View getGroupView(int groupPosition, boolean isExpanded,
-			View convertView, ViewGroup parent) {
-		if (convertView == null) {
-			convertView = layoutInflater.inflate(R.layout.friends_group_view,
-					null);
-		}
-
-		TextView name = (TextView) convertView.findViewById(R.id.name);
-		ImageView groupIndicator = (ImageView) convertView
-				.findViewById(R.id.group_indicator);
-		if (contactList.get(groupPosition).isEmpty()) {
-			groupIndicator.setVisibility(View.GONE);
-		} else {
-			groupIndicator.setVisibility(View.VISIBLE);
-			groupIndicator
-					.setImageResource(isExpanded ? R.drawable.ic_list_open
-							: R.drawable.ic_list_close);
-		}
-
-		name.setText(headerRes[groupPosition]);
-
-		return convertView;
-	}
-
-	@Override
-	public boolean hasStableIds() {
-		return true;
-	}
-
-	@Override
-	public boolean isChildSelectable(int groupPosition, int childPosition) {
-		return true;
 	}
 
 	@Override
@@ -376,6 +348,21 @@ public class FriendsAdapter extends BaseExpandableListAdapter implements
 				contactInfo, favoriteType);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
 				favoriteAdded);
+	}
+
+	@Override
+	public boolean areAllItemsEnabled() {
+		return false;
+	}
+
+	@Override
+	public boolean isEnabled(int position) {
+		ContactInfo contactInfo = getItem(position);
+		if (SECTION_ID.equals(contactInfo.getId())) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 }

@@ -5,11 +5,11 @@
     android:background="@color/home_bg"
     android:orientation="vertical" >
 
-    <ExpandableListView
-        android:id="@+id/friends_list"
+    <ListView
+        android:id="@id/android:list"
         style="@style/HomeList"
-        android:divider="@null"
-        android:groupIndicator="@null" />
+        android:layout_marginLeft="0dp"
+        android:layout_marginRight="0dp" />
 
     <ProgressBar
         android:id="@android:id/empty"

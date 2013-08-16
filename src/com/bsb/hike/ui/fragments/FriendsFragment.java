@@ -6,15 +6,13 @@ import java.util.List;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ExpandableListView;
-import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockListFragment;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -26,16 +24,14 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ChatThread;
 
-public class FriendsFragment extends SherlockFragment implements
-		OnChildClickListener, Listener {
+public class FriendsFragment extends SherlockListFragment implements Listener {
 
 	private FriendsAdapter friendsAdapter;
 
 	private String[] pubSubListeners = { HikePubSub.ICON_CHANGED,
-			HikePubSub.RECENT_CONTACTS_UPDATED, HikePubSub.FAVORITE_TOGGLED,
-			HikePubSub.USER_JOINED, HikePubSub.USER_LEFT,
-			HikePubSub.CONTACT_ADDED, HikePubSub.REFRESH_FAVORITES,
-			HikePubSub.REFRESH_RECENTS, HikePubSub.FRIEND_REQUEST_ACCEPTED,
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.USER_JOINED,
+			HikePubSub.USER_LEFT, HikePubSub.CONTACT_ADDED,
+			HikePubSub.REFRESH_FAVORITES, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST, HikePubSub.BLOCK_USER,
 			HikePubSub.UNBLOCK_USER, HikePubSub.LAST_SEEN_TIME_UPDATED };
 
@@ -46,17 +42,12 @@ public class FriendsFragment extends SherlockFragment implements
 			Bundle savedInstanceState) {
 		View parent = inflater.inflate(R.layout.friends, null);
 
-		ExpandableListView friendsList = (ExpandableListView) parent
-				.findViewById(R.id.friends_list);
+		ListView friendsList = (ListView) parent
+				.findViewById(android.R.id.list);
 		friendsList.setEmptyView(parent.findViewById(android.R.id.empty));
 
-		friendsAdapter = new FriendsAdapter(getActivity(), friendsList);
+		friendsAdapter = new FriendsAdapter(getActivity());
 		friendsList.setAdapter(friendsAdapter);
-		friendsList.setOnChildClickListener(this);
-
-		for (int i = 0; i < friendsAdapter.getGroupCount(); i++) {
-			friendsList.expandGroup(i);
-		}
 
 		return parent;
 	}
@@ -77,10 +68,12 @@ public class FriendsFragment extends SherlockFragment implements
 	}
 
 	@Override
-	public boolean onChildClick(ExpandableListView parent, View v,
-			int groupPosition, int childPosition, long id) {
-		ContactInfo contactInfo = friendsAdapter.getChild(groupPosition,
-				childPosition);
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		ContactInfo contactInfo = friendsAdapter.getItem(position);
+
+		if (FriendsAdapter.SECTION_ID.equals(contactInfo.getId())) {
+			return;
+		}
 
 		Intent intent = new Intent(getActivity(), ChatThread.class);
 		if (contactInfo.getName() != null) {
@@ -89,7 +82,7 @@ public class FriendsFragment extends SherlockFragment implements
 		intent.putExtra(HikeConstants.Extras.MSISDN, contactInfo.getMsisdn());
 		startActivity(intent);
 
-		return true;
+		return;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -106,8 +99,7 @@ public class FriendsFragment extends SherlockFragment implements
 					friendsAdapter.notifyDataSetChanged();
 				}
 			});
-		} else if (HikePubSub.RECENT_CONTACTS_UPDATED.equals(type)
-				|| HikePubSub.USER_JOINED.equals(type)
+		} else if (HikePubSub.USER_JOINED.equals(type)
 				|| HikePubSub.USER_LEFT.equals(type)) {
 			final ContactInfo contactInfo = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN((String) object, true);
@@ -119,10 +111,7 @@ public class FriendsFragment extends SherlockFragment implements
 
 				@Override
 				public void run() {
-					if (HikePubSub.RECENT_CONTACTS_UPDATED.equals(type)) {
-						friendsAdapter.addToGroup(contactInfo,
-								FriendsAdapter.RECENT_INDEX);
-					} else if (HikePubSub.USER_JOINED.equals(type)) {
+					if (HikePubSub.USER_JOINED.equals(type)) {
 						friendsAdapter.addToGroup(contactInfo,
 								FriendsAdapter.HIKE_INDEX);
 					} else if (HikePubSub.USER_LEFT.equals(type)) {
@@ -205,26 +194,6 @@ public class FriendsFragment extends SherlockFragment implements
 							FriendsAdapter.FRIEND_INDEX);
 				}
 			});
-		} else if (HikePubSub.REFRESH_RECENTS.equals(type)) {
-			String myMsisdn = preferences.getString(
-					HikeMessengerApp.MSISDN_SETTING, "");
-
-			boolean freeSMSOn = PreferenceManager.getDefaultSharedPreferences(
-					getActivity()).getBoolean(HikeConstants.FREE_SMS_PREF,
-					false);
-
-			final List<ContactInfo> recentList = HikeUserDatabase.getInstance()
-					.getRecentContacts(HikeConstants.RECENT_COUNT_IN_FAVORITE,
-							false, FavoriteType.NOT_FRIEND, freeSMSOn ? 1 : 0,
-							myMsisdn);
-			getActivity().runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					friendsAdapter.refreshGroupList(recentList,
-							FriendsAdapter.RECENT_INDEX);
-				}
-			});
 		} else if (HikePubSub.BLOCK_USER.equals(type)
 				|| HikePubSub.UNBLOCK_USER.equals(type)) {
 			String msisdn = (String) object;
@@ -239,7 +208,7 @@ public class FriendsFragment extends SherlockFragment implements
 				@Override
 				public void run() {
 					if (blocked) {
-						friendsAdapter.removeContact(contactInfo);
+						friendsAdapter.removeContact(contactInfo, true);
 					} else {
 						if (contactInfo.isOnhike()) {
 							friendsAdapter.addToGroup(contactInfo,
@@ -251,9 +220,7 @@ public class FriendsFragment extends SherlockFragment implements
 		} else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type)) {
 			final ContactInfo contactInfo = (ContactInfo) object;
 
-			if (contactInfo.getFavoriteType() != FavoriteType.FRIEND
-					&& contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED
-					&& contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED) {
+			if (contactInfo.getFavoriteType() != FavoriteType.FRIEND) {
 				return;
 			}
 
