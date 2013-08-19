@@ -19,7 +19,7 @@
 	<dimen name="contact_info_width">300dp</dimen>
 	<dimen name="conversation_footer_height">66dp</dimen>
 	<dimen name="avatar_top_bottom">11dp</dimen>
-	<dimen name="avatar_left_right">4dp</dimen>
+	<dimen name="avatar_left_right">2dp</dimen>
 	<dimen name="text_subtext_spacing">2dp</dimen>
 	<dimen name="main_text_size">18sp</dimen>
 	<dimen name="sub_text_size">14sp</dimen>
