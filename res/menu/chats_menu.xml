@@ -5,6 +5,6 @@
         android:id="@+id/new_conversation"
         android:icon="@drawable/ic_new_conversation"
         android:showAsAction="always"
-        android:title="@string/new_chat"/>
+        android:title="@string/start_new_chat"/>
 
 </menu>
