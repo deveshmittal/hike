@@ -1450,12 +1450,6 @@ public class MessagesList extends DrawerBaseActivity implements
 		}
 	}
 
-	public void onOpenTimelineClick(View v) {
-		Intent intent = new Intent(this, CentralTimeline.class);
-		startActivity(intent);
-		overridePendingTransition(R.anim.slide_up_noalpha, R.anim.no_animation);
-	}
-
 	public void onGroupChatClick(View v) {
 		Intent intent = new Intent(this, ChatThread.class);
 		intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);

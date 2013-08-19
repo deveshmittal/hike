@@ -20,7 +20,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
-import com.bsb.hike.ui.CentralTimeline;
 import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.view.DrawerLayout;
@@ -81,7 +80,7 @@ public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
 		/*
 		 * Only show the favorites drawer in the Messages list screen
 		 */
-		if ((this instanceof MessagesList) || (this instanceof CentralTimeline)) {
+		if ((this instanceof MessagesList)) {
 			parentLayout.setUpRightDrawerView(this);
 
 			if (showButtons) {
@@ -115,7 +114,7 @@ public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
 		super.onDestroy();
 		HikeMessengerApp.getPubSub().removeListeners(this,
 				leftDrawerPubSubListeners);
-		if ((this instanceof MessagesList) || (this instanceof CentralTimeline)) {
+		if ((this instanceof MessagesList)) {
 			HikeMessengerApp.getPubSub().removeListeners(this,
 					rightDrawerPubSubListeners);
 		}
@@ -161,14 +160,8 @@ public abstract class DrawerBaseActivity extends AuthSocialAccountBaseActivity
 				Intent intent = new Intent(this, MessagesList.class);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				startActivity(intent);
-				if (this instanceof CentralTimeline) {
-					super.onBackPressed();
-					overridePendingTransition(R.anim.no_animation,
-							R.anim.slide_down_noalpha);
-				} else {
-					overridePendingTransition(R.anim.alpha_in,
-							R.anim.slide_out_right_noalpha);
-				}
+				overridePendingTransition(R.anim.alpha_in,
+						R.anim.slide_out_right_noalpha);
 			} else {
 				super.onBackPressed();
 			}
