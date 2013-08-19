@@ -1356,7 +1356,7 @@ public class Utils {
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage,
 			int stateOrdinal) {
-		if (convMessage == null) {
+		if (convMessage == null || convMessage.getTypingNotification() != null) {
 			return false;
 		}
 		int minStatusOrdinal;
