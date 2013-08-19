@@ -22,6 +22,9 @@ public class ClearGroupTypingNotification extends ClearTypingNotification {
 
 		GroupTypingNotification groupTypingNotification = (GroupTypingNotification) HikeMessengerApp
 				.getTypingNotificationSet().get(id);
+		if (groupTypingNotification == null) {
+			return;
+		}
 		groupTypingNotification.removeParticipant(participantMsisdn);
 
 		if (groupTypingNotification.getGroupParticipantList().isEmpty()) {
