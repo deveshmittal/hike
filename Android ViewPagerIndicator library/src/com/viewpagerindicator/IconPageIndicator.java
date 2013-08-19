@@ -34,12 +34,12 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * across different configurations or circumstances.
  */
 public class IconPageIndicator extends HorizontalScrollView implements PageIndicator {
-    private final IcsLinearLayout mIconsLayout;
+    protected final IcsLinearLayout mIconsLayout;
 
-    private ViewPager mViewPager;
+    protected ViewPager mViewPager;
     private OnPageChangeListener mListener;
     private Runnable mIconSelector;
-    private int mSelectedIndex;
+    protected int mSelectedIndex;
 
     public IconPageIndicator(Context context) {
         this(context, null);

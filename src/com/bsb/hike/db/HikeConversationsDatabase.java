@@ -31,7 +31,6 @@ import android.util.Pair;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -2147,8 +2146,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public int[] fetchEmoticonsOfType(EmoticonType emoticonType,
-			int startOffset, int endOffset, int limit) {
+	public int[] fetchEmoticonsOfType(int startOffset, int endOffset, int limit) {
 		Cursor c = null;
 		try {
 			String[] columns = new String[] { DBConstants.EMOTICON_NUM };
@@ -2167,9 +2165,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			int emoticonIndexIdx = c.getColumnIndex(DBConstants.EMOTICON_NUM);
 			int i = 0;
 			while (c.moveToNext()) {
-				emoticonIndices[i++] = emoticonType == EmoticonType.HIKE_EMOTICON ? c
-						.getInt(emoticonIndexIdx) : c.getInt(emoticonIndexIdx)
-						- EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+				emoticonIndices[i++] = c.getInt(emoticonIndexIdx);
 			}
 			Log.d(getClass().getSimpleName(), "Emoticon RES ID size: "
 					+ emoticonIndices.length);

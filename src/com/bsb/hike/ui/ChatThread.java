@@ -64,6 +64,7 @@ import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.Intents.Insert;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.ClipboardManager;
@@ -104,28 +105,24 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.TabHost;
-import android.widget.TabHost.OnTabChangeListener;
-import android.widget.TabHost.TabContentFactory;
-import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter;
-import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.MessagesAdapter;
+import com.bsb.hike.adapters.StickerAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
@@ -147,7 +144,6 @@ import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
-import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
@@ -168,6 +164,7 @@ import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
+import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class ChatThread extends HikeAppStateBaseActivity implements
 		HikePubSub.Listener, TextWatcher, OnEditorActionListener,
@@ -256,10 +253,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private Button titleBtn;
 
-	private TabHost tabHost;
-
-	private boolean isTabInitialised = false;
-
 	private GroupParticipant myInfo;
 
 	private static File selectedFile;
@@ -281,8 +274,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	private Dialog recordingDialog;
 
 	private RecorderState recorderState;
-
-	private ImageView pageSelected;
 
 	private String[] pubSubListeners = { HikePubSub.MESSAGE_RECEIVED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
@@ -306,11 +297,9 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			HikePubSub.STICKER_CATEGORY_DOWNLOAD_FAILED,
 			HikePubSub.LAST_SEEN_TIME_UPDATED };
 
-	private View currentEmoticonCategorySelected;
-
 	private EmoticonType emoticonType;
 
-	private EmoticonAdapter emoticonsAdapter;
+	private PagerAdapter emoticonsAdapter;
 
 	private boolean wasOrientationChanged = false;
 
@@ -327,10 +316,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	private Dialog smsDialog;
 
 	private Dialog nativeSmsDialog;
-
-	private LinearLayout stickerCatgoryContainer;
-
-	private View currentStickerCategorySelected;
 
 	private long recordStartTime;
 
@@ -464,12 +449,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		mLastSeenView = (TextView) findViewById(R.id.last_seen);
 		lastSeenContainer = findViewById(R.id.last_seen_container);
 
-		tabHost = (TabHost) findViewById(android.R.id.tabhost);
-		tabHost.setup();
-		currentEmoticonCategorySelected = findViewById(savedInstanceState != null ? savedInstanceState
-				.getInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY,
-						R.id.hike_emoticons_btn) : R.id.hike_emoticons_btn);
-		currentEmoticonCategorySelected.setSelected(true);
 
 		/*
 		 * ensure that when the softkeyboard Done button is pressed (different
@@ -3594,31 +3573,21 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				updateRecordingDuration != null ? updateRecordingDuration
 						.getStartTime() : 0);
 		outState.putLong(HikeConstants.Extras.RECORDED_TIME, recordedTime);
-		if (emoticonLayout != null
-				&& emoticonLayout.getVisibility() == View.VISIBLE) {
-			outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_CATEGORY,
-					currentEmoticonCategorySelected.getId());
-			outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY,
-					tabHost.getCurrentTab());
-		}
 		outState.putInt(HikeConstants.Extras.DIALOG_SHOWING,
 				dialogShowing != null ? dialogShowing.ordinal() : -1);
 		super.onSaveInstanceState(outState);
 	}
 
+	public void onStickerBtnClicked(View v) {
+		onEmoticonBtnClicked(v, 0, false);
+	}
+
 	public void onEmoticonBtnClicked(View v) {
-		onEmoticonBtnClicked(v, tabHost != null ? tabHost.getCurrentTab() : 0,
-				false);
+		onEmoticonBtnClicked(v, 0, false);
 	}
 
 	public void onEmoticonBtnClicked(View v, int whichSubcategory,
 			boolean backPressed) {
-		// This will be -1 when the tab host was initialized, but not tabs were
-		// added to it.
-		if (whichSubcategory == -1) {
-			whichSubcategory = 0;
-		}
-
 		if (tipView != null) {
 			TipType viewTipType = (TipType) tipView.getTag();
 			if (viewTipType == TipType.EMOTICON) {
@@ -3632,93 +3601,46 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
 				: emoticonViewPager;
 
-		boolean wasCategoryChanged = !isTabInitialised;
-
-		if (tabHost != null && !isTabInitialised) {
-			isTabInitialised = true;
-			Log.d(getClass().getSimpleName(),
-					"Initialising boolean for emoticon layout setup.: "
-							+ isTabInitialised);
+		if (v != null) {
 
 			int[] tabDrawables = null;
 
-			int offset = 0;
-			int emoticonsListSize = 0;
-			switch (currentEmoticonCategorySelected.getId()) {
-			case R.id.hike_emoticons_btn:
+			if (v.getId() == R.id.sticker_btn) {
+				emoticonType = EmoticonType.STICKERS;
+			} else {
+				int offset = 0;
+				int emoticonsListSize = 0;
 				tabDrawables = new int[] { R.drawable.ic_recents_emo,
 						R.drawable.emo_im_01_bigsmile,
 						R.drawable.emo_im_81_exciting,
-						R.drawable.emo_im_111_grin };
-				emoticonType = EmoticonType.HIKE_EMOTICON;
+						R.drawable.emo_im_111_grin, R.drawable.e415,
+						R.drawable.e415, R.drawable.e415, R.drawable.e415,
+						R.drawable.e415 };
+				emoticonType = EmoticonType.EMOTICON;
 				emoticonsListSize = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
-				break;
-			case R.id.emoji_btn:
-				tabDrawables = new int[] { R.drawable.ic_recents_emo,
-						EmoticonConstants.EMOJI_RES_IDS[0],
-						EmoticonConstants.EMOJI_RES_IDS[109],
-						EmoticonConstants.EMOJI_RES_IDS[162],
-						EmoticonConstants.EMOJI_RES_IDS[294],
-						EmoticonConstants.EMOJI_RES_IDS[392] };
-				emoticonType = EmoticonType.EMOJI;
-				offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
-				emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
-				break;
-			case R.id.sticker_btn:
-				tabDrawables = new int[] { R.drawable.ic_recents_emo };
-				emoticonType = EmoticonType.STICKERS;
-				offset = 0;
-				emoticonsListSize = EmoticonConstants.LOCAL_STICKER_RES_IDS.length;
-				if (!prefs.getBoolean(
-						HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
-						false)) {
-					showStickerPreviewDialog(0);
-				}
-				setupBottomTab(0);
-				break;
-			}
 
-			LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-			for (int i = 0; i < tabDrawables.length; i++) {
-				View tabHead = layoutInflater.inflate(
-						R.layout.emoticon_tab_layout, null);
-				TabSpec ts = tabHost.newTabSpec("tab" + (i + 1));
-
-				((ImageView) tabHead.findViewById(R.id.tab_header_img))
-						.setImageResource(tabDrawables[i]);
-				if (i == 0) {
-					tabHead.findViewById(R.id.divider_left).setVisibility(
-							View.GONE);
-				} else if (i == tabDrawables.length - 1) {
-					tabHead.findViewById(R.id.divider_right).setVisibility(
-							View.GONE);
-				}
-				ts.setIndicator(tabHead);
-				ts.setContent(new TabFactory());
-				tabHost.addTab(ts);
-			}
-			/*
-			 * Checking whether we have a few emoticons in the recents category.
-			 * If not we show the next tab emoticons.
-			 */
-			if (whichSubcategory == 0 && emoticonType != EmoticonType.STICKERS) {
-				int startOffset = offset;
-				int endOffset = startOffset + emoticonsListSize;
-				int recentEmoticonsSizeReq = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT
-						: EmoticonAdapter.MAX_EMOTICONS_PER_ROW_LANDSCAPE;
-				int[] recentEmoticons = HikeConversationsDatabase.getInstance()
-						.fetchEmoticonsOfType(emoticonType, startOffset,
-								endOffset, recentEmoticonsSizeReq);
-				if (recentEmoticons.length < recentEmoticonsSizeReq) {
-					whichSubcategory++;
+				/*
+				 * Checking whether we have a few emoticons in the recents
+				 * category. If not we show the next tab emoticons.
+				 */
+				if (whichSubcategory == 0) {
+					int startOffset = offset;
+					int endOffset = startOffset + emoticonsListSize;
+					int recentEmoticonsSizeReq = getResources()
+							.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT ? EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT
+							: EmoticonAdapter.MAX_EMOTICONS_PER_ROW_LANDSCAPE;
+					int[] recentEmoticons = HikeConversationsDatabase
+							.getInstance().fetchEmoticonsOfType(startOffset,
+									endOffset, recentEmoticonsSizeReq);
+					if (recentEmoticons.length < recentEmoticonsSizeReq) {
+						whichSubcategory++;
+					}
 				}
 			}
-			setupEmoticonLayout(emoticonType, whichSubcategory);
-			tabHost.setCurrentTab(whichSubcategory);
+			setupEmoticonLayout(emoticonType, whichSubcategory, tabDrawables);
 		}
 
-		if (emoticonLayout.getVisibility() == View.VISIBLE
-				&& !wasCategoryChanged) {
+		if (emoticonLayout.getVisibility() == View.VISIBLE) {
 			mHandler.postDelayed(new Runnable() {
 
 				@Override
@@ -3733,12 +3655,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 						InputMethodManager.SHOW_IMPLICIT);
 			}
 		} else {
-			if (!wasCategoryChanged) {
-				Animation slideUp = AnimationUtils.loadAnimation(
-						ChatThread.this, android.R.anim.fade_in);
-				slideUp.setDuration(400);
-				emoticonLayout.setAnimation(slideUp);
-			}
+			Animation slideUp = AnimationUtils.loadAnimation(ChatThread.this,
+					android.R.anim.fade_in);
+			slideUp.setDuration(400);
+			emoticonLayout.setAnimation(slideUp);
 			mHandler.postDelayed(new Runnable() {
 
 				@Override
@@ -3750,67 +3670,40 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			Utils.hideSoftKeyboard(this, mComposeView);
 		}
 
-		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {
-			@Override
-			public void onPageSelected(int pageNum) {
-				Log.d("ViewPager", "Page number: " + pageNum);
-				if (emoticonType != EmoticonType.STICKERS) {
-					tabHost.setCurrentTab(pageNum);
-				} else {
-					if (currentStickerCategorySelected != null) {
-						currentStickerCategorySelected.setSelected(false);
-					}
-					if (stickerCatgoryContainer != null) {
-						currentStickerCategorySelected = stickerCatgoryContainer
-								.findViewWithTag(HikeMessengerApp.stickerCategories
-										.get(pageNum));
-						currentStickerCategorySelected.setSelected(true);
-					}
+	}
 
-					String categoryId = Utils.getCategoryIdForIndex(pageNum);
-					if (pageNum == 0
-							&& !prefs
-									.getBoolean(
-											HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
-											false)) {
-						showStickerPreviewDialog(0);
-					} else if (pageNum != 0
-							&& (!Utils.checkIfStickerCategoryExists(
-									ChatThread.this, categoryId) || !prefs.getBoolean(
-									HikeMessengerApp.stickerCategories
-											.get(pageNum).downloadDialogPref,
-									false))
-							&& !ChatThread.stickerTaskMap
-									.containsKey(categoryId)) {
-						showStickerPreviewDialog(pageNum);
-					}
+	OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
+
+		@Override
+		public void onPageSelected(int pageNum) {
+			Log.d("ViewPager", "Page number: " + pageNum);
+			if (emoticonType == EmoticonType.STICKERS) {
+				String categoryId = Utils.getCategoryIdForIndex(pageNum);
+				if (pageNum == 0
+						&& !prefs
+								.getBoolean(
+										HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+										false)) {
+					showStickerPreviewDialog(0);
+				} else if (pageNum != 0
+						&& (!Utils.checkIfStickerCategoryExists(
+								ChatThread.this, categoryId) || !prefs
+								.getBoolean(HikeMessengerApp.stickerCategories
+										.get(pageNum).downloadDialogPref, false))
+						&& !ChatThread.stickerTaskMap.containsKey(categoryId)) {
+					showStickerPreviewDialog(pageNum);
 				}
 			}
-
-			@Override
-			public void onPageScrolled(int arg0, float arg1, int arg2) {
-			}
-
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-			}
-		});
-
-		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
-			@Override
-			public void onTabChanged(String tabId) {
-				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab(), false);
-			}
-		});
-
-		/*
-		 * Here we dispatch a touch event to the compose view so that it regains
-		 * focus http://code.google.com/p/android/issues/detail?id=2516
-		 */
-		if (getResources().getConfiguration().keyboard != Configuration.KEYBOARD_NOKEYS) {
-			mComposeView.dispatchTouchEvent(null);
 		}
-	}
+
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
+		}
+
+		@Override
+		public void onPageScrollStateChanged(int arg0) {
+		}
+	};
 
 	private void showStickerPreviewDialog(final int categoryIndex) {
 		final Dialog dialog = new Dialog(this, R.style.Theme_CustomDialog);
@@ -3992,7 +3885,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private void updateStickerCategoryUI(int categoryIndex, boolean failed,
 			DownloadType downloadTypeBeforeFail) {
-		if (emoticonsAdapter == null) {
+		if (emoticonsAdapter == null
+				&& (emoticonsAdapter instanceof StickerAdapter)) {
 			return;
 		}
 		String categoryId = Utils.getCategoryIdForIndex(categoryIndex);
@@ -4002,88 +3896,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		if (emoticonPage == null) {
 			return;
 		}
-		emoticonsAdapter.setupStickerPage(emoticonPage, categoryIndex, failed,
-				downloadTypeBeforeFail);
+
+		((StickerAdapter) emoticonsAdapter).setupStickerPage(emoticonPage,
+				categoryIndex, failed, downloadTypeBeforeFail);
+
 		if (downloadTypeBeforeFail == DownloadType.UPDATE && !failed) {
-			setupBottomTab(categoryIndex);
-		}
-	}
-
-	private void setupBottomTab(int preselectedCategoryIndex) {
-		View tabContainer = findViewById(android.R.id.tabs);
-		tabContainer.setVisibility(View.GONE);
-
-		stickerCatgoryContainer = (LinearLayout) findViewById(R.id.sticker_categories_container);
-		stickerCatgoryContainer.setVisibility(View.VISIBLE);
-		stickerCatgoryContainer.removeAllViews();
-
-		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-
-		List<StickerCategory> stickerCatgoryTabList = new ArrayList<StickerCategory>(
-				HikeMessengerApp.stickerCategories);
-
-		stickerCatgoryTabList.add(0, new StickerCategory(
-				StickerCategory.BACK_CATEGORY_ID,
-				StickerCategory.BACK_CATEGORY_RES_ID, null, 0));
-
-		for (int i = 0; i < stickerCatgoryTabList.size(); i++) {
-			StickerCategory stickerCategory = stickerCatgoryTabList.get(i);
-
-			View parent = layoutInflater.inflate(R.layout.sticker_btn, null);
-
-			if (i == 0) {
-				parent.findViewById(R.id.divider_left).setVisibility(View.GONE);
-			}
-
-			boolean updateAvailable = HikeConversationsDatabase.getInstance()
-					.isStickerUpdateAvailable(stickerCategory.categoryId);
-
-			LayoutParams layoutParams = new LayoutParams(0,
-					LayoutParams.MATCH_PARENT, 1.0f);
-
-			ImageView updateAvailableView = (ImageView) parent
-					.findViewById(R.id.update_available);
-			updateAvailableView.setVisibility(updateAvailable ? View.VISIBLE
-					: View.GONE);
-
-			ImageButton stickerCategoryButton = (ImageButton) parent
-					.findViewById(R.id.category_btn);
-			stickerCategoryButton
-					.setImageResource(stickerCategory.categoryResId);
-			stickerCategoryButton.setTag(stickerCategory);
-
-			if (i == preselectedCategoryIndex + 1) {
-				stickerCategoryButton.setSelected(true);
-				currentStickerCategorySelected = stickerCategoryButton;
-			}
-
-			parent.setLayoutParams(layoutParams);
-			stickerCatgoryContainer.addView(parent);
-		}
-	}
-
-	public void onStickerCategoryClick(View v) {
-		Log.d(getClass().getSimpleName(), "ID: " + v.getId());
-
-		StickerCategory tag = (StickerCategory) v.getTag();
-
-		StickerCategory backCategory = new StickerCategory(
-				StickerCategory.BACK_CATEGORY_ID,
-				StickerCategory.BACK_CATEGORY_RES_ID, null, 0);
-		if (backCategory.equals(tag)) {
-			onEmoticonCategoryClick(findViewById(R.id.emoji_btn));
-			hideStickerTabs();
-			return;
-		}
-
-		for (int i = 0; i < HikeMessengerApp.stickerCategories.size(); i++) {
-			StickerCategory category = HikeMessengerApp.stickerCategories
-					.get(i);
-			if (category.equals(tag)) {
-				setStickerCategorySelected(tag);
-				emoticonViewPager.setCurrentItem(i, false);
-				break;
-			}
+			HikeMessengerApp.setStickerUpdateAvailable(categoryId, false);
 		}
 	}
 
@@ -4094,32 +3912,24 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		return emoticonViewPager.getCurrentItem();
 	}
 
-	private void setStickerCategorySelected(StickerCategory tag) {
-		if (currentStickerCategorySelected != null) {
-			currentStickerCategorySelected.setSelected(false);
+	private void setupEmoticonLayout(EmoticonType emoticonType, int pageNum,
+			int[] categoryResIds) {
+		boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+		if (emoticonType != EmoticonType.STICKERS) {
+			emoticonsAdapter = new EmoticonAdapter(this, mComposeView,
+					isPortrait, categoryResIds);
+		} else {
+			emoticonsAdapter = new StickerAdapter(this, isPortrait);
 		}
-		if (stickerCatgoryContainer != null) {
-			currentStickerCategorySelected = stickerCatgoryContainer
-					.findViewWithTag(tag);
-			currentStickerCategorySelected.setSelected(true);
-		}
-	}
 
-	private void hideStickerTabs() {
-		findViewById(android.R.id.tabs).setVisibility(View.VISIBLE);
-		findViewById(R.id.sticker_categories_container)
-				.setVisibility(View.GONE);
-	}
-
-	private void setupEmoticonLayout(EmoticonType emoticonType, int pageNum) {
-		emoticonsAdapter = new EmoticonAdapter(
-				ChatThread.this,
-				mComposeView,
-				emoticonType,
-				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
 		emoticonViewPager.setAdapter(emoticonsAdapter);
 		emoticonViewPager.setCurrentItem(pageNum, false);
 		emoticonViewPager.invalidate();
+
+		StickerEmoticonIconPageIndicator iconPageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
+		iconPageIndicator.setViewPager(emoticonViewPager, pageNum);
+		iconPageIndicator.setOnPageChangeListener(onPageChangeListener);
+		iconPageIndicator.notifyDataSetChanged();
 
 		/*
 		 * show the tip if we are not currently on the stickers tab and we have
@@ -4147,38 +3957,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				tipView = null;
 			}
 		}
-	}
-
-	public void onEmoticonCategoryClick(View v) {
-		if (v.isSelected()) {
-			return;
-		}
-		v.setSelected(true);
-		isTabInitialised = false;
-		currentEmoticonCategorySelected.setSelected(false);
-		currentEmoticonCategorySelected = v;
-		/*
-		 * Added this line for older android device issue
-		 * http://stackoverflow.com
-		 * /questions/6157373/removing-a-tab-and-the-activity
-		 * -intent-inside-of-it-from-a-tabhost
-		 */
-		tabHost.setCurrentTab(0);
-		tabHost.clearAllTabs();
-		onEmoticonBtnClicked(null, 0, false);
-	}
-
-	private class TabFactory implements TabContentFactory {
-
-		@Override
-		public View createTabContent(String tag) {
-			View v = new View(getApplicationContext());
-			v.setMinimumWidth(0);
-			v.setMinimumHeight(0);
-			return v;
-
-		}
-
 	}
 
 	private void toggleGroupLife(boolean alive) {

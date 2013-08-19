@@ -37,13 +37,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeConstants.EmoticonType;
+import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
-import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.EmoticonAdapter;
-import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
 import com.bsb.hike.adapters.MoodAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.http.HikeHttpRequest;
@@ -84,7 +84,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	private Handler handler;
 	private TextView charCounter;
-	private TabHost tabHost;
 	private View tipView;
 
 	@Override
@@ -112,9 +111,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		preferences = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
-
-		tabHost = (TabHost) findViewById(android.R.id.tabhost);
-		tabHost.setup();
 
 		emojiParent = (ViewGroup) findViewById(R.id.emoji_container);
 		moodParent = (ViewGroup) findViewById(R.id.mood_parent);
@@ -171,7 +167,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		twitter.setSelected(mActivityTask.twitterSelected);
 
 		if (mActivityTask.emojiShowing) {
-			showEmojiSelector();
+//			showEmojiSelector();
 			getWindow()
 					.setSoftInputMode(
 							WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
@@ -254,7 +250,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	public void onEmojiClick(View v) {
-		showEmojiSelector();
+		// showEmojiSelector();
 	}
 
 	public void onMoodClick(View v) {
@@ -464,140 +460,131 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		}
 	}
 
-	private void showEmojiSelector() {
-		Utils.hideSoftKeyboard(this, statusTxt);
-
-		mActivityTask.emojiShowing = true;
-
-		showCancelButton(false);
-
-		emojiParent.setClickable(true);
-		View categories = findViewById(R.id.emoticons_categories_container);
-		View shadow = findViewById(R.id.top_shadow);
-
-		emojiParent.setVisibility(View.VISIBLE);
-		categories.setVisibility(View.GONE);
-		shadow.setVisibility(View.GONE);
-
-		ViewGroup emoticonLayout = (ViewGroup) findViewById(R.id.emoji_container);
-		final ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
-		final EditText statusTxt = (EditText) findViewById(R.id.status_txt);
-
-		int whichSubcategory = 0;
-		boolean isTabInitialised = tabHost.getTabWidget().getTabCount() > 0;
-
-		if (tabHost != null && !isTabInitialised) {
-			isTabInitialised = true;
-
-			int[] tabDrawables = null;
-
-			int offset = 0;
-			int emoticonsListSize = 0;
-			tabDrawables = new int[] { R.drawable.ic_recents_emo,
-					EmoticonConstants.EMOJI_RES_IDS[0],
-					EmoticonConstants.EMOJI_RES_IDS[109],
-					EmoticonConstants.EMOJI_RES_IDS[162],
-					EmoticonConstants.EMOJI_RES_IDS[294],
-					EmoticonConstants.EMOJI_RES_IDS[392] };
-			offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
-			emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
-
-			LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-			for (int i = 0; i < tabDrawables.length; i++) {
-				View tabHead = layoutInflater.inflate(
-						R.layout.emoticon_tab_layout, null);
-				TabSpec ts = tabHost.newTabSpec("tab" + (i + 1));
-
-				((ImageView) tabHead.findViewById(R.id.tab_header_img))
-						.setImageResource(tabDrawables[i]);
-				if (i == 0) {
-					tabHead.findViewById(R.id.divider_left).setVisibility(
-							View.GONE);
-				} else if (i == tabDrawables.length - 1) {
-					tabHead.findViewById(R.id.divider_right).setVisibility(
-							View.GONE);
-				}
-				ts.setIndicator(tabHead);
-				ts.setContent(new TabContentFactory() {
-
-					@Override
-					public View createTabContent(String tag) {
-						View v = new View(getApplicationContext());
-						v.setMinimumWidth(0);
-						v.setMinimumHeight(0);
-						return v;
-					}
-				});
-				tabHost.addTab(ts);
-			}
-
-			/*
-			 * Checking whether we have a few emoticons in the recents category.
-			 * If not we show the next tab emoticons.
-			 */
-			if (whichSubcategory == 0) {
-				int startOffset = offset;
-				int endOffset = startOffset + emoticonsListSize;
-				int recentEmoticonsSizeReq = EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT;
-				int[] recentEmoticons = HikeConversationsDatabase.getInstance()
-						.fetchEmoticonsOfType(EmoticonType.EMOJI, startOffset,
-								endOffset, recentEmoticonsSizeReq);
-				if (recentEmoticons.length < recentEmoticonsSizeReq) {
-					whichSubcategory++;
-				}
-			}
-			setupEmoticonLayout(EmoticonType.EMOJI, whichSubcategory,
-					emoticonViewPager, statusTxt);
-			tabHost.setCurrentTab(whichSubcategory);
-			emoticonViewPager.setCurrentItem(whichSubcategory);
-		}
-
-		emoticonLayout.setVisibility(View.VISIBLE);
-
-		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {
-			@Override
-			public void onPageSelected(int position) {
-				tabHost.setCurrentTab(position);
-			}
-
-			@Override
-			public void onPageScrolled(int arg0, float arg1, int arg2) {
-			}
-
-			@Override
-			public void onPageScrollStateChanged(int arg0) {
-			}
-		});
-
-		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
-			@Override
-			public void onTabChanged(String tabId) {
-				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab());
-			}
-		});
-	}
-
-	public void hideEmoticonSelector() {
-		onBackPressed();
-	}
-
-	private void setRecentlyUsedTextVisibility(int currentPage) {
-		// findViewById(R.id.recent_use_head).setVisibility(
-		// currentPage == 0 ? View.VISIBLE : View.GONE);
-	}
-
-	private void setupEmoticonLayout(EmoticonType emoticonType,
-			int whichSubcategory, ViewPager emoticonViewPager,
-			EditText statusTxt) {
-
-		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(
-				this,
-				statusTxt,
-				EmoticonType.EMOJI,
-				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
-		emoticonViewPager.setAdapter(statusEmojiAdapter);
-		emoticonViewPager.invalidate();
-	}
+//	private void showEmojiSelector() {
+//		Utils.hideSoftKeyboard(this, statusTxt);
+//
+//		mActivityTask.emojiShowing = true;
+//
+//		showCancelButton(false);
+//
+//		emojiParent.setClickable(true);
+//
+//		emojiParent.setVisibility(View.VISIBLE);
+//
+//		ViewGroup emoticonLayout = (ViewGroup) findViewById(R.id.emoji_container);
+//		final ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
+//		final EditText statusTxt = (EditText) findViewById(R.id.status_txt);
+//
+//		int whichSubcategory = 0;
+//		boolean isTabInitialised = tabHost.getTabWidget().getTabCount() > 0;
+//
+//		if (tabHost != null && !isTabInitialised) {
+//			isTabInitialised = true;
+//
+//			int[] tabDrawables = null;
+//
+//			int offset = 0;
+//			int emoticonsListSize = 0;
+//			tabDrawables = new int[] { R.drawable.ic_recents_emo,
+//					EmoticonConstants.EMOJI_RES_IDS[0],
+//					EmoticonConstants.EMOJI_RES_IDS[109],
+//					EmoticonConstants.EMOJI_RES_IDS[162],
+//					EmoticonConstants.EMOJI_RES_IDS[294],
+//					EmoticonConstants.EMOJI_RES_IDS[392] };
+//			offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+//			emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
+//
+//			LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+//			for (int i = 0; i < tabDrawables.length; i++) {
+//				View tabHead = layoutInflater.inflate(
+//						R.layout.emoticon_tab_layout, null);
+//				TabSpec ts = tabHost.newTabSpec("tab" + (i + 1));
+//
+//				((ImageView) tabHead.findViewById(R.id.tab_header_img))
+//						.setImageResource(tabDrawables[i]);
+//				if (i == 0) {
+//					tabHead.findViewById(R.id.divider_left).setVisibility(
+//							View.GONE);
+//				} else if (i == tabDrawables.length - 1) {
+//					tabHead.findViewById(R.id.divider_right).setVisibility(
+//							View.GONE);
+//				}
+//				ts.setIndicator(tabHead);
+//				ts.setContent(new TabContentFactory() {
+//
+//					@Override
+//					public View createTabContent(String tag) {
+//						View v = new View(getApplicationContext());
+//						v.setMinimumWidth(0);
+//						v.setMinimumHeight(0);
+//						return v;
+//					}
+//				});
+//				tabHost.addTab(ts);
+//			}
+//
+//			/*
+//			 * Checking whether we have a few emoticons in the recents category.
+//			 * If not we show the next tab emoticons.
+//			 */
+//			if (whichSubcategory == 0) {
+//				int startOffset = offset;
+//				int endOffset = startOffset + emoticonsListSize;
+//				int recentEmoticonsSizeReq = EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT;
+//				int[] recentEmoticons = HikeConversationsDatabase.getInstance()
+//						.fetchEmoticonsOfType(EmoticonType.EMOJI, startOffset,
+//								endOffset, recentEmoticonsSizeReq);
+//				if (recentEmoticons.length < recentEmoticonsSizeReq) {
+//					whichSubcategory++;
+//				}
+//			}
+//			setupEmoticonLayout(EmoticonType.EMOJI, whichSubcategory,
+//					emoticonViewPager, statusTxt);
+//			tabHost.setCurrentTab(whichSubcategory);
+//			emoticonViewPager.setCurrentItem(whichSubcategory);
+//		}
+//
+//		emoticonLayout.setVisibility(View.VISIBLE);
+//
+//		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {
+//			@Override
+//			public void onPageSelected(int position) {
+//				tabHost.setCurrentTab(position);
+//			}
+//
+//			@Override
+//			public void onPageScrolled(int arg0, float arg1, int arg2) {
+//			}
+//
+//			@Override
+//			public void onPageScrollStateChanged(int arg0) {
+//			}
+//		});
+//
+//		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
+//			@Override
+//			public void onTabChanged(String tabId) {
+//				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab());
+//			}
+//		});
+//	}
+//
+//	public void hideEmoticonSelector() {
+//		onBackPressed();
+//	}
+//
+//	private void setupEmoticonLayout(EmoticonType emoticonType,
+//			int whichSubcategory, ViewPager emoticonViewPager,
+//			EditText statusTxt) {
+//
+//		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(
+//				this,
+//				statusTxt,
+//				EmoticonType.EMOJI,
+//				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
+//		emoticonViewPager.setAdapter(statusEmojiAdapter);
+//		emoticonViewPager.invalidate();
+//	}
 
 	private void showMoodSelector() {
 		Utils.hideSoftKeyboard(this, statusTxt);

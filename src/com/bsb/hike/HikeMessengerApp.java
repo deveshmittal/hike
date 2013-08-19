@@ -655,11 +655,15 @@ public class HikeMessengerApp extends Application implements Listener {
 		stickerCategories = new ArrayList<StickerCategory>();
 
 		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
+			boolean isUpdateAvailable = HikeConversationsDatabase.getInstance()
+					.isStickerUpdateAvailable(
+							EmoticonConstants.STICKER_CATEGORY_IDS[i]);
 			stickerCategories.add(new StickerCategory(
 					EmoticonConstants.STICKER_CATEGORY_IDS[i],
 					EmoticonConstants.STICKER_CATEGORY_RES_IDS[i],
 					EmoticonConstants.STICKER_DOWNLOAD_PREF[i],
-					EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[i]));
+					EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[i],
+					isUpdateAvailable));
 		}
 		String removedIds = preferences.getString(
 				HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
@@ -668,13 +672,28 @@ public class HikeMessengerApp extends Application implements Listener {
 			JSONArray removedIdArray = new JSONArray(removedIds);
 			for (int i = 0; i < removedIdArray.length(); i++) {
 				String removedCategoryId = removedIdArray.getString(i);
-				StickerCategory removedStickerCategory = new StickerCategory(
-						removedCategoryId, 0, null, 0);
+				StickerCategory removedStickerCategory = getStickerCategoryForCategoryId(removedCategoryId);
 
 				stickerCategories.remove(removedStickerCategory);
 			}
 		} catch (JSONException e) {
 			Log.w("HikeMessengerApp", "Invalid JSON", e);
 		}
+	}
+
+	public static StickerCategory getStickerCategoryForCategoryId(
+			String categoryId) {
+		return new StickerCategory(categoryId, 0, null, 0, false);
+	}
+
+	public static void setStickerUpdateAvailable(String categoryId,
+			boolean updateAvailable) {
+		int index = stickerCategories
+				.indexOf(getStickerCategoryForCategoryId(categoryId));
+		if (index == -1) {
+			return;
+		}
+		StickerCategory stickerCategory = stickerCategories.get(index);
+		stickerCategory.updateAvailable = updateAvailable;
 	}
 }

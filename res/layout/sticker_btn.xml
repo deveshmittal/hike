@@ -4,21 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="horizontal" >
 
-    <View
-        android:id="@+id/divider_left"
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="@drawable/ic_button_divider" />
-
-    <ImageButton
+    <ImageView
         android:id="@+id/category_btn"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_toRightOf="@id/divider_left"
-        android:background="@drawable/tab_selector"
-        android:gravity="center"
-        android:onClick="onStickerCategoryClick"
-        android:src="@drawable/kitty" />
+        android:scaleType="centerInside"
+        android:src="@drawable/kitty"
+        style="?attr/vpiIconPageIndicatorStyle" />
 
     <ImageView
         android:id="@+id/update_available"

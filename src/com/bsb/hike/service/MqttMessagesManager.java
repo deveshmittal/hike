@@ -917,6 +917,7 @@ public class MqttMessagesManager {
 			String categoryId = data.getString(HikeConstants.CATEGORY_ID);
 			if (HikeConstants.ADD_STICKER.equals(subType)) {
 				convDb.stickerUpdateAvailable(categoryId);
+				HikeMessengerApp.setStickerUpdateAvailable(categoryId, true);
 			} else if (HikeConstants.REMOVE_STICKER.equals(subType)
 					|| HikeConstants.REMOVE_CATEGORY.equals(subType)) {
 

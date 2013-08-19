@@ -4,126 +4,48 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <View
-        android:id="@+id/top_shadow"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:background="@drawable/top_shadow" />
+        android:layout_height="match_parent"
+        android:background="#2a3231"
+        android:orientation="vertical" >
 
-    <TabHost
-        android:id="@android:id/tabhost"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        <com.bsb.hike.view.StickerEmoticonIconPageIndicator
+            android:id="@+id/icon_indicator"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true" />
 
-        <RelativeLayout
+        <android.support.v4.view.ViewPager
+            android:id="@+id/emoticon_pager"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#e5e5e2"
-            android:orientation="vertical" >
+            android:layout_above="@id/icon_indicator"
+            android:paddingBottom="@dimen/emoticon_pager_padding"
+            android:paddingTop="@dimen/emoticon_pager_padding" />
 
-            <TabWidget
-                android:id="@android:id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:background="@color/offwhite" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentTop="true"
+            android:background="@color/sticker_emoticon_divider" />
 
-            <LinearLayout
-                android:id="@+id/emoticons_categories_container"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_alignParentBottom="true"
-                android:orientation="horizontal" >
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_above="@id/icon_indicator"
+            android:background="@color/sticker_emoticon_divider" />
 
-                <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/hike_emoticons_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/tab_selector_left"
-                    android:onClick="onEmoticonCategoryClick"
-                    android:shadowColor="#FFFFFFFF"
-                    android:shadowDy="1.0"
-                    android:shadowRadius="1.0"
-                    android:text="@string/hike"
-                    android:textColor="@drawable/tab_text_selector"
-                    android:textSize="15sp"
-                    android:textStyle="bold|italic" />
+        <LinearLayout
+            android:id="@+id/stickers_tip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="35dp"
+            android:visibility="gone" >
 
-                <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/emoji_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/tab_selector_right"
-                    android:onClick="onEmoticonCategoryClick"
-                    android:shadowColor="#FFFFFFFF"
-                    android:shadowDy="1.0"
-                    android:shadowRadius="1.0"
-                    android:text="@string/emoji"
-                    android:textColor="@drawable/tab_text_selector"
-                    android:textSize="15sp"
-                    android:textStyle="bold|italic" />
-
-                <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/sticker_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/tab_selector_right"
-                    android:onClick="onEmoticonCategoryClick"
-                    android:shadowColor="#FFFFFFFF"
-                    android:shadowDy="1.0"
-                    android:shadowRadius="1.0"
-                    android:text="@string/stickers"
-                    android:textColor="@drawable/tab_text_selector"
-                    android:textSize="15sp"
-                    android:textStyle="bold|italic" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/sticker_categories_container"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_alignParentBottom="true"
-                android:orientation="horizontal"
-                android:visibility="gone" />
-
-            <View
-                android:id="@+id/divider_2"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_above="@id/emoticons_categories_container"
-                android:layout_alignWithParentIfMissing="true"
-                android:background="@drawable/ic_emoticon_divider_2" />
-
-            <android.support.v4.view.ViewPager
-                android:id="@+id/emoticon_pager"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@id/divider_2"
-                android:layout_below="@android:id/tabs"
-                android:layout_alignWithParentIfMissing="true"
-                android:paddingBottom="@dimen/emoticon_pager_padding"
-                android:paddingTop="@dimen/emoticon_pager_padding" />
-
-            <LinearLayout
-                android:id="@+id/stickers_tip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@id/emoticons_categories_container"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="35dp"
-                android:visibility="gone" >
-
-                <include layout="@layout/tool_tip" />
-            </LinearLayout>
-            
-            <FrameLayout
-                android:id="@android:id/tabcontent"
-                android:layout_width="match_parent"
-                android:layout_height="0dp" />
-        </RelativeLayout>
-    </TabHost>
+            <include layout="@layout/tool_tip" />
+        </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>
