@@ -1228,7 +1228,7 @@ public class Utils {
 					return false;
 				}
 				byte[] fileBytes = Utils.bitmapToBytes(tempBmp,
-						Bitmap.CompressFormat.JPEG);
+						Bitmap.CompressFormat.JPEG, 75);
 				tempBmp.recycle();
 				src = new ByteArrayInputStream(fileBytes);
 			} else {

@@ -166,7 +166,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 				String thumbnailString = null;
 				if (hikeFileType == HikeFileType.IMAGE) {
 					thumbnail = Utils.scaleDownImage(filePath,
-							HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, true);
+							HikeConstants.MAX_DIMENSION_THUMBNAIL_PX, false);
 				} else if (hikeFileType == HikeFileType.VIDEO) {
 					thumbnail = ThumbnailUtils.createVideoThumbnail(filePath,
 							MediaStore.Images.Thumbnails.MICRO_KIND);
@@ -174,7 +174,7 @@ public class UploadFileTask extends FileTransferTaskBase {
 				if (thumbnail != null) {
 					thumbnailString = Base64
 							.encodeToString(Utils.bitmapToBytes(thumbnail,
-									Bitmap.CompressFormat.JPEG), Base64.DEFAULT);
+									Bitmap.CompressFormat.JPEG, 75), Base64.DEFAULT);
 				}
 
 				JSONObject metadata = getFileTransferMetadata(fileName,
