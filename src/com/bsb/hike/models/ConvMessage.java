@@ -260,10 +260,11 @@ public class ConvMessage {
 									(GroupConversation) conversation));
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = String.format(context
-					.getString(R.string.left_conversation),
-					((GroupConversation) conversation)
-							.getGroupParticipantFirstName(metadata.getMsisdn()));
+			this.mMessage = String
+					.format(context.getString(R.string.left_conversation),
+							((GroupConversation) conversation)
+									.getGroupParticipantFirstName(metadata
+											.getMsisdn()));
 			break;
 		case GROUP_END:
 			this.mMessage = context.getString(R.string.group_chat_end);

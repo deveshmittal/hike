@@ -30,7 +30,8 @@ import com.bsb.hike.utils.Utils;
 import com.viewpagerindicator.IconPagerAdapter;
 import com.viewpagerindicator.TabPageIndicator;
 
-public class HomeActivity extends HikeAppStateBaseFragmentActivity implements Listener {
+public class HomeActivity extends HikeAppStateBaseFragmentActivity implements
+		Listener {
 
 	private static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 
