@@ -2161,9 +2161,14 @@ public class Utils {
 
 	public static void saveBitmapToFile(File file, Bitmap bitmap)
 			throws IOException {
+		saveBitmapToFile(file, bitmap, CompressFormat.PNG, 70);
+	}
+
+	public static void saveBitmapToFile(File file, Bitmap bitmap,
+			CompressFormat compressFormat, int quality) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 
-		byte[] b = bitmapToBytes(bitmap, CompressFormat.PNG, 70);
+		byte[] b = bitmapToBytes(bitmap, compressFormat, quality);
 		if (b == null) {
 			throw new IOException();
 		}
