@@ -1390,6 +1390,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					groupName, groupOwner, isGroupAlive);
 			conv.setGroupParticipantList(getGroupParticipants(msisdn, false,
 					false));
+			conv.setGroupMemberAliveCount(getActiveParticipantCount(msisdn));
 			conv.setIsMuted(isMuted);
 
 			return conv;
@@ -1757,6 +1758,21 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						+ msisdn);
 			}
 			return participantList;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public int getActiveParticipantCount(String groupId) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.GROUP_MEMBERS_TABLE,
+					new String[] { DBConstants.MSISDN }, DBConstants.HAS_LEFT
+							+ "=0 AND " + DBConstants.GROUP_ID + "=?",
+					new String[] { groupId }, null, null, null);
+			return c.getCount();
 		} finally {
 			if (c != null) {
 				c.close();
