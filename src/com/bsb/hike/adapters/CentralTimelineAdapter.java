@@ -14,46 +14,34 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
-import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.StatusUpdate;
-import com.bsb.hike.ui.fragments.UpdatesFragment;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
 public class CentralTimelineAdapter extends BaseAdapter {
 
-	public static final long EMPTY_STATUS_NO_FRIEND_ID = -1;
-	public static final long FRIEND_REQUEST_ID = -2;
 	public static final long EMPTY_STATUS_NO_STATUS_ID = -3;
-	public static final long EMPTY_STATUS_NO_FRIEND_NO_STATUS_ID = -4;
 	public static final long EMPTY_STATUS_NO_STATUS_RECENTLY_ID = -5;
 
-	private UpdatesFragment updatesFragment;
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
-	private int unseenCount;
 
 	public CentralTimelineAdapter(Context context,
-			UpdatesFragment updatesFragment,
-			List<StatusMessage> statusMessages, String userMsisdn,
-			int unseenCount) {
+			List<StatusMessage> statusMessages, String userMsisdn) {
 		this.context = context;
-		this.updatesFragment = updatesFragment;
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
-		this.unseenCount = unseenCount;
 	}
 
 	@Override
@@ -82,13 +70,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		return true;
 	}
 
-	public void incrementUnseenCount() {
-		unseenCount++;
 	}
 
-	public void decrementUnseenCount() {
-		if (unseenCount > 0) {
-			unseenCount--;
 		}
 	}
 
@@ -300,22 +283,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		return convertView;
 	}
 
-	private boolean isLastUnseenStatus(int position) {
-		/*
-		 * We show a different divider if the status message in the current
-		 * position is unseen and the one after that has already been seen.
-		 */
-		if (position >= unseenCount) {
-			return false;
-		}
-		if (position == statusMessages.size() - 1) {
-			return true;
-		} else if (position + 1 >= unseenCount) {
-			return true;
-		}
-		return false;
-	}
-
 	private class ViewHolder {
 		ImageView avatar;
 		TextView name;
@@ -357,16 +324,11 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		public void onClick(View v) {
 			StatusMessage statusMessage = (StatusMessage) v.getTag();
 
-			if (CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID == statusMessage
-					.getId()) {
-			} else if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
+			if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
 					.getId()
 					|| CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
 							.getId()) {
 				context.startActivity(new Intent(context, StatusUpdate.class));
-			} else {
-				updatesFragment.toggleFavoriteAndRemoveTimelineItem(
-						statusMessage, FavoriteType.FRIEND);
 			}
 		}
 	};
@@ -376,16 +338,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		@Override
 		public void onClick(View v) {
 			StatusMessage statusMessage = (StatusMessage) v.getTag();
-			if (statusMessage.getStatusMessageType() != StatusMessageType.PROTIP) {
-				updatesFragment.toggleFavoriteAndRemoveTimelineItem(
-						statusMessage, FavoriteType.REQUEST_RECEIVED_REJECTED);
-			} else {
+			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				/*
 				 * Removing the protip
 				 */
 				statusMessages.remove(0);
 
-				decrementUnseenCount();
 				notifyDataSetChanged();
 
 				Editor editor = context.getSharedPreferences(

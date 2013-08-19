@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,7 +35,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 	public static final String SECTION_ID = "-911";
 
 	private enum ViewType {
-		SECTION, FRIEND, NOT_FRIEND
+		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST
 	}
 
 	private LayoutInflater layoutInflater;
@@ -71,6 +72,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 				favoriteTaskList = hikeUserDatabase
 						.getContactsOfFavoriteType(FavoriteType.FRIEND,
 								HikeConstants.BOTH_VALUE, myMsisdn);
+				favoriteTaskList.addAll(hikeUserDatabase
+						.getContactsOfFavoriteType(
+								FavoriteType.REQUEST_RECEIVED,
+								HikeConstants.BOTH_VALUE, myMsisdn, true));
 				favoriteTaskList.addAll(hikeUserDatabase
 						.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT,
 								HikeConstants.BOTH_VALUE, myMsisdn));
@@ -230,9 +235,15 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 					|| favoriteType == FavoriteType.REQUEST_SENT
 					|| favoriteType == FavoriteType.REQUEST_SENT_REJECTED) {
 				return ViewType.FRIEND.ordinal();
-			} else {
-				return ViewType.NOT_FRIEND.ordinal();
+			} else if (favoriteType == FavoriteType.REQUEST_RECEIVED) {
+				/*
+				 * Accounting for the friends header
+				 */
+				if (position <= ((friendsList.size() - 1) + 1)) {
+					return ViewType.FRIEND_REQUEST.ordinal();
+				}
 			}
+			return ViewType.NOT_FRIEND.ordinal();
 		}
 	}
 
@@ -259,10 +270,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 				convertView = layoutInflater.inflate(
 						R.layout.friends_group_view, null);
 				break;
+			case FRIEND_REQUEST:
+				convertView = layoutInflater.inflate(
+						R.layout.friend_request_view, null);
 			}
 		}
 
-		if (viewType == ViewType.FRIEND || viewType == ViewType.NOT_FRIEND) {
+		if (viewType == ViewType.FRIEND || viewType == ViewType.NOT_FRIEND
+				|| viewType == ViewType.FRIEND_REQUEST) {
 			ImageView avatar = (ImageView) convertView
 					.findViewById(R.id.avatar);
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
@@ -272,7 +287,8 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
 					.getMsisdn() : contactInfo.getName());
 
-			if (viewType == ViewType.FRIEND) {
+			if (viewType == ViewType.FRIEND
+					|| viewType == ViewType.FRIEND_REQUEST) {
 				TextView lastSeen = (TextView) convertView
 						.findViewById(R.id.last_seen);
 				ImageView avatarFrame = (ImageView) convertView
@@ -285,9 +301,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 				avatarFrame
 						.setImageResource(R.drawable.frame_avatar_medium_selector);
 
-				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND
-						|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED
-						|| contactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
+				if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
 					String lastSeenString = Utils.getLastSeenTimeAsString(
 							context, contactInfo.getLastSeenTime(),
 							contactInfo.getOffline());
@@ -305,6 +319,20 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.friend_request_sent);
+					} else if (viewType == ViewType.FRIEND_REQUEST) {
+						lastSeen.setVisibility(View.VISIBLE);
+						lastSeen.setText(R.string.sent_friend_request);
+
+						ImageButton acceptBtn = (ImageButton) convertView
+								.findViewById(R.id.accept);
+						ImageButton rejectBtn = (ImageButton) convertView
+								.findViewById(R.id.reject);
+
+						acceptBtn.setTag(contactInfo);
+						rejectBtn.setTag(contactInfo);
+
+						acceptBtn.setOnClickListener(acceptOnClickListener);
+						rejectBtn.setOnClickListener(rejectOnClickListener);
 					}
 				}
 			} else {
@@ -365,4 +393,36 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 		}
 	}
 
+	private OnClickListener acceptOnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+			respondToFriendRequest(contactInfo, true);
+		}
+	};
+
+	private OnClickListener rejectOnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			ContactInfo contactInfo = (ContactInfo) v.getTag();
+			respondToFriendRequest(contactInfo, false);
+		}
+	};
+
+	private void respondToFriendRequest(ContactInfo contactInfo, boolean accept) {
+		FavoriteType favoriteType = accept ? FavoriteType.FRIEND
+				: FavoriteType.REQUEST_RECEIVED_REJECTED;
+		Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
+				contactInfo, favoriteType);
+		HikeMessengerApp
+				.getPubSub()
+				.publish(
+						favoriteType == FavoriteType.FRIEND ? HikePubSub.FAVORITE_TOGGLED
+								: HikePubSub.REJECT_FRIEND_REQUEST,
+						favoriteAdded);
+
+		removeFromGroup(contactInfo, FRIEND_INDEX);
+	}
 }

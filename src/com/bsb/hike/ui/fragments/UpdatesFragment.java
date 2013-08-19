@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,18 +43,15 @@ public class UpdatesFragment extends SherlockListFragment implements
 		OnScrollListener, Listener {
 
 	private StatusMessage noStatusMessage;
-	private StatusMessage noFriendMessage;
 	private CentralTimelineAdapter centralTimelineAdapter;
 	private String userMsisdn;
 	private SharedPreferences prefs;
 	private List<StatusMessage> statusMessages;
-	private int friendRequests;
 	private boolean reachedEnd;
 	private boolean loadingMoreMessages;
-	private String[] friendMsisdns;
 
-	private String[] pubSubListeners = { HikePubSub.FAVORITE_TOGGLED,
-			HikePubSub.TIMELINE_UPDATE_RECIEVED };
+	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED };
+	private String[] friendMsisdns;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -114,20 +110,11 @@ public class UpdatesFragment extends SherlockListFragment implements
 		prefs = getActivity().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
 
-		int unseenCount = Utils.getNotificationCount(prefs, true);
-
 		userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
-
-		List<ContactInfo> friendRequestList = HikeUserDatabase.getInstance()
-				.getContactsOfFavoriteType(FavoriteType.REQUEST_RECEIVED,
-						HikeConstants.BOTH_VALUE, userMsisdn);
 
 		List<ContactInfo> friendsList = HikeUserDatabase.getInstance()
 				.getContactsOfFavoriteType(FavoriteType.FRIEND,
 						HikeConstants.BOTH_VALUE, userMsisdn);
-
-		int friendMsisdnLength = friendsList.size();
-		friendRequests = friendRequestList.size();
 
 		ArrayList<String> msisdnList = new ArrayList<String>();
 
@@ -145,21 +132,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 				.getStatusMessages(true,
 						HikeConstants.MAX_STATUSES_TO_LOAD_INITIALLY, -1,
 						friendMsisdns);
-
-		for (ContactInfo contactInfo : friendRequestList) {
-			statusMessages
-					.add(0,
-							new StatusMessage(
-									CentralTimelineAdapter.FRIEND_REQUEST_ID,
-									null,
-									contactInfo.getMsisdn(),
-									TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
-											.getMsisdn() : contactInfo
-											.getName(),
-									getString(R.string.added_as_hike_friend),
-									StatusMessageType.FRIEND_REQUEST, System
-											.currentTimeMillis() / 1000));
-		}
 
 		long currentProtipId = prefs.getLong(HikeMessengerApp.CURRENT_PROTIP,
 				-1);
@@ -216,19 +188,9 @@ public class UpdatesFragment extends SherlockListFragment implements
 				statusMessages.add(0, noStatusMessage);
 			}
 		}
-		if (friendMsisdnLength == 0
-				&& HikeUserDatabase.getInstance().getFriendTableRowCount() == 0) {
-			noFriendMessage = new StatusMessage(
-					CentralTimelineAdapter.EMPTY_STATUS_NO_FRIEND_ID, null,
-					"12345", getString(R.string.team_hike), getString(
-							R.string.hey_name, name),
-					StatusMessageType.NO_STATUS,
-					System.currentTimeMillis() / 1000);
-			statusMessages.add(0, noFriendMessage);
-		}
 
 		centralTimelineAdapter = new CentralTimelineAdapter(getActivity(),
-				this, statusMessages, userMsisdn, unseenCount);
+				statusMessages, userMsisdn);
 		setListAdapter(centralTimelineAdapter);
 		getListView().setOnScrollListener(this);
 
@@ -317,38 +279,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
 	}
 
-	public void toggleFavoriteAndRemoveTimelineItem(
-			StatusMessage statusMessage, FavoriteType favoriteType) {
-		ContactInfo contactInfo = HikeUserDatabase.getInstance()
-				.getContactInfoFromMSISDN(statusMessage.getMsisdn(), false);
-
-		Pair<ContactInfo, FavoriteType> favoriteAdded = new Pair<ContactInfo, FavoriteType>(
-				contactInfo, favoriteType);
-		HikeMessengerApp
-				.getPubSub()
-				.publish(
-						favoriteType == FavoriteType.FRIEND ? HikePubSub.FAVORITE_TOGGLED
-								: HikePubSub.REJECT_FRIEND_REQUEST,
-						favoriteAdded);
-
-		for (StatusMessage listItem : statusMessages) {
-			if (listItem.getMsisdn() == null) {
-				continue;
-			}
-			if (listItem.getMsisdn().equals(statusMessage.getMsisdn())
-					&& listItem.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST) {
-				friendRequests--;
-				statusMessages.remove(listItem);
-				break;
-			}
-		}
-		centralTimelineAdapter.decrementUnseenCount();
-		centralTimelineAdapter.notifyDataSetChanged();
-		HikeMessengerApp.getPubSub().publish(
-				HikePubSub.DECREMENT_NOTIFICATION_COUNTER, null);
-	}
-
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onEventReceived(String type, Object object) {
 
@@ -356,48 +286,7 @@ public class UpdatesFragment extends SherlockListFragment implements
 			return;
 		}
 
-		if (HikePubSub.FAVORITE_TOGGLED.equals(type)) {
-			final Pair<ContactInfo, FavoriteType> favoriteToggle = (Pair<ContactInfo, FavoriteType>) object;
-			final ContactInfo contactInfo = favoriteToggle.first;
-			if (favoriteToggle.second != FavoriteType.REQUEST_RECEIVED
-					&& favoriteToggle.second != FavoriteType.REQUEST_SENT) {
-				return;
-			}
-			final int startIndex = getStartIndex();
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (favoriteToggle.second == FavoriteType.REQUEST_RECEIVED) {
-						statusMessages.add(
-								startIndex,
-								new StatusMessage(
-										CentralTimelineAdapter.FRIEND_REQUEST_ID,
-										null,
-										contactInfo.getMsisdn(),
-										TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
-												.getMsisdn() : contactInfo
-												.getName(),
-										getString(R.string.added_as_hike_friend),
-										StatusMessageType.FRIEND_REQUEST,
-										System.currentTimeMillis() / 1000));
-						friendRequests++;
-					}
-					if (noFriendMessage != null) {
-						statusMessages.remove(noFriendMessage);
-						noFriendMessage = null;
-					} else if (favoriteToggle.second == FavoriteType.REQUEST_RECEIVED) {
-						/*
-						 * Since a new item was added, we increment the unseen
-						 * count.
-						 */
-						centralTimelineAdapter.incrementUnseenCount();
-					}
-
-					centralTimelineAdapter.notifyDataSetChanged();
-				}
-			});
-
-		} else if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
+		if (HikePubSub.TIMELINE_UPDATE_RECIEVED.equals(type)) {
 			final StatusMessage statusMessage = (StatusMessage) object;
 			final int startIndex = getStartIndex();
 			resetUnseenStatusCount();
@@ -405,15 +294,13 @@ public class UpdatesFragment extends SherlockListFragment implements
 			getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					statusMessages.add(friendRequests + startIndex,
-							statusMessage);
+					statusMessages.add(startIndex, statusMessage);
 					if (noStatusMessage != null
 							&& (statusMessages.size() >= HikeConstants.MIN_STATUS_COUNT || statusMessage
 									.getMsisdn().equals(userMsisdn))) {
 						statusMessages.remove(noStatusMessage);
 						noStatusMessage = null;
 					}
-					centralTimelineAdapter.incrementUnseenCount();
 					centralTimelineAdapter.notifyDataSetChanged();
 				}
 			});
@@ -424,9 +311,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 	private int getStartIndex() {
 		int startIndex = 0;
-		if (noFriendMessage != null) {
-			startIndex++;
-		}
 		if (noStatusMessage != null) {
 			startIndex++;
 		}

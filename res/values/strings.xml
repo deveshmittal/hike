@@ -563,4 +563,5 @@
 	<string name="read_by_everyone">Read by everyone</string>
 	<string name="new_chat">New Chat</string>
 	<string name="new_group">New Group</string>
+	<string name="sent_friend_request">Sent a friend request</string>
 </resources>
