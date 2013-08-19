@@ -19,7 +19,11 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
 
@@ -34,6 +38,7 @@ import com.bsb.hike.models.ConvMessage.State;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
@@ -156,6 +161,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, "
 				+ DBConstants.IMAGE_URL + " TEXT, " + DBConstants.WAIT_TIME
 				+ " INTEGER" + " )";
+		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE
+				+ " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
+				+ DBConstants.CONV_ID + " INTEGER" + " )";
+		db.execSQL(sql);
+		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_TABLE
+				+ " (" + DBConstants.FILE_KEY + " TEXT PRIMARY KEY, "
+				+ DBConstants.IMAGE + " BLOB" + " )";
 		db.execSQL(sql);
 	}
 
@@ -367,6 +380,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ " INTEGER DEFAULT 0";
 			db.execSQL(alter);
 		}
+		/*
+		 * Version 18 adds the shared media and file thumbnail table. We also
+		 * parse through all the messages to populate these tables.
+		 */
+		if (oldVersion < 18) {
+			initialiseSharedMediaAndFileThumbnailTable(db);
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -543,7 +563,63 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				updateStatement, null);
 	}
 
+	/**
+	 * Extracts the thumbnail string from the metadata to save it in a different
+	 * table. Returns this extracted string so that it can be set back in the
+	 * metadata once the insertion has been done.
+	 * 
+	 * @param metadata
+	 * @return
+	 */
+	private String extractThumbnailFromMetadata(MessageMetadata metadata) {
+		if (metadata == null || metadata.getHikeFiles() == null) {
+			return null;
+		}
+		try {
+			HikeFile hikeFile = metadata.getHikeFiles().get(0);
+
+			JSONObject metadataJson = metadata.getJSON();
+			JSONArray fileArray = metadataJson
+					.optJSONArray(HikeConstants.FILES);
+			JSONObject fileJson;
+
+			fileJson = fileArray.getJSONObject(0);
+			fileJson.remove(HikeConstants.THUMBNAIL);
+
+			String thumbnailString = hikeFile.getThumbnailString();
+
+			addFileThumbnail(hikeFile.getFileKey(),
+					Base64.decode(thumbnailString, Base64.DEFAULT));
+
+			return thumbnailString;
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), "Invalid json");
+			return null;
+		}
+	}
+
+	private void addThumbnailStringToMetadata(MessageMetadata metadata,
+			String thumbnailString) {
+		if (TextUtils.isEmpty(thumbnailString)) {
+			return;
+		}
+
+		try {
+			JSONObject metadataJson = metadata.getJSON();
+			JSONArray fileArray = metadataJson
+					.optJSONArray(HikeConstants.FILES);
+			JSONObject fileJson;
+
+			fileJson = fileArray.getJSONObject(0);
+			fileJson.put(HikeConstants.THUMBNAIL, thumbnailString);
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), "Invalid json");
+		}
+	}
+
 	public void updateMessageMetadata(long msgID, MessageMetadata metadata) {
+		String thumbnailString = extractThumbnailFromMetadata(metadata);
+
 		ContentValues contentValues = new ContentValues(1);
 		contentValues.put(DBConstants.MESSAGE_METADATA, metadata.serialize());
 		mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
@@ -553,6 +629,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.update(DBConstants.CONVERSATIONS_TABLE, contentValues,
 				DBConstants.MESSAGE_ID + "=? AND " + DBConstants.IS_STATUS_MSG
 						+ " = 0", new String[] { String.valueOf(msgID) });
+
+		addThumbnailStringToMetadata(metadata, thumbnailString);
 	}
 
 	private void bindConversationInsert(SQLiteStatement insertStatement,
@@ -636,8 +714,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				unreadMessageCount++;
 			}
 
+			String thumbnailString = extractThumbnailFromMetadata(conv
+					.getMetadata());
+
 			bindConversationInsert(insertStatement, conv);
 			msgId = insertStatement.executeInsert();
+
+			addThumbnailStringToMetadata(conv.getMetadata(), thumbnailString);
 			/*
 			 * Represents we dont have any conversation made for this msisdn.
 			 * Here we are also checking whether the message is a group message,
@@ -661,6 +744,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				conv.setConversation(conversation);
 			}
 			conv.setMsgID(msgId);
+
+			if (conv.isFileTransferMessage()) {
+				addSharedMedia(msgId, conv.getConversation().getConvId());
+			}
 
 			/*
 			 * Updating the conversations table
@@ -2477,4 +2564,135 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DatabaseUtils.sqlEscapeString(msisdn);
 		mDb.execSQL(sqlString);
 	}
+
+	public void initialiseSharedMediaAndFileThumbnailTable(SQLiteDatabase mDb) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] {
+					DBConstants.CONV_ID, DBConstants.MESSAGE_ID,
+					DBConstants.MESSAGE_METADATA }, null, null, null, null,
+					null);
+
+			final int convIdIdx = c.getColumnIndex(DBConstants.CONV_ID);
+			final int msgIdIdx = c.getColumnIndex(DBConstants.MESSAGE_ID);
+			final int metatdataIdx = c
+					.getColumnIndex(DBConstants.MESSAGE_METADATA);
+
+			mDb.beginTransaction();
+
+			while (c.moveToNext()) {
+
+				long convId = c.getLong(convIdIdx);
+				long messageId = c.getLong(msgIdIdx);
+				String metadata = c.getString(metatdataIdx);
+
+				try {
+					JSONObject metadataJson = new JSONObject(metadata);
+
+					JSONArray fileJsonArray = metadataJson
+							.optJSONArray(HikeConstants.FILES);
+
+					if (fileJsonArray == null) {
+						continue;
+					}
+
+					ContentValues sharedMediaValues = getSharedMediaContentValues(
+							messageId, convId);
+					mDb.insert(DBConstants.SHARED_MEDIA_TABLE, null,
+							sharedMediaValues);
+
+					JSONObject fileJson = fileJsonArray.getJSONObject(0);
+
+					HikeFile hikeFile = new HikeFile(fileJson);
+
+					if (hikeFile.getThumbnail() == null) {
+						continue;
+					}
+
+					byte[] imageBytes = Base64.decode(
+							hikeFile.getThumbnailString(), Base64.DEFAULT);
+
+					ContentValues fileThumbnailValues = getFileThumbnailContentValues(
+							hikeFile.getFileKey(), imageBytes);
+					mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null,
+							fileThumbnailValues);
+
+					fileJson.remove(HikeConstants.THUMBNAIL);
+
+					ContentValues fileJsonUpdateValues = new ContentValues();
+					fileJsonUpdateValues.put(DBConstants.MESSAGE_METADATA,
+							metadataJson.toString());
+					mDb.update(DBConstants.MESSAGES_TABLE,
+							fileJsonUpdateValues,
+							DBConstants.MESSAGE_ID + "=?",
+							new String[] { Long.toString(messageId) });
+
+				} catch (JSONException e) {
+					Log.w(getClass().getSimpleName(), "Invalid JSON");
+				}
+			}
+
+			mDb.setTransactionSuccessful();
+
+		} finally {
+			mDb.endTransaction();
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	public void addSharedMedia(long messageId, long convId) {
+		ContentValues sharedMediaValues = getSharedMediaContentValues(
+				messageId, convId);
+
+		mDb.insert(DBConstants.SHARED_MEDIA_TABLE, null, sharedMediaValues);
+	}
+
+	private ContentValues getSharedMediaContentValues(long messageId,
+			long convId) {
+		ContentValues sharedMediaValues = new ContentValues();
+		sharedMediaValues.put(DBConstants.MESSAGE_ID, messageId);
+		sharedMediaValues.put(DBConstants.CONV_ID, convId);
+
+		return sharedMediaValues;
+	}
+
+	public void addFileThumbnail(String fileKey, byte[] imageBytes) {
+		ContentValues fileThumbnailValues = getFileThumbnailContentValues(
+				fileKey, imageBytes);
+
+		mDb.insert(DBConstants.FILE_THUMBNAIL_TABLE, null, fileThumbnailValues);
+	}
+
+	private ContentValues getFileThumbnailContentValues(String fileKey,
+			byte[] imageBytes) {
+		ContentValues fileThumbnailValues = new ContentValues();
+		fileThumbnailValues.put(DBConstants.FILE_KEY, fileKey);
+		fileThumbnailValues.put(DBConstants.IMAGE, imageBytes);
+
+		return fileThumbnailValues;
+	}
+
+	public Drawable getFileThumbnail(String fileKey) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.FILE_THUMBNAIL_TABLE,
+					new String[] { DBConstants.IMAGE }, DBConstants.FILE_KEY
+							+ "=?", new String[] { fileKey }, null, null, null);
+
+			if (!c.moveToFirst()) {
+				return null;
+			}
+
+			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));
+			return new BitmapDrawable(BitmapFactory.decodeByteArray(icondata,
+					0, icondata.length));
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
 }

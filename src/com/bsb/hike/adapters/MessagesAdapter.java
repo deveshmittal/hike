@@ -856,9 +856,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					.wasFileDownloaded() && !ChatThread.fileTransferTaskMap
 					.containsKey(convMessage.getMsgID())))
 					&& (hikeFile.getThumbnail() != null)
-					&& (hikeFile.getHikeFileType() != HikeFileType.UNKNOWN);
+					&& (hikeFileType != HikeFileType.UNKNOWN);
 
-			boolean showingLargerImage = false;
+			Drawable thumbnail = null;
+			if (hikeFile.getThumbnail() == null) {
+				thumbnail = IconCacheManager.getInstance().getFileThumbnail(
+						hikeFile.getFileKey());
+				if (thumbnail != null) {
+					showThumbnail = true;
+				}
+			} else {
+				thumbnail = hikeFile.getThumbnail();
+			}
 
 			if (convMessage.isSent()
 					&& (hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile

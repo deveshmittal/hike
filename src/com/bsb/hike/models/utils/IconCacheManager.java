@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeUserDatabase;
 
 public class IconCacheManager {
@@ -51,6 +52,7 @@ public class IconCacheManager {
 										 */
 
 	private HikeUserDatabase mDb;
+	private HikeConversationsDatabase hCDb;
 	private static IconCacheManager mCacheManager;
 
 	public IconCacheManager() {
@@ -62,6 +64,7 @@ public class IconCacheManager {
 																	 * a time
 																	 */
 		mDb = HikeUserDatabase.getInstance();
+		hCDb = HikeConversationsDatabase.getInstance();
 	}
 
 	public static void init() {
@@ -83,6 +86,19 @@ public class IconCacheManager {
 		if (b == null) {
 			b = mDb.getIcon(msisdn);
 			mIcons.put(msisdn, b);
+		}
+
+		return b;
+	}
+
+	public synchronized Drawable getFileThumbnail(String fileKey) {
+		Drawable b = mIcons.get(fileKey);
+		if (b == null) {
+			b = hCDb.getFileThumbnail(fileKey);
+
+			if (b != null) {
+				mIcons.put(fileKey, b);
+			}
 		}
 
 		return b;
