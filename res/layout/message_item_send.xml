@@ -60,14 +60,6 @@
             android:layout_height="wrap_content"
             android:gravity="right" >
 
-            <ImageView
-                android:id="@+id/msg_status_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="7dp"
-                android:src="@drawable/ic_blank" />
-
             <com.bsb.hike.view.CircularProgress
                 android:id="@+id/file_transfer_progress"
                 android:layout_width="22dp"

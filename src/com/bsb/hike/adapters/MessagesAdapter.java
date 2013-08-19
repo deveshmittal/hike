@@ -337,8 +337,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							false);
 				}
 
-				holder.image = (ImageView) v
-						.findViewById(R.id.msg_status_indicator);
 				holder.dayContainer = (LinearLayout) v
 						.findViewById(R.id.day_container);
 				holder.dayTextView = (TextView) v.findViewById(R.id.day);
@@ -1178,14 +1176,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			 */
 			int resId = convMessage.getImageState();
 			if (resId > 0) {
-				if (convMessage.getState() == State.SENT_UNCONFIRMED) {
-					showTryingAgainIcon(holder.image,
-							convMessage.getTimestamp());
-				} else {
-					holder.image.setImageResource(resId);
-					holder.image.setAnimation(null);
-					holder.image.setVisibility(View.VISIBLE);
-				}
 				/*
 				 * Commenting this out for now.
 				 */
@@ -1202,7 +1192,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				// holder.undeliveredMsgTextView.setVisibility(View.GONE);
 				// }
 			} else if (convMessage.isSent()) {
-				holder.image.setImageResource(0);
 			} else {
 				holder.image.setVisibility(View.GONE);
 				if (isGroupChat) {
