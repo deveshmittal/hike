@@ -1334,14 +1334,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				ad.start();
 				break;
 			case SENT_CONFIRMED:
-				tv.setText("Sent, "
-						+ current.getTimestampFormatted(false, context));
+				tv.setText(context.getString(R.string.sent,
+						current.getTimestampFormatted(false, context)));
 				break;
 			case SENT_DELIVERED:
-				tv.setText("Delivered");
+				tv.setText(R.string.delivered);
 				break;
 			case SENT_DELIVERED_READ:
-				tv.setText("Read");
+				if (!isGroupChat) {
+					tv.setText(R.string.read);
+				} else {
+					setReadByForGroup(current, tv);
+				}
 				break;
 			}
 		} else {
@@ -1355,6 +1359,51 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				return;
 			}
 			tv.setVisibility(View.GONE);
+		}
+	}
+
+	private void setReadByForGroup(ConvMessage convMessage, TextView tv) {
+		GroupConversation groupConversation = (GroupConversation) conversation;
+		JSONArray readByArray = convMessage.getReadByArray();
+
+		if (readByArray == null
+				|| groupConversation.getGroupMemberAliveCount() == readByArray
+						.length()) {
+			tv.setText(R.string.read_by_everyone);
+		} else {
+			StringBuilder sb = new StringBuilder();
+
+			int lastIndex = readByArray.length()
+					- HikeConstants.MAX_READ_BY_NAMES;
+
+			boolean moreNamesThanMaxCount = false;
+			if (lastIndex < 0) {
+				lastIndex = 0;
+			} else if (lastIndex > 0) {
+				moreNamesThanMaxCount = true;
+			}
+
+			for (int i = readByArray.length() - 1; i >= lastIndex; i--) {
+				sb.append(groupConversation
+						.getGroupParticipantFirstName(readByArray.optString(i)));
+				if (i > lastIndex + 1) {
+					sb.append(", ");
+				} else if (i == lastIndex + 1) {
+					if (moreNamesThanMaxCount) {
+						sb.append(", ");
+					} else {
+						sb.append(" and ");
+					}
+				}
+			}
+			String readByString = sb.toString();
+			if (moreNamesThanMaxCount) {
+				tv.setText(context.getString(R.string.read_by_names_number,
+						readByString, lastIndex));
+			} else {
+				tv.setText(context.getString(R.string.read_by_names_only,
+						readByString));
+			}
 		}
 	}
 

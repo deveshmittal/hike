@@ -4,7 +4,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 18;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 19;
 
 	public static final int USERS_DATABASE_VERSION = 13;
 
@@ -171,4 +171,6 @@ public class DBConstants {
 	public static final String SHARED_MEDIA_TABLE = "sharedMediaTable";
 
 	public static final String FILE_THUMBNAIL_TABLE = "fileThumbnailTable";
+
+	public static final String READ_BY = "readBy";
 }

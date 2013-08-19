@@ -406,6 +406,8 @@ public class HikeConstants {
 
 	public static final String MICROMAX = "MICROMAX";
 
+	public static final int MAX_READ_BY_NAMES = 3;
+
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";

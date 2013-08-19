@@ -369,21 +369,6 @@ public class MqttMessagesManager {
 			if (convMessage.getConversation() == null) {
 				return;
 			}
-			/*
-			 * We are forcing the app to set all the messages sent by the user
-			 * in a group chat before this as read.
-			 */
-			long[] ids = convDb.getUnreadMessageIds(convMessage
-					.getConversation().getConvId());
-			if (ids != null && convMessage.isGroupChat()
-					&& convMessage.getMetadata() == null) {
-				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ,
-						convMessage.getMsisdn());
-
-				Pair<String, long[]> pair = new Pair<String, long[]>(
-						convMessage.getMsisdn(), ids);
-				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
-			}
 
 			/*
 			 * We need to add the name here in order to fix the bug where if the
@@ -473,22 +458,34 @@ public class MqttMessagesManager {
 																				// read
 		{
 			JSONArray msgIds = jsonObj.optJSONArray(HikeConstants.DATA);
-			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
+			String id = jsonObj.has(HikeConstants.TO) ? jsonObj
 					.getString(HikeConstants.TO) : jsonObj
 					.getString(HikeConstants.FROM);
+
+			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
+					.getString(HikeConstants.FROM) : "";
+
 			if (msgIds == null) {
 				Log.e(getClass().getSimpleName(),
 						"Update Error : Message id Array is empty or null . Check problem");
 				return;
 			}
 
-			long[] ids = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn,
-					msgIds);
-			if (ids == null) {
-				return;
+			long[] ids;
+			if (!Utils.isGroupConversation(id)) {
+				ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, msgIds);
+				if (ids == null) {
+					return;
+				}
+			} else {
+				ids = new long[msgIds.length()];
+				for (int i = 0; i < msgIds.length(); i++) {
+					ids[i] = msgIds.optLong(i);
+				}
+				convDb.setReadByForGroup(id, ids, participantMsisdn);
 			}
 
-			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, ids);
+			Pair<String, long[]> pair = new Pair<String, long[]>(id, ids);
 
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
 		} else if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)

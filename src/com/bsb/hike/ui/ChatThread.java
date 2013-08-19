@@ -1958,6 +1958,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				if (Utils.shouldChangeMessageState(msg,
 						ConvMessage.State.SENT_DELIVERED_READ.ordinal())) {
 					msg.setState(ConvMessage.State.SENT_DELIVERED_READ);
+					msg.setReadByArray(HikeConversationsDatabase.getInstance()
+							.getReadByValueForMessageID(msg.getMsgID()));
 				}
 			}
 			runOnUiThread(mUpdateAdapter);

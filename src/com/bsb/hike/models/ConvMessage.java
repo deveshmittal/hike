@@ -55,6 +55,8 @@ public class ConvMessage {
 
 	private TypingNotification typingNotification;
 
+	private JSONArray readByArray;
+
 	public boolean isInvite() {
 		return mInvite;
 	}
@@ -588,6 +590,21 @@ public class ConvMessage {
 
 	public void setTypingNotification(TypingNotification typingNotification) {
 		this.typingNotification = typingNotification;
+	}
+
+	public JSONArray getReadByArray() {
+		return readByArray;
+	}
+
+	public void setReadByArray(String readBy) {
+		if (TextUtils.isEmpty(readBy)) {
+			return;
+		}
+		try {
+			this.readByArray = new JSONArray(readBy);
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), "Invalid JSON");
+		}
 	}
 
 	public int getImageState() {

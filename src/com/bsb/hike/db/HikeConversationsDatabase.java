@@ -86,7 +86,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.CONV_ID + " INTEGER,"
 				+ DBConstants.MESSAGE_METADATA + " TEXT, "
 				+ DBConstants.GROUP_PARTICIPANT + " TEXT, "
-				+ DBConstants.IS_HIKE_MESSAGE + " INTEGER DEFAULT -1" + " ) ";
+				+ DBConstants.IS_HIKE_MESSAGE + " INTEGER DEFAULT -1, "
+				+ DBConstants.READ_BY + " TEXT" + " ) ";
 
 		db.execSQL(sql);
 		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.CONVERSATION_INDEX
@@ -387,6 +388,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		if (oldVersion < 18) {
 			initialiseSharedMediaAndFileThumbnailTable(db);
 		}
+		/*
+		 * Version 19 adds the 'read by' column in the messages table.
+		 */
+		if (oldVersion < 19) {
+			String alter = "ALTER TABLE " + DBConstants.MESSAGES_TABLE
+					+ " ADD COLUMN " + DBConstants.READ_BY + " TEXT";
+			db.execSQL(alter);
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -506,6 +515,97 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		executeUpdateMessageStatusStatement(query, status, msisdn);
 
 		return ids;
+	}
+
+	public void setReadByForGroup(String groupId, long[] ids, String msisdn) {
+		StringBuilder sb = new StringBuilder("(");
+		/* TODO make utils.join work for arrays */
+		for (int i = 0; i < ids.length; i++) {
+			sb.append(ids[i]);
+			if (i != ids.length - 1) {
+				sb.append(",");
+			}
+		}
+		sb.append(")");
+
+		Cursor c = null;
+		Cursor conversationCursor = null;
+		try {
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] {
+					DBConstants.READ_BY, DBConstants.MESSAGE_ID },
+					DBConstants.CONV_ID + " = (SELECT " + DBConstants.CONV_ID
+							+ " FROM " + DBConstants.CONVERSATIONS_TABLE
+							+ " WHERE " + DBConstants.MSISDN + "=? ) AND "
+							+ DBConstants.MESSAGE_ID + " IN " + sb.toString(),
+					new String[] { groupId }, null, null, null);
+
+			conversationCursor = mDb
+					.query(DBConstants.CONVERSATIONS_TABLE,
+							new String[] { DBConstants.MESSAGE_ID },
+							DBConstants.MSISDN + " = ?",
+							new String[] { msisdn }, null, null, null);
+
+			long conversationMsgId = -1;
+			if (conversationCursor.moveToFirst()) {
+				conversationMsgId = conversationCursor
+						.getLong(conversationCursor
+								.getColumnIndex(DBConstants.MESSAGE_ID));
+			}
+
+			while (c.moveToNext()) {
+				String readByString = c.getString(c
+						.getColumnIndex(DBConstants.READ_BY));
+				long msgId = c
+						.getLong(c.getColumnIndex(DBConstants.MESSAGE_ID));
+
+				try {
+					JSONArray readByArray;
+					if (TextUtils.isEmpty(readByString)) {
+						readByArray = new JSONArray();
+					} else {
+						readByArray = new JSONArray(readByString);
+					}
+					/*
+					 * Checking if this number has already been added.
+					 */
+					for (int i = 0; i < readByArray.length(); i++) {
+						if (readByArray.optString(i).equals(msisdn)) {
+							continue;
+						}
+					}
+					readByArray.put(msisdn);
+
+					String whereClause = DBConstants.MESSAGE_ID + "=?";
+
+					// TODO find a better way to perform this update.
+					ContentValues contentValues = new ContentValues();
+					contentValues.put(DBConstants.MSG_STATUS,
+							State.SENT_DELIVERED_READ.ordinal());
+
+					if (conversationMsgId == msgId) {
+						mDb.update(DBConstants.CONVERSATIONS_TABLE,
+								contentValues, DBConstants.MSISDN + "=?",
+								new String[] { msisdn });
+					}
+
+					contentValues.put(DBConstants.READ_BY,
+							readByArray.toString());
+					mDb.update(DBConstants.MESSAGES_TABLE, contentValues,
+							whereClause, new String[] { Long.toString(msgId) });
+
+				} catch (JSONException e) {
+					Log.w(getClass().getSimpleName(), "Invalid JSON", e);
+				}
+
+			}
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+			if (conversationCursor != null) {
+				conversationCursor.close();
+			}
+		}
 	}
 
 	public int updateBatch(long[] ids, int status, String msisdn) {
@@ -921,13 +1021,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		Cursor c = null;
 		try {
 			/* TODO this should be ORDER BY timestamp */
-			c = mDb.query(DBConstants.MESSAGES_TABLE,
-					new String[] { DBConstants.MESSAGE, DBConstants.MSG_STATUS,
-							DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
-							DBConstants.MAPPED_MSG_ID,
-							DBConstants.MESSAGE_METADATA,
-							DBConstants.GROUP_PARTICIPANT,
-							DBConstants.IS_HIKE_MESSAGE }, selection,
+			c = mDb.query(DBConstants.MESSAGES_TABLE, new String[] {
+					DBConstants.MESSAGE, DBConstants.MSG_STATUS,
+					DBConstants.TIMESTAMP, DBConstants.MESSAGE_ID,
+					DBConstants.MAPPED_MSG_ID, DBConstants.MESSAGE_METADATA,
+					DBConstants.GROUP_PARTICIPANT, DBConstants.IS_HIKE_MESSAGE,
+					DBConstants.READ_BY }, selection,
 					new String[] { Long.toString(convid) }, null, null,
 					DBConstants.MESSAGE_ID + " DESC", limitStr);
 
@@ -944,6 +1043,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					.getColumnIndex(DBConstants.GROUP_PARTICIPANT);
 			final int isHikeMessageColumn = c
 					.getColumnIndex(DBConstants.IS_HIKE_MESSAGE);
+			final int readByColumn = c.getColumnIndex(DBConstants.READ_BY);
 
 			List<ConvMessage> elements = new ArrayList<ConvMessage>(
 					c.getCount());
@@ -965,6 +1065,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					Log.e(HikeConversationsDatabase.class.getName(),
 							"Invalid JSON metadata", e);
 				}
+				message.setReadByArray(c.getString(readByColumn));
 				elements.add(elements.size(), message);
 				message.setConversation(conversation);
 			}
@@ -2711,4 +2812,23 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
+	public String getReadByValueForMessageID(long msgId) {
+		Cursor c = null;
+		try {
+			c = mDb.query(DBConstants.MESSAGES_TABLE,
+					new String[] { DBConstants.READ_BY },
+					DBConstants.MESSAGE_ID + "=?",
+					new String[] { Long.toString(msgId) }, null, null, null);
+			if (!c.moveToFirst()) {
+				return null;
+			}
+			String readByString = c.getString(c
+					.getColumnIndex(DBConstants.READ_BY));
+			return readByString;
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
 }
