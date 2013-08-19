@@ -1063,7 +1063,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				try {
 					message.setMetadata(metadata);
 				} catch (JSONException e) {
-					Log.e(HikeConversationsDatabase.class.getName(),
+					Log.w(HikeConversationsDatabase.class.getName(),
 							"Invalid JSON metadata", e);
 				}
 				message.setReadByArray(c.getString(readByColumn));
