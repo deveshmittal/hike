@@ -688,6 +688,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public List<ContactInfo> getContactsOfFavoriteType(
 			FavoriteType favoriteType, int onHike, String myMsisdn) {
+		return getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, false);
+	}
+
+	public List<ContactInfo> getContactsOfFavoriteType(
+			FavoriteType favoriteType, int onHike, String myMsisdn,
+			boolean ignoreUnknownContacts) {
 		String favoriteMsisdnColumnName = "tempMsisdn";
 		StringBuilder queryBuilder = new StringBuilder("SELECT "
 				+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + ", "
@@ -772,6 +778,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				String userMsisdn = c.getString(userMsisdnIdx);
 
 				if (TextUtils.isEmpty(userMsisdn)) {
+					if (ignoreUnknownContacts) {
+						continue;
+					}
 					contactInfo = new ContactInfo(msisdn, msisdn, null, msisdn);
 				} else {
 					contactInfo = new ContactInfo(c.getString(idx), userMsisdn,
