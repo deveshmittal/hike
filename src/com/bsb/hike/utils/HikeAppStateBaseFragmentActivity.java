@@ -9,7 +9,6 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
 import com.bsb.hike.ui.HomeActivity;
-import com.bsb.hike.ui.MessagesList;
 
 public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity {
 
