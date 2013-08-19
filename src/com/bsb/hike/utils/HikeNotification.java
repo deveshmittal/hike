@@ -139,7 +139,7 @@ public class HikeNotification {
 
 		long timeStamp = System.currentTimeMillis() / 1000;
 
-		Intent notificationIntent = getHomeActivityIntent(0);
+		Intent notificationIntent = getHomeActivityIntent(2);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
 		int icon = R.drawable.ic_contact_logo;
