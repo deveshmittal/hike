@@ -799,8 +799,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public List<ContactInfo> getContactsForComposeScreen(boolean freeSMSOn,
-			boolean fwdOrgroupChat, String userMsisdn, boolean nativeSMSOn) {
+	public List<Pair<AtomicBoolean, ContactInfo>> getContactsForComposeScreen(
+			boolean freeSMSOn, boolean fwdOrgroupChat, String userMsisdn,
+			boolean nativeSMSOn) {
 		StringBuilder selectionBuilder = new StringBuilder(DBConstants.MSISDN
 				+ " != 'null' AND " + DBConstants.MSISDN + " != "
 				+ DatabaseUtils.sqlEscapeString(userMsisdn));
@@ -833,39 +834,75 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		try {
 			c = mReadDb.query(DBConstants.USERS_TABLE, columns, selection,
 					null, null, null, orderBy);
-			List<ContactInfo> contactInfos = extractContactInfo(c);
+			List<Pair<AtomicBoolean, ContactInfo>> contactInfos = new ArrayList<Pair<AtomicBoolean, ContactInfo>>(
+					c.getCount());
+
+			int idx = c.getColumnIndex(DBConstants.ID);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+			int nameIdx = c.getColumnIndex(DBConstants.NAME);
+			int onhikeIdx = c.getColumnIndex(DBConstants.ONHIKE);
+			int phoneNumIdx = c.getColumnIndex(DBConstants.PHONE);
+			int msisdnTypeIdx = c.getColumnIndex(DBConstants.MSISDN_TYPE);
+			int lastMessagedIdx = c.getColumnIndex(DBConstants.LAST_MESSAGED);
+			int hasCustomPhotoIdx = c
+					.getColumnIndex(DBConstants.HAS_CUSTOM_PHOTO);
+
+			while (c.moveToNext()) {
+				ContactInfo contactInfo = new ContactInfo(c.getString(idx),
+						c.getString(msisdnIdx), c.getString(nameIdx),
+						c.getString(phoneNumIdx), c.getInt(onhikeIdx) != 0,
+						c.getString(msisdnTypeIdx), c.getLong(lastMessagedIdx),
+						c.getInt(hasCustomPhotoIdx) == 1);
+
+				contactInfos.add(new Pair<AtomicBoolean, ContactInfo>(
+						new AtomicBoolean(), contactInfo));
+			}
 
 			if (!shouldSortInDB) {
-				Collections.sort(contactInfos, new Comparator<ContactInfo>() {
+				Collections.sort(contactInfos,
+						new Comparator<Pair<AtomicBoolean, ContactInfo>>() {
 
-					@Override
-					public int compare(ContactInfo lhs, ContactInfo rhs) {
-						if (lhs.isOnhike() != rhs.isOnhike()) {
-							return (lhs.isOnhike()) ? -1 : 1;
-						} else {
-							if (lhs.isOnhike()) {
-								return lhs.compareTo(rhs);
-							} else {
-								if ((lhs.getMsisdn().startsWith(
-										HikeConstants.INDIA_COUNTRY_CODE) && rhs
-										.getMsisdn()
-										.startsWith(
-												HikeConstants.INDIA_COUNTRY_CODE))
-										|| (!lhs.getMsisdn()
-												.startsWith(
-														HikeConstants.INDIA_COUNTRY_CODE) && !rhs
+							@Override
+							public int compare(
+									Pair<AtomicBoolean, ContactInfo> lhs,
+									Pair<AtomicBoolean, ContactInfo> rhs) {
+								ContactInfo firstContact = lhs.second;
+								ContactInfo secondContact = rhs.second;
+
+								if (firstContact.isOnhike() != secondContact
+										.isOnhike()) {
+									return (firstContact.isOnhike()) ? -1 : 1;
+								} else {
+									if (firstContact.isOnhike()) {
+										return firstContact
+												.compareTo(secondContact);
+									} else {
+										if ((firstContact
 												.getMsisdn()
 												.startsWith(
-														HikeConstants.INDIA_COUNTRY_CODE))) {
-									return lhs.compareTo(rhs);
+														HikeConstants.INDIA_COUNTRY_CODE) && secondContact
+												.getMsisdn()
+												.startsWith(
+														HikeConstants.INDIA_COUNTRY_CODE))
+												|| (!firstContact
+														.getMsisdn()
+														.startsWith(
+																HikeConstants.INDIA_COUNTRY_CODE) && !secondContact
+														.getMsisdn()
+														.startsWith(
+																HikeConstants.INDIA_COUNTRY_CODE))) {
+											return firstContact
+													.compareTo(secondContact);
+										}
+										return firstContact
+												.getMsisdn()
+												.startsWith(
+														HikeConstants.INDIA_COUNTRY_CODE) ? -1
+												: 1;
+									}
 								}
-								return lhs.getMsisdn().startsWith(
-										HikeConstants.INDIA_COUNTRY_CODE) ? -1
-										: 1;
 							}
-						}
-					}
-				});
+						});
 			}
 			return contactInfos;
 		} finally {

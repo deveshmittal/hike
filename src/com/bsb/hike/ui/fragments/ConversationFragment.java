@@ -51,6 +51,7 @@ import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements
@@ -144,7 +145,7 @@ public class ConversationFragment extends SherlockListFragment implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.new_conversation:
-			Intent intent = new Intent(getActivity(), ChatThread.class);
+			Intent intent = new Intent(getActivity(), ComposeActivity.class);
 			intent.putExtra(HikeConstants.Extras.EDIT, true);
 			startActivity(intent);
 			return true;

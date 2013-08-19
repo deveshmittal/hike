@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -2087,10 +2088,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 	 * 
 	 * @return
 	 */
-	public List<ContactInfo> getGroupNameAndParticipantsAsContacts() {
+	public List<Pair<AtomicBoolean, ContactInfo>> getGroupNameAndParticipantsAsContacts() {
 		Cursor groupCursor = null;
 		try {
-			List<ContactInfo> groups = new ArrayList<ContactInfo>();
+			List<Pair<AtomicBoolean, ContactInfo>> groups = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
 			groupCursor = mDb.query(DBConstants.GROUP_INFO_TABLE, new String[] {
 					DBConstants.GROUP_ID, DBConstants.GROUP_NAME },
 					DBConstants.GROUP_ALIVE + "=1", null, null, null, null);
@@ -2112,8 +2113,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				String numberMembers = numMembers
 						+ (numMembers > 0 ? " Members" : " Member");
 
-				groups.add(new ContactInfo(groupId, numberMembers, groupName,
-						groupId, true));
+				ContactInfo group = new ContactInfo(groupId, numberMembers,
+						groupName, groupId, true);
+				groups.add(new Pair<AtomicBoolean, ContactInfo>(
+						new AtomicBoolean(), group));
 			}
 
 			return groups;

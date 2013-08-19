@@ -125,7 +125,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.adapters.AccountAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter;
 import com.bsb.hike.adapters.EmoticonAdapter.EmoticonType;
-import com.bsb.hike.adapters.HikeSearchContactAdapter;
 import com.bsb.hike.adapters.MessagesAdapter;
 import com.bsb.hike.adapters.UpdateAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
@@ -223,8 +222,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 	private View lastSeenContainer;
 
-	private LinearLayout mInputNumberContainer;
-
 	private boolean mUserIsBlocked;
 
 	private View mOverlayLayout;
@@ -262,10 +259,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	private TabHost tabHost;
 
 	private boolean isTabInitialised = false;
-
-	private EditText mInputNumberView;
-
-	private ListView mContactSearchView;
 
 	private GroupParticipant myInfo;
 
@@ -385,139 +378,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		}
 	}
 
-	private class CreateAutoCompleteViewTask extends
-			AsyncTask<Void, Void, List<ContactInfo>> {
-
-		private boolean isGroupChat;
-		private boolean isForwardingMessage;
-		private boolean isSharingFile;
-		private boolean freeSMSOn;
-		private boolean nativeSMSOn;
-		private String userMsisdn;
-		private String existingGroupId;
-		boolean loadOnUiThread;
-
-		@Override
-		protected void onPreExecute() {
-			isGroupChat = getIntent().getBooleanExtra(
-					HikeConstants.Extras.GROUP_CHAT, false);
-			isForwardingMessage = getIntent().getBooleanExtra(
-					HikeConstants.Extras.FORWARD_MESSAGE, false);
-			isSharingFile = getIntent().getType() != null;
-			// Getting the group id. This will be a valid value if the intent
-			// was
-			// passed to add group participants.
-			existingGroupId = getIntent().getStringExtra(
-					HikeConstants.Extras.EXISTING_GROUP_CHAT);
-
-			mComposeView.removeTextChangedListener(ChatThread.this);
-
-			if (isSharingFile) {
-				mLabelView.setText(R.string.share_file);
-			} else if (isForwardingMessage) {
-				mLabelView.setText(R.string.forward);
-			} else if (!TextUtils.isEmpty(existingGroupId)) {
-				mLabelView.setText(R.string.add_group);
-			} else if (isGroupChat) {
-				mLabelView.setText(R.string.new_group);
-			} else {
-				mLabelView.setText(R.string.new_message);
-			}
-
-			mBottomView.setVisibility(View.GONE);
-
-			if (isGroupChat) {
-				titleBtn = (Button) findViewById(R.id.title_icon);
-				titleBtn.setText(R.string.done);
-				titleBtn.setEnabled(false);
-				titleBtn.setVisibility(View.VISIBLE);
-				findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-			} else {
-				// Removing the attachment button that remains visible while
-				// forwarding files
-				findViewById(R.id.title_image_btn2).setVisibility(View.GONE);
-				findViewById(R.id.title_image_btn2_container).setVisibility(
-						View.GONE);
-				findViewById(R.id.button_bar3).setVisibility(View.GONE);
-			}
-			SharedPreferences appPref = PreferenceManager
-					.getDefaultSharedPreferences(getApplicationContext());
-
-			freeSMSOn = appPref.getBoolean(HikeConstants.FREE_SMS_PREF, true);
-
-			nativeSMSOn = appPref
-					.getBoolean(HikeConstants.SEND_SMS_PREF, false);
-
-			userMsisdn = prefs.getString(HikeMessengerApp.MSISDN_SETTING, "");
-
-			loadOnUiThread = Utils.loadOnUiThread();
-			/*
-			 * Show the progress icon.
-			 */
-			findViewById(R.id.progress_container).setVisibility(
-					loadOnUiThread ? View.GONE : View.VISIBLE);
-		}
-
-		@Override
-		protected List<ContactInfo> doInBackground(Void... params) {
-			if (!loadOnUiThread) {
-				return getContactsForComposeScreen(userMsisdn, freeSMSOn,
-						isGroupChat, isForwardingMessage, isSharingFile,
-						nativeSMSOn);
-			} else {
-				return null;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(List<ContactInfo> contactList) {
-			if (contactList == null) {
-				contactList = getContactsForComposeScreen(userMsisdn,
-						freeSMSOn, isGroupChat, isForwardingMessage,
-						isSharingFile, nativeSMSOn);
-			}
-			/*
-			 * Hide the progress icon.
-			 */
-			findViewById(R.id.progress_container).setVisibility(View.GONE);
-
-			mInputNumberView.setText("");
-			HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
-					ChatThread.this, contactList, mInputNumberView,
-					isGroupChat, titleBtn, existingGroupId, getIntent(),
-					freeSMSOn, nativeSMSOn);
-			mContactSearchView.setAdapter(adapter);
-			mContactSearchView.setOnItemClickListener(adapter);
-			mInputNumberView.addTextChangedListener(adapter);
-			mInputNumberView.setSingleLine(!isGroupChat);
-
-			mInputNumberContainer.setVisibility(View.VISIBLE);
-			mInputNumberView.setVisibility(View.VISIBLE);
-			mContactSearchView.setVisibility(View.VISIBLE);
-			mInputNumberView.requestFocus();
-
-			getWindow().setSoftInputMode(
-					WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-		}
-
-	}
-
-	private List<ContactInfo> getContactsForComposeScreen(String userMsisdn,
-			boolean freeSMSOn, boolean isGroupChat,
-			boolean isForwardingMessage, boolean isSharingFile,
-			boolean nativeSMSOn) {
-		List<ContactInfo> contactList = HikeUserDatabase.getInstance()
-				.getContactsForComposeScreen(freeSMSOn,
-						(isGroupChat || isForwardingMessage || isSharingFile),
-						userMsisdn, nativeSMSOn);
-
-		if (isForwardingMessage || isSharingFile) {
-			contactList.addAll(0, ChatThread.this.mConversationDb
-					.getGroupNameAndParticipantsAsContacts());
-		}
-		return contactList;
-	}
-
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -594,15 +454,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		/* bind views to variables */
 		chatLayout = (CustomLinearLayout) findViewById(R.id.chat_layout);
 		mBottomView = findViewById(R.id.bottom_panel);
-		mInputNumberContainer = (LinearLayout) findViewById(R.id.input_number_container);
 		mConversationsView = (ListView) findViewById(R.id.conversations_list);
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
 		mLabelView = (TextView) findViewById(R.id.title);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
-		mInputNumberView = (EditText) findViewById(R.id.input_number);
-		mContactSearchView = (ListView) findViewById(R.id.contact_search_result);
 		mNameView = (TextView) findViewById(R.id.name_txt);
 		mLastSeenView = (TextView) findViewById(R.id.last_seen);
 		lastSeenContainer = findViewById(R.id.last_seen_container);
@@ -1268,12 +1125,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 						mComposeView.getText(), false);
 			}
 			intent.removeExtra(HikeConstants.Extras.FORWARD_MESSAGE);
-		} else {
-			/*
-			 * The user chose to either start a new conversation or forward a
-			 * message.
-			 */
-			new CreateAutoCompleteViewTask().execute();
 		}
 		/*
 		 * close context menu(if open) if the previous MSISDN is different from
@@ -1340,10 +1191,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		mComposeView.setFocusable(true);
 		mComposeView.setVisibility(View.VISIBLE);
 		mComposeView.requestFocus();
-		/* hide the number picker */
-		mInputNumberView.setVisibility(View.GONE);
-		mContactSearchView.setVisibility(View.GONE);
-		mInputNumberContainer.setVisibility(View.GONE);
 
 		/*
 		 * strictly speaking we shouldn't be reading from the db in the UI

@@ -162,6 +162,9 @@
             android:theme="@style/NoTitleBar"
             android:windowSoftInputMode="adjustResize" >
         </activity>
+        <activity android:name=".ui.ComposeActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
         <receiver android:name=".service.BootService" >
             <intent-filter >
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
