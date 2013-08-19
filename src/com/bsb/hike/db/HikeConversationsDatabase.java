@@ -629,7 +629,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 		long msgId = -1;
 
+		int unreadMessageCount = 0;
+
 		for (ConvMessage conv : convMessages) {
+			if (!conv.isSent()) {
+				unreadMessageCount++;
+			}
+
 			bindConversationInsert(insertStatement, conv);
 			msgId = insertStatement.executeInsert();
 			/*
@@ -670,7 +676,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.endTransaction();
 
 		incrementUnreadCounter(convMessages.get(0).getMsisdn(),
-				convMessages.size());
+				unreadMessageCount);
 	}
 
 	public void updateIsHikeMessageState(long id, boolean isHikeMessage) {

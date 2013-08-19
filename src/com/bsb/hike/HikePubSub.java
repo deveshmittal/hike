@@ -254,6 +254,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String SHOW_IMAGE = "showImage";
 
+	public static final String RESET_UNREAD_COUNT = "resetUnreadCount";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

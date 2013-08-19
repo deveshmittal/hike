@@ -101,7 +101,8 @@ public class ConversationFragment extends SherlockListFragment implements
 			HikePubSub.MESSAGE_SENT, HikePubSub.MSG_READ,
 			HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
-			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION };
+			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
+			HikePubSub.RESET_UNREAD_COUNT };
 
 	private ConversationsAdapter mAdapter;
 	private HashMap<String, Conversation> mConversationsByMSISDN;
@@ -594,6 +595,15 @@ public class ConversationFragment extends SherlockListFragment implements
 			toggleTypingNotification(
 					HikePubSub.TYPING_CONVERSATION.equals(type),
 					(TypingNotification) object);
+		} else if (HikePubSub.RESET_UNREAD_COUNT.equals(type)) {
+			String msisdn = (String) object;
+			Conversation conv = mConversationsByMSISDN.get(msisdn);
+			if (conv == null) {
+				return;
+			}
+			conv.setUnreadCount(0);
+
+			getActivity().runOnUiThread(this);
 		}
 	}
 
