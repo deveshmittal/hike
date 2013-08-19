@@ -651,7 +651,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ (!TextUtils.isEmpty(msisdn) ? (" AND " + DBConstants.CONV_ID
 						+ "=(SELECT " + DBConstants.CONV_ID + " FROM "
 						+ DBConstants.CONVERSATIONS_TABLE + " WHERE "
-						+ DBConstants.MSISDN + " ='" + msisdn + "')") : "");
+						+ DBConstants.MSISDN + " ="
+						+ DatabaseUtils.sqlEscapeString(msisdn) + ")") : "");
 		Log.d(getClass().getSimpleName(), "UPDATE STATEMENT: "
 				+ updateStatement);
 
