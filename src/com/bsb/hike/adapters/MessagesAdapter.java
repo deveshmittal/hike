@@ -18,7 +18,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -52,6 +51,7 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -292,14 +292,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				v = inflater.inflate(R.layout.last_read_line, null);
 				break;
 			case STATUS_MESSAGE:
-				v = inflater.inflate(R.layout.profile_timeline_item, null);
+				v = inflater.inflate(R.layout.in_thread_status_update, null);
 
-				holder.image = (ImageView) v.findViewById(R.id.status_type);
+				holder.image = (ImageView) v.findViewById(R.id.avatar);
 				holder.messageTextView = (TextView) v
 						.findViewById(R.id.status_text);
-				holder.fileThumb = (ImageView) v.findViewById(R.id.status_pic);
-				holder.dayTextView = (TextView) v.findViewById(R.id.time);
-				holder.marginView = v.findViewById(R.id.empty_view);
+				holder.dayTextView = (TextView) v
+						.findViewById(R.id.status_info);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.content_container);
 				break;
@@ -462,9 +461,11 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				List<String> participantList = groupTypingNotification
 						.getGroupParticipantList();
 
-				LayoutParams layoutParams = new LayoutParams(
-						(int) (40 * Utils.densityMultiplier),
-						(int) (40 * Utils.densityMultiplier));
+				int avatarSize = context.getResources().getDimensionPixelSize(
+						R.dimen.avatar_size_chat_thread);
+
+				LayoutParams layoutParams = new LayoutParams(avatarSize,
+						avatarSize);
 
 				holder.avatarContainer.removeAllViews();
 				for (int i = participantList.size() - 1; i >= 0; i--) {
@@ -774,42 +775,36 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			return v;
 		} else if (infoState == ParticipantInfoState.STATUS_MESSAGE) {
-			v.findViewById(R.id.div1).setVisibility(View.GONE);
-			v.findViewById(R.id.div2).setVisibility(View.GONE);
-			v.findViewById(R.id.div3).setVisibility(View.GONE);
-
 			holder.container
 					.setBackgroundResource(R.drawable.bg_status_chat_thread);
 
 			StatusMessage statusMessage = convMessage.getMetadata()
 					.getStatusMessage();
+
+			holder.dayTextView.setText(context.getString(
+					R.string.xyz_posted_update,
+					Utils.getFirstName(conversation.getLabel())));
+
+			holder.image.setImageDrawable(IconCacheManager.getInstance()
+					.getIconForMSISDN(conversation.getMsisdn()));
+
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
-				holder.image.setImageResource(R.drawable.ic_text_status);
 				SmileyParser smileyParser = SmileyParser.getInstance();
 				holder.messageTextView.setText(smileyParser.addSmileySpans(
 						statusMessage.getText(), true));
 				Linkify.addLinks(holder.messageTextView, Linkify.ALL);
 
 			} else if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
-				holder.image.setImageResource(R.drawable.ic_profile_pic_status);
 				holder.messageTextView.setText(R.string.changed_profile);
 			}
+
 			if (statusMessage.hasMood()) {
-				holder.image.setBackgroundDrawable(null);
 				holder.image
 						.setImageResource(Utils.getMoodsResource()[statusMessage
 								.getMoodId()]);
 			} else {
 				holder.image.setBackgroundResource(R.drawable.bg_status_type);
 			}
-			holder.dayTextView.setText(convMessage.getTimestampFormatted(true,
-					context));
-			holder.fileThumb.setVisibility(View.GONE);
-
-			int padding = (int) (10 * Utils.densityMultiplier);
-			holder.container.setPadding(padding, padding, padding, padding);
-
-			holder.marginView.setVisibility(View.VISIBLE);
 
 			holder.container.setTag(convMessage);
 			holder.container.setOnClickListener(this);
@@ -843,10 +838,43 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			return v;
 		}
 
-		holder.stickerPlaceholder.setVisibility(View.GONE);
+		boolean firstMessageFromParticipant = false;
+		if (isGroupChat
+				&& !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn())) {
+			if (position != 0) {
+				ConvMessage previous = getItem(position - 1);
+				if (!convMessage.getGroupParticipantMsisdn().equals(
+						previous.getGroupParticipantMsisdn())) {
+					firstMessageFromParticipant = true;
+				}
+			}
+		}
+
 		MessageMetadata metadata = convMessage.getMetadata();
+
+		if (!convMessage.isSent()) {
+			RelativeLayout.LayoutParams bubbleParams = (RelativeLayout.LayoutParams) holder.bubbleContainer
+					.getLayoutParams();
+			if (conversation instanceof GroupConversation) {
+				if (convMessage.isStickerMessage()
+						|| (metadata != null && metadata.isPokeMessage())) {
+					bubbleParams.leftMargin = 0;
+				} else {
+					bubbleParams.leftMargin = context.getResources()
+							.getDimensionPixelSize(
+									R.dimen.group_bubble_left_margin);
+				}
+			} else {
+				bubbleParams.leftMargin = 0;
+			}
+			holder.bubbleContainer.setLayoutParams(bubbleParams);
+		}
+
+		holder.stickerPlaceholder.setVisibility(View.GONE);
+
 		if (convMessage.isFileTransferMessage()) {
 			final HikeFile hikeFile = metadata.getHikeFiles().get(0);
+			HikeFileType hikeFileType = hikeFile.getHikeFileType();
 
 			boolean showThumbnail = ((convMessage.isSent())
 					|| (conversation instanceof GroupConversation)
@@ -868,8 +896,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 
 			if (convMessage.isSent()
-					&& (hikeFile.getHikeFileType() == HikeFileType.IMAGE || hikeFile
-							.getHikeFileType() == HikeFileType.LOCATION)
+					&& (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
 					&& !showThumbnail) {
 				/*
 				 * This case should ideally only happen when downloading a
@@ -887,94 +914,63 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 
 				if (showThumbnail) {
-					if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
-							&& hikeFile.wasFileDownloaded()
-							&& !ChatThread.fileTransferTaskMap
-									.containsKey(convMessage.getMsgID())) {
-						showingLargerImage = true;
-						final ImageView imageView = holder.fileThumb;
-						holder.fileThumb.setScaleType(ScaleType.CENTER_INSIDE);
-						holder.fileThumb
-								.setMaxHeight((int) (250 * Utils.densityMultiplier));
-						holder.fileThumb
-								.setMaxWidth((int) (250 * Utils.densityMultiplier));
-						holder.fileThumb.setAdjustViewBounds(true);
-						new AsyncTask<Void, Void, Drawable>() {
-
-							protected void onPreExecute() {
-								imageView.setImageDrawable(hikeFile
-										.getThumbnail());
-							};
-
-							@Override
-							protected Drawable doInBackground(Void... params) {
-								return BitmapDrawable.createFromPath(hikeFile
-										.getFilePath());
-							}
-
-							protected void onPostExecute(Drawable result) {
-								imageView.setImageDrawable(result);
-							};
-						}.execute();
-					} else {
-						holder.fileThumb.setBackgroundDrawable(hikeFile
-								.getThumbnail());
-					}
-
+					holder.fileThumb.setImageDrawable(thumbnail);
 				} else {
-					switch (hikeFile.getHikeFileType()) {
+					switch (hikeFileType) {
 					case IMAGE:
 						holder.fileThumb
-								.setBackgroundResource(R.drawable.ic_default_img);
+								.setImageResource(R.drawable.ic_default_img);
 						break;
 					case VIDEO:
 						holder.fileThumb
-								.setBackgroundResource(R.drawable.ic_default_mov);
+								.setImageResource(R.drawable.ic_default_mov);
 						break;
 					case AUDIO:
 						holder.fileThumb
-								.setBackgroundResource(R.drawable.ic_default_audio);
+								.setImageResource(R.drawable.ic_default_audio);
 						break;
 					case CONTACT:
 						holder.fileThumb
-								.setBackgroundResource(R.drawable.ic_default_contact);
+								.setImageResource(R.drawable.ic_default_contact);
 						break;
 					case AUDIO_RECORDING:
 						holder.fileThumb
-								.setBackgroundResource(R.drawable.ic_audio_msg_received);
+								.setImageResource(R.drawable.ic_audio_msg_received);
 						break;
 					case UNKNOWN:
 						holder.fileThumb
-								.setBackgroundResource(R.drawable.ic_unknown_file);
+								.setImageResource(R.drawable.ic_unknown_file);
 						break;
 					}
 				}
 			}
 
 			holder.fileThumb
-					.setImageResource(((hikeFile.getHikeFileType() == HikeFileType.VIDEO) && (showThumbnail)) ? R.drawable.ic_video_play
+					.setImageResource(((hikeFileType == HikeFileType.VIDEO) && (showThumbnail)) ? R.drawable.ic_video_play
 							: 0);
 
 			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb
 					.getLayoutParams();
-			fileThumbParams.width = (int) (showThumbnail && !showingLargerImage ? (100 * Utils.densityMultiplier)
-					: LayoutParams.WRAP_CONTENT);
-			fileThumbParams.height = (int) (showThumbnail
-					&& !showingLargerImage ? (100 * Utils.densityMultiplier)
-					: LayoutParams.WRAP_CONTENT);
+
+			if (showThumbnail) {
+				holder.fileThumb.setScaleType(ScaleType.FIT_CENTER);
+				fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
+				fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail
+						.getIntrinsicHeight());
+			} else {
+				holder.fileThumb.setScaleType(ScaleType.CENTER);
+				fileThumbParams.height = LayoutParams.WRAP_CONTENT;
+				fileThumbParams.width = LayoutParams.WRAP_CONTENT;
+			}
 			holder.fileThumb.setLayoutParams(fileThumbParams);
-			holder.fileThumb
-					.setMaxHeight((int) (250 * Utils.densityMultiplier));
-			holder.fileThumb.setMaxWidth((int) (250 * Utils.densityMultiplier));
-			holder.fileThumb.setAdjustViewBounds(true);
 
 			holder.messageTextView.setVisibility(!showThumbnail ? View.VISIBLE
 					: View.GONE);
 
-			if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+			if (hikeFileType == HikeFileType.AUDIO_RECORDING) {
 				Utils.setupFormattedTime(holder.messageTextView,
 						hikeFile.getRecordingDuration());
-			} else if (hikeFile.getHikeFileType() == HikeFileType.UNKNOWN) {
+			} else if (hikeFileType == HikeFileType.UNKNOWN) {
 				holder.messageTextView.setText(context
 						.getString(R.string.unknown_msg));
 			} else {
@@ -983,7 +979,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			if (holder.showFileBtn != null) {
 				if (hikeFile.wasFileDownloaded()
-						&& hikeFile.getThumbnail() != null
+						&& showThumbnail
 						&& !ChatThread.fileTransferTaskMap
 								.containsKey(convMessage.getMsgID())) {
 					holder.showFileBtn.setVisibility(View.GONE);
@@ -995,9 +991,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							: Gravity.BOTTOM;
 					holder.showFileBtn.setLayoutParams(lp);
 
-					if (hikeFile.getHikeFileType() == HikeFileType.AUDIO_RECORDING) {
+					if (hikeFileType == HikeFileType.AUDIO_RECORDING) {
 						holder.showFileBtn.setVisibility(View.VISIBLE);
 						holder.showFileBtn.setBackgroundResource(0);
+						holder.showFileBtn.setImageResource(0);
 						holder.showFileBtn
 								.setScaleType(ScaleType.CENTER_INSIDE);
 						if (hikeFile.getFileKey().equals(
@@ -1042,12 +1039,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 			if (!convMessage.isSent()
 					&& (conversation instanceof GroupConversation)) {
-				holder.participantNameFT
-						.setText(((GroupConversation) conversation)
-								.getGroupParticipantName(convMessage
-										.getGroupParticipantMsisdn())
-								+ HikeConstants.SEPARATOR);
-				holder.participantNameFT.setVisibility(View.VISIBLE);
+				if (firstMessageFromParticipant) {
+					holder.participantNameFT
+							.setText(((GroupConversation) conversation)
+									.getGroupParticipantFirstName(convMessage
+											.getGroupParticipantMsisdn()));
+					holder.participantNameFT.setVisibility(View.VISIBLE);
+				} else {
+					holder.participantNameFT.setVisibility(View.GONE);
+				}
 			}
 			holder.messageContainer.setTag(convMessage);
 			holder.messageContainer.setOnClickListener(this);
@@ -1072,12 +1072,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			if (isGroupChat && !convMessage.isSent()
 					&& convMessage.getGroupParticipantMsisdn() != null) {
-				holder.stickerParticipantName.setVisibility(View.VISIBLE);
-				holder.stickerParticipantName
-						.setText(((GroupConversation) conversation)
-								.getGroupParticipantName(convMessage
-										.getGroupParticipantMsisdn())
-								+ HikeConstants.SEPARATOR);
+				if (firstMessageFromParticipant) {
+					holder.stickerParticipantName.setVisibility(View.VISIBLE);
+					holder.stickerParticipantName
+							.setText(((GroupConversation) conversation)
+									.getGroupParticipantFirstName(convMessage
+											.getGroupParticipantMsisdn()));
+				} else {
+					holder.stickerParticipantName.setVisibility(View.GONE);
+				}
 			}
 			/*
 			 * If this is the first category, then the sticker are a part of the
@@ -1133,10 +1136,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			// participant's name is never shown
 			if (isGroupChat && !convMessage.isSent()
 					&& convMessage.getGroupParticipantMsisdn() != null) {
-				markedUp = Utils
-						.addContactName(((GroupConversation) conversation)
-								.getGroupParticipantName(convMessage
-										.getGroupParticipantMsisdn()), markedUp);
+				if (firstMessageFromParticipant) {
+					holder.participantNameFT.setVisibility(View.VISIBLE);
+					holder.participantNameFT
+							.setText(((GroupConversation) conversation)
+									.getGroupParticipantFirstName(convMessage
+											.getGroupParticipantMsisdn()));
+				} else {
+					holder.participantNameFT.setVisibility(View.GONE);
+				}
 			}
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			markedUp = smileyParser.addSmileySpans(markedUp, false);
@@ -1193,12 +1201,25 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				// }
 			} else if (convMessage.isSent()) {
 			} else {
-				holder.image.setVisibility(View.GONE);
+				boolean showAvatar = false;
+
 				if (isGroupChat) {
+					if (position != 0) {
+						ConvMessage previous = getItem(position - 1);
+						if (!convMessage.getGroupParticipantMsisdn().equals(
+								previous.getGroupParticipantMsisdn())) {
+							showAvatar = true;
+						}
+					}
+				}
+				if (showAvatar) {
 					holder.image.setVisibility(View.VISIBLE);
 					holder.image.setImageDrawable(IconCacheManager
 							.getInstance().getIconForMSISDN(
 									convMessage.getGroupParticipantMsisdn()));
+				} else {
+					holder.image.setVisibility(isGroupChat ? View.INVISIBLE
+							: View.GONE);
 				}
 			}
 			setSDRAndTimestamp(position, holder.messageInfo, holder.sending);

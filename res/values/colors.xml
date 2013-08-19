@@ -128,6 +128,7 @@
     <color name="list_divider">#1f73716d</color>
     <color name="home_bg">#fffffc</color>
     <color name="update_no_btn">#73716d</color>
+    <color name="chat_thread_default_bg">#e8e3d8</color>
     <color name="actionbar_text">#faf8f2</color>
     <color name="sticker_emoticon_divider">#3d000000</color>
 </resources>

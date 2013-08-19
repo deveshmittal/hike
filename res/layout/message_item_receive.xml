@@ -3,8 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="8dp"
-    android:paddingLeft="18dp"
-	android:paddingRight="18dp">
+    android:paddingLeft="10dp"
+	android:paddingRight="10dp">
 
 	<LinearLayout
 		android:layout_marginBottom="5dp"
@@ -61,8 +61,8 @@
 
 	    <ImageView
 	        android:id="@+id/avatar"
-	        android:layout_width="40dp"
-	        android:layout_height="40dp"
+	        android:layout_width="@dimen/avatar_size_chat_thread"
+	        android:layout_height="@dimen/avatar_size_chat_thread"
 	        android:layout_alignParentTop="true"
 	        android:layout_marginRight="2dp"
 	        android:src="@drawable/ic_avatar1" />
@@ -104,6 +104,8 @@
 	                    android:textSize="16sp"
 	                    android:textStyle="bold"
 	                    android:visibility="gone"
+	                    android:layout_marginLeft="5dp"
+	                    android:layout_marginRight="5dp"
 	                    android:layout_marginBottom="5dp" />
 	            
 	            <LinearLayout
@@ -117,14 +119,16 @@
 	                    android:layout_width="100dp"
 	                    android:layout_height="100dp"
 	                    android:layout_gravity="center"
-	                    android:background="@drawable/ic_default_img"
-	                    android:scaleType="centerInside"
 	                    android:visibility="gone" />
 
 	                <com.bsb.hike.view.CustomFontTextView
 	                    android:id="@+id/message_receive"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
+	                    android:layout_marginBottom="2dp"
+	                    android:layout_marginLeft="5dp"
+	                    android:layout_marginRight="5dp"
+	                    android:layout_marginTop="2dp"
 	                    android:gravity="left"
 	                    android:text="Thanks lksad jfljasldkf alsdf lkasfdalskdfjlaslkfjalksdfjlas lf asdflasdf lasdjflkasdj flasdjfldsfl"
 	                    android:textColor="@color/chat_color"
@@ -135,7 +139,10 @@
 	                    android:id="@+id/message_receive_ft"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
+	                    android:layout_marginBottom="2dp"
 	                    android:layout_marginLeft="5dp"
+	                    android:layout_marginRight="5dp"
+	                    android:layout_marginTop="2dp"
 	                    android:gravity="left"
 	                    android:maxWidth="130dp"
 	                    android:text="Thanks lksad jfljasldkf alsdf lkasfdalskdfjlaslkfjalksdfjlas lf asdflasdf lasdjflkasdj flasdjfldsfl"
@@ -173,10 +180,10 @@
 	            android:id="@+id/typing"
 	            android:layout_width="wrap_content"
 	            android:layout_height="wrap_content"
-	            android:src="@drawable/typing"
+	            android:layout_toRightOf="@+id/avatar_container"
 	            android:background="@drawable/ic_bubble_white"
-	            android:visibility="gone"
-	            android:layout_toRightOf="@+id/avatar_container" />
+	            android:src="@drawable/typing"
+	            android:visibility="gone" />
 	        
 	        <RelativeLayout
 	            android:id="@+id/sticker_placeholder"

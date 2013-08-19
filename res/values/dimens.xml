@@ -41,6 +41,8 @@
 	<dimen name="medium_avatar">42dp</dimen>
 	<dimen name="small_avatar">33dp</dimen>
 	<dimen name="update_line_width">4dp</dimen>
+	<dimen name="group_bubble_left_margin">-9dp</dimen>
+	<dimen name="avatar_size_chat_thread">32dp</dimen>
 	
     <!-- Default height of an action bar. -->
     <dimen name="st__action_bar_default_height">48dip</dimen>

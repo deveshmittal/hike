@@ -61,7 +61,6 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
-import android.provider.ContactsContract.Intents.Insert;
 import android.provider.ContactsContract.RawContacts;
 import android.provider.MediaStore;
 import android.support.v4.view.PagerAdapter;
@@ -81,8 +80,6 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -104,7 +101,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -113,6 +109,9 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeConstants.TipType;
@@ -145,6 +144,7 @@ import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.models.TypingNotification;
+import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
@@ -157,7 +157,7 @@ import com.bsb.hike.utils.ContactDialog;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
-import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
@@ -166,7 +166,7 @@ import com.bsb.hike.view.CustomLinearLayout;
 import com.bsb.hike.view.CustomLinearLayout.OnSoftKeyboardListener;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
-public class ChatThread extends HikeAppStateBaseActivity implements
+public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		HikePubSub.Listener, TextWatcher, OnEditorActionListener,
 		OnSoftKeyboardListener, View.OnKeyListener, FinishableEvent,
 		OnTouchListener, OnScrollListener, OnItemLongClickListener {
@@ -211,13 +211,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	/* notifies that the adapter has been updated */
 	public Runnable mUpdateAdapter;
 
-	private TextView mLabelView;
-
-	private TextView mNameView;
-
 	private TextView mLastSeenView;
-
-	private View lastSeenContainer;
 
 	private boolean mUserIsBlocked;
 
@@ -248,10 +242,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	private ViewPager emoticonViewPager;
 
 	private ViewGroup emoticonLayout;
-
-	private ImageView titleIconView;
-
-	private Button titleBtn;
 
 	private GroupParticipant myInfo;
 
@@ -395,7 +385,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	}
 
 	@Override
-	public Object onRetainNonConfigurationInstance() {
+	public Object onRetainCustomNonConfigurationInstance() {
 		return getIntent();
 	}
 
@@ -443,12 +433,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		mComposeView = (EditText) findViewById(R.id.msg_compose);
 		mSendBtn = (ImageButton) findViewById(R.id.send_message);
 		mMetadataNumChars = (TextView) findViewById(R.id.sms_chat_metadata_num_chars);
-		mLabelView = (TextView) findViewById(R.id.title);
 		mOverlayLayout = findViewById(R.id.overlay_layout);
-		mNameView = (TextView) findViewById(R.id.name_txt);
-		mLastSeenView = (TextView) findViewById(R.id.last_seen);
-		lastSeenContainer = findViewById(R.id.last_seen_container);
-
 
 		/*
 		 * ensure that when the softkeyboard Done button is pressed (different
@@ -485,7 +470,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			setIntentFromField();
 			onNewIntent(getIntent());
 		} else {
-			Object o = getLastNonConfigurationInstance();
+			Object o = getLastCustomNonConfigurationInstance();
 			Intent intent = (o instanceof Intent) ? (Intent) o : getIntent();
 			onNewIntent(intent);
 		}
@@ -698,37 +683,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	}
 
 	@Override
-	/*
-	 * this function is called right before the options menu is shown. Disable
-	 * fields here as appropriate
-	 * 
-	 * @see android.app.Activity#onPrepareOptionsMenu(android.view.Menu)
-	 */
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		super.onPrepareOptionsMenu(menu);
-
-		/*
-		 * if the number ends with Hike, disable blocking, add to contacts and
-		 * call
-		 */
-		if ((mContactNumber != null) && (mContactNumber.endsWith("HIKE"))) {
-			return false;
-		}
-
-		onTitleIconClick(findViewById(R.id.title_image_btn));
-		return true;
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		/*
-		 * only enable the options menu after we've selected a conversation or
-		 * the conversation is not a group conversation
-		 */
-		if (mConversation == null) {
-			return false;
-		}
-
+		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
 		return true;
 	}
 
@@ -740,21 +696,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			return false;
 		}
 
-		if (item.getItemId() == R.id.block_menu) {
-			mPubSub.publish(HikePubSub.BLOCK_USER, getMsisdnMainUser());
-			blockUser();
-		} else if (item.getItemId() == R.id.add_contact_menu) {
-			Utils.logEvent(ChatThread.this,
-					HikeConstants.LogEvent.MENU_ADD_TO_CONTACTS);
-			Intent i = new Intent(Intent.ACTION_INSERT_OR_EDIT);
-			i.setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE);
-			i.putExtra(Insert.PHONE, mConversation.getMsisdn());
-			startActivity(i);
-		} else if (item.getItemId() == R.id.call) {
-			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.MENU_CALL);
-			Intent callIntent = new Intent(Intent.ACTION_CALL);
-			callIntent.setData(Uri.parse("tel:" + mContactNumber));
-			startActivity(callIntent);
+		if (item.getItemId() == R.id.attachment) {
+			showFilePickerDialog(Utils.getExternalStorageState());
 		}
 
 		return true;
@@ -950,13 +893,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 	@Override
 	protected void onNewIntent(Intent intent) {
 		Log.d(getClass().getSimpleName(), "Intent: " + intent.toString());
-		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
-		View btnBar = findViewById(R.id.button_bar);
-		titleIconView.setVisibility(View.GONE);
-		btnBar.setVisibility(View.GONE);
-
-		mLabelView.setVisibility(View.VISIBLE);
-		lastSeenContainer.setVisibility(View.GONE);
 
 		String prevContactNumber = null;
 
@@ -1160,13 +1096,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		// screen.
 		getIntent().removeExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
-		findViewById(R.id.title_icon).setVisibility(View.GONE);
-		findViewById(R.id.button_bar_2).setVisibility(View.GONE);
-		findViewById(R.id.title_image_btn2).setVisibility(View.VISIBLE);
-		findViewById(R.id.title_image_btn2_container).setVisibility(
-				View.VISIBLE);
-		findViewById(R.id.button_bar3).setVisibility(View.VISIBLE);
-
 		mComposeView.setFocusable(true);
 		mComposeView.setVisibility(View.VISIBLE);
 		mComposeView.requestFocus();
@@ -1210,19 +1139,11 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 		mLabel = mConversation.getLabel();
 
-		titleIconView = (ImageView) findViewById(R.id.title_image_btn);
-		titleIconView.setVisibility(View.VISIBLE);
-		titleIconView.setImageResource(R.drawable.ic_i);
-
-		View btnBar = findViewById(R.id.button_bar);
-		btnBar.setVisibility(View.VISIBLE);
+		setupActionBar();
 
 		gestureDetector = new GestureDetector(this, simpleOnGestureListener);
 
-		mLabelView.setText(mLabel);
 		if (!(mConversation instanceof GroupConversation)) {
-			mNameView.setText(mLabel);
-
 			favoriteType = HikeUserDatabase.getInstance()
 					.getContactInfoFromMSISDN(mContactNumber, false)
 					.getFavoriteType();
@@ -1399,6 +1320,74 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		}
 	}
 
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.chat_thread_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+		View contactInfoContainer = actionBarView
+				.findViewById(R.id.contact_info);
+		ImageView avatar = (ImageView) actionBarView.findViewById(R.id.avatar);
+		TextView contactName = (TextView) actionBarView
+				.findViewById(R.id.contact_name);
+		mLastSeenView = (TextView) actionBarView
+				.findViewById(R.id.contact_status);
+
+		avatar.setImageDrawable(IconCacheManager.getInstance()
+				.getIconForMSISDN(mContactNumber));
+		contactName.setText(mLabel);
+
+		backContainer.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(ChatThread.this, HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+		});
+
+		contactInfoContainer.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (!(mConversation instanceof GroupConversation)) {
+					String userMsisdn = prefs.getString(
+							HikeMessengerApp.MSISDN_SETTING, "");
+
+					Intent intent = new Intent();
+					intent.setClass(ChatThread.this, ProfileActivity.class);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					if (!userMsisdn.equals(mContactNumber)) {
+						intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
+								mContactNumber);
+						intent.putExtra(HikeConstants.Extras.ON_HIKE,
+								mConversation.isOnhike());
+					}
+					startActivity(intent);
+				} else {
+					if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+						return;
+					}
+
+					Utils.logEvent(ChatThread.this,
+							HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
+					Intent intent = new Intent();
+					intent.setClass(ChatThread.this, ProfileActivity.class);
+					intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+					intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT,
+							mConversation.getMsisdn());
+					startActivity(intent);
+				}
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
+	}
+
 	private boolean shouldShowLastSeen() {
 		if ((favoriteType == FavoriteType.FRIEND
 				|| favoriteType == FavoriteType.REQUEST_RECEIVED || favoriteType == FavoriteType.REQUEST_RECEIVED_REJECTED)
@@ -1447,11 +1436,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			removeSMSToggle();
 
 			setEmoticonButton();
-			mSendBtn.setBackgroundResource(R.drawable.send_hike_btn);
+			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
 			mComposeView
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
 							: R.string.hike_msg);
-			findViewById(R.id.title_image_btn2).setEnabled(true);
 			if ((mConversation instanceof GroupConversation)
 					&& ((GroupConversation) mConversation).hasSmsUser()) {
 				if (mCredits == 0) {
@@ -1465,7 +1453,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		} else {
 			updateChatMetadata();
 			setEmoticonButton();
-			mSendBtn.setBackgroundResource(R.drawable.send_sms_btn);
+			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
 			mComposeView.setHint(R.string.sms_msg);
 		}
 	}
@@ -1686,12 +1674,12 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						if (label != null) {
-							mLabelView.setText(label);
-							if (!(mConversation instanceof GroupConversation)) {
-								mNameView.setText(label);
-							}
-						}
+						// if (label != null) {
+						// mLabelView.setText(label);
+						// if (!(mConversation instanceof GroupConversation)) {
+						// mNameView.setText(label);
+						// }
+						// }
 
 						addMessage(message);
 					}
@@ -1835,7 +1823,7 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 				runOnUiThread(new Runnable() {
 					public void run() {
-						mLabelView.setText(groupName);
+						// mLabelView.setText(groupName);
 					}
 				});
 			}
@@ -1862,8 +1850,8 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						mLabelView.setText(mLabel);
-						mNameView.setText(mLabel);
+						// mLabelView.setText(mLabel);
+						// mNameView.setText(mLabel);
 					}
 				});
 			}
@@ -2010,12 +1998,10 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 
 				@Override
 				public void run() {
+					ActionBar actionBar = getSupportActionBar();
 					if (lastSeenString == null) {
-						lastSeenContainer.setVisibility(View.GONE);
-						mLabelView.setVisibility(View.VISIBLE);
+						mLastSeenView.setText("");
 					} else {
-						mLabelView.setVisibility(View.INVISIBLE);
-						lastSeenContainer.setVisibility(View.VISIBLE);
 						mLastSeenView.setText(lastSeenString);
 
 						if (tipView == null
@@ -2144,7 +2130,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 			}
 			mComposeView.setEnabled(true);
 		}
-		findViewById(R.id.title_image_btn2).setEnabled(true);
 		findViewById(
 				(mConversation instanceof GroupConversation) ? R.id.group_info_layout
 						: R.id.info_layout).setVisibility(View.GONE);
@@ -2377,124 +2362,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 					start + label.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		message.setText(str);
-	}
-
-	public void onTitleIconClick(View v) {
-
-		if (v.getId() == R.id.title_image_btn) {
-			if (!(mConversation instanceof GroupConversation)) {
-				String userMsisdn = prefs.getString(
-						HikeMessengerApp.MSISDN_SETTING, "");
-
-				Intent intent = new Intent();
-				intent.setClass(ChatThread.this, ProfileActivity.class);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-				if (!userMsisdn.equals(mContactNumber)) {
-					intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
-							mContactNumber);
-					intent.putExtra(HikeConstants.Extras.ON_HIKE,
-							mConversation.isOnhike());
-				}
-				startActivity(intent);
-			} else {
-				if (!((GroupConversation) mConversation).getIsGroupAlive()) {
-					return;
-				}
-
-				Utils.logEvent(ChatThread.this,
-						HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
-				Intent intent = new Intent();
-				intent.setClass(ChatThread.this, ProfileActivity.class);
-				intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-				intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT,
-						this.mConversation.getMsisdn());
-				startActivity(intent);
-
-				overridePendingTransition(R.anim.slide_in_right_noalpha,
-						R.anim.slide_out_left_noalpha);
-			}
-		} else if (v.getId() == R.id.info_layout
-				|| v.getId() == R.id.group_info_layout) {
-			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.I_BUTTON);
-			showOverlay(false);
-		} else if (v.getId() == R.id.title_icon) {
-			String groupId = getIntent().getStringExtra(
-					HikeConstants.Extras.EXISTING_GROUP_CHAT);
-			boolean newGroup = false;
-
-			if (TextUtils.isEmpty(groupId)) {
-				// Create new group
-				String uid = getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
-						.getString(HikeMessengerApp.UID_SETTING, "");
-				mContactNumber = uid + ":" + System.currentTimeMillis();
-				newGroup = true;
-			} else {
-				// Group alredy exists. Fetch existing participants.
-				mContactNumber = groupId;
-				newGroup = false;
-			}
-			String selectedContacts = this.mInputNumberView.getText()
-					.toString();
-			selectedContacts = selectedContacts.substring(0, selectedContacts
-					.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR));
-			List<String> selectedParticipants = Utils
-					.splitSelectedContacts(selectedContacts);
-			List<String> selectedParticipantNames = Utils
-					.splitSelectedContactsName(selectedContacts);
-			Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
-
-			for (int i = 0; i < selectedParticipants.size(); i++) {
-				String msisdn = selectedParticipants.get(i);
-				String name = selectedParticipantNames.get(i);
-				ContactInfo contactInfo = HikeUserDatabase.getInstance()
-						.getContactInfoFromMSISDN(msisdn, false);
-				contactInfo.setName(name);
-				GroupParticipant groupParticipant = new GroupParticipant(
-						contactInfo);
-				participantList.put(msisdn, groupParticipant);
-			}
-			ContactInfo userContactInfo = Utils.getUserContactInfo(prefs);
-
-			GroupConversation groupConversation = new GroupConversation(
-					mContactNumber, 0, null, userContactInfo.getMsisdn(), true);
-			groupConversation.setGroupParticipantList(participantList);
-
-			Log.d(getClass().getSimpleName(), "Creating group: "
-					+ mContactNumber);
-			mConversationDb.addGroupParticipants(mContactNumber,
-					groupConversation.getGroupParticipantList());
-			if (newGroup) {
-				mConversationDb.addConversation(groupConversation.getMsisdn(),
-						false, "", groupConversation.getGroupOwner());
-			}
-
-			try {
-				// Adding this boolean value to show a different system message
-				// if its a new group
-				JSONObject gcjPacket = groupConversation
-						.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
-				gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
-
-				sendMessage(new ConvMessage(gcjPacket, groupConversation,
-						ChatThread.this, true));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			mPubSub.publish(HikePubSub.MQTT_PUBLISH, groupConversation
-					.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN));
-			createConversation();
-			mComposeViewWatcher.init();
-			mComposeView.requestFocus();
-
-			mContactName = groupConversation.getLabel();
-
-			// To prevent the Contact picker layout from being shown on
-			// orientation change
-			setIntentFromField();
-		} else if (v.getId() == R.id.title_image_btn2) {
-			showFilePickerDialog(Utils.getExternalStorageState());
-		}
 	}
 
 	private void toggleConversationMuteViewVisibility(boolean isMuted) {
@@ -3963,7 +3830,6 @@ public class ChatThread extends HikeAppStateBaseActivity implements
 		((GroupConversation) mConversation).setGroupAlive(alive);
 		this.mSendBtn.setEnabled(false);
 		this.mComposeView.setVisibility(alive ? View.VISIBLE : View.INVISIBLE);
-		this.titleIconView.setEnabled(alive ? true : false);
 		findViewById(R.id.emo_btn).setEnabled(alive ? true : false);
 		findViewById(R.id.title_image_btn2).setEnabled(alive ? true : false);
 	}

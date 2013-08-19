@@ -81,7 +81,6 @@
             android:name=".ui.ChatThread"
             android:label="@string/app_label"
             android:launchMode="singleTop"
-            android:theme="@style/NoTitleBar"
             android:windowSoftInputMode="stateHidden" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
