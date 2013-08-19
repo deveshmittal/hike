@@ -44,6 +44,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.DownloadFileTask;
+import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
@@ -863,6 +864,19 @@ public class MqttMessagesManager {
 				 */
 				jsonObj.getJSONObject(HikeConstants.DATA).remove(
 						HikeConstants.THUMBNAIL);
+
+				/*
+				 * Start auto download of the profile image.
+				 */
+				String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+						+ HikeConstants.PROFILE_ROOT;
+				String fileName = Utils.getProfileImageFileName(statusMessage
+						.getMappedId());
+				File file = new File(basePath, fileName);
+				DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
+						context, statusMessage.getMappedId(), file.getPath(),
+						true, true);
+				downloadProfileImageTask.execute();
 			}
 
 			statusMessage

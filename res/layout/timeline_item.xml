@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/list_item"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_updates_white"
         android:paddingBottom="10dp"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp" >
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp" >
 
         <RelativeLayout
             android:id="@+id/avatar_container"
@@ -18,8 +26,8 @@
                 android:id="@+id/avatar"
                 android:layout_width="@dimen/medium_avatar"
                 android:layout_height="@dimen/medium_avatar"
-                android:layout_marginTop="13dp"
                 android:layout_marginLeft="3dp"
+                android:layout_marginTop="13dp"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView
@@ -27,8 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:src="@drawable/frame_avatar_medium_highlight_selector" />
-            
+                android:src="@drawable/frame_avatar_medium_selector" />
         </RelativeLayout>
 
         <LinearLayout
@@ -136,5 +143,6 @@
                 android:paddingRight="25dp"
                 android:text="@string/not_now" />
         </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>
