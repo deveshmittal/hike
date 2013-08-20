@@ -1162,9 +1162,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgress.setProgressAngle(fileTransferTask
 					.getProgress());
-			if (convMessage.isSent()) {
-				holder.image.setVisibility(View.INVISIBLE);
-			}
 		} else if (convMessage.isFileTransferMessage()
 				&& convMessage.isSent()
 				&& TextUtils.isEmpty(metadata.getHikeFiles().get(0)
@@ -1172,8 +1169,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (holder.circularProgress != null) {
 				holder.circularProgress.setVisibility(View.INVISIBLE);
 			}
-			holder.image.setVisibility(View.VISIBLE);
-			holder.image.setImageResource(R.drawable.ic_download_failed);
 		} else {
 			if (holder.circularProgress != null) {
 				holder.circularProgress.setVisibility(View.INVISIBLE);
