@@ -79,7 +79,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		selectedContactSet.clear();
 		doneBtn.setVisibility(View.GONE);
 		backIcon.setImageResource(R.drawable.ic_back);
-		getActionBar().setBackgroundDrawable(
+		getSupportActionBar().setBackgroundDrawable(
 				getResources().getDrawable(R.drawable.bg_header));
 	}
 
@@ -337,7 +337,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		if (!selectedContactSet.isEmpty()) {
 			doneBtn.setVisibility(View.VISIBLE);
 			doneBtn.setText(Integer.toString(selectedContactSet.size()));
-			getActionBar().setBackgroundDrawable(
+			getSupportActionBar().setBackgroundDrawable(
 					getResources().getDrawable(R.drawable.bg_header_compose));
 			title.setText(selectedContactSet.size() > 1 ? R.string.new_group
 					: R.string.new_chat);
