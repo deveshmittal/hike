@@ -1,10 +1,25 @@
 package com.bsb.hike;
 
+import static org.acra.ACRA.LOG_TAG;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.acra.ACRA;
+import org.acra.ErrorReporter;
+import org.acra.ReportField;
+import org.acra.annotation.ReportsCrashes;
+import org.acra.collector.CrashReportData;
+import org.acra.sender.HttpSender;
+import org.acra.sender.ReportSender;
+import org.acra.sender.ReportSenderException;
+import org.acra.util.HttpRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -17,6 +32,7 @@ import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
 import android.os.Message;
@@ -47,6 +63,11 @@ import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
 import com.facebook.android.Facebook;
 
+@ReportsCrashes(formKey = "", customReportContent = {
+		ReportField.APP_VERSION_CODE, ReportField.APP_VERSION_NAME,
+		ReportField.PHONE_MODEL, ReportField.BRAND, ReportField.PRODUCT,
+		ReportField.ANDROID_VERSION, ReportField.STACK_TRACE,
+		ReportField.USER_APP_START_DATE, ReportField.USER_CRASH_DATE })
 public class HikeMessengerApp extends Application implements Listener {
 
 	public static enum CurrentState {
@@ -343,6 +364,71 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 	}
 
+	/*
+	 * Implement a Custom report sender to add our own custom msisdn and token
+	 * for the username and password
+	 */
+	private class CustomReportSender implements ReportSender {
+		@Override
+		public void send(CrashReportData crashReportData)
+				throws ReportSenderException {
+			/* only send ACRA reports if we're in release mode */
+			if (0 != (getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE)) {
+				return;
+			}
+
+			try {
+				final String reportUrl = AccountUtils.base + "/logs/android";
+				Log.d(LOG_TAG, "Connect to " + reportUrl.toString());
+
+				final String login = msisdn;
+				final String password = token;
+
+				if (login != null && password != null) {
+					final HttpRequest request = new HttpRequest();
+					request.setLogin(login);
+					request.setPassword(password);
+					String paramsAsString = getParamsAsString(crashReportData);
+					Log.e(getClass().getSimpleName(), "Params: "
+							+ paramsAsString);
+					request.send(new URL(reportUrl), HttpSender.Method.POST,
+							paramsAsString, HttpSender.Type.FORM);
+				}
+			} catch (IOException e) {
+				Log.e(getClass().getSimpleName(), "IOException", e);
+			}
+		}
+
+	}
+
+	/**
+	 * Converts a Map of parameters into a URL encoded Sting.
+	 * 
+	 * @param parameters
+	 *            Map of parameters to convert.
+	 * @return URL encoded String representing the parameters.
+	 * @throws UnsupportedEncodingException
+	 *             if one of the parameters couldn't be converted to UTF-8.
+	 */
+	private String getParamsAsString(Map<?, ?> parameters)
+			throws UnsupportedEncodingException {
+
+		final StringBuilder dataBfr = new StringBuilder();
+		for (final Object key : parameters.keySet()) {
+			if (dataBfr.length() != 0) {
+				dataBfr.append('&');
+			}
+			final Object preliminaryValue = parameters.get(key);
+			final Object value = (preliminaryValue == null) ? ""
+					: preliminaryValue;
+			dataBfr.append(URLEncoder.encode(key.toString(), "UTF-8"));
+			dataBfr.append('=');
+			dataBfr.append(URLEncoder.encode(value.toString(), "UTF-8"));
+		}
+
+		return dataBfr.toString();
+	}
+
 	public void onCreate() {
 
 		SharedPreferences settings = getSharedPreferences(
@@ -350,6 +436,10 @@ public class HikeMessengerApp extends Application implements Listener {
 		token = settings.getString(HikeMessengerApp.TOKEN_SETTING, null);
 		msisdn = settings.getString(HikeMessengerApp.MSISDN_SETTING, null);
 		String uid = settings.getString(HikeMessengerApp.UID_SETTING, null);
+
+		ACRA.init(this);
+		CustomReportSender customReportSender = new CustomReportSender();
+		ErrorReporter.getInstance().setReportSender(customReportSender);
 
 		super.onCreate();
 
