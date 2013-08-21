@@ -311,7 +311,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			 * Fetch larger image
 			 */
 			new LargeImageTask(viewHolder.largeProfilePic,
-					statusMessage.getMappedId());
+					statusMessage.getMappedId()).execute();
 			break;
 		}
 
