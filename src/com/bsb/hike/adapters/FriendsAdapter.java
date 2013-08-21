@@ -26,8 +26,10 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.PinnedSectionListView.PinnedSectionListAdapter;
 
-public class FriendsAdapter extends BaseAdapter implements OnClickListener {
+public class FriendsAdapter extends BaseAdapter implements OnClickListener,
+		PinnedSectionListAdapter {
 
 	public static final int FRIEND_INDEX = 0;
 	public static final int HIKE_INDEX = 1;
@@ -424,5 +426,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener {
 						favoriteAdded);
 
 		removeFromGroup(contactInfo, FRIEND_INDEX);
+	}
+
+	@Override
+	public boolean isItemViewTypePinned(int viewType) {
+		return viewType == ViewType.SECTION.ordinal();
 	}
 }

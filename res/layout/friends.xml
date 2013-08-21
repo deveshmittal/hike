@@ -5,7 +5,7 @@
     android:background="@color/home_bg"
     android:orientation="vertical" >
 
-    <ListView
+    <com.bsb.hike.view.PinnedSectionListView
         android:id="@id/android:list"
         style="@style/HomeList"
         android:layout_marginLeft="0dp"
