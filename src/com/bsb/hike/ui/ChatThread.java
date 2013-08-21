@@ -557,18 +557,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				startActivity(intent);
 			}
 
-			/* slide down if we're still selecting a user, otherwise slide back */
-			if (mConversation == null
-					&& !getIntent().hasExtra(
-							HikeConstants.Extras.EXISTING_GROUP_CHAT)
-					&& !getIntent().hasExtra(
-							HikeConstants.Extras.FORWARD_MESSAGE)) {
-				overridePendingTransition(R.anim.no_animation,
-						R.anim.slide_down_noalpha);
-			} else {
-				overridePendingTransition(R.anim.slide_in_left_noalpha,
-						R.anim.slide_out_right_noalpha);
-			}
 			/*
 			 * If the user had typed something, we save it as a draft and will
 			 * show it in the text box when he comes back to this conversation.

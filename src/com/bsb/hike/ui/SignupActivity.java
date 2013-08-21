@@ -1077,8 +1077,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 				editor.commit();
 
 				startActivityForResult(intent, HikeConstants.CAMERA_RESULT);
-				overridePendingTransition(R.anim.slide_in_right_noalpha,
-						R.anim.slide_out_left_noalpha);
 			} else {
 				Toast.makeText(this, getString(R.string.no_sd_card),
 						Toast.LENGTH_LONG).show();
@@ -1094,8 +1092,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 			intent = new Intent(Intent.ACTION_PICK);
 			intent.setType("image/*");
 			startActivityForResult(intent, HikeConstants.GALLERY_RESULT);
-			overridePendingTransition(R.anim.slide_in_right_noalpha,
-					R.anim.slide_out_left_noalpha);
 			break;
 		}
 	}
