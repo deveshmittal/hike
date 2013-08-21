@@ -1,17 +1,11 @@
 package com.bsb.hike.adapters;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
@@ -31,6 +25,7 @@ import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.FetchAndSetLargeImageTask;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -303,14 +298,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.largeProfilePic.setTag(statusMessage);
 			viewHolder.largeProfilePic.setOnClickListener(imageClickListener);
 
-			final Drawable avatarDrawable = IconCacheManager.getInstance()
-					.getIconForMSISDN(statusMessage.getMappedId());
-			viewHolder.largeProfilePic.setImageDrawable(avatarDrawable);
-
 			/*
 			 * Fetch larger image
 			 */
-			new LargeImageTask(viewHolder.largeProfilePic,
+			new FetchAndSetLargeImageTask(context, viewHolder.largeProfilePic,
 					statusMessage.getMappedId()).execute();
 			break;
 		}
@@ -394,56 +385,4 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		}
 	};
 
-	private class LargeImageTask extends AsyncTask<Void, Void, Bitmap> {
-
-		File tempFile;
-		File orgFile;
-		ImageView iv;
-		String statusId;
-
-		public LargeImageTask(ImageView iv, String statusId) {
-			this.iv = iv;
-			this.statusId = statusId;
-		}
-
-		@Override
-		protected Bitmap doInBackground(Void... params) {
-			String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
-					+ HikeConstants.PROFILE_ROOT;
-			String fileName = Utils.getProfileImageFileName(statusId);
-
-			orgFile = new File(basePath, fileName);
-			if (!orgFile.exists()) {
-				return null;
-			}
-
-			File outputDir = context.getCacheDir();
-			try {
-				tempFile = File.createTempFile(statusId, ".jpg", outputDir);
-
-				Utils.saveBitmapToFile(tempFile,
-						BitmapFactory.decodeFile(orgFile.getPath()),
-						CompressFormat.JPEG, 50);
-				return BitmapFactory.decodeFile(tempFile.getPath());
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(Bitmap result) {
-			if (result == null) {
-				return;
-			}
-
-			StatusMessage statusMessage = (StatusMessage) iv.getTag();
-			if (statusMessage.getMappedId() != statusId) {
-				return;
-			}
-
-			iv.setImageBitmap(result);
-			tempFile.delete();
-		}
-	}
 }
