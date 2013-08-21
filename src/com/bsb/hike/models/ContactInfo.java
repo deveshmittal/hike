@@ -45,7 +45,7 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 	private long lastSeenTime;
 
-	private int offline;
+	private int offline = 1;
 
 	public String getName() {
 		return name;
