@@ -398,4 +398,21 @@
         <item name="android:textStyle">bold|italic</item>
     </style>
 
+    <style name="RequestBtn">
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="RequestBtn.Accept">
+        <item name="android:onClick">onYesBtnClick</item>
+        <item name="android:background">@drawable/bg_green_btn</item>
+        <item name="android:src">@drawable/ic_accept</item>
+    </style>
+
+    <style name="RequestBtn.Reject">
+        <item name="android:onClick">onNoBtnClick</item>
+        <item name="android:background">@drawable/bg_red_btn</item>
+        <item name="android:src">@drawable/ic_cancel</item>
+    </style>
+    
 </resources>

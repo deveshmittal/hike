@@ -38,23 +38,17 @@
 
         <ImageButton
             android:id="@+id/accept"
-            android:layout_width="36dp"
-            android:layout_height="wrap_content"
+            style="@style/RequestBtn.Accept"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="8dp"
-            android:background="@drawable/bg_green_btn"
-            android:src="@drawable/ic_accept" />
+            android:layout_marginLeft="8dp" />
 
         <ImageButton
             android:id="@+id/reject"
-            android:layout_width="36dp"
-            android:layout_height="wrap_content"
+            style="@style/RequestBtn.Reject"
             android:layout_centerVertical="true"
             android:layout_marginLeft="8dp"
-            android:layout_toLeftOf="@id/accept"
-            android:background="@drawable/bg_red_btn"
-            android:src="@drawable/ic_cancel" />
+            android:layout_toLeftOf="@id/accept" />
 
         <LinearLayout
             android:id="@+id/contact_details"
