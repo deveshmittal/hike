@@ -788,11 +788,12 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 							c.getString(msisdnTypeIdx),
 							c.getLong(lastMessagedIdx),
 							c.getInt(hasCustomPhotoIdx) == 1);
+
+					contactInfo.setOffline(c.getInt(isOfflineIdx));
+					contactInfo.setLastSeenTime(c.getLong(lastSeenIdx));
 				}
 
 				contactInfo.setFavoriteType(favoriteType);
-				contactInfo.setOffline(c.getInt(isOfflineIdx));
-				contactInfo.setLastSeenTime(c.getLong(lastSeenIdx));
 
 				contactInfos.add(contactInfo);
 			}
