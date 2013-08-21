@@ -22,8 +22,8 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_profile_pic_details" >
+            android:layout_height="58dp"
+            android:background="#8F323638" >
 
             <RelativeLayout
                 android:id="@+id/avatar_container"
