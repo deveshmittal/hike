@@ -2,17 +2,26 @@ package com.bsb.hike.utils;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
+import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
+import com.bsb.hike.R;
 import com.bsb.hike.ui.HomeActivity;
+import com.bsb.hike.ui.fragments.ImageViewerFragment;
 
-public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity {
+public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity
+		implements Listener {
 
+	private static final String IMAGE_FRAGMENT_TAG = "imageFragmentTag";
 	private static final String TAG = "HikeAppState";
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		if (HikeMessengerApp.currentState == CurrentState.BACKGROUNDED
@@ -21,7 +30,7 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity {
 			HikeMessengerApp.currentState = CurrentState.OPENED;
 			Utils.sendAppState(this);
 		}
-	   super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);
 
 	}
 
@@ -41,12 +50,22 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity {
 			Utils.sendAppState(this);
 		}
 		super.onStart();
+		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
 	}
 
 	@Override
 	public void onBackPressed() {
-		HikeMessengerApp.currentState = CurrentState.BACK_PRESSED;
-		super.onBackPressed();
+		Fragment fragment = getSupportFragmentManager().findFragmentByTag(
+				IMAGE_FRAGMENT_TAG);
+		if (fragment != null && fragment.isVisible()) {
+			FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+					.beginTransaction();
+			fragmentTransaction.remove(fragment);
+			fragmentTransaction.commit();
+		} else {
+			HikeMessengerApp.currentState = CurrentState.BACK_PRESSED;
+			super.onBackPressed();
+		}
 	}
 
 	@Override
@@ -70,6 +89,8 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity {
 			Utils.sendAppState(this);
 		}
 		super.onStop();
+		HikeMessengerApp.getPubSub()
+				.removeListener(HikePubSub.SHOW_IMAGE, this);
 	}
 
 	@Override
@@ -97,6 +118,26 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity {
 			Utils.sendAppState(this);
 		}
 	}
-	
-	
+
+	@Override
+	public void onEventReceived(String type, final Object object) {
+		if (HikePubSub.SHOW_IMAGE.equals(type)) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					Bundle arguments = (Bundle) object;
+
+					ImageViewerFragment imageViewerFragment = new ImageViewerFragment();
+					imageViewerFragment.setArguments(arguments);
+
+					FragmentTransaction fragmentTransaction = getSupportFragmentManager()
+							.beginTransaction();
+					fragmentTransaction.add(R.id.parent_layout,
+							imageViewerFragment, IMAGE_FRAGMENT_TAG);
+					fragmentTransaction.commit();
+				}
+			});
+		}
+	}
 }
