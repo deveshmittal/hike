@@ -549,6 +549,7 @@ public class HikeConstants {
 		public static final String DEFAULT_SMS_DIALOG_YES = "hoSsmSY";
 		public static final String DEFAULT_SMS_DIALOG_NO = "hoSsmSN";
 		public static final String DRAWER_BUTTON = "hoSdRB";
+		public static final String EMAIL_CONVERSATION = "hoSecON";
 
 		/*
 		 * Profile screen events <screen> = profS <event> = proES, credS, notyS,

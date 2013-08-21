@@ -566,4 +566,5 @@
 	<string name="new_group">New Group</string>
 	<string name="sent_friend_request">Sent a friend request</string>
 	<string name="xyz_posted_update">%1$s posted an update</string>
+	<string name="email_conversation">Email Conversation</string>
 </resources>

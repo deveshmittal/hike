@@ -1014,7 +1014,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 	public List<ConvMessage> getConversationThread(String msisdn, long convid,
 			int limit, Conversation conversation, long maxMsgId) {
-		String limitStr = new Integer(limit).toString();
+		String limitStr = (limit == -1)? null:new Integer(limit).toString(); 
 		String selection = DBConstants.CONV_ID
 				+ " = ?"
 				+ (maxMsgId == -1 ? "" : " AND " + DBConstants.MESSAGE_ID + "<"
@@ -1079,6 +1079,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			}
 		}
 	}
+	
 
 	public Conversation getConversation(String msisdn, int limit) {
 		Log.d(getClass().getSimpleName(), "Fetching conversation with msisdn: "
@@ -1111,11 +1112,11 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 						onhike);
 
 			}
-			if (limit > 0) {
-				List<ConvMessage> messages = getConversationThread(msisdn,
-						convid, limit, conv, -1);
-				conv.setMessages(messages);
-			}
+
+			List<ConvMessage> messages = getConversationThread(msisdn, convid,
+					limit, conv, -1);
+			conv.setMessages(messages);
+
 			return conv;
 		} finally {
 			if (c != null) {

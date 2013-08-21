@@ -1,16 +1,23 @@
 package com.bsb.hike.ui.fragments;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.json.JSONException;
 
 import android.app.AlertDialog;
 import android.app.NotificationManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +25,7 @@ import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,8 +51,12 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
+import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
@@ -55,10 +67,10 @@ import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements
-		OnItemLongClickListener, Listener, Runnable {
+OnItemLongClickListener, Listener, Runnable {
 
 	private class DeleteConversationsAsyncTask extends
-			AsyncTask<Conversation, Void, Conversation[]> {
+	AsyncTask<Conversation, Void, Conversation[]> {
 
 		@Override
 		protected Conversation[] doInBackground(Conversation... convs) {
@@ -93,6 +105,183 @@ public class ConversationFragment extends SherlockListFragment implements
 
 			mAdapter.notifyDataSetChanged();
 			mAdapter.setNotifyOnChange(false);
+		}
+	}
+
+	private class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]> {
+
+		ProgressDialog dialog;
+		List<String> listValues = new ArrayList<String>();
+
+		@Override
+		protected Conversation[] doInBackground(Conversation... convs) {
+
+			HikeConversationsDatabase db = null;
+			String msisdn = convs[0].getMsisdn();
+			StringBuilder sBuilder = new StringBuilder();
+			ArrayList<Uri> uris = new ArrayList<Uri>();
+			Map<String, String> map = new HashMap<String, String>();
+			String name = "";
+			String chatLabel ="";
+			db = HikeConversationsDatabase.getInstance();
+			Conversation conv = db.getConversation(msisdn, -1);
+			boolean isGroup = Utils.isGroupConversation(msisdn);
+
+			if (isGroup) {
+				sBuilder.append("Group ");
+				chatLabel = conv.getLabel();
+				// create a map of all group participants
+				for (Entry<String, GroupParticipant> entry : ((GroupConversation) convs[0])
+						.getGroupParticipantList().entrySet()) {
+					GroupParticipant groupParticipant = entry.getValue();
+					map.put(groupParticipant.getContactInfo().getMsisdn(),
+							groupParticipant.getContactInfo().getFirstName());
+				}
+			} else {
+
+				// populate this map with 1:1 contact info
+				ContactInfo contactInfo = HikeUserDatabase.getInstance()
+						.getContactInfoFromPhoneNo(msisdn);
+				
+				if (contactInfo != null) {
+					name = contactInfo.getName();
+					map.put(msisdn, name);
+					chatLabel = conv.getContactName();
+				}
+				else
+				{
+					chatLabel = conv.getMsisdn();
+				}
+			}
+
+			// initialize with a label
+			sBuilder.append("Chat with " + chatLabel + "\n");
+
+			// iterate through the messages and construct a meaningful payload
+			List<ConvMessage> cList = conv.getMessages();
+			for (int i = 0; i < cList.size(); i++) {
+				ConvMessage cMessage = cList.get(i);
+				String messageMask = cMessage.getMessage().toString();
+				String fromString = null;
+				// find if this message was sent or received
+				// also find out the sender number, this is needed for the chat
+				// file backup
+				MessageMetadata cMetadata = cMessage.getMetadata();
+				// TODO::what happens to squiggly messages here?
+
+				if (cMessage.isGroupChat())
+					fromString = (cMessage.isSent() == true) ? "me" : map
+							.get(cMessage.getGroupParticipantMsisdn());
+				else
+					fromString = (cMessage.isSent() == true) ? "me" : map
+							.get(cMessage.getMsisdn());
+
+				// if its still null , something's wrong, go with msisdn...
+				if (fromString == null) {
+					fromString = cMessage.getMsisdn();
+				}
+
+				if (cMessage.isFileTransferMessage()) {
+					// TODO: can make this generic and add support for multiple
+					// files.
+					HikeFile hikeFile = cMetadata.getHikeFiles().get(0);
+					listValues.add(hikeFile.getFilePath());
+					// tweak the message here based on the file
+					messageMask = "File transfer of type"
+							+ hikeFile.getFileTypeString();
+
+				}
+
+				// finally construct the backup string here
+				sBuilder.append(cMessage.getTimestampFormatted(false,
+						getSherlockActivity())
+						+ ":"
+						+ fromString
+						+ "- "
+						+ messageMask + "\n");
+
+				// TODO: add location and contact handling here.
+			}
+
+			File chatFile = createChatTextFile(
+					sBuilder.toString(),
+					"Chat backup_ " + chatLabel+"_"+
+					+ System.currentTimeMillis() + ".txt");
+			uris.add(Uri.fromFile(chatFile));
+
+			// append the attachments in hike messages in form of URI's. Dodo
+			// android needs uris duh!
+			for (String file : listValues) {
+				File tFile = new File(file);
+				Uri u = Uri.fromFile(tFile);
+				uris.add(u);
+			}
+
+			// create an email intent to attach the text file and other chat
+			// attachments
+			Intent intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+			intent.setType("text/plain");
+			intent.putExtra(Intent.EXTRA_EMAIL, "");
+			intent.putExtra(Intent.EXTRA_SUBJECT,
+					"Backup of conversation with: " + chatLabel);
+			intent.putExtra(Intent.EXTRA_TEXT,
+					"Attached is the conversation backup..");
+			intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+
+			// give the hike user a choice of intents
+			startActivity(Intent.createChooser(intent,
+					"Email your conversation"));
+
+			// TODO: Delete this temp file, although it might be useful for the
+			// user to have local chat backups ? Also we need to see 
+
+			return null;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			dialog = ProgressDialog.show(getActivity(), null,
+					"Exporting conversations...");
+
+			super.onPreExecute();
+		}
+
+		@Override
+		protected void onProgressUpdate(Void... values) {
+			super.onProgressUpdate(values);
+		}
+
+		@Override
+		protected void onPostExecute(Conversation[] result) {
+			dialog.dismiss();
+			super.onPostExecute(result);
+		}
+
+		public File createChatTextFile(String text, String fileName) {
+
+			File chatFile = new File(HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT,
+					fileName);
+
+			if (!chatFile.exists()) {
+				try {
+					chatFile.createNewFile();
+				} catch (IOException e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
+
+			try {
+				BufferedWriter buf = new BufferedWriter(new FileWriter(
+						chatFile, true));
+				buf.append(text);
+				buf.newLine();
+				buf.close();
+				return chatFile;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
 	}
 
@@ -190,6 +379,7 @@ public class ConversationFragment extends SherlockListFragment implements
 		final Conversation conv = (Conversation) mAdapter.getItem(position);
 
 		optionsList.add(getString(R.string.shortcut));
+		optionsList.add(getString(R.string.email_conversation));
 		if (conv instanceof GroupConversation) {
 			optionsList.add(getString(R.string.delete_leave));
 		} else {
@@ -206,48 +396,53 @@ public class ConversationFragment extends SherlockListFragment implements
 
 		builder.setAdapter(dialogAdapter,
 				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						String option = options[which];
-						if (getString(R.string.shortcut).equals(option)) {
-							Utils.logEvent(getActivity(),
-									HikeConstants.LogEvent.ADD_SHORTCUT);
-							Intent shortcutIntent = createIntentForConversation(conv);
-							Intent intent = new Intent();
-							intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
-									shortcutIntent);
-							intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
-									conv.getLabel());
-							Drawable d = IconCacheManager.getInstance()
-									.getIconForMSISDN(conv.getMsisdn());
-							Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String option = options[which];
+				if (getString(R.string.shortcut).equals(option)) {
+					Utils.logEvent(getActivity(),
+							HikeConstants.LogEvent.ADD_SHORTCUT);
+					Intent shortcutIntent = createIntentForConversation(conv);
+					Intent intent = new Intent();
+					intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
+							shortcutIntent);
+					intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
+							conv.getLabel());
+					Drawable d = IconCacheManager.getInstance()
+							.getIconForMSISDN(conv.getMsisdn());
+					Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
 
-							int dimension = (int) (Utils.densityMultiplier * 48);
+					int dimension = (int) (Utils.densityMultiplier * 48);
 
-							Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
-									dimension, dimension, false);
-							bitmap = null;
-							intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
-							intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
-							getActivity().sendBroadcast(intent);
-						} else if (getString(R.string.delete).equals(option)) {
-							Utils.logEvent(getActivity(),
-									HikeConstants.LogEvent.DELETE_CONVERSATION);
-							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-							task.execute(conv);
-						} else if (getString(R.string.delete_leave).equals(
-								option)) {
-							Utils.logEvent(getActivity(),
-									HikeConstants.LogEvent.DELETE_CONVERSATION);
-							leaveGroup(conv);
-						}
-					}
-				});
+					Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
+							dimension, dimension, false);
+					bitmap = null;
+					intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
+					intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+					getActivity().sendBroadcast(intent);
+				} else if (getString(R.string.delete).equals(option)) {
+					Utils.logEvent(getActivity(),
+							HikeConstants.LogEvent.DELETE_CONVERSATION);
+					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+					task.execute(conv);
+				} else if (getString(R.string.delete_leave).equals(
+						option)) {
+					Utils.logEvent(getActivity(),
+							HikeConstants.LogEvent.DELETE_CONVERSATION);
+					leaveGroup(conv);
+				} else if(getString(R.string.email_conversation).equals(option)){
+					Utils.logEvent(getActivity(), HikeConstants.LogEvent.EMAIL_CONVERSATION);
+					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask();
+					task.execute(conv);
+				}
+
+			}
+		});
 
 		AlertDialog alertDialog = builder.show();
 		alertDialog.getListView().setDivider(
 				getResources()
-						.getDrawable(R.drawable.ic_thread_divider_profile));
+				.getDrawable(R.drawable.ic_thread_divider_profile));
 		return true;
 	}
 
@@ -302,10 +497,10 @@ public class ConversationFragment extends SherlockListFragment implements
 			return;
 		}
 		HikeMessengerApp
-				.getPubSub()
-				.publish(
-						HikePubSub.MQTT_PUBLISH,
-						conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+		.getPubSub()
+		.publish(
+				HikePubSub.MQTT_PUBLISH,
+				conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
 	}
@@ -427,7 +622,7 @@ public class ConversationFragment extends SherlockListFragment implements
 					addMessage(conv, finalMessage);
 
 					messageRefreshHandler
-							.removeCallbacks(ConversationFragment.this);
+					.removeCallbacks(ConversationFragment.this);
 					messageRefreshHandler.postDelayed(
 							ConversationFragment.this, 100);
 				}
