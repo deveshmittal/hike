@@ -65,7 +65,8 @@
 	        android:layout_height="@dimen/avatar_size_chat_thread"
 	        android:layout_alignParentTop="true"
 	        android:layout_marginRight="2dp"
-	        android:src="@drawable/ic_avatar1" />
+	        android:src="@drawable/ic_avatar1"
+	        android:visibility="gone" />
 
 	    <RelativeLayout
 	        android:id="@+id/bubble_container"
