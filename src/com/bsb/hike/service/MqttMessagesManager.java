@@ -118,6 +118,8 @@ public class MqttMessagesManager {
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+
+			autoDownloadProfileImage(msisdn);
 		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 			String groupId = jsonObj.getString(HikeConstants.TO);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
@@ -144,6 +146,7 @@ public class MqttMessagesManager {
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			IconCacheManager.getInstance().clearIconForMSISDN(groupId);
+			autoDownloadProfileImage(groupId);
 			saveStatusMsg(jsonObj, groupId);
 		} else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
 																			// changed
@@ -868,15 +871,7 @@ public class MqttMessagesManager {
 				/*
 				 * Start auto download of the profile image.
 				 */
-				String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
-						+ HikeConstants.PROFILE_ROOT;
-				String fileName = Utils.getProfileImageFileName(statusMessage
-						.getMappedId());
-				File file = new File(basePath, fileName);
-				DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
-						context, statusMessage.getMappedId(), file.getPath(),
-						true, true);
-				downloadProfileImageTask.execute();
+				autoDownloadProfileImage(statusMessage.getMappedId());
 			}
 
 			statusMessage
@@ -1042,6 +1037,16 @@ public class MqttMessagesManager {
 
 			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 		}
+	}
+
+	private void autoDownloadProfileImage(String id) {
+		String basePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
+				+ HikeConstants.PROFILE_ROOT;
+		String fileName = Utils.getProfileImageFileName(id);
+		File file = new File(basePath, fileName);
+		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
+				context, id, file.getPath(), true, true);
+		downloadProfileImageTask.execute();
 	}
 
 	private void setDefaultSMSClientTutorialSetting() {
