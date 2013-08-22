@@ -31,10 +31,21 @@
 
             <ImageView
                 android:id="@+id/avatar"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:adjustViewBounds="true"
-                android:scaleType="fitCenter" />
+                android:layout_width="@dimen/small_avatar"
+                android:layout_height="@dimen/small_avatar"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="2dp"
+                android:layout_marginTop="2dp"
+                android:src="@drawable/ic_avatar1" />
+
+            <ImageView
+                android:id="@+id/avatar_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/frame_avatar_small_selector" />
         </FrameLayout>
     </LinearLayout>
 
