@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.json.JSONException;
 
@@ -51,17 +50,16 @@ import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.ConversationsAdapter;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
+import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
+import com.bsb.hike.models.Conversation;
+import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.TypingNotification;
-import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
-import com.bsb.hike.models.Conversation;
-import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
@@ -69,10 +67,10 @@ import com.bsb.hike.ui.SettingsActivity;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements
-OnItemLongClickListener, Listener, Runnable {
+		OnItemLongClickListener, Listener, Runnable {
 
 	private class DeleteConversationsAsyncTask extends
-	AsyncTask<Conversation, Void, Conversation[]> {
+			AsyncTask<Conversation, Void, Conversation[]> {
 
 		@Override
 		protected Conversation[] doInBackground(Conversation... convs) {
@@ -111,7 +109,7 @@ OnItemLongClickListener, Listener, Runnable {
 	}
 
 	private class EmailConversationsAsyncTask extends
-	AsyncTask<Conversation, Void, Conversation[]> {
+			AsyncTask<Conversation, Void, Conversation[]> {
 
 		ProgressDialog dialog;
 		List<String> listValues = new ArrayList<String>();
@@ -154,7 +152,7 @@ OnItemLongClickListener, Listener, Runnable {
 				{
 					GroupParticipant gPart = participantMap.get(cMessage
 							.getGroupParticipantMsisdn());
-					
+
 					if (gPart != null) {
 						fromString = (isSent == true) ? getString(R.string.me_key)
 								: gPart.getContactInfo().getName();
@@ -394,53 +392,53 @@ OnItemLongClickListener, Listener, Runnable {
 
 		builder.setAdapter(dialogAdapter,
 				new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				String option = options[which];
-				if (getString(R.string.shortcut).equals(option)) {
-					Utils.logEvent(getActivity(),
-							HikeConstants.LogEvent.ADD_SHORTCUT);
-					Intent shortcutIntent = createIntentForConversation(conv);
-					Intent intent = new Intent();
-					intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
-							shortcutIntent);
-					intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
-							conv.getLabel());
-					Drawable d = IconCacheManager.getInstance()
-							.getIconForMSISDN(conv.getMsisdn());
-					Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String option = options[which];
+						if (getString(R.string.shortcut).equals(option)) {
+							Utils.logEvent(getActivity(),
+									HikeConstants.LogEvent.ADD_SHORTCUT);
+							Intent shortcutIntent = createIntentForConversation(conv);
+							Intent intent = new Intent();
+							intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT,
+									shortcutIntent);
+							intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
+									conv.getLabel());
+							Drawable d = IconCacheManager.getInstance()
+									.getIconForMSISDN(conv.getMsisdn());
+							Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
 
-					int dimension = (int) (Utils.densityMultiplier * 48);
+							int dimension = (int) (Utils.densityMultiplier * 48);
 
-					Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
-							dimension, dimension, false);
-					bitmap = null;
-					intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
-					intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
-					getActivity().sendBroadcast(intent);
-				} else if (getString(R.string.delete).equals(option)) {
-					Utils.logEvent(getActivity(),
-							HikeConstants.LogEvent.DELETE_CONVERSATION);
-					DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
-					task.execute(conv);
-				} else if (getString(R.string.delete_leave).equals(
-						option)) {
-					Utils.logEvent(getActivity(),
-							HikeConstants.LogEvent.DELETE_CONVERSATION);
-					leaveGroup(conv);
-				} else if(getString(R.string.email_conversation).equals(option)){
-					Utils.logEvent(getActivity(), HikeConstants.LogEvent.EMAIL_CONVERSATION);
-					EmailConversationsAsyncTask task = new EmailConversationsAsyncTask();
-					task.execute(conv);
-				}
+							Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
+									dimension, dimension, false);
+							bitmap = null;
+							intent.putExtra(Intent.EXTRA_SHORTCUT_ICON, scaled);
+							intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+							getActivity().sendBroadcast(intent);
+						} else if (getString(R.string.delete).equals(option)) {
+							Utils.logEvent(getActivity(),
+									HikeConstants.LogEvent.DELETE_CONVERSATION);
+							DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
+							task.execute(conv);
+						} else if (getString(R.string.delete_leave).equals(
+								option)) {
+							Utils.logEvent(getActivity(),
+									HikeConstants.LogEvent.DELETE_CONVERSATION);
+							leaveGroup(conv);
+						} else if (getString(R.string.email_conversation)
+								.equals(option)) {
+							EmailConversationsAsyncTask task = new EmailConversationsAsyncTask();
+							task.execute(conv);
+						}
 
-			}
-		});
+					}
+				});
 
 		AlertDialog alertDialog = builder.show();
 		alertDialog.getListView().setDivider(
 				getResources()
-				.getDrawable(R.drawable.ic_thread_divider_profile));
+						.getDrawable(R.drawable.ic_thread_divider_profile));
 		return true;
 	}
 
@@ -495,10 +493,10 @@ OnItemLongClickListener, Listener, Runnable {
 			return;
 		}
 		HikeMessengerApp
-		.getPubSub()
-		.publish(
-				HikePubSub.MQTT_PUBLISH,
-				conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+				.getPubSub()
+				.publish(
+						HikePubSub.MQTT_PUBLISH,
+						conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
 	}
@@ -620,7 +618,7 @@ OnItemLongClickListener, Listener, Runnable {
 					addMessage(conv, finalMessage);
 
 					messageRefreshHandler
-					.removeCallbacks(ConversationFragment.this);
+							.removeCallbacks(ConversationFragment.this);
 					messageRefreshHandler.postDelayed(
 							ConversationFragment.this, 100);
 				}
