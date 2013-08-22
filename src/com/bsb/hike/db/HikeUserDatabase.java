@@ -24,6 +24,7 @@ import android.database.DatabaseUtils.InsertHelper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -106,6 +107,17 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DBConstants.MSISDN + ")";
 		db.execSQL(create);
 
+		create = "CREATE TABLE IF NOT EXISTS "
+				+ DBConstants.ROUNDED_THUMBNAIL_TABLE + " ( "
+				+ DBConstants.MSISDN + " TEXT PRIMARY KEY, "
+				+ DBConstants.IMAGE + " BLOB" + " ) ";
+		db.execSQL(create);
+
+		create = "CREATE INDEX IF NOT EXISTS "
+				+ DBConstants.ROUNDED_THUMBNAIL_INDEX + " ON "
+				+ DBConstants.THUMBNAILS_TABLE + " (" + DBConstants.MSISDN
+				+ ")";
+		db.execSQL(create);
 	}
 
 	private HikeUserDatabase(Context context) {
@@ -242,6 +254,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 					+ " ADD COLUMN " + DBConstants.IS_OFFLINE
 					+ " INTEGER DEFAULT 1";
 			db.execSQL(alter);
+		}
+
+		/*
+		 * Version 14 is for the rounded thumbnails
+		 */
+		if (oldVersion < 14) {
+			onCreate(db);
+			makeOlderAvatarsRounded(db);
 		}
 	}
 
@@ -1008,6 +1028,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		mDb.delete(DBConstants.BLOCK_TABLE, null, null);
 		mDb.delete(DBConstants.THUMBNAILS_TABLE, null, null);
 		mDb.delete(DBConstants.FAVORITES_TABLE, null, null);
+		mDb.delete(DBConstants.ROUNDED_THUMBNAIL_INDEX, null, null);
 	}
 
 	public ContactInfo getContactInfoFromPhoneNo(String number) {
@@ -1220,6 +1241,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 	}
 
+	private byte[] getRoundedBitmapBytes(byte[] data) {
+
+		Bitmap tempBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+		Bitmap roundedBitmap = Utils.getCircularBitmap(tempBitmap);
+
+		try {
+			return Utils
+					.bitmapToBytes(roundedBitmap, Bitmap.CompressFormat.PNG);
+		} finally {
+			tempBitmap.recycle();
+			roundedBitmap.recycle();
+		}
+	}
+
 	public void setIcon(String msisdn, byte[] data, boolean isProfileImage) {
 		if (!isProfileImage) {
 			/*
@@ -1227,6 +1262,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 			 * for this msisdn.
 			 */
 			Utils.removeLargerProfileImageForMsisdn(msisdn);
+
+			byte[] roundedData = getRoundedBitmapBytes(data);
+
+			insertRoundedThumbnailData(mDb, msisdn, roundedData);
 		}
 		IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 		ContentValues vals = new ContentValues(2);
@@ -1241,12 +1280,14 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				new String[] { msisdn });
 	}
 
-	public Drawable getIcon(String msisdn) {
+	public Drawable getIcon(String msisdn, boolean rounded) {
 		Cursor c = null;
 		try {
-			c = mDb.query(DBConstants.THUMBNAILS_TABLE,
-					new String[] { DBConstants.IMAGE }, "msisdn=?",
-					new String[] { msisdn }, null, null, null);
+			String table = rounded ? DBConstants.ROUNDED_THUMBNAIL_TABLE
+					: DBConstants.THUMBNAILS_TABLE;
+			c = mDb.query(table, new String[] { DBConstants.IMAGE },
+					DBConstants.MSISDN + "=?", new String[] { msisdn }, null,
+					null, null);
 
 			if (!c.moveToFirst()) {
 				/* lookup based on this msisdn */
@@ -1300,6 +1341,9 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		mDb.delete(DBConstants.THUMBNAILS_TABLE, DBConstants.MSISDN + "=?",
 				new String[] { msisdn });
+
+		mDb.delete(DBConstants.ROUNDED_THUMBNAIL_TABLE, DBConstants.MSISDN
+				+ "=?", new String[] { msisdn });
 
 		String whereClause = DBConstants.MSISDN + "=?"; // msisdn;
 		ContentValues customPhotoFlag = new ContentValues(1);
@@ -1818,5 +1862,48 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 		mDb.update(DBConstants.USERS_TABLE, contentValues, DBConstants.MSISDN
 				+ "=?", new String[] { msisdn });
+	}
+
+	private void makeOlderAvatarsRounded(SQLiteDatabase db) {
+		Cursor c = null;
+		try {
+			c = db.query(DBConstants.THUMBNAILS_TABLE, null, null, null, null,
+					null, null);
+
+			int thumbnailIdx = c.getColumnIndex(DBConstants.IMAGE);
+			int msisdnIdx = c.getColumnIndex(DBConstants.MSISDN);
+
+			Log.d(getClass().getSimpleName(),
+					"Making avatars rounded: " + c.getCount());
+			while (c.moveToNext()) {
+				byte[] data = c.getBlob(thumbnailIdx);
+				String msisdn = c.getString(msisdnIdx);
+
+				/*
+				 * An msisdn starts with a '+' and a group conversation contains
+				 * a ':'. Rest are profile pic updates.
+				 */
+				if (!msisdn.startsWith("+") && !msisdn.contains(":")) {
+					continue;
+				}
+
+				byte[] roundedData = getRoundedBitmapBytes(data);
+
+				insertRoundedThumbnailData(db, msisdn, roundedData);
+			}
+		} finally {
+			if (c != null) {
+				c.close();
+			}
+		}
+	}
+
+	private void insertRoundedThumbnailData(SQLiteDatabase db, String msisdn,
+			byte[] data) {
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(DBConstants.MSISDN, msisdn);
+		contentValues.put(DBConstants.IMAGE, data);
+
+		db.replace(DBConstants.ROUNDED_THUMBNAIL_TABLE, null, contentValues);
 	}
 }

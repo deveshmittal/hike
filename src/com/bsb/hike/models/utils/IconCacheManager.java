@@ -46,6 +46,7 @@ public class IconCacheManager {
 		}
 	}
 
+	private static final String ROUND_SUFFIX = "round";
 	private Map<String, Drawable> mIcons; /*
 										 * maps strings to bitmaps. Should be an
 										 * LRU cache
@@ -82,10 +83,16 @@ public class IconCacheManager {
 	}
 
 	public synchronized Drawable getIconForMSISDN(String msisdn) {
-		Drawable b = mIcons.get(msisdn);
+		return getIconForMSISDN(msisdn, false);
+	}
+
+	public synchronized Drawable getIconForMSISDN(String msisdn, boolean rounded) {
+		String key = msisdn + (rounded ? ROUND_SUFFIX : "");
+
+		Drawable b = mIcons.get(key);
 		if (b == null) {
-			b = mDb.getIcon(msisdn);
-			mIcons.put(msisdn, b);
+			b = mDb.getIcon(msisdn, rounded);
+			mIcons.put(key, b);
 		}
 
 		return b;
@@ -106,6 +113,7 @@ public class IconCacheManager {
 
 	public synchronized void clearIconForMSISDN(String msisdn) {
 		mIcons.remove(msisdn);
+		mIcons.remove(msisdn + ROUND_SUFFIX);
 		HikeMessengerApp.getPubSub().publish(HikePubSub.ICON_CHANGED, msisdn);
 	}
 
