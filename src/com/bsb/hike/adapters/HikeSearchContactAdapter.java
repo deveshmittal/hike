@@ -48,12 +48,13 @@ public class HikeSearchContactAdapter extends
 	private Map<String, GroupParticipant> groupParticipants;
 	private boolean freeSMSOn;
 	private boolean nativeSMSOn;
+	private boolean forwarding;
 
 	public HikeSearchContactAdapter(Activity context,
 			List<Pair<AtomicBoolean, ContactInfo>> contactList,
 			EditText inputNumber, boolean isGroupChat, Button topBarBtn,
-			String groupId, Intent presentIntent, boolean freeSMSOn,
-			boolean nativeSMSOn) {
+			String groupId, boolean freeSMSOn, boolean nativeSMSOn,
+			boolean forwarding) {
 		super(context, -1, contactList);
 		this.filteredList = contactList;
 		this.completeList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
@@ -66,6 +67,7 @@ public class HikeSearchContactAdapter extends
 		this.groupId = groupId;
 		this.freeSMSOn = freeSMSOn;
 		this.nativeSMSOn = nativeSMSOn;
+		this.forwarding = forwarding;
 		if (!TextUtils.isEmpty(groupId)) {
 			groupParticipants = HikeConversationsDatabase.getInstance()
 					.getGroupParticipants(groupId, true, false);
@@ -97,6 +99,7 @@ public class HikeSearchContactAdapter extends
 						: context.getString(R.string.tap_to_message));
 
 		CheckBox checkBox = (CheckBox) v.findViewById(R.id.checkbox);
+		checkBox.setVisibility(forwarding ? View.GONE : View.VISIBLE);
 		checkBox.setChecked(item.first.get());
 
 		if (contactInfo != null) {

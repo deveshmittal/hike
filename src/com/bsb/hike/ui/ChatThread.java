@@ -594,7 +594,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			return true;
 		case R.id.forward:
 			Utils.logEvent(ChatThread.this, HikeConstants.LogEvent.FORWARD_MSG);
-			Intent intent = new Intent(this, ChatThread.class);
+			Intent intent = new Intent(this, ComposeActivity.class);
 			String msg;
 			intent.putExtra(HikeConstants.Extras.FORWARD_MESSAGE, true);
 			if (message.isFileTransferMessage()) {

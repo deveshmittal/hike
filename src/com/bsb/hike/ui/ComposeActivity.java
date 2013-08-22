@@ -1,5 +1,7 @@
 package com.bsb.hike.ui;
 
+import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +16,7 @@ import org.json.JSONObject;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -57,12 +60,27 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	private TextView title;
 	private ImageView backIcon;
 
+	private boolean isGroupChat;
+	private boolean isForwardingMessage;
+	private boolean isSharingFile;
+	private String existingGroupId;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.compose);
 
 		selectedContactSet = new HashSet<ContactInfo>();
+
+		isGroupChat = getIntent().getBooleanExtra(
+				HikeConstants.Extras.GROUP_CHAT, false);
+		isForwardingMessage = getIntent().getBooleanExtra(
+				HikeConstants.Extras.FORWARD_MESSAGE, false);
+		isSharingFile = getIntent().getType() != null;
+		// Getting the group id. This will be a valid value if the intent
+		// was passed to add group participants.
+		existingGroupId = getIntent().getStringExtra(
+				HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
 		setupActionBar();
 
@@ -97,7 +115,16 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		doneBtn = (Button) actionBarView.findViewById(R.id.done_btn);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
-		title.setText(R.string.new_chat);
+
+		if (isSharingFile) {
+			title.setText(R.string.share_file);
+		} else if (isForwardingMessage) {
+			title.setText(R.string.forward);
+		} else if (!TextUtils.isEmpty(existingGroupId)) {
+			title.setText(R.string.add_group);
+		} else {
+			title.setText(R.string.new_chat);
+		}
 
 		backContainer.setOnClickListener(new OnClickListener() {
 
@@ -137,7 +164,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		ContactInfo conversationContactInfo = null;
-		if (selectedContactList.size() == 1) {
+		if (selectedContactList.size() == 1
+				&& TextUtils.isEmpty(existingGroupId)) {
 			conversationContactInfo = selectedContactList.get(0);
 		} else {
 			String groupId = getIntent().getStringExtra(
@@ -214,39 +242,13 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 	private class CreateAutoCompleteViewTask extends
 			AsyncTask<Void, Void, List<Pair<AtomicBoolean, ContactInfo>>> {
 
-		private boolean isGroupChat;
-		private boolean isForwardingMessage;
-		private boolean isSharingFile;
 		private boolean freeSMSOn;
 		private boolean nativeSMSOn;
 		private String userMsisdn;
-		private String existingGroupId;
 		boolean loadOnUiThread;
 
 		@Override
 		protected void onPreExecute() {
-			isGroupChat = getIntent().getBooleanExtra(
-					HikeConstants.Extras.GROUP_CHAT, false);
-			isForwardingMessage = getIntent().getBooleanExtra(
-					HikeConstants.Extras.FORWARD_MESSAGE, false);
-			isSharingFile = getIntent().getType() != null;
-			// Getting the group id. This will be a valid value if the intent
-			// was passed to add group participants.
-			existingGroupId = getIntent().getStringExtra(
-					HikeConstants.Extras.EXISTING_GROUP_CHAT);
-
-			// if (isSharingFile) {
-			// mLabelView.setText(R.string.share_file);
-			// } else if (isForwardingMessage) {
-			// mLabelView.setText(R.string.forward);
-			// } else if (!TextUtils.isEmpty(existingGroupId)) {
-			// mLabelView.setText(R.string.add_group);
-			// } else if (isGroupChat) {
-			// mLabelView.setText(R.string.new_group);
-			// } else {
-			// mLabelView.setText(R.string.new_message);
-			// }
-
 			SharedPreferences appPref = PreferenceManager
 					.getDefaultSharedPreferences(getApplicationContext());
 
@@ -286,8 +288,8 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			mInputNumberView.setText("");
 			HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
 					ComposeActivity.this, contactList, mInputNumberView,
-					isGroupChat, null, existingGroupId, getIntent(), freeSMSOn,
-					nativeSMSOn);
+					isGroupChat, null, existingGroupId, freeSMSOn, nativeSMSOn,
+					isForwardingMessage);
 			mContactList.setAdapter(adapter);
 			mContactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 			mContactList.setOnItemClickListener(ComposeActivity.this);
@@ -322,28 +324,80 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		Object tag = view.getTag();
 		Pair<AtomicBoolean, ContactInfo> pair = (Pair<AtomicBoolean, ContactInfo>) tag;
 
-		pair.first.set(!pair.first.get());
-		view.setTag(pair);
-		((HikeSearchContactAdapter) adapterView.getAdapter())
-				.notifyDataSetChanged();
+		if (!isForwardingMessage) {
+			pair.first.set(!pair.first.get());
+			view.setTag(pair);
+			((HikeSearchContactAdapter) adapterView.getAdapter())
+					.notifyDataSetChanged();
 
-		ContactInfo contactInfo = pair.second;
-		if (selectedContactSet.contains(contactInfo)) {
-			selectedContactSet.remove(contactInfo);
-		} else {
-			selectedContactSet.add(contactInfo);
-		}
+			ContactInfo contactInfo = pair.second;
+			if (selectedContactSet.contains(contactInfo)) {
+				selectedContactSet.remove(contactInfo);
+			} else {
+				selectedContactSet.add(contactInfo);
+			}
 
-		if (!selectedContactSet.isEmpty()) {
-			doneBtn.setVisibility(View.VISIBLE);
-			doneBtn.setText(Integer.toString(selectedContactSet.size()));
-			getSupportActionBar().setBackgroundDrawable(
-					getResources().getDrawable(R.drawable.bg_header_compose));
-			title.setText(selectedContactSet.size() > 1 ? R.string.new_group
-					: R.string.new_chat);
-			backIcon.setImageResource(R.drawable.ic_cancel);
+			if (!selectedContactSet.isEmpty()) {
+				doneBtn.setVisibility(View.VISIBLE);
+				doneBtn.setText(Integer.toString(selectedContactSet.size()));
+				getSupportActionBar().setBackgroundDrawable(
+						getResources()
+								.getDrawable(R.drawable.bg_header_compose));
+
+				if (!TextUtils.isEmpty(existingGroupId)) {
+					title.setText(R.string.add_group);
+				} else {
+					title.setText(selectedContactSet.size() > 1 ? R.string.new_group
+							: R.string.new_chat);
+				}
+
+				backIcon.setImageResource(R.drawable.ic_cancel);
+			} else {
+				init();
+			}
 		} else {
-			init();
+			Intent presentIntent = getIntent();
+
+			Intent intent = Utils.createIntentFromContactInfo(pair.second);
+			intent.setClass(this, ChatThread.class);
+
+			String type = presentIntent.getType();
+
+			if ("text/plain".equals(type)
+					|| presentIntent.hasExtra(HikeConstants.Extras.MSG)) {
+				String msg = presentIntent
+						.getStringExtra(presentIntent
+								.hasExtra(HikeConstants.Extras.MSG) ? HikeConstants.Extras.MSG
+								: Intent.EXTRA_TEXT);
+				Log.d(getClass().getSimpleName(), "Contained a message: " + msg);
+				intent.putExtra(HikeConstants.Extras.MSG, msg);
+			} else if (presentIntent.hasExtra(HikeConstants.Extras.FILE_KEY)
+					|| presentIntent
+							.hasExtra(HikeConstants.Extras.FWD_CATEGORY_ID)) {
+				intent.putExtras(presentIntent);
+			} else if (type != null
+					&& (type.startsWith("image") || type.startsWith("audio") || type
+							.startsWith("video"))) {
+				Uri fileUri = presentIntent
+						.getParcelableExtra(Intent.EXTRA_STREAM);
+				Log.d(getClass().getSimpleName(),
+						"File path uri: " + fileUri.toString());
+				String fileUriStart = "file:";
+				String fileUriString = fileUri.toString();
+				String filePath;
+				if (fileUriString.startsWith(fileUriStart)) {
+					File selectedFile = new File(URI.create(fileUriString));
+					/*
+					 * Done to fix the issue in a few Sony devices.
+					 */
+					filePath = selectedFile.getAbsolutePath();
+				} else {
+					filePath = Utils.getRealPathFromUri(fileUri, this);
+				}
+				intent.putExtra(HikeConstants.Extras.FILE_PATH, filePath);
+				intent.putExtra(HikeConstants.Extras.FILE_TYPE, type);
+			}
+			startActivity(intent);
 		}
 	}
 
