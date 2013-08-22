@@ -4,6 +4,7 @@ import java.io.File;
 
 import android.app.ProgressDialog;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -72,10 +73,16 @@ public class ImageViewerFragment extends SherlockFragment implements
 
 		File file = new File(basePath, fileName);
 
+		boolean downloadImage = true;
 		if (file.exists()) {
-			imageView.setImageDrawable(BitmapDrawable.createFromPath(basePath
-					+ "/" + fileName));
-		} else {
+			Drawable drawable = BitmapDrawable.createFromPath(basePath + "/"
+					+ fileName);
+			if (drawable != null) {
+				downloadImage = false;
+				imageView.setImageDrawable(drawable);
+			}
+		}
+		if (downloadImage) {
 			imageView.setImageDrawable(IconCacheManager.getInstance()
 					.getIconForMSISDN(mappedId));
 
