@@ -51,7 +51,6 @@ import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -853,24 +852,6 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		MessageMetadata metadata = convMessage.getMetadata();
-
-		if (!convMessage.isSent()) {
-			RelativeLayout.LayoutParams bubbleParams = (RelativeLayout.LayoutParams) holder.bubbleContainer
-					.getLayoutParams();
-			if (conversation instanceof GroupConversation) {
-				if (convMessage.isStickerMessage()
-						|| (metadata != null && metadata.isPokeMessage())) {
-					bubbleParams.leftMargin = 0;
-				} else {
-					bubbleParams.leftMargin = context.getResources()
-							.getDimensionPixelSize(
-									R.dimen.group_bubble_left_margin);
-				}
-			} else {
-				bubbleParams.leftMargin = 0;
-			}
-			holder.bubbleContainer.setLayoutParams(bubbleParams);
-		}
 
 		holder.stickerPlaceholder.setVisibility(View.GONE);
 
