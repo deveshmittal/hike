@@ -44,6 +44,9 @@
 	<dimen name="group_bubble_left_margin">-9dp</dimen>
 	<dimen name="avatar_size_chat_thread">32dp</dimen>
 	<dimen name="updates_margin">8dp</dimen>
+	<dimen name="small_avatar_margin">2dp</dimen>
+	<dimen name="medium_avatar_margin">2dp</dimen>
+	<dimen name="large_avatar_margin">1dp</dimen>
 	
     <!-- Default height of an action bar. -->
     <dimen name="st__action_bar_default_height">48dip</dimen>

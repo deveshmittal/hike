@@ -35,8 +35,8 @@
                     android:id="@+id/avatar"
                     android:layout_width="@dimen/medium_avatar"
                     android:layout_height="@dimen/medium_avatar"
-                    android:layout_marginLeft="3dp"
-                    android:layout_marginTop="3dp"
+                    android:layout_marginLeft="@dimen/medium_avatar_margin"
+                    android:layout_marginTop="@dimen/medium_avatar_margin"
                     android:src="@drawable/ic_avatar1" />
 
                 <ImageView
