@@ -185,6 +185,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		mDb.delete(DBConstants.EMOTICON_TABLE, null, null);
 		mDb.delete(DBConstants.STATUS_TABLE, null, null);
 		mDb.delete(DBConstants.STICKERS_TABLE, null, null);
+		mDb.delete(DBConstants.PROTIP_TABLE, null, null);
+		mDb.delete(DBConstants.SHARED_MEDIA_TABLE, null, null);
+		mDb.delete(DBConstants.FILE_THUMBNAIL_TABLE, null, null);
 	}
 
 	@Override
