@@ -56,6 +56,7 @@ import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.GroupParticipant;
 import com.bsb.hike.models.HikeFile;
+import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
@@ -108,7 +109,8 @@ OnItemLongClickListener, Listener, Runnable {
 		}
 	}
 
-	private class EmailConversationsAsyncTask extends AsyncTask<Conversation, Void, Conversation[]> {
+	private class EmailConversationsAsyncTask extends
+			AsyncTask<Conversation, Void, Conversation[]> {
 
 		ProgressDialog dialog;
 		List<String> listValues = new ArrayList<String>();
@@ -120,42 +122,21 @@ OnItemLongClickListener, Listener, Runnable {
 			String msisdn = convs[0].getMsisdn();
 			StringBuilder sBuilder = new StringBuilder();
 			ArrayList<Uri> uris = new ArrayList<Uri>();
-			Map<String, String> map = new HashMap<String, String>();
-			String name = "";
-			String chatLabel ="";
+			Map<String, GroupParticipant> participantMap = null;
+			String chatLabel = "";
 			db = HikeConversationsDatabase.getInstance();
 			Conversation conv = db.getConversation(msisdn, -1);
 			boolean isGroup = Utils.isGroupConversation(msisdn);
+			chatLabel = conv.getLabel();
 
 			if (isGroup) {
-				sBuilder.append("Group ");
-				chatLabel = conv.getLabel();
-				// create a map of all group participants
-				for (Entry<String, GroupParticipant> entry : ((GroupConversation) convs[0])
-						.getGroupParticipantList().entrySet()) {
-					GroupParticipant groupParticipant = entry.getValue();
-					map.put(groupParticipant.getContactInfo().getMsisdn(),
-							groupParticipant.getContactInfo().getFirstName());
-				}
-			} else {
-
-				// populate this map with 1:1 contact info
-				ContactInfo contactInfo = HikeUserDatabase.getInstance()
-						.getContactInfoFromPhoneNo(msisdn);
-				
-				if (contactInfo != null) {
-					name = contactInfo.getName();
-					map.put(msisdn, name);
-					chatLabel = conv.getContactName();
-				}
-				else
-				{
-					chatLabel = conv.getMsisdn();
-				}
+				sBuilder.append(R.string.group_name_email);
+				GroupConversation gConv = ((GroupConversation) convs[0]);
+				participantMap = gConv.getGroupParticipantList();
 			}
-
 			// initialize with a label
-			sBuilder.append("Chat with " + chatLabel + "\n");
+			sBuilder.append(getString(R.string.chat_with_prefix) + chatLabel
+					+ "\n");
 
 			// iterate through the messages and construct a meaningful payload
 			List<ConvMessage> cList = conv.getMessages();
@@ -170,14 +151,16 @@ OnItemLongClickListener, Listener, Runnable {
 				// TODO::what happens to squiggly messages here?
 
 				if (cMessage.isGroupChat())
-					fromString = (cMessage.isSent() == true) ? "me" : map
-							.get(cMessage.getGroupParticipantMsisdn());
+					fromString = (cMessage.isSent() == true) ? getString(R.string.me_key)
+							: participantMap
+									.get(cMessage.getGroupParticipantMsisdn())
+									.getContactInfo().getFirstName();
 				else
-					fromString = (cMessage.isSent() == true) ? "me" : map
-							.get(cMessage.getMsisdn());
+					fromString = (cMessage.isSent() == true) ? getString(R.string.me_key)
+							: chatLabel;
 
 				// if its still null , something's wrong, go with msisdn...
-				if (fromString == null) {
+				if (fromString == null || fromString.length() == 0) {
 					fromString = cMessage.getMsisdn();
 				}
 
@@ -185,10 +168,17 @@ OnItemLongClickListener, Listener, Runnable {
 					// TODO: can make this generic and add support for multiple
 					// files.
 					HikeFile hikeFile = cMetadata.getHikeFiles().get(0);
-					listValues.add(hikeFile.getFilePath());
+					HikeFileType fileType = hikeFile.getHikeFileType();
+					if (fileType == (HikeFileType.IMAGE)
+							|| fileType == (HikeFileType.AUDIO)
+							|| fileType == (HikeFileType.AUDIO_RECORDING)
+							|| fileType == (HikeFileType.VIDEO)) {
+
+						listValues.add(hikeFile.getFilePath());
+					}
 					// tweak the message here based on the file
-					messageMask = "File transfer of type"
-							+ hikeFile.getFileTypeString();
+					messageMask = getString(R.string.file_transfer_of_type)
+							+ " "+ fileType;
 
 				}
 
@@ -203,10 +193,9 @@ OnItemLongClickListener, Listener, Runnable {
 				// TODO: add location and contact handling here.
 			}
 
-			File chatFile = createChatTextFile(
-					sBuilder.toString(),
-					"Chat backup_ " + chatLabel+"_"+
-					+ System.currentTimeMillis() + ".txt");
+			File chatFile = createChatTextFile(sBuilder.toString(),
+					getString(R.string.chat_backup_) + chatLabel + "_"
+							+ +System.currentTimeMillis() + ".txt");
 			uris.add(Uri.fromFile(chatFile));
 
 			// append the attachments in hike messages in form of URI's. Dodo
@@ -223,17 +212,19 @@ OnItemLongClickListener, Listener, Runnable {
 			intent.setType("text/plain");
 			intent.putExtra(Intent.EXTRA_EMAIL, "");
 			intent.putExtra(Intent.EXTRA_SUBJECT,
-					"Backup of conversation with: " + chatLabel);
-			intent.putExtra(Intent.EXTRA_TEXT,
-					"Attached is the conversation backup..");
+					getString(R.string.backup_of_conversation_with_prefix)
+							+ chatLabel);
+			intent.putExtra(
+					Intent.EXTRA_TEXT,
+					getString(R.string.attached_is_the_conversation_backup_string));
 			intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
 			// give the hike user a choice of intents
 			startActivity(Intent.createChooser(intent,
-					"Email your conversation"));
+					getString(R.string.email_your_conversation)));
 
 			// TODO: Delete this temp file, although it might be useful for the
-			// user to have local chat backups ? Also we need to see 
+			// user to have local chat backups ? Also we need to see
 
 			return null;
 		}
@@ -241,7 +232,7 @@ OnItemLongClickListener, Listener, Runnable {
 		@Override
 		protected void onPreExecute() {
 			dialog = ProgressDialog.show(getActivity(), null,
-					"Exporting conversations...");
+					getString(R.string.exporting_conversations_prefix));
 
 			super.onPreExecute();
 		}
