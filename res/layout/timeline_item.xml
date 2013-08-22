@@ -75,9 +75,9 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="Rishabh Sharma"
-                android:textColor="@color/list_item_header"
+                android:textColor="@color/updates_text"
                 android:textSize="14sp"
-                android:textStyle="bold|italic" />
+                android:textStyle="bold" />
 
             <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/main_info"
@@ -85,9 +85,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
-                android:textColor="@color/list_item_subtext"
-                android:textSize="16sp"
-                android:textStyle="bold|italic" />
+                android:textColor="@color/updates_text"
+                android:textSize="16sp" />
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/details"

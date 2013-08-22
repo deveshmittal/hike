@@ -132,4 +132,5 @@
     <color name="actionbar_text">#faf8f2</color>
     <color name="sticker_emoticon_divider">#3d000000</color>
     <color name="updates_bg">#e7e2d6</color>
+    <color name="updates_text">#292d2e</color>
 </resources>
