@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -19,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Filter;
@@ -43,7 +41,6 @@ public class HikeSearchContactAdapter extends
 	private ContactFilter contactFilter;
 	private boolean isGroupChat;
 	private EditText inputNumber;
-	private Button topBarBtn;
 	private String groupId;
 	private Map<String, GroupParticipant> groupParticipants;
 	private boolean freeSMSOn;
@@ -52,9 +49,8 @@ public class HikeSearchContactAdapter extends
 
 	public HikeSearchContactAdapter(Activity context,
 			List<Pair<AtomicBoolean, ContactInfo>> contactList,
-			EditText inputNumber, boolean isGroupChat, Button topBarBtn,
-			String groupId, boolean freeSMSOn, boolean nativeSMSOn,
-			boolean forwarding) {
+			EditText inputNumber, boolean isGroupChat, String groupId,
+			boolean freeSMSOn, boolean nativeSMSOn, boolean forwarding) {
 		super(context, -1, contactList);
 		this.filteredList = contactList;
 		this.completeList = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
@@ -63,7 +59,6 @@ public class HikeSearchContactAdapter extends
 		this.contactFilter = new ContactFilter();
 		this.inputNumber = inputNumber;
 		this.isGroupChat = isGroupChat;
-		this.topBarBtn = topBarBtn;
 		this.groupId = groupId;
 		this.freeSMSOn = freeSMSOn;
 		this.nativeSMSOn = nativeSMSOn;
@@ -155,25 +150,12 @@ public class HikeSearchContactAdapter extends
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults results = new FilterResults();
 
-			String textInEditText = TextUtils.isEmpty(constraint) ? ""
+			String textToBeFiltered = TextUtils.isEmpty(constraint) ? ""
 					: constraint.toString().toLowerCase();
-			int indexTextToBeFiltered = textInEditText
-					.lastIndexOf(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) + 2;
-			String textToBeFiltered = (!textInEditText
-					.contains(HikeConstants.GROUP_PARTICIPANT_SEPARATOR) ? textInEditText
-					: textInEditText.substring(indexTextToBeFiltered));
 
 			if (!TextUtils.isEmpty(textToBeFiltered)
-					|| !TextUtils.isEmpty(textInEditText)
 					|| !TextUtils.isEmpty(groupId)) {
-				final List<String> currentSelectionsInTextBox = Utils
-						.splitSelectedContacts(textInEditText);
 				final Set<String> currentSelectionSet = new HashSet<String>();
-				/*
-				 * Making a set of all the currently selected contacts. Only
-				 * used in case of group chat.
-				 */
-				currentSelectionSet.addAll(currentSelectionsInTextBox);
 				Set<String> selectedSMSContacts = new HashSet<String>();
 				if (!TextUtils.isEmpty(groupId)) {
 					currentSelectionSet.addAll(groupParticipants.keySet());
@@ -189,22 +171,6 @@ public class HikeSearchContactAdapter extends
 
 				List<Pair<AtomicBoolean, ContactInfo>> filteredContacts = new ArrayList<Pair<AtomicBoolean, ContactInfo>>();
 
-				if (topBarBtn != null) {
-					((Activity) context).runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							/*
-							 * We only enable this if the user has selected more
-							 * than one participant OR if we are adding
-							 * participants in an existing group the user should
-							 * have selected at least one participant
-							 */
-							topBarBtn.setEnabled((currentSelectionSet.size() > 1 && currentSelectionsInTextBox
-									.size() > 0)
-									|| (currentSelectionsInTextBox.size() > 1));
-						}
-					});
-				}
 				for (Pair<AtomicBoolean, ContactInfo> item : HikeSearchContactAdapter.this.completeList) {
 					ContactInfo info = item.second;
 					if (info != null) {
@@ -227,11 +193,23 @@ public class HikeSearchContactAdapter extends
 					if (currentSelectionSet.contains(textToBeFiltered)) {
 						filteredContacts
 								.add(new Pair<AtomicBoolean, ContactInfo>(
-										new AtomicBoolean(true), null));
+										new AtomicBoolean(true),
+										new ContactInfo(
+												textToBeFiltered,
+												Utils.normalizeNumber(
+														textToBeFiltered, "+91"),
+												textToBeFiltered,
+												textToBeFiltered)));
 					} else {
 						filteredContacts
 								.add(new Pair<AtomicBoolean, ContactInfo>(
-										new AtomicBoolean(), null));
+										new AtomicBoolean(),
+										new ContactInfo(
+												textToBeFiltered,
+												Utils.normalizeNumber(
+														textToBeFiltered, "+91"),
+												textToBeFiltered,
+												textToBeFiltered)));
 					}
 				}
 				results.count = filteredContacts.size();

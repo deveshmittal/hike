@@ -288,7 +288,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 			mInputNumberView.setText("");
 			HikeSearchContactAdapter adapter = new HikeSearchContactAdapter(
 					ComposeActivity.this, contactList, mInputNumberView,
-					isGroupChat, null, existingGroupId, freeSMSOn, nativeSMSOn,
+					isGroupChat, existingGroupId, freeSMSOn, nativeSMSOn,
 					isForwardingMessage);
 			mContactList.setAdapter(adapter);
 			mContactList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
