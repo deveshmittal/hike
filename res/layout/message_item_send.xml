@@ -63,15 +63,24 @@
                 android:id="@+id/file_transfer_progress"
                 android:layout_width="22dp"
                 android:layout_height="22dp"
-                android:layout_alignLeft="@id/msg_status_indicator"
+                android:layout_marginRight="7dp"
                 android:layout_centerVertical="true"
                 android:visibility="invisible" />
 
+            <ImageView
+                android:id="@+id/msg_status_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_alignRight="@id/file_transfer_progress"
+                android:src="@drawable/ic_download_failed"
+                android:visibility="invisible" />
+            
             <LinearLayout
                 android:id="@+id/sent_message_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/msg_status_indicator"
+                android:layout_toRightOf="@id/file_transfer_progress"
                 android:background="@drawable/ic_bubble_green_selector"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"

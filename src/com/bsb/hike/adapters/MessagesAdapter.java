@@ -327,6 +327,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				holder.loadingThumb = v.findViewById(R.id.loading_thumb);
 				holder.showFileBtn = (ImageView) v
 						.findViewById(R.id.btn_open_file);
+				holder.image = (ImageView) v
+						.findViewById(R.id.msg_status_indicator);
 
 				showFileTransferElements(holder);
 			case SEND_HIKE:
@@ -1154,6 +1156,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					"tel:");
 		}
 
+		if (convMessage.isFileTransferMessage() && convMessage.isSent()) {
+			holder.image.setVisibility(View.INVISIBLE);
+		}
+
 		if (convMessage.isFileTransferMessage()
 				&& ChatThread.fileTransferTaskMap.containsKey(convMessage
 						.getMsgID())) {
@@ -1169,6 +1175,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (holder.circularProgress != null) {
 				holder.circularProgress.setVisibility(View.INVISIBLE);
 			}
+			holder.image.setVisibility(View.VISIBLE);
+			holder.image.setImageResource(R.drawable.ic_download_failed);
 		} else {
 			if (holder.circularProgress != null) {
 				holder.circularProgress.setVisibility(View.INVISIBLE);
