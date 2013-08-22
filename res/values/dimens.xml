@@ -39,7 +39,7 @@
 	<dimen name="divider_height">1dp</dimen>
 	<dimen name="larger_avatar">48dp</dimen>
 	<dimen name="medium_avatar">42dp</dimen>
-	<dimen name="small_avatar">33dp</dimen>
+	<dimen name="small_avatar">30dp</dimen>
 	<dimen name="update_line_width">4dp</dimen>
 	<dimen name="group_bubble_left_margin">-9dp</dimen>
 	<dimen name="avatar_size_chat_thread">32dp</dimen>

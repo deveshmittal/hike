@@ -387,7 +387,7 @@ public class ProfileAdapter extends BaseAdapter {
 			ContactInfo contactInfo = groupParticipant.getContactInfo();
 
 			viewHolder.image.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn()));
+					.getIconForMSISDN(contactInfo.getMsisdn(), true));
 
 			viewHolder.text.setText(contactInfo.getName());
 			if (contactInfo.isUnknownContact()) {

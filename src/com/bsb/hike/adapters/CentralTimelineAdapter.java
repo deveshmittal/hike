@@ -164,7 +164,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			} else {
 				viewHolder.avatar.setImageDrawable(IconCacheManager
 						.getInstance().getIconForMSISDN(
-								statusMessage.getMsisdn()));
+								statusMessage.getMsisdn(), true));
 			}
 			viewHolder.name
 					.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me"
@@ -288,7 +288,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		case PROFILE_PIC_CHANGE:
 			viewHolder.avatar.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(statusMessage.getMsisdn()));
+					.getIconForMSISDN(statusMessage.getMsisdn(), true));
 			viewHolder.name
 					.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me"
 							: statusMessage.getNotNullName());

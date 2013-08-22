@@ -25,8 +25,8 @@
                 android:layout_height="@dimen/small_avatar"
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="1dp"
-                android:layout_marginTop="1dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginTop="2dp"
                 android:src="@drawable/ic_avatar1" />
 
             <ImageView

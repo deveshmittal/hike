@@ -1325,7 +1325,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				.findViewById(R.id.contact_status);
 
 		avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(mContactNumber));
+				.getIconForMSISDN(mContactNumber, true));
 		contactName.setText(mLabel);
 
 		backContainer.setOnClickListener(new OnClickListener() {

@@ -258,7 +258,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
 		avatarView.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(conversation.getMsisdn()));
+				.getIconForMSISDN(conversation.getMsisdn(), true));
 
 		return v;
 	}

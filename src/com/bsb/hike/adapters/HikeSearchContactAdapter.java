@@ -119,11 +119,12 @@ public class HikeSearchContactAdapter extends
 		if (contactInfo != null
 				&& contactInfo.getId().equals(contactInfo.getPhoneNum())) {
 			avatar.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getPhoneNum()));
+					.getIconForMSISDN(contactInfo.getPhoneNum(), true));
 		} else {
 			avatar.setImageDrawable(contactInfo != null ? IconCacheManager
-					.getInstance().getIconForMSISDN(contactInfo.getMsisdn())
-					: context.getResources().getDrawable(R.drawable.ic_avatar1));
+					.getInstance().getIconForMSISDN(contactInfo.getMsisdn(),
+							true) : context.getResources().getDrawable(
+					R.drawable.ic_avatar1));
 		}
 
 		numberTextView.setVisibility(isEnabled(position) ? View.VISIBLE

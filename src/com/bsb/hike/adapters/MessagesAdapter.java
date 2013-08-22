@@ -471,7 +471,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				for (int i = participantList.size() - 1; i >= 0; i--) {
 					ImageView imageView = new ImageView(context);
 					imageView.setImageDrawable(IconCacheManager.getInstance()
-							.getIconForMSISDN(participantList.get(i)));
+							.getIconForMSISDN(participantList.get(i), true));
 					imageView.setLayoutParams(layoutParams);
 
 					holder.avatarContainer.addView(imageView);
@@ -786,7 +786,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					Utils.getFirstName(conversation.getLabel())));
 
 			holder.image.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(conversation.getMsisdn()));
+					.getIconForMSISDN(conversation.getMsisdn(), true));
 
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
 				SmileyParser smileyParser = SmileyParser.getInstance();
@@ -1211,7 +1211,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					holder.image.setVisibility(View.VISIBLE);
 					holder.image.setImageDrawable(IconCacheManager
 							.getInstance().getIconForMSISDN(
-									convMessage.getGroupParticipantMsisdn()));
+									convMessage.getGroupParticipantMsisdn(),
+									true));
 				} else {
 					holder.image.setVisibility(isGroupChat ? View.INVISIBLE
 							: View.GONE);
@@ -1790,7 +1791,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		String userMsisdn = prefs
 				.getString(HikeMessengerApp.MSISDN_SETTING, "");
 		avatar.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(userMsisdn));
+				.getIconForMSISDN(userMsisdn, true));
 
 		final Button sendBtn = (Button) dialog.findViewById(R.id.btn_send);
 		sendBtn.setEnabled(false);

@@ -285,7 +285,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			TextView name = (TextView) convertView.findViewById(R.id.contact);
 
 			avatar.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn()));
+					.getIconForMSISDN(contactInfo.getMsisdn(), true));
 			name.setText(TextUtils.isEmpty(contactInfo.getName()) ? contactInfo
 					.getMsisdn() : contactInfo.getName());
 
