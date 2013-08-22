@@ -2,13 +2,17 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/main_content"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content"
+    android:background="@color/black" >
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/updates_margin"
-        android:background="@drawable/bg_updates_white"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/bg_updates_grey"
         android:paddingBottom="10dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp" >
@@ -41,18 +45,46 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignTop="@id/avatar_container"
-            android:layout_marginTop="10dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginTop="12dp"
             android:gravity="right"
             android:orientation="vertical" >
 
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/timestamp"
+            <LinearLayout
+                android:id="@+id/btn_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2 mins ago"
-                android:textColor="@color/timestampcolor"
-                android:textSize="12sp"
-                android:textStyle="bold|italic" />
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone" >
+
+                <ImageButton
+                    android:id="@+id/no_btn"
+                    style="@style/RequestBtn.Reject"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toLeftOf="@id/accept" />
+
+                <ImageButton
+                    android:id="@+id/yes_btn"
+                    style="@style/RequestBtn.Accept"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="8dp" />
+            </LinearLayout>
+
+            <com.bsb.hike.view.CustomFontButton
+                android:id="@+id/add_btn"
+                android:layout_width="80dp"
+                android:layout_height="30dp"
+                android:background="@drawable/bg_blue_btn"
+                android:text="@string/add"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
 
         <LinearLayout
@@ -77,13 +109,24 @@
                 android:textStyle="bold" />
 
             <com.bsb.hike.view.LinkedTextView
+                android:id="@+id/extra"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Added you as a friend"
+                android:textColor="@color/profile_small_text"
+                android:textSize="12sp"
+                android:textStyle="bold|italic" />
+
+            <com.bsb.hike.view.LinkedTextView
                 android:id="@+id/main_info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="Added you as a friend"
                 android:textColor="@color/updates_text"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:visibility="gone" />
         </LinearLayout>
     </RelativeLayout>
 

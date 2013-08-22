@@ -566,4 +566,11 @@
 	<string name="new_group">New Group</string>
 	<string name="sent_friend_request">Sent a friend request</string>
 	<string name="xyz_posted_update">%1$s posted an update</string>
+	<string name="sent_you_friend_request">Sent you a friend request</string>
+	<string name="on_hike">On hike</string>
+	<string name="num_people">%1$d people</string>
+	<string name="add">Add</string>
+	<string name="tap_save_contact">Tap to save contact</string>
+	<string name="no_updates">No updates from %1$s yet.</string>
+	<string name="add_people">Add people</string>
 </resources>

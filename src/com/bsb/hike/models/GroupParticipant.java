@@ -1,5 +1,9 @@
 package com.bsb.hike.models;
 
+import java.util.Comparator;
+
+import com.bsb.hike.models.ContactInfo.FavoriteType;
+
 public class GroupParticipant implements Comparable<GroupParticipant> {
 	private boolean hasLeft;
 
@@ -42,4 +46,30 @@ public class GroupParticipant implements Comparable<GroupParticipant> {
 	public int compareTo(GroupParticipant another) {
 		return this.contactInfo.compareTo(another.contactInfo);
 	}
+
+	public static Comparator<GroupParticipant> lastSeenTimeComparator = new Comparator<GroupParticipant>() {
+
+		@Override
+		public int compare(GroupParticipant lhs, GroupParticipant rhs) {
+			ContactInfo lhsContactInfo = lhs.contactInfo;
+			ContactInfo rhsContactInfo = rhs.contactInfo;
+
+			if (lhsContactInfo.getFavoriteType() != rhsContactInfo
+					.getFavoriteType()) {
+				if (lhsContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+					return -1;
+				} else if (rhsContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+					return 1;
+				}
+			}
+			if (lhsContactInfo.getOffline() != rhsContactInfo.getOffline()) {
+				if (lhsContactInfo.getOffline() == 0) {
+					return -1;
+				} else if (rhsContactInfo.getOffline() == 0) {
+					return 1;
+				}
+			}
+			return lhsContactInfo.compareTo(rhsContactInfo);
+		}
+	};
 }

@@ -9,97 +9,88 @@ import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout.LayoutParams;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.GroupConversation;
 import com.bsb.hike.models.GroupParticipant;
+import com.bsb.hike.models.ImageViewerInfo;
+import com.bsb.hike.models.ProfileItem;
+import com.bsb.hike.models.ProfileItem.ProfileGroupItem;
+import com.bsb.hike.models.ProfileItem.ProfileStatusItem;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.ImageLoader;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
-@SuppressWarnings("unchecked")
-public class ProfileAdapter extends BaseAdapter {
-
-	public static final int PROFILE_HEADER_ID = -1;
-	public static final int PROFILE_BUTTON_ID = -2;
-	public static final int PROFILE_EMPTY_ID = -3;
-
-	public static final String GROUP_HEADER_ID = "-1";
-	public static final String GROUP_BUTTON_ID = "-2";
-	public static final String GROUP_LEAVE_BUTTON_ID = "-3";
+public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 
 	private static enum ViewType {
-		HEADER, BUTTONS, STATUS, GROUP_PARTICIPANT, EMPTY_STATUS
+		HEADER, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS
 	}
 
 	private Context context;
-	private List<GroupParticipant> groupParticipants;
-	private List<StatusMessage> statusMessages;
+	private ProfileActivity profileActivity;
 	private GroupConversation groupConversation;
 	private ContactInfo mContactInfo;
 	private Bitmap profilePreview;
 	private boolean groupProfile;
 	private boolean myProfile;
-	private int numParticipants;
 	private boolean isContactBlocked;
+	private ImageLoader imageLoader;
 
-	public ProfileAdapter(Context context, List<?> itemList,
-			GroupConversation groupConversation, ContactInfo contactInfo,
-			boolean myProfile) {
-		this(context, itemList, groupConversation, contactInfo, myProfile,
-				false);
+	public ProfileAdapter(ProfileActivity profileActivity,
+			List<ProfileItem> itemList, GroupConversation groupConversation,
+			ContactInfo contactInfo, boolean myProfile) {
+		this(profileActivity, itemList, groupConversation, contactInfo,
+				myProfile, false);
 	}
 
-	public ProfileAdapter(Context context, List<?> itemList,
-			GroupConversation groupConversation, ContactInfo contactInfo,
-			boolean myProfile, boolean isContactBlocked) {
-		this.context = context;
+	public ProfileAdapter(ProfileActivity profileActivity,
+			List<ProfileItem> itemList, GroupConversation groupConversation,
+			ContactInfo contactInfo, boolean myProfile, boolean isContactBlocked) {
+		super(profileActivity, -1, itemList);
+		this.context = profileActivity;
+		this.profileActivity = profileActivity;
 		this.groupProfile = groupConversation != null;
-		if (groupProfile) {
-			groupParticipants = (List<GroupParticipant>) itemList;
-		} else {
-			statusMessages = (List<StatusMessage>) itemList;
-		}
 		this.mContactInfo = contactInfo;
 		this.groupConversation = groupConversation;
 		this.myProfile = myProfile;
 		this.isContactBlocked = isContactBlocked;
+		this.imageLoader = new ImageLoader(context);
 	}
 
 	@Override
 	public int getItemViewType(int position) {
 		ViewType viewType;
-		if (groupProfile) {
-			ContactInfo contactInfo = groupParticipants.get(position)
-					.getContactInfo();
-			if (GROUP_HEADER_ID.equals(contactInfo.getId())) {
-				viewType = ViewType.HEADER;
-			} else if (GROUP_BUTTON_ID.equals(contactInfo.getId())
-					|| GROUP_LEAVE_BUTTON_ID.equals(contactInfo.getId())) {
-				viewType = ViewType.BUTTONS;
-			} else {
-				viewType = ViewType.GROUP_PARTICIPANT;
-			}
+		ProfileItem profileItem = getItem(position);
+		int itemId = profileItem.getItemId();
+		if (ProfileItem.HEADER_ID == itemId) {
+			viewType = ViewType.HEADER;
+		} else if (ProfileItem.EMPTY_ID == itemId) {
+			viewType = ViewType.EMPTY_STATUS;
 		} else {
-			StatusMessage statusMessage = statusMessages.get(position);
-			if (PROFILE_HEADER_ID == statusMessage.getId()) {
-				viewType = ViewType.HEADER;
-			} else if (PROFILE_BUTTON_ID == statusMessage.getId()) {
-				viewType = ViewType.BUTTONS;
-			} else if (PROFILE_EMPTY_ID == statusMessage.getId()) {
-				viewType = ViewType.EMPTY_STATUS;
+			if (groupProfile) {
+				viewType = ViewType.GROUP_PARTICIPANT;
 			} else {
-				viewType = ViewType.STATUS;
+				StatusMessage statusMessage = ((ProfileStatusItem) profileItem)
+						.getStatusMessage();
+				if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
+					viewType = ViewType.PROFILE_PIC_UPDATE;
+				} else {
+					viewType = ViewType.STATUS;
+				}
 			}
 		}
 		return viewType.ordinal();
@@ -117,16 +108,8 @@ public class ProfileAdapter extends BaseAdapter {
 
 	@Override
 	public boolean isEnabled(int position) {
-		/*
-		 * We got an IndexOutOfBoundsException here.
-		 */
-		if (position >= getCount()) {
-			return false;
-		}
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 		if (viewType == ViewType.HEADER) {
-			return false;
-		} else if (viewType == ViewType.BUTTONS) {
 			return false;
 		}
 		return true;
@@ -137,17 +120,9 @@ public class ProfileAdapter extends BaseAdapter {
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		Object item = getItem(position);
 		ViewType viewType = ViewType.values()[getItemViewType(position)];
 
-		GroupParticipant groupParticipant = null;
-		StatusMessage statusMessage = null;
-
-		if (item instanceof GroupParticipant) {
-			groupParticipant = (GroupParticipant) item;
-		} else {
-			statusMessage = (StatusMessage) item;
-		}
+		ProfileItem profileItem = getItem(position);
 
 		ViewHolder viewHolder = null;
 		View v = convertView;
@@ -165,70 +140,37 @@ public class ProfileAdapter extends BaseAdapter {
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
 				viewHolder.icon = (ImageView) v
 						.findViewById(R.id.change_profile);
-				viewHolder.requestLayout = (ViewGroup) v
-						.findViewById(R.id.request_layout);
 
-				viewHolder.requestMain = (TextView) v
-						.findViewById(R.id.req_main);
-				viewHolder.requestInfo = (TextView) v
-						.findViewById(R.id.req_info);
+				viewHolder.imageBtn1 = (ImageButton) v
+						.findViewById(R.id.yes_btn);
+				viewHolder.imageBtn2 = (ImageButton) v
+						.findViewById(R.id.no_btn);
 
-				viewHolder.btn1 = (Button) v.findViewById(R.id.yes_btn);
-				viewHolder.btn2 = (Button) v.findViewById(R.id.no_btn);
-				break;
-
-			case BUTTONS:
-				v = inflater.inflate(R.layout.profile_btns_item, null);
-
-				viewHolder.btnContainer1 = v.findViewById(R.id.btn1);
-				viewHolder.btnContainer2 = v.findViewById(R.id.btn2);
-				viewHolder.btnContainer3 = v.findViewById(R.id.btn3);
-
-				viewHolder.btnText1 = (TextView) v.findViewById(R.id.btn1_txt);
-				viewHolder.btnText2 = (TextView) v.findViewById(R.id.btn2_txt);
-				viewHolder.btnText3 = (TextView) v.findViewById(R.id.btn3_txt);
-
-				viewHolder.btnImage1 = (ImageView) v
-						.findViewById(R.id.btn1_img);
-				viewHolder.btnImage2 = (ImageView) v
-						.findViewById(R.id.btn2_img);
-				viewHolder.btnImage3 = (ImageView) v
-						.findViewById(R.id.btn3_img);
-
-				viewHolder.divContainer1 = (ViewGroup) v
-						.findViewById(R.id.div_container_1);
-				viewHolder.divContainer2 = (ViewGroup) v
-						.findViewById(R.id.div_container_2);
-				viewHolder.btnDivider = v.findViewById(R.id.btn_divider);
-				viewHolder.marginView = v.findViewById(R.id.margin_view);
-
-				viewHolder.container = (ViewGroup) v
-						.findViewById(R.id.btn_container);
 				break;
 
 			case GROUP_PARTICIPANT:
-				v = inflater.inflate(R.layout.group_profile_item, null);
-
-				viewHolder.text = (TextView) v.findViewById(R.id.name);
-				viewHolder.subText = (TextView) v.findViewById(R.id.info_txt);
-
-				viewHolder.image = (ImageView) v.findViewById(R.id.avatar);
-				viewHolder.icon = (ImageView) v
-						.findViewById(R.id.unknown_contact);
+				v = new LinearLayout(context);
 				break;
 
 			case STATUS:
 				v = inflater.inflate(R.layout.profile_timeline_item, null);
 
-				viewHolder.text = (TextView) v.findViewById(R.id.status_text);
-				viewHolder.subText = (TextView) v.findViewById(R.id.time);
+				viewHolder.icon = (ImageView) v.findViewById(R.id.avatar);
 
-				viewHolder.image = (ImageView) v.findViewById(R.id.status_pic);
-				viewHolder.icon = (ImageView) v.findViewById(R.id.status_type);
+				viewHolder.text = (TextView) v.findViewById(R.id.name);
+				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
+				viewHolder.timeStamp = (TextView) v
+						.findViewById(R.id.timestamp);
+				break;
 
-				viewHolder.container = (ViewGroup) v.findViewById(R.id.content);
-				viewHolder.contentContainer = (ViewGroup) v
-						.findViewById(R.id.content_container);
+			case PROFILE_PIC_UPDATE:
+				v = inflater.inflate(R.layout.profile_pic_timeline_item, null);
+
+				viewHolder.icon = (ImageView) v.findViewById(R.id.avatar);
+
+				viewHolder.text = (TextView) v.findViewById(R.id.name);
+				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
+				viewHolder.image = (ImageView) v.findViewById(R.id.profile_pic);
 				break;
 
 			case EMPTY_STATUS:
@@ -253,7 +195,7 @@ public class ProfileAdapter extends BaseAdapter {
 			String msisdn;
 			String name;
 
-			if (groupParticipant != null) {
+			if (groupProfile) {
 				msisdn = groupConversation.getMsisdn();
 				name = groupConversation.getLabel();
 			} else {
@@ -263,210 +205,211 @@ public class ProfileAdapter extends BaseAdapter {
 			}
 
 			viewHolder.text.setText(name);
+
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(msisdn, null,
+					false);
+			viewHolder.image.setTag(imageViewerInfo);
 			if (profilePreview == null) {
-				viewHolder.image.setImageDrawable(IconCacheManager
-						.getInstance().getIconForMSISDN(msisdn));
+				imageLoader.loadImage(msisdn, viewHolder.image);
 			} else {
 				viewHolder.image.setImageBitmap(profilePreview);
 			}
-			viewHolder.image.setTag(statusMessage);
-			viewHolder.subText.setVisibility(View.GONE);
-			viewHolder.icon
-					.setVisibility((myProfile || groupConversation != null) ? View.VISIBLE
-							: View.GONE);
-			if (mContactInfo != null) {
-				if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
-					viewHolder.requestLayout.setVisibility(View.VISIBLE);
-					viewHolder.requestInfo.setVisibility(View.VISIBLE);
-					viewHolder.requestMain.setVisibility(View.VISIBLE);
-					viewHolder.btn2.setVisibility(View.VISIBLE);
-
-					viewHolder.requestMain.setText(context.getString(
-							R.string.added_as_friend,
-							mContactInfo.getFirstName()));
-					viewHolder.requestInfo.setText(context.getString(
-							R.string.added_as_hike_friend_info,
-							mContactInfo.getFirstName()));
-
-					viewHolder.btn1.setText(R.string.confirm);
-					viewHolder.btn1.setTag(mContactInfo);
-					viewHolder.btn2.setTag(mContactInfo);
-				} else if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
-					viewHolder.requestLayout.setVisibility(View.VISIBLE);
-					viewHolder.requestInfo.setVisibility(View.GONE);
-					viewHolder.requestMain.setVisibility(View.GONE);
-					viewHolder.btn2.setVisibility(View.GONE);
-
-					viewHolder.btn1.setText(R.string.add_as_friend);
-					viewHolder.btn1.setTag(mContactInfo);
-				} else {
-					viewHolder.requestLayout.setVisibility(View.GONE);
-				}
+			viewHolder.icon.setVisibility(View.VISIBLE);
+			if (myProfile || groupProfile) {
+				viewHolder.icon
+						.setImageResource(R.drawable.ic_change_profile_pic);
+			} else {
+				viewHolder.icon
+						.setImageResource(R.drawable.ic_new_conversation);
 			}
+
 			if (mContactInfo != null) {
 				if (mContactInfo.isOnhike()) {
-					if (mContactInfo.getHikeJoinTime() > 0) {
+					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
 						viewHolder.subText.setVisibility(View.VISIBLE);
-						viewHolder.subText.setText(context.getString(
-								R.string.on_hike_since,
-								mContactInfo.getFormattedHikeJoinTime()));
+						viewHolder.subText
+								.setText(R.string.sent_you_friend_request);
+
+						viewHolder.btnContainer.setVisibility(View.VISIBLE);
+
+						viewHolder.imageBtn1.setTag(mContactInfo);
+						viewHolder.imageBtn2.setTag(mContactInfo);
+					} else if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
+
+					} else if (mContactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+						viewHolder.subText.setText(Utils
+								.getLastSeenTimeAsString(context,
+										mContactInfo.getLastSeenTime(),
+										mContactInfo.getOffline()));
 					} else {
-						viewHolder.subText.setVisibility(View.INVISIBLE);
+						if (mContactInfo.getHikeJoinTime() > 0) {
+							viewHolder.subText.setText(context.getString(
+									R.string.on_hike_since,
+									mContactInfo.getFormattedHikeJoinTime()));
+						} else {
+							viewHolder.subText.setText(R.string.on_hike);
+						}
 					}
 				} else {
-					viewHolder.subText.setVisibility(View.VISIBLE);
 					viewHolder.subText.setText(R.string.on_sms);
 				}
+			} else if (groupProfile) {
+				/*
+				 * Adding one to count self.
+				 */
+				viewHolder.subText.setText(context.getString(
+						R.string.num_people,
+						(groupConversation.getGroupMemberAliveCount() + 1)));
 			}
 
-			break;
-
-		case BUTTONS:
-			if (groupParticipant != null) {
-				if (groupParticipant.getContactInfo().getId()
-						.equals(GROUP_BUTTON_ID)) {
-					viewHolder.btnContainer1
-							.setVisibility(numParticipants < HikeConstants.MAX_CONTACTS_IN_GROUP ? View.VISIBLE
-									: View.GONE);
-					viewHolder.btnContainer2.setVisibility(View.VISIBLE);
-					viewHolder.btnContainer3.setVisibility(View.GONE);
-					viewHolder.marginView.setVisibility(View.GONE);
-
-					viewHolder.btnDivider
-							.setVisibility(viewHolder.btnContainer1
-									.getVisibility() == View.VISIBLE
-									&& viewHolder.btnContainer2.getVisibility() == View.VISIBLE ? View.VISIBLE
-									: View.GONE);
-
-					viewHolder.btnText1.setText(R.string.add_member);
-					viewHolder.btnText2
-							.setText(groupConversation.isMuted() ? R.string.unmute_group
-									: R.string.mute_group);
-
-					viewHolder.btnImage1
-							.setImageResource(R.drawable.ic_add_member);
-					viewHolder.btnImage2.setImageResource(groupConversation
-							.isMuted() ? R.drawable.ic_unmute
-							: R.drawable.ic_mute);
-				} else {
-					viewHolder.btnContainer1.setVisibility(View.GONE);
-					viewHolder.btnContainer2.setVisibility(View.GONE);
-					viewHolder.btnContainer3.setVisibility(View.VISIBLE);
-					viewHolder.marginView.setVisibility(View.GONE);
-
-					viewHolder.btnDivider.setVisibility(View.GONE);
-
-					viewHolder.btnText3.setText(R.string.leave_group);
-
-					viewHolder.btnImage3
-							.setImageResource(R.drawable.ic_leave_group);
-				}
-				v.setBackgroundResource(R.color.seen_timeline_item);
-				viewHolder.divContainer1.setVisibility(View.VISIBLE);
-				viewHolder.divContainer2.setVisibility(View.GONE);
-			} else {
-				viewHolder.btnContainer1.setVisibility(View.GONE);
-				viewHolder.btnContainer2.setVisibility(View.GONE);
-				viewHolder.container.setVisibility(View.GONE);
-
-				viewHolder.marginView.setVisibility(View.GONE);
-
-				viewHolder.btnContainer3.setVisibility(View.VISIBLE);
-				viewHolder.btnText3.setText(myProfile ? R.string.post_status
-						: R.string.send_message);
-				viewHolder.btnImage3
-						.setImageResource(myProfile ? R.drawable.ic_post_status
-								: R.drawable.ic_msg_small);
-				v.setBackgroundResource(R.color.seen_timeline_item);
-				viewHolder.divContainer1.setVisibility(View.GONE);
-				viewHolder.divContainer2.setVisibility(View.VISIBLE);
-			}
 			break;
 
 		case GROUP_PARTICIPANT:
-			ContactInfo contactInfo = groupParticipant.getContactInfo();
+			LinearLayout parentView = (LinearLayout) v;
+			parentView.removeAllViews();
 
-			viewHolder.image.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn(), true));
+			GroupParticipant[] groupParticipants = ((ProfileGroupItem) profileItem)
+					.getGroupParticipants();
 
-			viewHolder.text.setText(contactInfo.getName());
-			if (contactInfo.isUnknownContact()) {
-				viewHolder.text.append(" (" + contactInfo.getMsisdn() + ")");
-			}
+			for (int i = 0; i < groupParticipants.length; i++) {
+				GroupParticipant groupParticipant = groupParticipants[i];
 
-			viewHolder.subText.setVisibility(View.VISIBLE);
-			if (groupConversation.getGroupOwner().equals(
-					contactInfo.getMsisdn())) {
-				viewHolder.subText.setText(R.string.owner);
-			} else if (!contactInfo.isOnhike()) {
-				viewHolder.subText
-						.setText(groupParticipant.onDnd() ? R.string.on_dnd
+				View groupParticipantParentView = inflater.inflate(
+						R.layout.group_profile_item, parentView, false);
+
+				TextView nameTextView = (TextView) groupParticipantParentView
+						.findViewById(R.id.name);
+				TextView mainInfo = (TextView) groupParticipantParentView
+						.findViewById(R.id.main_info);
+
+				if (groupParticipant == null) {
+					/*
+					 * if the second element is null, we just make it invisible.
+					 */
+					if (i == 1) {
+						groupParticipantParentView
+								.setVisibility(View.INVISIBLE);
+					}
+
+					View avatarContainer = groupParticipantParentView
+							.findViewById(R.id.avatar_container);
+
+					View addParticipantView = groupParticipantParentView
+							.findViewById(R.id.add_participant);
+
+					avatarContainer.setVisibility(View.GONE);
+					addParticipantView.setVisibility(View.VISIBLE);
+					mainInfo.setVisibility(View.GONE);
+
+					nameTextView.setText(R.string.add_people);
+				} else {
+					ImageView avatar = (ImageView) groupParticipantParentView
+							.findViewById(R.id.avatar);
+					ImageView avatarFrame = (ImageView) groupParticipantParentView
+							.findViewById(R.id.avatar_frame);
+
+					ContactInfo contactInfo = groupParticipant.getContactInfo();
+
+					int offline = contactInfo.getOffline();
+
+					String lastSeenString = null;
+					if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+						lastSeenString = Utils.getLastSeenTimeAsString(context,
+								contactInfo.getLastSeenTime(), offline);
+					}
+
+					nameTextView.setText(contactInfo.getFirstName());
+
+					if (TextUtils.isEmpty(lastSeenString)) {
+						mainInfo.setText(contactInfo.isOnhike() ? R.string.on_hike
 								: R.string.on_sms);
-			} else {
-				viewHolder.subText.setVisibility(View.GONE);
-			}
+					} else {
+						mainInfo.setText(lastSeenString);
+					}
 
-			viewHolder.icon.setVisibility(View.GONE);
+					if (offline == 0) {
+						mainInfo.setTextColor(context.getResources().getColor(
+								R.color.unread_message));
+						avatarFrame
+								.setImageResource(R.drawable.frame_avatar_medium_highlight_selector);
+					} else {
+						mainInfo.setTextColor(context.getResources().getColor(
+								R.color.participant_last_seen));
+						avatarFrame
+								.setImageResource(R.drawable.frame_avatar_medium_selector);
+					}
+					avatar.setImageDrawable(IconCacheManager.getInstance()
+							.getIconForMSISDN(contactInfo.getMsisdn(), true));
+
+					groupParticipantParentView
+							.setOnLongClickListener(profileActivity);
+				}
+
+				LayoutParams layoutParams = (LayoutParams) groupParticipantParentView
+						.getLayoutParams();
+				int margin = context.getResources().getDimensionPixelSize(
+						R.dimen.updates_margin);
+
+				layoutParams.leftMargin = margin;
+				layoutParams.topMargin = margin;
+				if (i == groupParticipants.length - 1) {
+					layoutParams.rightMargin = margin;
+				}
+
+				groupParticipantParentView.setTag(groupParticipant);
+
+				groupParticipantParentView.setOnClickListener(profileActivity);
+
+				parentView.addView(groupParticipantParentView);
+			}
 			break;
 
 		case STATUS:
-			if (myProfile) {
-				viewHolder.contentContainer
-						.setBackgroundResource(R.drawable.seen_timeline_selector);
-			}
+			StatusMessage statusMessage = ((ProfileStatusItem) profileItem)
+					.getStatusMessage();
+			viewHolder.text.setText(statusMessage.getNotNullName());
+
 			SmileyParser smileyParser = SmileyParser.getInstance();
-			viewHolder.text.setText(smileyParser.addSmileySpans(
+			viewHolder.subText.setText(smileyParser.addSmileySpans(
 					statusMessage.getText(), true));
 
 			Linkify.addLinks(viewHolder.text, Linkify.ALL);
 			viewHolder.text.setMovementMethod(null);
 
-			viewHolder.image.setVisibility(View.GONE);
-			viewHolder.subText.setText(statusMessage.getTimestampFormatted(
+			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
 					true, context));
-			viewHolder.icon.setBackgroundResource(R.drawable.bg_status_type);
-			viewHolder.icon.setImageResource(R.drawable.ic_text_status);
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC) {
-				viewHolder.image.setVisibility(View.VISIBLE);
-				viewHolder.image.setImageDrawable(IconCacheManager
-						.getInstance().getIconForMSISDN(
-								statusMessage.getMappedId()));
-				viewHolder.icon
-						.setImageResource(R.drawable.ic_profile_pic_status);
-				viewHolder.image.setId(position);
-				viewHolder.image.setTag(statusMessage);
-				viewHolder.text.setText(R.string.changed_profile);
-			} else if (statusMessage.getStatusMessageType() == StatusMessageType.JOINED_HIKE) {
-				viewHolder.icon.setImageResource(R.drawable.ic_joined_hike);
 
-			} else if (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST_ACCEPTED
-					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
-				viewHolder.text.setText(R.string.friend_request_accepted);
+			if (statusMessage.hasMood()) {
 				viewHolder.icon
-						.setImageResource(R.drawable.ic_profile_pic_status);
-			}
-			if (statusMessage.hasMood()
-					|| statusMessage.getStatusMessageType() == StatusMessageType.JOINED_HIKE) {
-				viewHolder.icon.setBackgroundDrawable(null);
-				if (statusMessage.hasMood()) {
-					viewHolder.icon
-							.setImageResource(Utils.getMoodsResource()[statusMessage
-									.getMoodId()]);
-				}
+						.setImageResource(Utils.getMoodsResource()[statusMessage
+								.getMoodId()]);
 			} else {
-				viewHolder.icon
-						.setBackgroundResource(R.drawable.bg_status_type);
+				viewHolder.icon.setImageDrawable(IconCacheManager.getInstance()
+						.getIconForMSISDN(statusMessage.getMsisdn(), true));
 			}
-			LayoutParams lp = (LayoutParams) viewHolder.subText
-					.getLayoutParams();
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROFILE_PIC
-					|| viewHolder.text.getLineCount() > 1) {
-				lp.topMargin = 0;
-				viewHolder.subText.setLayoutParams(lp);
-			} else {
-				lp.topMargin = (int) (5 * Utils.densityMultiplier);
-				viewHolder.subText.setLayoutParams(lp);
-			}
+			break;
+
+		case PROFILE_PIC_UPDATE:
+			StatusMessage profilePicStatusUpdate = ((ProfileStatusItem) profileItem)
+					.getStatusMessage();
+			viewHolder.text.setText(profilePicStatusUpdate.getNotNullName());
+
+			viewHolder.subText
+					.setText(R.string.status_profile_pic_notification);
+
+			viewHolder.icon
+					.setImageDrawable(IconCacheManager.getInstance()
+							.getIconForMSISDN(
+									profilePicStatusUpdate.getMsisdn(), true));
+
+			ImageViewerInfo imageViewerInfo2 = new ImageViewerInfo(
+					profilePicStatusUpdate.getMappedId(), null, true);
+
+			viewHolder.image.setTag(imageViewerInfo2);
+
+			imageLoader.loadImage(profilePicStatusUpdate.getMappedId(),
+					viewHolder.image);
+
 			break;
 
 		case EMPTY_STATUS:
@@ -512,44 +455,14 @@ public class ProfileAdapter extends BaseAdapter {
 	private class ViewHolder {
 		TextView text;
 		TextView subText;
-		TextView requestMain;
-		TextView requestInfo;
 		ImageView image;
 		ImageView icon;
 		Button btn1;
 		Button btn2;
-		ViewGroup container;
-		View btnDivider;
-		ViewGroup requestLayout;
-		View marginView;
-		ViewGroup contentContainer;
-		View btnContainer1;
-		View btnContainer2;
-		View btnContainer3;
-		TextView btnText1;
-		TextView btnText2;
-		TextView btnText3;
-		ImageView btnImage1;
-		ImageView btnImage2;
-		ImageView btnImage3;
-		ViewGroup divContainer1;
-		ViewGroup divContainer2;
-	}
-
-	@Override
-	public int getCount() {
-		return groupProfile ? groupParticipants.size() : statusMessages.size();
-	}
-
-	@Override
-	public Object getItem(int position) {
-		return groupProfile ? groupParticipants.get(position) : statusMessages
-				.get(position);
-	}
-
-	@Override
-	public long getItemId(int position) {
-		return 0;
+		ImageButton imageBtn1;
+		ImageButton imageBtn2;
+		ViewGroup btnContainer;
+		TextView timeStamp;
 	}
 
 	public void setProfilePreview(Bitmap preview) {
@@ -567,15 +480,22 @@ public class ProfileAdapter extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 
-	public void setNumParticipants(int numParticipants) {
-		this.numParticipants = numParticipants;
-	}
-
 	public void setIsContactBlocked(boolean b) {
 		isContactBlocked = b;
 	}
 
 	public boolean isContactBlocked() {
 		return isContactBlocked;
+	}
+
+	public void stopImageLoaderThread() {
+		if (imageLoader == null) {
+			return;
+		}
+		imageLoader.interruptThread();
+	}
+
+	public void restartImageLoaderThread() {
+		imageLoader = new ImageLoader(context);
 	}
 }

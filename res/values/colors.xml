@@ -131,6 +131,9 @@
     <color name="chat_thread_default_bg">#e8e3d8</color>
     <color name="actionbar_text">#faf8f2</color>
     <color name="sticker_emoticon_divider">#3d000000</color>
+    <color name="almost_white">#fffff7</color>
     <color name="updates_bg">#e7e2d6</color>
     <color name="updates_text">#292d2e</color>
+    <color name="profile_small_text">#6f706c</color>
+    <color name="participant_last_seen">#aca9a2</color>
 </resources>

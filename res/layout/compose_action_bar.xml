@@ -40,6 +40,7 @@
         android:background="@drawable/bg_green_btn"
         android:drawableLeft="@drawable/ic_done"
         android:paddingLeft="12dp"
-        android:paddingRight="8dp" />
+        android:paddingRight="8dp"
+        android:visibility="gone" />
 
 </RelativeLayout>

@@ -1,81 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/timeline_selector" >
+    android:layout_height="72dp"
+    android:layout_weight="1"
+    android:background="@drawable/bg_updates_white"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp" >
 
-    <View
-        android:id="@+id/div1"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="#e0e0dc" />
+    <LinearLayout
+        android:id="@+id/image_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5dp" >
 
-    <View
-        android:id="@+id/div2"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_below="@id/div1"
-        android:background="#cdccc8" />
-
-    <View
-        android:id="@+id/div3"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_below="@id/div2"
-        android:background="#fefefe" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="10dp" >
-
-        <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:src="@drawable/ic_avatar1" />
-
-        <LinearLayout
-            android:id="@+id/info_container"
+        <RelativeLayout
+            android:id="@+id/avatar_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
-            android:gravity="center" >
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/info_txt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:text="Owner"
-                android:textColor="@color/group_info"
-                android:textSize="12sp"
-                android:textStyle="italic" />
+            android:layout_marginRight="5dp" >
 
             <ImageView
-                android:id="@+id/unknown_contact"
+                android:id="@+id/avatar"
+                android:layout_width="@dimen/medium_avatar"
+                android:layout_height="@dimen/medium_avatar"
+                android:layout_marginLeft="2dp"
+                android:layout_marginTop="2dp"
+                android:src="@drawable/ic_avatar1" />
+
+            <ImageView
+                android:id="@+id/avatar_frame"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_unknown_contact" />
-        </LinearLayout>
+                android:src="@drawable/frame_avatar_medium_selector" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/add_participant"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="5dp"
+            android:src="@drawable/ic_add_participant"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/details_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="5dp"
+        android:layout_toRightOf="@id/image_container"
+        android:orientation="vertical" >
 
         <com.bsb.hike.view.CustomFontTextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@id/info_container"
-            android:layout_toRightOf="@id/avatar"
             android:ellipsize="end"
             android:singleLine="true"
             android:text="Rishabh Sharma"
-            android:textColor="@color/group_item"
-            android:textSize="16sp" />
-    </RelativeLayout>
+            android:textColor="@color/updates_text"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <com.bsb.hike.view.LinkedTextView
+            android:id="@+id/main_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2:45"
+            android:textColor="@color/participant_last_seen"
+            android:textSize="12sp"
+            android:textStyle="bold|italic" />
+    </LinearLayout>
 
 </RelativeLayout>
