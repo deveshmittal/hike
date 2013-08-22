@@ -5,7 +5,6 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
@@ -21,11 +20,12 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.FetchAndSetLargeImageTask;
+import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -38,6 +38,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 	private List<StatusMessage> statusMessages;
 	private Context context;
 	private String userMsisdn;
+	private ImageLoader imageLoader;
 
 	private enum ViewType {
 		PROFILE_PIC_CHANGE, OTHER_UPDATE
@@ -48,6 +49,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		this.context = context;
 		this.statusMessages = statusMessages;
 		this.userMsisdn = userMsisdn;
+		this.imageLoader = new ImageLoader(context);
 	}
 
 	@Override
@@ -261,6 +263,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							.getInstance().getIconForMSISDN(
 									protip.getMappedId()));
 					viewHolder.statusImg.setVisibility(View.VISIBLE);
+
+					ImageViewerInfo imageViewerInfo = new ImageViewerInfo(
+							statusMessage.getMappedId(), protip.getImageURL(),
+							true);
+					viewHolder.statusImg.setTag(imageViewerInfo);
+					viewHolder.statusImg.setOnClickListener(imageClickListener);
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
 				}
@@ -281,9 +289,6 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.noBtn.setTag(statusMessage);
 			viewHolder.noBtn.setOnClickListener(noBtnClickListener);
 
-			viewHolder.statusImg.setTag(statusMessage);
-			viewHolder.statusImg.setOnClickListener(imageClickListener);
-
 			break;
 
 		case PROFILE_PIC_CHANGE:
@@ -295,14 +300,17 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			viewHolder.mainInfo
 					.setText(R.string.status_profile_pic_notification);
 
-			viewHolder.largeProfilePic.setTag(statusMessage);
+			ImageViewerInfo imageViewerInfo = new ImageViewerInfo(
+					statusMessage.getMappedId(), null, true);
+
+			viewHolder.largeProfilePic.setTag(imageViewerInfo);
 			viewHolder.largeProfilePic.setOnClickListener(imageClickListener);
 
 			/*
 			 * Fetch larger image
 			 */
-			new FetchAndSetLargeImageTask(context, viewHolder.largeProfilePic,
-					statusMessage.getMappedId()).execute();
+			imageLoader.loadImage(statusMessage.getMappedId(),
+					viewHolder.largeProfilePic);
 			break;
 		}
 
@@ -326,12 +334,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		@Override
 		public void onClick(View v) {
-			StatusMessage statusMessage = (StatusMessage) v.getTag();
-			String mappedId = statusMessage.getMappedId();
-			String url = null;
-			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
-				url = statusMessage.getProtip().getImageURL();
-			}
+			ImageViewerInfo imageViewerInfo = (ImageViewerInfo) v.getTag();
+
+			String mappedId = imageViewerInfo.mappedId;
+			String url = imageViewerInfo.url;
 
 			Bundle arguments = new Bundle();
 			arguments.putString(HikeConstants.Extras.MAPPED_ID, mappedId);
@@ -385,4 +391,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		}
 	};
 
+	public void stopImageLoaderThread() {
+		if (imageLoader == null) {
+			return;
+		}
+		imageLoader.interruptThread();
+	}
+
+	public void restartImageLoaderThread() {
+		imageLoader = new ImageLoader(context);
+	}
 }

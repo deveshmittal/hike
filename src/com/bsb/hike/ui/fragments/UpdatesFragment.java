@@ -76,6 +76,18 @@ public class UpdatesFragment extends SherlockListFragment implements
 		}
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, null);
+
+		if (centralTimelineAdapter != null) {
+			centralTimelineAdapter.restartImageLoaderThread();
+		}
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (centralTimelineAdapter != null) {
+			centralTimelineAdapter.stopImageLoaderThread();
+		}
 	}
 
 	@Override
