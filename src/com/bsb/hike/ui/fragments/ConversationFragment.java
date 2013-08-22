@@ -110,7 +110,7 @@ OnItemLongClickListener, Listener, Runnable {
 	}
 
 	private class EmailConversationsAsyncTask extends
-			AsyncTask<Conversation, Void, Conversation[]> {
+	AsyncTask<Conversation, Void, Conversation[]> {
 
 		ProgressDialog dialog;
 		List<String> listValues = new ArrayList<String>();
@@ -148,21 +148,22 @@ OnItemLongClickListener, Listener, Runnable {
 				// also find out the sender number, this is needed for the chat
 				// file backup
 				MessageMetadata cMetadata = cMessage.getMetadata();
-				// TODO::what happens to squiggly messages here?
-
-				if (cMessage.isGroupChat())
-					fromString = (cMessage.isSent() == true) ? getString(R.string.me_key)
-							: participantMap
-									.get(cMessage.getGroupParticipantMsisdn())
-									.getContactInfo().getFirstName();
-				else
-					fromString = (cMessage.isSent() == true) ? getString(R.string.me_key)
-							: chatLabel;
-
-				// if its still null , something's wrong, go with msisdn...
-				if (fromString == null || fromString.length() == 0) {
-					fromString = cMessage.getMsisdn();
-				}
+				boolean isSent = cMessage.isSent();
+				if (cMessage.isGroupChat()) // gc naming logic
+				{
+					GroupParticipant gPart = participantMap.get(cMessage
+							.getGroupParticipantMsisdn());
+					
+					if (gPart != null) {
+						fromString = (isSent == true) ? getString(R.string.me_key)
+								: gPart.getContactInfo().getName();
+					} else {
+						fromString = (isSent == true) ? getString(R.string.me_key)
+								: "";
+					}
+				} else
+					fromString = (isSent == true) ? getString(R.string.me_key)
+							: chatLabel; // 1:1 message logic
 
 				if (cMessage.isFileTransferMessage()) {
 					// TODO: can make this generic and add support for multiple
@@ -178,7 +179,7 @@ OnItemLongClickListener, Listener, Runnable {
 					}
 					// tweak the message here based on the file
 					messageMask = getString(R.string.file_transfer_of_type)
-							+ " "+ fileType;
+							+ " " + fileType;
 
 				}
 
