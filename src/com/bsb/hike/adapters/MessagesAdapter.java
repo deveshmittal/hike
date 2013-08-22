@@ -916,32 +916,32 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				}
 
 				if (showThumbnail) {
-					holder.fileThumb.setImageDrawable(thumbnail);
+					holder.fileThumb.setBackgroundDrawable(thumbnail);
 				} else {
 					switch (hikeFileType) {
 					case IMAGE:
 						holder.fileThumb
-								.setImageResource(R.drawable.ic_default_img);
+								.setBackgroundResource(R.drawable.ic_default_img);
 						break;
 					case VIDEO:
 						holder.fileThumb
-								.setImageResource(R.drawable.ic_default_mov);
+								.setBackgroundResource(R.drawable.ic_default_mov);
 						break;
 					case AUDIO:
 						holder.fileThumb
-								.setImageResource(R.drawable.ic_default_audio);
+								.setBackgroundResource(R.drawable.ic_default_audio);
 						break;
 					case CONTACT:
 						holder.fileThumb
-								.setImageResource(R.drawable.ic_default_contact);
+								.setBackgroundResource(R.drawable.ic_default_contact);
 						break;
 					case AUDIO_RECORDING:
 						holder.fileThumb
-								.setImageResource(R.drawable.ic_audio_msg_received);
+								.setBackgroundResource(R.drawable.ic_audio_msg_received);
 						break;
 					case UNKNOWN:
 						holder.fileThumb
-								.setImageResource(R.drawable.ic_unknown_file);
+								.setBackgroundResource(R.drawable.ic_unknown_file);
 						break;
 					}
 				}
@@ -955,7 +955,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					.getLayoutParams();
 
 			if (showThumbnail) {
-				holder.fileThumb.setScaleType(ScaleType.FIT_CENTER);
+				holder.fileThumb.setScaleType(ScaleType.CENTER);
 				fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
 				fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail
 						.getIntrinsicHeight());
