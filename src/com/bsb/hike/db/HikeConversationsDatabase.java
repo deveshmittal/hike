@@ -171,6 +171,10 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ " (" + DBConstants.FILE_KEY + " TEXT PRIMARY KEY, "
 				+ DBConstants.IMAGE + " BLOB" + " )";
 		db.execSQL(sql);
+		sql = "CREATE INDEX IF NOT EXISTS " + DBConstants.FILE_THUMBNAIL_INDEX
+				+ " ON " + DBConstants.FILE_THUMBNAIL_TABLE + " ("
+				+ DBConstants.FILE_KEY + " )";
+		db.execSQL(sql);
 	}
 
 	public void deleteAll() {
@@ -396,6 +400,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 					+ " ADD COLUMN " + DBConstants.READ_BY + " TEXT";
 			db.execSQL(alter);
 		}
+		/*
+		 * Version 20 adds an index for the file thumbnails table.
+		 */
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
