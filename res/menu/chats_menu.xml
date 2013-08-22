@@ -7,4 +7,10 @@
         android:showAsAction="always"
         android:title="@string/start_new_chat"/>
 
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_new_conversation"
+        android:showAsAction="never"
+        android:title="Settings"/>
+    
 </menu>

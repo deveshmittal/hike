@@ -3,67 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.bsb.hike.view.DrawerLayout
-        android:id="@+id/drawer_layout"
+    <ListView
+        android:id="@+id/settings_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <LinearLayout
-            android:id="@+id/animation_layout_left_sidebar"
-            android:layout_width="272dp"
-            android:layout_height="match_parent"
-            android:visibility="invisible" >
-
-            <include layout="@layout/left_drawer" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/animation_layout_right_sidebar"
-            android:layout_width="272dp"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:visibility="invisible" >
-
-            <include layout="@layout/right_drawer" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/animation_layout_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/thatch_repeat"
-                android:orientation="vertical" >
-
-                <include
-                    android:id="@+id/top_panel_ref"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    layout="@layout/top_panel" />
-
-                <ListView
-                    android:id="@+id/settings_content"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cacheColorHint="#00000000"
-                    android:divider="@drawable/ic_thread_divider_profile"
-                    android:dividerHeight="1dp"
-                    android:fadingEdge="none"
-                    android:footerDividersEnabled="false" />
-
-                <View
-                    android:id="@+id/list_dropshadow"
-                    android:layout_width="fill_parent"
-                    android:layout_height="1dp"
-                    android:background="@drawable/dropshadow_top" />
-            </LinearLayout>
-        </LinearLayout>
-
-    </com.bsb.hike.view.DrawerLayout>
+        android:layout_height="wrap_content"
+        android:cacheColorHint="#00000000"
+        android:divider="@drawable/ic_thread_divider_profile"
+        android:dividerHeight="1dp"
+        android:fadingEdge="none"
+        android:footerDividersEnabled="false" />
 
 </RelativeLayout>

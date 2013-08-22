@@ -148,8 +148,7 @@
             android:launchMode="singleTop"
             android:theme="@style/NoTitleBar" >
         </activity>
-        <activity android:name=".ui.SettingsActivity"
-            android:theme="@style/NoTitleBar" >
+        <activity android:name=".ui.SettingsActivity" >
         </activity>
         <activity android:name=".ui.TwitterAuthActivity"
             android:theme="@style/NoTitleBar" >
