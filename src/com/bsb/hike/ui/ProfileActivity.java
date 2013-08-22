@@ -389,10 +389,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			if (contactInfo.isOnhike() && contactInfo.getHikeJoinTime() > 0) {
 				profileItems.add(getJoinedHikeStatus(contactInfo));
 			}
-		} else {
-			// Adding an item for the empty status
-			profileItems.add(new ProfileItem.ProfileStatusItem(
-					ProfileItem.EMPTY_ID));
 		}
 	}
 
