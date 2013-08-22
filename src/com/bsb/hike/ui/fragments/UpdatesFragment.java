@@ -254,6 +254,10 @@ public class UpdatesFragment extends SherlockListFragment implements
 
 				@Override
 				protected void onPostExecute(List<StatusMessage> olderMessages) {
+					if (!isAdded()) {
+						return;
+					}
+
 					if (!olderMessages.isEmpty()) {
 						statusMessages.addAll(statusMessages.size(),
 								olderMessages);
