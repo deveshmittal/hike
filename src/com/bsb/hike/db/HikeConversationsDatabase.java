@@ -688,6 +688,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 		try {
 			HikeFile hikeFile = metadata.getHikeFiles().get(0);
+			if (TextUtils.isEmpty(hikeFile.getFileKey())) {
+				return null;
+			}
 
 			JSONObject metadataJson = metadata.getJSON();
 			JSONArray fileArray = metadataJson
@@ -699,6 +702,9 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 
 			String thumbnailString = hikeFile.getThumbnailString();
 
+			if (TextUtils.isEmpty(thumbnailString)) {
+				return null;
+			}
 			addFileThumbnail(hikeFile.getFileKey(),
 					Base64.decode(thumbnailString, Base64.DEFAULT));
 
