@@ -573,4 +573,14 @@
 	<string name="tap_save_contact">Tap to save contact</string>
 	<string name="no_updates">No updates from %1$s yet.</string>
 	<string name="add_people">Add people</string>
+	<string name="email_conversation">Email Conversation</string>
+	<string name="me_key">me</string>
+	<string name="group_name_email">"Group "</string>
+	<string name="chat_with_prefix">"Chat with "</string>
+	<string name="file_transfer_of_type">File transfer of type</string>
+	<string name="chat_backup_">"Chat backup_ "</string>
+	<string name="backup_of_conversation_with_prefix">"Backup of conversation with: "</string>
+	<string name="email_your_conversation">Email your conversation</string>
+	<string name="exporting_conversations_prefix">Exporting conversations...</string>
+	<string name="attached_is_the_conversation_backup_string">Attached is the conversation backup..</string>
 </resources>
