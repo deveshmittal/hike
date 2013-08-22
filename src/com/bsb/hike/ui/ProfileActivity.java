@@ -629,6 +629,9 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					StatusMessage statusMessage = ((ProfileStatusItem) profileItems
 							.get(profileItems.size() - 1)).getStatusMessage();
 
+					if (statusMessage == null) {
+						return new ArrayList<StatusMessage>();
+					}
 					List<StatusMessage> olderMessages = HikeConversationsDatabase
 							.getInstance()
 							.getStatusMessages(
