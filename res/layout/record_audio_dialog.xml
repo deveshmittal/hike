@@ -54,7 +54,6 @@
         android:id="@+id/dropshadow"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@id/alert_text"
         android:background="@drawable/ic_thread_divider_profile" />
 
     <LinearLayout

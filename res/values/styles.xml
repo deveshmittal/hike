@@ -201,42 +201,6 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
-    <style name="LeftDrawerDivider">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">2dp</item>
-        <item name="android:background">@drawable/right_drawer_divider</item>
-        <item name="android:visibility">visible</item>
-    </style>
-    
-    <style name="LeftDrawerItem">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">48dp</item>
-        <item name="android:background">@drawable/drawer_top_item_selector</item>
-        <item name="android:clickable">true</item>
-        <item name="android:paddingLeft">10dp</item>
-        <item name="android:paddingRight">10dp</item>
-    </style>
-
-    <style name="LeftDrawerItemIcon">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_centerVertical">true</item>
-    </style>
-    
-    <style name="LeftDrawerItemText">
-        <item name="android:layout_width">@dimen/drawer_text_width</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_centerVertical">true</item>
-        <item name="android:layout_marginLeft">10dp</item>
-        <item name="android:layout_toRightOf">@id/item_icon</item>
-        <item name="android:shadowDy">0.9</item>
-        <item name="android:shadowRadius">0.5</item>
-        <item name="android:shadowColor">#000000</item>
-        <item name="android:textColor">@color/offwhite</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textStyle">bold|italic</item>
-    </style>
-
     <style name="HelpButtonText">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">36dp</item>
