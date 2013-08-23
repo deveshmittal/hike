@@ -8,7 +8,6 @@ import android.util.Log;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikeMessengerApp.CurrentState;
-import com.bsb.hike.ui.MessagesList;
 
 /**
  * @author Rishabh Using this to notify the server when the app comes to the
@@ -61,13 +60,7 @@ public abstract class HikeAppStateBaseActivity extends Activity {
 					"App was going to another activity");
 			HikeMessengerApp.currentState = CurrentState.RESUMED;
 		} else if (HikeMessengerApp.currentState == CurrentState.BACK_PRESSED) {
-			if (this instanceof MessagesList) {
-				Log.d(TAG + getClass().getSimpleName(), "App was closed");
-				HikeMessengerApp.currentState = CurrentState.CLOSED;
-				Utils.sendAppState(this);
-			} else {
-				HikeMessengerApp.currentState = CurrentState.RESUMED;
-			}
+			HikeMessengerApp.currentState = CurrentState.RESUMED;
 		} else {
 			Log.d(TAG + getClass().getSimpleName(), "App was backgrounded");
 			HikeMessengerApp.currentState = CurrentState.BACKGROUNDED;

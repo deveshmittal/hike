@@ -27,11 +27,11 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.AccountUtils;
-import com.bsb.hike.utils.DrawerBaseActivity;
+import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.Utils;
 
-public class CreditsActivity extends DrawerBaseActivity implements Listener {
-	private TextView mTitleView;
+public class CreditsActivity extends AuthSocialAccountBaseActivity implements
+		Listener {
 	private ViewGroup creditsContainer;
 	private SharedPreferences settings;
 	private TextView freeSms50;
@@ -84,7 +84,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 
 	private void initalizeViews(Bundle savedInstanceState) {
 		setContentView(R.layout.credits);
-		afterSetContentView(savedInstanceState);
 
 		Object o = getLastNonConfigurationInstance();
 		if (o instanceof DeleteSocialCredentialsTask) {
@@ -97,7 +96,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 		editor.putBoolean(HikeMessengerApp.INVITE_TOOLTIP_DISMISSED, true);
 		editor.commit();
 
-		mTitleView = (TextView) findViewById(R.id.title_centered);
 		creditsContainer = (ViewGroup) findViewById(R.id.credits_container);
 		freeSms50 = (TextView) findViewById(R.id.free_sms);
 		freeSms100 = (TextView) findViewById(R.id.free_sms_100);
@@ -145,8 +143,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 					Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 		freeSms50.setText(ssb);
-
-		mTitleView.setText(R.string.free_sms_txt);
 
 		updateCredits();
 		setupSocialButtons();
@@ -260,7 +256,6 @@ public class CreditsActivity extends DrawerBaseActivity implements Listener {
 
 	@Override
 	public void onEventReceived(String type, Object object) {
-		super.onEventReceived(type, object);
 		/*
 		 * Here we check if we are already showing the twitter webview. If we
 		 * are, we dont do any other UI changes.

@@ -28,7 +28,6 @@ import android.util.Pair;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -63,8 +62,6 @@ public class SocialNetInviteActivity extends Activity implements
 	private SocialNetInviteAdapter adapter;
 	private List<GraphUser> friends;
 
-	private TextView labelView;
-	private Button titleBtn;
 	private EditText input;
 	private Set<String> selectedFriends;
 	private boolean isFacebook;
@@ -95,22 +92,14 @@ public class SocialNetInviteActivity extends Activity implements
 
 		list = new ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>>();
 
-		labelView = (TextView) findViewById(R.id.title);
-		titleBtn = (Button) findViewById(R.id.title_icon);
 		input = (EditText) findViewById(R.id.input_number);
-
-		titleBtn.setVisibility(View.VISIBLE);
-		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-		titleBtn.setText(getString(R.string.send_invite, 0));
 
 		findViewById(R.id.input_number_container).setVisibility(View.GONE);
 		findViewById(R.id.contact_list).setVisibility(View.GONE);
 		findViewById(R.id.progress_container).setVisibility(View.VISIBLE);
 		if (isFacebook) {
-			labelView.setText(R.string.invite_via_facebook);
 			getFriends();
 		} else {
-			labelView.setText(R.string.invite_via_twitter);
 			new GetTwitterFollowers().execute();
 		}
 		mTwitterInviteTask = (HikeHTTPTask) getLastNonConfigurationInstance();
@@ -424,8 +413,6 @@ public class SocialNetInviteActivity extends Activity implements
 		}
 		socialFriend.first.set(!socialFriend.first.get());
 		checkbox.setChecked(socialFriend.first.get());
-
-		titleBtn.setText(getString(R.string.send_invite, selectedFriends.size()));
 	}
 
 	@Override

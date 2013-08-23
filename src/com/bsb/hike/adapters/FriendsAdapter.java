@@ -118,14 +118,14 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public void makeCompleteList() {
 		completeList.clear();
 
-		friendsSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+		friendsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(friendsList.size()),
 				context.getString(R.string.friends), null);
 		completeList.add(friendsSection);
 
 		completeList.addAll(friendsList);
 
-		contactsSection = new ContactInfo(DrawerFavoritesAdapter.SECTION_ID,
+		contactsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(otherContactsList.size()),
 				context.getString(R.string.contacts), null);
 		completeList.add(contactsSection);

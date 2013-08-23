@@ -65,9 +65,6 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 
 		addPreferencesFromResource(preferences);
 
-		TextView titleView = (TextView) findViewById(R.id.title);
-		titleView.setText(getTitle());
-
 		Object retained = getLastNonConfigurationInstance();
 		if (retained instanceof ActivityCallableTask) {
 			isDeleting = savedInstanceState != null ? savedInstanceState
@@ -228,7 +225,7 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 		 * First we send the user to the Main Activity(MessagesList) from there
 		 * we redirect him to the welcome screen.
 		 */
-		Intent dltIntent = new Intent(this, MessagesList.class);
+		Intent dltIntent = new Intent(this, HomeActivity.class);
 		dltIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(dltIntent);
 	}

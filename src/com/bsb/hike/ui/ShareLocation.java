@@ -94,8 +94,6 @@ public class ShareLocation extends FragmentActivity {
 	private final int GPS_ENABLED = 1;
 	private final int GPS_DISABLED = 2;
 	private final int NO_LOCATION_DEVICE_ENABLED = 0;
-	private Button titleBtn;
-	private TextView labelView;
 	private static final String places_api_key = "AIzaSyCBrHWTSgFNu3NKEodf2FZugtrFDqMpDV8";
 
 	@Override
@@ -216,16 +214,6 @@ public class ShareLocation extends FragmentActivity {
 				}
 			}
 		});
-
-		titleBtn = (Button) findViewById(R.id.title_icon);
-		labelView = (TextView) findViewById(R.id.title);
-
-		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-
-		titleBtn.setText(R.string.send);
-		titleBtn.setVisibility(View.VISIBLE);
-
-		labelView.setText(R.string.share_location);
 
 	}
 

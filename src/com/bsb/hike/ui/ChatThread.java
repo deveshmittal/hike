@@ -2090,7 +2090,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (!(mConversation instanceof GroupConversation)) {
 			mComposeView.setHint("0 Free SMS left...");
 			mComposeView.setEnabled(false);
-			findViewById(R.id.title_image_btn2).setEnabled(false);
 			findViewById(R.id.info_layout).setVisibility(View.VISIBLE);
 		} else {
 			findViewById(R.id.group_info_layout).setVisibility(View.VISIBLE);

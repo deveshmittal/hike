@@ -120,7 +120,6 @@
         </activity>
 
         <activity
-			android:theme="@style/NoTitleBar"
             android:name=".ui.HikePreferences"
             android:label="@string/preferences">
             
@@ -128,7 +127,6 @@
         <activity
             android:name=".ui.HikeListActivity"
             android:label="@string/app_label"
-            android:theme="@style/NoTitleBar"
             android:configChanges="orientation">
         </activity>
         <activity
@@ -138,34 +136,27 @@
         <activity
             android:theme="@style/NoTitleBar"
             android:name=".cropimage.CropImage"/>
-        <activity android:name=".ui.CreditsActivity"
-            android:theme="@style/NoTitleBar" >
+        <activity android:name=".ui.CreditsActivity" >
         </activity>
         <activity android:name=".ui.WebViewActivity"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/NoTitleBar" >
+            android:configChanges="orientation|keyboardHidden" >
         </activity>
         <activity android:name=".ui.Tutorial"
-            android:launchMode="singleTop"
-            android:theme="@style/NoTitleBar" >
+            android:launchMode="singleTop" >
         </activity>
         <activity android:name=".ui.ShareLocation"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden"
-            android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/NoTitleBar" >
+            android:configChanges="orientation|keyboardHidden" >
         </activity>
         <activity android:name=".ui.TellAFriend"
-            android:launchMode="singleTop"
-            android:theme="@style/NoTitleBar" >
+            android:launchMode="singleTop" >
         </activity>
         <activity android:name=".ui.SettingsActivity" >
         </activity>
-        <activity android:name=".ui.TwitterAuthActivity"
-            android:theme="@style/NoTitleBar" >
+        <activity android:name=".ui.TwitterAuthActivity" >
         </activity>
         <activity android:name=".ui.StatusUpdate"
-            android:theme="@style/NoTitleBar"
             android:windowSoftInputMode="adjustResize" >
         </activity>
         <activity android:name=".ui.ComposeActivity"

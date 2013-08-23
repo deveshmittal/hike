@@ -76,8 +76,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private String[] pubsubListeners = { HikePubSub.SOCIAL_AUTH_COMPLETED,
 			HikePubSub.SOCIAL_AUTH_FAILED, HikePubSub.STATUS_POST_REQUEST_DONE };
 	private ViewGroup moodParent;
-	private Button titleBtn;
-	private TextView mTitleView;
 	private ImageView avatar;
 	private ViewGroup emojiParent;
 	private EditText statusTxt;
@@ -114,15 +112,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		emojiParent = (ViewGroup) findViewById(R.id.emoji_container);
 		moodParent = (ViewGroup) findViewById(R.id.mood_parent);
-		titleBtn = (Button) findViewById(R.id.title_icon);
-		mTitleView = (TextView) findViewById(R.id.title);
-
-		titleBtn.setText(R.string.post);
-		titleBtn.setVisibility(View.VISIBLE);
-
-		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
-
-		mTitleView.setText(R.string.status);
 
 		avatar = (ImageView) findViewById(R.id.avatar);
 		avatar.setImageResource(R.drawable.ic_text_status);
@@ -288,8 +277,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			mActivityTask.emojiShowing = false;
 			emojiParent.setVisibility(View.GONE);
 		}
-		titleBtn.setText(R.string.post);
-		mTitleView.setText(R.string.status);
 		toggleEnablePostButton();
 		/*
 		 * Show soft keyboard.
@@ -623,10 +610,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void showCancelButton(boolean moodLayout) {
-		titleBtn.setText(R.string.cancel);
-		titleBtn.setEnabled(true);
 		if (moodLayout) {
-			mTitleView.setText(R.string.moods);
 		}
 	}
 
@@ -653,9 +637,9 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		 * Enabling if the text length is > 0 or if the user has selected a mood
 		 * with some prefilled text.
 		 */
-		titleBtn.setEnabled(mActivityTask.moodId >= 0
+		boolean enable = mActivityTask.moodId >= 0
 				|| statusTxt.getText().toString().trim().length() > 0
-				|| isEmojiOrMoodLayoutVisible());
+				|| isEmojiOrMoodLayoutVisible();
 	}
 
 	@Override

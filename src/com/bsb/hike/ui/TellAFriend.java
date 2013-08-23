@@ -17,13 +17,15 @@ import android.widget.TextView;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
+import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.DrawerBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseActivity;
 import com.bsb.hike.utils.Utils;
 import com.facebook.Session;
 import com.facebook.SessionState;
 
-public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
+public class TellAFriend extends HikeAppStateBaseActivity implements
+		OnClickListener, Listener {
 
 	private boolean facebookPostPopupShowing = false;
 
@@ -43,8 +45,6 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 
 		settings = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
-
-		afterSetContentView(savedInstanceState);
 
 		TextView viaSms = (TextView) findViewById(R.id.via_sms);
 
@@ -66,9 +66,6 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 		} else {
 			viaSms.setVisibility(View.GONE);
 		}
-
-		TextView mTitleView = (TextView) findViewById(R.id.title_centered);
-		mTitleView.setText(R.string.invite_friends);
 
 		int ids[] = { R.id.facebook, R.id.twitter, R.id.sms, R.id.email,
 				R.id.other };
@@ -177,7 +174,6 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 
 	@Override
 	public void onEventReceived(String type, Object object) {
-		super.onEventReceived(type, object);
 		if (HikePubSub.SOCIAL_AUTH_COMPLETED.equals(type)) {
 			final boolean facebook = (Boolean) object;
 			runOnUiThread(new Runnable() {
@@ -210,7 +206,7 @@ public class TellAFriend extends DrawerBaseActivity implements OnClickListener {
 		if (ensureOpenSession()) {
 			Intent intent = new Intent(this, SocialNetInviteActivity.class);
 			intent.putExtra(HikeConstants.Extras.IS_FACEBOOK, true);
-			Log.d("tell a friend","calling socialNetInviteActivity");
+			Log.d("tell a friend", "calling socialNetInviteActivity");
 			startActivity(intent);
 		} else {
 			pickFriendsWhenSessionOpened = true;

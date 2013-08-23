@@ -496,8 +496,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	}
 
 	private void setupEditScreen() {
-		TextView mTitleView = (TextView) findViewById(R.id.title);
-
 		ViewGroup name = (ViewGroup) findViewById(R.id.name);
 		ViewGroup phone = (ViewGroup) findViewById(R.id.phone);
 		ViewGroup email = (ViewGroup) findViewById(R.id.email);
@@ -521,7 +519,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		picture.setBackgroundResource(R.drawable.profile_bottom_item_selector);
 		picture.setFocusable(true);
 
-		mTitleView.setText(getResources().getString(R.string.edit_profile));
 		((EditText) phone.findViewById(R.id.phone_input)).setText(mLocalMSISDN);
 		((EditText) phone.findViewById(R.id.phone_input)).setEnabled(false);
 
@@ -1199,7 +1196,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							Intent intent = new Intent(ProfileActivity.this,
-									MessagesList.class);
+									HomeActivity.class);
 							intent.putExtra(HikeConstants.Extras.GROUP_LEFT,
 									mLocalMSISDN);
 							intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
