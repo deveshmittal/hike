@@ -18,6 +18,7 @@ public class HikeConstants {
 	public static final String MA_TRACKER_REF_ID_PREFIX = "bsb_hike_";
 	public static final String MA_SITE_ID = "27576";
 
+	
 	public static final String ANDROID = "android";
 
 	public static final String MESSAGE = "msg";
@@ -315,7 +316,7 @@ public class HikeConstants {
 	public static final String CONTACT_CONTENT_TYPE = "contact/share";
 	public static final String CONTACT_FILE_NAME = "Contact";
 
-	public static final int DEFAULT_ZOOM_LEVEL = 12;
+	public static final int DEFAULT_ZOOM_LEVEL = 16;
 
 	public static final String VOICE_MESSAGE_CONTENT_TYPE = "audio/voice";
 
@@ -512,6 +513,9 @@ public class HikeConstants {
 		public static final String IS_STATUS_IMAGE = "isStatusImage";
 		public static final String URL = "url";
 		public static final String TAB_INDEX = "tabIndex";
+		public static final String IS_TEXT_SEARCH = "isTextSearch";
+		public static final String HTTP_SEARCH_STR = "searchStr";
+		public static final String IS_FACEBOOK = "isFacebook";
 	}
 
 	public static final class LogEvent {
