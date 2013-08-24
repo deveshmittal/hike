@@ -318,6 +318,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	 */
 	public View tipView;
 
+	private TextView mLabelView;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -1319,14 +1321,26 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		View contactInfoContainer = actionBarView
 				.findViewById(R.id.contact_info);
 		ImageView avatar = (ImageView) actionBarView.findViewById(R.id.avatar);
-		TextView contactName = (TextView) actionBarView
-				.findViewById(R.id.contact_name);
+		mLabelView = (TextView) actionBarView.findViewById(R.id.contact_name);
 		mLastSeenView = (TextView) actionBarView
 				.findViewById(R.id.contact_status);
 
+		if (mConversation instanceof GroupConversation) {
+			int numActivePeople = ((GroupConversation) mConversation)
+					.getGroupMemberAliveCount();
+			if (numActivePeople > 0) {
+				mLastSeenView.setVisibility(View.VISIBLE);
+				/*
+				 * Adding 1 to count the user.
+				 */
+				mLastSeenView.setText(getString(R.string.num_people,
+						(numActivePeople + 1)));
+			}
+		}
+
 		avatar.setImageDrawable(IconCacheManager.getInstance()
 				.getIconForMSISDN(mContactNumber, true));
-		contactName.setText(mLabel);
+		mLabelView.setText(mLabel);
 
 		backContainer.setOnClickListener(new OnClickListener() {
 
@@ -1662,12 +1676,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						// if (label != null) {
-						// mLabelView.setText(label);
-						// if (!(mConversation instanceof GroupConversation)) {
-						// mNameView.setText(label);
-						// }
-						// }
+						if (label != null) {
+							mLabelView.setText(label);
+						}
 
 						addMessage(message);
 					}
@@ -1811,7 +1822,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 				runOnUiThread(new Runnable() {
 					public void run() {
-						// mLabelView.setText(groupName);
+						mLabelView.setText(groupName);
 					}
 				});
 			}
@@ -1838,8 +1849,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						// mLabelView.setText(mLabel);
-						// mNameView.setText(mLabel);
+						mLabelView.setText(mLabel);
 					}
 				});
 			}
@@ -1986,10 +1996,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 				@Override
 				public void run() {
-					ActionBar actionBar = getSupportActionBar();
 					if (lastSeenString == null) {
-						mLastSeenView.setText("");
+						mLastSeenView.setVisibility(View.GONE);
 					} else {
+						mLastSeenView.setVisibility(View.VISIBLE);
 						mLastSeenView.setText(lastSeenString);
 
 						if (tipView == null
