@@ -7,12 +7,15 @@ import org.json.JSONObject;
 
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -39,6 +42,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 
 	private boolean deviceDetailsSent;
 
+	private View parentLayout;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -60,6 +65,8 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		actionBar.setIcon(R.drawable.hike_logo_top_bar);
 
 		setContentView(R.layout.home);
+
+		parentLayout = findViewById(R.id.parent_layout);
 
 		if (savedInstanceState != null) {
 			deviceDetailsSent = savedInstanceState
@@ -120,10 +127,64 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	}
 
 	private void initialiseTabs() {
-		TabPageIndicator TabIndicator = (TabPageIndicator) findViewById(R.id.titles);
-		TabIndicator.setViewPager(viewPager,
+		TabPageIndicator tabIndicator = (TabPageIndicator) findViewById(R.id.titles);
+		tabIndicator.setViewPager(viewPager,
 				getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1));
+		tabIndicator.setOnPageChangeListener(onPageChangeListener);
 	}
+
+	/*
+	 * Implemented to add a fade change in color when switching between updates
+	 * tab and other tabs
+	 */
+	OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
+
+		int initialRed = 231;
+		int initialGreen = 226;
+		int initialBlue = 214;
+
+		int finalRed = 255;
+		int finalGreen = 255;
+		int finalBlue = 255;
+
+		@Override
+		public void onPageSelected(int position) {
+			if (position == 0) {
+				parentLayout.setBackgroundColor(Color.argb(255, initialRed,
+						initialGreen, initialBlue));
+			} else {
+				parentLayout.setBackgroundColor(Color.argb(255, finalRed,
+						finalGreen, finalBlue));
+			}
+		}
+
+		@Override
+		public void onPageScrolled(int position, float positionOffset,
+				int positionOffsetPixels) {
+			if (position != 0) {
+				return;
+			}
+
+			int percent = (int) (positionOffset * 100);
+			if (percent % 2 != 0) {
+				return;
+			}
+
+			int red = initialRed
+					+ (int) (((finalRed - initialRed) * percent) / 100);
+			int green = initialGreen
+					+ (int) (((finalGreen - initialGreen) * percent) / 100);
+			int blue = initialBlue
+					+ (int) (((finalBlue - initialBlue) * percent) / 100);
+
+			parentLayout.setBackgroundColor(Color.argb(255, red, green, blue));
+		}
+
+		@Override
+		public void onPageScrollStateChanged(int state) {
+
+		}
+	};
 
 	private void initialiseViewPager() {
 		viewPager = (ViewPager) findViewById(R.id.viewpager);
