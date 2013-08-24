@@ -14,8 +14,7 @@
         android:drawablePadding="7dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
-        android:singleLine="true"
-        android:text=" lkasjd lasd asldasd asld asdasd asd" />
+        android:singleLine="true" />
 
     <View
         android:layout_width="match_parent"
