@@ -99,6 +99,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		backIcon.setImageResource(R.drawable.ic_back);
 		getSupportActionBar().setBackgroundDrawable(
 				getResources().getDrawable(R.drawable.bg_header));
+		setLabel();
 	}
 
 	private void setupActionBar() {
@@ -115,16 +116,6 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		doneBtn = (Button) actionBarView.findViewById(R.id.done_btn);
 
 		title = (TextView) actionBarView.findViewById(R.id.title);
-
-		if (isSharingFile) {
-			title.setText(R.string.share_file);
-		} else if (isForwardingMessage) {
-			title.setText(R.string.forward);
-		} else if (!TextUtils.isEmpty(existingGroupId)) {
-			title.setText(R.string.add_group);
-		} else {
-			title.setText(R.string.new_chat);
-		}
 
 		backContainer.setOnClickListener(new OnClickListener() {
 
@@ -153,6 +144,18 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		actionBar.setCustomView(actionBarView);
 
 		init();
+	}
+
+	private void setLabel() {
+		if (isSharingFile) {
+			title.setText(R.string.share_file);
+		} else if (isForwardingMessage) {
+			title.setText(R.string.forward);
+		} else if (!TextUtils.isEmpty(existingGroupId)) {
+			title.setText(R.string.add_group);
+		} else {
+			title.setText(R.string.new_chat);
+		}
 	}
 
 	private void onDoneButtonClick() {
