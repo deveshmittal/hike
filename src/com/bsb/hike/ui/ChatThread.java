@@ -320,6 +320,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private TextView mLabelView;
 
+	private ImageView avatar;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -1320,7 +1322,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		View backContainer = actionBarView.findViewById(R.id.back);
 		View contactInfoContainer = actionBarView
 				.findViewById(R.id.contact_info);
-		ImageView avatar = (ImageView) actionBarView.findViewById(R.id.avatar);
+		avatar = (ImageView) actionBarView.findViewById(R.id.avatar);
 		mLabelView = (TextView) actionBarView.findViewById(R.id.contact_name);
 		mLastSeenView = (TextView) actionBarView
 				.findViewById(R.id.contact_status);
@@ -1795,7 +1797,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			String msisdn = (String) object;
 			if (mContactNumber.equals(msisdn)) {
 				/* update the image drawable */
-				runOnUiThread(mUpdateAdapter);
+				avatar.setImageDrawable(IconCacheManager.getInstance()
+						.getIconForMSISDN(mContactNumber, true));
 			}
 		} else if ((HikePubSub.USER_LEFT.equals(type))
 				|| (HikePubSub.USER_JOINED.equals(type))) {
