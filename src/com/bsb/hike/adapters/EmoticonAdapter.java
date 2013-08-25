@@ -13,7 +13,6 @@ import android.widget.GridView;
 
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeConversationsDatabase;
-import com.bsb.hike.ui.StatusUpdate;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
@@ -35,10 +34,16 @@ public class EmoticonAdapter extends PagerAdapter implements
 	private int[] emoticonResIds;
 	private int[] emoticonSubCategories;
 	private int[] categoryResIds;
+
 	private int idOffset;
 
 	public EmoticonAdapter(Activity activity, EditText composeBox,
 			boolean isPortrait, int[] categoryResIds) {
+		this(activity, composeBox, isPortrait, categoryResIds, false);
+	}
+
+	public EmoticonAdapter(Activity activity, EditText composeBox,
+			boolean isPortrait, int[] categoryResIds, boolean emojiOnly) {
 		MAX_EMOTICONS_PER_ROW = isPortrait ? MAX_EMOTICONS_PER_ROW_PORTRAIT
 				: MAX_EMOTICONS_PER_ROW_LANDSCAPE;
 
@@ -47,10 +52,16 @@ public class EmoticonAdapter extends PagerAdapter implements
 		this.composeBox = composeBox;
 		this.categoryResIds = categoryResIds;
 
-		emoticonResIds = EmoticonConstants.DEFAULT_SMILEY_RES_IDS;
-		emoticonSubCategories = SmileyParser.EMOTICONS_SUBCATEGORIES;
-		idOffset = 0;
+		emoticonResIds = emojiOnly ? EmoticonConstants.EMOJI_RES_IDS
+				: EmoticonConstants.DEFAULT_SMILEY_RES_IDS;
+		emoticonSubCategories = emojiOnly ? SmileyParser.EMOJI_SUBCATEGORIES
+				: SmileyParser.EMOTICONS_SUBCATEGORIES;
 
+		if (emojiOnly) {
+			for (int i : SmileyParser.HIKE_SUBCATEGORIES) {
+				idOffset += i;
+			}
+		}
 	}
 
 	@Override
@@ -90,9 +101,6 @@ public class EmoticonAdapter extends PagerAdapter implements
 		int emoticonIndex = (Integer) arg1.getTag();
 		HikeConversationsDatabase.getInstance().updateRecencyOfEmoticon(
 				emoticonIndex, System.currentTimeMillis());
-		if (activity instanceof StatusUpdate) {
-//			((StatusUpdate) activity).hideEmoticonSelector();
-		}
 		// We don't add an emoticon if the compose box is near its maximum
 		// length of characters
 		if (composeBox.length() >= activity.getResources().getInteger(

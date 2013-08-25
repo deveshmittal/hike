@@ -136,4 +136,5 @@
     <color name="updates_text">#292d2e</color>
     <color name="profile_small_text">#6f706c</color>
     <color name="participant_last_seen">#aca9a2</color>
+    <color name="action_bar_disabled_text">#0f8fe1</color>
 </resources>

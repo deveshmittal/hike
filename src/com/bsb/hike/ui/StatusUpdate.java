@@ -13,7 +13,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextUtils;
@@ -21,6 +20,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -29,15 +29,11 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TabHost;
-import android.widget.TabHost.OnTabChangeListener;
-import android.widget.TabHost.TabContentFactory;
-import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.HikeConstants.EmoticonType;
 import com.bsb.hike.HikeConstants.TipType;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -56,6 +52,7 @@ import com.bsb.hike.utils.AuthSocialAccountBaseActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
 
 public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		Listener {
@@ -83,6 +80,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private Handler handler;
 	private TextView charCounter;
 	private View tipView;
+	private Button doneBtn;
 
 	@Override
 	public Object onRetainCustomNonConfigurationInstance() {
@@ -92,6 +90,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.status_dialog);
+
+		setupActionBar();
 
 		Object o = getLastCustomNonConfigurationInstance();
 
@@ -114,8 +114,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		moodParent = (ViewGroup) findViewById(R.id.mood_parent);
 
 		avatar = (ImageView) findViewById(R.id.avatar);
-		avatar.setImageResource(R.drawable.ic_text_status);
-		avatar.setBackgroundResource(R.drawable.bg_status_type);
 
 		charCounter = (TextView) findViewById(R.id.char_counter);
 
@@ -156,7 +154,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		twitter.setSelected(mActivityTask.twitterSelected);
 
 		if (mActivityTask.emojiShowing) {
-//			showEmojiSelector();
+			showEmojiSelector();
 			getWindow()
 					.setSoftInputMode(
 							WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
@@ -195,6 +193,45 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 			tipView.setLayoutParams(layoutParams);
 			Utils.showTip(this, TipType.MOOD, tipView);
 		}
+	}
+
+	private void setupActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
+		View actionBarView = LayoutInflater.from(this).inflate(
+				R.layout.compose_action_bar, null);
+
+		View backContainer = actionBarView.findViewById(R.id.back);
+
+		TextView title = (TextView) actionBarView.findViewById(R.id.title);
+		doneBtn = (Button) actionBarView.findViewById(R.id.post_btn);
+
+		title.setText(R.string.new_update);
+
+		doneBtn.setVisibility(View.VISIBLE);
+		doneBtn.setText(R.string.post);
+		doneBtn.setEnabled(false);
+
+		backContainer.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(StatusUpdate.this,
+						HomeActivity.class);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				startActivity(intent);
+			}
+		});
+
+		doneBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				postStatus();
+			}
+		});
+
+		actionBar.setCustomView(actionBarView);
 	}
 
 	private Runnable cancelStatusPost = new Runnable() {
@@ -239,7 +276,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	public void onEmojiClick(View v) {
-		// showEmojiSelector();
+		showEmojiSelector();
 	}
 
 	public void onMoodClick(View v) {
@@ -291,7 +328,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	private void postStatus() {
-		final EditText statusTxt = (EditText) findViewById(R.id.status_txt);
 		HikeHttpRequest hikeHttpRequest = new HikeHttpRequest("/user/status",
 				RequestType.STATUS_UPDATE, new HikeHttpCallback() {
 
@@ -442,131 +478,73 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		}
 	}
 
-//	private void showEmojiSelector() {
-//		Utils.hideSoftKeyboard(this, statusTxt);
-//
-//		mActivityTask.emojiShowing = true;
-//
-//		showCancelButton(false);
-//
-//		emojiParent.setClickable(true);
-//
-//		emojiParent.setVisibility(View.VISIBLE);
-//
-//		ViewGroup emoticonLayout = (ViewGroup) findViewById(R.id.emoji_container);
-//		final ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
-//		final EditText statusTxt = (EditText) findViewById(R.id.status_txt);
-//
-//		int whichSubcategory = 0;
-//		boolean isTabInitialised = tabHost.getTabWidget().getTabCount() > 0;
-//
-//		if (tabHost != null && !isTabInitialised) {
-//			isTabInitialised = true;
-//
-//			int[] tabDrawables = null;
-//
-//			int offset = 0;
-//			int emoticonsListSize = 0;
-//			tabDrawables = new int[] { R.drawable.ic_recents_emo,
-//					EmoticonConstants.EMOJI_RES_IDS[0],
-//					EmoticonConstants.EMOJI_RES_IDS[109],
-//					EmoticonConstants.EMOJI_RES_IDS[162],
-//					EmoticonConstants.EMOJI_RES_IDS[294],
-//					EmoticonConstants.EMOJI_RES_IDS[392] };
-//			offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
-//			emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
-//
-//			LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-//			for (int i = 0; i < tabDrawables.length; i++) {
-//				View tabHead = layoutInflater.inflate(
-//						R.layout.emoticon_tab_layout, null);
-//				TabSpec ts = tabHost.newTabSpec("tab" + (i + 1));
-//
-//				((ImageView) tabHead.findViewById(R.id.tab_header_img))
-//						.setImageResource(tabDrawables[i]);
-//				if (i == 0) {
-//					tabHead.findViewById(R.id.divider_left).setVisibility(
-//							View.GONE);
-//				} else if (i == tabDrawables.length - 1) {
-//					tabHead.findViewById(R.id.divider_right).setVisibility(
-//							View.GONE);
-//				}
-//				ts.setIndicator(tabHead);
-//				ts.setContent(new TabContentFactory() {
-//
-//					@Override
-//					public View createTabContent(String tag) {
-//						View v = new View(getApplicationContext());
-//						v.setMinimumWidth(0);
-//						v.setMinimumHeight(0);
-//						return v;
-//					}
-//				});
-//				tabHost.addTab(ts);
-//			}
-//
-//			/*
-//			 * Checking whether we have a few emoticons in the recents category.
-//			 * If not we show the next tab emoticons.
-//			 */
-//			if (whichSubcategory == 0) {
-//				int startOffset = offset;
-//				int endOffset = startOffset + emoticonsListSize;
-//				int recentEmoticonsSizeReq = EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT;
-//				int[] recentEmoticons = HikeConversationsDatabase.getInstance()
-//						.fetchEmoticonsOfType(EmoticonType.EMOJI, startOffset,
-//								endOffset, recentEmoticonsSizeReq);
-//				if (recentEmoticons.length < recentEmoticonsSizeReq) {
-//					whichSubcategory++;
-//				}
-//			}
-//			setupEmoticonLayout(EmoticonType.EMOJI, whichSubcategory,
-//					emoticonViewPager, statusTxt);
-//			tabHost.setCurrentTab(whichSubcategory);
-//			emoticonViewPager.setCurrentItem(whichSubcategory);
-//		}
-//
-//		emoticonLayout.setVisibility(View.VISIBLE);
-//
-//		emoticonViewPager.setOnPageChangeListener(new OnPageChangeListener() {
-//			@Override
-//			public void onPageSelected(int position) {
-//				tabHost.setCurrentTab(position);
-//			}
-//
-//			@Override
-//			public void onPageScrolled(int arg0, float arg1, int arg2) {
-//			}
-//
-//			@Override
-//			public void onPageScrollStateChanged(int arg0) {
-//			}
-//		});
-//
-//		tabHost.setOnTabChangedListener(new OnTabChangeListener() {
-//			@Override
-//			public void onTabChanged(String tabId) {
-//				emoticonViewPager.setCurrentItem(tabHost.getCurrentTab());
-//			}
-//		});
-//	}
-//
-//	public void hideEmoticonSelector() {
-//		onBackPressed();
-//	}
-//
-//	private void setupEmoticonLayout(EmoticonType emoticonType,
-//			int whichSubcategory, ViewPager emoticonViewPager,
-//			EditText statusTxt) {
-//
-//		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(
-//				this,
-//				statusTxt,
-//				EmoticonType.EMOJI,
-//				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT);
-//		emoticonViewPager.setAdapter(statusEmojiAdapter);
-//		emoticonViewPager.invalidate();
-//	}
+	private void showEmojiSelector() {
+		Utils.hideSoftKeyboard(this, statusTxt);
+
+		mActivityTask.emojiShowing = true;
+
+		showCancelButton(false);
+
+		emojiParent.setClickable(true);
+
+		emojiParent.setVisibility(View.VISIBLE);
+
+		ViewGroup emoticonLayout = (ViewGroup) findViewById(R.id.emoji_container);
+
+		int whichSubcategory = 0;
+
+		int[] tabDrawables = null;
+
+		int offset = 0;
+		int emoticonsListSize = 0;
+		tabDrawables = new int[] { R.drawable.ic_recents_emo,
+				EmoticonConstants.EMOJI_RES_IDS[0],
+				EmoticonConstants.EMOJI_RES_IDS[109],
+				EmoticonConstants.EMOJI_RES_IDS[162],
+				EmoticonConstants.EMOJI_RES_IDS[294],
+				EmoticonConstants.EMOJI_RES_IDS[392] };
+		offset = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
+		emoticonsListSize = EmoticonConstants.EMOJI_RES_IDS.length;
+
+		/*
+		 * Checking whether we have a few emoticons in the recents category. If
+		 * not we show the next tab emoticons.
+		 */
+		if (whichSubcategory == 0) {
+			int startOffset = offset;
+			int endOffset = startOffset + emoticonsListSize;
+			int recentEmoticonsSizeReq = EmoticonAdapter.MAX_EMOTICONS_PER_ROW_PORTRAIT;
+			int[] recentEmoticons = HikeConversationsDatabase.getInstance()
+					.fetchEmoticonsOfType(startOffset, endOffset,
+							recentEmoticonsSizeReq);
+			if (recentEmoticons.length < recentEmoticonsSizeReq) {
+				whichSubcategory++;
+			}
+		}
+		setupEmoticonLayout(whichSubcategory, tabDrawables);
+		emoticonLayout.setVisibility(View.VISIBLE);
+	}
+
+	public void hideEmoticonSelector() {
+		onBackPressed();
+	}
+
+	private void setupEmoticonLayout(int whichSubcategory, int[] tabDrawable) {
+
+		EmoticonAdapter statusEmojiAdapter = new EmoticonAdapter(
+				this,
+				statusTxt,
+				getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT,
+				tabDrawable, true);
+
+		ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
+		emoticonViewPager.setCurrentItem(whichSubcategory);
+		emoticonViewPager.setAdapter(statusEmojiAdapter);
+		emoticonViewPager.invalidate();
+
+		StickerEmoticonIconPageIndicator pageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
+		pageIndicator.setViewPager(emoticonViewPager);
+	}
 
 	private void showMoodSelector() {
 		Utils.hideSoftKeyboard(this, statusTxt);
@@ -596,7 +574,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		mActivityTask.moodId = moodId;
 
 		avatar.setImageResource(Utils.getMoodsResource()[moodId]);
-		avatar.setBackgroundResource(0);
 
 		String[] moodsArray = getResources().getStringArray(
 				R.array.mood_headings);
@@ -631,8 +608,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	}
 
 	public void toggleEnablePostButton() {
-		EditText statusTxt = (EditText) findViewById(R.id.status_txt);
-
 		/*
 		 * Enabling if the text length is > 0 or if the user has selected a mood
 		 * with some prefilled text.
@@ -640,6 +615,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		boolean enable = mActivityTask.moodId >= 0
 				|| statusTxt.getText().toString().trim().length() > 0
 				|| isEmojiOrMoodLayoutVisible();
+		doneBtn.setEnabled(enable);
 	}
 
 	@Override
