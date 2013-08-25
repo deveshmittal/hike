@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import twitter4j.auth.AccessToken;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -32,8 +31,9 @@ import com.facebook.android.Facebook;
 import com.facebook.android.Facebook.DialogListener;
 import com.facebook.android.FacebookError;
 
-public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseActivity
-		implements DialogListener, TwitterAuthListener {
+public abstract class AuthSocialAccountBaseActivity extends
+		HikeAppStateBaseFragmentActivity implements DialogListener,
+		TwitterAuthListener {
 
 	public static final int FB_AUTH_REQUEST_CODE = 64206;
 	private static final String CALLBACK_URL = "http://get.hike.in/";
@@ -84,7 +84,7 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseActi
 	@Override
 	protected void onResume() {
 		super.onResume();
-		Object o = getLastNonConfigurationInstance();
+		Object o = getLastCustomNonConfigurationInstance();
 		if (o instanceof HikeHTTPTask) {
 			dialog = ProgressDialog.show(this, null,
 					getString(R.string.saving_social));
@@ -112,7 +112,7 @@ public abstract class AuthSocialAccountBaseActivity extends HikeAppStateBaseActi
 	}
 
 	@Override
-	public Object onRetainNonConfigurationInstance() {
+	public Object onRetainCustomNonConfigurationInstance() {
 		if (hikeHTTPTask != null) {
 			return hikeHTTPTask;
 		}

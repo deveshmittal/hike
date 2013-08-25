@@ -85,7 +85,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 	private void initalizeViews(Bundle savedInstanceState) {
 		setContentView(R.layout.credits);
 
-		Object o = getLastNonConfigurationInstance();
+		Object o = getLastCustomNonConfigurationInstance();
 		if (o instanceof DeleteSocialCredentialsTask) {
 			dialog = ProgressDialog.show(this, null,
 					getString(R.string.social_unlinking));
@@ -228,7 +228,7 @@ public class CreditsActivity extends AuthSocialAccountBaseActivity implements
 	}
 
 	@Override
-	public Object onRetainNonConfigurationInstance() {
+	public Object onRetainCustomNonConfigurationInstance() {
 		if (deleteSocialCredentialsTask != null) {
 			return deleteSocialCredentialsTask;
 		}

@@ -85,7 +85,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	private View tipView;
 
 	@Override
-	public Object onRetainNonConfigurationInstance() {
+	public Object onRetainCustomNonConfigurationInstance() {
 		return mActivityTask;
 	}
 
@@ -93,7 +93,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.status_dialog);
 
-		Object o = getLastNonConfigurationInstance();
+		Object o = getLastCustomNonConfigurationInstance();
 
 		if (o instanceof ActivityTask) {
 			mActivityTask = (ActivityTask) o;
