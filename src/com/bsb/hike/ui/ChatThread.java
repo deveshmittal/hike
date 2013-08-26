@@ -3914,9 +3914,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
-		if (mConversation instanceof GroupConversation) {
-			return false;
-		}
 		return gestureDetector.onTouchEvent(event);
 	}
 
