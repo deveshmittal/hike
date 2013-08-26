@@ -594,4 +594,5 @@
     <string name="social_invite_network_error">Could not sent invite. Check network settings.</string>
     <string name="not_connected_to_internet">Unable to connect to the internet</string>
     <string name="limited_requests">Cannot send request to more than 50 Friends At a time</string>
+    <string name="places_api_key">AIzaSyCBrHWTSgFNu3NKEodf2FZugtrFDqMpDV8</string>
 </resources>

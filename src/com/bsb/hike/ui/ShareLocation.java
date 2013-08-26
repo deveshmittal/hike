@@ -80,8 +80,7 @@ public class ShareLocation extends FragmentActivity {
 	private final int GPS_ENABLED = 1;
 	private final int GPS_DISABLED = 2;
 	private final int NO_LOCATION_DEVICE_ENABLED = 0;
-	private static final String places_api_key = "AIzaSyCBrHWTSgFNu3NKEodf2FZugtrFDqMpDV8";
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -190,7 +189,7 @@ public class ShareLocation extends FragmentActivity {
 							+ lng
 							+ "radius=2000&sensor=true"
 							+ "&key="
-							+ places_api_key;// ADD KEY
+							+ getResources().getString(R.string.places_api_key);// ADD KEY
 
 					isTextSearch = true;
 
@@ -366,7 +365,7 @@ public class ShareLocation extends FragmentActivity {
 						+ myLocation.getLongitude()
 						+ "&types="
 						+ typesStr
-						+ "&radius=1000&sensor=true" + "&key=" + places_api_key;
+						+ "&radius=1000&sensor=true" + "&key=" + getResources().getString(R.string.places_api_key);;
 				isTextSearch = false;
 			}
 			new GetPlaces().execute(searchStr);
