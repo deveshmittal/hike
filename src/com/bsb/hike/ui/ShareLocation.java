@@ -1,22 +1,9 @@
 package com.bsb.hike.ui;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,8 +19,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -57,6 +42,7 @@ import android.widget.Toast;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.Utils;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -130,11 +116,13 @@ public class ShareLocation extends FragmentActivity {
 			 * 0=ConnectionResult.SUCCESS this implies we have correct version
 			 * and working playservice api
 			 */
-			Log.d("is play service available",
-					Integer.valueOf(
-							GooglePlayServicesUtil
-									.isGooglePlayServicesAvailable(this))
-							.toString());
+			Log.d(getClass().getSimpleName(),
+					"is play service available = "
+							+ Integer
+									.valueOf(
+											GooglePlayServicesUtil
+													.isGooglePlayServicesAvailable(this))
+									.toString());
 
 			MapFragment = (SupportMapFragment) getSupportFragmentManager()
 					.findFragmentById(R.id.map);
@@ -151,17 +139,15 @@ public class ShareLocation extends FragmentActivity {
 			updateMyLocation();
 
 			if (savedInstanceState != null) {
-				Log.d("test", "inside if");
 				isTextSearch = savedInstanceState
 						.getBoolean(HikeConstants.Extras.IS_TEXT_SEARCH);
 				searchStr = savedInstanceState
 						.getString(HikeConstants.Extras.HTTP_SEARCH_STR);
 				new GetPlaces().execute(searchStr);
-				Log.d("test", "if is over");
 			} else {
-				Log.d("test", "inside else");
-				updateNearbyPlaces();
-				Log.d("test", "else is over");
+				Log.d(getClass().getSimpleName(), "savedInstanceState is null updating nearby places");
+				if (myLocation != null)
+					updateNearbyPlaces();
 			}
 
 		}
@@ -210,7 +196,7 @@ public class ShareLocation extends FragmentActivity {
 
 					new GetPlaces().execute(searchStr);
 				} catch (UnsupportedEncodingException e) {
-					Log.w("ShareLocation", "in nearby search url encoding", e);
+					Log.w(getClass().getSimpleName(), "in nearby search url encoding", e);
 				}
 			}
 		});
@@ -228,8 +214,9 @@ public class ShareLocation extends FragmentActivity {
 
 	public void onTitleIconClick(View v) {
 		if (myLocation == null) {
-			Toast.makeText(getApplicationContext(), getString(R.string.select_location),
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(),
+					getString(R.string.select_location), Toast.LENGTH_SHORT)
+					.show();
 			return;
 		}
 		Intent result = new Intent();
@@ -251,9 +238,11 @@ public class ShareLocation extends FragmentActivity {
 
 				userMarker.setPosition(new LatLng(newLocation.getLatitude(),
 						newLocation.getLongitude()));
-				Log.d("is Location changed",
-						Double.valueOf(myLocation.distanceTo(newLocation))
-								.toString());
+				Log.d(getClass().getSimpleName(),
+						"is Location changed = "
+								+ Double.valueOf(
+										myLocation.distanceTo(newLocation))
+										.toString());
 				if ((currentLocationDevice == GPS_ENABLED && myLocation
 						.distanceTo(newLocation) > 300)
 						|| (currentLocationDevice == GPS_DISABLED && myLocation
@@ -266,12 +255,14 @@ public class ShareLocation extends FragmentActivity {
 					updateLocationAddress(myLocation.getLongitude(),
 							myLocation.getLatitude(), userMarker);
 					// do something on location change
-					Log.d("my longi in loc listener",
-							Double.valueOf(newLocation.getLongitude())
-									.toString());
-					Log.d("my lati in loc listener",
-							Double.valueOf(newLocation.getLatitude())
-									.toString());
+					Log.d(getClass().getSimpleName(),
+							"my longi in loc listener = "
+									+ Double.valueOf(newLocation.getLongitude())
+											.toString());
+					Log.d(getClass().getSimpleName(),
+							"my lati in loc listener = "
+									+ Double.valueOf(newLocation.getLatitude())
+											.toString());
 					if (!isTextSearch)
 						updateNearbyPlaces();
 				}
@@ -294,30 +285,36 @@ public class ShareLocation extends FragmentActivity {
 		// get location manager
 		showLocationDialog();
 		myLocation = null;
-		Log.d("before gps provider", "and getting location");
+		Log.d(getClass().getSimpleName(), "inside updateMyLocation");
 
 		if (currentLocationDevice == GPS_ENABLED) {
-			Log.d("gps provider", "getting location");
+			Log.d(getClass().getSimpleName(),
+					"gps provider getting location");
+			;
 			myLocation = locManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
 					50, locListener);
 			if (myLocation == null) {
-				Log.d("gps enabled but", "gps not working properly");
+				Log.d(getClass().getSimpleName(),
+						"gps enabled but gps not working properly");
 				currentLocationDevice = GPS_DISABLED;
 			}
 		}
 		if (currentLocationDevice == GPS_DISABLED) {
+			Log.d(getClass().getSimpleName(), "gps disabled");
 			myLocation = locManager
 					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
 					0, 1000, locListener);
 			if (myLocation == null) {
+				Log.d(getClass().getSimpleName(),
+						"gps disabled but Network provider not working properly");
 				currentLocationDevice = NO_LOCATION_DEVICE_ENABLED;
 			}
 		}
 		if (currentLocationDevice == NO_LOCATION_DEVICE_ENABLED) {
-			// TODO
+			return;
 		}
 
 		setMyLocation(myLocation);
@@ -346,7 +343,8 @@ public class ShareLocation extends FragmentActivity {
 				.target(myLatLng) // Sets the center of the map to Mountain View
 				.zoom(HikeConstants.DEFAULT_ZOOM_LEVEL) // Sets the zoom
 				.build(); // Creates a CameraPosition from the builder
-		Log.d("set my location", "setting up camera");
+		Log.d(getClass().getSimpleName(),
+				"stting up camera in set my location");
 		map.animateCamera(
 				CameraUpdateFactory.newCameraPosition(cameraPosition), 3000,
 				null);
@@ -374,7 +372,8 @@ public class ShareLocation extends FragmentActivity {
 			new GetPlaces().execute(searchStr);
 
 		} catch (UnsupportedEncodingException e) {
-			Log.w("ShareLocation", "in text search url encoding", e);
+			Log.w(getClass().getSimpleName(),
+					"in text search url encoding", e);
 		}
 	}
 
@@ -383,60 +382,16 @@ public class ShareLocation extends FragmentActivity {
 		@Override
 		protected Integer doInBackground(String... placesURL) {
 			// fetch places
-			Log.d("place", "I m inside do in background");
-			// build result as string
-			StringBuilder placesBuilder = new StringBuilder();
-			// process search parameter string(s)
+			Log.d(getClass().getSimpleName(),
+					"GetPlaces Async Task do in background");
+			JSONObject resultObject = null;
 			for (String placeSearchURL : placesURL) {
-				HttpClient placesClient = new DefaultHttpClient();
-				try {
-					// try to fetch the data
-					Log.d("place", "I m inside for loop");
-					Log.d("placeSearchURL", placeSearchURL);
-					// HTTP Get receives URL string
-					HttpGet placesGet = new HttpGet(placeSearchURL);
-					// execute GET with Client - return response
-					HttpResponse placesResponse = placesClient
-							.execute(placesGet);
-					// check response status
-					StatusLine placeSearchStatus = placesResponse
-							.getStatusLine();
-					// only carry on if response is OK
-					if (placeSearchStatus.getStatusCode() == 200) {
-						// get response entity
-
-						HttpEntity placesEntity = placesResponse.getEntity();
-						// get input stream setup
-						InputStream placesContent = placesEntity.getContent();
-						// create reader
-						InputStreamReader placesInput = new InputStreamReader(
-								placesContent);
-						// use buffered reader to process
-						BufferedReader placesReader = new BufferedReader(
-								placesInput);
-						// read a line at a time, append to string builder
-						String lineIn;
-						while ((lineIn = placesReader.readLine()) != null) {
-							placesBuilder.append(lineIn);
-							// Log.d("place", lineIn);
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				resultObject = Utils.getJSONfromURL(placeSearchURL);
 			}
 
-			String result = placesBuilder.toString();
-			// parse place data returned from Google Places
 			JSONArray placesArray = null;
 			try {
-				// parse JSON
-				// create JSONObject, pass stinrg returned from doInBackground
-				JSONObject resultObject = new JSONObject(result);
-				// get "results" array
 				placesArray = resultObject.getJSONArray("results");
-				// marker options for each place returned
-
 				// loop through places
 				for (int p = 0; p < placesArray.length(); p++) {
 					// parse each place
@@ -457,9 +412,10 @@ public class ShareLocation extends FragmentActivity {
 						placeLL = new LatLng(Double.valueOf(loc
 								.getString("lat")), Double.valueOf(loc
 								.getString("lng")));
-						// loop through types
-						Log.d(Integer.valueOf(p).toString(),
-								(String) placeObject.get("name"));
+
+						Log.d(getClass().getSimpleName(),
+								Integer.valueOf(p).toString() + " = "
+										+ (String) placeObject.get("name"));
 
 						// vicinity
 						if (!isTextSearch)
@@ -471,7 +427,8 @@ public class ShareLocation extends FragmentActivity {
 						// name
 						placeName = placeObject.getString("name");
 					} catch (JSONException jse) {
-						Log.v("PLACES", "missing value");
+						Log.v(getClass().getSimpleName(),
+								"Places missing value");
 						missingValue = true;
 						jse.printStackTrace();
 					}
@@ -507,16 +464,18 @@ public class ShareLocation extends FragmentActivity {
 					placeMarkers[pm].remove();
 				}
 			}
-			Log.d("list length before = ", Integer.valueOf(list.size())
-					.toString());
+			Log.d(getClass().getSimpleName(),
+					"list length before = "
+							+ Integer.valueOf(list.size()).toString());
 			int listSize = list.size();
 			for (int i = listSize - 1; i > 0; i--) {
-				Log.d(Integer.valueOf(i).toString(), list.get(i).getName());
+				Log.d(getClass().getSimpleName(), Integer.valueOf(i).toString()+" = "+ list.get(i).getName());
 				list.remove(i);
 			}
 			adapter.notifyDataSetChanged();
-			Log.d("list length after = ", Integer.valueOf(list.size())
-					.toString());
+			Log.d(getClass().getSimpleName(),
+					"list length after = "
+							+ Integer.valueOf(list.size()).toString());
 			for (int p = 0; p < totalPlaces; p++) {
 				if (places[p] != null) {
 					placeMarkers[p] = map.addMarker(places[p]);
@@ -751,20 +710,21 @@ public class ShareLocation extends FragmentActivity {
 
 	public static String getAddressFromPosition(double lat, double lng,
 			Context context) {
+		String address = "";
 		try {
-			Geocoder geoCoder = new Geocoder(context, Locale.getDefault());
-			List<Address> addresses = geoCoder.getFromLocation(lat, lng, 1);
-
-			final StringBuilder address = new StringBuilder();
-			if (!addresses.isEmpty()) {
-				for (int i = 0; i < addresses.get(0).getMaxAddressLineIndex(); i++)
-					address.append(addresses.get(0).getAddressLine(i) + "\n");
+			JSONObject resultObj = Utils
+					.getJSONfromURL("http://maps.googleapis.com/maps/api/geocode/json?latlng="
+							+ lat + "," + lng + "&sensor=true");
+			String Status = resultObj.getString("status");
+			if (Status.equalsIgnoreCase("OK")) {
+				JSONArray Results = resultObj.getJSONArray("results");
+				JSONObject zero = Results.getJSONObject(0);
+				address = zero.getString("formatted_address");
 			}
-
-			return address.toString();
-		} catch (IOException e) {
-			Log.e("GetPlaces", "getAddressFromPostion Exception", e);
-			return "";
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return address;
 	}
+
 }
