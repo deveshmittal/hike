@@ -601,4 +601,5 @@
     <string name="video">Video</string>
     <string name="location">Location</string>
     <string name="places_api_key">AIzaSyCBrHWTSgFNu3NKEodf2FZugtrFDqMpDV8</string>
+    <string name="enter_valid_group_name">Please enter a valid group name</string>
 </resources>

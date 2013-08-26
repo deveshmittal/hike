@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog.Builder;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -34,6 +36,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -160,7 +163,7 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 
 	private void onDoneButtonClick() {
 		Iterator<ContactInfo> iterator = selectedContactSet.iterator();
-		ArrayList<ContactInfo> selectedContactList = new ArrayList<ContactInfo>(
+		final ArrayList<ContactInfo> selectedContactList = new ArrayList<ContactInfo>(
 				selectedContactSet.size());
 		while (iterator.hasNext()) {
 			selectedContactList.add(iterator.next());
@@ -170,71 +173,125 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		if (selectedContactList.size() == 1
 				&& TextUtils.isEmpty(existingGroupId)) {
 			conversationContactInfo = selectedContactList.get(0);
+			Intent intent = Utils
+					.createIntentFromContactInfo(conversationContactInfo);
+			intent.setClass(this, ChatThread.class);
+			startActivity(intent);
+			finish();
 		} else {
-			String groupId = getIntent().getStringExtra(
-					HikeConstants.Extras.EXISTING_GROUP_CHAT);
-			boolean newGroup = false;
+			if (TextUtils.isEmpty(existingGroupId)) {
+				Builder builder = new Builder(this);
+				builder.setTitle("Group Name");
 
-			if (TextUtils.isEmpty(groupId)) {
-				// Create new group
-				String uid = getSharedPreferences(
-						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE)
-						.getString(HikeMessengerApp.UID_SETTING, "");
-				groupId = uid + ":" + System.currentTimeMillis();
-				newGroup = true;
+				final EditText editText = new EditText(this);
+				builder.setView(editText);
+
+				builder.setNegativeButton(R.string.cancel,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								dialog.dismiss();
+							}
+						});
+
+				builder.setPositiveButton(android.R.string.ok,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								String groupName = editText.getText()
+										.toString();
+								if (TextUtils.isEmpty(groupName)) {
+									Toast.makeText(ComposeActivity.this,
+											R.string.enter_valid_group_name,
+											Toast.LENGTH_SHORT).show();
+									return;
+								}
+								createGroup(selectedContactList, groupName);
+							}
+						});
+				builder.show();
 			} else {
-				// Group alredy exists. Fetch existing participants.
-				newGroup = false;
+				createGroup(selectedContactList, null);
 			}
-			Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
+		}
+	}
 
-			for (ContactInfo particpant : selectedContactList) {
-				GroupParticipant groupParticipant = new GroupParticipant(
-						particpant);
-				participantList.put(particpant.getMsisdn(), groupParticipant);
-			}
-			ContactInfo userContactInfo = Utils
-					.getUserContactInfo(getSharedPreferences(
-							HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
+	private void createGroup(ArrayList<ContactInfo> selectedContactList,
+			String groupName) {
+		String groupId = getIntent().getStringExtra(
+				HikeConstants.Extras.EXISTING_GROUP_CHAT);
+		boolean newGroup = false;
 
-			GroupConversation groupConversation = new GroupConversation(
-					groupId, 0, null, userContactInfo.getMsisdn(), true);
-			groupConversation.setGroupParticipantList(participantList);
+		if (TextUtils.isEmpty(groupId)) {
+			// Create new group
+			String uid = getSharedPreferences(
+					HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE).getString(
+					HikeMessengerApp.UID_SETTING, "");
+			groupId = uid + ":" + System.currentTimeMillis();
+			newGroup = true;
+		} else {
+			// Group alredy exists. Fetch existing participants.
+			newGroup = false;
+		}
+		Map<String, GroupParticipant> participantList = new HashMap<String, GroupParticipant>();
 
-			Log.d(getClass().getSimpleName(), "Creating group: " + groupId);
-			HikeConversationsDatabase mConversationDb = HikeConversationsDatabase
-					.getInstance();
-			mConversationDb.addGroupParticipants(groupId,
-					groupConversation.getGroupParticipantList());
-			if (newGroup) {
-				mConversationDb.addConversation(groupConversation.getMsisdn(),
-						false, "", groupConversation.getGroupOwner());
-			}
+		for (ContactInfo particpant : selectedContactList) {
+			GroupParticipant groupParticipant = new GroupParticipant(particpant);
+			participantList.put(particpant.getMsisdn(), groupParticipant);
+		}
+		ContactInfo userContactInfo = Utils
+				.getUserContactInfo(getSharedPreferences(
+						HikeMessengerApp.ACCOUNT_SETTINGS, MODE_PRIVATE));
 
+		GroupConversation groupConversation = new GroupConversation(groupId, 0,
+				null, userContactInfo.getMsisdn(), true);
+		groupConversation.setGroupParticipantList(participantList);
+
+		Log.d(getClass().getSimpleName(), "Creating group: " + groupId);
+		HikeConversationsDatabase mConversationDb = HikeConversationsDatabase
+				.getInstance();
+		mConversationDb.addGroupParticipants(groupId,
+				groupConversation.getGroupParticipantList());
+		if (newGroup) {
+			mConversationDb.addConversation(groupConversation.getMsisdn(),
+					false, "", groupConversation.getGroupOwner());
+			mConversationDb.setGroupName(groupId, groupName);
+		}
+
+		try {
+			// Adding this boolean value to show a different system message
+			// if its a new group
+			JSONObject gcjPacket = groupConversation
+					.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
+			gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
+
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MESSAGE_SENT,
+					new ConvMessage(gcjPacket, groupConversation, this, true));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		JSONObject gcjJson = groupConversation
+				.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
+		/*
+		 * Adding the group name to the packet
+		 */
+		if (newGroup) {
+			JSONObject metadata = new JSONObject();
 			try {
-				// Adding this boolean value to show a different system message
-				// if its a new group
-				JSONObject gcjPacket = groupConversation
-						.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN);
-				gcjPacket.put(HikeConstants.NEW_GROUP, newGroup);
-
-				HikeMessengerApp.getPubSub().publish(
-						HikePubSub.MESSAGE_SENT,
-						new ConvMessage(gcjPacket, groupConversation, this,
-								true));
+				metadata.put(HikeConstants.NAME, groupName);
+				gcjJson.put(HikeConstants.METADATA, metadata);
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			HikeMessengerApp
-					.getPubSub()
-					.publish(
-							HikePubSub.MQTT_PUBLISH,
-							groupConversation
-									.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_JOIN));
-
-			conversationContactInfo = new ContactInfo(groupId, groupId,
-					groupId, groupId);
 		}
+		HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH, gcjJson);
+
+		ContactInfo conversationContactInfo = new ContactInfo(groupId, groupId,
+				groupId, groupId);
 		Intent intent = Utils
 				.createIntentFromContactInfo(conversationContactInfo);
 		intent.setClass(this, ChatThread.class);
