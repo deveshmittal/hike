@@ -136,10 +136,10 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults results = new FilterResults();
 
-			String textToBeFiltered = constraint.toString().toLowerCase()
-					.trim();
+			if (!TextUtils.isEmpty(constraint)) {
 
-			if (!TextUtils.isEmpty(textToBeFiltered)) {
+				String textToBeFiltered = constraint.toString().toLowerCase()
+						.trim();
 
 				List<ContactInfo> filteredFriendsList = new ArrayList<ContactInfo>();
 				List<ContactInfo> filteredOtherContactsList = new ArrayList<ContactInfo>();
