@@ -276,6 +276,14 @@ public class MqttMessagesManager {
 						.addConversation(groupConversation.getMsisdn(), false,
 								"", groupConversation.getGroupOwner());
 
+				JSONObject metadata = jsonObj
+						.optJSONObject(HikeConstants.METADATA);
+				String groupName = metadata.optString(HikeConstants.NAME);
+				if (!TextUtils.isEmpty(groupName)) {
+					convDb.setGroupName(groupConversation.getMsisdn(),
+							groupName);
+					groupConversation.setContactName(groupName);
+				}
 				// Adding a key to the json signify that this was the GCJ
 				// received for group creation
 				jsonObj.put(HikeConstants.NEW_GROUP, true);
@@ -300,7 +308,16 @@ public class MqttMessagesManager {
 
 			if (this.convDb.setGroupName(groupId, groupname) > 0) {
 				this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
-				saveStatusMsg(jsonObj, groupId);
+
+				boolean showPush = true;
+				JSONObject metadata = jsonObj
+						.optJSONObject(HikeConstants.METADATA);
+				if (metadata != null) {
+					showPush = metadata.optBoolean(HikeConstants.PUSH, true);
+				}
+				if (showPush) {
+					saveStatusMsg(jsonObj, groupId);
+				}
 			}
 		} else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type)) // Group
 																				// chat
