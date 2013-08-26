@@ -94,15 +94,19 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -322,6 +326,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	private ImageView avatar;
 
+	private PopupWindow attachmentWindow;
+
 	@Override
 	protected void onPause() {
 		super.onPause();
@@ -482,7 +488,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		if (savedInstanceState != null) {
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.FILE_TRANSFER_DIALOG_SHOWING)) {
-				showFilePickerDialog(Utils.getExternalStorageState());
+				showFilePicker(Utils.getExternalStorageState());
 			}
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.EMOTICON_SHOWING)) {
@@ -524,6 +530,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public void onBackPressed() {
+		if (attachmentWindow != null && attachmentWindow.isShowing()) {
+			attachmentWindow.dismiss();
+			return;
+		}
+
 		if (!getIntent().hasExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT)
 				&& this.mConversation != null) {
 			if ((mConversation instanceof GroupConversation)) {
@@ -689,7 +700,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		if (item.getItemId() == R.id.attachment) {
-			showFilePickerDialog(Utils.getExternalStorageState());
+			showFilePicker(Utils.getExternalStorageState());
 		}
 
 		return true;
@@ -2369,9 +2380,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				isMuted ? View.VISIBLE : View.GONE);
 	}
 
-	private void showFilePickerDialog(
-			final ExternalStorageState externalStorageState) {
-
+	private void showFilePicker(final ExternalStorageState externalStorageState) {
 		final boolean canShareLocation = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_LOCATION);
 
@@ -2380,185 +2389,193 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		ArrayList<String> optionsList = new ArrayList<String>();
 
 		optionsList.add(getString(R.string.camera));
-		optionsList.add(getString(R.string.choose_photo));
-		optionsList.add(getString(R.string.choose_video));
-		optionsList.add(getString(R.string.choose_audio));
+		optionsList.add(getString(R.string.photo));
+		optionsList.add(getString(R.string.video));
+		optionsList.add(getString(R.string.audio));
 		if (canShareLocation) {
-			optionsList.add(getString(R.string.share_location));
+			optionsList.add(getString(R.string.location));
 		}
 		if (canShareContacts) {
-			optionsList.add(getString(R.string.contact_info));
+			optionsList.add(getString(R.string.contact));
 		}
 
-		final String[] options = new String[optionsList.size()];
-		optionsList.toArray(options);
-
-		ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
-		optionImagesList.add(R.drawable.ic_image_capture_item);
-		optionImagesList.add(R.drawable.ic_image_item);
-		optionImagesList.add(R.drawable.ic_video_item);
-		optionImagesList.add(R.drawable.ic_music_item);
+		final ArrayList<Integer> optionImagesList = new ArrayList<Integer>();
+		optionImagesList.add(R.drawable.ic_attach_camera);
+		optionImagesList.add(R.drawable.ic_attach_pic);
+		optionImagesList.add(R.drawable.ic_attach_video);
+		optionImagesList.add(R.drawable.ic_attach_music);
 		if (canShareLocation) {
-			optionImagesList.add(R.drawable.ic_share_location_item);
+			optionImagesList.add(R.drawable.ic_attach_location);
 		}
 		if (canShareContacts) {
-			optionImagesList.add(R.drawable.ic_contact_item);
+			optionImagesList.add(R.drawable.ic_attach_contact);
 		}
-		final Integer[] optionIcons = new Integer[optionImagesList.size()];
-		optionImagesList.toArray(optionIcons);
 
-		AlertDialog.Builder builder = new AlertDialog.Builder(ChatThread.this);
+		attachmentWindow = new PopupWindow(this);
 
-		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(this,
-				R.layout.alert_item, R.id.item, options) {
+		View parentView = getLayoutInflater().inflate(R.layout.attachments,
+				chatLayout, false);
+
+		attachmentWindow.setContentView(parentView);
+
+		GridView attachmentsGridView = (GridView) parentView
+				.findViewById(R.id.attachment_grid);
+		attachmentsGridView.setAdapter(new ArrayAdapter<String>(this,
+				R.layout.attachment_item, R.id.text, optionsList) {
 
 			@Override
 			public View getView(int position, View convertView, ViewGroup parent) {
-				View v = super.getView(position, convertView, parent);
-				TextView tv = (TextView) v.findViewById(R.id.item);
-				tv.setCompoundDrawablesWithIntrinsicBounds(
-						optionIcons[position], 0, 0, 0);
-				return v;
+				if (convertView == null) {
+					convertView = getLayoutInflater().inflate(
+							R.layout.attachment_item, parent, false);
+				}
+
+				ImageView attachmentImageView = (ImageView) convertView
+						.findViewById(R.id.attachment_icon);
+				TextView attachmentTextView = (TextView) convertView
+						.findViewById(R.id.text);
+
+				attachmentImageView.setImageResource(optionImagesList
+						.get(position));
+				attachmentTextView.setText(getItem(position));
+
+				return convertView;
 			}
+		});
 
-		};
+		attachmentsGridView.setOnItemClickListener(new OnItemClickListener() {
 
-		builder.setAdapter(dialogAdapter,
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						int requestCode;
-						Intent pickIntent = new Intent();
-						Intent newMediaFileIntent = null;
-						/*
-						 * If we're not doing a location/contact transfer, we
-						 * need an external storage
-						 */
-						if (which != 5 && which != 6) {
-							if (externalStorageState == ExternalStorageState.NONE) {
-								Toast.makeText(getApplicationContext(),
-										R.string.no_external_storage,
-										Toast.LENGTH_SHORT).show();
-								return;
-							}
-						}
+			@Override
+			public void onItemClick(AdapterView<?> adapterView, View view,
+					int position, long id) {
+				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
-						switch (which) {
-						case 0:
-							requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
-							pickIntent = new Intent(
-									MediaStore.ACTION_IMAGE_CAPTURE);
-							selectedFile = Utils.getOutputMediaFile(
-									HikeFileType.IMAGE, null, null);
-
-							pickIntent.putExtra(MediaStore.EXTRA_OUTPUT,
-									Uri.fromFile(selectedFile));
-							/*
-							 * For images, save the file path as a preferences
-							 * since in some devices the reference to the file
-							 * becomes null.
-							 */
-							Editor editor = prefs.edit();
-							editor.putString(HikeMessengerApp.FILE_PATH,
-									selectedFile.getAbsolutePath());
-							editor.commit();
-
-							break;
-						case 2:
-							requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
-							pickIntent.setType("video/*");
-							newMediaFileIntent = new Intent(
-									MediaStore.ACTION_VIDEO_CAPTURE);
-							newMediaFileIntent.putExtra(
-									MediaStore.EXTRA_SIZE_LIMIT,
-									(long) (0.9 * HikeConstants.MAX_FILE_SIZE));
-							break;
-
-						case 3:
-							requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
-							break;
-
-						case 4:
-							if (canShareLocation) {
-								requestCode = HikeConstants.SHARE_LOCATION_CODE;
-								break;
-							}
-						case 5:
-							requestCode = HikeConstants.SHARE_CONTACT_CODE;
-							break;
-
-						case 1:
-						default:
-							requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
-							pickIntent.setType("image/*");
-							break;
-						}
-						if (requestCode == HikeConstants.SHARE_LOCATION_CODE) {
-							startActivityForResult(new Intent(ChatThread.this,
-									ShareLocation.class), requestCode);
-							return;
-						} else if (requestCode == HikeConstants.AUDIO_TRANSFER_CODE) {
-							showAudioDialog();
-							return;
-						} else if (requestCode == HikeConstants.SHARE_CONTACT_CODE) {
-							pickIntent = new Intent(Intent.ACTION_PICK,
-									Contacts.CONTENT_URI);
-							startActivityForResult(pickIntent, requestCode);
-							return;
-						}
-						Intent chooserIntent;
-						if (requestCode != HikeConstants.IMAGE_CAPTURE_CODE) {
-							pickIntent.setAction(Intent.ACTION_PICK);
-
-							chooserIntent = Intent
-									.createChooser(pickIntent, "");
-						} else {
-							chooserIntent = pickIntent;
-						}
-
-						if (externalStorageState == ExternalStorageState.WRITEABLE) {
-							/*
-							 * Cannot send a file for new videos because of an
-							 * android issue
-							 * http://stackoverflow.com/questions/10494839
-							 * /verifiyandsetparameter
-							 * -error-when-trying-to-record-video
-							 */
-							if (requestCode == HikeConstants.IMAGE_CAPTURE_CODE) {
-								if (selectedFile == null) {
-									Log.w(getClass().getSimpleName(),
-											"Unable to create file to store media.");
-									Toast.makeText(
-											ChatThread.this,
-											ChatThread.this
-													.getResources()
-													.getString(
-															R.string.no_external_storage),
-											Toast.LENGTH_LONG).show();
-									return;
-								}
-							}
-							if (newMediaFileIntent != null) {
-								chooserIntent.putExtra(
-										Intent.EXTRA_INITIAL_INTENTS,
-										new Intent[] { newMediaFileIntent });
-							}
-						}
-						Editor editor = prefs.edit();
-						editor.putString(HikeMessengerApp.TEMP_NUM,
-								mContactNumber);
-						editor.putString(HikeMessengerApp.TEMP_NAME,
-								mContactName);
-						editor.commit();
-						startActivityForResult(chooserIntent, requestCode);
+				int requestCode;
+				Intent pickIntent = new Intent();
+				Intent newMediaFileIntent = null;
+				/*
+				 * If we're not doing a location/contact transfer, we need an
+				 * external storage
+				 */
+				if (position != 5 && position != 6) {
+					if (externalStorageState == ExternalStorageState.NONE) {
+						Toast.makeText(getApplicationContext(),
+								R.string.no_external_storage,
+								Toast.LENGTH_SHORT).show();
+						return;
 					}
-				});
+				}
 
-		filePickerDialog = builder.create();
-		((AlertDialog) filePickerDialog).getListView().setDivider(
-				getResources()
-						.getDrawable(R.drawable.ic_thread_divider_profile));
-		filePickerDialog.show();
+				switch (position) {
+				case 0:
+					requestCode = HikeConstants.IMAGE_CAPTURE_CODE;
+					pickIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+					selectedFile = Utils.getOutputMediaFile(HikeFileType.IMAGE,
+							null, null);
+
+					pickIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+							Uri.fromFile(selectedFile));
+					/*
+					 * For images, save the file path as a preferences since in
+					 * some devices the reference to the file becomes null.
+					 */
+					Editor editor = prefs.edit();
+					editor.putString(HikeMessengerApp.FILE_PATH,
+							selectedFile.getAbsolutePath());
+					editor.commit();
+
+					break;
+				case 2:
+					requestCode = HikeConstants.VIDEO_TRANSFER_CODE;
+					pickIntent.setType("video/*");
+					newMediaFileIntent = new Intent(
+							MediaStore.ACTION_VIDEO_CAPTURE);
+					newMediaFileIntent.putExtra(MediaStore.EXTRA_SIZE_LIMIT,
+							(long) (0.9 * HikeConstants.MAX_FILE_SIZE));
+					break;
+
+				case 3:
+					requestCode = HikeConstants.AUDIO_TRANSFER_CODE;
+					break;
+
+				case 4:
+					if (canShareLocation) {
+						requestCode = HikeConstants.SHARE_LOCATION_CODE;
+						break;
+					}
+				case 5:
+					requestCode = HikeConstants.SHARE_CONTACT_CODE;
+					break;
+
+				case 1:
+				default:
+					requestCode = HikeConstants.IMAGE_TRANSFER_CODE;
+					pickIntent.setType("image/*");
+					break;
+				}
+				if (requestCode == HikeConstants.SHARE_LOCATION_CODE) {
+					startActivityForResult(new Intent(ChatThread.this,
+							ShareLocation.class), requestCode);
+					return;
+				} else if (requestCode == HikeConstants.AUDIO_TRANSFER_CODE) {
+					showAudioDialog();
+					return;
+				} else if (requestCode == HikeConstants.SHARE_CONTACT_CODE) {
+					pickIntent = new Intent(Intent.ACTION_PICK,
+							Contacts.CONTENT_URI);
+					startActivityForResult(pickIntent, requestCode);
+					return;
+				}
+				Intent chooserIntent;
+				if (requestCode != HikeConstants.IMAGE_CAPTURE_CODE) {
+					pickIntent.setAction(Intent.ACTION_PICK);
+
+					chooserIntent = Intent.createChooser(pickIntent, "");
+				} else {
+					chooserIntent = pickIntent;
+				}
+
+				if (externalStorageState == ExternalStorageState.WRITEABLE) {
+					/*
+					 * Cannot send a file for new videos because of an android
+					 * issue http://stackoverflow.com/questions/10494839
+					 * /verifiyandsetparameter
+					 * -error-when-trying-to-record-video
+					 */
+					if (requestCode == HikeConstants.IMAGE_CAPTURE_CODE) {
+						if (selectedFile == null) {
+							Log.w(getClass().getSimpleName(),
+									"Unable to create file to store media.");
+							Toast.makeText(
+									ChatThread.this,
+									ChatThread.this.getResources().getString(
+											R.string.no_external_storage),
+									Toast.LENGTH_LONG).show();
+							return;
+						}
+					}
+					if (newMediaFileIntent != null) {
+						chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
+								new Intent[] { newMediaFileIntent });
+					}
+				}
+				Editor editor = prefs.edit();
+				editor.putString(HikeMessengerApp.TEMP_NUM, mContactNumber);
+				editor.putString(HikeMessengerApp.TEMP_NAME, mContactName);
+				editor.commit();
+				startActivityForResult(chooserIntent, requestCode);
+
+				attachmentWindow.dismiss();
+			}
+		});
+
+		attachmentWindow.setBackgroundDrawable(getResources().getDrawable(
+				android.R.color.transparent));
+		attachmentWindow.setOutsideTouchable(true);
+		attachmentWindow.setFocusable(true);
+		attachmentWindow.setWidth((int) (Utils.densityMultiplier * 184));
+		attachmentWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		attachmentWindow.showAsDropDown(findViewById(R.id.attachment_anchor));
 	}
 
 	private class AudioActivityInfo {

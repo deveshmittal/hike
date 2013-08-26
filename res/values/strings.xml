@@ -596,4 +596,8 @@
     <string name="limited_requests">Cannot send request to more than 50 Friends At a time</string>
     <string name="tap_chat">Tap to chat</string>
     <string name="tap_sms">Tap to send SMS</string>
+    <string name="photo">Photo</string>
+    <string name="audio">Audio</string>
+    <string name="video">Video</string>
+    <string name="location">Location</string>
 </resources>

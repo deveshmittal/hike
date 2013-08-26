@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="184dp"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_attachments"
+    android:orientation="vertical" >
+
+    <GridView
+        android:id="@+id/attachment_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numColumns="2"
+        android:padding="12dp" />
+
+</LinearLayout>
