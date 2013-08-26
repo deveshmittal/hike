@@ -80,7 +80,7 @@ public class ShareLocation extends FragmentActivity {
 	private final int GPS_ENABLED = 1;
 	private final int GPS_DISABLED = 2;
 	private final int NO_LOCATION_DEVICE_ENABLED = 0;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -131,7 +131,7 @@ public class ShareLocation extends FragmentActivity {
 			map.getUiSettings().setZoomControlsEnabled(false);
 			map.getUiSettings().setCompassEnabled(false);
 			map.getUiSettings().setMyLocationButtonEnabled(true);
-			map.setTrafficEnabled(true);
+			map.setTrafficEnabled(false);
 
 			places = new MarkerOptions[MAX_PLACES];
 			placeMarkers = new Marker[MAX_PLACES + 1];
@@ -144,7 +144,8 @@ public class ShareLocation extends FragmentActivity {
 						.getString(HikeConstants.Extras.HTTP_SEARCH_STR);
 				new GetPlaces().execute(searchStr);
 			} else {
-				Log.d(getClass().getSimpleName(), "savedInstanceState is null updating nearby places");
+				Log.d(getClass().getSimpleName(),
+						"savedInstanceState is null updating nearby places");
 				if (myLocation != null)
 					updateNearbyPlaces();
 			}
@@ -177,25 +178,30 @@ public class ShareLocation extends FragmentActivity {
 				try {
 					String searchString = ((EditText) findViewById(R.id.search))
 							.getText().toString();
-					searchString = URLEncoder.encode(searchString, "UTF-8");
-					double lat = myLocation.getLatitude();
-					double lng = myLocation.getLongitude();
-					searchStr = "https://maps.googleapis.com/maps/api/place/textsearch/"
-							+ "json?query="
-							+ searchString
-							+ "&location="
-							+ lat
-							+ ","
-							+ lng
-							+ "radius=2000&sensor=true"
-							+ "&key="
-							+ getResources().getString(R.string.places_api_key);// ADD KEY
+					if (!searchString.equals("")) {
+						searchString = URLEncoder.encode(searchString, "UTF-8");
+						double lat = myLocation.getLatitude();
+						double lng = myLocation.getLongitude();
+						searchStr = "https://maps.googleapis.com/maps/api/place/textsearch/"
+								+ "json?query="
+								+ searchString
+								+ "&location="
+								+ lat
+								+ ","
+								+ lng
+								+ "radius=2000&sensor=true"
+								+ "&key="
+								+ getResources().getString(
+										R.string.places_api_key);// ADD
+																	// KEY
 
-					isTextSearch = true;
+						isTextSearch = true;
 
-					new GetPlaces().execute(searchStr);
+						new GetPlaces().execute(searchStr);
+					}
 				} catch (UnsupportedEncodingException e) {
-					Log.w(getClass().getSimpleName(), "in nearby search url encoding", e);
+					Log.w(getClass().getSimpleName(),
+							"in nearby search url encoding", e);
 				}
 			}
 		});
@@ -234,50 +240,65 @@ public class ShareLocation extends FragmentActivity {
 
 		locListener = new LocationListener() {
 			public void onLocationChanged(Location newLocation) {
-
-				userMarker.setPosition(new LatLng(newLocation.getLatitude(),
-						newLocation.getLongitude()));
-				Log.d(getClass().getSimpleName(),
-						"is Location changed = "
-								+ Double.valueOf(
-										myLocation.distanceTo(newLocation))
-										.toString());
-				if ((currentLocationDevice == GPS_ENABLED && myLocation
-						.distanceTo(newLocation) > 300)
-						|| (currentLocationDevice == GPS_DISABLED && myLocation
-								.distanceTo(newLocation) > 1000)) {
-
-					myLocation = newLocation;
+				if (myLocation != null) {
 					userMarker.setPosition(new LatLng(
 							newLocation.getLatitude(), newLocation
 									.getLongitude()));
-					updateLocationAddress(myLocation.getLongitude(),
-							myLocation.getLatitude(), userMarker);
-					// do something on location change
 					Log.d(getClass().getSimpleName(),
-							"my longi in loc listener = "
-									+ Double.valueOf(newLocation.getLongitude())
+							"is Location changed = "
+									+ Double.valueOf(
+											myLocation.distanceTo(newLocation))
 											.toString());
-					Log.d(getClass().getSimpleName(),
-							"my lati in loc listener = "
-									+ Double.valueOf(newLocation.getLatitude())
-											.toString());
-					if (!isTextSearch)
-						updateNearbyPlaces();
-				}
+					if ((currentLocationDevice == GPS_ENABLED && myLocation
+							.distanceTo(newLocation) > 300)
+							|| (currentLocationDevice == GPS_DISABLED && myLocation
+									.distanceTo(newLocation) > 1000)) {
 
+						myLocation = newLocation;
+						userMarker.setPosition(new LatLng(newLocation
+								.getLatitude(), newLocation.getLongitude()));
+						updateLocationAddress(myLocation.getLongitude(),
+								myLocation.getLatitude(), userMarker);
+						// do something on location change
+						Log.d(getClass().getSimpleName(),
+								"my longi in loc listener = "
+										+ Double.valueOf(
+												newLocation.getLongitude())
+												.toString());
+						Log.d(getClass().getSimpleName(),
+								"my lati in loc listener = "
+										+ Double.valueOf(
+												newLocation.getLatitude())
+												.toString());
+						if (!isTextSearch)
+							updateNearbyPlaces();
+					}
+				} else {
+					myLocation = newLocation;
+					setMyLocation(newLocation);
+					updateNearbyPlaces();
+				}
 			}
 
 			public void onProviderDisabled(String arg0) {
 			}
 
-			public void onProviderEnabled(String provider) {
-
+			public void onProviderEnabled(String arg0) {
 			}
 
 			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 			}
 		};
+		try {
+			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+					50, locListener);
+			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+					0, 1000, locListener);
+
+		} catch (IllegalStateException e) {
+			Log.d(getClass().getSimpleName(), "No listener found");
+			showLocationDialog();
+		}
 	}
 
 	private void updateMyLocation() {
@@ -287,13 +308,9 @@ public class ShareLocation extends FragmentActivity {
 		Log.d(getClass().getSimpleName(), "inside updateMyLocation");
 
 		if (currentLocationDevice == GPS_ENABLED) {
-			Log.d(getClass().getSimpleName(),
-					"gps provider getting location");
-			;
+			Log.d(getClass().getSimpleName(), "gps provider getting location");
 			myLocation = locManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-					50, locListener);
 			if (myLocation == null) {
 				Log.d(getClass().getSimpleName(),
 						"gps enabled but gps not working properly");
@@ -304,8 +321,6 @@ public class ShareLocation extends FragmentActivity {
 			Log.d(getClass().getSimpleName(), "gps disabled");
 			myLocation = locManager
 					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-					0, 1000, locListener);
 			if (myLocation == null) {
 				Log.d(getClass().getSimpleName(),
 						"gps disabled but Network provider not working properly");
@@ -342,8 +357,7 @@ public class ShareLocation extends FragmentActivity {
 				.target(myLatLng) // Sets the center of the map to Mountain View
 				.zoom(HikeConstants.DEFAULT_ZOOM_LEVEL) // Sets the zoom
 				.build(); // Creates a CameraPosition from the builder
-		Log.d(getClass().getSimpleName(),
-				"stting up camera in set my location");
+		Log.d(getClass().getSimpleName(), "stting up camera in set my location");
 		map.animateCamera(
 				CameraUpdateFactory.newCameraPosition(cameraPosition), 3000,
 				null);
@@ -365,14 +379,16 @@ public class ShareLocation extends FragmentActivity {
 						+ myLocation.getLongitude()
 						+ "&types="
 						+ typesStr
-						+ "&radius=1000&sensor=true" + "&key=" + getResources().getString(R.string.places_api_key);;
+						+ "&radius=1000&sensor=true"
+						+ "&key="
+						+ getResources().getString(R.string.places_api_key);
+				;
 				isTextSearch = false;
 			}
 			new GetPlaces().execute(searchStr);
 
 		} catch (UnsupportedEncodingException e) {
-			Log.w(getClass().getSimpleName(),
-					"in text search url encoding", e);
+			Log.w(getClass().getSimpleName(), "in text search url encoding", e);
 		}
 	}
 
@@ -463,18 +479,17 @@ public class ShareLocation extends FragmentActivity {
 					placeMarkers[pm].remove();
 				}
 			}
-			Log.d(getClass().getSimpleName(),
-					"list length before = "
-							+ Integer.valueOf(list.size()).toString());
+			Log.d(getClass().getSimpleName(), "list length before = "
+					+ Integer.valueOf(list.size()).toString());
 			int listSize = list.size();
 			for (int i = listSize - 1; i > 0; i--) {
-				Log.d(getClass().getSimpleName(), Integer.valueOf(i).toString()+" = "+ list.get(i).getName());
+				Log.d(getClass().getSimpleName(), Integer.valueOf(i).toString()
+						+ " = " + list.get(i).getName());
 				list.remove(i);
 			}
 			adapter.notifyDataSetChanged();
-			Log.d(getClass().getSimpleName(),
-					"list length after = "
-							+ Integer.valueOf(list.size()).toString());
+			Log.d(getClass().getSimpleName(), "list length after = "
+					+ Integer.valueOf(list.size()).toString());
 			for (int p = 0; p < totalPlaces; p++) {
 				if (places[p] != null) {
 					placeMarkers[p] = map.addMarker(places[p]);
@@ -724,6 +739,18 @@ public class ShareLocation extends FragmentActivity {
 			e.printStackTrace();
 		}
 		return address;
+	}
+
+	private void removeMyLocationListeners() {
+		if (locManager != null) {
+			locManager.removeUpdates(locListener);
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		removeMyLocationListeners();
 	}
 
 }
