@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -44,18 +45,26 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private List<ContactInfo> completeList;
 	private List<ContactInfo> friendsList;
 	private List<ContactInfo> otherContactsList;
+	private List<ContactInfo> filteredFriendsList;
+	private List<ContactInfo> filteredOtherContactsList;
 	private Context context;
 	private ContactInfo friendsSection;
 	private ContactInfo contactsSection;
+	private ContactFilter contactFilter;
+	private String queryText;
 
 	public FriendsAdapter(final Context context) {
 		this.layoutInflater = LayoutInflater.from(context);
 		this.context = context;
+		this.contactFilter = new ContactFilter();
 
 		completeList = new ArrayList<ContactInfo>();
 
 		friendsList = new ArrayList<ContactInfo>(0);
 		otherContactsList = new ArrayList<ContactInfo>(0);
+
+		filteredFriendsList = new ArrayList<ContactInfo>(0);
+		filteredOtherContactsList = new ArrayList<ContactInfo>(0);
 
 		new AsyncTask<Void, Void, Void>() {
 
@@ -109,28 +118,109 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				friendsList = favoriteTaskList;
 				otherContactsList = otherTaskList;
 
-				makeCompleteList();
+				filteredFriendsList.addAll(favoriteTaskList);
+				filteredOtherContactsList.addAll(otherTaskList);
+				makeCompleteList(true);
 			}
 
 		}.execute();
 	}
 
-	public void makeCompleteList() {
+	public void onQueryChanged(String s) {
+		queryText = s;
+		contactFilter.filter(queryText);
+	}
+
+	private class ContactFilter extends Filter {
+		@Override
+		protected FilterResults performFiltering(CharSequence constraint) {
+			FilterResults results = new FilterResults();
+
+			String textToBeFiltered = constraint.toString().toLowerCase()
+					.trim();
+
+			if (!TextUtils.isEmpty(textToBeFiltered)) {
+
+				List<ContactInfo> filteredFriendsList = new ArrayList<ContactInfo>();
+				List<ContactInfo> filteredOtherContactsList = new ArrayList<ContactInfo>();
+
+				for (ContactInfo info : friendsList) {
+					String name = info.getName();
+					if (name != null) {
+						name = name.toLowerCase();
+						if (name.contains(textToBeFiltered)) {
+							filteredFriendsList.add(info);
+							continue;
+						}
+					}
+
+					if (textToBeFiltered.contains(info.getMsisdn())) {
+						filteredFriendsList.add(info);
+					}
+				}
+
+				for (ContactInfo info : otherContactsList) {
+					String name = info.getName();
+					if (name != null) {
+						name = name.toLowerCase();
+						if (name.contains(textToBeFiltered)) {
+							filteredOtherContactsList.add(info);
+							continue;
+						}
+					}
+
+					if (textToBeFiltered.contains(info.getMsisdn())) {
+						filteredOtherContactsList.add(info);
+					}
+				}
+
+				results.values = new Pair<List<ContactInfo>, List<ContactInfo>>(
+						filteredFriendsList, filteredOtherContactsList);
+			} else {
+				results.values = new Pair<List<ContactInfo>, List<ContactInfo>>(
+						friendsList, otherContactsList);
+			}
+			results.count = 1;
+			return results;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void publishResults(CharSequence constraint,
+				FilterResults results) {
+			Pair<List<ContactInfo>, List<ContactInfo>> pair = (Pair<List<ContactInfo>, List<ContactInfo>>) results.values;
+
+			filteredFriendsList.clear();
+			filteredFriendsList.addAll(pair.first);
+
+			filteredOtherContactsList.clear();
+			filteredOtherContactsList.addAll(pair.second);
+
+			makeCompleteList(true);
+		}
+	}
+
+	public void makeCompleteList(boolean filtered) {
+		if (!filtered) {
+			contactFilter.filter(queryText);
+			return;
+		}
+
 		completeList.clear();
 
 		friendsSection = new ContactInfo(SECTION_ID,
-				Integer.toString(friendsList.size()),
+				Integer.toString(filteredFriendsList.size()),
 				context.getString(R.string.friends), null);
 		completeList.add(friendsSection);
 
-		completeList.addAll(friendsList);
+		completeList.addAll(filteredFriendsList);
 
 		contactsSection = new ContactInfo(SECTION_ID,
-				Integer.toString(otherContactsList.size()),
+				Integer.toString(filteredOtherContactsList.size()),
 				context.getString(R.string.contacts), null);
 		completeList.add(contactsSection);
 
-		completeList.addAll(otherContactsList);
+		completeList.addAll(filteredOtherContactsList);
 
 		notifyDataSetChanged();
 	}
@@ -153,7 +243,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 		removeContactByMatchingMsisdn(otherContactsList, contactInfo);
 
 		if (remakeCompleteList) {
-			makeCompleteList();
+			makeCompleteList(false);
 		}
 	}
 
@@ -174,7 +264,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			Collections.sort(otherContactsList);
 		}
 
-		makeCompleteList();
+		makeCompleteList(false);
 	}
 
 	public void refreshGroupList(List<ContactInfo> newGroupList, int groupIndex) {
@@ -191,7 +281,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		groupList.addAll(newGroupList);
 
-		makeCompleteList();
+		makeCompleteList(false);
 	}
 
 	public void removeFromGroup(ContactInfo contactInfo, int groupIndex) {
@@ -203,7 +293,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 			removeContactByMatchingMsisdn(otherContactsList, contactInfo);
 			break;
 		}
-		makeCompleteList();
+		makeCompleteList(false);
 	}
 
 	@Override
@@ -241,7 +331,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				/*
 				 * Accounting for the friends header
 				 */
-				if (position <= ((friendsList.size() - 1) + 1)) {
+				if (position <= ((filteredFriendsList.size() - 1) + 1)) {
 					return ViewType.FRIEND_REQUEST.ordinal();
 				}
 			}
