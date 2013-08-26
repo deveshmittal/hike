@@ -40,8 +40,11 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -53,7 +56,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class ShareLocation extends FragmentActivity {
+public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 	private GoogleMap map;
 	private SupportMapFragment MapFragment;
@@ -208,6 +211,39 @@ public class ShareLocation extends FragmentActivity {
 
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.share_location_menu, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		if (item.getItemId() == R.id.sendLocation) {
+			sendSelectedLocation();
+		}
+
+		return true;
+	}
+	
+	public void sendSelectedLocation() {
+		if (lastMarker == null) {
+			Toast.makeText(getApplicationContext(), R.string.select_location,
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		Intent result = new Intent();
+		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, HikeConstants.DEFAULT_ZOOM_LEVEL);
+		result.putExtra(HikeConstants.Extras.LATITUDE,
+				lastMarker.getPosition().latitude);
+		result.putExtra(HikeConstants.Extras.LONGITUDE,
+				lastMarker.getPosition().longitude);
+		setResult(RESULT_OK, result);
+
+		finish();
+	}
+	
 	protected void onSaveInstanceState(Bundle outState) {
 
 		outState.putBoolean(HikeConstants.Extras.IS_TEXT_SEARCH, isTextSearch);
