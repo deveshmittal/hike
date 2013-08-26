@@ -3485,12 +3485,16 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		emoticonViewPager = emoticonViewPager == null ? (ViewPager) findViewById(R.id.emoticon_pager)
 				: emoticonViewPager;
 
+		boolean sameType = true;
 		if (v != null) {
 
 			int[] tabDrawables = null;
 
 			if (v.getId() == R.id.sticker_btn) {
-				emoticonType = EmoticonType.STICKERS;
+				if (emoticonType != EmoticonType.STICKERS) {
+					sameType = false;
+					emoticonType = EmoticonType.STICKERS;
+				}
 			} else {
 				int offset = 0;
 				int emoticonsListSize = 0;
@@ -3500,7 +3504,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						R.drawable.emo_im_111_grin, R.drawable.e415,
 						R.drawable.e415, R.drawable.e415, R.drawable.e415,
 						R.drawable.e415 };
-				emoticonType = EmoticonType.EMOTICON;
+				if (emoticonType != EmoticonType.EMOTICON) {
+					sameType = false;
+					emoticonType = EmoticonType.EMOTICON;
+				}
 				emoticonsListSize = EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length;
 
 				/*
@@ -3525,6 +3532,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		}
 
 		if (emoticonLayout.getVisibility() == View.VISIBLE) {
+			if (!sameType && v != null) {
+				return;
+			}
 			mHandler.postDelayed(new Runnable() {
 
 				@Override
