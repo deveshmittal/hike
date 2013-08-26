@@ -547,14 +547,14 @@
 	<string name="add_as_friend">Add to Circle of Friends</string>
 	<string name="audio_recording_msg_received">Sent you a voice message</string>
 	<string name="sent_sticker">Sent you a sticker</string>
-	<string name="friends">Friends</string>
+	<string name="friends">FRIENDS</string>
 	<string name="recents">Recents</string>
 	<string name="contacts">Contacts</string>
 	<string name="friend_request_sent">Friend request sent</string>
 	<string name="start_new_chat">Start a new chat</string>
 	<string name="post_new_update">Post a new update</string>
-	<string name="chats">Chats</string>
-	<string name="updates">Updates</string>
+	<string name="chats">CHATS</string>
+	<string name="updates">UPDATES</string>
 	<string name="sent">Sent, %1$s</string>
 	<string name="delivered">Delivered</string>
 	<string name="read">Read</string>
