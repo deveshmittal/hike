@@ -64,6 +64,7 @@ import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.ui.SettingsActivity;
+import com.bsb.hike.ui.TellAFriend;
 import com.bsb.hike.utils.Utils;
 
 public class ConversationFragment extends SherlockListFragment implements
@@ -333,6 +334,10 @@ public class ConversationFragment extends SherlockListFragment implements
 			Intent settingsIntent = new Intent(getActivity(),
 					SettingsActivity.class);
 			startActivity(settingsIntent);
+			return true;
+		case R.id.invite:
+			Intent inviteIntent = new Intent(getActivity(), TellAFriend.class);
+			startActivity(inviteIntent);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
