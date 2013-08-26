@@ -600,4 +600,5 @@
     <string name="audio">Audio</string>
     <string name="video">Video</string>
     <string name="location">Location</string>
+    <string name="places_api_key">AIzaSyCBrHWTSgFNu3NKEodf2FZugtrFDqMpDV8</string>
 </resources>

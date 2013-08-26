@@ -34,6 +34,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
@@ -44,6 +46,8 @@ import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.SocialNetFriendInfo;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
+import com.bsb.hike.utils.HikeAppStateBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.facebook.FacebookException;
 import com.facebook.FacebookOperationCanceledException;
 import com.facebook.FacebookRequestError;
@@ -55,7 +59,7 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.WebDialog;
 import com.facebook.widget.WebDialog.OnCompleteListener;
 
-public class SocialNetInviteActivity extends Activity implements
+public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity implements
 		OnItemClickListener, FinishableEvent {
 	private ListView listView;
 	private ArrayList<Pair<AtomicBoolean, SocialNetFriendInfo>> list;
@@ -69,7 +73,7 @@ public class SocialNetInviteActivity extends Activity implements
 	private SharedPreferences settings;
 	private HikeHTTPTask mTwitterInviteTask;
 	private Dialog mDialog;
-
+	private Menu mMenu;
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.hikelistactivity);
@@ -102,13 +106,31 @@ public class SocialNetInviteActivity extends Activity implements
 		} else {
 			new GetTwitterFollowers().execute();
 		}
-		mTwitterInviteTask = (HikeHTTPTask) getLastNonConfigurationInstance();
+		mTwitterInviteTask = (HikeHTTPTask) getLastCustomNonConfigurationInstance();
 		if(mTwitterInviteTask != null){
 			mDialog = ProgressDialog.show(this, null,
 					getString(R.string.posting_update_twitter)); 
 		}
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.social_net_invite_menu, menu);
+		menu.findItem(R.id.sendInvite).setTitle(getString(R.string.send_invite, 0));
+		mMenu = menu;
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		if (item.getItemId() == R.id.sendInvite) {
+			sendInvite();
+		}
+
+		return true;
+	}
+	
 	protected void onSaveInstanceState(Bundle outState) {
 
 		outState.putBoolean(HikeConstants.Extras.IS_FACEBOOK, isFacebook);
@@ -118,7 +140,7 @@ public class SocialNetInviteActivity extends Activity implements
 
 	/* store the task so we can keep keep the progress dialog going */
 	@Override
-	public Object onRetainNonConfigurationInstance() {
+	public Object onRetainCustomNonConfigurationInstance() {
 		Log.d("SocialNetInviteActivity", "onRetainNonConfigurationinstance");
 		return mTwitterInviteTask;
 	}
@@ -272,7 +294,7 @@ public class SocialNetInviteActivity extends Activity implements
 		}
 	}
 
-	public void onTitleIconClick(View v) {
+	public void sendInvite() {
 		String selectedFriendsIds = "";
 		selectedFriendsIds = TextUtils.join(",", selectedFriends);
 		Log.d("selectedFriendsIds", selectedFriendsIds);
@@ -413,6 +435,7 @@ public class SocialNetInviteActivity extends Activity implements
 		}
 		socialFriend.first.set(!socialFriend.first.get());
 		checkbox.setChecked(socialFriend.first.get());
+		mMenu.findItem(R.id.sendInvite).setTitle(getString(R.string.send_invite, selectedFriends.size()));
 	}
 
 	@Override
