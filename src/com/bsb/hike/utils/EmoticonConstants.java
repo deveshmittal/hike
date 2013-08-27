@@ -1,5 +1,8 @@
 package com.bsb.hike.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
@@ -434,19 +437,43 @@ public class EmoticonConstants {
 			R.drawable.e02e, R.drawable.e332, R.drawable.e333, R.drawable.e24e,
 			R.drawable.e24f, R.drawable.e537 };
 
-	public static final int[] MOOD_WITH_IPL_RES_IDS = {
-			R.drawable.mood_01_happy, R.drawable.mood_02_sad,
-			R.drawable.mood_03_in_love, R.drawable.mood_04_surprised,
-			R.drawable.mood_05_confused, R.drawable.mood_06_angry,
-			R.drawable.mood_07_sleepy, R.drawable.mood_08_hungover,
-			R.drawable.mood_09_chilling, R.drawable.mood_10_studying,
-			R.drawable.mood_11_busy, R.drawable.mood_12_love,
-			R.drawable.mood_13_middle_finger, R.drawable.mood_14_boozing,
-			R.drawable.mood_15_movie, R.drawable.mood_16_caffeinated,
-			R.drawable.mood_17_insomniac, R.drawable.mood_18_driving,
-			R.drawable.mood_19_traffic, R.drawable.mood_20_late,
-			R.drawable.mood_21_shopping, R.drawable.mood_22_gaming,
-			R.drawable.mood_23_coding, R.drawable.mood_24_television };
+	public static final Map<Integer, Integer> moodMapping = new HashMap<Integer, Integer>();
+
+	static {
+		moodMapping.put(0, R.drawable.mood_01_happy);
+		moodMapping.put(1, R.drawable.mood_02_sad);
+		moodMapping.put(2, R.drawable.mood_03_in_love);
+		moodMapping.put(3, R.drawable.mood_04_surprised);
+		moodMapping.put(4, R.drawable.mood_05_confused);
+		moodMapping.put(5, R.drawable.mood_06_angry);
+		moodMapping.put(6, R.drawable.mood_07_sleepy);
+		moodMapping.put(7, R.drawable.mood_08_hungover);
+		moodMapping.put(8, R.drawable.mood_09_chilling);
+		moodMapping.put(9, R.drawable.mood_10_studying);
+		moodMapping.put(10, R.drawable.mood_11_busy);
+		moodMapping.put(11, R.drawable.mood_12_love);
+		moodMapping.put(12, R.drawable.mood_13_middle_finger);
+		moodMapping.put(13, R.drawable.mood_14_boozing);
+		moodMapping.put(14, R.drawable.mood_15_movie);
+		moodMapping.put(15, R.drawable.mood_16_caffeinated);
+		moodMapping.put(16, R.drawable.mood_17_insomniac);
+		moodMapping.put(17, R.drawable.mood_18_driving);
+		moodMapping.put(18, R.drawable.mood_19_traffic);
+		moodMapping.put(19, R.drawable.mood_20_late);
+		moodMapping.put(20, R.drawable.mood_21_shopping);
+		moodMapping.put(21, R.drawable.mood_22_gaming);
+		moodMapping.put(22, R.drawable.mood_23_coding);
+		moodMapping.put(23, R.drawable.mood_24_television);
+		moodMapping.put(33, R.drawable.mood_34_music);
+		moodMapping.put(34, R.drawable.mood_35_partying_hard);
+		moodMapping.put(35, R.drawable.mood_36_singing);
+		moodMapping.put(36, R.drawable.mood_37_eating);
+		moodMapping.put(37, R.drawable.mood_38_working_out);
+		moodMapping.put(38, R.drawable.mood_39_cooking);
+		moodMapping.put(39, R.drawable.mood_40_beauty_saloon);
+		moodMapping.put(40, R.drawable.mood_41_sick);
+	}
+
 
 	public static final int[] LOCAL_STICKER_RES_IDS = {
 			R.drawable.sticker_1_hi, R.drawable.sticker_2_thumbsup,

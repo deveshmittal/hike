@@ -12,7 +12,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.bsb.hike.HikeConstants;
-import com.bsb.hike.utils.Utils;
+import com.bsb.hike.utils.EmoticonConstants;
 
 public class StatusMessage {
 
@@ -128,7 +128,7 @@ public class StatusMessage {
 	}
 
 	public boolean hasMood() {
-		return (moodId > -1 && moodId < Utils.getMoodsResource().length);
+		return (EmoticonConstants.moodMapping.containsKey(moodId));
 	}
 
 	public int getMoodId() {

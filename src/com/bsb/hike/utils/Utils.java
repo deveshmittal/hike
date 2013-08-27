@@ -1973,10 +1973,6 @@ public class Utils {
 		imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 	}
 
-	public static int[] getMoodsResource() {
-		return HikeMessengerApp.getMoodsResource();
-	}
-
 	public static void sendLocaleToServer(Context context) {
 		JSONObject object = new JSONObject();
 		JSONObject data = new JSONObject();

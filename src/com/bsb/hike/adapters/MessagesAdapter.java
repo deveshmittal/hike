@@ -800,9 +800,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 
 			if (statusMessage.hasMood()) {
-				holder.image
-						.setImageResource(Utils.getMoodsResource()[statusMessage
-								.getMoodId()]);
+				holder.image.setImageResource(EmoticonConstants.moodMapping
+						.get(statusMessage.getMoodId()));
 			} else {
 				holder.image.setBackgroundResource(R.drawable.bg_status_type);
 			}

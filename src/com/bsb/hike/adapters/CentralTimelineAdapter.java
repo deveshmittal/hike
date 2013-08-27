@@ -27,6 +27,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -161,8 +162,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.avatar.setImageResource(R.drawable.ic_protip);
 			} else if (statusMessage.hasMood()) {
 				viewHolder.avatar
-						.setImageResource(Utils.getMoodsResource()[statusMessage
-								.getMoodId()]);
+						.setImageResource(EmoticonConstants.moodMapping
+								.get(statusMessage.getMoodId()));
 			} else {
 				viewHolder.avatar.setImageDrawable(IconCacheManager
 						.getInstance().getIconForMSISDN(

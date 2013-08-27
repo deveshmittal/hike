@@ -276,8 +276,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	private static Map<String, TypingNotification> typingNotificationMap;
 
-	private static int[] moodsResource;
-
 	private Messenger mService;
 
 	private HikeServiceConnection mServiceConnection;
@@ -503,8 +501,6 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		initialiseListeners();
 
-		setMoodsResource();
-
 		mMessenger = new Messenger(new IncomingHandler());
 
 		if (token != null) {
@@ -568,14 +564,6 @@ public class HikeMessengerApp extends Application implements Listener {
 		if (!showBollywoodCategory) {
 			setupStickerCategoryList(prefs);
 		}
-	}
-
-	public void setMoodsResource() {
-		moodsResource = EmoticonConstants.MOOD_WITH_IPL_RES_IDS;
-	}
-
-	public static int[] getMoodsResource() {
-		return moodsResource;
 	}
 
 	public static Facebook getFacebook() {

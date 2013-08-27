@@ -31,6 +31,7 @@ import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.ImageLoader;
 import com.bsb.hike.ui.ProfileActivity;
+import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
 
@@ -380,9 +381,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 					true, context));
 
 			if (statusMessage.hasMood()) {
-				viewHolder.icon
-						.setImageResource(Utils.getMoodsResource()[statusMessage
-								.getMoodId()]);
+				viewHolder.icon.setImageResource(EmoticonConstants.moodMapping
+						.get(statusMessage.getMoodId()));
 			} else {
 				viewHolder.icon.setImageDrawable(IconCacheManager.getInstance()
 						.getIconForMSISDN(statusMessage.getMsisdn(), true));

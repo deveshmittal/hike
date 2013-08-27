@@ -59,6 +59,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	private class ActivityTask {
 		int moodId = -1;
+		int moodIndex = -1;
 		HikeHTTPTask hikeHTTPTask = null;
 		boolean fbSelected = false;
 		boolean twitterSelected = false;
@@ -125,7 +126,7 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 		charCounter.setText(Integer.toString(statusTxt.length()));
 
-		setMood(mActivityTask.moodId);
+		setMood(mActivityTask.moodId, mActivityTask.moodIndex);
 
 		statusTxt.addTextChangedListener(new TextWatcher() {
 
@@ -567,17 +568,18 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		moodPager.setOnItemClickListener(moodAdapter);
 	}
 
-	public void setMood(int moodId) {
+	public void setMood(int moodId, int moodIndex) {
 		if (moodId == -1) {
 			return;
 		}
 		mActivityTask.moodId = moodId;
+		mActivityTask.moodIndex = moodIndex;
 
-		avatar.setImageResource(Utils.getMoodsResource()[moodId]);
+		avatar.setImageResource(EmoticonConstants.moodMapping.get(moodId));
 
 		String[] moodsArray = getResources().getStringArray(
 				R.array.mood_headings);
-		statusTxt.setHint(moodsArray[moodId]);
+		statusTxt.setHint(moodsArray[moodIndex]);
 
 		toggleEnablePostButton();
 		if (isEmojiOrMoodLayoutVisible()) {
