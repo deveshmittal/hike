@@ -56,6 +56,8 @@ public class Conversation implements Comparable<Conversation> {
 
 	private boolean onhike;
 
+	private int unreadCount;
+
 	public void setOnhike(boolean onhike) {
 		this.onhike = onhike;
 	}
@@ -96,6 +98,14 @@ public class Conversation implements Comparable<Conversation> {
 
 	public void addMessage(ConvMessage message) {
 		this.messages.add(message);
+	}
+
+	public int getUnreadCount() {
+		return unreadCount;
+	}
+
+	public void setUnreadCount(int unreadCount) {
+		this.unreadCount = unreadCount;
 	}
 
 	@Override

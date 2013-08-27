@@ -21,7 +21,10 @@ import com.bsb.hike.R;
 public class SmileyParser {
 	private static int MAX_EMOTICONS = 100;
 
-	public static final int[] HIKE_EMOTICONS_SUBCATEGORIES = { 80, 30, 39 };
+	public static final int[] EMOTICONS_SUBCATEGORIES = { 80, 30, 39, 109, 53,
+			132, 72, 98 };
+
+	public static final int[] HIKE_SUBCATEGORIES = { 80, 30, 39 };
 
 	public static final int[] EMOJI_SUBCATEGORIES = { 109, 53, 132, 72, 98 };
 
@@ -66,24 +69,21 @@ public class SmileyParser {
 	 * (e.g. ":-)") to a resource ID for the icon version.
 	 */
 	private HashMap<String, Integer> buildSmileyToRes() {
-		if (EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length != mSmileyTexts.length) {
+		if (EmoticonConstants.DEFAULT_SMILEY_RES_IDS.length != (mSmileyTexts.length + EmoticonConstants.mEmojiUnicodes.length)) {
 			// Throw an exception if someone updated DEFAULT_SMILEY_RES_IDS
 			// and failed to update arrays.xml
 			throw new IllegalStateException("Smiley resource ID/text mismatch");
 		}
-		if (EmoticonConstants.EMOJI_RES_IDS.length != EmoticonConstants.mEmojiUnicodes.length) {
-			throw new IllegalStateException("Emoji resource ID/text mismatch");
-		}
 
-		HashMap<String, Integer> smileyToRes = new HashMap<String, Integer>(
-				mSmileyTexts.length);
+		HashMap<String, Integer> smileyToRes = new HashMap<String, Integer>();
 		for (int i = 0; i < mSmileyTexts.length; i++) {
 			smileyToRes.put(mSmileyTexts[i],
 					EmoticonConstants.DEFAULT_SMILEY_RES_IDS[i]);
 		}
-		for (int i = 0; i < EmoticonConstants.mEmojiUnicodes.length; i++) {
-			smileyToRes.put(EmoticonConstants.mEmojiUnicodes[i],
-					EmoticonConstants.EMOJI_RES_IDS[i]);
+		for (int i = mSmileyTexts.length; i < (mSmileyTexts.length + EmoticonConstants.mEmojiUnicodes.length); i++) {
+			smileyToRes.put(EmoticonConstants.mEmojiUnicodes[i
+					- mSmileyTexts.length],
+					EmoticonConstants.DEFAULT_SMILEY_RES_IDS[i]);
 		}
 
 		return smileyToRes;

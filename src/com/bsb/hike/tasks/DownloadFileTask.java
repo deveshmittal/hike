@@ -48,6 +48,13 @@ public class DownloadFileTask extends FileTransferTaskBase {
 	}
 
 	@Override
+	protected void onPreExecute() {
+		ChatThread.fileTransferTaskMap.put(msgId, this);
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
+	}
+
+	@Override
 	protected FTResult doInBackground(Void... params) {
 		FileOutputStream fos = null;
 		InputStream is = null;

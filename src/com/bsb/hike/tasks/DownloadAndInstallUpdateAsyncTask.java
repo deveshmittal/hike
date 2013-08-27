@@ -22,8 +22,7 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.bsb.hike.R;
-import com.bsb.hike.ui.MessagesList;
-import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.ui.HomeActivity;
 
 public class DownloadAndInstallUpdateAsyncTask extends
 		AsyncTask<Void, Integer, Boolean> {
@@ -32,19 +31,17 @@ public class DownloadAndInstallUpdateAsyncTask extends
 	private NotificationManager notificationManager;
 	private int notificationId = 119;
 	private Context context;
-	private MessagesList messagesList;
 	private String downloadUrl;
 
 	public DownloadAndInstallUpdateAsyncTask(Context context, String downloadUrl) {
 		this.context = context;
-		this.messagesList = (MessagesList) context;
 		this.downloadUrl = downloadUrl;
 	}
 
 	@Override
 	protected void onPreExecute() {
 		// Show progress notification
-		Intent intent = new Intent(context, MessagesList.class);
+		Intent intent = new Intent(context, HomeActivity.class);
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		PendingIntent pendingIntent = PendingIntent.getActivity(context, 0,
@@ -127,7 +124,6 @@ public class DownloadAndInstallUpdateAsyncTask extends
 		} else {
 			Toast.makeText(context, R.string.download_failed,
 					Toast.LENGTH_SHORT).show();
-			messagesList.updateFailed();
 		}
 	}
 }

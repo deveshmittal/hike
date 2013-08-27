@@ -35,7 +35,7 @@ public class Tutorial extends HikeAppStateBaseActivity {
 		editor.putBoolean(HikeMessengerApp.SHOWN_STICKERS_TUTORIAL, true);
 		editor.commit();
 
-		Intent i = new Intent(Tutorial.this, MessagesList.class);
+		Intent i = new Intent(Tutorial.this, HomeActivity.class);
 		startActivity(i);
 		finish();
 	}

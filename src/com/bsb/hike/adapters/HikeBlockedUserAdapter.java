@@ -62,7 +62,7 @@ public class HikeBlockedUserAdapter extends HikeArrayAdapter implements
 
 		if (contactInfo.hasCustomPhoto()) {
 			imageView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(contactInfo.getMsisdn()));
+					.getIconForMSISDN(contactInfo.getMsisdn(), true));
 		} else {
 			imageView.setImageDrawable(Utils.getDefaultIconForUser(context,
 					contactInfo.getMsisdn()));

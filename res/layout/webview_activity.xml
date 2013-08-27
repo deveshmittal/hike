@@ -1,64 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.bsb.hike.view.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/drawer_layout"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:background="@drawable/thatch_repeat"
+    android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/animation_layout_left_sidebar"
-        android:layout_width="272dp"
-        android:layout_height="match_parent"
-        android:visibility="invisible" >
-
-        <include layout="@layout/left_drawer" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/animation_layout_right_sidebar"
-        android:layout_width="272dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentRight="true"
-        android:visibility="invisible" >
-
-        <include layout="@layout/right_drawer" />
-    </LinearLayout>
+    <WebView
+        android:id="@+id/t_and_c_page"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <RelativeLayout
-        android:id="@+id/animation_layout_content"
+        android:id="@+id/loading_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:visibility="invisible" >
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/thatch_repeat"
-            android:orientation="vertical" >
-
-            <include
-                android:id="@+id/top_panel"
-                layout="@layout/top_panel" />
-
-            <WebView
-                android:id="@+id/t_and_c_page"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/top_panel" />
-
-            <RelativeLayout
-                android:id="@+id/loading_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="invisible" >
-
-                <ProgressBar
-                    android:id="@+id/loading_page"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_centerInParent="true"
-                    android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
-            </RelativeLayout>
-        </RelativeLayout>
+        <ProgressBar
+            android:id="@+id/loading_page"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_centerInParent="true"
+            android:indeterminateDrawable="@drawable/custom_progress_bar_drawable" />
     </RelativeLayout>
 
-</com.bsb.hike.view.DrawerLayout>
+</RelativeLayout>

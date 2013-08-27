@@ -2,6 +2,7 @@ package com.bsb.hike.models;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -41,6 +42,10 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 	private FavoriteType favoriteType;
 
 	private long hikeJoinTime;
+
+	private long lastSeenTime;
+
+	private int offline = 1;
 
 	public String getName() {
 		return name;
@@ -137,6 +142,22 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		return msisdn.equals(id);
 	}
 
+	public long getLastSeenTime() {
+		return lastSeenTime;
+	}
+
+	public void setLastSeenTime(long lastSeenTime) {
+		this.lastSeenTime = lastSeenTime;
+	}
+
+	public int getOffline() {
+		return offline;
+	}
+
+	public void setOffline(int offline) {
+		this.offline = offline;
+	}
+
 	public String getFormattedHikeJoinTime() {
 		String format = "MMM ''yy";
 		DateFormat df = new SimpleDateFormat(format);
@@ -219,6 +240,28 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 		json.put("id", this.id);
 		return json;
 	}
+
+	public static Comparator<ContactInfo> lastSeenTimeComparator = new Comparator<ContactInfo>() {
+
+		@Override
+		public int compare(ContactInfo lhs, ContactInfo rhs) {
+			if (lhs.getFavoriteType() != rhs.getFavoriteType()) {
+				if (lhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+					return -1;
+				} else if (rhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+					return 1;
+				}
+			}
+			if (lhs.getOffline() != rhs.getOffline()) {
+				if (lhs.getOffline() == 0) {
+					return -1;
+				} else if (rhs.getOffline() == 0) {
+					return 1;
+				}
+			}
+			return lhs.compareTo(rhs);
+		}
+	};
 
 	@Override
 	public int compareTo(ContactInfo rhs) {

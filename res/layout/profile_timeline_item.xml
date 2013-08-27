@@ -1,102 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_content"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
-    
+    android:layout_height="wrap_content" >
+
     <RelativeLayout
-        android:id="@+id/content_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/seen_timeline_item"
-        android:padding="10dp" >
+        android:layout_margin="@dimen/updates_margin"
+        android:background="@drawable/bg_updates_white"
+        android:paddingBottom="10dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp" >
 
-        <ImageView
-            android:id="@+id/status_type"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginRight="10dp"
-            android:background="@drawable/bg_status_type"
-            android:paddingBottom="2dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_text_status" />
+        <RelativeLayout
+            android:id="@+id/avatar_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp" >
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/time"
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="@dimen/small_avatar"
+                android:layout_height="@dimen/small_avatar"
+                android:layout_marginLeft="@dimen/small_avatar_margin"
+                android:layout_marginTop="@dimen/small_avatar_margin"
+                android:src="@drawable/ic_avatar1" />
+
+            <ImageView
+                android:id="@+id/avatar_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/frame_avatar_small_selector" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/side_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginTop="5dp"
+            android:layout_alignTop="@id/avatar_container"
             android:gravity="right"
-            android:paddingTop="1dp"
-            android:text="2 Minutes Ago"
-            android:textColor="@color/timestampcolor"
-            android:textSize="12sp"
-            android:textStyle="italic" />
-
-        <LinearLayout
-            android:id="@+id/content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/time"
-            android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@id/time"
-            android:layout_toRightOf="@id/status_type"
             android:orientation="vertical" >
 
-            <com.bsb.hike.view.LinkedTextView
-                android:id="@+id/status_text"
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="This is a status"
-                android:textColor="@color/subtext"
-                android:textSize="14sp" />
+                android:text="2 mins ago"
+                android:textColor="@color/timestampcolor"
+                android:textSize="12sp"
+                android:textStyle="bold|italic" />
+        </LinearLayout>
 
-            <ImageView
-                android:id="@+id/status_pic"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginTop="5dp"
-                android:scaleType="fitCenter"
-                android:onClick="onViewImageClicked"
-                android:visibility="visible" />
+        <LinearLayout
+            android:id="@+id/details_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@id/avatar_container"
+            android:orientation="vertical" >
+
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Rishabh Sharma"
+                android:textColor="@color/updates_text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.bsb.hike.view.LinkedTextView
+                android:id="@+id/main_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Added you as a friend"
+                android:textColor="@color/updates_text"
+                android:textSize="16sp" />
         </LinearLayout>
     </RelativeLayout>
 
-    <LinearLayout
-        android:id="@+id/status_tip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:visibility="gone" >
-
-        <include layout="@layout/tool_tip" />
-    </LinearLayout>
-
-    <View
-        android:id="@+id/empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_below="@id/content"
-        android:visibility="gone" />
-
-    <View
-        android:id="@+id/div1"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:background="#e0e0dc" />
-
-    <View
-        android:id="@+id/div2"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_below="@id/div1"
-        android:background="#cdccc8" />
-
-    <View
-        android:id="@+id/div3"
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_below="@id/div2"
-        android:background="#fefefe" />
-</LinearLayout>
+</RelativeLayout>

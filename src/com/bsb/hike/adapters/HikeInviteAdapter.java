@@ -69,7 +69,7 @@ public class HikeInviteAdapter extends
 		}
 		ImageView imageView = (ImageView) v.findViewById(R.id.avatar);
 		imageView.setImageDrawable(pair != null ? IconCacheManager
-				.getInstance().getIconForMSISDN(contactInfo.getMsisdn())
+				.getInstance().getIconForMSISDN(contactInfo.getMsisdn(), true)
 				: getContext().getResources()
 						.getDrawable(R.drawable.ic_avatar1));
 

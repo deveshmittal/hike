@@ -25,41 +25,17 @@ import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.MessagesList;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
-import com.bsb.hike.view.DrawerLayout;
 
 public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 
 	private int mResourceId;
-	private MessagesList mMessagesList;
-	private DrawerLayout drawerLayout;
-	private boolean shouldRefresh;
 
-	public ConversationsAdapter(MessagesList messagesList,
-			int textViewResourceId, List<Conversation> objects,
-			DrawerLayout drawerLayout) {
-		super(messagesList, textViewResourceId, objects);
+	public ConversationsAdapter(Context context, int textViewResourceId,
+			List<Conversation> objects) {
+		super(context, textViewResourceId, objects);
 		this.mResourceId = textViewResourceId;
-		mMessagesList = messagesList;
-		this.drawerLayout = drawerLayout;
-	}
-
-	@Override
-	public void notifyDataSetChanged() {
-		if (drawerLayout.isAnimating()) {
-			shouldRefresh = true;
-			return;
-		}
-		super.notifyDataSetChanged();
-	}
-
-	public void drawerAnimationComplete() {
-		if (shouldRefresh) {
-			super.notifyDataSetChanged();
-			shouldRefresh = false;
-		}
 	}
 
 	@Override
@@ -82,8 +58,15 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 		if (!messages.isEmpty()) {
 			ConvMessage message = messages.get(messages.size() - 1);
 
+			ImageView avatarframe = (ImageView) v
+					.findViewById(R.id.avatar_frame);
+
 			ImageView imgStatus = (ImageView) v
 					.findViewById(R.id.msg_status_indicator);
+
+			TextView unreadIndicator = (TextView) v
+					.findViewById(R.id.unread_indicator);
+			unreadIndicator.setVisibility(View.GONE);
 			/*
 			 * If the message is a status message, we only show an indicator if
 			 * the status of the message is unread.
@@ -92,13 +75,26 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					|| message.getState() == State.RECEIVED_UNREAD) {
 				int resId = message.getImageState();
 				if (resId > 0) {
+					avatarframe
+							.setImageResource(R.drawable.frame_avatar_large_selector);
 					imgStatus.setImageResource(resId);
 					imgStatus.setVisibility(View.VISIBLE);
 				} else if (message.getState() == ConvMessage.State.RECEIVED_UNREAD
 						&& (message.getMsgID() > -1 || message.getMappedMsgID() > -1)) {
-					imgStatus.setImageResource(R.drawable.ic_unread);
-					imgStatus.setVisibility(View.VISIBLE);
+					avatarframe
+							.setImageResource(R.drawable.frame_avatar_large_highlight_selector);
+					imgStatus.setVisibility(View.GONE);
+					unreadIndicator.setVisibility(View.VISIBLE);
+
+					if (conversation.getUnreadCount() == 0) {
+						unreadIndicator.setText("");
+					} else {
+						unreadIndicator.setText(Integer.toString(conversation
+								.getUnreadCount()));
+					}
 				} else {
+					avatarframe
+							.setImageResource(R.drawable.frame_avatar_large_selector);
 					imgStatus.setImageResource(0);
 					imgStatus.setVisibility(View.GONE);
 				}
@@ -118,13 +114,11 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 						message.isSent());
 				if ((conversation instanceof GroupConversation)
 						&& !message.isSent()) {
-					markedUp = Utils
-							.addContactName(
-									((GroupConversation) conversation)
-											.getGroupParticipant(
-													message.getGroupParticipantMsisdn())
-											.getContactInfo().getFirstName(),
-									markedUp);
+					markedUp = Utils.addContactName(
+							((GroupConversation) conversation)
+									.getGroupParticipantFirstName(message
+											.getGroupParticipantMsisdn()),
+							markedUp);
 				}
 				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null
 						&& ChatThread.fileTransferTaskMap.containsKey(message
@@ -152,9 +146,9 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					for (int i = 0; i < dndNumbers.length(); i++) {
 						String dndName;
 						dndName = conversation instanceof GroupConversation ? ((GroupConversation) conversation)
-								.getGroupParticipant(dndNumbers.optString(i))
-								.getContactInfo().getFirstName()
-								: Utils.getFirstName(conversation.getLabel());
+								.getGroupParticipantFirstName(dndNumbers
+										.optString(i)) : Utils
+								.getFirstName(conversation.getLabel());
 						if (i < dndNumbers.length() - 2) {
 							dndNames.append(dndName + ", ");
 						} else if (i < dndNumbers.length() - 1) {
@@ -186,8 +180,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 				if (conversation instanceof GroupConversation) {
 					String participantMsisdn = metadata.getMsisdn();
 					participantName = ((GroupConversation) conversation)
-							.getGroupParticipant(participantMsisdn)
-							.getContactInfo().getFirstName();
+							.getGroupParticipantFirstName(participantMsisdn);
 				} else {
 					participantName = Utils.getFirstName(conversation
 							.getLabel());
@@ -204,8 +197,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					// booted because of that reason
 					String participantMsisdn = metadata.getMsisdn();
 					String participantName = ((GroupConversation) conversation)
-							.getGroupParticipant(participantMsisdn)
-							.getContactInfo().getFirstName();
+							.getGroupParticipantFirstName(participantMsisdn);
 					markedUp = String.format(
 							context.getString(R.string.left_conversation),
 							participantName);
@@ -222,8 +214,7 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 				String participantName = userMsisdn.equals(msisdn) ? context
 						.getString(R.string.you)
 						: ((GroupConversation) conversation)
-								.getGroupParticipant(msisdn).getContactInfo()
-								.getFirstName();
+								.getGroupParticipantFirstName(msisdn);
 
 				markedUp = String.format(
 						context.getString(R.string.change_group_name),
@@ -243,9 +234,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 					markedUp = Utils
 							.addContactName(
 									((GroupConversation) conversation)
-											.getGroupParticipant(
-													message.getGroupParticipantMsisdn())
-											.getContactInfo().getFirstName(),
+											.getGroupParticipantFirstName(
+													message.getGroupParticipantMsisdn()),
 									markedUp);
 				}
 				SmileyParser smileyParser = SmileyParser.getInstance();
@@ -258,17 +248,17 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 			tsView.setText(message.getTimestampFormatted(true, context));
 			if (message.getState() == ConvMessage.State.RECEIVED_UNREAD) {
 				/* set unread messages to BLUE */
-				messageView.setTextColor(mMessagesList.getResources().getColor(
-						R.color.unread_message_blue));
+				messageView.setTextColor(context.getResources().getColor(
+						R.color.unread_message));
 			} else {
-				messageView.setTextColor(mMessagesList.getResources().getColor(
+				messageView.setTextColor(context.getResources().getColor(
 						R.color.grey));
 			}
 		}
 
 		ImageView avatarView = (ImageView) v.findViewById(R.id.avatar);
 		avatarView.setImageDrawable(IconCacheManager.getInstance()
-				.getIconForMSISDN(conversation.getMsisdn()));
+				.getIconForMSISDN(conversation.getMsisdn(), true));
 
 		return v;
 	}

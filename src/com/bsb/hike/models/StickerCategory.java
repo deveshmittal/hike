@@ -4,20 +4,20 @@ import com.bsb.hike.R;
 
 public class StickerCategory {
 
-	public static String BACK_CATEGORY_ID = "back";
-	public static int BACK_CATEGORY_RES_ID = R.drawable.ic_sticker_back;
-
 	public String categoryId;
 	public int categoryResId;
 	public String downloadDialogPref;
 	public int categoryPreviewResId;
+	public boolean updateAvailable;
 
 	public StickerCategory(String categoryId, int categoryResId,
-			String downloadDialogPref, int categoryPreviewResId) {
+			String downloadDialogPref, int categoryPreviewResId,
+			boolean updateAvailable) {
 		this.categoryId = categoryId;
 		this.categoryResId = categoryResId;
 		this.downloadDialogPref = downloadDialogPref;
 		this.categoryPreviewResId = categoryPreviewResId;
+		this.updateAvailable = updateAvailable;
 	}
 
 	@Override

@@ -304,7 +304,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	Runnable startWelcomeScreen = new Runnable() {
 		@Override
 		public void run() {
-			Intent i = new Intent(SignupActivity.this, MessagesList.class);
+			Intent i = new Intent(SignupActivity.this, HomeActivity.class);
 			startActivity(i);
 			finish();
 		}
@@ -1077,8 +1077,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 				editor.commit();
 
 				startActivityForResult(intent, HikeConstants.CAMERA_RESULT);
-				overridePendingTransition(R.anim.slide_in_right_noalpha,
-						R.anim.slide_out_left_noalpha);
 			} else {
 				Toast.makeText(this, getString(R.string.no_sd_card),
 						Toast.LENGTH_LONG).show();
@@ -1094,8 +1092,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 			intent = new Intent(Intent.ACTION_PICK);
 			intent.setType("image/*");
 			startActivityForResult(intent, HikeConstants.GALLERY_RESULT);
-			overridePendingTransition(R.anim.slide_in_right_noalpha,
-					R.anim.slide_out_left_noalpha);
 			break;
 		}
 	}

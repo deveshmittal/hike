@@ -4,15 +4,14 @@ import android.app.AlertDialog.Builder;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
 
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.ui.MessagesList;
 
 public class AppRater {
 
@@ -60,8 +59,7 @@ public class AppRater {
 				try {
 					mContext.startActivity(marketIntent);
 				} catch (ActivityNotFoundException e) {
-					Log.e(MessagesList.class.getSimpleName(),
-							"Unable to open market");
+					Log.e("AppRater", "Unable to open market");
 				}
 				dialog.dismiss();
 				editor.putBoolean(HikeMessengerApp.DONT_SHOW_APP_RATER, true);

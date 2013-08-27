@@ -1,163 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/bg_profile" >
+    android:layout_height="288dp" >
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/profile"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="288dp"
         android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp" >
+        android:onClick="onViewImageClicked"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_avatar1" />
 
-        <RelativeLayout
-            android:id="@+id/avatar"
-            android:layout_width="88dp"
-            android:layout_height="89dp"
-            android:layout_centerHorizontal="true" >
-
-            <ImageView
-                android:id="@+id/profile"
-                android:layout_width="83dp"
-                android:layout_height="83dp"
-                android:layout_centerInParent="true"
-                android:onClick="onViewImageClicked"
-                android:src="@drawable/ic_avatar1" />
-
-            <ImageView
-                android:id="@+id/profile_border"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/square" />
-
-            <ImageView
-                android:id="@+id/change_profile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:onClick="onChangeImageClicked"
-                android:paddingBottom="5dp"
-                android:paddingRight="3dp"
-                android:src="@drawable/ic_change_profile_pic" />
-        </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_alignParentBottom="true"
+        android:background="#8F323638"
+        android:clickable="true"
+        android:onClick="onAddToContactClicked" >
 
         <LinearLayout
             android:id="@+id/info_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/avatar"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="5dp"
-            android:gravity="center"
-            android:orientation="horizontal" >
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="8dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical" >
 
             <com.bsb.hike.view.CustomFontTextView
                 android:id="@+id/name"
-                style="@style/ProfileShadow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Group name"
-                android:textColor="@color/white"
-                android:clickable="true"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/info"
-            style="@style/ProfileShadow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/info_container"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="2dp"
-            android:text="Group name"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
-
-        <LinearLayout
-            android:id="@+id/request_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/info"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:visibility="gone" >
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="10dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/ic_request_divider" />
-
-            <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/req_main"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:shadowColor="@color/black"
-                android:shadowDy="-0.5"
-                android:shadowRadius="0.5"
-                android:text="@string/added_as_friend"
-                android:textColor="@color/white"
-                android:textSize="14sp"
+                android:textColor="@color/almost_white"
+                android:textSize="20sp"
                 android:textStyle="bold|italic" />
 
             <com.bsb.hike.view.CustomFontTextView
-                android:id="@+id/req_info"
+                android:id="@+id/info"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginTop="5dp"
-                android:gravity="center"
-                android:shadowColor="@color/black"
-                android:shadowDy="-0.5"
-                android:shadowRadius="0.5"
-                android:text="@string/added_as_hike_friend_info"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="italic" />
-
-            <LinearLayout
-                android:id="@+id/btn_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:orientation="horizontal" >
-
-                <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/yes_btn"
-                    style="@style/StatusYesBtn"
-                    android:background="@drawable/request_yes_btn"
-                    android:focusable="false"
-                    android:onClick="onYesBtnClick"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:text="@string/confirm" />
-
-                <com.bsb.hike.view.CustomFontButton
-                    android:id="@+id/no_btn"
-                    style="@style/StatusNoBtn"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/request_no_btn"
-                    android:focusable="false"
-                    android:onClick="onNoBtnClick"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="20dp"
-                    android:text="@string/not_now" />
-            </LinearLayout>
+                android:layout_marginTop="2dp"
+                android:text="Group name"
+                android:textColor="@color/almost_white"
+                android:textSize="12sp" />
         </LinearLayout>
-    </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/button_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true" >
+
+            <ImageView
+                android:id="@+id/change_profile"
+                android:layout_width="62dp"
+                android:layout_height="match_parent"
+                android:onClick="onHeaderButtonClicked"
+                android:padding="10dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_change_profile_pic" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/button_divider"
+            android:layout_width="2dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/button_container"
+            android:background="#52faf8f2" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="30dp"
+            android:src="@drawable/ic_arrow_up" />
+    </RelativeLayout>
 
 </RelativeLayout>
