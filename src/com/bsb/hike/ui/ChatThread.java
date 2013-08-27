@@ -3501,9 +3501,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				tabDrawables = new int[] { R.drawable.ic_recents_emo,
 						R.drawable.emo_im_01_bigsmile,
 						R.drawable.emo_im_81_exciting,
-						R.drawable.emo_im_111_grin, R.drawable.e415,
+						R.drawable.emo_im_111_grin, R.drawable.emo_im_151_auto,
 						R.drawable.e415, R.drawable.e415, R.drawable.e415,
-						R.drawable.e415 };
+						R.drawable.e415, R.drawable.e415 };
 				if (emoticonType != EmoticonType.EMOTICON) {
 					sameType = false;
 					emoticonType = EmoticonType.EMOTICON;
