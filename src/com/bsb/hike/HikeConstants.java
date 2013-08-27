@@ -406,8 +406,6 @@ public class HikeConstants {
 
 	public static final String MICROMAX = "MICROMAX";
 
-	public static final String[] MICROMAX_MODELS = { "A76", "A210", "A240" };
-
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
 		public static final String NAME = "name";
