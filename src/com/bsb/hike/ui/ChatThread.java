@@ -1808,8 +1808,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			String msisdn = (String) object;
 			if (mContactNumber.equals(msisdn)) {
 				/* update the image drawable */
-				avatar.setImageDrawable(IconCacheManager.getInstance()
-						.getIconForMSISDN(mContactNumber, true));
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						avatar.setImageDrawable(IconCacheManager.getInstance()
+								.getIconForMSISDN(mContactNumber, true));
+					}
+				});
 			}
 		} else if ((HikePubSub.USER_LEFT.equals(type))
 				|| (HikePubSub.USER_JOINED.equals(type))) {
