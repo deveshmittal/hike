@@ -8,13 +8,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.DrawerBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseActivity;
 
-public class WebViewActivity extends DrawerBaseActivity {
+public class WebViewActivity extends HikeAppStateBaseActivity {
 
 	private boolean rewardsPage;
 
@@ -29,14 +28,6 @@ public class WebViewActivity extends DrawerBaseActivity {
 
 		rewardsPage = getIntent().getBooleanExtra(
 				HikeConstants.Extras.REWARDS_PAGE, false);
-
-		TextView titleTV = (TextView) findViewById(rewardsPage ? R.id.title_centered
-				: R.id.title);
-		titleTV.setText(title);
-
-		if (rewardsPage) {
-			afterSetContentView(savedInstanceState);
-		}
 
 		WebView webView = (WebView) findViewById(R.id.t_and_c_page);
 

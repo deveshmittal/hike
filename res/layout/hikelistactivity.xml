@@ -5,13 +5,6 @@
     android:background="@drawable/thatch_repeat"
     android:orientation="vertical" >
 
-    <include
-        android:id="@+id/top_panel_ref"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        layout="@layout/top_panel" />
-
     <LinearLayout
         android:id="@+id/input_number_container"
         android:layout_width="match_parent"

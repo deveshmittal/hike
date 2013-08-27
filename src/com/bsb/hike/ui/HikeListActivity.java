@@ -44,8 +44,6 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 
 	private HikeInviteAdapter adapter;
 	private ListView listView;
-	private TextView labelView;
-	private Button titleBtn;
 	private EditText input;
 	private Set<String> selectedContacts;
 	private Type type;
@@ -65,13 +63,8 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 
 		selectedContacts = new HashSet<String>();
 
-		labelView = (TextView) findViewById(R.id.title);
 		listView = (ListView) findViewById(R.id.contact_list);
-		titleBtn = (Button) findViewById(R.id.title_icon);
 		input = (EditText) findViewById(R.id.input_number);
-
-		titleBtn.setVisibility(View.VISIBLE);
-		findViewById(R.id.button_bar_2).setVisibility(View.VISIBLE);
 
 		listView.setTextFilterEnabled(true);
 		listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -79,13 +72,9 @@ public class HikeListActivity extends HikeAppStateBaseActivity implements
 
 		switch (type) {
 		case BLOCK:
-			titleBtn.setText(R.string.done);
 			toggleBlockMap = new HashMap<String, Boolean>();
-			labelView.setText(R.string.blocked_list);
 			break;
 		case INVITE:
-			titleBtn.setText(R.string.send);
-			labelView.setText(R.string.invite_via_sms);
 			break;
 		}
 

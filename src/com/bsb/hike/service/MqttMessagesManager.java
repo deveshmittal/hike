@@ -34,14 +34,19 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.Conversation;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.GroupTypingNotification;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
+import com.bsb.hike.tasks.DownloadFileTask;
+import com.bsb.hike.tasks.DownloadProfileImageTask;
 import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
@@ -67,7 +72,7 @@ public class MqttMessagesManager {
 
 	private HikePubSub pubSub;
 
-	private Map<String, ClearTypingNotification> typingNotificationMap;
+	private Map<String, TypingNotification> typingNotificationMap;
 
 	private Handler clearTypingNotificationHandler;
 
@@ -113,6 +118,8 @@ public class MqttMessagesManager {
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
+
+			autoDownloadProfileImage(msisdn, false);
 		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 			String groupId = jsonObj.getString(HikeConstants.TO);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
@@ -139,6 +146,7 @@ public class MqttMessagesManager {
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			IconCacheManager.getInstance().clearIconForMSISDN(groupId);
+			autoDownloadProfileImage(groupId, false);
 			saveStatusMsg(jsonObj, groupId);
 		} else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
 																			// changed
@@ -268,6 +276,14 @@ public class MqttMessagesManager {
 						.addConversation(groupConversation.getMsisdn(), false,
 								"", groupConversation.getGroupOwner());
 
+				JSONObject metadata = jsonObj
+						.optJSONObject(HikeConstants.METADATA);
+				String groupName = metadata.optString(HikeConstants.NAME);
+				if (!TextUtils.isEmpty(groupName)) {
+					convDb.setGroupName(groupConversation.getMsisdn(),
+							groupName);
+					groupConversation.setContactName(groupName);
+				}
 				// Adding a key to the json signify that this was the GCJ
 				// received for group creation
 				jsonObj.put(HikeConstants.NEW_GROUP, true);
@@ -292,7 +308,16 @@ public class MqttMessagesManager {
 
 			if (this.convDb.setGroupName(groupId, groupname) > 0) {
 				this.pubSub.publish(HikePubSub.GROUP_NAME_CHANGED, groupId);
-				saveStatusMsg(jsonObj, groupId);
+
+				boolean showPush = true;
+				JSONObject metadata = jsonObj
+						.optJSONObject(HikeConstants.METADATA);
+				if (metadata != null) {
+					showPush = metadata.optBoolean(HikeConstants.PUSH, true);
+				}
+				if (showPush) {
+					saveStatusMsg(jsonObj, groupId);
+				}
 			}
 		} else if (HikeConstants.MqttMessageTypes.GROUP_CHAT_END.equals(type)) // Group
 																				// chat
@@ -365,21 +390,6 @@ public class MqttMessagesManager {
 			if (convMessage.getConversation() == null) {
 				return;
 			}
-			/*
-			 * We are forcing the app to set all the messages sent by the user
-			 * in a group chat before this as read.
-			 */
-			long[] ids = convDb.getUnreadMessageIds(convMessage
-					.getConversation().getConvId());
-			if (ids != null && convMessage.isGroupChat()
-					&& convMessage.getMetadata() == null) {
-				updateDbBatch(ids, ConvMessage.State.SENT_DELIVERED_READ,
-						convMessage.getMsisdn());
-
-				Pair<String, long[]> pair = new Pair<String, long[]>(
-						convMessage.getMsisdn(), ids);
-				this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
-			}
 
 			/*
 			 * We need to add the name here in order to fix the bug where if the
@@ -414,7 +424,23 @@ public class MqttMessagesManager {
 						convMessage.getMsisdn());
 			}
 
-			removeTypingNotification(convMessage.getMsisdn());
+			/*
+			 * Start auto download
+			 */
+			if (convMessage.isFileTransferMessage()) {
+				HikeFile hikeFile = convMessage.getMetadata().getHikeFiles()
+						.get(0);
+
+				if (hikeFile.getHikeFileType() != HikeFileType.LOCATION
+						&& hikeFile.getHikeFileType() != HikeFileType.CONTACT) {
+					DownloadFileTask downloadFile = new DownloadFileTask(
+							context, hikeFile.getFile(), hikeFile.getFileKey(),
+							convMessage.getMsgID(), hikeFile.getHikeFileType());
+					downloadFile.execute();
+				}
+			}
+			removeTypingNotification(convMessage.getMsisdn(),
+					convMessage.getGroupParticipantMsisdn());
 		} else if (HikeConstants.MqttMessageTypes.DELIVERY_REPORT.equals(type)) // Message
 																				// delivered
 																				// to
@@ -453,43 +479,49 @@ public class MqttMessagesManager {
 																				// read
 		{
 			JSONArray msgIds = jsonObj.optJSONArray(HikeConstants.DATA);
-			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
+			String id = jsonObj.has(HikeConstants.TO) ? jsonObj
 					.getString(HikeConstants.TO) : jsonObj
 					.getString(HikeConstants.FROM);
+
+			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
+					.getString(HikeConstants.FROM) : "";
+
 			if (msgIds == null) {
 				Log.e(getClass().getSimpleName(),
 						"Update Error : Message id Array is empty or null . Check problem");
 				return;
 			}
 
-			long[] ids = convDb.setAllDeliveredMessagesReadForMsisdn(msisdn,
-					msgIds);
-			if (ids == null) {
-				return;
+			long[] ids;
+			if (!Utils.isGroupConversation(id)) {
+				ids = convDb.setAllDeliveredMessagesReadForMsisdn(id, msgIds);
+				if (ids == null) {
+					return;
+				}
+			} else {
+				ids = new long[msgIds.length()];
+				for (int i = 0; i < msgIds.length(); i++) {
+					ids[i] = msgIds.optLong(i);
+				}
+				convDb.setReadByForGroup(id, ids, participantMsisdn);
 			}
 
-			Pair<String, long[]> pair = new Pair<String, long[]>(msisdn, ids);
+			Pair<String, long[]> pair = new Pair<String, long[]>(id, ids);
 
 			this.pubSub.publish(HikePubSub.MESSAGE_DELIVERED_READ, pair);
-		} else if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)) // Start
-																				// Typing
-																				// event
-																				// received
-		{
-			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
+		} else if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)
+				|| HikeConstants.MqttMessageTypes.END_TYPING.equals(type)) {
+			String id = jsonObj.has(HikeConstants.TO) ? jsonObj
 					.getString(HikeConstants.TO) : jsonObj
 					.getString(HikeConstants.FROM);
-			addTypingNotification(msisdn);
+			String participantMsisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
+					.getString(HikeConstants.FROM) : null;
 
-		} else if (HikeConstants.MqttMessageTypes.END_TYPING.equals(type)) // End
-																			// Typing
-																			// event
-																			// received
-		{
-			String msisdn = jsonObj.has(HikeConstants.TO) ? jsonObj
-					.getString(HikeConstants.TO) : jsonObj
-					.getString(HikeConstants.FROM);
-			removeTypingNotification(msisdn);
+			if (HikeConstants.MqttMessageTypes.START_TYPING.equals(type)) {
+				addTypingNotification(id, participantMsisdn);
+			} else {
+				removeTypingNotification(id, participantMsisdn);
+			}
 
 		} else if (HikeConstants.MqttMessageTypes.UPDATE_AVAILABLE.equals(type)) {
 			JSONObject data = jsonObj.optJSONObject(HikeConstants.DATA);
@@ -852,6 +884,11 @@ public class MqttMessagesManager {
 				 */
 				jsonObj.getJSONObject(HikeConstants.DATA).remove(
 						HikeConstants.THUMBNAIL);
+
+				/*
+				 * Start auto download of the profile image.
+				 */
+				autoDownloadProfileImage(statusMessage.getMappedId(), true);
 			}
 
 			statusMessage
@@ -906,6 +943,7 @@ public class MqttMessagesManager {
 			String categoryId = data.getString(HikeConstants.CATEGORY_ID);
 			if (HikeConstants.ADD_STICKER.equals(subType)) {
 				convDb.stickerUpdateAvailable(categoryId);
+				HikeMessengerApp.setStickerUpdateAvailable(categoryId, true);
 			} else if (HikeConstants.REMOVE_STICKER.equals(subType)
 					|| HikeConstants.REMOVE_CATEGORY.equals(subType)) {
 
@@ -976,9 +1014,10 @@ public class MqttMessagesManager {
 			userDb.updateLastSeenTime(msisdn, lastSeenTime);
 			userDb.updateIsOffline(msisdn, (int) isOffline);
 
-			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED,
-					new Pair<String, Long>(msisdn,
-							isOffline == 1 ? lastSeenTime : isOffline));
+			ContactInfo contactInfo = userDb.getContactInfoFromMSISDN(msisdn,
+					false);
+
+			pubSub.publish(HikePubSub.LAST_SEEN_TIME_UPDATED, contactInfo);
 		} else if (HikeConstants.MqttMessageTypes.SERVER_TIMESTAMP.equals(type)) {
 			long serverTimestamp = jsonObj.getLong(HikeConstants.TIMESTAMP);
 			long diff = (System.currentTimeMillis() / 1000) - serverTimestamp;
@@ -1015,6 +1054,13 @@ public class MqttMessagesManager {
 
 			pubSub.publish(HikePubSub.PROTIP_ADDED, protip);
 		}
+	}
+
+	private void autoDownloadProfileImage(String id, boolean statusUpdate) {
+		String fileName = Utils.getProfileImageFileName(id);
+		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
+				context, id, fileName, true, statusUpdate);
+		downloadProfileImageTask.execute();
 	}
 
 	private void setDefaultSMSClientTutorialSetting() {
@@ -1110,30 +1156,86 @@ public class MqttMessagesManager {
 		return convMessage;
 	}
 
-	private void addTypingNotification(String msisdn) {
-		this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, msisdn);
-
+	private void addTypingNotification(String id, String participant) {
+		TypingNotification typingNotification;
 		ClearTypingNotification clearTypingNotification;
-		if (!typingNotificationMap.containsKey(msisdn)) {
-			clearTypingNotification = new ClearTypingNotification(msisdn);
-			typingNotificationMap.put(msisdn, clearTypingNotification);
+		boolean isGroupConversation = !TextUtils.isEmpty(participant);
+
+		if (!typingNotificationMap.containsKey(id)) {
+			if (isGroupConversation) {
+				clearTypingNotification = new ClearGroupTypingNotification(id,
+						participant);
+				typingNotification = new GroupTypingNotification(id,
+						participant,
+						(ClearGroupTypingNotification) clearTypingNotification);
+			} else {
+				clearTypingNotification = new ClearTypingNotification(id);
+
+				typingNotification = new TypingNotification(id,
+						clearTypingNotification);
+			}
+
+			typingNotificationMap.put(id, typingNotification);
 		} else {
-			clearTypingNotification = typingNotificationMap.get(msisdn);
+			typingNotification = typingNotificationMap.get(id);
+
+			if (isGroupConversation) {
+				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) typingNotification;
+				if (!groupTypingNotification.hasParticipant(participant)) {
+					clearTypingNotification = new ClearGroupTypingNotification(
+							id, participant);
+
+					groupTypingNotification.addParticipant(participant);
+					groupTypingNotification
+							.addClearTypingNotification((ClearGroupTypingNotification) clearTypingNotification);
+				} else {
+					clearTypingNotification = groupTypingNotification
+							.getClearTypingNotification(participant);
+				}
+			} else {
+				clearTypingNotification = typingNotification
+						.getClearTypingNotification();
+			}
 			clearTypingNotificationHandler
 					.removeCallbacks(clearTypingNotification);
 		}
 		clearTypingNotificationHandler.postDelayed(clearTypingNotification,
 				HikeConstants.LOCAL_CLEAR_TYPING_TIME);
+
+		this.pubSub.publish(HikePubSub.TYPING_CONVERSATION, typingNotification);
 	}
 
-	private void removeTypingNotification(String msisdn) {
-		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION, msisdn);
+	private void removeTypingNotification(String id, String participant) {
 
-		ClearTypingNotification clearTypingNotification = typingNotificationMap
-				.remove(msisdn);
-		if (clearTypingNotification != null) {
+		boolean isGroupConversation = !TextUtils.isEmpty(participant);
+
+		TypingNotification typingNotification = typingNotificationMap.get(id);
+
+		ClearTypingNotification clearTypingNotification;
+
+		if (typingNotification != null) {
+			if (isGroupConversation) {
+				GroupTypingNotification groupTypingNotification = (GroupTypingNotification) typingNotification;
+				groupTypingNotification.removeParticipant(participant);
+				Log.d("TypingNotification", "Particpant size: "
+						+ groupTypingNotification.getGroupParticipantList()
+								.size());
+				if (groupTypingNotification.getGroupParticipantList().isEmpty()) {
+					typingNotificationMap.remove(id);
+				}
+				clearTypingNotification = groupTypingNotification
+						.getClearTypingNotification(participant);
+			} else {
+				typingNotificationMap.remove(id);
+				clearTypingNotification = typingNotification
+						.getClearTypingNotification();
+			}
+
 			clearTypingNotificationHandler
 					.removeCallbacks(clearTypingNotification);
 		}
+
+		this.pubSub.publish(HikePubSub.END_TYPING_CONVERSATION,
+				typingNotification);
 	}
 }

@@ -4,9 +4,9 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 16;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 20;
 
-	public static final int USERS_DATABASE_VERSION = 13;
+	public static final int USERS_DATABASE_VERSION = 14;
 
 	public static final String HAS_CUSTOM_PHOTO = "hascustomphoto";
 
@@ -165,4 +165,18 @@ public class DBConstants {
 	public static final String WAIT_TIME = "waitTime";
 
 	public static final String IS_OFFLINE = "isOffline";
+
+	public static final String UNREAD_COUNT = "unreadCount";
+
+	public static final String SHARED_MEDIA_TABLE = "sharedMediaTable";
+
+	public static final String FILE_THUMBNAIL_TABLE = "fileThumbnailTable";
+
+	public static final String READ_BY = "readBy";
+
+	public static final String ROUNDED_THUMBNAIL_TABLE = "roundedThumbnailTable";
+
+	public static final String ROUNDED_THUMBNAIL_INDEX = "roundedThumbnailIndex";
+
+	public static final String FILE_THUMBNAIL_INDEX = "fileThumbnailIndex";
 }

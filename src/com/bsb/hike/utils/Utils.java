@@ -34,7 +34,12 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -531,6 +536,25 @@ public class Utils {
 		return output;
 	}
 
+	public static Bitmap getCircularBitmap(Bitmap bitmap) {
+		Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+				bitmap.getHeight(), Config.ARGB_8888);
+		Canvas canvas = new Canvas(output);
+
+		final int color = 0xff424242;
+		final Paint paint = new Paint();
+		final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+		paint.setAntiAlias(true);
+		canvas.drawARGB(0, 0, 0, 0);
+		paint.setColor(color);
+		canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+				bitmap.getWidth() / 2, paint);
+		paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
+		canvas.drawBitmap(bitmap, rect, rect, paint);
+		return output;
+	}
+
 	public static void savedAccountCredentials(AccountInfo accountInfo,
 			SharedPreferences.Editor editor) {
 		AccountUtils.setToken(accountInfo.token);
@@ -690,16 +714,14 @@ public class Utils {
 			JSONArray participantInfoArray, GroupConversation conversation) {
 		JSONObject participant = (JSONObject) participantInfoArray.opt(0);
 		String highlight = ((GroupConversation) conversation)
-				.getGroupParticipant(
-						participant.optString(HikeConstants.MSISDN))
-				.getContactInfo().getFirstName();
+				.getGroupParticipantFirstName(participant
+						.optString(HikeConstants.MSISDN));
 
 		if (participantInfoArray.length() == 2) {
 			JSONObject participant2 = (JSONObject) participantInfoArray.opt(1);
 			String name2 = ((GroupConversation) conversation)
-					.getGroupParticipant(
-							participant2.optString(HikeConstants.MSISDN))
-					.getContactInfo().getFirstName();
+					.getGroupParticipantFirstName(participant2
+							.optString(HikeConstants.MSISDN));
 
 			highlight += " and " + name2;
 		} else if (participantInfoArray.length() > 2) {
@@ -1230,7 +1252,7 @@ public class Utils {
 					return false;
 				}
 				byte[] fileBytes = Utils.bitmapToBytes(tempBmp,
-						Bitmap.CompressFormat.JPEG);
+						Bitmap.CompressFormat.JPEG, 75);
 				tempBmp.recycle();
 				src = new ByteArrayInputStream(fileBytes);
 			} else {
@@ -1358,7 +1380,7 @@ public class Utils {
 
 	public static boolean shouldChangeMessageState(ConvMessage convMessage,
 			int stateOrdinal) {
-		if (convMessage == null) {
+		if (convMessage == null || convMessage.getTypingNotification() != null) {
 			return false;
 		}
 		int minStatusOrdinal;
@@ -2163,9 +2185,14 @@ public class Utils {
 
 	public static void saveBitmapToFile(File file, Bitmap bitmap)
 			throws IOException {
+		saveBitmapToFile(file, bitmap, CompressFormat.PNG, 70);
+	}
+
+	public static void saveBitmapToFile(File file, Bitmap bitmap,
+			CompressFormat compressFormat, int quality) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 
-		byte[] b = bitmapToBytes(bitmap, CompressFormat.PNG, 70);
+		byte[] b = bitmapToBytes(bitmap, compressFormat, quality);
 		if (b == null) {
 			throw new IOException();
 		}
@@ -2227,11 +2254,17 @@ public class Utils {
 	}
 
 	public static String getLastSeenTimeAsString(Context context,
-			long lastSeenTime) {
-		if (lastSeenTime == -1) {
+			long lastSeenTime, int offline) {
+		/*
+		 * This refers to the setting being turned off
+		 */
+		if (offline == -1) {
 			return null;
 		}
-		if (lastSeenTime == 0) {
+		/*
+		 * This refers to the user being online
+		 */
+		if (offline == 0) {
 			return context.getString(R.string.online);
 		}
 
@@ -2556,5 +2589,49 @@ public class Utils {
 			Log.w("LogEvent", e);
 		}
 
+	}
+	
+	public static JSONObject getJSONfromURL(String url) {
+
+		// initialize
+		InputStream is = null;
+		String result = "";
+		JSONObject jObject = null;
+
+		// http post
+		try {
+			HttpClient httpclient = new DefaultHttpClient();
+			HttpPost httppost = new HttpPost(url);
+			HttpResponse response = httpclient.execute(httppost);
+			HttpEntity entity = response.getEntity();
+			is = entity.getContent();
+
+		} catch (Exception e) {
+			Log.e("LogEvent", "Error in http connection " + e.toString());
+		}
+
+		// convert response to string
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					is, "iso-8859-1"), 8);
+			StringBuilder sb = new StringBuilder();
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				sb.append(line + "\n");
+			}
+			is.close();
+			result = sb.toString();
+		} catch (Exception e) {
+			Log.e("LogEvent", "Error converting result " + e.toString());
+		}
+
+		// try parse the string to a JSON object
+		try {
+			jObject = new JSONObject(result);
+		} catch (JSONException e) {
+			Log.e("LogEvent", "Error parsing data " + e.toString());
+		}
+
+		return jObject;
 	}
 }

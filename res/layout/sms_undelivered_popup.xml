@@ -241,7 +241,7 @@
 
     <com.bsb.hike.view.CustomFontButton
         android:id="@+id/btn_send"
-        style="@style/StatusYesBtn"
+        style="@style/UpdateText.StatusYesBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="10dp"

@@ -4,6 +4,7 @@ import static org.acra.ACRA.LOG_TAG;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,10 +12,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.acra.ACRA;
-import org.acra.CrashReportData;
 import org.acra.ErrorReporter;
 import org.acra.ReportField;
 import org.acra.annotation.ReportsCrashes;
+import org.acra.collector.CrashReportData;
+import org.acra.sender.HttpSender;
 import org.acra.sender.ReportSender;
 import org.acra.sender.ReportSenderException;
 import org.acra.util.HttpRequest;
@@ -46,6 +48,7 @@ import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.db.HikeMqttPersistence;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.StickerCategory;
+import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
 import com.bsb.hike.service.HikeService;
@@ -53,7 +56,6 @@ import com.bsb.hike.service.HikeServiceConnection;
 import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
-import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.ToastListener;
@@ -256,6 +258,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String SHOW_BOLLYWOOD_STICKERS = "showBollywoodStickers";
 
+	public static final String INVITED_FACEBOOK_FRIENDS_IDS = "invitedFacebookFriendsIds";
+
 	public static List<StickerCategory> stickerCategories;
 
 	public static CurrentState currentState = CurrentState.CLOSED;
@@ -270,7 +274,7 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	private static Messenger mMessenger;
 
-	private static Map<String, ClearTypingNotification> typingNotificationMap;
+	private static Map<String, TypingNotification> typingNotificationMap;
 
 	private static int[] moodsResource;
 
@@ -383,11 +387,14 @@ public class HikeMessengerApp extends Application implements Listener {
 				final String password = token;
 
 				if (login != null && password != null) {
-					final HttpRequest request = new HttpRequest(login, password);
+					final HttpRequest request = new HttpRequest();
+					request.setLogin(login);
+					request.setPassword(password);
 					String paramsAsString = getParamsAsString(crashReportData);
 					Log.e(getClass().getSimpleName(), "Params: "
 							+ paramsAsString);
-					request.sendPost(reportUrl, paramsAsString);
+					request.send(new URL(reportUrl), HttpSender.Method.POST,
+							paramsAsString, HttpSender.Type.FORM);
 				}
 			} catch (IOException e) {
 				Log.e(getClass().getSimpleName(), "IOException", e);
@@ -468,8 +475,12 @@ public class HikeMessengerApp extends Application implements Listener {
 		TrackerUtil tUtil = TrackerUtil.getInstance(this
 				.getApplicationContext());
 		if (tUtil != null) {
-			tUtil.setTrackOptions(!preferenceManager.contains(HikeConstants.SSL_PREF));
-			Log.d(getClass().getSimpleName(),"Init for apptracker sdk finished"+ !preferenceManager.contains(HikeConstants.SSL_PREF));
+			tUtil.setTrackOptions(!preferenceManager
+					.contains(HikeConstants.SSL_PREF));
+			Log.d(getClass().getSimpleName(),
+					"Init for apptracker sdk finished"
+							+ !preferenceManager
+									.contains(HikeConstants.SSL_PREF));
 		}
 
 		if (!preferenceManager.contains(HikeConstants.SSL_PREF)) {
@@ -488,7 +499,7 @@ public class HikeMessengerApp extends Application implements Listener {
 				settings.getBoolean(HikeMessengerApp.PRODUCTION, true),
 				Utils.switchSSLOn(getApplicationContext()));
 
-		typingNotificationMap = new HashMap<String, ClearTypingNotification>();
+		typingNotificationMap = new HashMap<String, TypingNotification>();
 
 		initialiseListeners();
 
@@ -616,7 +627,19 @@ public class HikeMessengerApp extends Application implements Listener {
 		}
 	}
 
-	public static Map<String, ClearTypingNotification> getTypingNotificationSet() {
+	public static Twitter getTwitterInstance(String token, String tokenSecret) {
+
+		try {
+			makeTwitterInstance(token, tokenSecret);
+
+			return twitter;
+		} catch (IllegalArgumentException e) {
+			Log.w("HikeMessengerApp", "Invalid format", e);
+			return null;
+		}
+	}
+
+	public static Map<String, TypingNotification> getTypingNotificationSet() {
 		return typingNotificationMap;
 	}
 
@@ -651,11 +674,15 @@ public class HikeMessengerApp extends Application implements Listener {
 		stickerCategories = new ArrayList<StickerCategory>();
 
 		for (int i = 0; i < EmoticonConstants.STICKER_CATEGORY_IDS.length; i++) {
+			boolean isUpdateAvailable = HikeConversationsDatabase.getInstance()
+					.isStickerUpdateAvailable(
+							EmoticonConstants.STICKER_CATEGORY_IDS[i]);
 			stickerCategories.add(new StickerCategory(
 					EmoticonConstants.STICKER_CATEGORY_IDS[i],
 					EmoticonConstants.STICKER_CATEGORY_RES_IDS[i],
 					EmoticonConstants.STICKER_DOWNLOAD_PREF[i],
-					EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[i]));
+					EmoticonConstants.STICKER_CATEGORY_PREVIEW_RES_IDS[i],
+					isUpdateAvailable));
 		}
 		String removedIds = preferences.getString(
 				HikeMessengerApp.REMOVED_CATGORY_IDS, "[]");
@@ -664,13 +691,28 @@ public class HikeMessengerApp extends Application implements Listener {
 			JSONArray removedIdArray = new JSONArray(removedIds);
 			for (int i = 0; i < removedIdArray.length(); i++) {
 				String removedCategoryId = removedIdArray.getString(i);
-				StickerCategory removedStickerCategory = new StickerCategory(
-						removedCategoryId, 0, null, 0);
+				StickerCategory removedStickerCategory = getStickerCategoryForCategoryId(removedCategoryId);
 
 				stickerCategories.remove(removedStickerCategory);
 			}
 		} catch (JSONException e) {
 			Log.w("HikeMessengerApp", "Invalid JSON", e);
 		}
+	}
+
+	public static StickerCategory getStickerCategoryForCategoryId(
+			String categoryId) {
+		return new StickerCategory(categoryId, 0, null, 0, false);
+	}
+
+	public static void setStickerUpdateAvailable(String categoryId,
+			boolean updateAvailable) {
+		int index = stickerCategories
+				.indexOf(getStickerCategoryForCategoryId(categoryId));
+		if (index == -1) {
+			return;
+		}
+		StickerCategory stickerCategory = stickerCategories.get(index);
+		stickerCategory.updateAvailable = updateAvailable;
 	}
 }

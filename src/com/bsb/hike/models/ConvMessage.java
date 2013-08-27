@@ -53,6 +53,10 @@ public class ConvMessage {
 
 	private boolean isStickerMessage;
 
+	private TypingNotification typingNotification;
+
+	private JSONArray readByArray;
+
 	public boolean isInvite() {
 		return mInvite;
 	}
@@ -128,6 +132,10 @@ public class ConvMessage {
 			}
 			return NO_INFO;
 		}
+	}
+
+	public ConvMessage(TypingNotification typingNotification) {
+		this.typingNotification = typingNotification;
 	}
 
 	public ConvMessage(String message, String msisdn, long timestamp,
@@ -252,11 +260,11 @@ public class ConvMessage {
 									(GroupConversation) conversation));
 			break;
 		case PARTICIPANT_LEFT:
-			this.mMessage = String.format(
-					context.getString(R.string.left_conversation),
-					((GroupConversation) conversation)
-							.getGroupParticipant(metadata.getMsisdn())
-							.getContactInfo().getFirstName());
+			this.mMessage = String
+					.format(context.getString(R.string.left_conversation),
+							((GroupConversation) conversation)
+									.getGroupParticipantFirstName(metadata
+											.getMsisdn()));
 			break;
 		case GROUP_END:
 			this.mMessage = context.getString(R.string.group_chat_end);
@@ -266,8 +274,7 @@ public class ConvMessage {
 				String name;
 				if (conversation instanceof GroupConversation) {
 					name = ((GroupConversation) conversation)
-							.getGroupParticipant(metadata.getMsisdn())
-							.getContactInfo().getFirstName();
+							.getGroupParticipantFirstName(metadata.getMsisdn());
 				} else {
 					name = Utils.getFirstName(conversation.getLabel());
 				}
@@ -280,8 +287,7 @@ public class ConvMessage {
 			String name;
 			if (conversation instanceof GroupConversation) {
 				name = ((GroupConversation) conversation)
-						.getGroupParticipant(metadata.getMsisdn())
-						.getContactInfo().getFirstName();
+						.getGroupParticipantFirstName(metadata.getMsisdn());
 			} else {
 				name = Utils.getFirstName(conversation.getLabel());
 			}
@@ -300,8 +306,7 @@ public class ConvMessage {
 			String participantName = userMsisdn.equals(msisdn) ? context
 					.getString(R.string.you)
 					: ((GroupConversation) conversation)
-							.getGroupParticipant(msisdn).getContactInfo()
-							.getFirstName();
+							.getGroupParticipantFirstName(msisdn);
 			this.mMessage = String
 					.format(context
 							.getString(participantInfoState == ParticipantInfoState.CHANGED_GROUP_NAME ? R.string.change_group_name
@@ -499,14 +504,27 @@ public class ConvMessage {
 		} else {
 			String format;
 			if (android.text.format.DateFormat.is24HourFormat(context)) {
-				format = "d MMM ''yy 'AT' HH:mm";
+				format = "HH:mm";
 			} else {
-				format = "d MMM ''yy 'AT' h:mm aaa";
+				format = "h:mm aaa";
 			}
 
 			DateFormat df = new SimpleDateFormat(format);
 			return df.format(date);
 		}
+	}
+
+	public String getMessageDate(Context context) {
+		Date date = new Date(mTimestamp * 1000);
+		String format;
+		if (android.text.format.DateFormat.is24HourFormat(context)) {
+			format = "d MMM ''yy";
+		} else {
+			format = "d MMM ''yy";
+		}
+
+		DateFormat df = new SimpleDateFormat(format);
+		return df.format(date);
 	}
 
 	public void setMsgID(long msgID) {
@@ -565,6 +583,29 @@ public class ConvMessage {
 
 	public boolean isSMS() {
 		return mIsSMS;
+	}
+
+	public TypingNotification getTypingNotification() {
+		return typingNotification;
+	}
+
+	public void setTypingNotification(TypingNotification typingNotification) {
+		this.typingNotification = typingNotification;
+	}
+
+	public JSONArray getReadByArray() {
+		return readByArray;
+	}
+
+	public void setReadByArray(String readBy) {
+		if (TextUtils.isEmpty(readBy)) {
+			return;
+		}
+		try {
+			this.readByArray = new JSONArray(readBy);
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), "Invalid JSON");
+		}
 	}
 
 	public int getImageState() {

@@ -1,235 +1,245 @@
 package com.bsb.hike.adapters;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
-import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AbsListView.LayoutParams;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
+import com.bsb.hike.adapters.StickerPageAdapter.ViewType;
+import com.bsb.hike.db.HikeConversationsDatabase;
 import com.bsb.hike.models.Sticker;
+import com.bsb.hike.models.StickerCategory;
 import com.bsb.hike.tasks.DownloadStickerTask;
 import com.bsb.hike.tasks.DownloadStickerTask.DownloadType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.Utils;
+import com.bsb.hike.view.StickerEmoticonIconPageIndicator.StickerEmoticonIconPagerAdapter;
 
-public class StickerAdapter extends BaseAdapter implements OnClickListener {
+public class StickerAdapter extends PagerAdapter implements
+		StickerEmoticonIconPagerAdapter {
 
-	public static final int MAX_STICKER_PER_ROW_PORTRAIT = 4;
-
-	public static final int MAX_STICKER_PER_ROW_LANDSCAPE = 6;
-
-	public static enum ViewType {
-		STICKER, UPDATING_STICKER, DOWNLOADING_MORE
-	}
-
-	public static final int SIZE_IMAGE = (int) (80 * Utils.densityMultiplier);
-
-	private int numItemsRow;
-	private int sizeEachImage;
-	private Activity activity;
-	private int numStickers;
-	private List<Sticker> stickerList;
-	private List<ViewType> viewTypeList;
+	private List<StickerCategory> stickerCategoryList;
 	private LayoutInflater inflater;
-	private String categoryId;
-	private int categoryIndex;
-	private int numStickerRows;
-	private boolean updateAvailable;
+	private Activity activity;
 
-	public StickerAdapter(Activity activity, List<Sticker> stickerList,
-			List<ViewType> viewTypeList, int categoryIndex,
-			boolean updateAvailable) {
-		this.activity = activity;
-		this.stickerList = stickerList;
-		this.numStickers = stickerList.size();
-		this.viewTypeList = viewTypeList;
-		this.categoryIndex = categoryIndex;
-		this.categoryId = Utils.getCategoryIdForIndex(categoryIndex);
-		this.updateAvailable = updateAvailable;
+	public StickerAdapter(Activity activity, boolean isPortrait) {
 		this.inflater = LayoutInflater.from(activity);
-
-		calculateNumRowsAndSize();
-	}
-
-	private void calculateNumRowsAndSize() {
-		int screenWidth = activity.getResources().getDisplayMetrics().widthPixels;
-
-		this.numItemsRow = (int) (screenWidth / SIZE_IMAGE);
-
-		int emoticonPagerPadding = (int) 2
-				* activity.getResources().getDimensionPixelSize(
-						R.dimen.emoticon_pager_padding);
-		int stickerPadding = (int) 2
-				* activity.getResources().getDimensionPixelSize(
-						R.dimen.sticker_padding);
-
-		int remainingSpace = (screenWidth - emoticonPagerPadding - stickerPadding)
-				- (this.numItemsRow * SIZE_IMAGE);
-
-		this.sizeEachImage = SIZE_IMAGE
-				+ ((int) (remainingSpace / this.numItemsRow));
-
-		if (numStickers != 0) {
-			if (numStickers % numItemsRow == 0) {
-				this.numStickerRows = numStickers / numItemsRow;
-			} else {
-				this.numStickerRows = numStickers / numItemsRow + 1;
-			}
-
-			for (int i = 0; i < numStickerRows; i++) {
-				viewTypeList.add(updateAvailable ? 1 : 0, ViewType.STICKER);
-			}
-		}
-	}
-
-	@Override
-	public int getItemViewType(int position) {
-		return viewTypeList.get(position).ordinal();
-	}
-
-	@Override
-	public int getViewTypeCount() {
-		return ViewType.values().length;
+		this.activity = activity;
+		stickerCategoryList = HikeMessengerApp.stickerCategories;
 	}
 
 	@Override
 	public int getCount() {
-		return viewTypeList.size();
+		return stickerCategoryList.size();
 	}
 
 	@Override
-	public Object getItem(int position) {
-		return null;
+	public boolean isViewFromObject(View view, Object object) {
+		return view == object;
 	}
 
 	@Override
-	public long getItemId(int position) {
-		return 0;
+	public void destroyItem(ViewGroup container, int position, Object object) {
+		((ViewPager) container).removeView((View) object);
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		ViewType viewType = viewTypeList.get(position);
-		if (convertView == null) {
-			switch (viewType) {
-			case STICKER:
-				convertView = new LinearLayout(activity);
-				break;
-			case UPDATING_STICKER:
-				convertView = inflater.inflate(R.layout.update_sticker_set,
-						null);
-				break;
-			case DOWNLOADING_MORE:
-				convertView = inflater.inflate(
-						R.layout.downloading_new_stickers, null);
-				break;
-			}
-		}
+	public Object instantiateItem(ViewGroup container, int position) {
+		View emoticonPage;
+		emoticonPage = inflater.inflate(R.layout.sticker_page, null);
 
-		switch (viewType) {
-		case STICKER:
-			AbsListView.LayoutParams parentParams = new LayoutParams(
-					LayoutParams.MATCH_PARENT, sizeEachImage);
-			convertView.setLayoutParams(parentParams);
+		setupStickerPage(emoticonPage, position, false, null);
 
-			LinearLayout.LayoutParams childParams = new LinearLayout.LayoutParams(
-					sizeEachImage, LayoutParams.MATCH_PARENT);
+		((ViewPager) container).addView(emoticonPage);
+		emoticonPage.setTag(Utils.getCategoryIdForIndex(position));
 
-			((LinearLayout) convertView).removeAllViews();
-			/*
-			 * If this is the last item, its possible that the number of items
-			 * won't fill the complete row
-			 */
-			int startPosition = updateAvailable ? position - 1 : position;
+		return emoticonPage;
+	}
 
-			int maxCount;
-			if ((startPosition == numStickerRows - 1)
-					&& (numStickers % numItemsRow != 0)) {
-				maxCount = numStickers % numItemsRow;
-			} else {
-				maxCount = numStickerRows != 0 ? numItemsRow : 0;
-			}
+	public void setupStickerPage(final View parent, final int position,
+			boolean failed, final DownloadType downloadTypeBeforeFail) {
 
-			int padding = (int) (5 * Utils.densityMultiplier);
-			for (int i = 0; i < maxCount; i++) {
-				ImageView imageView = new ImageView(activity);
-				imageView.setLayoutParams(childParams);
-				imageView.setScaleType(ScaleType.FIT_CENTER);
-				imageView.setPadding(padding, padding, padding, padding);
+		final ListView stickerList = (ListView) parent
+				.findViewById(R.id.emoticon_grid);
 
-				int index = (startPosition * numItemsRow) + i;
+		View downloadingParent = parent
+				.findViewById(R.id.downloading_container);
+		TextView downloadingText = (TextView) parent
+				.findViewById(R.id.downloading_sticker);
 
-				Sticker sticker = stickerList.get(index);
+		Button downloadingFailed = (Button) parent
+				.findViewById(R.id.sticker_fail_btn);
 
-				if (sticker.getStickerIndex() != -1) {
-					imageView
-							.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS[sticker
-									.getStickerIndex()]);
-				} else {
-					imageView.setImageBitmap(BitmapFactory.decodeFile(sticker
-							.getSmallStickerPath(activity)));
+		stickerList.setVisibility(View.GONE);
+		downloadingParent.setVisibility(View.GONE);
+		downloadingFailed.setVisibility(View.GONE);
+
+		final String categoryId = Utils.getCategoryIdForIndex(position);
+
+		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) ChatThread.stickerTaskMap
+				.get(categoryId);
+
+		if (currentStickerTask != null
+				&& currentStickerTask.getDownloadType() == DownloadType.NEW_CATEGORY) {
+
+			Log.d(getClass().getSimpleName(), "Downloading new category "
+					+ categoryId);
+
+			downloadingParent.setVisibility(View.VISIBLE);
+
+			downloadingText.setText(activity.getString(
+					R.string.downloading_category, categoryId));
+		} else if (failed
+				&& downloadTypeBeforeFail == DownloadType.NEW_CATEGORY) {
+
+			Log.d(getClass().getSimpleName(),
+					"Download failed for new category " + categoryId);
+
+			downloadingFailed.setVisibility(View.VISIBLE);
+
+			downloadingFailed.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
+							activity, position, downloadTypeBeforeFail);
+					downloadStickerTask.execute();
+
+					ChatThread.stickerTaskMap.put(categoryId,
+							downloadStickerTask);
+					setupStickerPage(parent, position, false, null);
 				}
-				imageView.setTag(sticker);
+			});
+		} else {
+			stickerList.setVisibility(View.VISIBLE);
 
-				imageView.setOnClickListener(this);
+			new AsyncTask<Void, Void, List<Sticker>>() {
 
-				((LinearLayout) convertView).addView(imageView);
-			}
-			break;
-		case UPDATING_STICKER:
-			View button = convertView.findViewById(R.id.update_btn);
-			TextView updateText = (TextView) convertView.findViewById(R.id.txt);
-			ProgressBar progressBar = (ProgressBar) convertView
-					.findViewById(R.id.download_progress);
+				boolean updateAvailable;
 
-			if (ChatThread.stickerTaskMap.containsKey(categoryId)) {
-				progressBar.setVisibility(View.VISIBLE);
-				updateText.setText(R.string.updating_set);
-				convertView.setClickable(false);
-				button.setBackgroundResource(R.drawable.invite_to_hike_pressed);
-			} else {
-				progressBar.setVisibility(View.GONE);
-				updateText.setText(R.string.new_stickers_available);
-				convertView.setClickable(true);
-				button.setBackgroundResource(R.drawable.invite_chatthread_button);
-				convertView.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
-								activity, categoryIndex, DownloadType.UPDATE);
-						downloadStickerTask.execute();
-
-						ChatThread.stickerTaskMap.put(categoryId,
-								downloadStickerTask);
-						notifyDataSetChanged();
+				@Override
+				protected List<Sticker> doInBackground(Void... params) {
+					List<Sticker> stickerList = new ArrayList<Sticker>();
+					if (position == 0) {
+						for (int i = 0; i < EmoticonConstants.LOCAL_STICKER_IDS.length; i++) {
+							stickerList.add(new Sticker(position,
+									EmoticonConstants.LOCAL_STICKER_IDS[i], i));
+						}
 					}
-				});
-			}
+					File categoryDir = new File(
+							Utils.getStickerDirectoryForCategoryId(activity,
+									categoryId)
+									+ HikeConstants.SMALL_STICKER_ROOT);
 
-			break;
-		case DOWNLOADING_MORE:
-			break;
+					if (categoryDir.exists()) {
+						String[] stickerIds = categoryDir.list();
+						for (String stickerId : stickerIds) {
+							stickerList.add(new Sticker(position, stickerId));
+						}
+
+					}
+					updateAvailable = stickerCategoryList.get(position).updateAvailable;
+
+					Collections.sort(stickerList);
+
+					return stickerList;
+				}
+
+				@Override
+				protected void onPostExecute(final List<Sticker> result) {
+					final List<ViewType> viewTypeList = new ArrayList<StickerPageAdapter.ViewType>();
+					if (updateAvailable
+							|| (currentStickerTask != null && currentStickerTask
+									.getDownloadType() == DownloadType.UPDATE)) {
+						viewTypeList.add(ViewType.UPDATING_STICKER);
+						updateAvailable = true;
+					}
+					if (currentStickerTask != null
+							&& currentStickerTask.getDownloadType() == DownloadType.MORE_STICKERS) {
+						viewTypeList.add(ViewType.DOWNLOADING_MORE);
+					}
+					final StickerPageAdapter stickerPageAdapter = new StickerPageAdapter(
+							activity, result, viewTypeList, position,
+							updateAvailable);
+
+					stickerList.setAdapter(stickerPageAdapter);
+					stickerList.setOnScrollListener(new OnScrollListener() {
+
+						@Override
+						public void onScrollStateChanged(AbsListView view,
+								int scrollState) {
+						}
+
+						@Override
+						public void onScroll(AbsListView view,
+								int firstVisibleItem, int visibleItemCount,
+								int totalItemCount) {
+							if (position == 0
+									|| result.isEmpty()
+									|| ((ChatThread) activity).getCurrentPage() != position
+									|| !activity
+											.getSharedPreferences(
+													HikeMessengerApp.ACCOUNT_SETTINGS,
+													0)
+											.getBoolean(
+													EmoticonConstants.STICKER_DOWNLOAD_PREF[position],
+													false)
+									|| HikeConversationsDatabase.getInstance()
+											.hasReachedStickerEnd(categoryId)) {
+								return;
+							}
+							if (!ChatThread.stickerTaskMap
+									.containsKey(categoryId)) {
+								if (firstVisibleItem + visibleItemCount >= totalItemCount - 1) {
+									Log.d(getClass().getSimpleName(),
+											"Downloading more stickers "
+													+ categoryId);
+									viewTypeList.add(ViewType.DOWNLOADING_MORE);
+
+									DownloadStickerTask downloadStickerTask = new DownloadStickerTask(
+											activity, position,
+											DownloadType.MORE_STICKERS);
+									downloadStickerTask.execute();
+
+									ChatThread.stickerTaskMap.put(categoryId,
+											downloadStickerTask);
+									stickerPageAdapter.notifyDataSetChanged();
+								}
+							}
+						}
+					});
+				}
+
+			}.execute();
 		}
-
-		return convertView;
 	}
 
 	@Override
-	public void onClick(View v) {
-		Sticker sticker = (Sticker) v.getTag();
-		((ChatThread) activity).sendSticker(sticker);
+	public int getIconResId(int index) {
+		return stickerCategoryList.get(index).categoryResId;
+	}
+
+	@Override
+	public boolean isUpdateAvailable(int index) {
+		return stickerCategoryList.get(index).updateAvailable;
 	}
 }

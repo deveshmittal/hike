@@ -23,6 +23,7 @@ public class GroupConversation extends Conversation {
 	private boolean isMuted;
 	private boolean hasSmsUser;
 	private Map<String, GroupParticipant> groupParticipantList;
+	private int groupMemberAliveCount;
 
 	public GroupConversation(String msisdn, long convId, String contactName,
 			String groupOwner, boolean isGroupAlive) {
@@ -83,6 +84,10 @@ public class GroupConversation extends Conversation {
 				msisdn, msisdn, msisdn));
 	}
 
+	public String getGroupParticipantFirstName(String msisdn) {
+		return getGroupParticipant(msisdn).getContactInfo().getFirstName();
+	}
+
 	public String getLabel() {
 		return !TextUtils.isEmpty(getContactName()) ? getContactName() : Utils
 				.defaultGroupName(groupParticipantList);
@@ -102,6 +107,14 @@ public class GroupConversation extends Conversation {
 
 	public boolean hasSmsUser() {
 		return hasSmsUser;
+	}
+
+	public int getGroupMemberAliveCount() {
+		return groupMemberAliveCount;
+	}
+
+	public void setGroupMemberAliveCount(int groupMemberAliveCount) {
+		this.groupMemberAliveCount = groupMemberAliveCount;
 	}
 
 	public JSONObject serialize(String type) {

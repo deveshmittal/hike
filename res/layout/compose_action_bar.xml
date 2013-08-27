@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:id="@+id/back"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:background="?actionBarItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingRight="5dp" >
+
+        <ImageView
+            android:id="@id/abs__up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:src="@drawable/ic_back" />
+
+        <com.bsb.hike.view.CustomFontTextView
+            android:id="@+id/title"
+            style="@style/ActionBarText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="1dp" />
+    </LinearLayout>
+
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/done_btn"
+        style="@style/ActionBarText"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/bg_green_btn"
+        android:drawableLeft="@drawable/ic_done"
+        android:paddingLeft="12dp"
+        android:paddingRight="8dp"
+        android:visibility="gone" />
+
+    <com.bsb.hike.view.CustomFontButton
+        android:id="@+id/post_btn"
+        android:layout_width="56dp"
+        android:layout_height="32dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/bg_update_post_btn"
+        android:textColor="@drawable/action_bar_btn_text"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+    
+</RelativeLayout>

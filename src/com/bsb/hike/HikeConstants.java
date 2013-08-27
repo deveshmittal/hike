@@ -17,6 +17,7 @@ public class HikeConstants {
 	public static final String MA_TRACKER_USERID = "bsb_hike";
 	public static final String MA_TRACKER_REF_ID_PREFIX = "bsb_hike_";
 	public static final String MA_SITE_ID = "27576";
+
 	
 	public static final String ANDROID = "android";
 
@@ -315,7 +316,7 @@ public class HikeConstants {
 	public static final String CONTACT_CONTENT_TYPE = "contact/share";
 	public static final String CONTACT_FILE_NAME = "Contact";
 
-	public static final int DEFAULT_ZOOM_LEVEL = 12;
+	public static final int DEFAULT_ZOOM_LEVEL = 16;
 
 	public static final String VOICE_MESSAGE_CONTENT_TYPE = "audio/voice";
 
@@ -405,6 +406,8 @@ public class HikeConstants {
 	public static final int MAX_SMS_PULL_IN_SENTBOX = 1000;
 
 	public static final String MICROMAX = "MICROMAX";
+
+	public static final int MAX_READ_BY_NAMES = 3;
 
 	public static final class Extras {
 		public static final String MSISDN = "msisdn";
@@ -506,6 +509,13 @@ public class HikeConstants {
 		public static final String FWD_CATEGORY_ID = "fwdCategoryId";
 		public static final String POST_TO_TWITTER = "postToTwitter";
 		public static final String RECORDING_TIME = "recordingTime";
+		public static final String MAPPED_ID = "mappedId";
+		public static final String IS_STATUS_IMAGE = "isStatusImage";
+		public static final String URL = "url";
+		public static final String TAB_INDEX = "tabIndex";
+		public static final String IS_TEXT_SEARCH = "isTextSearch";
+		public static final String HTTP_SEARCH_STR = "searchStr";
+		public static final String IS_FACEBOOK = "isFacebook";
 	}
 
 	public static final class LogEvent {
@@ -543,6 +553,7 @@ public class HikeConstants {
 		public static final String DEFAULT_SMS_DIALOG_YES = "hoSsmSY";
 		public static final String DEFAULT_SMS_DIALOG_NO = "hoSsmSN";
 		public static final String DRAWER_BUTTON = "hoSdRB";
+		public static final String EMAIL_CONVERSATION = "hoSecON";
 
 		/*
 		 * Profile screen events <screen> = profS <event> = proES, credS, notyS,
@@ -701,6 +712,10 @@ public class HikeConstants {
 		EMOTICON, STICKER, WALKIE_TALKIE, LAST_SEEN, STATUS, MOOD
 	}
 
+	public static enum EmoticonType {
+		EMOTICON, STICKERS
+	}
+	
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
 			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
 

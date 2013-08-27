@@ -20,20 +20,15 @@ import android.widget.Toast;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
-import com.bsb.hike.utils.DrawerBaseActivity;
+import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 
-public class SettingsActivity extends DrawerBaseActivity implements
-		OnItemClickListener {
+public class SettingsActivity extends HikeAppStateBaseFragmentActivity
+		implements OnItemClickListener {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings);
-
-		afterSetContentView(savedInstanceState);
-
-		TextView titleTV = (TextView) findViewById(R.id.title_centered);
-		titleTV.setText(R.string.settings);
 
 		ArrayList<String> items = new ArrayList<String>();
 		items.add(getString(R.string.notifications));
