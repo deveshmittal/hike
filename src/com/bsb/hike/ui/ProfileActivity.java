@@ -1651,6 +1651,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			return false;
 		}
 
+		final ContactInfo contactInfo = tempContactInfo;
+
 		optionsList.add(getString(R.string.send_message));
 		optionImagesList.add(R.drawable.ic_send_message);
 		if (!tempContactInfo.isOnhike()) {
