@@ -1,6 +1,5 @@
 package com.bsb.hike.models;
 
-import com.bsb.hike.R;
 
 public class StickerCategory {
 

@@ -3576,10 +3576,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				if (pageNum == 0
 						&& !prefs
 								.getBoolean(
-										HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+										HikeMessengerApp.SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP,
 										false)) {
-					showStickerPreviewDialog(0);
+					showStickerPreviewDialog(pageNum);
+				} else if (pageNum == 1
+						&& !prefs
+								.getBoolean(
+										HikeMessengerApp.SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP,
+										false)) {
+					showStickerPreviewDialog(pageNum);
 				} else if (pageNum != 0
+						&& pageNum != 1
 						&& (!Utils.checkIfStickerCategoryExists(
 								ChatThread.this, categoryId) || !prefs
 								.getBoolean(HikeMessengerApp.stickerCategories
@@ -3617,9 +3624,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				dialog.dismiss();
 				Editor editor = prefs.edit();
 				try {
-					if (categoryIndex == 0) {
+					if (categoryIndex == 1) {
 						editor.putBoolean(
-								HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+								HikeMessengerApp.SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP,
+								true);
+						return;
+					} else if (categoryIndex == 0) {
+						editor.putBoolean(
+								HikeMessengerApp.SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP,
 								true);
 						return;
 					}
@@ -3676,6 +3688,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		int dividerBg = 0;
 
 		switch (HikeMessengerApp.stickerCategories.get(categoryIndex).categoryResId) {
+		case R.drawable.humanoid:
 		case R.drawable.doggy:
 			resParentBg = getResources().getColor(R.color.doggy_bg);
 

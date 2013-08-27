@@ -1074,9 +1074,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			 */
 			if (sticker.getStickerIndex() != -1) {
 				holder.stickerImage.setVisibility(View.VISIBLE);
-				holder.stickerImage
-						.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS[sticker
-								.getStickerIndex()]);
+				if (sticker.getCategoryIndex() == 1) {
+					holder.stickerImage
+							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+									.getStickerIndex()]);
+				} else if (sticker.getCategoryIndex() == 0) {
+					holder.stickerImage
+							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+									.getStickerIndex()]);
+				}
 			} else {
 				String categoryId = sticker.getCategoryId();
 				String stickerId = sticker.getStickerId();

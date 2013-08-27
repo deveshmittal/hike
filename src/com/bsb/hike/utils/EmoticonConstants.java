@@ -474,14 +474,32 @@ public class EmoticonConstants {
 		moodMapping.put(40, R.drawable.mood_41_sick);
 	}
 
+	public static final int[] LOCAL_STICKER_RES_IDS_1 = {
+			R.drawable.sticker_9_love1, R.drawable.sticker_10_love2,
+			R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
+			R.drawable.sticker_13_bored, R.drawable.sticker_14_angry,
+			R.drawable.sticker_15_strangle, R.drawable.sticker_16_shocked,
+			R.drawable.sticker_17_hurray, R.drawable.sticker_18_yawning };
 
-	public static final int[] LOCAL_STICKER_RES_IDS = {
+	public static final int[] LOCAL_STICKER_SMALL_RES_IDS_1 = {
+			R.drawable.sticker_9_love1, R.drawable.sticker_10_love2,
+			R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
+			R.drawable.sticker_13_bored, R.drawable.sticker_14_angry,
+			R.drawable.sticker_15_strangle, R.drawable.sticker_16_shocked,
+			R.drawable.sticker_17_hurray, R.drawable.sticker_18_yawning };
+
+	public static final String[] LOCAL_STICKER_IDS_1 = { "001_love1.png",
+			"002_love2.png", "003_teasing.png", "004_rofl.png",
+			"005_bored.png", "006_angry.png", "007_strangle.png",
+			"008_shocked.png", "009_hurray.png", "010_yawning.png" };
+
+	public static final int[] LOCAL_STICKER_RES_IDS_2 = {
 			R.drawable.sticker_1_hi, R.drawable.sticker_2_thumbsup,
 			R.drawable.sticker_3_drooling, R.drawable.sticker_4_devilsmile,
 			R.drawable.sticker_5_sorry, R.drawable.sticker_6_urgh,
 			R.drawable.sticker_7_confused, R.drawable.sticker_8_dreaming, };
 
-	public static final int[] LOCAL_STICKER_SMALL_RES_IDS = {
+	public static final int[] LOCAL_STICKER_SMALL_RES_IDS_2 = {
 			R.drawable.sticker_small_1_hi, R.drawable.sticker_small_2_thumbsup,
 			R.drawable.sticker_small_3_drooling,
 			R.drawable.sticker_small_4_devilsmile,
@@ -489,24 +507,26 @@ public class EmoticonConstants {
 			R.drawable.sticker_small_7_confused,
 			R.drawable.sticker_small_8_dreaming };
 
-	public static final String[] LOCAL_STICKER_IDS = { "001_hi.png",
+	public static final String[] LOCAL_STICKER_IDS_2 = { "001_hi.png",
 			"002_thumbsup.png", "003_drooling.png", "004_devilsmile.png",
 			"005_sorry.png", "006_urgh.png", "007_confused.png",
 			"008_dreaming.png", };
 
-	public static final String[] STICKER_CATEGORY_IDS = { "doggy", "kitty",
-			"expressions", HikeConstants.BOLLYWOOD_CATEGORY, "rageface" };
+	public static final String[] STICKER_CATEGORY_IDS = { "humanoid", "doggy",
+			"kitty", "expressions", HikeConstants.BOLLYWOOD_CATEGORY,
+			"rageface" };
 
-	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.doggy,
-			R.drawable.kitty, R.drawable.expressions, R.drawable.bollywood,
-			R.drawable.rageface };
+	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.humanoid,
+			R.drawable.doggy, R.drawable.kitty, R.drawable.expressions,
+			R.drawable.bollywood, R.drawable.rageface };
 
 	public static final int[] STICKER_CATEGORY_PREVIEW_RES_IDS = {
-			R.drawable.preview_doggy, R.drawable.preview_kitty,
-			R.drawable.preview_expressions, R.drawable.preview_bollywood,
-			R.drawable.preview_rageface };
+			R.drawable.preview_doggy, R.drawable.preview_doggy,
+			R.drawable.preview_kitty, R.drawable.preview_expressions,
+			R.drawable.preview_bollywood, R.drawable.preview_rageface };
 
 	public static final String[] STICKER_DOWNLOAD_PREF = {
-			"doggyDownloadShown", "kittyDownloadShown", "expDownloadShown",
-			"bollywoodDownloadShown", "rfDownloadShown" };
+			"humanoidDownloadShown", "doggyDownloadShown",
+			"kittyDownloadShown", "expDownloadShown", "bollywoodDownloadShown",
+			"rfDownloadShown" };
 }

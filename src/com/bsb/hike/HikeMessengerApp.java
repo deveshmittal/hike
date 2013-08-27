@@ -222,9 +222,13 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static final String REMOVED_CATGORY_IDS = "removedCategoryIds";
 
-	public static final String SHOWN_DEFAULT_STICKER_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
+	public static final String SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP = "shownDefaultStickerCategoryPopup";
+
+	public static final String SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP = "shownDefaultStickerHumanoidCategoryPopup";
 
 	public static final String FIRST_CATEGORY_INSERT_TO_DB = "firstCategoryInsertedToDB";
+
+	public static final String SECOND_CATEGORY_INSERT_TO_DB = "secondCategoryInsertedToDB";
 
 	public static final String SERVER_TIME_OFFSET = "serverTimeOffset";
 
@@ -523,9 +527,17 @@ public class HikeMessengerApp extends Application implements Listener {
 
 		if (!preferenceManager.getBoolean(FIRST_CATEGORY_INSERT_TO_DB, false)) {
 			HikeConversationsDatabase.getInstance()
-					.insertFirstStickerCategory();
+					.insertDoggyStickerCategory();
 			Editor editor = preferenceManager.edit();
 			editor.putBoolean(FIRST_CATEGORY_INSERT_TO_DB, true);
+			editor.commit();
+		}
+
+		if (!preferenceManager.getBoolean(SECOND_CATEGORY_INSERT_TO_DB, false)) {
+			HikeConversationsDatabase.getInstance()
+					.insertHumanoidStickerCategory();
+			Editor editor = preferenceManager.edit();
+			editor.putBoolean(SECOND_CATEGORY_INSERT_TO_DB, true);
 			editor.commit();
 		}
 
