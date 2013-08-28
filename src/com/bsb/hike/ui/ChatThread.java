@@ -1338,17 +1338,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		mLastSeenView = (TextView) actionBarView
 				.findViewById(R.id.contact_status);
 
+		mLastSeenView.setVisibility(View.VISIBLE);
+
 		if (mConversation instanceof GroupConversation) {
 			int numActivePeople = ((GroupConversation) mConversation)
 					.getGroupMemberAliveCount();
 			if (numActivePeople > 0) {
-				mLastSeenView.setVisibility(View.VISIBLE);
 				/*
 				 * Adding 1 to count the user.
 				 */
 				mLastSeenView.setText(getString(R.string.num_people,
 						(numActivePeople + 1)));
 			}
+		} else {
+			mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike
+					: R.string.on_sms);
 		}
 
 		avatar.setImageDrawable(IconCacheManager.getInstance()
@@ -2017,9 +2021,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					if (lastSeenString == null) {
-						mLastSeenView.setVisibility(View.GONE);
+						mLastSeenView
+								.setText(mConversation.isOnhike() ? R.string.on_hike
+										: R.string.on_sms);
 					} else {
-						mLastSeenView.setVisibility(View.VISIBLE);
 						mLastSeenView.setText(lastSeenString);
 
 						if (tipView == null
