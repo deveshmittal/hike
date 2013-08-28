@@ -133,6 +133,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 	private ContactInfo contactInfo;
 	private boolean isBlocked;
 	private Dialog groupEditDialog;
+	private boolean showingRequestItem = false;
 
 	private static enum ProfileType {
 		USER_PROFILE, // The user profile screen
@@ -379,6 +380,14 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		profileItems.add(new ProfileItem.ProfileStatusItem(
 				ProfileItem.HEADER_ID));
 
+		showingRequestItem = false;
+		if (!contactInfo.isOnhike()
+				|| contactInfo.getFavoriteType() != FavoriteType.FRIEND) {
+			profileItems.add(new ProfileItem.ProfileStatusItem(
+					ProfileItem.REQUEST_ID));
+			showingRequestItem = true;
+		}
+
 		if (showContactsUpdates(contactInfo)) {
 
 			addStatusMessageAsProfileItems(HikeConversationsDatabase
@@ -434,10 +443,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 		httpRequestURL = "/group/" + groupConversation.getMsisdn();
 
 		profileItems = new ArrayList<ProfileItem>();
+		setupGroupProfileList();
+
 		profileAdapter = new ProfileAdapter(this, profileItems,
 				groupConversation, null, false);
-
-		setupGroupProfileList();
 
 		profileContent = (ListView) findViewById(R.id.profile_content);
 		profileContent.setAdapter(profileAdapter);
@@ -491,8 +500,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 		isGroupOwner = userInfo.getContactInfo().getMsisdn()
 				.equals(groupConversation.getGroupOwner());
-
-		profileAdapter.notifyDataSetChanged();
 	}
 
 	private void setupEditScreen() {
@@ -1158,6 +1165,19 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 						: HikePubSub.REJECT_FRIEND_REQUEST, favoriteToggle);
 	}
 
+	public void onTextButtonClick(View v) {
+		if (contactInfo.isOnhike()) {
+			contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
+
+			Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
+					contactInfo, contactInfo.getFavoriteType());
+			HikeMessengerApp.getPubSub().publish(HikePubSub.FAVORITE_TOGGLED,
+					favoriteToggle);
+		} else {
+			inviteToHike(contactInfo.getMsisdn());
+		}
+	}
+
 	public void onHeaderButtonClicked(View v) {
 		if (profileType == ProfileType.USER_PROFILE
 				|| profileType == ProfileType.GROUP_INFO) {
@@ -1468,10 +1488,13 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				String msisdn = ((JSONObject) object)
 						.optString(HikeConstants.DATA);
 				this.participantMap.remove(msisdn);
+
+				setupGroupProfileList();
+
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						setupGroupProfileList();
+						profileAdapter.notifyDataSetChanged();
 					}
 				});
 			}
@@ -1499,10 +1522,11 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					participantMap.put(msisdn,
 							new GroupParticipant(participant));
 				}
+				setupGroupProfileList();
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						setupGroupProfileList();
+						profileAdapter.notifyDataSetChanged();
 					}
 				});
 			}
@@ -1551,14 +1575,16 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 				groupParticipant.getContactInfo().setOnhike(
 						HikePubSub.USER_JOINED.equals(type));
 			}
+
+			if (profileType == ProfileType.GROUP_INFO) {
+				setupGroupProfileList();
+			} else {
+				setupContactProfileList();
+			}
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if (profileType == ProfileType.GROUP_INFO) {
-						setupGroupProfileList();
-					} else {
-						profileAdapter.notifyDataSetChanged();
-					}
+					profileAdapter.notifyDataSetChanged();
 				}
 			});
 		} else if (HikePubSub.STATUS_MESSAGE_RECEIVED.equals(type)) {
@@ -1568,7 +1594,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					|| statusMessage.getStatusMessageType() == StatusMessageType.USER_ACCEPTED_FRIEND_REQUEST) {
 				return;
 			}
-			profileItems.add(1,
+			profileItems.add(showingRequestItem ? 2 : 1,
 					new ProfileItem.ProfileStatusItem(statusMessage));
 			runOnUiThread(new Runnable() {
 

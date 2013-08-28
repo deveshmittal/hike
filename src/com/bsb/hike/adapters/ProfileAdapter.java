@@ -38,7 +38,7 @@ import com.bsb.hike.utils.Utils;
 public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 
 	private static enum ViewType {
-		HEADER, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS
+		HEADER, STATUS, PROFILE_PIC_UPDATE, GROUP_PARTICIPANT, EMPTY_STATUS, REQUEST
 	}
 
 	private Context context;
@@ -81,6 +81,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			viewType = ViewType.HEADER;
 		} else if (ProfileItem.EMPTY_ID == itemId) {
 			viewType = ViewType.EMPTY_STATUS;
+		} else if (ProfileItem.REQUEST_ID == itemId) {
+			viewType = ViewType.REQUEST;
 		} else {
 			if (groupProfile) {
 				viewType = ViewType.GROUP_PARTICIPANT;
@@ -141,12 +143,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile);
 				viewHolder.icon = (ImageView) v
 						.findViewById(R.id.change_profile);
-
-				viewHolder.imageBtn1 = (ImageButton) v
-						.findViewById(R.id.yes_btn);
-				viewHolder.imageBtn2 = (ImageButton) v
-						.findViewById(R.id.no_btn);
-
 				break;
 
 			case GROUP_PARTICIPANT:
@@ -186,6 +182,24 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.btn2 = (Button) v
 						.findViewById(R.id.add_sms_friend_btn);
 				break;
+
+			case REQUEST:
+				v = inflater
+						.inflate(R.layout.profile_friend_request_item, null);
+
+				viewHolder.icon = (ImageView) v.findViewById(R.id.avatar);
+
+				viewHolder.text = (TextView) v.findViewById(R.id.name);
+				viewHolder.subText = (TextView) v.findViewById(R.id.info);
+				viewHolder.extraInfo = (TextView) v
+						.findViewById(R.id.extra_info);
+
+				viewHolder.imageBtn1 = (ImageButton) v
+						.findViewById(R.id.yes_btn);
+				viewHolder.imageBtn2 = (ImageButton) v
+						.findViewById(R.id.no_btn);
+
+				viewHolder.btn1 = (Button) v.findViewById(R.id.text_btn);
 			}
 
 			v.setTag(viewHolder);
@@ -228,31 +242,26 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 
 			if (mContactInfo != null) {
 				if (mContactInfo.isOnhike()) {
-					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
-						viewHolder.subText.setVisibility(View.VISIBLE);
-						viewHolder.subText
-								.setText(R.string.sent_you_friend_request);
-
-						viewHolder.btnContainer.setVisibility(View.VISIBLE);
-
-						viewHolder.imageBtn1.setTag(mContactInfo);
-						viewHolder.imageBtn2.setTag(mContactInfo);
-					} else if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED) {
-
-					} else if (mContactInfo.getFavoriteType() == FavoriteType.FRIEND) {
-						viewHolder.subText.setText(Utils
-								.getLastSeenTimeAsString(context,
-										mContactInfo.getLastSeenTime(),
-										mContactInfo.getOffline()));
-					} else {
-						if (mContactInfo.getHikeJoinTime() > 0) {
-							viewHolder.subText.setText(context.getString(
-									R.string.on_hike_since,
-									mContactInfo.getFormattedHikeJoinTime()));
-						} else {
-							viewHolder.subText.setText(R.string.on_hike);
-						}
+					String subText = null;
+					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED
+							|| mContactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+						subText = Utils.getLastSeenTimeAsString(context,
+								mContactInfo.getLastSeenTime(),
+								mContactInfo.getOffline());
 					}
+
+					if (TextUtils.isEmpty(subText)) {
+						subText = context.getString(R.string.on_hike_since,
+								mContactInfo.getFormattedHikeJoinTime());
+					}
+
+					if (TextUtils.isEmpty(subText)) {
+						subText = context.getString(R.string.on_hike);
+					}
+
+					viewHolder.subText.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(subText);
+
 				} else {
 					viewHolder.subText.setText(R.string.on_sms);
 				}
@@ -451,6 +460,74 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			}
 
 			break;
+
+		case REQUEST:
+			String contactFirstName = mContactInfo.getFirstName();
+
+			viewHolder.icon.setImageDrawable(IconCacheManager.getInstance()
+					.getIconForMSISDN(mContactInfo.getMsisdn(), true));
+
+			viewHolder.text.setText(contactFirstName);
+
+			if (mContactInfo.isOnhike()) {
+				switch (mContactInfo.getFavoriteType()) {
+				case NOT_FRIEND:
+				case REQUEST_SENT_REJECTED:
+				case REQUEST_RECEIVED_REJECTED:
+					viewHolder.subText.setText(mContactInfo.getMsisdn());
+
+					viewHolder.imageBtn1.setVisibility(View.GONE);
+					viewHolder.imageBtn2.setVisibility(View.GONE);
+
+					viewHolder.btn1.setVisibility(View.VISIBLE);
+					viewHolder.btn1.setText(R.string.add);
+					viewHolder.btn1
+							.setBackgroundResource(R.drawable.bg_blue_btn_selector);
+
+					viewHolder.extraInfo.setVisibility(View.VISIBLE);
+					viewHolder.extraInfo.setText(context.getString(
+							R.string.add_as_friend_profile, contactFirstName));
+					break;
+				case REQUEST_RECEIVED:
+					viewHolder.subText
+							.setText(R.string.sent_you_friend_request);
+
+					viewHolder.imageBtn1.setVisibility(View.VISIBLE);
+					viewHolder.imageBtn2.setVisibility(View.VISIBLE);
+
+					viewHolder.btn1.setVisibility(View.GONE);
+
+					viewHolder.extraInfo.setVisibility(View.GONE);
+					break;
+
+				case REQUEST_SENT:
+					viewHolder.subText.setText(R.string.request_pending);
+
+					viewHolder.imageBtn1.setVisibility(View.GONE);
+					viewHolder.imageBtn2.setVisibility(View.GONE);
+					viewHolder.btn1.setVisibility(View.GONE);
+					viewHolder.extraInfo.setVisibility(View.GONE);
+					break;
+				}
+			} else {
+				if (mContactInfo.getMsisdn().equals(mContactInfo.getId())) {
+					viewHolder.subText.setText(R.string.on_sms);
+				} else {
+					viewHolder.subText.setText(mContactInfo.getMsisdn());
+				}
+
+				viewHolder.imageBtn1.setVisibility(View.GONE);
+				viewHolder.imageBtn2.setVisibility(View.GONE);
+
+				viewHolder.btn1.setVisibility(View.VISIBLE);
+				viewHolder.btn1.setText(R.string.invite_1);
+				viewHolder.btn1
+						.setBackgroundResource(R.drawable.bg_green_btn_selector);
+
+				viewHolder.extraInfo.setVisibility(View.VISIBLE);
+				viewHolder.extraInfo.setText(R.string.invite_to_hike);
+			}
+			break;
 		}
 
 		return v;
@@ -459,6 +536,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 	private class ViewHolder {
 		TextView text;
 		TextView subText;
+		TextView extraInfo;
 		ImageView image;
 		ImageView icon;
 		ImageView iconFrame;
@@ -466,7 +544,6 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		Button btn2;
 		ImageButton imageBtn1;
 		ImageButton imageBtn2;
-		ViewGroup btnContainer;
 		TextView timeStamp;
 	}
 
