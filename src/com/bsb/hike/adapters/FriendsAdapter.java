@@ -210,7 +210,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		friendsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(filteredFriendsList.size()),
-				context.getString(R.string.friends), null);
+				context.getString(R.string.friends_lower_case), null);
 		completeList.add(friendsSection);
 
 		completeList.addAll(filteredFriendsList);
