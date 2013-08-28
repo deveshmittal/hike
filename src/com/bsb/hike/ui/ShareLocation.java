@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.SearchManager.OnDismissListener;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -46,6 +47,7 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.Utils;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -83,53 +85,76 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 	private final int GPS_ENABLED = 1;
 	private final int GPS_DISABLED = 2;
 	private final int NO_LOCATION_DEVICE_ENABLED = 0;
+	private Dialog playServiceErrordialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.share_location);
-		gpsDialogShown = savedInstanceState != null
-				&& savedInstanceState
-						.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
-		initMyLocationManager();
-		listview = (ListView) findViewById(R.id.itemListView);
-		list = new ArrayList<ItemDetails>();
-		adapter = new ItemListBaseAdapter(this, list);
-		listview.setAdapter(adapter);
-		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, final View view,
-					int position, long id) {
-				lastMarker.setVisible(false);
-				Marker currentMarker = adapter.getMarker(position);
-				currentMarker.setVisible(true);
-				currentMarker.setIcon(BitmapDescriptorFactory
-						.fromResource(R.drawable.yellow_point));
-				lastMarker = currentMarker;
-				map.animateCamera(CameraUpdateFactory.newLatLng(currentMarker
-						.getPosition()));
-			}
-		});
-		if (map == null) {
-			/*
-			 * if isGooglePlayServicesAvailable method returns
-			 * 2=ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED this implies
-			 * we need to update our playservice library if it returns
-			 * 0=ConnectionResult.SUCCESS this implies we have correct version
-			 * and working playservice api
-			 */
-			Log.d(getClass().getSimpleName(),
-					"is play service available = "
-							+ Integer
-									.valueOf(
-											GooglePlayServicesUtil
-													.isGooglePlayServicesAvailable(this))
-									.toString());
+		/*
+		 * if isGooglePlayServicesAvailable method returns
+		 * 2=ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED this implies we
+		 * need to update our playservice library if it returns
+		 * 0=ConnectionResult.SUCCESS this implies we have correct version and
+		 * working playservice api
+		 */
+		Log.d(getClass().getSimpleName(),
+				"is play service available = "
+						+ Integer.valueOf(
+								GooglePlayServicesUtil
+										.isGooglePlayServicesAvailable(this))
+								.toString());
+
+		// Getting Google Play availability status
+		int status = GooglePlayServicesUtil
+				.isGooglePlayServicesAvailable(getBaseContext());
+
+		// Showing status
+		if (status != ConnectionResult.SUCCESS) { // Google Play Services// are
+													// not available
+			int requestCode = 10;
+			playServiceErrordialog = GooglePlayServicesUtil.getErrorDialog(
+					status, this, requestCode);
+			playServiceErrordialog.show();
+			playServiceErrordialog
+					.setOnDismissListener(new Dialog.OnDismissListener() {
+
+						@Override
+						public void onDismiss(DialogInterface arg0) {
+							finish();
+						}
+
+					});
+			return;
+
+		} else { // Google Play Services are available
+
+			setContentView(R.layout.share_location);
+			gpsDialogShown = savedInstanceState != null
+					&& savedInstanceState
+							.getBoolean(HikeConstants.Extras.GPS_DIALOG_SHOWN);
+			initMyLocationManager();
+			listview = (ListView) findViewById(R.id.itemListView);
+			list = new ArrayList<ItemDetails>();
+			adapter = new ItemListBaseAdapter(this, list);
+			listview.setAdapter(adapter);
+			listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+				@Override
+				public void onItemClick(AdapterView<?> parent, final View view,
+						int position, long id) {
+					lastMarker.setVisible(false);
+					Marker currentMarker = adapter.getMarker(position);
+					currentMarker.setVisible(true);
+					currentMarker.setIcon(BitmapDescriptorFactory
+							.fromResource(R.drawable.yellow_point));
+					lastMarker = currentMarker;
+					map.animateCamera(CameraUpdateFactory
+							.newLatLng(currentMarker.getPosition()));
+				}
+			});
 
 			MapFragment = (SupportMapFragment) getSupportFragmentManager()
 					.findFragmentById(R.id.map);
 			map = MapFragment.getMap();
-
 			map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 			map.getUiSettings().setZoomControlsEnabled(false);
 			map.getUiSettings().setCompassEnabled(false);
@@ -152,7 +177,6 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 				if (myLocation != null)
 					updateNearbyPlaces();
 			}
-
 		}
 
 		Button fullScreenButton = (Button) findViewById(R.id.full_screen_button);
@@ -219,22 +243,24 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		
+
 		if (item.getItemId() == R.id.sendLocation) {
 			sendSelectedLocation();
 		}
 
 		return true;
 	}
-	
+
 	public void sendSelectedLocation() {
 		if (lastMarker == null) {
+			Log.d("ShareLocation", "sendSelectedLocation");
 			Toast.makeText(getApplicationContext(), R.string.select_location,
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		Intent result = new Intent();
-		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL, HikeConstants.DEFAULT_ZOOM_LEVEL);
+		result.putExtra(HikeConstants.Extras.ZOOM_LEVEL,
+				HikeConstants.DEFAULT_ZOOM_LEVEL);
 		result.putExtra(HikeConstants.Extras.LATITUDE,
 				lastMarker.getPosition().latitude);
 		result.putExtra(HikeConstants.Extras.LONGITUDE,
@@ -243,7 +269,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 		finish();
 	}
-	
+
 	protected void onSaveInstanceState(Bundle outState) {
 
 		outState.putBoolean(HikeConstants.Extras.IS_TEXT_SEARCH, isTextSearch);
@@ -280,32 +306,28 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 					userMarker.setPosition(new LatLng(
 							newLocation.getLatitude(), newLocation
 									.getLongitude()));
-					Log.d(getClass().getSimpleName(),
+					Log.d("ShareLocation",
 							"is Location changed = "
 									+ Double.valueOf(
 											myLocation.distanceTo(newLocation))
 											.toString());
 					if ((currentLocationDevice == GPS_ENABLED && myLocation
-							.distanceTo(newLocation) > 300)
+							.distanceTo(newLocation) > 50)
 							|| (currentLocationDevice == GPS_DISABLED && myLocation
-									.distanceTo(newLocation) > 1000)) {
+									.distanceTo(newLocation) > 500)) {
 
 						myLocation = newLocation;
 						userMarker.setPosition(new LatLng(newLocation
 								.getLatitude(), newLocation.getLongitude()));
-						updateLocationAddress(myLocation.getLongitude(),
-								myLocation.getLatitude(), userMarker);
+						updateLocationAddress(myLocation.getLatitude(),
+								myLocation.getLongitude(), userMarker);
 						// do something on location change
-						Log.d(getClass().getSimpleName(),
-								"my longi in loc listener = "
-										+ Double.valueOf(
-												newLocation.getLongitude())
-												.toString());
-						Log.d(getClass().getSimpleName(),
-								"my lati in loc listener = "
-										+ Double.valueOf(
-												newLocation.getLatitude())
-												.toString());
+						Log.d("ShareLocation", "my longi in loc listener = "
+								+ Double.valueOf(newLocation.getLongitude())
+										.toString());
+						Log.d("ShareLocation", "my lati in loc listener = "
+								+ Double.valueOf(newLocation.getLatitude())
+										.toString());
 						if (!isTextSearch)
 							updateNearbyPlaces();
 					}
@@ -325,16 +347,13 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
 			}
 		};
-		try {
-			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
-					50, locListener);
-			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
-					0, 1000, locListener);
-
-		} catch (IllegalStateException e) {
-			Log.d(getClass().getSimpleName(), "No listener found");
-			showLocationDialog();
-		}
+		/*
+		 * try {
+		 * 
+		 * 
+		 * } catch (IllegalStateException e) { Log.d(getClass().getSimpleName(),
+		 * "No listener found"); showLocationDialog(); }
+		 */
 	}
 
 	private void updateMyLocation() {
@@ -345,6 +364,8 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 
 		if (currentLocationDevice == GPS_ENABLED) {
 			Log.d(getClass().getSimpleName(), "gps provider getting location");
+			locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,
+					0, locListener);
 			myLocation = locManager
 					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 			if (myLocation == null) {
@@ -355,6 +376,8 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		}
 		if (currentLocationDevice == GPS_DISABLED) {
 			Log.d(getClass().getSimpleName(), "gps disabled");
+			locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
+					0, 0, locListener);
 			myLocation = locManager
 					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 			if (myLocation == null) {
@@ -505,11 +528,7 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			findViewById(R.id.progress_dialog).setVisibility(View.VISIBLE);
-		}
 
-		// process data retrieved from doInBackground
-		protected void onPostExecute(Integer totalPlaces) {
 			for (int pm = 1; pm < placeMarkers.length; pm++) {
 				if (placeMarkers[pm] != null) {
 					placeMarkers[pm].remove();
@@ -526,6 +545,15 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 			adapter.notifyDataSetChanged();
 			Log.d(getClass().getSimpleName(), "list length after = "
 					+ Integer.valueOf(list.size()).toString());
+
+			Log.d(getClass().getSimpleName(),
+					"GetPlaces Async Task do in background");
+			findViewById(R.id.progress_dialog).setVisibility(View.VISIBLE);
+		}
+
+		// process data retrieved from doInBackground
+		protected void onPostExecute(Integer totalPlaces) {
+
 			for (int p = 0; p < totalPlaces; p++) {
 				if (places[p] != null) {
 					placeMarkers[p] = map.addMarker(places[p]);
@@ -766,10 +794,15 @@ public class ShareLocation extends HikeAppStateBaseFragmentActivity {
 					.getJSONfromURL("http://maps.googleapis.com/maps/api/geocode/json?latlng="
 							+ lat + "," + lng + "&sensor=true");
 			String Status = resultObj.getString("status");
+			Log.d("ShareLocation",
+					"url = "
+							+ "http://maps.googleapis.com/maps/api/geocode/json?latlng="
+							+ lat + "," + lng + "&sensor=true");
 			if (Status.equalsIgnoreCase("OK")) {
 				JSONArray Results = resultObj.getJSONArray("results");
 				JSONObject zero = Results.getJSONObject(0);
 				address = zero.getString("formatted_address");
+				Log.d("ShareLocation", "my address = " + address);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
