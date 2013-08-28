@@ -157,6 +157,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				v = inflater.inflate(R.layout.profile_timeline_item, null);
 
 				viewHolder.icon = (ImageView) v.findViewById(R.id.avatar);
+				viewHolder.iconFrame = (ImageView) v
+						.findViewById(R.id.avatar_frame);
 
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
@@ -383,9 +385,11 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			if (statusMessage.hasMood()) {
 				viewHolder.icon.setImageResource(EmoticonConstants.moodMapping
 						.get(statusMessage.getMoodId()));
+				viewHolder.iconFrame.setVisibility(View.GONE);
 			} else {
 				viewHolder.icon.setImageDrawable(IconCacheManager.getInstance()
 						.getIconForMSISDN(statusMessage.getMsisdn(), true));
+				viewHolder.iconFrame.setVisibility(View.VISIBLE);
 			}
 			break;
 
@@ -457,6 +461,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		TextView subText;
 		ImageView image;
 		ImageView icon;
+		ImageView iconFrame;
 		Button btn1;
 		Button btn2;
 		ImageButton imageBtn1;

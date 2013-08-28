@@ -114,6 +114,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 				viewHolder.avatar = (ImageView) convertView
 						.findViewById(R.id.avatar);
+				viewHolder.avatarFrame = (ImageView) convertView
+						.findViewById(R.id.avatar_frame);
 
 				viewHolder.name = (TextView) convertView
 						.findViewById(R.id.name);
@@ -160,14 +162,17 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		case OTHER_UPDATE:
 			if (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP) {
 				viewHolder.avatar.setImageResource(R.drawable.ic_protip);
+				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else if (statusMessage.hasMood()) {
 				viewHolder.avatar
 						.setImageResource(EmoticonConstants.moodMapping
 								.get(statusMessage.getMoodId()));
+				viewHolder.avatarFrame.setVisibility(View.GONE);
 			} else {
 				viewHolder.avatar.setImageDrawable(IconCacheManager
 						.getInstance().getIconForMSISDN(
 								statusMessage.getMsisdn(), true));
+				viewHolder.avatarFrame.setVisibility(View.VISIBLE);
 			}
 			viewHolder.name
 					.setText(userMsisdn.equals(statusMessage.getMsisdn()) ? "Me"
@@ -320,6 +325,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 	private class ViewHolder {
 		ImageView avatar;
+		ImageView avatarFrame;
 		TextView name;
 		TextView mainInfo;
 		TextView extraInfo;
