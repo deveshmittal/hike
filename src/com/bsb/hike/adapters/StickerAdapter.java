@@ -95,7 +95,7 @@ public class StickerAdapter extends PagerAdapter implements
 
 		final String categoryId = Utils.getCategoryIdForIndex(position);
 
-		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) ChatThread.stickerTaskMap
+		final DownloadStickerTask currentStickerTask = (DownloadStickerTask) HikeMessengerApp.stickerTaskMap
 				.get(categoryId);
 
 		if (currentStickerTask != null
@@ -124,7 +124,7 @@ public class StickerAdapter extends PagerAdapter implements
 							activity, position, downloadTypeBeforeFail);
 					downloadStickerTask.execute();
 
-					ChatThread.stickerTaskMap.put(categoryId,
+					HikeMessengerApp.stickerTaskMap.put(categoryId,
 							downloadStickerTask);
 					setupStickerPage(parent, position, false, null);
 				}
@@ -207,7 +207,7 @@ public class StickerAdapter extends PagerAdapter implements
 											.hasReachedStickerEnd(categoryId)) {
 								return;
 							}
-							if (!ChatThread.stickerTaskMap
+							if (!HikeMessengerApp.stickerTaskMap
 									.containsKey(categoryId)) {
 								if (firstVisibleItem + visibleItemCount >= totalItemCount - 1) {
 									Log.d(getClass().getSimpleName(),
@@ -220,7 +220,7 @@ public class StickerAdapter extends PagerAdapter implements
 											DownloadType.MORE_STICKERS);
 									downloadStickerTask.execute();
 
-									ChatThread.stickerTaskMap.put(categoryId,
+									HikeMessengerApp.stickerTaskMap.put(categoryId,
 											downloadStickerTask);
 									stickerPageAdapter.notifyDataSetChanged();
 								}

@@ -120,8 +120,8 @@ public class ConversationsAdapter extends ArrayAdapter<Conversation> {
 											.getGroupParticipantMsisdn()),
 							markedUp);
 				}
-				imgStatus.setVisibility(ChatThread.fileTransferTaskMap != null
-						&& ChatThread.fileTransferTaskMap.containsKey(message
+				imgStatus.setVisibility(HikeMessengerApp.fileTransferTaskMap != null
+						&& HikeMessengerApp.fileTransferTaskMap.containsKey(message
 								.getMsgID()) ? View.GONE : View.VISIBLE);
 			} else if (message.getParticipantInfoState() == ParticipantInfoState.PARTICIPANT_JOINED) {
 				JSONArray participantInfoArray = metadata

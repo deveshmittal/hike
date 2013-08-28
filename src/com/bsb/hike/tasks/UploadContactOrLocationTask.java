@@ -216,7 +216,7 @@ public class UploadContactOrLocationTask extends FileTransferTaskBase {
 		HikeMessengerApp.getPubSub().publish(HikePubSub.FILE_MESSAGE_CREATED,
 				convMessage);
 
-		ChatThread.fileTransferTaskMap.put(convMessage.getMsgID(), this);
+		HikeMessengerApp.fileTransferTaskMap.put(convMessage.getMsgID(), this);
 		return convMessage;
 	}
 
@@ -247,7 +247,7 @@ public class UploadContactOrLocationTask extends FileTransferTaskBase {
 	@Override
 	protected void onPostExecute(FTResult result) {
 		if (convMessage != null) {
-			ChatThread.fileTransferTaskMap.remove(convMessage.getMsgID());
+			HikeMessengerApp.fileTransferTaskMap.remove(convMessage.getMsgID());
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
 		}

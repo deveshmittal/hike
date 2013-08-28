@@ -659,6 +659,7 @@ public class HikeConstants {
 		public static final String GROUP_CHAT_KICK = "gck";
 		public static final String ACCOUNT_CONFIG = "ac";
 		public static final String REWARDS = "rewards";
+		public static final String GAMES ="games";
 		public static final String DISPLAY_PIC = "dp";
 		public static final String STATUS_UPDATE = "su";
 		public static final String ACTION = "action";

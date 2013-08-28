@@ -144,7 +144,7 @@ public class DownloadStickerTask extends StickerTaskBase {
 
 	@Override
 	protected void onPostExecute(FTResult result) {
-		ChatThread.stickerTaskMap.remove(catId);
+		HikeMessengerApp.stickerTaskMap.remove(catId);
 		if (result != FTResult.SUCCESS) {
 			HikeMessengerApp.getPubSub()
 					.publish(

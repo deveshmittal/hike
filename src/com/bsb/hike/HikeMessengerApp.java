@@ -57,7 +57,9 @@ import com.bsb.hike.ui.WelcomeActivity;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.ActivityTimeLogger;
 import com.bsb.hike.utils.EmoticonConstants;
+import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.SmileyParser;
+import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.ToastListener;
 import com.bsb.hike.utils.TrackerUtil;
 import com.bsb.hike.utils.Utils;
@@ -182,7 +184,7 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String REWARDS_TOKEN = "rewardsToken";
 	public static final String SHOW_REWARDS = "showRewards";
 	public static final String TALK_TIME = "talkTime";
-
+	
 	public static final String GCK_SHOWN = "gckShown";
 	public static final String ADD_CONTACT_SHOWN = "addContactShown";
 
@@ -293,6 +295,11 @@ public class HikeMessengerApp extends Application implements Listener {
 	private ToastListener toastListener;
 
 	private ActivityTimeLogger activityTimeLogger;
+	
+	public static Map<Long, FileTransferTaskBase> fileTransferTaskMap;
+
+	public static Map<String, StickerTaskBase> stickerTaskMap;
+
 
 	class IncomingHandler extends Handler {
 		@Override
@@ -330,6 +337,13 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	static {
 		mPubSubInstance = new HikePubSub();
+		if (HikeMessengerApp.fileTransferTaskMap == null) {
+			HikeMessengerApp.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
+		}
+
+		if (HikeMessengerApp.stickerTaskMap == null) {
+			HikeMessengerApp.stickerTaskMap = new HashMap<String, StickerTaskBase>();
+		}
 	}
 
 	public void sendToService(Message message) {
