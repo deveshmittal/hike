@@ -4,23 +4,26 @@
     android:layout_height="match_parent"
     android:background="@drawable/welcome_bckg" >
 
-    <ImageView
-        android:id="@+id/hike_logo"
+    <com.bsb.hike.view.CustomFontTextView
+        android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
         android:layout_marginBottom="11dp"
-        android:src="@drawable/hike_logo" />
+        android:layout_marginTop="8dp"
+        android:text="Phone"
+        android:textColor="@color/signup_white"
+        android:textSize="20dp"
+        android:textStyle="bold" />
 
     <View
         android:id="@+id/header_dropshadow"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:layout_below="@+id/hike_logo"
+        android:layout_below="@id/header"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:background="@drawable/signup_header_dropshadow" />
+        android:background="#a4006ab4" />
 
     <com.bsb.hike.view.MyViewFlipper
         android:id="@+id/signup_viewflipper"

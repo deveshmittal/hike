@@ -605,5 +605,7 @@
 	<string name="add_as_friend_profile">Would you like to add %1$s as a friend to share updates?</string>
 	<string name="request_pending">Friend request pending</string>
 	<string name="remove_from_friends">Remove from your friend list</string>
-	<string name="friends_lower_case">Friends</string>    
+	<string name="friends_lower_case">Friends</string>
+	<string name="hike_tag">Keep close friends close</string>
+	<string name="verify">Verify</string>
 </resources>
