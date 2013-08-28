@@ -2607,7 +2607,7 @@ public class Utils {
 		}
 
 	}
-	
+
 	public static JSONObject getJSONfromURL(String url) {
 
 		// initialize
