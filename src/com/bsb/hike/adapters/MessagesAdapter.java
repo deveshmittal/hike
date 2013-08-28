@@ -847,8 +847,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				&& !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn())) {
 			if (position != 0) {
 				ConvMessage previous = getItem(position - 1);
-				if (!convMessage.getGroupParticipantMsisdn().equals(
-						previous.getGroupParticipantMsisdn())) {
+				if (previous.getParticipantInfoState() == ParticipantInfoState.NO_INFO
+						&& !convMessage.getGroupParticipantMsisdn().equals(
+								previous.getGroupParticipantMsisdn())) {
 					firstMessageFromParticipant = true;
 				}
 			}
