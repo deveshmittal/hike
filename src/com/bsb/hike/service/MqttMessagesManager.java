@@ -278,11 +278,13 @@ public class MqttMessagesManager {
 
 				JSONObject metadata = jsonObj
 						.optJSONObject(HikeConstants.METADATA);
-				String groupName = metadata.optString(HikeConstants.NAME);
-				if (!TextUtils.isEmpty(groupName)) {
-					convDb.setGroupName(groupConversation.getMsisdn(),
-							groupName);
-					groupConversation.setContactName(groupName);
+				if (metadata != null) {
+					String groupName = metadata.optString(HikeConstants.NAME);
+					if (!TextUtils.isEmpty(groupName)) {
+						convDb.setGroupName(groupConversation.getMsisdn(),
+								groupName);
+						groupConversation.setContactName(groupName);
+					}
 				}
 				// Adding a key to the json signify that this was the GCJ
 				// received for group creation
