@@ -1,8 +1,11 @@
 package com.bsb.hike.ui.fragments;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,6 +13,10 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
@@ -24,12 +31,14 @@ import com.bsb.hike.HikePubSub;
 import com.bsb.hike.HikePubSub.Listener;
 import com.bsb.hike.R;
 import com.bsb.hike.adapters.FriendsAdapter;
+import com.bsb.hike.adapters.FriendsAdapter.ViewType;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ChatThread;
 
-public class FriendsFragment extends SherlockListFragment implements Listener {
+public class FriendsFragment extends SherlockListFragment implements Listener,
+		OnItemLongClickListener {
 
 	private FriendsAdapter friendsAdapter;
 
@@ -60,6 +69,7 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 		friendsAdapter = new FriendsAdapter(getActivity());
 		friendsList.setAdapter(friendsAdapter);
 
+		friendsList.setOnItemLongClickListener(this);
 		return parent;
 	}
 
@@ -276,5 +286,56 @@ public class FriendsFragment extends SherlockListFragment implements Listener {
 
 			});
 		}
+	}
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		FriendsAdapter.ViewType viewType = FriendsAdapter.ViewType.values()[friendsAdapter
+				.getItemViewType(position)];
+		if (viewType != ViewType.FRIEND) {
+			return false;
+		}
+		final ContactInfo contactInfo = friendsAdapter.getItem(position);
+
+		ArrayList<String> optionsList = new ArrayList<String>();
+
+		optionsList.add(getString(R.string.remove_from_friends));
+
+		final String[] options = new String[optionsList.size()];
+		optionsList.toArray(options);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+		ListAdapter dialogAdapter = new ArrayAdapter<CharSequence>(
+				getActivity(), R.layout.alert_item, R.id.item, options);
+
+		builder.setAdapter(dialogAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String option = options[which];
+						if (getString(R.string.remove_from_friends).equals(
+								option)) {
+							FavoriteType favoriteType;
+							if (contactInfo.getFavoriteType() == FavoriteType.FRIEND) {
+								favoriteType = FavoriteType.REQUEST_RECEIVED_REJECTED;
+							} else {
+								favoriteType = FavoriteType.NOT_FRIEND;
+							}
+							Pair<ContactInfo, FavoriteType> favoriteRemoved = new Pair<ContactInfo, FavoriteType>(
+									contactInfo, favoriteType);
+							HikeMessengerApp.getPubSub().publish(
+									HikePubSub.FAVORITE_TOGGLED,
+									favoriteRemoved);
+						}
+					}
+				});
+
+		AlertDialog alertDialog = builder.show();
+		alertDialog.getListView().setDivider(
+				getResources()
+						.getDrawable(R.drawable.ic_thread_divider_profile));
+		return true;
 	}
 }

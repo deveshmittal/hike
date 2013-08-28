@@ -604,5 +604,6 @@
     <string name="enter_valid_group_name">Please enter a valid group name</string>
 	<string name="add_as_friend_profile">Would you like to add %1$s as a friend to share updates?</string>
 	<string name="request_pending">Friend request pending</string>
+	<string name="remove_from_friends">Remove from your friend list</string>
 	<string name="friends_lower_case">Friends</string>    
 </resources>

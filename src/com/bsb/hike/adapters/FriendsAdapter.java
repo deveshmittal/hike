@@ -37,7 +37,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 	public static final String SECTION_ID = "-911";
 
-	private enum ViewType {
+	public enum ViewType {
 		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST
 	}
 
