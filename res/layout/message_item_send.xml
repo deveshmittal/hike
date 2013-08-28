@@ -135,16 +135,20 @@
                     android:src="@drawable/ic_play_audio"
                     android:visibility="gone" />
 
-            </LinearLayout>
+                <ImageView
+                    android:id="@+id/poke_sent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/msg_status_indicator"
+                    android:gravity="center_vertical"
+                    android:src="@drawable/ic_nudge_hike_sent"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="10dp"
+                    android:visibility="gone" />
 
-            <ImageView
-                android:id="@+id/poke_sent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/msg_status_indicator"
-                android:gravity="center_vertical"
-                android:src="@drawable/ic_nudge_hike_sent"
-                android:visibility="gone" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/sticker_placeholder"

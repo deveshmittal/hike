@@ -838,6 +838,10 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			return v;
 		}
 
+		if (holder.poke != null) {
+			holder.poke.setVisibility(View.GONE);
+		}
+
 		boolean firstMessageFromParticipant = false;
 		if (isGroupChat
 				&& !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn())) {
@@ -1039,11 +1043,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.messageContainer.setOnClickListener(this);
 			holder.messageContainer.setOnLongClickListener(this);
 		} else if (metadata != null && metadata.isPokeMessage()) {
-			holder.messageContainer.setVisibility(View.GONE);
+			holder.messageTextView.setVisibility(View.GONE);
+			holder.messageContainer.setVisibility(View.VISIBLE);
 			holder.poke.setVisibility(View.VISIBLE);
 			holder.poke
 					.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
-							: R.drawable.ic_nudge_hike_received);
+							: R.drawable.ic_nudge_hike_receive);
 		} else if (convMessage.isStickerMessage()) {
 			holder.messageContainer.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.GONE);
@@ -1119,6 +1124,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 
 		} else {
+			holder.messageTextView.setVisibility(View.VISIBLE);
 			holder.stickerPlaceholder.setVisibility(View.GONE);
 			holder.messageContainer.setVisibility(View.VISIBLE);
 			holder.poke.setVisibility(View.GONE);
