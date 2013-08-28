@@ -100,6 +100,16 @@ public class HikeAppStateBaseFragmentActivity extends SherlockFragmentActivity
 	}
 
 	@Override
+	public void startActivityFromFragment(Fragment fragment, Intent intent,
+			int requestCode) {
+		HikeMessengerApp.currentState = requestCode == -1
+				|| requestCode == HikeConstants.SHARE_LOCATION_CODE
+				|| requestCode == HikeConstants.CROP_RESULT ? CurrentState.NEW_ACTIVITY
+				: CurrentState.BACKGROUNDED;
+		super.startActivityFromFragment(fragment, intent, requestCode);
+	}
+
+	@Override
 	public void startActivityForResult(Intent intent, int requestCode) {
 		HikeMessengerApp.currentState = requestCode == -1
 				|| requestCode == HikeConstants.SHARE_LOCATION_CODE
