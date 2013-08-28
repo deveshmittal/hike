@@ -1451,7 +1451,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			removeSMSToggle();
 
 			setEmoticonButton();
-			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
+			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
 			mComposeView
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
 							: R.string.hike_msg);

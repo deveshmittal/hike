@@ -127,7 +127,7 @@
                     android:layout_alignBottom="@+id/tb_layout"
                     android:layout_alignParentRight="true"
                     android:onClick="onSendClick"
-                    android:background="@drawable/bg_red_btn"
+                    android:background="@drawable/bg_red_btn_selector"
                     android:src="@drawable/ic_msg_btn"
                     android:state_enabled="false" />
 
@@ -151,7 +151,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/tb_layout"
                     android:layout_alignParentLeft="true"
-                    android:background="@drawable/bg_brown_btn"
+                    android:background="@drawable/bg_brown_btn_selector"
                     android:onClick="onStickerBtnClicked"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_sticker_btn" />
