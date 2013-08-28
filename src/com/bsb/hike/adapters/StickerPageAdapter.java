@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.R;
 import com.bsb.hike.models.Sticker;
 import com.bsb.hike.tasks.DownloadStickerTask;
@@ -201,7 +202,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 			ProgressBar progressBar = (ProgressBar) convertView
 					.findViewById(R.id.download_progress);
 
-			if (ChatThread.stickerTaskMap.containsKey(categoryId)) {
+			if (HikeMessengerApp.stickerTaskMap.containsKey(categoryId)) {
 				progressBar.setVisibility(View.VISIBLE);
 				updateText.setText(R.string.updating_set);
 				convertView.setClickable(false);
@@ -218,7 +219,7 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 								activity, categoryIndex, DownloadType.UPDATE);
 						downloadStickerTask.execute();
 
-						ChatThread.stickerTaskMap.put(categoryId,
+						HikeMessengerApp.stickerTaskMap.put(categoryId,
 								downloadStickerTask);
 						notifyDataSetChanged();
 					}

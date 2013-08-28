@@ -128,7 +128,7 @@ public class DownloadSingleStickerTask extends StickerTaskBase {
 
 	@Override
 	protected void onPostExecute(FTResult result) {
-		ChatThread.stickerTaskMap.remove(key);
+		HikeMessengerApp.stickerTaskMap.remove(key);
 		if (result != FTResult.SUCCESS) {
 			(new File(largeStickerPath)).delete();
 			return;

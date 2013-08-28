@@ -119,7 +119,7 @@ public class MqttMessagesManager {
 
 			IconCacheManager.getInstance().clearIconForMSISDN(msisdn);
 
-			autoDownloadProfileImage(msisdn, false);
+			//autoDownloadProfileImage(msisdn, false);
 		} else if (HikeConstants.MqttMessageTypes.DISPLAY_PIC.equals(type)) {
 			String groupId = jsonObj.getString(HikeConstants.TO);
 			String iconBase64 = jsonObj.getString(HikeConstants.DATA);
@@ -146,7 +146,7 @@ public class MqttMessagesManager {
 					Base64.decode(iconBase64, Base64.DEFAULT), false);
 
 			IconCacheManager.getInstance().clearIconForMSISDN(groupId);
-			autoDownloadProfileImage(groupId, false);
+			autoDownloadGroupImage(groupId);
 			saveStatusMsg(jsonObj, groupId);
 		} else if (HikeConstants.MqttMessageTypes.SMS_CREDITS.equals(type)) // Credits
 																			// changed
@@ -437,7 +437,7 @@ public class MqttMessagesManager {
 						&& hikeFile.getHikeFileType() != HikeFileType.CONTACT) {
 					DownloadFileTask downloadFile = new DownloadFileTask(
 							context, hikeFile.getFile(), hikeFile.getFileKey(),
-							convMessage.getMsgID(), hikeFile.getHikeFileType());
+							convMessage, hikeFile.getHikeFileType(), convMessage.getMsgID());
 					downloadFile.execute();
 				}
 			}
@@ -664,6 +664,8 @@ public class MqttMessagesManager {
 						account.optString(HikeConstants.REWARDS_TOKEN));
 				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS,
 						account.optBoolean(HikeConstants.SHOW_REWARDS));
+			
+				
 				if (account.optBoolean(HikeConstants.SHOW_REWARDS)) {
 					toggleRewards = true;
 				}
@@ -775,13 +777,12 @@ public class MqttMessagesManager {
 						.getString(HikeConstants.REWARDS_TOKEN);
 				editor.putString(HikeMessengerApp.REWARDS_TOKEN, rewardToken);
 			}
-
+			
 			if (data.has(HikeConstants.SHOW_REWARDS)) {
 				boolean showRewards = data
 						.getBoolean(HikeConstants.SHOW_REWARDS);
 				editor.putBoolean(HikeMessengerApp.SHOW_REWARDS, showRewards);
 			}
-
 			if (data.has(HikeConstants.ENABLE_PUSH_BATCHING_STATUS_NOTIFICATIONS)) {
 				JSONArray array = data
 						.getJSONArray(HikeConstants.ENABLE_PUSH_BATCHING_STATUS_NOTIFICATIONS);
@@ -803,7 +804,8 @@ public class MqttMessagesManager {
 			editor.commit();
 
 			this.pubSub.publish(HikePubSub.TALK_TIME_CHANGED, talkTime);
-		} else if (HikeConstants.MqttMessageTypes.ACTION.equals(type)) {
+		}
+		else if (HikeConstants.MqttMessageTypes.ACTION.equals(type)) {
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
 			if (data.optBoolean(HikeConstants.POST_AB)) {
 				String token = settings.getString(
@@ -881,7 +883,7 @@ public class MqttMessagesManager {
 				/*
 				 * Start auto download of the profile image.
 				 */
-				autoDownloadProfileImage(statusMessage.getMappedId(), true);
+				autoDownloadProfileImage(statusMessage, true);
 			}
 
 			statusMessage
@@ -1049,10 +1051,18 @@ public class MqttMessagesManager {
 		}
 	}
 
-	private void autoDownloadProfileImage(String id, boolean statusUpdate) {
+	private void autoDownloadProfileImage(StatusMessage statusMessage, boolean statusUpdate) {
+		String fileName = Utils.getProfileImageFileName(statusMessage.getMappedId());
+		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
+				context, statusMessage.getMappedId(), fileName, true, statusUpdate, statusMessage.getMsisdn(), statusMessage.getName());
+		downloadProfileImageTask.execute();
+	}
+	
+	private void autoDownloadGroupImage(String id)
+	{
 		String fileName = Utils.getProfileImageFileName(id);
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
-				context, id, fileName, true, statusUpdate);
+				context, id, fileName, true, false, null, null);
 		downloadProfileImageTask.execute();
 	}
 

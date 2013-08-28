@@ -866,7 +866,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			boolean showThumbnail = ((convMessage.isSent())
 					|| (conversation instanceof GroupConversation)
 					|| (!TextUtils.isEmpty(conversation.getContactName())) || (hikeFile
-					.wasFileDownloaded() && !ChatThread.fileTransferTaskMap
+					.wasFileDownloaded() && !HikeMessengerApp.fileTransferTaskMap
 					.containsKey(convMessage.getMsgID())))
 					&& (hikeFile.getThumbnail() != null)
 					&& (hikeFileType != HikeFileType.UNKNOWN);
@@ -971,7 +971,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (holder.showFileBtn != null) {
 				if (hikeFile.wasFileDownloaded()
 						&& showThumbnail
-						&& !ChatThread.fileTransferTaskMap
+						&& !HikeMessengerApp.fileTransferTaskMap
 								.containsKey(convMessage.getMsgID())) {
 					holder.showFileBtn.setVisibility(View.GONE);
 
@@ -1004,7 +1004,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 									.setDurationTxt(holder.messageTextView);
 						} else {
 							if (!convMessage.isSent()
-									|| !ChatThread.fileTransferTaskMap
+									|| !HikeMessengerApp.fileTransferTaskMap
 											.containsKey(convMessage.getMsgID())) {
 								holder.showFileBtn.setVisibility(View.VISIBLE);
 								setFileButtonResource(holder.showFileBtn,
@@ -1099,7 +1099,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				File stickerImage = new File(categoryDirPath, stickerId);
 
 				String key = categoryId + stickerId;
-				boolean downloadingSticker = ChatThread.stickerTaskMap
+				boolean downloadingSticker = HikeMessengerApp.stickerTaskMap
 						.containsKey(key);
 
 				if (stickerImage.exists() && !downloadingSticker) {
@@ -1117,7 +1117,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 					if (!downloadingSticker) {
 						DownloadSingleStickerTask downloadSingleStickerTask = new DownloadSingleStickerTask(
 								context, categoryId, stickerId);
-						ChatThread.stickerTaskMap.put(key,
+						HikeMessengerApp.stickerTaskMap.put(key,
 								downloadSingleStickerTask);
 						downloadSingleStickerTask.execute();
 					}
@@ -1158,9 +1158,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		if (convMessage.isFileTransferMessage()
-				&& ChatThread.fileTransferTaskMap.containsKey(convMessage
+				&& HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
 						.getMsgID())) {
-			FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
+			FileTransferTaskBase fileTransferTask = HikeMessengerApp.fileTransferTaskMap
 					.get(convMessage.getMsgID());
 			holder.circularProgress.setVisibility(View.VISIBLE);
 			holder.circularProgress.setProgressAngle(fileTransferTask
@@ -1217,7 +1217,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	private void setFileButtonResource(ImageView button,
 			ConvMessage convMessage, HikeFile hikeFile) {
-		if (ChatThread.fileTransferTaskMap.containsKey(convMessage.getMsgID())) {
+		if (HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage.getMsgID())) {
 			button.setImageResource(R.drawable.ic_open_file_disabled);
 		} else if (hikeFile.wasFileDownloaded()
 				&& hikeFile.getHikeFileType() != HikeFileType.CONTACT) {
@@ -1493,7 +1493,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 									+ " File key: " + hikeFile.getFileKey());
 					// If uploading failed then we try again.
 					if (TextUtils.isEmpty(hikeFile.getFileKey())
-							&& !ChatThread.fileTransferTaskMap
+							&& !HikeMessengerApp.fileTransferTaskMap
 									.containsKey(convMessage.getMsgID())) {
 
 						FileTransferTaskBase uploadTask;
@@ -1509,7 +1509,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 									conversation);
 						}
 						uploadTask.execute();
-						ChatThread.fileTransferTaskMap.put(
+						HikeMessengerApp.fileTransferTaskMap.put(
 								convMessage.getMsgID(), uploadTask);
 						notifyDataSetChanged();
 					}
@@ -1524,13 +1524,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								Toast.LENGTH_SHORT).show();
 						return;
 					}
-					if (!ChatThread.fileTransferTaskMap.containsKey(convMessage
+					if (!HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
 							.getMsgID())
 							&& ((hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 									|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || receivedFile
 										.exists())) {
 						openFile(hikeFile, convMessage, v);
-					} else if (!ChatThread.fileTransferTaskMap
+					} else if (!HikeMessengerApp.fileTransferTaskMap
 							.containsKey(convMessage.getMsgID())) {
 						Log.d(getClass().getSimpleName(),
 								"HIKEFILE: NAME: " + hikeFile.getFileName()
@@ -1539,8 +1539,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 										+ hikeFile.getFileTypeString());
 						DownloadFileTask downloadFile = new DownloadFileTask(
 								context, receivedFile, hikeFile.getFileKey(),
-								convMessage.getMsgID(),
-								hikeFile.getHikeFileType());
+								convMessage,
+								hikeFile.getHikeFileType(), convMessage.getMsgID());
 						downloadFile.execute();
 					}
 				}
