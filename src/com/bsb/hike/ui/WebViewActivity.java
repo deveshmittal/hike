@@ -15,7 +15,7 @@ import com.bsb.hike.utils.HikeAppStateBaseActivity;
 
 public class WebViewActivity extends HikeAppStateBaseActivity {
 
-	private boolean rewardsPage;
+	private String pageString;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +26,8 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 				HikeConstants.Extras.URL_TO_LOAD);
 		String title = getIntent().getStringExtra(HikeConstants.Extras.TITLE);
 
-		rewardsPage = getIntent().getBooleanExtra(
-				HikeConstants.Extras.REWARDS_PAGE, false);
+		pageString = getIntent().getStringExtra(
+				HikeConstants.Extras.REWARDS_PAGE);
 
 		WebView webView = (WebView) findViewById(R.id.t_and_c_page);
 
@@ -73,7 +73,7 @@ public class WebViewActivity extends HikeAppStateBaseActivity {
 
 	@Override
 	public void onBackPressed() {
-		if (rewardsPage) {
+		if (pageString.equals(HikeConstants.REWARDS) || pageString.equals(HikeConstants.GAMES)) {
 			super.onBackPressed();
 		} else {
 			finish();

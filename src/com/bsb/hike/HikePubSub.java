@@ -188,6 +188,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String TOGGLE_REWARDS = "toggleRewards";
 
+	public static final String TOGGLE_GAMES = "toggleGames";
+	
 	public static final String TALK_TIME_CHANGED = "talkTimeChanged";
 
 	public static final String SHOW_STATUS_DIALOG = "showStatusDialog";

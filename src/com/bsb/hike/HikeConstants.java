@@ -80,6 +80,9 @@ public class HikeConstants {
 	public static final String REWARDS_TOKEN = "reward_token";
 	public static final String SHOW_REWARDS = "show_rewards";
 	public static final String REWARDS = "rewards";
+	public static final String GAMES_TOKEN = "games_token";
+	public static final String SHOW_GAMES = "show_games";
+	public static final String GAMES = "games";
 	public static final String TALK_TIME = "tt";
 	public static final String PHONE_NUMBERS = "phone_numbers";
 	public static final String EMAILS = "emails";
@@ -491,6 +494,7 @@ public class HikeConstants {
 		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
 		public static final String GPS_DIALOG_SHOWN = "gpsDialogShown";
 		public static final String REWARDS_PAGE = "rewardsPage";
+		public static final String GAMES_PAGE = "gamesPage";
 		public static final String CUSTOM_LOCATION_SELECTED = "customLocationSelected";
 		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
 		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
