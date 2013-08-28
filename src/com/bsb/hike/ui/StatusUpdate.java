@@ -1,7 +1,7 @@
 package com.bsb.hike.ui;
 
+import java.util.Arrays;
 import java.util.Calendar;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,6 +53,9 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.EmoticonTextWatcher;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.view.StickerEmoticonIconPageIndicator;
+import com.facebook.Session;
+import com.facebook.Session.StatusCallback;
+import com.facebook.SessionState;
 
 public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 		Listener {
@@ -256,7 +259,6 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 
 	public void onTwitterClick(View v) {
 		setSelectionSocialButton(false, !v.isSelected());
-
 		if (!v.isSelected()
 				|| preferences.getBoolean(
 						HikeMessengerApp.TWITTER_AUTH_COMPLETE, false)) {
@@ -272,7 +274,82 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 						HikeMessengerApp.FACEBOOK_AUTH_COMPLETE, false)) {
 			return;
 		}
-		startFBAuth(false);
+
+		startFbSession();
+	}
+	
+	private void startFbSession(){
+		if (ensureOpenSession()) {
+			ensurePublishPermissions();
+		}
+	}
+	private boolean ensureOpenSession() {
+		Log.d("StatusUpdate", "entered in ensureOpenSession");
+		if (Session.getActiveSession() == null
+				|| !Session.getActiveSession().isOpened()) {
+
+			Log.d("StatusUpdate",
+					"active session is either null or closed");
+			Session.openActiveSession(this, true, new Session.StatusCallback() {
+				@Override
+				public void call(Session session, SessionState state,
+						Exception exception) {
+					onSessionStateChanged(session, state, exception);
+				}
+			});
+			return false;
+		}
+
+		return true;
+	}
+
+	private void onSessionStateChanged(Session session, SessionState state,
+			Exception exception) {
+		Log.d("StatusUpdate", "inside onSessionStateChanged");
+		Log.d("StatusUpdate", "state = " + state.toString());
+		if (state.isOpened()) {
+			startFbSession();
+		}
+		if (exception != null) {
+			Log.e("StatusUpdate", "error trying to open the session", exception);
+		}
+	}
+
+	private boolean hasPublishPermission() {
+		Session session = Session.getActiveSession();
+		return session != null
+				&& session.getPermissions().contains("publish_stream");
+	}
+
+	private void ensurePublishPermissions() {
+		Session session = Session.getActiveSession();
+		Log.d("StatusUpdate", "ensurePublishPermissions");
+		if (!hasPublishPermission()) {
+			Log.d("StatusUpdate", "not hasPublishPermission");
+			session.requestNewPublishPermissions(new Session.NewPermissionsRequest(
+					this, Arrays.asList("publish_stream"))
+					.setCallback(new StatusCallback() {
+
+						@Override
+						public void call(Session session, SessionState state,
+								Exception exception) {
+							if (hasPublishPermission()) {
+								Log.d("StatusUpdate", session
+										.getExpirationDate().toString());
+								makeMeRequest(session,
+										session.getAccessToken(), session.getExpirationDate().getTime());
+							} else {
+
+							}
+
+						}
+
+					}));
+		} else {
+			Log.d("StatusUpdate", "time = "+Long.valueOf(session.getExpirationDate().getTime()).toString());
+			makeMeRequest(session,
+					session.getAccessToken(), session.getExpirationDate().getTime());
+		}
 	}
 
 	public void onEmojiClick(View v) {
@@ -604,6 +681,8 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		HikeMessengerApp.getFacebook().authorizeCallback(requestCode,
+				resultCode, data);
+		Session.getActiveSession().onActivityResult(this, requestCode,
 				resultCode, data);
 	}
 

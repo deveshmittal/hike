@@ -327,6 +327,7 @@ public class SocialNetInviteActivity extends HikeAppStateBaseFragmentActivity im
 						Toast.makeText(SocialNetInviteActivity.this,
 								getString(R.string.posted_update),
 								Toast.LENGTH_SHORT).show();
+						finish();
 					}
 
 					@Override
