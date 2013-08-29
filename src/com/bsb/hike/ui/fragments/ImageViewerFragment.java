@@ -10,6 +10,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
@@ -24,7 +25,7 @@ import com.bsb.hike.tasks.ProfileImageLoader;
 import com.bsb.hike.utils.Utils;
 
 public class ImageViewerFragment extends SherlockFragment implements
-		LoaderCallbacks<Boolean> {
+		LoaderCallbacks<Boolean>, OnClickListener {
 
 	ImageView imageView;
 	private ProgressDialog mDialog;
@@ -46,6 +47,7 @@ public class ImageViewerFragment extends SherlockFragment implements
 			Bundle savedInstanceState) {
 		View parent = inflater.inflate(R.layout.image_viewer, null);
 		imageView = (ImageView) parent.findViewById(R.id.image);
+		imageView.setOnClickListener(this);
 
 		return parent;
 	}
@@ -138,5 +140,10 @@ public class ImageViewerFragment extends SherlockFragment implements
 			mDialog.dismiss();
 			mDialog = null;
 		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		getActivity().onBackPressed();
 	}
 }
