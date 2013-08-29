@@ -3819,10 +3819,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		emoticonViewPager.invalidate();
 
 		StickerEmoticonIconPageIndicator iconPageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
-		iconPageIndicator.setViewPager(emoticonViewPager, pageNum);
+		iconPageIndicator.setViewPager(emoticonViewPager);
 		iconPageIndicator.setOnPageChangeListener(onPageChangeListener);
 		iconPageIndicator.notifyDataSetChanged();
+		iconPageIndicator.setCurrentItem(pageNum);
 
+		onPageChangeListener.onPageSelected(pageNum);
 		/*
 		 * show the tip if we are not currently on the stickers tab and we have
 		 * not shown this tip before and there is no other tip showing.
