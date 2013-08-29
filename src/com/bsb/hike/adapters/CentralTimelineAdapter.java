@@ -2,12 +2,15 @@ package com.bsb.hike.adapters;
 
 import java.util.List;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -238,22 +241,27 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			case PROTIP:
 				Protip protip = statusMessage.getProtip();
 
-				viewHolder.yesBtn.setVisibility(View.GONE);
 				viewHolder.buttonDivider.setVisibility(View.GONE);
 				viewHolder.timeStamp.setVisibility(View.GONE);
 
 				viewHolder.noBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setText(R.string.dismiss);
-
+				viewHolder.yesBtn.setText(R.string.download);
+				
 				int btnPadding = context.getResources().getDimensionPixelSize(
 						R.dimen.protip_btn_padding);
 				viewHolder.noBtn.setPadding(btnPadding,
 						viewHolder.noBtn.getPaddingTop(), btnPadding,
 						viewHolder.noBtn.getPaddingTop());
+				
+				viewHolder.yesBtn.setPadding(btnPadding,
+						viewHolder.yesBtn.getPaddingTop(), btnPadding,
+						viewHolder.yesBtn.getPaddingTop());
 
 				if (!TextUtils.isEmpty(protip.getText())) {
 					viewHolder.extraInfo.setVisibility(View.VISIBLE);
 					viewHolder.extraInfo.setText(protip.getText());
+					
 				} else {
 					viewHolder.extraInfo.setVisibility(View.GONE);
 				}
@@ -269,6 +277,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							true);
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
+					if (!TextUtils.isEmpty(protip.getGameDownlodURL())) {
+						viewHolder.yesBtn.setTag(protip);
+						viewHolder.yesBtn.setVisibility(View.VISIBLE);
+						viewHolder.yesBtn
+						.setOnClickListener(yesBtnClickListener);
+					}
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
 				}
@@ -283,8 +297,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			viewHolder.avatar.setTag(statusMessage);
 
-			viewHolder.yesBtn.setTag(statusMessage);
-			viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
+//			viewHolder.yesBtn.setTag(statusMessage);
+//			viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
 
 			viewHolder.noBtn.setTag(statusMessage);
 			viewHolder.noBtn.setOnClickListener(noBtnClickListener);
@@ -354,13 +368,17 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		@Override
 		public void onClick(View v) {
-			StatusMessage statusMessage = (StatusMessage) v.getTag();
+			Protip protip = (Protip) v.getTag();
 
-			if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
-					.getId()
-					|| CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
-							.getId()) {
-				context.startActivity(new Intent(context, StatusUpdate.class));
+			Intent marketIntent = new Intent(Intent.ACTION_VIEW,
+					Uri.parse(protip.getGameDownlodURL()));
+			marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
+					| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+			try {
+				context.startActivity(marketIntent);
+			} catch (ActivityNotFoundException e) {
+				Log.e(CentralTimelineAdapter.class.getSimpleName(),
+						"Unable to open market");
 			}
 		}
 	};

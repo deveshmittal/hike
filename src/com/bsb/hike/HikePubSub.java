@@ -251,6 +251,8 @@ public class HikePubSub implements Runnable {
 	public static final String REMOVE_PROTIP = "removeProtip";
 
 	public static final String PROTIP_ADDED = "protipAdded";
+	
+	public static final String GAMING_PROTIP_DOWNLOADED ="gamingProtipDownloaded";
 
 	public static final String DISMISS_POSTING_DIALOG = "dismissPostingDialog";
 

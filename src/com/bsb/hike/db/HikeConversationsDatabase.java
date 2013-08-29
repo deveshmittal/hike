@@ -161,7 +161,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				+ DBConstants.HEADER + " TEXT, " + DBConstants.PROTIP_TEXT
 				+ " TEXT, " + DBConstants.TIMESTAMP + " INTEGER, "
 				+ DBConstants.IMAGE_URL + " TEXT, " + DBConstants.WAIT_TIME
-				+ " INTEGER" + " )";
+				+ " INTEGER, " + DBConstants.PROTIP_GAMING_DOWNLOAD_URL + " TEXT"+" )";
 		db.execSQL(sql);
 		sql = "CREATE TABLE IF NOT EXISTS " + DBConstants.SHARED_MEDIA_TABLE
 				+ " (" + DBConstants.MESSAGE_ID + " INTEGER PRIMARY KEY, "
@@ -406,6 +406,12 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		/*
 		 * Version 20 adds an index for the file thumbnails table.
 		 */
+		if (oldVersion < 21) {
+			String alter = "ALTER TABLE" + DBConstants.PROTIP_TABLE
+					+ "ADD COLUMN" + DBConstants.PROTIP_GAMING_DOWNLOAD_URL
+					+ " TEXT";
+			db.execSQL(alter);
+		}
 	}
 
 	public int updateOnHikeStatus(String msisdn, boolean onHike) {
@@ -2624,7 +2630,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		contentValues.put(DBConstants.IMAGE_URL, protip.getImageURL());
 		contentValues.put(DBConstants.WAIT_TIME, protip.getWaitTime());
 		contentValues.put(DBConstants.TIMESTAMP, protip.getTimeStamp());
-
+		contentValues.put(DBConstants.PROTIP_GAMING_DOWNLOAD_URL, protip.getGameDownlodURL());
 		return mDb.insert(DBConstants.PROTIP_TABLE, null, contentValues);
 	}
 
@@ -2633,7 +2639,8 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 				"max(" + DBConstants.ID + ") as " + DBConstants.ID,
 				DBConstants.PROTIP_MAPPED_ID, DBConstants.HEADER,
 				DBConstants.PROTIP_TEXT, DBConstants.IMAGE_URL,
-				DBConstants.WAIT_TIME, DBConstants.TIMESTAMP };
+				DBConstants.WAIT_TIME, DBConstants.TIMESTAMP ,
+				DBConstants.PROTIP_GAMING_DOWNLOAD_URL};
 
 		return getProtip(columns, null, null);
 	}
@@ -2642,7 +2649,7 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		String[] columns = { DBConstants.ID, DBConstants.PROTIP_MAPPED_ID,
 				DBConstants.HEADER, DBConstants.PROTIP_TEXT,
 				DBConstants.IMAGE_URL, DBConstants.WAIT_TIME,
-				DBConstants.TIMESTAMP };
+				DBConstants.TIMESTAMP , DBConstants.PROTIP_GAMING_DOWNLOAD_URL};
 		String selection = DBConstants.ID + "=?";
 		String[] selectionArgs = { Long.toString(id) };
 
@@ -2668,12 +2675,13 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 			String url = c.getString(c.getColumnIndex(DBConstants.IMAGE_URL));
 			long waitTime = c.getLong(c.getColumnIndex(DBConstants.WAIT_TIME));
 			long timeStamp = c.getLong(c.getColumnIndex(DBConstants.TIMESTAMP));
+			String gamingDownloadURL = c.getString(c.getColumnIndex(DBConstants.PROTIP_GAMING_DOWNLOAD_URL));
 			if (mappedId == null) {
 				return null;
 			}
 
 			return new Protip(id, mappedId, header, text, url, waitTime,
-					timeStamp);
+					timeStamp, gamingDownloadURL);
 		} finally {
 			if (c != null) {
 				c.close();

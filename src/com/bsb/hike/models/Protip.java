@@ -14,6 +14,7 @@ public class Protip {
 	private String imageURL;
 	private long waitTime;
 	private long timeStamp;
+	private String gameDownlodURL;
 
 	public Protip(JSONObject jsonObject) throws JSONException {
 
@@ -30,10 +31,11 @@ public class Protip {
 		this.text = data.optString(HikeConstants.PROTIP_TEXT, null);
 		this.imageURL = data.optString(HikeConstants.PROTIP_IMAGE_URL, null);
 		this.waitTime = data.optLong(HikeConstants.PROTIP_WAIT_TIME, -1);
+		this.gameDownlodURL = data.optString(HikeConstants.PROTIP_GAME_DOWNLOAD_URL, null);
 	}
 
 	public Protip(long id, String mappedId, String header, String text,
-			String imageURL, long waitTime, long timeStamp) {
+			String imageURL, long waitTime, long timeStamp, String gameDownlodURL) {
 		this.id = id;
 		this.mappedId = mappedId;
 		this.header = header;
@@ -41,6 +43,7 @@ public class Protip {
 		this.imageURL = imageURL;
 		this.waitTime = waitTime;
 		this.timeStamp = timeStamp;
+		this.gameDownlodURL = gameDownlodURL;
 	}
 
 	public long getId() {
@@ -77,6 +80,13 @@ public class Protip {
 
 	public void setTimeStamp(long timeStamp) {
 		this.timeStamp = timeStamp;
+	}
+	public String getGameDownlodURL() {
+		return gameDownlodURL;
+	}
+
+	public void setGameDownlodURL(String gameDownlodURL) {
+		this.gameDownlodURL = gameDownlodURL;
 	}
 
 }
