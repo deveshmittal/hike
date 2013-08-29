@@ -122,7 +122,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			HikePubSub.USER_LEFT, HikePubSub.STATUS_MESSAGE_RECEIVED,
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.FRIEND_REQUEST_ACCEPTED,
 			HikePubSub.REJECT_FRIEND_REQUEST,
-			HikePubSub.HIKE_JOIN_TIME_OBTAINED };
+			HikePubSub.HIKE_JOIN_TIME_OBTAINED,
+			HikePubSub.LAST_SEEN_TIME_UPDATED };
 
 	private String[] profilePubSubListeners = {
 			HikePubSub.STATUS_MESSAGE_RECEIVED,
@@ -1645,6 +1646,26 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 					profileAdapter.notifyDataSetChanged();
 				}
+			});
+		} else if (HikePubSub.LAST_SEEN_TIME_UPDATED.equals(type)) {
+			final ContactInfo contactInfo = (ContactInfo) object;
+
+			if (profileType != ProfileType.CONTACT_INFO) {
+				return;
+			}
+
+			if (!mLocalMSISDN.equals(contactInfo.getMsisdn())
+					|| contactInfo.getFavoriteType() != FavoriteType.FRIEND) {
+				return;
+			}
+
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					profileAdapter.updateContactInfo(contactInfo);
+				}
+
 			});
 		}
 	}
