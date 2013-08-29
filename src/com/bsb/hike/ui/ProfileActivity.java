@@ -47,7 +47,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -55,6 +54,7 @@ import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -313,7 +313,87 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		switch (profileType) {
+		case CONTACT_INFO:
+			getSupportMenuInflater().inflate(R.menu.contact_profile_menu, menu);
+			return true;
+		case GROUP_INFO:
+			getSupportMenuInflater().inflate(R.menu.group_profile_menu, menu);
+			return true;
+		case USER_PROFILE:
+			getSupportMenuInflater().inflate(R.menu.my_profile_menu, menu);
+			return true;
+		}
 		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		switch (profileType) {
+		case CONTACT_INFO:
+			MenuItem friendItem = menu.findItem(R.id.unfriend);
+
+			if (contactInfo.isOnhike()) {
+				friendItem.setVisible(false);
+			} else {
+				friendItem.setVisible(true);
+				if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
+					friendItem.setTitle(R.string.unfriend);
+				} else {
+					friendItem.setTitle(R.string.add_as_friend_menu);
+				}
+			}
+			return true;
+		case GROUP_INFO:
+			MenuItem muteItem = menu.findItem(R.id.mute_group);
+			muteItem.setTitle(groupConversation.isMuted() ? R.string.unmute_group
+					: R.string.mute_group);
+			return true;
+		}
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.call:
+			onCallClicked(null);
+			break;
+		case R.id.unfriend:
+			if (contactInfo.getFavoriteType() == FavoriteType.NOT_FRIEND) {
+				contactInfo.setFavoriteType(FavoriteType.REQUEST_SENT);
+
+				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
+						contactInfo, contactInfo.getFavoriteType());
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			} else {
+				contactInfo.setFavoriteType(FavoriteType.NOT_FRIEND);
+
+				Pair<ContactInfo, FavoriteType> favoriteToggle = new Pair<ContactInfo, FavoriteType>(
+						contactInfo, contactInfo.getFavoriteType());
+				HikeMessengerApp.getPubSub().publish(
+						HikePubSub.FAVORITE_TOGGLED, favoriteToggle);
+			}
+			break;
+		case R.id.edit_group_name:
+			onEditGroupNameClick(null);
+			break;
+		case R.id.leave_group:
+			onProfileLargeBtnClick(null);
+			break;
+		case R.id.mute_group:
+			onProfileSmallRightBtnClick(null);
+			break;
+		case R.id.new_update:
+			onProfileLargeBtnClick(null);
+			break;
+		case R.id.edit:
+			onEditProfileClicked(null);
+			break;
+		}
+
+		return super.onOptionsItemSelected(item);
 	}
 
 	private void setupContactProfileScreen() {
@@ -1216,6 +1296,16 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
+							HikePubSub hikePubSub = HikeMessengerApp
+									.getPubSub();
+							hikePubSub
+									.publish(
+											HikePubSub.MQTT_PUBLISH,
+											groupConversation
+													.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+							hikePubSub.publish(HikePubSub.GROUP_LEFT,
+									groupConversation.getMsisdn());
+
 							Intent intent = new Intent(ProfileActivity.this,
 									HomeActivity.class);
 							intent.putExtra(HikeConstants.Extras.GROUP_LEFT,
@@ -1270,12 +1360,6 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 
 	public void onProfileSmallRightBtnClick(View v) {
 		groupConversation.setIsMuted(!groupConversation.isMuted());
-
-		((TextView) v.findViewById(R.id.btn2_txt)).setText(groupConversation
-				.isMuted() ? R.string.unmute_group : R.string.mute_group);
-		((ImageView) v.findViewById(R.id.btn2_img))
-				.setImageResource(groupConversation.isMuted() ? R.drawable.ic_unmute
-						: R.drawable.ic_mute);
 
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.MUTE_CONVERSATION_TOGGLED,

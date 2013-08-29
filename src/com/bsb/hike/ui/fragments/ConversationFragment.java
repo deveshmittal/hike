@@ -280,7 +280,7 @@ public class ConversationFragment extends HomeBaseFragment implements
 			HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
-			HikePubSub.RESET_UNREAD_COUNT };
+			HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT };
 
 	private ConversationsAdapter mAdapter;
 	private HashMap<String, Conversation> mConversationsByMSISDN;
@@ -477,6 +477,10 @@ public class ConversationFragment extends HomeBaseFragment implements
 				.publish(
 						HikePubSub.MQTT_PUBLISH,
 						conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+		deleteConversation(conv);
+	}
+
+	private void deleteConversation(Conversation conv) {
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
 	}
@@ -776,6 +780,19 @@ public class ConversationFragment extends HomeBaseFragment implements
 			conv.setUnreadCount(0);
 
 			getActivity().runOnUiThread(this);
+		} else if (HikePubSub.GROUP_LEFT.equals(type)) {
+			String groupId = (String) object;
+			final Conversation conversation = mConversationsByMSISDN
+					.get(groupId);
+			if (conversation == null) {
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					deleteConversation(conversation);
+				}
+			});
 		}
 	}
 
