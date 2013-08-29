@@ -2435,6 +2435,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					int position, long id) {
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
+				attachmentWindow.dismiss();
+
 				int requestCode;
 				Intent pickIntent = new Intent();
 				Intent newMediaFileIntent = null;
@@ -2549,8 +2551,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				editor.putString(HikeMessengerApp.TEMP_NAME, mContactName);
 				editor.commit();
 				startActivityForResult(chooserIntent, requestCode);
-
-				attachmentWindow.dismiss();
 			}
 		});
 
