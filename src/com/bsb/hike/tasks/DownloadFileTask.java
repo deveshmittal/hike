@@ -137,14 +137,18 @@ public class DownloadFileTask extends FileTransferTaskBase {
 							: result == FTResult.FILE_EXPIRED ? R.string.file_expire
 									: R.string.download_failed;
 			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
-			destinationFile.delete();
+			if (destinationFile != null) {
+				destinationFile.delete();
+			}
 		}
 
-		if (destinationFile.exists()
-				&& hikeFileType != HikeFileType.AUDIO_RECORDING) {
-			context.sendBroadcast(new Intent(
-					Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
-							.fromFile(destinationFile)));
+		if (destinationFile != null) {
+			if (destinationFile.exists()
+					&& hikeFileType != HikeFileType.AUDIO_RECORDING) {
+				context.sendBroadcast(new Intent(
+						Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri
+								.fromFile(destinationFile)));
+			}
 		}
 		
 		HikeMessengerApp.fileTransferTaskMap.remove(msgId);
