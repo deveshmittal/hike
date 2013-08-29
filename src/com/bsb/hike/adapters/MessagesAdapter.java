@@ -300,6 +300,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 						.findViewById(R.id.status_info);
 				holder.container = (ViewGroup) v
 						.findViewById(R.id.content_container);
+				holder.messageInfo = (TextView) v.findViewById(R.id.timestamp);
 				break;
 			case PARTICIPANT_INFO:
 				v = inflater.inflate(R.layout.message_item_receive, null);
@@ -788,6 +789,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			holder.image.setImageDrawable(IconCacheManager.getInstance()
 					.getIconForMSISDN(conversation.getMsisdn(), true));
+
+			holder.messageInfo.setText(statusMessage.getTimestampFormatted(
+					true, context));
 
 			if (statusMessage.getStatusMessageType() == StatusMessageType.TEXT) {
 				SmileyParser smileyParser = SmileyParser.getInstance();

@@ -154,6 +154,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 						.findViewById(R.id.main_info);
 				viewHolder.largeProfilePic = (ImageView) convertView
 						.findViewById(R.id.profile_pic);
+				viewHolder.timeStamp = (TextView) convertView
+						.findViewById(R.id.timestamp);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -331,6 +333,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			 */
 			imageLoader.loadImage(statusMessage.getMappedId(),
 					viewHolder.largeProfilePic);
+
+			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
+					true, context));
 			break;
 		}
 

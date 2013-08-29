@@ -45,6 +45,18 @@
                     android:src="@drawable/frame_avatar_medium_selector" />
             </RelativeLayout>
 
+            <com.bsb.hike.view.CustomFontTextView
+                android:id="@+id/timestamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/details_content"
+                android:layout_marginRight="5dp"
+                android:text="2 mins ago"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="bold|italic" />
+            
             <LinearLayout
                 android:id="@+id/details_content"
                 android:layout_width="match_parent"

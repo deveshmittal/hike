@@ -170,6 +170,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile_pic);
+				viewHolder.timeStamp = (TextView) v
+						.findViewById(R.id.timestamp);
 				break;
 
 			case EMPTY_STATUS:
@@ -423,6 +425,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			imageLoader.loadImage(profilePicStatusUpdate.getMappedId(),
 					viewHolder.image);
 
+			viewHolder.timeStamp.setText(profilePicStatusUpdate
+					.getTimestampFormatted(true, context));
 			break;
 
 		case EMPTY_STATUS:
