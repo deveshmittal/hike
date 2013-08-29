@@ -247,6 +247,8 @@ public class HikePubSub implements Runnable {
 	public static final String STICKER_CATEGORY_DOWNLOAD_FAILED = "stickerCategoryDownloadFailed";
 
 	public static final String LAST_SEEN_TIME_UPDATED = "lastSeenTimeUpdated";
+	
+	public static final String LAST_SEEN_TIME_BULK_UPDATED ="lastSeenTimeBulkUpdated";
 
 	public static final String REMOVE_PROTIP = "removeProtip";
 

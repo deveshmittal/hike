@@ -303,7 +303,8 @@ public class HikeMessengerApp extends Application implements Listener {
 
 	public static Map<String, StickerTaskBase> stickerTaskMap;
 
-
+	public static Map<String, Long> lastSeenFriendsMap;	
+	
 	class IncomingHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
@@ -343,9 +344,11 @@ public class HikeMessengerApp extends Application implements Listener {
 		if (HikeMessengerApp.fileTransferTaskMap == null) {
 			HikeMessengerApp.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
 		}
-
 		if (HikeMessengerApp.stickerTaskMap == null) {
 			HikeMessengerApp.stickerTaskMap = new HashMap<String, StickerTaskBase>();
+		}
+		if (HikeMessengerApp.lastSeenFriendsMap == null) {
+			HikeMessengerApp.lastSeenFriendsMap = new HashMap<String, Long>();
 		}
 	}
 

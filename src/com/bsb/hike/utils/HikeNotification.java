@@ -545,14 +545,13 @@ public class HikeNotification {
 		mNotificationManager.notify(notificationId, mBuilder.build());
 
 	}
-	private int returnSmallIcon()
-	{
+
+	private int returnSmallIcon() {
 		if (Build.VERSION.SDK_INT < 16) {
 			return R.drawable.ic_contact_logo;
 
-		}
-		else{
-			return  R.drawable.ic_stat_notify;
+		} else {
+			return R.drawable.ic_stat_notify;
 		}
 
 	}
