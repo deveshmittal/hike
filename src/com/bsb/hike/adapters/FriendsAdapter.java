@@ -410,7 +410,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				} else {
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.friend_request_sent);
+						lastSeen.setText(R.string.request_pending);
 					} else if (viewType == ViewType.FRIEND_REQUEST) {
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.sent_friend_request);
