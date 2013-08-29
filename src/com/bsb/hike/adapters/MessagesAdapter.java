@@ -1332,14 +1332,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				ad.setVisible(true, true);
 				ad.start();
 
-				scheduleUndeliveredText(tv, container, iv,
-						current.getTimestamp());
+				if (!current.isSMS()) {
+					scheduleUndeliveredText(tv, container, iv,
+							current.getTimestamp());
+				}
 				break;
 			case SENT_CONFIRMED:
 				tv.setText(context.getString(R.string.sent,
 						current.getTimestampFormatted(false, context)));
-				scheduleUndeliveredText(tv, container, iv,
-						current.getTimestamp());
+				if (!current.isSMS()) {
+					scheduleUndeliveredText(tv, container, iv,
+							current.getTimestamp());
+				}
 				break;
 			case SENT_DELIVERED:
 				tv.setText(R.string.delivered);
