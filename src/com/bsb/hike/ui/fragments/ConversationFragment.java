@@ -39,10 +39,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -62,14 +60,10 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeActivity;
-import com.bsb.hike.ui.SettingsActivity;
-import com.bsb.hike.ui.TellAFriend;
-import com.bsb.hike.ui.WebViewActivity;
-import com.bsb.hike.utils.AccountUtils;
+import com.bsb.hike.utils.HomeBaseFragment;
 import com.bsb.hike.utils.Utils;
 
-public class ConversationFragment extends SherlockListFragment implements
+public class ConversationFragment extends HomeBaseFragment implements
 		OnItemLongClickListener, Listener, Runnable {
 
 	private class DeleteConversationsAsyncTask extends
@@ -322,27 +316,6 @@ public class ConversationFragment extends SherlockListFragment implements
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.chats_menu, menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.new_conversation:
-			Intent intent = new Intent(getActivity(), ComposeActivity.class);
-			intent.putExtra(HikeConstants.Extras.EDIT, true);
-			startActivity(intent);
-			return true;
-		case R.id.settings:
-			Intent settingsIntent = new Intent(getActivity(),
-					SettingsActivity.class);
-			startActivity(settingsIntent);
-			return true;
-		case R.id.invite:
-			Intent inviteIntent = new Intent(getActivity(), TellAFriend.class);
-			startActivity(inviteIntent);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -840,33 +813,5 @@ public class ConversationFragment extends SherlockListFragment implements
 		if (messageRefreshHandler == null) {
 			messageRefreshHandler = new Handler();
 		}
-	}
-
-	private Intent getGamingIntent() {
-		Intent intent = new Intent(this.getSherlockActivity().getApplicationContext(),WebViewActivity.class);
-		intent.putExtra(HikeConstants.Extras.GAMES_PAGE, true);
-		intent.putExtra(
-				HikeConstants.Extras.URL_TO_LOAD,
-				AccountUtils.gamesUrl
-						+getActivity().getSharedPreferences(HikeConstants.GAMES, Context.MODE_PRIVATE) .getString(
-								HikeMessengerApp.REWARDS_TOKEN, ""));  //using the same token as rewards token, as per DK sir's mail.
-		intent.putExtra(HikeConstants.Extras.TITLE,
-				getSherlockActivity().getString(R.string.new_string));
-		return intent;
-	}
-	private Intent getRewardsIntent()
-	{
-		Intent intent = new Intent(this.getSherlockActivity().getApplicationContext(),WebViewActivity.class);			
-		if (intent != null) {
-			intent.putExtra(HikeConstants.Extras.REWARDS_PAGE, true);
-			intent.putExtra(
-					HikeConstants.Extras.URL_TO_LOAD,
-					AccountUtils.rewardsUrl
-							+ getActivity().getSharedPreferences(HikeConstants.GAMES, Context.MODE_PRIVATE) .getString(
-									HikeMessengerApp.REWARDS_TOKEN, ""));  //using the same token as rewards token, as per DK sir's mail.
-			intent.putExtra(HikeConstants.Extras.TITLE,
-					getSherlockActivity().getString(R.string.new_string));
-		}
-		return intent;
 	}
 }

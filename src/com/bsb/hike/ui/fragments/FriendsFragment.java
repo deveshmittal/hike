@@ -19,7 +19,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -36,8 +35,9 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.HomeBaseFragment;
 
-public class FriendsFragment extends SherlockListFragment implements Listener,
+public class FriendsFragment extends HomeBaseFragment implements Listener,
 		OnItemLongClickListener {
 
 	private FriendsAdapter friendsAdapter;
@@ -84,6 +84,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+		inflater.inflate(R.menu.friends_menu, menu);
+
 		final SearchView searchView = new SearchView(getSherlockActivity()
 				.getSupportActionBar().getThemedContext());
 		searchView.setQueryHint(getString(R.string.search_hint));
