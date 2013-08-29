@@ -41,27 +41,16 @@ public class ToastListener implements Listener {
 	private Context context;
 
 	private MQTTConnectionStatus mCurrentUnnotifiedStatus;
-	String[] hikePubSubListeners = {
-			HikePubSub.PUSH_AVATAR_DOWNLOADED, 
+	String[] hikePubSubListeners = { HikePubSub.PUSH_AVATAR_DOWNLOADED,
 			HikePubSub.PUSH_FILE_DOWNLOADED,
-			HikePubSub.PUSH_STICKER_DOWNLOADED
-	};
+			HikePubSub.PUSH_STICKER_DOWNLOADED, HikePubSub.MESSAGE_RECEIVED,
+			HikePubSub.NEW_ACTIVITY, HikePubSub.CONNECTION_STATUS,
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
+			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
+			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS };
 
 	public ToastListener(Context context) {
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED,
-				this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTION_STATUS,
-				this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.FAVORITE_TOGGLED,
-				this);
-		HikeMessengerApp.getPubSub().addListener(
-				HikePubSub.TIMELINE_UPDATE_RECIEVED, this);
-		HikeMessengerApp.getPubSub().addListener(
-				HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED, this);
-		HikeMessengerApp.getPubSub().addListener(
-				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, this);
-		HikeMessengerApp.getPubSub().addListeners(this,hikePubSubListeners);
+		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
 		this.toaster = new HikeNotification(context);
 		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
