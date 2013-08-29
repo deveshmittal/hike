@@ -2,8 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/welcome_bckg" >
+    android:background="@color/signup_bg" >
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:src="@drawable/welcome_bckg" />
+    
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/header"
         android:layout_width="wrap_content"
