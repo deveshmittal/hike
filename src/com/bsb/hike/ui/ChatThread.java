@@ -674,7 +674,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
+
+		MenuItem profileItem = menu.findItem(R.id.profile);
+		if (mConversation instanceof GroupConversation) {
+			profileItem.setTitle(R.string.group_profile);
+		} else {
+			profileItem.setTitle(R.string.profile_title);
+		}
+
+		MenuItem muteItem = menu.findItem(R.id.mute);
+		muteItem.setVisible(mConversation instanceof GroupConversation);
 		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (mConversation == null) {
+			return super.onPrepareOptionsMenu(menu);
+		}
+		MenuItem menuItem = menu.findItem(R.id.mute);
+		if (mConversation instanceof GroupConversation) {
+			boolean isMuted = ((GroupConversation) mConversation).isMuted();
+			menuItem.setTitle(isMuted ? R.string.unmute_group
+					: R.string.mute_group);
+			return true;
+		}
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
@@ -685,8 +710,23 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			return false;
 		}
 
-		if (item.getItemId() == R.id.attachment) {
+		switch (item.getItemId()) {
+		case R.id.attachment:
 			showFilePicker(Utils.getExternalStorageState());
+			break;
+		case R.id.profile:
+			openProfileScreen();
+			break;
+		case R.id.mute:
+			GroupConversation groupConversation = (GroupConversation) mConversation;
+
+			groupConversation.setIsMuted(!groupConversation.isMuted());
+
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.MUTE_CONVERSATION_TOGGLED,
+					new Pair<String, Boolean>(groupConversation.getMsisdn(),
+							groupConversation.isMuted()));
+			break;
 		}
 
 		return true;
@@ -1360,38 +1400,42 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			@Override
 			public void onClick(View v) {
-				if (!(mConversation instanceof GroupConversation)) {
-					String userMsisdn = prefs.getString(
-							HikeMessengerApp.MSISDN_SETTING, "");
-
-					Intent intent = new Intent();
-					intent.setClass(ChatThread.this, ProfileActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					if (!userMsisdn.equals(mContactNumber)) {
-						intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
-								mContactNumber);
-						intent.putExtra(HikeConstants.Extras.ON_HIKE,
-								mConversation.isOnhike());
-					}
-					startActivity(intent);
-				} else {
-					if (!((GroupConversation) mConversation).getIsGroupAlive()) {
-						return;
-					}
-
-					Utils.logEvent(ChatThread.this,
-							HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
-					Intent intent = new Intent();
-					intent.setClass(ChatThread.this, ProfileActivity.class);
-					intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-					intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT,
-							mConversation.getMsisdn());
-					startActivity(intent);
-				}
+				openProfileScreen();
 			}
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	private void openProfileScreen() {
+		if (!(mConversation instanceof GroupConversation)) {
+			String userMsisdn = prefs.getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+
+			Intent intent = new Intent();
+			intent.setClass(ChatThread.this, ProfileActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			if (!userMsisdn.equals(mContactNumber)) {
+				intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
+						mContactNumber);
+				intent.putExtra(HikeConstants.Extras.ON_HIKE,
+						mConversation.isOnhike());
+			}
+			startActivity(intent);
+		} else {
+			if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+				return;
+			}
+
+			Utils.logEvent(ChatThread.this,
+					HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
+			Intent intent = new Intent();
+			intent.setClass(ChatThread.this, ProfileActivity.class);
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT,
+					mConversation.getMsisdn());
+			startActivity(intent);
+		}
 	}
 
 	private boolean shouldShowLastSeen() {
