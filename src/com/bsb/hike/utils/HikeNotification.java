@@ -433,7 +433,15 @@ public class HikeNotification {
 				.getIconForMSISDN(contactInfo.getMsisdn());
 		Bitmap avatarBitmap = Utils.drawableToBitmap(avatarDrawable);
 		int notificationId = convMessage.getMsisdn().hashCode(); // group the
-		String maskedText = Utils.getMessageDisplayText(convMessage, context);
+
+		String maskedText;
+		if (convMessage.isStickerMessage()) {
+			maskedText = convMessage.getMessage();
+		} else {
+			maskedText = HikeFileType.getFileTypeMessage(context, convMessage
+					.getMetadata().getHikeFiles().get(0).getHikeFileType(),
+					convMessage.isSent());
+		}
 		// conversation
 
 		Spanned text = Html.fromHtml(String.format("<bold>%1$s</bold>: %2$s",
