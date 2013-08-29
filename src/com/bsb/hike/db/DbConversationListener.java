@@ -80,6 +80,8 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.SEND_HIKE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.SEND_NATIVE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
+		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
+		
 	}
 
 	@Override
