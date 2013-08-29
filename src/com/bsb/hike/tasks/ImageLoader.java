@@ -138,6 +138,8 @@ public class ImageLoader {
 							Bitmap bmp = BitmapFactory.decodeFile(tempFile
 									.getPath());
 
+							tempFile.delete();
+
 							imageMap.put(listItemToLoad.id,
 									new SoftReference<Bitmap>(bmp));
 							ImageViewerInfo tag = (ImageViewerInfo) listItemToLoad.imageView
