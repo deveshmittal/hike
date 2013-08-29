@@ -2685,7 +2685,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		recordBtn.setEnabled(true);
 
-		recordBtn.setImageResource(R.drawable.ic_record);
+		recordBtn.setImageResource(R.drawable.ic_record_selector);
 		sendBtn.setEnabled(false);
 
 		recordingHandler = new Handler();
@@ -2927,6 +2927,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		recorderState = RecorderState.RECORDED;
 
 		recordBtn.setEnabled(false);
+		recordBtn.setImageResource(R.drawable.ic_big_tick);
 		recordImage.setImageResource(R.drawable.ic_recorded);
 		Utils.setupFormattedTime(recordText, duration);
 
