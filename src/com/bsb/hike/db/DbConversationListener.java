@@ -80,6 +80,8 @@ public class DbConversationListener implements Listener {
 		mPubSub.addListener(HikePubSub.SEND_HIKE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.SEND_NATIVE_SMS_FALLBACK, this);
 		mPubSub.addListener(HikePubSub.REMOVE_PROTIP, this);
+		mPubSub.addListener(HikePubSub.GAMING_PROTIP_DOWNLOADED, this);
+		
 	}
 
 	@Override
@@ -351,8 +353,16 @@ public class DbConversationListener implements Listener {
 			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
 			mConversationDb.deleteProtip(mappedId);
 
-			sendDismissTipLogEvent(mappedId);
+			sendDismissTipLogEvent(mappedId, null);
+		} else if(HikePubSub.GAMING_PROTIP_DOWNLOADED.equals(type)){
+			String mappedId = (String) object;
+			IconCacheManager.getInstance().deleteIconForMSISDN(mappedId);
+			String url= mConversationDb.getProtipForId(Long.valueOf(mappedId)).getGameDownlodURL();
+			mConversationDb.deleteProtip(mappedId);
+			sendDismissTipLogEvent(mappedId, url);
 		}
+			
+			
 	}
 
 	private void sendNativeSMSFallbackLogEvent(boolean onHike, boolean userOnline,
@@ -374,12 +384,13 @@ public class DbConversationListener implements Listener {
 		}
 	}
 
-	private void sendDismissTipLogEvent(String tipId) {
+	private void sendDismissTipLogEvent(String tipId, String URL) {
 		JSONObject data = new JSONObject();
 		JSONObject metadata = new JSONObject();
 		try {
 			metadata.put(HikeConstants.TIP_ID, tipId);
-
+			if(!TextUtils.isEmpty(URL))
+				metadata.put(HikeConstants.TIP_URL, URL);
 			data.put(HikeConstants.SUB_TYPE, HikeConstants.UI_EVENT);
 			data.put(HikeConstants.METADATA, metadata);
 
@@ -388,7 +399,7 @@ public class DbConversationListener implements Listener {
 			Log.w(getClass().getSimpleName(), "Invalid JSON", e);
 		}
 	}
-
+	
 	private void sendNativeSMS(ConvMessage convMessage) {
 		SmsManager smsManager = SmsManager.getDefault();
 

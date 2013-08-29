@@ -4,7 +4,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 
 public class DBConstants {
 
-	public static final int CONVERSATIONS_DATABASE_VERSION = 20;
+	public static final int CONVERSATIONS_DATABASE_VERSION = 21;
 
 	public static final int USERS_DATABASE_VERSION = 14;
 
@@ -163,6 +163,8 @@ public class DBConstants {
 	public static final String IMAGE_URL = "imageUrl";
 
 	public static final String WAIT_TIME = "waitTime";
+	
+	public static final String PROTIP_GAMING_DOWNLOAD_URL = "url";
 
 	public static final String IS_OFFLINE = "isOffline";
 

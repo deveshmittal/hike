@@ -1387,7 +1387,9 @@ public class Utils {
 		AccountUtils.rewardsUrl = httpString
 				+ (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE
 						: AccountUtils.REWARDS_STAGING_BASE);
-
+		AccountUtils.gamesUrl = httpString
+				+ (isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE
+						: AccountUtils.GAMES_STAGING_BASE);
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE
 						: AccountUtils.STICKERS_STAGING_BASE);

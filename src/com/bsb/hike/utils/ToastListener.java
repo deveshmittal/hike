@@ -25,6 +25,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
@@ -41,6 +42,7 @@ public class ToastListener implements Listener {
 	private Context context;
 
 	private MQTTConnectionStatus mCurrentUnnotifiedStatus;
+
 	String[] hikePubSubListeners = { HikePubSub.PUSH_AVATAR_DOWNLOADED,
 			HikePubSub.PUSH_FILE_DOWNLOADED,
 			HikePubSub.PUSH_STICKER_DOWNLOADED, HikePubSub.MESSAGE_RECEIVED,
@@ -48,7 +50,7 @@ public class ToastListener implements Listener {
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
 			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
-			HikePubSub.CANCEL_ALL_NOTIFICATIONS };
+			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED };
 
 	public ToastListener(Context context) {
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -164,7 +166,6 @@ public class ToastListener implements Listener {
 			}
 			String[] profileStruct = (String[]) object;
 			toaster.pushBigPictureStatusNotifications(profileStruct);
-
 		} else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type)
 				| HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type)) {
 			ConvMessage message = (ConvMessage) object;
@@ -185,6 +186,15 @@ public class ToastListener implements Listener {
 			toaster.notifyMessage(contactInfo, message);
 		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllNotifications();
+		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
+			Protip proTip = (Protip) object;
+
+			if (currentActivity != null && currentActivity.get() != null) {
+				return;
+			}
+			if (proTip.isShowPush())
+				toaster.notifyMessage(proTip);
+
 		}
 	}
 

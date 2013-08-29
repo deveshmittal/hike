@@ -185,6 +185,10 @@ public class HikeMessengerApp extends Application implements Listener {
 	public static final String SHOW_REWARDS = "showRewards";
 	public static final String TALK_TIME = "talkTime";
 	
+	public static final String GAMES_TOKEN = "gamesToken";
+	
+	public static final String SHOW_GAMES = "showGames";
+	
 	public static final String GCK_SHOWN = "gckShown";
 	public static final String ADD_CONTACT_SHOWN = "addContactShown";
 

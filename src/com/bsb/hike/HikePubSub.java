@@ -188,6 +188,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String TOGGLE_REWARDS = "toggleRewards";
 
+	public static final String TOGGLE_GAMES = "toggleGames";
+	
 	public static final String TALK_TIME_CHANGED = "talkTimeChanged";
 
 	public static final String SHOW_STATUS_DIALOG = "showStatusDialog";
@@ -249,18 +251,20 @@ public class HikePubSub implements Runnable {
 	public static final String REMOVE_PROTIP = "removeProtip";
 
 	public static final String PROTIP_ADDED = "protipAdded";
+	
+	public static final String GAMING_PROTIP_DOWNLOADED ="gamingProtipDownloaded";
 
 	public static final String DISMISS_POSTING_DIALOG = "dismissPostingDialog";
 
 	public static final String SHOW_IMAGE = "showImage";
 
 	public static final String RESET_UNREAD_COUNT = "resetUnreadCount";
-
-	public static final String PUSH_FILE_DOWNLOADED = "pushFileDownloaded";
-
+	
+	public static final String PUSH_FILE_DOWNLOADED ="pushFileDownloaded";
+	
 	public static final String PUSH_AVATAR_DOWNLOADED = "pushAvtarDownloaded";
-
-	public static final String PUSH_STICKER_DOWNLOADED = "pushStickerDownloaded";
+	
+	public static final String PUSH_STICKER_DOWNLOADED ="pushStickerDownloaded";
 
 	public static final String CANCEL_ALL_NOTIFICATIONS = "cancelAllNotifications";
 
