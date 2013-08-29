@@ -1817,6 +1817,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			mConversation.setOnhike(HikePubSub.USER_JOINED.equals(type));
 			runOnUiThread(new Runnable() {
 				public void run() {
+					mLastSeenView
+							.setText(mConversation.isOnhike() ? R.string.on_hike
+									: R.string.on_sms);
+
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
 				}
