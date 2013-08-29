@@ -269,7 +269,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				if (!TextUtils.isEmpty(protip.getText())) {
 					viewHolder.extraInfo.setVisibility(View.VISIBLE);
 					viewHolder.extraInfo.setText(protip.getText());
-					
+
 				} else {
 					viewHolder.extraInfo.setVisibility(View.GONE);
 				}
@@ -289,7 +289,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 						viewHolder.yesBtn.setTag(protip);
 						viewHolder.yesBtn.setVisibility(View.VISIBLE);
 						viewHolder.yesBtn
-						.setOnClickListener(yesBtnClickListener);
+								.setOnClickListener(yesBtnClickListener);
 					}
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
@@ -305,8 +305,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			viewHolder.avatar.setTag(statusMessage);
 
-//			viewHolder.yesBtn.setTag(statusMessage);
-//			viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
+			// viewHolder.yesBtn.setTag(statusMessage);
+			// viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
 
 			viewHolder.noBtn.setTag(statusMessage);
 			viewHolder.noBtn.setOnClickListener(noBtnClickListener);
@@ -382,8 +382,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		public void onClick(View v) {
 			Protip protip = (Protip) v.getTag();
 			String url = protip.getGameDownlodURL();
-			Intent marketIntent = new Intent(Intent.ACTION_VIEW,
-					Uri.parse(url));
+			Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 			marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
 					| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 			try {
