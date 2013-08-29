@@ -1,14 +1,23 @@
 package com.bsb.hike.utils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.ui.ComposeActivity;
 import com.bsb.hike.ui.CreditsActivity;
@@ -51,6 +60,10 @@ public class HomeBaseFragment extends SherlockListFragment {
 			break;
 		case R.id.games:
 			intent = getGamingIntent();
+			break;
+		case R.id.mute_notification:
+			toggleMute();
+			return true;
 		}
 
 		if (intent != null) {
@@ -64,10 +77,12 @@ public class HomeBaseFragment extends SherlockListFragment {
 	@Override
 	public void onPrepareOptionsMenu(Menu menu) {
 		MenuItem gamesItem = menu.findItem(R.id.games);
+		MenuItem rewardsItem = menu.findItem(R.id.rewards);
+		MenuItem muteItem = menu.findItem(R.id.mute_notification);
 
 		SharedPreferences prefs = getSherlockActivity().getSharedPreferences(
 				HikeMessengerApp.ACCOUNT_SETTINGS, 0);
-		MenuItem rewardsItem = menu.findItem(R.id.rewards);
+
 		if (rewardsItem != null) {
 			rewardsItem.setVisible(prefs.getBoolean(
 					HikeMessengerApp.SHOW_REWARDS, false));
@@ -78,6 +93,12 @@ public class HomeBaseFragment extends SherlockListFragment {
 					false));
 		}
 
+		if (muteItem != null) {
+			int preference = PreferenceManager.getDefaultSharedPreferences(
+					getActivity()).getInt(HikeConstants.STATUS_PREF, 0);
+			muteItem.setTitle(preference == 0 ? R.string.mute_notifications
+					: R.string.unmute_notifications);
+		}
 		super.onPrepareOptionsMenu(menu);
 	}
 
@@ -111,5 +132,42 @@ public class HomeBaseFragment extends SherlockListFragment {
 		intent.putExtra(HikeConstants.Extras.TITLE, getSherlockActivity()
 				.getString(R.string.new_string));
 		return intent;
+	}
+
+	private void toggleMute() {
+		SharedPreferences settingPref = PreferenceManager
+				.getDefaultSharedPreferences(getActivity());
+		int preference = settingPref.getInt(HikeConstants.STATUS_PREF, 0);
+
+		int newValue;
+
+		Editor editor = settingPref.edit();
+		if (preference == 0) {
+			newValue = -1;
+			editor.putInt(HikeConstants.STATUS_PREF, newValue);
+		} else {
+			newValue = 0;
+			editor.putInt(HikeConstants.STATUS_PREF, newValue);
+		}
+		editor.commit();
+
+		try {
+			JSONObject jsonObject = new JSONObject();
+			JSONObject data = new JSONObject();
+			data.put(HikeConstants.PUSH_SU, newValue);
+			jsonObject.put(HikeConstants.DATA, data);
+			jsonObject.put(HikeConstants.TYPE,
+					HikeConstants.MqttMessageTypes.ACCOUNT_CONFIG);
+			HikeMessengerApp.getPubSub().publish(HikePubSub.MQTT_PUBLISH,
+					jsonObject);
+
+			Toast.makeText(
+					getActivity(),
+					newValue == 0 ? R.string.status_notification_on
+							: R.string.status_notification_off,
+					Toast.LENGTH_SHORT).show();
+		} catch (JSONException e) {
+			Log.w(getClass().getSimpleName(), e);
+		}
 	}
 }

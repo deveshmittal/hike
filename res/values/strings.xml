@@ -621,4 +621,6 @@
 	<string name="updates_friends">You can see updates from your friends here</string>
 	<string name="tap_plus">Tap on + to add a contact as your friend</string>
     <string name="games">Games</string>
+    <string name="mute_notifications">Mute Notifications</string>
+	<string name="unmute_notifications">Unmute Notifications</string>
 </resources>
