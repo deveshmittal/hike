@@ -1891,7 +1891,8 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			public void onSuccess(JSONObject response) {
 				HikeMessengerApp.getPubSub().publish(HikePubSub.DELETE_STATUS,
 						statusId);
-				for (ProfileItem profileItem : profileItems) {
+				for (int i = 0; i < profileItems.size(); i++) {
+					ProfileItem profileItem = profileAdapter.getItem(i);
 					StatusMessage message = ((ProfileStatusItem) profileItem)
 							.getStatusMessage();
 
@@ -1900,7 +1901,7 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					}
 
 					if (statusId.equals(message.getMappedId())) {
-						profileItems.remove(message);
+						profileItems.remove(i);
 						break;
 					}
 				}
