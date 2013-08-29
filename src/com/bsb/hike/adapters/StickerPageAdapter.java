@@ -175,9 +175,15 @@ public class StickerPageAdapter extends BaseAdapter implements OnClickListener {
 				Sticker sticker = stickerList.get(index);
 
 				if (sticker.getStickerIndex() != -1) {
-					imageView
-							.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS[sticker
-									.getStickerIndex()]);
+					if (sticker.getCategoryIndex() == 1) {
+						imageView
+								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_2[sticker
+										.getStickerIndex()]);
+					} else if (sticker.getCategoryIndex() == 0) {
+						imageView
+								.setImageResource(EmoticonConstants.LOCAL_STICKER_SMALL_RES_IDS_1[sticker
+										.getStickerIndex()]);
+					}
 				} else {
 					imageView.setImageBitmap(BitmapFactory.decodeFile(sticker
 							.getSmallStickerPath(activity)));

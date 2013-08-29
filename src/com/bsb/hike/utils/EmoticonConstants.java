@@ -1,5 +1,8 @@
 package com.bsb.hike.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.R;
 
@@ -196,124 +199,136 @@ public class EmoticonConstants {
 			R.drawable.emo_im_144_xd, R.drawable.emo_im_145_kaboom,
 			R.drawable.emo_im_146_yarr, R.drawable.emo_im_147_ninja,
 			R.drawable.emo_im_148_yuush, R.drawable.emo_im_149_brains,
-			R.drawable.emo_im_150_sleeping, R.drawable.e415, R.drawable.e056,
-			R.drawable.e057, R.drawable.e414, R.drawable.e405, R.drawable.e106,
-			R.drawable.e418, R.drawable.e417, R.drawable.e40d, R.drawable.e40a,
-			R.drawable.e404, R.drawable.e105, R.drawable.e409, R.drawable.e40e,
-			R.drawable.e402, R.drawable.e108, R.drawable.e403, R.drawable.e058,
-			R.drawable.e407, R.drawable.e401, R.drawable.e40f, R.drawable.e40b,
-			R.drawable.e406, R.drawable.e413, R.drawable.e411, R.drawable.e412,
-			R.drawable.e410, R.drawable.e107, R.drawable.e059, R.drawable.e416,
-			R.drawable.e408, R.drawable.e40c, R.drawable.e11a, R.drawable.e10c,
-			R.drawable.e32c, R.drawable.e32a, R.drawable.e32d, R.drawable.e328,
-			R.drawable.e32b, R.drawable.e022, R.drawable.e023, R.drawable.e327,
-			R.drawable.e329, R.drawable.e32e, R.drawable.e335, R.drawable.e334,
-			R.drawable.e337, R.drawable.e336, R.drawable.e13c, R.drawable.e330,
-			R.drawable.e331, R.drawable.e326, R.drawable.e03e, R.drawable.e11d,
-			R.drawable.e05a, R.drawable.e00e, R.drawable.e421, R.drawable.e420,
-			R.drawable.e00d, R.drawable.e010, R.drawable.e011, R.drawable.e41e,
-			R.drawable.e012, R.drawable.e422, R.drawable.e22e, R.drawable.e22f,
-			R.drawable.e231, R.drawable.e230, R.drawable.e427, R.drawable.e41d,
-			R.drawable.e00f, R.drawable.e41f, R.drawable.e14c, R.drawable.e201,
-			R.drawable.e115, R.drawable.e428, R.drawable.e51f, R.drawable.e429,
-			R.drawable.e424, R.drawable.e423, R.drawable.e253, R.drawable.e426,
-			R.drawable.e111, R.drawable.e425, R.drawable.e31e, R.drawable.e31f,
-			R.drawable.e31d, R.drawable.e001, R.drawable.e002, R.drawable.e005,
-			R.drawable.e004, R.drawable.e51a, R.drawable.e519, R.drawable.e518,
-			R.drawable.e515, R.drawable.e516, R.drawable.e517, R.drawable.e51b,
-			R.drawable.e152, R.drawable.e04e, R.drawable.e51c, R.drawable.e51e,
-			R.drawable.e11c, R.drawable.e536, R.drawable.e003, R.drawable.e41c,
-			R.drawable.e41b, R.drawable.e419, R.drawable.e41a, R.drawable.e04a,
-			R.drawable.e04b, R.drawable.e049, R.drawable.e048, R.drawable.e04c,
-			R.drawable.e13d, R.drawable.e443, R.drawable.e43e, R.drawable.e04f,
-			R.drawable.e052, R.drawable.e053, R.drawable.e524, R.drawable.e52c,
-			R.drawable.e52a, R.drawable.e531, R.drawable.e050, R.drawable.e527,
-			R.drawable.e051, R.drawable.e10b, R.drawable.e52b, R.drawable.e52f,
-			R.drawable.e109, R.drawable.e528, R.drawable.e01a, R.drawable.e134,
-			R.drawable.e530, R.drawable.e529, R.drawable.e526, R.drawable.e52d,
-			R.drawable.e521, R.drawable.e523, R.drawable.e52e, R.drawable.e055,
-			R.drawable.e525, R.drawable.e10a, R.drawable.e522, R.drawable.e019,
-			R.drawable.e054, R.drawable.e520, R.drawable.e306, R.drawable.e030,
-			R.drawable.e304, R.drawable.e110, R.drawable.e032, R.drawable.e305,
-			R.drawable.e303, R.drawable.e118, R.drawable.e447, R.drawable.e119,
-			R.drawable.e307, R.drawable.e308, R.drawable.e444, R.drawable.e441,
-			R.drawable.e436, R.drawable.e437, R.drawable.e438, R.drawable.e43a,
-			R.drawable.e439, R.drawable.e43b, R.drawable.e117, R.drawable.e440,
-			R.drawable.e442, R.drawable.e446, R.drawable.e445, R.drawable.e11b,
-			R.drawable.e448, R.drawable.e033, R.drawable.e112, R.drawable.e325,
-			R.drawable.e312, R.drawable.e310, R.drawable.e126, R.drawable.e127,
-			R.drawable.e008, R.drawable.e03d, R.drawable.e00c, R.drawable.e12a,
-			R.drawable.e00a, R.drawable.e00b, R.drawable.e009, R.drawable.e316,
-			R.drawable.e129, R.drawable.e141, R.drawable.e142, R.drawable.e317,
-			R.drawable.e128, R.drawable.e14b, R.drawable.e211, R.drawable.e114,
-			R.drawable.e145, R.drawable.e144, R.drawable.e03f, R.drawable.e313,
-			R.drawable.e116, R.drawable.e10f, R.drawable.e104, R.drawable.e103,
-			R.drawable.e101, R.drawable.e102, R.drawable.e13f, R.drawable.e140,
-			R.drawable.e11f, R.drawable.e12f, R.drawable.e031, R.drawable.e30e,
-			R.drawable.e311, R.drawable.e113, R.drawable.e30f, R.drawable.e13b,
-			R.drawable.e42b, R.drawable.e42a, R.drawable.e018, R.drawable.e016,
-			R.drawable.e015, R.drawable.e014, R.drawable.e42c, R.drawable.e42d,
-			R.drawable.e017, R.drawable.e013, R.drawable.e20e, R.drawable.e20c,
-			R.drawable.e20f, R.drawable.e20d, R.drawable.e131, R.drawable.e12b,
-			R.drawable.e130, R.drawable.e12d, R.drawable.e324, R.drawable.e301,
-			R.drawable.e148, R.drawable.e502, R.drawable.e03c, R.drawable.e30a,
-			R.drawable.e042, R.drawable.e040, R.drawable.e041, R.drawable.e12c,
-			R.drawable.e007, R.drawable.e31a, R.drawable.e13e, R.drawable.e31b,
-			R.drawable.e006, R.drawable.e302, R.drawable.e319, R.drawable.e321,
-			R.drawable.e322, R.drawable.e314, R.drawable.e503, R.drawable.e10e,
-			R.drawable.e318, R.drawable.e43c, R.drawable.e11e, R.drawable.e323,
-			R.drawable.e31c, R.drawable.e034, R.drawable.e035, R.drawable.e045,
-			R.drawable.e338, R.drawable.e047, R.drawable.e30c, R.drawable.e044,
-			R.drawable.e30b, R.drawable.e043, R.drawable.e120, R.drawable.e33b,
-			R.drawable.e33f, R.drawable.e341, R.drawable.e34c, R.drawable.e344,
-			R.drawable.e342, R.drawable.e33d, R.drawable.e33e, R.drawable.e340,
-			R.drawable.e34d, R.drawable.e339, R.drawable.e147, R.drawable.e343,
-			R.drawable.e33c, R.drawable.e33a, R.drawable.e43f, R.drawable.e34b,
-			R.drawable.e046, R.drawable.e345, R.drawable.e346, R.drawable.e348,
-			R.drawable.e347, R.drawable.e34a, R.drawable.e349, R.drawable.e036,
-			R.drawable.e157, R.drawable.e038, R.drawable.e153, R.drawable.e155,
-			R.drawable.e14d, R.drawable.e156, R.drawable.e501, R.drawable.e158,
-			R.drawable.e43d, R.drawable.e037, R.drawable.e504, R.drawable.e44a,
-			R.drawable.e146, R.drawable.e154, R.drawable.e505, R.drawable.e506,
-			R.drawable.e122, R.drawable.e508, R.drawable.e509, R.drawable.e03b,
-			R.drawable.e04d, R.drawable.e449, R.drawable.e44b, R.drawable.e51d,
-			R.drawable.e44c, R.drawable.e124, R.drawable.e121, R.drawable.e433,
-			R.drawable.e202, R.drawable.e135, R.drawable.e01c, R.drawable.e01d,
-			R.drawable.e10d, R.drawable.e136, R.drawable.e42e, R.drawable.e01b,
-			R.drawable.e15a, R.drawable.e159, R.drawable.e432, R.drawable.e430,
-			R.drawable.e431, R.drawable.e42f, R.drawable.e01e, R.drawable.e039,
-			R.drawable.e435, R.drawable.e01f, R.drawable.e125, R.drawable.e03a,
-			R.drawable.e14e, R.drawable.e252, R.drawable.e137, R.drawable.e209,
-			R.drawable.e133, R.drawable.e150, R.drawable.e320, R.drawable.e123,
-			R.drawable.e132, R.drawable.e143, R.drawable.e50b, R.drawable.e514,
-			R.drawable.e513, R.drawable.e50c, R.drawable.e50d, R.drawable.e511,
-			R.drawable.e50f, R.drawable.e512, R.drawable.e510, R.drawable.e50e,
-			R.drawable.e21c, R.drawable.e21d, R.drawable.e21e, R.drawable.e21f,
-			R.drawable.e220, R.drawable.e221, R.drawable.e222, R.drawable.e223,
-			R.drawable.e224, R.drawable.e225, R.drawable.e210, R.drawable.e232,
-			R.drawable.e233, R.drawable.e235, R.drawable.e234, R.drawable.e236,
-			R.drawable.e237, R.drawable.e238, R.drawable.e239, R.drawable.e23b,
-			R.drawable.e23a, R.drawable.e23d, R.drawable.e23c, R.drawable.e24d,
-			R.drawable.e212, R.drawable.e24c, R.drawable.e213, R.drawable.e214,
-			R.drawable.e507, R.drawable.e203, R.drawable.e20b, R.drawable.e22a,
-			R.drawable.e22b, R.drawable.e226, R.drawable.e227, R.drawable.e22c,
-			R.drawable.e22d, R.drawable.e215, R.drawable.e216, R.drawable.e217,
-			R.drawable.e218, R.drawable.e228, R.drawable.e151, R.drawable.e138,
-			R.drawable.e139, R.drawable.e13a, R.drawable.e208, R.drawable.e14f,
-			R.drawable.e20a, R.drawable.e434, R.drawable.e309, R.drawable.e315,
-			R.drawable.e30d, R.drawable.e207, R.drawable.e229, R.drawable.e206,
-			R.drawable.e205, R.drawable.e204, R.drawable.e12e, R.drawable.e250,
-			R.drawable.e251, R.drawable.e14a, R.drawable.e149, R.drawable.e23f,
-			R.drawable.e240, R.drawable.e241, R.drawable.e242, R.drawable.e243,
-			R.drawable.e244, R.drawable.e245, R.drawable.e246, R.drawable.e247,
-			R.drawable.e248, R.drawable.e249, R.drawable.e24a, R.drawable.e24b,
-			R.drawable.e23e, R.drawable.e532, R.drawable.e533, R.drawable.e534,
-			R.drawable.e535, R.drawable.e21a, R.drawable.e219, R.drawable.e21b,
-			R.drawable.e02f, R.drawable.e024, R.drawable.e025, R.drawable.e026,
-			R.drawable.e027, R.drawable.e028, R.drawable.e029, R.drawable.e02a,
-			R.drawable.e02b, R.drawable.e02c, R.drawable.e02d, R.drawable.e02e,
-			R.drawable.e332, R.drawable.e333, R.drawable.e24e, R.drawable.e24f,
-			R.drawable.e537 };
+			R.drawable.emo_im_150_sleeping, R.drawable.emo_im_151_auto,
+			R.drawable.emo_im_152_batti, R.drawable.emo_im_153_best,
+			R.drawable.emo_im_154_metro, R.drawable.emo_im_155_biscuit,
+			R.drawable.emo_im_156_chai, R.drawable.emo_im_157_chips,
+			R.drawable.emo_im_158_samosa, R.drawable.emo_im_159_noodles,
+			R.drawable.emo_im_160_jalebi, R.drawable.emo_im_161_icecream,
+			R.drawable.emo_im_162_nariyal, R.drawable.emo_im_163_rum,
+			R.drawable.emo_im_164_paisa, R.drawable.emo_im_165_tiranga,
+			R.drawable.emo_im_166_hero, R.drawable.emo_im_167_neta,
+			R.drawable.emo_im_168_police, R.drawable.emo_im_169_nimbu,
+			R.drawable.emo_im_170_patakha, R.drawable.emo_im_171_love,
+			R.drawable.emo_im_172_cupid, R.drawable.emo_im_173_shaktiman,
+			R.drawable.emo_im_174_tandoori, R.drawable.emo_im_175_dd,
+			R.drawable.e415, R.drawable.e056, R.drawable.e057, R.drawable.e414,
+			R.drawable.e405, R.drawable.e106, R.drawable.e418, R.drawable.e417,
+			R.drawable.e40d, R.drawable.e40a, R.drawable.e404, R.drawable.e105,
+			R.drawable.e409, R.drawable.e40e, R.drawable.e402, R.drawable.e108,
+			R.drawable.e403, R.drawable.e058, R.drawable.e407, R.drawable.e401,
+			R.drawable.e40f, R.drawable.e40b, R.drawable.e406, R.drawable.e413,
+			R.drawable.e411, R.drawable.e412, R.drawable.e410, R.drawable.e107,
+			R.drawable.e059, R.drawable.e416, R.drawable.e408, R.drawable.e40c,
+			R.drawable.e11a, R.drawable.e10c, R.drawable.e32c, R.drawable.e32a,
+			R.drawable.e32d, R.drawable.e328, R.drawable.e32b, R.drawable.e022,
+			R.drawable.e023, R.drawable.e327, R.drawable.e329, R.drawable.e32e,
+			R.drawable.e335, R.drawable.e334, R.drawable.e337, R.drawable.e336,
+			R.drawable.e13c, R.drawable.e330, R.drawable.e331, R.drawable.e326,
+			R.drawable.e03e, R.drawable.e11d, R.drawable.e05a, R.drawable.e00e,
+			R.drawable.e421, R.drawable.e420, R.drawable.e00d, R.drawable.e010,
+			R.drawable.e011, R.drawable.e41e, R.drawable.e012, R.drawable.e422,
+			R.drawable.e22e, R.drawable.e22f, R.drawable.e231, R.drawable.e230,
+			R.drawable.e427, R.drawable.e41d, R.drawable.e00f, R.drawable.e41f,
+			R.drawable.e14c, R.drawable.e201, R.drawable.e115, R.drawable.e428,
+			R.drawable.e51f, R.drawable.e429, R.drawable.e424, R.drawable.e423,
+			R.drawable.e253, R.drawable.e426, R.drawable.e111, R.drawable.e425,
+			R.drawable.e31e, R.drawable.e31f, R.drawable.e31d, R.drawable.e001,
+			R.drawable.e002, R.drawable.e005, R.drawable.e004, R.drawable.e51a,
+			R.drawable.e519, R.drawable.e518, R.drawable.e515, R.drawable.e516,
+			R.drawable.e517, R.drawable.e51b, R.drawable.e152, R.drawable.e04e,
+			R.drawable.e51c, R.drawable.e51e, R.drawable.e11c, R.drawable.e536,
+			R.drawable.e003, R.drawable.e41c, R.drawable.e41b, R.drawable.e419,
+			R.drawable.e41a, R.drawable.e04a, R.drawable.e04b, R.drawable.e049,
+			R.drawable.e048, R.drawable.e04c, R.drawable.e13d, R.drawable.e443,
+			R.drawable.e43e, R.drawable.e04f, R.drawable.e052, R.drawable.e053,
+			R.drawable.e524, R.drawable.e52c, R.drawable.e52a, R.drawable.e531,
+			R.drawable.e050, R.drawable.e527, R.drawable.e051, R.drawable.e10b,
+			R.drawable.e52b, R.drawable.e52f, R.drawable.e109, R.drawable.e528,
+			R.drawable.e01a, R.drawable.e134, R.drawable.e530, R.drawable.e529,
+			R.drawable.e526, R.drawable.e52d, R.drawable.e521, R.drawable.e523,
+			R.drawable.e52e, R.drawable.e055, R.drawable.e525, R.drawable.e10a,
+			R.drawable.e522, R.drawable.e019, R.drawable.e054, R.drawable.e520,
+			R.drawable.e306, R.drawable.e030, R.drawable.e304, R.drawable.e110,
+			R.drawable.e032, R.drawable.e305, R.drawable.e303, R.drawable.e118,
+			R.drawable.e447, R.drawable.e119, R.drawable.e307, R.drawable.e308,
+			R.drawable.e444, R.drawable.e441, R.drawable.e436, R.drawable.e437,
+			R.drawable.e438, R.drawable.e43a, R.drawable.e439, R.drawable.e43b,
+			R.drawable.e117, R.drawable.e440, R.drawable.e442, R.drawable.e446,
+			R.drawable.e445, R.drawable.e11b, R.drawable.e448, R.drawable.e033,
+			R.drawable.e112, R.drawable.e325, R.drawable.e312, R.drawable.e310,
+			R.drawable.e126, R.drawable.e127, R.drawable.e008, R.drawable.e03d,
+			R.drawable.e00c, R.drawable.e12a, R.drawable.e00a, R.drawable.e00b,
+			R.drawable.e009, R.drawable.e316, R.drawable.e129, R.drawable.e141,
+			R.drawable.e142, R.drawable.e317, R.drawable.e128, R.drawable.e14b,
+			R.drawable.e211, R.drawable.e114, R.drawable.e145, R.drawable.e144,
+			R.drawable.e03f, R.drawable.e313, R.drawable.e116, R.drawable.e10f,
+			R.drawable.e104, R.drawable.e103, R.drawable.e101, R.drawable.e102,
+			R.drawable.e13f, R.drawable.e140, R.drawable.e11f, R.drawable.e12f,
+			R.drawable.e031, R.drawable.e30e, R.drawable.e311, R.drawable.e113,
+			R.drawable.e30f, R.drawable.e13b, R.drawable.e42b, R.drawable.e42a,
+			R.drawable.e018, R.drawable.e016, R.drawable.e015, R.drawable.e014,
+			R.drawable.e42c, R.drawable.e42d, R.drawable.e017, R.drawable.e013,
+			R.drawable.e20e, R.drawable.e20c, R.drawable.e20f, R.drawable.e20d,
+			R.drawable.e131, R.drawable.e12b, R.drawable.e130, R.drawable.e12d,
+			R.drawable.e324, R.drawable.e301, R.drawable.e148, R.drawable.e502,
+			R.drawable.e03c, R.drawable.e30a, R.drawable.e042, R.drawable.e040,
+			R.drawable.e041, R.drawable.e12c, R.drawable.e007, R.drawable.e31a,
+			R.drawable.e13e, R.drawable.e31b, R.drawable.e006, R.drawable.e302,
+			R.drawable.e319, R.drawable.e321, R.drawable.e322, R.drawable.e314,
+			R.drawable.e503, R.drawable.e10e, R.drawable.e318, R.drawable.e43c,
+			R.drawable.e11e, R.drawable.e323, R.drawable.e31c, R.drawable.e034,
+			R.drawable.e035, R.drawable.e045, R.drawable.e338, R.drawable.e047,
+			R.drawable.e30c, R.drawable.e044, R.drawable.e30b, R.drawable.e043,
+			R.drawable.e120, R.drawable.e33b, R.drawable.e33f, R.drawable.e341,
+			R.drawable.e34c, R.drawable.e344, R.drawable.e342, R.drawable.e33d,
+			R.drawable.e33e, R.drawable.e340, R.drawable.e34d, R.drawable.e339,
+			R.drawable.e147, R.drawable.e343, R.drawable.e33c, R.drawable.e33a,
+			R.drawable.e43f, R.drawable.e34b, R.drawable.e046, R.drawable.e345,
+			R.drawable.e346, R.drawable.e348, R.drawable.e347, R.drawable.e34a,
+			R.drawable.e349, R.drawable.e036, R.drawable.e157, R.drawable.e038,
+			R.drawable.e153, R.drawable.e155, R.drawable.e14d, R.drawable.e156,
+			R.drawable.e501, R.drawable.e158, R.drawable.e43d, R.drawable.e037,
+			R.drawable.e504, R.drawable.e44a, R.drawable.e146, R.drawable.e154,
+			R.drawable.e505, R.drawable.e506, R.drawable.e122, R.drawable.e508,
+			R.drawable.e509, R.drawable.e03b, R.drawable.e04d, R.drawable.e449,
+			R.drawable.e44b, R.drawable.e51d, R.drawable.e44c, R.drawable.e124,
+			R.drawable.e121, R.drawable.e433, R.drawable.e202, R.drawable.e135,
+			R.drawable.e01c, R.drawable.e01d, R.drawable.e10d, R.drawable.e136,
+			R.drawable.e42e, R.drawable.e01b, R.drawable.e15a, R.drawable.e159,
+			R.drawable.e432, R.drawable.e430, R.drawable.e431, R.drawable.e42f,
+			R.drawable.e01e, R.drawable.e039, R.drawable.e435, R.drawable.e01f,
+			R.drawable.e125, R.drawable.e03a, R.drawable.e14e, R.drawable.e252,
+			R.drawable.e137, R.drawable.e209, R.drawable.e133, R.drawable.e150,
+			R.drawable.e320, R.drawable.e123, R.drawable.e132, R.drawable.e143,
+			R.drawable.e50b, R.drawable.e514, R.drawable.e513, R.drawable.e50c,
+			R.drawable.e50d, R.drawable.e511, R.drawable.e50f, R.drawable.e512,
+			R.drawable.e510, R.drawable.e50e, R.drawable.e21c, R.drawable.e21d,
+			R.drawable.e21e, R.drawable.e21f, R.drawable.e220, R.drawable.e221,
+			R.drawable.e222, R.drawable.e223, R.drawable.e224, R.drawable.e225,
+			R.drawable.e210, R.drawable.e232, R.drawable.e233, R.drawable.e235,
+			R.drawable.e234, R.drawable.e236, R.drawable.e237, R.drawable.e238,
+			R.drawable.e239, R.drawable.e23b, R.drawable.e23a, R.drawable.e23d,
+			R.drawable.e23c, R.drawable.e24d, R.drawable.e212, R.drawable.e24c,
+			R.drawable.e213, R.drawable.e214, R.drawable.e507, R.drawable.e203,
+			R.drawable.e20b, R.drawable.e22a, R.drawable.e22b, R.drawable.e226,
+			R.drawable.e227, R.drawable.e22c, R.drawable.e22d, R.drawable.e215,
+			R.drawable.e216, R.drawable.e217, R.drawable.e218, R.drawable.e228,
+			R.drawable.e151, R.drawable.e138, R.drawable.e139, R.drawable.e13a,
+			R.drawable.e208, R.drawable.e14f, R.drawable.e20a, R.drawable.e434,
+			R.drawable.e309, R.drawable.e315, R.drawable.e30d, R.drawable.e207,
+			R.drawable.e229, R.drawable.e206, R.drawable.e205, R.drawable.e204,
+			R.drawable.e12e, R.drawable.e250, R.drawable.e251, R.drawable.e14a,
+			R.drawable.e149, R.drawable.e23f, R.drawable.e240, R.drawable.e241,
+			R.drawable.e242, R.drawable.e243, R.drawable.e244, R.drawable.e245,
+			R.drawable.e246, R.drawable.e247, R.drawable.e248, R.drawable.e249,
+			R.drawable.e24a, R.drawable.e24b, R.drawable.e23e, R.drawable.e532,
+			R.drawable.e533, R.drawable.e534, R.drawable.e535, R.drawable.e21a,
+			R.drawable.e219, R.drawable.e21b, R.drawable.e02f, R.drawable.e024,
+			R.drawable.e025, R.drawable.e026, R.drawable.e027, R.drawable.e028,
+			R.drawable.e029, R.drawable.e02a, R.drawable.e02b, R.drawable.e02c,
+			R.drawable.e02d, R.drawable.e02e, R.drawable.e332, R.drawable.e333,
+			R.drawable.e24e, R.drawable.e24f, R.drawable.e537 };
 
 	public static final int[] EMOJI_RES_IDS = { R.drawable.e415,
 			R.drawable.e056, R.drawable.e057, R.drawable.e414, R.drawable.e405,
@@ -434,27 +449,69 @@ public class EmoticonConstants {
 			R.drawable.e02e, R.drawable.e332, R.drawable.e333, R.drawable.e24e,
 			R.drawable.e24f, R.drawable.e537 };
 
-	public static final int[] MOOD_WITH_IPL_RES_IDS = {
-			R.drawable.mood_01_happy, R.drawable.mood_02_sad,
-			R.drawable.mood_03_in_love, R.drawable.mood_04_surprised,
-			R.drawable.mood_05_confused, R.drawable.mood_06_angry,
-			R.drawable.mood_07_sleepy, R.drawable.mood_08_hungover,
-			R.drawable.mood_09_chilling, R.drawable.mood_10_studying,
-			R.drawable.mood_11_busy, R.drawable.mood_12_love,
-			R.drawable.mood_13_middle_finger, R.drawable.mood_14_boozing,
-			R.drawable.mood_15_movie, R.drawable.mood_16_caffeinated,
-			R.drawable.mood_17_insomniac, R.drawable.mood_18_driving,
-			R.drawable.mood_19_traffic, R.drawable.mood_20_late,
-			R.drawable.mood_21_shopping, R.drawable.mood_22_gaming,
-			R.drawable.mood_23_coding, R.drawable.mood_24_television };
+	public static final Map<Integer, Integer> moodMapping = new HashMap<Integer, Integer>();
 
-	public static final int[] LOCAL_STICKER_RES_IDS = {
+	static {
+		moodMapping.put(0, R.drawable.mood_01_happy);
+		moodMapping.put(1, R.drawable.mood_02_sad);
+		moodMapping.put(2, R.drawable.mood_03_in_love);
+		moodMapping.put(3, R.drawable.mood_04_surprised);
+		moodMapping.put(4, R.drawable.mood_05_confused);
+		moodMapping.put(5, R.drawable.mood_06_angry);
+		moodMapping.put(6, R.drawable.mood_07_sleepy);
+		moodMapping.put(7, R.drawable.mood_08_hungover);
+		moodMapping.put(8, R.drawable.mood_09_chilling);
+		moodMapping.put(9, R.drawable.mood_10_studying);
+		moodMapping.put(10, R.drawable.mood_11_busy);
+		moodMapping.put(11, R.drawable.mood_12_love);
+		moodMapping.put(12, R.drawable.mood_13_middle_finger);
+		moodMapping.put(13, R.drawable.mood_14_boozing);
+		moodMapping.put(14, R.drawable.mood_15_movie);
+		moodMapping.put(15, R.drawable.mood_16_caffeinated);
+		moodMapping.put(16, R.drawable.mood_17_insomniac);
+		moodMapping.put(17, R.drawable.mood_18_driving);
+		moodMapping.put(18, R.drawable.mood_19_traffic);
+		moodMapping.put(19, R.drawable.mood_20_late);
+		moodMapping.put(20, R.drawable.mood_21_shopping);
+		moodMapping.put(21, R.drawable.mood_22_gaming);
+		moodMapping.put(22, R.drawable.mood_23_coding);
+		moodMapping.put(23, R.drawable.mood_24_television);
+		moodMapping.put(33, R.drawable.mood_34_music);
+		moodMapping.put(34, R.drawable.mood_35_partying_hard);
+		moodMapping.put(35, R.drawable.mood_36_singing);
+		moodMapping.put(36, R.drawable.mood_37_eating);
+		moodMapping.put(37, R.drawable.mood_38_working_out);
+		moodMapping.put(38, R.drawable.mood_39_cooking);
+		moodMapping.put(39, R.drawable.mood_40_beauty_saloon);
+		moodMapping.put(40, R.drawable.mood_41_sick);
+	}
+
+	public static final int[] LOCAL_STICKER_RES_IDS_1 = {
+			R.drawable.sticker_9_love1, R.drawable.sticker_10_love2,
+			R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
+			R.drawable.sticker_13_bored, R.drawable.sticker_14_angry,
+			R.drawable.sticker_15_strangle, R.drawable.sticker_16_shocked,
+			R.drawable.sticker_17_hurray, R.drawable.sticker_18_yawning };
+
+	public static final int[] LOCAL_STICKER_SMALL_RES_IDS_1 = {
+			R.drawable.sticker_9_love1, R.drawable.sticker_10_love2,
+			R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
+			R.drawable.sticker_13_bored, R.drawable.sticker_14_angry,
+			R.drawable.sticker_15_strangle, R.drawable.sticker_16_shocked,
+			R.drawable.sticker_17_hurray, R.drawable.sticker_18_yawning };
+
+	public static final String[] LOCAL_STICKER_IDS_1 = { "001_love1.png",
+			"002_love2.png", "003_teasing.png", "004_rofl.png",
+			"005_bored.png", "006_angry.png", "007_strangle.png",
+			"008_shocked.png", "009_hurray.png", "010_yawning.png" };
+
+	public static final int[] LOCAL_STICKER_RES_IDS_2 = {
 			R.drawable.sticker_1_hi, R.drawable.sticker_2_thumbsup,
 			R.drawable.sticker_3_drooling, R.drawable.sticker_4_devilsmile,
 			R.drawable.sticker_5_sorry, R.drawable.sticker_6_urgh,
 			R.drawable.sticker_7_confused, R.drawable.sticker_8_dreaming, };
 
-	public static final int[] LOCAL_STICKER_SMALL_RES_IDS = {
+	public static final int[] LOCAL_STICKER_SMALL_RES_IDS_2 = {
 			R.drawable.sticker_small_1_hi, R.drawable.sticker_small_2_thumbsup,
 			R.drawable.sticker_small_3_drooling,
 			R.drawable.sticker_small_4_devilsmile,
@@ -462,24 +519,26 @@ public class EmoticonConstants {
 			R.drawable.sticker_small_7_confused,
 			R.drawable.sticker_small_8_dreaming };
 
-	public static final String[] LOCAL_STICKER_IDS = { "001_hi.png",
+	public static final String[] LOCAL_STICKER_IDS_2 = { "001_hi.png",
 			"002_thumbsup.png", "003_drooling.png", "004_devilsmile.png",
 			"005_sorry.png", "006_urgh.png", "007_confused.png",
 			"008_dreaming.png", };
 
-	public static final String[] STICKER_CATEGORY_IDS = { "doggy", "kitty",
-			"expressions", HikeConstants.BOLLYWOOD_CATEGORY, "rageface" };
+	public static final String[] STICKER_CATEGORY_IDS = { "humanoid", "doggy",
+			"kitty", "expressions", HikeConstants.BOLLYWOOD_CATEGORY,
+			"rageface" };
 
-	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.doggy,
-			R.drawable.kitty, R.drawable.expressions, R.drawable.bollywood,
-			R.drawable.rageface };
+	public static final int[] STICKER_CATEGORY_RES_IDS = { R.drawable.humanoid,
+			R.drawable.doggy, R.drawable.kitty, R.drawable.expressions,
+			R.drawable.bollywood, R.drawable.rageface };
 
 	public static final int[] STICKER_CATEGORY_PREVIEW_RES_IDS = {
-			R.drawable.preview_doggy, R.drawable.preview_kitty,
-			R.drawable.preview_expressions, R.drawable.preview_bollywood,
-			R.drawable.preview_rageface };
+			R.drawable.preview_doggy, R.drawable.preview_doggy,
+			R.drawable.preview_kitty, R.drawable.preview_expressions,
+			R.drawable.preview_bollywood, R.drawable.preview_rageface };
 
 	public static final String[] STICKER_DOWNLOAD_PREF = {
-			"doggyDownloadShown", "kittyDownloadShown", "expDownloadShown",
-			"bollywoodDownloadShown", "rfDownloadShown" };
+			"humanoidDownloadShown", "doggyDownloadShown",
+			"kittyDownloadShown", "expDownloadShown", "bollywoodDownloadShown",
+			"rfDownloadShown" };
 }

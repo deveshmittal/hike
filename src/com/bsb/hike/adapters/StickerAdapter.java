@@ -139,12 +139,15 @@ public class StickerAdapter extends PagerAdapter implements
 				@Override
 				protected List<Sticker> doInBackground(Void... params) {
 					List<Sticker> stickerList = new ArrayList<Sticker>();
-					if (position == 0) {
-						for (int i = 0; i < EmoticonConstants.LOCAL_STICKER_IDS.length; i++) {
-							stickerList.add(new Sticker(position,
-									EmoticonConstants.LOCAL_STICKER_IDS[i], i));
-						}
+
+					if (position == 1) {
+						addDefaultStickers(stickerList,
+								EmoticonConstants.LOCAL_STICKER_IDS_2);
+					} else if (position == 0) {
+						addDefaultStickers(stickerList,
+								EmoticonConstants.LOCAL_STICKER_IDS_1);
 					}
+
 					File categoryDir = new File(
 							Utils.getStickerDirectoryForCategoryId(activity,
 									categoryId)
@@ -162,6 +165,14 @@ public class StickerAdapter extends PagerAdapter implements
 					Collections.sort(stickerList);
 
 					return stickerList;
+				}
+
+				private void addDefaultStickers(List<Sticker> stickerList,
+						String[] stickerIds) {
+					for (int i = 0; i < stickerIds.length; i++) {
+						stickerList
+								.add(new Sticker(position, stickerIds[i], i));
+					}
 				}
 
 				@Override

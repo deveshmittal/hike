@@ -21,10 +21,10 @@ import com.bsb.hike.R;
 public class SmileyParser {
 	private static int MAX_EMOTICONS = 100;
 
-	public static final int[] EMOTICONS_SUBCATEGORIES = { 80, 30, 39, 109, 53,
-			132, 72, 98 };
+	public static final int[] EMOTICONS_SUBCATEGORIES = { 80, 30, 39, 25, 109,
+			53, 132, 72, 98 };
 
-	public static final int[] HIKE_SUBCATEGORIES = { 80, 30, 39 };
+	public static final int[] HIKE_SUBCATEGORIES = { 80, 30, 39, 25 };
 
 	public static final int[] EMOJI_SUBCATEGORIES = { 109, 53, 132, 72, 98 };
 

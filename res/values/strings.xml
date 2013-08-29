@@ -200,7 +200,6 @@
 	<string name="sms_subtext">Invite friends via SMS</string>
 	<string name="email_subtext">Invite via Email</string>
 	<string name="other_subtext">Get an invite URL</string>
-	<string name="email_subject">hike. Fun, free messaging for life</string>
 	<string name="facebook_msg">I\'ve started using hike, an awesome new free messaging app. You can message friends on hike and also those who aren\'t for free! Messaging has never been simpler. Download the app at http://get.hike.in/%1$s to start messaging me for free!</string>
 	<string name="gps_disabled">For better accuracy to your location, enable the GPS.</string>
 	<string name="twitter_post_success">Posted to your timeline!</string>
@@ -268,7 +267,7 @@
 	<string name="msisdn">Phone No:</string>
 	<string name="tap_to_invite">Invite to hike</string>
 	<string name="file_transferring">Please wait while the file is being transferred.</string>
-	<string name="unobfuscated_map_api">0Luu6V6IYSC0UpLSUZe7oO-bvd392OgrXSnY8aA</string>
+	<string name="unobfuscated_map_api">AIzaSyAckz5xn4yqDAMs0GU-jrcq_pLq_TyLLjA</string>
 	<string name="production_map_api">0Luu6V6IYSC3olBhRm5jHLKDIn5_CA3P17l_3Mw</string>
 	<string name="enter_some_text">Please enter some text.</string>
 	<string name="t_and_p_signup">Terms and Privacy</string>
@@ -442,7 +441,6 @@
 	<string name="friends_on_hike_tut">Friends on hike</string>
 	<string name="remove_circle">Remove from Circle of Friends</string>
 	<string name="add_hike_friend">View friends</string>
-	<string name="email_body">Hi!\n\nI started using hike, a simple beautiful messaging app that\'s absolutely free.\n\nhike comes with some hilarious emoticons. You can also post Status Updates to your close circle of friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
 	<string name="file_expire">This file no longer exists.</string>
 	<string name="friends_on_hike_tut_info">Tap on the button to see friends on hike</string>
 	<string name="twitter_msg">I\'m using @hikeapp 2.0 with status updates &amp; moods. Its like BBM but much, much better! Get hike at http://get.hike.in #gethike</string>
@@ -600,6 +598,25 @@
     <string name="audio">Audio</string>
     <string name="video">Video</string>
     <string name="location">Location</string>
-    <string name="places_api_key">AIzaSyCBrHWTSgFNu3NKEodf2FZugtrFDqMpDV8</string>
+    <string name="places_api_key">AIzaSyA91tJgFfEPKOXjXm_dyL1mgGP1ys2hU04</string>
     <string name="enter_valid_group_name">Please enter a valid group name</string>
+	<string name="add_as_friend_profile">Would you like to add %1$s as a friend to share updates?</string>
+	<string name="request_pending">Friend request pending</string>
+	<string name="remove_from_friends">Remove from your friend list</string>
+	<string name="friends_lower_case">Friends</string>
+	<string name="hike_tag">Keep close friends close</string>
+	<string name="verify">Verify</string>
+	<string name="accepted_request">Accepted your friend request. You will now be able to see updates from %1$s</string>
+	<string name="edit_group_name">Edit Group Name</string>
+	<string name="invite_name_to_hike">Invite %1$s to hike</string>
+	<string name="you_no_updates">You have no updates! Let your friends know what you are up to</string>
+	<string name="tap_hold_participant">Tap and hold on participant\'s name to see more options</string>
+	<string name="add_as_friend_notification">%1$s added you as a friend</string>
+	<string name="add_as_friend_notification_line">Added you as a friend</string>
+	<string name="friend_request_accepted_notification">You will now be able to see updates from %1$s</string>
+	<string name="only_friends_last_seen">Only your friends can see when you were last seen</string>
+	<string name="email_subject">hike. Keep close friends close.</string>
+	<string name="email_body">Hi!\n\nI\'ve started using hike, a simple beautiful messaging app that\'s absolutely free.\n\nhike lets you send free messages to your friends and family! With hike, you can message friends that are on hike and also those who aren\'t on hike! You\'ll never have to use another messaging app again. Better yet, it\'s absolutely FREE!\n\nhike comes with some hilarious stickers and emoticons. You can also post Status Updates to your friends! Think of it like BBM but much, much better!\n\nGet it now and say good bye to plain boring SMS.\n\nGet hike: http://get.hike.in</string>
+	<string name="updates_friends">You can see updates from your friends here</string>
+	<string name="tap_plus">Tap on + to add a contact as your friend</string>
 </resources>

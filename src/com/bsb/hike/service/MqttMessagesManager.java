@@ -278,11 +278,13 @@ public class MqttMessagesManager {
 
 				JSONObject metadata = jsonObj
 						.optJSONObject(HikeConstants.METADATA);
-				String groupName = metadata.optString(HikeConstants.NAME);
-				if (!TextUtils.isEmpty(groupName)) {
-					convDb.setGroupName(groupConversation.getMsisdn(),
-							groupName);
-					groupConversation.setContactName(groupName);
+				if (metadata != null) {
+					String groupName = metadata.optString(HikeConstants.NAME);
+					if (!TextUtils.isEmpty(groupName)) {
+						convDb.setGroupName(groupConversation.getMsisdn(),
+								groupName);
+						groupConversation.setContactName(groupName);
+					}
 				}
 				// Adding a key to the json signify that this was the GCJ
 				// received for group creation
@@ -788,16 +790,7 @@ public class MqttMessagesManager {
 						array.toString());
 			}
 
-			if (data.has(HikeConstants.CRICKET_MOODS)) {
-				editor.putBoolean(HikeMessengerApp.SHOW_CRICKET_MOODS,
-						data.optBoolean(HikeConstants.CRICKET_MOODS, true));
-			}
-
 			editor.commit();
-			if (data.has(HikeConstants.CRICKET_MOODS)) {
-				((HikeMessengerApp) context.getApplicationContext())
-						.setMoodsResource();
-			}
 
 			this.pubSub.publish(HikePubSub.TOGGLE_REWARDS, null);
 		} else if (HikeConstants.MqttMessageTypes.REWARDS.equals(type)) {

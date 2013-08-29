@@ -4,6 +4,7 @@ public abstract class ProfileItem {
 
 	public static final int HEADER_ID = -1;
 	public static final int EMPTY_ID = -2;
+	public static final int REQUEST_ID = -3;
 
 	private int itemId;
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:hike="http://schemas.android.com/apk/res/com.bsb.hike"
     android:id="@+id/name_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,15 +9,13 @@
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_img1"
         style="@style/SignupButton.Text.Info"
-        android:text="@string/all_set_signup"
-        hike:font="omnes" />
+        android:text="@string/all_set_signup" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_img2"
         style="@style/SignupButton.Text.Info"
         android:layout_below="@id/txt_img1"
-        android:text="@string/enter_name_signup"
-        hike:font="omnes" />
+        android:text="@string/enter_name_signup" />
 
     <RelativeLayout
         android:id="@+id/avatar_border"
@@ -34,30 +31,22 @@
             android:layout_width="84dp"
             android:layout_height="84dp"
             android:layout_centerInParent="true"
-            android:src="@drawable/ic_avatar1" />
+            android:src="@drawable/ic_avatar1_rounded" />
 
         <ImageView
             android:id="@+id/profile_border"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/square" />
+            android:background="@drawable/frame_avatar_signup" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="5dp"
-            android:layout_marginRight="3dp"
-            android:src="@drawable/ic_edit_profile" />
     </RelativeLayout>
 
     <com.bsb.hike.view.CustomFontEditText
         android:id="@+id/et_enter_name"
-        style="@style/SignupButton"
+        style="@style/SignupButton.Input"
         android:layout_below="@id/avatar_border"
         android:layout_marginTop="12dp"
-        android:background="@drawable/tb_name"
+        android:drawableLeft="@drawable/ic_name"
         android:hint="@string/name"
         android:imeOptions="actionDone"
         android:inputType="textCapWords"
@@ -77,8 +66,7 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/signup_button"
             android:onClick="onClick"
-            android:text="@string/lets_hike_signup"
-            hike:font="omnes" />
+            android:text="@string/lets_hike_signup" />
 
         <RelativeLayout
             android:id="@+id/loading_layout"
@@ -102,8 +90,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
                 android:layout_toRightOf="@id/loading_progress"
-                android:text="@string/scanning_contacts_signup"
-                hike:font="omnes" />
+                android:text="@string/scanning_contacts_signup" />
         </RelativeLayout>
     </RelativeLayout>
 
@@ -118,14 +105,12 @@
         android:background="@drawable/connect_fb_btn"
         android:text="@string/connect_fb"
         android:textSize="14sp"
-        android:onClick="onFacebookConnectClick"
-        hike:font="omnes" />
+        android:onClick="onFacebookConnectClick" />
 
     <com.bsb.hike.view.CustomFontTextView
         android:id="@+id/txt_other"
         style="@style/SignupButton.Text.Info"
         android:layout_above="@id/connect_fb"
-        android:text="@string/feeling_lazy"
-        hike:font="omnes" />
+        android:text="@string/feeling_lazy" />
     
 </RelativeLayout>

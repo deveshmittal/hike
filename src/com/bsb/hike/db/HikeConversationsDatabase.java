@@ -2610,9 +2610,14 @@ public class HikeConversationsDatabase extends SQLiteOpenHelper {
 		}
 	}
 
-	public void insertFirstStickerCategory() {
+	public void insertDoggyStickerCategory() {
+		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[1],
+				EmoticonConstants.LOCAL_STICKER_RES_IDS_2.length, true);
+	}
+
+	public void insertHumanoidStickerCategory() {
 		addOrUpdateStickerCategory(EmoticonConstants.STICKER_CATEGORY_IDS[0],
-				EmoticonConstants.LOCAL_STICKER_RES_IDS.length, true);
+				EmoticonConstants.LOCAL_STICKER_RES_IDS_1.length, true);
 	}
 
 	public long addProtip(Protip protip) {

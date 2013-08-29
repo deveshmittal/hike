@@ -90,6 +90,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	private ViewGroup nameLayout;
 	private ViewGroup booBooLayout;
 
+	private TextView header;
 	private TextView infoTxt;
 	private TextView loadingText;
 	private ViewGroup loadingLayout;
@@ -165,6 +166,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 		accountPrefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
 				MODE_PRIVATE);
 
+		header = (TextView) findViewById(R.id.header);
 		viewFlipper = (ViewFlipper) findViewById(R.id.signup_viewflipper);
 		numLayout = (ViewGroup) findViewById(R.id.num_layout);
 		pinLayout = (ViewGroup) findViewById(R.id.pin_layout);
@@ -512,6 +514,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	private void prepareLayoutForFetchingNumber() {
 		initializeViews(numLayout);
 
+		header.setText(R.string.phone);
+
 		countryPicker.setEnabled(true);
 
 		String prevCode = accountPrefs.getString(
@@ -599,6 +603,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 	private void prepareLayoutForGettingPin(long timeLeft) {
 		initializeViews(pinLayout);
 
+		header.setText(R.string.verify);
+
 		callmeBtn.setVisibility(View.VISIBLE);
 
 		enterEditText.setText("");
@@ -682,6 +688,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 			Utils.hideSoftKeyboard(this, enterEditText);
 		}
 
+		header.setText(R.string.profile_title);
+
 		String msisdn = accountPrefs.getString(HikeMessengerApp.MSISDN_SETTING,
 				null);
 		if (TextUtils.isEmpty(msisdn)) {
@@ -702,7 +710,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 		if (mActivityState.profileBitmap == null) {
 			mIconView.setImageDrawable(IconCacheManager.getInstance()
-					.getIconForMSISDN(msisdn));
+					.getIconForMSISDN(msisdn, true));
 		} else {
 			mIconView.setImageBitmap(mActivityState.profileBitmap);
 		}
@@ -1217,10 +1225,14 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
-		mActivityState.profileBitmap = Utils.scaleDownImage(
-				mActivityState.destFilePath,
+		Bitmap tempBitmap = Utils.scaleDownImage(mActivityState.destFilePath,
 				HikeConstants.PROFILE_IMAGE_DIMENSIONS, true);
+
+		mActivityState.profileBitmap = Utils.getCircularBitmap(tempBitmap);
 		mIconView.setImageBitmap(mActivityState.profileBitmap);
+
+		tempBitmap.recycle();
+		tempBitmap = null;
 	}
 
 	@Override

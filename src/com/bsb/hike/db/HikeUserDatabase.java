@@ -1301,7 +1301,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 			if (!c.moveToFirst()) {
 				/* lookup based on this msisdn */
-				return Utils.getDefaultIconForUser(mContext, msisdn);
+				return Utils.getDefaultIconForUser(mContext, msisdn, rounded);
 			}
 
 			byte[] icondata = c.getBlob(c.getColumnIndex(DBConstants.IMAGE));

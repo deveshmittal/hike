@@ -45,10 +45,12 @@ public class Sticker implements Comparable<Sticker> {
 		/*
 		 * Only set sticker index if the category is a local one
 		 */
-		if (categoryIndex == 0) {
+		if (categoryIndex == 0 || categoryIndex == 1) {
 			int stickerNumber = Integer.valueOf(stickerId.substring(0,
 					stickerId.indexOf("_")));
-			if (stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS.length) {
+
+			if ((categoryIndex == 1 && stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS_2.length)
+					|| (categoryIndex == 0 && stickerNumber <= EmoticonConstants.LOCAL_STICKER_RES_IDS_1.length)) {
 				this.stickerIndex = stickerNumber - 1;
 			}
 		}

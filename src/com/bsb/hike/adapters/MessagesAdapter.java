@@ -800,9 +800,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 
 			if (statusMessage.hasMood()) {
-				holder.image
-						.setImageResource(Utils.getMoodsResource()[statusMessage
-								.getMoodId()]);
+				holder.image.setImageResource(EmoticonConstants.moodMapping
+						.get(statusMessage.getMoodId()));
 			} else {
 				holder.image.setBackgroundResource(R.drawable.bg_status_type);
 			}
@@ -839,13 +838,18 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			return v;
 		}
 
+		if (holder.poke != null) {
+			holder.poke.setVisibility(View.GONE);
+		}
+
 		boolean firstMessageFromParticipant = false;
 		if (isGroupChat
 				&& !TextUtils.isEmpty(convMessage.getGroupParticipantMsisdn())) {
 			if (position != 0) {
 				ConvMessage previous = getItem(position - 1);
-				if (!convMessage.getGroupParticipantMsisdn().equals(
-						previous.getGroupParticipantMsisdn())) {
+				if (previous.getParticipantInfoState() == ParticipantInfoState.NO_INFO
+						&& !convMessage.getGroupParticipantMsisdn().equals(
+								previous.getGroupParticipantMsisdn())) {
 					firstMessageFromParticipant = true;
 				}
 			}
@@ -1040,11 +1044,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			holder.messageContainer.setOnClickListener(this);
 			holder.messageContainer.setOnLongClickListener(this);
 		} else if (metadata != null && metadata.isPokeMessage()) {
-			holder.messageContainer.setVisibility(View.GONE);
+			holder.messageTextView.setVisibility(View.GONE);
+			holder.messageContainer.setVisibility(View.VISIBLE);
 			holder.poke.setVisibility(View.VISIBLE);
 			holder.poke
 					.setImageResource(convMessage.isSent() ? R.drawable.ic_nudge_hike_sent
-							: R.drawable.ic_nudge_hike_received);
+							: R.drawable.ic_nudge_hike_receive);
 		} else if (convMessage.isStickerMessage()) {
 			holder.messageContainer.setVisibility(View.GONE);
 			holder.poke.setVisibility(View.GONE);
@@ -1075,9 +1080,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			 */
 			if (sticker.getStickerIndex() != -1) {
 				holder.stickerImage.setVisibility(View.VISIBLE);
-				holder.stickerImage
-						.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS[sticker
-								.getStickerIndex()]);
+				if (sticker.getCategoryIndex() == 1) {
+					holder.stickerImage
+							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+									.getStickerIndex()]);
+				} else if (sticker.getCategoryIndex() == 0) {
+					holder.stickerImage
+							.setImageResource(EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+									.getStickerIndex()]);
+				}
 			} else {
 				String categoryId = sticker.getCategoryId();
 				String stickerId = sticker.getStickerId();
@@ -1114,6 +1125,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			}
 
 		} else {
+			holder.messageTextView.setVisibility(View.VISIBLE);
 			holder.stickerPlaceholder.setVisibility(View.GONE);
 			holder.messageContainer.setVisibility(View.VISIBLE);
 			holder.poke.setVisibility(View.GONE);
@@ -1166,29 +1178,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (holder.circularProgress != null) {
 				holder.circularProgress.setVisibility(View.INVISIBLE);
 			}
-			/*
-			 * set the image resource, getImageState returns -1 if this is a
-			 * received image
-			 */
-			int resId = convMessage.getImageState();
-			if (resId > 0) {
-				/*
-				 * Commenting this out for now.
-				 */
-				// if (position == lastSentMessagePosition) {
-				// if (isMessageUndelivered(convMessage)) {
-				// View container = holder.bubbleContainer;
-				//
-				// scheduleUndeliveredText(holder.undeliveredMsgTextView,
-				// container, convMessage.getTimestamp());
-				// } else {
-				// holder.undeliveredMsgTextView.setVisibility(View.GONE);
-				// }
-				// } else {
-				// holder.undeliveredMsgTextView.setVisibility(View.GONE);
-				// }
-			} else if (convMessage.isSent()) {
-			} else {
+			if (!convMessage.isSent()) {
 				boolean showAvatar = false;
 
 				if (isGroupChat) {
@@ -1211,7 +1201,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 							: View.GONE);
 				}
 			}
-			setSDRAndTimestamp(position, holder.messageInfo, holder.sending);
+			setSDRAndTimestamp(position, holder.messageInfo, holder.sending,
+					holder.bubbleContainer);
 		}
 
 		if (convMessage.isSent() && holder.messageContainer != null) {
@@ -1264,7 +1255,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	Handler handler = new Handler();
 
-	private void scheduleUndeliveredText(TextView tv, View container, long ts) {
+	private void scheduleUndeliveredText(TextView tv, View container,
+			ImageView iv, long ts) {
 		if (showUndeliveredMessage != null) {
 			handler.removeCallbacks(showUndeliveredMessage);
 		}
@@ -1273,11 +1265,12 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		if (Utils.isUserOnline(context)
 				&& diff < HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME) {
-			showUndeliveredMessage = new ShowUndeliveredMessage(tv, container);
+			showUndeliveredMessage = new ShowUndeliveredMessage(tv, container,
+					iv);
 			handler.postDelayed(showUndeliveredMessage,
 					(HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME - diff) * 1000);
 		} else {
-			showUndeliveredTextAndSetClick(tv, container, true);
+			showUndeliveredTextAndSetClick(tv, container, iv, true);
 		}
 	}
 
@@ -1307,7 +1300,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		return (current.getTimestamp() - previous.getTimestamp() > 60 * 60 * 24);
 	}
 
-	private void setSDRAndTimestamp(int position, TextView tv, ImageView iv) {
+	private void setSDRAndTimestamp(int position, TextView tv, ImageView iv,
+			View container) {
 		/*
 		 * We show the time stamp in the status message separately so no need to
 		 * show this time stamp.
@@ -1321,7 +1315,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		}
 
 		ConvMessage current = getItem(position);
-		if (current.isSent() && (position == getCount() - 1)) {
+		if (current.isSent() && (position == lastSentMessagePosition)) {
 			switch (current.getState()) {
 			case SENT_UNCONFIRMED:
 				tv.setVisibility(View.GONE);
@@ -1331,10 +1325,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 				ad.setCallback(iv);
 				ad.setVisible(true, true);
 				ad.start();
+
+				scheduleUndeliveredText(tv, container, iv,
+						current.getTimestamp());
 				break;
 			case SENT_CONFIRMED:
 				tv.setText(context.getString(R.string.sent,
 						current.getTimestampFormatted(false, context)));
+				scheduleUndeliveredText(tv, container, iv,
+						current.getTimestamp());
 				break;
 			case SENT_DELIVERED:
 				tv.setText(R.string.delivered);
@@ -1432,17 +1431,20 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (convMessage == null) {
 				return;
 			}
+			Log.d(getClass().getSimpleName(), "OnCLICK");
 			if (convMessage.isSent()
 					&& convMessage.equals(convMessages
 							.get(lastSentMessagePosition))
 					&& isMessageUndelivered(convMessage)) {
 				long diff = (((long) System.currentTimeMillis() / 1000) - convMessage
 						.getTimestamp());
+
 				/*
 				 * Only show fallback if the message has not been sent for our
 				 * max wait time.
 				 */
-				if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME) {
+				if (diff >= HikeConstants.DEFAULT_UNDELIVERED_WAIT_TIME
+						|| !Utils.isUserOnline(context)) {
 
 					if (conversation.isOnhike()) {
 						if (!Utils.isUserOnline(context)) {
@@ -1687,11 +1689,13 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	private class ShowUndeliveredMessage implements Runnable {
 
 		TextView tv;
+		ImageView iv;
 		View container;
 
-		public ShowUndeliveredMessage(TextView tv, View container) {
+		public ShowUndeliveredMessage(TextView tv, View container, ImageView iv) {
 			this.tv = tv;
 			this.container = container;
+			this.iv = iv;
 		}
 
 		@Override
@@ -1703,13 +1707,14 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			ConvMessage lastSentMessage = convMessages
 					.get(lastSentMessagePosition);
 			if (isMessageUndelivered(lastSentMessage)) {
-				showUndeliveredTextAndSetClick(tv, container, true);
+				showUndeliveredTextAndSetClick(tv, container, iv, true);
 			}
 		}
 	}
 
 	private void showUndeliveredTextAndSetClick(TextView tv, View container,
-			boolean fromHandler) {
+			ImageView iv, boolean fromHandler) {
+		iv.setVisibility(View.GONE);
 		tv.setVisibility(View.VISIBLE);
 		tv.setText(getUndeliveredTextRes());
 
@@ -1808,7 +1813,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 		nativeSmsTextHead.setText(username);
 
-		int numUnsentMessages = getAllUnsentMessages().size();
+		int numUnsentMessages = getAllUnsentMessages(false).size();
 		if (numUnsentMessages == 1) {
 			nativeSMSInfo.setText(R.string.native_sms_info1);
 		} else {
@@ -1947,7 +1952,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		dialog.show();
 	}
 
-	private List<ConvMessage> getAllUnsentMessages() {
+	private List<ConvMessage> getAllUnsentMessages(boolean resetTimestamp) {
 		List<ConvMessage> unsentMessages = new ArrayList<ConvMessage>();
 		int count = 0;
 		for (int i = lastSentMessagePosition; i >= 0; i--) {
@@ -1958,8 +1963,9 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (!isMessageUndelivered(convMessage)) {
 				break;
 			}
-			if (convMessage.getState().ordinal() < State.SENT_CONFIRMED
-					.ordinal()) {
+			if (resetTimestamp
+					&& convMessage.getState().ordinal() < State.SENT_CONFIRMED
+							.ordinal()) {
 				convMessage.setTimestamp(System.currentTimeMillis() / 1000);
 			}
 			unsentMessages.add(convMessage);
@@ -1971,7 +1977,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 	}
 
 	private void sendAllUnsentMessagesAsSMS(boolean nativeSMS) {
-		List<ConvMessage> unsentMessages = getAllUnsentMessages();
+		List<ConvMessage> unsentMessages = getAllUnsentMessages(true);
 		Log.d(getClass().getSimpleName(),
 				"Unsent messages: " + unsentMessages.size());
 

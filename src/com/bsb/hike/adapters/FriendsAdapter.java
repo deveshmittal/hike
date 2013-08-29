@@ -37,7 +37,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 	public static final String SECTION_ID = "-911";
 
-	private enum ViewType {
+	public enum ViewType {
 		SECTION, FRIEND, NOT_FRIEND, FRIEND_REQUEST
 	}
 
@@ -210,7 +210,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 
 		friendsSection = new ContactInfo(SECTION_ID,
 				Integer.toString(filteredFriendsList.size()),
-				context.getString(R.string.friends), null);
+				context.getString(R.string.friends_lower_case), null);
 		completeList.add(friendsSection);
 
 		completeList.addAll(filteredFriendsList);
@@ -410,7 +410,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 				} else {
 					if (contactInfo.getFavoriteType() == FavoriteType.REQUEST_SENT) {
 						lastSeen.setVisibility(View.VISIBLE);
-						lastSeen.setText(R.string.friend_request_sent);
+						lastSeen.setText(R.string.request_pending);
 					} else if (viewType == ViewType.FRIEND_REQUEST) {
 						lastSeen.setVisibility(View.VISIBLE);
 						lastSeen.setText(R.string.sent_friend_request);

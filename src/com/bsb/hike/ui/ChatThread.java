@@ -1338,17 +1338,21 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		mLastSeenView = (TextView) actionBarView
 				.findViewById(R.id.contact_status);
 
+		mLastSeenView.setVisibility(View.VISIBLE);
+
 		if (mConversation instanceof GroupConversation) {
 			int numActivePeople = ((GroupConversation) mConversation)
 					.getGroupMemberAliveCount();
 			if (numActivePeople > 0) {
-				mLastSeenView.setVisibility(View.VISIBLE);
 				/*
 				 * Adding 1 to count the user.
 				 */
 				mLastSeenView.setText(getString(R.string.num_people,
 						(numActivePeople + 1)));
 			}
+		} else {
+			mLastSeenView.setText(mConversation.isOnhike() ? R.string.on_hike
+					: R.string.on_sms);
 		}
 
 		avatar.setImageDrawable(IconCacheManager.getInstance()
@@ -1451,7 +1455,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			removeSMSToggle();
 
 			setEmoticonButton();
-			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
+			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
 			mComposeView
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
 							: R.string.hike_msg);
@@ -1808,8 +1812,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			String msisdn = (String) object;
 			if (mContactNumber.equals(msisdn)) {
 				/* update the image drawable */
-				avatar.setImageDrawable(IconCacheManager.getInstance()
-						.getIconForMSISDN(mContactNumber, true));
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						avatar.setImageDrawable(IconCacheManager.getInstance()
+								.getIconForMSISDN(mContactNumber, true));
+					}
+				});
 			}
 		} else if ((HikePubSub.USER_LEFT.equals(type))
 				|| (HikePubSub.USER_JOINED.equals(type))) {
@@ -2011,9 +2021,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					if (lastSeenString == null) {
-						mLastSeenView.setVisibility(View.GONE);
+						mLastSeenView
+								.setText(mConversation.isOnhike() ? R.string.on_hike
+										: R.string.on_sms);
 					} else {
-						mLastSeenView.setVisibility(View.VISIBLE);
 						mLastSeenView.setText(lastSeenString);
 
 						if (tipView == null
@@ -2674,7 +2685,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		recordBtn.setEnabled(true);
 
-		recordBtn.setImageResource(R.drawable.ic_record);
+		recordBtn.setImageResource(R.drawable.ic_record_selector);
 		sendBtn.setEnabled(false);
 
 		recordingHandler = new Handler();
@@ -2916,6 +2927,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		recorderState = RecorderState.RECORDED;
 
 		recordBtn.setEnabled(false);
+		recordBtn.setImageResource(R.drawable.ic_big_tick);
 		recordImage.setImageResource(R.drawable.ic_recorded);
 		Utils.setupFormattedTime(recordText, duration);
 
@@ -3501,9 +3513,9 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				tabDrawables = new int[] { R.drawable.ic_recents_emo,
 						R.drawable.emo_im_01_bigsmile,
 						R.drawable.emo_im_81_exciting,
-						R.drawable.emo_im_111_grin, R.drawable.e415,
+						R.drawable.emo_im_111_grin, R.drawable.emo_im_151_auto,
 						R.drawable.e415, R.drawable.e415, R.drawable.e415,
-						R.drawable.e415 };
+						R.drawable.e415, R.drawable.e415 };
 				if (emoticonType != EmoticonType.EMOTICON) {
 					sameType = false;
 					emoticonType = EmoticonType.EMOTICON;
@@ -3576,10 +3588,17 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				if (pageNum == 0
 						&& !prefs
 								.getBoolean(
-										HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+										HikeMessengerApp.SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP,
 										false)) {
-					showStickerPreviewDialog(0);
+					showStickerPreviewDialog(pageNum);
+				} else if (pageNum == 1
+						&& !prefs
+								.getBoolean(
+										HikeMessengerApp.SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP,
+										false)) {
+					showStickerPreviewDialog(pageNum);
 				} else if (pageNum != 0
+						&& pageNum != 1
 						&& (!Utils.checkIfStickerCategoryExists(
 								ChatThread.this, categoryId) || !prefs
 								.getBoolean(HikeMessengerApp.stickerCategories
@@ -3617,9 +3636,14 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				dialog.dismiss();
 				Editor editor = prefs.edit();
 				try {
-					if (categoryIndex == 0) {
+					if (categoryIndex == 1) {
 						editor.putBoolean(
-								HikeMessengerApp.SHOWN_DEFAULT_STICKER_CATEGORY_POPUP,
+								HikeMessengerApp.SHOWN_DEFAULT_STICKER_DOGGY_CATEGORY_POPUP,
+								true);
+						return;
+					} else if (categoryIndex == 0) {
+						editor.putBoolean(
+								HikeMessengerApp.SHOWN_DEFAULT_STICKER_HUMANOID_CATEGORY_POPUP,
 								true);
 						return;
 					}
@@ -3676,6 +3700,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		int dividerBg = 0;
 
 		switch (HikeMessengerApp.stickerCategories.get(categoryIndex).categoryResId) {
+		case R.drawable.humanoid:
 		case R.drawable.doggy:
 			resParentBg = getResources().getColor(R.color.doggy_bg);
 
