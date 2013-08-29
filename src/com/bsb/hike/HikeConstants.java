@@ -149,6 +149,7 @@ public class HikeConstants {
 	public static final String UNIFIED_INBOX = "unified_inbox";
 	public static final String PULL_OLD_SMS = "pull_old_sms";
 	public static final String TIP_ID = "tip_id";
+	public static final String TIP_URL = "tip_url";
 	public static final String SMS = "sms";
 	public static final String UI_EVENT = "uiEvent";
 	public static final String LOGEVENT_TAG = "mob";

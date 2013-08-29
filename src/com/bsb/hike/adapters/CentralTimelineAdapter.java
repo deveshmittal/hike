@@ -369,9 +369,9 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		@Override
 		public void onClick(View v) {
 			Protip protip = (Protip) v.getTag();
-
+			String url = protip.getGameDownlodURL();
 			Intent marketIntent = new Intent(Intent.ACTION_VIEW,
-					Uri.parse(protip.getGameDownlodURL()));
+					Uri.parse(url));
 			marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
 					| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
 			try {
@@ -380,6 +380,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				Log.e(CentralTimelineAdapter.class.getSimpleName(),
 						"Unable to open market");
 			}
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+					protip.getMappedId());
 		}
 	};
 
