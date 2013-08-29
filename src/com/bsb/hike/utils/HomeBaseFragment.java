@@ -33,6 +33,9 @@ public class HomeBaseFragment extends SherlockListFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent = null;
 
+		if (!isAdded()) {
+			return super.onOptionsItemSelected(item);
+		}
 		switch (item.getItemId()) {
 		case R.id.new_conversation:
 			intent = new Intent(getActivity(), ComposeActivity.class);
