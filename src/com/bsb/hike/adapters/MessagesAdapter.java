@@ -875,7 +875,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			if (hikeFile.getHikeFileType() == HikeFileType.IMAGE
 					|| hikeFile.getHikeFileType() == HikeFileType.VIDEO
 					|| hikeFile.getHikeFileType() == HikeFileType.LOCATION) {
-				if (hikeFile.getThumbnail() == null) {
+				if (hikeFile.getThumbnail() == null
+						&& !TextUtils.isEmpty(hikeFile.getFileKey())) {
 					thumbnail = IconCacheManager.getInstance()
 							.getFileThumbnail(hikeFile.getFileKey());
 					if (thumbnail != null) {
@@ -888,7 +889,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 			if (convMessage.isSent()
 					&& (hikeFileType == HikeFileType.IMAGE || hikeFileType == HikeFileType.LOCATION)
-					&& !showThumbnail) {
+					&& thumbnail == null) {
 				/*
 				 * This case should ideally only happen when downloading a
 				 * picasa image or the thumbnail for a location. In that case we
@@ -943,7 +944,7 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 			LayoutParams fileThumbParams = (LayoutParams) holder.fileThumb
 					.getLayoutParams();
 
-			if (showThumbnail) {
+			if (showThumbnail && thumbnail != null) {
 				holder.fileThumb.setScaleType(ScaleType.CENTER);
 				fileThumbParams.height = (int) (150 * Utils.densityMultiplier);
 				fileThumbParams.width = (int) ((thumbnail.getIntrinsicWidth() * fileThumbParams.height) / thumbnail
