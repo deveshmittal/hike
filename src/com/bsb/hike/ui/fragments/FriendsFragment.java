@@ -93,6 +93,7 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 		searchView.setIconifiedByDefault(false);
 		searchView.setIconified(false);
 		searchView.setOnQueryTextListener(onQueryTextListener);
+		searchView.clearFocus();
 
 		menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
 				.setIcon(R.drawable.ic_top_bar_search)
