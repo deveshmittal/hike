@@ -623,4 +623,5 @@
     <string name="games">Games</string>
     <string name="mute_notifications">Mute Notifications</string>
 	<string name="unmute_notifications">Unmute Notifications</string>
+	<string name="tap_to_save">Tap to save contact</string>
 </resources>

@@ -243,7 +243,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			}
 
 			if (mContactInfo != null) {
-				if (mContactInfo.isOnhike()) {
+				if (mContactInfo.getMsisdn().equals(mContactInfo.getId())) {
+					viewHolder.subText.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(R.string.tap_to_save);
+				} else if (mContactInfo.isOnhike()) {
 					String subText = null;
 					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED
 							|| mContactInfo.getFavoriteType() == FavoriteType.FRIEND) {
