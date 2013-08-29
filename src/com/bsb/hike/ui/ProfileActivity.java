@@ -1895,6 +1895,10 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 					StatusMessage message = ((ProfileStatusItem) profileItem)
 							.getStatusMessage();
 
+					if (message == null) {
+						continue;
+					}
+
 					if (statusId.equals(message.getMappedId())) {
 						profileItems.remove(message);
 						break;
