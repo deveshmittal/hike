@@ -245,14 +245,16 @@ public class ContactInfo implements JSONSerializable, Comparable<ContactInfo> {
 
 		@Override
 		public int compare(ContactInfo lhs, ContactInfo rhs) {
-			if (lhs.getFavoriteType() != rhs.getFavoriteType()) {
-				if (lhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+			FavoriteType lhsFavoriteType = lhs.getFavoriteType();
+			FavoriteType rhsFavoriteType = rhs.getFavoriteType();
+
+			if (lhsFavoriteType != rhsFavoriteType) {
+				if (lhsFavoriteType == FavoriteType.REQUEST_RECEIVED) {
 					return -1;
-				} else if (rhs.getFavoriteType() == FavoriteType.REQUEST_RECEIVED) {
+				} else if (rhsFavoriteType == FavoriteType.REQUEST_RECEIVED) {
 					return 1;
 				}
-			}
-			if (lhs.getOffline() != rhs.getOffline()) {
+			} else if (lhs.getOffline() != rhs.getOffline()) {
 				if (lhs.getOffline() == 0) {
 					return -1;
 				} else if (rhs.getOffline() == 0) {
