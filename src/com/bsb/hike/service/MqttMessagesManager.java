@@ -438,7 +438,7 @@ public class MqttMessagesManager {
 					DownloadFileTask downloadFile = new DownloadFileTask(
 							context, hikeFile.getFile(), hikeFile.getFileKey(),
 							convMessage, hikeFile.getHikeFileType(),
-							convMessage.getMsgID());
+							convMessage.getMsgID(), false);
 					downloadFile.execute();
 				}
 			}
@@ -1080,14 +1080,14 @@ public class MqttMessagesManager {
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
 				context, statusMessage.getMappedId(), fileName, true,
 				statusUpdate, statusMessage.getMsisdn(),
-				statusMessage.getName());
+				statusMessage.getName(), false);
 		downloadProfileImageTask.execute();
 	}
 
 	private void autoDownloadGroupImage(String id) {
 		String fileName = Utils.getProfileImageFileName(id);
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
-				context, id, fileName, true, false, null, null);
+				context, id, fileName, true, false, null, null, false);
 		downloadProfileImageTask.execute();
 	}
 

@@ -36,16 +36,18 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	private String msisdn;
 	private String name;
 	private boolean statusImage;
+	private boolean showToast;
 
 	public DownloadProfileImageTask(Context context, String id,
 			String fileName, boolean hasCustomIcon, boolean statusImage,
-			String msisdn, String name) {
-		this(context, id, fileName, hasCustomIcon, statusImage, null, msisdn, name);
+			String msisdn, String name, boolean showToast) {
+		this(context, id, fileName, hasCustomIcon, statusImage, null, msisdn,
+				name, showToast);
 	}
 
 	private DownloadProfileImageTask(Context context, String id,
 			String fileName, boolean hasCustomIcon, boolean statusImage,
-			String url, String msisdn, String name) {
+			String url, String msisdn, String name, boolean showToast) {
 		this.context = context;
 		this.id = id;
 		this.msisdn = msisdn;
@@ -81,6 +83,8 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 		this.filePath = HikeConstants.HIKE_MEDIA_DIRECTORY_ROOT
 				+ HikeConstants.PROFILE_ROOT;
 		this.fileName = filePath + "/" + fileName;
+
+		this.showToast = showToast;
 	}
 
 	@Override
@@ -151,8 +155,10 @@ public class DownloadProfileImageTask extends AsyncTask<Void, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		if (result == false) {
-			Toast.makeText(context, R.string.error_download, Toast.LENGTH_SHORT)
-					.show();
+			if (showToast) {
+				Toast.makeText(context, R.string.error_download,
+						Toast.LENGTH_SHORT).show();
+			}
 			File file = new File(fileName);
 			file.delete();
 			HikeMessengerApp.getPubSub().publish(

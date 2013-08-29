@@ -38,16 +38,25 @@ public class DownloadFileTask extends FileTransferTaskBase {
 	private long msgId;
 	private ConvMessage convMessage;
 	private HikeFileType hikeFileType;
+	private boolean showToast;
 
 	public DownloadFileTask(Context context, File destinationFile,
 			String fileKey, ConvMessage convMessage, HikeFileType hikeFileType,
 			long msgId) {
+		this(context, destinationFile, fileKey, convMessage, hikeFileType,
+				msgId, true);
+	}
+
+	public DownloadFileTask(Context context, File destinationFile,
+			String fileKey, ConvMessage convMessage, HikeFileType hikeFileType,
+			long msgId, boolean showToast) {
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
 		this.context = context;
 		this.hikeFileType = hikeFileType;
 		this.msgId = msgId;
 		this.convMessage = convMessage;
+		this.showToast = showToast;
 	}
 
 	@Override
@@ -136,7 +145,10 @@ public class DownloadFileTask extends FileTransferTaskBase {
 					: result == FTResult.CANCELLED ? R.string.download_cancelled
 							: result == FTResult.FILE_EXPIRED ? R.string.file_expire
 									: R.string.download_failed;
-			Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT).show();
+			if (showToast) {
+				Toast.makeText(context, errorStringId, Toast.LENGTH_SHORT)
+						.show();
+			}
 			if (destinationFile != null) {
 				destinationFile.delete();
 			}
