@@ -26,7 +26,6 @@ import com.bsb.hike.R;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.mqtt.client.HikeSSLUtil;
-import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.utils.AccountUtils;
 import com.bsb.hike.utils.FileTransferCancelledException;
 import com.bsb.hike.utils.FileTransferTaskBase;
@@ -41,7 +40,8 @@ public class DownloadFileTask extends FileTransferTaskBase {
 	private HikeFileType hikeFileType;
 
 	public DownloadFileTask(Context context, File destinationFile,
-			String fileKey, ConvMessage convMessage, HikeFileType hikeFileType, long msgId) {
+			String fileKey, ConvMessage convMessage, HikeFileType hikeFileType,
+			long msgId) {
 		this.destinationFile = destinationFile;
 		this.fileKey = fileKey;
 		this.context = context;
@@ -150,13 +150,13 @@ public class DownloadFileTask extends FileTransferTaskBase {
 								.fromFile(destinationFile)));
 			}
 		}
-		
+
 		HikeMessengerApp.fileTransferTaskMap.remove(msgId);
 		HikeMessengerApp.getPubSub().publish(
 				HikePubSub.FILE_TRANSFER_PROGRESS_UPDATED, null);
-		if(HikeFileType.IMAGE == hikeFileType)
-			HikeMessengerApp.getPubSub().publish(HikePubSub.PUSH_FILE_DOWNLOADED, convMessage);
-		
+		if (HikeFileType.IMAGE == hikeFileType)
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.PUSH_FILE_DOWNLOADED, convMessage);
 
 	}
 }
