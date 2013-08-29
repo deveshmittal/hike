@@ -381,7 +381,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		case STATUS:
 			StatusMessage statusMessage = ((ProfileStatusItem) profileItem)
 					.getStatusMessage();
-			viewHolder.text.setText(statusMessage.getNotNullName());
+			viewHolder.text.setText(myProfile ? context.getString(R.string.me)
+					: statusMessage.getNotNullName());
 
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			viewHolder.subText.setText(smileyParser.addSmileySpans(
