@@ -1218,7 +1218,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 
 	private void setFileButtonResource(ImageView button,
 			ConvMessage convMessage, HikeFile hikeFile) {
-		if (HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage.getMsgID())) {
+		if (HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
+				.getMsgID())) {
 			button.setImageResource(R.drawable.ic_open_file_disabled);
 		} else if (hikeFile.wasFileDownloaded()
 				&& hikeFile.getHikeFileType() != HikeFileType.CONTACT) {
@@ -1525,8 +1526,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 								Toast.LENGTH_SHORT).show();
 						return;
 					}
-					if (!HikeMessengerApp.fileTransferTaskMap.containsKey(convMessage
-							.getMsgID())
+					if (!HikeMessengerApp.fileTransferTaskMap
+							.containsKey(convMessage.getMsgID())
 							&& ((hikeFile.getHikeFileType() == HikeFileType.LOCATION)
 									|| (hikeFile.getHikeFileType() == HikeFileType.CONTACT) || receivedFile
 										.exists())) {
@@ -1540,8 +1541,8 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 										+ hikeFile.getFileTypeString());
 						DownloadFileTask downloadFile = new DownloadFileTask(
 								context, receivedFile, hikeFile.getFileKey(),
-								convMessage,
-								hikeFile.getHikeFileType(), convMessage.getMsgID());
+								convMessage, hikeFile.getHikeFileType(),
+								convMessage.getMsgID());
 						downloadFile.execute();
 					}
 				}
