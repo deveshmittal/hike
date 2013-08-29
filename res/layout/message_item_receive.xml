@@ -16,7 +16,7 @@
 		android:layout_marginTop="10dp">
 
 		<View 
-		    android:layout_height="1px"
+		    android:layout_height="2dp"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
 		    android:layout_gravity="center"
@@ -31,14 +31,12 @@
         	android:layout_alignParentTop="true"
         	android:layout_centerHorizontal="true"
         	android:text="This is the timestamp"
-        	android:textSize="13sp"
-        	android:textColor="@color/timestampcolor"
-        	android:shadowColor="#80FFFFFF"
-        	android:shadowDy="0.4"
-        	android:shadowRadius="0.3" />
+        	android:textSize="12sp"
+        	android:textColor="@color/list_item_header"
+        	android:textStyle="bold|italic" />
 
 	    <View 
-		    android:layout_height="1px"
+		    android:layout_height="2dp"
 		    android:layout_width="0dp"
 		    android:layout_weight="10"
 		    android:layout_gravity="center"
