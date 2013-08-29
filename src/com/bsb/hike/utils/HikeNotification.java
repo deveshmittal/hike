@@ -470,8 +470,16 @@ public class HikeNotification {
 			 */
 			if (sticker.getStickerIndex() != -1) {
 
-				int resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS[sticker
-						.getStickerIndex()];
+				int resourceId = 0;
+
+				if (sticker.getCategoryIndex() == 0) {
+					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_1[sticker
+							.getStickerIndex()];
+				} else if (sticker.getCategoryIndex() == 1) {
+					resourceId = EmoticonConstants.LOCAL_STICKER_RES_IDS_2[sticker
+							.getStickerIndex()];
+				}
+
 				if (resourceId > 0) {
 					Drawable dr = context.getResources()
 							.getDrawable(resourceId);
