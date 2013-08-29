@@ -255,13 +255,13 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				viewHolder.noBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setText(R.string.dismiss);
 				viewHolder.yesBtn.setText(R.string.download);
-				
+
 				int btnPadding = context.getResources().getDimensionPixelSize(
 						R.dimen.protip_btn_padding);
 				viewHolder.noBtn.setPadding(btnPadding,
 						viewHolder.noBtn.getPaddingTop(), btnPadding,
 						viewHolder.noBtn.getPaddingTop());
-				
+
 				viewHolder.yesBtn.setPadding(btnPadding,
 						viewHolder.yesBtn.getPaddingTop(), btnPadding,
 						viewHolder.yesBtn.getPaddingTop());
