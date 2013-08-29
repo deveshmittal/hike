@@ -183,7 +183,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 					ContactInfo contactInfo = favoriteToggle.first;
 					contactInfo.setFavoriteType(favoriteType);
 					if ((favoriteType == FavoriteType.FRIEND)
-							|| (favoriteType == FavoriteType.REQUEST_SENT)) {
+							|| (favoriteType == FavoriteType.REQUEST_SENT)
+							|| (favoriteType == FavoriteType.REQUEST_RECEIVED)) {
 						friendsAdapter.addToGroup(contactInfo,
 								FriendsAdapter.FRIEND_INDEX);
 					} else if (favoriteType == FavoriteType.NOT_FRIEND
