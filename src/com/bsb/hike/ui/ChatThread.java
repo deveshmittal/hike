@@ -1439,7 +1439,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			removeSMSToggle();
 
-			setEmoticonButton();
 			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
 			mComposeView
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
@@ -1456,7 +1455,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		} else {
 			updateChatMetadata();
-			setEmoticonButton();
 			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
 			mComposeView.setHint(R.string.sms_msg);
 		}
@@ -1465,21 +1463,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private void removeSMSToggle() {
 		if (!messages.isEmpty() && hasSMSToggle()) {
 			mAdapter.removeMessage(0);
-		}
-	}
-
-	private void setEmoticonButton() {
-		if (emoticonLayout != null
-				&& emoticonLayout.getVisibility() == View.VISIBLE) {
-			((ImageButton) findViewById(R.id.emo_btn))
-					.setImageResource(R.drawable.keyboard_btn);
-		} else {
-			if (mConversation == null) {
-				return;
-			}
-			((ImageButton) findViewById(R.id.emo_btn))
-					.setImageResource((mConversation.isOnhike() || (mConversation instanceof GroupConversation)) ? R.drawable.emoticon_hike_btn
-							: R.drawable.emoticon_sms_btn);
 		}
 	}
 
@@ -3541,7 +3524,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					emoticonLayout.setVisibility(View.GONE);
-					setEmoticonButton();
 				}
 			}, 65);
 			if (!backPressed) {
@@ -3559,7 +3541,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					emoticonLayout.setVisibility(View.VISIBLE);
-					setEmoticonButton();
 				}
 			}, 45);
 			Utils.hideSoftKeyboard(this, mComposeView);
