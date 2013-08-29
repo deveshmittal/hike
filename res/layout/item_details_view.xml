@@ -4,12 +4,22 @@
     android:layout_height="fill_parent"
     android:padding="12sp" >
 
-    <TextView
-        android:id="@+id/name"
+    <ImageView
+        android:id="@+id/isChecked"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/ic_is_selected"
+        android:visibility="gone"/>
+    
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:singleLine="true"
-        android:textSize="18sp"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@id/isChecked"
+        android:textSize="22sp"
         android:textStyle="bold" />
 
     <TextView
@@ -18,7 +28,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/name"
         android:singleLine="true"
-        android:textColor="@color/lightgrey"
-        android:textSize="14sp" />
+        android:textColor="@color/description_lightgrey"
+        android:textSize="16sp" />
+    
+    
 
 </RelativeLayout>
