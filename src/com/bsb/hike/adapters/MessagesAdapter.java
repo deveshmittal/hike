@@ -3,6 +3,7 @@ package com.bsb.hike.adapters;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -1303,7 +1304,15 @@ public class MessagesAdapter extends BaseAdapter implements OnClickListener,
 		} else if (previous.getMsgID() == LAST_READ_CONV_MESSAGE_ID) {
 			return false;
 		}
-		return (current.getTimestamp() - previous.getTimestamp() > 60 * 60 * 24);
+
+		Calendar currentMessageCalendar = Calendar.getInstance();
+		currentMessageCalendar.setTimeInMillis(current.getTimestamp() * 1000);
+
+		Calendar previousMessageCalendar = Calendar.getInstance();
+		previousMessageCalendar.setTimeInMillis(previous.getTimestamp() * 1000);
+
+		return (previousMessageCalendar.get(Calendar.DAY_OF_YEAR) != currentMessageCalendar
+				.get(Calendar.DAY_OF_YEAR));
 	}
 
 	private void setSDRAndTimestamp(int position, TextView tv, ImageView iv,
