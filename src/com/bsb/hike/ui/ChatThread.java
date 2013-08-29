@@ -642,7 +642,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 						.get(message.getMsgID());
 				if (fileTransferTask != null) {
 					fileTransferTask.cancelTask();
-					HikeMessengerApp.fileTransferTaskMap.remove(message.getMsgID());
+					HikeMessengerApp.fileTransferTaskMap.remove(message
+							.getMsgID());
 					mAdapter.notifyDataSetChanged();
 				}
 			}
@@ -756,7 +757,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					&& hikeFile.wasFileDownloaded()) {
 				optionsList.add(getString(R.string.forward));
 			}
-			if (HikeMessengerApp.fileTransferTaskMap.containsKey(message.getMsgID())) {
+			if (HikeMessengerApp.fileTransferTaskMap.containsKey(message
+					.getMsgID())) {
 				optionsList
 						.add(message.isSent() ? getString(R.string.cancel_upload)
 								: getString(R.string.cancel_download));
@@ -3573,7 +3575,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 								ChatThread.this, categoryId) || !prefs
 								.getBoolean(HikeMessengerApp.stickerCategories
 										.get(pageNum).downloadDialogPref, false))
-						&& !HikeMessengerApp.stickerTaskMap.containsKey(categoryId)) {
+						&& !HikeMessengerApp.stickerTaskMap
+								.containsKey(categoryId)) {
 					showStickerPreviewDialog(pageNum);
 				}
 			}
