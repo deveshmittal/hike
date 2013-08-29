@@ -835,11 +835,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DatabaseUtils.sqlEscapeString(userMsisdn));
 
 		if (!nativeSMSOn) {
-			if (freeSMSOn && fwdOrgroupChat) {
+			if (freeSMSOn) {
 				selectionBuilder.append(" AND ((" + DBConstants.ONHIKE
 						+ " = 0 AND " + DBConstants.MSISDN
 						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))");
-			} else if (fwdOrgroupChat) {
+			} else {
 				selectionBuilder.append(" AND " + DBConstants.ONHIKE + " != 0");
 			}
 		}
