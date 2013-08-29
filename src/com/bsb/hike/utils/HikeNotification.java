@@ -164,10 +164,11 @@ public class HikeNotification {
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
 				.getName())) ? contactInfo.getName() : msisdn;
 
-		String message = context.getString(R.string.added_friend);
+		String message = context
+				.getString(R.string.add_as_friend_notification_line);
 
 		Spanned text = Html.fromHtml(context.getString(
-				R.string.name_added_friend, key));
+				R.string.add_as_friend_notification, key));
 
 		showNotification(notificationIntent, icon, timeStamp, notificationId,
 				text, key, message, msisdn);
