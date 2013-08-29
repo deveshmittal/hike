@@ -85,7 +85,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:paddingTop="2dp"
+                    android:paddingTop="1dp"
                     android:layout_marginRight="3dp"
                     android:visibility="gone" />
 
