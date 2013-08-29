@@ -115,8 +115,8 @@ public class ToastListener implements Listener {
 							message.getMsisdn(), false);
 				}
 
-			//	this.toaster.pushInboxNotifications(contactInfo, message);
-		     this.toaster.notifyMessage(contactInfo, message);
+				// this.toaster.pushInboxNotifications(contactInfo, message);
+				this.toaster.notifyMessage(contactInfo, message);
 			}
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
 			HikeMqttManager.MQTTConnectionStatus status = (HikeMqttManager.MQTTConnectionStatus) object;
@@ -157,13 +157,13 @@ public class ToastListener implements Listener {
 			toaster.notifyBatchUpdate(batchSU.first, batchSU.second);
 		} else if (HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllStatusNotifications();
-		}else if (HikePubSub.PUSH_AVATAR_DOWNLOADED.equals(type)) {
+		} else if (HikePubSub.PUSH_AVATAR_DOWNLOADED.equals(type)) {
 			if (currentActivity != null && currentActivity.get() != null) {
 				return;
 			}
 			String[] profileStruct = (String[]) object;
 			toaster.pushBigPictureStatusNotifications(profileStruct);
-			
+
 		} else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type)
 				| HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type)) {
 			ConvMessage message = (ConvMessage) object;
@@ -176,7 +176,7 @@ public class ToastListener implements Listener {
 						+ message.getConversation().getLabel());
 				contactInfo = new ContactInfo(message.getMsisdn(),
 						message.getMsisdn(), message.getConversation()
-						.getLabel(), message.getMsisdn());				
+								.getLabel(), message.getMsisdn());
 			} else {
 				contactInfo = this.db.getContactInfoFromMSISDN(
 						message.getMsisdn(), false);
