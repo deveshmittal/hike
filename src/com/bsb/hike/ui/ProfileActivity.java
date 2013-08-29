@@ -1655,7 +1655,9 @@ public class ProfileActivity extends HikeAppStateBaseFragmentActivity implements
 			}
 
 			if (!mLocalMSISDN.equals(contactInfo.getMsisdn())
-					|| contactInfo.getFavoriteType() != FavoriteType.FRIEND) {
+					|| (contactInfo.getFavoriteType() != FavoriteType.FRIEND
+							&& contactInfo.getFavoriteType() != FavoriteType.REQUEST_RECEIVED && contactInfo
+							.getFavoriteType() != FavoriteType.REQUEST_RECEIVED_REJECTED)) {
 				return;
 			}
 
