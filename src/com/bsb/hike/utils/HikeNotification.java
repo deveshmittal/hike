@@ -29,6 +29,7 @@ import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.HikeFile;
 import com.bsb.hike.models.HikeFile.HikeFileType;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.Sticker;
@@ -56,6 +57,45 @@ public class HikeNotification {
 				HikeMessengerApp.STATUS_NOTIFICATION_SETTING, 0);
 	}
 
+	public void notifyMessage(Protip proTip) {
+		SharedPreferences preferenceManager = PreferenceManager
+				.getDefaultSharedPreferences(this.context);
+
+		int vibrate = preferenceManager.getBoolean(HikeConstants.VIBRATE_PREF,
+				false) ? Notification.DEFAULT_VIBRATE : 0;
+		boolean led = preferenceManager
+				.getBoolean(HikeConstants.LED_PREF, true);
+
+		int notificationId = context.getString(R.string.team_hike).hashCode();
+		// we've got to invoke the timeline here
+		Intent notificationIntent = getHomeActivityIntent(0);
+		notificationIntent.putExtra(HikeConstants.Extras.NAME,
+				context.getString(R.string.team_hike));
+		
+		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
+		final Drawable avatarDrawable = context.getResources().getDrawable(R.drawable.ic_protip);
+		Bitmap avatarBitmap = Utils.drawableToBitmap(avatarDrawable);
+		int smallIconId = returnSmallIcon();
+
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+				context).setContentTitle(context.getString(R.string.team_hike))
+				.setSmallIcon(smallIconId).setLargeIcon(avatarBitmap)
+				.setContentText(proTip.getHeader()).setAutoCancel(true)
+				.setTicker(proTip.getHeader()).setDefaults(vibrate);
+
+		TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+		stackBuilder.addNextIntent(notificationIntent);
+
+		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,
+				PendingIntent.FLAG_UPDATE_CURRENT);
+		mBuilder.setContentIntent(resultPendingIntent);
+
+		if (led) {
+			mBuilder.setLights(Color.BLUE, 300, 1000);
+		}
+		notificationManager.notify(notificationId, mBuilder.getNotification());
+
+	}
 	public void notifyMessage(ContactInfo contactInfo, ConvMessage convMsg) {
 		String msisdn = convMsg.getMsisdn();
 		// we are using the MSISDN now to group the notifications
@@ -97,7 +137,7 @@ public class HikeNotification {
 					+ message;
 		}
 
-		int icon = R.drawable.ic_contact_logo;
+		int icon = returnSmallIcon();
 
 		/*
 		 * Jellybean has added support for emojis so we don't need to add a '*'
@@ -159,7 +199,7 @@ public class HikeNotification {
 		Intent notificationIntent = getHomeActivityIntent(0);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
-		int icon = R.drawable.ic_contact_logo;
+		int icon = returnSmallIcon();
 
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
 				.getName())) ? contactInfo.getName() : msisdn;
@@ -191,7 +231,7 @@ public class HikeNotification {
 		Intent notificationIntent = getHomeActivityIntent(0);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
-		int icon = R.drawable.ic_contact_logo;
+		int icon = returnSmallIcon();
 
 		String key = statusMessage.getNotNullName();
 
@@ -233,7 +273,7 @@ public class HikeNotification {
 		Intent notificationIntent = getHomeActivityIntent(0);
 		notificationIntent.setData((Uri.parse("custom://" + notificationId)));
 
-		int icon = R.drawable.ic_contact_logo;
+		int icon = returnSmallIcon();
 
 		String key = header;
 
@@ -302,7 +342,7 @@ public class HikeNotification {
 		boolean led = preferenceManager
 				.getBoolean(HikeConstants.LED_PREF, true);
 
-		int smallIconId = R.drawable.ic_contact_logo;
+		int smallIconId = returnSmallIcon();
 		final Drawable avatarDrawable = IconCacheManager.getInstance()
 				.getIconForMSISDN(msisdn);
 		Bitmap avatarBitmap = Utils.drawableToBitmap(avatarDrawable);
@@ -369,7 +409,7 @@ public class HikeNotification {
 					.getString(R.string.status_profile_pic_notification);
 		String	text = title + " " + message;
 		
-		int smallIconId = R.drawable.ic_contact_logo;
+		int smallIconId = returnSmallIcon();
 		Bitmap bigPictureImage = BitmapFactory.decodeFile(profileStruct[0]);
 
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
@@ -378,6 +418,7 @@ public class HikeNotification {
 				.setAutoCancel(true)
 				.setLargeIcon(bigPictureImage)
 				.setTicker(text)
+				.setDefaults(vibrate)
 				.setContentText(text);
 
 		NotificationCompat.BigPictureStyle bigPicStyle = new NotificationCompat.BigPictureStyle();
@@ -426,7 +467,7 @@ public class HikeNotification {
 		String msisdn = convMessage.getMsisdn();
 		String key = (contactInfo != null && !TextUtils.isEmpty(contactInfo
 				.getName())) ? contactInfo.getName() : msisdn;
-		int smallIconId = R.drawable.ic_contact_logo;
+		int smallIconId = returnSmallIcon();
 		
 		final Drawable avatarDrawable = IconCacheManager.getInstance()
 				.getIconForMSISDN(contactInfo.getMsisdn());
@@ -504,4 +545,16 @@ public class HikeNotification {
 		mNotificationManager.notify(notificationId, mBuilder.build());
 
 	}
+	private int returnSmallIcon()
+	{
+		if (Build.VERSION.SDK_INT < 16) {
+			return R.drawable.ic_contact_logo;
+
+		}
+		else{
+			return  R.drawable.ic_stat_notify;
+		}
+
+	}
+
 }

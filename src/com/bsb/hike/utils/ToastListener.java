@@ -25,6 +25,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
@@ -44,7 +45,8 @@ public class ToastListener implements Listener {
 	String[] hikePubSubListeners = {
 			HikePubSub.PUSH_AVATAR_DOWNLOADED, 
 			HikePubSub.PUSH_FILE_DOWNLOADED,
-			HikePubSub.PUSH_STICKER_DOWNLOADED
+			HikePubSub.PUSH_STICKER_DOWNLOADED,
+			HikePubSub.PROTIP_ADDED
 	};
 
 	public ToastListener(Context context) {
@@ -193,6 +195,16 @@ public class ToastListener implements Listener {
 						message.getMsisdn(), false);
 			}
 			toaster.notifyMessage(contactInfo, message);
+		}
+		else if(HikePubSub.PROTIP_ADDED.equals(type)){
+			Protip proTip = (Protip) object;
+		
+			if (currentActivity != null && currentActivity.get() != null) {
+				return;
+			}
+			if(proTip.isShowPush())
+			toaster.notifyMessage(proTip);
+			
 		}
 	}
 

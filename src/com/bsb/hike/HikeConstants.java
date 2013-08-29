@@ -138,6 +138,7 @@ public class HikeConstants {
 	public static final String PROTIP_IMAGE_URL = "img";
 	public static final String PROTIP_WAIT_TIME = "wt";
 	public static final String PROTIP_GAME_DOWNLOAD_URL ="url";
+	public static final String PROTIP_SHOW_PUSH ="fp";
 	public static final String NO_SMS = "nosms";
 	public static final String RETURNING_USER = "ru";
 	public static final String NUMBER_OF_SMS = "no_of_sms";
