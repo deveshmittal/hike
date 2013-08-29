@@ -262,6 +262,8 @@ public class HikePubSub implements Runnable {
 
 	public static final String PUSH_STICKER_DOWNLOADED = "pushStickerDownloaded";
 
+	public static final String CANCEL_ALL_NOTIFICATIONS = "cancelAllNotifications";
+
 	private final Thread mThread;
 
 	private final BlockingQueue<Operation> mQueue;

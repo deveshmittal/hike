@@ -280,6 +280,10 @@ public class HikeNotification {
 		editor.commit();
 	}
 
+	public void cancelAllNotifications() {
+		notificationManager.cancelAll();
+	}
+
 	private void showNotification(Intent notificationIntent, int icon,
 			long timestamp, int notificationId, CharSequence text, String key,
 			String message, String msisdn) {

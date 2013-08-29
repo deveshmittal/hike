@@ -47,7 +47,8 @@ public class ToastListener implements Listener {
 			HikePubSub.NEW_ACTIVITY, HikePubSub.CONNECTION_STATUS,
 			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
 			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
-			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS };
+			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
+			HikePubSub.CANCEL_ALL_NOTIFICATIONS };
 
 	public ToastListener(Context context) {
 		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
@@ -182,6 +183,8 @@ public class ToastListener implements Listener {
 						message.getMsisdn(), false);
 			}
 			toaster.notifyMessage(contactInfo, message);
+		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
+			toaster.cancelAllNotifications();
 		}
 	}
 

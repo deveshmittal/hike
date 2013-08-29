@@ -89,6 +89,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
+	}
+
+	@Override
 	protected void onStart() {
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
