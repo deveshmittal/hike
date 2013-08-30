@@ -107,6 +107,7 @@ public class HikeSearchContactAdapter extends
 		}
 
 		ImageView onhike = (ImageView) v.findViewById(R.id.hike_status);
+		onhike.setVisibility(View.VISIBLE);
 		onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike() ? R.drawable.ic_hike_user
 				: R.drawable.ic_sms_user)
 				: 0);
