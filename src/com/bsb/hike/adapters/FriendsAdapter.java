@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -46,7 +47,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private List<ContactInfo> friendsList;
 	private List<ContactInfo> otherContactsList;
 	private List<ContactInfo> filteredFriendsList;
-	
+
 	private List<ContactInfo> filteredOtherContactsList;
 	private Context context;
 	private ContactInfo friendsSection;
@@ -78,37 +79,49 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						HikeMessengerApp.ACCOUNT_SETTINGS, 0).getString(
 						HikeMessengerApp.MSISDN_SETTING, "");
 
+				boolean nativeSMSOn = PreferenceManager
+						.getDefaultSharedPreferences(context).getBoolean(
+								HikeConstants.SEND_SMS_PREF, false);
+
 				HikeUserDatabase hikeUserDatabase = HikeUserDatabase
 						.getInstance();
 
-				favoriteTaskList = hikeUserDatabase
-						.getContactsOfFavoriteType(FavoriteType.FRIEND,
-								HikeConstants.BOTH_VALUE, myMsisdn);
+				favoriteTaskList = hikeUserDatabase.getContactsOfFavoriteType(
+						FavoriteType.FRIEND, HikeConstants.BOTH_VALUE,
+						myMsisdn, nativeSMSOn);
 				favoriteTaskList.addAll(hikeUserDatabase
 						.getContactsOfFavoriteType(
 								FavoriteType.REQUEST_RECEIVED,
-								HikeConstants.BOTH_VALUE, myMsisdn, true));
-				favoriteTaskList.addAll(hikeUserDatabase
-						.getContactsOfFavoriteType(FavoriteType.REQUEST_SENT,
-								HikeConstants.BOTH_VALUE, myMsisdn));
-				favoriteTaskList.addAll(hikeUserDatabase
-						.getContactsOfFavoriteType(
-								FavoriteType.REQUEST_SENT_REJECTED,
-								HikeConstants.BOTH_VALUE, myMsisdn));
+								HikeConstants.BOTH_VALUE, myMsisdn,
+								nativeSMSOn, false));
+				favoriteTaskList
+						.addAll(hikeUserDatabase
+								.getContactsOfFavoriteType(
+										FavoriteType.REQUEST_SENT,
+										HikeConstants.BOTH_VALUE, myMsisdn,
+										nativeSMSOn));
+				favoriteTaskList
+						.addAll(hikeUserDatabase
+								.getContactsOfFavoriteType(
+										FavoriteType.REQUEST_SENT_REJECTED,
+										HikeConstants.BOTH_VALUE, myMsisdn,
+										nativeSMSOn));
 				Collections.sort(favoriteTaskList,
 						ContactInfo.lastSeenTimeComparator);
 
 				otherTaskList = hikeUserDatabase.getContactsOfFavoriteType(
 						FavoriteType.NOT_FRIEND, HikeConstants.BOTH_VALUE,
-						myMsisdn);
+						myMsisdn, nativeSMSOn);
 				otherTaskList.addAll(hikeUserDatabase
 						.getContactsOfFavoriteType(
 								FavoriteType.REQUEST_RECEIVED,
-								HikeConstants.BOTH_VALUE, myMsisdn, true));
+								HikeConstants.BOTH_VALUE, myMsisdn,
+								nativeSMSOn, true));
 				otherTaskList.addAll(hikeUserDatabase
 						.getContactsOfFavoriteType(
 								FavoriteType.REQUEST_RECEIVED_REJECTED,
-								HikeConstants.BOTH_VALUE, myMsisdn, true));
+								HikeConstants.BOTH_VALUE, myMsisdn,
+								nativeSMSOn, true));
 				Collections.sort(otherTaskList);
 
 				return null;
@@ -527,6 +540,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public boolean isItemViewTypePinned(int viewType) {
 		return viewType == ViewType.SECTION.ordinal();
 	}
+
 	public List<ContactInfo> getCompleteList() {
 		return completeList;
 	}

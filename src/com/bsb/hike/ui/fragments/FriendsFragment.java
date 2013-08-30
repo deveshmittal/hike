@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -232,20 +233,24 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 			String myMsisdn = preferences.getString(
 					HikeMessengerApp.MSISDN_SETTING, "");
 
+			boolean nativeSMSOn = PreferenceManager
+					.getDefaultSharedPreferences(getActivity()).getBoolean(
+							HikeConstants.SEND_SMS_PREF, false);
+
 			HikeUserDatabase hikeUserDatabase = HikeUserDatabase.getInstance();
 
 			final List<ContactInfo> favoriteList = hikeUserDatabase
 					.getContactsOfFavoriteType(FavoriteType.FRIEND,
-							HikeConstants.BOTH_VALUE, myMsisdn);
+							HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn);
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_SENT, HikeConstants.BOTH_VALUE,
-					myMsisdn));
+					myMsisdn, nativeSMSOn));
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_SENT_REJECTED,
-					HikeConstants.BOTH_VALUE, myMsisdn));
+					HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE,
-					myMsisdn));
+					myMsisdn, nativeSMSOn));
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
 			getActivity().runOnUiThread(new Runnable() {
 

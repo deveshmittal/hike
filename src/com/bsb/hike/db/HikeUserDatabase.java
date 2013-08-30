@@ -706,12 +706,20 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 
 	public List<ContactInfo> getContactsOfFavoriteType(
 			FavoriteType favoriteType, int onHike, String myMsisdn) {
-		return getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, false);
+		return getContactsOfFavoriteType(favoriteType, onHike, myMsisdn, false,
+				false);
 	}
 
 	public List<ContactInfo> getContactsOfFavoriteType(
 			FavoriteType favoriteType, int onHike, String myMsisdn,
-			boolean ignoreUnknownContacts) {
+			boolean nativeSMSOn) {
+		return getContactsOfFavoriteType(favoriteType, onHike, myMsisdn,
+				nativeSMSOn, false);
+	}
+
+	public List<ContactInfo> getContactsOfFavoriteType(
+			FavoriteType favoriteType, int onHike, String myMsisdn,
+			boolean nativeSMSOn, boolean ignoreUnknownContacts) {
 		String favoriteMsisdnColumnName = "tempMsisdn";
 		StringBuilder queryBuilder = new StringBuilder("SELECT "
 				+ DBConstants.USERS_TABLE + "." + DBConstants.MSISDN + ", "
@@ -756,6 +764,10 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 		}
 		if (onHike != -1) {
 			queryBuilder.append(" AND " + DBConstants.ONHIKE + " = " + onHike);
+		} else if (!nativeSMSOn) {
+			queryBuilder.append(" AND ((" + DBConstants.ONHIKE + " =1) OR  ("
+					+ DBConstants.ONHIKE + "=0 AND " + DBConstants.USERS_TABLE
+					+ "." + DBConstants.MSISDN + " LIKE '+91%'))");
 		}
 		String query = queryBuilder.toString();
 		Log.d(getClass().getSimpleName(), "Favorites query: " + query);
