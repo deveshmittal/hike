@@ -51,7 +51,6 @@ import com.bsb.hike.utils.ClearGroupTypingNotification;
 import com.bsb.hike.utils.ClearTypingNotification;
 import com.bsb.hike.utils.ContactUtils;
 import com.bsb.hike.utils.Utils;
-import com.facebook.android.Facebook;
 
 /**
  * 
@@ -610,36 +609,6 @@ public class MqttMessagesManager {
 						} catch (JSONException e) {
 							Log.w(getClass().getSimpleName(),
 									"Unknown format for twitter", e);
-						}
-					}
-					if (accounts.has(HikeConstants.FACEBOOK)) {
-						try {
-							JSONObject facebookJSON = accounts
-									.getJSONObject(HikeConstants.FACEBOOK);
-							String userId = facebookJSON
-									.getString(HikeConstants.ID);
-							String userToken = facebookJSON
-									.getString(HikeConstants.TOKEN);
-							long expires = facebookJSON
-									.getLong(HikeConstants.EXPIRES);
-							Facebook facebook = HikeMessengerApp.getFacebook();
-
-							facebook.setAccessToken(userToken);
-							facebook.setAccessExpires(expires);
-
-							editor.putBoolean(
-									HikeMessengerApp.FACEBOOK_AUTH_COMPLETE,
-									true);
-							editor.putLong(
-									HikeMessengerApp.FACEBOOK_TOKEN_EXPIRES,
-									facebook.getAccessExpires());
-							editor.putString(HikeMessengerApp.FACEBOOK_TOKEN,
-									facebook.getAccessToken());
-							editor.putString(HikeMessengerApp.FACEBOOK_USER_ID,
-									userId);
-						} catch (JSONException e) {
-							Log.w(getClass().getSimpleName(),
-									"Unknown format for facebook", e);
 						}
 					}
 				}
