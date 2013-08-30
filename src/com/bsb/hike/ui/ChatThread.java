@@ -2505,7 +2505,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				 * If we're not doing a location/contact transfer, we need an
 				 * external storage
 				 */
-				if (position != 5 && position != 6) {
+				if (position != 4 && position != 5) {
 					if (externalStorageState == ExternalStorageState.NONE) {
 						Toast.makeText(getApplicationContext(),
 								R.string.no_external_storage,
