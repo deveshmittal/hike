@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="48dp"
     android:layout_gravity="center_vertical"
-    android:background="@drawable/timeline_selector"
+    android:background="@drawable/list_item"
     android:gravity="center_vertical"
     android:orientation="vertical"
     android:paddingLeft="12dp"
