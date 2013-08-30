@@ -170,6 +170,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 				viewHolder.text = (TextView) v.findViewById(R.id.name);
 				viewHolder.subText = (TextView) v.findViewById(R.id.main_info);
 				viewHolder.image = (ImageView) v.findViewById(R.id.profile_pic);
+				viewHolder.timeStamp = (TextView) v
+						.findViewById(R.id.timestamp);
+				viewHolder.infoContainer = v
+						.findViewById(R.id.info_container);
 				break;
 
 			case EMPTY_STATUS:
@@ -241,7 +245,10 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			}
 
 			if (mContactInfo != null) {
-				if (mContactInfo.isOnhike()) {
+				if (mContactInfo.getMsisdn().equals(mContactInfo.getId())) {
+					viewHolder.subText.setVisibility(View.VISIBLE);
+					viewHolder.subText.setText(R.string.tap_to_save);
+				} else if (mContactInfo.isOnhike()) {
 					String subText = null;
 					if (mContactInfo.getFavoriteType() == FavoriteType.REQUEST_RECEIVED_REJECTED
 							|| mContactInfo.getFavoriteType() == FavoriteType.FRIEND) {
@@ -379,7 +386,8 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		case STATUS:
 			StatusMessage statusMessage = ((ProfileStatusItem) profileItem)
 					.getStatusMessage();
-			viewHolder.text.setText(statusMessage.getNotNullName());
+			viewHolder.text.setText(myProfile ? context.getString(R.string.me)
+					: statusMessage.getNotNullName());
 
 			SmileyParser smileyParser = SmileyParser.getInstance();
 			viewHolder.subText.setText(smileyParser.addSmileySpans(
@@ -423,6 +431,12 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 			imageLoader.loadImage(profilePicStatusUpdate.getMappedId(),
 					viewHolder.image);
 
+			viewHolder.timeStamp.setText(profilePicStatusUpdate
+					.getTimestampFormatted(true, context));
+
+			viewHolder.infoContainer.setTag(profilePicStatusUpdate);
+			viewHolder.infoContainer
+					.setOnLongClickListener(profileActivity);
 			break;
 
 		case EMPTY_STATUS:
@@ -545,6 +559,7 @@ public class ProfileAdapter extends ArrayAdapter<ProfileItem> {
 		ImageButton imageBtn1;
 		ImageButton imageBtn2;
 		TextView timeStamp;
+		View infoContainer;
 	}
 
 	public void setProfilePreview(Bitmap preview) {

@@ -1387,7 +1387,9 @@ public class Utils {
 		AccountUtils.rewardsUrl = httpString
 				+ (isProductionServer ? AccountUtils.REWARDS_PRODUCTION_BASE
 						: AccountUtils.REWARDS_STAGING_BASE);
-
+		AccountUtils.gamesUrl = httpString
+				+ (isProductionServer ? AccountUtils.GAMES_PRODUCTION_BASE
+						: AccountUtils.GAMES_STAGING_BASE);
 		AccountUtils.stickersUrl = AccountUtils.HTTP_STRING
 				+ (isProductionServer ? AccountUtils.STICKERS_PRODUCTION_BASE
 						: AccountUtils.STICKERS_STAGING_BASE);
@@ -2410,7 +2412,7 @@ public class Utils {
 			break;
 		case LAST_SEEN:
 			container.setBackgroundResource(R.drawable.bg_tip_top_left);
-			tipText.setText(R.string.last_seen_tip);
+			tipText.setText(R.string.last_seen_tip_friends);
 			break;
 		case MOOD:
 			container.setBackgroundResource(R.drawable.bg_tip_bottom_right);
@@ -2651,4 +2653,18 @@ public class Utils {
 
 		return jObject;
 	}
+	public static Bitmap drawableToBitmap (Drawable drawable) {
+	    if (drawable instanceof BitmapDrawable) {
+	        return ((BitmapDrawable)drawable).getBitmap();
+	    }
+	    /*
+	     * http://developer.android.com/reference/android/graphics/Bitmap.Config.html
+	     */
+	    Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Config.ARGB_8888);
+	    Canvas canvas = new Canvas(bitmap); 
+	    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+	    drawable.draw(canvas);
+	    return bitmap;
+	}
+
 }

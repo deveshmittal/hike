@@ -2,12 +2,15 @@ package com.bsb.hike.adapters;
 
 import java.util.List;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,13 +23,15 @@ import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
+import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ImageViewerInfo;
 import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.tasks.ImageLoader;
-import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.ui.ProfileActivity;
 import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.SmileyParser;
 import com.bsb.hike.utils.Utils;
@@ -151,6 +156,10 @@ public class CentralTimelineAdapter extends BaseAdapter {
 						.findViewById(R.id.main_info);
 				viewHolder.largeProfilePic = (ImageView) convertView
 						.findViewById(R.id.profile_pic);
+				viewHolder.timeStamp = (TextView) convertView
+						.findViewById(R.id.timestamp);
+				viewHolder.infoContainer = convertView
+						.findViewById(R.id.info_container);
 				break;
 			}
 			convertView.setTag(viewHolder);
@@ -244,12 +253,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			case PROTIP:
 				Protip protip = statusMessage.getProtip();
 
-				viewHolder.yesBtn.setVisibility(View.GONE);
 				viewHolder.buttonDivider.setVisibility(View.GONE);
 				viewHolder.timeStamp.setVisibility(View.GONE);
 
 				viewHolder.noBtn.setVisibility(View.VISIBLE);
 				viewHolder.noBtn.setText(R.string.dismiss);
+				viewHolder.yesBtn.setText(R.string.download);
 
 				int btnPadding = context.getResources().getDimensionPixelSize(
 						R.dimen.protip_btn_padding);
@@ -257,9 +266,14 @@ public class CentralTimelineAdapter extends BaseAdapter {
 						viewHolder.noBtn.getPaddingTop(), btnPadding,
 						viewHolder.noBtn.getPaddingTop());
 
+				viewHolder.yesBtn.setPadding(btnPadding,
+						viewHolder.yesBtn.getPaddingTop(), btnPadding,
+						viewHolder.yesBtn.getPaddingTop());
+
 				if (!TextUtils.isEmpty(protip.getText())) {
 					viewHolder.extraInfo.setVisibility(View.VISIBLE);
 					viewHolder.extraInfo.setText(protip.getText());
+
 				} else {
 					viewHolder.extraInfo.setVisibility(View.GONE);
 				}
@@ -275,6 +289,12 @@ public class CentralTimelineAdapter extends BaseAdapter {
 							true);
 					viewHolder.statusImg.setTag(imageViewerInfo);
 					viewHolder.statusImg.setOnClickListener(imageClickListener);
+					if (!TextUtils.isEmpty(protip.getGameDownlodURL())) {
+						viewHolder.yesBtn.setTag(protip);
+						viewHolder.yesBtn.setVisibility(View.VISIBLE);
+						viewHolder.yesBtn
+								.setOnClickListener(yesBtnClickListener);
+					}
 				} else {
 					viewHolder.statusImg.setVisibility(View.GONE);
 				}
@@ -289,8 +309,8 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 			viewHolder.avatar.setTag(statusMessage);
 
-			viewHolder.yesBtn.setTag(statusMessage);
-			viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
+			// viewHolder.yesBtn.setTag(statusMessage);
+			// viewHolder.yesBtn.setOnClickListener(yesBtnClickListener);
 
 			viewHolder.noBtn.setTag(statusMessage);
 			viewHolder.noBtn.setOnClickListener(noBtnClickListener);
@@ -317,6 +337,13 @@ public class CentralTimelineAdapter extends BaseAdapter {
 			 */
 			imageLoader.loadImage(statusMessage.getMappedId(),
 					viewHolder.largeProfilePic);
+
+			viewHolder.timeStamp.setText(statusMessage.getTimestampFormatted(
+					true, context));
+
+			viewHolder.infoContainer.setTag(statusMessage);
+			viewHolder.infoContainer
+					.setOnClickListener(onProfileInfoClickListener);
 			break;
 		}
 
@@ -335,6 +362,7 @@ public class CentralTimelineAdapter extends BaseAdapter {
 		ImageView statusImg;
 		View buttonDivider;
 		ImageView largeProfilePic;
+		View infoContainer;
 	}
 
 	private OnClickListener imageClickListener = new OnClickListener() {
@@ -361,14 +389,19 @@ public class CentralTimelineAdapter extends BaseAdapter {
 
 		@Override
 		public void onClick(View v) {
-			StatusMessage statusMessage = (StatusMessage) v.getTag();
-
-			if (CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_ID == statusMessage
-					.getId()
-					|| CentralTimelineAdapter.EMPTY_STATUS_NO_STATUS_RECENTLY_ID == statusMessage
-							.getId()) {
-				context.startActivity(new Intent(context, StatusUpdate.class));
+			Protip protip = (Protip) v.getTag();
+			String url = protip.getGameDownlodURL();
+			Intent marketIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+			marketIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY
+					| Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+			try {
+				context.startActivity(marketIntent);
+			} catch (ActivityNotFoundException e) {
+				Log.e(CentralTimelineAdapter.class.getSimpleName(),
+						"Unable to open market");
 			}
+			HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
+					protip.getMappedId());
 		}
 	};
 
@@ -395,6 +428,32 @@ public class CentralTimelineAdapter extends BaseAdapter {
 				HikeMessengerApp.getPubSub().publish(HikePubSub.REMOVE_PROTIP,
 						statusMessage.getProtip().getMappedId());
 			}
+		}
+	};
+
+	private OnClickListener onProfileInfoClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			StatusMessage statusMessage = (StatusMessage) v.getTag();
+			if ((statusMessage.getStatusMessageType() == StatusMessageType.NO_STATUS)
+					|| (statusMessage.getStatusMessageType() == StatusMessageType.FRIEND_REQUEST)
+					|| (statusMessage.getStatusMessageType() == StatusMessageType.PROTIP)) {
+				return;
+			} else if (userMsisdn.equals(statusMessage.getMsisdn())) {
+				Intent intent = new Intent(context, ProfileActivity.class);
+				intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE,
+						true);
+				context.startActivity(intent);
+				return;
+			}
+
+			Intent intent = Utils.createIntentFromContactInfo(new ContactInfo(
+					null, statusMessage.getMsisdn(), statusMessage
+							.getNotNullName(), statusMessage.getMsisdn()));
+			intent.putExtra(HikeConstants.Extras.FROM_CENTRAL_TIMELINE, true);
+			intent.setClass(context, ChatThread.class);
+			context.startActivity(intent);
 		}
 	};
 

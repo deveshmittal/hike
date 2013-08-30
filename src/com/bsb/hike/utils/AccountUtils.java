@@ -120,7 +120,13 @@ public class AccountUtils {
 	public static final String REWARDS_STAGING_BASE = "staging.im.hike.in/rewards/android/";
 
 	public static String rewardsUrl = HTTP_STRING + REWARDS_PRODUCTION_BASE;
+	
+	public static final String GAMES_PRODUCTION_BASE = "hike.in/apps/android/";
 
+	public static final String GAMES_STAGING_BASE = "staging.im.hike.in/apps/android/";
+
+	public static String gamesUrl = HTTP_STRING + GAMES_PRODUCTION_BASE;
+	
 	public static final String STICKERS_PRODUCTION_BASE = "hike.in/s/%1$s/%2$s";
 
 	public static final String STICKERS_STAGING_BASE = "staging.im.hike.in/s/%1$s/%2$s";

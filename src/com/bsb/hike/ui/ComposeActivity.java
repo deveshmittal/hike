@@ -85,6 +85,11 @@ public class ComposeActivity extends HikeAppStateBaseFragmentActivity implements
 		existingGroupId = getIntent().getStringExtra(
 				HikeConstants.Extras.EXISTING_GROUP_CHAT);
 
+		if (getIntent().getAction() == Intent.ACTION_SEND
+				|| getIntent().getAction() == Intent.ACTION_SENDTO) {
+			isForwardingMessage = true;
+		}
+
 		setupActionBar();
 
 		mInputNumberView = (EditText) findViewById(R.id.search_text);

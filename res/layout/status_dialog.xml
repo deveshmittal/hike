@@ -6,20 +6,10 @@
     android:background="@color/white" >
 
     <LinearLayout
-        android:id="@+id/emoji_container"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/emoticon_pallete"
-        android:layout_alignParentBottom="true"
-        android:visibility="gone" >
-
-        <include layout="@layout/emoticon_layout" />
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:layout_above="@id/emoji_container"
+        android:layout_above="@+id/emoji_container"
         android:layout_alignWithParentIfMissing="true"
         android:background="#323638"
         android:orientation="horizontal" >
@@ -129,4 +119,13 @@
         <include layout="@layout/tool_tip" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/emoji_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/emoticon_pallete"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone" >
+
+        <include layout="@layout/emoticon_layout" />
+    </LinearLayout>
 </RelativeLayout>

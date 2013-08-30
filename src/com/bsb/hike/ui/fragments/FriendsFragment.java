@@ -19,7 +19,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -36,8 +35,9 @@ import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.ContactInfo;
 import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.ui.ChatThread;
+import com.bsb.hike.utils.HomeBaseFragment;
 
-public class FriendsFragment extends SherlockListFragment implements Listener,
+public class FriendsFragment extends HomeBaseFragment implements Listener,
 		OnItemLongClickListener {
 
 	private FriendsAdapter friendsAdapter;
@@ -84,12 +84,16 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+		inflater.inflate(R.menu.friends_menu, menu);
+
 		final SearchView searchView = new SearchView(getSherlockActivity()
 				.getSupportActionBar().getThemedContext());
 		searchView.setQueryHint(getString(R.string.search_hint));
 		searchView.setIconifiedByDefault(false);
 		searchView.setIconified(false);
 		searchView.setOnQueryTextListener(onQueryTextListener);
+		searchView.clearFocus();
 
 		menu.add(Menu.NONE, Menu.NONE, 1, R.string.search_hint)
 				.setIcon(R.drawable.ic_top_bar_search)
@@ -183,7 +187,8 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 					ContactInfo contactInfo = favoriteToggle.first;
 					contactInfo.setFavoriteType(favoriteType);
 					if ((favoriteType == FavoriteType.FRIEND)
-							|| (favoriteType == FavoriteType.REQUEST_SENT)) {
+							|| (favoriteType == FavoriteType.REQUEST_SENT)
+							|| (favoriteType == FavoriteType.REQUEST_RECEIVED)) {
 						friendsAdapter.addToGroup(contactInfo,
 								FriendsAdapter.FRIEND_INDEX);
 					} else if (favoriteType == FavoriteType.NOT_FRIEND
@@ -237,6 +242,9 @@ public class FriendsFragment extends SherlockListFragment implements Listener,
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_SENT_REJECTED,
 					HikeConstants.BOTH_VALUE, myMsisdn));
+			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
+					FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE,
+					myMsisdn));
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
 			getActivity().runOnUiThread(new Runnable() {
 

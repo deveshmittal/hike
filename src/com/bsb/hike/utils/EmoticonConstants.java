@@ -494,11 +494,16 @@ public class EmoticonConstants {
 			R.drawable.sticker_17_hurray, R.drawable.sticker_18_yawning };
 
 	public static final int[] LOCAL_STICKER_SMALL_RES_IDS_1 = {
-			R.drawable.sticker_9_love1, R.drawable.sticker_10_love2,
-			R.drawable.sticker_11_teasing, R.drawable.sticker_12_rofl,
-			R.drawable.sticker_13_bored, R.drawable.sticker_14_angry,
-			R.drawable.sticker_15_strangle, R.drawable.sticker_16_shocked,
-			R.drawable.sticker_17_hurray, R.drawable.sticker_18_yawning };
+			R.drawable.sticker_9_love1_small,
+			R.drawable.sticker_10_love2_small,
+			R.drawable.sticker_11_teasing_small,
+			R.drawable.sticker_12_rofl_small,
+			R.drawable.sticker_13_bored_small,
+			R.drawable.sticker_14_angry_small,
+			R.drawable.sticker_15_strangle_small,
+			R.drawable.sticker_16_shocked_small,
+			R.drawable.sticker_17_hurray_small,
+			R.drawable.sticker_18_yawning_small };
 
 	public static final String[] LOCAL_STICKER_IDS_1 = { "001_love1.png",
 			"002_love2.png", "003_teasing.png", "004_rofl.png",

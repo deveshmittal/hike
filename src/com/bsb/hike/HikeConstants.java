@@ -18,7 +18,6 @@ public class HikeConstants {
 	public static final String MA_TRACKER_REF_ID_PREFIX = "bsb_hike_";
 	public static final String MA_SITE_ID = "27576";
 
-	
 	public static final String ANDROID = "android";
 
 	public static final String MESSAGE = "msg";
@@ -80,6 +79,9 @@ public class HikeConstants {
 	public static final String REWARDS_TOKEN = "reward_token";
 	public static final String SHOW_REWARDS = "show_rewards";
 	public static final String REWARDS = "rewards";
+	public static final String GAMES_TOKEN = "games_token";
+	public static final String SHOW_GAMES = "show_games";
+	public static final String GAMES = "games";
 	public static final String TALK_TIME = "tt";
 	public static final String PHONE_NUMBERS = "phone_numbers";
 	public static final String EMAILS = "emails";
@@ -134,6 +136,8 @@ public class HikeConstants {
 	public static final String PROTIP_TEXT = "t";
 	public static final String PROTIP_IMAGE_URL = "img";
 	public static final String PROTIP_WAIT_TIME = "wt";
+	public static final String PROTIP_GAME_DOWNLOAD_URL = "url";
+	public static final String PROTIP_SHOW_PUSH = "fp";
 	public static final String NO_SMS = "nosms";
 	public static final String RETURNING_USER = "ru";
 	public static final String NUMBER_OF_SMS = "no_of_sms";
@@ -145,6 +149,7 @@ public class HikeConstants {
 	public static final String UNIFIED_INBOX = "unified_inbox";
 	public static final String PULL_OLD_SMS = "pull_old_sms";
 	public static final String TIP_ID = "tip_id";
+	public static final String TIP_URL = "tip_url";
 	public static final String SMS = "sms";
 	public static final String UI_EVENT = "uiEvent";
 	public static final String LOGEVENT_TAG = "mob";
@@ -492,6 +497,7 @@ public class HikeConstants {
 		public static final String FACEBOOK_POST_POPUP_SHOWING = "facebookPostPopupShowing";
 		public static final String GPS_DIALOG_SHOWN = "gpsDialogShown";
 		public static final String REWARDS_PAGE = "rewardsPage";
+		public static final String GAMES_PAGE = "gamesPage";
 		public static final String CUSTOM_LOCATION_SELECTED = "customLocationSelected";
 		public static final String CUSTOM_LOCATION_LAT = "customLocationLat";
 		public static final String CUSTOM_LOCATION_LONG = "customLocationLong";
@@ -517,6 +523,7 @@ public class HikeConstants {
 		public static final String IS_TEXT_SEARCH = "isTextSearch";
 		public static final String HTTP_SEARCH_STR = "searchStr";
 		public static final String IS_FACEBOOK = "isFacebook";
+		public static final String EMOTICON_TYPE = "emoticonType";
 	}
 
 	public static final class LogEvent {
@@ -660,6 +667,7 @@ public class HikeConstants {
 		public static final String GROUP_CHAT_KICK = "gck";
 		public static final String ACCOUNT_CONFIG = "ac";
 		public static final String REWARDS = "rewards";
+		public static final String GAMES = "games";
 		public static final String DISPLAY_PIC = "dp";
 		public static final String STATUS_UPDATE = "su";
 		public static final String ACTION = "action";
@@ -717,7 +725,7 @@ public class HikeConstants {
 	public static enum EmoticonType {
 		EMOTICON, STICKERS
 	}
-	
+
 	public static final int[] INVITE_STRINGS = { R.string.native_sms_invite_1,
 			R.string.native_sms_invite_2, R.string.native_sms_invite_3 };
 

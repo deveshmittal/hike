@@ -25,6 +25,7 @@ import com.bsb.hike.models.ContactInfo.FavoriteType;
 import com.bsb.hike.models.ConvMessage;
 import com.bsb.hike.models.ConvMessage.ParticipantInfoState;
 import com.bsb.hike.models.GroupConversation;
+import com.bsb.hike.models.Protip;
 import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.service.HikeMqttManager;
 import com.bsb.hike.service.HikeMqttManager.MQTTConnectionStatus;
@@ -42,20 +43,17 @@ public class ToastListener implements Listener {
 
 	private MQTTConnectionStatus mCurrentUnnotifiedStatus;
 
+	String[] hikePubSubListeners = { HikePubSub.PUSH_AVATAR_DOWNLOADED,
+			HikePubSub.PUSH_FILE_DOWNLOADED,
+			HikePubSub.PUSH_STICKER_DOWNLOADED, HikePubSub.MESSAGE_RECEIVED,
+			HikePubSub.NEW_ACTIVITY, HikePubSub.CONNECTION_STATUS,
+			HikePubSub.FAVORITE_TOGGLED, HikePubSub.TIMELINE_UPDATE_RECIEVED,
+			HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED,
+			HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS,
+			HikePubSub.CANCEL_ALL_NOTIFICATIONS, HikePubSub.PROTIP_ADDED };
+
 	public ToastListener(Context context) {
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.MESSAGE_RECEIVED,
-				this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.NEW_ACTIVITY, this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.CONNECTION_STATUS,
-				this);
-		HikeMessengerApp.getPubSub().addListener(HikePubSub.FAVORITE_TOGGLED,
-				this);
-		HikeMessengerApp.getPubSub().addListener(
-				HikePubSub.TIMELINE_UPDATE_RECIEVED, this);
-		HikeMessengerApp.getPubSub().addListener(
-				HikePubSub.BATCH_STATUS_UPDATE_PUSH_RECEIVED, this);
-		HikeMessengerApp.getPubSub().addListener(
-				HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS, this);
+		HikeMessengerApp.getPubSub().addListeners(this, hikePubSubListeners);
 		this.toaster = new HikeNotification(context);
 		this.db = HikeUserDatabase.getInstance();
 		this.context = context;
@@ -120,6 +118,7 @@ public class ToastListener implements Listener {
 							message.getMsisdn(), false);
 				}
 
+				// this.toaster.pushInboxNotifications(contactInfo, message);
 				this.toaster.notifyMessage(contactInfo, message);
 			}
 		} else if (HikePubSub.CONNECTION_STATUS.equals(type)) {
@@ -161,6 +160,41 @@ public class ToastListener implements Listener {
 			toaster.notifyBatchUpdate(batchSU.first, batchSU.second);
 		} else if (HikePubSub.CANCEL_ALL_STATUS_NOTIFICATIONS.equals(type)) {
 			toaster.cancelAllStatusNotifications();
+		} else if (HikePubSub.PUSH_AVATAR_DOWNLOADED.equals(type)) {
+			if (currentActivity != null && currentActivity.get() != null) {
+				return;
+			}
+			String[] profileStruct = (String[]) object;
+			toaster.pushBigPictureStatusNotifications(profileStruct);
+		} else if (HikePubSub.PUSH_FILE_DOWNLOADED.equals(type)
+				| HikePubSub.PUSH_STICKER_DOWNLOADED.equals(type)) {
+			ConvMessage message = (ConvMessage) object;
+			if (currentActivity != null && currentActivity.get() != null) {
+				return;
+			}
+			ContactInfo contactInfo;
+			if (message.isGroupChat()) {
+				Log.d("ToastListener", "GroupName is "
+						+ message.getConversation().getLabel());
+				contactInfo = new ContactInfo(message.getMsisdn(),
+						message.getMsisdn(), message.getConversation()
+								.getLabel(), message.getMsisdn());
+			} else {
+				contactInfo = this.db.getContactInfoFromMSISDN(
+						message.getMsisdn(), false);
+			}
+			toaster.notifyMessage(contactInfo, message);
+		} else if (HikePubSub.CANCEL_ALL_NOTIFICATIONS.equals(type)) {
+			toaster.cancelAllNotifications();
+		} else if (HikePubSub.PROTIP_ADDED.equals(type)) {
+			Protip proTip = (Protip) object;
+
+			if (currentActivity != null && currentActivity.get() != null) {
+				return;
+			}
+			if (proTip.isShowPush())
+				toaster.notifyMessage(proTip);
+
 		}
 	}
 
@@ -182,54 +216,6 @@ public class ToastListener implements Listener {
 			return;
 		}
 
-		/* don't show any connection message until we've connected once */
-		// Not showing any connection statuses for now..
-		if (true) {
-			return;
-		}
-
-		if ((currentActivity == null) || (currentActivity.get() == null)) {
-			// no activity on the screen, so don't toast it
-			return;
-		}
-
-		int icon = R.drawable.ic_contact_logo;
-
-		int id = -1;
-		Log.d("ToastListener", "status is " + status);
-		switch (status) {
-		case NOTCONNECTED_DATADISABLED:
-			id = R.string.notconnected_data_disabled;
-			break;
-		case NOTCONNECTED_WAITINGFORINTERNET:
-			id = R.string.notconnected_no_internet;
-			break;
-		case NOTCONNECTED_USERDISCONNECT:
-			id = R.string.notconnected_no_internet;
-			break;
-		case NOTCONNECTED_UNKNOWNREASON:
-			id = R.string.notconnected_no_internet;
-			break;
-		default:
-			return;
-		}
-
-		String text = context.getResources().getString(id);
-		Notification notification = new Notification(icon, text,
-				System.currentTimeMillis());
-
-		Intent notificationIntent = new Intent(
-				android.provider.Settings.ACTION_WIRELESS_SETTINGS);
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-				notificationIntent, 0);
-		notification.setLatestEventInfo(context, context.getResources()
-				.getString(R.string.hike_network_connection), text,
-				contentIntent);
-
-		NotificationManager notificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		notificationManager.notify(HikeConstants.HIKE_SYSTEM_NOTIFICATION,
-				notification);
 	}
 
 }

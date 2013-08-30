@@ -89,6 +89,13 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.CANCEL_ALL_NOTIFICATIONS, null);
+	}
+
+	@Override
 	protected void onStart() {
 		super.onStart();
 		HikeMessengerApp.getPubSub().addListener(HikePubSub.SHOW_IMAGE, this);
@@ -131,6 +138,27 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 		tabIndicator.setViewPager(viewPager,
 				getIntent().getIntExtra(HikeConstants.Extras.TAB_INDEX, 1));
 		tabIndicator.setOnPageChangeListener(onPageChangeListener);
+
+		setBackground();
+	}
+
+	int initialRed = 231;
+	int initialGreen = 226;
+	int initialBlue = 214;
+
+	int finalRed = 255;
+	int finalGreen = 255;
+	int finalBlue = 255;
+
+	private void setBackground() {
+		int position = viewPager.getCurrentItem();
+		if (position == 0) {
+			parentLayout.setBackgroundColor(Color.argb(255, initialRed,
+					initialGreen, initialBlue));
+		} else {
+			parentLayout.setBackgroundColor(Color.argb(255, finalRed,
+					finalGreen, finalBlue));
+		}
 	}
 
 	/*
@@ -139,23 +167,9 @@ public class HomeActivity extends HikeAppStateBaseFragmentActivity {
 	 */
 	OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
 
-		int initialRed = 231;
-		int initialGreen = 226;
-		int initialBlue = 214;
-
-		int finalRed = 255;
-		int finalGreen = 255;
-		int finalBlue = 255;
-
 		@Override
 		public void onPageSelected(int position) {
-			if (position == 0) {
-				parentLayout.setBackgroundColor(Color.argb(255, initialRed,
-						initialGreen, initialBlue));
-			} else {
-				parentLayout.setBackgroundColor(Color.argb(255, finalRed,
-						finalGreen, finalBlue));
-			}
+			setBackground();
 		}
 
 		@Override

@@ -39,10 +39,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -62,12 +60,10 @@ import com.bsb.hike.models.MessageMetadata;
 import com.bsb.hike.models.TypingNotification;
 import com.bsb.hike.models.utils.IconCacheManager;
 import com.bsb.hike.ui.ChatThread;
-import com.bsb.hike.ui.ComposeActivity;
-import com.bsb.hike.ui.SettingsActivity;
-import com.bsb.hike.ui.TellAFriend;
+import com.bsb.hike.utils.HomeBaseFragment;
 import com.bsb.hike.utils.Utils;
 
-public class ConversationFragment extends SherlockListFragment implements
+public class ConversationFragment extends HomeBaseFragment implements
 		OnItemLongClickListener, Listener, Runnable {
 
 	private class DeleteConversationsAsyncTask extends
@@ -284,7 +280,7 @@ public class ConversationFragment extends SherlockListFragment implements
 			HikePubSub.ICON_CHANGED, HikePubSub.GROUP_NAME_CHANGED,
 			HikePubSub.CONTACT_ADDED, HikePubSub.LAST_MESSAGE_DELETED,
 			HikePubSub.TYPING_CONVERSATION, HikePubSub.END_TYPING_CONVERSATION,
-			HikePubSub.RESET_UNREAD_COUNT };
+			HikePubSub.RESET_UNREAD_COUNT, HikePubSub.GROUP_LEFT };
 
 	private ConversationsAdapter mAdapter;
 	private HashMap<String, Conversation> mConversationsByMSISDN;
@@ -320,27 +316,6 @@ public class ConversationFragment extends SherlockListFragment implements
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.chats_menu, menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.new_conversation:
-			Intent intent = new Intent(getActivity(), ComposeActivity.class);
-			intent.putExtra(HikeConstants.Extras.EDIT, true);
-			startActivity(intent);
-			return true;
-		case R.id.settings:
-			Intent settingsIntent = new Intent(getActivity(),
-					SettingsActivity.class);
-			startActivity(settingsIntent);
-			return true;
-		case R.id.invite:
-			Intent inviteIntent = new Intent(getActivity(), TellAFriend.class);
-			startActivity(inviteIntent);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -502,6 +477,10 @@ public class ConversationFragment extends SherlockListFragment implements
 				.publish(
 						HikePubSub.MQTT_PUBLISH,
 						conv.serialize(HikeConstants.MqttMessageTypes.GROUP_CHAT_LEAVE));
+		deleteConversation(conv);
+	}
+
+	private void deleteConversation(Conversation conv) {
 		DeleteConversationsAsyncTask task = new DeleteConversationsAsyncTask();
 		task.execute(conv);
 	}
@@ -801,6 +780,19 @@ public class ConversationFragment extends SherlockListFragment implements
 			conv.setUnreadCount(0);
 
 			getActivity().runOnUiThread(this);
+		} else if (HikePubSub.GROUP_LEFT.equals(type)) {
+			String groupId = (String) object;
+			final Conversation conversation = mConversationsByMSISDN
+					.get(groupId);
+			if (conversation == null) {
+				return;
+			}
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					deleteConversation(conversation);
+				}
+			});
 		}
 	}
 

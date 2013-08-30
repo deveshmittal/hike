@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/profile_item_bckg"
-        android:cacheColorHint="#000000"
+        android:cacheColorHint="#00000000"
         android:choiceMode="none"
         android:divider="@drawable/ic_thread_divider_profile"
         android:dividerHeight="1dp"

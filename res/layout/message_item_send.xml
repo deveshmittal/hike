@@ -8,42 +8,41 @@
     android:paddingRight="10dp" >
 
     <LinearLayout
-        android:id="@+id/day_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal" >
+		android:layout_marginBottom="5dp"
+	    android:orientation="horizontal"
+	    android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/day_container"
+		android:gravity="center_vertical"
+		android:layout_marginTop="10dp">
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_gravity="center"
-            android:layout_weight="10"
-            android:background="@drawable/ic_chatthread_divider" />
+		<View 
+		    android:layout_height="2dp"
+		    android:layout_width="0dp"
+		    android:layout_weight="10"
+		    android:layout_gravity="center"
+		    android:background="@drawable/ic_chatthread_divider"/>
+		    
+	    <com.bsb.hike.view.CustomFontTextView
+	        android:id="@+id/day"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:layout_marginLeft="7dp"
+        	android:layout_marginRight="7dp"
+        	android:layout_alignParentTop="true"
+        	android:layout_centerHorizontal="true"
+        	android:text="This is the timestamp"
+        	android:textSize="12sp"
+        	android:textColor="@color/list_item_header"
+        	android:textStyle="bold|italic" />
 
-        <com.bsb.hike.view.CustomFontTextView
-            android:id="@+id/day"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginLeft="7dp"
-            android:layout_marginRight="7dp"
-            android:shadowColor="#80FFFFFF"
-            android:shadowDy="0.4"
-            android:shadowRadius="0.3"
-            android:text="This is the timestamp"
-            android:textColor="@color/timestampcolor"
-            android:textSize="13sp" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_gravity="center"
-            android:layout_weight="10"
-            android:background="@drawable/ic_chatthread_divider" />
-    </LinearLayout>
+	    <View 
+		    android:layout_height="2dp"
+		    android:layout_width="0dp"
+		    android:layout_weight="10"
+		    android:layout_gravity="center"
+		    android:background="@drawable/ic_chatthread_divider"/>
+	</LinearLayout>
 
     <RelativeLayout
         android:id="@+id/relativeLayout1"

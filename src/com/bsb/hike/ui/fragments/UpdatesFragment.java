@@ -17,10 +17,8 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.bsb.hike.HikeConstants;
 import com.bsb.hike.HikeMessengerApp;
 import com.bsb.hike.HikePubSub;
@@ -36,10 +34,10 @@ import com.bsb.hike.models.StatusMessage;
 import com.bsb.hike.models.StatusMessage.StatusMessageType;
 import com.bsb.hike.ui.ChatThread;
 import com.bsb.hike.ui.ProfileActivity;
-import com.bsb.hike.ui.StatusUpdate;
+import com.bsb.hike.utils.HomeBaseFragment;
 import com.bsb.hike.utils.Utils;
 
-public class UpdatesFragment extends SherlockListFragment implements
+public class UpdatesFragment extends HomeBaseFragment implements
 		OnScrollListener, Listener {
 
 	private StatusMessage noStatusMessage;
@@ -50,7 +48,8 @@ public class UpdatesFragment extends SherlockListFragment implements
 	private boolean reachedEnd;
 	private boolean loadingMoreMessages;
 
-	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED };
+	private String[] pubSubListeners = { HikePubSub.TIMELINE_UPDATE_RECIEVED,
+			HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED };
 	private String[] friendMsisdns;
 
 	@Override
@@ -93,19 +92,6 @@ public class UpdatesFragment extends SherlockListFragment implements
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		inflater.inflate(R.menu.updates_menu, menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.new_update:
-			Intent intent = new Intent(getActivity(), StatusUpdate.class);
-			intent.putExtra(HikeConstants.Extras.FROM_CONVERSATIONS_SCREEN,
-					true);
-			startActivity(intent);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	private void resetUnseenStatusCount() {
@@ -322,6 +308,14 @@ public class UpdatesFragment extends SherlockListFragment implements
 			});
 			HikeMessengerApp.getPubSub().publish(
 					HikePubSub.RESET_NOTIFICATION_COUNTER, null);
+		} else if (HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED.equals(type)) {
+			getActivity().runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					centralTimelineAdapter.notifyDataSetChanged();
+				}
+			});
 		}
 	}
 

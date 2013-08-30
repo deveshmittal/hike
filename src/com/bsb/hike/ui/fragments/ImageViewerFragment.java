@@ -10,6 +10,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
@@ -17,6 +18,8 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.bsb.hike.HikeConstants;
+import com.bsb.hike.HikeMessengerApp;
+import com.bsb.hike.HikePubSub;
 import com.bsb.hike.R;
 import com.bsb.hike.db.HikeUserDatabase;
 import com.bsb.hike.models.utils.IconCacheManager;
@@ -24,7 +27,7 @@ import com.bsb.hike.tasks.ProfileImageLoader;
 import com.bsb.hike.utils.Utils;
 
 public class ImageViewerFragment extends SherlockFragment implements
-		LoaderCallbacks<Boolean> {
+		LoaderCallbacks<Boolean>, OnClickListener {
 
 	ImageView imageView;
 	private ProgressDialog mDialog;
@@ -46,6 +49,7 @@ public class ImageViewerFragment extends SherlockFragment implements
 			Bundle savedInstanceState) {
 		View parent = inflater.inflate(R.layout.image_viewer, null);
 		imageView = (ImageView) parent.findViewById(R.id.image);
+		imageView.setOnClickListener(this);
 
 		return parent;
 	}
@@ -126,6 +130,13 @@ public class ImageViewerFragment extends SherlockFragment implements
 			imageView.setImageDrawable(BitmapDrawable.createFromPath(basePath
 					+ "/" + fileName));
 		}
+
+		if (isStatusImage) {
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.LARGER_UPDATE_IMAGE_DOWNLOADED, null);
+		}
+		HikeMessengerApp.getPubSub().publish(
+				HikePubSub.LARGER_IMAGE_DOWNLOADED, null);
 	}
 
 	@Override
@@ -138,5 +149,10 @@ public class ImageViewerFragment extends SherlockFragment implements
 			mDialog.dismiss();
 			mDialog = null;
 		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		getActivity().onBackPressed();
 	}
 }

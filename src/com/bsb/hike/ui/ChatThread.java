@@ -7,9 +7,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -163,7 +161,6 @@ import com.bsb.hike.utils.EmoticonConstants;
 import com.bsb.hike.utils.FileTransferTaskBase;
 import com.bsb.hike.utils.HikeAppStateBaseFragmentActivity;
 import com.bsb.hike.utils.SmileyParser;
-import com.bsb.hike.utils.StickerTaskBase;
 import com.bsb.hike.utils.Utils;
 import com.bsb.hike.utils.Utils.ExternalStorageState;
 import com.bsb.hike.view.CustomLinearLayout;
@@ -256,10 +253,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private static MediaRecorder recorder;
 
 	private static MediaPlayer player;
-
-	public static Map<Long, FileTransferTaskBase> fileTransferTaskMap;
-
-	public static Map<String, StickerTaskBase> stickerTaskMap;
 
 	private Handler recordingHandler;
 
@@ -416,14 +409,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 		setContentView(R.layout.chatthread);
 
-		if (ChatThread.fileTransferTaskMap == null) {
-			ChatThread.fileTransferTaskMap = new HashMap<Long, FileTransferTaskBase>();
-		}
-
-		if (ChatThread.stickerTaskMap == null) {
-			ChatThread.stickerTaskMap = new HashMap<String, StickerTaskBase>();
-		}
-
 		mHandler = new Handler();
 
 		prefs = getSharedPreferences(HikeMessengerApp.ACCOUNT_SETTINGS,
@@ -492,9 +477,20 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.EMOTICON_SHOWING)) {
-				onEmoticonBtnClicked(null, savedInstanceState.getInt(
-						HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY, 0),
-						false);
+
+				int emoticonTypeOrdinal = savedInstanceState.getInt(
+						HikeConstants.Extras.EMOTICON_TYPE, -1);
+				if (emoticonTypeOrdinal != -1) {
+					EmoticonType type = EmoticonType.values()[emoticonTypeOrdinal];
+
+					View emoticonLayout = findViewById(type == EmoticonType.STICKERS ? R.id.sticker_btn
+							: R.id.emo_btn);
+					onEmoticonBtnClicked(
+							emoticonLayout,
+							savedInstanceState
+									.getInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY,
+											0), false);
+				}
 			}
 			if (savedInstanceState
 					.getBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING)) {
@@ -653,21 +649,22 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		case R.id.delete:
 			removeMessage(message);
 			if (message.isFileTransferMessage()) {
-				FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
+				FileTransferTaskBase fileTransferTask = HikeMessengerApp.fileTransferTaskMap
 						.get(message.getMsgID());
 				if (fileTransferTask != null) {
 					fileTransferTask.cancelTask();
-					ChatThread.fileTransferTaskMap.remove(message.getMsgID());
+					HikeMessengerApp.fileTransferTaskMap.remove(message
+							.getMsgID());
 					mAdapter.notifyDataSetChanged();
 				}
 			}
 			return true;
 		case R.id.cancel_file_transfer:
-			FileTransferTaskBase fileTransferTask = ChatThread.fileTransferTaskMap
+			FileTransferTaskBase fileTransferTask = HikeMessengerApp.fileTransferTaskMap
 					.get(message.getMsgID());
 			if (fileTransferTask != null) {
 				fileTransferTask.cancelTask();
-				ChatThread.fileTransferTaskMap.remove(message.getMsgID());
+				HikeMessengerApp.fileTransferTaskMap.remove(message.getMsgID());
 				mAdapter.notifyDataSetChanged();
 			}
 			return true;
@@ -688,7 +685,32 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getSupportMenuInflater().inflate(R.menu.chat_thread_menu, menu);
+
+		MenuItem profileItem = menu.findItem(R.id.profile);
+		if (mConversation instanceof GroupConversation) {
+			profileItem.setTitle(R.string.group_profile);
+		} else {
+			profileItem.setTitle(R.string.profile_title);
+		}
+
+		MenuItem muteItem = menu.findItem(R.id.mute);
+		muteItem.setVisible(mConversation instanceof GroupConversation);
 		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (mConversation == null) {
+			return super.onPrepareOptionsMenu(menu);
+		}
+		MenuItem menuItem = menu.findItem(R.id.mute);
+		if (mConversation instanceof GroupConversation) {
+			boolean isMuted = ((GroupConversation) mConversation).isMuted();
+			menuItem.setTitle(isMuted ? R.string.unmute_group
+					: R.string.mute_group);
+			return true;
+		}
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
@@ -699,8 +721,29 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			return false;
 		}
 
-		if (item.getItemId() == R.id.attachment) {
+		if (mConversation instanceof GroupConversation) {
+			if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+				return false;
+			}
+		}
+
+		switch (item.getItemId()) {
+		case R.id.attachment:
 			showFilePicker(Utils.getExternalStorageState());
+			break;
+		case R.id.profile:
+			openProfileScreen();
+			break;
+		case R.id.mute:
+			GroupConversation groupConversation = (GroupConversation) mConversation;
+
+			groupConversation.setIsMuted(!groupConversation.isMuted());
+
+			HikeMessengerApp.getPubSub().publish(
+					HikePubSub.MUTE_CONVERSATION_TOGGLED,
+					new Pair<String, Boolean>(groupConversation.getMsisdn(),
+							groupConversation.isMuted()));
+			break;
 		}
 
 		return true;
@@ -771,7 +814,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					&& hikeFile.wasFileDownloaded()) {
 				optionsList.add(getString(R.string.forward));
 			}
-			if (ChatThread.fileTransferTaskMap.containsKey(message.getMsgID())) {
+			if (HikeMessengerApp.fileTransferTaskMap.containsKey(message
+					.getMsgID())) {
 				optionsList
 						.add(message.isSent() ? getString(R.string.cancel_upload)
 								: getString(R.string.cancel_download));
@@ -1373,38 +1417,42 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			@Override
 			public void onClick(View v) {
-				if (!(mConversation instanceof GroupConversation)) {
-					String userMsisdn = prefs.getString(
-							HikeMessengerApp.MSISDN_SETTING, "");
-
-					Intent intent = new Intent();
-					intent.setClass(ChatThread.this, ProfileActivity.class);
-					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					if (!userMsisdn.equals(mContactNumber)) {
-						intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
-								mContactNumber);
-						intent.putExtra(HikeConstants.Extras.ON_HIKE,
-								mConversation.isOnhike());
-					}
-					startActivity(intent);
-				} else {
-					if (!((GroupConversation) mConversation).getIsGroupAlive()) {
-						return;
-					}
-
-					Utils.logEvent(ChatThread.this,
-							HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
-					Intent intent = new Intent();
-					intent.setClass(ChatThread.this, ProfileActivity.class);
-					intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
-					intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT,
-							mConversation.getMsisdn());
-					startActivity(intent);
-				}
+				openProfileScreen();
 			}
 		});
 
 		actionBar.setCustomView(actionBarView);
+	}
+
+	private void openProfileScreen() {
+		if (!(mConversation instanceof GroupConversation)) {
+			String userMsisdn = prefs.getString(
+					HikeMessengerApp.MSISDN_SETTING, "");
+
+			Intent intent = new Intent();
+			intent.setClass(ChatThread.this, ProfileActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			if (!userMsisdn.equals(mContactNumber)) {
+				intent.putExtra(HikeConstants.Extras.CONTACT_INFO,
+						mContactNumber);
+				intent.putExtra(HikeConstants.Extras.ON_HIKE,
+						mConversation.isOnhike());
+			}
+			startActivity(intent);
+		} else {
+			if (!((GroupConversation) mConversation).getIsGroupAlive()) {
+				return;
+			}
+
+			Utils.logEvent(ChatThread.this,
+					HikeConstants.LogEvent.GROUP_INFO_TOP_BUTTON);
+			Intent intent = new Intent();
+			intent.setClass(ChatThread.this, ProfileActivity.class);
+			intent.putExtra(HikeConstants.Extras.GROUP_CHAT, true);
+			intent.putExtra(HikeConstants.Extras.EXISTING_GROUP_CHAT,
+					mConversation.getMsisdn());
+			startActivity(intent);
+		}
 	}
 
 	private boolean shouldShowLastSeen() {
@@ -1454,7 +1502,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 
 			removeSMSToggle();
 
-			setEmoticonButton();
 			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn_selector);
 			mComposeView
 					.setHint(mConversation instanceof GroupConversation ? R.string.group_msg
@@ -1471,7 +1518,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			}
 		} else {
 			updateChatMetadata();
-			setEmoticonButton();
 			mSendBtn.setBackgroundResource(R.drawable.bg_red_btn);
 			mComposeView.setHint(R.string.sms_msg);
 		}
@@ -1480,21 +1526,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 	private void removeSMSToggle() {
 		if (!messages.isEmpty() && hasSMSToggle()) {
 			mAdapter.removeMessage(0);
-		}
-	}
-
-	private void setEmoticonButton() {
-		if (emoticonLayout != null
-				&& emoticonLayout.getVisibility() == View.VISIBLE) {
-			((ImageButton) findViewById(R.id.emo_btn))
-					.setImageResource(R.drawable.keyboard_btn);
-		} else {
-			if (mConversation == null) {
-				return;
-			}
-			((ImageButton) findViewById(R.id.emo_btn))
-					.setImageResource((mConversation.isOnhike() || (mConversation instanceof GroupConversation)) ? R.drawable.emoticon_hike_btn
-							: R.drawable.emoticon_sms_btn);
 		}
 	}
 
@@ -1832,6 +1863,10 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 			mConversation.setOnhike(HikePubSub.USER_JOINED.equals(type));
 			runOnUiThread(new Runnable() {
 				public void run() {
+					mLastSeenView
+							.setText(mConversation.isOnhike() ? R.string.on_hike
+									: R.string.on_sms);
+
 					updateUIForHikeStatus();
 					mUpdateAdapter.run();
 				}
@@ -2461,6 +2496,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 					int position, long id) {
 				Log.d(getClass().getSimpleName(), "Onclick: " + position);
 
+				attachmentWindow.dismiss();
+
 				int requestCode;
 				Intent pickIntent = new Intent();
 				Intent newMediaFileIntent = null;
@@ -2575,8 +2612,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				editor.putString(HikeMessengerApp.TEMP_NAME, mContactName);
 				editor.commit();
 				startActivityForResult(chooserIntent, requestCode);
-
-				attachmentWindow.dismiss();
 			}
 		});
 
@@ -3460,6 +3495,11 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		outState.putBoolean(HikeConstants.Extras.EMOTICON_SHOWING,
 				emoticonLayout != null
 						&& emoticonLayout.getVisibility() == View.VISIBLE);
+		outState.putInt(HikeConstants.Extras.EMOTICON_TYPE,
+				emoticonType != null ? emoticonType.ordinal() : -1);
+		outState.putInt(HikeConstants.Extras.WHICH_EMOTICON_SUBCATEGORY,
+				emoticonViewPager != null ? emoticonViewPager.getCurrentItem()
+						: -1);
 		outState.putBoolean(HikeConstants.Extras.FILE_TRANSFER_DIALOG_SHOWING,
 				filePickerDialog != null && filePickerDialog.isShowing());
 		outState.putBoolean(HikeConstants.Extras.RECORDER_DIALOG_SHOWING,
@@ -3513,9 +3553,13 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				tabDrawables = new int[] { R.drawable.ic_recents_emo,
 						R.drawable.emo_im_01_bigsmile,
 						R.drawable.emo_im_81_exciting,
-						R.drawable.emo_im_111_grin, R.drawable.emo_im_151_auto,
-						R.drawable.e415, R.drawable.e415, R.drawable.e415,
-						R.drawable.e415, R.drawable.e415 };
+						R.drawable.emo_im_111_grin,
+						R.drawable.emo_im_165_tiranga,
+						EmoticonConstants.EMOJI_RES_IDS[0],
+						EmoticonConstants.EMOJI_RES_IDS[109],
+						EmoticonConstants.EMOJI_RES_IDS[162],
+						EmoticonConstants.EMOJI_RES_IDS[294],
+						EmoticonConstants.EMOJI_RES_IDS[392] };
 				if (emoticonType != EmoticonType.EMOTICON) {
 					sameType = false;
 					emoticonType = EmoticonType.EMOTICON;
@@ -3552,7 +3596,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					emoticonLayout.setVisibility(View.GONE);
-					setEmoticonButton();
 				}
 			}, 65);
 			if (!backPressed) {
@@ -3570,7 +3613,6 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 				@Override
 				public void run() {
 					emoticonLayout.setVisibility(View.VISIBLE);
-					setEmoticonButton();
 				}
 			}, 45);
 			Utils.hideSoftKeyboard(this, mComposeView);
@@ -3603,7 +3645,8 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 								ChatThread.this, categoryId) || !prefs
 								.getBoolean(HikeMessengerApp.stickerCategories
 										.get(pageNum).downloadDialogPref, false))
-						&& !ChatThread.stickerTaskMap.containsKey(categoryId)) {
+						&& !HikeMessengerApp.stickerTaskMap
+								.containsKey(categoryId)) {
 					showStickerPreviewDialog(pageNum);
 				}
 			}
@@ -3652,7 +3695,7 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 							DownloadType.NEW_CATEGORY);
 					downloadStickerTask.execute();
 
-					ChatThread.stickerTaskMap.put(categoryId,
+					HikeMessengerApp.stickerTaskMap.put(categoryId,
 							downloadStickerTask);
 					updateStickerCategoryUI(categoryIndex, false, null);
 
@@ -3846,10 +3889,12 @@ public class ChatThread extends HikeAppStateBaseFragmentActivity implements
 		emoticonViewPager.invalidate();
 
 		StickerEmoticonIconPageIndicator iconPageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
-		iconPageIndicator.setViewPager(emoticonViewPager, pageNum);
+		iconPageIndicator.setViewPager(emoticonViewPager);
 		iconPageIndicator.setOnPageChangeListener(onPageChangeListener);
 		iconPageIndicator.notifyDataSetChanged();
+		iconPageIndicator.setCurrentItem(pageNum);
 
+		onPageChangeListener.onPageSelected(pageNum);
 		/*
 		 * show the tip if we are not currently on the stickers tab and we have
 		 * not shown this tip before and there is no other tip showing.

@@ -139,5 +139,6 @@
     <color name="action_bar_disabled_text">#0f8fe1</color>
     <color name="signup_white">#fafaf4</color>
     <color name="voice_message_stroke">#1273716d</color>
+    <color name="signup_bg">#0f8fe1</color>
     <color name="description_lightgrey">#bfbcb6</color>
 </resources>

@@ -58,8 +58,6 @@ import com.bsb.hike.http.HikeHttpRequest;
 import com.bsb.hike.http.HikeHttpRequest.RequestType;
 import com.bsb.hike.models.HikeFile.HikeFileType;
 import com.bsb.hike.models.utils.IconCacheManager;
-import com.bsb.hike.tasks.DownloadImageTask;
-import com.bsb.hike.tasks.DownloadImageTask.ImageDownloadResult;
 import com.bsb.hike.tasks.FinishableEvent;
 import com.bsb.hike.tasks.HikeHTTPTask;
 import com.bsb.hike.tasks.SignupTask;
@@ -137,10 +135,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 
 	private class ActivityState {
 		public HikeHTTPTask task; /* the task to update the global profile */
-		public DownloadImageTask downloadImageTask; /*
-													 * the task to download the
-													 * picasa image
-													 */
+		public Thread downloadImageTask; /*
+										 * the task to download the picasa image
+										 */
 
 		public String destFilePath = null;
 
@@ -184,7 +181,8 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 						getString(R.string.calling_you));
 				dialog.setCancelable(true);
 				dialog.setOnCancelListener(this);
-			} else if (mActivityState.downloadImageTask != null) {
+			} else if (mActivityState.downloadImageTask != null
+					&& mActivityState.downloadImageTask.getState() != java.lang.Thread.State.TERMINATED) {
 				dialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
 			}
@@ -1007,19 +1005,24 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 								.getString(HikeMessengerApp.MSISDN_SETTING, ""));
 
 						final File destFile = new File(directory, fileName);
-						mActivityState.downloadImageTask = new DownloadImageTask(
-								getApplicationContext(), destFile, Uri
-										.parse(fbProfileUrl),
+						downloadImage(destFile, Uri.parse(fbProfileUrl),
 								new ImageDownloadResult() {
 
 									@Override
 									public void downloadFinished(boolean result) {
 										mActivityState = new ActivityState();
 										if (!result) {
-											Toast.makeText(
-													getApplicationContext(),
-													R.string.fb_fetch_image_error,
-													Toast.LENGTH_SHORT).show();
+											runOnUiThread(new Runnable() {
+
+												@Override
+												public void run() {
+													Toast.makeText(
+															getApplicationContext(),
+															R.string.fb_fetch_image_error,
+															Toast.LENGTH_SHORT)
+															.show();
+												}
+											});
 										} else {
 											mActivityState.destFilePath = destFile
 													.getPath();
@@ -1033,7 +1036,6 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 														result);
 									}
 								});
-						mActivityState.downloadImageTask.execute();
 						dialog = ProgressDialog.show(SignupActivity.this, null,
 								getResources()
 										.getString(R.string.fetching_info));
@@ -1041,6 +1043,49 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 				}
 			});
 		}
+	}
+
+	private void downloadImage(final File destFile, Uri picasaUri,
+			ImageDownloadResult imageDownloadResult) {
+		mActivityState.downloadImageTask = new Thread(new DownloadImageTask(
+				getApplicationContext(), destFile, picasaUri,
+				imageDownloadResult));
+
+		mActivityState.downloadImageTask.start();
+	}
+
+	public interface ImageDownloadResult {
+		public void downloadFinished(boolean result);
+	}
+
+	private class DownloadImageTask implements Runnable {
+
+		private File destFile;
+		private Uri imageUri;
+		private Context context;
+		private ImageDownloadResult imageDownloadResult;
+
+		public DownloadImageTask(Context context, File destFile, Uri picasaUri,
+				ImageDownloadResult imageDownloadResult) {
+			this.destFile = destFile;
+			this.imageUri = picasaUri;
+			this.context = context;
+			this.imageDownloadResult = imageDownloadResult;
+		}
+
+		@Override
+		public void run() {
+			Log.d(getClass().getSimpleName(), "Downloading profileImage");
+			try {
+				Utils.downloadAndSaveFile(context, destFile, imageUri);
+				imageDownloadResult.downloadFinished(true);
+			} catch (Exception e) {
+				Log.e(getClass().getSimpleName(), "Error while fetching image",
+						e);
+				imageDownloadResult.downloadFinished(false);
+			}
+		}
+
 	}
 
 	public void onChangeImageClicked(View v) {
@@ -1180,21 +1225,33 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 				Utils.startCropActivity(this, path, destFilePath);
 			} else {
 				final File destFile = new File(path);
-				mActivityState.downloadImageTask = new DownloadImageTask(
-						getApplicationContext(), destFile, selectedFileUri,
+				downloadImage(destFile, selectedFileUri,
 						new ImageDownloadResult() {
 
 							@Override
 							public void downloadFinished(boolean result) {
-								if (dialog != null) {
-									dialog.dismiss();
-									dialog = null;
-								}
+								runOnUiThread(new Runnable() {
+
+									@Override
+									public void run() {
+										if (dialog != null) {
+											dialog.dismiss();
+											dialog = null;
+										}
+									}
+								});
 								mActivityState = new ActivityState();
 								if (!result) {
-									Toast.makeText(getApplicationContext(),
-											R.string.error_download,
-											Toast.LENGTH_SHORT).show();
+									runOnUiThread(new Runnable() {
+
+										@Override
+										public void run() {
+											Toast.makeText(
+													getApplicationContext(),
+													R.string.error_download,
+													Toast.LENGTH_SHORT).show();
+										}
+									});
 								} else {
 									Utils.startCropActivity(
 											SignupActivity.this,
@@ -1203,7 +1260,7 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 								}
 							}
 						});
-				mActivityState.downloadImageTask.execute();
+
 				dialog = ProgressDialog.show(this, null, getResources()
 						.getString(R.string.downloading_image));
 			}
@@ -1248,6 +1305,9 @@ public class SignupActivity extends HikeAppStateBaseActivity implements
 						dialog = null;
 					}
 					if (!result) {
+						return;
+					}
+					if (mActivityState.destFilePath == null) {
 						return;
 					}
 					setProfileImage();

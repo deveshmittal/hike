@@ -83,7 +83,8 @@ public class EmoticonPageAdapter extends BaseAdapter {
 			convertView.setTag(Integer.valueOf(idOffset
 					+ recentEmoticons[position]));
 			((ImageView) convertView)
-					.setImageResource(emoticonResIds[recentEmoticons[position]]);
+					.setImageResource(emoticonResIds[recentEmoticons[position]
+							- idOffset]);
 		} else {
 			convertView.setTag(Integer.valueOf(idOffset + offset + position));
 			((ImageView) convertView).setImageResource(emoticonResIds[offset

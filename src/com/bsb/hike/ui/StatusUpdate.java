@@ -616,12 +616,12 @@ public class StatusUpdate extends AuthSocialAccountBaseActivity implements
 				tabDrawable, true);
 
 		ViewPager emoticonViewPager = (ViewPager) findViewById(R.id.emoticon_pager);
-		emoticonViewPager.setCurrentItem(whichSubcategory);
 		emoticonViewPager.setAdapter(statusEmojiAdapter);
 		emoticonViewPager.invalidate();
 
 		StickerEmoticonIconPageIndicator pageIndicator = (StickerEmoticonIconPageIndicator) findViewById(R.id.icon_indicator);
 		pageIndicator.setViewPager(emoticonViewPager);
+		pageIndicator.setCurrentItem(whichSubcategory);
 	}
 
 	private void showMoodSelector() {

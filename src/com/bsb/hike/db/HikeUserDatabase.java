@@ -835,11 +835,11 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 				+ DatabaseUtils.sqlEscapeString(userMsisdn));
 
 		if (!nativeSMSOn) {
-			if (freeSMSOn && fwdOrgroupChat) {
+			if (freeSMSOn) {
 				selectionBuilder.append(" AND ((" + DBConstants.ONHIKE
 						+ " = 0 AND " + DBConstants.MSISDN
 						+ " LIKE '+91%') OR (" + DBConstants.ONHIKE + "=1))");
-			} else if (fwdOrgroupChat) {
+			} else {
 				selectionBuilder.append(" AND " + DBConstants.ONHIKE + " != 0");
 			}
 		}
@@ -906,39 +906,7 @@ public class HikeUserDatabase extends SQLiteOpenHelper {
 									Pair<AtomicBoolean, ContactInfo> rhs) {
 								ContactInfo firstContact = lhs.second;
 								ContactInfo secondContact = rhs.second;
-
-								if (firstContact.isOnhike() != secondContact
-										.isOnhike()) {
-									return (firstContact.isOnhike()) ? -1 : 1;
-								} else {
-									if (firstContact.isOnhike()) {
-										return firstContact
-												.compareTo(secondContact);
-									} else {
-										if ((firstContact
-												.getMsisdn()
-												.startsWith(
-														HikeConstants.INDIA_COUNTRY_CODE) && secondContact
-												.getMsisdn()
-												.startsWith(
-														HikeConstants.INDIA_COUNTRY_CODE))
-												|| (!firstContact
-														.getMsisdn()
-														.startsWith(
-																HikeConstants.INDIA_COUNTRY_CODE) && !secondContact
-														.getMsisdn()
-														.startsWith(
-																HikeConstants.INDIA_COUNTRY_CODE))) {
-											return firstContact
-													.compareTo(secondContact);
-										}
-										return firstContact
-												.getMsisdn()
-												.startsWith(
-														HikeConstants.INDIA_COUNTRY_CODE) ? -1
-												: 1;
-									}
-								}
+								return firstContact.compareTo(secondContact);
 							}
 						});
 			}

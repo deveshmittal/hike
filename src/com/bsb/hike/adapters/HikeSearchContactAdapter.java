@@ -106,12 +106,10 @@ public class HikeSearchContactAdapter extends
 			}
 		}
 
-		// ImageView onhike = (ImageView) v.findViewById(R.id.onhike);
-		// onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike()
-		// ? R.drawable.ic_hike_user
-		// : inviteOnly ? R.drawable.ic_invite_user
-		// : R.drawable.ic_sms_user)
-		// : 0);
+		ImageView onhike = (ImageView) v.findViewById(R.id.hike_status);
+		onhike.setImageResource(contactInfo != null ? (contactInfo.isOnhike() ? R.drawable.ic_hike_user
+				: R.drawable.ic_sms_user)
+				: 0);
 
 		ImageView avatar = (ImageView) v.findViewById(R.id.contact_image);
 		if (contactInfo != null
