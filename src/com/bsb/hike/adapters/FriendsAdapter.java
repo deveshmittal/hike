@@ -93,7 +93,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 						.getContactsOfFavoriteType(
 								FavoriteType.REQUEST_RECEIVED,
 								HikeConstants.BOTH_VALUE, myMsisdn,
-								nativeSMSOn, false));
+								nativeSMSOn, false, true));
 				favoriteTaskList
 						.addAll(hikeUserDatabase
 								.getContactsOfFavoriteType(

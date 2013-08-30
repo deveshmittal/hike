@@ -250,7 +250,7 @@ public class FriendsFragment extends HomeBaseFragment implements Listener,
 					HikeConstants.BOTH_VALUE, myMsisdn, nativeSMSOn));
 			favoriteList.addAll(hikeUserDatabase.getContactsOfFavoriteType(
 					FavoriteType.REQUEST_RECEIVED, HikeConstants.BOTH_VALUE,
-					myMsisdn, nativeSMSOn));
+					myMsisdn, nativeSMSOn, false, true));
 			Collections.sort(favoriteList, ContactInfo.lastSeenTimeComparator);
 			getActivity().runOnUiThread(new Runnable() {
 
