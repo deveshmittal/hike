@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.bsb.hike.HikeConstants;
@@ -270,6 +271,9 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					if (session != null) {
 						session.closeAndClearTokenInformation();
 					}
+					Toast.makeText(getApplicationContext(),
+							R.string.social_unlink_success, Toast.LENGTH_SHORT)
+							.show();
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
@@ -294,6 +298,10 @@ public class HikePreferences extends HikeAppStateBasePreferenceActivity
 					editor.putString(HikeMessengerApp.TWITTER_TOKEN, "");
 					editor.putString(HikeMessengerApp.TWITTER_TOKEN_SECRET, "");
 					editor.commit();
+
+					Toast.makeText(getApplicationContext(),
+							R.string.social_unlink_success, Toast.LENGTH_SHORT)
+							.show();
 				}
 			});
 			builder.setNegativeButton(R.string.cancel, new OnClickListener() {
