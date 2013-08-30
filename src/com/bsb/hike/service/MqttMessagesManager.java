@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -902,10 +903,6 @@ public class MqttMessagesManager {
 				jsonObj.getJSONObject(HikeConstants.DATA).remove(
 						HikeConstants.THUMBNAIL);
 
-				/*
-				 * Start auto download of the profile image.
-				 */
-				autoDownloadProfileImage(statusMessage, true);
 			}
 
 			statusMessage
@@ -918,7 +915,10 @@ public class MqttMessagesManager {
 						statusMessage);
 			}
 			pubSub.publish(HikePubSub.STATUS_MESSAGE_RECEIVED, statusMessage);
-
+			/*
+			 * Start auto download of the profile image.
+			 */
+			autoDownloadProfileImage(statusMessage, true);
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			ConvMessage convMessage = saveStatusMsg(jsonObj, msisdn);
 
@@ -1008,6 +1008,43 @@ public class MqttMessagesManager {
 					}
 				}
 			}
+		} else if (HikeConstants.MqttMessageTypes.BULK_LAST_SEEN.equals(type)) {
+			/*
+			 * {"t": "bls", "ts":<server timestamp>, "d":
+			 * {"lastseens":{"+919818149394":<last_seen_time_in_epoch>
+			 * ,"+919810335374":<last_seen_time_in_epoch>}}}
+			 */
+			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
+			JSONObject lastSeens = data
+					.getJSONObject(HikeConstants.BULK_LAST_SEEN_KEY);
+			// Iterator<String> iterator = lastSeens.keys();
+
+			for (Iterator<String> iterator = lastSeens.keys(); iterator
+					.hasNext();) {
+				String msisdn = iterator.next();
+				int isOffline;
+				long lastSeenTime = lastSeens.getLong(msisdn);
+				if (lastSeenTime > 0) {
+					isOffline = 1;
+					lastSeenTime = Utils.applyServerTimeOffset(context,
+							lastSeenTime);
+				} else {
+					/*
+					 * Otherwise the last seen time notifies that the user is
+					 * either online or has turned the setting off.
+					 */
+					isOffline = (int) lastSeenTime;
+					lastSeenTime = System.currentTimeMillis() / 1000;
+				}
+				userDb.updateLastSeenTime(msisdn, lastSeenTime);
+				userDb.updateIsOffline(msisdn, (int) isOffline);
+
+				HikeMessengerApp.lastSeenFriendsMap.put(msisdn,
+						Long.valueOf(lastSeenTime));
+
+			}
+			pubSub.publish(HikePubSub.LAST_SEEN_TIME_BULK_UPDATED, null);
+
 		} else if (HikeConstants.MqttMessageTypes.LAST_SEEN.equals(type)) {
 			String msisdn = jsonObj.getString(HikeConstants.FROM);
 			JSONObject data = jsonObj.getJSONObject(HikeConstants.DATA);
@@ -1082,7 +1119,7 @@ public class MqttMessagesManager {
 		DownloadProfileImageTask downloadProfileImageTask = new DownloadProfileImageTask(
 				context, statusMessage.getMappedId(), fileName, true,
 				statusUpdate, statusMessage.getMsisdn(),
-				statusMessage.getName(), false);
+				statusMessage.getNotNullName(), false);
 		downloadProfileImageTask.execute();
 	}
 

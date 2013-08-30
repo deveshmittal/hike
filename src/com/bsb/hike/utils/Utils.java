@@ -2255,11 +2255,11 @@ public class Utils {
 			if (HikeMessengerApp.currentState == CurrentState.OPENED
 					|| HikeMessengerApp.currentState == CurrentState.RESUMED) {
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.FOREGROUND);
-
+				
 				JSONObject data = new JSONObject();
 				data.put(HikeConstants.JUST_OPENED,
 						HikeMessengerApp.currentState == CurrentState.OPENED);
-
+				data.put(HikeConstants.BULK_LAST_SEEN, true); //adding this for bulk 
 				object.put(HikeConstants.DATA, data);
 			} else {
 				object.put(HikeConstants.SUB_TYPE, HikeConstants.BACKGROUND);
@@ -2660,7 +2660,7 @@ public class Utils {
 	    /*
 	     * http://developer.android.com/reference/android/graphics/Bitmap.Config.html
 	     */
-	    Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Config.ARGB_8888);
+	    Bitmap bitmap = Bitmap.createBitmap((int)(48*densityMultiplier), (int)(48*densityMultiplier), Config.ARGB_8888);
 	    Canvas canvas = new Canvas(bitmap); 
 	    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
 	    drawable.draw(canvas);

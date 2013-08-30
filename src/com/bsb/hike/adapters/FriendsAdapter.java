@@ -46,6 +46,7 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	private List<ContactInfo> friendsList;
 	private List<ContactInfo> otherContactsList;
 	private List<ContactInfo> filteredFriendsList;
+	
 	private List<ContactInfo> filteredOtherContactsList;
 	private Context context;
 	private ContactInfo friendsSection;
@@ -526,4 +527,25 @@ public class FriendsAdapter extends BaseAdapter implements OnClickListener,
 	public boolean isItemViewTypePinned(int viewType) {
 		return viewType == ViewType.SECTION.ordinal();
 	}
+	public List<ContactInfo> getCompleteList() {
+		return completeList;
+	}
+
+	public void setCompleteList(List<ContactInfo> completeList) {
+		this.completeList = completeList;
+	}
+	public List<ContactInfo> getFriendsList() {
+		return friendsList;
+	}
+	public void setFriendsList(List<ContactInfo> friendsList) {
+		this.friendsList = friendsList;
+	}
+	public List<ContactInfo> getFilteredFriendsList() {
+		return filteredFriendsList;
+	}
+	public void setFilteredFriendsList(List<ContactInfo> filteredFriendsList) {
+		this.filteredFriendsList = filteredFriendsList;
+	}
+
+
 }
